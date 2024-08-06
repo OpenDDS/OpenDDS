@@ -21,6 +21,7 @@
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
+#include <dds/DCPS/EncapsulationHeader.h>
 
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
@@ -248,6 +249,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   remote.participantId(0xefcdab89); // guidPrefix2
   remote.entityKey(0x452310);
   remote.entityKind(ENTITYKIND_USER_READER_WITH_KEY);
+  GUID_t remote_guid(remote);
 
   LocatorSeq locators;
   locators.length(1);
@@ -255,16 +257,18 @@ int DDS_TEST::test(ACE_TString host, u_short port)
 
   size_t size_locator = 0;
   serialized_size(locators_encoding, size_locator, locators);
+  serialized_size(locators_encoding, size_locator, VENDORID_OPENDDS);
   ACE_Message_Block mb_locator(size_locator + 1);
   Serializer ser_loc(&mb_locator, locators_encoding);
   if (!(ser_loc << locators) ||
+      !(ser_loc << VENDORID_OPENDDS) ||
       !(ser_loc << ACE_OutputCDR::from_boolean(false))) { // requires inline QoS
     std::cerr << "publisher serialize locators failed\n";
     return 1;
   }
 
   SimpleDataWriter sdw(local_guid);
-  sdw.enable_transport(true /*reliable*/, false /*durable*/);
+  sdw.enable_transport(true /*reliable*/, false /*durable*/, 0);
   AssociationData subscription;
   subscription.remote_id_ = remote;
   subscription.remote_reliable_ = false;

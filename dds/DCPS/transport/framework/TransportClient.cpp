@@ -14,9 +14,11 @@
 #include "TransportReceiveListener.h"
 
 #include <dds/DCPS/DataWriterImpl.h>
-#include <dds/DCPS/SendStateDataSampleList.h>
-#include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/SendStateDataSampleList.h>
+#include <dds/DCPS/Timers.h>
+
 #include <dds/DCPS/RTPS/ICE/Ice.h>
 
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -80,7 +82,7 @@ TransportClient::clean_prev_pending()
 }
 
 void
-TransportClient::enable_transport(bool reliable, bool durable)
+TransportClient::enable_transport(bool reliable, bool durable, DomainParticipantImpl* dpi)
 {
   // Search for a TransportConfig to use:
   TransportConfig_rch tc;
@@ -117,20 +119,21 @@ TransportClient::enable_transport(bool reliable, bool durable)
     throw Transport::NotConfigured();
   }
 
-  enable_transport_using_config(reliable, durable, tc);
+  enable_transport_using_config(reliable, durable, tc, dpi);
 }
 
 void
 TransportClient::enable_transport_using_config(bool reliable, bool durable,
-                                               const TransportConfig_rch& tc)
+                                               const TransportConfig_rch& tc,
+                                               DomainParticipantImpl* dpi)
 {
   config_ = tc;
   swap_bytes_ = tc->swap_bytes_;
   reliable_ = reliable;
   durable_ = durable;
-  unsigned long duration = tc->passive_connect_duration_;
-  if (duration == 0) {
-    duration = TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION;
+  passive_connect_duration_ = tc->passive_connect_duration_;
+  if (passive_connect_duration_ == 0) {
+    passive_connect_duration_ = TimeDuration::from_msec(TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION);
     if (DCPS_debug_level) {
       ACE_DEBUG((LM_WARNING,
         ACE_TEXT("(%P|%t) TransportClient::enable_transport_using_config ")
@@ -138,9 +141,8 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
         ACE_TEXT("default value\n")));
     }
   }
-  passive_connect_duration_ = TimeDuration::from_msec(duration);
 
-  populate_connection_info();
+  populate_connection_info(dpi);
 
   const size_t n = tc->instances_.size();
 
@@ -148,12 +150,12 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
     TransportInst_rch inst = tc->instances_[i];
 
     if (check_transport_qos(*inst)) {
-      TransportImpl_rch impl = inst->get_or_create_impl();
+      TransportImpl_rch impl = inst->get_or_create_impl(domain_id(), dpi);
 
       if (impl) {
         impls_.push_back(impl);
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
         impl->local_crypto_handle(get_crypto_handle());
 #endif
 
@@ -171,7 +173,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
 }
 
 void
-TransportClient::populate_connection_info()
+TransportClient::populate_connection_info(DomainParticipantImpl* dpi)
 {
   conn_info_.length(0);
 
@@ -179,7 +181,7 @@ TransportClient::populate_connection_info()
   for (size_t i = 0; i < n; ++i) {
     TransportInst_rch inst = config_->instances_[i];
     if (check_transport_qos(*inst)) {
-      TransportImpl_rch impl = inst->get_or_create_impl();
+      TransportImpl_rch impl = inst->get_or_create_impl(domain_id(), dpi);
       if (impl) {
         const CORBA::ULong idx = DCPS::grow(conn_info_) - 1;
         impl->connection_info(conn_info_[idx], CONNINFO_ALL);
@@ -341,15 +343,45 @@ TransportClient::associate(const AssociationData& data, bool active)
 }
 
 void
-TransportClient::PendingAssoc::reset_client() {
+TransportClient::PendingAssoc::reset_client()
+{
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   client_.reset();
 }
 
 bool
-TransportClient::PendingAssoc::safe_to_remove() {
+TransportClient::PendingAssoc::safe_to_remove()
+{
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   return !client_ && !scheduled_;
+}
+
+void
+TransportClient::PendingAssocTimer::ScheduleCommand::execute()
+{
+  if (timer_->reactor()) {
+    const TransportClient_rch client = transport_client_.lock();
+    if (client) {
+      ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
+      assoc_->scheduled_ = true;
+      const Timers::TimerId id = Timers::schedule(timer_->reactor(), *assoc_, client.in(),
+                                                  client->passive_connect_duration_);
+      if (id != Timers::InvalidTimerId) {
+        timer_->set_id(id);
+      }
+    }
+  }
+}
+
+void
+TransportClient::PendingAssocTimer::CancelCommand::execute()
+{
+  if (timer_->reactor() && timer_->get_id() != Timers::InvalidTimerId) {
+    ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
+    Timers::cancel(timer_->reactor(), timer_->get_id());
+    timer_->set_id(Timers::InvalidTimerId);
+    assoc_->scheduled_ = false;
+  }
 }
 
 int
@@ -736,7 +768,7 @@ TransportClient::disassociate(const GUID_t& peerId)
   }
 
   OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
-  link->release_reservations(peerId, guid_, released);
+  link->release_reservations(peerId, guid_, &released);
 
   if (!released.empty()) {
 
@@ -902,7 +934,7 @@ TransportClient::send_response(const GUID_t& peer,
 
   DataLinkSet singular;
   singular.insert_link(found->second);
-  singular.send_response(peer, header, move(payload));
+  singular.send_response(peer, header, OPENDDS_MOVE_NS::move(payload));
   return true;
 }
 
@@ -927,7 +959,7 @@ TransportClient::send_w_control(SendStateDataSampleList send_list,
   if (send_list.head()) {
     send_i(send_list, 0);
   }
-  return send_control_to(header, move(msg), destination);
+  return send_control_to(header, OPENDDS_MOVE_NS::move(msg), destination);
 }
 
 void
@@ -1105,7 +1137,7 @@ TransportClient::send_control(const DataSampleHeader& header,
                               Message_Block_Ptr msg)
 {
   OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
-  return links_.send_control(guid_, get_send_listener(), header, move(msg));
+  return links_.send_control(guid_, get_send_listener(), header, OPENDDS_MOVE_NS::move(msg));
 }
 
 SendControlStatus
@@ -1126,7 +1158,7 @@ TransportClient::send_control_to(const DataSampleHeader& header,
 
     singular.insert_link(found->second);
   }
-  return singular.send_control(guid_, get_send_listener(), header, move(msg));
+  return singular.send_control(guid_, get_send_listener(), header, OPENDDS_MOVE_NS::move(msg));
 }
 
 bool

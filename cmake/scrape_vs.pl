@@ -45,15 +45,19 @@ while (my $line = <$fh>) {
     my $name = $1;
     my $pf = File::Spec->catfile(dirname($values{sln}), $2);
 
-    my $loc = undef;
+    my %configs;
+    my $config;
     open(my $pf_fh, $pf) or die("Couldn't open \"$pf\": $!");
     while (my $pf_line = <$pf_fh>) {
       $pf_line =~ s/\s$//;
-      if ($pf_line =~ /<OutputFile>(\$\(\w+\))?(.*)<\/OutputFile>$/) {
+      if ($pf_line =~ /<ItemDefinitionGroup Condition="'\$\(Configuration\)\|\$\(Platform\)'=='(\w+)\|\w+'">$/) {
+        $config = $1;
+      }
+      elsif ($pf_line =~ /<OutputFile>(\$\(\w+\))?(.*)<\/OutputFile>$/) {
         my $base_var = $1;
         my $output_file = $2;
-        $output_file =~ s/d?\.dll/d.dll/;
         $output_file =~ s/\.dll$/.lib/;
+        my $loc;
         if ($base_var) {
           if ($base_var eq '$(OutDir)') {
             $loc = File::Spec->catfile(
@@ -69,19 +73,32 @@ while (my $line = <$fh>) {
         else {
           $loc = File::Spec->catfile(dirname($pf), $output_file);
         }
-        last;
+
+        if ($loc && $config) {
+          $configs{$config} = $loc;
+          $config = undef;
+        }
       }
     }
-    if (!defined($loc)) {
-        # print STDERR ("Didn't get OutputFile from $pf\n");
-        next;
+    if (!%configs) {
+      next;
     }
 
-    # print STDERR ("$name $pf $loc\n");
-    $projects{$name} = {
-      name => $name,
-      loc => $loc,
-    };
+    my @locs = values(%configs);
+    my $loc = $locs[0];
+    if (@locs == grep { $_ eq $loc } @locs) {
+      # The locations are the same for each config
+      $projects{$name} = {
+        name => $name,
+        loc => $loc,
+      };
+    }
+    else {
+      $projects{$name} = {
+        name => $name,
+        configs => \%configs,
+      };
+    }
   }
 }
 

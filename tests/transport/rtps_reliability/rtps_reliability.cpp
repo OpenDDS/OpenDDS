@@ -15,6 +15,7 @@
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
+#include "dds/DCPS/RTPS/RtpsSubmessageKindTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
 #include "dds/DCPS/RTPS/MessageUtils.h"
 #include "dds/DCPS/RTPS/GuidGenerator.h"
@@ -24,6 +25,8 @@
 #include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/DataSampleElement.h"
+#include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/EncapsulationHeader.h"
 
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
@@ -417,17 +420,13 @@ struct TestParticipant: ACE_Event_Handler {
         if (!recv_nackfrag(ser, peer)) return false;
         break;
       default:
-#ifdef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-        ACE_DEBUG((LM_INFO, "Received submessage type: %u\n", unsigned(subm)));
-#else
-        if (static_cast<size_t>(subm) < gen_OpenDDS_RTPS_SubmessageKind_names_size) {
+        if (gen_OpenDDS_RTPS_SubmessageKind_helper->valid(subm)) {
           ACE_DEBUG((LM_INFO, "Received submessage type: %C\n",
-                     gen_OpenDDS_RTPS_SubmessageKind_names[static_cast<size_t>(subm)]));
+                     gen_OpenDDS_RTPS_SubmessageKind_helper->get_name(subm)));
         } else {
           ACE_ERROR((LM_ERROR, "ERROR: Received unknown submessage type: %u\n",
                      unsigned(subm)));
         }
-#endif
         SubmessageHeader smh;
         if (!(ser >> smh)) {
           ACE_ERROR((LM_ERROR, "ERROR: in handle_input() failed to deserialize "
@@ -665,9 +664,11 @@ void make_blob(const ACE_INET_Addr& part1_addr, ACE_Message_Block& mb_locator)
   address_to_locator(part1_locators[0], part1_addr);
   size_t size = 0;
   serialized_size(blob_encoding, size, part1_locators);
+  serialized_size(blob_encoding, size, VENDORID_OPENDDS);
   mb_locator.init(size + 1);
   Serializer ser_loc(&mb_locator, blob_encoding);
   ser_loc << part1_locators;
+  ser_loc << VENDORID_OPENDDS;
   ser_loc << ACE_OutputCDR::from_boolean(false); // requires inline QoS
 }
 
@@ -729,10 +730,10 @@ bool run_test()
   part1_addr.set(part1_addr.get_port_number(), "localhost");
 #endif
   SimpleDataWriter sdw2(writer2);
-  sdw2.enable_transport(true /*reliable*/, false /*durable*/);
+  sdw2.enable_transport(true /*reliable*/, false /*durable*/, 0);
 
   SimpleDataReader sdr2(reader2);
-  sdr2.enable_transport(true /*reliable*/, true /*durable*/);
+  sdr2.enable_transport(true /*reliable*/, true /*durable*/, 0);
 
 
   // "local" setup is now done, start making associations

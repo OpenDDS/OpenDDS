@@ -6,22 +6,25 @@
 #ifndef OPENDDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H
 #define OPENDDS_DCPS_DOMAIN_PARTICIPANT_IMPL_H
 
-#include "EntityImpl.h"
+#include "ConditionVariable.h"
 #include "Definitions.h"
 #include "DisjointSequence.h"
-#include "TopicImpl.h"
+#include "EntityImpl.h"
+#include "GuidBuilder.h"
+#include "GuidUtils.h"
 #include "InstanceHandle.h"
 #include "OwnershipManager.h"
-#include "GuidBuilder.h"
 #include "PoolAllocator.h"
 #include "Recorder.h"
 #include "Replayer.h"
-#include "ConditionVariable.h"
-#include "TimeTypes.h"
-#include "GuidUtils.h"
 #include "SporadicTask.h"
+#include "TimeTypes.h"
+#include "TopicImpl.h"
+
 #include "XTypes/TypeLookupService.h"
+
 #include "transport/framework/TransportImpl_rch.h"
+
 #include "security/framework/SecurityConfig_rch.h"
 
 #include <dds/DdsDcpsPublicationC.h>
@@ -401,7 +404,7 @@ public:
 
   XTypes::TypeLookupService_rch get_type_lookup_service() { return type_lookup_service_; }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   Security::SecurityConfig_rch get_security_config() const
   {
     return security_config_;
@@ -477,7 +480,7 @@ private:
   /// can be notified by the listener of this entity.
   DDS::StatusMask listener_mask_;
 
-  #if defined(OPENDDS_SECURITY)
+  #if OPENDDS_CONFIG_SECURITY
   /// This participant id handle given by authentication.
   DDS::Security::IdentityHandle id_handle_;
   /// This participant permissions handle given by access constrol.
@@ -567,7 +570,7 @@ private:
   RecorderSet recorders_;
   ReplayerSet replayers_;
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   Security::SecurityConfig_rch security_config_;
 #endif
 

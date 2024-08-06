@@ -213,35 +213,35 @@ TEST(dds_DCPS_Qos_Helper, DurabilityQosPolicyBuilder_kind)
 {
   OpenDDS::DCPS::DurabilityQosPolicyBuilder uut;
   uut.kind(DDS::TRANSIENT_DURABILITY_QOS);
-  EXPECT_EQ(uut.qos().kind, DDS::TRANSIENT_DURABILITY_QOS);;
+  EXPECT_EQ(uut.qos().kind, DDS::TRANSIENT_DURABILITY_QOS);
 }
 
 TEST(dds_DCPS_Qos_Helper, DurabilityQosPolicyBuilder_volatile)
 {
   OpenDDS::DCPS::DurabilityQosPolicyBuilder uut;
   uut._volatile();
-  EXPECT_EQ(uut.qos().kind, DDS::VOLATILE_DURABILITY_QOS);;
+  EXPECT_EQ(uut.qos().kind, DDS::VOLATILE_DURABILITY_QOS);
 }
 
 TEST(dds_DCPS_Qos_Helper, DurabilityQosPolicyBuilder_transient_local)
 {
   OpenDDS::DCPS::DurabilityQosPolicyBuilder uut;
   uut.transient_local();
-  EXPECT_EQ(uut.qos().kind, DDS::TRANSIENT_LOCAL_DURABILITY_QOS);;
+  EXPECT_EQ(uut.qos().kind, DDS::TRANSIENT_LOCAL_DURABILITY_QOS);
 }
 
 TEST(dds_DCPS_Qos_Helper, DurabilityQosPolicyBuilder_transient)
 {
   OpenDDS::DCPS::DurabilityQosPolicyBuilder uut;
   uut.transient();
-  EXPECT_EQ(uut.qos().kind, DDS::TRANSIENT_DURABILITY_QOS);;
+  EXPECT_EQ(uut.qos().kind, DDS::TRANSIENT_DURABILITY_QOS);
 }
 
 TEST(dds_DCPS_Qos_Helper, DurabilityQosPolicyBuilder_persistent)
 {
   OpenDDS::DCPS::DurabilityQosPolicyBuilder uut;
   uut.persistent();
-  EXPECT_EQ(uut.qos().kind, DDS::PERSISTENT_DURABILITY_QOS);;
+  EXPECT_EQ(uut.qos().kind, DDS::PERSISTENT_DURABILITY_QOS);
 }
 
 TEST(dds_DCPS_Qos_Helper, DurabilityServiceQosPolicyBuilder_default_ctor)
@@ -421,14 +421,14 @@ TEST(dds_DCPS_Qos_Helper, OwnershipQosPolicyBuilder_shared)
 {
   OpenDDS::DCPS::OwnershipQosPolicyBuilder uut;
   uut.shared();
-  EXPECT_EQ(uut.qos().kind, DDS::SHARED_OWNERSHIP_QOS);;
+  EXPECT_EQ(uut.qos().kind, DDS::SHARED_OWNERSHIP_QOS);
 }
 
 TEST(dds_DCPS_Qos_Helper, OwnershipQosPolicyBuilder_exclusive)
 {
   OpenDDS::DCPS::OwnershipQosPolicyBuilder uut;
   uut.exclusive();
-  EXPECT_EQ(uut.qos().kind, DDS::EXCLUSIVE_OWNERSHIP_QOS);;
+  EXPECT_EQ(uut.qos().kind, DDS::EXCLUSIVE_OWNERSHIP_QOS);
 }
 
 TEST(dds_DCPS_Qos_Helper, OwnershipStrengthQosPolicyBuilder_default_ctor)
@@ -494,14 +494,14 @@ TEST(dds_DCPS_Qos_Helper, LivelinessQosPolicyBuilder_manual_by_participant)
 {
   OpenDDS::DCPS::LivelinessQosPolicyBuilder uut;
   uut.manual_by_participant();
-  EXPECT_EQ(uut.qos().kind, DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS);;
+  EXPECT_EQ(uut.qos().kind, DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS);
 }
 
 TEST(dds_DCPS_Qos_Helper, LivelinessQosPolicyBuilder_manual_by_topic)
 {
   OpenDDS::DCPS::LivelinessQosPolicyBuilder uut;
   uut.manual_by_topic();
-  EXPECT_EQ(uut.qos().kind, DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS);;
+  EXPECT_EQ(uut.qos().kind, DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS);
 }
 
 TEST(dds_DCPS_Qos_Helper, LivelinessQosPolicyBuilder_lease_duration)

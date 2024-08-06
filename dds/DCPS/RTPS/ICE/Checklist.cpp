@@ -5,7 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 
 #include "Checklist.h"
 
@@ -814,4 +816,4 @@ void Checklist::indication()
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
-#endif /* OPENDDS_SECURITY */
+#endif

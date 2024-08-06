@@ -101,16 +101,30 @@ function(_opendds_group_exe name)
   set("${prefix}_BIN_DIRS" "${bin_dirs}" PARENT_SCOPE)
 endfunction()
 
-function(_opendds_find_in_mpc_projects found_var path_var mpc_projects mpc_name)
+function(_opendds_find_in_mpc_projects found_var path_var mpc_projects mpc_name config)
   string(JSON mpc_project ERROR_VARIABLE err GET "${mpc_projects}" "${mpc_name}")
   if(NOT mpc_project)
-    set(${found_var} FALSE CACHE INTERNAL "" FORCE)
-    if(debug)
-      message(STATUS "lib ${target} (${mpc_name}) not in MPC projects")
+    # The ACE and TAO libraries targets from MPC might be called ACE-target and
+    # TAO-target depending on if they're in directories of the same name. It
+    # should be trivial to predict this, but the path logic for this in MPC
+    # seems buggy and might not prepend -target when OPENDDS_ACE_TAO_SRC is
+    # outside of the build directory, so we're just going to check both for all
+    # targets.
+    string(JSON mpc_project ERROR_VARIABLE err GET "${mpc_projects}" "${mpc_name}-target")
+    if(NOT mpc_project)
+      set(${found_var} FALSE CACHE INTERNAL "" FORCE)
+      if(debug)
+        message(STATUS "lib ${target} (${mpc_name} or ${mpc_name}-target) not in MPC projects")
+      endif()
+      return()
     endif()
-    return()
   endif()
-  string(JSON path GET "${mpc_project}" "loc")
+  string(JSON configs ERROR_VARIABLE err GET "${mpc_project}" "configs")
+  if(config AND configs)
+    string(JSON path GET "${configs}" "${config}")
+  else()
+    string(JSON path GET "${mpc_project}" "loc")
+  endif()
   if(NOT CMAKE_GENERATOR STREQUAL "Ninja" AND NOT IS_ABSOLUTE "${path}")
     cmake_path(ABSOLUTE_PATH path BASE_DIRECTORY "${OPENDDS_BUILD_DIR}")
   endif()
@@ -134,6 +148,7 @@ function(_opendds_find_our_libraries_for_config group libs config suffix)
   endif()
 
   string(TOUPPER "_OPENDDS_${group}" group_prefix)
+  string(TOUPPER "${config}" config_upper)
 
   if(MSVC AND OPENDDS_STATIC)
     set(suffix "s${suffix}")
@@ -149,7 +164,7 @@ function(_opendds_find_our_libraries_for_config group libs config suffix)
     set(lib_file_base "${lib}${suffix}")
     string(TOUPPER "${group_prefix}_${short_name}" lib_prefix)
     string(TOUPPER "${lib}" upper)
-    set(lib_var "${upper}_LIBRARY_${config}")
+    set(lib_var "${upper}_LIBRARY_${config_upper}")
     set(found_var "${upper}_LIBRARY_FOUND")
     string(TOUPPER "${group}_IS_BEING_BUILT" group_is_being_built_var)
     set(group_is_being_built "${${group_is_being_built_var}}")
@@ -168,7 +183,7 @@ function(_opendds_find_our_libraries_for_config group libs config suffix)
     set(mpc_projects_var "${group_prefix}_MPC_PROJECTS")
     if(DEFINED "${mpc_projects_var}")
       _opendds_find_in_mpc_projects(
-        "${found_var}" "${lib_var}" "${${mpc_projects_var}}" "${${lib_prefix}_MPC_NAME}")
+        "${found_var}" "${lib_var}" "${${mpc_projects_var}}" "${${lib_prefix}_MPC_NAME}" ${config})
       if(${${found_var}})
         if(debug)
           message(STATUS "${config} lib ${target} assumed: ${${lib_var}}")
@@ -206,7 +221,7 @@ function(_opendds_find_our_libraries_for_config group libs config suffix)
         # IMPORTED_RUNTIME_ARTIFACTS to work correctly.
         find_file("${lib_var}_DLL" "${lib_file_base}.dll" HINTS "${lib_dir}")
       endif()
-    elseif(NOT DEFINED ${found_var})
+    elseif(NOT CMAKE_CONFIGURATION_TYPES AND NOT DEFINED ${found_var})
       if(debug)
         message(STATUS "${config} lib ${target} NOT FOUND")
       endif()
@@ -243,7 +258,7 @@ function(_opendds_find_executables group exes)
     set(mpc_projects_var "${group_prefix}_MPC_PROJECTS")
     if(DEFINED "${mpc_projects_var}" AND NOT ${var}_HOST_TOOL)
       _opendds_find_in_mpc_projects(
-        "${found_var}" "${var}" "${${mpc_projects_var}}" "${${var}_MPC_NAME}")
+        "${found_var}" "${var}" "${${mpc_projects_var}}" "${${var}_MPC_NAME}" "")
       if(${${found_var}})
         if(debug)
           message(STATUS "exe ${target} assumed: ${${var}}")
@@ -263,13 +278,13 @@ endfunction()
 
 # Needs to be a macro because of select_library_configurations
 macro(_opendds_find_group_targets group libs exes)
-  if(MSVC)
-    _opendds_find_our_libraries_for_config(${group} "${libs}" "RELEASE" "")
-    _opendds_find_our_libraries_for_config(${group} "${libs}" "DEBUG" "d")
+  if(CMAKE_CONFIGURATION_TYPES)
+    _opendds_find_our_libraries_for_config(${group} "${libs}" "Release" "")
+    _opendds_find_our_libraries_for_config(${group} "${libs}" "Debug" "d")
   elseif(OPENDDS_DEBUG)
-    _opendds_find_our_libraries_for_config(${group} "${libs}" "DEBUG" "")
+    _opendds_find_our_libraries_for_config(${group} "${libs}" "Debug" "")
   else()
-    _opendds_find_our_libraries_for_config(${group} "${libs}" "RELEASE" "")
+    _opendds_find_our_libraries_for_config(${group} "${libs}" "Release" "")
   endif()
 
   foreach(_lib ${libs})
@@ -305,6 +320,14 @@ function(_opendds_import_group_targets group libs exes)
   string(TOUPPER "${group}" group_upper)
   set(group_prefix "_OPENDDS_${group_upper}")
 
+  function(set_imported_prop target config prop value)
+    if(NOT CMAKE_CONFIGURATION_TYPES)
+      set_target_properties(${target} PROPERTIES ${prop} "${value}")
+    endif()
+    set(prop "${prop}_${config}")
+    set_target_properties(${target} PROPERTIES ${prop} "${value}")
+  endfunction()
+
   macro(add_target_library_config target var_prefix config)
     set(lib_var "${var_prefix}_LIBRARY_${config}")
     set(lib_file "${${lib_var}}")
@@ -329,20 +352,14 @@ function(_opendds_import_group_targets group libs exes)
 
       set(imploc "${lib_file}")
       if(MSVC)
-        set_target_properties(${target}
-          PROPERTIES
-            "IMPORTED_IMPLIB_${config}" "${lib_file}"
-        )
+        set_imported_prop(${target} ${config} IMPORTED_IMPLIB "${lib_file}")
         set(dll "${lib_var}_DLL")
         if(DEFINED "${dll}")
           set(imploc "${${dll}}")
         endif()
       endif()
-      set_target_properties(${target}
-        PROPERTIES
-          "IMPORTED_LINK_INTERFACE_LANGUAGES_${config}" "CXX"
-          "IMPORTED_LOCATION_${config}" "${imploc}"
-      )
+      set_imported_prop(${target} ${config} IMPORTED_LINK_INTERFACE_LANGUAGES "CXX")
+      set_imported_prop(${target} ${config} IMPORTED_LOCATION "${imploc}")
     endif()
   endmacro()
 
@@ -352,6 +369,7 @@ function(_opendds_import_group_targets group libs exes)
 
     if(NOT TARGET ${target} AND ${var_prefix}_LIBRARY_FOUND)
       add_library(${target} ${OPENDDS_LIBRARY_TYPE} IMPORTED GLOBAL)
+      _opendds_cxx_std(${target} INTERFACE)
       set_target_properties(${target}
         PROPERTIES
           INTERFACE_INCLUDE_DIRECTORIES "${include_dirs}"
@@ -365,7 +383,7 @@ function(_opendds_import_group_targets group libs exes)
         add_dependencies(${target} "${${mpc_ext_proj_var}}")
       endif()
 
-      if(MSVC)
+      if(CMAKE_CONFIGURATION_TYPES)
         add_target_library_config(${target} ${var_prefix} "RELEASE")
         add_target_library_config(${target} ${var_prefix} "DEBUG")
       elseif(OPENDDS_DEBUG)

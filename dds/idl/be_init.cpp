@@ -49,9 +49,7 @@ BE_post_init(char*[], long)
           << std::setw(2) << std::setfill('0') << OPENDDS_MICRO_VERSION;
   DRV_cpp_putarg(version.str().c_str());
 
-#ifdef ACE_HAS_CDR_FIXED
   DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_FIXED");
-#endif
 
   std::string include_dds = be_util::dds_root();
   if (include_dds.find(' ') != std::string::npos && include_dds[0] != '"') {
@@ -66,5 +64,6 @@ BE_post_init(char*[], long)
   be_global->builtin_annotations_.register_all();
   // This annotation isn't used, but must match the one in idl2jni to avoid
   // warnings or errors.
-  idl_global->eval("module OpenDDS {@annotation hidden_op_in_java {string impl;};};\n");
+  idl_global->eval(
+    "module OpenDDS {module internal {@annotation hidden_op_in_java {int8 dummy;};};};\n");
 }

@@ -1566,7 +1566,7 @@ DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
         }
 
         const DDS::ReturnCode_t this_rc = copy_member(dest, id, src, id);
-        if (this_rc != DDS::RETCODE_OK && rc == DDS::RETCODE_OK) {
+        if (this_rc != DDS::RETCODE_OK && this_rc != DDS::RETCODE_NO_DATA && rc == DDS::RETCODE_OK) {
           rc = this_rc;
         }
       }
@@ -1678,6 +1678,35 @@ bool has_explicit_keys(DDS::DynamicType* dt)
     }
   }
   return false;
+}
+
+DDS::ReturnCode_t flat_index(CORBA::ULong& flat_idx, const DDS::BoundSeq& idx_vec,
+                             const DDS::BoundSeq& dims)
+{
+  if (idx_vec.length() != dims.length()) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: flat_index: Number of dimensions (%u) != "
+                 " size of the index vector (%u)\n", dims.length(), idx_vec.length()));
+    }
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
+  CORBA::ULong ret_val = 0;
+  CORBA::ULong factor = 1;
+  for (CORBA::ULong i = dims.length() - 1; i > 0; --i) {
+    const CORBA::ULong dim = dims[i];
+    if (idx_vec[i] >= dim) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: flat_index: %u-th index (%u) is invalid for"
+                   " the %u-th dimension (%u)", i, idx_vec[i], i, dim));
+      }
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
+    ret_val += factor * idx_vec[i];
+    factor *= dim;
+  }
+  flat_idx = ret_val + factor * idx_vec[0];
+  return DDS::RETCODE_OK;
 }
 
 } // namespace XTypes

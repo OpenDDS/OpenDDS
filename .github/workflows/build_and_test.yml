@@ -1,11 +1,7 @@
-name: "Build & Test"
+name: "MPC Builds"
 
 on:
   push:
-    branches:
-      - master
-      - branch-DDS-3.*
-      - gh_wf_*
     paths:
       - '**'
       # Don't run this workflow if the only files that changed are the
@@ -29,9 +25,6 @@ on:
       - '!**/.lint_config'
       - '!**/README*'
   pull_request:
-    branches:
-      - master
-      - branch-DDS-3.*
     paths:
       - '**'
       # Don't run this workflow if the only files that changed are the
@@ -64,7 +57,8 @@ env:
   TRIGGERING_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
   VCPKG_INSTALLED_DIR: ${{ github.workspace }}\vcpkg\installed
   CTEST_OUTPUT_ON_FAILURE: ON
-  VCPKG_GIT_COMMIT: 8eb57355a4ffb410a2e94c07b4dca2dffbee8e50
+  VCPKG_GIT_COMMIT: f7423ee180c4b7f40d43402c2feb3859161ef625
+  SCOREBOARD_UPLOAD_BRANCH: refs/heads/master
 
 jobs:
 
@@ -102,7 +96,7 @@ jobs:
         echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
@@ -116,7 +110,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --no-inline --tests --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --no-inline --tests --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -178,14 +172,14 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --no-inline --tests --java=$JAVA_HOME_17_X64 --no-rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --no-inline --tests --java=$JAVA_HOME_17_X64 --no-rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -313,7 +307,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -336,15 +329,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -372,8 +370,9 @@ jobs:
           --optimize \
           --no-debug \
           --features=versioned_namespace=1 \
-          --tests
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+          --tests \
+          --compile-warnings=WARNING
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make OpenDDS
       run: |
         cd OpenDDS
@@ -550,10 +549,10 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c10_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v4
@@ -581,7 +580,8 @@ jobs:
           --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
           --no-rapidjson \
           --safety-profile \
-          --tests
+          --tests \
+          --compile-warnings=WARNING
     - name: exclude OpenDDS_Util and opendds_idl
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
@@ -608,7 +608,8 @@ jobs:
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         cd $GITHUB_WORKSPACE/OpenDDS
         find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO build/host/setenv.sh build/host/VERSION.txt
+        rm -rf build/{host,target}/ACE_TAO/{ACE,TAO}/{examples,performance-tests,tests}
+        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v4
@@ -660,7 +661,8 @@ jobs:
           --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
           --no-rapidjson \
           --safety-profile \
-          --tests
+          --tests \
+          --compile-warnings=WARNING
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
@@ -671,7 +673,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u22_esafe_js0.tar.xz
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
       run: |
@@ -700,10 +702,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS/build
-        tar cvf ../../${{ github.job }}.tar host/dds/idl/opendds_idl
-        tar uvf ../../${{ github.job }}.tar host/bin/opendds_idl
-        tar uvf ../../${{ github.job }}.tar host/dds/DCPS/libOpenDDS_Util*
-        tar uvf ../../${{ github.job }}.tar host/lib/libOpenDDS_Util*
+        tar cvf ../../${{ github.job }}.tar host/dds/idl/opendds_idl host/bin/opendds_idl host/setenv.sh host/VERSION.txt
         cd target
         find . -iname "*\.o" | xargs rm
         cd ..
@@ -809,7 +808,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
@@ -831,15 +829,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -876,10 +879,10 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c10_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v4
@@ -908,7 +911,8 @@ jobs:
           --no-rapidjson \
           --safety-profile=base \
           --no-built-in-topics \
-          --tests
+          --tests \
+          --compile-warnings=WARNING
     - name: exclude OpenDDS_Util and opendds_idl
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
@@ -935,7 +939,8 @@ jobs:
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         cd $GITHUB_WORKSPACE/OpenDDS
         find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO build/host/setenv.sh build/host/VERSION.txt
+        rm -rf build/{host,target}/ACE_TAO/{ACE,TAO}/{examples,performance-tests,tests}
+        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v4
@@ -988,7 +993,8 @@ jobs:
           --no-rapidjson \
           --safety-profile=base \
           --no-built-in-topics \
-          --tests
+          --tests \
+          --compile-warnings=WARNING
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
@@ -999,7 +1005,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u22_bsafe_js0_FM-1f.tar.xz
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
       run: |
@@ -1028,10 +1034,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS/build
-        tar cvf ../../${{ github.job }}.tar host/dds/idl/opendds_idl
-        tar uvf ../../${{ github.job }}.tar host/bin/opendds_idl
-        tar uvf ../../${{ github.job }}.tar host/dds/DCPS/libOpenDDS_Util*
-        tar uvf ../../${{ github.job }}.tar host/lib/libOpenDDS_Util*
+        tar cvf ../../${{ github.job }}.tar host/dds/idl/opendds_idl host/bin/opendds_idl host/setenv.sh host/VERSION.txt
         cd target
         find . -iname "*\.o" | xargs rm
         cd ..
@@ -1137,7 +1140,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
@@ -1159,15 +1161,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -1204,7 +1211,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -1221,7 +1228,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --no-debug --no-inline --features=versioned_namespace=1 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --no-debug --no-inline --features=versioned_namespace=1 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -1285,14 +1292,14 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --no-debug --no-inline --features=versioned_namespace=1 --tests --security --no-rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --no-debug --no-inline --features=versioned_namespace=1 --tests --security --no-rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -1415,7 +1422,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -1438,15 +1444,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -1483,7 +1494,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -1509,7 +1520,8 @@ jobs:
           --features=uses_wchar=1 \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --tests \
-          --security
+          --security \
+          --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -1542,6 +1554,8 @@ jobs:
     needs: ACE_TAO_u20_clang12_i0w1_sec
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -1583,14 +1597,15 @@ jobs:
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --tests \
           --security \
-          --rapidjson
+          --rapidjson \
+          --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -1630,6 +1645,8 @@ jobs:
       id-token: write
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -1714,7 +1731,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -1737,15 +1753,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -1782,7 +1803,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -1807,7 +1828,8 @@ jobs:
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --tests \
           --security \
-          --no-rapidjson
+          --no-rapidjson \
+          --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -1840,6 +1862,8 @@ jobs:
     needs: ACE_TAO_u20_clang10_sec_js0
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -1880,14 +1904,15 @@ jobs:
           --tests \
           --security \
           --no-rapidjson \
-          --mpcopts="-features no_opendds_testing_features=0"
+          --features no_opendds_testing_features=0 \
+          --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -1927,6 +1952,8 @@ jobs:
       id-token: write
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -2011,7 +2038,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -2034,15 +2060,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -2079,7 +2110,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -2104,7 +2135,8 @@ jobs:
           --std=c++03 \
           --tests \
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
-          --mpc=$GITHUB_WORKSPACE/MPC
+          --mpc=$GITHUB_WORKSPACE/MPC \
+          --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -2137,6 +2169,8 @@ jobs:
     needs: ACE_TAO_u20_gcc9_d0w1_cpp03
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -2177,14 +2211,15 @@ jobs:
           --tests \
           --rapidjson \
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
-          --mpc=$GITHUB_WORKSPACE/MPC
+          --mpc=$GITHUB_WORKSPACE/MPC \
+          --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -2305,7 +2340,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -2328,15 +2362,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -2381,7 +2420,7 @@ jobs:
         echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
@@ -2398,7 +2437,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --compiler=g++-8 --no-inline --no-rapidjson --tests --java --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=g++-8 --no-inline --no-rapidjson --tests --java --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -2431,6 +2470,8 @@ jobs:
     needs: ACE_TAO_u20_gcc8_i0_js0_j
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install gcc and g++
       run: |
         sudo apt-get install g++-8
@@ -2465,14 +2506,14 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --compiler=g++-8 --no-inline --no-rapidjson --tests --java --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=g++-8 --no-inline --no-rapidjson --tests --java --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -2593,7 +2634,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -2616,15 +2656,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -2632,14 +2677,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  ACE_TAO_u22_gcc11_i0_xer0:
+  ACE_TAO_u22_i0_xer0:
 
     runs-on: ubuntu-22.04
 
     steps:
-    - name: install gcc and g++
-      run: |
-        sudo apt-get install g++-11
     - name: checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -2660,14 +2702,14 @@ jobs:
     - name: get compiler version
       shell: bash
       run: |
-        export COMPILER_VERSION=$(g++-11 --version 2>&1 | head -n 1)
+        export COMPILER_VERSION=$(g++ --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v4
@@ -2678,7 +2720,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --compiler=g++-11 --std=c++20 --no-inline --tests --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --std=c++20 --no-inline --tests --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -2704,16 +2746,13 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_u22_gcc11_i0_xer0:
+  build_u22_i0_xer0:
 
     runs-on: ubuntu-22.04
 
-    needs: ACE_TAO_u22_gcc11_i0_xer0
+    needs: ACE_TAO_u22_i0_xer0
 
     steps:
-    - name: install gcc and g++
-      run: |
-        sudo apt-get install g++-11
     - name: checkout MPC
       uses: actions/checkout@v4
       with:
@@ -2728,13 +2767,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_u22_gcc11_i0_xer0_artifact
+        name: ACE_TAO_u22_i0_xer0_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u22_gcc11_i0_xer0.tar.xz
+        tar xvfJ ACE_TAO_u22_i0_xer0.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -2743,14 +2782,14 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --compiler=g++-11 --std=c++20 --no-inline --tests --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --std=c++20 --no-inline --tests --rapidjson --boottime --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -2762,7 +2801,7 @@ jobs:
         source OpenDDS/setenv.sh
         mkdir OpenDDS/tests/cmake/build
         cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_COMPILER=g++-11 ..
+        cmake ..
         cmake --build . -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -2779,11 +2818,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_u22_gcc11_i0_xer0:
+  test_u22_i0_xer0:
 
     runs-on: ubuntu-22.04
 
-    needs: build_u22_gcc11_i0_xer0
+    needs: build_u22_i0_xer0
 
     permissions:
       contents: read
@@ -2809,13 +2848,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_u22_gcc11_i0_xer0_artifact
+        name: ACE_TAO_u22_i0_xer0_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u22_gcc11_i0_xer0.tar.xz
+        tar xvfJ ACE_TAO_u22_i0_xer0.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -2824,13 +2863,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_u22_gcc11_i0_xer0_artifact
+        name: build_u22_i0_xer0_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u22_gcc11_i0_xer0.tar.xz
+        tar xvfJ build_u22_i0_xer0.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -2871,14 +2910,13 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config CXX11 -Config RAPIDJSON -Config BOOTTIME_TIMERS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -2894,15 +2932,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -2915,6 +2958,8 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout OpenDDS
@@ -2941,7 +2986,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c10_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -2976,7 +3021,8 @@ jobs:
           --no-content-subscription \
           --no-object-model-profile \
           --no-persistence-profile \
-          --tests
+          --tests \
+          --compile-warnings=WARNING
     - name: exclude OpenDDS_Util and opendds_idl
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
@@ -3018,6 +3064,8 @@ jobs:
     needs: ACE_TAO_u20_gcc10_bsafe_js0_FM-2c
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -3059,7 +3107,8 @@ jobs:
           --no-content-subscription \
           --no-object-model-profile \
           --no-persistence-profile \
-          --tests
+          --tests \
+          --compile-warnings=WARNING
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
@@ -3070,7 +3119,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u20_gcc10_bsafe_js0_FM-2c.tar.xz
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
       run: |
@@ -3147,7 +3196,7 @@ jobs:
         echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_master_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
@@ -3164,7 +3213,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -3229,14 +3278,14 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --qt --wireshark --tests --security --java --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --qt --wireshark --tests --security --java --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -3375,7 +3424,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -3398,15 +3446,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -3443,7 +3496,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -3469,7 +3522,8 @@ jobs:
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --ipv6 \
           --tests \
-          --security
+          --security \
+          --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -3503,6 +3557,8 @@ jobs:
     needs: ACE_TAO_u20_p1_asan
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -3544,14 +3600,15 @@ jobs:
           --ipv6 \
           --tests \
           --security \
-          --rapidjson
+          --rapidjson \
+          --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -3591,6 +3648,8 @@ jobs:
       id-token: write
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -3675,7 +3734,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -3698,15 +3756,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -3743,7 +3806,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -3768,7 +3831,8 @@ jobs:
           --sanitize tsan \
           --ipv6 \
           --tests \
-          --security
+          --security \
+          --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -3801,6 +3865,8 @@ jobs:
     needs: ACE_TAO_u20_p1_tsan
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -3841,14 +3907,15 @@ jobs:
           --ipv6 \
           --tests \
           --security \
-          --rapidjson
+          --rapidjson \
+          --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -3881,6 +3948,8 @@ jobs:
       id-token: write
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -3965,7 +4034,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -3988,15 +4056,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -4033,7 +4106,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -4060,7 +4133,8 @@ jobs:
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --ipv6 \
           --tests \
-          --security
+          --security \
+          --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -4093,6 +4167,8 @@ jobs:
     needs: ACE_TAO_u20_p1_ubsan
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -4136,14 +4212,15 @@ jobs:
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --ipv6 \
           --security \
-          --rapidjson
+          --rapidjson \
+          --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -4182,6 +4259,8 @@ jobs:
       id-token: write
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -4266,7 +4345,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -4289,15 +4367,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -4350,7 +4433,7 @@ jobs:
         echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c06_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
@@ -4368,7 +4451,7 @@ jobs:
       run: |
         SSL_DIR=$PWD/openssl_install
         cd OpenDDS
-        ./configure --ipv6 --tests --security --openssl=$SSL_DIR --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --ipv6 --tests --security --openssl=$SSL_DIR --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -4410,6 +4493,8 @@ jobs:
       run: |
         tar xvJf openssl3_u20.tar.xz
         rm -f openssl3_u20.tar.xz
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -4443,7 +4528,7 @@ jobs:
         SSL_DIR=$PWD/openssl_install
         export SSL_LIBDIR=$SSL_DIR/lib64
         cd OpenDDS
-        ./configure --ipv6 --tests --security --openssl=$SSL_DIR --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --ipv6 --tests --security --openssl=$SSL_DIR --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
         echo "export SSL_LIBDIR=$SSL_LIBDIR" >> setenv.sh
     - name: check build configuration
       shell: bash
@@ -4451,7 +4536,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -4500,6 +4585,8 @@ jobs:
       run: |
         tar xvJf openssl3_u20.tar.xz
         rm -f openssl3_u20.tar.xz
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -4583,7 +4670,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -4606,15 +4692,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -4718,7 +4809,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -4741,15 +4831,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -4764,6 +4859,8 @@ jobs:
     needs: ACE_TAO_u20_p1
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -4795,14 +4892,14 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --tests --java=$JAVA_HOME_8_X64 --no-built-in-topics --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --tests --java=$JAVA_HOME_8_X64 --no-built-in-topics --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -4857,6 +4954,8 @@ jobs:
       id-token: write
 
     steps:
+    - name: Update apt indexes
+      run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -4940,7 +5039,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -4963,15 +5061,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -5013,7 +5116,7 @@ jobs:
         echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
@@ -5030,7 +5133,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --features=uses_wchar=1 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --features=uses_wchar=1 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -5094,14 +5197,14 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --features=uses_wchar=1 "--mpcopts=-features dds_suppress_anys=0" --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --features=uses_wchar=1 --features dds_suppress_anys=0 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -5224,7 +5327,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -5247,15 +5349,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -5301,14 +5408,14 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --features=uses_wchar=1 --tests --java --no-content-subscription --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --features=uses_wchar=1 --tests --java --no-content-subscription --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -5446,7 +5553,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -5469,15 +5575,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -5514,7 +5625,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -5531,7 +5642,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --static --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --static --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -5607,14 +5718,14 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --static --qt --wireshark --security --rapidjson --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --static --qt --wireshark --security --rapidjson --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -5712,7 +5823,7 @@ jobs:
         sudo sysctl -w kernel.core_pattern=core.%e.%p
         echo Core file pattern set to:
         cat /proc/sys/kernel/core_pattern
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: Build CMake Tests
       run: |
         source OpenDDS/setenv.sh
@@ -5742,7 +5853,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -5765,15 +5875,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -5876,7 +5991,7 @@ jobs:
         . setenv.sh
         cd tests/DCPS/Messenger
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: bash
       run: |
@@ -5920,7 +6035,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
@@ -5942,15 +6056,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -6053,7 +6172,7 @@ jobs:
         . setenv.sh
         cd tests/DCPS/Compiler
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: bash
       run: |
@@ -6083,7 +6202,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
@@ -6105,15 +6223,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -6216,7 +6339,7 @@ jobs:
         . setenv.sh
         cd tests/unit-tests
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make unit tests
       shell: bash
       run: |
@@ -6246,7 +6369,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
@@ -6268,15 +6390,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -6370,7 +6497,7 @@ jobs:
         . setenv.sh
         cd tests/security/attributes
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build security tests
       shell: bash
       run: |
@@ -6399,7 +6526,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
@@ -6421,15 +6547,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -6471,7 +6602,7 @@ jobs:
         echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
@@ -6488,7 +6619,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -6552,14 +6683,14 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --tests --java --no-content-filtered-topic --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --tests --java --no-content-filtered-topic --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -6697,7 +6828,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -6720,15 +6850,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -6765,7 +6900,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -6794,7 +6929,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --no-rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy
+        configure --ipv6 --static --no-rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -6881,14 +7016,14 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --no-rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows
+        configure --ipv6 --static --no-rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --compile-warnings=WARNING
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -6975,7 +7110,7 @@ jobs:
         rm -f build_w19_p1_stat_js0.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -7011,7 +7146,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -7041,15 +7175,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -7146,7 +7285,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -7188,7 +7327,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -7217,15 +7355,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -7324,7 +7467,7 @@ jobs:
         rm -rf xcdr
         rm -rf XTypesExtensibility
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -7353,7 +7496,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -7382,15 +7524,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -7491,7 +7638,7 @@ jobs:
         rm -rf isolated_types
         rm -rf is_topic_type
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -7520,7 +7667,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -7549,15 +7695,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -7654,7 +7805,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -7682,7 +7833,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -7711,15 +7861,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -7756,7 +7911,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -7785,7 +7940,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy
+        configure --ipv6 --static --rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -7872,14 +8027,14 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows
+        configure --ipv6 --static --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --compile-warnings=WARNING
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -7966,7 +8121,7 @@ jobs:
         rm -f build_w19_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -8002,7 +8157,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -8032,15 +8186,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -8137,7 +8296,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -8179,7 +8338,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -8208,15 +8366,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -8315,7 +8478,7 @@ jobs:
         rm -rf xcdr
         rm -rf XTypesExtensibility
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -8343,7 +8506,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -8372,15 +8534,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -8481,7 +8648,7 @@ jobs:
         rm -rf isolated_types
         rm -rf is_topic_type
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -8509,7 +8676,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -8538,15 +8704,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -8643,7 +8814,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -8671,7 +8842,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -8700,15 +8870,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -8756,7 +8931,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -8785,7 +8960,7 @@ jobs:
       run: |
         set SSL_DIR=%CD%/openssl3
         cd OpenDDS
-        call configure -v --optimize --ipv6 --security --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=%SSL_DIR% --mpcopts=-hierarchy
+        call configure -v --optimize --ipv6 --security --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=%SSL_DIR% --mpcopts=-hierarchy --compile-warnings=WARNING
         echo "SSL_DIR=%SSL_DIR%" >> setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: build ACE & TAO
@@ -8884,7 +9059,7 @@ jobs:
       run: |
         set SSL_DIR=%CD%/openssl3
         cd OpenDDS
-        configure --optimize --ipv6 --rapidjson --security --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=%SSL_DIR%
+        configure --optimize --ipv6 --rapidjson --security --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=%SSL_DIR% --compile-warnings=WARNING
         echo "SSL_DIR=%SSL_DIR%" >> setenv.cmd
     - name: check build configuration
       shell: cmd
@@ -8892,7 +9067,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -9041,7 +9216,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -9071,15 +9245,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -9185,7 +9364,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -9227,7 +9406,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -9256,15 +9434,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -9361,7 +9544,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -9389,7 +9572,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -9418,15 +9600,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -9532,7 +9719,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -9560,7 +9747,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -9589,15 +9775,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -9627,21 +9818,10 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c02_${{ github.job }}_${{ env.WIRESHARK_COMMIT }}_${{ env.COMPILER_VERSION }}
-    - name: setup for run-vcpkg
-      shell: bash
-      run: |
-        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "qt5-winextras", "qt5-tools", "qt5-svg", "qt5-multimedia", "qt5-declarative" ] }' > vcpkg.json
-    - name: install vcpkg packages
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      id: runvcpkg
-      uses: lukka/run-vcpkg@v11
-      with:
-        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
-        runVcpkgInstall: true
     - name: checkout WinFlexBison
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v4
@@ -9727,7 +9907,7 @@ jobs:
         echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
@@ -9756,7 +9936,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --optimize --java --no-built-in-topics --rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy
+        configure --optimize --java --no-built-in-topics --rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -9852,14 +10032,14 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --optimize --java --no-built-in-topics --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --wireshark-cmake=${{ github.workspace }}\wireshark --wireshark-build=${{ github.workspace }}\wsbuild --wireshark-lib=run --glib=${{ github.workspace }}\wireshark-win64-libs-3.6\vcpkg-export-20210609-1-win64ws\installed\x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy
+        configure --optimize --java --no-built-in-topics --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --wireshark-cmake=${{ github.workspace }}\wireshark --wireshark-build=${{ github.workspace }}\wsbuild --wireshark-lib=run --glib=${{ github.workspace }}\wireshark-win64-libs-3.6\vcpkg-export-20210609-1-win64ws\installed\x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -9972,7 +10152,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -10002,15 +10181,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -10107,7 +10291,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -10149,7 +10333,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -10178,15 +10361,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -10283,7 +10471,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -10311,7 +10499,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -10340,15 +10527,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -10452,7 +10644,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -10480,7 +10672,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -10509,15 +10700,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -10559,7 +10755,7 @@ jobs:
         echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
@@ -10591,7 +10787,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call configure -v --no-inline --tests --security --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x86-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x86-windows --mpcopts=-hierarchy
+        call configure -v --no-inline --tests --security --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x86-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x86-windows --mpcopts=-hierarchy --compile-warnings=WARNING
         perl tools\scripts\show_build_config.pl
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
@@ -10680,14 +10876,14 @@ jobs:
       shell: cmd
       run: |
         cd /d C:\OpenDDS
-        configure --tests --rapidjson --security --ace=${{ github.workspace }}\ACE_TAO\ACE --tao=${{ github.workspace }}\ACE_TAO\TAO --mpc=${{ github.workspace }}\MPC --xerces3="${{ env.VCPKG_INSTALLED_DIR }}\x86-windows" --openssl="${{ env.VCPKG_INSTALLED_DIR }}\x86-windows"
+        configure --tests --rapidjson --security --ace=${{ github.workspace }}\ACE_TAO\ACE --tao=${{ github.workspace }}\ACE_TAO\TAO --mpc=${{ github.workspace }}\MPC --xerces3="${{ env.VCPKG_INSTALLED_DIR }}\x86-windows" --openssl="${{ env.VCPKG_INSTALLED_DIR }}\x86-windows" --compile-warnings=WARNING
     - name: check build configuration
       shell: cmd
       run: |
         cd /d C:\OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -10779,7 +10975,7 @@ jobs:
         mv OpenDDS /c/
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -10814,7 +11010,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -10843,15 +11038,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd /c/OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: C:\OpenDDS\${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -10965,7 +11165,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -10994,15 +11193,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd /c/OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: C:\OpenDDS\${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -11058,7 +11262,7 @@ jobs:
       shell: bash
       run: |
         mv OpenDDS /c/
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
       with:
@@ -11067,7 +11271,7 @@ jobs:
       shell: cmd
       run: |
         cd /d C:\OpenDDS
-        configure --tests --java --no-built-in-topics --rapidjson --mpc=${{ github.workspace }}\MPC --xerces3="${{ env.VCPKG_INSTALLED_DIR }}\x86-windows" --mpcopts="-features no_opendds_testing_features=0"
+        configure --tests --java --no-built-in-topics --rapidjson --mpc=${{ github.workspace }}\MPC --xerces3="${{ env.VCPKG_INSTALLED_DIR }}\x86-windows" --features no_opendds_testing_features=0 --compile-warnings=WARNING
     - name: check build configuration
       shell: cmd
       run: |
@@ -11165,7 +11369,7 @@ jobs:
         mv OpenDDS /c/
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: check build configuration
       shell: cmd
       run: |
@@ -11200,7 +11404,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -11230,15 +11433,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd /c/OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: c:/OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -11275,10 +11483,10 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: setup for run-vcpkg
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
@@ -11304,7 +11512,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --tests --ipv6 --rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy
+        configure --std=c++20 --tests --ipv6 --rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -11391,14 +11599,14 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows
+        configure --std=c++20 --ipv6 --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --compile-warnings=WARNING
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -11485,7 +11693,7 @@ jobs:
         rm -f build_w22_p1.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -11493,7 +11701,7 @@ jobs:
         call setenv.cmd
         mkdir tests\cmake\build
         cd tests\cmake\build
-        cmake ..
+        cmake .. -DCMAKE_CXX_STANDARD=20
         cmake --build .
     - name: check build configuration
       shell: cmd
@@ -11521,7 +11729,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -11551,15 +11758,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -11644,8 +11856,8 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Messenger
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_rapidjson=0 -features ipv6=1 -features ssl=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -11659,7 +11871,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\C++11
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_rapidjson=0 -features ipv6=1 -features ssl=1 -features no_cxx11=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - name: make C++11 messenger test
       shell: cmd
       run: |
@@ -11687,7 +11899,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -11716,15 +11927,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -11820,8 +12036,8 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Compiler
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features ssl=1 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -11849,7 +12065,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -11878,15 +12093,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -11982,8 +12202,8 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\unit-tests
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features ssl=1 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -12011,7 +12231,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="msvc"/>
@@ -12040,15 +12259,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -12056,11 +12280,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  # macOS 11.0
+  # macOS 13
 
-  ACE_TAO_m11_sec:
+  ACE_TAO_m13_sec:
 
-    runs-on: macos-11.0
+    runs-on: macos-13
 
     steps:
     - name: checkout OpenDDS
@@ -12092,7 +12316,7 @@ jobs:
         echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
@@ -12111,7 +12335,7 @@ jobs:
       run: |
         cd OpenDDS
         XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
-        ./configure --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
+        ./configure --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1 --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -12137,11 +12361,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_m11_sec:
+  build_m13_sec:
 
-    runs-on: macos-11.0
+    runs-on: macos-13
 
-    needs: ACE_TAO_m11_sec
+    needs: ACE_TAO_m13_sec
 
     steps:
     - name: install xerces-c
@@ -12161,13 +12385,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_m11_sec_artifact
+        name: ACE_TAO_m13_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        gtar xvfJ ACE_TAO_m11_sec.tar.xz
+        gtar xvfJ ACE_TAO_m13_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -12177,14 +12401,14 @@ jobs:
       run: |
         cd OpenDDS
         XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
-        ./configure --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
+        ./configure --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1 --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -12213,11 +12437,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_m11_sec:
+  test_m13_sec:
 
-    runs-on: macos-11.0
+    runs-on: macos-13
 
-    needs: build_m11_sec
+    needs: build_m13_sec
 
     permissions:
       contents: read
@@ -12246,13 +12470,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_m11_sec_artifact
+        name: ACE_TAO_m13_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        gtar xvfJ ACE_TAO_m11_sec.tar.xz
+        gtar xvfJ ACE_TAO_m13_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -12261,13 +12485,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_m11_sec_artifact
+        name: build_m13_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        gtar xvfJ build_m11_sec.tar.xz
+        gtar xvfJ build_m13_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -12295,7 +12519,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
@@ -12317,15 +12540,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -12333,11 +12561,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  cmake_m11_sec:
+  cmake_m13_sec:
 
-    runs-on: macos-11.0
+    runs-on: macos-13
 
-    needs: build_m11_sec
+    needs: build_m13_sec
 
     permissions:
       contents: read
@@ -12366,13 +12594,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_m11_sec_artifact
+        name: ACE_TAO_m13_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        gtar xvfJ ACE_TAO_m11_sec.tar.xz
+        gtar xvfJ ACE_TAO_m13_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -12381,13 +12609,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_m11_sec_artifact
+        name: build_m13_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        gtar xvfJ build_m11_sec.tar.xz
+        gtar xvfJ build_m13_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -12415,7 +12643,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
@@ -12437,15 +12664,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -12453,11 +12685,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  build_m11_j_FM-1f:
+  build_m13_j_FM-1f:
 
-    runs-on: macos-11.0
+    runs-on: macos-13
 
-    needs: ACE_TAO_m11_sec
+    needs: ACE_TAO_m13_sec
 
     steps:
     - name: install xerces-c
@@ -12477,13 +12709,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_m11_sec_artifact
+        name: ACE_TAO_m13_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        gtar xvfJ ACE_TAO_m11_sec.tar.xz
+        gtar xvfJ ACE_TAO_m13_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -12492,14 +12724,14 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --std=c++11 --tests --rapidjson --java --no-built-in-topics --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --std=c++11 --tests --rapidjson --java --no-built-in-topics --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -12543,11 +12775,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_m11_j_FM-1f:
+  test_m13_j_FM-1f:
 
-    runs-on: macos-11.0
+    runs-on: macos-13
 
-    needs: build_m11_j_FM-1f
+    needs: build_m13_j_FM-1f
 
     permissions:
       contents: read
@@ -12576,13 +12808,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_m11_sec_artifact
+        name: ACE_TAO_m13_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        gtar xvfJ ACE_TAO_m11_sec.tar.xz
+        gtar xvfJ ACE_TAO_m13_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -12591,13 +12823,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_m11_j_FM-1f_artifact
+        name: build_m13_j_FM-1f_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        gtar xvfJ build_m11_j_FM-1f.tar.xz
+        gtar xvfJ build_m13_j_FM-1f.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -12625,7 +12857,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
@@ -12647,15 +12878,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -12663,11 +12899,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  cmake_modeling_m11_j_FM-1f:
+  cmake_modeling_m13_j_FM-1f:
 
-    runs-on: macos-11.0
+    runs-on: macos-13
 
-    needs: build_m11_j_FM-1f
+    needs: build_m13_j_FM-1f
 
     permissions:
       contents: read
@@ -12696,13 +12932,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_m11_sec_artifact
+        name: ACE_TAO_m13_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        gtar xvfJ ACE_TAO_m11_sec.tar.xz
+        gtar xvfJ ACE_TAO_m13_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -12711,13 +12947,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_m11_j_FM-1f_artifact
+        name: build_m13_j_FM-1f_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        gtar xvfJ build_m11_j_FM-1f.tar.xz
+        gtar xvfJ build_m13_j_FM-1f.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -12745,7 +12981,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_make_version"/>
         <command name="check_compiler" options="gcc"/>
@@ -12767,15 +13002,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -12814,7 +13054,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c03_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -12833,7 +13073,7 @@ jobs:
       run: |
         cd OpenDDS
         XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
-        ./configure --optimize --no-debug --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
+        ./configure --optimize --no-debug --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1 --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -12900,14 +13140,14 @@ jobs:
         cd OpenDDS
         clang++ --version
         XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
-        ./configure --optimize --no-debug --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
+        ./configure --optimize --no-debug --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1 --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -13021,7 +13261,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -13044,15 +13283,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -13144,7 +13388,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -13167,15 +13410,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -13217,7 +13465,7 @@ jobs:
         echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
@@ -13236,7 +13484,7 @@ jobs:
       run: |
         cd OpenDDS
         XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
-        ./configure  --no-inline --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
+        ./configure  --no-inline --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1 --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -13303,14 +13551,14 @@ jobs:
       run: |
         cd OpenDDS
         clang++ --version
-        ./configure --no-inline --std=c++11 --tests --rapidjson --java --no-built-in-topics --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --no-inline --std=c++11 --tests --rapidjson --java --no-built-in-topics --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -13439,7 +13687,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -13462,15 +13709,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -13562,7 +13814,6 @@ jobs:
         </configuration>
         <command name="log" options="on"/>
         <command name="print_os_version"/>
-        <command name="print_env_vars"/>
         <command name="print_ace_config"/>
         <command name="print_cmake_version"/>
         <command name="print_make_version"/>
@@ -13585,15 +13836,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -13611,7 +13867,7 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: Build
       run: cd OpenDDS && docker build -f .github/workflows/build_u14_gcc4.Dockerfile .
 
@@ -13627,7 +13883,7 @@ jobs:
         echo "OPENSSL_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c02_${{ github.job }}_${{ env.OPENSSL_COMMIT }}
@@ -13670,7 +13926,7 @@ jobs:
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
         key: c01_${{ github.job }}_${{ env.OPENSSL_COMMIT }}_${{ env.COMPILER_VERSION }}
@@ -13706,305 +13962,3 @@ jobs:
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
-
-  build_cmake_u22:
-
-    runs-on: ubuntu-22.04
-
-    steps:
-    - name: Checkout OpenDDS
-      uses: actions/checkout@v4
-      with:
-        path: OpenDDS
-        submodules: true
-    - name: Checkout MPC
-      uses: actions/checkout@v4
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: Checkout ACE/TAO
-      uses: actions/checkout@v4
-      with:
-        repository: DOCGroup/ACE_TAO
-        path: OpenDDS/build/ACE_TAO
-    - name: Install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: Configure
-      run: |
-        cd OpenDDS
-        cmake -B build \
-          -DCMAKE_UNITY_BUILD=TRUE \
-          -DBUILD_SHARED_LIBS=TRUE \
-          -DCMAKE_BUILD_TYPE=Debug \
-          -DOPENDDS_SECURITY=TRUE \
-          -DOPENDDS_ACE_TAO_SRC=$GITHUB_WORKSPACE/OpenDDS/build/ACE_TAO \
-          -DOPENDDS_MPC=$GITHUB_WORKSPACE/MPC \
-          -DOPENDDS_BUILD_TESTS=TRUE \
-          -DOPENDDS_CMAKE_VERBOSE=all
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
-    - name: Build
-      run: |
-        cd OpenDDS
-        cmake --build build -- -j $(getconf _NPROCESSORS_ONLN)
-    - name: Run Tests
-      run: |
-        cd OpenDDS/build
-        ctest
-
-  build_cmake_u22_stat:
-
-    runs-on: ubuntu-22.04
-
-    steps:
-    - name: Checkout OpenDDS
-      uses: actions/checkout@v4
-      with:
-        path: OpenDDS
-        submodules: true
-    - name: Checkout MPC
-      uses: actions/checkout@v4
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: Checkout ACE/TAO
-      uses: actions/checkout@v4
-      with:
-        repository: DOCGroup/ACE_TAO
-        path: OpenDDS/build/ACE_TAO
-    - name: Configure
-      run: |
-        cd OpenDDS
-        cmake -B build \
-          -DCMAKE_UNITY_BUILD=TRUE \
-          -DBUILD_SHARED_LIBS=FALSE \
-          -DCMAKE_BUILD_TYPE=Debug \
-          -DOPENDDS_ACE_TAO_SRC=$GITHUB_WORKSPACE/OpenDDS/build/ACE_TAO \
-          -DOPENDDS_MPC=$GITHUB_WORKSPACE/MPC \
-          -DOPENDDS_BUILD_TESTS=TRUE \
-          -DOPENDDS_CMAKE_VERBOSE=all
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
-    - name: Build
-      run: |
-        cd OpenDDS
-        cmake --build build -- -j $(getconf _NPROCESSORS_ONLN)
-    - name: Run Tests
-      run: |
-        cd OpenDDS/build
-        ctest
-
-  build_cmake_u22_no_features:
-
-    runs-on: ubuntu-22.04
-
-    steps:
-    - name: Checkout OpenDDS
-      uses: actions/checkout@v4
-      with:
-        path: OpenDDS
-        submodules: true
-    - name: Checkout MPC
-      uses: actions/checkout@v4
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: Checkout ACE/TAO
-      uses: actions/checkout@v4
-      with:
-        repository: DOCGroup/ACE_TAO
-        path: OpenDDS/build/ACE_TAO
-    - name: Install Ninja
-      run: sudo apt-get -y install ninja-build
-    - name: Configure
-      run: |
-        cd OpenDDS
-        cmake -B build \
-          -G Ninja \
-          -DCMAKE_UNITY_BUILD=TRUE \
-          -DBUILD_SHARED_LIBS=TRUE \
-          -DCMAKE_BUILD_TYPE=Debug \
-          -DOPENDDS_ACE_TAO_SRC=$GITHUB_WORKSPACE/OpenDDS/build/ACE_TAO \
-          -DOPENDDS_MPC=$GITHUB_WORKSPACE/MPC \
-          -DOPENDDS_BUILD_TESTS=TRUE \
-          -DOPENDDS_BUILT_IN_TOPICS=FALSE \
-          -DOPENDDS_OBJECT_MODEL_PROFILE=FALSE \
-          -DOPENDDS_PERSISTENCE_PROFILE=FALSE \
-          -DOPENDDS_OWNERSHIP_PROFILE=FALSE \
-          -DOPENDDS_CONTENT_SUBSCRIPTION=FALSE \
-          -DOPENDDS_CMAKE_VERBOSE=all
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
-    - name: Build
-      run: |
-        cd OpenDDS
-        cmake --build build
-    - name: Run Tests
-      run: |
-        cd OpenDDS/build
-        ctest
-
-  build_cmake_u22_android29:
-
-    runs-on: ubuntu-22.04
-
-    steps:
-    - name: Checkout OpenDDS
-      uses: actions/checkout@v4
-      with:
-        path: OpenDDS
-        submodules: true
-    - uses: nttld/setup-ndk@v1
-      id: setup-ndk
-      with:
-        ndk-version: r25c
-        add-to-path: false
-    - name: Checkout MPC
-      uses: actions/checkout@v4
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: Checkout ACE/TAO
-      uses: actions/checkout@v4
-      with:
-        repository: DOCGroup/ACE_TAO
-        path: OpenDDS/build/ACE_TAO
-    - name: Install Ninja
-      run: sudo apt-get -y install ninja-build
-    - name: Configure Host Tools
-      run: |
-        cd OpenDDS
-        cmake -B build-host \
-          -G Ninja \
-          -DBUILD_SHARED_LIBS=FALSE \
-          -DOPENDDS_JUST_BUILD_HOST_TOOLS=TRUE
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
-    - name: Build Host Tools
-      run: |
-        cd OpenDDS
-        cmake --build build-host
-    - name: Configure Target
-      run: |
-        cd OpenDDS
-        cmake -B build-target \
-          -G Ninja \
-          -DBUILD_SHARED_LIBS=TRUE \
-          -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-29 \
-          --toolchain ${{ steps.setup-ndk.outputs.ndk-path }}/build/cmake/android.toolchain.cmake \
-          -DOPENDDS_CMAKE_VERBOSE=all \
-          -DOPENDDS_HOST_TOOLS=$(realpath build-host)
-    - name: Build Target
-      run: |
-        cd OpenDDS
-        cmake --build build-target
-
-  build_cmake_w22:
-
-    runs-on: windows-2022
-
-    needs: ACE_TAO_w22_p1
-
-    steps:
-    - name: setup for run-vcpkg
-      shell: bash
-      run: |
-        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
-    - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v11
-      with:
-        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
-        runVcpkgInstall: true
-    - name: Checkout OpenDDS
-      uses: actions/checkout@v4
-      with:
-        path: OpenDDS
-        submodules: true
-    - name: Checkout MPC
-      uses: actions/checkout@v4
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: Checkout ACE_TAO
-      uses: actions/checkout@v4
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: Download ACE_TAO artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: ACE_TAO_w22_p1_artifact
-        path: OpenDDS/ACE_TAO
-    - name: Extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w22_p1.tar.xz
-        rm -f ACE_TAO_w22_p1.tar.xz
-    - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1
-    - name: Configure
-      shell: cmd
-      run: |
-        cd OpenDDS
-        cmake -B build^
-          -DBUILD_SHARED_LIBS=TRUE^
-          -DCMAKE_BUILD_TYPE=Debug^
-          -DOPENDDS_ACE=${{ github.workspace }}\OpenDDS\ACE_TAO\ACE^
-          -DOPENDDS_MPC=${{ github.workspace }}\MPC^
-          -DOPENDDS_BUILD_TESTS=TRUE^
-          -DOPENDDS_CMAKE_VERBOSE=all
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
-    - name: Build
-      shell: cmd
-      run: |
-        cd OpenDDS
-        cmake --build build
-    - name: Run Tests
-      shell: cmd
-      run: |
-        cd OpenDDS\build
-        ctest -C Debug
-
-  build_cmake_w22_stat:
-
-    runs-on: windows-2022
-
-    steps:
-    - name: Checkout OpenDDS
-      uses: actions/checkout@v4
-      with:
-        path: OpenDDS
-        submodules: true
-    - name: Checkout MPC
-      uses: actions/checkout@v4
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: Checkout ACE/TAO
-      uses: actions/checkout@v4
-      with:
-        repository: DOCGroup/ACE_TAO
-        path: OpenDDS/build/ACE_TAO
-    - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1
-    - name: Configure
-      shell: cmd
-      run: |
-        cd OpenDDS
-        cmake -B build^
-          -DCMAKE_UNITY_BUILD=TRUE^
-          -DBUILD_SHARED_LIBS=FALSE^
-          -DCMAKE_BUILD_TYPE=Debug^
-          -DOPENDDS_ACE_TAO_SRC=${{ github.workspace }}\OpenDDS\build\ACE_TAO^
-          -DOPENDDS_MPC=${{ github.workspace }}\MPC^
-          -DOPENDDS_BUILD_TESTS=TRUE^
-          -DOPENDDS_CMAKE_VERBOSE=all
-    - uses: ammaraskar/msvc-problem-matcher@0.2.0
-    - name: Build
-      shell: cmd
-      run: |
-        cd OpenDDS
-        cmake --build build
-    - name: Run Tests
-      shell: cmd
-      run: |
-        cd OpenDDS\build
-        ctest -C Debug

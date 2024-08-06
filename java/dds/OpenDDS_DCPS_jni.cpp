@@ -179,6 +179,20 @@ jobject JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_network_1config_1modifie
 #endif
 }
 
+jobject JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_config_1store
+(JNIEnv * jni, jclass)
+{
+  try {
+    OpenDDS::DCPS::ConfigStore_var c_ret(TheServiceParticipant->config_store().get());
+    jobject j_ret = 0;
+    copyToJava (jni, j_ret, c_ret, true);
+    return j_ret;
+  } catch (const CORBA::SystemException& se) {
+    throw_java_exception(jni, se);
+    return 0;
+  }
+}
+
 // NetworkConfigModifier
 
 // NetworkConfigModifier::_jni_fini
@@ -567,7 +581,7 @@ jint JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_getPassiveConnectDurati
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::TransportConfig_rch config = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jthis));
-  return config->passive_connect_duration_;
+  return config->passive_connect_duration().value().msec();
 }
 
 // TransportConfig::setPassiveConnectDuration
@@ -575,7 +589,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_TransportConfig_setPassiveConnectDurati
 (JNIEnv * jni, jobject jthis, jint val)
 {
   OpenDDS::DCPS::TransportConfig_rch config = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS::TransportConfig>(jni, jthis));
-  config->passive_connect_duration_ = val;
+  config->passive_connect_duration(OpenDDS::DCPS::TimeDuration::from_msec(val));
 }
 
 // TransportInst
@@ -1097,10 +1111,10 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setUseMulticast
 
 // RtpsUdpInst::getMulticastGroupAddress
 jstring JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getMulticastGroupAddress
-(JNIEnv * jni, jobject jthis)
+(JNIEnv * jni, jobject jthis, jint domain)
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  return jni->NewStringUTF(OpenDDS::DCPS::LogAddr(inst->multicast_group_address()).c_str());
+  return jni->NewStringUTF(OpenDDS::DCPS::LogAddr(inst->multicast_group_address(domain)).c_str());
 }
 
 // RtpsUdpInst::setMulticastGroupAddress

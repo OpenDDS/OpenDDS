@@ -23,6 +23,8 @@
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/GuidUtils.h>
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include <ace/Time_Value.h>
 #include <ace/Event_Handler.h>
 #include <ace/Reverse_Lock_T.h>
@@ -60,14 +62,15 @@ public:
 
   // Local setup:
 
-  void enable_transport(bool reliable, bool durable);
+  void enable_transport(bool reliable, bool durable, DomainParticipantImpl* dpi);
   void enable_transport_using_config(bool reliable, bool durable,
-                                     const TransportConfig_rch& tc);
+                                     const TransportConfig_rch& tc,
+                                     DomainParticipantImpl* dpi);
 
   bool swap_bytes() const { return swap_bytes_; }
   bool cdr_encapsulation() const { return cdr_encapsulation_; }
   const TransportLocatorSeq& connection_info() const { return conn_info_; }
-  void populate_connection_info();
+  void populate_connection_info(DomainParticipantImpl* dpi);
   bool is_reliable() const { return reliable_; }
 
   // Managing associations to remote peers:
@@ -170,7 +173,7 @@ private:
 
 
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   virtual DDS::Security::ParticipantCryptoHandle get_crypto_handle() const
   {
     return DDS::HANDLE_NIL;
@@ -260,15 +263,12 @@ private:
     }
 
   private:
-    ~PendingAssocTimer()
-    { }
-
     class CommandBase : public Command {
     public:
       CommandBase(PendingAssocTimer* timer,
                   const PendingAssoc_rch& assoc)
-        : timer_ (timer)
-        , assoc_ (assoc)
+        : timer_(timer)
+        , assoc_(assoc)
       { }
     protected:
       PendingAssocTimer* timer_;
@@ -278,41 +278,18 @@ private:
       ScheduleCommand(PendingAssocTimer* timer,
                       TransportClient_rch transport_client,
                       const PendingAssoc_rch& assoc)
-        : CommandBase (timer, assoc)
-        , transport_client_ (transport_client)
+        : CommandBase(timer, assoc)
+        , transport_client_(transport_client)
       { }
-      virtual void execute()
-      {
-        if (timer_->reactor()) {
-          TransportClient_rch client = transport_client_.lock();
-          if (client) {
-            ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
-            assoc_->scheduled_ = true;
-            long id = timer_->reactor()->schedule_timer(assoc_.in(),
-                                                        client.in(),
-                                                        client->passive_connect_duration_.value());
-            if (id != -1) {
-              timer_->set_id(id);
-            }
-          }
-        }
-      }
-      WeakRcHandle<TransportClient> transport_client_;
+      virtual void execute();
+      const WeakRcHandle<TransportClient> transport_client_;
     };
     struct CancelCommand : public CommandBase {
       CancelCommand(PendingAssocTimer* timer,
                     const PendingAssoc_rch& assoc)
-        : CommandBase (timer, assoc)
+        : CommandBase(timer, assoc)
       { }
-      virtual void execute()
-      {
-        if (timer_->reactor() && timer_->get_id()) {
-          ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
-          timer_->reactor()->cancel_timer(timer_->get_id());
-          timer_->set_id(-1);
-          assoc_->scheduled_ = false;
-        }
-      }
+      virtual void execute();
     };
     long timer_id_;
   };

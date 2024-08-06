@@ -163,8 +163,12 @@ struct AddrSetStats {
 
   bool has_discovery_addrs() const
   {
+    bool spdp = false;
+    bool sedp = false;
     for (const auto& ip : ip_to_ports) {
-      if (!ip.second.spdp_ports.empty() && !ip.second.sedp_ports.empty()) {
+      spdp = spdp || !ip.second.spdp_ports.empty();
+      sedp = sedp || !ip.second.sedp_ports.empty();
+      if (spdp && sedp) {
         return true;
       }
     }
@@ -304,7 +308,7 @@ public:
                     const size_t& msg_len,
                     const RelayHandler& handler)
     {
-      return gas_.record_activity(*this, remote_address, now, src_guid, msg_type, msg_len, handler);
+      return gas_.record_activity(remote_address, now, src_guid, msg_type, msg_len, handler);
     }
 
     ParticipantStatisticsReporter&
@@ -338,7 +342,7 @@ public:
         return;
       }
 
-      gas_.remove(*this, guid, it, now, reporter);
+      gas_.remove(guid, it, now, reporter);
     }
 
     void reject_address(const ACE_INET_Addr& addr,
@@ -354,7 +358,7 @@ public:
 
     void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now)
     {
-      gas_.process_expirations(*this, now);
+      gas_.process_expirations(now);
     }
 
     bool admitting() const
@@ -386,16 +390,14 @@ private:
   }
 
   ParticipantStatisticsReporter&
-  record_activity(const Proxy& proxy,
-                  const AddrPort& remote_address,
+  record_activity(const AddrPort& remote_address,
                   const OpenDDS::DCPS::MonotonicTimePoint& now,
                   const OpenDDS::DCPS::GUID_t& src_guid,
                   MessageType msg_type,
                   const size_t& msg_len,
                   const RelayHandler& handler);
 
-  void process_expirations(const Proxy& proxy,
-                           const OpenDDS::DCPS::MonotonicTimePoint& now);
+  void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   bool admitting() const
   {
@@ -409,8 +411,7 @@ private:
                    const OpenDDS::DCPS::MonotonicTimePoint& now,
                    bool& admitted);
 
-  void remove(const Proxy& proxy,
-              const OpenDDS::DCPS::GUID_t& guid,
+  void remove(const OpenDDS::DCPS::GUID_t& guid,
               GuidAddrSetMap::iterator it,
               const OpenDDS::DCPS::MonotonicTimePoint& now,
               RelayParticipantStatusReporter* reporter);

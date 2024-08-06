@@ -407,7 +407,7 @@ WriteDataContainer::register_instance(
     }
 
     // registered the instance for the first time.
-    instance.reset(new PublicationInstance(move(registered_sample)), keep_count());
+    instance.reset(new PublicationInstance(OPENDDS_MOVE_NS::move(registered_sample)), keep_count());
 
     instance_handle = this->writer_->get_next_handle();
 

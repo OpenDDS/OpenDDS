@@ -7,28 +7,32 @@
 
 #include "RecorderImpl.h"
 
-#include "SubscriptionInstance.h"
-#include "ReceivedDataElementList.h"
+#include "DCPS_Utils.h"
 #include "DomainParticipantImpl.h"
-#include "Service_Participant.h"
-#include "Qos_Helper.h"
+#include "EncapsulationHeader.h"
 #include "FeatureDisabledQosCheck.h"
 #include "GuidConverter.h"
-#include "Serializer.h"
-#include "SubscriberImpl.h"
-#include "Transient_Kludge.h"
-#include "Util.h"
+#include "MonitorFactory.h"
+#include "PoolAllocator.h"
+#include "Qos_Helper.h"
 #include "QueryConditionImpl.h"
 #include "ReadConditionImpl.h"
-#include "MonitorFactory.h"
+#include "ReceivedDataElementList.h"
 #include "SafetyProfileStreams.h"
+#include "Serializer.h"
+#include "Service_Participant.h"
+#include "SubscriberImpl.h"
+#include "SubscriptionInstance.h"
+#include "Transient_Kludge.h"
 #include "TypeSupportImpl.h"
-#include "PoolAllocator.h"
-#include "DCPS_Utils.h"
+#include "Util.h"
+
 #ifndef DDS_HAS_MINIMUM_BIT
 #  include "BuiltInTopicUtils.h"
 #endif
+
 #include "XTypes/DynamicDataXcdrReadImpl.h"
+
 #include "transport/framework/EntryExit.h"
 #include "transport/framework/TransportExceptions.h"
 
@@ -191,7 +195,7 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
       Encoding enc;
       Serializer ser(payload.get(), enc);
       EncapsulationHeader encap;
-      if (ser >> encap && encap.to_any_encoding(enc)) {
+      if (ser >> encap && to_any_encoding(enc, encap)) {
         kind = enc.kind();
       }
     }
@@ -364,7 +368,7 @@ RecorderImpl::add_association(const WriterAssociation& writer,
     //
     //     if (where->second->should_ack(now)) {
     //       const SequenceNumber sequence = where->second->ack_sequence();
-    //       if (send_sample_ack(writer.writerId, sequence, now.to_dds_time())) {
+    //       if (send_sample_ack(writer.writerId, sequence, now.to_idl_struct())) {
     //         where->second->clear_acks(sequence);
     //       }
     //     }
@@ -886,7 +890,8 @@ RecorderImpl::enable()
 
     try {
       enable_transport(qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS,
-                             qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
+                       qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS,
+                       participant_servant_);
     } catch (const Transport::Exception&) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RecorderImpl::enable: Transport Exception\n"));

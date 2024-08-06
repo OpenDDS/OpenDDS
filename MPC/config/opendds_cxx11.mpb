@@ -1,8 +1,6 @@
-project: dcps, dcps_ts_defaults {
-
-  avoids += no_cxx11
-  requires += no_opendds_safety_profile
-  macros += OPENDDS_HAS_CXX11
+// This is for projects that use the IDL to C++11 Mapping. Use
+// opendds_uses_cxx11 if the project only requires C++11.
+project: dcps, dcps_ts_defaults, opendds_uses_cxx11 {
   dcps_ts_flags += -Lc++11
   idlflags += -SS -Sa -St
 

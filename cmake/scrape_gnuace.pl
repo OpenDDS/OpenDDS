@@ -42,7 +42,7 @@ my $gnumf = 'GNUmakefile';
 
 sub get_projects {
   my %projects;
-  open(my $fh, '-|', "$make -f $gnumf project_name_list") or die("get_projects make: $!");
+  open(my $fh, '-|', "$make --no-print-directory -f $gnumf project_name_list") or die("get_projects make: $!");
   while (my $project = <$fh>) {
     $project =~ s/\s//;
     my $mf = "$gnumf.$project";

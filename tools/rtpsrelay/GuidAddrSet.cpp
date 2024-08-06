@@ -8,8 +8,7 @@
 namespace RtpsRelay {
 
 ParticipantStatisticsReporter&
-GuidAddrSet::record_activity(const Proxy& proxy,
-                             const AddrPort& remote_address,
+GuidAddrSet::record_activity(const AddrPort& remote_address,
                              const OpenDDS::DCPS::MonotonicTimePoint& now,
                              const OpenDDS::DCPS::GUID_t& src_guid,
                              MessageType msg_type,
@@ -27,8 +26,7 @@ GuidAddrSet::record_activity(const Proxy& proxy,
     auto result = remote_map_.insert(std::make_pair(remote, src_guid));
     if (result.second) {
       relay_stats_reporter_.remote_map_size(static_cast<uint32_t>(remote_map_.size()), now);
-    }
-    if (!result.second && result.first->second != src_guid) {
+    } else if (result.first->second != src_guid) {
       if (config_.log_activity()) {
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity change detected %C -> %C\n"),
                    guid_to_string(result.first->second).c_str(),
@@ -38,7 +36,7 @@ GuidAddrSet::record_activity(const Proxy& proxy,
       const auto pos = guid_addr_set_map_.find(result.first->second);
       const auto prev_guid = result.first->second;
       if (pos != guid_addr_set_map_.end()) {
-        remove(proxy, prev_guid, pos, now, &relay_participant_status_reporter_);
+        remove(prev_guid, pos, now, &relay_participant_status_reporter_);
         result = remote_map_.insert(std::make_pair(remote, src_guid));
         if (!result.second) {
           result.first->second = src_guid;
@@ -68,7 +66,7 @@ GuidAddrSet::record_activity(const Proxy& proxy,
     deactivation_guid_queue_.push_back(std::make_pair(deactivation, src_guid));
   }
   addr_set_stats.deactivation = deactivation;
-  relay_participant_status_reporter_.set_alive_active(proxy, src_guid, true, true);
+  relay_participant_status_reporter_.set_alive_active(src_guid, true, true);
 
   if (addr_set_stats.upsert_address(remote_address, now, expiration, config_.max_ips_per_client())) {
     if (config_.log_activity()) {
@@ -97,8 +95,7 @@ GuidAddrSet::record_activity(const Proxy& proxy,
   return stats_reporter;
 }
 
-void GuidAddrSet::process_expirations(const Proxy& proxy,
-                                      const OpenDDS::DCPS::MonotonicTimePoint& now)
+void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
   bool update_reject_stat = false;
   auto it = rejected_address_expiration_queue_.begin();
@@ -132,7 +129,7 @@ void GuidAddrSet::process_expirations(const Proxy& proxy,
     AddrSetStats& addr_stats = pos->second;
 
     if (addr_stats.deactivation <= now) {
-      relay_participant_status_reporter_.set_active(proxy, guid, false);
+      relay_participant_status_reporter_.set_active(guid, false);
       addr_stats.deactivation = OpenDDS::DCPS::MonotonicTimePoint::zero_value;
     } else {
       deactivation_guid_queue_.push_back(std::make_pair(addr_stats.deactivation, guid));
@@ -186,7 +183,7 @@ void GuidAddrSet::process_expirations(const Proxy& proxy,
     relay_stats_reporter_.expired_address(now);
 
     if (addr_stats.ip_to_ports.empty()) {
-      remove(proxy, ga.guid, pos, now, &relay_participant_status_reporter_);
+      remove(ga.guid, pos, now, &relay_participant_status_reporter_);
     }
   }
 }
@@ -210,7 +207,7 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
     pos->second.allow_rtps = true;
 
     if (config_.log_activity()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity ")
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::ignore_rtps ")
                  ACE_TEXT("%C was admitted %C into session\n"),
                  guid_to_string(guid).c_str(),
                  pos->second.get_session_time(now).sec_str().c_str()));
@@ -248,7 +245,7 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
   admitted = true;
 
   if (config_.log_activity()) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity ")
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::ignore_rtps ")
                ACE_TEXT("%C was admitted %C into session\n"),
                guid_to_string(guid).c_str(),
                pos->second.get_session_time(now).sec_str().c_str()));
@@ -257,8 +254,7 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
   return false;
 }
 
-void GuidAddrSet::remove(const Proxy& proxy,
-                         const OpenDDS::DCPS::GUID_t& guid,
+void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid,
                          GuidAddrSetMap::iterator it,
                          const OpenDDS::DCPS::MonotonicTimePoint& now,
                          RelayParticipantStatusReporter* reporter)
@@ -284,7 +280,7 @@ void GuidAddrSet::remove(const Proxy& proxy,
   relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
 
   if (config_.log_activity()) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::remove_i "
+    ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::remove "
                "%C removed %C into session total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
                guid_to_string(guid).c_str(),
                session_time.sec_str().c_str(),
@@ -296,7 +292,7 @@ void GuidAddrSet::remove(const Proxy& proxy,
   }
 
   if (reporter) {
-    reporter->set_alive(proxy, guid, false);
+    reporter->set_alive(guid, false);
   }
 }
 

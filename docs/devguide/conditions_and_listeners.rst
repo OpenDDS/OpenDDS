@@ -20,7 +20,7 @@ The DDS specification defines two separate mechanisms for notifying applications
 Most of the status types define a structure that contains information related to the change of status and can be detected by the application using conditions or listeners.
 The different status types are described in :ref:`conditions_and_listeners--communication-status-types`.
 
-Each entity type (domain participant, topic, publisher, subscriber, data reader, and data writer) defines its own corresponding listener interface.
+Each :term:`entity` type defines its own corresponding listener interface.
 Applications can implement this interface and then attach their listener implementation to the entity.
 Each listener interface contains an operation for each status that can be reported for that entity.
 The listener is asynchronously called back with the appropriate operation whenever a qualifying status change occurs.
@@ -40,7 +40,7 @@ Communication Status Types
 ..
     Sect<4.2>
 
-Each status type is associated with a particular entity type.
+Each status type is associated with a particular :term:`entity` type.
 This section is organized by the entity types, with the corresponding statuses described in subsections under the associated entity type.
 
 Most of the statuses below are plain communication statuses.
@@ -52,8 +52,7 @@ The read statuses are simple notifications to the application which then reads o
 Incremental values in the status data structure report a change since the last time the status was accessed.
 A status is considered accessed when a listener is called for that status or the status is read from its entity.
 
-Fields in the status data structure with a type of ``InstanceHandle_t`` identify an entity (topic, data reader, data writer, etc.)
-by the instance handle used for that entity in the Built-In-Topics.
+Fields in the status data structure with a type of ``InstanceHandle_t`` identify an entity by the instance handle used for that entity in the :term:`built-in topics`.
 
 .. _conditions_and_listeners--topic-status-types:
 
@@ -71,7 +70,7 @@ Inconsistent Topic Status
 ..
     Sect<4.2.1.1>
 
-The ``INCONSISTENT_TOPIC`` status indicates that a topic was attempted to be registered that already exists with different characteristics.
+The ``INCONSISTENT_TOPIC`` status indicates that the :term:`topic` being registered has different characteristics than an existing topic with the same name.
 Typically, the existing topic may have a different type associated with it.
 The IDL associated with the Inconsistent Topic Status is listed below:
 
@@ -153,7 +152,7 @@ Liveliness Changed Status
 ..
     Sect<4.2.3.2>
 
-The ``LIVELINESS_CHANGED`` status indicates that there have been liveliness changes for one or more data writers that are publishing instances for this data reader.
+The ``LIVELINESS_CHANGED`` status indicates that there have been :ref:`liveliness changes <qos-liveliness>` for one or more data writers that are publishing instances for this data reader.
 The IDL associated with the Liveliness Changed Status is listed below:
 
 .. code-block:: omg-idl
@@ -166,7 +165,7 @@ The IDL associated with the Liveliness Changed Status is listed below:
       InstanceHandle_t last_publication_handle;
     };
 
-The ``alive_count`` value is the total number of data writers currently active on the topic this data reader is reading.
+The ``alive_count`` value is the total number of data writers currently active on the :term:`topic` this data reader is reading.
 The ``not_alive_count`` value is the total number of data writers writing to the data reader's topic that are no longer asserting their liveliness.
 The ``alive_count_change`` value is the change in the alive count since the last time the status was accessed.
 The ``not_alive_count_change`` value is the change in the not alive count since the last time the status was accessed.
@@ -180,7 +179,7 @@ Requested Deadline Missed Status
 ..
     Sect<4.2.3.3>
 
-The ``REQUESTED_DEADLINE_MISSED`` status indicates that the deadline requested via the Deadline QoS policy was not respected for a specific instance.
+The ``REQUESTED_DEADLINE_MISSED`` status indicates that the deadline requested via the :ref:`qos-deadline` policy was not respected for a specific instance.
 The IDL associated with the Requested Deadline Missed Status is listed below:
 
 .. code-block:: omg-idl
@@ -203,7 +202,8 @@ Requested Incompatible QoS Status
 ..
     Sect<4.2.3.4>
 
-The ``REQUESTED_INCOMPATIBLE_QOS`` status indicates that one or more QoS policy values that were requested were incompatible with what was offered.
+The ``REQUESTED_INCOMPATIBLE_QOS`` status indicates that one or more :term:`qos` policy values that were requested by a local :term:`DataReader` were incompatible with what was offered by a :term:`DataWriter`.
+See :ref:`qos-changing` for details.
 The IDL associated with the Requested Incompatible QoS Status is listed below:
 
 .. code-block:: omg-idl
@@ -324,7 +324,7 @@ Offered Deadline Missed Status
 ..
     Sect<4.2.4.2>
 
-The ``OFFERED_DEADLINE_MISSED`` status indicates that the deadline offered by the data writer has been missed for one or more instances.
+The ``OFFERED_DEADLINE_MISSED`` status indicates that the :ref:`deadline <qos-deadline>` offered by the data writer has been missed for one or more instances.
 The IDL associated with the Offered Deadline Missed Status is listed below:
 
 .. code-block:: omg-idl
@@ -347,7 +347,8 @@ Offered Incompatible QoS Status
 ..
     Sect<4.2.4.3>
 
-The ``OFFERED_INCOMPATIBLE_QOS`` status indicates that an offered QoS was incompatible with the requested QoS of a data reader.
+The ``OFFERED_INCOMPATIBLE_QOS`` status indicates that one or more :term:`qos` policy values offered by a local :term:`DataWriter` were incompatible with what was requested by a :term:`DataReader`.
+See :ref:`qos-changing` for details.
 The IDL associated with the Offered Incompatible QoS Status is listed below:
 
 .. code-block:: omg-idl
@@ -396,6 +397,120 @@ The ``total_count_change`` value is the incremental change in the total count si
 The ``current_count`` value is the current number of data readers matched to this data writer.
 The ``current_count_change`` value is the change in the current count since the last time this status was accessed.
 The ``last_subscription_handle`` value is a handle for the last data reader matched.
+
+.. _conditions_and_listeners--budget-exceeded-status:
+
+Budget Exceeded Status
+----------------------
+
+This is an OpenDDS-specific listener extension allows for reporting delays in excess of the :ref:`qos-latency-budget`.
+The ``OpenDDS::DCPS::DataReaderListener`` interface has an additional operation for notification that samples were received with a measured transport delay greater than the latency budget policy duration.
+The IDL for this method is:
+
+.. code-block:: omg-idl
+
+      struct BudgetExceededStatus {
+        long total_count;
+        long total_count_change;
+        DDS::InstanceHandle_t last_instance_handle;
+      };
+
+      void on_budget_exceeded(
+             in DDS::DataReader reader,
+             in BudgetExceededStatus status);
+
+To use the extended listener callback you will need to derive the listener implementation from the extended interface, as shown in the following code fragment:
+
+.. code-block:: cpp
+
+  class DataReaderListenerImpl
+    : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
+  {
+    void on_budget_exceeded(
+      DDS::DataReader* reader,
+      const OpenDDS::DCPS::BudgetExceededStatus& status)
+    {
+    }
+
+Then you must provide a non-null implementation for the ``on_budget_exceeded()`` operation.
+Note that you will need to provide empty implementations for the following extended operations as well:
+
+.. code-block:: cpp
+
+  void on_subscription_disconnected(
+    DDS::DataReader* reader,
+    const OpenDDS::DCPS::SubscriptionDisconnectedStatus& status)
+  {
+  }
+
+  void on_subscription_reconnected(
+    DDS::DataReader* reader,
+    const OpenDDS::DCPS::SubscriptionReconnectedStatus& status)
+  {
+  }
+
+  void on_subscription_lost(
+    DDS::DataReader* reader,
+    const OpenDDS::DCPS::SubscriptionLostStatus& status)
+  {
+  }
+
+OpenDDS also makes the summary latency statistics available via an extended interface of the data reader.
+This extended interface is located in the ``OpenDDS::DCPS`` module and the IDL is defined as:
+
+.. code-block:: omg-idl
+
+      struct LatencyStatistics {
+        GUID_t        publication;
+        unsigned long n;
+        double        maximum;
+        double        minimum;
+        double        mean;
+        double        variance;
+      };
+
+      typedef sequence<LatencyStatistics> LatencyStatisticsSeq;
+
+      local interface DataReaderEx : DDS::DataReader {
+        /// Obtain a sequence of statistics summaries.
+        void get_latency_stats(inout LatencyStatisticsSeq stats);
+
+        /// Clear any intermediate statistical values.
+        void reset_latency_stats();
+
+        /// Statistics gathering enable state.
+        attribute boolean statistics_enabled;
+      };
+
+To gather this statistical summary data you will need to use the extended interface.
+You can do so simply by dynamically casting the OpenDDS data reader pointer and calling the operations directly.
+In the following example, we assume that reader is initialized correctly by calling ``DDS::Subscriber::create_datareader()``:
+
+.. code-block:: cpp
+
+      DDS::DataReader_var reader;
+      // ...
+
+      // To start collecting new data.
+      dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in())->
+        reset_latency_stats();
+      dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in())->
+        statistics_enabled(true);
+
+      // ...
+
+      // To collect data.
+      OpenDDS::DCPS::LatencyStatisticsSeq stats;
+      dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in())->
+        get_latency_stats(stats);
+      for (unsigned long i = 0; i < stats.length(); ++i) {
+        std::cout << "stats[" << i << "]:" << std::endl;
+        std::cout << "         n = " << stats[i].n << std::endl;
+        std::cout << "       max = " << stats[i].maximum << std::endl;
+        std::cout << "       min = " << stats[i].minimum << std::endl;
+        std::cout << "      mean = " << stats[i].mean << std::endl;
+        std::cout << "  variance = " << stats[i].variance << std::endl;
+      }
 
 .. _conditions_and_listeners--listeners:
 

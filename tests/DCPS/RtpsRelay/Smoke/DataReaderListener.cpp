@@ -21,6 +21,8 @@ DataReaderListenerImpl::DataReaderListenerImpl()
   : num_reads_(0)
   , valid_(true)
   , rediscovered_(false)
+  , initial_discovery_data_(false)
+  , rediscovery_data_(false)
 {}
 
 DataReaderListenerImpl::~DataReaderListenerImpl()

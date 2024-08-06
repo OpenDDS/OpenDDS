@@ -14,7 +14,6 @@
 #include "XTypes/TypeObject.h"
 #include "XTypes/TypeLookupService.h"
 
-#include <dds/DdsDynamicDataC.h>
 #include <dds/DdsDcpsTypeSupportExtC.h>
 
 #ifndef ACE_LACKS_PRAGMA_ONCE
@@ -98,11 +97,6 @@ public:
   virtual char* get_type_name();
 
 #ifndef OPENDDS_SAFETY_PROFILE
-  virtual DDS::DynamicType_ptr get_type() const
-  {
-    return DDS::DynamicType::_duplicate(type_);
-  }
-
   // IDL local interface uses non-const memebers
   DDS::DynamicType_ptr get_type()
   {
@@ -164,61 +158,6 @@ private:
 #endif
 
   OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(TypeSupportImpl)
-};
-
-template <typename NativeType>
-class TypeSupportImpl_T : public TypeSupportImpl {
-public:
-  typedef DDSTraits<NativeType> TraitsType;
-  typedef MarshalTraits<NativeType> MarshalTraitsType;
-
-  const char* name() const
-  {
-    return TraitsType::type_name();
-  }
-
-  size_t key_count() const
-  {
-    return TraitsType::key_count();
-  }
-
-  bool is_dcps_key(const char* fieldname) const
-  {
-    return TraitsType::is_key(fieldname);
-  }
-
-  void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq)
-  {
-    MarshalTraitsType::representations_allowed_by_type(seq);
-  }
-
-  Extensibility base_extensibility() const
-  {
-    return MarshalTraitsType::extensibility();
-  }
-
-  Extensibility max_extensibility() const
-  {
-    return MarshalTraitsType::max_extensibility_level();
-  }
-
-  SerializedSizeBound serialized_size_bound(const Encoding& encoding) const
-  {
-    return MarshalTraitsType::serialized_size_bound(encoding);
-  }
-
-  SerializedSizeBound key_only_serialized_size_bound(const Encoding& encoding) const
-  {
-    return MarshalTraitsType::key_only_serialized_size_bound(encoding);
-  }
-
-#ifndef OPENDDS_SAFETY_PROFILE
-  DDS::DynamicType_ptr get_type()
-  {
-    get_type_from_type_lookup_service();
-    return TypeSupportImpl::get_type();
-  }
-#endif
 };
 
 template <typename T>

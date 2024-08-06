@@ -3,6 +3,7 @@
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/AssociationData.h"
+#include "dds/DCPS/EncapsulationHeader.h"
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Qos_Helper.h"
 
@@ -24,7 +25,7 @@ SimpleDataReader::SimpleDataReader(const AppConfig& ac, const int readerIndex, A
 {
   TransportClient::set_guid(AppConfig::readerId[index]);
 
-  enable_transport((index == 2), false); //(reliable, durable)
+  enable_transport((index == 2), false, 0); //(reliable, durable)
 
   for (int i = index; i < 3; ++i) {
     ad.remote_id_ = AppConfig::writerId[i];

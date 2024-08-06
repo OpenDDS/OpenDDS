@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 #include "dds/DCPS/security/OpenSSL_init.h"
 #endif
 
@@ -9,7 +11,7 @@
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   openssl_init();
 #endif
   ACE::init();

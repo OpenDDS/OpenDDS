@@ -598,7 +598,7 @@ TAO_DDS_DCPSInfo_i::add_publication(DDS::DomainId_t domainId,
                    serializedTypeInfo));
 
   DCPS_IR_Publication* pub = pubPtr.get();
-  switch (partPtr->add_publication(move(pubPtr))) {
+  switch (partPtr->add_publication(OPENDDS_MOVE_NS::move(pubPtr))) {
   case -1: {
     OpenDDS::DCPS::RepoIdConverter converter(pubId);
     ACE_ERROR((LM_ERROR,
@@ -821,7 +821,7 @@ bool TAO_DDS_DCPSInfo_i::add_subscription(DDS::DomainId_t domainId,
 
   bool retval = true;
   DCPS_IR_Subscription* sub = subPtr.get();
-  if (partPtr->add_subscription(move(subPtr)) != 0) {
+  if (partPtr->add_subscription(OPENDDS_MOVE_NS::move(subPtr)) != 0) {
     // failed to add.  we are responsible for the memory.
     retval = false;
   } else if (topic->add_subscription_reference(sub) != 0) {

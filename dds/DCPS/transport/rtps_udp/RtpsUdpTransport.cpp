@@ -11,14 +11,17 @@
 #include "RtpsUdpSendStrategy.h"
 #include "RtpsUdpReceiveStrategy.h"
 
+#include <dds/OpenDDSConfigWrapper.h>
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
 #include <dds/DCPS/AssociationData.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/NetworkResource.h>
+
 #include <dds/DCPS/transport/framework/TransportClient.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
+
 #include <dds/DCPS/RTPS/MessageUtils.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 
@@ -45,12 +48,13 @@ RtpsUdpCore::RtpsUdpCore(const RtpsUdpInst_rch& inst)
   , relay_stun_task_falloff_(TimeDuration::zero_value)
 {}
 
-RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst)
-  : TransportImpl(inst)
-#if defined(OPENDDS_SECURITY)
+RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst,
+                                   DDS::DomainId_t domain)
+  : TransportImpl(inst, domain)
+#if OPENDDS_CONFIG_SECURITY
   , local_crypto_handle_(DDS::HANDLE_NIL)
 #endif
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   , ice_endpoint_(make_rch<IceEndpoint>(ref(*this)))
   , ice_agent_(ICE::Agent::instance())
 #endif
@@ -68,7 +72,7 @@ RtpsUdpTransport::config() const
   return dynamic_rchandle_cast<RtpsUdpInst>(TransportImpl::config());
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 DCPS::RcHandle<ICE::Agent>
 RtpsUdpTransport::get_ice_agent() const
 {
@@ -79,7 +83,7 @@ RtpsUdpTransport::get_ice_agent() const
 DCPS::WeakRcHandle<ICE::Endpoint>
 RtpsUdpTransport::get_ice_endpoint()
 {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   return core_.use_ice() ? static_rchandle_cast<ICE::Endpoint>(ice_endpoint_) : DCPS::WeakRcHandle<ICE::Endpoint>();
 #else
   return DCPS::WeakRcHandle<ICE::Endpoint>();
@@ -98,16 +102,16 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 
   if (equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
     assign(local_prefix_, local_prefix);
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     core_.reset_relay_stun_task_falloff();
     relay_stun_task_->schedule(TimeDuration::zero_value);
 #endif
   }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   {
     if (core_.use_ice()) {
-      ReactorInterceptor_rch ri = reactor_task_->interceptor();
+      ReactorInterceptor_rch ri = reactor_task()->interceptor();
       ri->execute_or_enqueue(make_rch<RemoveHandler>(unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
       ri->execute_or_enqueue(make_rch<RemoveHandler>(ipv6_unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
@@ -118,7 +122,7 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 
   RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(rchandle_from(this), local_prefix, config(), reactor_task());
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   link->local_crypto_handle(local_crypto_handle_);
 #endif
 
@@ -229,7 +233,7 @@ RtpsUdpTransport::stop_accepting_or_connecting(const TransportClient_wrch& clien
     if (link_) {
       TransportClient_rch c = client.lock();
       if (c) {
-        link_->disassociated(c->get_guid(), remote_id);
+        link_->release_reservations(c->get_guid(), remote_id);
       }
     }
   }
@@ -260,15 +264,16 @@ RtpsUdpTransport::use_datalink(const GUID_t& local_id,
 {
   NetworkAddressSet uc_addrs, mc_addrs;
   bool requires_inline_qos;
+  RTPS::VendorId_t vendor_id = { 0, 0 };
   unsigned int blob_bytes_read;
-  get_connection_addrs(remote_data, &uc_addrs, &mc_addrs, &requires_inline_qos, &blob_bytes_read);
+  get_connection_addrs(remote_data, &uc_addrs, &mc_addrs, &requires_inline_qos, &vendor_id, &blob_bytes_read);
 
   NetworkAddress disco_addr_hint;
   if (discovery_locator.length()) {
     NetworkAddressSet disco_uc_addrs, disco_mc_addrs;
     bool disco_requires_inline_qos;
     unsigned int disco_blob_bytes_read;
-    get_connection_addrs(discovery_locator, &disco_uc_addrs, &disco_mc_addrs, &disco_requires_inline_qos, &disco_blob_bytes_read);
+    get_connection_addrs(discovery_locator, &disco_uc_addrs, &disco_mc_addrs, &disco_requires_inline_qos, 0, &disco_blob_bytes_read);
 
     for (NetworkAddressSet::const_iterator it = disco_uc_addrs.begin(), limit = disco_uc_addrs.end(); it != limit; ++it) {
       for (NetworkAddressSet::const_iterator it2 = uc_addrs.begin(), limit2 = uc_addrs.end(); it2 != limit2; ++it2) {
@@ -282,6 +287,7 @@ RtpsUdpTransport::use_datalink(const GUID_t& local_id,
   if (link_) {
     return link_->associated(local_id, remote_id, local_reliable, remote_reliable,
                              local_durable, remote_durable,
+                             vendor_id,
                              participant_discovered_at, participant_flags, max_sn, client,
                              uc_addrs, mc_addrs, disco_addr_hint, requires_inline_qos);
   }
@@ -289,7 +295,7 @@ RtpsUdpTransport::use_datalink(const GUID_t& local_id,
   return true;
 }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 void
 RtpsUdpTransport::local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch)
 {
@@ -310,14 +316,20 @@ RtpsUdpTransport::get_connection_addrs(const TransportBLOB& remote,
                                        NetworkAddressSet* uc_addrs,
                                        NetworkAddressSet* mc_addrs,
                                        bool* requires_inline_qos,
+                                       RTPS::VendorId_t* vendor_id,
                                        unsigned int* blob_bytes_read) const
 {
   using namespace OpenDDS::RTPS;
   LocatorSeq locators;
+  VendorId_t vid;
   DDS::ReturnCode_t result =
-    blob_to_locators(remote, locators, requires_inline_qos, blob_bytes_read);
+    blob_to_locators(remote, locators, vid, requires_inline_qos, blob_bytes_read);
   if (result != DDS::RETCODE_OK) {
     return;
+  }
+
+  if (vendor_id) {
+    *vendor_id = vid;
   }
 
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
@@ -341,7 +353,7 @@ RtpsUdpTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags 
 {
   RtpsUdpInst_rch cfg = config();
   if (cfg) {
-    cfg->populate_locator(info, flags);
+    cfg->populate_locator(info, flags, domain_);
     return true;
   }
   return false;
@@ -459,13 +471,14 @@ RtpsUdpTransport::update_locators(const GUID_t& remote,
     NetworkAddressSet uc_addrs, mc_addrs;
     bool requires_inline_qos;
     unsigned int blob_bytes_read;
-    get_connection_addrs(*blob, &uc_addrs, &mc_addrs, &requires_inline_qos, &blob_bytes_read);
+    get_connection_addrs(*blob, &uc_addrs, &mc_addrs, &requires_inline_qos, 0, &blob_bytes_read);
     link_->update_locators(remote, uc_addrs, mc_addrs, requires_inline_qos, false);
   }
 }
 
 void
 RtpsUdpTransport::get_last_recv_locator(const GUID_t& remote,
+                                        const GuidVendorId_t& vendor_id,
                                         TransportLocator& tl)
 {
   if (is_shut_down()) {
@@ -492,13 +505,19 @@ RtpsUdpTransport::get_last_recv_locator(const GUID_t& remote,
   locators.length(1);
   address_to_locator(locators[0], addr.to_addr());
 
+  RTPS::VendorId_t vid;
+  vid.vendorId[0] = vendor_id[0];
+  vid.vendorId[1] = vendor_id[1];
+
   const Encoding& encoding = RTPS::get_locators_encoding();
   size_t size = serialized_size(encoding, locators);
+  serialized_size(encoding, size, vid);
   primitive_serialized_size_boolean(encoding, size);
 
   ACE_Message_Block mb_locator(size);
   Serializer ser_loc(&mb_locator, encoding);
   ser_loc << locators;
+  ser_loc << vid;
   ser_loc << ACE_OutputCDR::from_boolean(expects_inline_qos);
 
   tl.transport_type = "rtps_udp";
@@ -509,6 +528,105 @@ void
 RtpsUdpTransport::append_transport_statistics(TransportStatisticsSequence& seq)
 {
   core_.append_transport_statistics(seq);
+}
+
+bool RtpsUdpTransport::open_socket(
+  const RtpsUdpInst_rch& config, ACE_SOCK_Dgram& sock, int protocol, ACE_INET_Addr& actual)
+{
+  const bool ipv4 = protocol == PF_INET;
+  const DDS::UInt16 init_part_port_id =
+#ifdef ACE_HAS_IPV6
+    ipv4 ? config->init_participant_port_id() : config->ipv6_init_participant_port_id();
+#else
+    config->init_participant_port_id();
+#endif
+
+  NetworkAddress address;
+  bool fixed_port;
+  DDS::UInt16 part_port_id = init_part_port_id;
+  while (true) {
+#ifdef ACE_HAS_IPV6
+    if (ipv4) {
+#endif
+      if (!config->unicast_address(address, fixed_port, domain_, part_port_id)) {
+        return false;
+      }
+#ifdef ACE_HAS_IPV6
+    } else if (!config->ipv6_unicast_address(address, fixed_port, domain_, part_port_id)) {
+      return false;
+    }
+#endif
+
+    if (sock.open(address.to_addr(), protocol) == 0) {
+      break;
+    }
+
+    if (fixed_port) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpTransport::open_socket: "
+          "failed to open unicast %C socket for %C: %m\n",
+          ipv4 ? "IPv4" : "IPv6", LogAddr(address).c_str()));
+      }
+      return false;
+
+    } else {
+      if (DCPS::DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpTransport::open_socket: "
+          "failed to open unicast %C socket for %C: %m, trying next participant ID...\n",
+          ipv4 ? "IPv4" : "IPv6", LogAddr(address).c_str()));
+      }
+
+      ++part_port_id;
+
+      if (part_port_id == init_part_port_id) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpTransport::open_socket: "
+            "could not find a free %C unicast port\n",
+            ipv4 ? "IPv4" : "IPv6"));
+        }
+        return false;
+      }
+    }
+  }
+
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_DEBUG,
+               "(%P|%t) RtpsUdpTransport::open_socket: "
+               "opened %C unicast socket %d for %C\n",
+               ipv4 ? "IPv4" : "IPv6", sock.get_handle(), LogAddr(address).c_str()));
+  }
+
+#ifdef ACE_WIN32
+  // By default Winsock will cause reads to fail with "connection reset"
+  // when UDP sends result in ICMP "port unreachable" messages.
+  // The transport framework is not set up for this since returning <= 0
+  // from our receive_bytes causes the framework to close down the datalink
+  // which in this case is used to receive from multiple peers.
+  {
+    BOOL recv_udp_connreset = FALSE;
+    sock.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
+  }
+#endif
+
+  if (sock.get_local_addr(actual) != 0) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpTransport::open_socket: "
+        "failed to get actual address from %C socket for %C: %m\n",
+        ipv4 ? "IPv4" : "IPv6", LogAddr(address).c_str()));
+    }
+    return false;
+  }
+
+  if (!set_recvpktinfo(sock, ipv4)) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsUdpTransport::open_socket: "
+        "failed to set RECVPKTINFO on %C socket for %C\n",
+        ipv4 ? "IPv4" : "IPv6", LogAddr(address).c_str()));
+    }
+    return false;
+  }
+
+  return true;
 }
 
 bool
@@ -524,98 +642,30 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
   // detect and report errors during DataReader/Writer setup instead
   // of during association.
 
-  const NetworkAddress address4 = config->local_address();
-
-  if (unicast_socket_.open(address4.to_addr(), PF_INET) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: RtpsUdpTransport::configure_i: open4 %C: %m\n"),
-                      LogAddr(address4).c_str()),
-                     false);
-  }
-
-#ifdef ACE_WIN32
-  // By default Winsock will cause reads to fail with "connection reset"
-  // when UDP sends result in ICMP "port unreachable" messages.
-  // The transport framework is not set up for this since returning <= 0
-  // from our receive_bytes causes the framework to close down the datalink
-  // which in this case is used to receive from multiple peers.
-  {
-    BOOL recv_udp_connreset = FALSE;
-    unicast_socket_.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
-  }
-#endif
-
   ACE_INET_Addr actual4;
-  if (unicast_socket_.get_local_addr(actual4) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: RtpsUdpTransport::configure_i: get_local_addr4 %C: %m\n"),
-                      LogAddr(address4).c_str()),
-                     false);
+  if (!open_socket(config, unicast_socket_, PF_INET, actual4)) {
+    return false;
   }
-
-  config->actual_local_address_ = NetworkAddress(actual4);
-
-#ifdef ACE_RECVPKTINFO
-  int sockopt = 1;
-  if (unicast_socket_.set_option(IPPROTO_IP, ACE_RECVPKTINFO, &sockopt, sizeof sockopt) == -1) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: RtpsUdpTransport::configure_i: set_option4 %C: %m\n"),
-                      LogAddr(address4).c_str()), false);
-  }
-#endif
+  config->actual_local_address_ = actual4;
 
 #ifdef ACE_HAS_IPV6
-  const NetworkAddress address6 = config->ipv6_local_address();
-
-  if (ipv6_unicast_socket_.open(address6.to_addr(), PF_INET6) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: RtpsUdpTransport::configure_i: open6 %C: %m\n"),
-                      LogAddr(address6).c_str()),
-                     false);
-  }
-
-#ifdef ACE_WIN32
-  // By default Winsock will cause reads to fail with "connection reset"
-  // when UDP sends result in ICMP "port unreachable" messages.
-  // The transport framework is not set up for this since returning <= 0
-  // from our receive_bytes causes the framework to close down the datalink
-  // which in this case is used to receive from multiple peers.
-  {
-    BOOL recv_udp_connreset = FALSE;
-    ipv6_unicast_socket_.control(SIO_UDP_CONNRESET, &recv_udp_connreset);
-  }
-#endif
-
   ACE_INET_Addr actual6;
-  if (ipv6_unicast_socket_.get_local_addr(actual6) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: RtpsUdpTransport::configure_i: get_local_addr6 %C: %m\n"),
-                      LogAddr(address6).c_str()),
-                     false);
+  if (!open_socket(config, ipv6_unicast_socket_, PF_INET6, actual6)) {
+    return false;
   }
-
   NetworkAddress temp(actual6);
   if (actual6.is_ipv4_mapped_ipv6() && temp.is_any()) {
     temp = NetworkAddress(actual6.get_port_number(), "::");
   }
   config->ipv6_actual_local_address_ = temp;
-
-#ifdef ACE_RECVPKTINFO6
-  if (ipv6_unicast_socket_.set_option(IPPROTO_IPV6, ACE_RECVPKTINFO6, &sockopt, sizeof sockopt) == -1) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: RtpsUdpTransport::configure_i: set_option4 %C: %m\n"),
-                      LogAddr(address6).c_str()),
-                     false);
-  }
-#endif
 #endif
 
   create_reactor_task(false, "RtpsUdpTransport" + config->name());
 
-  ACE_Reactor* reactor = reactor_task_->get_reactor();
+  ACE_Reactor* reactor = reactor_task()->get_reactor();
   job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (core_.use_ice()) {
     start_ice();
   }
@@ -629,7 +679,7 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
     link_->default_listener(*config->opendds_discovery_default_listener_);
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   core_.reset_relay_stun_task_falloff();
   relay_stun_task_->schedule(TimeDuration::zero_value);
 #endif
@@ -655,7 +705,7 @@ void RtpsUdpTransport::client_stop(const GUID_t& localId)
 void
 RtpsUdpTransport::shutdown_i()
 {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (core_.use_ice()) {
     stop_ice();
   }
@@ -702,7 +752,7 @@ RtpsUdpTransport::on_data_available(ConfigReader_rch)
     if (sample.key_has_prefix(config_prefix)) {
       has_prefix = true;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       if (sample.key() == cfg->config_key("RTPS_RELAY_ONLY")) {
         core_.rtps_relay_only(cfg->rtps_relay_only());
         if (core_.rtps_relay_only()) {
@@ -748,7 +798,7 @@ RtpsUdpTransport::on_data_available(ConfigReader_rch)
   }
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 
 const ACE_SOCK_Dgram&
 RtpsUdpTransport::IceEndpoint::choose_recv_socket(ACE_HANDLE fd) const
@@ -775,7 +825,7 @@ RtpsUdpTransport::IceEndpoint::handle_input(ACE_HANDLE fd)
 
   bool stop;
   RtpsUdpReceiveStrategy::receive_bytes_helper(iov, 1, choose_recv_socket(fd), remote_address,
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
                                                transport.get_ice_agent(), transport.get_ice_endpoint(),
 #endif
                                                transport, stop);
@@ -949,7 +999,7 @@ RtpsUdpTransport::start_ice()
   GuardThreadType guard_links(links_lock_);
 
   if (!link_) {
-    ReactorInterceptor_rch ri = reactor_task_->interceptor();
+    ReactorInterceptor_rch ri = reactor_task()->interceptor();
     ri->execute_or_enqueue(make_rch<RegisterHandler>(unicast_socket_.get_handle(), ice_endpoint_.get(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
     ri->execute_or_enqueue(make_rch<RegisterHandler>(ipv6_unicast_socket_.get_handle(), ice_endpoint_.get(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
@@ -967,7 +1017,7 @@ RtpsUdpTransport::stop_ice()
   GuardThreadType guard_links(links_lock_);
 
   if (!link_) {
-    ReactorInterceptor_rch ri = reactor_task_->interceptor();
+    ReactorInterceptor_rch ri = reactor_task()->interceptor();
     ri->execute_or_enqueue(make_rch<RemoveHandler>(unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
     ri->execute_or_enqueue(make_rch<RemoveHandler>(ipv6_unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));

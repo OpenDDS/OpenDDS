@@ -48,6 +48,9 @@ project(OpenDDS_Dcps): core, coverage_optional, \
   }
 
   Header_Files {
+    OpenDDSConfig.h
+    OpenDDSConfigWrapper.h
+    OpenDDSConfigWrapperC.h
     Version.h
     Versioned_Namespace.h
     DCPS
@@ -71,7 +74,10 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     DdsDcpsTopicS.h
     DdsDcpsTypeSupportExtS.h
     DdsDynamicDataS.h
+    DdsDynamicDataSeqS.h
     DdsDynamicTypeSupportS.h
+    DdsSecurityCoreS.h
+    DdsSecurityParamsS.h
   }
 
   // Should this be removed?
@@ -106,8 +112,10 @@ project(OpenDDS_Dcps): core, coverage_optional, \
 "	@$(MKDIR) $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds"
 "	ln -sf ../../../include/dds/Version.h $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds"
 "	cp $(DDS_ROOT)/user_macros.GNU $(DESTDIR)$(INSTALL_PREFIX)/share/dds $(ACE_NUL_STDERR)"
+"	cp $(DDS_ROOT)/dds/OpenDDSConfigWrapper.idl $(DESTDIR)$(INSTALL_PREFIX)/include/dds $(ACE_NUL_STDERR)"
 "	@$(MKDIR) $(cmake_dir_install_dest)"
 "	cp $(DDS_ROOT)/cmake/*.cmake $(cmake_dir_install_dest)"
+"	cp $(DDS_ROOT)/cmake/test_cxx_std.cpp $(cmake_dir_install_dest)"
 "	cp $(DDS_ROOT)/cmake/export.h.in $(cmake_dir_install_dest)"
 "	echo '' >> $(cmake_config_install_dest)"
 "	echo '# From make install' >> $(cmake_config_install_dest)"

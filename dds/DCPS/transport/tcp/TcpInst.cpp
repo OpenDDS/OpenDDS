@@ -26,24 +26,16 @@ OpenDDS::DCPS::TcpInst::~TcpInst()
 }
 
 OpenDDS::DCPS::TransportImpl_rch
-OpenDDS::DCPS::TcpInst::new_impl()
+OpenDDS::DCPS::TcpInst::new_impl(DDS::DomainId_t domain)
 {
-  return make_rch<TcpTransport>(rchandle_from(this));
-}
-
-int
-OpenDDS::DCPS::TcpInst::load(ACE_Configuration_Heap& cf,
-                             ACE_Configuration_Section_Key& trans_sect)
-{
-  TransportInst::load(cf, trans_sect);
-  return 0;
+  return make_rch<TcpTransport>(rchandle_from(this), domain);
 }
 
 OPENDDS_STRING
-OpenDDS::DCPS::TcpInst::dump_to_str() const
+OpenDDS::DCPS::TcpInst::dump_to_str(DDS::DomainId_t domain) const
 {
   std::ostringstream os;
-  os << TransportInst::dump_to_str();
+  os << TransportInst::dump_to_str(domain);
 
   os << formatNameForDump("local_address")                 << this->local_address() << std::endl;
   os << formatNameForDump("pub_address")                   << this->pub_address_str() << std::endl;
@@ -58,7 +50,9 @@ OpenDDS::DCPS::TcpInst::dump_to_str() const
 }
 
 size_t
-OpenDDS::DCPS::TcpInst::populate_locator(OpenDDS::DCPS::TransportLocator& local_info, ConnectionInfoFlags) const
+OpenDDS::DCPS::TcpInst::populate_locator(OpenDDS::DCPS::TransportLocator& local_info,
+                                         ConnectionInfoFlags,
+                                         DDS::DomainId_t) const
 {
   const std::string local_addr = local_address();
   const std::string locator_addr = get_locator_address();

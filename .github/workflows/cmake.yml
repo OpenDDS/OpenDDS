@@ -1,0 +1,486 @@
+name: "CMake Builds"
+
+on:
+  push:
+    paths:
+      - '**'
+      # Don't run this workflow if the only files that changed are the
+      # following. Make sure this is the same as the "pull_request.paths" list.
+      - '!AUTHORS'
+      - '!PROBLEM-REPORT-FORM'
+      - '!LICENSE'
+      - '!Dockerfile**'
+      - '!.dockerignore'
+      - '!.mailmap'
+      - '!.github/workflows/lint.yml'
+      - '!.github/workflows/sphinx_strict.yml'
+      - '!etc/**'
+      - '!docs/**'
+      - '!hooks/**'
+      - '!tools/scripts/gitrelease.pl'
+      - '!tools/scripts/lint.pl'
+      - '!**.md'
+      - '!**.rst'
+      - '!**/.gitignore'
+      - '!**/.lint_config'
+      - '!**/README*'
+  pull_request:
+    paths:
+      - '**'
+      # Don't run this workflow if the only files that changed are the
+      # following. Make sure this is the same as the "push.paths" list.
+      - '!AUTHORS'
+      - '!PROBLEM-REPORT-FORM'
+      - '!LICENSE'
+      - '!Dockerfile**'
+      - '!.dockerignore'
+      - '!.mailmap'
+      - '!.github/workflows/lint.yml'
+      - '!.github/workflows/sphinx_strict.yml'
+      - '!etc/**'
+      - '!docs/**'
+      - '!hooks/**'
+      - '!tools/scripts/gitrelease.pl'
+      - '!tools/scripts/lint.pl'
+      - '!**.md'
+      - '!**.rst'
+      - '!**/.gitignore'
+      - '!**/.lint_config'
+      - '!**/README*'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TRIGGERING_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+  VCPKG_INSTALLED_DIR: ${{ github.workspace }}\vcpkg\installed
+  CTEST_OUTPUT_ON_FAILURE: ON
+  VCPKG_GIT_COMMIT: f7423ee180c4b7f40d43402c2feb3859161ef625
+
+jobs:
+  u22:
+
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout OpenDDS
+      uses: actions/checkout@v4
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: Checkout MPC
+      uses: actions/checkout@v4
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: Checkout ACE/TAO
+      uses: actions/checkout@v4
+      with:
+        repository: DOCGroup/ACE_TAO
+        path: OpenDDS/build/ACE_TAO
+    - name: Install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: "3.23"
+        ninjaVersion: "latest"
+    - name: Configure
+      run: |
+        cd OpenDDS
+        cmake -B build \
+          -DCMAKE_UNITY_BUILD=TRUE \
+          -DBUILD_SHARED_LIBS=TRUE \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DOPENDDS_BOOTTIME_TIMERS=TRUE \
+          -DOPENDDS_COMPILE_WARNINGS=WARNING \
+          -DOPENDDS_SECURITY=TRUE \
+          -DOPENDDS_ACE_TAO_SRC=$GITHUB_WORKSPACE/OpenDDS/build/ACE_TAO \
+          -DOPENDDS_MPC=$GITHUB_WORKSPACE/MPC \
+          -DOPENDDS_BUILD_TESTS=TRUE \
+          -DOPENDDS_CMAKE_VERBOSE=all
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
+    - name: Build
+      run: |
+        cd OpenDDS
+        cmake --build build -- -j $(getconf _NPROCESSORS_ONLN)
+    - name: Run Tests
+      run: |
+        cd OpenDDS/build
+        ctest
+
+  u22_stat:
+
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout OpenDDS
+      uses: actions/checkout@v4
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: Checkout MPC
+      uses: actions/checkout@v4
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: Checkout ACE/TAO
+      uses: actions/checkout@v4
+      with:
+        repository: DOCGroup/ACE_TAO
+        path: OpenDDS/build/ACE_TAO
+    - name: Configure
+      run: |
+        cd OpenDDS
+        cmake -B build \
+          -DCMAKE_UNITY_BUILD=TRUE \
+          -DBUILD_SHARED_LIBS=FALSE \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DOPENDDS_COMPILE_WARNINGS=WARNING \
+          -DOPENDDS_ACE_TAO_SRC=$GITHUB_WORKSPACE/OpenDDS/build/ACE_TAO \
+          -DOPENDDS_MPC=$GITHUB_WORKSPACE/MPC \
+          -DOPENDDS_BUILD_TESTS=TRUE \
+          -DOPENDDS_CMAKE_VERBOSE=all
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
+    - name: Build
+      run: |
+        cd OpenDDS
+        cmake --build build -- -j $(getconf _NPROCESSORS_ONLN)
+    - name: Run Tests
+      run: |
+        cd OpenDDS/build
+        ctest
+
+  u22_no_features:
+
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout OpenDDS
+      uses: actions/checkout@v4
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: Checkout MPC
+      uses: actions/checkout@v4
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: Checkout ACE/TAO
+      uses: actions/checkout@v4
+      with:
+        repository: DOCGroup/ACE_TAO
+        path: OpenDDS/build/ACE_TAO
+    - uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: "latest"
+        ninjaVersion: "latest"
+    - name: Configure
+      run: |
+        cd OpenDDS
+        cmake -B build \
+          -G Ninja \
+          -DCMAKE_UNITY_BUILD=TRUE \
+          -DBUILD_SHARED_LIBS=TRUE \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -DOPENDDS_COMPILE_WARNINGS=WARNING \
+          -DOPENDDS_ACE_TAO_SRC=$GITHUB_WORKSPACE/OpenDDS/build/ACE_TAO \
+          -DOPENDDS_MPC=$GITHUB_WORKSPACE/MPC \
+          -DOPENDDS_BUILD_TESTS=TRUE \
+          -DOPENDDS_BUILT_IN_TOPICS=FALSE \
+          -DOPENDDS_OBJECT_MODEL_PROFILE=FALSE \
+          -DOPENDDS_PERSISTENCE_PROFILE=FALSE \
+          -DOPENDDS_OWNERSHIP_PROFILE=FALSE \
+          -DOPENDDS_CONTENT_SUBSCRIPTION=FALSE \
+          -DOPENDDS_CMAKE_VERBOSE=all
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
+    - name: Build
+      run: |
+        cd OpenDDS
+        cmake --build build
+    - name: Run Tests
+      run: |
+        cd OpenDDS/build
+        ctest
+
+  u22_android29:
+
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout OpenDDS
+      uses: actions/checkout@v4
+      with:
+        path: OpenDDS
+        submodules: true
+    - uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: r25c
+        add-to-path: false
+    - uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: "3.24"
+        ninjaVersion: "latest"
+    - name: Configure Host Tools
+      run: |
+        cd OpenDDS
+        cmake -B build-host \
+          -G Ninja \
+          -DBUILD_SHARED_LIBS=FALSE \
+          -DOPENDDS_COMPILE_WARNINGS=WARNING \
+          -DOPENDDS_JUST_BUILD_HOST_TOOLS=TRUE
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
+    - name: Build Host Tools
+      run: |
+        cd OpenDDS
+        cmake --build build-host
+    - name: Configure Target
+      run: |
+        cd OpenDDS
+        cmake -B build-target \
+          -G Ninja \
+          -DBUILD_SHARED_LIBS=TRUE \
+          -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-29 \
+          --toolchain ${{ steps.setup-ndk.outputs.ndk-path }}/build/cmake/android.toolchain.cmake \
+          -DOPENDDS_COMPILE_WARNINGS=WARNING \
+          -DOPENDDS_CMAKE_VERBOSE=all \
+          -DOPENDDS_HOST_TOOLS=$(realpath build-host)
+    - name: Build Target
+      run: |
+        cd OpenDDS
+        cmake --build build-target
+
+  w22:
+
+    runs-on: windows-2022
+
+    steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
+    - name: install openssl & xerces-c
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
+        runVcpkgInstall: true
+    - name: Checkout OpenDDS
+      uses: actions/checkout@v4
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: Checkout MPC
+      uses: actions/checkout@v4
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: Checkout ACE/TAO
+      uses: actions/checkout@v4
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: OpenDDS/build/ACE_TAO
+    - name: set up msvc env
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Configure
+      shell: cmd
+      run: |
+        cd OpenDDS
+        cmake -B build^
+          -DBUILD_SHARED_LIBS=TRUE^
+          -DOPENDDS_COMPILE_WARNINGS=WARNING^
+          -DOPENDDS_ACE_TAO_SRC=${{ github.workspace }}\OpenDDS\build\ACE_TAO^
+          -DOPENDDS_MPC=${{ github.workspace }}\MPC^
+          -DOPENDDS_XERCES3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
+          -DOPENDDS_OPENSSL=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
+          -DOPENDDS_BUILD_TESTS=TRUE^
+          -DOPENDDS_CMAKE_VERBOSE=all
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
+    - name: Build
+      shell: cmd
+      run: |
+        cd OpenDDS
+        cmake --build build --config Debug
+    - name: Run Tests
+      shell: cmd
+      run: |
+        cd OpenDDS\build
+        ctest -C Debug
+
+  w22_stat:
+
+    runs-on: windows-2022
+
+    steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
+    - name: install openssl & xerces-c
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
+        runVcpkgInstall: true
+    - uses: lukka/get-cmake@latest
+      with:
+        cmakeVersion: "3.23"
+        ninjaVersion: "latest"
+    - name: Checkout OpenDDS
+      uses: actions/checkout@v4
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: Checkout MPC
+      uses: actions/checkout@v4
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: Checkout ACE/TAO
+      uses: actions/checkout@v4
+      with:
+        repository: DOCGroup/ACE_TAO
+        path: OpenDDS/build/ACE_TAO
+    - name: set up msvc env
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Configure
+      shell: cmd
+      run: |
+        cd OpenDDS
+        cmake -B build^
+          -DCMAKE_UNITY_BUILD=TRUE^
+          -DBUILD_SHARED_LIBS=FALSE^
+          -DOPENDDS_COMPILE_WARNINGS=WARNING^
+          -DOPENDDS_ACE_TAO_SRC=${{ github.workspace }}\OpenDDS\build\ACE_TAO^
+          -DOPENDDS_MPC=${{ github.workspace }}\MPC^
+          -DOPENDDS_XERCES3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
+          -DOPENDDS_OPENSSL=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
+          -DOPENDDS_BUILD_TESTS=TRUE^
+          -DOPENDDS_CMAKE_VERBOSE=all
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
+    - name: Build
+      shell: cmd
+      run: |
+        cd OpenDDS
+        cmake --build build --config Debug
+    - name: Run Tests
+      shell: cmd
+      run: |
+        cd OpenDDS\build
+        ctest -C Debug
+
+  w22_rel:
+
+    runs-on: windows-2022
+
+    steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
+    - name: install openssl & xerces-c
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
+        runVcpkgInstall: true
+    - name: Checkout OpenDDS
+      uses: actions/checkout@v4
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: Checkout MPC
+      uses: actions/checkout@v4
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: Checkout ACE/TAO
+      uses: actions/checkout@v4
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: OpenDDS/build/ACE_TAO
+    - name: set up msvc env
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Configure
+      shell: cmd
+      run: |
+        cd OpenDDS
+        cmake -B build^
+          -DCMAKE_UNITY_BUILD=TRUE^
+          -DBUILD_SHARED_LIBS=TRUE^
+          -DOPENDDS_COMPILE_WARNINGS=WARNING^
+          -DOPENDDS_ACE_TAO_SRC=${{ github.workspace }}\OpenDDS\build\ACE_TAO^
+          -DOPENDDS_MPC=${{ github.workspace }}\MPC^
+          -DOPENDDS_XERCES3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
+          -DOPENDDS_OPENSSL=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
+          -DOPENDDS_BUILD_TESTS=TRUE^
+          -DOPENDDS_CMAKE_VERBOSE=all
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
+    - name: Build
+      shell: cmd
+      run: |
+        cd OpenDDS
+        cmake --build build --config Release
+    - name: Run Tests
+      shell: cmd
+      run: |
+        cd OpenDDS\build
+        ctest -C Release
+
+  w22_rel_stat:
+
+    runs-on: windows-2022
+
+    steps:
+    - name: setup for run-vcpkg
+      shell: bash
+      run: |
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "openssl", "xerces-c" ] }' > vcpkg.json
+    - name: install openssl & xerces-c
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
+        runVcpkgInstall: true
+    - name: Checkout OpenDDS
+      uses: actions/checkout@v4
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: Checkout MPC
+      uses: actions/checkout@v4
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: Checkout ACE/TAO
+      uses: actions/checkout@v4
+      with:
+        repository: DOCGroup/ACE_TAO
+        path: OpenDDS/build/ACE_TAO
+    - name: set up msvc env
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: Configure
+      shell: cmd
+      run: |
+        cd OpenDDS
+        cmake -B build^
+          -DCMAKE_UNITY_BUILD=TRUE^
+          -DBUILD_SHARED_LIBS=FALSE^
+          -DOPENDDS_COMPILE_WARNINGS=WARNING^
+          -DOPENDDS_ACE_TAO_SRC=${{ github.workspace }}\OpenDDS\build\ACE_TAO^
+          -DOPENDDS_MPC=${{ github.workspace }}\MPC^
+          -DOPENDDS_XERCES3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
+          -DOPENDDS_OPENSSL=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
+          -DOPENDDS_BUILD_TESTS=TRUE^
+          -DOPENDDS_CMAKE_VERBOSE=all
+    - uses: ammaraskar/msvc-problem-matcher@0.3.0
+    - name: Build
+      shell: cmd
+      run: |
+        cd OpenDDS
+        cmake --build build --config Release
+    - name: Run Tests
+      shell: cmd
+      run: |
+        cd OpenDDS\build
+        ctest -C Release

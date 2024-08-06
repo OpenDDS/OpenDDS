@@ -236,6 +236,8 @@ public:
   TryConstructFailAction array_element_try_construct(AST_Array* node);
   TryConstructFailAction union_discriminator_try_construct(AST_Union* node);
 
+  bool value(AST_Decl* node, ACE_INT32& value) const;
+
   OpenDDS::DataRepresentation data_representations(AST_Decl* node) const;
 
   OpenDDS::XTypes::MemberId compute_id(AST_Structure* stru, AST_Field* field, AutoidKind auto_id,

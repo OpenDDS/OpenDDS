@@ -1,10 +1,9 @@
 Pygments>=2.9 # For OMG IDL Support
-Sphinx>=2.4
+Sphinx>=7.2
 doc2dash
 furo
 sphinx-copybutton
-sphinx-markdown-builder @ git+https://github.com/OpenDDS/sphinx-markdown-builder
-urllib3<2.0 # Try to fix error on Read the Docs:
-# ImportError: urllib3 v2.0 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with OpenSSL 1.0.2n  7 Dec 2017. See: https://github.com/urllib3/urllib3/issues/2168
+sphinx-markdown-builder @ git+https://github.com/liran-funaro/sphinx-markdown-builder
 sphinx-inline-tabs
 PyMuPDF
+sphinxcontrib-svgbob

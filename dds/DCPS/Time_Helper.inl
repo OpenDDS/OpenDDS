@@ -192,13 +192,6 @@ operator==(const MonotonicTime_t& t1, const MonotonicTime_t& t2)
 #endif
 
 ACE_INLINE
-ACE_Time_Value time_to_time_value(const DDS::Time_t& t)
-{
-  ACE_Time_Value tv(t.sec, t.nanosec / 1000);
-  return tv;
-}
-
-ACE_INLINE
 DDS::Time_t time_value_to_time(const ACE_Time_Value& tv)
 {
   DDS::Time_t t;
@@ -208,7 +201,7 @@ DDS::Time_t time_value_to_time(const ACE_Time_Value& tv)
 }
 
 ACE_INLINE
-MonotonicTime_t time_value_to_monotonic_time(const ACE_Time_Value& tv)
+MonotonicTime_t time_value_to_time(const ACE_Time_Value_T<ACE_Monotonic_Time_Policy>& tv)
 {
   MonotonicTime_t t;
   t.sec = tv.sec();

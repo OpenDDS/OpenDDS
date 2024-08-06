@@ -82,10 +82,10 @@ participant_data(DDS::DomainId_t domain,
     DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_READER;
 
   const DDS::Security::ExtendedBuiltinEndpointSet_t availableExtendedBuiltinEndpoints =
-    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE |
-    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE |
-    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |
-    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE;
+    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_SECURE_WRITER |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_SECURE_WRITER |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_SECURE_READER |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_SECURE_READER;
 
   ACE_INET_Addr bogus(12345, "127.0.0.1");
   OpenDDS::DCPS::LocatorSeq nonEmptyList(1);
@@ -163,6 +163,7 @@ participant_data(DDS::DomainId_t domain,
         , {PFLAGS_THIS_VERSION} // opendds_participant_flags
         , false // opendds_rtps_relay_application_participant
         , availableExtendedBuiltinEndpoints
+        , 0
       },
       {300, 0}, // leaseDuration
       {0, 0}, // discoveredAt
@@ -264,8 +265,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  const u_short port_common = disc->config()->port_common(domain);
-  const NetworkAddress multicast_address = disc->config()->multicast_address(port_common, domain);
+  NetworkAddress multicast_address;
+  if (!disc->config()->spdp_multicast_address(multicast_address, domain)) {
+    ACE_ERROR((LM_ERROR, "ERROR: failed to get SPDP multicast address\n"));
+    return EXIT_FAILURE;
+  }
   ACE_DEBUG((LM_DEBUG, "multicast_address = %C\n", LogAddr(multicast_address).c_str()));
   ACE_SOCK_Dgram_Mcast multicast_socket;
 #ifdef ACE_HAS_MAC_OSX

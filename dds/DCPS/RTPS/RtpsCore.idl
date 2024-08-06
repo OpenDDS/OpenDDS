@@ -11,10 +11,13 @@
 #include "dds/OpenddsDcpsExt.idl"
 #include "dds/DdsDcpsInfoUtils.idl"
 #include "dds/DdsDcpsInfrastructure.idl"
+#include <dds/OpenDDSConfigWrapper.idl>
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #include "dds/DdsSecurityParams.idl"
 #endif
+
+#include "RtpsSubmessageKind.idl"
 
 module OpenDDS {
   module RTPS {
@@ -342,6 +345,7 @@ module OpenDDS {
     const ParameterId_t PID_OPENDDS_ICE_CANDIDATE     = PID_OPENDDS_BASE + 4;
     const ParameterId_t PID_OPENDDS_PARTICIPANT_FLAGS = PID_OPENDDS_BASE + 5;
     const ParameterId_t PID_OPENDDS_RTPS_RELAY_APPLICATION_PARTICIPANT = PID_OPENDDS_BASE + 6;
+    const ParameterId_t PID_OPENDDS_SPDP_USER_TAG     = PID_OPENDDS_BASE + 7;
 
     /* Always used inside a ParameterList */
     /* custom de/serializer implemented in opendds_idl */
@@ -467,7 +471,7 @@ module OpenDDS {
       case PID_OPENDDS_LOCATOR:
         DCPS::TransportLocator opendds_locator;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       case DDS::Security::PID_IDENTITY_TOKEN:
         DDS::Security::IdentityToken identity_token;
 
@@ -514,6 +518,9 @@ module OpenDDS {
       case PID_XTYPES_TYPE_CONSISTENCY:
         DDS::TypeConsistencyEnforcementQosPolicy type_consistency;
 
+      case PID_OPENDDS_SPDP_USER_TAG:
+        unsigned long user_tag;
+
       default:
         DDS::OctetSeq unknown_data;
     };
@@ -538,9 +545,9 @@ module OpenDDS {
       unsigned short submessageLength; /* octetsToNextHeader */
     };
     // Valid constants for the submessageId field are the enumerators
-    // of the SubmessageKind enum in MessageTypes.h.
+    // of the SubmessageKind enum in RtpsSubmessageKind.idl.
     // The least-significant bit of "flags" is E, the endianness flag:
-    // pseudoenum E { BIG_ENDIAN = 0, LITTLE_ENDIAN = 1};
+    // pseudoenum E { BIG_ENDIAN = 0, LITTLE_ENDIAN = 1 };
 
     /* Type used to hold fragment numbers. */
     struct FragmentNumber_t {
@@ -616,9 +623,10 @@ module OpenDDS {
       DDS::PropertyQosPolicy property;
       OpenDDSParticipantFlags_t opendds_participant_flags;
       boolean opendds_rtps_relay_application_participant;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       DDS::Security::ExtendedBuiltinEndpointSet_t availableExtendedBuiltinEndpoints;
 #endif
+      unsigned long opendds_user_tag;
     };
 
     // top-level data type for SPDP
@@ -773,61 +781,11 @@ module OpenDDS {
       DDS::OctetSeq content;
     };
 
-    enum SubmessageKind {
-      SUBMESSAGE_NONE,
-      PAD,            /* = 0x01, Pad */
-      RESERVED_2,
-      RESERVED_3,
-      RESERVED_4,
-      RESERVED_5,
-      ACKNACK,        /* = 0x06, AckNack */
-      HEARTBEAT,      /* = 0x07, Heartbeat */
-      GAP,            /* = 0x08, Gap */
-      INFO_TS,        /* = 0x09, InfoTimestamp */
-      RESERVED_10,
-      RESERVED_11,
-      INFO_SRC,       /* = 0x0c, InfoSource */
-      INFO_REPLY_IP4, /* = 0x0d, InfoReplyIp4 */
-      INFO_DST,       /* = 0x0e, InfoDestination */
-      INFO_REPLY,     /* = 0x0f, InfoReply */
-      RESERVED_16,
-      RESERVED_17,
-      NACK_FRAG,      /* = 0x12, NackFrag */
-      HEARTBEAT_FRAG, /* = 0x13, HeartbeatFrag */
-      RESERVED_20,
-      DATA,           /* = 0x15, Data */
-      DATA_FRAG,      /* = 0x16, DataFrag */
-      RESERVED_23,
-      RESERVED_24,
-      RESERVED_25,
-      RESERVED_26,
-      RESERVED_27,
-      RESERVED_28,
-      RESERVED_29,
-      RESERVED_30,
-      RESERVED_31,
-      RESERVED_32,
-      RESERVED_33,
-      RESERVED_34,
-      RESERVED_35,
-      RESERVED_36,
-      RESERVED_37,
-      RESERVED_38,
-      RESERVED_39,
-      RESERVED_40,
-      RESERVED_41,
-      RESERVED_42,
-      RESERVED_43,
-      RESERVED_44,
-      RESERVED_45,
-      RESERVED_46,
-      RESERVED_47,
-      SEC_BODY,  // SubmessageKinds 0x30-3f reserved for security
-      SEC_PREFIX,
-      SEC_POSTFIX,
-      SRTPS_PREFIX,
-      SRTPS_POSTFIX,
-      RESERVED_53_SECURITY
+    // UserTagSubmessage is an OpenDDS-specific extension that adds a configurable
+    // 32-bit value to the start of certain RTPS messages.
+    struct UserTagSubmessage {
+      SubmessageHeader smHeader;
+      unsigned long userTag;
     };
 
     @OpenDDS::internal::special_serialization
@@ -877,6 +835,12 @@ module OpenDDS {
       case SRTPS_PREFIX:
       case SRTPS_POSTFIX:
         SecuritySubmessage security_sm;
+
+      // SUBMESSAGE_KIND_USER_TAG isn't included here.
+      // We don't need to parse incoming submessages or add a UserTagSubmessage
+      // to a generic collection of Submessages.
+      // If "vendor-specific" types are added, incoming messages need to have
+      // the Header::vendorId checked.
 
       default:
         SubmessageHeader unknown_sm;

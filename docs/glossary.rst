@@ -29,7 +29,7 @@ Common Terms
   BITs
     Built-in Topics are :term:`topics <Topic>` that contain meta-information about local and remote :term:`DDS entites <Entity>` and the operational status of OpenDDS.
 
-    See :doc:`devguide/built_in_topics` for more information.
+    See :ref:`bit` for more information.
 
   Common Data Representation
   CDR
@@ -75,7 +75,12 @@ Common Terms
   Discovery
     Discovery is the configurable method that :term:`DomainParticipant`\s use to find one another.
 
-    See :ref:`introduction--dds-discovery` for more information.
+    See :ref:`dds-introduction--discovery` for more information.
+
+  Dispose
+    When an :term:`instance` is disposed by a :term:`DataWriter`, it means keeping the cached data related to it is no longer necessary.
+    This is done automatically if the instance is :term:`unregister`\ed and ``autodispose_unregistered_instances`` of :ref:`qos-writer-data-lifecycle` is set to ``true``.
+    This can also be done manually using ``dispose`` method on ``DataWriter``.
 
   Domain
     Domains are sets of :term:`DomainParticipant` that can interact with one another.
@@ -87,6 +92,12 @@ Common Terms
   ``Entity``
     ``Entity`` is the abstract base class for the main classes in the :term:`DDS`/:term:`DCPS` API, including :term:`DataReader` and :term:`DataWriter`.
     All entities have :term:`QoS` and can accept :term:`Listener`\s and :term:`Condition`\s.
+
+  Instance
+    In the specific context of :term:`DDS` and :term:`sample`\s, instances refer to a set of samples that share a common key value.
+    Many parts of the DDS API involve instances, including the :term:`dispose` and :term:`unregister` operations.
+
+    See :ref:`getting_started--keys` for more information.
 
   Interface Definition Language
   IDL
@@ -155,6 +166,11 @@ Common Terms
 
   Transport
     Transports are the configurable methods that :term:`DataWriter`\s and :term:`DataReader`\s use to communicate.
+
+  Unregister
+    When an :term:`instance` is unregistered by a :term:`DataWriter`, it means the writer "no longer has ‘anything to say’ about the instance", as phrased by the DDS specification.
+    This is similar, but separate from :term:`disposing <dispose>` an instance.
+    They are usually done at the same time, but this can be changed using :ref:`qos-writer-data-lifecycle` and the ``unregister_instance`` method of ``DataWriter`` to make what unregister means application-defined.
 
   XTypes
   Extensible and Dynamic Topic Types for DDS

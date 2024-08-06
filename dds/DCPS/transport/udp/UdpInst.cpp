@@ -30,24 +30,16 @@ UdpInst::UdpInst(const std::string& name)
 }
 
 TransportImpl_rch
-UdpInst::new_impl()
+UdpInst::new_impl(DDS::DomainId_t domain)
 {
-  return make_rch<UdpTransport>(rchandle_from(this));
-}
-
-int
-UdpInst::load(ACE_Configuration_Heap& cf,
-              ACE_Configuration_Section_Key& sect)
-{
-  TransportInst::load(cf, sect); // delegate to parent
-  return 0;
+  return make_rch<UdpTransport>(rchandle_from(this), domain);
 }
 
 OPENDDS_STRING
-UdpInst::dump_to_str() const
+UdpInst::dump_to_str(DDS::DomainId_t domain) const
 {
   std::ostringstream os;
-  os << TransportInst::dump_to_str();
+  os << TransportInst::dump_to_str(domain);
 
   os << formatNameForDump("local_address") << local_address() << std::endl;
   os << formatNameForDump("send_buffer_size") << this->send_buffer_size() << std::endl;
@@ -56,7 +48,9 @@ UdpInst::dump_to_str() const
 }
 
 size_t
-UdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info, ConnectionInfoFlags) const
+UdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info,
+                          ConnectionInfoFlags,
+                          DDS::DomainId_t) const
 {
   const std::string locator_addr = get_locator_address();
   if (!locator_addr.empty()) {

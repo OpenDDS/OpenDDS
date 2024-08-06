@@ -5,7 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 #ifndef OPENDDS_DCPS_RTPS_ICE_STUN_H
 #define OPENDDS_DCPS_RTPS_ICE_STUN_H
 
@@ -126,7 +128,7 @@ OpenDDS_Rtps_Export
 Attribute make_priority(ACE_UINT32 priority);
 
 OpenDDS_Rtps_Export
-Attribute make_use_candidate();;
+Attribute make_use_candidate();
 
 OpenDDS_Rtps_Export
 Attribute make_fingerprint();
@@ -279,4 +281,4 @@ const DCPS::Encoding encoding(DCPS::Encoding::KIND_UNALIGNED_CDR, DCPS::ENDIAN_B
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_RTPS_STUN_H */
-#endif /* OPENDDS_SECURITY */
+#endif

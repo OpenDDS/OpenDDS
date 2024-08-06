@@ -10,11 +10,11 @@
 #include "DataWriterRemoteC.h"
 #include "DataWriterRemoteImpl.h"
 #include "FailoverListener.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/RepoIdBuilder.h"
-#include "dds/DCPS/ConfigUtils.h"
-#include "dds/DCPS/DCPS_Utils.h"
+
 #include "dds/DCPS/BuiltInTopicUtils.h"
+#include "dds/DCPS/DCPS_Utils.h"
+#include "dds/DCPS/RepoIdBuilder.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportType.h"
@@ -23,6 +23,8 @@
 #include "tao/ORB_Core.h"
 #include "tao/BiDir_GIOP/BiDirGIOP.h"
 #include "ace/Reactor.h"
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "dds/DCPS/DomainParticipantImpl.h"
@@ -136,7 +138,7 @@ namespace DCPS {
 
 InfoRepoDiscovery::InfoRepoDiscovery(const String& name)
   : name_(name)
-  , config_prefix_(ConfigPair::canonicalize("OPENDDS_REPOSITORY_" + name))
+  , config_prefix_(ConfigPair::canonicalize("REPOSITORY_" + name))
   , use_bidir_giop_(TheServiceParticipant->use_bidir_giop())
   , orb_from_user_(false)
   , config_store_(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic()))
@@ -147,7 +149,7 @@ InfoRepoDiscovery::InfoRepoDiscovery(const String& name)
 InfoRepoDiscovery::InfoRepoDiscovery(const String& name,
                                      const DCPSInfo_var& info)
   : name_(name)
-  , config_prefix_(ConfigPair::canonicalize("OPENDDS_REPOSITORY_" + name))
+  , config_prefix_(ConfigPair::canonicalize("REPOSITORY_" + name))
   , info_(info)
   , use_bidir_giop_(TheServiceParticipant->use_bidir_giop())
   , orb_from_user_(false)
@@ -290,7 +292,7 @@ String
 InfoRepoDiscovery::ior() const
 {
   return TheServiceParticipant->config_store()->get(config_key("RepositoryIor").c_str(),
-                                                    (key() == Discovery::DEFAULT_REPO) ? TheServiceParticipant->config_store()->get(OPENDDS_COMMON_DCPS_INFO_REPO, "file://repo.ior") : "");
+                                                    (key() == Discovery::DEFAULT_REPO) ? TheServiceParticipant->config_store()->get(COMMON_DCPS_INFO_REPO, "file://repo.ior") : "");
 }
 
 TransportConfig_rch
@@ -526,7 +528,7 @@ InfoRepoDiscovery::add_domain_participant(DDS::DomainId_t domainId,
   return ads;
 }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 DCPS::AddDomainStatus
 InfoRepoDiscovery::add_domain_participant_secure(
   DDS::DomainId_t /*domain*/,
@@ -951,7 +953,7 @@ InfoRepoDiscovery::Config::discovery_config()
   const Service_Participant::RepoKeyDiscoveryMap& discoveryMap = TheServiceParticipant->discoveryMap();
 
   typedef OPENDDS_VECTOR(String) VecType;
-  const VecType cseq = TheServiceParticipant->config_store()->get_section_names("OPENDDS_REPOSITORY");
+  const VecType cseq = TheServiceParticipant->config_store()->get_section_names("REPOSITORY");
   for (VecType::const_iterator pos = cseq.begin(), limit = cseq.end(); pos != limit; ++pos) {
     if (discoveryMap.find(*pos) == discoveryMap.end()) {
       InfoRepoDiscovery_rch discovery(make_rch<InfoRepoDiscovery>(*pos));

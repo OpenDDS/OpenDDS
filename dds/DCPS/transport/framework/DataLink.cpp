@@ -509,8 +509,8 @@ DataLink::peer_ids(const GUID_t& local_id) const
 /// with a simultaneous call (in another thread) to one of this
 /// DataLink's make_reservation() methods.
 void
-DataLink::release_reservations(GUID_t remote_id, GUID_t local_id,
-                               DataLinkSetMap& released_locals)
+DataLink::release_reservations(const GUID_t& remote_id, const GUID_t& local_id,
+                               DataLinkSetMap* released_locals)
 {
   DBG_ENTRY_LVL("DataLink", "release_reservations", 6);
 
@@ -541,23 +541,32 @@ DataLink::release_reservations(GUID_t remote_id, GUID_t local_id,
 
     if (this->stopped_) return;
 
-    ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_id];
-    if (rls->size() == 1) {
-      assoc_by_remote_.erase(remote_id);
-      release_remote_required = true;
-    } else {
-      rls->remove(local_id);
-    }
-    RepoIdSet& ris = assoc_by_local_[local_id].associated_;
-    if (ris.size() == 1) {
-      DataLinkSet_rch& links = released_locals[local_id];
-      if (links.is_nil()) {
-        links = make_rch<DataLinkSet>();
+    AssocByRemote::iterator remote_it = assoc_by_remote_.find(remote_id);
+    if (remote_it != assoc_by_remote_.end()) {
+      ReceiveListenerSet_rch& rls = remote_it->second;
+      if (rls->size() == 1) {
+        assoc_by_remote_.erase(remote_id);
+        release_remote_required = true;
+      } else {
+        rls->remove(local_id);
       }
-      links->insert_link(rchandle_from(this));
-      assoc_by_local_.erase(local_id);
-    } else {
-      ris.erase(remote_id);
+    }
+
+    AssocByLocal::iterator local_it = assoc_by_local_.find(local_id);
+    if (local_it != assoc_by_local_.end()) {
+      RepoIdSet& ris = local_it->second.associated_;
+      if (ris.size() == 1) {
+        if (released_locals) {
+          DataLinkSet_rch& links = (*released_locals)[local_id];
+          if (links.is_nil()) {
+            links = make_rch<DataLinkSet>();
+          }
+          links->insert_link(rchandle_from(this));
+        }
+        assoc_by_local_.erase(local_id);
+      } else {
+        ris.erase(remote_id);
+      }
     }
 
     if (assoc_by_local_.empty()) {
@@ -669,9 +678,10 @@ DataLink::send_control(const DataSampleHeader& header, Message_Block_Ptr message
 {
   DBG_ENTRY_LVL("DataLink", "send_control", 6);
 
-  TransportSendControlElement* const elem = new TransportSendControlElement(1, // initial_count
-                                       GUID_UNKNOWN, &send_response_listener_,
-                                       header, move(message));
+  TransportSendControlElement* const elem
+    = new TransportSendControlElement(1, // initial_count
+                                      GUID_UNKNOWN, &send_response_listener_,
+                                      header, OPENDDS_MOVE_NS::move(message));
 
   send_response_listener_.track_message();
 

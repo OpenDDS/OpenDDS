@@ -11,6 +11,7 @@
 #include "dcps_export.h"
 
 #include "AssociationData.h"
+#include "AtomicBool.h"
 #include "Cached_Allocator_With_Overflow_T.h"
 #include "CoherentChangeControl.h"
 #include "ContentFilteredTopicImpl.h"
@@ -35,7 +36,7 @@
 #include "TopicImpl.h"
 #include "WriterInfo.h"
 #include "ZeroCopyInfoSeq_T.h"
-#include "AtomicBool.h"
+
 #include "transport/framework/ReceivedDataSample.h"
 #include "transport/framework/TransportClient.h"
 #include "transport/framework/TransportReceiveListener.h"
@@ -141,8 +142,6 @@ public:
   }
 
 private:
-  ~EndHistoricSamplesMissedSweeper();
-
   WeakRcHandle<DataReaderImpl> reader_;
   OPENDDS_SET(WriterInfo_rch) info_set_;
 
@@ -824,7 +823,7 @@ private:
     return data.publication_transport_priority_;
   }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   DDS::Security::ParticipantCryptoHandle get_crypto_handle() const;
 #endif
 
@@ -912,8 +911,6 @@ private:
     }
 
   private:
-    ~LivelinessTimer() { }
-
     WeakRcHandle<DataReaderImpl> data_reader_;
 
     /// liveliness timer id; -1 if no timer is set
@@ -1074,7 +1071,7 @@ public:
   };
 
 protected:
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   Security::SecurityConfig_rch security_config_;
   DDS::DynamicType_var dynamic_type_;
 #endif

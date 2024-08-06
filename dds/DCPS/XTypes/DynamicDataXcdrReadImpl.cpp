@@ -931,7 +931,7 @@ DDS::MemberDescriptor* DynamicDataXcdrReadImpl::get_union_selected_member()
   }
 
   if (has_default) {
-    return default_member._retn();;
+    return default_member._retn();
   }
 
   // The union has no selected member.
@@ -2226,6 +2226,21 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDesc
         return DDS::RETCODE_NO_DATA;
       }
     }
+
+    if (member_desc->is_optional()) {
+      bool has_value = false;
+      if (!(strm_ >> ACE_InputCDR::to_boolean(has_value))) {
+        if (DCPS::DCPS_debug_level >= 1) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) DynamicDataXcdrReadImpl::skip_to_struct_member: "
+                     "Failed to read is_present for member ID %d\n", id));
+        }
+        return DDS::RETCODE_ERROR;
+      }
+      if (!has_value) {
+        return DDS::RETCODE_NO_DATA;
+      }
+    }
+
     return DDS::RETCODE_OK;
   } else {
     size_t dheader = 0;
@@ -2900,97 +2915,6 @@ bool DynamicDataXcdrReadImpl::check_xcdr1_mutable_i(DDS::DynamicType_ptr dt, Dyn
   }
   return true;
 }
-
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-namespace {
-  template <typename T>
-  DDS::ReturnCode_t get_some_value(DCPS::Value& value, DDS::MemberId id, DynamicDataXcdrReadImpl& dyn,
-                                   DDS::ReturnCode_t (DynamicDataXcdrReadImpl::* pmf)(T&, DDS::MemberId))
-  {
-    T v;
-    const DDS::ReturnCode_t ret = (dyn.*pmf)(v, id);
-    if (ret == DDS::RETCODE_OK) {
-      value = v;
-    }
-    return ret;
-  }
-
-  DDS::ReturnCode_t get_some_value(DCPS::Value& value, DDS::MemberId id, DynamicDataXcdrReadImpl& dyn,
-                                   DDS::ReturnCode_t (DynamicDataXcdrReadImpl::* pmf)(char*&, DDS::MemberId))
-  {
-    CORBA::String_var v;
-    const DDS::ReturnCode_t ret = (dyn.*pmf)(v, id);
-    if (ret == DDS::RETCODE_OK) {
-      value = v.in();
-    }
-    return ret;
-  }
-
-  DDS::ReturnCode_t get_some_value(DCPS::Value& value, DDS::MemberId id, DynamicDataXcdrReadImpl& dyn,
-                                   DDS::ReturnCode_t (DynamicDataXcdrReadImpl::* pmf)(ACE_CDR::WChar*&, DDS::MemberId))
-  {
-    CORBA::WString_var v;
-    const DDS::ReturnCode_t ret = (dyn.*pmf)(v, id);
-    if (ret == DDS::RETCODE_OK) {
-      value = v.in();
-    }
-    return ret;
-  }
-}
-
-DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_simple_value(DCPS::Value& value, DDS::MemberId id)
-{
-  DDS::DynamicTypeMember_var dtm;
-  if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
-    return DDS::RETCODE_ERROR;
-  }
-  DDS::MemberDescriptor_var md;
-  if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
-    return DDS::RETCODE_ERROR;
-  }
-  DDS::DynamicType_var member_type = get_base_type(md->type());
-  const TypeKind member_kind = member_type->get_kind();
-  switch (member_kind) {
-  case TK_BOOLEAN:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_boolean_value);
-  case TK_BYTE:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_byte_value);
-  case TK_INT8:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_int8_value);
-  case TK_INT16:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_int16_value);
-  case TK_INT32:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_int32_value);
-  case TK_INT64:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_int64_value_impl);
-  case TK_UINT8:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_uint8_value);
-  case TK_UINT16:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_uint16_value);
-  case TK_UINT32:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_uint32_value);
-  case TK_UINT64:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_uint64_value_impl);
-  case TK_FLOAT32:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_float32_value);
-  case TK_FLOAT64:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_float64_value);
-  case TK_FLOAT128:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_float128_value);
-  case TK_CHAR8:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_char8_value);
-  case TK_CHAR16:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_char16_value);
-  case TK_ENUM:
-  case TK_STRING8:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_string_value);
-  case TK_STRING16:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_wstring_value);
-  default:
-    return DDS::RETCODE_UNSUPPORTED;
-  }
-}
-#endif
 
 #ifndef OPENDDS_SAFETY_PROFILE
 bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::String& indent,

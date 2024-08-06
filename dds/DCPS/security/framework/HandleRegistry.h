@@ -3,7 +3,9 @@
  * See: http://www.OpenDDS.org/license.html
  */
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 
 #ifndef OPENDDS_DCPS_SECURITY_FRAMEWORK_HANDLEREGISTRY_H
 #define OPENDDS_DCPS_SECURITY_FRAMEWORK_HANDLEREGISTRY_H
@@ -113,4 +115,4 @@ typedef DCPS::RcHandle<HandleRegistry> HandleRegistry_rch;
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_DCPS_SECURITY_FRAMEWORK_HANDLEREGISTRY_H
-#endif // OPENDDS_SECURITY
+#endif

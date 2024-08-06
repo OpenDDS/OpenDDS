@@ -5,17 +5,21 @@
  */
 
 #include "ace/OS_main.h"
+
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidBuilder.h"
+#include "dds/DCPS/Service_Participant.h"
+
 #include "dds/DCPS/RTPS/MessageUtils.h"
+#include "dds/DCPS/RTPS/MessageTypes.h"
 #include "dds/DCPS/RTPS/GuidGenerator.h"
 #include "dds/DCPS/RTPS/ParameterListConverter.h"
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
-#include "dds/DCPS/Service_Participant.h"
+
 #include "dds/DdsDcpsInfoUtilsC.h"
 
 // make sure we get set_default overloads in scope
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #include "dds/DdsSecurityCoreTypeSupportImpl.h"
 #endif
 #include "dds/DdsDcpsInfoUtilsTypeSupportImpl.h"
@@ -33,7 +37,7 @@ using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS::ParameterListConverter;
 using namespace OpenDDS::RTPS;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 using namespace DDS::Security;
 using namespace OpenDDS::Security;
 #endif
@@ -356,7 +360,7 @@ namespace {
         }
         loc.transport_type = "rtps_udp";
         // Add that seq to the blob
-        locators_to_blob(rtps_locators, loc.data);
+        locators_to_blob(rtps_locators, VENDORID_OPENDDS, loc.data);
       }
       return result;
     }
@@ -478,7 +482,7 @@ namespace {
         }
         loc.transport_type = "rtps_udp";
         // Add that seq to the blob
-        locators_to_blob(rtps_locators, loc.data);
+        locators_to_blob(rtps_locators, VENDORID_OPENDDS, loc.data);
       }
 
       result.ddsSubscriptionData.type_consistency = TheServiceParticipant->initial_TypeConsistencyEnforcementQosPolicy();
@@ -487,7 +491,7 @@ namespace {
     } // method
   } // Factory namespace
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   OpenDDS::RTPS::SPDPdiscoveredParticipantData spdp_participant(
     const void* user_data = 0,
     CORBA::ULong user_data_len = 0,
@@ -685,7 +689,7 @@ Parameter get(const ParameterList& param_list,
   return Parameter();
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 namespace {
   void init(OpenDDS::Security::SPDPdiscoveredParticipantData& s)
   {
@@ -1471,7 +1475,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_topic_name)
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(!strcmp(writer_data.ddsPublicationData.topic_name,
                       writer_data_out.ddsPublicationData.topic_name));
 }
@@ -1485,7 +1489,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_topic_name_default)
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
-  EXPECT_TRUE(from_param_list(empty_param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(!strcmp(writer_data_out.ddsPublicationData.topic_name, ""));
 }
 
@@ -1516,7 +1520,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_type_name)
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(!strcmp(writer_data.ddsPublicationData.type_name,
                       writer_data_out.ddsPublicationData.type_name));
 }
@@ -1530,7 +1534,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_topic_type_default)
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
-  EXPECT_TRUE(from_param_list(empty_param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(!strcmp(writer_data_out.ddsPublicationData.type_name, ""));
 }
 
@@ -1565,7 +1569,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_durability_qos)
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(writer_data.ddsPublicationData.durability.kind ==
               writer_data_out.ddsPublicationData.durability.kind);
 }
@@ -1579,7 +1583,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_durability_default)
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
-  EXPECT_TRUE(from_param_list(empty_param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   DurabilityQosPolicy defaultQos =
     TheServiceParticipant->initial_DurabilityQosPolicy();
   EXPECT_TRUE(defaultQos.kind ==
@@ -1631,7 +1635,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_durability_service)
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   DurabilityServiceQosPolicy& ds_in =
     writer_data.ddsPublicationData.durability_service;
   DurabilityServiceQosPolicy& ds_out =
@@ -1659,7 +1663,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_durability_service_default
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
-  EXPECT_TRUE(from_param_list(empty_param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   DurabilityServiceQosPolicy defaultQos =
     TheServiceParticipant->initial_DurabilityServiceQosPolicy();
   DurabilityServiceQosPolicy& ds_out =
@@ -1710,7 +1714,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_deadline)
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(writer_data.ddsPublicationData.deadline.period.sec ==
               writer_data_out.ddsPublicationData.deadline.period.sec);
   EXPECT_TRUE(writer_data.ddsPublicationData.deadline.period.nanosec ==
@@ -1728,7 +1732,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_deadline_default)
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
-  EXPECT_TRUE(from_param_list(empty_param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   DeadlineQosPolicy defaultQos =
     TheServiceParticipant->initial_DeadlineQosPolicy();
   EXPECT_TRUE(defaultQos.period.sec ==
@@ -1770,7 +1774,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_latency_budget)
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(writer_data.ddsPublicationData.latency_budget.duration.sec ==
               writer_data_out.ddsPublicationData.latency_budget.duration.sec);
 }
@@ -1786,7 +1790,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_latency_budget_default)
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
-  EXPECT_TRUE(from_param_list(empty_param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   LatencyBudgetQosPolicy defaultQos =
     TheServiceParticipant->initial_LatencyBudgetQosPolicy();
   EXPECT_TRUE(defaultQos.duration.sec ==
@@ -1829,7 +1833,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_liveliness)
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(writer_data.ddsPublicationData.liveliness.kind ==
               writer_data_out.ddsPublicationData.liveliness.kind);
   EXPECT_TRUE(writer_data.ddsPublicationData.liveliness.lease_duration.sec ==
@@ -1851,7 +1855,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_liveliness_default)
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
-  EXPECT_TRUE(from_param_list(empty_param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   LivelinessQosPolicy defaultQos =
     TheServiceParticipant->initial_LivelinessQosPolicy();
   EXPECT_TRUE(defaultQos.kind ==
@@ -1898,7 +1902,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_reliability)
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(writer_data.ddsPublicationData.reliability.kind ==
               writer_data_out.ddsPublicationData.reliability.kind);
   EXPECT_TRUE(writer_data.ddsPublicationData.reliability.max_blocking_time.sec ==
@@ -1920,7 +1924,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_reliability_default)
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
-  EXPECT_TRUE(from_param_list(empty_param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   ReliabilityQosPolicy defaultQos =
     TheServiceParticipant->initial_DataWriterQos().reliability;
   EXPECT_TRUE(defaultQos.kind ==
@@ -1968,7 +1972,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_lifespan)
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(writer_data.ddsPublicationData.lifespan.duration.sec ==
               writer_data_out.ddsPublicationData.lifespan.duration.sec);
   EXPECT_TRUE(writer_data.ddsPublicationData.lifespan.duration.nanosec ==
@@ -1986,7 +1990,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_lifespan_default)
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
-  EXPECT_TRUE(from_param_list(empty_param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   LifespanQosPolicy defaultQos =
     TheServiceParticipant->initial_LifespanQosPolicy();
   EXPECT_TRUE(defaultQos.duration.sec ==
@@ -2038,7 +2042,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_user_data)
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(writer_data.ddsPublicationData.user_data.value ==
               writer_data_out.ddsPublicationData.user_data.value);
 }
@@ -2059,7 +2063,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_user_data_default)
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
-  EXPECT_TRUE(from_param_list(empty_param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   UserDataQosPolicy defaultQos =
     TheServiceParticipant->initial_UserDataQosPolicy();
   EXPECT_TRUE(defaultQos.value ==
@@ -2102,7 +2106,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_ownership)
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(writer_data.ddsPublicationData.ownership.kind ==
               writer_data_out.ddsPublicationData.ownership.kind);
 }
@@ -2117,7 +2121,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_ownership_default)
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
-  EXPECT_TRUE(from_param_list(empty_param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   OwnershipQosPolicy defaultQos =
     TheServiceParticipant->initial_OwnershipQosPolicy();
   EXPECT_TRUE(defaultQos.kind ==
@@ -2165,7 +2169,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_ownership_strength)
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(writer_data.ddsPublicationData.ownership_strength.value ==
               writer_data_out.ddsPublicationData.ownership_strength.value);
 }
@@ -2180,7 +2184,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_ownership_strength_default
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
-  EXPECT_TRUE(from_param_list(empty_param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   OwnershipStrengthQosPolicy defaultQos =
     TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
   EXPECT_TRUE(defaultQos.value ==
@@ -2227,7 +2231,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_destination_order)
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(writer_data.ddsPublicationData.destination_order.kind ==
               writer_data_out.ddsPublicationData.destination_order.kind);
 }
@@ -2243,7 +2247,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_destination_order_default)
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
-  EXPECT_TRUE(from_param_list(empty_param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   DestinationOrderQosPolicy defaultQos =
     TheServiceParticipant->initial_DestinationOrderQosPolicy();
   EXPECT_TRUE(defaultQos.kind ==
@@ -2293,7 +2297,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_presentation)
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(writer_data.ddsPublicationData.presentation.access_scope ==
               writer_data_out.ddsPublicationData.presentation.access_scope);
   EXPECT_TRUE(writer_data.ddsPublicationData.presentation.coherent_access ==
@@ -2315,7 +2319,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_presentation_default)
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
-  EXPECT_TRUE(from_param_list(empty_param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   PresentationQosPolicy defaultQos =
     TheServiceParticipant->initial_PresentationQosPolicy();
   EXPECT_TRUE(defaultQos.access_scope ==
@@ -2371,7 +2375,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_partition)
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(writer_data_out.ddsPublicationData.partition.name.length() == 1);
   EXPECT_TRUE(!strcmp(writer_data.ddsPublicationData.partition.name[0],
                       writer_data_out.ddsPublicationData.partition.name[0]));
@@ -2395,7 +2399,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_partition_default)
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
-  EXPECT_TRUE(from_param_list(empty_param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(!writer_data_out.ddsPublicationData.partition.name.length());
 }
 
@@ -2447,7 +2451,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_topic_data)
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(writer_data.ddsPublicationData.topic_data.value ==
               writer_data_out.ddsPublicationData.topic_data.value);
 }
@@ -2470,7 +2474,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_topic_data_default)
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
-  EXPECT_TRUE(from_param_list(empty_param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(!writer_data_out.ddsPublicationData.topic_data.value.length());
 }
 
@@ -2522,7 +2526,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_group_data)
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(writer_data.ddsPublicationData.group_data.value ==
               writer_data_out.ddsPublicationData.group_data.value);
 }
@@ -2545,7 +2549,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_group_data_default)
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
-  EXPECT_TRUE(from_param_list(empty_param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(!writer_data_out.ddsPublicationData.group_data.value.length());
 }
 
@@ -2580,7 +2584,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_guid)
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(!memcmp(&writer_data.writerProxy.remoteWriterGuid,
                       &writer_data_out.writerProxy.remoteWriterGuid,
                       sizeof(GUID_t)));
@@ -2643,7 +2647,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_unicast_allocators)
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(writer_data_out.writerProxy.allLocators.length() == 1);
   EXPECT_TRUE(!strcmp(writer_data_out.writerProxy.allLocators[0].transport_type, "rtps_udp"));
 }
@@ -2704,7 +2708,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_multicast_locators)
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(writer_data_out.writerProxy.allLocators.length() == 1);
   EXPECT_TRUE(!strcmp(writer_data_out.writerProxy.allLocators[0].transport_type, "rtps_udp"));
 }
@@ -2749,7 +2753,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_topic_name)
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
   EXPECT_TRUE(!strcmp(reader_data.ddsSubscriptionData.topic_name,
                       reader_data_out.ddsSubscriptionData.topic_name));
 }
@@ -2781,7 +2785,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_type_name)
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
   EXPECT_TRUE(!strcmp(reader_data.ddsSubscriptionData.type_name,
                       reader_data_out.ddsSubscriptionData.type_name));
 }
@@ -2817,7 +2821,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_durability)
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.durability.kind ==
               reader_data_out.ddsSubscriptionData.durability.kind);
 }
@@ -2854,7 +2858,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_deadline)
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.deadline.period.sec ==
               reader_data_out.ddsSubscriptionData.deadline.period.sec);
   EXPECT_TRUE(reader_data.ddsSubscriptionData.deadline.period.nanosec ==
@@ -2892,7 +2896,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_latency_budget)
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.latency_budget.duration.sec ==
               reader_data_out.ddsSubscriptionData.latency_budget.duration.sec);
 }
@@ -2929,7 +2933,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_liveliness)
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.liveliness.kind ==
               reader_data_out.ddsSubscriptionData.liveliness.kind);
   EXPECT_TRUE(reader_data.ddsSubscriptionData.liveliness.lease_duration.sec ==
@@ -2972,7 +2976,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_reliability)
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.reliability.kind ==
               reader_data_out.ddsSubscriptionData.reliability.kind);
   EXPECT_TRUE(reader_data.ddsSubscriptionData.reliability.max_blocking_time.sec ==
@@ -3022,7 +3026,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_user_data)
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.user_data.value ==
               reader_data_out.ddsSubscriptionData.user_data.value);
 }
@@ -3061,7 +3065,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_ownership)
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.ownership.kind ==
               reader_data_out.ddsSubscriptionData.ownership.kind);
 }
@@ -3103,7 +3107,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_destination_order)
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.destination_order.kind ==
               reader_data_out.ddsSubscriptionData.destination_order.kind);
 }
@@ -3149,7 +3153,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_presentation)
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.presentation.access_scope ==
               reader_data_out.ddsSubscriptionData.presentation.access_scope);
   EXPECT_TRUE(reader_data.ddsSubscriptionData.presentation.coherent_access ==
@@ -3201,7 +3205,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_partition)
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
   EXPECT_TRUE(reader_data_out.ddsSubscriptionData.partition.name.length() == 1);
   EXPECT_TRUE(!strcmp(reader_data.ddsSubscriptionData.partition.name[0],
                       reader_data_out.ddsSubscriptionData.partition.name[0]));
@@ -3253,7 +3257,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_topic_data)
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.topic_data.value ==
               reader_data_out.ddsSubscriptionData.topic_data.value);
 }
@@ -3304,7 +3308,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_group_data)
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.group_data.value ==
               reader_data_out.ddsSubscriptionData.group_data.value);
 }
@@ -3339,7 +3343,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_guid)
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
   EXPECT_TRUE(!memcmp(&reader_data.readerProxy.remoteReaderGuid,
                       &reader_data_out.readerProxy.remoteReaderGuid,
                       sizeof(GUID_t)));
@@ -3400,7 +3404,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_unicast_locators)
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
   EXPECT_TRUE(reader_data_out.readerProxy.allLocators.length() == 1);
 }
 
@@ -3462,7 +3466,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_multicast_locators)
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
   EXPECT_TRUE(reader_data_out.readerProxy.allLocators.length() == 1);
   EXPECT_TRUE(!strcmp(reader_data_out.readerProxy.allLocators[0].transport_type, "rtps_udp"));
 }
@@ -3522,7 +3526,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_content_filter_property
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
   EXPECT_TRUE(
               !strcmp(reader_data.contentFilterProperty.contentFilteredTopicName,
                       reader_data_out.contentFilterProperty.contentFilteredTopicName));
@@ -3582,7 +3586,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_decode_reader_associated_guid_
                       sizeof(OpenDDS::DCPS::GuidPrefix_t)));
 
   DiscoveredReaderData reader_data_out;
-  from_param_list(param_list, reader_data_out, true, type_info);
+  from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info);
   EXPECT_TRUE(reader_data_out.readerProxy.associatedWriters.length() == 2);
   EXPECT_TRUE(!memcmp(reader_data_out.readerProxy.associatedWriters[0].guidPrefix,
                       writer0.guidPrefix,
@@ -3632,7 +3636,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_reader_defaults)
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
   type_info.minimal.dependent_typeid_count = 0;
   type_info.complete.dependent_typeid_count = 0;
-  EXPECT_TRUE(from_param_list(empty_param_list, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
   EXPECT_TRUE(!strcmp(reader_data_out.ddsSubscriptionData.topic_name, ""));
   EXPECT_TRUE(!strcmp(reader_data_out.ddsSubscriptionData.type_name, ""));
   EXPECT_TRUE(reader_data_out.ddsSubscriptionData.durability.kind ==

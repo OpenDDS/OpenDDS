@@ -34,7 +34,7 @@ bool TimingChecker::check_timing(const OpenDDS::DCPS::TimeDuration& epsilon, con
 
   ThreadStatusManager tsm;
   ReactorTask reactor_task(false);
-  reactor_task.open_reactor_task(0, &tsm);
+  reactor_task.open_reactor_task(&tsm);
 
   for (int i = 0; result && i < 5; ++i) {
     RcHandle<TimingChecker> checker = make_rch<TimingChecker>();

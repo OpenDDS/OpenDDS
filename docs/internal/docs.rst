@@ -18,8 +18,8 @@ Multiple kinds can be passed, and they are documented in the following sections.
 Requirements
 ============
 
-The script requires `Python 3.6 or later <https://www.python.org/downloads/>`__ and an internet connection if the script needs to download dependencies or check the validity of external links.
-It will also try to download extra information for things like :rst:role:`omgspec`, but it shouldn't be a fatal error if there's not internet.
+The script requires `Python 3.10 or later <https://www.python.org/downloads/>`__ and an internet connection if the script needs to download dependencies or check the validity of external links.
+It will also try to download extra information for things like :rst:role:`omgspec`, but it shouldn't be a fatal error if there's not an internet connection.
 
 You might receive a message like this when running for the first time::
 
@@ -41,20 +41,22 @@ If it was built successfully, then the front page will be at ``docs/_build/html/
 A single page variant is also available using ``docs/build.py singlehtml -o``
 If it was built successfully, then the page will be at ``docs/_build/singlehtml/index.html``.
 
-PDF
-===
-
-.. note:: This has additional dependencies on LaTeX that are documented `here <https://www.sphinx-doc.org/en/master/usage/builders/index.html#sphinx.builders.latex.LaTeXBuilder>`__.
-
-PDF documentation can be built and viewed using ``docs/build.py pdf -o``.
-If it was built successfully, then the PDF file will be at ``docs/_build/latex/opendds.pdf``.
-
 Dash
 ====
 
 Documentation can be built for `Dash <https://kapeli.com/dash>`_, `Zeal <https://zealdocs.org/>`_, and other Dash-compatible applications using `doc2dash <https://github.com/hynek/doc2dash>`_.
 The command for this is ``docs/build.py dash``.
 This will create a ``docs/_build/OpenDDS.docset`` directory that must be manually moved to where other docsets are stored.
+
+PDF
+===
+
+.. note:: The PDF output is currently much less optimized than the HTML-based outputs.
+
+.. note:: The Sphinx PDF builder has additional dependencies on LaTeX that are documented :py:class:`here <sphinx:sphinx.builders.latex.LaTeXBuilder>`.
+
+PDF documentation can be built and viewed using ``docs/build.py pdf -o``.
+If it was built successfully, then the PDF file will be at ``docs/_build/latex/opendds.pdf``.
 
 Strict Checks
 =============
@@ -88,7 +90,7 @@ For example to build the HTML documentation::
 RST/Sphinx Usage
 ****************
 
-* See `Sphinx reStructuredText Primer <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html>`__ for basic RST usage.
+* See :ref:`Sphinx reStructuredText Primer <sphinx:rst-primer>` for basic RST usage.
 * Inline code such as class names like ``DataReader`` and other symbolic text such as commands like ``ls`` should use double backticks: ````TEXT````.
   This distinguishes it as code, makes it easier to distinguish characters, and reduces the chance of needing to escape characters if they happen to be special for RST.
 * `One sentence per line should be perfered. <https://rhodesmill.org/brandon/2012/one-sentence-per-line/>`__
@@ -289,63 +291,373 @@ These come in the form of `RST roles <https://docutils.sourceforge.io/docs/ref/r
 
   See :doc:`here <omg_spec_links>` for all the possible sections.
 
+Custom Domains
+==============
+
+:doc:`Sphinx domains <sphinx:usage/domains/index>` are a way to document collections of hierarchical definitions such as APIs.
+Sphinx has a number of built-in domains such as Python and C++, but it helps to have custom ones.
+Custom domains in OpenDDS should use classes derived from the ones in :ghfile:`docs/sphinx_extensions/custom_domain.py`.
+
+All of the custom domain directives can and should have RST content nested in them.
+They all support the ``:no-index:``, ``:no-index-entry:``, and ``:no-contents-entry:`` directive options.
+See :ref:`sphinx:basic-domain-markup` for more information.
+
 CMake Domain
-============
+------------
 
-For :doc:`/devguide/building/cmake` there's a custom CMake `Sphinx domain <https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html>`__ in :ghfile:`docs/sphinx_extensions/cmake.py`.
-All of the directives can and should have RST content nested in them.
+For :doc:`/devguide/building/cmake` there's a custom CMake Sphinx domain in :ghfile:`docs/sphinx_extensions/cmake_domain.py`.
+There is an official CMake domain used by CMake for their own documentation, but it would be impractical for us to use because it requires a separate RST file for every property and variable.
 
-.. rst:directive:: .. cmake:func:: NAME
+.. rst:directive:: .. cmake:func:: <name>
 
-  For public CMake functions.
+  Use to document public CMake functions.
 
-.. rst:directive:: .. cmake:func:arg:: NAME [SIGNATURE]
+  .. code-block:: rst
 
-  For arguments and options for public CMake functions.
+    .. cmake:func:: opendds_cmake_function
+
+      ::
+
+        opendds_cmake_function(<target> [ARG <value>])
+
+      This is a function.
+
+      .. cmake:func:arg:: target
+
+        This is a positional argument
+
+      .. cmake:func:arg:: ARG <value>
+
+        This is a keyword argument
+
+  Turns into:
+
+    .. cmake:func:: opendds_cmake_function
+      :no-contents-entry:
+      :no-index-entry:
+
+      ::
+
+        opendds_cmake_function(<target> [ARG <value>])
+
+      This is a function.
+
+      .. cmake:func:arg:: target
+
+        This is a positional argument
+
+      .. cmake:func:arg:: ARG <value>
+
+        This is a keyword argument
+
+.. rst:directive:: .. cmake:func:arg:: <name> [<subargument>...]
+
+  Use to document arguments and options for public CMake functions.
   Should be nested in :rst:dir:`cmake:func` of the function the argument belongs to.
 
 .. rst:role:: cmake:func
 
-  Reference a :rst:dir:`cmake:func` by name or reference a :rst:dir:`cmake:func:arg` by function name followed by argument name in parentheses.
+  Use to reference a :rst:dir:`cmake:func` by name or reference a :rst:dir:`cmake:func:arg` by function name followed by argument name in parentheses.
   For example:
 
   .. code-block:: rst
 
-    :cmake:func:`opendds_target_sources`
+    :cmake:func:`opendds_cmake_function`
 
-    :cmake:func:`opendds_target_sources(OPENDDS_IDL_OPTIONS)`
+    :cmake:func:`opendds_cmake_function(target)`
+
+    :cmake:func:`opendds_cmake_function(ARG)`
 
   Turns into:
 
-    :cmake:func:`opendds_target_sources`
+    :cmake:func:`opendds_cmake_function`
 
-    :cmake:func:`opendds_target_sources(OPENDDS_IDL_OPTIONS)`
+    :cmake:func:`opendds_cmake_function(target)`
 
-.. rst:directive:: .. cmake:var:: NAME
+    :cmake:func:`opendds_cmake_function(ARG)`
 
-  For public variables
+.. rst:directive:: .. cmake:var:: <name>
+
+  Use to document public variables.
+
+  .. code-block:: rst
+
+    .. cmake:var:: OPENDDS_CMAKE_VARIABLE
+
+      This is a variable
+
+  Turns into:
+
+    .. cmake:var:: OPENDDS_CMAKE_VARIABLE
+      :no-contents-entry:
+      :no-index-entry:
+
+      This is a variable
 
 .. rst:role:: cmake:var
 
-  Reference a :rst:dir:`cmake:var` by name.
+  Use to reference a :rst:dir:`cmake:var` by name.
 
-.. rst:directive:: .. cmake:prop:: NAME
+  .. code-block:: rst
 
-  For properties on CMake targets, or possibly other kinds of properties, that we're looking for or creating for the user.
+    :cmake:var:`OPENDDS_CMAKE_VARIABLE`
+
+  Turns into:
+
+    :cmake:var:`OPENDDS_CMAKE_VARIABLE`
+
+.. rst:directive:: .. cmake:prop:: <name>
+
+  Use to document properties on CMake targets, or possibly other kinds of properties, that we're looking for or creating for the user.
+
+  .. code-block:: rst
+
+    .. cmake:prop:: OPENDDS_CMAKE_PROPERTY
+
+      This is a property
+
+  Turns into:
+
+    .. cmake:prop:: OPENDDS_CMAKE_PROPERTY
+      :no-contents-entry:
+      :no-index-entry:
+
+      This is a property
 
 .. rst:role:: cmake:prop
 
-  Reference a :rst:dir:`cmake:prop` by name.
+  Use to reference a :rst:dir:`cmake:prop` by name.
 
-.. rst:directive:: .. cmake:tgt:: NAME
+  .. code-block:: rst
 
-  A target meant for users that be a library or executable that is imported or exported.
+    :cmake:prop:`OPENDDS_CMAKE_PROPERTY`
+
+  Turns into:
+
+    :cmake:prop:`OPENDDS_CMAKE_PROPERTY`
+
+.. rst:directive:: .. cmake:tgt:: <name>
+
+  Use to document a library or executable CMake target meant to users that can be imported or exported.
+
+  .. code-block:: rst
+
+    .. cmake:tgt:: OpenDDS::MessengerPigeonTransport
+
+      Transport for IP over messenger pigeon (:rfc:`1149`)
+
+  Turns into:
+
+    .. cmake:tgt:: OpenDDS::MessengerPigeonTransport
+      :no-contents-entry:
+      :no-index-entry:
+
+      Transport for IP over messenger pigeon (:rfc:`1149`)
 
 .. rst:role:: cmake:tgt
 
-  Reference a :rst:dir:`cmake:tgt` by name.
+  Use to reference a :rst:dir:`cmake:tgt` by name.
 
-.. _docs-news:
+  .. code-block:: rst
+
+    :cmake:tgt:`OpenDDS::MessengerPigeonTransport`
+
+  Turns into:
+
+    :cmake:tgt:`OpenDDS::MessengerPigeonTransport`
+
+Config Domain
+-------------
+
+For :doc:`/devguide/run_time_configuration` there's a custom configuration Sphinx domain in :ghfile:`docs/sphinx_extensions/config_domain.py`.
+
+.. rst:directive:: .. cfg:sec:: <name>[@<discriminator>][/<argument>]
+
+  Use to document a configuration section that can contain :rst:dir:`cfg:prop` and most other RST content.
+  ``<discriminator>`` is an optional extension of the name to document cases where the available properties depend on something.
+  Using discriminators requires separate :rst:dir:`cfg:sec` entires.
+  ``<arguments>`` is just for display and has no restrictions on the contents.
+
+.. rst:role:: cfg:sec
+
+  Use to reference a :rst:dir:`cfg:sec` by name and optional discriminator.
+  If the section has a discriminator, it must be separated by a ``@`` symbol.
+  Do not include arguments if it has arguments in the directive.
+  The possible formats are ``<sect_name>`` and ``<sect_name>@<disc_name>``.
+
+.. rst:directive:: .. default-cfg-sec:: [<section_name>[@<discriminator>]]
+
+  This sets the default :rst:dir:`cfg:sec` to use in the roles when outside of a section.
+  If this is not used or has been used with no argument, then the default will be ``common``.
+
+.. rst:directive:: .. cfg:prop:: <name>=<values>
+
+  Use to document a configuration property that can contain :rst:dir:`cfg:val` and most other RST content.
+  Must be in a :rst:dir:`cfg:sec`.
+  ``<values>`` describe what sort of text is accepted.
+  It is just for display and has no restrictions on the contents, but should follow the following conventions to describe the accepted values:
+
+  - ``|`` indicates an OR
+  - ``[]`` indicates an optional part of the value
+  - ``...`` indicates the previous part can be repeated
+  - Words surrounded angle brackets (ex: ``<prop_name>``) indicate placeholders.
+  - Everything else should be considered literal.
+
+  For example: ``log_level=none|error|warn|debug``, ``memory_limit=<uint64>``, ``addresses=<ip>[:<port>],...``.
+
+  .. rst:directive:option:: required
+
+    Indicates the property is required for the section
+
+  .. rst:directive:option:: default
+
+    The default value of the property if omitted
+
+.. rst:role:: cfg:prop
+
+  Use to reference a :rst:dir:`cfg:prop` by name.
+  Do not include values if it has values in the directive.
+  The possible formats are:
+
+  - ``<prop_name>``
+
+    Inside of a :rst:dir:`cfg:sec`, it refers to a property in that section.
+    Outside of a :rst:dir:`cfg:sec`, the property is assumed to be in :rst:dir:`default-cfg-sec`.
+
+  - ``[<sect_name>]<prop_name>``
+  - ``[<sect_name>@<disc_name>]<prop_name>``
+
+.. rst:directive:: .. cfg:val:: [<]<name>[>]
+
+  Use to document a part of what a configuration property accepts.
+  Must be in a :rst:dir:`cfg:prop`.
+  The optional angle brackets (``<>``) are just for display and are meant to help distinguish between the value being a literal and a placeholder.
+
+.. rst:role:: cfg:val
+
+  Use to reference a :rst:dir:`cfg:val` by name.
+  Do not include brackets if it has brackets in the directive.
+  The possible formats are:
+
+  - ``<val_name>``
+
+    This must be inside a :rst:dir:`cfg:prop`.
+
+  - ``<prop_name>=<val_name>``
+
+    Inside of a :rst:dir:`cfg:sec`, it refers to a value of a property in that section.
+    Outside of a :rst:dir:`cfg:sec`, the property is assumed to be in :rst:dir:`default-cfg-sec`.
+
+  - ``[<sect_name>]<prop_name>=<val_name>``
+  - ``[<sect_name>@<disc_name>]<prop_name>=<val_name>``
+
+Example
+^^^^^^^
+
+This is a example made up for the following INI file:
+
+.. code-block:: ini
+
+  [server/Alpha]
+  os=windows
+
+  [server/Beta]
+  os=linux
+  distro=Debian
+
+.. code-block:: rst
+
+  Outside their sections, references to properties and values must be complete: :cfg:val:`[server]os=linux`, :cfg:prop:`[server@linux]distro`
+
+  Otherwise the default section will be assumed.
+
+  .. cfg:sec:: server/<name>
+
+    A property or value's section can be omitted from references within their sections: :cfg:prop:`os`, :cfg:val:`os=windows`
+
+    .. cfg:prop:: os=windows|linux
+      :required:
+
+      A value's property can be omitted from references within their properties: :cfg:val:`linux`
+
+      .. cfg:val:: windows
+
+        Implied titles will be shortened within their scopes: :cfg:prop:`[server]os`, :cfg:val:`[server]os=windows`
+
+      .. cfg:val:: linux
+
+        Sections with discriminators require them in the reference targets: :cfg:sec:`server@linux`, :cfg:prop:`[server@linux]distro`
+
+  .. cfg:sec:: server@linux/<name>
+
+    .. cfg:prop:: distro=<name>
+      :default: ``Ubuntu``
+
+  .. default-cfg-sec:: server
+
+  ``default-cfg-sec=server``: :cfg:prop:`os`.
+
+  .. default-cfg-sec:: server@linux
+
+  ``default-cfg-sec=server@linux``: :cfg:prop:`distro`.
+
+  .. default-cfg-sec::
+
+  ``default-cfg-sec=``: :cfg:prop:`[server@linux]distro`.
+
+Turns into:
+
+  Outside their sections, references to properties and values must be complete: :cfg:val:`[server]os=linux`, :cfg:prop:`[server@linux]distro`
+
+  Otherwise the default section will be assumed.
+
+  .. cfg:sec:: server/<name>
+    :no-contents-entry:
+    :no-index-entry:
+
+    A property or value's section can be omitted from references within their sections: :cfg:prop:`os`, :cfg:val:`os=windows`
+
+    .. cfg:prop:: os=windows|linux
+      :required:
+      :no-contents-entry:
+      :no-index-entry:
+
+      A value's property can be omitted from references within their properties: :cfg:val:`linux`
+
+      .. cfg:val:: windows
+        :no-contents-entry:
+        :no-index-entry:
+
+        Implied titles will be shortened within their scopes: :cfg:prop:`[server]os`, :cfg:val:`[server]os=windows`
+
+      .. cfg:val:: linux
+        :no-contents-entry:
+        :no-index-entry:
+
+        Sections with discriminators require them in the reference targets: :cfg:sec:`server@linux`, :cfg:prop:`[server@linux]distro`
+
+  .. cfg:sec:: server@linux/<name>
+    :no-contents-entry:
+    :no-index-entry:
+
+    .. cfg:prop:: distro=<name>
+      :default: ``Ubuntu``
+      :no-contents-entry:
+      :no-index-entry:
+
+  .. default-cfg-sec:: server
+
+  ``default-cfg-sec=server``: :cfg:prop:`os`.
+
+  .. default-cfg-sec:: server@linux
+
+  ``default-cfg-sec=server@linux``: :cfg:prop:`distro`.
+
+  .. default-cfg-sec::
+
+  ``default-cfg-sec=``: :cfg:prop:`[server@linux]distro`.
+
+  .. _docs-news:
 
 ****
 News

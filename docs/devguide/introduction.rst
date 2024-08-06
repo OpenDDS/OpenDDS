@@ -36,7 +36,7 @@ You may modify it for your own needs, within the terms of the license agreements
 You must not copyright OpenDDS software.
 For details of the licensing terms, see the file named :ghfile:`LICENSE` that is included in the OpenDDS source code distribution or visit https://opendds.org/about/license.html.
 
-OpenDDS also utilizes other open source software products including MPC (Make Project Creator), ACE (the ADAPTIVE Communication Environment), and TAO (The ACE ORB).
+OpenDDS also utilizes other open source software products including :ref:`deps-mpc` and :ref:`deps-ace-tao`.
 
 OpenDDS is open source and the development team welcomes contributions of code, tests, documentation, and ideas.
 Active participation by users ensures a robust implementation.
@@ -70,7 +70,7 @@ Real-time Publish-Subscribe (RTPS)
 
 The full name of this specification is the *Real-time Publish-Subscribe Protocol DDS Interoperability Wire Protocol* (DDSI-RTPS), but can also be just called RTPS.
 This specification describes the requirements for interoperability between DDS implementations.
-See :ref:`introduction--peer-to-peer-discovery-with-rtps` for more information.
+See :ref:`rtps-disc` and :ref:`rtps-udp-transport` for more information.
 
 The version OpenDDS uses is :omgspec:`rtps`.
 Although the document number is v2.3, it specifies protocol version 2.4.
@@ -178,9 +178,9 @@ Section 2 of the DDS specification defines five compliance points for a DDS impl
 OpenDDS complies with the entire DDS specification (including all optional profiles).
 This includes the implementation of all Quality of Service policies with the following notes:
 
-* RELIABILITY.kind = RELIABLE is supported by the RTPS_UDP transport, the TCP transport, or the IP Multicast transport (when configured as reliable).
+* :ref:`qos-reliability` ``RELIABLE_RELIABILITY_QOS`` is supported by the :ref:`rtps-udp-transport`, the :ref:`tcp-transport`, and the :ref:`multicast-transport` (when configured as reliable).
 
-* TRANSPORT_PRIORITY is not implemented as changeable.
+* :ref:`qos-transport-priority` is not implemented as changeable.
 
 Although version 1.5 of the DDS specification is not yet published, OpenDDS incorporates some changes planned for that version that are required for a robust implementation:
 
@@ -216,7 +216,7 @@ Items not implemented in OpenDDS:
 
    OpenDDS may still drop samples that aren't needed (due to content filtering) by any associated readers -- this is done above the transport layer
 
-#. :omgspec:`rtps:8.7.6 Coherent Sets` for ``PRESENTATION`` QoS
+#. :omgspec:`rtps:8.7.6 Coherent Sets` for :ref:`qos-presentation`
 
 #. :omgspec:`rtps:8.7.7 Directed Write`
 
@@ -224,7 +224,7 @@ Items not implemented in OpenDDS:
 
 #. :omgspec:`rtps:8.7.8 Property Lists`
 
-#. :omgspec:`rtps:8.7.9 Original Writer Info` for ``DURABLE`` data
+#. :omgspec:`rtps:8.7.9 Original Writer Info` for :ref:`qos-durability`
 
    This would only be used for transient and persistent durability, which are :omgspec:`not supported by the RTPS specification <rtps:8.7.2.2.1>`
 
@@ -336,32 +336,208 @@ The main deviation from the OMG IDL PSM is that local interfaces are used for th
 These are defined as unconstrained (non-local) interfaces in the DDS specification.
 Defining them as local interfaces improves performance, reduces memory usage, simplifies the client's interaction with these interfaces, and makes it easier for clients to build their own implementations.
 
-.. _introduction--extensible-transport-framework-etf:
+.. _plugins:
 
-Extensible Transport Framework (ETF)
-====================================
+Plugins
+=======
+
+OpenDDS puts many implementation details into libraries that are outside the core ``OpenDDS_Dcps`` library.
+Making these features modular allows users to build and distribute their applications without building or distributing code their applications won't use.
+It also makes it easier to replace these libraries with custom ones.
+
+- :ref:`transports <transports>`:
+
+  - :ref:`tcp-transport`
+  - :ref:`rtps-udp-transport`
+  - :ref:`udp-transport`
+  - :ref:`multicast-transport`
+  - :ref:`shmem-transport`
+
+- :ref:`discovery <discovery>` [#plugins-static-disc]_:
+
+  - :ref:`inforepo-disc`
+  - :ref:`rtps-disc`
+
+- :ref:`security <sec>` [#plugins-sec]_
+
+How to enable and use a particular plugin will differ based on the kind of plugin and the plugin itself, but generally they are enabled by some form of configuration setting, for example using :cfg:prop:`[transport]transport_type` or :cfg:prop:`DCPSSecurity` in a configuration file.
+The plugin will also have to be linked and initialized at runtime.
+For dynamic libraries (``.dll``, ``.dynlib`` or, ``.so`` files) this is done automatically as the OpenDDS will load the dynamic library and then run any initialization the plugin requires.
+When the plugins are statically linked, then it requires explicit linking and including an initialization header in the application that contains a global object that will initialize the plugin.
+If OpenDDS was :ref:`built using CMake <cmake-building>`, then :ghfile:`dds/DCPS/StaticIncludes.h` can be included and the initialization headers will be included automatically based on the :ref:`static libraries <cmake-libraries>` that were linked.
+Explicit linking and initialization headers can also be used with dynamic libraries.
+This will always load and initialize the plugin when the application starts instead of delaying until the plugin is needed.
+
+.. _transports:
+
+Transports
+==========
 
 ..
     Sect<1.2.3.2>
 
-OpenDDS uses the IDL interfaces defined by the DDS specification to initialize and control service usage.
-Data transmission is accomplished via an OpenDDS-specific transport framework that allows the service to be used with a variety of transport protocols.
-This is referred to as *pluggable transports* and makes the extensibility of OpenDDS an important part of its architecture.
-OpenDDS currently supports TCP/IP, UDP/IP, IP multicast, shared-memory, and RTPS_UDP transport protocols as shown below.
-
-.. figure:: images/pluggable.png
-
-  OpenDDS Transport Framework
-
+Transmission of :term:`samples <Sample>` and information related to their management is accomplished via an OpenDDS-specific transport framework that allows the service to be used with a variety of transport protocols.
 Transports are typically specified via configuration files and are attached to various entities in the publisher and subscriber processes.
-See :ref:`run_time_configuration--transport-configuration-options` for details on configuring ETF components.
+See :ref:`config-transport` for details on configuring transports generally.
 
-The ETF enables application developers to implement their own customized transports.
+.. svgbob::
+
+  .---------------------------.  .---------------------------.
+  |  "Publisher Application"  |  |  "Subscriber Application" |
+  | +-----------------------+ |  | +-----------------------+ |
+  | |      "DataWriter"     | |  | |      "DataReader"     | |
+  | +-----------------------+ |  | +-----------------------+ |
+  | |      "Publisher"      | |  | |      "Subscriber"     | |
+  | +-----------------------+ |  | +-----------------------+ |
+  | |  "DomainParticipant"  | |  | |  "DomainParticipant"  | |
+  | +-----------+-----------+ |  | +-----------+-----------+ |
+  | |"Discovery"|"Transport"| |  | |"Transport"|"Discovery"| |
+  | +-----o-----+-----o-----+ |  | +-----o-----+-----o-----+ |
+  |       |           |       |  |       |           |       |
+  |       +-----+-----+       |  |       +-----+-----+       |
+  `-------------|-------------'  `-------------|-------------'
+                |                              |
+                |           "Network"          |
+  ==============#==============================#==============
+
+Transports are used along with :ref:`discovery <discovery>` to define how OpenDDS communicates.
+
+.. _tcp-transport:
+
+TCP Transport
+-------------
+
+The TCP transport (``tcp``) uses `TCP <https://en.wikipedia.org/wiki/Transmission_Control_Protocol>`__ as the transmission mechanism.
+It's the default transport normally.
+It's :ref:`reliable <qos-reliability>`, regardless of configuration.
+
+.. important::
+
+  Library filename: ``OpenDDS_Tcp``
+
+  MPC base project name: :ghfile:`\`\`dcps_tcp\`\` <MPC/config/dcps_tcp.mpb>`
+
+  CMake target Name: :cmake:tgt:`OpenDDS::Tcp`
+
+  :ref:`Initialization header <plugins>`: :ghfile:`dds/DCPS/transport/tcp/Tcp.h`
+
+  :cfg:prop:`[transport]transport_type`: :cfg:val:`tcp <[transport]transport_type=tcp>`
+
+  Configuration: :ref:`tcp-transport-config`
+
+.. _rtps-udp-transport:
+
+RTPS/UDP Transport
+------------------
+
+The RTPS/UDP transport (``rtps_udp``) uses the UDP-based transport described in :ref:`spec-rtps` as the transmission mechanism.
+It's interoperable with other DDS implementations when used with :ref:`rtps-disc`.
+It's the default transport when :doc:`safety_profile` is being used.
+It supports :ref:`reliability <qos-reliability>`.
+
+.. important::
+
+  Library filename: ``OpenDDS_Rtps_Udp``
+
+  MPC base project name: :ghfile:`\`\`dcps_rtps_udp\`\` <MPC/config/dcps_rtps_udp.mpb>`
+
+  CMake target Name: :cmake:tgt:`OpenDDS::Rtps_Udp`
+
+  :ref:`Initialization header <plugins>`: :ghfile:`dds/DCPS/transport/rtps_udp/RtpsUdp.h`
+
+  :cfg:prop:`[transport]transport_type`: :cfg:val:`rtps_udp <[transport]transport_type=rtps_udp>`
+
+  Configuration: :ref:`rtps-udp-transport-config`
+
+.. seealso::
+
+  :doc:`dds_security`
+    For security capabilities that are possible when using :ref:`rtps-disc` and the :ref:`rtps-udp-transport`
+
+  :doc:`internet_enabled_rtps`
+    For using :ref:`rtps-disc` and the :ref:`rtps-udp-transport` over the internet
+
+.. _udp-transport:
+
+UDP Transport
+-------------
+
+The UDP transport (``udp``) uses `unicasted <https://en.wikipedia.org/wiki/Unicast>`__ `UDP <https://en.wikipedia.org/wiki/User_Datagram_Protocol>`__ as the transmission mechanism.
+It doesn't support :ref:`reliability <qos-reliability>` at all.
+
+.. important::
+
+  Library filename: ``OpenDDS_Udp``
+
+  MPC base project name: :ghfile:`\`\`dcps_udp\`\` <MPC/config/dcps_udp.mpb>`
+
+  CMake target Name: :cmake:tgt:`OpenDDS::Udp`
+
+  :ref:`Initialization header <plugins>`: :ghfile:`dds/DCPS/transport/udp/Udp.h`
+
+  :cfg:prop:`[transport]transport_type`: :cfg:val:`udp <[transport]transport_type=udp>`
+
+  Configuration: :ref:`udp-transport-config`
+
+.. _multicast-transport:
+
+Multicast Transport
+-------------------
+
+The multicast transport (``mutlicast``) uses `multicasted <https://en.wikipedia.org/wiki/Multicast>`__ `UDP <https://en.wikipedia.org/wiki/User_Datagram_Protocol>`__ as the transmission mechanism.
+It supports :ref:`reliability <qos-reliability>`.
+
+.. important::
+
+  Library filename: ``OpenDDS_Multicast``
+
+  MPC base project name: :ghfile:`\`\`dcps_multicast\`\` <MPC/config/dcps_multicast.mpb>`
+
+  CMake target Name: :cmake:tgt:`OpenDDS::Multicast`
+
+  :ref:`Initialization header <plugins>`: :ghfile:`dds/DCPS/transport/multicast/Multicast.h`
+
+  :cfg:prop:`[transport]transport_type`: :cfg:val:`multicast <[transport]transport_type=multicast>`
+
+  Configuration: :ref:`multicast-transport-config`
+
+.. _shmem-transport:
+
+Shared Memory Transport
+-----------------------
+
+.. note::
+
+  This transport is not currently supported on macOS because `macOS lacks support for POSIX unnamed semaphores <https://stackoverflow.com/questions/27736618>`__.
+
+The shared memory transport (``shmem``) uses `shared memory <https://en.wikipedia.org/wiki/Shared_memory>`__ on the local host as the transmission mechanism.
+It's :ref:`reliable <qos-reliability>`, regardless of configuration.
+
+.. important::
+
+  Library filename: ``OpenDDS_Shmem``
+
+  MPC base project name: :ghfile:`\`\`dcps_shmem\`\` <MPC/config/dcps_shmem.mpb>`
+
+  CMake target Name: :cmake:tgt:`OpenDDS::Shmem`
+
+  :ref:`Initialization header <plugins>`: :ghfile:`dds/DCPS/transport/shmem/Shmem.h`
+
+  :cfg:prop:`[transport]transport_type`: :cfg:val:`shmem <[transport]transport_type=shmem>`
+
+  Configuration: :ref:`shmem-transport-config`
+
+.. _introduction--custom-transports:
+
+Custom Transports
+-----------------
+
+The transport framework enables application developers to implement their own customized transports.
 Implementing a custom transport involves specializing a number of classes defined in the transport framework.
 The ``udp`` transport provides a good foundation developers may use when creating their own implementation.
 See the :ghfile:`dds/DCPS/transport/udp/` directory for details.
 
-.. _introduction--dds-discovery:
+.. _discovery:
 
 Discovery
 =========
@@ -369,38 +545,75 @@ Discovery
 ..
     Sect<1.2.3.3>
 
-DDS applications must discover one another via some central agent or through some distributed scheme (see :ref:`dds-introduction--discovery`).
-OpenDDS provides three options for discovery:  :ref:`introduction--centralized-discovery-with-dcpsinforepo`, :ref:`introduction--peer-to-peer-discovery-with-rtps`, and :ref:`introduction--static-discovery`.
+DDS applications must :ref:`discover <dds-introduction--discovery>` one another via some central agent or through some distributed scheme.
+OpenDDS provides three options for discovery: :ref:`inforepo-disc`, :ref:`rtps-disc`, and :ref:`static-disc`.
 The choice of discovery is independent of the choice of transport in most cases.
-For example, one can use the tcp transport with RTPS Discovery.
-Two notable exceptions are:
+For example, one can use the :ref:`tcp-transport` with :ref:`rtps-disc`.
+Notable exceptions are:
 
-#. If using DDS Security, RTPS must be used for both the transport and discovery.
-#. RTPS must be used for the transport when using Static Discovery.
+#. :doc:`dds_security` requires using both :ref:`rtps-disc` and the :ref:`rtps-udp-transport`.
+#. To get the most out of :doc:`xtypes`, it's recommended to both :ref:`rtps-disc` and the :ref:`rtps-udp-transport`
+#. :ref:`static-disc` requires :ref:`rtps-udp-transport`.
 
 Like transports, additional discovery implementations can be created and plugged in.
 
 .. _introduction--centralized-discovery-with-dcpsinforepo:
+.. _inforepo-disc:
 
-DCPSInfoRepo
-------------
+InfoRepo Discovery
+------------------
 
 ..
     Sect<1.2.3.3.1>
 
-.. figure:: images/inforepo_discovery.png
+.. note::
 
-   Centralized Discovery with DCPSInfoRepo
+  InfoRepo discovery is scheduled for deprecation with OpenDDS 4 and scheduled for removal with OpenDDS 5.
 
 OpenDDS contains a standalone CORBA service called :ref:`inforepo`.
 An instance of the DCPSInfoRepo is shared by all the participants in a domain and constitutes a centralized approach to discovery.
 Each OpenDDS application connects to the DCPSInfoRepo and creates records for its participants, topics, data writers, and data readers.
 As records for data writers and data readers are created, they are matched against the existing set of records.
 When matches are found, the DCPSInfoRepo invokes the participant to perform the necessary associations.
+
+.. svgbob::
+
+          .---------------------------.  .---------------------------.
+          |  "Publisher Application"  |  |  "Subscriber Application" |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |      "DataWriter"     | |  | |      "DataReader"     | |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |      "Publisher"      | |  | |      "Subscriber"     | |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |  "DomainParticipant"  | |  | |  "DomainParticipant"  | |
+          | +-----------+-----------+ |  | +-----------+-----------+ |
+          | |"InfoRepo" |"Transport"| |  | |"Transport"|"InfoRepo" | |
+          | |"Discovery"|           | |  | |           |"Discovery"| |
+          | +-----o-----+-----o-----+ |  | +-----------+-----------+ |
+          |       |           |       |  |       ^           ^       |
+          `-------|-----------|-------'  `-------|-----------|-------'
+                  |           +------------------+           |
+  "1. Publisher"  |       "3. Publisher Writes Samples"      |2. Subscriber
+  "   Advertises" |                                          |   Discovers
+  "   Topic"      |        .------------------------.        |   Topic
+                  +------->+ "InfoRepo Application" +--------+
+                           `------------------------'
+
+.. important::
+
+  Library filename: ``OpenDDS_InfoRepoDiscovery``
+
+  MPC base project name: :ghfile:`\`\`dcps_inforepodiscovery\`\` <MPC/config/dcps_inforepodiscovery.mpb>`
+
+  CMake target Name: :cmake:tgt:`OpenDDS::InfoRepoDiscovery`
+
+  :ref:`Initialization header <plugins>`: :ghfile:`dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h`
+
+  Configuration: :ref:`inforepo-disc-config`
+
 The DCPSInfoRepo is not involved in data propagation; its role is limited in scope to OpenDDS applications discovering one another.
 The DCPSInfoRepo populates the :ref:`introduction--built-in-topics` for a participant if configured to do so.
 OpenDDS creates its own ORB and a separate thread to run that ORB when using DCPSInfoRepo discovery.
-See :ref:`run_time_configuration--configuring-applications-for-dcpsinforepo` for details on how applications can be configured to use the DCPSInfoRepo.
 
 Application developers are free to run multiple information repositories with each managing their own non-overlapping sets of DCPS domains.
 
@@ -409,7 +622,13 @@ This is known as *Repository Federation*.
 In order for individual repositories to participate in a federation, each one must specify its own federation identifier value (a 32-bit numeric value) upon start-up.
 See :ref:`the_dcps_information_repository--repository-federation` for further information about repository federations.
 
+.. seealso::
+
+  :ref:`inforepo`
+    Documentation on the ``DCPSInfoRepo`` program
+
 .. _introduction--peer-to-peer-discovery-with-rtps:
+.. _rtps-disc:
 
 RTPS Discovery
 --------------
@@ -417,21 +636,50 @@ RTPS Discovery
 ..
     Sect<1.2.3.3.2>
 
-.. figure:: images/rtps_discovery.png
+RTPS discovery is a peer-to-peer discovery mechanism standardized as part of the :omgspec:`RTPS spec <rtps:8.5 Discovery Module>`.
+Other DDS implementations can interoperate with OpenDDS when RTPS discovery is used with the :ref:`rtps-udp-transport`.
 
-  Peer-to-peer Discovery with RTPS
+.. svgbob::
 
-RTPS Discovery is an implementation of the OMG DDSI-RTPS ``(formal/2014-09-01)`` specification (see :omgspec:`rtps:8.5 Discovery Module`).
+          .---------------------------.  .---------------------------.
+          |  "Publisher Application"  |  |  "Subscriber Application" |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |      "DataWriter"     | |  | |      "DataReader"     | |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |      "Publisher"      | |  | |      "Subscriber"     | |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |  "DomainParticipant"  | |  | |  "DomainParticipant"  | |
+          | +-----------+-----------+ |  | +-----------+-----------+ |
+          | |"RTPS"     |"Transport"| |  | |"Transport"|"RTPS"     | |
+          | |"Discovery"|           | |  | |           |"Discovery"| |
+          | +-----o-----+-----o-----+ |  | +-----------+-----------+ |
+          |       |           |       |  |       ^           ^       |
+          `-------|-----------|-------'  `-------|-----------|-------'
+                  |           +------------------+           |
+  "1. Publisher"  |       "3. Publisher Writes Samples"      |2. Subscriber
+  "   Advertises" |                                          |   Discovers
+  "   Topic"      |                                          |   Topic
+                  |         "RTPS SPDP Multicast Group"      |
+          ========#==========================================#========
+
+.. important::
+
+  Library filename: ``OpenDDS_Rtps``
+
+  MPC base project name: :ghfile:`\`\`dcps_rtps\`\` <MPC/config/dcps_rtps.mpb>`
+
+  CMake target Name: :cmake:tgt:`OpenDDS::Rtps`
+
+  :ref:`Initialization header <plugins>`: :ghfile:`dds/DCPS/RTPS/RtpsDiscovery.h`
+
+  Configuration: :ref:`rtps-disc-config`
+
 RTPS Discovery uses the RTPS protocol to advertise and discover participants, data writers, and data readers.
-RTPS Discovery uses multicast to discover participants and *builtin endpoints* (not to be confused with Builtin Topics).
+RTPS Discovery uses multicast to discover participants and *built-in endpoints* (not to be confused with :term:`built-in topics`) each other without a centralized broker such as InfoRepo.
 This part of RTPS discovery is called the Simple Participant Discovery Protocol (SPDP).
-After the builtin endpoints are discovered and associated, they exchange information about data writers and data readers which are called *endpoints*.
+After the built-in endpoints are discovered and associated, they exchange information about data writers and data readers which are called *endpoints*.
 This part of RTPS discovery is called Simple Endpoint Discovery Protocol (SEDP).
 RTPS Discovery is a peer-to-peer approach to discovery as each participant interacts directly with other participants to accomplish discovery.
-RTPS is interoperable and supports :ref:`dds_security`.
-RTPS discovery populates the Builtin Topics for a participant.
-See :ref:`run_time_configuration--configuring-for-ddsi-rtps-discovery` for details on how applications can be configured to use RTPS Discovery.
-See also :ref:`run_time_configuration--rtps-udp-transport-configuration-options` as the parameters for configuring an RTPS transport also apply to SEDP.
 
 The following are additional implementation limits that developers need to take into consideration when developing and deploying applications that use RTPS discovery:
 
@@ -440,20 +688,60 @@ The following are additional implementation limits that developers need to take 
 
 #. Topic names and type identifiers are limited to 256 characters.
 
-#. OpenDDS's native multicast transport does not work with RTPS Discovery due to the way GUIDs are assigned (a warning will be issued if this is attempted).
+#. The :ref:`multicast-transport` does not work with RTPS Discovery due to the way GUIDs are assigned (a warning will be issued if this is attempted).
+
+.. seealso::
+
+  :doc:`xtypes`
+    For expanded type-system capabilities that are possible when using RTPS discovery
+
+  :doc:`dds_security`
+    For security capabilities that are possible when using :ref:`rtps-disc` and the :ref:`rtps-udp-transport`
+
+  :doc:`internet_enabled_rtps`
+    For using :ref:`rtps-disc` and the :ref:`rtps-udp-transport` over the internet
 
 .. _introduction--static-discovery:
+.. _static-disc:
 
 Static Discovery
 ----------------
 
-In Static Discovery, each particpant starts with a database containing identifiers, QoS settings, and network locators for all participants, topics, data writers, data readers.
-The RTPS transport must be used with Static Discovery.
+In Static Discovery, each participant starts with a database containing identifiers, QoS settings, and network locators for all participants, topics, data writers, data readers.
+
+.. svgbob::
+
+          .---------------------------.  .---------------------------.
+          |  "Publisher Application"  |  |  "Subscriber Application" |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |      "DataWriter"     | |  | |      "DataReader"     | |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |      "Publisher"      | |  | |      "Subscriber"     | |
+          | +-----------------------+ |  | +-----------------------+ |
+          | |  "DomainParticipant"  | |  | |  "DomainParticipant"  | |
+          | +-----------+-----------+ |  | +-----------+-----------+ |
+          | |"Static"   |"RTPS UDP" | |  | |"RTPS UDP" |"Static"   | |
+          | |"Discovery"|"Transport"| |  | |"Transport"|"Discovery"| |
+          | +-----------+-----o-----+ |  | +-----------+-----------+ |
+          |                   |       |  |       ^                   |
+          `-------------------|-------'  `-------|-------------------'
+                              +------------------+
+                          "2. Publisher Writes Samples"
+                                                        1. Subscriber
+                                                           Assumes Topic
+
+.. important::
+
+  The :ref:`rtps-udp-transport` is the only transport that can be used with Static Discovery.
+
+  Static Discovery is built-in to the core Dcps library, so it doesn't require linking a separate library or including an initialization header.
+
+  Configuration: :ref:`static-disc-config`
+
 When an application creates a data writer or data reader, Static Discovery causes it to send out periodic announcements.
 Upon receiving one of these announcements, Static Discovery consults its local database of entities to look up the details necessary for matching and matches it against local entities.
-See :ref:`run_time_configuration--configuring-for-static-discovery` for details on how applications can be configured to use Static Discovery.
 
-Static Discovery requires that the :ref:`quality_of_service--user-data` QoS be configured for each participant, data writer, and data reader.
+Static Discovery requires that the :ref:`qos-user-data` be configured for each participant, data writer, and data reader.
 This user data must contain the identifier of the entity that is being created.
 Thus, the user data QoS is not available for general use when using Static Discovery.
 Static Discovery also requires that the network locators for all entities be determined up front by configuring the transport with the necessary networking information.
@@ -468,7 +756,7 @@ Threading
 
 OpenDDS creates its own threads for handling I/O, timers, asynchronous jobs, and cleanup tasks.
 These threads are collectively called *service threads*.
-Applications may receive a callback from these threads via :ref:`introduction--listeners` (see :ref:`conditions_and_listeners--listeners`).
+Applications may receive a callback from these threads via :ref:`conditions_and_listeners--listeners`.
 
 When publishing a sample, OpenDDS normally attempts to send the sample to any connected subscribers using the calling thread.
 If the send call would block, then the sample may be queued for sending on a separate service thread.
@@ -488,3 +776,11 @@ Configuration
 OpenDDS includes a file-based configuration framework for configuring both global items such as debug level, memory allocation, and discovery, as well as transport implementation details for publishers and subscribers.
 Configuration can also be achieved directly in code, however, it is recommended that configuration be externalized for ease of maintenance and reduction in runtime errors.
 The complete set of configuration options are described in :ref:`config`.
+
+.. rubric:: Footnotes
+
+.. [#plugins-static-disc] :ref:`static-disc` is built-in to the core Dcps library, so it doesn't require linking a separate library or including an initialization header.
+
+.. [#plugins-sec] Within DDS Security there is :ref:`a concept of plugins <dds_security--architecture-of-the-dds-security-specification>` that is mostly separate from the plugins described here.
+    They are for implementing specific security features such as different encryption methods.
+    The built-in security library is a default implementation of these, but a custom OpenDDS security plugin could implement one or more of these DDS Security plugins.

@@ -11,6 +11,8 @@
 #include "TimeDuration.h"
 #include "TimePoint_T.h"
 
+#include <dds/DdsDcpsInfoUtilsC.h>
+
 #include <ace/Monotonic_Time_Policy.h>
 #include <ace/Time_Policy.h>
 
@@ -29,7 +31,7 @@ namespace DCPS {
  */
 ///@{
 typedef ACE_System_Time_Policy SystemClock;
-typedef TimePoint_T<SystemClock> SystemTimePoint;
+typedef TimePoint_T<SystemClock, DDS::Time_t> SystemTimePoint;
 ///@}
 
 /**
@@ -48,7 +50,7 @@ typedef ACE_Monotonic_Time_Policy MonotonicClock;
 #else
 typedef SystemClock MonotonicClock;
 #endif
-typedef TimePoint_T<MonotonicClock> MonotonicTimePoint;
+typedef TimePoint_T<MonotonicClock, MonotonicTime_t> MonotonicTimePoint;
 ///@}
 
 } // namespace DCPS

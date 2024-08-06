@@ -242,7 +242,8 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_StringList)
 enum MyConfigStoreEnum {
   ALPHA,
   BETA,
-  GAMMA
+  GAMMA,
+  DELTA
 };
 
 TEST(dds_DCPS_ConfigStoreImpl, set_get_Enum)
@@ -251,14 +252,31 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_Enum)
     {
       { ALPHA, "alpha" },
       { BETA, "beta" },
-      { GAMMA, "gamma" },
-      { static_cast<MyConfigStoreEnum>(0), 0 }
+      { GAMMA, "gamma" }
     };
 
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
   ConfigStoreImpl store(topic);
+  // Get the default if there is no entry.
   EXPECT_EQ(store.get("key", GAMMA, kinds), GAMMA);
-  store.set("key", "beta");
+
+  // Default not in helper works.
+  EXPECT_EQ(store.get("key", DELTA, kinds), DELTA);
+
+  // Setting with enum works.
+  store.set("key", ALPHA, kinds);
+  EXPECT_EQ(store.get("key", GAMMA, kinds), ALPHA);
+
+  // Setting with string works.
+  store.set("key", "beta", kinds);
+  EXPECT_EQ(store.get("key", GAMMA, kinds), BETA);
+
+  // Setting with enum that is not in helper does nothing.
+  store.set("key", DELTA, kinds);
+  EXPECT_EQ(store.get("key", GAMMA, kinds), BETA);
+
+  // Setting with enum that is not in helper does nothing.
+  store.set("key", "delta", kinds);
   EXPECT_EQ(store.get("key", GAMMA, kinds), BETA);
 }
 
@@ -522,11 +540,11 @@ TEST(dds_DCPS_ConfigStoreImpl, process_section)
 
   EXPECT_CALL(*listener.get(), on_data_available(reader)).Times(3);
 
-  process_section(config_store, reader, listener, "MYPREFIX", config, config.root_section(), "my file name", false);
+  process_section(config_store, reader, listener, "MYPREFIX", config, config.root_section(), false);
 
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION", "default"), "@my_section");
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_MYKEY", "default"), "myvalue");
-  EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_ANOTHERKEY", "default"), "my file name");
+  EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_ANOTHERKEY", "default"), "$file");
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_THIRDKEY", "default"), "firstvalue");
 }
 
@@ -543,10 +561,10 @@ TEST(dds_DCPS_ConfigStoreImpl, process_section_allow_overwrite)
   config.set_string_value(section_key, ACE_TEXT("anotherkey"), ACE_TEXT("$file"));
   config.set_string_value(section_key, ACE_TEXT("thirdkey"), ACE_TEXT("secondvalue"));
 
-  process_section(config_store, ConfigReader_rch(), ConfigReaderListener_rch(), "MYPREFIX", config, config.root_section(), "my file name", true);
+  process_section(config_store, ConfigReader_rch(), ConfigReaderListener_rch(), "MYPREFIX", config, config.root_section(), true);
 
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_MYKEY", "default"), "myvalue");
-  EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_ANOTHERKEY", "default"), "my file name");
+  EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_ANOTHERKEY", "default"), "$file");
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_THIRDKEY", "default"), "secondvalue");
 }
 
@@ -584,13 +602,33 @@ TEST(dds_DCPS_ConfigStoreImpl, get_section_values)
 
   EXPECT_CALL(*listener.get(), on_data_available(reader)).Times(4);
 
-  process_section(config_store, reader, listener, "MYPREFIX", config, config.root_section(), "my file name", false);
+  process_section(config_store, reader, listener, "MYPREFIX", config, config.root_section(), false);
 
   ConfigStoreImpl::StringMap expected_sm;
   expected_sm["MYKEY"] = "myvalue";
-  expected_sm["ANOTHERKEY"] = "my file name";
+  expected_sm["ANOTHERKEY"] = "$file";
   expected_sm["THIRDKEY"] = "secondvalue";
 
   const ConfigStoreImpl::StringMap sm = config_store.get_section_values("MYPREFIX_MY_SECTION");
   EXPECT_EQ(sm, expected_sm);
+}
+
+TEST(dds_DCPS_ConfigStoreImpl, delete_section)
+{
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl config_store(topic);
+  config_store.set("MYPREFIX_MY_SECTION", "@my_section");
+  config_store.set("MYPREFIX_MY_SECTION_KEY", "not a section");
+  config_store.set("MYPREFIX_MY_SECTION2", "@my_section2");
+  config_store.set("MYPREFIX_MY_SECTION2_KEY", "not a section");
+  config_store.set("NOTMYPREFIX_MY_SECTION2", "@my_section2");
+  config_store.set("NOTMYPREFIX_MY_SECTION2_KEY", "not a section");
+
+  config_store.unset_section("MYPREFIX");
+  EXPECT_FALSE(config_store.has("MYPREFIX_MY_SECTION"));
+  EXPECT_FALSE(config_store.has("MYPREFIX_MY_SECTION_KEY"));
+  EXPECT_FALSE(config_store.has("MYPREFIX_MY_SECTION2"));
+  EXPECT_FALSE(config_store.has("MYPREFIX_MY_SECTION2_KEY"));
+  EXPECT_TRUE(config_store.has("NOTMYPREFIX_MY_SECTION2"));
+  EXPECT_TRUE(config_store.has("NOTMYPREFIX_MY_SECTION2_KEY"));
 }

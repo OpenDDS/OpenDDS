@@ -21,10 +21,7 @@ class OpenDDS_Shmem_Export ShmemInst : public TransportInst {
 public:
   static const TimeDuration default_association_resend_period;
 
-  virtual int load(ACE_Configuration_Heap& cf,
-                   ACE_Configuration_Section_Key& sect);
-
-  virtual OPENDDS_STRING dump_to_str() const;
+  virtual OPENDDS_STRING dump_to_str(DDS::DomainId_t domain) const;
 
   /// Size (in bytes) of the single shared-memory pool allocated by this
   /// transport instance.  Defaults to 16 megabytes.
@@ -41,7 +38,9 @@ public:
 
   bool is_reliable() const { return true; }
 
-  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const;
+  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info,
+                                  ConnectionInfoFlags flags,
+                                  DDS::DomainId_t domain) const;
 
   void hostname(const String& h);
   String hostname() const;
@@ -57,7 +56,7 @@ private:
   friend RcHandle<T> OpenDDS::DCPS::make_rch(U const&);
   explicit ShmemInst(const std::string& name);
 
-  TransportImpl_rch new_impl();
+  TransportImpl_rch new_impl(DDS::DomainId_t domain);
   std::string poolname_;
 };
 

@@ -8,11 +8,7 @@
 
 #include <ace/config-lite.h>
 
-#ifdef __has_include
-#  if __has_include(<dds/DCPS/config.h>)
-#    include <dds/DCPS/config.h>
-#  endif
-#endif
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <dds/Versioned_Namespace.h>
 
@@ -97,14 +93,18 @@
 #  define OPENDDS_GCC_HAS_DIAG_PUSHPOP 0
 #endif
 
-#ifndef OPENDDS_USES_AUTO_STATIC_INCLUDES
-#  define OPENDDS_USES_AUTO_STATIC_INCLUDES 0
+#ifndef OPENDDS_CONFIG_AUTO_STATIC_INCLUDES
+#  define OPENDDS_CONFIG_AUTO_STATIC_INCLUDES 0
 #endif
 
-#if !OPENDDS_USES_AUTO_STATIC_INCLUDES && defined(ACE_AS_STATIC_LIBS)
+#if !OPENDDS_CONFIG_AUTO_STATIC_INCLUDES && defined(ACE_AS_STATIC_LIBS)
 #  define OPENDDS_DO_MANUAL_STATIC_INCLUDES 1
 #else
 #  define OPENDDS_DO_MANUAL_STATIC_INCLUDES 0
+#endif
+
+#ifndef OPENDDS_CONFIG_BOOTTIME_TIMERS
+#  define OPENDDS_CONFIG_BOOTTIME_TIMERS 0
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

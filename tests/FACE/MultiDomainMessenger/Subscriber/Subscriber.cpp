@@ -91,24 +91,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     FACE::TS::Receive_Message(connId1, timeout, txn, msg, max_msg_size1, status);
     if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
     ACE_DEBUG((LM_INFO, "%C\t%d\n", msg.text.in(), msg.count));
-#ifdef ACE_HAS_CDR_FIXED
     if (msg.deci != FACE::Fixed("987.654")) {
       const FACE::String_var decimal = msg.deci.to_string();
       ACE_ERROR((LM_ERROR, "ERROR: invalid fixed data %C\n", decimal.in()));
       testPassed = false;
     }
-#endif
     ACE_DEBUG((LM_INFO, "Subscriber2: about to Receive_Message()\n"));
     FACE::TS::Receive_Message(connId2, timeout, txn, msg, max_msg_size2, status);
     if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
     ACE_DEBUG((LM_INFO, "%C\t%d\n", msg.text.in(), msg.count));
-#ifdef ACE_HAS_CDR_FIXED
     if (msg.deci != FACE::Fixed("987.654")) {
       const FACE::String_var decimal = msg.deci.to_string();
       ACE_ERROR((LM_ERROR, "ERROR: invalid fixed data %C\n", decimal.in()));
       testPassed = false;
     }
-#endif
   }
 
   FACE::TRANSPORT_CONNECTION_STATUS_TYPE connectionStatus;

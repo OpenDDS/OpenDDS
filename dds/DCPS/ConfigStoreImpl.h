@@ -24,8 +24,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-const char OPENDDS_CONFIG_DEBUG_LOGGING[] = "OPENDDS_CONFIG_DEBUG_LOGGING";
-const bool OPENDDS_CONFIG_DEBUG_LOGGING_default = false;
+const char CONFIG_DEBUG_LOGGING[] = "CONFIG_DEBUG_LOGGING";
+const bool CONFIG_DEBUG_LOGGING_default = false;
 
 OpenDDS_Dcps_Export
 OPENDDS_VECTOR(String) split(const String& str,
@@ -166,15 +166,14 @@ public:
   StringList get(const char* key,
                  const StringList& value) const;
 
-  template<typename T>
+  template<typename T, size_t count>
   T get(const char* key,
         T value,
-        const EnumList<T> decoder[])
+        const EnumList<T> (&decoder)[count])
   {
     bool found = false;
-    // Encode the default.
     String value_as_string;
-    for (size_t idx = 0; decoder[idx].name; ++idx) {
+    for (size_t idx = 0; idx < count; ++idx) {
       if (decoder[idx].value == value) {
         value_as_string = decoder[idx].name;
         found = true;
@@ -184,12 +183,12 @@ public:
 
     if (!found && log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: ConfigStoreImpl::get: ")
-                 ACE_TEXT("failed to convert default value to string\n")));
+                 "(%P|%t) WARNING: ConfigStoreImpl::get: "
+                 "failed to convert default value to string\n"));
     }
 
     const String actual = get(key, value_as_string);
-    for (size_t idx = 0; decoder[idx].name; ++idx) {
+    for (size_t idx = 0; idx < count; ++idx) {
       if (decoder[idx].name == actual) {
         return decoder[idx].value;
       }
@@ -197,12 +196,64 @@ public:
 
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: ConfigStoreImpl::get: ")
-                 ACE_TEXT("failed to encode (%C) to enumerated value, defaulting to (%C)\n"),
-                 actual.c_str(), value_as_string.c_str()));
+                 "(%P|%t) WARNING: ConfigStoreImpl::get: "
+                 "for %C, failed to encode (%C) to enumerated value, defaulting to (%C)\n",
+                 key, actual.c_str(), value_as_string.c_str()));
     }
 
     return value;
+  }
+
+  template<typename T, size_t count>
+  void set(const char* key,
+           T value,
+           const EnumList<T> (&decoder)[count])
+  {
+    bool found = false;
+    String value_as_string;
+    for (size_t idx = 0; idx < count; ++idx) {
+      if (decoder[idx].value == value) {
+        value_as_string = decoder[idx].name;
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING,
+                   "(%P|%t) WARNING: ConfigStoreImpl::set: "
+                   "for %C, failed to convert enum value to string\n",
+                   key));
+      }
+      return;
+    }
+
+    set(key, value_as_string);
+  }
+
+  template<typename T, size_t count>
+  void set(const char* key,
+           const String& value,
+           const EnumList<T> (&decoder)[count])
+  {
+    bool found = false;
+    // Sanity check.
+    String value_as_string;
+    for (size_t idx = 0; idx < count; ++idx) {
+      if (value == decoder[idx].name) {
+        set(key, value);
+        found = true;
+        break;
+      }
+    }
+
+    if (!found && log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING,
+                 "(%P|%t) WARNING: ConfigStoreImpl::set: "
+                 "for %C, %C is not a valid enum value\n",
+                 key, value.c_str()));
+    }
   }
 
   void set(const char* key,
@@ -238,6 +289,9 @@ public:
   typedef OPENDDS_MAP(String, String) StringMap;
   StringMap get_section_values(const String& prefix) const;
 
+  /// Remove the section key and all section values.
+  void unset_section(const String& prefix) const;
+
   static DDS::DataWriterQos datawriter_qos();
   static DDS::DataReaderQos datareader_qos();
 
@@ -261,7 +315,6 @@ process_section(ConfigStoreImpl& config_store,
                 const String& key_prefix,
                 ACE_Configuration_Heap& config,
                 const ACE_Configuration_Section_Key& base,
-                const String& filename,
                 bool allow_overwrite);
 
 } // namespace DCPS

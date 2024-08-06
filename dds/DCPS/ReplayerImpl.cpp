@@ -102,7 +102,7 @@ ReplayerImpl::cleanup()
 {
 
   //     // Unregister all registered instances prior to deletion.
-  //     // this->unregister_instances(SystemTimePoint::now().to_dds_time());
+  //     // this->unregister_instances(SystemTimePoint::now().to_idl_struct());
   //
   //     // CORBA::String_var topic_name = this->get_Atopic_name();
   {
@@ -348,7 +348,7 @@ ReplayerImpl::enable()
 
   try {
     this->enable_transport(reliable,
-                           this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
+                           this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS, participant_servant_);
 
   } catch (const Transport::Exception&) {
     ACE_ERROR((LM_ERROR,
@@ -430,7 +430,7 @@ ReplayerImpl::add_association(const ReaderAssociation& reader,
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
     reader_info_.insert(std::make_pair(reader.readerId,
-                                       ReaderInfo(TheServiceParticipant->publisher_content_filter() ? reader.filterExpression : "",
+                                       ReaderInfo(TheServiceParticipant->publisher_content_filter() ? reader.filterExpression.in() : "",
                                                   reader.exprParams, participant_servant_,
                                                   reader.readerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS)));
   }
@@ -902,12 +902,12 @@ ReplayerImpl::write (const RawDataSample*   samples,
     list.enqueue_tail(element);
     Message_Block_Ptr temp;
     Message_Block_Ptr sample(samples[i].sample_->duplicate());
-    DDS::ReturnCode_t ret = create_sample_data_message(move(sample),
+    DDS::ReturnCode_t ret = create_sample_data_message(OPENDDS_MOVE_NS::move(sample),
                                                        element->get_header(),
                                                        temp,
                                                        samples[i].source_timestamp_,
                                                        false);
-    element->set_sample(move(temp));
+    element->set_sample(OPENDDS_MOVE_NS::move(temp));
     if (reader_ih_ptr) {
       element->set_num_subs(1);
       element->set_sub_id(0, repo_id);

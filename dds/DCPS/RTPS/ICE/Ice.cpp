@@ -4,11 +4,15 @@
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
-#ifdef OPENDDS_SECURITY
+
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 
 #include "Ice.h"
 
 #include "AgentImpl.h"
+
 #include "dds/DCPS/SafetyProfileStreams.h"
 #include "dds/DCPS/debug.h"
 #include <dds/DCPS/LogAddr.h>
@@ -18,136 +22,136 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace ICE {
 
-const char OPENDDS_ICE_TA[] = "OPENDDS_ICE_TA";
-const char OPENDDS_ICE_CONNECTIVITY_CHECK_TTL[] = "OPENDDS_ICE_CONNECTIVITY_CHECK_TTL";
-const char OPENDDS_ICE_CHECKLIST_PERIOD[] = "OPENDDS_ICE_CHECKLIST_PERIOD";
-const char OPENDDS_ICE_INDICATION_PERIOD[] = "OPENDDS_ICE_INDICATION_PERIOD";
-const char OPENDDS_ICE_NOMINATED_TTL[] = "OPENDDS_ICE_NOMINATED_TTL";
-const char OPENDDS_ICE_SERVER_REFLEXIVE_ADDRESS_PERIOD[] = "OPENDDS_ICE_SERVER_REFLEXIVE_ADDRESS_PERIOD";
-const char OPENDDS_ICE_SERVER_REFLEXIVE_INDICATION_COUNT[] = "OPENDDS_ICE_SERVER_REFLEXIVE_INDICATION_COUNT";
-const char OPENDDS_ICE_DEFERRED_TRIGGERED_CHECK_TTL[] = "OPENDDS_ICE_DEFERRED_TRIGGERED_CHECK_TTL";
-const char OPENDDS_ICE_CHANGE_PASSWORD_PERIOD[] = "OPENDDS_ICE_CHANGE_PASSWORD_PERIOD";
+const char ICE_TA[] = "ICE_TA";
+const char ICE_CONNECTIVITY_CHECK_TTL[] = "ICE_CONNECTIVITY_CHECK_TTL";
+const char ICE_CHECKLIST_PERIOD[] = "ICE_CHECKLIST_PERIOD";
+const char ICE_INDICATION_PERIOD[] = "ICE_INDICATION_PERIOD";
+const char ICE_NOMINATED_TTL[] = "ICE_NOMINATED_TTL";
+const char ICE_SERVER_REFLEXIVE_ADDRESS_PERIOD[] = "ICE_SERVER_REFLEXIVE_ADDRESS_PERIOD";
+const char ICE_SERVER_REFLEXIVE_INDICATION_COUNT[] = "ICE_SERVER_REFLEXIVE_INDICATION_COUNT";
+const char ICE_DEFERRED_TRIGGERED_CHECK_TTL[] = "ICE_DEFERRED_TRIGGERED_CHECK_TTL";
+const char ICE_CHANGE_PASSWORD_PERIOD[] = "ICE_CHANGE_PASSWORD_PERIOD";
 
 void Configuration::T_a(const DCPS::TimeDuration& x)
 {
-  TheServiceParticipant->config_store()->set(OPENDDS_ICE_TA,
+  TheServiceParticipant->config_store()->set(ICE_TA,
                                              x,
                                              DCPS::ConfigStoreImpl::Format_IntegerMilliseconds);
 }
 
 DCPS::TimeDuration Configuration::T_a() const
 {
-  return TheServiceParticipant->config_store()->get(OPENDDS_ICE_TA,
+  return TheServiceParticipant->config_store()->get(ICE_TA,
                                                     DCPS::TimeDuration(0, 50000),
                                                     DCPS::ConfigStoreImpl::Format_IntegerMilliseconds);
 }
 
 void Configuration::connectivity_check_ttl(const DCPS::TimeDuration& x)
 {
-  TheServiceParticipant->config_store()->set(OPENDDS_ICE_CONNECTIVITY_CHECK_TTL,
+  TheServiceParticipant->config_store()->set(ICE_CONNECTIVITY_CHECK_TTL,
                                              x,
                                              DCPS::ConfigStoreImpl::Format_IntegerSeconds);
 }
 
 DCPS::TimeDuration Configuration::connectivity_check_ttl() const
 {
-  return TheServiceParticipant->config_store()->get(OPENDDS_ICE_CONNECTIVITY_CHECK_TTL,
+  return TheServiceParticipant->config_store()->get(ICE_CONNECTIVITY_CHECK_TTL,
                                                     DCPS::TimeDuration(5 * 60),
                                                     DCPS::ConfigStoreImpl::Format_IntegerSeconds);
 }
 
 void Configuration::checklist_period(const DCPS::TimeDuration& x)
 {
-  TheServiceParticipant->config_store()->set(OPENDDS_ICE_CHECKLIST_PERIOD,
+  TheServiceParticipant->config_store()->set(ICE_CHECKLIST_PERIOD,
                                              x,
                                              DCPS::ConfigStoreImpl::Format_IntegerSeconds);
 }
 
 DCPS::TimeDuration Configuration::checklist_period() const
 {
-  return TheServiceParticipant->config_store()->get(OPENDDS_ICE_CHECKLIST_PERIOD,
+  return TheServiceParticipant->config_store()->get(ICE_CHECKLIST_PERIOD,
                                                     DCPS::TimeDuration(10),
                                                     DCPS::ConfigStoreImpl::Format_IntegerSeconds);
 }
 
 void Configuration::indication_period(const DCPS::TimeDuration& x)
 {
-  TheServiceParticipant->config_store()->set(OPENDDS_ICE_INDICATION_PERIOD,
+  TheServiceParticipant->config_store()->set(ICE_INDICATION_PERIOD,
                                              x,
                                              DCPS::ConfigStoreImpl::Format_IntegerSeconds);
 }
 
 DCPS::TimeDuration Configuration::indication_period() const
 {
-  return TheServiceParticipant->config_store()->get(OPENDDS_ICE_INDICATION_PERIOD,
+  return TheServiceParticipant->config_store()->get(ICE_INDICATION_PERIOD,
                                                     DCPS::TimeDuration(15),
                                                     DCPS::ConfigStoreImpl::Format_IntegerSeconds);
 }
 
 void Configuration::nominated_ttl(const DCPS::TimeDuration& x)
 {
-  TheServiceParticipant->config_store()->set(OPENDDS_ICE_NOMINATED_TTL,
+  TheServiceParticipant->config_store()->set(ICE_NOMINATED_TTL,
                                              x,
                                              DCPS::ConfigStoreImpl::Format_IntegerSeconds);
 }
 
 DCPS::TimeDuration Configuration::nominated_ttl() const
 {
-  return TheServiceParticipant->config_store()->get(OPENDDS_ICE_NOMINATED_TTL,
+  return TheServiceParticipant->config_store()->get(ICE_NOMINATED_TTL,
                                                     DCPS::TimeDuration(5 * 60),
                                                     DCPS::ConfigStoreImpl::Format_IntegerSeconds);
 }
 
 void Configuration::server_reflexive_address_period(const DCPS::TimeDuration& x)
 {
-  TheServiceParticipant->config_store()->set(OPENDDS_ICE_SERVER_REFLEXIVE_ADDRESS_PERIOD,
+  TheServiceParticipant->config_store()->set(ICE_SERVER_REFLEXIVE_ADDRESS_PERIOD,
                                              x,
                                              DCPS::ConfigStoreImpl::Format_IntegerSeconds);
 }
 
 DCPS::TimeDuration Configuration::server_reflexive_address_period() const
 {
-  return TheServiceParticipant->config_store()->get(OPENDDS_ICE_SERVER_REFLEXIVE_ADDRESS_PERIOD,
+  return TheServiceParticipant->config_store()->get(ICE_SERVER_REFLEXIVE_ADDRESS_PERIOD,
                                                     DCPS::TimeDuration(30),
                                                     DCPS::ConfigStoreImpl::Format_IntegerSeconds);
 }
 
 void Configuration::server_reflexive_indication_count(size_t x)
 {
-  TheServiceParticipant->config_store()->set_uint32(OPENDDS_ICE_SERVER_REFLEXIVE_INDICATION_COUNT,
+  TheServiceParticipant->config_store()->set_uint32(ICE_SERVER_REFLEXIVE_INDICATION_COUNT,
                                                     static_cast<DDS::UInt32>(x));
 }
 
 size_t Configuration::server_reflexive_indication_count() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(OPENDDS_ICE_SERVER_REFLEXIVE_INDICATION_COUNT,
+  return TheServiceParticipant->config_store()->get_uint32(ICE_SERVER_REFLEXIVE_INDICATION_COUNT,
                                                            10);
 }
 
 void Configuration::deferred_triggered_check_ttl(const DCPS::TimeDuration& x)
 {
-  TheServiceParticipant->config_store()->set(OPENDDS_ICE_DEFERRED_TRIGGERED_CHECK_TTL,
+  TheServiceParticipant->config_store()->set(ICE_DEFERRED_TRIGGERED_CHECK_TTL,
                                              x,
                                              DCPS::ConfigStoreImpl::Format_IntegerSeconds);
 }
 
 DCPS::TimeDuration Configuration::deferred_triggered_check_ttl() const
 {
-  return TheServiceParticipant->config_store()->get(OPENDDS_ICE_DEFERRED_TRIGGERED_CHECK_TTL,
+  return TheServiceParticipant->config_store()->get(ICE_DEFERRED_TRIGGERED_CHECK_TTL,
                                                     DCPS::TimeDuration(5 * 60),
                                                     DCPS::ConfigStoreImpl::Format_IntegerSeconds);
 }
 
 void Configuration::change_password_period(const DCPS::TimeDuration& x)
 {
-  TheServiceParticipant->config_store()->set(OPENDDS_ICE_CHANGE_PASSWORD_PERIOD,
+  TheServiceParticipant->config_store()->set(ICE_CHANGE_PASSWORD_PERIOD,
                                              x,
                                              DCPS::ConfigStoreImpl::Format_IntegerSeconds);
 }
 
 DCPS::TimeDuration Configuration::change_password_period() const
 {
-  return TheServiceParticipant->config_store()->get(OPENDDS_ICE_CHANGE_PASSWORD_PERIOD,
+  return TheServiceParticipant->config_store()->get(ICE_CHANGE_PASSWORD_PERIOD,
                                                     DCPS::TimeDuration(5 * 60),
                                                     DCPS::ConfigStoreImpl::Format_IntegerSeconds);
 }
@@ -468,4 +472,4 @@ ServerReflexiveStateMachine::error_response(const STUN::Message& message)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* OPENDDS_SECURITY */
+#endif

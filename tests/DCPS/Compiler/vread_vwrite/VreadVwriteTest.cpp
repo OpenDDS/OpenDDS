@@ -6,6 +6,7 @@
 #include <dds/DCPS/JsonValueReader.h>
 #include <dds/DCPS/JsonValueWriter.h>
 #include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/XTypes/DynamicVwrite.h>
 #include <dds/DCPS/XTypes/DynamicDataImpl.h>
 
 #include <fstream>
@@ -291,6 +292,181 @@ TEST(VreadVwriteTest, StaticSerializeTest)
   //val.Accept(writer);
   //std::string output(buffer.GetString());
   //std::cout << output << std::endl;
+}
+
+template <typename T>
+void write_helper(const T& sample, CORBA::String_out out)
+{
+  OpenDDS::DCPS::KeyOnly<const T> keyonly(sample);
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  OpenDDS::DCPS::JsonValueWriter<rapidjson::Writer<rapidjson::StringBuffer> > jvw(writer);
+
+  ASSERT_TRUE(vwrite(jvw, keyonly));
+  out = buffer.GetString();
+}
+
+TEST(VreadVwriteTest, KeyOnly_StructWithNoKeys)
+{
+  Mod::NoExplicitKeysStruct sample;
+  OpenDDS::DCPS::set_default(sample);
+
+  // Write the KeyOnly sample to JSON. Then parse the result and compare with the original sample.
+  // In this case no fields are serialized.
+  CORBA::String_var result;
+  write_helper(sample, result);
+  rapidjson::Document document;
+  document.Parse(result.in());
+  rapidjson::Value& val = document;
+
+  ASSERT_TRUE(val.IsObject());
+  ASSERT_TRUE(val.ObjectEmpty());
+
+  // Read from the JSON result with vread
+  rapidjson::StringStream buffer(result.in());
+  OpenDDS::DCPS::JsonValueReader<> jvr(buffer);
+  Mod::NoExplicitKeysStruct sample_out;
+  OpenDDS::DCPS::set_default(sample_out);
+  const OpenDDS::DCPS::KeyOnly<Mod::NoExplicitKeysStruct> keyonly_out(sample_out);
+  ASSERT_TRUE(vread(jvr, keyonly_out));
+  ASSERT_EQ(sample.b, sample_out.b);
+  ASSERT_EQ(sample.c, sample_out.c);
+  ASSERT_EQ(sample.l, sample_out.l);
+}
+
+TEST(VreadVwriteTest, KeyOnly_StructWithKeys)
+{
+  Mod::KeyOnlyStruct sample;
+  OpenDDS::DCPS::set_default(sample);
+  sample.id = 1;
+  sample.eks.s = 10;
+  sample.eks.str = "eks.str";
+  sample.neks.b = true;
+  sample.neks.c = 'a';
+  sample.neks.l = 12l;
+  sample.eksarr[0][0].s = 1;
+  sample.eksarr[0][0].str = "eksarr[0][0].str";
+  sample.eksarr[0][1].s = 2;
+  sample.eksarr[0][1].str = "eksarr[0][1].str";
+  sample.eksarr[1][0].s = 3;
+  sample.eksarr[1][0].str = "eksarr[1][0].str";
+  sample.eksarr[1][1].s = 4;
+  sample.eksarr[1][1].str = "eksarr[1][1].str";
+  sample.eku.c('d');
+  sample.neku.b(false);
+  sample.str = "hello";
+
+  // Write the KeyOnly sample to JSON. Then parse and check the result against the input.
+  CORBA::String_var result;
+  write_helper(sample, result);
+  rapidjson::Document document;
+  document.Parse(result.in());
+  rapidjson::Value& val = document;
+
+  ASSERT_TRUE(val.IsObject());
+  ASSERT_EQ(7ul, val.MemberCount());
+  ASSERT_EQ(val["id"], 1);
+  ASSERT_EQ(2ul, val["eks"].MemberCount());
+  ASSERT_EQ(val["eks"]["s"], 10);
+  ASSERT_EQ(val["eks"]["str"], "eks.str");
+  ASSERT_EQ(val["neks"]["b"], true);
+  ASSERT_EQ(val["neks"]["c"], "a");
+  ASSERT_EQ(val["neks"]["l"], 12);
+  ASSERT_EQ(2ul, val["eksarr"].Size());
+  ASSERT_EQ(2ul, val["eksarr"][0].Size());
+  ASSERT_EQ(2ul, val["eksarr"][1].Size());
+  ASSERT_EQ(2ul, val["eksarr"][0][0].MemberCount());
+  ASSERT_EQ(val["eksarr"][0][0]["s"], 1);
+  ASSERT_EQ(val["eksarr"][0][0]["str"], "eksarr[0][0].str");
+  ASSERT_EQ(2ul, val["eksarr"][0][1].MemberCount());
+  ASSERT_EQ(val["eksarr"][0][1]["s"], 2);
+  ASSERT_EQ(val["eksarr"][0][1]["str"], "eksarr[0][1].str");
+  ASSERT_EQ(2ul, val["eksarr"][1][0].MemberCount());
+  ASSERT_EQ(val["eksarr"][1][0]["s"], 3);
+  ASSERT_EQ(val["eksarr"][1][0]["str"], "eksarr[1][0].str");
+  ASSERT_EQ(2ul, val["eksarr"][1][1].MemberCount());
+  ASSERT_EQ(val["eksarr"][1][1]["s"], 4);
+  ASSERT_EQ(val["eksarr"][1][1]["str"], "eksarr[1][1].str");
+  ASSERT_EQ(1ul, val["eku"].MemberCount());
+  ASSERT_EQ(val["eku"]["$discriminator"], "two");
+  ASSERT_EQ(1ul, val["neku"].MemberCount());
+  ASSERT_EQ(val["neku"]["$discriminator"], "one");
+  ASSERT_EQ(val["str"], "hello");
+
+  // Read from the JSON result into a KeyOnly sample and compare with the original sample.
+  rapidjson::StringStream buffer(result.in());
+  OpenDDS::DCPS::JsonValueReader<> jvr(buffer);
+  Mod::KeyOnlyStruct sample_out;
+  OpenDDS::DCPS::set_default(sample_out);
+  const OpenDDS::DCPS::KeyOnly<Mod::KeyOnlyStruct> keyonly_out(sample_out);
+
+  ASSERT_TRUE(vread(jvr, keyonly_out));
+  ASSERT_EQ(sample.id, sample_out.id);
+  ASSERT_EQ(sample.eks.s, sample_out.eks.s);
+  ASSERT_STREQ(sample.eks.str, sample_out.eks.str);
+  ASSERT_EQ(sample.neks.b, sample_out.neks.b);
+  ASSERT_EQ(sample.neks.c, sample_out.neks.c);
+  ASSERT_EQ(sample.neks.l, sample_out.neks.l);
+  ASSERT_EQ(sample.eksarr[0][0].s, sample_out.eksarr[0][0].s);
+  ASSERT_STREQ(sample.eksarr[0][0].str, sample_out.eksarr[0][0].str);
+  ASSERT_EQ(sample.eksarr[0][1].s, sample_out.eksarr[0][1].s);
+  ASSERT_STREQ(sample.eksarr[0][1].str, sample_out.eksarr[0][1].str);
+  ASSERT_EQ(sample.eksarr[1][0].s, sample_out.eksarr[1][0].s);
+  ASSERT_STREQ(sample.eksarr[1][0].str, sample_out.eksarr[1][0].str);
+  ASSERT_EQ(sample.eksarr[1][1].s, sample_out.eksarr[1][1].s);
+  ASSERT_STREQ(sample.eksarr[1][1].str, sample_out.eksarr[1][1].str);
+  ASSERT_EQ(sample.eku._d(), sample_out.eku._d());
+  ASSERT_EQ(sample.neku._d(), sample_out.neku._d());
+  ASSERT_STREQ(sample.str, sample_out.str);
+}
+
+TEST(VreadVwriteTest, KeyOnly_UnionWithNoKey)
+{
+  Mod::NoExplicitKeyUnion sample;
+  OpenDDS::DCPS::set_default(sample);
+
+  CORBA::String_var result;
+  write_helper(sample, result);
+  rapidjson::Document document;
+  document.Parse(result.in());
+  rapidjson::Value& val = document;
+
+  ASSERT_TRUE(val.IsObject());
+  ASSERT_TRUE(val.ObjectEmpty());
+
+  rapidjson::StringStream buffer(result.in());
+  OpenDDS::DCPS::JsonValueReader<> jvr(buffer);
+  Mod::NoExplicitKeyUnion sample_out;
+  OpenDDS::DCPS::set_default(sample_out);
+  const OpenDDS::DCPS::KeyOnly<Mod::NoExplicitKeyUnion> keyonly_out(sample_out);
+  ASSERT_TRUE(vread(jvr, keyonly_out));
+  ASSERT_EQ(sample._d(), sample_out._d());
+}
+
+TEST(VreadVwriteTest, KeyOnly_UnionWithKey)
+{
+  Mod::ExplicitKeyUnion sample;
+  sample.o(0x22);
+  sample._d(Mod::three);
+
+  CORBA::String_var result;
+  write_helper(sample, result);
+  rapidjson::Document document;
+  document.Parse(result.in());
+  rapidjson::Value& val = document;
+
+  ASSERT_TRUE(val.IsObject());
+  ASSERT_EQ(1ul, val.MemberCount());
+  ASSERT_EQ(val["$discriminator"], "three");
+
+  rapidjson::StringStream buffer(result.in());
+  OpenDDS::DCPS::JsonValueReader<> jvr(buffer);
+  Mod::ExplicitKeyUnion sample_out;
+  OpenDDS::DCPS::set_default(sample_out);
+  const OpenDDS::DCPS::KeyOnly<Mod::ExplicitKeyUnion> keyonly_out(sample_out);
+  ASSERT_TRUE(vread(jvr, keyonly_out));
+  ASSERT_EQ(sample._d(), sample_out._d());
 }
 
 #ifndef OPENDDS_SAFETY_PROFILE

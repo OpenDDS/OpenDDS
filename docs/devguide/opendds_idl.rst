@@ -156,7 +156,8 @@ opendds_idl Command Line Options
   Don't warn about ``#pragma DCPS_DATA_TYPE``.
   See :ref:`getting_started--identifying-topic-types` for more information.
 
-.. option:: --[no-]default-nested
+.. option:: --default-nested
+.. option:: --no-default-nested
 
   Un-annotated types/modules are treated as nested.
   By default all types are nested by default
@@ -173,7 +174,7 @@ opendds_idl Command Line Options
 
 .. option:: --default-autoid VALUE
 
-  Set the default :ref:`XTypes auto member-id assignment strategy <xtypes--autoid-value>`.
+  Set the default :ref:`XTypes auto member-id assignment strategy <xtypes--anno-autoid>`.
   *VALUE* can be ``sequential`` (the default) or ``hash``.
 
 .. option:: --default-try-construct VALUE
@@ -269,7 +270,7 @@ Unlike when using the classic mapping, ``Foo.idl`` is not processed by ``tao_idl
   * Bounded strings and sequences are supported, but bounds checks are not currently enforced.
     Due to this limitation, distinct types are not used for bounded instantiations.
 
-* annotations -- see :ref:`getting_started--defining-data-types-with-idl`
+* annotations -- see :ref:`getting_started--defining-data-types-with-idl` and :ref:`xtypes--idl-annotations`
 
 * ``#include``\s of IDL files that are also used with the IDL-to-C++11 mapping
 

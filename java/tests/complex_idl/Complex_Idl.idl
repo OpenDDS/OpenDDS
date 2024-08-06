@@ -36,4 +36,16 @@ module Complex_Idl {
         @key long id;
         DataUnion payload;
     };
+
+    struct Position {
+        double x;
+        double y;
+        double z;
+    };
+
+    @topic
+    struct TimePosition {
+        @key long time;
+        Position pos;
+    };
 };

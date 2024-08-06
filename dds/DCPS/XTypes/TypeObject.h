@@ -11,6 +11,7 @@
 #include <dds/DCPS/PoolAllocationBase.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/optional.h>
 
 #include <ace/CDR_Base.h>
 
@@ -62,89 +63,6 @@ namespace XTypes {
 
   OpenDDS_Dcps_Export
   const DCPS::Encoding& get_typeobject_encoding();
-
-  template <typename T>
-  class Optional {
-  public:
-    Optional()
-      : present_(false)
-      , value_()
-    {}
-
-    Optional(const T& v)
-      : present_(true)
-    {
-      new(value_) T(v);
-    }
-
-    ~Optional() {
-      if (present_) {
-        value().~T();
-      }
-    }
-
-    Optional(const Optional& rhs)
-      : present_(false)
-      , value_()
-    {
-      *this = rhs;
-    }
-
-    Optional& operator=(const Optional& rhs) {
-      if (this != &rhs) {
-        if (present_) {
-          if (rhs.present_) {
-            value() = rhs.value();
-          } else {
-            value().~T();
-          }
-        } else {
-          if (rhs.present_) {
-            new(value_) T(rhs.value());
-          }
-        }
-        present_ = rhs.present_;
-      }
-      return *this;
-    }
-
-    bool operator==(const Optional& other) const
-    {
-      if (present_) {
-        return present_ == other.present_ && value() == other.value();
-      }
-
-      return present_ == other.present_;
-    }
-
-    bool operator!=(const Optional& other) const
-    {
-      return !(*this == other);
-    }
-
-    operator bool() const {
-      return present_;
-    }
-
-    bool has_value() const {
-      return present_;
-    }
-
-    T& value() {
-      return reinterpret_cast<T&>(value_);
-    }
-
-    const T& value() const {
-      return reinterpret_cast<const T&>(value_);
-    }
-
-  private:
-    bool present_;
-    union {
-      ACE_CDR::LongDouble max_alignment;
-      unsigned char value_[sizeof(T)];
-    };
-  };
 
   template <typename T>
   struct Sequence {
@@ -909,8 +827,11 @@ namespace XTypes {
   // ID of a type member
   typedef ACE_CDR::ULong MemberId;
   const ACE_CDR::ULong MEMBER_ID_INVALID = ACE_UINT32_MAX;
-  /// Implementation specific sentinel for a union discriminator used in DynamicData
+  // Union discriminator does not have an Id specified in TypeObject or DynamicType.
+  // OpenDDS uses the following sentinels for interacting with DynamicData and
+  // for serialization, respectively.
   const ACE_CDR::ULong DISCRIMINATOR_ID = MEMBER_ID_INVALID - 1;
+  const ACE_CDR::ULong DISCRIMINATOR_SERIALIZED_ID = 0;
   const ACE_CDR::ULong ANNOTATION_STR_VALUE_MAX_LEN = 128;
   const ACE_CDR::ULong ANNOTATION_OCTETSEC_VALUE_MAX_LEN = 128;
 
@@ -1136,12 +1057,12 @@ namespace XTypes {
 
   struct AppliedAnnotation {
     TypeIdentifier annotation_typeid;
-    Optional<AppliedAnnotationParameterSeq> param_seq;
+    OPENDDS_OPTIONAL_NS::optional<AppliedAnnotationParameterSeq> param_seq;
 
     AppliedAnnotation() {}
 
     AppliedAnnotation(const TypeIdentifier& ann_typeid,
-                      const Optional<AppliedAnnotationParameterSeq>& a_param_seq)
+                      const OPENDDS_OPTIONAL_NS::optional<AppliedAnnotationParameterSeq>& a_param_seq)
       : annotation_typeid(ann_typeid)
       , param_seq(a_param_seq)
     {}
@@ -1193,17 +1114,17 @@ namespace XTypes {
 
   // --- Aggregate types: ------------------------------------------------
   struct OpenDDS_Dcps_Export AppliedBuiltinMemberAnnotations {
-    Optional<DCPS::String> unit; // @unit("<unit>")
-    Optional<AnnotationParameterValue> min; // @min , @range
-    Optional<AnnotationParameterValue> max; // @max , @range
-    Optional<DCPS::String> hash_id; // @hash_id("<membername>")
+    OPENDDS_OPTIONAL_NS::optional<DCPS::String> unit; // @unit("<unit>")
+    OPENDDS_OPTIONAL_NS::optional<AnnotationParameterValue> min; // @min , @range
+    OPENDDS_OPTIONAL_NS::optional<AnnotationParameterValue> max; // @max , @range
+    OPENDDS_OPTIONAL_NS::optional<DCPS::String> hash_id; // @hash_id("<membername>")
 
     AppliedBuiltinMemberAnnotations() {}
 
-    AppliedBuiltinMemberAnnotations(const Optional<DCPS::String>& a_unit,
-                                    const Optional<AnnotationParameterValue>& a_min,
-                                    const Optional<AnnotationParameterValue>& a_max,
-                                    const Optional<DCPS::String>& a_hash_id);
+    AppliedBuiltinMemberAnnotations(const OPENDDS_OPTIONAL_NS::optional<DCPS::String>& a_unit,
+                                    const OPENDDS_OPTIONAL_NS::optional<AnnotationParameterValue>& a_min,
+                                    const OPENDDS_OPTIONAL_NS::optional<AnnotationParameterValue>& a_max,
+                                    const OPENDDS_OPTIONAL_NS::optional<DCPS::String>& a_hash_id);
 
     bool operator==(const AppliedBuiltinMemberAnnotations& other) const
     {
@@ -1248,14 +1169,14 @@ namespace XTypes {
   // COMPLETE Details for a member of an aggregate type
   struct CompleteMemberDetail {
     MemberName name;
-    Optional<AppliedBuiltinMemberAnnotations> ann_builtin;
-    Optional<AppliedAnnotationSeq> ann_custom;
+    OPENDDS_OPTIONAL_NS::optional<AppliedBuiltinMemberAnnotations> ann_builtin;
+    OPENDDS_OPTIONAL_NS::optional<AppliedAnnotationSeq> ann_custom;
 
     CompleteMemberDetail() {}
 
     CompleteMemberDetail(const MemberName& a_name,
-                         const Optional<AppliedBuiltinMemberAnnotations>& an_ann_builtin,
-                         const Optional<AppliedAnnotationSeq>& an_ann_custom)
+                         const OPENDDS_OPTIONAL_NS::optional<AppliedBuiltinMemberAnnotations>& an_ann_builtin,
+                         const OPENDDS_OPTIONAL_NS::optional<AppliedAnnotationSeq>& an_ann_custom)
       : name(a_name)
       , ann_builtin(an_ann_builtin)
       , ann_custom(an_ann_custom)
@@ -1367,11 +1288,11 @@ namespace XTypes {
   typedef Sequence<MinimalStructMember> MinimalStructMemberSeq;
 
   struct AppliedBuiltinTypeAnnotations {
-    Optional<AppliedVerbatimAnnotation> verbatim;  // @verbatim(...)
+    OPENDDS_OPTIONAL_NS::optional<AppliedVerbatimAnnotation> verbatim;  // @verbatim(...)
 
     AppliedBuiltinTypeAnnotations() {}
 
-    explicit AppliedBuiltinTypeAnnotations(const Optional<AppliedVerbatimAnnotation>& a_verbatim)
+    explicit AppliedBuiltinTypeAnnotations(const OPENDDS_OPTIONAL_NS::optional<AppliedVerbatimAnnotation>& a_verbatim)
       : verbatim(a_verbatim)
     {}
 
@@ -1400,14 +1321,14 @@ namespace XTypes {
   };
 
   struct CompleteTypeDetail {
-    Optional<AppliedBuiltinTypeAnnotations> ann_builtin;
-    Optional<AppliedAnnotationSeq> ann_custom;
+    OPENDDS_OPTIONAL_NS::optional<AppliedBuiltinTypeAnnotations> ann_builtin;
+    OPENDDS_OPTIONAL_NS::optional<AppliedAnnotationSeq> ann_custom;
     QualifiedTypeName type_name;
 
     CompleteTypeDetail() {}
 
-    CompleteTypeDetail(const Optional<AppliedBuiltinTypeAnnotations>& an_ann_builtin,
-                       const Optional<AppliedAnnotationSeq>& an_ann_custom,
+    CompleteTypeDetail(const OPENDDS_OPTIONAL_NS::optional<AppliedBuiltinTypeAnnotations>& an_ann_builtin,
+                       const OPENDDS_OPTIONAL_NS::optional<AppliedAnnotationSeq>& an_ann_custom,
                        const QualifiedTypeName& a_type_name)
       : ann_builtin(an_ann_builtin)
       , ann_custom(an_ann_custom)
@@ -1655,14 +1576,14 @@ namespace XTypes {
   // Member of a union type
   struct CompleteDiscriminatorMember {
     CommonDiscriminatorMember common;
-    Optional<AppliedBuiltinTypeAnnotations> ann_builtin;
-    Optional<AppliedAnnotationSeq> ann_custom;
+    OPENDDS_OPTIONAL_NS::optional<AppliedBuiltinTypeAnnotations> ann_builtin;
+    OPENDDS_OPTIONAL_NS::optional<AppliedAnnotationSeq> ann_custom;
 
     CompleteDiscriminatorMember() {}
 
     CompleteDiscriminatorMember(const CommonDiscriminatorMember& a_common,
-                                const Optional<AppliedBuiltinTypeAnnotations>& an_ann_builtin,
-                                const Optional<AppliedAnnotationSeq>& an_ann_custom)
+                                const OPENDDS_OPTIONAL_NS::optional<AppliedBuiltinTypeAnnotations>& an_ann_builtin,
+                                const OPENDDS_OPTIONAL_NS::optional<AppliedAnnotationSeq>& an_ann_custom)
       : common(a_common)
       , ann_builtin(an_ann_builtin)
       , ann_custom(an_ann_custom)
@@ -1960,14 +1881,14 @@ namespace XTypes {
 
   struct CompleteAliasBody {
     CommonAliasBody common;
-    Optional<AppliedBuiltinMemberAnnotations> ann_builtin;
-    Optional<AppliedAnnotationSeq> ann_custom;
+    OPENDDS_OPTIONAL_NS::optional<AppliedBuiltinMemberAnnotations> ann_builtin;
+    OPENDDS_OPTIONAL_NS::optional<AppliedAnnotationSeq> ann_custom;
 
     CompleteAliasBody() {}
 
     CompleteAliasBody(const CommonAliasBody& a_common,
-                      const Optional<AppliedBuiltinMemberAnnotations>& an_ann_builtin,
-                      const Optional<AppliedAnnotationSeq>& an_ann_custom)
+                      const OPENDDS_OPTIONAL_NS::optional<AppliedBuiltinMemberAnnotations>& an_ann_builtin,
+                      const OPENDDS_OPTIONAL_NS::optional<AppliedAnnotationSeq>& an_ann_custom)
       : common(a_common)
       , ann_builtin(an_ann_builtin)
       , ann_custom(an_ann_custom)
@@ -2096,13 +2017,13 @@ namespace XTypes {
 
   // --- Collections: ----------------------------------------------------
   struct CompleteElementDetail {
-    Optional<AppliedBuiltinMemberAnnotations> ann_builtin;
-    Optional<AppliedAnnotationSeq> ann_custom;
+    OPENDDS_OPTIONAL_NS::optional<AppliedBuiltinMemberAnnotations> ann_builtin;
+    OPENDDS_OPTIONAL_NS::optional<AppliedAnnotationSeq> ann_custom;
 
     CompleteElementDetail() {}
 
-    CompleteElementDetail(const Optional<AppliedBuiltinMemberAnnotations>& an_ann_builtin,
-                          const Optional<AppliedAnnotationSeq>& an_ann_custom)
+    CompleteElementDetail(const OPENDDS_OPTIONAL_NS::optional<AppliedBuiltinMemberAnnotations>& an_ann_builtin,
+                          const OPENDDS_OPTIONAL_NS::optional<AppliedAnnotationSeq>& an_ann_custom)
       : ann_builtin(an_ann_builtin)
       , ann_custom(an_ann_custom)
     {}
@@ -2207,12 +2128,12 @@ namespace XTypes {
 
   struct CompleteCollectionHeader {
     CommonCollectionHeader common;
-    Optional<CompleteTypeDetail> detail; // not present for anonymous
+    OPENDDS_OPTIONAL_NS::optional<CompleteTypeDetail> detail; // not present for anonymous
 
     CompleteCollectionHeader() {}
 
     CompleteCollectionHeader(const CommonCollectionHeader& a_common,
-                             const Optional<CompleteTypeDetail>& a_detail)
+                             const OPENDDS_OPTIONAL_NS::optional<CompleteTypeDetail>& a_detail)
       : common(a_common)
       , detail(a_detail)
     {}
@@ -3474,7 +3395,7 @@ const XTypes::TypeMap& getCompleteTypeMap();
 
 template<typename T>
 void serialized_size(const Encoding& encoding, size_t& size,
-                     const XTypes::Optional<T>& opt)
+                     const OPENDDS_OPTIONAL_NS::optional<T>& opt)
 {
   size += DCPS::boolean_cdr_size;
   if (opt) {
@@ -3483,7 +3404,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
 }
 
 template<typename T>
-bool operator<<(Serializer& strm, const XTypes::Optional<T>& opt)
+bool operator<<(Serializer& strm, const OPENDDS_OPTIONAL_NS::optional<T>& opt)
 {
   if (!(strm << ACE_OutputCDR::from_boolean(opt.has_value()))) {
     return false;
@@ -3492,7 +3413,7 @@ bool operator<<(Serializer& strm, const XTypes::Optional<T>& opt)
 }
 
 template<typename T>
-bool operator>>(Serializer& strm, XTypes::Optional<T>& opt)
+bool operator>>(Serializer& strm, OPENDDS_OPTIONAL_NS::optional<T>& opt)
 {
   bool present;
   if (!(strm >> ACE_InputCDR::to_boolean(present))) {
@@ -3501,7 +3422,7 @@ bool operator>>(Serializer& strm, XTypes::Optional<T>& opt)
   if (present) {
     T value;
     const bool status = strm >> value;
-    opt = XTypes::Optional<T>(value);
+    opt = OPENDDS_OPTIONAL_NS::optional<T>(value);
     return status;
   }
 

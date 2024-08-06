@@ -1,8 +1,0 @@
-module optional {
-
-  @topic
-  struct OptionalMembers {
-    @optional long value;
-  };
-
-};

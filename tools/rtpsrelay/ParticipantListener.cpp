@@ -41,8 +41,7 @@ void ParticipantListener::on_data_available(DDS::DataReader_ptr reader)
     switch (info.instance_state) {
     case DDS::ALIVE_INSTANCE_STATE:
       if (info.valid_data) {
-        GuidAddrSet::Proxy proxy(guid_addr_set_);
-        participant_status_reporter_.add_participant(proxy, participant_->get_repoid(info.instance_handle), data);
+        participant_status_reporter_.add_participant(participant_->get_repoid(info.instance_handle), data);
       }
       break;
     case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:

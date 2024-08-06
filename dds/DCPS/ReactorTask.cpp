@@ -13,6 +13,7 @@
 #endif /* __ACE_INLINE__ */
 
 #include "Service_Participant.h"
+#include "Timers.h"
 
 #include <ace/Select_Reactor.h>
 #include <ace/WFMO_Reactor.h>
@@ -76,8 +77,7 @@ void ReactorTask::cleanup()
   timer_queue_ = 0;
 }
 
-int ReactorTask::open_reactor_task(void*,
-                                   ThreadStatusManager* thread_status_manager,
+int ReactorTask::open_reactor_task(ThreadStatusManager* thread_status_manager,
                                    const String& name)
 {
   GuardType guard(lock_);
@@ -160,18 +160,29 @@ int ReactorTask::svc()
     condition_.notify_all();
   }
 
-  // Tell the reactor to handle events.
-  if (thread_status_manager_->update_thread_status()) {
-    while (state() == STATE_RUNNING) {
-      ACE_Time_Value t = thread_status_manager_->thread_status_interval().value();
-      ThreadStatusManager::Sleeper sleeper(*thread_status_manager_);
-      reactor_->run_reactor_event_loop(t, 0);
-    }
+  Timers::TimerId thread_status_timer = Timers::InvalidTimerId;
+  RcHandle<RcEventHandler> tsm_updater_handler;
 
-  } else {
-    reactor_->run_reactor_event_loop();
+  if (thread_status_manager_->update_thread_status()) {
+    tsm_updater_handler = make_rch<ThreadStatusManager::Updater>();
+    const TimeDuration period = thread_status_manager_->thread_status_interval();
+    thread_status_timer = Timers::schedule(reactor_, *tsm_updater_handler, thread_status_manager_,
+                                           period, period);
+
+    if (thread_status_timer == Timers::InvalidTimerId) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: ReactorTask::svc: failed to "
+                              "schedule timer for ThreadStatusManager::Updater\n"));
+      }
+    }
   }
 
+  ThreadStatusManager::Sleeper sleeper(thread_status_manager_);
+  reactor_->run_reactor_event_loop();
+
+  if (thread_status_timer != Timers::InvalidTimerId) {
+    Timers::cancel(reactor_, thread_status_timer);
+  }
   return 0;
 }
 

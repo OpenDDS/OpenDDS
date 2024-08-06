@@ -5,7 +5,20 @@ set(_opendds_exec_perms
   GROUP_READ GROUP_WRITE GROUP_EXECUTE
   WORLD_READ WORLD_EXECUTE)
 
-function(_opendds_alias target)
+# Load in build settings.
+file(STRINGS "${OPENDDS_SOURCE_DIR}/build.ini" build_ini)
+unset(section)
+foreach(line IN LISTS build_ini)
+  if(line MATCHES "^\\[(.*)\\]$")
+    set(section "${CMAKE_MATCH_1}")
+  elseif(section AND line MATCHES "^([^=#]+)=(.*)$")
+    set(name "${CMAKE_MATCH_1}")
+    set(value "${CMAKE_MATCH_2}")
+    set("${section}-${name}" "${value}")
+  endif()
+endforeach()
+
+function(_opendds_target target)
   # This is the name the target should be exported from CMake-build OpenDDS as
   # or imported in the MPC-built OpenDDS CMake package. For consistency and
   # convenience, alias it so we can use it within the OpenDDS CMake build.
@@ -18,6 +31,15 @@ function(_opendds_alias target)
     add_executable("${name}" ALIAS "${target}")
   endif()
   set_target_properties(${target} PROPERTIES EXPORT_NAME "${name}")
+
+  if(OPENDDS_COMPILE_WARNINGS STREQUAL "WARNING" OR OPENDDS_COMPILE_WARNINGS STREQUAL "ERROR")
+    string(REPLACE " " ";" outvar ${${CMAKE_CXX_COMPILER_ID}-warning})
+    target_compile_options(${target} PRIVATE ${outvar})
+    if(OPENDDS_COMPILE_WARNINGS STREQUAL "ERROR")
+      string(REPLACE " " ";" outvar ${{CMAKE_CXX_COMPILER_ID}-error})
+      target_compile_options(${target} PRIVATE ${outvar})
+    endif()
+  endif()
 endfunction()
 
 function(_opendds_library target)
@@ -27,7 +49,9 @@ function(_opendds_library target)
   cmake_parse_arguments(arg
     "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
 
-  _opendds_alias(${target})
+  _opendds_target(${target})
+  _opendds_cxx_std(${target} PUBLIC)
+  target_link_libraries(${target} PUBLIC OpenDDS_Config)
 
   # Put library in BINARY_DIR/lib
   set_target_properties(${target} PROPERTIES
@@ -81,7 +105,9 @@ function(_opendds_executable target)
   cmake_parse_arguments(arg
     "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
 
-  _opendds_alias(${target})
+  _opendds_target(${target})
+  _opendds_cxx_std(${target} PRIVATE)
+  target_link_libraries(${target} PRIVATE OpenDDS_Config)
   set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OPENDDS_BIN_DIR}")
 
   if(NOT arg_NO_INSTALL)

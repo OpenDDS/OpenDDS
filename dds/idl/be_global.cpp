@@ -980,6 +980,12 @@ TryConstructFailAction BE_GlobalData::union_discriminator_try_construct(AST_Unio
   return try_construct_annotation->union_value(node);
 }
 
+bool BE_GlobalData::value(AST_Decl* node, ACE_INT32& value) const
+{
+  ValueAnnotation* annotation = dynamic_cast<ValueAnnotation*>(builtin_annotations_["::@value"]);
+  return annotation->node_value_exists(node, value);
+}
+
 OpenDDS::DataRepresentation BE_GlobalData::data_representations(
   AST_Decl* node) const
 {
@@ -1051,7 +1057,7 @@ OpenDDS::XTypes::MemberId BE_GlobalData::get_id(AST_Field* field)
     return pos->second;
   }
   be_util::misc_error_and_abort("Could not get member id for field");
-  return -1;
+  return OpenDDS::XTypes::MEMBER_ID_INVALID;
 }
 
 bool BE_GlobalData::dynamic_data_adapter(AST_Decl* node) const

@@ -1,8 +1,12 @@
 // This base project is only meant to be used by the core OpenDDS
 // libraries
 
-project : taoidldefaults {
+project: taoidldefaults, dcps_ts_defaults {
   idlflags += -Wb,versioning_begin=OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL \
               -Wb,versioning_end=OPENDDS_END_VERSIONED_NAMESPACE_DECL \
               -Wb,versioning_include=dds/Versioned_Namespace.h
+
+  dcps_ts_flags += -Wb,versioning_begin=OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL \
+                   -Wb,versioning_end=OPENDDS_END_VERSIONED_NAMESPACE_DECL \
+                   -Wb,versioning_name=OPENDDS_VERSIONED_NAMESPACE_NAME
 }

@@ -14,12 +14,16 @@
 #include <dds/DCPS/FibonacciSequence.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/SporadicTask.h>
+
 #include <dds/DCPS/RTPS/ICE/Ice.h>
 #include <dds/DCPS/RTPS/RtpsCoreC.h>
+
 #include <dds/DCPS/transport/framework/TransportClient.h>
 #include <dds/DCPS/transport/framework/TransportImpl.h>
 #include <dds/DCPS/transport/framework/TransportStatistics.h>
 #include <dds/DCPS/transport/framework/MessageDropper.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -211,7 +215,7 @@ public:
     transport_statistics_.reload(TheServiceParticipant->config_store(), config_prefix);
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   void reset_relay_stun_task_falloff()
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -250,13 +254,14 @@ private:
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl, public ConfigListener {
 public:
-  RtpsUdpTransport(const RtpsUdpInst_rch& inst);
+  RtpsUdpTransport(const RtpsUdpInst_rch& inst,
+                   DDS::DomainId_t domain);
   RtpsUdpInst_rch config() const;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DCPS::RcHandle<ICE::Agent> get_ice_agent() const;
 #endif
   virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   ICE::ServerReflexiveStateMachine& relay_srsm() { return relay_srsm_; }
   void process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange);
   void disable_relay_stun_task();
@@ -266,6 +271,7 @@ public:
                                const TransportLocatorSeq& /*locators*/);
 
   virtual void get_last_recv_locator(const GUID_t& /*remote_id*/,
+                                     const GuidVendorId_t& /*vendor_id*/,
                                      TransportLocator& /*locators*/);
 
   void append_transport_statistics(TransportStatisticsSequence& seq);
@@ -286,6 +292,9 @@ private:
                                             const GUID_t& remote_id,
                                             bool disassociate,
                                             bool association_failed);
+
+  bool open_socket(
+    const RtpsUdpInst_rch& config, ACE_SOCK_Dgram& sock, int protocol, ACE_INET_Addr& actual);
 
   bool configure_i(const RtpsUdpInst_rch& config);
 
@@ -319,6 +328,7 @@ private:
                             NetworkAddressSet* uc_addrs,
                             NetworkAddressSet* mc_addrs = 0,
                             bool* requires_inline_qos = 0,
+                            RTPS::VendorId_t* vendor_id = 0,
                             unsigned int* blob_bytes_read = 0) const;
 
   virtual void release_datalink(DataLink* link);
@@ -338,7 +348,7 @@ private:
                     SequenceNumber max_sn,
                     const TransportClient_rch& client);
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch);
 #endif
 
@@ -365,7 +375,7 @@ private:
 
   JobQueue_rch job_queue_;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 

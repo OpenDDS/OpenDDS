@@ -321,7 +321,7 @@ OpenDDS::DCPS::TcpDataLink::send_graceful_disconnect_message()
   //header_data.message_length_ = 0;
   //header_data.sequence_ = 0;
   //DDS::Time_t source_timestamp
-  //  = SystemTimePoint::now().to_dds_time();
+  //  = SystemTimePoint::now().to_idl_struct();
   //header_data.source_timestamp_sec_ = source_timestamp.sec;
   //header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
   //header_data.coherency_group_ = 0;
@@ -366,7 +366,7 @@ OpenDDS::DCPS::TcpDataLink::send_graceful_disconnect_message()
 
   *message << header_data;
 
-  TransportControlElement* send_element = new TransportControlElement(move(message));
+  TransportControlElement* send_element = new TransportControlElement(OPENDDS_MOVE_NS::move(message));
 
   // I don't want to rebuild a connection in order to send
   // a graceful disconnect message.
@@ -486,7 +486,7 @@ OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sampl
 
   *message << header_data;
 
-  TransportControlElement* send_element =  new TransportControlElement(move(message));
+  TransportControlElement* send_element =  new TransportControlElement(OPENDDS_MOVE_NS::move(message));
 
 
   // I don't want to rebuild a connection in order to send
@@ -554,7 +554,7 @@ OpenDDS::DCPS::TcpDataLink::send_association_msg(const GUID_t& local, const GUID
   Serializer ser(message.get(), encoding_unaligned_native);
   ser << remote;
 
-  TransportControlElement* send_element = new TransportControlElement(move(message), local);
+  TransportControlElement* send_element = new TransportControlElement(OPENDDS_MOVE_NS::move(message), local);
 
   this->send_i(send_element, false);
 }

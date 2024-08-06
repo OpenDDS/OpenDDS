@@ -25,29 +25,6 @@ namespace {
     {
     }
   };
-}
-
-bool
-metaclass_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
-  const std::vector<AST_EnumVal*>& contents, const char*)
-{
-  NamespaceGuard ng;
-  std::string array_decl = "const char* gen_" + scoped_helper(name, "_") + "_names[]";
-  std::string size_decl = "const size_t gen_" + scoped_helper(name, "_") + "_names_size";
-  std::string decl_prefix = ((be_global->export_macro() == "") ? std::string("extern ") : (std::string(be_global->export_macro().c_str()) + " extern "));
-  be_global->header_ << decl_prefix << array_decl << ";\n";
-  be_global->header_ << decl_prefix << size_decl << ";\n";
-  be_global->impl_ << array_decl << " = {\n";
-  for (size_t i = 0; i < contents.size(); ++i) {
-    be_global->impl_ << "  \"" << canonical_name(contents[i])
-      << ((i < contents.size() - 1) ? "\",\n" : "\"\n");
-  }
-  be_global->impl_ << "};\n";
-  be_global->impl_ << size_decl << " = " << contents.size() << ";\n";
-  return true;
-}
-
-namespace {
 
   void
   delegateToNested(const std::string& fieldName, AST_Field* field,
@@ -68,7 +45,8 @@ namespace {
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const Classification cls = classify(field->field_type());
-    const std::string fieldName = field->local_name()->get_string();
+    std::string fieldName = field->local_name()->get_string();
+
     const std::string idl_name = canonical_name(field);
     if (cls & CL_SCALAR) {
       std::string prefix, suffix;
@@ -76,14 +54,30 @@ namespace {
         AST_Type* enum_type = resolveActualType(field->field_type());
         prefix = "gen_" +
           dds_generator::scoped_helper(enum_type->name(), "_")
-          + "_names[";
+          + "_helper->get_name(";
         if (use_cxx11) {
           prefix += "static_cast<int>(";
         }
-        suffix = use_cxx11 ? "())]" : "]";
+        suffix = use_cxx11 ? "()))" : ")";
+      } else if (cls & CL_PRIMITIVE) {
+        AST_Type* const actual = resolveActualType(field->field_type());
+        const AST_PredefinedType::PredefinedType pt =
+          dynamic_cast<AST_PredefinedType*>(actual)->pt();
+        if (use_cxx11) {
+          suffix += "()";
+        }
+        if (pt == AST_PredefinedType::PT_wchar) {
+          prefix = "ACE_OutputCDR::from_wchar(" + prefix;
+          suffix += ")";
+        }
       } else if (use_cxx11) {
         suffix += "()";
       }
+
+      if (be_global->is_optional(field)) {
+        fieldName += "().value";
+      }
+
       const std::string string_to_ptr = use_cxx11 ? "" : ".in()";
       be_global->impl_ <<
         "    if (std::strcmp(field, \"" << idl_name << "\") == 0) {\n"
@@ -92,8 +86,12 @@ namespace {
         "    }\n";
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     } else if (cls & CL_STRUCTURE) {
-      delegateToNested(idl_name, field,
-                       "&typed." + std::string(use_cxx11 ? "_" : "") + fieldName);
+      std::string fieldAccessor = "&typed." + std::string(use_cxx11 ? "_" : "") + fieldName;
+      if (be_global->is_optional(field)) {
+        fieldAccessor += ".value()";
+      }
+
+      delegateToNested(idl_name, field, fieldAccessor);
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     }
   }
@@ -327,7 +325,7 @@ namespace {
       marshal_generator::gen_field_getValueFromSerialized(struct_node, clazz);
     } else {
       be_global->impl_ <<
-        "  Value getValue(Serializer& ser, const char* field, const TypeSupportImpl* = 0) const\n"
+        "  Value getValue(Serializer& ser, const char* field, TypeSupportImpl* = 0) const\n"
         "  {\n"
         "    ACE_UNUSED_ARG(ser);\n"
         "    if (!field[0]) {\n"   // if 'field' is the empty string...
@@ -526,8 +524,8 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   AST_Type* type, const char*)
 {
   AST_Array* arr = dynamic_cast<AST_Array*>(type);
-  AST_Sequence* seq = 0;
-  if (!arr && !(seq = dynamic_cast<AST_Sequence*>(type))) {
+  AST_Sequence* seq = dynamic_cast<AST_Sequence*>(type);
+  if (!arr && !seq) {
     return true;
   }
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;

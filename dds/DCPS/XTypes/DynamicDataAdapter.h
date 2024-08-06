@@ -6,6 +6,8 @@
 #ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_ADAPTER_H
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_ADAPTER_H
 
+#include "DynamicDataAdapterFwd.h"
+
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include <dds/DCPS/Definitions.h>
 #  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
@@ -22,30 +24,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
-// If changing just these two, also change the get_dynamic_data_adapter forward
-// declarations in Sample.h.
-template <typename T, typename Tag>
-DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, const T& value);
-template <typename T, typename Tag>
-DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, T& value);
-
-template <typename T>
-DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, T& value)
-{
-  return get_dynamic_data_adapter<T, T>(type, value);
-}
-
-template <typename T>
-DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, const T& value)
-{
-  return get_dynamic_data_adapter<T, T>(type, value);
-}
-
-template <typename T, typename Tag>
-const T* get_dynamic_data_adapter_value(DDS::DynamicData_ptr dda);
-
 #  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
-
 template <typename T, typename Tag = void>
 class DynamicDataAdapterImpl;
 
@@ -56,7 +35,7 @@ class DynamicDataAdapterImpl;
  * TODO:
  * - Support direct array methods, like get_int32_values
  *   - Part of this is accessing all types as complex value.
- * - Implement equals, clear_value, clear_all_values, and clear_nonkey_values
+ * - Implement equals, clear_value, and clear_nonkey_values
  * - Respect bounds of strings and sequences.
  * - Add a way to check if using get_complex_value on a complex member of a
  *   union that isn't selected. Doing this will cause a segfault. It should
@@ -75,10 +54,8 @@ public:
   virtual DDS::MemberId get_member_id_at_index_impl(DDS::UInt32);
   DDS::MemberId get_member_id_at_index(DDS::UInt32 index);
 
-  DDS::ReturnCode_t clear_all_values();
   DDS::ReturnCode_t clear_nonkey_values();
   DDS::ReturnCode_t clear_value(DDS::MemberId);
-  DDS::DynamicData_ptr clone() = 0;
 
   DDS::ReturnCode_t get_int8_value(CORBA::Int8& value,
                                    DDS::MemberId id)
@@ -594,9 +571,17 @@ protected:
   DDS::ReturnCode_t get_cpp11_s8_raw_value(
     const char* method, void* dest, DDS::TypeKind tk,
     const std::string& source, DDS::MemberId id);
+  template<typename T>
   DDS::ReturnCode_t set_cpp11_s8_raw_value(
-    const char* method, std::string& dest, DDS::MemberId id,
-    const void* source, DDS::TypeKind tk);
+    const char* method, T& dest, DDS::MemberId id,
+    const void* source, DDS::TypeKind tk)
+  {
+    const DDS::ReturnCode_t rc = check_member(method, tk, id);
+    if (rc == DDS::RETCODE_OK) {
+      dest = static_cast<const char*>(source);
+    }
+    return rc;
+  }
   DDS::ReturnCode_t get_s16_raw_value(
     const char* method, void* dest, DDS::TypeKind tk,
     const DDS::Char16* source, DDS::MemberId id);

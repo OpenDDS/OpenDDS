@@ -200,6 +200,7 @@ void postprocess(const char* fn, ostringstream& content,
       if (be_global->language_mapping() == BE_GlobalData::LANGMAP_FACE_CXX ||
           be_global->language_mapping() == BE_GlobalData::LANGMAP_SP_CXX) {
         out <<
+          "#include <dds/DCPS/Definitions.h>\n\n"
           "#include <tao/orbconf.h>\n"
           "#include <tao/Basic_Types_IDLv4.h>\n"
           "TAO_BEGIN_VERSIONED_NAMESPACE_DECL\n"
@@ -252,10 +253,7 @@ void postprocess(const char* fn, ostringstream& content,
   case BE_GlobalData::STREAM_IDL: {
     macrofied = to_macro(fn);
     out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';
-
-#ifdef ACE_HAS_CDR_FIXED
     out << "#define __OPENDDS_IDL_HAS_FIXED\n";
-#endif
 
     string filebase(be_global->filename());
     const size_t idx = filebase.find_last_of("/\\"); // allow either slash
@@ -276,7 +274,7 @@ void postprocess(const char* fn, ostringstream& content,
     // to make namespaces with names based on the file instead.
     std::string prefix = to_macro(fn);
     for (size_t i = 0; i < prefix.size(); ++i) {
-      prefix[i] = tolower(prefix[i]);
+      prefix[i] = static_cast<char>(tolower(prefix[i]));
     }
     out <<
       "\n"

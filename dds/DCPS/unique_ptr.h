@@ -1,14 +1,15 @@
 #ifndef OPENDDS_DCPS_UNIQUE_PTR_H
 #define OPENDDS_DCPS_UNIQUE_PTR_H
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-# pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#include "Definitions.h"
 
+#include <dds/Versioned_Namespace.h>
 
-#include "dds/Versioned_Namespace.h"
+#include <ace/config-lite.h>
 
-#include "ace/config-lite.h"
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 #ifdef ACE_HAS_CPP11
 #  define OPENDDS_HAS_STD_UNIQUE_PTR
@@ -16,6 +17,7 @@
 
 #ifdef OPENDDS_HAS_STD_UNIQUE_PTR
 #  include <memory>
+#  define OPENDDS_MOVE_NS std
 #else
 #  include "Atomic.h"
 #  ifdef ACE_HAS_CPP11
@@ -23,6 +25,7 @@
 #  else
 #    include <algorithm>
 #  endif
+#  define OPENDDS_MOVE_NS OpenDDS::DCPS
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -343,4 +346,4 @@ typename unique_ptr<T>::rv_reference move(container_supported_unique_ptr<T>& ptr
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
-#endif /* end of include guard: UNIQUE_PTR_H_18C6F30C */
+#endif

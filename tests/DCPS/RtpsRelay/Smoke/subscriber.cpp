@@ -10,28 +10,32 @@
 
 #include <dds/DCPS/JsonValueWriter.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/WaitSet.h>
+
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#  ifdef OPENDDS_SECURITY
+#  if OPENDDS_CONFIG_SECURITY
 #    include <dds/DCPS/security/BuiltInPlugins.h>
 #  endif
 #endif
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #  include <dds/DCPS/security/framework/Properties.h>
 #endif
 
 #include <iostream>
 #include <cstdlib>
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 const char auth_ca_file[] = "file:../../../security/certs/identity/identity_ca_cert.pem";
 const char perm_ca_file[] = "file:../../../security/certs/permissions/permissions_ca_cert.pem";
 const char id_cert_file[] = "file:../../../security/certs/identity/test_participant_03_cert.pem";
@@ -124,7 +128,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     part_qos.user_data.value.length(static_cast<unsigned int>(std::strlen(USER_DATA)));
     std::memcpy(part_qos.user_data.value.get_buffer(), USER_DATA, std::strlen(USER_DATA));
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
     if (TheServiceParticipant->get_security()) {
       DDS::PropertySeq& props = part_qos.property.value;
       append(props, DDS::Security::Properties::AuthIdentityCA, auth_ca_file);
@@ -232,7 +236,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       OpenDDS::DCPS::TransportStatisticsSequence stats;
       disc->append_transport_statistics(42, guid, stats);
       if (transport_inst) {
-        transport_inst->append_transport_statistics(stats);
+        transport_inst->append_transport_statistics(stats, 42, dp_impl);
       }
 
       for (unsigned int i = 0; i != stats.length(); ++i) {

@@ -8,9 +8,9 @@
 # what's printed by:
 #   git shortlog --summary --numbered --email
 
-Justin Wilson <wilsonj@unityfoundation.io> <jrw972@gmail.com>
-Justin Wilson <wilsonj@unityfoundation.io> Justin R. Wilson
-Justin Wilson <wilsonj@unityfoundation.io> <wilsonj@objectcomputing.com>
+Justin Wilson <wilsonj@objectcomputing.com> <jrw972@gmail.com>
+Justin Wilson <wilsonj@objectcomputing.com> Justin R. Wilson
+Justin Wilson <wilsonj@objectcomputing.com> <wilsonj@unityfoundation.io>
 
 Jeff Schmitz <schmitzj@ociweb.com> <jeffrey.j.schmitz@gmail.com>
 Jeff Schmitz <schmitzj@ociweb.com> iamtheschmitzer <schmitzj@ociweb.com>
@@ -21,9 +21,10 @@ Paul Calabrese <calabrep@objectcomputing.com> <calabrese_p@ociweb.com>
 
 Huang-Ming Huang <huangh@ociweb.com> <huangming.huang@gmail.com>
 
-Fred Hornsey <hornseyf@unityfoundation.io> <fred@hornsey.us>
-Fred Hornsey <hornseyf@unityfoundation.io> Frederick Hornsey
-Fred Hornsey <hornseyf@unityfoundation.io> <hornseyf@objectcomputing.com>
+Fred Hornsey <hornseyf@objectcomputing.com> <fred@hornsey.us>
+Fred Hornsey <hornseyf@objectcomputing.com> Frederick Hornsey
+Fred Hornsey <hornseyf@objectcomputing.com> <hornseyf@unityfoundation.io>
+Fred Hornsey <hornseyf@objectcomputing.com> iguessthislldo <iguessthislldo@users.noreply.github.com>
 
 Doug Lewis <lewisdo@objectcomputing.com> unknown <lewisdo@objectcomputing.com>
 
@@ -58,3 +59,7 @@ Jose Morato <jmmorato@enxarxats.com> jmmorato
 Jose Morato <jmmorato@enxarxats.com> jmorato
 Jose Morato <jmmorato@enxarxats.com> jose_morato
 Jose Morato <jmmorato@enxarxats.com> <jose.morato@swisstiming.com>
+
+Simon Rogers <smnrgrs@gmail.com> smnrgrs
+
+Tyler Mayoff <tyler@tylermayoff.com> Tyler

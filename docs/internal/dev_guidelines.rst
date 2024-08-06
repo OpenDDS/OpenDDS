@@ -53,6 +53,41 @@ Dependencies
 
   :doc:`/devguide/building/dependencies` for all dependencies and details on how these are used in OpenDDS.
 
+*********************
+Dependency Management
+*********************
+
+ACE/TAO
+=======
+
+By default, the :ghfile:`configure` script and :ref:`CMake support<cmake-building>` use released versions of ACE/TAO.
+The same versions are used for pull requests.
+The versions are documented in :ghfile:`acetao.ini`.
+Currently, the :ghfile:`configure` scripts uses a release of ACE6 and CMake uses a release of ACE7.
+
+The versions are updated by the GitHub Actions workflow in :ghfile:`.github/workflows/update-ace-tao.yml` for micro/patch releases.
+When a new version of ACE/TAO is available, the workflow creates a pull request based on the new version.
+Ideally, this pull request would be merged early in a development cycle to allow the maximum number of builds to use the new versions.
+Changing the major and minor version will be considered at the beginning of a development cycle.
+
+To stay abreast of changes in ACE/TAO and provide feedback to ACE/TAO, there are additional GitHub Action workflows for build and testing with various ACE/TAO branches.
+These workflows are executed on a periodic basis.
+
+A developer is allowed to change the ACE/TAO version for their PR.
+If this is not a release, then the PR would be merged after the necessary ACE/TAO functionality is released.
+Ideally, the GitHub Actions files would be extended with variables that allow the default versions to be changed easily and a lint script would be added to prevent unintended changes.
+
+TODO
+====
+
+* MPC
+* Perl
+* openssl
+* xerces
+* rapidjson
+* GoogleTest
+* vcpkg
+
 .. _dev_guidelines-text_file_formating:
 
 ********************
@@ -126,8 +161,8 @@ Avoid using implementation-defined extensions (including ``#pragma``). Exception
 Use the C++ standard library as much as possible.
 The standard library should be preferred over ACE, which in turn should be preferred over system-specific libraries.
 
-The C++ standard library includes the C standard library by reference, making those identifiers available in namespace std.
-Using C's standard library identifiers in namespace std is preferred over the global namespace -- ``#include <cstring>`` instead of ``#include <string.h>``.
+The C++ standard library includes the C standard library by reference, making those identifiers available in namespace ``std``.
+Using C's standard library identifiers in namespace ``std`` is preferred over the global namespace -- ``#include <cstring>`` instead of ``#include <string.h>``.
 Not all supported platforms have standard library support for wide characters (``wchar_t``) but this is rarely needed.
 Preprocessor macro ``DDS_HAS_WCHAR`` can be used to detect those platforms.
 
@@ -266,7 +301,7 @@ Naming
 
 .. note::
 
-  For CMake `<https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html>` are nominally supported.
+  For CMake :ref:`unity builds <cmake-building-speed>` should be supported.
   This may cause unexpected build issues in CI builds when a name in one file happens to clash with another source file in the same source file batch.
 
 Comments
@@ -584,7 +619,7 @@ Perl Coding Style
 *****************
 
 `The Perl style guide <https://perldoc.perl.org/perlstyle>`_ should be generally followed, as long as it doesn't conflict with :ref:`dev_guidelines-text_file_formating`.
-Some additional nodes and exceptions:
+Some additional notes and exceptions:
 
 - New files should use 2 space indents, while existing 4 space indent files should stay that way for the most part.
 
@@ -595,7 +630,7 @@ Some additional nodes and exceptions:
     if (x) {
     }
     elsif (y) {
-    {
+    }
     else {
     }
 
@@ -629,7 +664,7 @@ CMake Coding Style
 ******************
 
 `The vcpkg CMake style guide <https://learn.microsoft.com/en-us/vcpkg/contributing/cmake-guidelines>`_ should be generally followed, as long as it doesn't conflict with :ref:`dev_guidelines-text_file_formating`.
-Some additional nodes and exceptions:
+Some additional notes and exceptions:
 
 - vcpkg-specific things can be ignored.
 - Whitespace:

@@ -103,6 +103,7 @@ FieldInfo::FieldInfo(AST_Field& field)
   , elem_ref_(as_base_ ? ref(scoped_elem_, "") : "")
   , elem_const_ref_(as_base_ ? ref(scoped_elem_) : "")
   , n_elems_(container_element_limit(type_))
+  , is_optional_(be_global->is_optional(&field))
 {
   if (arr_) {
     std::ostringstream os;

@@ -8,7 +8,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  VCPKG_GIT_COMMIT: 8eb57355a4ffb410a2e94c07b4dca2dffbee8e50
+  VCPKG_GIT_COMMIT: f7423ee180c4b7f40d43402c2feb3859161ef625
 
 jobs:
 
@@ -40,7 +40,7 @@ jobs:
         cd OpenDDS
         ./configure --optimize --no-debug --static --tests --qt
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.2.0
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build
       shell: bash
       run: |
@@ -92,9 +92,9 @@ jobs:
         cd OpenDDS
         perl configure --optimize --no-debug --static --tests ^
           "--qt=%VCPKG_INSTALLED_DIR%/x64-windows" ^
-          "--mpcopts=-value_template platforms=x64" ^
-          "--mpcopts=-value_template configurations=Release" ^
-          "--mpcopts=-value_template Release::runtime_library=MultiThreadedDLL"
+          --mpc:value_template platforms=x64 ^
+          --mpc:value_template configurations=Release ^
+          --mpc:value_template Release::runtime_library=MultiThreadedDLL
         tools\scripts\show_build_config.pl
     - name: build
       shell: cmd

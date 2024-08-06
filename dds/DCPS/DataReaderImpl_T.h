@@ -7,15 +7,19 @@
 #  define OPENDDS_HAS_STD_SHARED_PTR
 #endif
 
+#include "BuiltInTopicUtils.h"
+#include "EncapsulationHeader.h"
+#include "GuidConverter.h"
 #include "MultiTopicImpl.h"
 #include "RakeResults_T.h"
 #include "SubscriberImpl.h"
-#include "BuiltInTopicUtils.h"
-#include "Util.h"
 #include "TypeSupportImpl.h"
+#include "Util.h"
 #include "dcps_export.h"
-#include "GuidConverter.h"
+
 #include "XTypes/DynamicDataAdapter.h"
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #ifndef OPENDDS_HAS_STD_SHARED_PTR
 #  include <ace/Bound_Ptr.h>
@@ -847,7 +851,7 @@ namespace OpenDDS {
     bool filtered = false;
     SubscriptionInstance_rch instance;
 
-    const DDS::Time_t now = timestamp.to_dds_time();
+    const DDS::Time_t now = timestamp.to_idl_struct();
     DataSampleHeader header;
     header.source_timestamp_sec_ = now.sec;
     header.source_timestamp_nanosec_ = now.nanosec;
@@ -863,7 +867,7 @@ namespace OpenDDS {
 
       bool just_registered;
       unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator(sample));
-      store_instance_data(move(data), DDS::HANDLE_NIL, header, instance, just_registered, filtered);
+      store_instance_data(OPENDDS_MOVE_NS::move(data), DDS::HANDLE_NIL, header, instance, just_registered, filtered);
       if (instance) inst = instance->instance_handle_;
     }
 
@@ -895,7 +899,7 @@ namespace OpenDDS {
 
     SubscriptionInstance_rch si = get_handle_instance(instance);
     if (si && state != DDS::ALIVE_INSTANCE_STATE) {
-      const DDS::Time_t now = timestamp.to_dds_time();
+      const DDS::Time_t now = timestamp.to_idl_struct();
       DataSampleHeader header;
       header.publication_id_ = publication_id;
       header.source_timestamp_sec_ = now.sec;
@@ -906,7 +910,7 @@ namespace OpenDDS {
       bool just_registered, filtered;
       unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
       get_key_value(*data, instance);
-      store_instance_data(move(data), publication_handle, header, si, just_registered, filtered);
+      store_instance_data(OPENDDS_MOVE_NS::move(data), publication_handle, header, si, just_registered, filtered);
       if (!filtered) {
         notify_read_conditions();
       }
@@ -936,7 +940,14 @@ namespace OpenDDS {
         return;
       }
       Encoding encoding;
-      if (!encap.to_encoding(encoding, type_support_->base_extensibility())) {
+      if (!to_encoding(encoding, encap, type_support_->base_extensibility())) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: %CDataReaderImpl::lookup_instance: "
+                     "to_encoding failed writer %C reader %C\n",
+                     LogGuid(sample.header_.publication_id_).c_str(),
+                     LogGuid(subscription_id()).c_str()));
+        }
         return;
       }
 
@@ -1083,7 +1094,7 @@ protected:
         }
         return;
       }
-      store_instance_data(move(data), publication_handle, sample.header_, instance, just_registered, filtered);
+      store_instance_data(OPENDDS_MOVE_NS::move(data), publication_handle, sample.header_, instance, just_registered, filtered);
       return;
     }
     const bool encapsulated = sample.header_.cdr_encapsulation_;
@@ -1105,7 +1116,14 @@ protected:
         return;
       }
       Encoding encoding;
-      if (!encap.to_encoding(encoding, type_support_->base_extensibility())) {
+      if (!to_encoding(encoding, encap, type_support_->base_extensibility())) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: %CDataReaderImpl::dds_demarshal: "
+                     "to_encoding failed writer %C reader %C\n",
+                     LogGuid(sample.header_.publication_id_).c_str(),
+                     LogGuid(subscription_id()).c_str()));
+        }
         return;
       }
 
@@ -1187,7 +1205,7 @@ protected:
     }
 #endif
 
-    store_instance_data(move(data), publication_handle, sample.header_, instance, just_registered, filtered);
+    store_instance_data(OPENDDS_MOVE_NS::move(data), publication_handle, sample.header_, instance, just_registered, filtered);
   }
 
   virtual void dispose_unregister(const OpenDDS::DCPS::ReceivedDataSample& sample,
@@ -1268,7 +1286,7 @@ private:
                                  const OpenDDS::DCPS::DataSampleHeader& header,
                                  OpenDDS::DCPS::SubscriptionInstance_rch& instance_ptr)
   {
-#if defined(OPENDDS_SECURITY) && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+#if OPENDDS_CONFIG_SECURITY && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
     const bool is_dispose_msg =
       header.message_id_ == OpenDDS::DCPS::DISPOSE_INSTANCE ||
       header.message_id_ == OpenDDS::DCPS::DISPOSE_UNREGISTER_INSTANCE;
@@ -1834,7 +1852,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       const std::pair<typename SubscriptionInstanceMapType::iterator, bool> bpair =
         instances_.insert(typename SubscriptionInstanceMapType::value_type(handle, instance));
 
-      if (bpair.second == false) {
+      if (!bpair.second) {
         if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ")
@@ -1857,9 +1875,9 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
         }
 
         if (new_handle) {
-          const std::pair<typename InstanceMap::iterator, bool> bpair =
+          const std::pair<typename InstanceMap::iterator, bool> res =
             inst->insert(typename InstanceMap::value_type(*instance_data, handle));
-          if (!bpair.second) {
+          if (!res.second) {
             if (DCPS_debug_level > 0) {
               ACE_ERROR ((LM_ERROR,
                           ACE_TEXT("(%P|%t) ")
@@ -1890,7 +1908,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
     std::pair<typename InstanceMap::iterator, bool> bpair =
       instance_map_.insert(typename InstanceMap::value_type(*instance_data,
         handle));
-    if (bpair.second == false)
+    if (!bpair.second)
     {
       if (DCPS_debug_level > 0) {
         ACE_ERROR ((LM_ERROR,
@@ -1926,7 +1944,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       if (!filtered && time_based_filter_instance(instance_ptr, now, deadline)) {
         filtered = true;
         if (qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
-          delay_sample(handle, move(instance_data), header, just_registered, now, deadline);
+          delay_sample(handle, OPENDDS_MOVE_NS::move(instance_data), header, just_registered, now, deadline);
         }
       } else {
         // nothing time based filtered now
@@ -1939,7 +1957,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       }
     }
 
-    finish_store_instance_data(move(instance_data), header, instance_ptr, is_dispose_msg, is_unregister_msg);
+    finish_store_instance_data(OPENDDS_MOVE_NS::move(instance_data), header, instance_ptr, is_dispose_msg, is_unregister_msg);
   }
   else
   {
@@ -2314,7 +2332,7 @@ void delay_sample(DDS::InstanceHandle_t handle,
 #ifdef ACE_HAS_CPP11
       filter_delayed_sample_map_.emplace(std::piecewise_construct,
                                          std::forward_as_tuple(handle),
-                                         std::forward_as_tuple(move(data), hdr, just_registered));
+                                         std::forward_as_tuple(OPENDDS_MOVE_NS::move(data), hdr, just_registered));
 #else
       filter_delayed_sample_map_.insert(std::make_pair(handle, FilterDelayedSample(move(data), hdr, just_registered)));
 #endif
@@ -2332,7 +2350,7 @@ void delay_sample(DDS::InstanceHandle_t handle,
     FilterDelayedSample& sample = i->second;
     // we only care about the most recently filtered sample, so clean up the last one
 
-    sample.message = move(data);
+    sample.message = OPENDDS_MOVE_NS::move(data);
     sample.header = hdr;
     sample.new_instance = just_registered;
     // already scheduled for timeout at the desired time
@@ -2408,7 +2426,7 @@ void filter_delayed(const MonotonicTimePoint& now)
       const bool new_instance = data->second.new_instance;
 
       // should not use data iterator anymore, since finish_store_instance_data releases sample_lock_
-      finish_store_instance_data(move(data->second.message),
+      finish_store_instance_data(OPENDDS_MOVE_NS::move(data->second.message),
                                  *header,
                                  instance,
                                  NOT_DISPOSE_MSG,
@@ -2459,7 +2477,7 @@ typedef ACE_Strong_Bound_Ptr<const OpenDDS::DCPS::DataSampleHeader, ACE_Null_Mut
 #endif
 struct FilterDelayedSample {
   FilterDelayedSample(unique_ptr<MessageTypeWithAllocator> msg, DataSampleHeader_ptr hdr, bool new_inst)
-    : message(move(msg))
+    : message(OPENDDS_MOVE_NS::move(msg))
     , header(hdr)
     , new_instance(new_inst)
   {}

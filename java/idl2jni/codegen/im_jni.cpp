@@ -484,6 +484,23 @@ bool isSSU(AST_Type *t)  //sequence, struct, union
     return false;
   }
 }
+
+bool isInterface(AST_Type *t)
+{
+  if (t->node_type() == AST_Decl::NT_typedef) {
+    AST_Typedef *td = dynamic_cast<AST_Typedef*>(t);
+    t = td->primitive_base_type();
+  }
+
+  switch (t->node_type()) {
+  case AST_Decl::NT_interface:
+  case AST_Decl::NT_interface_fwd:
+    return true;
+  default:
+    return false;
+  }
+}
+
 }
 
 bool idl_mapping_jni::gen_enum(UTL_ScopedName *name,
@@ -1300,32 +1317,33 @@ void write_native_operation(UTL_ScopedName *name, const char *javaStub,
 {
   const char *opname = op->local_name()->get_string();
   string ret = "void",
-               cxx = idl_mapping_jni::scoped(name),
-                     fnName = jni_function_name(javaStub, opname),
-                              retval, retconv, ret_exception;
-  //for the JavaPeer (local interfaces only)
+    cxx = idl_mapping_jni::scoped(name),
+    fnName = jni_function_name(javaStub, opname),
+    retval, retconv, ret_exception;
+  // for the JavaPeer (local interfaces only)
   string ret_jsig = "V", jniFn = "Void", tao_ret = "void",
-                                                   tao_retval, tao_retconv, array_cast;
+    tao_retval, tao_retconv, array_cast;
+  AST_Type* op_return_type = op->return_type();
 
   if (!op->void_return_type()) {
-    ret = idl_mapping_jni::type(op->return_type());
-    retval = idl_mapping_jni::taoType(op->return_type());
-    tao_ret = idl_mapping_jni::taoParam(op->return_type(),
+    ret = idl_mapping_jni::type(op_return_type);
+    retval = idl_mapping_jni::taoType(op_return_type);
+    tao_ret = idl_mapping_jni::taoParam(op_return_type,
                                         AST_Argument::dir_IN /*ignored*/, true);
     tao_retval = ret;
-    jniFn = idl_mapping_jni::jniFnName(op->return_type());
-    ret_jsig = idl_mapping_jni::jvmSignature(op->return_type());
+    jniFn = idl_mapping_jni::jniFnName(op_return_type);
+    ret_jsig = idl_mapping_jni::jvmSignature(op_return_type);
     string suffix, extra_type, extra_init, extra_retn;
-    bool is_array = isArray(op->return_type()),
-                    is_objref = isObjref(op->return_type());
+    bool is_array = isArray(op_return_type),
+                    is_objref = isObjref(op_return_type);
 
-    if (is_array || op->return_type()->size_type() != AST_Type::FIXED) {
+    if (is_array || op_return_type->size_type() != AST_Type::FIXED) {
       if (!is_array && !is_objref) suffix = ".in ()";
 
       if (is_array) {
         extra_type = "_forany";
         retval = append_forany(retval);
-      } else if (isSSU(op->return_type())) {
+      } else if (isSSU(op_return_type)) {
         extra_type = "_var";
         extra_init = " = new " + retval;
         retval = append_var(retval);
@@ -1343,18 +1361,20 @@ void write_native_operation(UTL_ScopedName *name, const char *javaStub,
     tao_retconv = "  return _j_ret;\n";
     ret_exception = "  return 0;\n";
 
-    if (!isPrimitive(op->return_type())) {
+    if (!isPrimitive(op_return_type)) {
       retconv =
         "      " + ret + " _j_ret = 0;\n"
         "      copyToJava (_jni, _j_ret, _c_ret" + suffix + ", true);\n"
         "      return _j_ret;\n";
       tao_retconv =
-        "  " + idl_mapping_jni::taoType(op->return_type()) + extra_type
+        "  " + idl_mapping_jni::taoType(op_return_type) + extra_type
         + " _c_ret" + extra_init + ";\n"
         "  copyToCxx (_jni, _c_ret, _j_ret);\n"
         "  return _c_ret" + extra_retn + ";\n";
     }
   }
+
+  const bool hidden = is_hidden_op_in_java(op);
 
   //for the JavaPeer (local interfaces only)
   string tao_args, java_args, args_jsig, tao_argconv_in, tao_argconv_out;
@@ -1367,17 +1387,23 @@ void write_native_operation(UTL_ScopedName *name, const char *javaStub,
     AST_Decl *item = it.item();
 
     if (item->node_type() == AST_Decl::NT_argument) {
-      AST_Argument *arg = dynamic_cast<AST_Argument*>(item);
-      const char *argname = arg->local_name()->get_string();
-      bool in = arg->direction() == AST_Argument::dir_IN;
-      args += ", " + (in ? idl_mapping_jni::type(arg->field_type())
-                      : "jobject")
-              + ' ' + argname;
+      AST_Argument* const arg = dynamic_cast<AST_Argument*>(item);
+      const char* const argname = arg->local_name()->get_string();
+      const bool in = arg->direction() == AST_Argument::dir_IN;
 
-      if (tao_args != "") tao_args += ", ";
+      args += ", " + (in ? idl_mapping_jni::type(arg->field_type()) : "jobject");
+      if (!hidden) {
+        args += std::string(" ") + argname;
+      }
 
-      tao_args += idl_mapping_jni::taoParam(arg->field_type(),
-                                            arg->direction()) + ' ' + argname;
+      if (!tao_args.empty()) {
+        tao_args.append(", ");
+      }
+      tao_args += idl_mapping_jni::taoParam(arg->field_type(), arg->direction());
+      if (!hidden) {
+        tao_args += std::string(" ") + argname;
+      }
+
       args_jsig += in
                    ? idl_mapping_jni::jvmSignature(arg->field_type())
                    : "L" + idl_mapping::scoped_helper(arg->field_type()->name(),
@@ -1409,9 +1435,17 @@ void write_native_operation(UTL_ScopedName *name, const char *javaStub,
       idl_mapping_jni::scoped_helper(name, "_") << "JavaPeer::" << opname_cxx <<
       " (" << tao_args << ")\n"
       "{\n";
-    std::string hidden_impl;
-    if (is_hidden_op_in_java(op, &hidden_impl)) {
-      be_global->stub_impl_ << "  " << hidden_impl << "\n";
+    if (hidden) {
+      if (isPrimitive(op_return_type) ||
+          (isSSU(op_return_type) && op_return_type->size_type() == AST_Type::VARIABLE) ||
+          isInterface(op_return_type)) {
+        be_global->stub_impl_ << "  " << tao_ret << " x = 0;\n";
+      } else {
+        be_global->add_include((be_global->filebase() + "Impl.h").c_str());
+        be_global->stub_impl_ << "  " << tao_ret << " x;\n";
+        be_global->stub_impl_ << "  OpenDDS::DCPS::set_default(x);\n";
+      }
+      be_global->stub_impl_ << "  return x;\n";
     } else {
       be_global->stub_impl_ <<
         "  JNIThreadAttacher _jta (jvm_, cl_);\n"
@@ -1433,26 +1467,34 @@ void write_native_operation(UTL_ScopedName *name, const char *javaStub,
   }
 
   be_global->stub_impl_ <<
-  "extern \"C\" JNIEXPORT " << ret << " JNICALL\n" <<
-  fnName << " (JNIEnv *_jni, jobject _jthis" << args << ")\n"
-  "{\n"
-  "  CORBA::Object_ptr _this_obj = recoverTaoObject (_jni, _jthis);\n"
-  "  try\n"
-  "    {\n"
-  "      " << cxx << "_var _this = " << cxx << "::_narrow (_this_obj);\n"
-  << argconv_in <<
-  "      " << retval << "_this->" << (isCxxKeyword(opname) ? "_cxx_" : "")
-  << opname << " (" << cxx_args << ");\n"
-  << argconv_out
-  << retconv <<
-  //FUTURE: catch declared user exceptions
-  "    }\n"
-  "  catch (const CORBA::SystemException &_se)\n"
-  "    {\n"
-  "      throw_java_exception (_jni, _se);\n"
-  "    }\n"
-  << ret_exception <<
-  "}\n\n";
+    "extern \"C\" JNIEXPORT " << ret << " JNICALL\n" <<
+    fnName << "(JNIEnv* _jni, jobject _jthis" << args << ")\n"
+    "{\n";
+  if (hidden) {
+    be_global->stub_impl_ <<
+      "  (void)_jni;\n"
+      "  (void)_jthis;\n";
+  } else {
+    be_global->stub_impl_ <<
+      "  CORBA::Object_ptr _this_obj = recoverTaoObject (_jni, _jthis);\n"
+      "  try\n"
+      "    {\n"
+      "      " << cxx << "_var _this = " << cxx << "::_narrow (_this_obj);\n"
+      << argconv_in <<
+      "      " << retval << "_this->" << (isCxxKeyword(opname) ? "_cxx_" : "")
+      << opname << " (" << cxx_args << ");\n"
+      << argconv_out
+      << retconv <<
+      // FUTURE: catch declared user exceptions
+      "    }\n"
+      "  catch (const CORBA::SystemException &_se)\n"
+      "    {\n"
+      "      throw_java_exception (_jni, _se);\n"
+      "    }\n";
+  }
+  be_global->stub_impl_
+    << ret_exception
+    << "}\n\n";
 }
 
 void recursive_bases(AST_Interface *interf, set<string> &bases,

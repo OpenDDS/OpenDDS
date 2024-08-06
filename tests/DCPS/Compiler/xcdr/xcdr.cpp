@@ -8,16 +8,15 @@
 #include "mutable_typesTypeSupportImpl.h"
 #include "mutable_types2TypeSupportImpl.h"
 #include "keyonlyTypeSupportImpl.h"
+#include "optionalTypeSupportImpl.h"
 
 #include <tests/Utils/DataView.h>
 #include <tests/Utils/GtestRc.h>
 
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
-#include <dds/DCPS/XTypes/Utils.h>
+#include <dds/DCPS/Xcdr2ValueWriter.h>
 #include <dds/DCPS/XTypes/TypeLookupService.h>
-#include <dds/DCPS/XTypes/DynamicDataAdapter.h>
-#include <dds/DCPS/XTypes/DynamicDataFactory.h>
 #include <dds/DCPS/XTypes/DynamicDataImpl.h>
 #include <dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h>
 
@@ -80,26 +79,26 @@ DDS::DynamicType_var get_dynamic_type()
 template <typename Type>
 void set_base_values(Type& value)
 {
-  value.short_field = 0x7fff;
-  value.long_field = 0x7fffffff;
-  value.octet_field = 0x01;
-  value.long_long_field = 0x7fffffffffffffff;
+  value.short_field() = 0x7fff;
+  value.long_field() = 0x7fffffff;
+  value.octet_field() = 0x01;
+  value.long_long_field() = 0x7fffffffffffffff;
 }
 
 template <typename Type>
 void set_base_values_union(Type& value, UnionDisc disc)
 {
   switch (disc) {
-  case E_SHORT_FIELD:
+  case UnionDisc::E_SHORT_FIELD:
     value.short_field(0x7fff);
     break;
-  case E_LONG_FIELD:
+  case UnionDisc::E_LONG_FIELD:
     value.long_field(0x7fffffff);
     break;
-  case E_OCTET_FIELD:
+  case UnionDisc::E_OCTET_FIELD:
     value.octet_field(0x01);
     break;
-  case E_LONG_LONG_FIELD:
+  case UnionDisc::E_LONG_LONG_FIELD:
     value.long_long_field(0x7fffffffffffffff);
     break;
   default:
@@ -126,10 +125,11 @@ void set_values_union(Type& value, UnionDisc disc)
   set_base_values_union(value, disc);
 }
 
-template <typename Type, size_t length>
-void expect_arrays_are_equal(const Type (&a)[length], const Type (&b)[length])
+template <typename Type>
+void expect_arrays_are_equal(const Type& a, const Type& b)
 {
-  for (size_t i = 0; i < length; ++i) {
+  ASSERT_EQ(a.size(), b.size());
+  for (size_t i = 0; i < a.size(); ++i) {
     EXPECT_EQ(a[i], b[i]);
   }
 }
@@ -137,10 +137,10 @@ void expect_arrays_are_equal(const Type (&a)[length], const Type (&b)[length])
 template<typename TypeA, typename TypeB>
 void expect_values_equal_base(const TypeA& a, const TypeB& b)
 {
-  EXPECT_EQ(a.short_field, b.short_field);
-  EXPECT_EQ(a.long_field, b.long_field);
-  EXPECT_EQ(a.octet_field, b.octet_field);
-  EXPECT_EQ(a.long_long_field, b.long_long_field);
+  EXPECT_EQ(a.short_field(), b.short_field());
+  EXPECT_EQ(a.long_field(), b.long_field());
+  EXPECT_EQ(a.octet_field(), b.octet_field());
+  EXPECT_EQ(a.long_long_field(), b.long_long_field());
 }
 
 template<typename TypeA, typename TypeB>
@@ -148,16 +148,16 @@ void expect_values_equal_base_union(const TypeA& a, const TypeB& b)
 {
   EXPECT_EQ(a._d(), b._d());
   switch (a._d()) {
-  case E_SHORT_FIELD:
+  case UnionDisc::E_SHORT_FIELD:
     EXPECT_EQ(a.short_field(), b.short_field());
     break;
-  case E_LONG_FIELD:
+  case UnionDisc::E_LONG_FIELD:
     EXPECT_EQ(a.long_field(), b.long_field());
     break;
-  case E_OCTET_FIELD:
+  case UnionDisc::E_OCTET_FIELD:
     EXPECT_EQ(a.octet_field(), b.octet_field());
     break;
-  case E_LONG_LONG_FIELD:
+  case UnionDisc::E_LONG_LONG_FIELD:
     EXPECT_EQ(a.long_long_field(), b.long_long_field());
     break;
   default:
@@ -222,11 +222,9 @@ void amalgam_serializer_test_base(
     Serializer serializer(&buffer, encoding);
     if (dynamic) {
 #if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
-      add_type<RealTypeA>();
-      DDS::DynamicType_var type = get_dynamic_type<RealTypeA>();
-      DDS::DynamicData_var dda = get_dynamic_data_adapter<RealTypeA>(type, value);
-      DDS::DynamicData_var dd = DDS::DynamicDataFactory::get_instance()->create_data(type);
-      ASSERT_RC_OK(copy(dd, dda));
+      typename DDSTraits<RealTypeA>::TypeSupportImplType tsi;
+      DDS::DynamicData_var dd;
+      ASSERT_RC_OK(tsi.create_dynamic_sample_rc(dd, value));
 
       DDS::DynamicData_ptr dd_ptr = dd.in();
       if (key_only) {
@@ -253,10 +251,10 @@ void amalgam_serializer_test_base(
 #if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
       add_type<RealTypeB>();
       DDS::DynamicType_var type = get_dynamic_type<RealTypeB>();
-      DDS::DynamicData_var dda = get_dynamic_data_adapter<RealTypeB>(type, result);
       DDS::DynamicData_var ddi = new DynamicDataXcdrReadImpl(serializer, type,
         key_only ? Sample::KeyOnly: Sample::Full);
-      ASSERT_RC_OK(copy(dda, ddi));
+      typename DDSTraits<RealTypeB>::TypeSupportImplType tsi;
+      ASSERT_RC_OK(tsi.create_sample_rc(result, ddi));
 #else
       ASSERT_TRUE(false);
 #endif
@@ -304,6 +302,23 @@ void serializer_test_union(const Encoding& encoding, const DataView& expected_cd
   amalgam_serializer_test_union<Type, Type>(encoding, expected_cdr, disc);
 }
 
+template <typename Type>
+void baseline_checks_vwrite(const Encoding& encoding, const Type& value, const DataView& expected_cdr)
+{
+  if (encoding.kind() == Encoding::KIND_XCDR2) {
+    // Compute serialized size
+    Xcdr2ValueWriter value_writer(encoding);
+    EXPECT_TRUE(vwrite(value_writer, value));
+
+    // Serialize
+    ACE_Message_Block buffer(value_writer.get_serialized_size());
+    Serializer ser(&buffer, encoding);
+    value_writer.set_serializer(&ser);
+    EXPECT_TRUE(vwrite(value_writer, value));
+    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+  }
+}
+
 template<typename Type>
 void baseline_checks(const Encoding& encoding, const DataView& expected_cdr,
   SerializedSizeBound bound = SerializedSizeBound())
@@ -325,8 +340,9 @@ void baseline_checks(const Encoding& encoding, const DataView& expected_cdr,
   Type value;
   set_values(value);
   EXPECT_EQ(serialized_size(encoding, value), expected_cdr.size);
-
   serializer_test<Type>(encoding, expected_cdr);
+
+  baseline_checks_vwrite(encoding, value, expected_cdr);
 }
 
 template<typename Type>
@@ -336,6 +352,8 @@ void baseline_checks_union(const Encoding& encoding, const DataView& expected_cd
   set_values_union(value, disc);
   EXPECT_EQ(serialized_size(encoding, value), expected_cdr.size);
   serializer_test_union<Type>(encoding, expected_cdr, disc);
+
+  baseline_checks_vwrite(encoding, value, expected_cdr);
 }
 
 #define STREAM_DATA \
@@ -613,18 +631,18 @@ void expect_values_equal(const MutableUnion& a, const MutableUnion& b)
 
 TEST(BasicTests, MutableXcdr12Union)
 {
-  baseline_checks_union<MutableUnion>(xcdr2, MutableXcdr2UnionExpectedShortBE::expected, E_SHORT_FIELD);
-  baseline_checks_union<MutableUnion>(xcdr2, MutableXcdr2UnionExpectedLongBE::expected, E_LONG_FIELD);
-  baseline_checks_union<MutableUnion>(xcdr2, MutableXcdr2UnionExpectedOctetBE::expected, E_OCTET_FIELD);
-  baseline_checks_union<MutableUnion>(xcdr2, MutableXcdr2UnionExpectedLongLongBE::expected, E_LONG_LONG_FIELD);
+  baseline_checks_union<MutableUnion>(xcdr2, MutableXcdr2UnionExpectedShortBE::expected, UnionDisc::E_SHORT_FIELD);
+  baseline_checks_union<MutableUnion>(xcdr2, MutableXcdr2UnionExpectedLongBE::expected, UnionDisc::E_LONG_FIELD);
+  baseline_checks_union<MutableUnion>(xcdr2, MutableXcdr2UnionExpectedOctetBE::expected, UnionDisc::E_OCTET_FIELD);
+  baseline_checks_union<MutableUnion>(xcdr2, MutableXcdr2UnionExpectedLongLongBE::expected, UnionDisc::E_LONG_LONG_FIELD);
 }
 
 TEST(BasicTests, MutableXcdr12UnionLE)
 {
-  test_little_endian_union<MutableUnion, MutableXcdr2UnionExpectedShortBE>(E_SHORT_FIELD);
-  test_little_endian_union<MutableUnion, MutableXcdr2UnionExpectedLongBE>(E_LONG_FIELD);
-  test_little_endian_union<MutableUnion, MutableXcdr2UnionExpectedOctetBE>(E_OCTET_FIELD);
-  test_little_endian_union<MutableUnion, MutableXcdr2UnionExpectedLongLongBE>(E_LONG_LONG_FIELD);
+  test_little_endian_union<MutableUnion, MutableXcdr2UnionExpectedShortBE>(UnionDisc::E_SHORT_FIELD);
+  test_little_endian_union<MutableUnion, MutableXcdr2UnionExpectedLongBE>(UnionDisc::E_LONG_FIELD);
+  test_little_endian_union<MutableUnion, MutableXcdr2UnionExpectedOctetBE>(UnionDisc::E_OCTET_FIELD);
+  test_little_endian_union<MutableUnion, MutableXcdr2UnionExpectedLongLongBE>(UnionDisc::E_LONG_LONG_FIELD);
 }
 
 // ---------- FinalUnion
@@ -676,18 +694,18 @@ void expect_values_equal(const FinalUnion& a, const FinalUnion& b)
 
 TEST(BasicTests, FinalUnion)
 {
-  baseline_checks_union<FinalUnion>(xcdr2, FinalUnionExpectedShortBE::expected, E_SHORT_FIELD);
-  baseline_checks_union<FinalUnion>(xcdr2, FinalUnionExpectedLongBE::expected, E_LONG_FIELD);
-  baseline_checks_union<FinalUnion>(xcdr2, FinalUnionExpectedOctetBE::expected, E_OCTET_FIELD);
-  baseline_checks_union<FinalUnion>(xcdr2, FinalUnionExpectedLongLongBE::expected, E_LONG_LONG_FIELD);
+  baseline_checks_union<FinalUnion>(xcdr2, FinalUnionExpectedShortBE::expected, UnionDisc::E_SHORT_FIELD);
+  baseline_checks_union<FinalUnion>(xcdr2, FinalUnionExpectedLongBE::expected, UnionDisc::E_LONG_FIELD);
+  baseline_checks_union<FinalUnion>(xcdr2, FinalUnionExpectedOctetBE::expected, UnionDisc::E_OCTET_FIELD);
+  baseline_checks_union<FinalUnion>(xcdr2, FinalUnionExpectedLongLongBE::expected, UnionDisc::E_LONG_LONG_FIELD);
 }
 
 TEST(BasicTests, FinalUnionLE)
 {
-  test_little_endian_union<FinalUnion, FinalUnionExpectedShortBE>(E_SHORT_FIELD);
-  test_little_endian_union<FinalUnion, FinalUnionExpectedLongBE>(E_LONG_FIELD);
-  test_little_endian_union<FinalUnion, FinalUnionExpectedOctetBE>(E_OCTET_FIELD);
-  test_little_endian_union<FinalUnion, FinalUnionExpectedLongLongBE>(E_LONG_LONG_FIELD);
+  test_little_endian_union<FinalUnion, FinalUnionExpectedShortBE>(UnionDisc::E_SHORT_FIELD);
+  test_little_endian_union<FinalUnion, FinalUnionExpectedLongBE>(UnionDisc::E_LONG_FIELD);
+  test_little_endian_union<FinalUnion, FinalUnionExpectedOctetBE>(UnionDisc::E_OCTET_FIELD);
+  test_little_endian_union<FinalUnion, FinalUnionExpectedLongLongBE>(UnionDisc::E_LONG_LONG_FIELD);
 }
 
 // Appendable Tests ==========================================================
@@ -725,7 +743,7 @@ template<>
 void set_values(AdditionalFieldNestedStruct& value)
 {
   set_base_values(value);
-  value.additional_field = 0x12345678;
+  value.additional_field() = 0x12345678;
 }
 
 TEST(AppendableTests, FromAdditionalNestedStruct)
@@ -745,7 +763,7 @@ void expect_values_equal(const AdditionalFieldNestedStruct& a,
                          const AdditionalFieldNestedStruct& b)
 {
   expect_values_equal_base(a, b);
-  EXPECT_EQ(a.additional_field, b.additional_field);
+  EXPECT_EQ(a.additional_field(), b.additional_field());
 }
 
 TEST(AppendableTests, BothAdditionalNestedStruct)
@@ -795,7 +813,7 @@ const unsigned AppendableExpectedXcdr2BE::layout[] = {4,4,2,2,4,1,3,8,2,2,4,1,3,
 template<>
 void set_values(AppendableWithNestedStruct& value)
 {
-  set_base_values(value.nested);
+  set_base_values(value.nested());
   set_base_values(value);
 }
 
@@ -803,7 +821,7 @@ template<typename TypeA, typename TypeB>
 void expect_equal_with_nested(const TypeA& a, const TypeB& b)
 {
   expect_values_equal_base(a, b);
-  expect_values_equal_base(a.nested, b.nested);
+  expect_values_equal_base(a.nested(), b.nested());
 }
 
 template<>
@@ -882,9 +900,9 @@ const unsigned AdditionalAppendableExpectedXcdr2BE::layout[] = {4,4,2,2,4,1,3,8,
 template<>
 void set_values(AdditionalFieldAppendableStruct& value)
 {
-  set_values(value.nested);
+  set_values(value.nested());
   set_base_values(value);
-  value.additional_field = 0x12345678;
+  value.additional_field() = 0x12345678;
 }
 
 template<>
@@ -911,8 +929,8 @@ void expect_values_equal(const AdditionalFieldAppendableStruct& a,
                          const AdditionalFieldAppendableStruct& b)
 {
   expect_equal_with_nested(a, b);
-  EXPECT_EQ(a.additional_field, b.additional_field);
-  EXPECT_EQ(a.nested.additional_field, b.nested.additional_field);
+  EXPECT_EQ(a.additional_field(), b.additional_field());
+  EXPECT_EQ(a.nested().additional_field(), b.nested().additional_field());
 }
 
 TEST(AppendableTests, BothAdditionalAppendableStruct)
@@ -958,16 +976,16 @@ const unsigned AppendableExpected2Xcdr2BE::layout[] = {4,4,1,1,1,1,1,1,
 template<>
 void set_values(AppendableWithNestedStruct2& value)
 {
-  set_values(value.nested);
-  value.string_field = "abcdefghi";
+  set_values(value.nested());
+  value.string_field() = "abcdefghi";
 }
 
 template<>
 void expect_values_equal(const AppendableWithNestedStruct2& a,
                          const AppendableWithNestedStruct2& b)
 {
-  expect_values_equal(a.nested, b.nested);
-  EXPECT_STREQ(a.string_field, b.string_field);
+  expect_values_equal(a.nested(), b.nested());
+  EXPECT_EQ(a.string_field(), b.string_field());
 }
 
 TEST(AppendableTests, BothAppendableWithNestedStruct2)
@@ -1034,25 +1052,25 @@ void expect_values_equal(const AppendableUnion& a, const ModifiedAppendableUnion
 TEST(AppendableTests, FromAppendableUnion)
 {
   amalgam_serializer_test_union<AppendableUnion, ModifiedAppendableUnion>(
-    xcdr2, AppendableUnionXcdr2ExpectedShortBE::expected, E_SHORT_FIELD);
+    xcdr2, AppendableUnionXcdr2ExpectedShortBE::expected, UnionDisc::E_SHORT_FIELD);
   amalgam_serializer_test_union<AppendableUnion, ModifiedAppendableUnion>(
-    xcdr2, AppendableUnionXcdr2ExpectedLongBE::expected, E_LONG_FIELD);
+    xcdr2, AppendableUnionXcdr2ExpectedLongBE::expected, UnionDisc::E_LONG_FIELD);
   amalgam_serializer_test_union<AppendableUnion, ModifiedAppendableUnion>(
-    xcdr2, AppendableUnionXcdr2ExpectedOctetBE::expected, E_OCTET_FIELD);
+    xcdr2, AppendableUnionXcdr2ExpectedOctetBE::expected, UnionDisc::E_OCTET_FIELD);
   amalgam_serializer_test_union<AppendableUnion, ModifiedAppendableUnion>(
-    xcdr2, AppendableUnionXcdr2ExpectedLongLongBE::expected, E_LONG_LONG_FIELD);
+    xcdr2, AppendableUnionXcdr2ExpectedLongLongBE::expected, UnionDisc::E_LONG_LONG_FIELD);
 }
 
 TEST(AppendableTests, FromAppendableUnionLE)
 {
   test_little_endian_union<AppendableUnion, ModifiedAppendableUnion,
-                           AppendableUnionXcdr2ExpectedShortBE>(E_SHORT_FIELD);
+                           AppendableUnionXcdr2ExpectedShortBE>(UnionDisc::E_SHORT_FIELD);
   test_little_endian_union<AppendableUnion, ModifiedAppendableUnion,
-                           AppendableUnionXcdr2ExpectedLongBE>(E_LONG_FIELD);
+                           AppendableUnionXcdr2ExpectedLongBE>(UnionDisc::E_LONG_FIELD);
   test_little_endian_union<AppendableUnion, ModifiedAppendableUnion,
-                           AppendableUnionXcdr2ExpectedOctetBE>(E_OCTET_FIELD);
+                           AppendableUnionXcdr2ExpectedOctetBE>(UnionDisc::E_OCTET_FIELD);
   test_little_endian_union<AppendableUnion, ModifiedAppendableUnion,
-                           AppendableUnionXcdr2ExpectedLongLongBE>(E_LONG_LONG_FIELD);
+                           AppendableUnionXcdr2ExpectedLongLongBE>(UnionDisc::E_LONG_LONG_FIELD);
 }
 
 // Mutable Tests =============================================================
@@ -1192,18 +1210,18 @@ void expect_values_equal(const MutableUnionWithExplicitIDs& a, const MutableUnio
 
 TEST(MutableTests, BaselineXcdr2TestUnion)
 {
-  baseline_checks_union<MutableUnionWithExplicitIDs>(xcdr2, MutableUnionExpectedXcdr2ShortBE::expected, E_SHORT_FIELD);
-  baseline_checks_union<MutableUnionWithExplicitIDs>(xcdr2, MutableUnionExpectedXcdr2LongBE::expected, E_LONG_FIELD);
-  baseline_checks_union<MutableUnionWithExplicitIDs>(xcdr2, MutableUnionExpectedXcdr2OctetBE::expected, E_OCTET_FIELD);
-  baseline_checks_union<MutableUnionWithExplicitIDs>(xcdr2, MutableUnionExpectedXcdr2LongLongBE::expected, E_LONG_LONG_FIELD);
+  baseline_checks_union<MutableUnionWithExplicitIDs>(xcdr2, MutableUnionExpectedXcdr2ShortBE::expected, UnionDisc::E_SHORT_FIELD);
+  baseline_checks_union<MutableUnionWithExplicitIDs>(xcdr2, MutableUnionExpectedXcdr2LongBE::expected, UnionDisc::E_LONG_FIELD);
+  baseline_checks_union<MutableUnionWithExplicitIDs>(xcdr2, MutableUnionExpectedXcdr2OctetBE::expected, UnionDisc::E_OCTET_FIELD);
+  baseline_checks_union<MutableUnionWithExplicitIDs>(xcdr2, MutableUnionExpectedXcdr2LongLongBE::expected, UnionDisc::E_LONG_LONG_FIELD);
 }
 
 TEST(MutableTests, BaselineXcdr2TestUnionLE)
 {
-  test_little_endian_union<MutableUnionWithExplicitIDs, MutableUnionExpectedXcdr2ShortBE>(E_SHORT_FIELD);
-  test_little_endian_union<MutableUnionWithExplicitIDs, MutableUnionExpectedXcdr2LongBE>(E_LONG_FIELD);
-  test_little_endian_union<MutableUnionWithExplicitIDs, MutableUnionExpectedXcdr2OctetBE>(E_OCTET_FIELD);
-  test_little_endian_union<MutableUnionWithExplicitIDs, MutableUnionExpectedXcdr2LongLongBE>(E_LONG_LONG_FIELD);
+  test_little_endian_union<MutableUnionWithExplicitIDs, MutableUnionExpectedXcdr2ShortBE>(UnionDisc::E_SHORT_FIELD);
+  test_little_endian_union<MutableUnionWithExplicitIDs, MutableUnionExpectedXcdr2LongBE>(UnionDisc::E_LONG_FIELD);
+  test_little_endian_union<MutableUnionWithExplicitIDs, MutableUnionExpectedXcdr2OctetBE>(UnionDisc::E_OCTET_FIELD);
+  test_little_endian_union<MutableUnionWithExplicitIDs, MutableUnionExpectedXcdr2LongLongBE>(UnionDisc::E_LONG_LONG_FIELD);
 }
 
 template<typename TypeA, typename TypeB>
@@ -1211,10 +1229,10 @@ void expect_values_equal_base_union2(const TypeA& a, const TypeB& b)
 {
   EXPECT_EQ(a._d(), b._d());
   switch(a._d()) {
-  case E_SHORT_FIELD:
+  case UnionDisc::E_SHORT_FIELD:
     EXPECT_EQ(a.short_field(), b.short_field());
     break;
-  case E_LONG_FIELD:
+  case UnionDisc::E_LONG_FIELD:
     EXPECT_EQ(a.long_field(), b.long_field());
     break;
   default:
@@ -1231,21 +1249,21 @@ void expect_values_equal(const MutableUnionWithExplicitIDs& a, const ModifiedMut
 TEST(MutableTests, FromMutableUnion)
 {
   amalgam_serializer_test_union<MutableUnionWithExplicitIDs, ModifiedMutableUnion>(
-    xcdr2, MutableUnionExpectedXcdr2ShortBE::expected, E_SHORT_FIELD);
+    xcdr2, MutableUnionExpectedXcdr2ShortBE::expected, UnionDisc::E_SHORT_FIELD);
   amalgam_serializer_test_union<MutableUnionWithExplicitIDs, ModifiedMutableUnion>(
-    xcdr2, MutableUnionExpectedXcdr2LongBE::expected, E_LONG_FIELD);
+    xcdr2, MutableUnionExpectedXcdr2LongBE::expected, UnionDisc::E_LONG_FIELD);
   serializer_test_union<MutableUnionWithExplicitIDs>(
-    xcdr2, MutableUnionExpectedXcdr2AdditionalBE::expected, E_ADDITIONAL_FIELD);
+    xcdr2, MutableUnionExpectedXcdr2AdditionalBE::expected, UnionDisc::E_ADDITIONAL_FIELD);
 }
 
 TEST(MutableTests, FromMutableUnionLE)
 {
   test_little_endian_union<MutableUnionWithExplicitIDs, ModifiedMutableUnion,
-                           MutableUnionExpectedXcdr2ShortBE>(E_SHORT_FIELD);
+                           MutableUnionExpectedXcdr2ShortBE>(UnionDisc::E_SHORT_FIELD);
   test_little_endian_union<MutableUnionWithExplicitIDs, ModifiedMutableUnion,
-                           MutableUnionExpectedXcdr2LongBE>(E_LONG_FIELD);
+                           MutableUnionExpectedXcdr2LongBE>(UnionDisc::E_LONG_FIELD);
   test_little_endian_union<MutableUnionWithExplicitIDs,
-                           MutableUnionExpectedXcdr2AdditionalBE>(E_ADDITIONAL_FIELD);
+                           MutableUnionExpectedXcdr2AdditionalBE>(UnionDisc::E_ADDITIONAL_FIELD);
 }
 
 // ---------- ModifiedMutableUnion
@@ -1253,13 +1271,13 @@ template<>
 void set_values_union(ModifiedMutableUnion& value, UnionDisc disc)
 {
   switch (disc) {
-  case E_SHORT_FIELD:
+  case UnionDisc::E_SHORT_FIELD:
     value.short_field(0x7fff);
     break;
-  case E_LONG_FIELD:
+  case UnionDisc::E_LONG_FIELD:
     value.long_field(0x7fffffff);
     break;
-  case E_ADDITIONAL_FIELD:
+  case UnionDisc::E_ADDITIONAL_FIELD:
     value.additional_field(0x7eeeeeee);
     break;
   default:
@@ -1276,9 +1294,9 @@ void expect_values_equal(const ModifiedMutableUnion& a, const MutableUnion& b)
 TEST(MutableTests, FromModifiedMutableUnion)
 {
   amalgam_serializer_test_union<ModifiedMutableUnion, MutableUnion>(
-    xcdr2, MutableUnionExpectedXcdr2ShortBE::expected, E_SHORT_FIELD);
+    xcdr2, MutableUnionExpectedXcdr2ShortBE::expected, UnionDisc::E_SHORT_FIELD);
   amalgam_serializer_test_union<ModifiedMutableUnion, MutableUnion>(
-    xcdr2, MutableUnionExpectedXcdr2LongBE::expected, E_LONG_FIELD);
+    xcdr2, MutableUnionExpectedXcdr2LongBE::expected, UnionDisc::E_LONG_FIELD);
   // TODO (sonndinh): test try-construct behavior when additional_field of
   // ModifiedMutableUnion is selected
 }
@@ -1286,9 +1304,9 @@ TEST(MutableTests, FromModifiedMutableUnion)
 TEST(MutableTests, FromModifiedMutableUnionLE)
 {
   test_little_endian_union<ModifiedMutableUnion, MutableUnion,
-                           MutableUnionExpectedXcdr2ShortBE>(E_SHORT_FIELD);
+                           MutableUnionExpectedXcdr2ShortBE>(UnionDisc::E_SHORT_FIELD);
   test_little_endian_union<ModifiedMutableUnion, MutableUnion,
-                           MutableUnionExpectedXcdr2LongBE>(E_LONG_FIELD);
+                           MutableUnionExpectedXcdr2LongBE>(UnionDisc::E_LONG_FIELD);
   // TODO (sonndinh): similarly, test try-construct of additional_field here
 }
 
@@ -1362,7 +1380,7 @@ void set_values<AdditionalFieldMutableStruct>(
   AdditionalFieldMutableStruct& value)
 {
   set_base_values(value);
-  value.additional_field = 0x12345678;
+  value.additional_field() = 0x12345678;
 }
 
 TEST(MutableTests, ToAdditionalFieldXcdr1Test)
@@ -1465,39 +1483,39 @@ TEST(MutableTests, FromAdditionalFieldXcdr2Test)
 template<>
 void expect_values_equal(const LengthCodeStruct& a, const LengthCodeStruct& b)
 {
-  EXPECT_EQ(a.o, b.o);
-  EXPECT_EQ(a.s, b.s);
-  EXPECT_EQ(a.l, b.l);
-  EXPECT_EQ(a.ll, b.ll);
+  EXPECT_EQ(a.o(), b.o());
+  EXPECT_EQ(a.s(), b.s());
+  EXPECT_EQ(a.l(), b.l());
+  EXPECT_EQ(a.ll(), b.ll());
 
-  EXPECT_EQ(a.b3.a, b.b3.a);
-  EXPECT_EQ(a.b3.b, b.b3.b);
-  EXPECT_EQ(a.b3.c, b.b3.c);
+  EXPECT_EQ(a.b3().a(), b.b3().a());
+  EXPECT_EQ(a.b3().b(), b.b3().b());
+  EXPECT_EQ(a.b3().c(), b.b3().c());
 
-  EXPECT_EQ(a.o5.a, b.o5.a);
-  EXPECT_EQ(a.o5.b, b.o5.b);
-  EXPECT_EQ(a.o5.c, b.o5.c);
-  EXPECT_EQ(a.o5.d, b.o5.d);
-  EXPECT_EQ(a.o5.e, b.o5.e);
+  EXPECT_EQ(a.o5().a(), b.o5().a());
+  EXPECT_EQ(a.o5().b(), b.o5().b());
+  EXPECT_EQ(a.o5().c(), b.o5().c());
+  EXPECT_EQ(a.o5().d(), b.o5().d());
+  EXPECT_EQ(a.o5().e(), b.o5().e());
 
-  EXPECT_EQ(a.s3.x, b.s3.x);
-  EXPECT_EQ(a.s3.y, b.s3.y);
-  EXPECT_EQ(a.s3.z, b.s3.z);
+  EXPECT_EQ(a.s3().x(), b.s3().x());
+  EXPECT_EQ(a.s3().y(), b.s3().y());
+  EXPECT_EQ(a.s3().z(), b.s3().z());
 
-  EXPECT_EQ(a.t7.s3.x, b.t7.s3.x);
-  EXPECT_EQ(a.t7.s3.y, b.t7.s3.y);
-  EXPECT_EQ(a.t7.s3.z, b.t7.s3.z);
-  EXPECT_EQ(a.t7.o, b.t7.o);
+  EXPECT_EQ(a.t7().s3().x(), b.t7().s3().x());
+  EXPECT_EQ(a.t7().s3().y(), b.t7().s3().y());
+  EXPECT_EQ(a.t7().s3().z(), b.t7().s3().z());
+  EXPECT_EQ(a.t7().o(), b.t7().o());
 
-  EXPECT_EQ(a.l3.a, b.l3.a);
-  EXPECT_EQ(a.l3.b, b.l3.b);
-  EXPECT_EQ(a.l3.c, b.l3.c);
+  EXPECT_EQ(a.l3().a(), b.l3().a());
+  EXPECT_EQ(a.l3().b(), b.l3().b());
+  EXPECT_EQ(a.l3().c(), b.l3().c());
 
-  EXPECT_STREQ(a.str1, b.str1);
-  EXPECT_STREQ(a.str2, b.str2);
-  EXPECT_STREQ(a.str3, b.str3);
-  EXPECT_STREQ(a.str4, b.str4);
-  EXPECT_STREQ(a.str5, b.str5);
+  EXPECT_EQ(a.str1(), b.str1());
+  EXPECT_EQ(a.str2(), b.str2());
+  EXPECT_EQ(a.str3(), b.str3());
+  EXPECT_EQ(a.str4(), b.str4());
+  EXPECT_EQ(a.str5(), b.str5());
 }
 
 TEST(MutableTests, LengthCodeTest)
@@ -1559,31 +1577,31 @@ TEST(MutableTests, LengthCodeTest)
 template<>
 void expect_values_equal(const LC567Struct& a, const LC567Struct& b)
 {
-  EXPECT_EQ(a.o3.length(), b.o3.length());
-  EXPECT_EQ(a.o3[0], b.o3[0]);
-  EXPECT_EQ(a.o3[1], b.o3[1]);
-  EXPECT_EQ(a.o3[2], b.o3[2]);
+  EXPECT_EQ(a.o3().size(), b.o3().size());
+  EXPECT_EQ(a.o3()[0], b.o3()[0]);
+  EXPECT_EQ(a.o3()[1], b.o3()[1]);
+  EXPECT_EQ(a.o3()[2], b.o3()[2]);
 
-  EXPECT_EQ(a.l3.length(), b.l3.length());
-  EXPECT_EQ(a.l3[0], b.l3[0]);
-  EXPECT_EQ(a.l3[1], b.l3[1]);
-  EXPECT_EQ(a.l3[2], b.l3[2]);
+  EXPECT_EQ(a.l3().size(), b.l3().size());
+  EXPECT_EQ(a.l3()[0], b.l3()[0]);
+  EXPECT_EQ(a.l3()[1], b.l3()[1]);
+  EXPECT_EQ(a.l3()[2], b.l3()[2]);
 
-  EXPECT_EQ(a.ll3.length(), b.ll3.length());
-  EXPECT_EQ(a.ll3[0], b.ll3[0]);
-  EXPECT_EQ(a.ll3[1], b.ll3[1]);
-  EXPECT_EQ(a.ll3[2], b.ll3[2]);
+  EXPECT_EQ(a.ll3().size(), b.ll3().size());
+  EXPECT_EQ(a.ll3()[0], b.ll3()[0]);
+  EXPECT_EQ(a.ll3()[1], b.ll3()[1]);
+  EXPECT_EQ(a.ll3()[2], b.ll3()[2]);
 
-  EXPECT_EQ(a.s3.length(), b.s3.length());
-  EXPECT_EQ(a.s3[0], b.s3[0]);
-  EXPECT_EQ(a.s3[1], b.s3[1]);
+  EXPECT_EQ(a.s3().size(), b.s3().size());
+  EXPECT_EQ(a.s3()[0], b.s3()[0]);
+  EXPECT_EQ(a.s3()[1], b.s3()[1]);
 
-  EXPECT_STREQ(a.str4, b.str4);
-  EXPECT_STREQ(a.str5, b.str5);
+  EXPECT_EQ(a.str4(), b.str4());
+  EXPECT_EQ(a.str5(), b.str5());
 
-  EXPECT_EQ(a.ls.length(), b.ls.length());
-  EXPECT_EQ(a.ls[0], b.ls[0]);
-  EXPECT_EQ(a.ls[1], b.ls[1]);
+  EXPECT_EQ(a.ls().size(), b.ls().size());
+  EXPECT_EQ(a.ls()[0], b.ls()[0]);
+  EXPECT_EQ(a.ls()[1], b.ls()[1]);
 }
 
 TEST(MutableTests, ReadLc567Test)
@@ -1606,16 +1624,16 @@ TEST(MutableTests, ReadLc567Test)
                              1,1,1,1,1,4,4,4,4,4,4,1,1,1,1,1,1,1};
 
   LC567Struct expected;
-  expected.o3.length(3); expected.l3.length(3); expected.ll3.length(3);
-  expected.o3[0] = 1;    expected.l3[0] = 1;    expected.ll3[0] = 1;
-  expected.o3[1] = 2;    expected.l3[1] = 2;    expected.ll3[1] = 2;
-  expected.o3[2] = 3;    expected.l3[2] = 3;    expected.ll3[2] = 3;
-  expected.s3.length(2); expected.ls.length(2);
-  expected.s3[0] = 1;    expected.ls[0] = 1;
-  expected.s3[1] = 2;    expected.ls[1] = 2;
-  expected.str4 = "abc";
-  expected.str5 = "abcd";
-  expected.str7 = "abcdef";
+  expected.o3().resize(3); expected.l3().resize(3); expected.ll3().resize(3);
+  expected.o3()[0] = 1;    expected.l3()[0] = 1;    expected.ll3()[0] = 1;
+  expected.o3()[1] = 2;    expected.l3()[1] = 2;    expected.ll3()[1] = 2;
+  expected.o3()[2] = 3;    expected.l3()[2] = 3;    expected.ll3()[2] = 3;
+  expected.s3().resize(2); expected.ls().resize(2);
+  expected.s3()[0] = 1;    expected.ls()[0] = 1;
+  expected.s3()[1] = 2;    expected.ls()[1] = 2;
+  expected.str4() = "abc";
+  expected.str5() = "abcd";
+  expected.str7() = "abcdef";
 
   deserialize_compare(xcdr2, data, expected);
 
@@ -1628,32 +1646,32 @@ TEST(MutableTests, ReadLc567Test)
 template<>
 void set_values(MixedMutableStruct& value)
 {
-  set_values(value.struct_nested);
-  value.sequence_field.length(3);
-  value.sequence_field[0] = value.sequence_field[1] = value.sequence_field[2] = 0x7fff;
-  value.union_nested.string_field("abcdefghi");
+  set_values(value.struct_nested());
+  value.sequence_field().resize(3);
+  value.sequence_field()[0] = value.sequence_field()[1] = value.sequence_field()[2] = 0x7fff;
+  value.union_nested().string_field("abcdefghi");
   // Set discriminator after so it doesn't get overwritten
-  value.union_nested._d(3);
-  value.sequence_field2.length(3);
-  value.sequence_field2[0] = "my string1";
-  value.sequence_field2[1] = "my string2";
-  value.sequence_field2[2] = "my string3";
+  value.union_nested()._d(3);
+  value.sequence_field2().resize(3);
+  value.sequence_field2()[0] = "my string1";
+  value.sequence_field2()[1] = "my string2";
+  value.sequence_field2()[2] = "my string3";
 }
 
 template<>
 void expect_values_equal(const MixedMutableStruct& a,
                          const MixedMutableStruct& b)
 {
-  expect_values_equal(a.struct_nested, b.struct_nested);
-  EXPECT_EQ(a.sequence_field.length(), b.sequence_field.length());
-  for (unsigned i = 0; i < a.sequence_field.length(); ++i) {
-    EXPECT_EQ(a.sequence_field[i], b.sequence_field[i]);
+  expect_values_equal(a.struct_nested(), b.struct_nested());
+  EXPECT_EQ(a.sequence_field().size(), b.sequence_field().size());
+  for (unsigned i = 0; i < a.sequence_field().size(); ++i) {
+    EXPECT_EQ(a.sequence_field()[i], b.sequence_field()[i]);
   }
-  EXPECT_EQ(a.union_nested._d(), b.union_nested._d());
-  EXPECT_STREQ(a.union_nested.string_field(), b.union_nested.string_field());
-  EXPECT_EQ(a.sequence_field2.length(), b.sequence_field2.length());
-  for (unsigned i = 0; i < a.sequence_field2.length(); ++i) {
-    EXPECT_STREQ(a.sequence_field2[i], b.sequence_field2[i]);
+  EXPECT_EQ(a.union_nested()._d(), b.union_nested()._d());
+  EXPECT_EQ(a.union_nested().string_field(), b.union_nested().string_field());
+  EXPECT_EQ(a.sequence_field2().size(), b.sequence_field2().size());
+  for (unsigned i = 0; i < a.sequence_field2().size(); ++i) {
+    EXPECT_EQ(a.sequence_field2()[i], b.sequence_field2()[i]);
   }
 }
 
@@ -1708,7 +1726,7 @@ template<>
 void expect_values_equal(const MixedMutableStruct& a,
                          const ModifiedMixedMutableStruct& b)
 {
-  expect_values_equal_base(a.struct_nested, b.struct_nested);
+  expect_values_equal_base(a.struct_nested(), b.struct_nested());
 }
 
 TEST(MutableTests, FromMixedMutableStruct)
@@ -1729,24 +1747,24 @@ TEST(MutableTests, FromMixedMutableStructLE)
 template<>
 void set_values(NestingFinalStruct& value)
 {
-  value.string_field = "make sense";
-  set_values(value.appendable_nested);
-  value.sequence_field.length(3);
-  value.sequence_field[0] = value.sequence_field[1] = value.sequence_field[2] = 0x1234;
-  set_values(value.mutable_nested);
+  value.string_field() = "make sense";
+  set_values(value.appendable_nested());
+  value.sequence_field().resize(3);
+  value.sequence_field()[0] = value.sequence_field()[1] = value.sequence_field()[2] = 0x1234;
+  set_values(value.mutable_nested());
 }
 
 template<>
 void expect_values_equal(const NestingFinalStruct& a,
                          const NestingFinalStruct& b)
 {
-  EXPECT_STREQ(a.string_field, b.string_field);
-  expect_values_equal_base(a.appendable_nested, b.appendable_nested);
-  EXPECT_EQ(a.sequence_field.length(), b.sequence_field.length());
-  for (unsigned i = 0; i < a.sequence_field.length(); ++i) {
-    EXPECT_EQ(a.sequence_field[i], b.sequence_field[i]);
+  EXPECT_EQ(a.string_field(), b.string_field());
+  expect_values_equal_base(a.appendable_nested(), b.appendable_nested());
+  EXPECT_EQ(a.sequence_field().size(), b.sequence_field().size());
+  for (unsigned i = 0; i < a.sequence_field().size(); ++i) {
+    EXPECT_EQ(a.sequence_field()[i], b.sequence_field()[i]);
   }
-  expect_values_equal_base(a.mutable_nested, b.mutable_nested);
+  expect_values_equal_base(a.mutable_nested(), b.mutable_nested());
 }
 
 struct NestingFinalStructXcdr2BE {
@@ -1791,26 +1809,26 @@ TEST(MixedExtenTests, NestingFinalStructLE)
 template<>
 void set_values(NestingAppendableStruct& value)
 {
-  value.string_field = "hello world";
-  set_values(value.mutable_nested);
-  value.sequence_field.length(3);
-  for (unsigned i = 0; i < value.sequence_field.length(); ++i) {
-    value.sequence_field[i] = 0x7fffffff;
+  value.string_field() = "hello world";
+  set_values(value.mutable_nested());
+  value.sequence_field().resize(3);
+  for (unsigned i = 0; i < value.sequence_field().size(); ++i) {
+    value.sequence_field()[i] = 0x7fffffff;
   }
-  set_values(value.final_nested);
+  set_values(value.final_nested());
 }
 
 template<>
 void expect_values_equal(const NestingAppendableStruct& a,
                          const NestingAppendableStruct& b)
 {
-  EXPECT_STREQ(a.string_field, b.string_field);
-  expect_values_equal_base(a.mutable_nested, b.mutable_nested);
-  EXPECT_EQ(a.sequence_field.length(), b.sequence_field.length());
-  for (unsigned i = 0; i < a.sequence_field.length(); ++i) {
-    EXPECT_EQ(a.sequence_field[i], b.sequence_field[i]);
+  EXPECT_EQ(a.string_field(), b.string_field());
+  expect_values_equal_base(a.mutable_nested(), b.mutable_nested());
+  EXPECT_EQ(a.sequence_field().size(), b.sequence_field().size());
+  for (unsigned i = 0; i < a.sequence_field().size(); ++i) {
+    EXPECT_EQ(a.sequence_field()[i], b.sequence_field()[i]);
   }
-  expect_values_equal_base(a.final_nested, b.final_nested);
+  expect_values_equal_base(a.final_nested(), b.final_nested());
 }
 
 struct NestingAppendableStructXcdr2BE {
@@ -1855,26 +1873,26 @@ TEST(MixedExtenTests, NestingAppendableStructLE)
 template<>
 void set_values(NestingMutableStruct& value)
 {
-  value.string_field = "hello world";
-  set_values(value.appendable_nested);
-  value.sequence_field.length(7);
-  for (unsigned i = 0; i < value.sequence_field.length(); ++i) {
-    value.sequence_field[i] = 0x7f;
+  value.string_field() = "hello world";
+  set_values(value.appendable_nested());
+  value.sequence_field().resize(7);
+  for (unsigned i = 0; i < value.sequence_field().size(); ++i) {
+    value.sequence_field()[i] = 0x7f;
   }
-  set_values(value.final_nested);
+  set_values(value.final_nested());
 }
 
 template<>
 void expect_values_equal(const NestingMutableStruct& a,
                          const NestingMutableStruct& b)
 {
-  EXPECT_STREQ(a.string_field, b.string_field);
-  expect_values_equal_base(a.appendable_nested, b.appendable_nested);
-  EXPECT_EQ(a.sequence_field.length(), b.sequence_field.length());
-  for (unsigned i = 0; i < a.sequence_field.length(); ++i) {
-    EXPECT_EQ(a.sequence_field[i], b.sequence_field[i]);
+  EXPECT_EQ(a.string_field(), b.string_field());
+  expect_values_equal_base(a.appendable_nested(), b.appendable_nested());
+  EXPECT_EQ(a.sequence_field().size(), b.sequence_field().size());
+  for (unsigned i = 0; i < a.sequence_field().size(); ++i) {
+    EXPECT_EQ(a.sequence_field()[i], b.sequence_field()[i]);
   }
-  expect_values_equal_base(a.final_nested, b.final_nested);
+  expect_values_equal_base(a.final_nested(), b.final_nested());
 }
 
 struct NestingMutableStructXcdr2BE {
@@ -1923,15 +1941,15 @@ template <>
 void expect_values_equal<IdVsDeclOrder, IdVsDeclOrder>(
   const IdVsDeclOrder& a, const IdVsDeclOrder& b)
 {
-  EXPECT_EQ(a.first_id2, b.first_id2);
-  EXPECT_EQ(a.second_id1, b.second_id1);
+  EXPECT_EQ(a.first_id2(), b.first_id2());
+  EXPECT_EQ(a.second_id1(), b.second_id1());
 }
 
 template <>
 void set_values<IdVsDeclOrder>(IdVsDeclOrder& value)
 {
-  value.first_id2 = 0x12345678;
-  value.second_id1 = 0x9abc;
+  value.first_id2() = 0x12345678;
+  value.second_id1() = 0x9abc;
 }
 
 const unsigned char id_vs_decl_order_expected[] = {
@@ -1982,6 +2000,16 @@ void key_only_test(bool topic_type)
   amalgam_serializer_test_base<ConstWrapper, Type, Wrapper, Type>(
     xcdr2, expected, wrapped_value, wrapped_result, field_filter);
   EXPECT_PRED_FORMAT2(assert_values, wrapped_value, wrapped_result);
+
+  // Test vwrite with KeyOnly or NestedKeyOnly samples
+  Xcdr2ValueWriter value_writer(xcdr2);
+  EXPECT_TRUE(vwrite(value_writer, wrapped_value));
+
+  ACE_Message_Block buffer(value_writer.get_serialized_size());
+  Serializer ser(&buffer, xcdr2);
+  value_writer.set_serializer(&ser);
+  EXPECT_TRUE(vwrite(value_writer, wrapped_value));
+  EXPECT_PRED_FORMAT2(assert_DataView, expected, buffer);
 }
 
 void serialize_u32(DataVec& data_vec, size_t value)
@@ -2011,17 +2039,17 @@ void key_only_set_base_values(Type& value,
 
   set_default(value);
   if (include_possible_keyed) {
-    value.long_value = 0x7fffffff;
-    value.long_array_value[0] = 1;
-    value.long_array_value[1] = 2;
+    value.long_value() = 0x7fffffff;
+    value.long_array_value()[0] = 1;
+    value.long_array_value()[1] = 2;
     /* TODO(iguessthislldo): See IDL Def
     value.long_seq_value.length(1);
     value.long_seq_value[1] = 3;
     */
-    value.string_value = "STRINGY";
+    value.string_value() = "STRINGY";
   }
   if (include_unkeyed) {
-    value.extra_value = 0x2020;
+    value.extra_value() = 0x2020;
   }
 }
 
@@ -2122,60 +2150,62 @@ void key_only_complex_set_base_values(Type& value,
   const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed =
     field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
+  const FieldFilter nested_field_filter =
+    field_filter == FieldFilter_All ? FieldFilter_All : FieldFilter_NestedKeyOnly;
 
   set_default(value);
 
   if (include_possible_keyed) {
     key_only_set_base_values(
-      value.unkeyed_struct_value, field_filter, false);
+      value.unkeyed_struct_value(), nested_field_filter, false);
     key_only_set_base_values(
-      value.unkeyed_struct_array_value[0], field_filter, false);
+      value.unkeyed_struct_array_value()[0], nested_field_filter, false);
     key_only_set_base_values(
-      value.unkeyed_struct_array_value[1], field_filter, false);
+      value.unkeyed_struct_array_value()[1], nested_field_filter, false);
     /* TODO(iguessthislldo): See IDL Def
     value.unkeyed_struct_seq_value.length(1);
     key_only_set_base_values(
-      value.unkeyed_struct_seq_value[0], field_filter, false);
+      value.unkeyed_struct_seq_value[0], nested_field_filter, false);
     */
     key_only_set_base_values(
-      value.keyed_struct_value, field_filter, true);
+      value.keyed_struct_value(), nested_field_filter, true);
     key_only_set_base_values(
-      value.keyed_struct_array_value[0], field_filter, true);
+      value.keyed_struct_array_value()[0], nested_field_filter, true);
     key_only_set_base_values(
-      value.keyed_struct_array_value[1], field_filter, true);
+      value.keyed_struct_array_value()[1], nested_field_filter, true);
     /* TODO(iguessthislldo): See IDL Def
     value.keyed_struct_seq_value.length(1);
     key_only_set_base_values(
-      value.keyed_struct_seq_value[0], field_filter, true);
+      value.keyed_struct_seq_value[0], nested_field_filter, true);
     */
 
     key_only_union_set_base_values(
-      value.unkeyed_union_value, field_filter, false);
+      value.unkeyed_union_value(), nested_field_filter, false);
     key_only_union_set_base_values(
-      value.unkeyed_union_array_value[0], field_filter, false);
+      value.unkeyed_union_array_value()[0], nested_field_filter, false);
     key_only_union_set_base_values(
-      value.unkeyed_union_array_value[1], field_filter, false);
+      value.unkeyed_union_array_value()[1], nested_field_filter, false);
     /* TODO(iguessthislldo): See IDL Def
     value.unkeyed_union_seq_value.length(1);
     key_only_union_set_base_values(
-      value.unkeyed_union_seq_value[0], field_filter, false);
+      value.unkeyed_union_seq_value[0], nested_field_filter, false);
     */
 
     key_only_union_set_base_values(
-      value.keyed_union_value, field_filter, true);
+      value.keyed_union_value(), nested_field_filter, true);
     key_only_union_set_base_values(
-      value.keyed_union_array_value[0], field_filter, true);
+      value.keyed_union_array_value()[0], nested_field_filter, true);
     key_only_union_set_base_values(
-      value.keyed_union_array_value[1], field_filter, true);
+      value.keyed_union_array_value()[1], nested_field_filter, true);
     /* TODO(iguessthislldo): See IDL Def
     value.keyed_union_seq_value.length(1);
     key_only_union_set_base_values(
-      value.keyed_union_seq_value[0], field_filter, true);
+      value.keyed_union_seq_value[0], nested_field_filter, true);
     */
   }
 
   if (include_unkeyed) {
-    value.extra_value = 0x2020;
+    value.extra_value() = 0x2020;
   }
 }
 
@@ -2224,16 +2254,16 @@ void key_only_tests_struct_expect_values_equal(
   FieldFilter field_filter, bool keyed)
 {
   if ((field_filter != FieldFilter_KeyOnly) || keyed) {
-    EXPECT_EQ(a.long_value, b.long_value);
-    expect_arrays_are_equal(a.long_array_value, b.long_array_value);
+    EXPECT_EQ(a.long_value(), b.long_value());
+    expect_arrays_are_equal(a.long_array_value(), b.long_array_value());
     /* TODO(iguessthislldo): See IDL Def
     EXPECT_EQ(a.long_seq_value, b.long_seq_value);
     */
-    EXPECT_STREQ(a.string_value, b.string_value);
+    EXPECT_EQ(a.string_value(), b.string_value());
   }
   if (field_filter == FieldFilter_All ||
       (!keyed && field_filter == FieldFilter_NestedKeyOnly)) {
-    EXPECT_EQ(a.extra_value, b.extra_value);
+    EXPECT_EQ(a.extra_value(), b.extra_value());
   }
 }
 
@@ -2359,36 +2389,36 @@ void key_only_tests_complex_expect_values_equal(const TypeA& a, const TypeB& b,
 
   if (include_possible_keyed) {
     key_only_tests_struct_expect_values_equal(
-      a.unkeyed_struct_value, b.unkeyed_struct_value, child, false);
+      a.unkeyed_struct_value(), b.unkeyed_struct_value(), child, false);
     key_only_tests_struct_expect_values_equal(
-      a.unkeyed_struct_array_value[0], b.unkeyed_struct_array_value[0], child, false);
+      a.unkeyed_struct_array_value()[0], b.unkeyed_struct_array_value()[0], child, false);
     key_only_tests_struct_expect_values_equal(
-      a.unkeyed_struct_array_value[1], b.unkeyed_struct_array_value[1], child, false);
+      a.unkeyed_struct_array_value()[1], b.unkeyed_struct_array_value()[1], child, false);
     /* expect_values_equal(a.unkeyed_struct_seq_value, b.unkeyed_struct_seq_value, child); */
     key_only_tests_struct_expect_values_equal(
-      a.keyed_struct_value, b.keyed_struct_value, child, true);
+      a.keyed_struct_value(), b.keyed_struct_value(), child, true);
     key_only_tests_struct_expect_values_equal(
-      a.keyed_struct_array_value[0], b.keyed_struct_array_value[0], child, true);
+      a.keyed_struct_array_value()[0], b.keyed_struct_array_value()[0], child, true);
     key_only_tests_struct_expect_values_equal(
-      a.keyed_struct_array_value[1], b.keyed_struct_array_value[1], child, true);
+      a.keyed_struct_array_value()[1], b.keyed_struct_array_value()[1], child, true);
     /* expect_values_equal(a.keyed_struct_seq_value, b.keyed_struct_seq_value, child); */
     key_only_tests_union_expect_values_equal(
-      a.keyed_union_value, b.keyed_union_value, child, true);
+      a.keyed_union_value(), b.keyed_union_value(), child, true);
     key_only_tests_union_expect_values_equal(
-      a.keyed_union_array_value[0], b.keyed_union_array_value[0], child, true);
+      a.keyed_union_array_value()[0], b.keyed_union_array_value()[0], child, true);
     key_only_tests_union_expect_values_equal(
-      a.keyed_union_array_value[1], b.keyed_union_array_value[1], child, true);
+      a.keyed_union_array_value()[1], b.keyed_union_array_value()[1], child, true);
     /* expect_values_equal(a.keyed_union_seq_value, b.keyed_union_seq_value, child); */
   }
   if (include_unkeyed) {
     key_only_tests_union_expect_values_equal(
-      a.unkeyed_union_value, b.unkeyed_union_value, child, false);
+      a.unkeyed_union_value(), b.unkeyed_union_value(), child, false);
     key_only_tests_union_expect_values_equal(
-      a.unkeyed_union_array_value[0], b.unkeyed_union_array_value[0], child, false);
+      a.unkeyed_union_array_value()[0], b.unkeyed_union_array_value()[0], child, false);
     key_only_tests_union_expect_values_equal(
-      a.unkeyed_union_array_value[1], b.unkeyed_union_array_value[1], child, false);
+      a.unkeyed_union_array_value()[1], b.unkeyed_union_array_value()[1], child, false);
     /* expect_values_equal(a.unkeyed_union_seq_value, b.unkeyed_union_seq_value); */
-    EXPECT_EQ(a.extra_value, b.extra_value);
+    EXPECT_EQ(a.extra_value(), b.extra_value());
   }
 }
 
@@ -2515,9 +2545,7 @@ void build_expected_union(DataVec& expected, FieldFilter field_filter, bool keye
   if (include_unkeyed) {
     non_keys = DataView(key_only_union_non_keys_expected_base);
   }
-  if (include_possible_keyed) {
-    serialize_u32(expected, keys.size + non_keys.size);
-  }
+  serialize_u32(expected, keys.size + non_keys.size);
   keys.copy_to(expected);
   non_keys.copy_to(expected);
 }
@@ -2544,7 +2572,7 @@ void build_expected_complex_struct(DataVec& expected, FieldFilter field_filter, 
     field_filter == FieldFilter_All ? FieldFilter_All : FieldFilter_NestedKeyOnly;
 
   if (include_possible_keyed) {
-    build_expected_basic_struct(all_contents, field_filter, false);
+    build_expected_basic_struct(all_contents, nested_field_filter, false);
     {
       DataVec array_contents;
       build_expected_basic_struct(array_contents, nested_field_filter, false);
@@ -2695,7 +2723,100 @@ TEST(KeyTests, KeyOnly_KeyedUnion)
     KeyOnly<KeyedUnion>, KeyOnly<const KeyedUnion> >(true);
 }
 
+TEST(KeyTests, KeyOnly_ComplexUnkeyedStruct)
+{
+  key_only_test<ComplexUnkeyedStruct,
+    KeyOnly<ComplexUnkeyedStruct>, KeyOnly<const ComplexUnkeyedStruct> >(true);
+}
+
+TEST(KeyTests, KeyOnly_ComplexKeyedStruct)
+{
+  key_only_test<ComplexKeyedStruct,
+    KeyOnly<ComplexKeyedStruct>, KeyOnly<const ComplexKeyedStruct> >(true);
+}
+
 // ----------------------------------------------------------------------------
+
+template<>
+void expect_values_equal(const Optional::OptionalMembers& a, const Optional::OptionalMembers& b)
+{
+  EXPECT_EQ(a.bool_field(), b.bool_field());
+  EXPECT_EQ(a.short_field(), b.short_field());
+  EXPECT_EQ(a.int32_field(), b.int32_field());
+  EXPECT_EQ(a.int64_field(), b.int64_field());
+  EXPECT_EQ(a.str_field(), b.str_field());
+  EXPECT_EQ(a.seq_field(), b.seq_field());
+  ASSERT_EQ(a.struct_field().has_value(), b.struct_field().has_value());
+  if (a.struct_field().has_value()) {
+    EXPECT_EQ(a.struct_field()->octet_field(), b.struct_field()->octet_field());
+  }
+}
+
+TEST(OptionalTests, NotPresent)
+{
+  const uint8_t expected[] = {
+    // Delimeter
+    0x00, 0x00, 0x00, 0x07, // +4 = 4
+
+    // bool_field
+    0x00, // +1 = 5
+
+    // short_field
+    0x00, // +1 = 6
+
+    // int32_field
+    0x00, // +1 = 7
+
+    // int64_field
+    0x00, // +1 = 8
+
+    // str_field
+    0x00, // +1 = 9
+
+    0x00,
+
+    0x00
+  };
+
+  Optional::OptionalMembers empty{};
+  Optional::OptionalMembers result;
+  amalgam_serializer_test(xcdr2, expected, empty, result);
+}
+
+TEST(OptionalTests, Present)
+{
+  const uint8_t expected[] = {
+    // Delimeter
+    0x00, 0x00, 0x00, 0x1a, // +4 = 4
+
+    // bool_field
+    0x00,
+
+    // short_field
+    0x01, // +1 is_present = 5
+    0x7f, 0xff, // +2 = 8
+
+    // int32_field
+    0x00, // +1 is_present = 9
+    0x00,
+
+    // str_field
+    0x01, // +1 = 10
+    0x00, // ?
+    0x00, 0x00, 0x00, 0x0c, // +4 = 14
+    'H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '\0', // +12 = 26
+    0x00,
+
+    // struct_field
+    0x00
+  };
+
+  Optional::OptionalMembers value{};
+  value.short_field(0x7fff);
+  value.str_field(OPENDDS_OPTIONAL_NS::optional<std::string>("Hello World"));
+  Optional::OptionalMembers result;
+  amalgam_serializer_test(xcdr2, expected, value, result);
+}
 
 int main(int argc, char* argv[])
 {

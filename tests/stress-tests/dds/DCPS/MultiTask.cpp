@@ -56,7 +56,7 @@ TEST(dds_DCPS_MultiTask, TimingChecker)
 
   ThreadStatusManager tsm;
   ReactorTask reactor_task(false);
-  reactor_task.open_reactor_task(0, &tsm);
+  reactor_task.open_reactor_task(&tsm);
 
   RcHandle<TestObj> obj = make_rch<TestObj>(reactor_task.interceptor());
   obj->multi_->enable(TimeDuration::from_msec(2000)); // 2.0 seconds
