@@ -888,7 +888,7 @@ int locator_to_address(ACE_INET_Addr& dest,
                          16, 0 /*encode*/) == -1) {
       return -1;
     }
-    dest.set_port_number(locator.port);
+    dest.set_port_number(static_cast<u_short>(locator.port));
     return 0;
 #endif
   case LOCATOR_KIND_UDPv4:

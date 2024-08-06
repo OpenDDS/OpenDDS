@@ -258,7 +258,7 @@ std::string param_type(AST_Type *t, AST_Argument::Direction dir)
     break;
   }
 
-  if (capitalize) type[0] = toupper(type[0]);
+  if (capitalize) type[0] = static_cast<char>(toupper(type[0]));
 
   if (builtin) type = "org.omg.CORBA." + type;
 
@@ -748,11 +748,11 @@ bool idl_mapping_java::gen_interf(UTL_ScopedName *name, bool local,
       "  public native " + signature + ";\n\n";
 
     if (!attr->readonly()) {
-      string signature = attr_signature_w(attr);
+      string signature_w = attr_signature_w(attr);
       body_ops +=
-        "  " + signature + ";\n";
+        "  " + signature_w + ";\n";
       body_stub +=
-        "  public native " + signature + ";\n\n";
+        "  public native " + signature_w + ";\n\n";
     }
   }
 
@@ -785,9 +785,9 @@ bool idl_mapping_java::gen_interf(UTL_ScopedName *name, bool local,
           "  public native " + signature + ";\n\n";
 
         if (!attr->readonly()) {
-          string signature = attr_signature_w(attr);
+          string signature_w = attr_signature_w(attr);
           body_stub +=
-            "  public native " + signature + ";\n\n";
+            "  public native " + signature_w + ";\n\n";
         }
 
       } else if (item->node_type() == AST_Decl::NT_op) {

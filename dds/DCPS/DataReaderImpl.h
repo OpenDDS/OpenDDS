@@ -449,8 +449,7 @@ public:
 
   // Access to OwnershipManager is only valid when the domain participant is valid;
   // therefore, we must lock the domain pariticipant when using  OwnershipManager.
-  class OwnershipManagerPtr
-  {
+  class OwnershipManagerPtr {
   public:
     OwnershipManagerPtr(DataReaderImpl* reader)
       : participant_( (reader && reader->is_exclusive_ownership_) ? reader->participant_servant_.lock() : RcHandle<DomainParticipantImpl>())
