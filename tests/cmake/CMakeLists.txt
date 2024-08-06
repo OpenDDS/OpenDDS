@@ -14,6 +14,11 @@ if(OPENDDS_QT AND OPENDDS_CXX11)
   add_subdirectory(
     "../../examples/DCPS/ishapes"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../examples/DCPS/ishapes/build")
+
+  add_subdirectory( 
+    "../../DevGuideExamples/FACE/two-topic" 
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../DevGuideExamples/FACE/two-topic/build") 
+
 endif()
 
 if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8.2")
