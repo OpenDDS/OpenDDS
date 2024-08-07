@@ -325,12 +325,12 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
     //still present in the actual pending_connections_ before calling use_datalink
     Callbacks tmp(pend->second);
     for (size_t i = 0; i < tmp.size(); ++i) {
-      const PendConnMap::iterator pend = pending_connections_.find(key);
-      if (pend != pending_connections_.end()) {
-        const Callbacks::iterator tmp_iter = find(pend->second.begin(),
-                                                  pend->second.end(),
+      const PendConnMap::iterator pos = pending_connections_.find(key);
+      if (pos != pending_connections_.end()) {
+        const Callbacks::iterator tmp_iter = find(pos->second.begin(),
+                                                  pos->second.end(),
                                                   tmp.at(i));
-        if (tmp_iter != pend->second.end()) {
+        if (tmp_iter != pos->second.end()) {
           TransportClient_wrch pend_client = tmp.at(i).first;
           GUID_t remote_repo = tmp.at(i).second;
           guard.release();

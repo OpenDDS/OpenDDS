@@ -904,13 +904,11 @@ int locator_to_address(ACE_INET_Addr& dest,
     ) == -1) {
       return -1;
     }
-    dest.set_port_number(locator.port);
+    dest.set_port_number(static_cast<u_short>(locator.port));
     return 0;
   default:
     return -1;  // Unknown kind
   }
-
-  return -1;
 }
 
 OpenDDS_Dcps_Export

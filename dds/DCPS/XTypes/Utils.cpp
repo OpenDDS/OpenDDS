@@ -74,7 +74,7 @@ DDS::ReturnCode_t max_extensibility(DDS::DynamicType_ptr type, DCPS::Extensibili
   }
 
   for (DynamicTypeMembersByIdImpl::const_iterator it = members_impl->begin();
-      it != members_impl->end(); ++it) {
+       it != members_impl->end(); ++it) {
     DDS::MemberDescriptor_var md;
     rc = it->second->get_descriptor(md);
     if (rc != DDS::RETCODE_OK) {
@@ -86,7 +86,7 @@ DDS::ReturnCode_t max_extensibility(DDS::DynamicType_ptr type, DCPS::Extensibili
       return DDS::RETCODE_BAD_PARAMETER;
     }
     DCPS::Extensibility member_ext;
-    DDS::ReturnCode_t rc = max_extensibility(member_type, member_ext);
+    rc = max_extensibility(member_type, member_ext);
     if (rc != DDS::RETCODE_OK) {
       return rc;
     }
@@ -370,9 +370,9 @@ namespace {
           // TODO: Except when @key(FALSE)
           include_all = true;
           for (DynamicTypeMembersByIdImpl::const_iterator it = members_i->begin();
-              it != members_i->end(); ++it) {
+               it != members_i->end(); ++it) {
             DDS::MemberDescriptor_var md;
-            DDS::ReturnCode_t rc = it->second->get_descriptor(md);
+            rc = it->second->get_descriptor(md);
             if (rc != DDS::RETCODE_OK) {
               return rc;
             }
@@ -384,9 +384,9 @@ namespace {
         }
 
         for (DynamicTypeMembersByIdImpl::const_iterator it = members_i->begin();
-            it != members_i->end(); ++it) {
+             it != members_i->end(); ++it) {
           DDS::MemberDescriptor_var md;
-          DDS::ReturnCode_t rc = it->second->get_descriptor(md);
+          rc = it->second->get_descriptor(md);
           if (rc != DDS::RETCODE_OK) {
             return rc;
           }
@@ -1444,7 +1444,7 @@ DDS::ReturnCode_t copy_member(
       if (tk == TK_STRUCTURE || tk == TK_UNION) {
         CORBA::String_var src_member_name;
         DDS::MemberDescriptor_var src_md;
-        DDS::ReturnCode_t rc = src->get_descriptor(src_md, src_id);
+        rc = src->get_descriptor(src_md, src_id);
         if (rc == DDS::RETCODE_OK) {
           src_member_name = src_md->name();
         }

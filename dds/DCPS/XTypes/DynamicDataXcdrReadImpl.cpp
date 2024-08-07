@@ -1789,7 +1789,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_values_from_struct(SequenceType& 
       }
       const LBound bit_bound = etd->bound()[0];
       if (bit_bound >= lower && bit_bound <= upper) {
-        const DDS::ReturnCode_t rc = skip_to_struct_member(md, id);
+        rc = skip_to_struct_member(md, id);
         if (rc != DDS::RETCODE_OK) {
           return rc;
         }
@@ -1912,11 +1912,11 @@ bool DynamicDataXcdrReadImpl::get_values_from_sequence(SequenceType& value, Memb
       return skip_to_sequence_element(id) && read_values(value, ElementTypeKind);
     } else if (nested_elem_tk == enum_or_bitmask) {
       // Read from a sequence of sequences of enums or bitmasks.
-      DDS::TypeDescriptor_var td;
-      if (nested_elem_type->get_descriptor(td) != DDS::RETCODE_OK) {
+      DDS::TypeDescriptor_var nested_td;
+      if (nested_elem_type->get_descriptor(nested_td) != DDS::RETCODE_OK) {
         return false;
       }
-      const LBound bit_bound = td->bound()[0];
+      const LBound bit_bound = nested_td->bound()[0];
       return bit_bound >= lower && bit_bound <= upper &&
         skip_to_sequence_element(id) && read_values(value, enum_or_bitmask);
     }
@@ -1953,11 +1953,11 @@ bool DynamicDataXcdrReadImpl::get_values_from_array(SequenceType& value, MemberI
   if (nested_elem_tk == ElementTypeKind) {
     return skip_to_array_element(id) && read_values(value, nested_elem_tk);
   } else if (nested_elem_tk == enum_or_bitmask) {
-    DDS::TypeDescriptor_var td;
-    if (nested_elem_type->get_descriptor(td) != DDS::RETCODE_OK) {
+    DDS::TypeDescriptor_var nested_td;
+    if (nested_elem_type->get_descriptor(neste_td) != DDS::RETCODE_OK) {
       return false;
     }
-    const LBound bit_bound = td->bound()[0];
+    const LBound bit_bound = nested_td->bound()[0];
     return bit_bound >= lower && bit_bound <= upper &&
       skip_to_array_element(id) && read_values(value, nested_elem_tk);
   }
@@ -1993,11 +1993,11 @@ bool DynamicDataXcdrReadImpl::get_values_from_map(SequenceType& value, MemberId 
   if (nested_elem_tk == ElementTypeKind) {
     return skip_to_map_element(id) && read_values(value, nested_elem_tk);
   } else if (nested_elem_tk == enum_or_bitmask) {
-    DDS::TypeDescriptor_var td;
-    if (nested_elem_type->get_descriptor(td) != DDS::RETCODE_OK) {
+    DDS::TypeDescriptor_var nested_td;
+    if (nested_elem_type->get_descriptor(nested_td) != DDS::RETCODE_OK) {
       return false;
     }
-    const LBound bit_bound = td->bound()[0];
+    const LBound bit_bound = nested_td->bound()[0];
     return bit_bound >= lower && bit_bound <= upper &&
       skip_to_map_element(id) && read_values(value, nested_elem_tk);
   }
@@ -2905,11 +2905,11 @@ bool DynamicDataXcdrReadImpl::check_xcdr1_mutable_i(DDS::DynamicType_ptr dt, Dyn
       }
       return false;
     }
-    DDS::MemberDescriptor_var descriptor;
-    if (dtm->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+    DDS::MemberDescriptor_var mem_desc;
+    if (dtm->get_descriptor(mem_desc) != DDS::RETCODE_OK) {
       return false;
     }
-    if (!check_xcdr1_mutable_i(descriptor->type(), dtns)) {
+    if (!check_xcdr1_mutable_i(mem_desc->type(), dtns)) {
       return false;
     }
   }
