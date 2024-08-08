@@ -871,7 +871,7 @@ ReplayerImpl::write (const RawDataSample*   samples,
 {
   DBG_ENTRY_LVL("ReplayerImpl","write",6);
 
-  OpenDDS::DCPS::GUID_t repo_id;
+  OpenDDS::DCPS::GUID_t repo_id = GUID_UNKNOWN;
   if (reader_ih_ptr) {
     repo_id = this->participant_servant_->get_repoid(*reader_ih_ptr);
     if (repo_id == GUID_UNKNOWN) {

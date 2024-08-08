@@ -105,7 +105,7 @@ RtpsUdpInst::ttl(unsigned char t)
 unsigned char
 RtpsUdpInst::ttl() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("TTL").c_str(), 1);
+  return static_cast<unsigned char>(TheServiceParticipant->config_store()->get_uint32(config_key("TTL").c_str(), 1));
 }
 
 void
@@ -252,8 +252,8 @@ void RtpsUdpInst::pb(DDS::UInt16 port_base)
 
 DDS::UInt16 RtpsUdpInst::pb() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("PB").c_str(),
-                                                           RTPS::default_port_base);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("PB").c_str(),
+                                                                                    RTPS::default_port_base));
 }
 
 void RtpsUdpInst::dg(DDS::UInt16 domain_gain)
@@ -264,8 +264,8 @@ void RtpsUdpInst::dg(DDS::UInt16 domain_gain)
 
 DDS::UInt16 RtpsUdpInst::dg() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("DG").c_str(),
-                                                           RTPS::default_domain_gain);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("DG").c_str(),
+                                                                                    RTPS::default_domain_gain));
 }
 
 void RtpsUdpInst::pg(DDS::UInt16 participant_gain)
@@ -276,8 +276,8 @@ void RtpsUdpInst::pg(DDS::UInt16 participant_gain)
 
 DDS::UInt16 RtpsUdpInst::pg() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("PG").c_str(),
-                                                           RTPS::default_part_gain);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("PG").c_str(),
+                                                                                    RTPS::default_part_gain));
 }
 
 void RtpsUdpInst::d2(DDS::UInt16 multicast_offset)
@@ -288,8 +288,8 @@ void RtpsUdpInst::d2(DDS::UInt16 multicast_offset)
 
 DDS::UInt16 RtpsUdpInst::d2() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("D2").c_str(),
-                                                           RTPS::default_user_multicast_offset);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("D2").c_str(),
+                                                                                    RTPS::default_user_multicast_offset));
 }
 
 void RtpsUdpInst::d3(DDS::UInt16 unicast_offset)
@@ -300,20 +300,21 @@ void RtpsUdpInst::d3(DDS::UInt16 unicast_offset)
 
 DDS::UInt16 RtpsUdpInst::d3() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("D3").c_str(),
-                                                           RTPS::default_user_unicast_offset);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("D3").c_str(),
+                                                                                    RTPS::default_user_unicast_offset));
 }
 
 bool RtpsUdpInst::set_multicast_port(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const
 {
-  return RTPS::set_rtps_multicast_port(addr, "RTPS/UDP multicast", pb(), d2(), domain, dg());
+  return RTPS::set_rtps_multicast_port(addr, "RTPS/UDP multicast", pb(), d2(),
+                                       static_cast<DDS::UInt16>(domain), dg());
 }
 
 bool RtpsUdpInst::set_unicast_port(DCPS::NetworkAddress& addr, bool& fixed_port,
   DDS::DomainId_t domain, DDS::UInt16 part_id) const
 {
   return RTPS::set_rtps_unicast_port(addr, fixed_port, "RTPS/UDP unicast", port_mode(),
-    pb(), d3(), domain, dg(), part_id, pg());
+    pb(), d3(), static_cast<DDS::UInt16>(domain), dg(), part_id, pg());
 }
 
 void
@@ -394,10 +395,10 @@ bool RtpsUdpInst::multicast_address(DCPS::NetworkAddress& na, DDS::DomainId_t do
       if (directive.find("add_domain_id_to_port") != directive.npos) {
         if (na.get_port_number() == 0) {
           // use default port + domainId
-          na.set_port_number(default_port + domain);
+          na.set_port_number(default_port + static_cast<DDS::UInt16>(domain));
         } else {
           // address has a port supplied
-          na.set_port_number(na.get_port_number() + domain);
+          na.set_port_number(na.get_port_number() + static_cast<DDS::UInt16>(domain));
         }
 
         if (DCPS_debug_level > 0) {
@@ -421,8 +422,8 @@ void RtpsUdpInst::init_participant_port_id(DDS::UInt16 part_id)
 
 DDS::UInt16 RtpsUdpInst::init_participant_port_id() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("INIT_PARTICIPANT_PORT_ID").c_str(),
-                                                           0);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("INIT_PARTICIPANT_PORT_ID").c_str(),
+                                                                                    0));
 }
 
 void
@@ -502,8 +503,8 @@ void RtpsUdpInst::ipv6_init_participant_port_id(DDS::UInt16 part_id)
 
 DDS::UInt16 RtpsUdpInst::ipv6_init_participant_port_id() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("IPV6_INIT_PARTICIPANT_PORT_ID").c_str(),
-                                                           0);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("IPV6_INIT_PARTICIPANT_PORT_ID").c_str(),
+                                                                                    0));
 }
 
 void

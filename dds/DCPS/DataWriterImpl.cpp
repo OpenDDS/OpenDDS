@@ -2125,7 +2125,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
                                        Message_Block_Ptr data,
                                        const DDS::Time_t& source_timestamp)
 {
-  header_data.message_id_ = message_id;
+  header_data.message_id_ = static_cast<char>(message_id);
   header_data.byte_order_ =
     this->swap_bytes() ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER;
   header_data.coherent_change_ = false;

@@ -1800,17 +1800,17 @@ bool DynamicDataImpl::insert_discriminator(ACE_CDR::Long value)
   case TK_BOOLEAN:
     return insert_single(DISCRIMINATOR_ID, ACE_OutputCDR::from_boolean(value));
   case TK_BYTE:
-    return insert_single(DISCRIMINATOR_ID, ACE_OutputCDR::from_octet(value));
+    return insert_single(DISCRIMINATOR_ID, ACE_OutputCDR::from_octet(static_cast<ACE_CDR::Octet>(value)));
   case TK_CHAR8:
-    return insert_single(DISCRIMINATOR_ID, ACE_OutputCDR::from_char(value));
+    return insert_single(DISCRIMINATOR_ID, ACE_OutputCDR::from_char(static_cast<ACE_CDR::Char>(value)));
 #ifdef DDS_HAS_WCHAR
   case TK_CHAR16:
-    return insert_single(DISCRIMINATOR_ID, ACE_OutputCDR::from_wchar(value));
+    return insert_single(DISCRIMINATOR_ID, ACE_OutputCDR::from_wchar(static_cast<ACE_CDR::WChar>(value)));
 #endif
   case TK_INT8:
-    return insert_single(DISCRIMINATOR_ID, ACE_OutputCDR::from_int8(value));
+    return insert_single(DISCRIMINATOR_ID, ACE_OutputCDR::from_int8(static_cast<ACE_CDR::Int8>(value)));
   case TK_UINT8:
-    return insert_single(DISCRIMINATOR_ID, ACE_OutputCDR::from_uint8(value));
+    return insert_single(DISCRIMINATOR_ID, ACE_OutputCDR::from_uint8(static_cast<ACE_CDR::UInt8>(value)));
   case TK_INT16:
     return insert_single(DISCRIMINATOR_ID, static_cast<ACE_CDR::Short>(value));
   case TK_UINT16:

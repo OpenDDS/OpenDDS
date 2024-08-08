@@ -619,7 +619,7 @@ private:
     SequenceNumber preemptive_acknack_base() const
     {
       // RTI expects 0 while the spec implies it should be 1.
-      static const RTPS::VendorId_t rti_vendor_id = { 0x01, 0x01 };
+      static const RTPS::VendorId_t rti_vendor_id = {{ 0x01, 0x01 }};
       return vendor_id_ == rti_vendor_id ? 0 : 1;
     }
 

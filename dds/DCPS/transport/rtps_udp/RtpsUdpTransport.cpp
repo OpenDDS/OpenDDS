@@ -264,7 +264,7 @@ RtpsUdpTransport::use_datalink(const GUID_t& local_id,
 {
   NetworkAddressSet uc_addrs, mc_addrs;
   bool requires_inline_qos;
-  RTPS::VendorId_t vendor_id = { 0, 0 };
+  RTPS::VendorId_t vendor_id = {{ 0, 0 }};
   unsigned int blob_bytes_read;
   get_connection_addrs(remote_data, &uc_addrs, &mc_addrs, &requires_inline_qos, &vendor_id, &blob_bytes_read);
 

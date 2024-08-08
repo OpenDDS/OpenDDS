@@ -470,10 +470,10 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
         for (PublicationMap::iterator iter = publication_map_.begin();
             iter != publication_map_.end();
             ++iter) {
-          DDS::DataWriterQos qos = iter->second->qos_;
+          DDS::DataWriterQos dw_qos = iter->second->qos_;
           GUID_t id = iter->second->get_guid();
           std::pair<DwIdToQosMap::iterator, bool> pair =
-              idToQosMap.insert(DwIdToQosMap::value_type(id, qos));
+              idToQosMap.insert(DwIdToQosMap::value_type(id, dw_qos));
 
           if (!pair.second) {
             if (DCPS_debug_level > 0) {

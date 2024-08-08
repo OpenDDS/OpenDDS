@@ -3191,9 +3191,9 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
           plist[len].user_tag(userTag);
         }
 
-        DCPS::RcHandle<Spdp> outer = outer_.lock();
-        if (outer) {
-          outer->data_received(data, plist, remote_na);
+        DCPS::RcHandle<Spdp> outer_rc = outer_.lock();
+        if (outer_rc) {
+          outer_rc->data_received(data, plist, remote_na);
         }
         break;
       }
