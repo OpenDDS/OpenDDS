@@ -321,7 +321,7 @@ InfoRepoDiscovery::bit_config()
                          ip + ":" + to_dds_string(port));
     } else {
       String addr = tcp_inst->local_address();
-      tcp_inst->set_port_in_addr_string(addr, port);
+      tcp_inst->set_port_in_addr_string(addr, static_cast<u_short>(port));
       config_store_->set(tcp_inst->config_key("LOCAL_ADDRESS").c_str(), addr);
     }
 

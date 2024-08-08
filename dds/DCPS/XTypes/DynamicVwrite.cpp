@@ -588,7 +588,7 @@ bool vwrite_item(ValueWriter& vw, DDS::DynamicData_ptr value, DDS::MemberId id,
   }
   MapBitmaskHelper bitmask_helper(treat_as);
   if (item_tk == TK_BITMASK) {
-    bitmask_helper.bit_bound(td->bound()[0]);
+    bitmask_helper.bit_bound(static_cast<ACE_CDR::UShort>(td->bound()[0]));
   }
   if ((item_tk == TK_ENUM && !set_enumerated_helper<ACE_CDR::Long>(item_type, enum_helper)) ||
       (item_tk == TK_BITMASK && !set_enumerated_helper<ACE_CDR::UShort>(item_type, bitmask_helper))) {

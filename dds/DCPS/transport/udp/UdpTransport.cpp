@@ -143,7 +143,6 @@ UdpTransport::accept_datalink(const RemoteTransport& remote,
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink pending\n"));
     return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
   }
-  return AcceptConnectResult();
 }
 
 void

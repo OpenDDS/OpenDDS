@@ -1642,10 +1642,10 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
 
         const DDS::DynamicType_var disc_type = get_base_type(type_desc_->discriminator_type());
         if (ek == DDS::MUTABLE) {
-          unsigned id;
+          unsigned disc_id;
           size_t size;
           bool must_understand;
-          if (!strm_.read_parameter_id(id, size, must_understand)) {
+          if (!strm_.read_parameter_id(disc_id, size, must_understand)) {
             good = false;
             break;
           }
@@ -1662,10 +1662,10 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
       }
 
       if (ek == DDS::MUTABLE) {
-        unsigned id;
+        unsigned mem_id;
         size_t size;
         bool must_understand;
-        if (!strm_.read_parameter_id(id, size, must_understand)) {
+        if (!strm_.read_parameter_id(mem_id, size, must_understand)) {
           good = false;
           break;
         }
@@ -1954,7 +1954,7 @@ bool DynamicDataXcdrReadImpl::get_values_from_array(SequenceType& value, MemberI
     return skip_to_array_element(id) && read_values(value, nested_elem_tk);
   } else if (nested_elem_tk == enum_or_bitmask) {
     DDS::TypeDescriptor_var nested_td;
-    if (nested_elem_type->get_descriptor(neste_td) != DDS::RETCODE_OK) {
+    if (nested_elem_type->get_descriptor(nested_td) != DDS::RETCODE_OK) {
       return false;
     }
     const LBound bit_bound = nested_td->bound()[0];

@@ -191,10 +191,10 @@ void
 MulticastSession::send_all_syn(const MonotonicTimePoint& /*now*/)
 {
   ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
-  for (PendingRemoteMap::const_iterator pos1 = pending_remote_map_.begin(), limit = pending_remote_map_.end();
-       pos1 != limit; ++pos1) {
+  for (PendingRemoteMap::const_iterator pos1 = pending_remote_map_.begin(), limit1 = pending_remote_map_.end();
+       pos1 != limit1; ++pos1) {
     const GUID_t& local_writer = pos1->first;
-    for (RepoIdSet::const_iterator pos2 = pos1->second.begin(), limit = pos1->second.end(); pos2 != limit; ++pos2) {
+    for (RepoIdSet::const_iterator pos2 = pos1->second.begin(), limit2 = pos1->second.end(); pos2 != limit2; ++pos2) {
       const GUID_t& remote_reader = *pos2;
       send_syn(local_writer, remote_reader);
     }
