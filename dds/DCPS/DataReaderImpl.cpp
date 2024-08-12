@@ -173,7 +173,7 @@ DataReaderImpl::cleanup()
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   {
-    ACE_Guard<ACE_Thread_Mutex> guard(content_filtered_topic_mutex_);
+    ACE_Guard<ACE_Thread_Mutex> guard_cft(content_filtered_topic_mutex_);
     content_filtered_topic_ = 0;
   }
 #endif
@@ -1391,10 +1391,10 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         to_string(sample.header_).c_str()));
   }
 
-  SubscriptionInstance_rch instance;
   switch (sample.header_.message_id_) {
   case SAMPLE_DATA:
   case INSTANCE_REGISTRATION: {
+    SubscriptionInstance_rch instance;
     if (!check_historic(sample)) break;
 
     DataSampleHeader const & header = sample.header_;
@@ -1948,7 +1948,6 @@ DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (this->is_exclusive_ownership_ && instance->instance_state_->is_exclusive()) {
-    DataReaderImpl::OwnershipManagerPtr owner_manager = ownership_manager();
     if (owner_manager) {
       owner_manager->remove_writers(instance->instance_handle_);
     }
@@ -1997,8 +1996,8 @@ OpenDDS::DCPS::LatencyStatistics OpenDDS::DCPS::WriterStats::get_stats() const
   value.n           = this->stats_.n();
   value.maximum     = this->stats_.maximum();
   value.minimum     = this->stats_.minimum();
-  value.mean        = this->stats_.mean();
-  value.variance    = this->stats_.var();
+  value.mean        = static_cast<double>(this->stats_.mean());
+  value.variance    = static_cast<double>(this->stats_.var());
 
   return value;
 }
