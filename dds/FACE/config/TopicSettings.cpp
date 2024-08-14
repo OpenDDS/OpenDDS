@@ -10,6 +10,12 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS { namespace FaceTSS { namespace config {
 
+TopicSettings::TopicSettings()
+  : type_name_(0)
+  , platform_view_guid_(0)
+  , max_message_size_(0)
+{}
+
 int
 TopicSettings::set(const char* name, const char* value)
 {

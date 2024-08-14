@@ -232,23 +232,25 @@ public:
   }
 
 private:
+  struct Numeric {
+    Numeric(bool sign, ACE_UINT64 val, bool exp_sign, ACE_UINT64 exp_val)
+      : signed_(sign)
+      , integer_value_(val)
+      , exponent_signed_(exp_sign)
+      , exponent_value_(exp_val)
+    {}
+
+    bool signed_;  // Integer or Float is signed.
+    ACE_UINT64 integer_value_; // Integer or Float.
+    bool exponent_signed_; // Exponent is signed for Float.
+    ACE_UINT64 exponent_value_; // Exponent value for Float.
+  };
+
   Kind kind_;
   union {
     bool boolean_value_;
     char character_value_;
-    struct Numeric {
-      Numeric(bool sign, ACE_UINT64 val, bool exp_sign, ACE_UINT64 exp_val)
-        : signed_(sign)
-        , integer_value_(val)
-        , exponent_signed_(exp_sign)
-        , exponent_value_(exp_val)
-      {}
-
-      bool signed_;  // Integer or Float is signed.
-      ACE_UINT64 integer_value_; // Integer or Float.
-      bool exponent_signed_; // Exponent is signed for Float.
-      ACE_UINT64 exponent_value_; // Exponent value for Float.
-    } numeric_value_;
+    Numeric numeric_value_;
   };
   std::string string_value_;
   std::string identifier_value_;
@@ -636,7 +638,7 @@ private:
 
     const char c = scanner_.peek();
     if (c >= '0' && c <= '7') {
-      return scanner_.match(c) && scale_integer(8, c - '0');
+      return scanner_.match(c) && scale_integer(8, static_cast<ACE_UINT64>(c - '0'));
     }
 
     return false;
@@ -650,7 +652,8 @@ private:
 
     const char c = scanner_.peek();
     if (c >= '0' && c <= '7') {
-      return scanner_.match(c) && scale_integer(8, c - '0') && scan_numeric_octal_optional_digits();
+      return scanner_.match(c) && scale_integer(8, static_cast<ACE_UINT64>(c - '0'))
+        && scan_numeric_octal_optional_digits();
     }
 
     return true;
@@ -891,17 +894,19 @@ private:
     return true;
   }
 
+  struct Numeric {
+    bool signed_;
+    ACE_UINT64 integer_value_;
+    ACE_UINT64 digits_after_decimal_;
+    bool exponent_signed_;
+    ACE_UINT64 exponent_value_; // TODO:  Handle overflow.
+  };
+
   CharacterScanner& scanner_;
   union {
     bool boolean_literal_;
     char character_literal_;
-    struct Numeric {
-      bool signed_;
-      ACE_UINT64 integer_value_;
-      ACE_UINT64 digits_after_decimal_;
-      bool exponent_signed_;
-      ACE_UINT64 exponent_value_; // TODO:  Handle overflow.
-    } numeric_literal_;
+    Numeric numeric_literal_;
   };
   std::string string_literal_;
   std::string identifier_;
