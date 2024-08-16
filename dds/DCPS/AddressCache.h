@@ -17,9 +17,6 @@
 #include "PoolAllocator.h"
 #include "RcObject.h"
 #include "TimeTypes.h"
-#include "dcps_export.h"
-
-#include <ace/INET_Addr.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -30,15 +27,18 @@ typedef OPENDDS_SET_CMP(GUID_t, GUID_tKeyLessThan) GuidSet;
 
 struct AddressCacheEntry : public virtual RcObject {
 
-  AddressCacheEntry() : addrs_(), expires_(MonotonicTimePoint::max_value)
+  AddressCacheEntry()
+    : expires_(MonotonicTimePoint::max_value)
 #if defined ACE_HAS_CPP11
     , addrs_hash_(0)
 #endif
   {}
 
-  AddressCacheEntry(const NetworkAddressSet& addrs, const MonotonicTimePoint& expires) : addrs_(addrs), expires_(expires)
+  AddressCacheEntry(const NetworkAddressSet& addrs, const MonotonicTimePoint& expires)
+    : addrs_(addrs)
+    , expires_(expires)
 #if defined ACE_HAS_CPP11
-  , addrs_hash_(calculate_hash(addrs_))
+    , addrs_hash_(calculate_hash(addrs_))
 #endif
   {}
 
@@ -209,7 +209,7 @@ public:
   bool remove(const Key& key)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    return map_.erase(key) != 0;
+    return remove_i(key);
   }
 
   void remove_id(const GUID_t& val)
@@ -223,21 +223,13 @@ public:
     }
 
     for (typename KeySet::iterator key = keys.begin(), limit = keys.end(); key != limit; ++key) {
-      map_.erase(*key);
-
-      // Undo insert_ids(key)
-      GuidSet guids;
-      key->get_contained_guids(guids);
-      for (GuidSet::const_iterator guid = guids.begin(), limit = guids.end(); guid != limit; ++guid) {
-        const typename IdMapType::iterator other = id_map_.find(*guid);
-        if (other != id_map_.end()) {
-          other->second.erase(*key);
-          if (other->second.empty()) {
-            id_map_.erase(other);
-          }
-        }
-      }
+      remove_i(*key);
     }
+  }
+
+  bool empty() const
+  {
+    return map_.empty() && id_map_.empty();
   }
 
 private:
@@ -249,6 +241,26 @@ private:
     for (GuidSet::const_iterator it = guids.begin(), limit = guids.end(); it != limit; ++it) {
       id_map_[*it].insert(key);
     }
+  }
+
+  bool remove_i(const Key& key)
+  {
+    const bool found = map_.erase(key) != 0;
+
+    // Undo insert_ids(key)
+    GuidSet guids;
+    key.get_contained_guids(guids);
+    for (GuidSet::const_iterator guid = guids.begin(), limit = guids.end(); guid != limit; ++guid) {
+      const typename IdMapType::iterator other = id_map_.find(*guid);
+      if (other != id_map_.end()) {
+        other->second.erase(key);
+        if (other->second.empty()) {
+          id_map_.erase(other);
+        }
+      }
+    }
+
+    return found;
   }
 
   mutable ACE_Thread_Mutex mutex_;
