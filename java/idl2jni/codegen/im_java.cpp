@@ -350,7 +350,7 @@ ACE_CDR::Short ju_s(ACE_CDR::UShort u)
 
 ACE_CDR::Long ju_l(ACE_CDR::ULong u)
 {
-  return (u > 0x7FFFFFFFUL) ? -static_cast<ACE_CDR::Long>(~u+1) : static_cast<Long>(u);
+  return (u > 0x7FFFFFFFUL) ? -static_cast<ACE_CDR::Long>(~u+1) : static_cast<ACE_CDR::Long>(u);
 }
 
 ACE_CDR::LongLong ju_ll(ACE_CDR::ULongLong u)
