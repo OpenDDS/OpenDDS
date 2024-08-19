@@ -746,7 +746,7 @@ This policy applies to the domain participant, data reader, and data writer enti
 
        - :ref:`Default values <qos-defaults>`
 
-     * - :term:`DomainParticipant`, :term:`DataWriter`, :term:`DataReader`
+     * - :term:`DomainParticipant`, :term:`DataWriter`, and :term:`DataReader`
 
        - ``value``
 
@@ -1435,7 +1435,7 @@ The property QoS policy contains sequences of key-value pairs for the :term:`Dom
 
 .. important::
 
-  This policy is :ref:`mutable <qos-changing>`, but updates to properties after creating the participant might not an effect.
+  This policy is :ref:`mutable <qos-changing>`, but updates to properties after creating the participant might not have an effect.
   This policy affects association indirectly through security.
 
   IDL:
