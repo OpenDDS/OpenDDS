@@ -1069,7 +1069,7 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
     }
   }
 
-  sq_.ignore_remote(remote_id);
+  sq_.ignore(local_id, remote_id);
 
   for (TqeVector::iterator drop_it = to_drop.begin(); drop_it != to_drop.end(); ++drop_it) {
     (*drop_it)->data_dropped(true);

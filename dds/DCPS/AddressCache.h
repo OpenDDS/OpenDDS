@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,11 +6,10 @@
 #ifndef OPENDDS_DCPS_ADDRESSCACHE_H
 #define OPENDDS_DCPS_ADDRESSCACHE_H
 
-#include "dcps_export.h"
-
+#include <ace/config-lite.h>
 #ifndef ACE_LACKS_PRAGMA_ONCE
 #  pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#endif
 
 #include "Definitions.h"
 #include "GuidUtils.h"
@@ -20,8 +17,6 @@
 #include "PoolAllocator.h"
 #include "RcObject.h"
 #include "TimeTypes.h"
-
-#include "ace/INET_Addr.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -32,15 +27,18 @@ typedef OPENDDS_SET_CMP(GUID_t, GUID_tKeyLessThan) GuidSet;
 
 struct AddressCacheEntry : public virtual RcObject {
 
-  AddressCacheEntry() : addrs_(), expires_(MonotonicTimePoint::max_value)
+  AddressCacheEntry()
+    : expires_(MonotonicTimePoint::max_value)
 #if defined ACE_HAS_CPP11
     , addrs_hash_(0)
 #endif
   {}
 
-  AddressCacheEntry(const AddrSet& addrs, const MonotonicTimePoint& expires) : addrs_(addrs), expires_(expires)
+  AddressCacheEntry(const AddrSet& addrs, const MonotonicTimePoint& expires)
+    : addrs_(addrs)
+    , expires_(expires)
 #if defined ACE_HAS_CPP11
-  , addrs_hash_(calculate_hash(addrs_))
+    , addrs_hash_(calculate_hash(addrs_))
 #endif
   {}
 
@@ -54,7 +52,8 @@ struct AddressCacheEntry : public virtual RcObject {
 struct AddressCacheEntryProxy {
   AddressCacheEntryProxy(RcHandle<AddressCacheEntry> rch) : entry_(rch) {}
 
-  bool operator==(const AddressCacheEntryProxy& rhs) const {
+  bool operator==(const AddressCacheEntryProxy& rhs) const
+  {
 #if defined ACE_HAS_CPP11
     return entry_ && rhs.entry_ && entry_->addrs_hash_ == rhs.entry_->addrs_hash_ && entry_->addrs_ == rhs.entry_->addrs_;
 #else
@@ -62,7 +61,8 @@ struct AddressCacheEntryProxy {
 #endif
   }
 
-  bool operator<(const AddressCacheEntryProxy& rhs) const {
+  bool operator<(const AddressCacheEntryProxy& rhs) const
+  {
 #if defined ACE_HAS_CPP11
     return (rhs.entry_ && (!entry_ || (entry_->addrs_hash_ < rhs.entry_->addrs_hash_ || (entry_->addrs_hash_ == rhs.entry_->addrs_hash_ && entry_->addrs_ < rhs.entry_->addrs_))));
 #else
@@ -84,14 +84,13 @@ template <typename Key>
 class AddressCache {
 public:
 
+  typedef OPENDDS_SET(Key) KeySet;
 #if defined ACE_HAS_CPP11
   typedef OPENDDS_UNORDERED_MAP_T(Key, RcHandle<AddressCacheEntry>) MapType;
-  typedef OPENDDS_VECTOR(Key) KeyVec;
-  typedef OPENDDS_UNORDERED_MAP_T(GUID_t, KeyVec) IdMapType;
+  typedef OPENDDS_UNORDERED_MAP_T(GUID_t, KeySet) IdMapType;
 #else
   typedef OPENDDS_MAP_T(Key, RcHandle<AddressCacheEntry>) MapType;
-  typedef OPENDDS_VECTOR(Key) KeyVec;
-  typedef OPENDDS_MAP_T(GUID_t, KeyVec) IdMapType;
+  typedef OPENDDS_MAP_T(GUID_t, KeySet) IdMapType;
 #endif
 
   AddressCache() {}
@@ -120,11 +119,7 @@ public:
       if (pos == cache.map_.end()) {
         rch_ = make_rch<AddressCacheEntry>();
         cache.map_[key] = rch_;
-        GuidSet set;
-        key.get_contained_guids(set);
-        for (GuidSet::const_iterator it = set.begin(), limit = set.end(); it != limit; ++it) {
-          cache.id_map_[*it].push_back(key);
-        }
+        cache.insert_ids(key);
         is_new_ = true;
       } else {
         rch_ = pos->second;
@@ -144,7 +139,8 @@ public:
 #endif
     }
 
-    inline AddressCacheEntry& value() {
+    AddressCacheEntry& value()
+    {
       OPENDDS_ASSERT(rch_);
 #if defined ACE_HAS_CPP11
       non_const_touch_ = true;
@@ -152,13 +148,15 @@ public:
       return *rch_;
     }
 
-    inline const AddressCacheEntry& value() const {
+    const AddressCacheEntry& value() const
+    {
       OPENDDS_ASSERT(rch_);
       return *rch_;
     }
 
 #if defined ACE_HAS_CPP11
-    inline void recalculate_hash() {
+    void recalculate_hash()
+    {
       if (non_const_touch_) {
         rch_->addrs_hash_ = calculate_hash(rch_->addrs_);
         non_const_touch_ = false;
@@ -204,33 +202,66 @@ public:
       rch->expires_ = expires;
     } else {
       rch = make_rch<AddressCacheEntry>(addrs, expires);
-      GuidSet set;
-      key.get_contained_guids(set);
-      for (GuidSet::const_iterator it = set.begin(), limit = set.end(); it != limit; ++it) {
-        id_map_[*it].push_back(key);
-      }
+      insert_ids(key);
     }
   }
 
   bool remove(const Key& key)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    return map_.erase(key) != 0;
+    return remove_i(key);
   }
 
   void remove_id(const GUID_t& val)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     const typename IdMapType::iterator pos = id_map_.find(val);
+    KeySet keys;
     if (pos != id_map_.end()) {
-      for (typename KeyVec::iterator it = pos->second.begin(), limit = pos->second.end(); it != limit; ++it) {
-        map_.erase(*it);
-      }
+      keys.swap(pos->second);
       id_map_.erase(pos);
+    }
+
+    for (typename KeySet::iterator key = keys.begin(), limit = keys.end(); key != limit; ++key) {
+      remove_i(*key);
     }
   }
 
+  bool empty() const
+  {
+    return map_.empty() && id_map_.empty();
+  }
+
 private:
+
+  void insert_ids(const Key& key)
+  {
+    GuidSet guids;
+    key.get_contained_guids(guids);
+    for (GuidSet::const_iterator it = guids.begin(), limit = guids.end(); it != limit; ++it) {
+      id_map_[*it].insert(key);
+    }
+  }
+
+  bool remove_i(const Key& key)
+  {
+    const bool found = map_.erase(key) != 0;
+
+    // Undo insert_ids(key)
+    GuidSet guids;
+    key.get_contained_guids(guids);
+    for (GuidSet::const_iterator guid = guids.begin(), limit = guids.end(); guid != limit; ++guid) {
+      const typename IdMapType::iterator other = id_map_.find(*guid);
+      if (other != id_map_.end()) {
+        other->second.erase(key);
+        if (other->second.empty()) {
+          id_map_.erase(other);
+        }
+      }
+    }
+
+    return found;
+  }
 
   mutable ACE_Thread_Mutex mutex_;
   MapType map_;
