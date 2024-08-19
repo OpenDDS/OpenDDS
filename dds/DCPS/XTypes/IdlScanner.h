@@ -273,6 +273,7 @@ private:
 
   Kind kind_;
   union {
+    ACE_CDR::ULongLong max_alignment;
     bool boolean_value_;
     char character_value_;
     unsigned char numeric_value_[sizeof(Numeric)];

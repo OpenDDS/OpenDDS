@@ -1775,7 +1775,6 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
 
     for (unsigned long j = 0; j < n_labels; ++j) {
       AST_UnionLabel *ul = branches[i]->label(j);
-      ostringstream oss;
 
       if (ul->label_kind() == AST_UnionLabel::UL_default) {
         hasDefault = true;

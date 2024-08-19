@@ -64,7 +64,7 @@ TestDriver::parse_args(int& argc, ACE_TCHAR* argv[])
         throw TestException();
       }
 
-      num_publishers_ = tmp;
+      num_publishers_ = static_cast<unsigned>(tmp);
     }
     // The '-n' option
     else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-n")))) {
@@ -78,7 +78,7 @@ TestDriver::parse_args(int& argc, ACE_TCHAR* argv[])
         throw TestException();
       }
 
-      num_packets_ = tmp;
+      num_packets_ = static_cast<unsigned>(tmp);
     }
     // The '-d' option
     else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-d")))) {
@@ -159,7 +159,7 @@ TestDriver::init()
   delete packet;
 
   // Init the stats
-  stats_.init(num_publishers_,num_packets_,data_size_,num_bytes_per_packet);
+  stats_.init(num_publishers_, num_packets_, static_cast<unsigned>(data_size_), num_bytes_per_packet);
 }
 
 

@@ -30,11 +30,11 @@ namespace TestData
   struct Packet
   {
     Header   header_;
-    ElemType payload_[1 << DATA_SIZE];
+    ElemType payload_[1u << DATA_SIZE];
 
     Packet()
     {
-      header_.payload_size_ = (1 << DATA_SIZE) * sizeof(ElemType);
+      header_.payload_size_ = (1u << DATA_SIZE) * sizeof(ElemType);
       ACE_OS::memset(payload_, 0, header_.payload_size_);
     }
   };
