@@ -2517,6 +2517,8 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, 
   size_t cache_misses = 0;
   size_t addrset_min_size = std::numeric_limits<size_t>::max();
   size_t addrset_max_size = 0;
+  const size_t max_reserve_count = 64;
+  const size_t reserve_count = std::min(meta_submessages.size(), max_reserve_count);
 
   BundlingCache::ScopedAccess global_access(bundling_cache_);
   const MonotonicTimePoint now = MonotonicTimePoint::now();
@@ -2568,11 +2570,11 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, 
     DestMetaSubmessageMap& dest_map = addr_map[AddressCacheEntryProxy(const_entry.rch_)];
     if (std::memcmp(&(it->dst_guid_.guidPrefix), &GUIDPREFIX_UNKNOWN, sizeof(GuidPrefix_t)) != 0) {
       MetaSubmessageIterVec& vec = dest_map[make_unknown_guid(it->dst_guid_.guidPrefix)];
-      vec.reserve(meta_submessages.size());
+      vec.reserve(reserve_count);
       vec.push_back(it);
     } else {
       MetaSubmessageIterVec& vec = dest_map[GUID_UNKNOWN];
-      vec.reserve(meta_submessages.size());
+      vec.reserve(reserve_count);
       vec.push_back(it);
     }
   }
