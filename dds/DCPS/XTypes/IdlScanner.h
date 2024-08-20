@@ -117,10 +117,8 @@ public:
   {
     IdlToken token;
     token.kind_ = IntegerLiteral;
-    token.activate_numeric();
-    Numeric& num_val = token.numeric_value();
-    num_val.signed_ = is_signed;
-    num_val.integer_value_ = value;
+    token.numeric_value_.signed_ = is_signed;
+    token.numeric_value_.integer_value_ = value;
     return token;
   }
 
@@ -128,12 +126,10 @@ public:
   {
     IdlToken token;
     token.kind_ = FloatLiteral;
-    token.activate_numeric();
-    Numeric& num_val = token.numeric_value();
-    num_val.signed_ = is_signed;
-    num_val.integer_value_ = value;
-    num_val.exponent_signed_ = exponent_is_signed;
-    num_val.exponent_value_ = exponent_value;
+    token.numeric_value_.signed_ = is_signed;
+    token.numeric_value_.integer_value_ = value;
+    token.numeric_value_.exponent_signed_ = exponent_is_signed;
+    token.numeric_value_.exponent_value_ = exponent_value;
     return token;
   }
 
@@ -166,20 +162,13 @@ public:
     case BooleanLiteral:
       return boolean_value_ == other.boolean_value_;
     case IntegerLiteral:
-      {
-        const Numeric& val = numeric_value();
-        const Numeric& other_val = other.numeric_value();
-        return val.signed_ == other_val.signed_ && val.integer_value_ == other_val.integer_value_;
-      }
+      return numeric_value_.signed_ == other.numeric_value_.signed_
+        && numeric_value_.integer_value_ == other.numeric_value_.integer_value_;
     case FloatLiteral:
-      {
-        const Numeric& val = numeric_value();
-        const Numeric& other_val = other.numeric_value();
-        return val.signed_ == other_val.signed_
-          && val.integer_value_ == other_val.integer_value_
-          && val.exponent_signed_ == other_val.exponent_signed_
-          && val.exponent_value_ == other_val.exponent_value_;
-      }
+      return numeric_value_.signed_ == other.numeric_value_.signed_
+        && numeric_value_.integer_value_ == other.numeric_value_.integer_value_
+        && numeric_value_.exponent_signed_ == other.numeric_value_.exponent_signed_
+        && numeric_value_.exponent_value_ == other.numeric_value_.exponent_value_;
     case StringLiteral:
       return string_value_ == other.string_value_;
     case CharacterLiteral:
@@ -218,22 +207,22 @@ public:
 
   bool is_signed() const
   {
-    return numeric_value().signed_;
+    return numeric_value_.signed_;
   }
 
   ACE_UINT64 integer_value() const
   {
-    return numeric_value().integer_value_;
+    return numeric_value_.integer_value_;
   }
 
   bool exponent_is_signed() const
   {
-    return numeric_value().exponent_signed_;
+    return numeric_value_.exponent_signed_;
   }
 
   ACE_UINT64 exponent_value() const
   {
-    return numeric_value().exponent_value_;
+    return numeric_value_.exponent_value_;
   }
 
   const std::string& identifier_value() const
@@ -243,40 +232,17 @@ public:
 
 private:
   struct Numeric {
-    Numeric(bool sign = false, ACE_UINT64 val = 0, bool exp_sign = false, ACE_UINT64 exp_val = 0)
-      : signed_(sign)
-      , integer_value_(val)
-      , exponent_signed_(exp_sign)
-      , exponent_value_(exp_val)
-    {}
-
     bool signed_;  // Integer or Float is signed.
     ACE_UINT64 integer_value_; // Integer or Float.
     bool exponent_signed_; // Exponent is signed for Float.
     ACE_UINT64 exponent_value_; // Exponent value for Float.
   };
 
-  void activate_numeric()
-  {
-    new(numeric_value_) Numeric();
-  }
-
-  const Numeric& numeric_value() const
-  {
-    return *reinterpret_cast<const Numeric*>(numeric_value_);
-  }
-
-  Numeric& numeric_value()
-  {
-    return *reinterpret_cast<Numeric*>(numeric_value_);
-  }
-
   Kind kind_;
   union {
-    ACE_CDR::ULongLong max_alignment;
     bool boolean_value_;
     char character_value_;
-    unsigned char numeric_value_[sizeof(Numeric)];
+    Numeric numeric_value_;
   };
   std::string string_value_;
   std::string identifier_value_;
