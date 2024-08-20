@@ -60,6 +60,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
                  guid_to_string(src_guid).c_str()));
     }
     relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
+    check_participants_limit();
   }
 
   if (addr_set_stats.deactivation == OpenDDS::DCPS::MonotonicTimePoint::zero_value) {
@@ -278,6 +279,7 @@ void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid,
 
   guid_addr_set_map_.erase(it);
   relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
+  check_participants_limit();
 
   if (config_.log_activity()) {
     ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::remove "
@@ -315,6 +317,15 @@ void GuidAddrSet::reject_address(const ACE_INET_Addr& addr,
 bool GuidAddrSet::check_address(const ACE_INET_Addr& addr)
 {
   return rejected_address_map_.find(OpenDDS::DCPS::NetworkAddress(addr)) == rejected_address_map_.end();
+}
+
+void GuidAddrSet::check_participants_limit()
+{
+  const auto low = config_.admission_max_participants_low_water();
+  if (low > 0) {
+    participant_admission_limit_reached_ = guid_addr_set_map_.size() >=
+      (participant_admission_limit_reached_ ? low : config_.admission_max_participants_high_water());
+  }
 }
 
 }

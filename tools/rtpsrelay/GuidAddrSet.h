@@ -249,6 +249,7 @@ public:
     , spdp_vertical_handler_(0)
     , sedp_vertical_handler_(0)
     , data_vertical_handler_(0)
+    , participant_admission_limit_reached_(false)
   {}
 
   void spdp_vertical_handler(RelayHandler* spdp_vertical_handler)
@@ -403,7 +404,7 @@ private:
   {
     const size_t limit = config_.admission_control_queue_size();
     const bool limit_okay = !limit || admission_control_queue_.size() < limit;
-    return limit_okay && relay_thread_monitor_.threads_okay();
+    return !participant_admission_limit_reached_ && limit_okay && relay_thread_monitor_.threads_okay();
   }
 
   bool ignore_rtps(bool from_application_participant,
@@ -429,8 +430,9 @@ private:
       it->second.get_session_time(now);
   }
 
-  struct AdmissionControlInfo
-  {
+  void check_participants_limit();
+
+  struct AdmissionControlInfo {
     AdmissionControlInfo(const OpenDDS::DCPS::GuidPrefix_t& prefix, const OpenDDS::DCPS::MonotonicTimePoint& admitted)
      : admitted_(admitted)
     {
@@ -462,6 +464,7 @@ private:
   typedef std::list<RejectedAddressMapType::iterator> RejectedAddressExpirationQueue;
   RejectedAddressExpirationQueue rejected_address_expiration_queue_;
   mutable ACE_Thread_Mutex mutex_;
+  bool participant_admission_limit_reached_;
 };
 
 }
