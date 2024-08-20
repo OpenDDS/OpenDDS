@@ -7,28 +7,20 @@ categories: [opendds]
 
 ## Commercial Support
 
-### OpenDDS Foundation
+### [Object Computing, Inc. (OCI)](https://objectcomputing.com/)
 
-Members of the OpenDDS Foundation are available for enhancements, consulting, and troubleshooting.
-[Terms and Conditions](support_terms_and_conditions.pdf)
+Members of the core OpenDDS development team are available to provide training, consulting, code review, troubleshooting, and more.
+OCI's pre-paid support packages enable you and your team to get the help you need when you need it at economical hourly rates.
+Fully managed project delivery is also available.
+[Contact OCI for a custom quote](https://objectcomputing.com/platforms/opendds).
 
-### Object Computing, Inc. (OCI)
-
-Members of the core OpenDDS development team are available to provide [training](https://objectcomputing.com/products/opendds/training), consulting, code review, troubleshooting, and more.
-
-[OCI's pre-paid support packages](https://objectcomputing.com/products/opendds/opendds-consulting-and-support) enable you and your team to get the help you need when you need it at economical hourly rates. Fully managed project delivery is also available; [contact OCI for a custom quote](https://objectcomputing.com/products/opendds/opendds-consulting-and-support#contact).
-
-### Remedy IT
+### [Remedy IT](https://www.remedy.nl)
 
 [Remedy's RS_Year support](https://www.remedy.nl/services/opensource-support.html) provides you and your team the assistance you need using a pre-purchased pool of hours.
 
 Remedy IT also offers [training courses](https://www.remedy.nl/training/overview.html) in communication middleware and frameworks, including the OpenDDS project. Courses are offered as open enrollment, but on request, can also be delivered at your location.
 
 ## Community Support
-
-### Mailing Lists
-
-Visit [OCI's OpenDDS resources page](https://objectcomputing.com/products/opendds/resources) to subscribe to the OpenDDS mailing list and receive regular updates, invitations to webinars and events, and more.
 
 ### GitHub Issues and Discussions
 
