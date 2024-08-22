@@ -168,10 +168,6 @@ Java
 OpenDDS has optional :ref:`Java bindings <java>`.
 It requires the Java Development Kit (JDK).
 
-There is also support for Java Message Server (JMS) v1.1.
-In addition to the JDK, it requires Ant and JBoss 4.2.x.
-See :ghfile:`java/jms/README`.
-
 .. _deps-qt:
 
 Qt
