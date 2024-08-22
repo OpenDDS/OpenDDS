@@ -6,7 +6,6 @@ workspace {
   DevGuideExamples
 
   exclude {
-    java/jms
     tools/modeling/tests
   }
 
