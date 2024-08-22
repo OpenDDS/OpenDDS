@@ -98,7 +98,7 @@ std::ostream& char_helper(std::ostream& o, CharType value)
     return o << "\\a";
   }
   const unsigned cvalue = char_value(value);
-  if (cvalue <= UCHAR_MAX && isprint(cvalue)) {
+  if (cvalue <= UCHAR_MAX && isprint(static_cast<int>(cvalue))) {
     return o << static_cast<char>(value);
   }
   return hex_value(o << "\\x", cvalue, sizeof(CharType) == 1 ? 1 : 2);
