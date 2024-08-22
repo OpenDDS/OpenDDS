@@ -250,8 +250,6 @@ my @specs =
    ],
    ['Optional dependencies for OpenDDS (disabled by default unless noted otherwise):',
     'java:s', 'Java development kit (use JAVA_HOME)',
-    'jboss:s', 'JBoss application server (use JBOSS_HOME)',
-    'ant:s', 'Ant for JBoss (use ANT_HOME or system pkg)',
     'wireshark:s',
       'Wireshark dev headers or source not built with' .
       $argIndent . 'CMake (use WIRESHARK_SRC or system pkg)' .
@@ -1485,8 +1483,6 @@ sub write_opendds_configh {
 ## Optional OpenDDS dependencies
 my %optdep = (
   'java' => {env => 'JAVA_HOME', sanity => 'include/jni.h', mpc => 'java'},
-  'jboss' => {env => 'JBOSS_HOME', sanity => 'lib/jboss-common.jar'},
-  'ant' => {env => 'ANT_HOME', sanity => 'bin/ant'},
   'wireshark' => {env => 'WIRESHARK_SRC', sanity => 'epan/packet.h', mpc => 'wireshark'},
   'wireshark-cmake' => {
     env => 'WIRESHARK_SRC',
@@ -1748,7 +1744,7 @@ if (exists $opts{'rapidjson'}) {
   }
 }
 
-my %use_system_pkg = map {$_, 1} qw/ant glib qt xerces3 openssl/;
+my %use_system_pkg = map {$_, 1} qw/glib qt xerces3 openssl/;
 
 my %use_win_default = (
     'openssl' => system_default_install_dir() . '/OpenSSL',
@@ -1990,14 +1986,6 @@ if ($build_gtest) {
   }
 
   print("Done Building GoogleTest\n");
-}
-
-if (exists $opts{'jboss'} && !exists $opts{'java'}) {
-  die "ERROR: --java is required for --jboss (OpenDDS JMS Provider).\nStopped";
-}
-
-if (exists $opts{'jboss'} && !exists $opts{'ant'}) {
-  die "ERROR: --ant is required for --jboss (OpenDDS JMS Provider).\nStopped";
 }
 
 if (exists $opts{'wireshark-cmake'}) {

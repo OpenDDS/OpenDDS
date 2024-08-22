@@ -626,18 +626,3 @@ To run the Messenger Java OpenDDS application, use the following commands:
     $JAVA_HOME/bin/java -ea -cp classes:$DDS_ROOT/lib/i2jrt.jar:$DDS_ROOT/lib/OpenDDS_DCPS.jar:classes TestSubscriber -DCPSConfigFile sub_tcp.ini
 
 The ``-DCPSConfigFile`` command-line argument passes the location of the OpenDDS configuration file.
-
-.. _java_bindings--java-message-service-jms-support:
-
-**********************************
-Java Message Service (JMS) Support
-**********************************
-
-..
-    Sect<10.10>
-
-OpenDDS provides partial support for `JMS version 1.1 <https://docs.oracle.com/javaee/6/tutorial/doc/bncdq.html>`__.
-Enterprise Java applications can make use of the complete OpenDDS middleware just like standard Java and C++ applications.
-
-See the ``INSTALL`` file in the :ghfile:`java/jms/` directory for information on getting started with the OpenDDS JMS support, including the prerequisites and dependencies.
-

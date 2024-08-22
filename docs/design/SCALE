@@ -188,34 +188,3 @@ the system socket resources may limit the number of nodes
 which can be added.  The simplest way to extend the scaling
 if this limit is reached is to aggregate some traffic and
 send only to the aggregators.
-
-ESB Scale Issues
-
-In addition to the scalability issues described above, use
-of the OpenDDS JMS Provider within the JBoss ESB also
-introduces some scalability issues of its own.
-
-The ESB is exceptionally configuration-sensitive. Adjustments
-to the configuration of the ESB, the JMS Provider, and even
-JBoss AS itself will be required to achieve optimal
-performance.
-
-Typical memory and garbage collection issues will affect both
-the ESB and JBoss AS; there are a number of documentation
-sources on how to best tune and deal with these problems (and
-are therefore out of scope for this document).
-
-The ESB configuration, particularly the services and
-providers configuration can affect the number of OpenDDS
-entities which are initialized and used at runtime.
-Mis-configuration of these attributes can create an in-ordinate
-number of resource allocations and de-allocations over the
-lifespan of processing a single message. Ideally, a single set
-of resources is initialized at start up, and then re-used for
-the lifetime of the service.
-
-The OpenDDS JMS provider aggressively caches lower-level
-entities such as DomainParticipants and Topics, however bad
-configuration can result in an application creating (and
-destroying) an arbitrary number of Subscribers, Publishers,
-DataReaders, DataWriters, and Transports.

@@ -8,7 +8,6 @@ workspace {
   DevGuideExamples
 
   exclude {
-    java/jms
     // Run tools/modeling/tests/setup.pl to generate
     // tools/modeling/tests/modeling_tests.mwc.
     tools/modeling/tests
