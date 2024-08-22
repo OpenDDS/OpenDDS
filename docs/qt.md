@@ -4,8 +4,6 @@ Some applications included with OpenDDS require Qt5:
 
   - [ishapes demo](../examples/DCPS/ishapes)
   - [OpenDDS Monitor](../tools/monitor)
-  - [ExcelRTD](../tools/excelRTD)
-    - (Indirectly through dependence on some of Monitor's functionality)
 
 To build and use these applications, Qt5 must be available on the system and
 Qt5 support must be enabled in the build system.
