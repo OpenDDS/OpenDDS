@@ -19,7 +19,7 @@ target/project named `MonitorApp` but will also be built by default if
 everything is being built.
 
 **NOTE: After OpenDDS 3.13, support for MSVC 9 (Microsoft Visual Studio 2008)
-has been dropped for the Montior and ExcelRTD even though OpenDDS supports it
+has been dropped for the Monitor even though OpenDDS supports it
 in the core libraries.**
 
 ## Usage
