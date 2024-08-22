@@ -34,6 +34,7 @@ public class ComplexIDLTest extends QuoteSupport {
     private static DomainParticipant participant;
 
     private static Topic topic;
+    private static Topic union_topic;
 
     private static Publisher publisher;
     private static Subscriber subscriber;
@@ -50,10 +51,20 @@ public class ComplexIDLTest extends QuoteSupport {
         int result = typeSupport.register_type(participant, "Complex::Data");
         assert (result != RETCODE_ERROR.value);
 
+        ElectionNews_tTypeSupportImpl electionNewsTypeSupport = new ElectionNews_tTypeSupportImpl();
+
+        result = electionNewsTypeSupport.register_type(participant, "Complex::ElectionNews_t");
+        assert (result != RETCODE_ERROR.value);
+
         topic = participant.create_topic("Complex::Topic", "Complex::Data",
                                          TOPIC_QOS_DEFAULT.get(), null,
                                          DEFAULT_STATUS_MASK.value);
         assert (topic != null);
+
+        union_topic = participant.create_topic("Complex::UnionTopic", "Complex::ElectionNews_t",
+                                               TOPIC_QOS_DEFAULT.get(), null,
+                                               DEFAULT_STATUS_MASK.value);
+        assert (union_topic != null);
 
         publisher = participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         assert (publisher != null);
@@ -212,11 +223,111 @@ public class ComplexIDLTest extends QuoteSupport {
         System.out.println("(Those responsible have been sacked.)");
     }
 
+    protected static void testElectionNews() throws Exception {
+        final AtomicInteger count = new AtomicInteger();
+
+        final Lock lock = new ReentrantLock();
+        final Condition finished = lock.newCondition();
+
+        publisher.create_datawriter(union_topic, DATAWRITER_QOS_DEFAULT.get(),
+            new DDS._DataWriterListenerLocalBase() {
+                public void on_liveliness_lost(DataWriter dw, LivelinessLostStatus status) {}
+
+                public void on_offered_deadline_missed(DataWriter dw, OfferedDeadlineMissedStatus status) {}
+
+                public void on_offered_incompatible_qos(DataWriter dw, OfferedIncompatibleQosStatus status) {}
+
+                public void on_publication_matched(DataWriter dw, PublicationMatchedStatus status) {
+                    try {
+                        if (status.current_count == 0) return;
+                        // Don't run the rest of this method if the callback is
+                        // due to the datareader going away.
+
+                        ElectionNews_tDataWriter writer = ElectionNews_tDataWriterHelper.narrow(dw);
+
+                        count.set(1);
+
+                        ElectionNews_t data = new ElectionNews_t();
+                        data.status(ElectionNewsType_t.ELECTION_STATUS, new Candidate_t("A Name", 10));
+
+                        int result = writer.write(data, HANDLE_NIL.value);
+                        assert (result != RETCODE_ERROR.value);
+
+                    } catch (Throwable t) {
+                        t.printStackTrace();
+                    }
+                };
+            }, DEFAULT_STATUS_MASK.value
+        );
+
+        lock.lock();
+        try {
+            subscriber.create_datareader(union_topic, DATAREADER_QOS_DEFAULT.get(),
+                new DDS._DataReaderListenerLocalBase() {
+                    public void on_liveliness_changed(DataReader dr, LivelinessChangedStatus status) {}
+
+                    public void on_requested_deadline_missed(DataReader dr, RequestedDeadlineMissedStatus status) {}
+
+                    public void on_requested_incompatible_qos(DataReader dr, RequestedIncompatibleQosStatus status) {}
+
+                    public void on_sample_lost(DataReader dr, SampleLostStatus status) {}
+
+                    public void on_sample_rejected(DataReader dr, SampleRejectedStatus status) {}
+
+                    public void on_subscription_matched(DataReader dr, SubscriptionMatchedStatus status) {}
+
+                    public void on_data_available(DataReader dr) {
+                        try {
+                            ElectionNews_tDataReader reader = ElectionNews_tDataReaderHelper.narrow(dr);
+
+                            ElectionNews_t en = new ElectionNews_t();
+                            en.status(ElectionNewsType_t.ELECTION_STATUS, new Candidate_t(new String(""), 0));
+                            ElectionNews_tHolder dh = new ElectionNews_tHolder(en);
+
+                            SampleInfo si = new SampleInfo();
+                            si.source_timestamp = new Time_t();
+
+                            int result = reader.take_next_sample(dh, new SampleInfoHolder(si));
+                            assert (result != RETCODE_ERROR.value);
+
+                            ElectionNews_t data = dh.value;
+
+                            if (si.valid_data) {
+                                assert data.discriminator() == ElectionNewsType_t.ELECTION_STATUS;
+                                assert data.status().name.equals("A Name");
+                                assert data.status().votes == 10;
+                            }
+
+                            if (count.decrementAndGet() == 0) {
+                                // Signal main thread
+                                lock.lock();
+                                try {
+                                    finished.signalAll();
+                                } finally {
+                                    lock.unlock();
+                                }
+                            }
+
+                        } catch (Throwable t) {
+                            t.printStackTrace();
+                        }
+                    }
+                }, DEFAULT_STATUS_MASK.value
+            );
+
+            // Wait for DataReader
+            finished.await();
+
+        } finally {
+            lock.unlock();
+        }
+    }
+
     public static void main(String[] args) throws Exception {
         setUp(args);
         try {
             testQuotes();
-
+            testElectionNews();
         } finally {
             tearDown();
         }
