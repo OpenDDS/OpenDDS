@@ -7,9 +7,5 @@ workspace {
     // For the case where the user clones git repository
     ATCD
     ACE_TAO
-
-    // Run tools/modeling/tests/setup.pl to generate
-    // tools/modeling/tests/modeling_tests.mwc.
-    tools/modeling/tests
   }
 }

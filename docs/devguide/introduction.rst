@@ -316,7 +316,7 @@ Relative to :envvar:`DDS_ROOT`:
 
 * the :ghfile:`dds/` directory contains the source code for OpenDDS.
 * the :ghfile:`tests/` directory contains tests.
-* the :ghfile:`tools/` directory contains tools and libraries like the DCPSInfoRepo, RtpsRelay, and the Modeling SDK.
+* the :ghfile:`tools/` directory contains tools and libraries like the DCPSInfoRepo, and RtpsRelay.
 * the :ghfile:`DevGuideExamples/` directory contains examples used in this guide.
 * the :ghfile:`examples/` directory contains examples *not* used in this guide.
 * the :ghfile:`docs/` directory contains documentation for users and developers of OpenDDS.

@@ -4,7 +4,7 @@
 #include "tests/Utils/DDSApp.h"
 #include "tests/Utils/Options.h"
 #include "tests/Utils/ListenerRecorder.h"
-#include "model/Sync.h"
+#include "tests/Utils/StatusMatching.h"
 #include "ace/OS_NS_unistd.h"
 #include <vector>
 
@@ -97,8 +97,16 @@ public:
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) Sub waiting for writer to come and go\n")));
       }
-      {
-        OpenDDS::Model::ReaderSync rs(reader);
+
+      if (wait_match(reader, 1, Utils::EQ) != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, "ERROR: %N:%l: run: "
+                   "wait for publisher failed\n"));
+        return;
+      }
+      if (wait_match(reader, 0, Utils::EQ) != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, "ERROR: %N:%l: run: "
+                   "wait for publisher failed\n"));
+        return;
       }
 
       const typename ListenerRecorder::Messages msgs = listener_impl->messages();

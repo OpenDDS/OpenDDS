@@ -14,7 +14,7 @@
 
 #include "MessengerTypeSupportC.h"
 #include "Writer.h"
-#include "model/Sync.h"
+#include "tests/Utils/StatusMatching.h"
 
 const int num_instances_per_writer = 1;
 const int num_messages = 20;
@@ -194,7 +194,11 @@ Writer::is_finished() const
 void
 Writer::wait_for_acks()
 {
-  OpenDDS::Model::WriterSync::wait_ack(writer_);
+  const DDS::Duration_t max_wait = { 30, 0 };
+  if (writer_->wait_for_acknowledgments(max_wait) != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) %C : wait for acknowledgement failed\n",
+               ownership_dw_id_.c_str()));
+  }
 }
 
 int

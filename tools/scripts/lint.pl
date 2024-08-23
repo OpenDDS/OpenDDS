@@ -337,7 +337,6 @@ my %path_conditions = (
       qr@^dds/(?!(idl|InfoRepo)/)@,
       qr@^FACE/@,
       qr@^tools/dds/@,
-      qr@^tools/modeling/codegen/@,
     );
     for my $pattern (@patterns) {
       return 1 if $filename =~ $pattern;
@@ -404,7 +403,6 @@ sub valid_include_guard_names {
   my $x = shift;
   $x =~ s@^tools/@@g;
   $x =~ s@^dds/@@g;
-  $x =~ s@^modeling/codegen/@@g;
   $x =~ s/^opendds//ig;
   $x =~ s/^[_]//g;
   $x =~ s/\W+/_/g;

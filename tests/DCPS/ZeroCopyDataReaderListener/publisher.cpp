@@ -26,7 +26,7 @@
 #include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
 #include "Args.h"
-#include "model/Sync.h"
+#include "tests/Utils/StatusMatching.h"
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -121,7 +121,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     delete writer;
 
     // Wait for acks
-    OpenDDS::Model::WriterSync::wait_ack(dw);
+    const DDS::Duration_t max_wait = { 30, 0 };
+    if (dw->wait_for_acknowledgments(max_wait) != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "%N:%l: main: wait for acknowledgement failed\n"));
+      return -1;
+    }
 
     // Clean-up!
     participant->delete_contained_entities();

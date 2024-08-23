@@ -1,4 +1,4 @@
-project(ZeroCopyDRL_Publisher): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dds_model {
+project(ZeroCopyDRL_Publisher): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
 
   exename   = publisher
 
@@ -11,7 +11,7 @@ project(ZeroCopyDRL_Publisher): dcpsexe, dcps_test, dcps_cm, dcps_transports_for
   }
 }
 
-project(ZeroCopyDRL_Subscriber): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dds_model {
+project(ZeroCopyDRL_Subscriber): dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
 
   exename   = subscriber
 
@@ -24,7 +24,7 @@ project(ZeroCopyDRL_Subscriber): dcpsexe, dcps_test, dcps_cm, dcps_transports_fo
   }
 }
 
-project(ZeroCopyDRL_StackSubscriber) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dds_model {
+project(ZeroCopyDRL_StackSubscriber) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
 
   exename   = stack_subscriber
 
