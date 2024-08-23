@@ -9,7 +9,8 @@
 #include "Boilerplate.h"
 #include <iostream>
 
-TakeNextReaderListenerImpl::TakeNextReaderListenerImpl()
+TakeNextReaderListenerImpl::TakeNextReaderListenerImpl(DistributedConditionSet_rch dcs)
+  : DataReaderListenerImpl(dcs)
 {
   std::cout << "Using TakeNextReaderListenerImpl" << std::endl;
 }

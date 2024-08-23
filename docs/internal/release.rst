@@ -102,22 +102,6 @@ These are files or the parts of the files that the release script won't be able 
 - Update :ghfile:`README.md` and :doc:`/devguide/building/dependencies` for any platform or dependency changes.
 - Document changes to building OpenDDS, at least in :doc:`/devguide/building/index`, but possibly also in :ghfile:`java/README` and :ghfile:`java/INSTALL`.
 
-Update the Modeling SDK version numbers and release notes
-=========================================================
-
-Our convention recently has been to only update these if changes have been made to the Modeling SDK plugins in the current release cycle.
-Notes are in :ghfile:`tools/modeling/plugins/org.opendds.modeling.help/html/gettingstarted/maintopic.html`.
-Version numbers are updated by running :ghfile:`tools/modeling/update_version.pl`.
-
-Generate the Modeling SDK Eclipse update site
-=============================================
-
-Our convention recently has been to only update these if changes have been made to the Modeling SDK plugins in the current release cycle.
-
-Follow all the steps in :ghfile:`tools/modeling/features/org.opendds.modeling.site/README.txt`
-The step dealing with version numbers is already taken care of by the above section "Update the Modeling SDK version numbers and release notes".
-The result of this process is adding the update site contents to the repository for http://www.opendds.org (which will be synced to the live site in the steps below).
-
 Update the opendds.org Website
 ==============================
 

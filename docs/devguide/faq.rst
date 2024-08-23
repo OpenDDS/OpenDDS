@@ -232,35 +232,6 @@ The typedefs are in the "CORBA" IDL module, so the typedef for LongSeq could be 
      CORBA::LongSeq seq;
    };
 
-******************************
-Using the OpenDDS Modeling SDK
-******************************
-
-============================================
-How do I obtain the OpenDDS Modeling SDK?
-============================================
-
-Please refer to the :ref:`modeling_sdk` for complete installation instructions.
-
-Make sure that Eclipse's list of Available Software Sites contains an enabled site for the Eclipse release itself.  Version 3.5 uses URL: http://download.eclipse.org/releases/galileo.  If not, you need to add the correct update site for your version of Eclipse.
-
-=================================================
-Why can't I see the element I added to my figure?
-=================================================
-
-If auto-sizing isn't enabled for the figure and depending on the figure's size, an element added to one of the figure's compartments may not be immediately visible.
-By increasing the size of the figure, the element should appear.
-See the OpenDDS Modeling SDK Guide > Tasks > Working with Diagrams > Creating Figures in the Eclipse help for information on how to make the figure automatically re-size to accommodate additional content.
-
-====================================================================
-How to I open a library (for example a DataLib) on the main diagram?
-====================================================================
-
-Double clicking on the library should open the library in a subdiagram.
-However, sometimes no action will be taken after double clicking.
-An alternative way to open a library is to select the library and then press the Enter key.
-This topic, along with other topics related to libraries, is in the Eclipse help content under OpenDDS Modeling SDK Guide > Tasks > Modeling > Working with OpenDDS Models.
-
 **********************
 Using the DDS DCPS API
 **********************

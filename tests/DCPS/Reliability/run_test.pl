@@ -9,6 +9,7 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use File::Path;
 use strict;
 
 PerlDDS::add_lib_path('./IDL');
@@ -43,6 +44,8 @@ $test->enable_console_logging();
 
 $test->process('sub', 'sub/subscriber', $sub_opts);
 $test->process('pub', 'pub/publisher', $pub_opts);
+
+rmtree('./DCS');
 
 $test->start_process('sub');
 $test->start_process('pub');
