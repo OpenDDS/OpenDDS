@@ -85,11 +85,7 @@ my @builtin_test_lists = (
     {
         name => 'java',
         file => "java/tests/dcps_java_tests.lst",
-    },
-    {
-        name => 'modeling',
-        file => "tools/modeling/tests/modeling_tests.lst",
-    },
+    }
 );
 
 sub print_usage {

@@ -3292,21 +3292,6 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4
-    - name: set up Modeling tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tools/modeling/tests
-        ./setup.pl
-        cd -
-        mwc.pl -type gnuace -workers 4 -features no_opendds_security=0 tools/modeling/tests/modeling_tests.mwc
-    - name: build Modeling tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        make -j4 -C tools/modeling/tests
     - name: Build CMake Tests
       run: |
         source OpenDDS/setenv.sh
@@ -3430,7 +3415,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config WIRESHARK --java --modeling --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config WIRESHARK --java --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -4913,21 +4898,6 @@ jobs:
         cd OpenDDS/tests/cmake/build
         cmake ..
         cmake --build . -- -j4
-    - name: set up Modeling tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tools/modeling/tests
-        ./setup.pl
-        cd -
-        mwc.pl -type gnuace -workers 4 -features built_in_topics=0 -features ipv6=1 tools/modeling/tests/modeling_tests.mwc
-    - name: build Modeling tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        make -j4 -C tools/modeling/tests
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -5045,7 +5015,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS --modeling --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -5429,21 +5399,6 @@ jobs:
         cd OpenDDS/tests/cmake/build
         cmake ..
         cmake --build . -- -j4
-    - name: set up Modeling tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tools/modeling/tests
-        ./setup.pl
-        cd -
-        mwc.pl -type gnuace -workers 4 -features content_subscription=0 tools/modeling/tests/modeling_tests.mwc
-    - name: build Modeling tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        make -j4 -C tools/modeling/tests
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -5559,7 +5514,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config WCHAR -Config CXX11 -Config RAPIDJSON -Config DDS_NO_CONTENT_SUBSCRIPTION -Config NO_UNIT_TESTS --java --modeling --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config WCHAR -Config CXX11 -Config RAPIDJSON -Config DDS_NO_CONTENT_SUBSCRIPTION -Config NO_UNIT_TESTS --java --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -6704,21 +6659,6 @@ jobs:
         cd OpenDDS/tests/cmake/build
         cmake ..
         cmake --build . -- -j4
-    - name: set up Modeling tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tools/modeling/tests
-        ./setup.pl
-        cd -
-        mwc.pl -type gnuace -workers 4 -features content_filtered_topic=0 tools/modeling/tests/modeling_tests.mwc
-    - name: build Modeling tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        make -j4 -C tools/modeling/tests
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -6834,7 +6774,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RAPIDJSON -Config DDS_NO_CONTENT_FILTERED_TOPIC --modeling --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RAPIDJSON -Config DDS_NO_CONTENT_FILTERED_TOPIC --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -12745,21 +12685,6 @@ jobs:
         cd OpenDDS/tests/cmake/build
         cmake -DCMAKE_CXX_STANDARD=11 ..
         cmake --build . -- -j4
-    - name: set up Modeling tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tools/modeling/tests
-        ./setup.pl
-        cd -
-        mwc.pl -type gnuace -workers 4 -features built_in_topics=0 tools/modeling/tests/modeling_tests.mwc
-    - name: build Modeling tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        make -j4 -C tools/modeling/tests
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -12899,7 +12824,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  cmake_modeling_m13_j_FM-1f:
+  cmake_m13_j_FM-1f:
 
     runs-on: macos-13
 
@@ -12986,7 +12911,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS --java --cmake --modeling"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS --java --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -13573,21 +13498,6 @@ jobs:
         cd OpenDDS/tests/cmake/build
         cmake -DCMAKE_CXX_STANDARD=11 ..
         cmake --build . -- -j4
-    - name: set up Modeling tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tools/modeling/tests
-        ./setup.pl
-        cd -
-        mwc.pl -type gnuace -workers 4 -features built_in_topics=0 tools/modeling/tests/modeling_tests.mwc
-    - name: build Modeling tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        make -j4 -C tools/modeling/tests
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -13731,7 +13641,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  cmake_modeling_m14_i0_j_FM-1f:
+  cmake_m14_i0_j_FM-1f:
 
     runs-on: macos-14
 
@@ -13821,7 +13731,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS --modeling --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>

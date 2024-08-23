@@ -12,8 +12,9 @@
 
 using namespace examples::boilerplate;
 
-DataReaderListenerImpl::DataReaderListenerImpl()
-  : sample_count_(0)
+DataReaderListenerImpl::DataReaderListenerImpl(DistributedConditionSet_rch dcs)
+  : dcs_(dcs)
+  , sample_count_(0)
   , expected_count_(0)
   , expected_seq_(0)
   , sleep_length_(0)
@@ -53,7 +54,7 @@ void DataReaderListenerImpl::on_requested_incompatible_qos (
 void DataReaderListenerImpl::on_sample(Reliability::Message& msg)
 {
   if (sample_count_ == 0) {
-    expected_count_ = msg.expected;
+    expected_count_ = static_cast<unsigned long long>(msg.expected);
   } else if (msg.expected != expected_count_) {
     std::cout << "Error: expected_count changed to " << msg.expected
               << std::endl;
@@ -69,8 +70,11 @@ void DataReaderListenerImpl::on_sample(Reliability::Message& msg)
   }
   ++sample_count_;
   if (num_sleeps_ && (((sample_count_ + 1) % (expected_count_/num_sleeps_)) == 0)) {
-    std::cout << "Got sample " << sample_count_ + 1 << " sleeping" << std::endl;
+    std::cout << "Got sample " << sample_count_ + 1 << " sleeping for " << sleep_length_ << std::endl;
     ACE_OS::sleep(sleep_length_);
   }
 
+  if (sample_count_ == expected_count_) {
+    dcs_->post("subscriber", "subscriber done");
+  }
 }

@@ -1,9 +1,0 @@
-feature(dds_model) {
-  includes  += $(DDS_ROOT)/tools/modeling/codegen
-  libs      += OpenDDS_Model
-  after     += Model_Lib
-}
-
-feature(!dds_model) {
-  requires += dummy_label
-}
