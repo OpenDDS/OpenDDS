@@ -17,10 +17,6 @@ $corbaloc_prefix = 'corbaloc:iiop:';
 $corbaloc_suffix = '/DCPSInfoRepo';
 $pub_ini = '-DCPSConfigFile pub.ini';
 $sub_ini = '-DCPSConfigFile sub.ini';
-  if ($ARGV[0] eq 'udp' || $ARGV[1] eq 'udp') {
-    $pub_ini = '-DCPSConfigFile pub_udp.ini';
-    $sub_ini = '-DCPSConfigFile sub_udp.ini';
-  }
 
   if ($ARGV[0] eq 'host_port_only' || $ARGV[1] eq 'host_port_only') {
     $corbaloc_prefix = '';

@@ -165,7 +165,6 @@
 /OpenDDS_DCPS_transport_TheTransportRegistry.h
 /OpenDDS_DCPS_transport_TransportConfig.h
 /OpenDDS_DCPS_transport_TransportInst.h
-/OpenDDS_DCPS_transport_UdpInst.h
 /OpenDDS_DCPS_TypeSupportHelper.h
 /OpenddsDcpsExtJC.cpp
 /OpenddsDcpsExtJC.h

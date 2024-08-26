@@ -12,10 +12,9 @@
 #include "common.h"
 #include "Writer.h"
 #include "TestException.h"
-// Include the Udp.h to make sure Initializer is created before the Service
+// Include the Multicast.h to make sure Initializer is created before the Service
 // Configurator open service configure file.
 #ifndef OPENDDS_SAFETY_PROFILE
-#include "dds/DCPS/transport/udp/Udp.h"
 #include "dds/DCPS/transport/multicast/Multicast.h"
 #include "dds/DCPS/transport/shmem/Shmem.h"
 #endif
@@ -51,7 +50,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -m num_instances_per_writer defaults to 1
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth            defaults to 1
-    //  -u using udp flag           defaults to 0 - using TCP
     //  -c using multicast flag     defaults to 0 - using TCP
     //  -p using rtps transport flag     defaults to 0 - using TCP
     //  -s using shared memory flag      defaults to 0 - using TCP
@@ -95,15 +93,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     {
       history_depth = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-u"))) != 0)
-    {
-      using_udp = ACE_OS::atoi (currentArg);
-      if (using_udp == 1)
-      {
-        ACE_DEBUG((LM_DEBUG, "Publisher Using UDP transport.\n"));
-      }
-      arg_shifter.consume_arg();
     }
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-c"))) != 0)
     {
@@ -178,7 +167,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     }
   }
 
-  if ((using_udp != 0 || mixed_trans != 0) && using_multicast != 0)
+  if (mixed_trans != 0 && using_multicast != 0)
   {
     using_multicast = 0;
     ACE_DEBUG((LM_DEBUG, "Publisher NOT using MULTICAST transport.\n"));
@@ -191,7 +180,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
 
 ::DDS::Publisher_ptr
 create_publisher (::DDS::DomainParticipant_ptr participant,
-                  int                          attach_to_udp,
                   int                          attach_to_multicast,
                   int                          attach_to_rtps,
                   int                          attach_to_shmem)
@@ -213,12 +201,7 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
         }
 
       // Attach the publisher to the transport.
-      if (attach_to_udp)
-        {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to udp\n")));
-          TheTransportRegistry->bind_config("udp", pub.in());
-        }
-      else if (attach_to_multicast)
+      if (attach_to_multicast)
         {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to multicast\n")));
           TheTransportRegistry->bind_config("multicast", pub.in());
@@ -322,7 +305,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             = new ::Xyz::FooTypeSupportImpl();
           OpenDDS::DCPS::LocalObject_var safe_servant = fts_servant;
 
-          if (::DDS::RETCODE_OK != fts_servant->register_type(participant.in (), MY_TYPE_FOR_UDP))
+          if (::DDS::RETCODE_OK != fts_servant->register_type(participant.in (), MY_TYPE_FOR_RTPS))
             {
               ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t) register_type failed.\n")));
               throw TestException ();
@@ -348,8 +331,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ::DDS::Topic_var topic1;
       if (mixed_trans)
         {
-          topic1 = participant->create_topic (MY_TOPIC_FOR_UDP,
-                                              MY_TYPE_FOR_UDP,
+          topic1 = participant->create_topic (MY_TOPIC_FOR_RTPS,
+                                              MY_TYPE_FOR_RTPS,
                                               topic_qos,
                                               ::DDS::TopicListener::_nil(),
                                               ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -361,11 +344,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             }
         }
 
-      int attach_to_udp = using_udp;
       int attach_to_multicast = using_multicast;
       // Create the default publisher
       ::DDS::Publisher_var pub =
-        create_publisher(participant, attach_to_udp, attach_to_multicast,
+        create_publisher(participant, attach_to_multicast,
                          using_rtps_transport, using_shmem);
 
       if (CORBA::is_nil (pub.in ()))
@@ -379,8 +361,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (mixed_trans)
         {
           // Create another publisher for a difference transport.
-          pub1 = create_publisher(participant, !attach_to_udp,
-                                  attach_to_multicast, false /*rtps*/, false);
+          pub1 = create_publisher(participant,
+                                  attach_to_multicast, !using_rtps_transport, false);
 
           if (CORBA::is_nil (pub1.in ()))
             {
@@ -412,14 +394,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       for (int i = 0; i < num_datawriters; i ++)
         {
-          int attach_to_udp = using_udp;
+          int attach_to_rtps = using_rtps_transport;
           ::DDS::Publisher_var the_pub = pub;
           ::DDS::Topic_var the_topic = topic;
           // The first datawriter would be using a different transport
           // from others for the diff trans test case.
           if (mixed_trans && i == 0)
             {
-              attach_to_udp = ! attach_to_udp;
+              attach_to_rtps = ! attach_to_rtps;
               the_pub = pub1;
               the_topic = topic1;
             }

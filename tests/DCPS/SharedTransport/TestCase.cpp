@@ -13,7 +13,6 @@
 #include <dds/DCPS/TimePoint_T.h>
 #include <dds/DCPS/WaitSet.h>
 #if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
-#include <dds/DCPS/transport/udp/Udp.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/multicast/Multicast.h>
@@ -30,7 +29,6 @@
 namespace {
 
 const int num_messages = 100;
-const bool best_effort = ACE_OS::getenv("OPENDDS_TEST_BEST_EFFORT") != 0 && std::strtol(ACE_OS::getenv("OPENDDS_TEST_BEST_EFFORT"), 0, 10) != 0;
 
 } // namespace
 
@@ -61,9 +59,7 @@ TestCase::init_datareader(
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: TestCase::init_datareader\n")));
 
-  if (!best_effort) {
-    qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  }
+  qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
   qos.liveliness.lease_duration.sec = 1;
   qos.liveliness.lease_duration.nanosec = 0;
   return DDS::RETCODE_OK;
@@ -84,10 +80,6 @@ int
 TestCase::test()
 {
   wait_for_subscribers(); // wait for association
-
-  // As there are no fully association establishment between pub and sub for UDP
-  // transport, a delay is required for the test to receive all messages.
-  ACE_OS::sleep (3);
 
   // Write test data to exercise the data paths:
   for (int i = 0; i < num_messages; ++i) {
@@ -137,7 +129,7 @@ TestCase::test()
     ws->detach_condition(rc);
 
     // Only check the number read if the transport is reliable
-    if (!best_effort && read < num_expected) {
+    if (read < num_expected) {
       ACE_ERROR_RETURN((LM_ERROR, "ERROR: timeout exceeded\n"), -1);
     }
 
@@ -147,7 +139,7 @@ TestCase::test()
   // publishers attached to the same TransportImpl. There is nothing
   // which needs to be verified other than the association is formed
   // without crashing the DCPS subsystem.
-  for (int i = 0; i < num_messages; ++i) {
+  for (int j = 0; j < num_messages; ++j) {
     TestMessageSeq message_seq;
     DDS::SampleInfoSeq si_seq;
     ::CORBA::Long max_take = 1;
@@ -183,7 +175,7 @@ TestCase::test()
                         ACE_TEXT(" ERROR: unknown instance state: %d\n"),
                         si.instance_state), -1);
           }
-        } else if (!best_effort) {
+        } else {
           // We can only be sure there will be something to read if the transport is reliable
           ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("%N:%l: take_next_sample()")

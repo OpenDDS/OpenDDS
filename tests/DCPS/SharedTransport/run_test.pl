@@ -21,9 +21,6 @@ my @other_args = ();
 foreach my $arg (@ARGV) {
   if ($arg eq 'tcp') {
     $transport = "tcp.ini";
-  } elsif ($arg eq 'udp') {
-    $ENV{'OPENDDS_TEST_BEST_EFFORT'} = 1;
-    $transport = "udp.ini";
   } elsif ($arg eq 'multicast') {
     $transport = "multicast.ini";
   } elsif ($arg eq 'shmem') {

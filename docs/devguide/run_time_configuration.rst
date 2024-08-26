@@ -441,7 +441,6 @@ For example:
     Default value for the host portion of ``local_address`` in transport instances and some other host address values:
 
     - :prop:`[transport@tcp]local_address`
-    - :prop:`[transport@udp]local_address`
     - :prop:`[transport@multicast]local_address`
     - :prop:`[transport@rtps_udp]local_address`
     - :prop:`[transport@rtps_udp]ipv6_local_address`
@@ -2089,7 +2088,7 @@ If an existing data link is found it is used for all subsequent communication be
 
 If no existing data link is found, the Data Writer attempts to connect using the different Transport Instances in the order they are defined in its Transport Configuration.
 Any Transport Instances not "matched" by the other side are skipped.
-For example, if the writer specifies udp and tcp transport instances and the reader only specifies tcp, the udp transport instance is ignored.
+For example, if the writer specifies shmem and tcp transport instances and the reader only specifies tcp, the shmem transport instance is ignored.
 Matching algorithms may also be affected by :ref:`QoS <qos-changing>`, configuration of the instances, and other specifics of the transport implementation.
 The first pair of Transport Instances that successfully "connect" results in a data link that is used for all subsequent data sample publication.
 
@@ -2368,11 +2367,6 @@ See :ref:`plugins` for more information.
       Use the :ref:`tcp-transport`.
       See :ref:`tcp-transport-config` for properties specific to this transport.
 
-    .. val:: udp
-
-      Use the :ref:`udp-transport`.
-      See :ref:`udp-transport-config` for properties specific to this transport.
-
     .. val:: multicast
 
       Use the :ref:`multicast-transport`.
@@ -2535,35 +2529,6 @@ The reconnection process is (a successful reconnect ends this sequence):
 * If that fails, then wait :prop:`[transport@tcp]conn_retry_initial_delay` milliseconds and attempt reconnect.
 
 * While we have not tried more than :prop:`[transport@tcp]conn_retry_attempts`, wait (previous wait time * :prop:`[transport@tcp]conn_retry_backoff_multiplier`) milliseconds and attempt to reconnect.
-
-.. _udp-transport-config:
-.. _run_time_configuration--udp-ip-transport-configuration-options:
-
-UDP Transport Configuration Properties
---------------------------------------
-
-..
-    Sect<7.4.5.3>
-
-This section describes the configuration properties for the :ref:`udp-transport`.
-
-.. sec:: transport@udp/<inst_name>
-
-  .. prop:: local_address=<host>:<port>
-    :default: :prop:`[common]DCPSDefaultAddress`
-
-    Hostname and port of the listening socket.
-    The port can be omitted, in which case the value should end in ``:``.
-
-  .. prop:: send_buffer_size=<n>
-    :default: Platform value of ``ACE_DEFAULT_MAX_SOCKET_BUFSIZ``
-
-    Total send buffer size in bytes for UDP payload.
-
-  .. prop:: rcv_buffer_size=<n>
-    :default: Platform value of ``ACE_DEFAULT_MAX_SOCKET_BUFSIZ``
-
-    Total receive buffer size in bytes for UDP payload.
 
 .. _multicast-transport-config:
 .. _run_time_configuration--ip-multicast-transport-configuration-options:
