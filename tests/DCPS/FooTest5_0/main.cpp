@@ -41,8 +41,6 @@ int history_depth = 10 ;
 bool support_client_side_BIT = false;
 
 // default to using TCP
-int sub_using_udp = 0;
-int pub_using_udp = 0;
 int sub_using_rtps = 0;
 int pub_using_rtps = 0;
 int sub_using_shmem = 0;
@@ -88,8 +86,6 @@ int parse_args(int argc, ACE_TCHAR *argv[])
     //  -d history.depth            defaults to 1
     //  -z                          verbose transport debug
     //  -b                          enable client side Built-In topic support
-    //  -us                         Subscriber using UDP transport
-    //  -up                         Publisher using UDP transport
     //  -rs                         Subscriber using RTPS transport
     //  -rp                         Publisher using RTPS transport
     //  -ss                         Subscriber using Shared Memory transport
@@ -125,18 +121,6 @@ int parse_args(int argc, ACE_TCHAR *argv[])
     else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-b")) == 0)
     {
       support_client_side_BIT = true;
-      arg_shifter.consume_arg();
-    }
-    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-us")) == 0)
-    {
-      ACE_DEBUG((LM_DEBUG, "Subscriber Using UDP transport.\n"));
-      sub_using_udp = 1;
-      arg_shifter.consume_arg();
-    }
-    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-up")) == 0)
-    {
-      ACE_DEBUG((LM_DEBUG, "Publisher Using UDP transport.\n"));
-      pub_using_udp = 1;
       arg_shifter.consume_arg();
     }
     else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-rs")) == 0)
@@ -271,9 +255,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
       }
 
       // Attach the subscriber to the transport.
-      if (sub_using_udp) {
-        TheTransportRegistry->bind_config("udp", sub.in());
-      } else if (sub_using_rtps) {
+      if (sub_using_rtps) {
         TheTransportRegistry->bind_config("rtps", sub.in());
       } else if (sub_using_shmem) {
         TheTransportRegistry->bind_config("shmem", sub.in());
@@ -282,9 +264,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
       }
 
       // Attach the publisher to the transport.
-      if (pub_using_udp) {
-        TheTransportRegistry->bind_config("udp", pub.in());
-      } else if (pub_using_rtps) {
+      if (pub_using_rtps) {
         TheTransportRegistry->bind_config("rtps", pub.in());
       } else if (pub_using_shmem) {
         TheTransportRegistry->bind_config("shmem", pub.in());
@@ -378,7 +358,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
       ::DDS::InstanceHandle_t handle;
 
-      if (pub_using_udp != sub_using_udp)
+      if (pub_using_rtps != sub_using_rtps)
         {
           if (!incompatible_transport_found)
             ACE_ERROR_RETURN((LM_ERROR,

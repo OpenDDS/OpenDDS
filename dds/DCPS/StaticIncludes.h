@@ -23,10 +23,6 @@
 #    include "transport/rtps_udp/RtpsUdp.h"
 #  endif
 
-#  if defined OPENDDS_UDP_HAS_DLL && !OPENDDS_UDP_HAS_DLL
-#    include "transport/udp/Udp.h"
-#  endif
-
 #  if defined OPENDDS_SHMEM_HAS_DLL && !OPENDDS_SHMEM_HAS_DLL
 #    include "transport/shmem/Shmem.h"
 #  endif

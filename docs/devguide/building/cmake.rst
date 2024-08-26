@@ -270,10 +270,6 @@ The CMake package can provide library targets that can be linked using `target_l
 
   :ref:`tcp-transport`
 
-.. cmake:tgt:: OpenDDS::Udp
-
-  :ref:`udp-transport`
-
 .. cmake:tgt:: OpenDDS::Security
 
   :ref:`sec`

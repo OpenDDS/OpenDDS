@@ -15,10 +15,10 @@
 
 const long  MY_DOMAIN = 111;
 extern const char* MY_TOPIC;
-extern const char* MY_TOPIC_FOR_UDP;
+extern const char* MY_TOPIC_FOR_RTPS;
 extern const char* MY_TOPIC_FOR_MULTICAST;
 extern const char* MY_TYPE;
-extern const char* MY_TYPE_FOR_UDP;
+extern const char* MY_TYPE_FOR_RTPS;
 extern const char* MY_TYPE_FOR_MULTICAST;
 extern const ACE_Time_Value max_blocking_time;
 
@@ -29,7 +29,6 @@ extern int num_datawriters;
 extern int max_samples_per_instance;
 extern int history_depth;
 // default to using TCP
-extern int using_udp;
 extern int using_multicast;
 extern int using_rtps_transport;
 extern int using_shmem;

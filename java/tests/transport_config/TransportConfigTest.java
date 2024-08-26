@@ -17,7 +17,6 @@ import OpenDDS.DCPS.transport.TransportConfig;
 import OpenDDS.DCPS.transport.TransportException;
 import OpenDDS.DCPS.transport.TransportInst;
 import OpenDDS.DCPS.transport.TcpInst;
-import OpenDDS.DCPS.transport.UdpInst;
 import OpenDDS.DCPS.transport.MulticastInst;
 
 public class TransportConfigTest {
@@ -37,7 +36,6 @@ public class TransportConfigTest {
 
         testConfigStore();
         testModifyTransportFromFileTCP();
-        testCreateNewTransportUdp();
         testCreateNewTransportMulticast();
         testConfigCreation();
 
@@ -69,24 +67,6 @@ public class TransportConfigTest {
         TcpInst ti_tcp2 = (TcpInst) ti2;
         assert ti_tcp2.getConnRetryAttempts() == 49;
     }
-
-
-    protected static void testCreateNewTransportUdp() throws Exception {
-        final String ID = "Udp2";
-        TransportInst ti =
-            TheTransportRegistry.create_inst(ID,
-                                             TheTransportRegistry.TRANSPORT_UDP);
-        ti.setMaxPacketSize(999);
-        UdpInst sui = (UdpInst) ti;
-        sui.setLocalAddress("0.0.0.0:1234");
-
-        TransportInst ti2 = TheTransportRegistry.get_inst(ID);
-        assert ti2.getMaxPacketSize() == 999;
-        UdpInst sui2 = (UdpInst) ti2;
-        //Only checking endsWith here b/c the 0.0.0.0 is resolved to a hostname
-        assert sui2.getLocalAddress().endsWith(":1234");
-    }
-
 
     protected static void testCreateNewTransportMulticast() throws Exception {
         final String ID = "multicast3";
