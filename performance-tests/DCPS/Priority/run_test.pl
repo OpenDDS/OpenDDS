@@ -251,7 +251,7 @@ Options:
 
   -t NAME | --transport=NAME
                          use NAME transport for test execution - one of
-                         (tcp, udp, mc, rmc), default tcp
+                         (tcp, mc, rmc), default tcp
 
   -c NUMBER | --duration=NUMBER
                          time duration to execute the test
@@ -332,7 +332,6 @@ Establishes the transport type to use for the current test execution.
 
 Accepted values are:
   tcp       - use the SimpleTCP transport;
-  udp       - use the udp transport;
   multicast - use the multicast transport;
 
 The default value is 'tcp'.
@@ -379,7 +378,7 @@ priority samples is demonstrated.
 
 =item B<./run_demo.pl -n>
 
-=item B<./run_demo.pl -d 10 -T 4 -f test.log -t udp>
+=item B<./run_demo.pl -d 10 -T 4 -f test.log -t tcp>
 
 =item B<./run_demo.pl -x -t multicast>
 

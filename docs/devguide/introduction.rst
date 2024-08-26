@@ -349,7 +349,6 @@ It also makes it easier to replace these libraries with custom ones.
 
   - :ref:`tcp-transport`
   - :ref:`rtps-udp-transport`
-  - :ref:`udp-transport`
   - :ref:`multicast-transport`
   - :ref:`shmem-transport`
 
@@ -457,28 +456,6 @@ It supports :ref:`reliability <qos-reliability>`.
   :doc:`internet_enabled_rtps`
     For using :ref:`rtps-disc` and the :ref:`rtps-udp-transport` over the internet
 
-.. _udp-transport:
-
-UDP Transport
--------------
-
-The UDP transport (``udp``) uses `unicasted <https://en.wikipedia.org/wiki/Unicast>`__ `UDP <https://en.wikipedia.org/wiki/User_Datagram_Protocol>`__ as the transmission mechanism.
-It doesn't support :ref:`reliability <qos-reliability>` at all.
-
-.. important::
-
-  Library filename: ``OpenDDS_Udp``
-
-  MPC base project name: :ghfile:`\`\`dcps_udp\`\` <MPC/config/dcps_udp.mpb>`
-
-  CMake target Name: :cmake:tgt:`OpenDDS::Udp`
-
-  :ref:`Initialization header <plugins>`: :ghfile:`dds/DCPS/transport/udp/Udp.h`
-
-  :cfg:prop:`[transport]transport_type`: :cfg:val:`udp <[transport]transport_type=udp>`
-
-  Configuration: :ref:`udp-transport-config`
-
 .. _multicast-transport:
 
 Multicast Transport
@@ -534,8 +511,7 @@ Custom Transports
 
 The transport framework enables application developers to implement their own customized transports.
 Implementing a custom transport involves specializing a number of classes defined in the transport framework.
-The ``udp`` transport provides a good foundation developers may use when creating their own implementation.
-See the :ghfile:`dds/DCPS/transport/udp/` directory for details.
+See the subdirectories in :ghfile:`dds/DCPS/transport/` for details.
 
 .. _discovery:
 

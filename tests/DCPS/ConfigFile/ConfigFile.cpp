@@ -21,7 +21,6 @@
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/udp/Udp.h"
 #include "dds/DCPS/transport/multicast/Multicast.h"
 #endif
 
@@ -108,7 +107,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     //  std::cout << "  " << default_config->instances_[i]->name() << std::endl;
     //}
     // Should be in alpha-sorted order
-    TEST_CHECK(default_config->instances_.size() == 11);
+    TEST_CHECK(default_config->instances_.size() == 10);
     TEST_CHECK(default_config->instances_[0] == inst2);  // anothertcp
     TEST_CHECK(default_config->instances_[2] == inst);   // mytcp
     TEST_CHECK(default_config->instances_[9]->name() == std::string("tcp7"));

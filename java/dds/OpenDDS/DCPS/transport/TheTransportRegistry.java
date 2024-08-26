@@ -15,7 +15,6 @@ public final class TheTransportRegistry {
     // to the create_transport_impl() method and to the
     // get_or_create_configuration() method.
     public static final String TRANSPORT_TCP = "tcp";
-    public static final String TRANSPORT_UDP = "udp";
     public static final String TRANSPORT_MULTICAST = "multicast";
 
     public static native TransportInst create_inst(String name,

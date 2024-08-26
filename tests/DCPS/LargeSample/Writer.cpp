@@ -70,12 +70,12 @@ void Writer::write(bool reliable, int num_messages, unsigned data_field_length_o
 
         // If there are 2 writers and there are 10 samples per writer, lengths
         // will vary from 15k to 165k.
-        // Over 65K will require multiple fragments for udp/mcast.
+        // Over 65K will require multiple fragments for mcast.
         message.data.length(
           expected_data_field_length(
             data_field_length_offset, message.writer_id, message.sample_id));
         for (CORBA::ULong j = 0; j < message.data.length(); ++j) {
-          message.data[j] = expected_data_field_element(message.writer_id, message.sample_id, j);
+          message.data[j] = expected_data_field_element(message.writer_id, static_cast<int>(message.sample_id), j);
         }
 
         ACE_DEBUG((LM_DEBUG,
