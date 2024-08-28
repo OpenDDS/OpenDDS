@@ -15,7 +15,6 @@
 #include <dds/OpenDDSConfigWrapper.h>
 
 #if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
-#  include <dds/DCPS/transport/multicast/Multicast.h>
 #  include <dds/DCPS/transport/shmem/Shmem.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>

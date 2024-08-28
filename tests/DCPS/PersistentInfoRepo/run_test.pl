@@ -28,20 +28,7 @@ my $pub_ini = ' -DCPSConfigFile tcp.ini';
 my $sub_ini = ' -DCPSConfigFile tcp.ini';
 
 for my $arg (@ARGV) {
-    if ($arg eq 'udp') {
-        $pub_ini = " -DCPSConfigFile udp.ini";
-        $sub_ini = " -DCPSConfigFile udp.ini";
-        $reliable = 0;
-    }
-    elsif ($arg eq 'multicast') {
-        $pub_ini = " -DCPSConfigFile multicast.ini";
-        $sub_ini = " -DCPSConfigFile multicast.ini";
-    }
-    elsif ($arg eq 'multicast_async') {
-        $pub_ini = " -DCPSConfigFile pub_multicast_async.ini";
-        $sub_ini = " -DCPSConfigFile multicast.ini";
-    }
-    elsif ($arg eq 'shmem') {
+    if ($arg eq 'shmem') {
         $pub_ini = " -DCPSConfigFile shmem.ini";
         $sub_ini = " -DCPSConfigFile shmem.ini";
     }

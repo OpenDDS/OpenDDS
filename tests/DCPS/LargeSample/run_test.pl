@@ -24,12 +24,7 @@ my $security_id = 1;
 
 my $test = new PerlDDS::TestFramework();
 
-# cannot use default ini for multicast_async
-if ($test->flag('multicast_async')) {
-  push(@common_pub_opts, "-DCPSConfigFile", "pub_multicast_async.ini");
-  push(@sub_opts, "-DCPSConfigFile", "multicast.ini");
-}
-elsif ($test->flag('rtps')) {
+if ($test->flag('rtps')) {
   $is_rtps = 1;
   push(@common_opts,
     "-DCPSConfigFile", "rtps.ini",
