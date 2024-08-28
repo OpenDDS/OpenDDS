@@ -12,10 +12,7 @@
 #include "common.h"
 #include "Writer.h"
 #include "TestException.h"
-// Include the Multicast.h to make sure Initializer is created before the Service
-// Configurator open service configure file.
 #ifndef OPENDDS_SAFETY_PROFILE
-#include "dds/DCPS/transport/multicast/Multicast.h"
 #include "dds/DCPS/transport/shmem/Shmem.h"
 #endif
 #include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
@@ -50,7 +47,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -m num_instances_per_writer defaults to 1
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth            defaults to 1
-    //  -c using multicast flag     defaults to 0 - using TCP
     //  -p using rtps transport flag     defaults to 0 - using TCP
     //  -s using shared memory flag      defaults to 0 - using TCP
     //  -z length of float sequence in data type   defaults to 10
@@ -93,15 +89,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     {
       history_depth = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-c"))) != 0)
-    {
-      using_multicast = ACE_OS::atoi (currentArg);
-      if (using_multicast == 1)
-      {
-        ACE_DEBUG((LM_DEBUG, "Publisher Using MULTICAST transport.\n"));
-      }
-      arg_shifter.consume_arg();
     }
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-p"))) != 0)
     {
@@ -167,12 +154,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     }
   }
 
-  if (mixed_trans != 0 && using_multicast != 0)
-  {
-    using_multicast = 0;
-    ACE_DEBUG((LM_DEBUG, "Publisher NOT using MULTICAST transport.\n"));
-  }
-
   // Indicates successful parsing of the command line
   return 0;
 }
@@ -180,7 +161,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
 
 ::DDS::Publisher_ptr
 create_publisher (::DDS::DomainParticipant_ptr participant,
-                  int                          attach_to_multicast,
                   int                          attach_to_rtps,
                   int                          attach_to_shmem)
 {
@@ -201,12 +181,7 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
         }
 
       // Attach the publisher to the transport.
-      if (attach_to_multicast)
-        {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to multicast\n")));
-          TheTransportRegistry->bind_config("multicast", pub.in());
-        }
-      else if (attach_to_rtps)
+      if (attach_to_rtps)
         {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to RTPS\n")));
           TheTransportRegistry->bind_config("rtps", pub);
@@ -344,11 +319,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             }
         }
 
-      int attach_to_multicast = using_multicast;
       // Create the default publisher
       ::DDS::Publisher_var pub =
-        create_publisher(participant, attach_to_multicast,
-                         using_rtps_transport, using_shmem);
+        create_publisher(participant, using_rtps_transport, using_shmem);
 
       if (CORBA::is_nil (pub.in ()))
         {
@@ -361,8 +334,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (mixed_trans)
         {
           // Create another publisher for a difference transport.
-          pub1 = create_publisher(participant,
-                                  attach_to_multicast, !using_rtps_transport, false);
+          pub1 = create_publisher(participant, !using_rtps_transport, false);
 
           if (CORBA::is_nil (pub1.in ()))
             {

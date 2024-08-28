@@ -18,7 +18,6 @@ PerlDDS::add_lib_path('../FooType5');
 my $num_writers = 1;
 my $num_instances_per_writer = 1;
 my $num_samples_per_instance = 100;
-my $use_multicast = 0;
 my $use_rtps_transport = 0;
 my $use_shmem = 0;
 my $num_readers = 1;
@@ -36,11 +35,7 @@ if ($test->flag('nokey')) {
   $no_key = 1;
 }
 
-if ($test->flag('multicast')) {
-  $use_multicast = 1;
-  $write_interval_ms = 50;
-}
-elsif ($test->flag('rtps') || $PerlDDS::SafetyProfile) {
+if ($test->flag('rtps') || $PerlDDS::SafetyProfile) {
   $use_rtps_transport = 1;
   $write_interval_ms = 50;
 }
@@ -113,13 +108,13 @@ $test->{dcps_debug_level} = 1;
 
 my $cfg = $PerlDDS::SafetyProfile ? 'rtps.ini' : 'all.ini';
 
-my $sub_parameters = "-DCPSConfigFile $cfg -c $use_multicast"
+my $sub_parameters = "-DCPSConfigFile $cfg"
     . " -p $use_rtps_transport -s $use_shmem -r $num_readers "
     . " -m $num_instances_per_writer -i $num_samples_per_instance"
     . " -w $num_writers -z $sequence_length"
     . " -k $no_key -y $read_interval_ms -f $mixed_trans";
 
-my $pub_parameters = "-DCPSConfigFile $cfg -c $use_multicast "
+my $pub_parameters = "-DCPSConfigFile $cfg"
     . " -p $use_rtps_transport -s $use_shmem -r $num_readers -w $num_writers "
     . " -m $num_instances_per_writer -i $num_samples_per_instance "
     . " -n $max_samples_per_instance -z $sequence_length"

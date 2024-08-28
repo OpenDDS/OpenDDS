@@ -59,7 +59,6 @@ tests/DCPS/TopicReuse/run_test.pl: RTPS
 tests/DCPS/DpShutdown/run_test.pl: RTPS
 tests/DCPS/DpShutdown/run_test.pl t=tcp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/DpShutdown/run_test.pl t=shmem: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !NO_SHMEM
-tests/DCPS/DpShutdown/run_test.pl t=multicast: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !NO_MCAST
 
 tests/DCPS/ContainsEntity/run_test.pl: RTPS
 
@@ -105,7 +104,6 @@ tests/DCPS/FooTest4/run_test.pl mrit: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !DDS_N
 tests/DCPS/FooTest4_0/run_test.pl: !DDS_NO_OWNERSHIP_PROFILE
 
 tests/DCPS/FooTest5/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/FooTest5/run_test.pl multicast: !DCPS_MIN !NO_MCAST !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest5/run_test.pl rtps: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest5/run_test.pl shmem: !DCPS_MIN !NO_SHMEM !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest5/run_test.pl mi: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
@@ -118,7 +116,6 @@ tests/DCPS/FooTest5/run_test.pl blocking: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest5/run_test.pl blocking_timeout: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest5/run_test.pl mwmr: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest5/run_test.pl mr: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/FooTest5/run_test.pl multicast mr: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest5/run_test.pl mixed_trans: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest5_0/run_test.pl: !STATIC !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 tests/DCPS/FooTest5_0/run_test.pl rtps: !DCPS_MIN !STATIC RTPS !DDS_NO_OWNERSHIP_PROFILE !BROKEN_DLCLOSE
@@ -188,18 +185,6 @@ performance-tests/DCPS/TCPListenerTest/run_test.pl -p 1 -s 4: !DCPS_MIN !OPENDDS
 performance-tests/DCPS/TCPListenerTest/run_test.pl -p 2 -s 3: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 performance-tests/DCPS/TCPListenerTest/run_test.pl -p 4 -s 1: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 
-## N.B. There appear to be some bad assumptions in the following tests:
-#performance-tests/DCPS/UDPListenerTest/run_test-1p1s.pl: !DCPS_MIN
-#performance-tests/DCPS/UDPListenerTest/run_test-4p1s.pl: !DCPS_MIN
-#performance-tests/DCPS/UDPListenerTest/run_test-1p4s.pl: !DCPS_MIN
-#performance-tests/DCPS/UDPListenerTest/run_test-2p3s.pl: !DCPS_MIN
-
-## N.B. There appear to be some bad assumptions in the following tests:
-#performance-tests/DCPS/MulticastListenerTest/run_test.pl -p 1 -s 1: !DCPS_MIN !NO_MCAST
-#performance-tests/DCPS/MulticastListenerTest/run_test.pl -p 4 -s 1: !DCPS_MIN !NO_MCAST
-#performance-tests/DCPS/MulticastListenerTest/run_test.pl -p 1 -s 4: !DCPS_MIN !NO_MCAST
-#performance-tests/DCPS/MulticastListenerTest/run_test.pl -p 2 -s 3: !DCPS_MIN !NO_MCAST
-
 DevGuideExamples/DCPS/Messenger/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 DevGuideExamples/DCPS/Messenger/run_test.pl --rtps: !DCPS_MIN !OPENDDS_SAFETY_PROFILE RTPS
 DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
@@ -207,9 +192,6 @@ DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_
 tests/DCPS/Messenger/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Messenger/run_test.pl default_tcp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Messenger/run_test.pl thread_per: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/Messenger/run_test.pl multicast: !DCPS_MIN !NO_MCAST !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/Messenger/run_test.pl multicast_be: !DCPS_MIN !NO_MCAST !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/Messenger/run_test.pl default_multicast: !DCPS_MIN !NO_MCAST !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Messenger/run_test.pl shmem: !DCPS_MIN !NO_SHMEM !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Messenger/run_test.pl nobits: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Messenger/run_test.pl stack: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
@@ -367,7 +349,6 @@ tests/DCPS/Serializer_wstring/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/SharedTransport/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/SharedTransport/run_test.pl rtps: !DCPS_MIN !OPENDDS_SAFETY_PROFILE RTPS
 tests/DCPS/SharedTransport/run_test.pl rtps 2: !DCPS_MIN !OPENDDS_SAFETY_PROFILE RTPS
-tests/DCPS/SharedTransport/run_test.pl multicast: !DCPS_MIN !NO_MCAST !OPENDDS_SAFETY_PROFILE !GH_ACTIONS
 tests/DCPS/SharedTransport/run_test.pl shmem: !DCPS_MIN !NO_SHMEM !OPENDDS_SAFETY_PROFILE
 tests/DCPS/SharedTransport/run_test.pl rtps_disc_tcp: !DCPS_MIN !NO_MCAST RTPS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Ownership/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_KIND_EXCLUSIVE !DDS_NO_OWNERSHIP_PROFILE
@@ -382,8 +363,6 @@ tests/DCPS/GroupPresentation/run_test.pl: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
 tests/DCPS/GroupPresentation/run_test.pl topic: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/GroupPresentation/run_test.pl instance: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/LargeSample/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/LargeSample/run_test.pl multicast: !DCPS_MIN !NO_MCAST !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/LargeSample/run_test.pl multicast_async: !DCPS_MIN !NO_MCAST !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/LargeSample/run_test.pl shmem: !DCPS_MIN !NO_SHMEM !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/LargeSample/run_test.pl rtps: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_PROFILE !TARGET
 tests/DCPS/ConfigFile/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
@@ -419,10 +398,6 @@ tests/DCPS/QoS_XML/dump/run_test.pl: XERCES3
 tests/DCPS/QoS_XML/dumpXMLString/run_test.pl dcps_qos_xml_handler: XERCES3
 tests/DCPS/ManyToMany/run_test.pl tcp 12to12 small: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !LYNXOS
 tests/DCPS/ManyToMany/run_test.pl tcp 12to12 large: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !LYNXOS
-tests/DCPS/ManyToMany/run_test.pl multicast 1to1 small: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/ManyToMany/run_test.pl multicast 1to1 large: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/ManyToMany/run_test.pl multicast_async 1to1 small: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/ManyToMany/run_test.pl multicast_async 1to1 large: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/ManyToMany/run_test.pl rtps 1to1 small: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/ManyToMany/run_test.pl rtps 1to1 large: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/ManyToMany/run_test.pl rtps_disc 12to12 small: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_PROFILE !LYNXOS

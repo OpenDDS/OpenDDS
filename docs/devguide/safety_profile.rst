@@ -36,7 +36,7 @@ The following features of OpenDDS are not available when it is configured for Sa
 
 * DCPSInfoRepo and its associated libraries and tools
 
-* Transport types: tcp, udp, multicast, shared memory
+* Transport types: tcp, udp, shared memory
 
   * The rtps_udp transport type is available (uses UDP unicast or multicast)
 
