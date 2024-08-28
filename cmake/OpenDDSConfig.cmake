@@ -249,7 +249,6 @@ endif()
 if(NOT TARGET OpenDDS::OpenDDS)
   set(_opendds_core_libs
     OpenDDS::Dcps
-    OpenDDS::Multicast
     OpenDDS::Rtps
     OpenDDS::Rtps_Udp
     OpenDDS::InfoRepoDiscovery

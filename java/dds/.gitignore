@@ -159,7 +159,6 @@
 /OpenDDS_DCPS_RepresentationFormatHelper.h
 /OpenDDS_DCPS_TheParticipantFactory.h
 /OpenDDS_DCPS_TheServiceParticipant.h
-/OpenDDS_DCPS_transport_MulticastInst.h
 /OpenDDS_DCPS_transport_RtpsUdpInst.h
 /OpenDDS_DCPS_transport_TcpInst.h
 /OpenDDS_DCPS_transport_TheTransportRegistry.h

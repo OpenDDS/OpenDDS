@@ -178,7 +178,7 @@ Section 2 of the DDS specification defines five compliance points for a DDS impl
 OpenDDS complies with the entire DDS specification (including all optional profiles).
 This includes the implementation of all Quality of Service policies with the following notes:
 
-* :ref:`qos-reliability` ``RELIABLE_RELIABILITY_QOS`` is supported by the :ref:`rtps-udp-transport`, the :ref:`tcp-transport`, and the :ref:`multicast-transport` (when configured as reliable).
+* :ref:`qos-reliability` ``RELIABLE_RELIABILITY_QOS`` is supported by the :ref:`rtps-udp-transport`, and the :ref:`tcp-transport` (when configured as reliable).
 
 * :ref:`qos-transport-priority` is not implemented as changeable.
 
@@ -349,7 +349,6 @@ It also makes it easier to replace these libraries with custom ones.
 
   - :ref:`tcp-transport`
   - :ref:`rtps-udp-transport`
-  - :ref:`multicast-transport`
   - :ref:`shmem-transport`
 
 - :ref:`discovery <discovery>` [#plugins-static-disc]_:
@@ -455,28 +454,6 @@ It supports :ref:`reliability <qos-reliability>`.
 
   :doc:`internet_enabled_rtps`
     For using :ref:`rtps-disc` and the :ref:`rtps-udp-transport` over the internet
-
-.. _multicast-transport:
-
-Multicast Transport
--------------------
-
-The multicast transport (``mutlicast``) uses `multicasted <https://en.wikipedia.org/wiki/Multicast>`__ `UDP <https://en.wikipedia.org/wiki/User_Datagram_Protocol>`__ as the transmission mechanism.
-It supports :ref:`reliability <qos-reliability>`.
-
-.. important::
-
-  Library filename: ``OpenDDS_Multicast``
-
-  MPC base project name: :ghfile:`\`\`dcps_multicast\`\` <MPC/config/dcps_multicast.mpb>`
-
-  CMake target Name: :cmake:tgt:`OpenDDS::Multicast`
-
-  :ref:`Initialization header <plugins>`: :ghfile:`dds/DCPS/transport/multicast/Multicast.h`
-
-  :cfg:prop:`[transport]transport_type`: :cfg:val:`multicast <[transport]transport_type=multicast>`
-
-  Configuration: :ref:`multicast-transport-config`
 
 .. _shmem-transport:
 
@@ -663,8 +640,6 @@ The following are additional implementation limits that developers need to take 
    In each OpenDDS process, up to 120 domain participants are supported in each domain.
 
 #. Topic names and type identifiers are limited to 256 characters.
-
-#. The :ref:`multicast-transport` does not work with RTPS Discovery due to the way GUIDs are assigned (a warning will be issued if this is attempted).
 
 .. seealso::
 

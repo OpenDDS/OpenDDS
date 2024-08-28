@@ -21,8 +21,6 @@ my @other_args = ();
 foreach my $arg (@ARGV) {
   if ($arg eq 'tcp') {
     $transport = "tcp.ini";
-  } elsif ($arg eq 'multicast') {
-    $transport = "multicast.ini";
   } elsif ($arg eq 'shmem') {
     $transport = "shmem.ini";
   } elsif ($arg eq 'rtps_disc_tcp') {

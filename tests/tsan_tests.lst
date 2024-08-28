@@ -29,7 +29,6 @@ tests/transport/simple/run_test.pl shmem: !NO_DDS_TRANSPORT !DCPS_MIN !NO_SHMEM 
 tests/DCPS/DpShutdown/run_test.pl: RTPS
 tests/DCPS/DpShutdown/run_test.pl t=tcp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/DpShutdown/run_test.pl t=shmem: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !NO_SHMEM
-tests/DCPS/DpShutdown/run_test.pl t=multicast: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !NO_MCAST
 
 tests/DCPS/Messenger/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Messenger/run_test.pl default_tcp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
@@ -82,7 +81,6 @@ tests/DCPS/Ownership/run_test.pl miss_deadline rtps: !DCPS_MIN RTPS !DDS_NO_OWNE
 tests/DCPS/SharedTransport/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/SharedTransport/run_test.pl rtps: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/SharedTransport/run_test.pl rtps 2: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE
-tests/DCPS/SharedTransport/run_test.pl multicast: !DCPS_MIN !NO_MCAST !OPENDDS_SAFETY_PROFILE
 tests/DCPS/SharedTransport/run_test.pl shmem: !DCPS_MIN !NO_SHMEM !OPENDDS_SAFETY_PROFILE
 tests/DCPS/SharedTransport/run_test.pl rtps_disc_tcp: !DCPS_MIN !NO_MCAST RTPS !OPENDDS_SAFETY_PROFILE
 

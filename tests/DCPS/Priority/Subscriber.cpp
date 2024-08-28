@@ -13,9 +13,6 @@
 #include "dds/DCPS/SubscriberImpl.h"
 
 #include "dds/DCPS/StaticIncludes.h"
-#if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
-#include "dds/DCPS/transport/multicast/Multicast.h"
-#endif
 
 #include <sstream>
 
@@ -147,12 +144,7 @@ Subscriber::Subscriber( const Options& options)
   // Reliability varies with the transport implementation.
   switch( this->options_.transportType()) {
     case Options::TCP:
-    case Options::MC:
       readerQos.reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
-      break;
-
-    case Options::UDP:
-      readerQos.reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
       break;
 
     case Options::TRANSPORT_NONE:

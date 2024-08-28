@@ -50,7 +50,6 @@ target_link_libraries(ishapes
   Qt5::Widgets
   OpenDDS::Dcps
   OpenDDS::Tcp
-  OpenDDS::Multicast
   OpenDDS::Rtps_Udp
   OpenDDS::InfoRepoDiscovery
 )

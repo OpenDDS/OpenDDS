@@ -34,21 +34,9 @@ if ($test->flag('thread_per')) {
 }
 
 my $flag_found = 1;
-if ($test->flag('multicast')) {
-    $pub_opts .= " -DCPSConfigFile pub_multicast.ini";
-    $sub_opts .= " -DCPSConfigFile sub_multicast.ini";
-}
-elsif ($test->flag('multicast_be')) {
-    $pub_opts .= " -DCPSConfigFile pub_multicast_be.ini";
-    $sub_opts .= " -DCPSConfigFile sub_multicast_be.ini";
-}
-elsif ($test->flag('default_tcp')) {
+if ($test->flag('default_tcp')) {
     $pub_opts .= " -t tcp";
     $sub_opts .= " -t tcp";
-}
-elsif ($test->flag('default_multicast')) {
-    $pub_opts .= " -t multicast";
-    $sub_opts .= " -t multicast";
 }
 elsif ($test->flag('nobits')) {
     # nobits handled by TestFramework
@@ -109,8 +97,7 @@ elsif ($test->flag('shmem')) {
 }
 elsif ($test->flag('all')) {
     @original_ARGV = grep { $_ ne 'all' } @original_ARGV;
-    my @tests = ('', qw/multicast default_tcp default_multicast
-                        nobits stack shmem
+    my @tests = ('', qw/default_tcp nobits stack shmem
                         rtps rtps_disc rtps_unicast rtps_disc_tcp/);
     push(@tests, 'ipv6') if new PerlACE::ConfigList->check_config('IPV6');
     for my $test (@tests) {

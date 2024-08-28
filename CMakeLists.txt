@@ -90,7 +90,6 @@ if(NOT CMAKE_CROSSCOMPILING)
 endif()
 
 add_subdirectory(dds) # OpenDDS_Dcps
-add_subdirectory(dds/DCPS/transport/multicast)
 add_subdirectory(dds/DCPS/RTPS)
 add_subdirectory(dds/DCPS/transport/rtps_udp)
 add_subdirectory(dds/DCPS/transport/shmem)

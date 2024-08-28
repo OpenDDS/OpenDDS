@@ -27,10 +27,6 @@
 #    include "transport/shmem/Shmem.h"
 #  endif
 
-#  if defined OPENDDS_MULTICAST_HAS_DLL && !OPENDDS_MULTICAST_HAS_DLL
-#    include "transport/multicast/Multicast.h"
-#  endif
-
 #  if defined OPENDDS_SECURITY_HAS_DLL && !OPENDDS_SECURITY_HAS_DLL
 #    include "security/BuiltInPlugins.h"
 #  endif

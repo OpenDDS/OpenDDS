@@ -258,10 +258,6 @@ The CMake package can provide library targets that can be linked using `target_l
 
   :ref:`rtps-udp-transport`
 
-.. cmake:tgt:: OpenDDS::Multicast
-
-  :ref:`multicast-transport`
-
 .. cmake:tgt:: OpenDDS::Shmem
 
   :ref:`shmem-transport`

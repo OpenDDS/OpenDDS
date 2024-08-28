@@ -12,7 +12,7 @@ project(DDS*idl): dcps_test_idl_only_lib {
   }
 }
 
-project(DDS*Publisher) : dcpsexe, dcps_test, dcps_tcp, dcps_multicast, dcps_rtps_udp {
+project(DDS*Publisher) : dcpsexe, dcps_test, dcps_tcp, dcps_rtps_udp {
   exename   = publisher
   after    += DDS*idl
   libs     += DDS*idl
@@ -28,7 +28,7 @@ project(DDS*Publisher) : dcpsexe, dcps_test, dcps_tcp, dcps_multicast, dcps_rtps
   }
 }
 
-project(DDS*Subscriber) : dcpsexe, dcps_test, dcps_tcp, dcps_multicast, dcps_rtps_udp {
+project(DDS*Subscriber) : dcpsexe, dcps_test, dcps_tcp, dcps_rtps_udp {
   exename   = subscriber
   after    += DDS*idl
   libs     += DDS*idl

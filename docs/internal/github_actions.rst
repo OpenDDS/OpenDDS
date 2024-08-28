@@ -192,10 +192,6 @@ If this is the case, we have to assume that the failure is due to some sort of l
 Only Failing on CI
 ------------------
 
-* tests/DCPS/SharedTransport/run_test.pl multicast
-
-  * Multicast times out waiting for remote peer. Fails on ``test_u20_p1_j8_FM-1f`` and ``test_u20_p1_sec``.
-
 * tests/DCPS/Thrasher/run_test.pl high/aggressive/medium XXXX XXXX
 
   * The more intense thrasher tests cause consistent failures due to the increased load from ASAN.
