@@ -362,6 +362,11 @@ public:
       gas_.process_expirations(now);
     }
 
+    void maintain_admission_queue(const OpenDDS::DCPS::MonotonicTimePoint& now)
+    {
+      gas_.maintain_admission_queue(now);
+    }
+
     bool admitting() const
     {
       return gas_.admitting();
@@ -399,6 +404,8 @@ private:
                   const RelayHandler& handler);
 
   void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now);
+
+  void maintain_admission_queue(const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   bool admitting() const
   {

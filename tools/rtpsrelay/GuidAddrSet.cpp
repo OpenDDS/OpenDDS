@@ -189,6 +189,18 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
   }
 }
 
+void GuidAddrSet::maintain_admission_queue(const OpenDDS::DCPS::MonotonicTimePoint& now)
+{
+  if (config_.admission_control_queue_size()) {
+    const OpenDDS::DCPS::MonotonicTimePoint earliest = now - config_.admission_control_queue_duration();
+    auto limit = admission_control_queue_.begin();
+    while (limit != admission_control_queue_.end() && limit->admitted_ < earliest) {
+      ++limit;
+    }
+    admission_control_queue_.erase(admission_control_queue_.begin(), limit);
+  }
+}
+
 bool GuidAddrSet::ignore_rtps(bool from_application_participant,
                               const OpenDDS::DCPS::GUID_t& guid,
                               const OpenDDS::DCPS::MonotonicTimePoint& now,
@@ -220,16 +232,6 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
   if (!pos->second.has_discovery_addrs() || !pos->second.spdp_message) {
     // Don't have the necessary addresses or message to complete discovery.
     return true;
-  }
-
-  // Clean old entries from admission queue
-  if (config_.admission_control_queue_size()) {
-    const OpenDDS::DCPS::MonotonicTimePoint earliest = now - config_.admission_control_queue_duration();
-    auto limit = admission_control_queue_.begin();
-    while (limit != admission_control_queue_.end() && limit->admitted_ < earliest) {
-      ++limit;
-    }
-    admission_control_queue_.erase(admission_control_queue_.begin(), limit);
   }
 
   if (!admitting()) {
