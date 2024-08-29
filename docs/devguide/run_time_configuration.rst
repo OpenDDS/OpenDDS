@@ -529,11 +529,6 @@ For example:
 
     See :ref:`run_time_configuration--logging` for details.
 
-  .. prop:: DCPSMonitor=<boolean>
-    :default: ``0``
-
-    Use the Monitor library to publish data on monitoring topics (see :ghfile:`dds/monitor/README`).
-
   .. prop:: DCPSPendingTimeout=<sec>
     :default: ``0``
 

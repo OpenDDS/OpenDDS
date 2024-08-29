@@ -69,7 +69,6 @@ class DomainParticipantImpl;
 class SubscriptionInstance;
 class TopicImpl;
 class TopicDescriptionImpl;
-class Monitor;
 class DataReaderImpl;
 class FilterEvaluator;
 
@@ -1007,12 +1006,6 @@ private:
   typedef VarLess<DDS::ReadCondition> RCCompLess;
   typedef OPENDDS_SET_CMP(DDS::ReadCondition_var,  RCCompLess) ReadConditionSet;
   ReadConditionSet read_conditions_;
-
-  /// Monitor object for this entity
-  unique_ptr<Monitor> monitor_;
-
-  /// Periodic Monitor object for this entity
-  unique_ptr<Monitor>  periodic_monitor_;
 
   bool transport_disabled_;
 

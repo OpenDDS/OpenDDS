@@ -173,7 +173,7 @@ It requires the Java Development Kit (JDK).
 Qt
 ==
 
-`Qt5 <https://www.qt.io/>`__ is used for the :ghfile:`tools/monitor` utility program and the :ghfile:`examples/DCPS/ishapes` RTPS demo.
+`Qt5 <https://www.qt.io/>`__ is used for the :ghfile:`examples/DCPS/ishapes` RTPS demo.
 
 See :ghfile:`docs/qt.md` for details on configuring OpenDDS to use Qt.
 

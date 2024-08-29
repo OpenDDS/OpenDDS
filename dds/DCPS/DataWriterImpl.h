@@ -54,7 +54,6 @@ namespace DCPS {
 
 class PublisherImpl;
 class DomainParticipantImpl;
-class Monitor;
 class DataSampleElement;
 class SendStateDataSampleList;
 struct AssociationData;
@@ -809,13 +808,6 @@ private:
   ACE_UINT64 min_suspended_transaction_id_;
   ACE_UINT64 max_suspended_transaction_id_;
   SendStateDataSampleList available_data_list_;
-
-  /// Monitor object for this entity
-  unique_ptr<Monitor> monitor_;
-
-  /// Periodic Monitor object for this entity
-  unique_ptr<Monitor> periodic_monitor_;
-
 
   // Do we need to set the sequence repair header bit?
   //   must call prior to incrementing sequence number

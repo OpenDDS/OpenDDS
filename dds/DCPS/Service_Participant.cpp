@@ -13,7 +13,6 @@
 #include "GuidConverter.h"
 #include "LinuxNetworkConfigMonitor.h"
 #include "Logging.h"
-#include "MonitorFactory.h"
 #include "Qos_Helper.h"
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
@@ -152,7 +151,6 @@ Service_Participant::Service_Participant()
 #endif
   time_source_()
   , reactor_task_(false)
-  , monitor_factory_(0)
   , priority_min_(0)
   , priority_max_(0)
   , shut_down_(false)
@@ -269,11 +267,6 @@ DDS::ReturnCode_t Service_Participant::shutdown()
 
   if (shut_down_) {
     return DDS::RETCODE_ALREADY_DELETED;
-  }
-
-  if (monitor_factory_) {
-    monitor_factory_->deinitialize();
-    monitor_factory_ = 0;
   }
 
   {
@@ -454,36 +447,6 @@ Service_Participant::get_domain_participant_factory(int &argc,
       reactor_task_.open_reactor_task(&thread_status_manager_, "Service_Participant");
 
       job_queue_ = make_rch<JobQueue>(reactor_task_.get_reactor());
-
-      const bool monitor_enabled = config_store_->get_boolean(COMMON_DCPS_MONITOR,
-                                                              COMMON_DCPS_MONITOR_default);
-
-      if (monitor_enabled) {
-#if !defined(ACE_AS_STATIC_LIBS)
-        ACE_TString directive = ACE_TEXT("dynamic OpenDDS_Monitor Service_Object * OpenDDS_monitor:_make_MonitorFactoryImpl()");
-        ACE_Service_Config::process_directive(directive.c_str());
-#endif
-        this->monitor_factory_ =
-          ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor");
-
-        if (this->monitor_factory_ == 0) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("ERROR: Service_Participant::get_domain_participant_factory, ")
-                     ACE_TEXT("Unable to enable monitor factory.\n")));
-        }
-      }
-
-      if (this->monitor_factory_ == 0) {
-        // Use the stubbed factory
-        MonitorFactory::service_initialize();
-        this->monitor_factory_ =
-          ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor_Default");
-      }
-      if (monitor_enabled) {
-        this->monitor_factory_->initialize();
-      }
-
-      this->monitor_.reset(this->monitor_factory_->create_sp_monitor(this));
     }
 
 #if defined OPENDDS_LINUX_NETWORK_CONFIG_MONITOR

@@ -27,7 +27,6 @@ namespace OpenDDS {
 namespace DCPS {
 
 class DomainParticipantImpl;
-class Monitor;
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
 class MultiTopicImpl;
@@ -212,9 +211,6 @@ private:
   /// If datareader_set_ is accessed together with other data members,
   /// acquire dr_set_lock_ in the scope of this lock.
   ACE_Recursive_Thread_Mutex   si_lock_;
-
-  /// Monitor object for this entity
-  unique_ptr<Monitor> monitor_;
 
   int access_depth_;
 };

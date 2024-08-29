@@ -22,6 +22,7 @@
 #include <dds/DCPS/Logging.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/PublicationInstance.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/RecorderImpl.h>
 #include <dds/DCPS/SafetyProfileStreams.h>

@@ -12,7 +12,6 @@
 #include "Discovery.h"
 #include "DomainParticipantFactoryImpl.h"
 #include "JobQueue.h"
-#include "MonitorFactory.h"
 #include "NetworkConfigModifier.h"
 #include "NetworkConfigMonitor.h"
 #include "PoolAllocator.h"
@@ -817,13 +816,6 @@ public:
 
   /// Get the service participant's thread status manager.
   ThreadStatusManager& get_thread_status_manager();
-
-  /// Pointer to the monitor factory that is used to create
-  /// monitor objects.
-  MonitorFactory* monitor_factory_;
-
-  /// Pointer to the monitor object for this object
-  unique_ptr<Monitor> monitor_;
 
 private:
   /// Minimum priority value for the current scheduling policy.

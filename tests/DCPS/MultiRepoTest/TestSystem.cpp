@@ -61,10 +61,6 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
       this->config_.publisherDomain(),
       OpenDDS::DCPS::Discovery::DEFAULT_REPO
     );
-
-#if 1
-    TheServiceParticipant->monitor_factory_->initialize();
-#endif
   }
 
   //
