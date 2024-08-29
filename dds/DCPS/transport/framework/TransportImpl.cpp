@@ -15,7 +15,6 @@
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/Util.h"
-#include "dds/DCPS/MonitorFactory.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/ServiceEventDispatcher.h"
 #include "tao/debug.h"
@@ -38,9 +37,6 @@ TransportImpl::TransportImpl(TransportInst_rch config,
   , domain_(domain)
 {
   DBG_ENTRY_LVL("TransportImpl", "TransportImpl", 6);
-  if (TheServiceParticipant->monitor_factory_) {
-    monitor_.reset(TheServiceParticipant->monitor_factory_->create_transport_monitor(this));
-  }
 }
 
 TransportImpl::~TransportImpl()
@@ -77,10 +73,6 @@ bool
 TransportImpl::open()
 {
   // Success.
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
-
   if (Transport_debug_level > 0) {
 
     ACE_DEBUG((LM_DEBUG,
@@ -129,14 +121,6 @@ TransportImpl::release_link_resources(DataLink* link)
   EventBase_rch do_clear = make_rch<DoClear>(link_rch);
   event_dispatcher_->dispatch(do_clear);
   return true;
-}
-
-void
-TransportImpl::report()
-{
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
 }
 
 void

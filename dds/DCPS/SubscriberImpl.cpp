@@ -13,7 +13,6 @@
 #include "GuidConverter.h"
 #include "BuiltInTopicUtils.h"
 #include "TopicImpl.h"
-#include "MonitorFactory.h"
 #include "DataReaderImpl.h"
 #include "Service_Participant.h"
 #include "TopicDescriptionImpl.h"
@@ -55,8 +54,6 @@ SubscriberImpl::SubscriberImpl(DDS::InstanceHandle_t       handle,
 {
   //Note: OK to duplicate a nil.
   listener_ = DDS::SubscriberListener::_duplicate(a_listener);
-
-  monitor_.reset(TheServiceParticipant->monitor_factory_->create_subscriber_monitor(this));
 }
 
 SubscriberImpl::~SubscriberImpl()
@@ -375,10 +372,6 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
                      this->dr_set_lock_,
                      DDS::RETCODE_ERROR);
     datareader_set_.erase(dr_servant);
-  }
-
-  if (this->monitor_) {
-    this->monitor_->report();
   }
 
   const GUID_t subscription_id = dr_servant->subscription_id();
@@ -886,10 +879,6 @@ SubscriberImpl::enable()
 
   dp_id_ = participant->get_id();
 
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
-
   this->set_enabled();
 
   if (qos_.entity_factory.autoenable_created_entities) {
@@ -949,10 +938,6 @@ SubscriberImpl::reader_enabled(const char*     topic_name,
   readers_not_enabled_.erase(reader);
 
   this->datareader_map_.insert(DataReaderMap::value_type(topic_name, reader));
-
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
 
   return DDS::RETCODE_OK;
 }

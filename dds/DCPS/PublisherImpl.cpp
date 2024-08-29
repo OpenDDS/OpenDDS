@@ -16,7 +16,6 @@
 #include "GuidConverter.h"
 #include "Marked_Default_Qos.h"
 #include "TopicImpl.h"
-#include "MonitorFactory.h"
 #include "transport/framework/ReceivedDataSample.h"
 #include "transport/framework/DataLinkSet.h"
 #include "transport/framework/TransportImpl.h"
@@ -46,9 +45,7 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t      handle,
   sequence_number_(),
   reverse_pi_lock_(pi_lock_),
   publisher_id_(id)
-{
-  monitor_.reset(TheServiceParticipant->monitor_factory_->create_publisher_monitor(this));
-}
+{}
 
 PublisherImpl::~PublisherImpl()
 {
@@ -297,10 +294,6 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
     // remove_association may lost.
     dw_servant->remove_all_associations();
     dw_servant->cleanup();
-  }
-
-  if (this->monitor_) {
-    this->monitor_->report();
   }
 
   RcHandle<DomainParticipantImpl> participant = this->participant_.lock();
@@ -877,10 +870,6 @@ PublisherImpl::enable()
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
-
   this->set_enabled();
 
   if (qos_.entity_factory.autoenable_created_entities) {
@@ -946,10 +935,6 @@ PublisherImpl::writer_enabled(const char*     topic_name,
           LogGuid(publication_id).c_str()));
     }
     return DDS::RETCODE_ERROR;
-  }
-
-  if (this->monitor_) {
-    this->monitor_->report();
   }
 
   return DDS::RETCODE_OK;

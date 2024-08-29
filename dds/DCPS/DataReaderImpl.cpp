@@ -11,7 +11,6 @@
 #include "DomainParticipantImpl.h"
 #include "FeatureDisabledQosCheck.h"
 #include "GuidConverter.h"
-#include "MonitorFactory.h"
 #include "Qos_Helper.h"
 #include "QueryConditionImpl.h"
 #include "ReadConditionImpl.h"
@@ -124,9 +123,6 @@ DataReaderImpl::DataReaderImpl()
   this->budget_exceeded_status_.total_count = 0;
   this->budget_exceeded_status_.total_count_change = 0;
   this->budget_exceeded_status_.last_instance_handle = DDS::HANDLE_NIL;
-
-  monitor_.reset(TheServiceParticipant->monitor_factory_->create_data_reader_monitor(this));
-  periodic_monitor_.reset(TheServiceParticipant->monitor_factory_->create_data_reader_periodic_monitor(this));
 }
 
 // This method is called when there are no longer any reference to the
@@ -431,10 +427,6 @@ DataReaderImpl::transport_assoc_done(int flags, const GUID_t& remote_id)
       pos->second->start_liveliness_timer();
     }
   }
-
-  if (monitor_) {
-    monitor_->report();
-  }
 }
 
 void
@@ -618,10 +610,6 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   // subscription lost.
   if (notify_lost) {
     this->notify_subscription_lost(handles);
-  }
-
-  if (this->monitor_) {
-    this->monitor_->report();
   }
 }
 
@@ -1280,10 +1268,6 @@ DataReaderImpl::enable()
   if (topic_servant_) {
     const CORBA::String_var name = topic_servant_->get_name();
     return_value = subscriber->reader_enabled(name.in(), this);
-
-    if (this->monitor_) {
-      this->monitor_->report();
-    }
   }
 
   if (return_value == DDS::RETCODE_OK) {
@@ -1819,9 +1803,6 @@ DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
 #endif
 
   this->release_instance_i(handle);
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
 }
 
 void
@@ -1982,10 +1963,6 @@ DataReaderImpl::writer_became_alive(WriterInfo& info,
 
     liveliness_changed_status_.last_publication_handle = info.handle();
 
-    if (this->monitor_) {
-      this->monitor_->report();
-    }
-
     // Call listener only when there are liveliness status changes.
     if (liveliness_changed) {
       set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
@@ -2058,10 +2035,6 @@ DataReaderImpl::writer_became_dead(WriterInfo& info,
     }
 
     liveliness_changed_status_.last_publication_handle = info.handle();
-
-    if (this->monitor_) {
-      this->monitor_->report();
-    }
 
     instances_liveliness_update(info_writer_id, publication_handle);
 
