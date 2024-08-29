@@ -24,7 +24,6 @@ namespace OpenDDS {
 namespace DCPS {
 
 class TopicDescriptionImpl;
-class Monitor;
 
 /**
 * @class TopicImpl
@@ -110,12 +109,7 @@ private:
   /// Count of discovered (readers/writers using) topics with the same
   /// topic name but different characteristics (typename)
   DDS::InconsistentTopicStatus inconsistent_topic_status_;
-
-  /// Pointer to the monitor object for this entity
-  unique_ptr<Monitor> monitor_;
 };
-
-
 
 } // namespace DCPS
 } // namespace OpenDDS

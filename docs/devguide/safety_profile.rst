@@ -40,8 +40,6 @@ The following features of OpenDDS are not available when it is configured for Sa
 
   * The rtps_udp transport type is available (uses UDP unicast or multicast)
 
-* OpenDDS Monitor library and monitoring GUI
-
 When developing the Safety Profile, the following DDS Compliance Profiles were disabled:
 
 * content_subscription

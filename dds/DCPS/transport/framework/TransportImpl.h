@@ -40,7 +40,6 @@ class TransportClient;
 class TransportReceiveListener;
 class DataLink;
 class TransportInst;
-class Monitor;
 struct AssociationData;
 typedef RcHandle<TransportClient> TransportClient_rch;
 typedef WeakRcHandle<TransportClient> TransportClient_wrch;
@@ -128,8 +127,6 @@ public:
   /// Diagnostic aid.
   void dump();
   OPENDDS_STRING dump_to_str();
-
-  void report();
 
   struct ConnectionAttribs {
     GUID_t local_id_;
@@ -301,9 +298,6 @@ private:
 
   /// smart ptr to the associated DL cleanup task
   EventDispatcher_rch event_dispatcher_;
-
-  /// Monitor object for this entity
-  unique_ptr<Monitor> monitor_;
 
 protected:
   /// Id of the last link established.

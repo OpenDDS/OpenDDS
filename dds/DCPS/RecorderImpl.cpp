@@ -12,7 +12,6 @@
 #include "EncapsulationHeader.h"
 #include "FeatureDisabledQosCheck.h"
 #include "GuidConverter.h"
-#include "MonitorFactory.h"
 #include "PoolAllocator.h"
 #include "Qos_Helper.h"
 #include "QueryConditionImpl.h"

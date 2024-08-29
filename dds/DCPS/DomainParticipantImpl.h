@@ -55,7 +55,6 @@ class PublisherImpl;
 class SubscriberImpl;
 class DataWriterImpl;
 class DomainParticipantFactoryImpl;
-class Monitor;
 class BitSubscriber;
 
 class RecorderImpl;
@@ -549,8 +548,6 @@ private:
 
   /// Keep track of handles that can be reused (use handle_protector_)
   DisjointSequence::OrderedRanges<DDS::InstanceHandle_t> reusable_handles_;
-
-  unique_ptr<Monitor> monitor_;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   OwnershipManager owner_man_;
