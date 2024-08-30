@@ -455,6 +455,7 @@ namespace dds
     element_const_iterator begin_element () const;
     element_const_iterator end_element () const;
     void add_element (element_value_type const&);
+    void del_element (element_value_type const&);
     size_t count_element () const;
 
     protected:
@@ -487,6 +488,7 @@ namespace dds
     element_const_iterator begin_element () const;
     element_const_iterator end_element () const;
     void add_element (element_value_type const&);
+    void del_element (element_value_type const&);
     size_t count_element () const;
 
     protected:
@@ -2144,6 +2146,7 @@ namespace dds
     datareader_qos_const_iterator begin_datareader_qos () const;
     datareader_qos_const_iterator end_datareader_qos () const;
     void add_datareader_qos (datareader_qos_value_type const&);
+    void del_datareader_qos (datareader_qos_value_type const&);
     size_t count_datareader_qos () const;
 
     protected:
@@ -2160,6 +2163,7 @@ namespace dds
     datawriter_qos_const_iterator begin_datawriter_qos () const;
     datawriter_qos_const_iterator end_datawriter_qos () const;
     void add_datawriter_qos (datawriter_qos_value_type const&);
+    void del_datawriter_qos (datawriter_qos_value_type const&);
     size_t count_datawriter_qos () const;
 
     protected:
@@ -2176,6 +2180,7 @@ namespace dds
     topic_qos_const_iterator begin_topic_qos () const;
     topic_qos_const_iterator end_topic_qos () const;
     void add_topic_qos (topic_qos_value_type const&);
+    void del_topic_qos (topic_qos_value_type const&);
     size_t count_topic_qos () const;
 
     protected:
@@ -2192,6 +2197,7 @@ namespace dds
     domainparticipant_qos_const_iterator begin_domainparticipant_qos () const;
     domainparticipant_qos_const_iterator end_domainparticipant_qos () const;
     void add_domainparticipant_qos (domainparticipant_qos_value_type const&);
+    void del_domainparticipant_qos (domainparticipant_qos_value_type const&);
     size_t count_domainparticipant_qos () const;
 
     protected:
@@ -2208,6 +2214,7 @@ namespace dds
     publisher_qos_const_iterator begin_publisher_qos () const;
     publisher_qos_const_iterator end_publisher_qos () const;
     void add_publisher_qos (publisher_qos_value_type const&);
+    void del_publisher_qos (publisher_qos_value_type const&);
     size_t count_publisher_qos () const;
 
     protected:
@@ -2224,6 +2231,7 @@ namespace dds
     subscriber_qos_const_iterator begin_subscriber_qos () const;
     subscriber_qos_const_iterator end_subscriber_qos () const;
     void add_subscriber_qos (subscriber_qos_value_type const&);
+    void del_subscriber_qos (subscriber_qos_value_type const&);
     size_t count_subscriber_qos () const;
 
     protected:

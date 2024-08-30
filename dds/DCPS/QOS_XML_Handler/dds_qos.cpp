@@ -400,6 +400,12 @@ namespace dds
     element_.push_back (e);
   }
 
+  void stringSeq::
+  del_element (stringSeq::element_value_type const& e)
+  {
+    element_.remove (e);
+  }
+
   size_t stringSeq::
   count_element() const
   {
@@ -461,6 +467,12 @@ namespace dds
   add_element (dataRepresentationIdSeq::element_value_type const& e)
   {
     element_.push_back (e);
+  }
+
+  void dataRepresentationIdSeq::
+  del_element (dataRepresentationIdSeq::element_value_type const& e)
+  {
+    element_.remove (e);
   }
 
   size_t dataRepresentationIdSeq::
@@ -5257,6 +5269,12 @@ namespace dds
     datareader_qos_.push_back (e);
   }
 
+  void qosProfile::
+  del_datareader_qos (qosProfile::datareader_qos_value_type const& e)
+  {
+    datareader_qos_.remove (e);
+  }
+
   size_t qosProfile::
   count_datareader_qos() const
   {
@@ -5292,6 +5310,12 @@ namespace dds
   add_datawriter_qos (qosProfile::datawriter_qos_value_type const& e)
   {
     datawriter_qos_.push_back (e);
+  }
+
+  void qosProfile::
+  del_datawriter_qos (qosProfile::datawriter_qos_value_type const& e)
+  {
+    datawriter_qos_.remove (e);
   }
 
   size_t qosProfile::
@@ -5331,6 +5355,12 @@ namespace dds
     topic_qos_.push_back (e);
   }
 
+  void qosProfile::
+  del_topic_qos (qosProfile::topic_qos_value_type const& e)
+  {
+    topic_qos_.remove (e);
+  }
+
   size_t qosProfile::
   count_topic_qos() const
   {
@@ -5366,6 +5396,12 @@ namespace dds
   add_domainparticipant_qos (qosProfile::domainparticipant_qos_value_type const& e)
   {
     domainparticipant_qos_.push_back (e);
+  }
+
+  void qosProfile::
+  del_domainparticipant_qos (qosProfile::domainparticipant_qos_value_type const& e)
+  {
+    domainparticipant_qos_.remove (e);
   }
 
   size_t qosProfile::
@@ -5405,6 +5441,12 @@ namespace dds
     publisher_qos_.push_back (e);
   }
 
+  void qosProfile::
+  del_publisher_qos (qosProfile::publisher_qos_value_type const& e)
+  {
+    publisher_qos_.remove (e);
+  }
+
   size_t qosProfile::
   count_publisher_qos() const
   {
@@ -5440,6 +5482,12 @@ namespace dds
   add_subscriber_qos (qosProfile::subscriber_qos_value_type const& e)
   {
     subscriber_qos_.push_back (e);
+  }
+
+  void qosProfile::
+  del_subscriber_qos (qosProfile::subscriber_qos_value_type const& e)
+  {
+    subscriber_qos_.remove (e);
   }
 
   size_t qosProfile::
@@ -5559,7 +5607,7 @@ namespace dds
   }
 
   void qosProfile_seq::
-  del_qos_profile(qosProfile_seq::qos_profile_value_type const& e)
+  del_qos_profile (qosProfile_seq::qos_profile_value_type const& e)
   {
     qos_profile_.remove (e);
   }
@@ -5583,7 +5631,7 @@ namespace dds
 
     if (v == ACE_TEXT ("BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS")) v_ = BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS_l;
     else if (v == ACE_TEXT ("BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS")) v_ = BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5596,7 +5644,7 @@ namespace dds
 
     if (v == ACE_TEXT ("BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS")) v_ = BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS_l;
     else if (v == ACE_TEXT ("BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS")) v_ = BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5616,7 +5664,7 @@ namespace dds
     else if (v == ACE_TEXT ("TRANSIENT_LOCAL_DURABILITY_QOS")) v_ = TRANSIENT_LOCAL_DURABILITY_QOS_l;
     else if (v == ACE_TEXT ("TRANSIENT_DURABILITY_QOS")) v_ = TRANSIENT_DURABILITY_QOS_l;
     else if (v == ACE_TEXT ("PERSISTENT_DURABILITY_QOS")) v_ = PERSISTENT_DURABILITY_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5631,7 +5679,7 @@ namespace dds
     else if (v == ACE_TEXT ("TRANSIENT_LOCAL_DURABILITY_QOS")) v_ = TRANSIENT_LOCAL_DURABILITY_QOS_l;
     else if (v == ACE_TEXT ("TRANSIENT_DURABILITY_QOS")) v_ = TRANSIENT_DURABILITY_QOS_l;
     else if (v == ACE_TEXT ("PERSISTENT_DURABILITY_QOS")) v_ = PERSISTENT_DURABILITY_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5651,7 +5699,7 @@ namespace dds
 
     if (v == ACE_TEXT ("KEEP_LAST_HISTORY_QOS")) v_ = KEEP_LAST_HISTORY_QOS_l;
     else if (v == ACE_TEXT ("KEEP_ALL_HISTORY_QOS")) v_ = KEEP_ALL_HISTORY_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5664,7 +5712,7 @@ namespace dds
 
     if (v == ACE_TEXT ("KEEP_LAST_HISTORY_QOS")) v_ = KEEP_LAST_HISTORY_QOS_l;
     else if (v == ACE_TEXT ("KEEP_ALL_HISTORY_QOS")) v_ = KEEP_ALL_HISTORY_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5683,7 +5731,7 @@ namespace dds
     if (v == ACE_TEXT ("AUTOMATIC_LIVELINESS_QOS")) v_ = AUTOMATIC_LIVELINESS_QOS_l;
     else if (v == ACE_TEXT ("MANUAL_BY_PARTICIPANT_LIVELINESS_QOS")) v_ = MANUAL_BY_PARTICIPANT_LIVELINESS_QOS_l;
     else if (v == ACE_TEXT ("MANUAL_BY_TOPIC_LIVELINESS_QOS")) v_ = MANUAL_BY_TOPIC_LIVELINESS_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5697,7 +5745,7 @@ namespace dds
     if (v == ACE_TEXT ("AUTOMATIC_LIVELINESS_QOS")) v_ = AUTOMATIC_LIVELINESS_QOS_l;
     else if (v == ACE_TEXT ("MANUAL_BY_PARTICIPANT_LIVELINESS_QOS")) v_ = MANUAL_BY_PARTICIPANT_LIVELINESS_QOS_l;
     else if (v == ACE_TEXT ("MANUAL_BY_TOPIC_LIVELINESS_QOS")) v_ = MANUAL_BY_TOPIC_LIVELINESS_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5717,7 +5765,7 @@ namespace dds
     if (v == ACE_TEXT ("INSTANCE_PRESENTATION_QOS")) v_ = INSTANCE_PRESENTATION_QOS_l;
     else if (v == ACE_TEXT ("TOPIC_PRESENTATION_QOS")) v_ = TOPIC_PRESENTATION_QOS_l;
     else if (v == ACE_TEXT ("GROUP_PRESENTATION_QOS")) v_ = GROUP_PRESENTATION_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5731,7 +5779,7 @@ namespace dds
     if (v == ACE_TEXT ("INSTANCE_PRESENTATION_QOS")) v_ = INSTANCE_PRESENTATION_QOS_l;
     else if (v == ACE_TEXT ("TOPIC_PRESENTATION_QOS")) v_ = TOPIC_PRESENTATION_QOS_l;
     else if (v == ACE_TEXT ("GROUP_PRESENTATION_QOS")) v_ = GROUP_PRESENTATION_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5750,7 +5798,7 @@ namespace dds
 
     if (v == ACE_TEXT ("BEST_EFFORT_RELIABILITY_QOS")) v_ = BEST_EFFORT_RELIABILITY_QOS_l;
     else if (v == ACE_TEXT ("RELIABLE_RELIABILITY_QOS")) v_ = RELIABLE_RELIABILITY_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5763,7 +5811,7 @@ namespace dds
 
     if (v == ACE_TEXT ("BEST_EFFORT_RELIABILITY_QOS")) v_ = BEST_EFFORT_RELIABILITY_QOS_l;
     else if (v == ACE_TEXT ("RELIABLE_RELIABILITY_QOS")) v_ = RELIABLE_RELIABILITY_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5781,7 +5829,7 @@ namespace dds
 
     if (v == ACE_TEXT ("SHARED_OWNERSHIP_QOS")) v_ = SHARED_OWNERSHIP_QOS_l;
     else if (v == ACE_TEXT ("EXCLUSIVE_OWNERSHIP_QOS")) v_ = EXCLUSIVE_OWNERSHIP_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5794,7 +5842,7 @@ namespace dds
 
     if (v == ACE_TEXT ("SHARED_OWNERSHIP_QOS")) v_ = SHARED_OWNERSHIP_QOS_l;
     else if (v == ACE_TEXT ("EXCLUSIVE_OWNERSHIP_QOS")) v_ = EXCLUSIVE_OWNERSHIP_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5814,7 +5862,7 @@ namespace dds
     else if (v == ACE_TEXT ("XML_DATA_REPRESENTATION")) v_ = XML_DATA_REPRESENTATION_l;
     else if (v == ACE_TEXT ("XCDR2_DATA_REPRESENTATION")) v_ = XCDR2_DATA_REPRESENTATION_l;
     else if (v == ACE_TEXT ("UNALIGNED_CDR_DATA_REPRESENTATION")) v_ = UNALIGNED_CDR_DATA_REPRESENTATION_l;
-    else
+    else 
     {
     }
   }
@@ -5829,7 +5877,7 @@ namespace dds
     else if (v == ACE_TEXT ("XML_DATA_REPRESENTATION")) v_ = XML_DATA_REPRESENTATION_l;
     else if (v == ACE_TEXT ("XCDR2_DATA_REPRESENTATION")) v_ = XCDR2_DATA_REPRESENTATION_l;
     else if (v == ACE_TEXT ("UNALIGNED_CDR_DATA_REPRESENTATION")) v_ = UNALIGNED_CDR_DATA_REPRESENTATION_l;
-    else
+    else 
     {
     }
   }
@@ -5849,7 +5897,7 @@ namespace dds
 
     if (v == ACE_TEXT ("DISALLOW_TYPE_COERCION")) v_ = DISALLOW_TYPE_COERCION_l;
     else if (v == ACE_TEXT ("ALLOW_TYPE_COERCION")) v_ = ALLOW_TYPE_COERCION_l;
-    else
+    else 
     {
     }
   }
@@ -5862,7 +5910,7 @@ namespace dds
 
     if (v == ACE_TEXT ("DISALLOW_TYPE_COERCION")) v_ = DISALLOW_TYPE_COERCION_l;
     else if (v == ACE_TEXT ("ALLOW_TYPE_COERCION")) v_ = ALLOW_TYPE_COERCION_l;
-    else
+    else 
     {
     }
   }
@@ -5896,7 +5944,7 @@ namespace dds
         nanosec (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -5922,7 +5970,7 @@ namespace dds
         add_element (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -5948,7 +5996,7 @@ namespace dds
         add_element (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -5974,7 +6022,7 @@ namespace dds
         period (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6000,7 +6048,7 @@ namespace dds
         kind (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6026,7 +6074,7 @@ namespace dds
         kind (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6082,7 +6130,7 @@ namespace dds
         max_samples_per_instance (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6108,7 +6156,7 @@ namespace dds
         autoenable_created_entities (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6134,7 +6182,7 @@ namespace dds
         value (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6166,7 +6214,7 @@ namespace dds
         depth (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6192,7 +6240,7 @@ namespace dds
         duration (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6218,7 +6266,7 @@ namespace dds
         duration (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6250,7 +6298,7 @@ namespace dds
         lease_duration (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6276,7 +6324,7 @@ namespace dds
         kind (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6302,7 +6350,7 @@ namespace dds
         value (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6328,7 +6376,7 @@ namespace dds
         name (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6366,7 +6414,7 @@ namespace dds
         ordered_access (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6398,7 +6446,7 @@ namespace dds
         autopurge_disposed_samples_delay (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6430,7 +6478,7 @@ namespace dds
         max_blocking_time (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6480,7 +6528,7 @@ namespace dds
         initial_instances (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6506,7 +6554,7 @@ namespace dds
         minimum_separation (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6532,7 +6580,7 @@ namespace dds
         value (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6558,7 +6606,7 @@ namespace dds
         value (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6584,7 +6632,7 @@ namespace dds
         value (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6610,7 +6658,7 @@ namespace dds
         autodispose_unregistered_instances (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6636,7 +6684,7 @@ namespace dds
         value (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6692,7 +6740,7 @@ namespace dds
         force_type_validation (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6724,7 +6772,7 @@ namespace dds
         entity_factory (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6745,7 +6793,7 @@ namespace dds
         base_name (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6789,7 +6837,7 @@ namespace dds
         entity_factory (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6810,7 +6858,7 @@ namespace dds
         base_name (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6854,7 +6902,7 @@ namespace dds
         entity_factory (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6875,7 +6923,7 @@ namespace dds
         base_name (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6979,7 +7027,7 @@ namespace dds
         representation (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -7006,7 +7054,7 @@ namespace dds
         topic_filter (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -7110,7 +7158,7 @@ namespace dds
         type_consistency (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -7137,7 +7185,7 @@ namespace dds
         topic_filter (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -7253,7 +7301,7 @@ namespace dds
         representation (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -7280,7 +7328,7 @@ namespace dds
         topic_filter (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -7336,7 +7384,7 @@ namespace dds
         add_subscriber_qos (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -7357,7 +7405,7 @@ namespace dds
         base_name (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -7383,7 +7431,7 @@ namespace dds
         add_qos_profile (t);
       }
 
-      else
+      else 
       {
       }
     }
