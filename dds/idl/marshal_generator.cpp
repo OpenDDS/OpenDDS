@@ -146,6 +146,10 @@ namespace {
                       AST_Type* type, const string& prefix, bool wrap_nested_key_only,
                       Intro& intro, const string& stru = "");
 
+  string initializeUnion(const std::string& indent, AST_Decl* node, const string& name,
+                         AST_Type* type, const string& prefix, bool wrap_nested_key_only,
+                         Intro& intro, const string& stru = "");
+
   const std::string construct_bound_fail =
     "strm.get_construction_status() == Serializer::BoundConstructionFailure";
   const std::string construct_elem_fail =
@@ -768,6 +772,7 @@ namespace {
               "  return strm.read_" << getSerializerName(elem)
               << "_array(" << get_buffer << ", length);\n";
           }
+          return;
         }
       } else if (elem_cls & CL_INTERFACE) {
         be_global->impl_ <<
@@ -1718,6 +1723,16 @@ namespace {
       wrapper.done(&intro);
       return "(strm " + shift + " " + wrapper.ref() + ")";
     }
+  }
+
+  string initializeUnion(const std::string& indent, AST_Decl* field, const string& /*name*/,
+                         AST_Type* type, const string& /*prefix*/, bool /*wrap_nested_key_only*/, Intro& /*intro*/,
+                         const string& /*stru*/)
+  {
+    return
+      field_type_name(dynamic_cast<AST_Field*>(field), type) + " temp;\n" +
+      type_to_default(indent, type, "temp", type->anonymous(), false) +
+      "uni.value." + field->local_name()->get_string() + "(temp);\n";
   }
 
   std::string generate_field_stream(
@@ -3083,7 +3098,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
   RtpsFieldCustomizer rtpsCustom(cpp_name);
 
   be_global->impl_ <<
-    "  Value getValue(Serializer& strm, const char* field, const TypeSupportImpl* = 0) const\n"
+    "  Value getValue(Serializer& strm, const char* field, TypeSupportImpl* = 0) const\n"
     "  {\n"
     "    const Encoding& encoding = strm.encoding();\n"
     "    ACE_UNUSED_ARG(encoding);\n";
@@ -3446,7 +3461,9 @@ namespace {
     return true;
   }
 
-  void gen_union_key_serializers(AST_Union* node, FieldFilter kind)
+  void gen_union_key_serializers(AST_Union* node,
+                                 FieldFilter kind,
+                                 const std::vector<AST_UnionBranch*>& branches)
   {
     const string cxx = scoped(node->name()); // name as a C++ class
     AST_Type* const discriminator = node->disc_type();
@@ -3563,7 +3580,13 @@ namespace {
 
         be_global->impl_
           << "  " << scoped(discriminator->name()) << " disc;\n"
-          << streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT))
+          << streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
+
+        // Activate the branch with a default so the union is in a good state.
+        generateSwitchForUnion(node, "disc", initializeUnion, branches,
+                               discriminator, "", ">> forceStreamExp", cxx.c_str());
+
+        be_global->impl_
           << "  uni.value._d(disc);\n";
       }
 
@@ -3825,9 +3848,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     }
   }
 
-  gen_union_key_serializers(node, FieldFilter_NestedKeyOnly);
+  gen_union_key_serializers(node, FieldFilter_NestedKeyOnly, branches);
   if (be_global->is_topic_type(node)) {
-    gen_union_key_serializers(node, FieldFilter_KeyOnly);
+    gen_union_key_serializers(node, FieldFilter_KeyOnly, branches);
   }
 
   TopicKeys keys(node);

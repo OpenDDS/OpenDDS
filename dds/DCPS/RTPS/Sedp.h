@@ -655,13 +655,12 @@ private:
       return OPENDDS_STRING("dds.builtin.TOS.") +
         DCPS::to_hex_dds_string(&participant.guidPrefix[0], sizeof(DCPS::GuidPrefix_t)) +
         DCPS::to_hex_dds_string(&participant.entityId.entityKey[0], sizeof(DCPS::EntityKey_t)) +
-        DCPS::to_dds_string(unsigned(participant.entityId.entityKind), true);
+        DCPS::to_dds_string(participant.entityId.entityKind, true);
     }
 
     EntityId_t counterpart_entity_id() const;
     GUID_t make_counterpart_guid(const DCPS::GUID_t& remote_part) const;
     bool associated_with_counterpart(const DCPS::GUID_t& remote_part) const;
-    bool pending_association_with_counterpart(const DCPS::GUID_t& remote_part) const;
     bool associated_with_counterpart_if_not_pending(const DCPS::GUID_t& remote_part) const;
 
     RcHandle<DCPS::BitSubscriber> get_builtin_subscriber_proxy() const;

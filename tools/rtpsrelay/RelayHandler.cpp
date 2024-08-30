@@ -288,6 +288,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
   const auto msg_len = msg->length();
   {
     GuidAddrSet::Proxy proxy(guid_addr_set_);
+    proxy.maintain_admission_queue(now);
     proxy.process_expirations(now);
     if (!proxy.check_address(remote_address)) {
       stats_reporter_.ignored_message(msg_len, now, type);
@@ -757,7 +758,8 @@ SpdpHandler::SpdpHandler(const Config& config,
 {}
 
 namespace {
-  std::string extract_common_name(const ACE_Message_Block& msg)
+  std::string extract_common_name(const ACE_Message_Block& msg,
+                                  const OpenDDS::DCPS::GUID_t& src_guid)
   {
     OpenDDS::RTPS::MessageParser message_parser(msg);
     if (!message_parser.parseHeader()) {
@@ -804,11 +806,12 @@ namespace {
           OpenDDS::RTPS::ParameterList plist;
           OpenDDS::DCPS::EncapsulationHeader encap;
           OpenDDS::DCPS::Encoding enc;
-          if (!(message_parser >> encap) || !encap.to_encoding(enc, OpenDDS::DCPS::MUTABLE)
+          if (!(message_parser >> encap) || !to_encoding(enc, encap, OpenDDS::DCPS::MUTABLE)
                                          || enc.kind() != OpenDDS::DCPS::Encoding::KIND_XCDR1) {
             ACE_ERROR((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: extract_common_name() - ")
-                       ACE_TEXT("failed to deserialize encapsulation header for SPDP\n")));
+                       ACE_TEXT("failed to deserialize encapsulation header for SPDP from %C\n"),
+                       OpenDDS::DCPS::LogGuid(src_guid).c_str()));
             return "";
           }
           message_parser.serializer().encoding(enc);
@@ -854,7 +857,7 @@ void SpdpHandler::cache_message(GuidAddrSet::Proxy& proxy,
     const auto pos = proxy.find(src_guid);
     if (pos != proxy.end()) {
       if (!pos->second.spdp_message) {
-        pos->second.common_name = extract_common_name(*msg);
+        pos->second.common_name = extract_common_name(*msg, src_guid);
         if (config_.log_activity()) {
           ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SpdpHandler::cache_message ")
                      ACE_TEXT("%C got first SPDP %C into session dds.cert.sn %C\n"),

@@ -97,11 +97,6 @@ public:
   virtual char* get_type_name();
 
 #ifndef OPENDDS_SAFETY_PROFILE
-  virtual DDS::DynamicType_ptr get_type() const
-  {
-    return DDS::DynamicType::_duplicate(type_);
-  }
-
   // IDL local interface uses non-const memebers
   DDS::DynamicType_ptr get_type()
   {

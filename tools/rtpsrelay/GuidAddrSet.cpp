@@ -26,8 +26,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
     auto result = remote_map_.insert(std::make_pair(remote, src_guid));
     if (result.second) {
       relay_stats_reporter_.remote_map_size(static_cast<uint32_t>(remote_map_.size()), now);
-    }
-    if (!result.second && result.first->second != src_guid) {
+    } else if (result.first->second != src_guid) {
       if (config_.log_activity()) {
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity change detected %C -> %C\n"),
                    guid_to_string(result.first->second).c_str(),
@@ -61,6 +60,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
                  guid_to_string(src_guid).c_str()));
     }
     relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
+    check_participants_limit();
   }
 
   if (addr_set_stats.deactivation == OpenDDS::DCPS::MonotonicTimePoint::zero_value) {
@@ -189,6 +189,18 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
   }
 }
 
+void GuidAddrSet::maintain_admission_queue(const OpenDDS::DCPS::MonotonicTimePoint& now)
+{
+  if (config_.admission_control_queue_size()) {
+    const OpenDDS::DCPS::MonotonicTimePoint earliest = now - config_.admission_control_queue_duration();
+    auto limit = admission_control_queue_.begin();
+    while (limit != admission_control_queue_.end() && limit->admitted_ < earliest) {
+      ++limit;
+    }
+    admission_control_queue_.erase(admission_control_queue_.begin(), limit);
+  }
+}
+
 bool GuidAddrSet::ignore_rtps(bool from_application_participant,
                               const OpenDDS::DCPS::GUID_t& guid,
                               const OpenDDS::DCPS::MonotonicTimePoint& now,
@@ -208,7 +220,7 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
     pos->second.allow_rtps = true;
 
     if (config_.log_activity()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity ")
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::ignore_rtps ")
                  ACE_TEXT("%C was admitted %C into session\n"),
                  guid_to_string(guid).c_str(),
                  pos->second.get_session_time(now).sec_str().c_str()));
@@ -220,16 +232,6 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
   if (!pos->second.has_discovery_addrs() || !pos->second.spdp_message) {
     // Don't have the necessary addresses or message to complete discovery.
     return true;
-  }
-
-  // Clean old entries from admission queue
-  if (config_.admission_control_queue_size()) {
-    const OpenDDS::DCPS::MonotonicTimePoint earliest = now - config_.admission_control_queue_duration();
-    auto limit = admission_control_queue_.begin();
-    while (limit != admission_control_queue_.end() && limit->admitted_ < earliest) {
-      ++limit;
-    }
-    admission_control_queue_.erase(admission_control_queue_.begin(), limit);
   }
 
   if (!admitting()) {
@@ -246,7 +248,7 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
   admitted = true;
 
   if (config_.log_activity()) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity ")
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::ignore_rtps ")
                ACE_TEXT("%C was admitted %C into session\n"),
                guid_to_string(guid).c_str(),
                pos->second.get_session_time(now).sec_str().c_str()));
@@ -279,9 +281,10 @@ void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid,
 
   guid_addr_set_map_.erase(it);
   relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
+  check_participants_limit();
 
   if (config_.log_activity()) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::remove_i "
+    ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::remove "
                "%C removed %C into session total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
                guid_to_string(guid).c_str(),
                session_time.sec_str().c_str(),
@@ -316,6 +319,15 @@ void GuidAddrSet::reject_address(const ACE_INET_Addr& addr,
 bool GuidAddrSet::check_address(const ACE_INET_Addr& addr)
 {
   return rejected_address_map_.find(OpenDDS::DCPS::NetworkAddress(addr)) == rejected_address_map_.end();
+}
+
+void GuidAddrSet::check_participants_limit()
+{
+  const auto low = config_.admission_max_participants_low_water();
+  if (low > 0) {
+    participant_admission_limit_reached_ = guid_addr_set_map_.size() >=
+      (participant_admission_limit_reached_ ? low : config_.admission_max_participants_high_water());
+  }
 }
 
 }

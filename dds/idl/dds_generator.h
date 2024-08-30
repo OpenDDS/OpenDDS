@@ -583,6 +583,9 @@ inline std::string to_cxx_type(AST_Type* type, std::size_t& size)
       return "ACE_CDR::Double";
     case AST_PredefinedType::PT_longdouble:
       size = 16;
+      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+        return "long double";
+      }
       return "ACE_CDR::LongDouble";
     case AST_PredefinedType::PT_char:
       size = 1;

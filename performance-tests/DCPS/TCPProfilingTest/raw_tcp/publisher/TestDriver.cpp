@@ -69,7 +69,7 @@ TestDriver::parse_args(int& argc, ACE_TCHAR* argv[])
         throw TestException();
       }
 
-      publisher_id_ = tmp;
+      publisher_id_ = static_cast<char>(tmp);
     }
     // The '-n' option
     else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-n")))) {
@@ -83,7 +83,7 @@ TestDriver::parse_args(int& argc, ACE_TCHAR* argv[])
         throw TestException();
       }
 
-      num_packets_ = tmp;
+      num_packets_ = static_cast<unsigned>(tmp);
     }
     // The '-d' option
     else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-d")))) {
@@ -97,7 +97,7 @@ TestDriver::parse_args(int& argc, ACE_TCHAR* argv[])
         throw TestException();
       }
 
-      data_size_ = tmp;
+      data_size_ = static_cast<char>(tmp);
     }
     // A '-s' option
     else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-s")))) {

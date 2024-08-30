@@ -224,6 +224,7 @@ my @specs =
     'mpc=s', 'MPC (use MPC_ROOT, ACE_ROOT/MPC, or download)',
     'doc-group|doc_group!', 'Use the DOC Group release of TAO 2.5.x (yes)',
     'doc-group3|doc_group3!', 'Use the DOC Group release of TAO 3.x (no)',
+    'ace-tao=s', 'Use the ACE/TAO version from acetao.ini',
     'ace-github-latest!', 'Clone latest ACE/TAO/MPC from GitHub (no)',
     'force-ace-tao', 'Force configuration of ACE/TAO (no)',
     'no-disable-deprecated', 'Turn off disabling deprecated interfaces when' .
@@ -997,6 +998,10 @@ if (!$ace_src || !$tao_src) {
     # Get ACE/TAO version info
     my ($section_names, $sections) = read_ini_file("$FindBin::RealBin/acetao.ini");
     my $ace_tao_version = $opts{'doc-group3'} ? $sections->{ace7tao3} : $sections->{ace6tao2};
+    if ($opts{'ace-tao'}) {
+      $ace_tao_version = $sections->{$opts{'ace-tao'}};
+      die "ERROR: No entry named '$opts{'ace-tao'}' in acetao.ini" unless $ace_tao_version;
+    }
     if ($opts{verbose}) {
       print("ACE/TAO Version Info:");
       new Dumpvalue()->dumpValue($ace_tao_version);
@@ -1228,6 +1233,8 @@ sub default_features {
     push(@feat, 'ipv6=1') if $opts{'ipv6'};
     my @normalized = map {/=/ ? $_ : "$_=1"} @features;
     push(@feat, @normalized) if @normalized;
+  } elsif ($opts{'java'}) {
+    push(@feat, 'java=1');
   }
   return @feat;
 }

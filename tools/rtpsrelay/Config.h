@@ -34,6 +34,8 @@ public:
     , restart_detection_(false)
     , admission_control_queue_size_(0)
     , max_ips_per_client_(0)
+    , admission_max_participants_high_water_(0)
+    , admission_max_participants_low_water_(0)
   {}
 
   void relay_id(const std::string& value)
@@ -316,6 +318,26 @@ public:
     rejected_address_duration_ = value;
   }
 
+  void admission_max_participants_high_water(size_t count)
+  {
+    admission_max_participants_high_water_ = count;
+  }
+
+  size_t admission_max_participants_high_water() const
+  {
+    return admission_max_participants_high_water_;
+  }
+
+  void admission_max_participants_low_water(size_t count)
+  {
+    admission_max_participants_low_water_ = count;
+  }
+
+  size_t admission_max_participants_low_water() const
+  {
+    return admission_max_participants_low_water_;
+  }
+
 private:
   std::string relay_id_;
   OpenDDS::DCPS::GUID_t application_participant_guid_;
@@ -345,6 +367,8 @@ private:
   OpenDDS::DCPS::TimeDuration run_time_;
   size_t max_ips_per_client_;
   OpenDDS::DCPS::TimeDuration rejected_address_duration_;
+  size_t admission_max_participants_high_water_;
+  size_t admission_max_participants_low_water_;
 };
 
 }

@@ -1,0 +1,3953 @@
+Fri Jul 26 16:35:45 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit f8cddf0eb02cc65e1c06b96d418804b3cffc9375
+
+          Merge pull request #4746 from mitza-oci/master
+
+          Removed duplicate call to find()
+
+Thu Jul 25 20:29:45 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3306bf811350eda160ddda4794310f9a27e2f7b2
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Removed duplicate call to find()
+
+Thu Jul 25 19:29:35 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 139c58514f061a40779c0251864c1632f1c015c8
+
+          Merge pull request #4745 from jrw972/ace4tao8news
+
+          Add news for ACE8TAO4
+
+Thu Jul 25 18:54:03 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit aee0dcb387cece9ce01e8eed9e6cb5a5cee5ac47
+
+        * docs/news.d/ace8_tao4.rst:
+
+          Add news for ACE8TAO4
+
+Thu Jul 25 18:33:14 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 3ac828b6340818f057b13edcac34fec6d281b3d8
+
+          Merge pull request #4731 from
+          iguessthislldo/igtd/rtps-udp-memory-leaks
+
+          Fix Locator Memory Leak in RTPS/UDP Transport
+
+Thu Jul 25 18:32:41 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit c25313272eaf77d8020e75b69fc7f083831b795e
+
+          Merge pull request #4735 from jrw972/rti-preemptive-master
+
+          Support preemptive acknacks for Connext
+
+Thu Jul 25 18:32:19 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 12eda84baf32300fa8423d5555d237aeefdf8b60
+
+          Merge pull request #4741 from mitza-oci/master
+
+          Initialize opendds_user_tag_ in DiscoveredParticipant's default
+          constructor
+
+Thu Jul 25 18:31:40 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 9702ce9e45f703d9cb937a08c9db1afbbc96de65
+
+          Merge pull request #4742 from mitza-oci/openssl-links
+
+          devguide: updated links to OpenSSL
+
+Thu Jul 25 18:31:18 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 24bc9fc9ae1a78153917534600b71675dec29e90
+
+          Merge pull request #4743 from jrw972/spdp-multicast-addr-env
+
+          Unit test fails when `OPENDDS_RTPS_DEFAULT_D0` is set
+
+Mon Jul 22 19:40:41 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit bcad9f491ffaeaeb17191c155c2852cf04094426
+
+        * docs/news.d/preemptive_acknacks.rst:
+
+          Add news
+
+Mon Jul 22 19:35:44 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit ab6f27da00d9d90e1ecd74d50f66127e88a00c63
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+
+          Pre-association acknacks don't have backoff
+
+          Problem
+          -------
+
+          Pre-association acknacks send at a constant rate determined by
+          the
+          heartbeat period.
+
+          Solution
+          --------
+
+          Add fallback.
+
+Thu Jul 25 13:30:26 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 36f0e8072fde778c35d5f1f2779ed56bfe378cb6
+
+        * tests/unit-tests/dds/DCPS/RTPS/RtpsDiscoveryConfig.cpp:
+
+          Unit test fails when `OPENDDS_RTPS_DEFAULT_D0` is set
+
+          Problem
+          -------
+
+          The `spdp_multicast_address` method is sensitive to the
+          `OPENDDS_RTPS_DEFAULT_D0` environment variable. However, the unit
+          test does not take it into account.
+
+          Solution
+          --------
+
+          Modify the unit test to accommodate `OPENDDS_RTPS_DEFAULT_D0`.
+
+Fri Jul 19 20:41:53 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 0deb7144523566ee2629d5f7d050d778fb652898
+
+        * dds/DCPS/RTPS/MessageUtils.cpp:
+        * dds/DCPS/RTPS/MessageUtils.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/RTPS/ParameterListConverter.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * tests/transport/best_effort_reader/subscriber.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_directed_write/subscriber.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/unit-tests/dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Empty durable writers don't respond to pre-emptive acknacks
+
+          Problem
+          -------
+
+          A reliable, durable writer from RTI Connext does not respond to a
+          pre-emptive (preassociation) acknack from OpenDDS.
+
+          Solution
+          --------
+
+          Tailor the acknack behavior based on the remote implementation:
+
+          * RTI writers will receive a bitmap base of 0 instead of 1.
+          * Non-OpenDDS writers will receive monotonically increasing
+          counts.
+          * OpenDDS writers will receive a reflected heartbeat count.
+
+          If an acknack is received that has a bitmap base of 0, adjust it
+          to 1.
+
+Wed Jul 24 20:04:23 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit f205e9fffa15c209c9bedcda5607b103e7bd12b2
+
+        * docs/devguide/building/dependencies.rst:
+        * docs/devguide/quickstart/pi.rst:
+
+          devguide: updated links to OpenSSL
+
+Wed Jul 24 19:07:42 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8c707f57b8a51408ea957ec86c3e2dc8ca2b7769
+
+        * dds/DCPS/RTPS/DiscoveredEntities.h:
+
+          Initialize opendds_user_tag_ in DiscoveredParticipant's default
+          constructor
+
+Wed Jul 24 18:33:53 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 26dd5cec9142287b4c607a3409170c9956eb3d3f
+
+          Merge pull request #4727 from iguessthislldo/igtd/gdb
+
+          GDB Extension to Help Debug OpenDDS
+
+Wed Jul 24 17:02:31 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit c81f864abeb61a3b6155443f00ccab0a458e7606
+
+        * tools/scripts/gdbext.py:
+
+          Address Pretty Printer and Other Improvements
+
+Wed Jul 24 16:43:25 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 0bc9a99e883553d9ac84ce2c64b7b2080ea40e5c
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Change Errors to Warnings
+
+Tue Jul 23 18:33:55 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 97f9b7a63671f9549b36b2aa400e80278bc9f2b7
+
+          Merge pull request #4736 from mitza-oci/docker-update
+
+          Update Dockerfiles
+
+Tue Jul 23 18:33:26 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 21227c4aa8e317283394d1c5ee2f44ce54ca7da4
+
+          Merge pull request #4737 from mitza-oci/omg-dds_dds-rtps
+
+          Use CMake to build the shape_main test from omg-dds/dds-rtps
+
+Mon Jul 22 22:00:06 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 69d367e5fc7079f0938282b9e0520eeb0d2de5c6
+
+        * Dockerfile-optimized:
+
+          removed unused file
+
+Tue Jul 23 15:45:30 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4c8ad098a4ff033cba996260bf88d10779c9d94d
+
+        * .github/workflows/dds-rtps.yml:
+
+          Simplified CMake build steps
+
+Mon Jul 22 22:21:44 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 0971c1fd58dc18dc8444fdf9d701c7d584f2e9fd
+
+        * .github/workflows/dds-rtps.yml:
+
+          Use CMake to build the shape_main test from omg-dds/dds-rtps
+
+Mon Jul 22 20:48:19 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit dd3be707ad4157b80436e4f0485d43e5a1af40df
+
+        * Dockerfile:
+
+          Updated Dockerfile to use Ubuntu 22.04
+
+Mon Jul 22 18:31:50 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit e80a522c7ae1b60d0bec6a3691f046c86eb89d04
+
+          Merge pull request #4734 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-6.4.1
+
+          Bump docker/build-push-action from 6.3.0 to 6.4.1
+
+Mon Jul 22 07:14:00 UTC 2024  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit ca3e2e512d12719549d5504ede9eab49c6fd013b
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 6.3.0 to 6.4.1
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 6.3.0 to 6.4.1.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/1a162644f9a7e87d8f4b053101d1d9a712edc18c...1ca370b3a9802c92e886402e0dd88098a2533b12)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Fri Jul 19 18:55:00 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit b578a4c978df354b9be8b763891d55171b8697c0
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Handle Missing Entries in release_reservations
+
+          Also clean up in RtpsUdpDataLink::release_reservations_i
+
+Fri Jul 19 18:42:36 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 67293563e278e10492a9070ed7bf058b14276397
+
+          Merge pull request #4729 from jrw972/check-source-ip-false
+
+          RtpsRelay tests don't have CheckSourceIp=false
+
+Thu Jul 18 18:37:13 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit a8499875a0488268a958e2639d5eb0670ed62b74
+
+        * dds/DCPS/RTPS/DiscoveredEntities.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * docs/news.d/rtps-udp-memory-leaks.rst:
+        * tools/rtpsrelay/GuidAddrSet.cpp:
+
+          Fix Locator Memory Leak in RTPS/UDP Transport
+
+          Locators were not being cleaned up correctly because there were
+          two
+          functions for cleaning up after remotes in `RtpsUdpDataLink`.
+          These
+          changes merge those two functions.
+
+          Also:
+          - Don't create locator entries for unknown remotes in
+          `RtpsUdpDataLink::update_locators`
+          - Change `RemoteInfo::ref_count_` from `size_t` to a
+          `DDS::UInt32` to
+          save a bit of space in 64-bit builds. If the RtpsRelay SEDP
+          transport
+          is serving 10,000 participants with 12 `RemoteInfo` for each
+          remote
+          builtin entity, then this saves almost half a megabyte of memory.
+          - Methods for getting GUIDs from `DiscoveredParticipant` to
+          simplify
+          code
+          - Remove an unused function in Sedp
+
+Mon Jul 15 13:49:04 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 35860294fe422c78da63b0307242f3cad048f2ee
+
+        * tests/DCPS/RtpsRelay/Smoke/relay1.ini:
+        * tests/DCPS/RtpsRelay/Smoke/relay2.ini:
+
+          RtpsRelay tests don't have CheckSourceIp=false
+
+          Problem
+          -------
+
+          The RtpsRelay tests are a starting poing to users that want to
+          use the
+          RtpsRelay.  In any realistic deployment, the user must have
+          `CheckSourceIp=false` in the configuration file. Since the tests
+          don't have this line, the user will have to learn "the hard way."
+
+          Solution
+          --------
+
+          Add `CheckSourceIp=false` to the configuration files.
+
+Sat Jul 13 04:41:37 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 0b595bb9934474e1492a5796e8d3ccac0c1e20a5
+
+        * tools/scripts/gdbext.py:
+
+          Note Workaround for Bug in GDB libstdc++ Code
+
+Fri Jul 12 17:56:37 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit e264c499ac5a1b7775da12b0c662b8e6fc1b2e11
+
+        * tools/scripts/gdbext.py:
+
+          GDB Extension to Help Debug OpenDDS
+
+          Features:
+
+          - Properly display GUID/BuiltinTopicKeys, GUID Prefixes, and GUID
+          Entity
+          IDs with known built-in names
+          - Shortcuts to important global singletons
+          - Shortcuts to all participants, discoveries, SPDP and SEDP
+          instances, user
+          readers, and user writers
+          - Helpers to make it easier to work with data structures in
+          Python:
+          `value_is`, `std_*_values`, `deref`, and `deref_holder`.
+
+          To use:
+
+          - Run `gdb -x path/to/gdbext.py ...` for a new session
+          - `source path/to/gdbext.py` for an existing session
+
+          Tested with Ubuntu 22.04 (GDB 12.1, gcc 11.4, and libstdc++
+          3.4.30)
+          This script might break with changes to either OpenDDS, GDB, or
+          gcc/libstdc++
+
+          Example output:
+
+          ```
+          (gdb) source gdbext.py
+          OpenDDS GDB Extension
+          ==============================================================================
+          - $service_part is the service participant
+          - $part_factory is the participant factory
+          - $transport_reg is the transport registry
+          Discoveries
+          ----------------------------------------------------------------------------------------
+          - $disc_DEFAULT_RTPS is a OpenDDS::RTPS::RtpsDiscovery
+          - $disc_DEFAULT_STATIC is a OpenDDS::DCPS::StaticDiscovery
+          - $disc_application_rtps_discovery is a
+          OpenDDS::RTPS::RtpsDiscovery
+          - $spdp_9b5587a4_9b0b0df5_f76f1ce4_000001c1 is a
+          OpenDDS::RTPS::Spdp
+          - $sedp_9b5587a4_9b0b0df5_f76f1ce4_000001c1 is a
+          OpenDDS::RTPS::Sedp
+          - $disc_relay_rtps_discovery is a OpenDDS::RTPS::RtpsDiscovery
+          - $spdp_01030022_48a8c1a1_075e65c0_000001c1 is a
+          OpenDDS::RTPS::Spdp
+          - $sedp_01030022_48a8c1a1_075e65c0_000001c1 is a
+          OpenDDS::RTPS::Sedp
+          domain
+          -------------------------------------------------------------------------------------------
+          - $part_9b5587a4_9b0b0df5_f76f1ce4_000001c1 is a participant
+          - $sub_9b5587a4_9b0b0df5_f76f1ce4_000001c1_0 is a subscriber
+          domain 1
+          -------------------------------------------------------------------------------------------
+          - $part_01030022_48a8c1a1_075e65c0_000001c1 is a participant
+          - $pub_01030022_48a8c1a1_075e65c0_000001c1_0 is a publisher
+          - $dw_01030022_48a8c1a1_075e65c0_01000002 is a
+          OpenDDS::DCPS::DataWriterImpl_T<RtpsRelay::HandlerStatistics> for
+          "Handler Statistics"
+          - $dw_01030022_48a8c1a1_075e65c0_02000002 is a
+          OpenDDS::DCPS::DataWriterImpl_T<RtpsRelay::ParticipantStatistics>
+          for "Participant Statistics"
+          - $dw_01030022_48a8c1a1_075e65c0_06000002 is a
+          OpenDDS::DCPS::DataWriterImpl_T<RtpsRelay::RelayAddress> for
+          "Relay Addresses"
+          - $dw_01030022_48a8c1a1_075e65c0_04000002 is a
+          OpenDDS::DCPS::DataWriterImpl_T<RtpsRelay::RelayParticipantStatus>
+          for "Relay Participant
+          Status"
+          - $dw_01030022_48a8c1a1_075e65c0_03000002 is a
+          OpenDDS::DCPS::DataWriterImpl_T<RtpsRelay::RelayPartitions> for
+          "Relay Partitions"
+          - $dw_01030022_48a8c1a1_075e65c0_00000002 is a
+          OpenDDS::DCPS::DataWriterImpl_T<RtpsRelay::RelayStatistics> for
+          "Relay Statistics"
+          - $dw_01030022_48a8c1a1_075e65c0_07000002 is a
+          OpenDDS::DCPS::DataWriterImpl_T<RtpsRelay::RelayStatus> for
+          "Relay Status"
+          - $dw_01030022_48a8c1a1_075e65c0_05000003 is a
+          OpenDDS::DCPS::DataWriterImpl_T<RtpsRelay::SpdpReplay> for "SPDP
+          Replay"
+          - $sub_01030022_48a8c1a1_075e65c0_000001c1_0 is a subscriber
+          - $sub_01030022_48a8c1a1_075e65c0_000001c1_1 is a subscriber
+          - $dr_01030022_48a8c1a1_075e65c0_01000007 is a
+          OpenDDS::DCPS::DataReaderImpl_T<RtpsRelay::RelayAddress> for
+          topic "Relay Addresses"
+          - $dr_01030022_48a8c1a1_075e65c0_00000007 is a
+          OpenDDS::DCPS::DataReaderImpl_T<RtpsRelay::RelayPartitions> for
+          topic "Relay Partitions"
+          - $dr_01030022_48a8c1a1_075e65c0_02000004 is a
+          OpenDDS::DCPS::DataReaderImpl_T<RtpsRelay::SpdpReplay> for topic
+          "SPDP Replay"
+          (gdb) p
+          $sedp_01030022_48a8c1a1_075e65c0_000001c1.type_lookup_reply_secure_writer_.ptr_->guid_
+          $1 = 01030022.48a8c1a1.075e65c0.ff0301c3 (secure type lookup
+          reply builtin unkeyed writer)
+          ```
+
+Thu Jul 11 18:41:52 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit a785621689de43abb51e93232afda58d6c912e40
+
+          Merge pull request #4725 from
+          iguessthislldo/igtd/sec-tl-entity-names
+
+          Remove Broken Links, Fix TypeLookup Secure Entity Names
+
+Thu Jul 11 00:06:02 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 9244c3e636f0f889915577226f5185c93f896165
+
+        * dds/DCPS/RTPS/MessageTypes.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DdsSecurityCore.idl:
+        * dds/DdsSecurityParams.idl:
+        * docs/devguide/xtypes.rst:
+        * tests/security/ConcurrentAuthLimit/ConcurrentAuthLimit.cpp:
+        * tests/transport/spdp/spdp_transport.cpp:
+
+          Fixed Broken Links, TypeLookup Sec Entity Names
+
+          There were links that should have gone to
+          https://issues.omg.org/issues/DDSSEC12-86 that that were wrong.
+          On
+          inspection, the issue was fixed in v1.2 of the DDS security spec,
+          which
+          just came out. It looks like what we have matches what's in 1.2,
+          so I
+          removed the links.
+
+          I also switched the "reader"/"writer" and "secure" in names
+          because
+          it's what's in 1.2 and matches the other builtin entities.
+
+Mon Jul 08 18:32:37 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 7d3a82fbba24e3914d6d30a8bfe27b939343db46
+
+          Merge pull request #4723 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-6.3.0
+
+          Bump docker/build-push-action from 6.2.0 to 6.3.0
+
+Mon Jul 08 07:14:39 UTC 2024  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 567680ae74fb8f8384f9f1faa8d1042071ea03b7
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 6.2.0 to 6.3.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 6.2.0 to 6.3.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/15560696de535e4014efeff63c48f16952e52dd1...1a162644f9a7e87d8f4b053101d1d9a712edc18c)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Wed Jul 03 18:33:35 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 3092ae73f72ce34aaef5c3e3b6781f582d79dec8
+
+          Merge pull request #4718 from iguessthislldo/igtd/relay-multi-ip
+
+          Allow RtpsRelay Clients With Multiple IP Addresses
+
+Wed Jul 03 18:32:07 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 58625a161a6f8dd0f3eff05a7ad6721b9a95e48b
+
+          Merge pull request #4719 from iguessthislldo/igtd/sphinx-strict
+
+          Fix News and Move Linkcheck to a Seperate Job
+
+Tue Jul 02 22:18:57 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 4c29b61175d0ebfca294b32eab5304c916334cdc
+
+        * .github/workflows/sphinx_strict.yml:
+        * docs/build.py:
+        * docs/news.d/resend_period_fractions_seconds.rst:
+
+          Fix News and Move Linkcheck to a Seperate Job
+
+          Fixes #4713
+
+Tue Jul 02 22:00:53 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 80dc3bda5ab3224c0f9f023da0074d690997be05
+
+        * docs/news.d/relay-multi-ip.rst:
+        * tools/rtpsrelay/GuidAddrSet.cpp:
+        * tools/rtpsrelay/GuidAddrSet.h:
+
+          Allow RtpsRelay Clients With Multiple IP Addresses
+
+Mon Jul 01 20:52:51 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 4b8ff3cb28c8b8beb6a88a856668e5ba6e22be1b
+
+          Merge pull request #4717 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-6.2.0
+
+          Bump docker/build-push-action from 6.1.0 to 6.2.0
+
+Mon Jul 01 20:52:17 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 28acbc22826fd489f1213f203a8c46b5c69dd632
+
+          Merge pull request #4714 from jrw972/compiler-warnings
+
+          Fix compiler warnings
+
+Mon Jul 01 07:47:59 UTC 2024  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 80872d973c7d5c126636e9775bf657e7c06fc84b
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 6.1.0 to 6.2.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 6.1.0 to 6.2.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/31159d49c0d4756269a0940a750801a1ea5d7003...15560696de535e4014efeff63c48f16952e52dd1)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Fri Jun 28 20:43:04 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 116a843e8e3d228a79bbec225ab1e8c177a36abd
+
+          Merge pull request #4715 from mitza-oci/location-utag
+
+          Fixed warning introduced in #4711
+
+Fri Jun 28 20:42:36 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 19bd8c3fa23f5c17826d9b3020fbb39830d23ae2
+
+          Merge pull request #4707 from jrw972/to_encoding_i
+
+          `EncapsulationHeader::to_encoding_i` error messages lack detail
+
+Fri Jun 28 18:38:02 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 2dc877f69aafeb971ad82fadd7e347d050316bc1
+
+          Merge pull request #4712 from jmmorato/master
+
+          [fix] RtpsDiscoveryConfig RESEND_PERIOD
+
+Fri Jun 28 16:28:42 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit dcb0c2fa39d4ddf38c19db696fae29f10e5e6677
+
+        * tests/security/ConcurrentAuthLimit/ConcurrentAuthLimit.cpp:
+
+          fixed warning
+
+Fri Jun 28 13:58:11 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit c6a24f645a7d8c391058ba7effd1e3c447cf638d
+
+        * FACE/Fixed.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/JsonValueReader.h:
+        * dds/DCPS/RakeResults_T.cpp:
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DCPS/transport/framework/TransportClient.h:
+
+          Fix compiler warnings
+
+Fri Jun 28 10:31:56 UTC 2024  Jose Morato  <jmmorato@enxarxats.com>
+        commit 7fb03db1bcb81fea96a07a9a91ab0a39617779b4
+
+        * docs/news.d/resend_period_fractions_seconds.rst:
+
+          Added newline for lint checks
+
+Fri Jun 28 07:32:58 UTC 2024  Jose Morato  <jmmorato@enxarxats.com>
+        commit 797c61e0078b2e8106bd5aef2cf6adbbfc51f04d
+
+        * docs/devguide/run_time_configuration.rst:
+        * docs/news.d/resend_period_fractions_seconds.rst:
+
+          Added documentations
+
+Thu Jun 27 21:39:19 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 862e1eeef11f80d1adff6127f53e16921b7f910b
+
+          Merge pull request #4711 from mitza-oci/location-utag
+
+          Add the peer's SPDP user tag to ParticipantLocation BIT
+
+Thu Jun 27 16:33:28 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 983656de5986dbe5f81a44fe4e1364c8449ff330
+
+        * dds/DCPS/FilterEvaluator.cpp:
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/GuidUtils.h:
+        * dds/DCPS/TypeSupportImpl.h:
+        * dds/DCPS/XTypes/DynamicTypeSupport.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/metaclass_generator.cpp:
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+
+          Fix warnings
+
+Fri Jun 21 22:08:14 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 6163fd170c516f8e37c86b7e918b1e689b031a95
+
+        * dds/CMakeLists.txt:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/EncapsulationHeader.cpp:
+        * dds/DCPS/EncapsulationHeader.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/Serializer.cpp:
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/Serializer.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+        * tests/transport/best_effort_reader/SimpleDataReader.cpp:
+        * tests/transport/best_effort_reader/SocketWriter.h:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_directed_write/publisher.cpp:
+        * tests/transport/rtps_directed_write/subscriber.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/unit-tests/dds/DCPS/EncapsulationHeader.cpp:
+        * tests/unit-tests/dds/DCPS/Serializer.cpp:
+        * tools/rtpsrelay/RelayHandler.cpp:
+
+          `EncapsulationHeader::to_encoding_i` error messages lack detail
+
+          Problem
+          -------
+
+          The error messages from `EncapsulationHeader::to_encoding_i` lack
+          enough detail to actually debug the error. Typically, the issue
+          is a
+          mismatch in encoding, however, it is unclear which topic, writer,
+          reader, etc. is involved.
+
+          Solution
+          --------
+
+          Refactor `EncapsulationHeader` and add writer and reader guids to
+          logging after calls to `to_encoding`.
+
+Thu Jun 27 18:08:09 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit ee5bace84f1d8293c5d6350460f1030c96a4ebea
+
+        * docs/devguide/built_in_topics.rst:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/news.d/utag-location.rst:
+
+          Added docs
+
+Thu Jun 27 17:47:27 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 66abf05304bc13e2691a2348d6db6f84732a9e90
+
+        * java/tests/participant_location/ParticipantLocationListener.java:
+
+          updated Java test
+
+Thu Jun 27 15:42:33 UTC 2024  Jose Morato  <jmmorato@enxarxats.com>
+        commit a9f90c6bb57372210b7ccc1d7672ffe85b729f7a
+
+        * dds/DCPS/RTPS/RtpsDiscoveryConfig.cpp:
+
+          Use Format_FractionalSeconds instead of
+          Format_IntegerMilliseconds
+
+Wed Jun 26 21:24:38 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit b19c00350356885fdd5bf7e420a75b858e20223d
+
+        * dds/DCPS/RTPS/DiscoveredEntities.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/RTPS/RtpsCore.idl:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/OpenddsDcpsExt.idl:
+        * tests/transport/spdp/spdp_transport.cpp:
+
+          Add the peer's SPDP user tag to ParticipantLocation BIT
+
+Thu Jun 27 13:51:29 UTC 2024  Jose Morato  <jmmorato@enxarxats.com>
+        commit 476821173b736c5d3c99f87f92e78979389229e8
+
+        * dds/DCPS/RTPS/RtpsDiscoveryConfig.cpp:
+
+          [fix] RtpsDiscoveryConfig RESEND_PERIOD
+
+Wed Jun 26 20:10:04 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit e0cd8c8bdeceef9c67bf70e38395f88fd84c1938
+
+          Merge pull request #4710 from mitza-oci/spdp-infodst
+
+          Parse InfoDestinationSubmessages in incoming SPDP messages
+
+Wed Jun 26 16:46:06 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit cc9e6f91cb5b6f6ba9e1f6d28dabb704534950c3
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          fix missing assignment
+
+Wed Jun 26 14:26:17 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8d7d3ef5de3b32a16e0284bacc4c6b824a4ead64
+
+        * docs/news.d/spdp-infodst.rst:
+
+          Added NEWS
+
+Tue Jun 25 22:33:46 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 31db56a5e13d7aa687149032a59ca10ba92918da
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * tests/transport/spdp/spdp_transport.cpp:
+
+          Parse InfoDestinationSubmessages in incoming SPDP messages
+
+          If InfoDestinationSubmessage indicates this isn't directed at
+          the current participant, the following DataSubmessage(s) are
+          dropped.
+
+Mon Jun 24 18:31:47 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 91ec626dd356f78bd7017e8d4c2c1dedf4270d71
+
+          Merge pull request #4708 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-6.1.0
+
+          Bump docker/build-push-action from 5.4.0 to 6.1.0
+
+Mon Jun 24 07:24:48 UTC 2024  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 75810f0c9a704c602e739437d677e50fbdd52337
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 5.4.0 to 6.1.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 5.4.0 to 6.1.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/ca052bb54ab0790a636c9b5f226502c73d547a25...31159d49c0d4756269a0940a750801a1ea5d7003)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-major
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Thu Jun 20 18:35:35 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit db05e56b93457f2d8e8f2b18426e78f982e7475c
+
+          Merge pull request #4700 from mitza-oci/warnings
+
+          Fixed warnings related to int-to-string conversions
+
+Thu Jun 20 18:35:03 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit ca8460428c854ef79b7828ff22f4db7ffc29a8f2
+
+          Merge pull request #4705 from mitza-oci/docs-relay
+
+          Updated documentation
+
+Wed Jun 19 22:35:14 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit af42b2593e8f01b4ef51fe0513f117465d986ad3
+
+        * docs/index.rst:
+
+          consistent style
+
+Wed Jun 19 22:05:43 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1ea2973fa670292d7b44a873af0592afe0f82219
+
+        * docs/devguide/internet_enabled_rtps.rst:
+
+          Update docs/devguide/internet_enabled_rtps.rst
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Wed Jun 19 21:54:03 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 564f75e0afb3834e5d2eedf08a63967bcd5a5544
+
+        * docs/conf.py:
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/index.rst:
+
+          Updated documentation
+
+          Mostly related to RtpsRelay
+          Also updated copyright year
+          Top-level index page: use same format for link to devguide index
+          as other links
+
+Wed Jun 19 20:12:42 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 0b81444c14625e1e005b8cd132d12ae07fd656a1
+
+        * dds/DCPS/SafetyProfileStreams.cpp:
+
+          added #include
+
+Wed Jun 19 20:00:26 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8cece0756fc4a37d6ebf514796e1a3f1ffaec96e
+
+          Merge branch 'master' into warnings
+
+Wed Jun 19 19:54:34 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit a549ac4e9d98de85a4a3796ea6b0aef2aacf07a0
+
+        * dds/DCPS/GuidConverter.cpp:
+        * dds/DCPS/GuidConverter.h:
+        * dds/DCPS/SafetyProfileStreams.cpp:
+        * dds/DCPS/SafetyProfileStreams.h:
+        * dds/DCPS/security/CommonUtilities.cpp:
+        * tests/unit-tests/dds/DCPS/GuidConverter.cpp:
+        * tests/unit-tests/dds/DCPS/SafetyProfileStreams.cpp:
+
+          Updated to_dds_string int-to-string conversions for consistent
+          formatting
+
+          Hex formats use leading zeroes. Hex for the C++ long type is not
+          supported
+          since it has different sizes on different platforms.
+
+Wed Jun 19 18:32:25 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit f9470e619666f770287c4cd13cdb4ae8b65603d8
+
+          Merge pull request #4704 from jwillemsen/jwi-vcpkg20240615
+
+          [githubCI] Upgrade to vcpkg 2024.06.15
+
+Wed Jun 19 07:29:18 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit bea75e6860d92d3e11bfe576e915175b00c3fccc
+
+          Merge branch 'master' into jwi-vcpkg20240615
+
+Wed Jun 19 06:55:48 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 9d6f8c57bbd3d0ac94743f0b5c3a533ccb9f9dec
+
+        * .github/workflows/cmake.yml:
+        * .github/workflows/ishapes.yml:
+
+          Upgrade vcpkg
+
+          * .github/workflows/cmake.yml:
+          * .github/workflows/ishapes.yml:
+
+Tue Jun 18 18:37:08 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 6744eecef1800917c12e12bfe7ece8c85c5facd2
+
+          Merge pull request #4695 from mitza-oci/java-build
+
+          Updated Java build (non-Android)
+
+Tue Jun 18 18:35:49 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit f58eef921ad6c559270e88a76399f7d601e3680b
+
+          Merge pull request #4697 from jrw972/missing-news
+
+          Add missing news
+
+Tue Jun 18 18:35:21 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit b1659c73a7a2373ba6102d1c978dd8a1516c9166
+
+          Merge pull request #4699 from iguessthislldo/igtd/devguide-fixes
+
+          Fix and Improve Various Parts of DevGuide
+
+Tue Jun 18 18:34:22 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 88c937247d7a1e4913ac285309d83905a6393a22
+
+          Merge pull request #4703 from jrw972/ace8tao4
+
+          Updates for ace8tao4
+
+Tue Jun 18 14:20:51 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 094bb69b36ff41965f6ba8ea98456a182338106a
+
+        * docs/devguide/building/dependencies.rst:
+
+          Don't number supported versions
+
+Tue Jun 18 14:16:59 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit ae28bd23dabcb623bd188e3d98b4e9c402094964
+
+        * docs/devguide/building/index.rst:
+
+          Update docs/devguide/building/index.rst
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Tue Jun 18 14:16:02 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit cbe3438235f3b89945a20bda63c2e9ddb5fedac3
+
+        * docs/devguide/building/dependencies.rst:
+
+          Update docs/devguide/building/dependencies.rst
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Tue Jun 18 06:39:57 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 905bf8bdc20a22a4041f8fe2498e0c325b18f3ec
+
+        * .github/workflows/build_and_test.yml:
+
+          [githubCI\ Upgrade to vcpkg 2024.06.15
+
+          * .github/workflows/build_and_test.yml:
+
+Mon Jun 17 21:48:34 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit c9e55cea396a9b7d3c938a2d3562e77b20a37188
+
+        * docs/news.d/OpenDDSConfig.rst:
+
+          Clarify "this file"
+
+Mon Jun 17 21:39:22 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 96cc9d8bb822dfe8b09a4ba7050c3395d624c2e5
+
+        * acetao.ini:
+        * configure:
+        * docs/devguide/building/dependencies.rst:
+        * docs/devguide/building/index.rst:
+
+          Updates for ace8tao4
+
+Mon Jun 17 19:18:42 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4a6b64507223c42a89df134f4682f96174ea1574
+
+        * java/dds/dcps_java.mpc:
+
+          remove workaround no longer needed
+
+Mon Jun 17 18:43:27 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 225d6a35eb5f2226dcf06562b182632192e74755
+
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/devguide/run_time_configuration.rst:
+
+          Respond to Review
+
+Mon Jun 17 18:39:22 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit bdde2c6a593a1b73891d60f9a49d3c4510d50646
+
+          Merge pull request #4685 from jrw972/warnings
+
+          Fix various compile warnings
+
+Mon Jun 17 18:38:24 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 00148e18f77de188755e4e8387829b4484d225a3
+
+          Merge pull request #4696 from jrw972/msg-reset-checks
+
+          MAX_SPDP_SEQUENCE_MSG_RESET_CHECK lacks an "s"
+
+Mon Jun 17 18:33:44 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 3271526436b20629bca2e9e5b0edc2a9a21db74a
+
+          Merge pull request #4701 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-5.4.0
+
+          Bump docker/build-push-action from 5.3.0 to 5.4.0
+
+Mon Jun 17 18:32:12 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit d6259174231bcbec62a208d292328bedd69bbd9f
+
+          Merge pull request #4702 from jrw972/windows-ishapes
+
+          Arguments to the Windows ishapes build are over-quoted
+
+Mon Jun 17 17:50:39 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3208e2e9d08a10dd59d495485ff618e5fed79ca2
+
+        * java/dds/dcps_java.mpc:
+
+          updated make install for dcps_java
+
+Mon Jun 17 15:42:53 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 35dc6b2c2d21984d1c8392de5ccfb1f011e949e2
+
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/devguide/run_time_configuration.rst:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Justin Wilson <wilsonj@objectcomputing.com>
+
+Mon Jun 17 15:42:16 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 681f1c732ddb2ede1ecff216856abf86dbc81241
+
+        * .github/workflows/ishapes.yml:
+
+          Arguments to the Windows ishapes build are over-quoted
+
+          Problem
+          -------
+
+          The `--mpc` argument to the Windows ishapes contains the "value."
+
+          Solution
+          --------
+
+          Split the argument into a `--mpc` argument and a `key=value`
+          pair.
+
+Mon Jun 17 07:16:43 UTC 2024  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 8e7ffab09fac4f5f7f73157996b775b07478da02
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 5.3.0 to 5.4.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 5.3.0 to 5.4.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/2cdde995de11925a030ce8070c3d77a52ffcf1c0...ca052bb54ab0790a636c9b5f226502c73d547a25)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Fri Jun 14 21:31:02 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 53fe621ae3bc2868c867625c3067b8f10c9202cd
+
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/GuidUtils.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/SafetyProfileStreams.cpp:
+        * dds/DCPS/SafetyProfileStreams.h:
+        * dds/DCPS/Serializer.cpp:
+
+          Fixed warnings related to int-to-string conversions
+
+Fri Jun 14 21:18:40 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3a3581996cd8c28bcd2e01c6753e79bf77dc7ebe
+
+        * tools/rtpsrelay/GuidAddrSet.cpp:
+
+          Updated logged function name to match function
+
+Fri Jun 14 19:54:27 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit ed987dc2b47581fe5547161c2bfb488684f89e9d
+
+          Merge pull request #4694 from iguessthislldo/igtd/wchar-escapes
+
+          Update char_literals Tests to Check for `wchar` Escape Sequence
+          Support in tao_idl
+
+Fri Jun 14 18:21:00 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit d80b91ea64ed0458fb173db21277a8a2f9ec7134
+
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/devguide/introduction.rst:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/devguide/safety_profile.rst:
+        * docs/internal/docs.rst:
+        * docs/internal/release.rst:
+        * docs/news.d/devguide-misc-fixes.rst:
+        * docs/sphinx_extensions/config_domain.py:
+        * docs/sphinx_extensions/custom_domain.py:
+
+          Fix and Improve Various Part of DevGuide
+
+          - Add `default-cfg-sec` directive
+          - Add missing `-LogHttp`, `-AdmissionControlQueueSize`, and
+          `-AdmissionControlQueueDuration` to RtpsRelay option
+          documentation.
+          - Document and Link Descriptions of SPDP and SEDP
+
+Fri Jun 14 18:40:37 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit eaa82988c12a09ce09cf927ffbaa18aa95b9af72
+
+          Merge pull request #4364 from tmayoff/optional
+
+          Implement @optional annotation
+
+Fri Jun 14 18:32:27 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit b288f27288a0424ec76cee84a5edf86297afc169
+
+        * docs/news.d/OpenDDSConfigWrapper.rst:
+
+          Update docs/news.d/OpenDDSConfigWrapper.rst
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Fri Jun 07 14:49:55 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 360cb6865c77d515f21ef8256f2646cd2024d1f4
+
+        * dds/DCPS/Serializer.h:
+
+          Fix member shadowing warning
+
+Fri Jun 07 14:29:31 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit ea19b0a2ddbe83396549f3196ec7c986298ab43e
+
+        * dds/idl/marshal_generator.cpp:
+
+          Fix warnings in marshall generator
+
+Fri Jun 14 17:47:46 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 798f981be503b029d6ff687284b05b8b9ba98cb9
+
+        * docs/news.d/OpenDDSConfigWrapper.rst:
+
+          Fix typo
+
+Fri Jun 14 17:27:26 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit d2a44cf893cf510eaf0b3331a913cfa8f71072b7
+
+        * docs/news.d/OpenDDSConfigWrapper.rst:
+
+          Update docs/news.d/OpenDDSConfigWrapper.rst
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Fri Jun 14 16:31:06 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit bd066bba9637225579f5c491c21eaef1328383e2
+
+        * docs/news.d/OpenDDSConfig.rst:
+        * docs/news.d/OpenDDSConfigWrapper.rst:
+
+          Add missing news
+
+Fri Jun 14 16:21:36 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit a74c9b420f04a2be1a723ea8d4384c1af5496f33
+
+          Merge pull request #4693 from mitza-oci/participant-location
+
+          Publish the ParticipantLocation BIT before participant discovery
+          completes
+
+Fri Jun 14 16:03:13 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 534c608367a442ec76b28a3920246a5b61d82035
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscoveryConfig.cpp:
+        * dds/DCPS/RTPS/RtpsDiscoveryConfig.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * docs/news.d/msg_reset_checks.rst:
+
+          MAX_SPDP_SEQUENCE_MSG_RESET_CHECK lacks an "s"
+
+          Problem
+          -------
+
+          The config store reads `MAX_SPDP_SEQUENCE_MSG_RESET_CHECK`
+          instead of
+          `MAX_SPDP_SEQUENCE_MSG_RESET_CHECKS`.
+
+          Solution
+          --------
+
+          Add an "s".
+
+          Notes
+          -----
+
+          Introduced in #4361.
+
+          This may explain Thrasher test failures which use this feature.
+
+Fri Jun 14 15:29:17 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit d73183e1370a69ade1899a9d6aeb55217415700d
+
+        * tests/DCPS/Compiler/char_literals/test.idl:
+
+          Respond to Review, Comment Out Wchar Union
+
+Fri Jun 07 02:49:52 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit cb053753baf8c1d71cad7e0cab3bd19405cd30b6
+
+        * dds/idl/be_produce.cpp:
+
+          Fix conversion warning
+
+Fri Jun 07 02:42:19 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 384cab37631d810830bc820163172428c2f69a43
+
+        * dds/idl/be_global.cpp:
+
+          Fix sign conversion warning
+
+Fri Jun 07 02:19:51 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 84cbf6f91b3f0de3c883de48b4c5dea3e68b1f00
+
+        * dds/DCPS/XTypes/TypeObject.cpp:
+
+          Fix unreachable code
+
+Fri Jun 07 02:15:50 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 2a410286c12544c94aec2e8a43e5cd3a31e719c9
+
+        * dds/DCPS/security/CommonUtilities.cpp:
+
+          Fix sprintf warning
+
+Fri Jun 07 02:12:22 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 058467b03a97629c0c159105a74a5904cf2de4d3
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsCustomizedElement.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsCustomizedElement.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/DCPS/unique_ptr.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/UpdateListener_T.cpp:
+
+          Fix std::move warning
+
+Thu Jun 13 22:07:49 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 3287a6a6b84f9005cd56c4cee21c4610c1650ec0
+
+          Merge branch 'master' into optional
+
+Thu Jun 13 21:53:59 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit eb6ada1df71d1f491d55842280c36c5c72d09b75
+
+        * java/dds/OpenDDS/DCPS/FakeAndroidNetworkCallback.java:
+        * java/dds/dcps_java.mpc:
+
+          Updated Java build (non-Android)
+
+          Generated makefile needs to see a .class file so it doesn't need
+          to build every time make is run
+
+Thu Jun 13 21:47:25 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 0d19a827371f3f831e03938c5c5bbf746e2430fc
+
+        * tests/DCPS/Compiler/char_literals/test.idl:
+
+          Update char_literals to Check for wchar Esc. Seqs
+
+          https://github.com/DOCGroup/ACE_TAO/pull/2244 sets
+          `TAO_IDL_HAS_OCTET_AND_WCHAR_UNION_DISCS` to 1, but the
+          char_literals
+          wchar union contains all the escape sequences literals, which are
+          not
+          supported in TAO_IDL:
+          https://github.com/DOCGroup/ACE_TAO/issues/1284.
+          This changes it to check the planned macro name.
+
+          Also removed the hex and octet escape sequences for wchar, which
+          are
+          probably not indented to work with wchar.
+
+Thu Jun 13 20:24:43 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 814a4a1143fc574f15c9dff506b84e5dca80c71c
+
+        * docs/news.d/participant-location.rst:
+
+          NEWS for this PR
+
+Thu Jun 13 20:17:12 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit c12a3d9a382de638a77eeed3f5beca1c152e0f9f
+
+        * docs/devguide/built_in_topics.rst:
+
+          documented change to ParticipantLocation BIT
+
+Thu Jun 13 20:16:06 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit e0656cff37aa2aaf27f7b4e14fb062e94b3a6cc1
+
+        * java/tests/participant_location/ParticipantLocationListener.java:
+        * java/tests/participant_location/ParticipantLocationSubscriber.java:
+        * java/tests/participant_location/ParticipantLocationTest.java:
+
+          Updated Java participant_location test
+
+Thu Jun 13 18:37:42 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 211ad7a6a2e74f1642c57636aedfef0e677e1f3c
+
+          Merge pull request #4691 from mitza-oci/boottime-thrasher
+
+          Skip additional Thrasher tests with configuration BOOTTIME_TIMERS
+
+Thu Jun 13 18:13:32 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit a9fbee773afc5f107132fac6c21edb257db8b4c1
+
+          Merge branch 'optional' of github.com:tmayoff/OpenDDS into
+          optional
+
+Thu Jun 13 18:13:16 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit abd918ce9e667137476957e732d47527f7b1b42e
+
+        * docs/devguide/xtypes.rst:
+
+          Fixed docs with newline after code-block
+
+Thu Jun 13 18:11:34 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit fdbcc1f24f4c5d5ada9eeb958ec54f6efb270f88
+
+          Merge branch 'master' into optional
+
+Thu Jun 13 18:11:07 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit ef61bd7f3e4a38bf8fcfb23273541305dd3157c3
+
+        * dds/idl/dds_visitor.cpp:
+
+          Fixed warning to only print when the language mapping isn't C++11
+
+Thu Jun 13 18:09:19 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 5dde8f541b43bd8dca1e1566ee1be091bda6a698
+
+        * docs/devguide/xtypes.rst:
+
+          Added more to the docs
+
+Thu Jun 13 17:38:21 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 932b38f1e7d57a7df3107d15466c054c4335262c
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * tests/DCPS/ParticipantLocationTopic/ParticipantLocationListenerImpl.cpp  tests/DCPS/ParticipantLocationTopic/BitListener.cpp:
+        * tests/DCPS/ParticipantLocationTopic/BitListener.h:
+        * tests/DCPS/ParticipantLocationTopic/ParticipantLocation.mpc:
+        * tests/DCPS/ParticipantLocationTopic/ParticipantLocationListenerImpl.h:
+        * tests/DCPS/ParticipantLocationTopic/ParticipantLocationTest.cpp:
+
+          Publish the ParticipantLocation BIT before participant discovery
+          completes
+
+          Applications can use ParticipantLocation to get notified that
+          discovery
+          is in progress. The spec-defined Participant BIT won't be
+          published
+          until participant discovery is complete.
+
+Wed Jun 12 22:11:53 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2f90fa840a6f0ba8449a28911680f2d1b3c2f258
+
+        * tests/dcps_tests.lst:
+
+          Skip additional Thrasher tests with configuration BOOTTIME_TIMERS
+
+Wed Jun 12 18:32:43 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit c1418e10e49a2dd8c52b0607a080d28d88dda1b3
+
+          Merge pull request #4373 from iguessthislldo/igtd/create-sample
+
+          Implement `create_sample` and `create_dynamic_sample`
+
+Tue Jun 11 15:49:56 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 24103270e73c67b313291fee4e0f9c897291b3cd
+
+        * docs/devguide/xtypes.rst:
+
+          s/vector/sequence/, Add note about map
+
+Mon Jun 10 22:48:09 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit f6c041273d0b8e6ca5468f4914b42303c5a866c0
+
+        * docs/devguide/xtypes.rst:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Mon Jun 10 22:20:53 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 2bcb36c2eda14d5f7ee1f40ca314be0f5f775950
+
+        * dds/idl/IDLTemplate.txt:
+
+          Fix Mismatched Argument Types
+
+Mon Jun 10 22:20:30 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit ebe5de300f22202c5008995f7e6e2c3e6411fec4
+
+        * docs/devguide/xtypes.rst:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Adam Mitz <mitza@objectcomputing.com>
+
+Mon Jun 10 20:38:02 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 1dc8757c815bbb8eb577b8deade3dd9e74dc38de
+
+        * dds/DCPS/TypeSupportImpl_T.h:
+        * dds/idl/IDLTemplate.txt:
+        * dds/idl/ts_generator.cpp:
+        * docs/devguide/xtypes.rst:
+        * tests/DCPS/Compiler/xcdr/xcdr.cpp:
+
+          Switch create*_sample args, Fix XTypes Unsupported
+
+Mon Jun 10 18:37:34 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 99a02369beaa92d4f39bf910a4a39815e2c55c7d
+
+          Merge pull request #4687 from OpenDDS/jwillemsen-patch-1
+
+          Update OpenDDSConfigWrapper.h, remove
+          `OPENDDS_IGNORE_OPENDDSCONFIG_H_FILE` check
+
+Mon Jun 10 18:33:01 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 7725d0fb21289a5cce056c6f01e27f6abe2214e8
+
+          Merge pull request #4686 from
+          OpenDDS/revert-4671-jwi-hasincludeopenddsconfig_h
+
+          Revert "Add feature to disable include of OpenDDSConfig.h when
+          compiling an IDL file"
+
+Mon Jun 10 18:29:39 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit f2581f4f0d4d7a0b7eab7498e805220361063435
+
+          Merge remote-tracking branch 'upstream/master' into
+          igtd/create-sample
+
+Mon Jun 10 18:28:50 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 4ca0ed277ae90145f56bf7f2c44b951613eadba3
+
+        * docs/devguide/opendds_idl.rst:
+        * docs/devguide/xtypes.rst:
+        * docs/news.d/_releases/v3.28.0.rst:
+        * docs/news.d/create-sample.rst:
+        * tests/DCPS/Compiler/xcdr/xcdr.cpp:
+
+          Add Documentation and Test in Xcdr Test
+
+Mon Jun 10 07:37:52 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit d0fc328aa73b2c704696b8f2df60f51ba81a10b5
+
+        * dds/OpenDDSConfigWrapper.h:
+
+          Update OpenDDSConfigWrapper.h
+
+          Removed OPENDDS_IGNORE_OPENDDSCONFIG_H_FILE, this new
+          configuration file must be there, as some DDS features (like
+          security) can only be enabled it this file, not from ace/config.h
+          anymore
+
+Mon Jun 10 07:35:11 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 3d323d5560a5cd4a53ed05aad38c590c642214cc
+
+        * MPC/config/dcps_optional_features.mpb:
+
+          Revert "Add feature to disable include of OpenDDSConfig.h when
+          compiling an IDL file"
+
+Fri Jun 07 18:39:15 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 607413e4bb6a3925af9df6c45a29d59015eac998
+
+          Merge pull request #4677 from
+          mitza-oci/threadstatusmanager-timing
+
+          Updates to the InternalThreadStatus built-in topic and boottime
+          timer support
+
+Fri Jun 07 18:38:47 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 1840a59f1afaea278bc1c1f449c1561e62b668fb
+
+          Merge pull request #4680 from iguessthislldo/igtd/tsplugin
+
+          `TypeSupportPlugin` Test Should Use `ConsolidatedMessengerIdl`
+
+Fri Jun 07 18:38:30 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 57edcce7b7bc5c05097c5e387eb13a8245ff8473
+
+          Merge pull request #4681 from iguessthislldo/igtd/vs-vers
+
+          Make CMake and Configure Fallback To Last Known VS
+
+Fri Jun 07 18:22:00 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit f804ba286eb4c16d52f6d07ab1ed16b4264572be
+
+        * dds/idl/ts_generator.cpp:
+
+          Fix Namespace Issue
+
+Fri Jun 07 13:49:36 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit a7c8efd9d19ae759bc7a2c93e5d1202d5f8e15e4
+
+        * dds/DCPS/Time_Helper.h:
+
+          reverted change from review - didn't compile
+
+Fri Jun 07 13:03:22 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 9d812c8233adda58172b368d012afaa299f99a6f
+
+        * dds/DCPS/ThreadStatusManager.h:
+        * dds/DCPS/Time_Helper.h:
+        * docs/news.d/thread-status-boottime.rst:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Fri Jun 07 00:18:42 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 10c6b35a7243bb6ba156f75ad0854fd009870c1a
+
+        * cmake/get_ace_tao.cmake:
+        * configure:
+
+          Make CMake and Configure Fallback To Last Known VS
+
+Thu Jun 06 23:01:39 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit d46f463f974567f5d961877281c93a5a05fec70a
+
+        * tests/DCPS/TypeSupportPlugin/.gitignore:
+        * tests/DCPS/TypeSupportPlugin/TypeSupportPlugin.cpp:
+        * tests/DCPS/TypeSupportPlugin/TypeSupportPlugin.idl:
+        * tests/DCPS/TypeSupportPlugin/TypeSupportPlugin.mpc:
+        * tests/DCPS/TypeSupportPlugin/run_test.pl:
+
+          TypeSupportPlugin Should Use ConsolidatedMessenger
+
+Thu Jun 06 21:56:42 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 6646fdca5f2ef1be7c39d5e08aa083ad577a81fa
+
+        * dds/CMakeLists.txt:
+        * dds/DCPS/Sample.h:
+        * dds/DCPS/TypeSupportImpl.h:
+        * dds/DCPS/TypeSupportImpl_T.h:
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * dds/DCPS/XTypes/DynamicDataAdapterFwd.h:
+        * dds/idl/ts_generator.cpp:
+        * tests/DCPS/Compiler/xcdr/xcdr.cpp:
+
+          Fix Circular Includes
+
+Thu Jun 06 21:27:47 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit df9e1b8a7b69a2a577ad7342d722c46acce02ae5
+
+        * configure:
+
+          configure: updated for Visual Studio 2022 17.10 version of cl
+
+Thu Jun 06 21:10:46 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit b2d528331b51441350aacf6f8b07c14beced6e4a
+
+        * dds/DCPS/TimePoint_T.inl:
+        * dds/DCPS/Time_Helper.h:
+
+          Updated for platforms that don't have OPENDDS_USES_MONOTONIC_TIME
+
+Thu Jun 06 20:27:21 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2c1c94b6fb89eabfdde67adc0730464f70684a27
+
+        * docs/news.d/thread-status-boottime.rst:
+
+          added NEWS
+
+Thu Jun 06 19:47:26 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 37209381b2a3152833cb332ae255daac650cf99d
+
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl_T.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/InternalDataReader.h:
+        * dds/DCPS/Logging.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/TimePoint_T.cpp:
+        * dds/DCPS/TimePoint_T.h:
+        * dds/DCPS/TimePoint_T.inl:
+        * dds/DCPS/TimeTypes.h:
+        * dds/DCPS/Time_Helper.h:
+        * dds/DCPS/Time_Helper.inl:
+        * dds/DCPS/XTypes/DynamicDataWriterImpl.h:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/FACE/FaceTSS.cpp:
+        * tools/rtpsrelay/RelayParticipantStatusReporter.cpp:
+
+          Added a template parameter to TimePoint_T so each instantiation
+          can use a distinct IDL struct
+
+Thu Jun 06 18:40:18 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit e4a9ae8cbe2270f21af64a3fc3b3e0a7138d5ed1
+
+          Merge branch 'optional' of github.com:tmayoff/OpenDDS into
+          optional
+
+Thu Jun 06 18:40:16 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 018d8660dc6489e749a1ee86a50149d25fd255a2
+
+        * docs/devguide/xtypes.rst:
+
+          More docs
+
+Thu Jun 06 18:35:24 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 0928f862eb3824c061e66f2f8311d1f74211300a
+
+          Merge pull request #4671 from
+          jwillemsen/jwi-hasincludeopenddsconfig_h
+
+          Add feature to disable include of OpenDDSConfig.h when compiling
+          an IDL file
+
+Thu Jun 06 18:34:36 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit aca14cf4e88e8df6ef9646f6307623c4d8394e71
+
+          Merge pull request #4676 from iguessthislldo/igtd/readme-links
+
+          Fix Links in `README.md` and Use OCI Instead of Unity in
+          `.mailmap`
+
+Thu Jun 06 18:24:59 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 45b6588b521bce8e8fb43eebd0f676eaff10e6ff
+
+        * .github/workflows/build_and_test.yml:
+
+          Remove `-Config CXX17`
+
+Thu Jun 06 18:25:18 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 84e5654e6743b78b1126ed685ee1f0e82539f4ab
+
+        * docs/news.d/optional_annotation.rst:
+
+          Update docs/news.d/optional_annotation.rst
+
+          Co-authored-by: Adam Mitz <mitza@objectcomputing.com>
+
+Wed Jun 05 20:38:59 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 68b9b6f3eedcd187042bad0340358c5133b90469
+
+        * dds/DCPS/ReactorTask.cpp:
+
+          added error message
+
+Wed Jun 05 20:36:52 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3079427cb66649fd6e8e80783af1b855f1f09bc7
+
+        * .github/workflows/bootime.yaml:
+        * .github/workflows/build_and_test.yml:
+        * tests/dcps_tests.lst:
+
+          Thrasher aggressive creates too many timers for select reactor
+
+Wed Jun 05 20:35:29 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 1fdc04c05eb3a19a20b38b98cc39058063cf410e
+
+        * dds/idl/marshal_generator.cpp:
+
+          Resolve comment about strings
+
+Wed Jun 05 20:33:38 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 227dc9e5bb22ab66dbda9ee37ebdc70beebe8028
+
+          Merge branch 'ci-tests' into threadstatusmanager-timing
+
+Wed Jun 05 20:02:45 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 8fcb40dabce1432ddb49b1957cc81417f9389dc1
+
+        * .mailmap:
+
+          Use OCI instead of Unity in .mailmap
+
+Wed Jun 05 19:55:32 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 9d4dd9e7d99d61a0d89c087d073a2701c8b0413c
+
+        * README.md:
+
+          README: Fix Link and Use Direct Quick Start Links
+
+Wed Jun 05 18:57:36 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit b11312d9135c97450c2c946a0112c015088b0aff
+
+          Merge pull request #4675 from OpenDDS/jrw972-patch-3
+
+          Clarify windows build instructions
+
+Wed Jun 05 18:55:06 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 151be8b43048d1e2ee02834a92cac30c2418c7cb
+
+        * docs/devguide/building/index.rst:
+
+          Clarify windows build instructions
+
+Wed Jun 05 17:26:57 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 57d0a73fd01c3546731510c39ddd88b15ee09628
+
+        * dds/idl/dds_generator.h:
+        * dds/idl/field_info.cpp:
+        * dds/idl/field_info.h:
+        * dds/idl/langmap_generator.cpp:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/value_reader_generator.cpp:
+        * tests/DCPS/Compiler/xcdr/optional.idl:
+
+          Extend for anonymous sequences and arrays
+
+Wed Jun 05 15:00:27 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2b06e3e8b33168d651818868027112576e469357
+
+        * dds/DCPS/Timers.cpp:
+        * tests/unit-tests/dds/DCPS/Timers.cpp:
+
+          Boottime timers: allow negative delay values
+
+Wed Jun 05 14:25:35 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit bb6c53bcb8ed64dedf584cec1a8c6842dbf22e41
+
+        * dds/DCPS/Hash.cpp:
+
+          fixed compiler warning
+
+Tue Jun 04 22:34:44 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2cb7414f81d3ddfaa7825d4219716d45a7bd609a
+
+        * dds/DCPS/TimePoint_T.h:
+        * dds/DCPS/TimePoint_T.inl:
+        * dds/DCPS/Time_Helper.h:
+        * dds/DCPS/Time_Helper.inl:
+
+          Allow constructing a TimePoint_T (which should be using a
+          monotonic clock) from MonotonicTime_T
+
+Tue Jun 04 20:48:21 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 9881fd52cc98430286e1335724384588892ac9ac
+
+        * tests/DCPS/InternalThreadStatus/rtps.ini:
+
+          updated test config file for faster SPDP
+
+Tue Jun 04 20:42:04 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit de5ffa42110f2bc6b4b89fdbdb8e03f0f91a8cc3
+
+        * .github/workflows/build_and_test.yml:
+
+          Update GitHub Actions CI
+
+          Run complete test suite for build_u22_gcc11_i0_xer0.
+          Renamed it to build_u22_i0_xer0 since the default compiler on
+          Ubuntu 22.04 is GCC 11
+
+Mon Jun 03 19:24:41 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5d7cbb4514cc30bf65dfd9c280990b6fc9ea62c6
+
+        * .github/workflows/bootime.yaml:
+
+          Add more CI testing
+
+Tue Jun 04 20:31:34 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 8d5deeeb90849743a5bc756455b9cec730ee90f6
+
+        * docs/devguide/xtypes.rst:
+
+          more docs, not done will address
+          https://github.com/OpenDDS/OpenDDS/pull/4364#discussion_r1626116058.
+
+Tue Jun 04 20:18:12 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 8f215bda759c461840f9f84fc4631647c0e66997
+
+          Merge branch 'optional' of github.com:tmayoff/OpenDDS into
+          optional
+
+Tue Jun 04 20:17:56 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 550e85a7be51619e4ddcff4fc47b9efa099b3a65
+
+        * dds/idl/marshal_generator.cpp:
+
+          Resolved some review comments
+
+Tue Jun 04 18:39:10 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 8ec472125e76253667229333eb96497f3daaed60
+
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * docs/devguide/xtypes.rst:
+        * docs/news.d/optional_annotation.rst:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Adam Mitz <mitza@objectcomputing.com>
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Tue Jun 04 18:36:03 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit ebe6e8f03a99a27a87b47f95ed669a98a414ab16
+
+          Merge pull request #4646 from vermaete/vermaete/cmake_host_tools
+
+          cmake: ignore the not-used targets when building with just the
+          host tools
+
+Tue Jun 04 18:34:13 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 8c79fca94873c364bcb2f7c2b95c2b9f43442bfb
+
+          Merge pull request #4669 from iguessthislldo/igtd/omg-spec-links
+
+          Fix OMG-Related Link Checking Issues
+
+Tue Jun 04 17:38:46 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 3be10052c8ca3574fe2ee3adc0367fa2e495dbac
+
+        * dds/DCPS/TypeSupportImpl.h:
+        * dds/idl/ts_generator.cpp:
+
+          Add missing include, No null from create_sample
+
+Mon Jun 03 17:42:06 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 7fa6c885f99f5d05b3ab6ee8e2d4510f48114496
+
+        * .github/workflows/build_and_test.yml:
+
+          Remove `-Config CXX17`
+
+Tue Jun 04 07:44:43 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit ca47c82eb4333050a803916c33f5e32e918ecbbe
+
+        * MPC/config/dcps_optional_features.mpb:
+
+          Add feature to disable inlcude of dds/OpenDDSConfig.h when
+          compiling an IDL file
+
+          * MPC/config/dcps_optional_features.mpb:
+
+Tue Jun 04 00:52:18 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 82908f3ae98afde2d5b225ea2435ef5e533e4a60
+
+        * .github/workflows/cmake.yml:
+
+          Ninja needs CMake 3.24 to build ACE/TAO
+
+Tue Jun 04 00:39:24 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit cd8856e728c94e14dcc56fa367edefe57d0eb851
+
+        * docs/build.py:
+        * docs/conf.py:
+        * docs/sphinx_extensions/links.py:
+
+          Fix OMG-Related Link Checking Issues
+
+          - Ignore `dds-foundation.org` and `corba.org`, which have been
+          returning
+          403 for a while
+          - Ignore login redirect on spec issues
+          - Completely omit generating links to all the spec sections when
+          running
+          `linkcheck`
+
+Mon Jun 03 23:54:21 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 83529ddc190aff74d4970c8691e19056f01acabb
+
+        * .github/workflows/cmake.yml:
+        * cmake/build_ace_tao.cmake:
+
+          Check HOST_TOOLS_ONLY and Test with CMake 3.23
+
+Mon Jun 03 18:36:49 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 554942ec33d5632896531250f5632dac66d24c7b
+
+          Merge pull request #4659 from jrw972/opendds-config-security
+
+          Inconsistent setting of `OPENDDS_SECURITY` corrupts builds
+
+Mon Jun 03 18:36:26 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 180c9f202925d5ef60fbbfd283793d5bbf13f641
+
+          Merge pull request #4666 from
+          OpenDDS/dependabot/github_actions/docker/login-action-3.2.0
+
+          Bump docker/login-action from 3.1.0 to 3.2.0
+
+Mon Jun 03 18:26:59 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 763b3e85e7bfcd964065a5303bf045fdeebe45bf
+
+        * dds/DCPS/TypeSupportImpl.h:
+        * dds/idl/IDLTemplate.txt:
+        * dds/idl/ts_generator.cpp:
+        * docs/devguide/building/index.rst:
+        * docs/internal/dev_guidelines.rst:
+        * tests/DCPS/Compiler/xcdr/xcdr.cpp:
+
+          Expose Retcode Versions of create_*sample
+
+Mon Jun 03 16:13:21 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 0317ecc21b92b25dcecd38e6bd9448b530922bfa
+
+        * docs/devguide/xtypes.rst:
+        * docs/news.d/optional_annotation.rst:
+
+          Add news fragment for optional, and updated the docs removing
+          optional as unimplemented and some docs what the annotation does
+          (It seems quite self-explanatory so wasn't really sure what to
+          write)
+
+Mon Jun 03 07:41:48 UTC 2024  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit ec9b87429c2a0312388b0593f63b949bd2f6fdab
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/login-action from 3.1.0 to 3.2.0
+
+          Bumps
+          [docker/login-action](https://github.com/docker/login-action)
+          from 3.1.0 to 3.2.0.
+          - [Release
+          notes](https://github.com/docker/login-action/releases)
+          -
+          [Commits](https://github.com/docker/login-action/compare/e92390c5fb421da1463c202d546fed0ec5c39f20...0d4c9c5ea7693da7b068278f7b52bda2a190a446)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/login-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Fri May 31 13:50:45 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1ef00f6d7b962b5a44ed7623df5f6670b28433da
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/ReactorTask.cpp:
+        * dds/DCPS/ReactorTask.h:
+        * dds/DCPS/ThreadStatusManager.h:
+        * dds/OpenddsDcpsExt.idl:
+        * docs/devguide/built_in_topics.rst:
+        * java/dds/.gitignore:
+        * java/dds/OpenDDS/DCPS/.gitignore:
+        * java/dds/dcps_java.mpc:
+        * java/tests/internal_thread_status/InternalThreadListener.java:
+        * tests/DCPS/InternalThreadStatus/InternalThreadStatusListenerImpl.cpp:
+
+          Updates to InternalThreadStatus for systems that suspend/resume
+
+          * Added a monotonic timestamp to the struct used for the
+          InternalThreadStatus topic
+
+          * Updated the ReactorTask's event loop to use timers instead of a
+          timeout in the select() call
+
+Wed May 22 15:49:48 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit cd58f706ffbdff3b5f4631ba430f7b9ea91a475a
+
+        * CMakeLists.txt:
+        * cmake/opendds_target_sources.cmake:
+        * configure:
+        * dds/CMakeLists.txt:
+        * dds/DCPS/DCPS_Utils.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl_T.h:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+        * dds/DCPS/RTPS/DiscoveredEntities.h:
+        * dds/DCPS/RTPS/ICE/AgentImpl.cpp:
+        * dds/DCPS/RTPS/ICE/AgentImpl.h:
+        * dds/DCPS/RTPS/ICE/Checklist.cpp:
+        * dds/DCPS/RTPS/ICE/Checklist.h:
+        * dds/DCPS/RTPS/ICE/EndpointManager.cpp:
+        * dds/DCPS/RTPS/ICE/EndpointManager.h:
+        * dds/DCPS/RTPS/ICE/Ice.cpp:
+        * dds/DCPS/RTPS/ICE/Ice.h:
+        * dds/DCPS/RTPS/ICE/Stun.cpp:
+        * dds/DCPS/RTPS/ICE/Stun.h:
+        * dds/DCPS/RTPS/ICE/Task.cpp:
+        * dds/DCPS/RTPS/LocalEntities.h:
+        * dds/DCPS/RTPS/MessageTypes.h:
+        * dds/DCPS/RTPS/MessageUtils.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/RTPS/ParameterListConverter.h:
+        * dds/DCPS/RTPS/RtpsCore.idl:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscoveryConfig.cpp:
+        * dds/DCPS/RTPS/RtpsDiscoveryConfig.h:
+        * dds/DCPS/RTPS/RtpsSecurity.idl:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/StaticDiscovery.cpp:
+        * dds/DCPS/StaticDiscovery.h:
+        * dds/DCPS/debug.cpp:
+        * dds/DCPS/debug.h:
+        * dds/DCPS/security/BuiltInSecurityPluginInst.cpp:
+        * dds/DCPS/security/BuiltInSecurityPluginInst.h:
+        * dds/DCPS/security/framework/HandleRegistry.cpp:
+        * dds/DCPS/security/framework/HandleRegistry.h:
+        * dds/DCPS/security/framework/SecurityConfig.cpp:
+        * dds/DCPS/security/framework/SecurityConfig.h:
+        * dds/DCPS/security/framework/SecurityPluginInst.h:
+        * dds/DCPS/security/framework/SecurityRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DdsDcps.mpc:
+        * dds/DdsSecurityCore.idl:
+        * dds/DdsSecurityParams.idl:
+        * dds/OpenDDSConfig.h.in:
+        * dds/OpenDDSConfigWrapper.h:
+        * dds/OpenDDSConfigWrapper.idl:
+        * dds/OpenDDSConfigWrapperC.h:
+        * examples/DCPS/ishapes/ShapesWidget.cpp:
+        * examples/DCPS/ishapes/main.cpp:
+        * performance-tests/bench/unit-tests/UnitTests.cpp:
+        * performance-tests/bench/worker/main.cpp:
+        * tests/DCPS/FindTopic/LocalDiscovery.cpp:
+        * tests/DCPS/FindTopic/LocalDiscovery.h:
+        * tests/DCPS/LargeSample/common.cpp:
+        * tests/DCPS/LargeSample/common.h:
+        * tests/DCPS/LargeSample/publisher.cpp:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+        * tests/DCPS/ParticipantLocationTopic/ParticipantLocationTest.cpp:
+        * tests/DCPS/Restart/RestartTest.cpp:
+        * tests/DCPS/RtpsRelay/STUN/StunClient.cpp:
+        * tests/DCPS/RtpsRelay/Smoke/monitor.cpp:
+        * tests/DCPS/RtpsRelay/Smoke/publisher.cpp:
+        * tests/DCPS/RtpsRelay/Smoke/subscriber.cpp:
+        * tests/DCPS/XTypes/Common.h:
+        * tests/cmake/idl_compiler_tests/CMakeLists.txt:
+        * tests/stress-tests/StressTests.cpp:
+        * tests/transport/spdp/spdp_transport.cpp:
+        * tests/unit-tests/UnitTests.cpp:
+        * tests/unit-tests/dds/DCPS/RTPS/DiscoveredEntities.cpp:
+        * tests/unit-tests/dds/DCPS/RTPS/LocalEntities.cpp:
+        * tests/unit-tests/dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/unit-tests/dds/DCPS/security/AccessControl/Permissions.cpp:
+        * tests/unit-tests/dds/DCPS/security/AccessControl/XmlUtils.cpp:
+        * tests/unit-tests/dds/DCPS/security/AccessControlBuiltInImpl.cpp:
+        * tests/unit-tests/dds/DCPS/security/Authentication/LocalAuthCredentialData.cpp:
+        * tests/unit-tests/dds/DCPS/security/AuthenticationBuiltInImpl.cpp:
+        * tests/unit-tests/dds/DCPS/security/CryptoBuiltInImpl.cpp:
+        * tests/unit-tests/dds/DCPS/security/SSL/Certificate.cpp:
+        * tests/unit-tests/dds/DCPS/security/SSL/DiffieHellman.cpp:
+        * tests/unit-tests/dds/DCPS/security/SSL/PrivateKey.cpp:
+        * tests/unit-tests/dds/DCPS/security/SSL/SignedDocument.cpp:
+        * tests/unit-tests/dds/DCPS/security/SSL/SubjectName.cpp:
+        * tests/unit-tests/dds/DCPS/security/SSL/Utils.cpp:
+        * tests/unit-tests/dds/DCPS/security/framework/SecurityConfig.cpp:
+
+          Inconsistent setting of `OPENDDS_SECURITY` corrupts builds
+
+          Problem
+          -------
+
+          `OPENDDS_SECURITY` is a macro that appears in public headers.
+          If a user enables security during the build of OpenDDS but then
+          does
+          not set it during the build of their application, then the build
+          is
+          inconsistent and the application fails in unexpected ways.
+          Regardless
+          of the build system (MPC, CMake, or something else), the idea
+          that
+          security is enabled must be preserved to generate consistent
+          builds.
+
+          Solution
+          --------
+
+          See https://github.com/OpenDDS/OpenDDS/issues/4616 for
+          background.
+
+          Add `OPENDDS_CONFIG_SECURITY` to `dds/OpenDDSConfig.h`.
+
+          Add `dds/OpenDDSConfigWrapper.h` and
+          `dds/OpenDDSConfigWrapper.idl`
+          which accommodate both `OPENDDS_SECURITY` and
+          `OPENDDS_CONFIG_SECURITY`.
+
+Fri May 31 17:29:57 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit e905ac9a5662a625908ede078b202bd3ea6de059
+
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+
+          Fix bad access
+
+Thu May 30 15:47:29 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 64274a3797442347f2ca5810469be714095ba515
+
+        * dds/DCPS/XTypes/DynamicDataAdapter.cpp:
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+
+          Fixes for DynamicData implementations
+
+Wed May 29 18:44:04 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit b96e697057648c9ab7c947471aebe32cfb13f473
+
+        * cmake/build_ace_tao.cmake:
+        * docs/news.d/cmake_just_build_host_tools.rst:
+
+          Cleaner CMake C++ Standard Target Check, Add News
+
+Wed May 29 18:33:13 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit ba3dd97f1c6b1226190b54bf76ecc854725312e1
+
+          Merge pull request #4655 from iguessthislldo/igtd/rtps-ports
+
+          More Predictable Port Usage in RTPS
+
+Tue May 28 21:17:55 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 1d8c53c6d79ac23907fa01f7762d6c5c5d03dd2a
+
+        * dds/idl/dds_generator.cpp:
+        * dds/idl/value_reader_generator.cpp:
+        * tests/DCPS/Compiler/xcdr/xcdr.cpp:
+
+          Fix integration issues
+
+Tue May 28 18:26:07 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit cc0ea977f88ae56f437a0cbf56aa37c146e977b4
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/news.d/rtps-ports.rst:
+
+          Review, Fix spdp_transport Test, Doc Tweaks
+
+Tue May 28 07:31:17 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 5e07cfbf3c5fb323fbb2b6a5792591685238b82b
+
+        * dds/DCPS/RTPS/MessageUtils.cpp:
+        * dds/DCPS/RTPS/MessageUtils.h:
+        * dds/DCPS/RTPS/RtpsDiscoveryConfig.cpp:
+        * dds/DCPS/RTPS/RtpsDiscoveryConfig.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/news.d/rtps-ports.rst:
+        * tests/unit-tests/dds/DCPS/RTPS/RtpsDiscoveryConfig.cpp:
+        * tests/unit-tests/dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Fix IPv6, SEDP Ports, Simplify Code, and News
+
+Mon May 27 14:26:11 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 2077b6da649e2ba9f77260a30d8a3387236ea85c
+
+        * dds/DCPS/optional.h:
+        * dds/idl/dds_generator.cpp:
+
+          Remove nullopt and just default construct the optional
+
+Mon May 27 13:14:02 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 81cfbf9621f833a5b8d8133ff1fe1031d2a6415b
+
+        * dds/DCPS/optional.h:
+
+          const ref nullopt constructor
+
+Mon May 27 13:13:24 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit f3f28f85a4c49937948fe8d2855bb22c51f88183
+
+        * dds/DCPS/optional.h:
+
+          Maybe fixed the nullopt
+
+Sat May 25 01:51:38 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit abcdc6866900de3a6f1304d326440662cf1eefee
+
+        * dds/DCPS/optional.h:
+
+          removed constexpr
+
+Sat May 25 01:31:46 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 6a0d3f93d4d4d9ff2ad511f1379941ad482d94d7
+
+        * dds/DCPS/optional.h:
+        * dds/idl/dds_generator.cpp:
+
+          Add nullopt implementation, this may not work for C++ less than
+          C++11
+
+Sat May 25 01:10:37 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit b547e3635ea50340a6658648758b987db3b81319
+
+        * dds/DCPS/NetworkResource.cpp:
+        * dds/DCPS/NetworkResource.h:
+        * dds/DCPS/RTPS/MessageUtils.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * tests/security/ConcurrentAuthLimit/ConcurrentAuthLimit.cpp:
+        * tests/unit-tests/dds/DCPS/RTPS/RtpsDiscoveryConfig.cpp:
+        * tests/unit-tests/dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          PortMode for RTPS/UDP, Fixes for RTPS Disc Ports
+
+Sat May 25 01:05:01 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 043c46bcd4a7dce8e2961e25617a50fe3bdb9e52
+
+        * dds/idl/dds_generator.cpp:
+
+          Replace std::nullopt with {} for the default value
+
+Sat May 25 00:11:05 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 897ee021c15bd2f2ab8738d122548c3a39c83bf8
+
+        * dds/idl/langmap_generator.cpp:
+
+          Fixed optional include
+
+Fri May 24 23:50:29 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 0885928e251e10127f2e2395f0c44f450ac597db
+
+        * dds/idl/langmap_generator.cpp:
+
+          Use OPENDDS_OPTIONAL_NS
+
+Fri May 24 23:25:45 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit b1a68dc9be4b45718379e54592cf3c31669cf77e
+
+        * dds/idl/value_reader_generator.cpp:
+
+          Readd boolean edgecase
+
+Fri May 24 22:01:59 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit fb7a2d78d34df73c0367eaf9f1d9842753915f74
+
+        * tests/DCPS/Compiler/CMakeLists.txt:
+
+          Remove the add_subdirectory for the now moved optional tests
+
+Fri May 24 21:56:36 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 5ea4b4a4eda319331bab4e1a7d78ff67aebeecdf
+
+          Merge pull request #7 from jrw972/optional-integration
+
+Tue May 21 18:02:52 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 85561d54d10af95f6ff05b06e34a279983550600
+
+          Merge pull request #4652 from jrw972/macos13-gha
+
+          macos-11 runners are going away
+
+Tue May 21 18:02:00 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 2a59510d2921d9fe06e850354b28d163e769f965
+
+          Merge pull request #4656 from iguessthislldo/igtd/3.28.1-sync
+
+          Update Master with v3.28.1 Release
+
+Tue May 21 15:21:04 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 6ee2f343b5e0eadef6f9ff8582d9652a53df792d
+
+        * NEWS.md:
+        * docs/news.d/_releases/v3.28.1.rst:
+        * docs/news.d/buffer-doc.rst:
+        * docs/news.d/cmake-ace-tao-src.rst:
+        * docs/news.d/compiler-warnings.rst:
+        * docs/news.d/gov-gen.rst:
+        * docs/news.d/heartbeat-fragmentation.rst:
+        * docs/news.d/mpcopts.rst:
+        * docs/news.d/type-object-encoding.rst:
+
+          Update Master with v3.28.1 Release
+
+Tue May 21 14:55:51 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit b4a030ce29949c7ab3efd83e6281bd7ff9fe4627
+
+        * dds/DCPS/ConfigStoreImpl.h:
+        * dds/DCPS/NetworkAddress.cpp:
+        * dds/DCPS/RTPS/MessageUtils.cpp:
+        * dds/DCPS/RTPS/MessageUtils.h:
+        * dds/DCPS/RTPS/RtpsDiscoveryConfig.cpp:
+        * dds/DCPS/RTPS/RtpsDiscoveryConfig.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/StaticDiscovery.cpp:
+        * docs/devguide/run_time_configuration.rst:
+        * tests/Utils/GtestRc.h:
+        * tests/unit-tests/dds/DCPS/ConfigStoreImpl.cpp:
+        * tests/unit-tests/dds/DCPS/RTPS/RtpsDiscoveryConfig.cpp:
+
+          More Predictable Port Usage in RTPS
+
+          - Added `SedpPortMode=probe` to make it make it possible to
+          predict what
+          ports the unicast SEDP sockets use.
+          - Added `SpdpPortMode` which deprecates `SpdpRequestRandomPort`.
+          - Added `SpdpMulticastAddress`, `Ipv4SpdpMulticastAddress`,
+          `SedpMulticastAddress`, and `Ipv4SedpMulticastAddress` to set the
+          multicast addresses and ports separately on SPDP and SEDP.
+          - Calculated ports are now checked if they would overflow.
+          - Remove need for sentinel in `EnumList` arrays for
+          `ConfigStore`.
+
+Mon May 20 21:04:17 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit fdb4f2775dde2153340d708762ca3ed338407be6
+
+        * .github/workflows/build_and_test.yml:
+
+          macos-11 runners are going away
+
+          Problem
+          -------
+
+          The macos-11 GHA runners are going away.
+
+          Solution
+          --------
+
+          Upgrade to macos-13.
+
+Mon May 20 18:03:03 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit cd4303551503114c8ffff5ed9aa79eb86d5afc89
+
+          Merge pull request #4643 from jrw972/environment-listener
+
+          Environment variables are not processed immediately
+
+Mon May 20 18:01:22 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 5f0ec6d1f0dfb44deffccc7cd4ed82de4ff5c099
+
+          Merge pull request #4648 from OpenDDS/workflows/update-ace-tao
+
+          Update ACE/TAO to 6.5.21
+
+Mon May 20 00:53:05 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit fcc93fa03851f4252c56c04f5962f8ab80a5b0e6
+
+        * acetao.ini:
+        * docs/news.d/automated-update-ace6tao2.rst:
+
+          Update ACE/TAO to 6.5.21
+
+          Updated:
+          - ACE 6/TAO 2 from 6.5.20 to
+          [6.5.21](https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_21).
+
+Sat May 18 17:34:30 UTC 2024  Jan Vermaete  <jan.vermaete@gmail.com>
+        commit 1e3257d584b94b2e4eb35ff341f6d2497000db2b
+
+        * cmake/build_ace_tao.cmake:
+
+          cmake: ignore the not used targets when building with juist the
+          host tools.
+
+          Signed-off-by: Jan Vermaete <jan.vermaete@gmail.com>
+
+Fri May 17 21:20:27 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 0d82400a523f9fe0c31ebd1d45343dbacaa31be0
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Environment variables are not processed immediately
+
+          Problem
+          -------
+
+          Environment variables are not processed immediately by the
+          Service
+          Participant. For many configuration keys, this is irrelevant. For
+          others, like those processed in
+          `Service_Participant::ConfigReaderListener::on_data_available`,
+          it
+          applies the configuration immediately.
+
+          A related problem is that if there are no arguments or
+          configuration
+          file, then the configuration from environment variables is not
+          applied. This prevents an "environment variable only"
+          configuration
+          from working properly.
+
+          Solution
+          --------
+
+          Invoke the listener after each environment variable is processed.
+
+Fri May 17 18:37:09 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 7bfb2d87f4a6c5de050ff413e7c8ff16532d8e0f
+
+        * dds/idl/keys_generator.cpp:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/value_reader_generator.cpp:
+        * tests/DCPS/Compiler/optional/.gitignore:
+        * tests/DCPS/Compiler/optional/CMakeLists.txt:
+        * tests/DCPS/Compiler/optional/main.cpp:
+        * tests/DCPS/Compiler/optional/optional.mpc:
+        * tests/DCPS/Compiler/optional/run_test.pl:
+        * tests/DCPS/Compiler/xcdr/.gitignore:
+        * tests/DCPS/Compiler/optional/optional.idl  tests/DCPS/Compiler/xcdr/optional.idl:
+        * tests/DCPS/Compiler/xcdr/xcdr.cpp:
+        * tests/DCPS/Compiler/xcdr/xcdr.mpc:
+        * tests/dcps_tests.lst:
+
+          Integrate test into xcdr test
+
+Fri May 17 18:03:08 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 755adffd173589dd4a841b709c62d8d2e3bbb9b7
+
+          Merge pull request #4640 from jwillemsen/jwi-configuretypo
+
+          Fixed typo
+
+Fri May 17 18:02:31 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit b9bd925f0fad30727ef8595f1af4e1d758a39c98
+
+          Merge pull request #4641 from OpenDDS/jwillemsen-patch-1
+
+          Update dependencies.rst
+
+Fri May 17 06:53:37 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 6bfa061fa3e0bbc3cac221c0315722d743e81dd6
+
+        * docs/devguide/building/dependencies.rst:
+
+          Update dependencies.rst
+
+          Updated link to OCI TAO DevGruide
+
+Fri May 17 06:41:20 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 4afecf71c51abeeed844c31c867bc57520f77338
+
+        * configure:
+
+          Fixed typo
+
+          * configure:
+
+Thu May 16 21:32:02 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 93e9d28037805477e5431fb70a2d035cb095903b
+
+        * tests/DCPS/CMakeLists.txt:
+        * tests/DCPS/optional/.gitignore:
+        * tests/DCPS/optional/CMakeLists.txt:
+        * tests/DCPS/optional/README.rst:
+        * tests/DCPS/optional/optional.idl:
+        * tests/DCPS/optional/optional.mpc:
+        * tests/DCPS/optional/publisher.cpp:
+        * tests/DCPS/optional/rtps.ini:
+        * tests/DCPS/optional/run_test.pl:
+        * tests/DCPS/optional/subscriber.cpp:
+        * tests/dcps_tests.lst:
+
+          Remove test
+
+Thu May 16 19:35:30 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 08ac017e13b93c1dd1052433a24842b3799b9d59
+
+        * tests/DCPS/Compiler/optional/main.cpp:
+        * tests/DCPS/Compiler/optional/optional.idl:
+
+          Fix build errors
+
+Thu May 16 18:28:24 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit af968cfc0344b6d4082ce11645a53a6031733453
+
+          Merge remote-tracking branch 'upstream/master' into optional
+
+Thu May 16 18:11:29 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit bfc7c0324da52de2c5208d320d267954125b0dab
+
+          Merge pull request #4635 from jrw972/fix-warnings-in-hash-cpp
+
+          Fix warnings in Hash.cpp
+
+Thu May 16 18:10:50 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit f16692b1275e6d2f278c671081d1d7233fe24fb7
+
+          Merge pull request #4634 from jrw972/debug-messenger
+
+          Debugging output not available for Messenger test
+
+Thu May 16 18:10:28 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit a684b88d577b58bb54e3b6f7f359f7b059bf59f9
+
+          Merge pull request #4632 from jrw972/optional-shim
+
+          OpenDDS lacks pre-C++17 support for `optional`
+
+Wed May 15 14:38:57 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 2dce55d2489742e3e6cbcb3535f4b98b632dfb3c
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Debugging output not available for Messenger test
+
+          Problem
+          -------
+
+          Debugging is not turned on for the Messenger test.
+
+          Solution
+          --------
+
+          Restore default debugging.
+
+          See 2605ead31cb4334c388f305e0fee89aa838bf857.
+
+Wed May 15 19:30:02 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit f4a6c0f270a8a80f70cde9c8ee3926dd7ab474f8
+
+        * .github/workflows/build_and_test.yml:
+
+          Try C++ language standard
+
+Wed May 15 14:56:40 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit ba3c67e922991df6067cd2c6bf5c1c5411479aa3
+
+        * dds/DCPS/Hash.cpp:
+
+          Fix warnings in Hash.cpp
+
+Fri May 10 17:43:13 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit c235225dd99779b48fbd9cdb0dfa7fa389625d07
+
+        * dds/DCPS/XTypes/TypeObject.cpp:
+        * dds/DCPS/XTypes/TypeObject.h:
+        * dds/DCPS/optional.h:
+        * dds/idl/typeobject_generator.cpp:
+        * dds/idl/typeobject_generator.h:
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/unit-tests/dds/DCPS/XTypes/TypeObject.cpp:
+        * tests/unit-tests/dds/DCPS/optional.cpp:
+
+          OpenDDS lacks pre-C++17 support for `optional`
+
+          Problem
+          -------
+
+          OpenDDS has an implementation of `optional` in XTypes. However,
+          it is
+          not an exact replacement for `std::optional`.  Providing an
+          implementation of `optional` will ease issues with the impending
+          `@optional` implementation.
+
+          Solution
+          --------
+
+          Provide an implementation of `optional` when `std::optional` is
+          not
+          available.
+
+Fri May 10 08:42:53 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 74cf880a62d7dc9b17111330c99ef230e58b12f6
+
+        * MPC/config/optional_jni_check.mpb:
+        * dds/DdsDcpsTopic.idl:
+        * dds/idl/IDLTemplate.txt:
+        * dds/idl/be_init.cpp:
+        * docs/news.d/create-sample.rst:
+        * java/idl2jni/codegen/be_init.cpp:
+        * java/idl2jni/codegen/idl_mapping.cpp:
+        * java/idl2jni/codegen/idl_mapping.h:
+        * java/idl2jni/codegen/im_jni.cpp:
+
+          Try to Avoid Missing Functions Issue on Windows
+
+          Also:
+          - Make @hidden_op_in_java smarter so it doesn't require a
+          argument for
+          C++ code (thought it needs on because of IDL).
+          - Explicitly call Perl on Windows in Java build so it doesn't
+          require the
+          file association to be set.
+          - Add news.
+
+Fri May 10 02:18:52 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit aac7634d512cd3eaf2e23b988bb54fbe71212f13
+
+        * tests/DCPS/CMakeLists.txt:
+        * tests/DCPS/Compiler/CMakeLists.txt:
+
+          linted, for real this time. ran script locally
+
+Fri May 10 02:01:02 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit e64c915ff5b13965279e4aa930a94698e0890f44
+
+        * tests/DCPS/Compiler/CMakeLists.txt:
+
+          linting issue again
+
+Fri May 10 02:00:38 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit d574746126ebe43311283a576f34acf997e5058d
+
+        * tests/DCPS/CMakeLists.txt:
+
+          Fixed lint issue
+
+Fri May 10 01:56:50 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 68f5f809963a41fab012efb78939eb74701a19ca
+
+        * tests/DCPS/CMakeLists.txt:
+        * tests/DCPS/Compiler/CMakeLists.txt:
+        * tests/DCPS/Compiler/optional/main.cpp:
+        * tests/DCPS/optional/CMakeLists.txt:
+
+          Fixed cmake CXX_STD year, and gtest EXPECT_EQ macros
+
+Thu May 09 01:28:02 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 82d06a670033bb595b744d75e244f0e951c8d8b5
+
+          Merge branch 'main' into optional
+
+Wed May 08 18:10:54 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 81660e1d67b2230b029c0cbe2430ab4317129ea2
+
+          Merge pull request #4614 from jrw972/dependency-management-policy
+
+          Internal documentation lacks dependency management policy
+
+Wed May 08 18:07:27 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit c601184cb338d231bc5d09781e57b403c8c3c4cc
+
+          Merge pull request #4618 from
+          iguessthislldo/igtd/cmake-ace-tao-cpp-std
+
+          Test ACE's Minimum Required C++ Standard in CMake
+
+Wed May 08 18:05:12 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 6a506e1569b62db4610f2cfd55cc200a779ba2c5
+
+          Merge pull request #4630 from jrw972/wchar-conversion
+
+          MetaStruct conversion of wchar is compiler dependent
+
+Wed May 01 15:29:06 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 37ff5a857c3a24aa49882f96160d73d5fbb7efa5
+
+        * docs/internal/dev_guidelines.rst:
+
+          Internal documentation lacks dependency management policy
+
+          Problem
+          -------
+
+          The internal (developer) documentation lacks the policy used for
+          managing the dependencies of OpenDDS.
+
+          Solution
+          --------
+
+          Add it.
+
+Tue May 07 16:25:39 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 26d2d2e6f38df67c94c6ef308fc5e15041fd9c95
+
+        * dds/DCPS/FilterEvaluator.cpp:
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/idl/metaclass_generator.cpp:
+
+          MetaStruct conversion of wchar is compiler dependent
+
+          Problem
+          -------
+
+          The `Value` class used for `MetaStruct` has various constructors
+          based
+          on integer size and sign. When constructing a `Value` from a
+          wchar,
+          different compilers make different choices.
+
+          Solution
+          --------
+
+          Provide explicit support for wchar conversion.
+
+Mon May 06 22:16:52 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 9a218e92b530a19b17585cc49d3c9dc8cf4f996b
+
+        * cmake/init.cmake:
+        * cmake/test_cxx_std.cpp:
+        * docs/news.d/cmake-ace-tao-cpp-std.rst:
+
+          Test _MSVC_LANG instead of __cplusplus for CMake
+
+Mon May 06 18:06:57 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit d5aeb63f07477812de92cae68730d747ad894291
+
+          Merge pull request #4609 from jrw972/dynamic-read-modify-write
+
+          Samples from a DynamicDataReader are immutable
+
+Sat May 04 00:50:28 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit a9d17f11aeaa433aa5016368da8f88a37826c678
+
+        * CMakeLists.txt:
+        * dds/DdsDcps.mpc:
+
+          Install test_cxx_std.cpp
+
+Fri May 03 21:36:56 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 6d4d51d6895640b853783f699945cf6eda9f132a
+
+        * cmake/ace_cppstd.cpp:
+        * cmake/cplusplus.cpp:
+        * cmake/init.cmake:
+        * cmake/test_cxx_std.cpp:
+
+          Merge C++ Std Test Source Files CMake
+
+Tue Apr 30 14:06:34 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 5a08a0580215a6405c2207554db6e11b78e74ef6
+
+        * dds/DCPS/XTypes/DynamicDataBase.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h:
+        * dds/DCPS/XTypes/DynamicSample.cpp:
+        * docs/news.d/dynamic-read-write.rst:
+        * tests/DCPS/DynamicResponse/Common.h:
+        * tests/DCPS/DynamicResponse/Origin.cpp:
+        * tests/DCPS/DynamicResponse/README.rst:
+        * tests/DCPS/DynamicResponse/Responder.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/DynamicDataImpl.cpp:
+
+          Samples from a DynamicDataReader are immutable
+
+          Problem
+          -------
+
+          Users cannot read a sample from a DynamicDataReader, modify it,
+          and
+          then write it.
+
+          Solution
+          --------
+
+          Update the DynamicSample implementation to use DynamicDataImpl
+          with a
+          DynamicDataXcdrReadImpl backing store.
+
+Thu May 02 02:26:25 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit c69fdcf0d4c670eabcda52024f305d9ced6951d1
+
+        * .github/workflows/cmake.yml:
+
+          Remove Unused Checkouts in cmake.yml
+
+Thu May 02 02:25:13 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 03feae5132e4c93aefb4a3feb83c0673723f3864
+
+        * cmake/cplusplus.cpp:
+
+          MSVC doesn't define the correct __cplusplus
+
+Thu May 02 00:31:21 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 2f5bfb2b82c52bdb08742158e9295713508c50f6
+
+        * cmake/ace_cppstd.cpp:
+        * cmake/init.cmake:
+        * dds/DdsDcps.mpc:
+        * docs/news.d/cmake-ace-tao-cpp-std.rst:
+
+          Brute Force Check of ACE Required C++ Std in CMake
+
+          Since https://github.com/OpenDDS/OpenDDS/pull/4487, CMake
+          requires
+          knowledge of the minimum C++ standard of ACE. Before it used the
+          ACE
+          version to assume it, but the required standard changed in ACE to
+          C++17.
+          To support this correctly in CMake, we could do a version check,
+          but
+          master has currently the same version as the last ACE7 release.
+
+          This changes it to try to compile against `ace/Global_Macros.h`
+          like how
+          we currently check the compiler default. This will allow us to
+          get any
+          standard ACE requires as long it's a standard we're aware of. We
+          will
+          not need this after
+          https://github.com/OpenDDS/OpenDDS/issues/4578,
+          because CMake can directly tell us what ACE/TAO requires.
+
+          This change still doesn't cover a case like ACE/TAO 7.1.4, where
+          ACE/TAO
+          was compiled with something other the compiler default or the
+          minimum
+          standard of ACE. CMake can't detect that, so that requires
+          manually
+          setting the standard in either CMake and/or the ACE/TAO build so
+          they
+          match.
+
+Tue Apr 30 23:58:57 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 0e2c2725efff36bcb9fe88fd5e113fe0936f1b27
+
+        * dds/idl/value_reader_generator.cpp:
+
+          Optional non KeyOnly structs use the "tmp" variable rather than
+
+Tue Apr 30 22:12:22 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 82017fd3df4887f50e182d5a2a549edd857ef836
+
+        * dds/idl/value_reader_generator.cpp:
+
+          Fixed KeyOnly tests
+
+Tue Apr 30 18:48:03 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit db857d460612e060e34d109857d606d464ba01ad
+
+        * dds/idl/value_reader_generator.cpp:
+        * dds/idl/value_writer_generator.cpp:
+
+          Fix bugs in value_*_generator.cpp
+
+Tue Apr 30 15:54:28 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 4ede16ef7b4ec91f45f35d7d2fbac1a5a95c9d9a
+
+          Merge remote-tracking branch 'upstream/master' into optional
+
+Sun Apr 28 21:16:23 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit cde05d02d155c366a4b1379af67d005b7ad95209
+
+          Merge branch 'master' into optional
+
+Wed Apr 24 20:21:36 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 5e81702eef6ff9e4fbc47961771beb6b3068265b
+
+          Merge remote-tracking branch 'upstream/master' into
+          igtd/create-sample
+
+Wed Apr 24 20:19:25 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 8db6875cfee683baae6718af82f7f4254f387f80
+
+        * dds/DCPS/TypeSupportImpl.h:
+        * dds/DCPS/XTypes/DynamicDataAdapter.cpp:
+        * dds/DCPS/XTypes/DynamicDataAdapter.h:
+        * dds/DdsDcps.mpc:
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+        * dds/idl/ts_generator.cpp:
+        * java/idl2jni/codegen/be_init.cpp:
+
+          Tweak create_sample and Improve DynamicDataAdapter
+
+          Use DynamicDataBase::clone for DynamicDataAdapter::clone and
+          implement
+          DynamicDataAdapter::clear_all_values.
+
+Wed Apr 24 17:58:44 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 6a029a59596752e0c764870e4f4e6a661cabafd2
+
+        * MPC/modules/IDLBase.pm:
+        * dds/DdsDynamicData.idl:
+        * java/idl2jni/codegen/be_init.cpp:
+
+          Fix Misspelled "DYNAMIC"
+
+Thu Apr 18 18:08:27 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 97c8f42f5b76ca4bb41aa18e9970b7575f9c0ee5
+
+        * dds/idl/value_reader_generator.cpp:
+
+          minor cleanup
+
+Thu Apr 18 18:04:45 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 4e86f11f36446cc1b058c8add4b34f7fd74e031b
+
+        * dds/idl/value_writer_generator.cpp:
+
+          Remove commented out merge conflict
+
+Thu Apr 18 18:01:56 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit d659e7ff72574376e0d0304fd7e7097fa7ea0977
+
+        * dds/idl/value_reader_generator.cpp:
+        * dds/idl/value_writer_generator.cpp:
+
+          Fixed merge issues
+
+Thu Apr 18 02:04:44 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 1a22b27a8a769d42cc1138cf5061480793f2fea6
+
+          Merge branch 'refs/heads/main' into optional
+
+Wed Apr 10 23:16:41 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 8004336fe507e85105a6e9369a64b5581b92bd38
+
+        * tests/DCPS/optional/.gitignore:
+
+          Fix .gitignore
+
+Fri Mar 29 23:47:08 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 68e3d06729dea33fd9ee90538179ed688a58d9a4
+
+          Merge branch 'master' into optional
+
+Fri Mar 29 20:51:58 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit be21157c3f1abc8a9f8fd6708e659e9e966fe677
+
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/value_reader_generator.cpp:
+        * tests/DCPS/Compiler/optional/main.cpp:
+        * tests/DCPS/Compiler/optional/optional.idl:
+
+          Cleanup comments, and uneeded changes
+
+Fri Mar 29 20:44:00 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 96118fd572aa5d85113f57228687f4cfa031931b
+
+        * tests/DCPS/Compiler/optional/optional.idl:
+
+          Removed comments in .idl file
+
+Fri Mar 29 20:39:11 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 9b384a8249c3e331c62e47c4b03362c7ba5d8b7a
+
+        * tests/DCPS/Compiler/optional/main.cpp:
+
+          Updated test
+
+Fri Mar 29 20:27:25 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit bf2b132c7458eb3e87f1757e1d948f2f45f95e2d
+
+        * dds/idl/metaclass_generator.cpp:
+        * tests/DCPS/Compiler/optional/optional.idl:
+
+          Fixed struct compilation
+
+Fri Mar 29 17:51:22 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 66f63c59364b20d4f84d577ed204fc354005d96f
+
+        * dds/idl/value_reader_generator.cpp:
+
+          Fixed formatting
+
+Fri Mar 29 17:46:39 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit eb32ce439a37dea14720c0f34cd8ceded3e24ffa
+
+        * dds/idl/value_reader_generator.cpp:
+
+          Fixed the member_has_value wrapping
+
+Fri Mar 29 17:10:25 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 47e284e7d60ab7c88d86e9ca7f9e72af260b78cd
+
+        * dds/idl/value_reader_generator.cpp:
+
+          Removed duplicate temporary values
+
+Fri Mar 22 02:52:08 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 185adad2da2e890ea29eb13f1a3f0bdcf9684465
+
+        * dds/idl/value_reader_generator.cpp:
+        * tests/DCPS/Compiler/optional/main.cpp:
+
+          Formatted
+
+Wed Mar 20 22:25:18 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 25678f303028ee580a2bf3ef58c2936613501049
+
+        * dds/DCPS/JsonValueReader.h:
+        * dds/idl/value_writer_generator.cpp:
+
+          Removed unused functions
+
+Wed Mar 20 22:24:14 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 7b018ed3e062de1285224a0c59816d4c62a1c85c
+
+        * tests/DCPS/Compiler/optional/main.cpp:
+
+          Remove test REQUIRE_TRUE(false)
+
+Wed Mar 20 22:17:21 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 8ae3dbd7c98090df9b87e106014fc424946c56de
+
+        * dds/idl/value_reader_generator.cpp:
+
+          Cleanup and improve the vread for optionals
+
+Tue Mar 19 14:09:55 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 05e1afc81df0106fdb0d418301a50e0e83ea291f
+
+        * dds/idl/value_reader_generator.cpp:
+
+          Remove include
+
+Tue Mar 19 14:07:56 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 67f94d9221904a3870c55f702964714560b1d9bf
+
+        * dds/idl/value_reader_generator.cpp:
+
+          Fixed vread generation
+
+Tue Mar 19 13:20:21 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit df12b8d6ad64943b7011d6862ece49241cf1e661
+
+        * dds/idl/value_reader_generator.cpp:
+
+          fixed formatting
+
+Tue Mar 19 13:16:22 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 07e4664d329461a3ce6ac5a0d936b19a6b902863
+
+        * dds/idl/value_reader_generator.cpp:
+
+          Cleanup some optional handling
+
+Tue Mar 19 13:06:34 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 48f9d57e0d3b1242493c8567bfce0270ed9a5f00
+
+        * dds/DCPS/ValueReader.h:
+        * dds/idl/value_reader_generator.cpp:
+        * dds/idl/value_writer_generator.cpp:
+
+          Fixed tests and started with vread
+
+Tue Mar 19 12:36:31 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 0d6cdee9831bddbc76bcd908f0428065397fad3a
+
+          Merge branch 'master' into optional
+
+Fri Mar 15 11:49:55 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit d659623de763293c5ec2bce7d3830163107e2765
+
+        * dds/DCPS/PrinterValueWriter.h:
+
+          Discard changes to dds/DCPS/PrinterValueWriter.h
+
+Fri Mar 15 11:49:23 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 0e485ca02855c579d342ccf2f4dfb27289e5db66
+
+        * dds/DCPS/PrinterValueWriter.h:
+
+          Removed being_optional from PrinterValueWriter
+
+Fri Mar 15 11:45:41 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 05eb15a09c7bc59432281f3ea63b6b1895c3abe0
+
+        * dds/idl/value_writer_generator.cpp:
+
+          Formatted
+
+Fri Mar 15 11:42:46 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit cb93a19a824290e661ffd6717a36a05ca42a74fb
+
+        * dds/DCPS/JsonValueWriter.h:
+        * dds/DCPS/ValueWriter.h:
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.h:
+        * dds/idl/value_writer_generator.cpp:
+
+          Sinplified value_writer generation
+
+Mon Mar 11 18:22:09 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 475eaa39736c08da16bc32f83a3f8694d8dfa52d
+
+          Merge branch 'master' into optional
+
+Sun Mar 10 13:38:27 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit e0805a00f4227027dc838d468cee9d3c7f528589
+
+          Merge branch 'master' into optional
+
+Sun Mar 10 04:03:06 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 920cef2f4cf3d201250d200367400ed483bd3042
+
+        * dds/DCPS/PrinterValueWriter.h:
+
+          Added begin/end _optional to PrinterValueWriter in a test
+
+Sun Mar 10 02:55:27 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 00c7e950f863629dd811401a383d17a840906ae6
+
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+
+          Formatting
+
+Sun Mar 10 02:53:04 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 3234f7d4928ecfde6326b23dd2e930faef74dbb4
+
+        * dds/DCPS/Xcdr2ValueWriter.cpp:
+        * dds/DCPS/Xcdr2ValueWriter.h:
+
+          Fixed XcdrValueWriter
+
+Sat Mar 09 15:08:22 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit e8e7beaf67498d4bd37acb41d02e11d43f69b4d2
+
+        * dds/DCPS/JsonValueWriter.h:
+
+          Fixed formatting
+
+Sat Mar 09 15:03:06 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 14fdcea8243bda9c7bc879b854df802e07215dc8
+
+        * dds/DCPS/JsonValueWriter.h:
+        * dds/DCPS/ValueWriter.h:
+        * tests/DCPS/Compiler/optional/main.cpp:
+
+          Addressed some more review comments
+
+Sat Mar 09 14:13:14 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 9801a282f39129305e07dae032d050e852aa4730
+
+          Merge branch 'optional' of github.com:tmayoff/OpenDDS into
+          optional
+
+Sat Mar 09 14:11:46 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 985f63018787736309f63c523c68237e7f95d981
+
+        * tests/DCPS/Compiler/optional/main.cpp:
+        * tests/DCPS/Compiler/optional/optional.idl:
+        * tests/DCPS/optional/publisher.cpp:
+
+          Addressed some review comments
+
+Mon Mar 04 21:19:17 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 47412a6b3a33b0035024a804c59adebf6056938b
+
+          Merge branch 'master' into optional
+
+Fri Mar 01 19:55:14 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 103558f0ea35520cb742eff6895de59625dc4118
+
+        * tests/DCPS/Compiler/optional/optional.mpc:
+
+          Fixed mpc builds
+
+Fri Mar 01 14:36:27 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 31dbf1f30cc9cd64f78f46628de14d82039665a5
+
+        * tests/DCPS/Compiler/optional/main.cpp:
+
+          Readded deserialize check
+
+Fri Mar 01 12:55:57 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit ddd56938a7fcef9131d96e4b5498ecd13d4dd95f
+
+          Merge branch 'main' into optional
+
+Tue Feb 27 23:44:34 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 99f556e1213ee1e243d4b8b7b692e309965fa2b3
+
+          Merge branch 'master' into optional
+
+Tue Feb 27 03:30:17 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit a15d02a44d568be20a204571c2e1693396f154e7
+
+        * .github/workflows/build_and_test.yml:
+
+          Removed or fixed CXX17 from CI tests
+
+Mon Feb 26 22:00:30 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 6fbb6d09e19a4c99040af6571aa036fa00f09954
+
+        * tests/DCPS/Compiler/optional/optional.mpc:
+
+          Removed IDL_Files
+
+Thu Feb 22 22:56:31 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit da6d4657c40106138556ff20a0c184fd97adb894
+
+        * .github/workflows/build_and_test.yml:
+
+          Find and replace -Config CXX11 with -Config CXX11 -Config CXX17
+
+Thu Feb 22 22:49:06 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 0e9feb6a343ce5266177492631a992d8a9211968
+
+          Merge branch 'optional' of github.com:tmayoff/OpenDDS into
+          optional
+
+Thu Feb 22 22:48:47 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit e8ba3f7a004c4085c899e1e15f4e8a0431179e4e
+
+        * tests/DCPS/Compiler/optional/optional.mpc:
+        * tests/DCPS/optional/optional.mpc:
+
+          Updated mpc build for optional tests
+
+Tue Feb 20 01:49:42 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 6525ac2fc5573816b2c0c64c1211522dcccb6913
+
+          Merge branch 'master' into optional
+
+Sat Feb 17 02:54:05 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 72762e300af6939684946f73df8dd9e83c275715
+
+        * dds/idl/marshal_generator.cpp:
+
+          null check
+
+Sat Feb 17 02:35:56 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 74ad0617cfdc0c0213de497955564d22f5eb0521
+
+          Merge branch 'optional' of github.com:tmayoff/OpenDDS into
+          optional
+
+Sat Feb 17 02:34:24 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 067c2db538bfef7c0c3047b7ff97c456e553e3ab
+
+        * dds/idl/marshal_generator.cpp:
+
+          Moved '.value()' gen
+
+Sat Feb 17 02:17:41 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit dae3a077319a80580a3c7948722f61d68c253422
+
+          Merge branch 'master' into optional
+
+Sat Feb 17 02:17:15 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit a7e25e9ac2e458ba5060f839d3b0762fe703d971
+
+        * dds/idl/marshal_generator.cpp:
+
+          Removed include
+
+Sat Feb 17 02:15:18 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit af94ba72854e717121d50af49e037b031e0d37fb
+
+          Merge branch 'optional' of github.com:tmayoff/OpenDDS into
+          optional
+
+Sat Feb 17 02:14:58 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 03fd220c5eb594fd743612d55adcb2f2c99d44d6
+
+        * dds/idl/marshal_generator.cpp:
+
+          Add '.value()' to strings
+
+Fri Feb 16 16:08:04 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 7f2a42a6c0d4773e982bdd9ac479090d225eaa2d
+
+        * tests/DCPS/Compiler/optional/optional.mpc:
+
+          Added -lc++11 to test .mpc file
+
+Fri Feb 16 14:12:49 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 0fd6e2c87279af79c887c43eaaa04b3daf170e9e
+
+        * dds/idl/marshal_generator.cpp:
+
+          Fixed null check
+
+Fri Feb 16 14:09:13 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 2fb4e94dee33322cb8514d88f10767e439557f94
+
+        * dds/idl/marshal_generator.cpp:
+
+          Added an extra nullcheck
+
+Fri Feb 16 02:56:53 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 227f1a5708e216a9b684875eb7bf63ff194c0359
+
+        * dds/idl/marshal_generator.cpp:
+
+          Little bit of cleanup
+
+          still not sure how to debug the segfault in CI builds
+
+Fri Feb 16 00:42:59 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 7d9da5c4c7d99181089e498ff76dab3c961811e8
+
+          Merge remote-tracking branch 'origin/main' into optional
+
+Tue Feb 06 19:48:14 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit dfb251098bb903406393086cd49c6c08f1adfed7
+
+        * MPC/modules/IDLBase.pm:
+        * dds/DdsDynamicData.idl:
+        * dds/idl/ts_generator.cpp:
+        * java/dds/.gitignore:
+        * java/dds/dcps_java.mpc:
+        * java/idl2jni/codegen/be_init.cpp:
+
+          Use DdsDynamicData.idl in Java but hide most of it
+
+Sat Feb 03 04:08:23 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 30c71979d07c4b7701d004771d133f9f1b2975fb
+
+        * dds/DCPS/Serializer.h:
+
+          Discard changes to dds/DCPS/Serializer.h
+
+Sat Feb 03 03:20:04 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 418e109cc114dbae4c38d61fc439edf798c4db5a
+
+        * dds/idl/langmap_generator.cpp:
+
+          Update dds/idl/langmap_generator.cpp
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Sat Feb 03 03:19:22 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 9911509e80ca0eb72f0761a23363aacd9ceda12b
+
+        * configure:
+
+          Update configure
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Fri Feb 02 20:29:11 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 8e87e91ecfd2bc48b69f5e8c30c5ab23c6d5af2f
+
+        * dds/DCPS/Serializer.h:
+
+          Removed templated >>
+
+Fri Feb 02 19:39:57 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 0ea901ce62d6b8eaade21fdd31920836fd01e131
+
+          Merge branch 'master' into optional
+
+Fri Feb 02 03:59:24 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit ba323f2057df8fb4c54c505b0a79e9858c83b18d
+
+          Merge branch 'master' into optional
+
+Fri Feb 02 03:44:47 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit a0c5bb28eaeb0ba9fa274a2b5669eafce81b23bc
+
+        * dds/DCPS/Serializer.h:
+        * dds/idl/marshal_generator.cpp:
+
+          Reverted to codegen stuff
+
+          I saved the experiment in a branch but fails on every older
+          compiler,
+          and I can't debug it at the moment. Need to readd deserialization
+
+          This now passes the tests comparing bytes.
+
+Thu Feb 01 14:14:04 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit a8c83052d4c7b68c3726731317905757fc810b17
+
+        * dds/DCPS/Serializer.h:
+
+          Moved function into #if
+
+Thu Feb 01 14:10:52 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit cf6f8344695ba49f31be02d4a96ab732df28f67a
+
+        * dds/DCPS/Serializer.h:
+        * dds/idl/marshal_generator.cpp:
+        * tests/DCPS/Compiler/optional/main.cpp:
+        * tests/DCPS/Compiler/optional/optional.idl:
+
+          Added guards to the Serializer functions,
+
+          added more fields to the tests
+
+Thu Feb 01 03:31:56 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit a411e5d439a65e4c4360fd0dfa9763b66cd88f01
+
+        * dds/DCPS/Serializer.h:
+        * dds/idl/marshal_generator.cpp:
+        * tests/DCPS/Compiler/optional/main.cpp:
+        * tests/DCPS/Compiler/optional/optional.idl:
+
+          Remove some codegen in favour of Serializer funcs
+
+          I may need to readd some codegen for certain code paths, but this
+          felt
+          seemed like a better solution
+
+Thu Feb 01 00:43:15 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit ee8ce393a2ccff8aa66896ee01ee611ae320c2ef
+
+        * tests/DCPS/Compiler/optional/main.cpp:
+        * tests/DCPS/Compiler/optional/optional.idl:
+
+          Serialization test with comparing bytes
+
+          Currently struggling with getting the actual bytes layout correct
+
+Sun Jan 28 16:42:11 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit e1b7c258a11ba74291e5f56adaee8ae3535897b5
+
+        * dds/idl/langmap_generator.cpp:
+        * tests/DCPS/Compiler/optional/main.cpp:
+
+          Added XCDR2 test,
+
+          serialized_size isn't quite right
+
+Thu Jan 25 22:15:28 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit d36569a6b14a3b359634c8ae0730353e454201c5
+
+          Merge branch 'optional' of github.com:tmayoff/OpenDDS into
+          optional
+
+Thu Jan 25 22:15:10 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 0b69bdec2a5316bb0b3fa07491460d78815573b7
+
+        * .github/workflows/build_and_test.yml:
+
+          Bump cache prefix
+
+Thu Jan 25 18:23:17 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 4bc51d398698a2157316164299ebbd4b3b430edd
+
+        * tests/dcps_tests.lst:
+
+          Update tests/dcps_tests.lst
+
+          Co-authored-by: Adam Mitz <mitza@objectcomputing.com>
+
+Thu Jan 25 13:24:36 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit e12ec8fa48df2a7d4030565d09767cc1d29b3bb2
+
+          Merge branch 'optional' of github.com:tmayoff/OpenDDS into
+          optional
+
+Thu Jan 25 13:24:15 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit ee61ec0a91b48bce9d6c44593b6793a09f1aa97e
+
+        * tests/dcps_tests.lst:
+
+          Fixed optional test configuration
+
+Thu Jan 25 03:48:45 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 88691ef8f1f96209ffe3fabf5297387282cb3782
+
+        * configure:
+        * tests/DCPS/Compiler/optional/optional.mpc:
+
+          Removed no_cxx17=0 from MSVC and remove opendds_cxx11 from tests
+
+Thu Jan 25 03:36:31 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 732ce8919ddce5d275e6e575096ec628b148d560
+
+        * MPC/config/opendds_uses_cxx17.mpb:
+
+          Fixed copy-paste bug
+
+Thu Jan 25 02:02:47 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit a04b2a1937d8efc7467003078d9a3a1a3b62fab0
+
+          Merge branch 'optional' of github.com:tmayoff/OpenDDS into
+          optional
+
+Thu Jan 25 02:02:08 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit b80dbc5e7e8c2d2f0be40aa7391290ba26fa4ede
+
+        * configure:
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+
+          Formatting + consolidated configure script ifs
+
+Wed Jan 24 22:06:29 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 872999aaf72caab3b01ffc11b4876ae89a1a93a2
+
+          Merge branch 'master' into optional
+
+Wed Jan 24 03:44:17 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 9019966eb3f278de805328d0d7b94a2ca15cb29d
+
+        * dds/idl/marshal_generator.cpp:
+
+          Revert "Add extra () to some code gen"
+
+          This reverts commit fb3987ae4f2f2a5e0ebab223713dea127833b49c.
+
+Wed Jan 24 03:04:11 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit fb3987ae4f2f2a5e0ebab223713dea127833b49c
+
+        * dds/idl/marshal_generator.cpp:
+
+          Add extra () to some code gen
+
+Tue Jan 23 23:05:12 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit e26eac200cdd9421387579dd57448b84d5e779b6
+
+        * tests/dcps_tests.lst:
+
+          Add optional to tests
+
+Tue Jan 23 22:54:22 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit fb94d5e81ebe23d27b4fef9412ef04fc76aadf4a
+
+        * MPC/config/opendds_cxx17.mpb:
+        * MPC/config/opendds_uses_cxx17.mpb:
+        * tests/DCPS/Compiler/optional/optional.mpc:
+        * tests/DCPS/optional/optional.mpc:
+
+          Updated mpc files
+
+Sat Jan 20 21:47:08 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 833361c458a346c8d742fc315ef25d39287e7c18
+
+        * dds/idl/value_reader_generator.cpp:
+
+          Fixed warning
+
+Sat Jan 20 16:17:09 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit a64a5c017c3131da211cf97584a2c54aeeacdc5c
+
+        * dds/idl/marshal_generator.cpp:
+        * tests/DCPS/Compiler/optional/main.cpp:
+
+          Fixed deserialization for real this time, tests passing locally
+
+Sat Jan 20 14:37:27 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 78756cf762f6db3543a66f5710031c36d592b8c0
+
+        * dds/idl/marshal_generator.cpp:
+
+          Fixed crash with serialization functions
+
+Sat Jan 20 01:43:01 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit e21cd7eeb6a8e6f1f75bf7d2271be8399faf52e8
+
+        * tests/DCPS/Compiler/optional/main.cpp:
+
+          Fixing tests
+
+Fri Jan 19 15:19:49 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 20c4b01a08693cc048e31ba36f464088614be1ad
+
+        * dds/idl/dds_generator.cpp:
+        * dds/idl/dds_generator.h:
+        * dds/idl/marshal_generator.cpp:
+
+          Switched to order of the arguments
+
+Fri Jan 19 15:04:48 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 3717a57d1092a9ef4ee7813ee1377c107914ed82
+
+        * dds/idl/dds_generator.h:
+
+          Fix for generating std::nullopt when it shouldn't
+
+          type_to_default, in more places we generate with is_optional than
+          we do
+          is_union, so I placed is_optional first in the function
+          definition this
+          broke it in a single place. Will need to decide which is easier
+          to get,
+          the is_optional from the generateCaseBody or the is_union from
+          the other
+          places we call type_to_default.
+
+Fri Jan 19 14:56:18 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit eccc5bd67c675b7a419d59395258c00bc2d30522
+
+        * dds/idl/dds_generator.cpp:
+        * tests/DCPS/Compiler/optional/optional.idl:
+
+          Use typedef in test
+
+Fri Jan 19 14:38:10 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 601396da98dcc75a61c719acb480d9bf1b14b7a1
+
+          Merge branch 'optional' of github.com:tmayoff/OpenDDS into
+          optional
+
+Fri Jan 19 14:36:12 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 9b65b9f860769d65102ad16b41402373fe9f58fc
+
+        * dds/idl/dds_generator.cpp:
+        * dds/idl/dds_generator.h:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/value_writer_generator.cpp:
+        * tests/DCPS/Compiler/optional/optional.idl:
+
+          Added to compiler tests
+          fixed an issue with multiple optional values in a struct
+
+Fri Jan 19 03:55:16 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit edd1a07c53c2e91a7c4a74b018e353959b4c9f9e
+
+        * tests/DCPS/Compiler/optional/CMakeLists.txt:
+        * tests/DCPS/optional/CMakeLists.txt:
+
+          Updated cmake tests to compile IDLs with C++17
+
+Fri Jan 19 02:29:48 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 3e02ca91473068bf2d5fe7ad9adf0d56763b6705
+
+        * tests/DCPS/Compiler/optional/optional.mpc:
+
+          Fixed missing comma
+
+Fri Jan 19 02:22:26 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 724b1e8c1008a026c4b05f79c56cd987e4b69ab6
+
+        * tests/DCPS/Compiler/optional/optional.mpc:
+
+          Add opendds_cxx17 to MPC compiler test for optional
+
+Fri Jan 19 02:09:19 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 90928206784666f96811075733a76dd7128186ea
+
+        * configure:
+
+          Add no_cxx17 to configure script
+
+Fri Jan 19 01:49:01 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit e7745f45d8ecd6a1c03f66e5193de73fb3e497a7
+
+        * MPC/config/opendds_cxx17.mpb:
+        * configure:
+        * tests/DCPS/optional/optional.mpc:
+
+          Added a cxx_17 config for MPC
+
+Thu Jan 18 23:16:07 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 14e7cea3f816dd34fd08a35375d79ee15715c7b0
+
+        * dds/idl/langmap_generator.cpp:
+        * dds/idl/marshal_generator.cpp:
+        * tests/DCPS/optional/CMakeLists.txt:
+
+          Cleaned up some code, set cmake C++ version
+
+Thu Jan 18 22:26:04 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 7bbe231eea54e09cd75c7331d1bedee46c008c40
+
+          Merge branch 'master' into optional
+
+Thu Jan 18 22:25:33 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 8844ae6deebd91875fba7de8d3f3d52b7e67abb6
+
+        * tests/DCPS/optional/publisher.cpp:
+        * tests/DCPS/optional/subscriber.cpp:
+
+          Fixed tests to work with static libs
+
+Thu Jan 18 22:18:27 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 8a9968fde006b7d41af375197c5de31af9cd1dce
+
+        * tests/DCPS/optional/CMakeLists.txt:
+        * tests/DCPS/optional/optional.idl:
+        * tests/DCPS/optional/publisher.cpp:
+        * tests/DCPS/optional/subscriber.cpp:
+
+          Fixed some more copy/paste bugs in cmake build
+
+          Tests now failing with static libs
+
+Thu Jan 18 21:54:45 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit ba74b436c819ce9c05dc0d545a06a170dd4bccab
+
+        * tests/DCPS/optional/CMakeLists.txt:
+        * tests/DCPS/optional/run_test.pl:
+
+          Some fixes to CMake setup
+
+Sat Jan 13 14:13:55 UTC 2024  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit ecb824163577c9bdd9a00de1b1a94582594e4614
+
+          Merge branch 'master' into optional
+
+Wed Dec 13 08:28:54 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 465dcf60accb8470f052b6142835af08ef914182
+
+        * dds/DdsDcpsTopic.idl:
+        * dds/idl/IDLTemplate.txt:
+        * dds/idl/be_init.cpp:
+        * dds/idl/ts_generator.cpp:
+        * java/dds/DDS/.gitignore:
+        * java/idl2jni/codegen/be_init.cpp:
+        * java/idl2jni/codegen/idl_mapping.cpp:
+
+          Fix Broken Java Builds
+
+          Also:
+          - Add missing files to java/dds/DDS/.gitignore
+          - Move `@OpenDDS::hidden_op_in_java` in
+          `@OpenDDS::internal::hidden_op_in_java`.
+
+Thu Dec 07 03:06:51 UTC 2023  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 2fd23edf02aa5b8b5876711a60d3840bdc2dd4ef
+
+        * tests/DCPS/optional/CMakeLists.txt:
+        * tests/DCPS/optional/optional.idl:
+        * tests/DCPS/optional/publisher.cpp:
+        * tests/DCPS/optional/run_test.pl:
+        * tests/DCPS/optional/subscriber.cpp:
+
+          updates to tests
+
+Sun Dec 03 17:53:22 UTC 2023  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit b9e5f0edc75674bfb16b5e1759b22ca54976de0a
+
+        * dds/idl/marshal_generator.cpp:
+        * tests/DCPS/Compiler/optional/main.cpp:
+
+          proper defaulting of optional
+
+Sun Dec 03 17:24:53 UTC 2023  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit d549aec8c6a6397a375c86a2640faf3fcfad0fac
+
+        * dds/idl/marshal_generator.cpp:
+        * tests/DCPS/Compiler/optional/main.cpp:
+
+          Serialize the has_value  of optional
+
+Sun Dec 03 04:49:05 UTC 2023  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit bfed4f5538a189046eaf4f5f9ab01e143d38ebdd
+
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+
+          use 0 not nullptr
+
+Sun Dec 03 04:45:08 UTC 2023  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit c86171ce3ce8b27b758c66bcb7504d7b4e271f4e
+
+        * dds/idl/dynamic_data_adapter_generator.cpp:
+        * tests/DCPS/optional/subscriber.cpp:
+
+          Fixed test, and final code gen
+
+Sun Dec 03 03:39:17 UTC 2023  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 4762462807c0fed884ab6d033eeb211dd1c92128
+
+        * tests/DCPS/Compiler/optional/optional.mpc:
+
+          mpc options
+
+Sun Dec 03 03:26:54 UTC 2023  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 5595efc3e71155e25ef0bdc74e31e721d81690ea
+
+        * tests/DCPS/Compiler/optional/optional.mpc:
+
+          add googletest to mpc
+
+Wed Nov 29 17:05:22 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit cb2715d99e80498fd2cc2455135d50834b5ee3eb
+
+        * dds/DCPS/TypeSupportImpl.h:
+        * dds/idl/IDLTemplate.txt:
+        * dds/idl/ts_generator.cpp:
+        * dds/idl/ts_generator.h:
+
+          Add `create_sample` and `create_dynamic_sample`
+
+Mon Nov 27 19:05:56 UTC 2023  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 734cc57f2f426c5b02d4f50d4758d8d73b410732
+
+          Merge branch 'master' into optional
+
+Sat Nov 25 21:05:03 UTC 2023  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 801a7144d4406407b9ed4ed7819e92f04075dd61
+
+        * CMakeLists.txt:
+
+          ^
+
+Sat Nov 25 21:04:59 UTC 2023  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 00f998b9badb49694c463dfc2bbc143aae1ff199
+
+        * tests/DCPS/optional/.gitignore:
+        * tests/DCPS/optional/CMakeLists.txt:
+        * tests/DCPS/optional/README.rst:
+        * tests/DCPS/optional/optional.idl:
+        * tests/DCPS/optional/optional.mpc:
+        * tests/DCPS/optional/publisher.cpp:
+        * tests/DCPS/optional/rtps.ini:
+        * tests/DCPS/optional/run_test.pl:
+        * tests/DCPS/optional/subscriber.cpp:
+
+          Added another optional test
+
+Sat Nov 25 19:51:32 UTC 2023  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 6f44dc7a50d351d9ffd871e2271e6f37feb9eef6
+
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/value_reader_generator.cpp:
+        * dds/idl/value_writer_generator.cpp:
+        * tests/DCPS/Compiler/optional/main.cpp:
+
+          fixed lint
+
+Sat Nov 25 19:46:44 UTC 2023  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 1794a2d245c3a0a05e44f06cb894247136adb31a
+
+        * tests/DCPS/Compiler/optional/main.cpp:
+
+          extended tests
+
+Sat Nov 25 19:40:53 UTC 2023  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 6be278f88984a188c9a577796c66fbe8feb9f841
+
+        * dds/idl/marshal_generator.cpp:
+
+          Added support for serialization functions
+
+Sat Nov 25 03:17:44 UTC 2023  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit ccf9455f2a417c70a8f47463f1245b9e3a4588de
+
+        * tests/DCPS/Compiler/optional/CMakeLists.txt:
+
+          add gtest to optional test
+
+Wed Nov 22 19:59:29 UTC 2023  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit ba1428bc74ce4d8bb80fd888bec1c1d7e30a9f6a
+
+        * dds/DCPS/JsonValueReader.h:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/metaclass_generator.cpp:
+
+          fixed build errors
+
+Wed Nov 22 19:44:23 UTC 2023  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 17ddd27e475e3bbf10f2461ffdfae90c35887905
+
+        * dds/DCPS/JsonValueReader.h:
+        * dds/DCPS/ValueReader.h:
+        * dds/DCPS/ValueWriter.h:
+        * dds/idl/value_reader_generator.cpp:
+        * dds/idl/value_writer_generator.cpp:
+
+          ValueReade/Writer generation
+
+Wed Nov 22 01:45:35 UTC 2023  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit 2067e9de893e52bc8572d4a3daa66d01d9e0293b
+
+        * dds/idl/value_reader_generator.cpp:
+
+          todo
+
+Wed Nov 22 01:32:43 UTC 2023  Tyler Mayoff  <tyler@tylermayoff.com>
+        commit c5a6265ea69a1b72f0e603f85350904f2a738c36
+
+        * dds/idl/langmap_generator.cpp:
+        * dds/idl/value_reader_generator.cpp:
+
+          start on rough implementation
+
+Wed Nov 22 01:31:22 UTC 2023  Tyler Mayoff  <tyler@tylermayoff.com>
+
+        * tests/DCPS/Compiler/optional/main.cpp:
+        * tests/DCPS/Compiler/optional/optional.idl:
+
+          updated test
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

@@ -153,6 +153,7 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
 
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
+                     const VendorId_t& vendor_id,
                      DCPS::DiscoveredWriterData& writer_data,
                      bool use_xtypes,
                      XTypes::TypeInformation& type_info);
@@ -168,6 +169,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
 
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
+                     const VendorId_t& vendor_id,
                      DCPS::DiscoveredReaderData& reader_data,
                      bool use_xtypes,
                      XTypes::TypeInformation& type_info);
@@ -204,6 +206,7 @@ bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
 
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
+                     const VendorId_t& vendor_id,
                      DiscoveredPublication_SecurityWrapper& wrapper,
                      bool use_xtypes,
                      XTypes::TypeInformation& type_info);
@@ -219,6 +222,7 @@ bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
 
 OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
+                     const VendorId_t& vendor_id,
                      DiscoveredSubscription_SecurityWrapper& wrapper,
                      bool use_xtypes,
                      XTypes::TypeInformation& type_info);

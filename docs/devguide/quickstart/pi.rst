@@ -164,7 +164,7 @@ Setup
 OpenSSL
 =======
 
-#. In ``$BUILD_ROOT``, download and extract the `OpenSSL source archive <https://www.openssl.org/source/>`__, and change to that extracted directory.
+#. In ``$BUILD_ROOT``, download and extract the `OpenSSL source archive <https://www.openssl-library.org/source/>`__, and change to that extracted directory.
    See :ref:`deps-openssl` for any version requirements for OpenSSL.
 
 #. .. code-block:: bash

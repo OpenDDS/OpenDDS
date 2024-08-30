@@ -8,6 +8,7 @@
 #endif
 
 #include "BuiltInTopicUtils.h"
+#include "EncapsulationHeader.h"
 #include "GuidConverter.h"
 #include "MultiTopicImpl.h"
 #include "RakeResults_T.h"
@@ -939,7 +940,14 @@ namespace OpenDDS {
         return;
       }
       Encoding encoding;
-      if (!encap.to_encoding(encoding, type_support_->base_extensibility())) {
+      if (!to_encoding(encoding, encap, type_support_->base_extensibility())) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: %CDataReaderImpl::lookup_instance: "
+                     "to_encoding failed writer %C reader %C\n",
+                     LogGuid(sample.header_.publication_id_).c_str(),
+                     LogGuid(subscription_id()).c_str()));
+        }
         return;
       }
 
@@ -1108,7 +1116,14 @@ protected:
         return;
       }
       Encoding encoding;
-      if (!encap.to_encoding(encoding, type_support_->base_extensibility())) {
+      if (!to_encoding(encoding, encap, type_support_->base_extensibility())) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: %CDataReaderImpl::dds_demarshal: "
+                     "to_encoding failed writer %C reader %C\n",
+                     LogGuid(sample.header_.publication_id_).c_str(),
+                     LogGuid(subscription_id()).c_str()));
+        }
         return;
       }
 
@@ -1837,7 +1852,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       const std::pair<typename SubscriptionInstanceMapType::iterator, bool> bpair =
         instances_.insert(typename SubscriptionInstanceMapType::value_type(handle, instance));
 
-      if (bpair.second == false) {
+      if (!bpair.second) {
         if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ")
@@ -1860,9 +1875,9 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
         }
 
         if (new_handle) {
-          const std::pair<typename InstanceMap::iterator, bool> bpair =
+          const std::pair<typename InstanceMap::iterator, bool> res =
             inst->insert(typename InstanceMap::value_type(*instance_data, handle));
-          if (!bpair.second) {
+          if (!res.second) {
             if (DCPS_debug_level > 0) {
               ACE_ERROR ((LM_ERROR,
                           ACE_TEXT("(%P|%t) ")
@@ -1893,7 +1908,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
     std::pair<typename InstanceMap::iterator, bool> bpair =
       instance_map_.insert(typename InstanceMap::value_type(*instance_data,
         handle));
-    if (bpair.second == false)
+    if (!bpair.second)
     {
       if (DCPS_debug_level > 0) {
         ACE_ERROR ((LM_ERROR,

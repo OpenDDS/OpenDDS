@@ -208,10 +208,10 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
 
     if (enable_type_lookup_service) {
       available_extended_builtin_endpoints_ =
-        TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |
-        TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE |
-        TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE |
-        TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE;
+        TYPE_LOOKUP_SERVICE_REQUEST_SECURE_READER |
+        TYPE_LOOKUP_SERVICE_REPLY_SECURE_READER |
+        TYPE_LOOKUP_SERVICE_REQUEST_SECURE_WRITER |
+        TYPE_LOOKUP_SERVICE_REPLY_SECURE_WRITER;
     }
   }
 #endif
@@ -532,6 +532,7 @@ void Spdp::process_location_updates_i(const DiscoveredParticipantIter& iter, con
 
   DCPS::ParticipantLocationBuiltinTopicData& location_data = iter->second.location_data_;
   location_data.lease_duration = leaseDuration.to_dds_duration();
+  location_data.user_tag = iter->second.opendds_user_tag_;
 
   bool published = false;
   for (DiscoveredParticipant::LocationUpdateList::const_iterator pos = location_updates.begin(),
@@ -1262,8 +1263,8 @@ DDS::OctetSeq Spdp::local_participant_data_as_octets() const
   if (participant_sec_attr_.is_discovery_protected) {
     pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_DISCOVERY_PROTECTED;
     pbtds.base.extended_builtin_endpoints =
-      DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE | DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |
-      DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE | DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE;
+      DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_SECURE_WRITER | DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_SECURE_READER |
+      DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_SECURE_WRITER | DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_SECURE_READER;
   }
   if (participant_sec_attr_.is_liveliness_protected) {
     pbtds.base.security_info.participant_security_attributes |= DDS::Security::PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_LIVELINESS_PROTECTED;
@@ -2301,6 +2302,7 @@ ParticipantData_t Spdp::build_local_pdata(
 #if OPENDDS_CONFIG_SECURITY
       , available_extended_builtin_endpoints_
 #endif
+      , 0
     },
     { // Duration_t (leaseDuration)
       static_cast<CORBA::Long>(lease_duration_.value().sec()),
@@ -2904,12 +2906,31 @@ Spdp::SpdpTransport::write_i(const DCPS::GUID_t& guid, const DCPS::NetworkAddres
   wbuff_.reset();
   DCPS::Serializer ser(&wbuff_, encoding_plain_native);
   DCPS::EncapsulationHeader encap(ser.encoding(), DCPS::MUTABLE);
-  if (!(ser << hdr_) || !(ser << info_dst) || !(ser << data_) || !(ser << encap)
-      || !(ser << plist)) {
+  if (!(ser << hdr_)) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write_i: ")
+        ACE_TEXT("failed to serialize RTPS header for SPDP\n")));
+    }
+  }
+
+  // The implementation-specific UserTagSubmessage is designed to directly
+  // follow the RTPS Message Header.  No other submessages should be added
+  // before it.  This enables filtering based on a fixed offset.
+  if (user_tag_.smHeader.submessageId && !(ser << user_tag_)) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write_i: ")
+        ACE_TEXT("failed to serialize user tag for SPDP\n")));
+    }
+    return;
+  }
+
+  if (!(ser << info_dst) || !(ser << data_) || !(ser << encap) || !(ser << plist)) {
     if (DCPS::DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::write_i() - ")
-        ACE_TEXT("failed to serialize headers for SPDP\n")));
+        ACE_TEXT("failed to serialize submessages for SPDP\n")));
     }
     return;
   }
@@ -3100,12 +3121,15 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
       message.hdr = header;
     }
 
+    DCPS::GuidPrefix_t destinationGuidPrefix = {0};
+    ACE_CDR::ULong userTag = 0;
+
     while (buff_.length() > 3) {
       const char subm = buff_.rd_ptr()[0], flags = buff_.rd_ptr()[1];
       ser.swap_bytes((flags & FLAG_E) != ACE_CDR_BYTE_ORDER);
       const size_t start = buff_.length();
       CORBA::UShort submessageLength = 0;
-      switch (subm) {
+      switch (static_cast<ACE_CDR::Octet>(subm)) {
       case DATA: {
         DataSubmessage data;
         if (!(ser >> data)) {
@@ -3122,9 +3146,11 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
           append_submessage(message, data);
         }
 
-        if (data.writerId != ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER) {
-          // Not our message: this could be the same multicast group used
-          // for SEDP and other traffic.
+        if (data.writerId != ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER ||
+            (data.readerId != ENTITYID_SPDP_BUILTIN_PARTICIPANT_READER &&
+             data.readerId != ENTITYID_UNKNOWN) ||
+            (!DCPS::equal_guid_prefixes(destinationGuidPrefix, hdr_.guidPrefix) &&
+             !DCPS::equal_guid_prefixes(destinationGuidPrefix, DCPS::GUIDPREFIX_UNKNOWN))) {
           break;
         }
 
@@ -3132,11 +3158,13 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
         if (data.smHeader.flags & (FLAG_D | FLAG_K_IN_DATA)) {
           DCPS::EncapsulationHeader encap;
           DCPS::Encoding enc;
-          if (!(ser >> encap) || !encap.to_encoding(enc, DCPS::MUTABLE) || enc.kind() != Encoding::KIND_XCDR1) {
+          if (!(ser >> encap) || !to_encoding(enc, encap, DCPS::MUTABLE) || enc.kind() != Encoding::KIND_XCDR1) {
             if (DCPS::DCPS_debug_level > 0) {
               ACE_ERROR((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
-                        ACE_TEXT("failed to deserialize encapsulation header for SPDP\n")));
+                         "(%P|%t) ERROR: Spdp::SpdpTransport::handle_input: "
+                         "failed to deserialize encapsulation header for SPDP writer %C reader %C\n",
+                         LogGuid(make_id(header.guidPrefix, data.writerId)).c_str(),
+                         LogGuid(outer->guid_).c_str()));
             }
             return 0;
           }
@@ -3157,29 +3185,60 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
           plist[0]._d(PID_PARTICIPANT_GUID);
         }
 
-        DCPS::RcHandle<Spdp> outer = outer_.lock();
-        if (outer) {
-          outer->data_received(data, plist, remote_na);
+        if (userTag) {
+          const ACE_CDR::ULong len = plist.length();
+          plist.length(len + 1);
+          plist[len].user_tag(userTag);
+        }
+
+        DCPS::RcHandle<Spdp> outer_rc = outer_.lock();
+        if (outer_rc) {
+          outer_rc->data_received(data, plist, remote_na);
         }
         break;
       }
       case INFO_DST: {
+        InfoDestinationSubmessage sm;
+        if (!(ser >> sm)) {
+          if (DCPS::DCPS_debug_level > 0) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - "
+                       "failed to deserialize INFO_DST submessage for SPDP\n"));
+          }
+          return 0;
+        }
+        assign(destinationGuidPrefix, sm.guidPrefix);
+        submessageLength = sm.smHeader.submessageLength;
         if (DCPS::transport_debug.log_messages) {
-          InfoDestinationSubmessage sm;
+          append_submessage(message, sm);
+        }
+        break;
+      }
+      case SUBMESSAGE_KIND_USER_TAG: {
+        if (hdr_.vendorId == VENDORID_OPENDDS) {
+          UserTagSubmessage sm;
           if (!(ser >> sm)) {
             if (DCPS::DCPS_debug_level > 0) {
-              ACE_ERROR((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
-                        ACE_TEXT("failed to deserialize INFO_DST header for SPDP\n")));
+              ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - "
+                        "failed to deserialize UserTagSubmessage for SPDP\n"));
             }
             return 0;
           }
           submessageLength = sm.smHeader.submessageLength;
-          append_submessage(message, sm);
-          break;
+          userTag = sm.userTag;
+        } else {
+          SubmessageHeader smHeader;
+          if (!(ser >> smHeader)) {
+            if (DCPS::DCPS_debug_level > 0) {
+              ACE_ERROR((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::handle_input() - ")
+                        ACE_TEXT("failed to deserialize SubmessageHeader for SPDP\n")));
+            }
+            return 0;
+          }
+          submessageLength = smHeader.submessageLength;
         }
+        break;
       }
-      // fallthrough
       default:
         SubmessageHeader smHeader;
         if (!(ser >> smHeader)) {
@@ -4097,24 +4156,24 @@ void Spdp::start_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, GUID_t r, Built
     r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
     ice_agent_->start_ice(endpoint, l, r, agent_info);
   }
-  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE) {
-    l.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
-    r.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_SECURE_WRITER) {
+    l.entityId = ENTITYID_TL_SVC_REQ_SECURE_READER;
+    r.entityId = ENTITYID_TL_SVC_REQ_SECURE_WRITER;
     ice_agent_->start_ice(endpoint, l, r, agent_info);
   }
-  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE) {
-    l.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
-    r.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_SECURE_READER) {
+    l.entityId = ENTITYID_TL_SVC_REQ_SECURE_WRITER;
+    r.entityId = ENTITYID_TL_SVC_REQ_SECURE_READER;
     ice_agent_->start_ice(endpoint, l, r, agent_info);
   }
-  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE) {
-    l.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
-    r.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_SECURE_WRITER) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_SECURE_READER;
+    r.entityId = ENTITYID_TL_SVC_REPLY_SECURE_WRITER;
     ice_agent_->start_ice(endpoint, l, r, agent_info);
   }
-  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) {
-    l.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
-    r.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_SECURE_READER) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_SECURE_WRITER;
+    r.entityId = ENTITYID_TL_SVC_REPLY_SECURE_READER;
     ice_agent_->start_ice(endpoint, l, r, agent_info);
   }
 }
@@ -4237,24 +4296,24 @@ void Spdp::stop_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, DCPS::GUID_t r, 
     r.entityId = ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_READER;
     ice_agent_->stop_ice(endpoint, l, r);
   }
-  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE) {
-    l.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
-    r.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_SECURE_WRITER) {
+    l.entityId = ENTITYID_TL_SVC_REQ_SECURE_READER;
+    r.entityId = ENTITYID_TL_SVC_REQ_SECURE_WRITER;
     ice_agent_->stop_ice(endpoint, l, r);
   }
-  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE) {
-    l.entityId = ENTITYID_TL_SVC_REQ_WRITER_SECURE;
-    r.entityId = ENTITYID_TL_SVC_REQ_READER_SECURE;
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REQUEST_SECURE_READER) {
+    l.entityId = ENTITYID_TL_SVC_REQ_SECURE_WRITER;
+    r.entityId = ENTITYID_TL_SVC_REQ_SECURE_READER;
     ice_agent_->stop_ice(endpoint, l, r);
   }
-  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE) {
-    l.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
-    r.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_SECURE_WRITER) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_SECURE_READER;
+    r.entityId = ENTITYID_TL_SVC_REPLY_SECURE_WRITER;
     ice_agent_->stop_ice(endpoint, l, r);
   }
-  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE) {
-    l.entityId = ENTITYID_TL_SVC_REPLY_WRITER_SECURE;
-    r.entityId = ENTITYID_TL_SVC_REPLY_READER_SECURE;
+  if (extended_avail & TYPE_LOOKUP_SERVICE_REPLY_SECURE_READER) {
+    l.entityId = ENTITYID_TL_SVC_REPLY_SECURE_WRITER;
+    r.entityId = ENTITYID_TL_SVC_REPLY_SECURE_READER;
     ice_agent_->stop_ice(endpoint, l, r);
   }
 }
@@ -4618,6 +4677,23 @@ DDS::ParticipantBuiltinTopicData Spdp::get_part_bit_data(bool secure) const
   bit_data.key = DDS::BuiltinTopicKey_t();
   bit_data.user_data = include_user_data ? qos_.user_data : DDS::UserDataQosPolicy();
   return bit_data;
+}
+
+VendorId_t Spdp::get_vendor_id(const GUID_t& guid) const
+{
+  const VendorId_t unknown_vendor = {{ 0, 0 }};
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, unknown_vendor);
+  return get_vendor_id_i(guid);
+}
+
+VendorId_t Spdp::get_vendor_id_i(const GUID_t& guid) const
+{
+  const VendorId_t unknown_vendor = {{ 0, 0 }};
+  DiscoveredParticipantConstIter iter = participants_.find(make_part_guid(guid));
+  if (iter != participants_.end()) {
+    return iter->second.pdata_.participantProxy.vendorId;
+  }
+  return unknown_vendor;
 }
 
 void Spdp::ignore_domain_participant(const GUID_t& ignoreId)

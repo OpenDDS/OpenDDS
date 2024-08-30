@@ -82,10 +82,10 @@ participant_data(DDS::DomainId_t domain,
     DDS::Security::SPDP_BUILTIN_PARTICIPANT_SECURE_READER;
 
   const DDS::Security::ExtendedBuiltinEndpointSet_t availableExtendedBuiltinEndpoints =
-    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_WRITER_SECURE |
-    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_WRITER_SECURE |
-    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |
-    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE;
+    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_SECURE_WRITER |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_SECURE_WRITER |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_SECURE_READER |
+    DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_SECURE_READER;
 
   ACE_INET_Addr bogus(12345, "127.0.0.1");
   OpenDDS::DCPS::LocatorSeq nonEmptyList(1);
@@ -163,6 +163,7 @@ participant_data(DDS::DomainId_t domain,
         , {PFLAGS_THIS_VERSION} // opendds_participant_flags
         , false // opendds_rtps_relay_application_participant
         , availableExtendedBuiltinEndpoints
+        , 0
       },
       {300, 0}, // leaseDuration
       {0, 0}, // discoveredAt
