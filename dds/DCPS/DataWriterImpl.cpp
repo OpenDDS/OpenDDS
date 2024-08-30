@@ -2125,7 +2125,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
                                        Message_Block_Ptr data,
                                        const DDS::Time_t& source_timestamp)
 {
-  header_data.message_id_ = message_id;
+  header_data.message_id_ = static_cast<char>(message_id);
   header_data.byte_order_ =
     this->swap_bytes() ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER;
   header_data.coherent_change_ = false;
@@ -3035,7 +3035,7 @@ ACE_Message_Block* DataWriterImpl::serialize_sample(const Sample& sample)
     Serializer serializer(mb.get(), encoding);
     if (encapsulated) {
       EncapsulationHeader encap;
-      if (!encap.from_encoding(encoding, type_support_->base_extensibility())) {
+      if (!from_encoding(encap, encoding, type_support_->base_extensibility())) {
         // from_encoding logged the error
         return 0;
       }

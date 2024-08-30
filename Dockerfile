@@ -1,4 +1,4 @@
-ARG BASIS=ubuntu:focal
+ARG BASIS=ubuntu:jammy
 FROM $BASIS
 
 ENV DEBIAN_FRONTEND=noninteractive

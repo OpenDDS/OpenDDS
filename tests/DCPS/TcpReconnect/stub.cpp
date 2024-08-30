@@ -83,12 +83,12 @@ public:
       ACE_DEBUG((LM_DEBUG, "stub(%P): Pub_Handler handle_input(), this=%@\n", this));
     }
     iovec iov;
-    size_t result = this->peer ().recvv (&iov);
+    size_t result = static_cast<size_t>(this->peer().recvv(&iov));
     if (result > 0) {
       if (debug_level) {
         ACE_DEBUG ((LM_DEBUG, "stub(%P): read %d bytes from publisher\n", result));
       }
-      size_t sent = sub_handler_->peer().sendv_n(&iov, 1);
+      size_t sent = static_cast<size_t>(sub_handler_->peer().sendv_n(&iov, 1));
       if (debug_level) {
         ACE_DEBUG ((LM_DEBUG, "stub(%P): wrote %d bytes to subscriber\n", sent));
       }
@@ -113,12 +113,12 @@ private:
 int Sub_Handler::handle_input (ACE_HANDLE fd) {
   ACE_DEBUG((LM_DEBUG, "stub(%P): Sub_Handler handle_input(), this=%@\n", this));
   iovec iov;
-  size_t result = this->peer ().recvv (&iov);
+  size_t result = static_cast<size_t>(this->peer().recvv(&iov));
   if (result > 0) {
     if (debug_level) {
       ACE_DEBUG ((LM_DEBUG, "stub(%P): read %d bytes from subscriber\n", result));
     }
-    size_t sent = pub_handler_->peer().sendv_n(&iov, 1);
+    size_t sent = static_cast<size_t>(pub_handler_->peer().sendv_n(&iov, 1));
     if (debug_level) {
       ACE_DEBUG ((LM_DEBUG, "stub(%P): wrote %d bytes to publisher\n", sent));
     }

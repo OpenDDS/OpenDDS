@@ -11,6 +11,7 @@
 
 #include <dds/DCPS/DataSampleElement.h>
 #include <dds/DCPS/DisjointSequence.h>
+#include <dds/DCPS/EncapsulationHeader.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/SequenceNumber.h>
@@ -643,7 +644,7 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
   using namespace RTPS;
   size_t data_offset = 0;
   const char* rd = orig.rd_ptr();
-  ACE_CDR::ULong starting_frag, sample_size;
+  ACE_CDR::ULong starting_frag = 0, sample_size = 0;
   ACE_CDR::Octet flags;
   bool swap_bytes;
 

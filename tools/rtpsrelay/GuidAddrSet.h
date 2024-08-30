@@ -163,8 +163,12 @@ struct AddrSetStats {
 
   bool has_discovery_addrs() const
   {
+    bool spdp = false;
+    bool sedp = false;
     for (const auto& ip : ip_to_ports) {
-      if (!ip.second.spdp_ports.empty() && !ip.second.sedp_ports.empty()) {
+      spdp = spdp || !ip.second.spdp_ports.empty();
+      sedp = sedp || !ip.second.sedp_ports.empty();
+      if (spdp && sedp) {
         return true;
       }
     }
@@ -245,6 +249,7 @@ public:
     , spdp_vertical_handler_(0)
     , sedp_vertical_handler_(0)
     , data_vertical_handler_(0)
+    , participant_admission_limit_reached_(false)
   {}
 
   void spdp_vertical_handler(RelayHandler* spdp_vertical_handler)
@@ -357,6 +362,11 @@ public:
       gas_.process_expirations(now);
     }
 
+    void maintain_admission_queue(const OpenDDS::DCPS::MonotonicTimePoint& now)
+    {
+      gas_.maintain_admission_queue(now);
+    }
+
     bool admitting() const
     {
       return gas_.admitting();
@@ -395,11 +405,13 @@ private:
 
   void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now);
 
+  void maintain_admission_queue(const OpenDDS::DCPS::MonotonicTimePoint& now);
+
   bool admitting() const
   {
     const size_t limit = config_.admission_control_queue_size();
     const bool limit_okay = !limit || admission_control_queue_.size() < limit;
-    return limit_okay && relay_thread_monitor_.threads_okay();
+    return !participant_admission_limit_reached_ && limit_okay && relay_thread_monitor_.threads_okay();
   }
 
   bool ignore_rtps(bool from_application_participant,
@@ -425,8 +437,9 @@ private:
       it->second.get_session_time(now);
   }
 
-  struct AdmissionControlInfo
-  {
+  void check_participants_limit();
+
+  struct AdmissionControlInfo {
     AdmissionControlInfo(const OpenDDS::DCPS::GuidPrefix_t& prefix, const OpenDDS::DCPS::MonotonicTimePoint& admitted)
      : admitted_(admitted)
     {
@@ -458,6 +471,7 @@ private:
   typedef std::list<RejectedAddressMapType::iterator> RejectedAddressExpirationQueue;
   RejectedAddressExpirationQueue rejected_address_expiration_queue_;
   mutable ACE_Thread_Mutex mutex_;
+  bool participant_admission_limit_reached_;
 };
 
 }

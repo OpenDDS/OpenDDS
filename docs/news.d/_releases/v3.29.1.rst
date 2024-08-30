@@ -1,0 +1,11 @@
+Released 2024-07-31
+
+Download :ghrelease:`this release on GitHub <DDS-3.29.1>`.
+
+Read `the documentation for this release on Read the Docs <https://opendds.readthedocs.io/en/dds-3.29.1>`__.
+
+Fixes
+=====
+
+- Fixed code generation for fixed-size structs in Java that caused compilation errors. (:ghpr:`4752`)
+

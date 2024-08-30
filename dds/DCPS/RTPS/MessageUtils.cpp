@@ -29,6 +29,7 @@ const DCPS::Encoding& get_locators_encoding()
 
 DDS::ReturnCode_t blob_to_locators(const DCPS::TransportBLOB& blob,
                                    DCPS::LocatorSeq& locators,
+                                   VendorId_t& vendor_id,
                                    bool* requires_inline_qos,
                                    unsigned int* pBytesRead)
 {
@@ -43,6 +44,13 @@ DDS::ReturnCode_t blob_to_locators(const DCPS::TransportBLOB& blob,
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) blob_to_locators: ")
                       ACE_TEXT("Failed to deserialize blob's locators\n")),
+                     DDS::RETCODE_ERROR);
+  }
+
+  if (!(ser >> vendor_id)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) blob_to_locators: ")
+                      ACE_TEXT("Failed to deserialize blob's vendor id\n")),
                      DDS::RETCODE_ERROR);
   }
 
@@ -69,17 +77,24 @@ DDS::ReturnCode_t blob_to_locators(const DCPS::TransportBLOB& blob,
 }
 
 void locators_to_blob(const DCPS::LocatorSeq& locators,
+                      const VendorId_t& vendor_id,
                       DCPS::TransportBLOB& blob)
 {
   using namespace OpenDDS::DCPS;
   const Encoding& encoding = get_locators_encoding();
   size_t size = 0;
   serialized_size(encoding, size, locators);
-  ACE_Message_Block mb_locator(size + 1);
+  serialized_size(encoding, size, vendor_id);
+  DCPS::primitive_serialized_size_boolean(encoding, size);
+  ACE_Message_Block mb_locator(size);
   Serializer ser(&mb_locator, encoding);
   if (!(ser << locators)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) locators_to_blob: ")
       ACE_TEXT("Failed to serialize locators to blob\n")));
+  }
+  if (!(ser << vendor_id)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) locators_to_blob: ")
+               ACE_TEXT("Failed to serialize vendor id to blob\n")));
   }
   // Add a bool for 'requires inline qos', see Sedp::set_inline_qos():
   // if the bool is no longer the last octet of the sequence then that function
@@ -95,7 +110,8 @@ OpenDDS_Rtps_Export
 DCPS::LocatorSeq transport_locator_to_locator_seq(const DCPS::TransportLocator& info)
 {
   DCPS::LocatorSeq locators;
-  blob_to_locators(info.data, locators);
+  VendorId_t vendor_id;
+  blob_to_locators(info.data, locators, vendor_id);
   return locators;
 }
 

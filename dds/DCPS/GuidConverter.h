@@ -68,7 +68,7 @@ public:
   virtual ~GuidConverter();
 
   /// Calculate the CRC32 checksum.
-  long checksum() const;
+  unsigned int checksum() const;
 
   /// Extract the VendorId value.
   long vendorId() const;

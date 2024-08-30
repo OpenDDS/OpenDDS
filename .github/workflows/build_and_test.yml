@@ -57,7 +57,8 @@ env:
   TRIGGERING_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
   VCPKG_INSTALLED_DIR: ${{ github.workspace }}\vcpkg\installed
   CTEST_OUTPUT_ON_FAILURE: ON
-  VCPKG_GIT_COMMIT: 898b728edc5e0d12b50015f9cd18247c4257a3eb
+  VCPKG_GIT_COMMIT: f7423ee180c4b7f40d43402c2feb3859161ef625
+  SCOREBOARD_UPLOAD_BRANCH: refs/heads/master
 
 jobs:
 
@@ -328,15 +329,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -823,15 +829,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -1150,15 +1161,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -1428,15 +1444,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -1732,15 +1753,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -2034,15 +2060,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -2331,15 +2362,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -2620,15 +2656,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -2891,15 +2932,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -3117,7 +3163,7 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  ACE_TAO_u20_ace7_j_qt_ws_sec:
+  ACE_TAO_u20_acem_j_qt_ws_sec:
 
     runs-on: ubuntu-20.04
 
@@ -3193,11 +3239,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_u20_ace7_j_qt_ws_sec:
+  build_u20_acem_j_qt_ws_sec:
 
     runs-on: ubuntu-20.04
 
-    needs: ACE_TAO_u20_ace7_j_qt_ws_sec
+    needs: ACE_TAO_u20_acem_j_qt_ws_sec
 
     steps:
     - name: update apt
@@ -3217,13 +3263,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_u20_ace7_j_qt_ws_sec_artifact
+        name: ACE_TAO_u20_acem_j_qt_ws_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u20_ace7_j_qt_ws_sec.tar.xz
+        tar xvfJ ACE_TAO_u20_acem_j_qt_ws_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -3283,11 +3329,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_u20_ace7_j_qt_ws_sec:
+  test_u20_acem_j_qt_ws_sec:
 
     runs-on: ubuntu-20.04
 
-    needs: build_u20_ace7_j_qt_ws_sec
+    needs: build_u20_acem_j_qt_ws_sec
 
     permissions:
       contents: read
@@ -3316,13 +3362,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_u20_ace7_j_qt_ws_sec_artifact
+        name: ACE_TAO_u20_acem_j_qt_ws_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u20_ace7_j_qt_ws_sec.tar.xz
+        tar xvfJ ACE_TAO_u20_acem_j_qt_ws_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -3331,13 +3377,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_u20_ace7_j_qt_ws_sec_artifact
+        name: build_u20_acem_j_qt_ws_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u20_ace7_j_qt_ws_sec.tar.xz
+        tar xvfJ build_u20_acem_j_qt_ws_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -3400,15 +3446,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -3705,15 +3756,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -4000,15 +4056,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -4306,15 +4367,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -4626,15 +4692,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -4760,15 +4831,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -4985,15 +5061,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -5268,15 +5349,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -5489,15 +5575,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -5784,15 +5875,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -5960,15 +6056,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -6122,15 +6223,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -6284,15 +6390,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -6436,15 +6547,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -6734,15 +6850,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -7054,15 +7175,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -7229,15 +7355,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -7393,15 +7524,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -7559,15 +7695,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -7720,15 +7861,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -8040,15 +8186,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -8215,15 +8366,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -8378,15 +8534,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -8543,15 +8704,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -8704,15 +8870,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -9074,15 +9245,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -9258,15 +9434,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -9419,15 +9600,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -9589,15 +9775,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -9990,15 +10181,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -10165,15 +10361,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -10326,15 +10527,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -10494,15 +10700,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -10827,15 +11038,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd /c/OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: C:\OpenDDS\${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -10977,15 +11193,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd /c/OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: C:\OpenDDS\${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -11212,15 +11433,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd /c/OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: c:/OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -11532,15 +11758,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -11696,15 +11927,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -11857,15 +12093,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -12018,15 +12259,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -12294,15 +12540,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -12413,15 +12664,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -12622,15 +12878,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -12741,15 +13002,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -13017,15 +13283,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -13139,15 +13410,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -13433,15 +13709,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |
@@ -13555,15 +13836,20 @@ jobs:
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
       uses: 'google-github-actions/upload-cloud-storage@v2'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ github.job }}
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
         parent: false
         process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == 'refs/heads/master' }}
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
     - name: check results
       shell: bash
       run: |

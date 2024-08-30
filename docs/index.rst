@@ -15,7 +15,7 @@ OpenDDS
 
 Welcome to the documentation for OpenDDS |release|!
 
-OpenDDS is an open-source C++ framework for exchanging data in distributed systems.
+OpenDDS is an open-source framework for exchanging data in distributed systems.
 See :ref:`introduction--what-is-opendds` for more information.
 
 .. ifconfig:: is_release
@@ -55,7 +55,8 @@ Using OpenDDS
 :doc:`devguide/getting_started`
   A tutorial on making basic OpenDDS applications
 
-Much more information can be found in the :doc:`devguide/index`
+:doc:`devguide/index`
+  The OpenDDS Developer's Guide has more detailed documentation
 
 *******************
 Other Documentation

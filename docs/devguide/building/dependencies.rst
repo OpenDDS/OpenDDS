@@ -49,7 +49,7 @@ ACE/TAO
 
 The DOC Group repository for ACE/TAO is hosted on Github at `DOCGroup/ACE_TAO <https://github.com/DOCGroup/ACE_TAO>`__.
 
-There are two versions of ACE/TAO that are officially supported by OpenDDS in this release (|release|):
+These are the versions of ACE/TAO that are officially supported by OpenDDS in this release (|release|):
 
 .. _ace6tao2:
 
@@ -72,6 +72,14 @@ DOC Group :acetaorel:`ace7tao3`
   Pass ``--ace-github-latest`` to the configure script to clone the ``master`` branch of ACE/TAO as is.
   This also clones the ``master`` branch of MPC as is.
   :ref:`CMake <cmake-building>` will do the same if :cmake:var:`OPENDDS_ACE_TAO_GIT` is set to ``TRUE``.
+
+.. _ace8tao4:
+
+DOC Group :acetaorel:`ace8tao4`
+  Pass ``--ace-tao=ace8tao4`` to the configure script to download this version.
+  :ref:`CMake <cmake-building>` will download this version if :cmake:var:`OPENDDS_ACE_TAO_KIND` is set to ``ace8tao4``.
+
+  This version requires a C++17-capable compiler.
 
 .. _deps-ace:
 
@@ -209,7 +217,7 @@ Xerces
 OpenSSL
 =======
 
-`OpenSSL <https://www.openssl.org/>`__ is used for :ref:`sec` for verifying security configurations and encryption and decryption.
+`OpenSSL <https://www.openssl-library.org/>`__ is used for :ref:`sec` for verifying security configurations and encryption and decryption.
 Versions 1.0, 1.1 and 3.0 (3.0.1 or later) are supported.
 
 .. _deps-python:

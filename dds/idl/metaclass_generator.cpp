@@ -325,7 +325,7 @@ namespace {
       marshal_generator::gen_field_getValueFromSerialized(struct_node, clazz);
     } else {
       be_global->impl_ <<
-        "  Value getValue(Serializer& ser, const char* field, const TypeSupportImpl* = 0) const\n"
+        "  Value getValue(Serializer& ser, const char* field, TypeSupportImpl* = 0) const\n"
         "  {\n"
         "    ACE_UNUSED_ARG(ser);\n"
         "    if (!field[0]) {\n"   // if 'field' is the empty string...
@@ -524,8 +524,8 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   AST_Type* type, const char*)
 {
   AST_Array* arr = dynamic_cast<AST_Array*>(type);
-  AST_Sequence* seq = 0;
-  if (!arr && !(seq = dynamic_cast<AST_Sequence*>(type))) {
+  AST_Sequence* seq = dynamic_cast<AST_Sequence*>(type);
+  if (!arr && !seq) {
     return true;
   }
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;

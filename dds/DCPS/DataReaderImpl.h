@@ -142,8 +142,6 @@ public:
   }
 
 private:
-  ~EndHistoricSamplesMissedSweeper();
-
   WeakRcHandle<DataReaderImpl> reader_;
   OPENDDS_SET(WriterInfo_rch) info_set_;
 
@@ -451,8 +449,7 @@ public:
 
   // Access to OwnershipManager is only valid when the domain participant is valid;
   // therefore, we must lock the domain pariticipant when using  OwnershipManager.
-  class OwnershipManagerPtr
-  {
+  class OwnershipManagerPtr {
   public:
     OwnershipManagerPtr(DataReaderImpl* reader)
       : participant_( (reader && reader->is_exclusive_ownership_) ? reader->participant_servant_.lock() : RcHandle<DomainParticipantImpl>())
@@ -913,8 +910,6 @@ private:
     }
 
   private:
-    ~LivelinessTimer() { }
-
     WeakRcHandle<DataReaderImpl> data_reader_;
 
     /// liveliness timer id; -1 if no timer is set
