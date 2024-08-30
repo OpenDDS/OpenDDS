@@ -407,7 +407,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::duration, ACE_Null_Mutex> _ptr;
-
     // sec
     public:
     bool sec_p () const;
@@ -415,8 +414,8 @@ namespace dds
     void sec (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) sec_auto_ptr_type;
-    sec_auto_ptr_type sec_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) sec_type;
+    sec_type sec_;
 
     // nanosec
     public:
@@ -425,8 +424,8 @@ namespace dds
     void nanosec (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) nanosec_auto_ptr_type;
-    nanosec_auto_ptr_type nanosec_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) nanosec_type;
+    nanosec_type nanosec_;
 
     public:
     duration ();
@@ -443,7 +442,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::stringSeq, ACE_Null_Mutex> _ptr;
-
     // element
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::XMLSchema::string<ACE_TCHAR>, ACE_Null_Mutex> element_value_type;
@@ -476,7 +474,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::dataRepresentationIdSeq, ACE_Null_Mutex> _ptr;
-
     // element
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::dataRepresentationIdKind, ACE_Null_Mutex> element_value_type;
@@ -509,7 +506,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::deadlineQosPolicy, ACE_Null_Mutex> _ptr;
-
     // period
     public:
     bool period_p () const;
@@ -517,8 +513,8 @@ namespace dds
     void period (::dds::duration const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::duration) period_auto_ptr_type;
-    period_auto_ptr_type period_;
+    typedef XML_XSC_SMART_PTR( ::dds::duration) period_type;
+    period_type period_;
 
     public:
     deadlineQosPolicy ();
@@ -535,7 +531,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::destinationOrderQosPolicy, ACE_Null_Mutex> _ptr;
-
     // kind
     public:
     bool kind_p () const;
@@ -543,8 +538,8 @@ namespace dds
     void kind (::dds::destinationOrderKind const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::destinationOrderKind) kind_auto_ptr_type;
-    kind_auto_ptr_type kind_;
+    typedef XML_XSC_SMART_PTR( ::dds::destinationOrderKind) kind_type;
+    kind_type kind_;
 
     public:
     destinationOrderQosPolicy ();
@@ -561,7 +556,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::durabilityQosPolicy, ACE_Null_Mutex> _ptr;
-
     // kind
     public:
     bool kind_p () const;
@@ -569,8 +563,8 @@ namespace dds
     void kind (::dds::durabilityKind const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::durabilityKind) kind_auto_ptr_type;
-    kind_auto_ptr_type kind_;
+    typedef XML_XSC_SMART_PTR( ::dds::durabilityKind) kind_type;
+    kind_type kind_;
 
     public:
     durabilityQosPolicy ();
@@ -587,7 +581,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::durabilityServiceQosPolicy, ACE_Null_Mutex> _ptr;
-
     // service_cleanup_delay
     public:
     bool service_cleanup_delay_p () const;
@@ -595,8 +588,8 @@ namespace dds
     void service_cleanup_delay (::dds::duration const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::duration) service_cleanup_delay_auto_ptr_type;
-    service_cleanup_delay_auto_ptr_type service_cleanup_delay_;
+    typedef XML_XSC_SMART_PTR( ::dds::duration) service_cleanup_delay_type;
+    service_cleanup_delay_type service_cleanup_delay_;
 
     // history_kind
     public:
@@ -605,8 +598,8 @@ namespace dds
     void history_kind (::dds::historyKind const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::historyKind) history_kind_auto_ptr_type;
-    history_kind_auto_ptr_type history_kind_;
+    typedef XML_XSC_SMART_PTR( ::dds::historyKind) history_kind_type;
+    history_kind_type history_kind_;
 
     // history_depth
     public:
@@ -615,8 +608,8 @@ namespace dds
     void history_depth (::XMLSchema::positiveInteger const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::positiveInteger) history_depth_auto_ptr_type;
-    history_depth_auto_ptr_type history_depth_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::positiveInteger) history_depth_type;
+    history_depth_type history_depth_;
 
     // max_samples
     public:
@@ -625,8 +618,8 @@ namespace dds
     void max_samples (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) max_samples_auto_ptr_type;
-    max_samples_auto_ptr_type max_samples_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) max_samples_type;
+    max_samples_type max_samples_;
 
     // max_instances
     public:
@@ -635,8 +628,8 @@ namespace dds
     void max_instances (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) max_instances_auto_ptr_type;
-    max_instances_auto_ptr_type max_instances_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) max_instances_type;
+    max_instances_type max_instances_;
 
     // max_samples_per_instance
     public:
@@ -645,8 +638,8 @@ namespace dds
     void max_samples_per_instance (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) max_samples_per_instance_auto_ptr_type;
-    max_samples_per_instance_auto_ptr_type max_samples_per_instance_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) max_samples_per_instance_type;
+    max_samples_per_instance_type max_samples_per_instance_;
 
     public:
     durabilityServiceQosPolicy ();
@@ -663,7 +656,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::entityFactoryQosPolicy, ACE_Null_Mutex> _ptr;
-
     // autoenable_created_entities
     public:
     bool autoenable_created_entities_p () const;
@@ -671,8 +663,8 @@ namespace dds
     void autoenable_created_entities (::XMLSchema::boolean const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::boolean) autoenable_created_entities_auto_ptr_type;
-    autoenable_created_entities_auto_ptr_type autoenable_created_entities_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::boolean) autoenable_created_entities_type;
+    autoenable_created_entities_type autoenable_created_entities_;
 
     public:
     entityFactoryQosPolicy ();
@@ -689,7 +681,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::groupDataQosPolicy, ACE_Null_Mutex> _ptr;
-
     // value
     public:
     bool value_p () const;
@@ -697,8 +688,8 @@ namespace dds
     void value (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) value_auto_ptr_type;
-    value_auto_ptr_type value_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) value_type;
+    value_type value_;
 
     public:
     groupDataQosPolicy ();
@@ -715,7 +706,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::historyQosPolicy, ACE_Null_Mutex> _ptr;
-
     // kind
     public:
     bool kind_p () const;
@@ -723,8 +713,8 @@ namespace dds
     void kind (::dds::historyKind const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::historyKind) kind_auto_ptr_type;
-    kind_auto_ptr_type kind_;
+    typedef XML_XSC_SMART_PTR( ::dds::historyKind) kind_type;
+    kind_type kind_;
 
     // depth
     public:
@@ -733,8 +723,8 @@ namespace dds
     void depth (::XMLSchema::positiveInteger const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::positiveInteger) depth_auto_ptr_type;
-    depth_auto_ptr_type depth_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::positiveInteger) depth_type;
+    depth_type depth_;
 
     public:
     historyQosPolicy ();
@@ -751,7 +741,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::latencyBudgetQosPolicy, ACE_Null_Mutex> _ptr;
-
     // duration
     public:
     bool duration_p () const;
@@ -759,8 +748,8 @@ namespace dds
     void duration (::dds::duration const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::duration) duration_auto_ptr_type;
-    duration_auto_ptr_type duration_;
+    typedef XML_XSC_SMART_PTR( ::dds::duration) duration_type;
+    duration_type duration_;
 
     public:
     latencyBudgetQosPolicy ();
@@ -777,7 +766,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::lifespanQosPolicy, ACE_Null_Mutex> _ptr;
-
     // duration
     public:
     bool duration_p () const;
@@ -785,8 +773,8 @@ namespace dds
     void duration (::dds::duration const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::duration) duration_auto_ptr_type;
-    duration_auto_ptr_type duration_;
+    typedef XML_XSC_SMART_PTR( ::dds::duration) duration_type;
+    duration_type duration_;
 
     public:
     lifespanQosPolicy ();
@@ -803,7 +791,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::livelinessQosPolicy, ACE_Null_Mutex> _ptr;
-
     // kind
     public:
     bool kind_p () const;
@@ -811,8 +798,8 @@ namespace dds
     void kind (::dds::livelinessKind const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::livelinessKind) kind_auto_ptr_type;
-    kind_auto_ptr_type kind_;
+    typedef XML_XSC_SMART_PTR( ::dds::livelinessKind) kind_type;
+    kind_type kind_;
 
     // lease_duration
     public:
@@ -821,8 +808,8 @@ namespace dds
     void lease_duration (::dds::duration const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::duration) lease_duration_auto_ptr_type;
-    lease_duration_auto_ptr_type lease_duration_;
+    typedef XML_XSC_SMART_PTR( ::dds::duration) lease_duration_type;
+    lease_duration_type lease_duration_;
 
     public:
     livelinessQosPolicy ();
@@ -839,7 +826,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::ownershipQosPolicy, ACE_Null_Mutex> _ptr;
-
     // kind
     public:
     bool kind_p () const;
@@ -847,8 +833,8 @@ namespace dds
     void kind (::dds::ownershipKind const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::ownershipKind) kind_auto_ptr_type;
-    kind_auto_ptr_type kind_;
+    typedef XML_XSC_SMART_PTR( ::dds::ownershipKind) kind_type;
+    kind_type kind_;
 
     public:
     ownershipQosPolicy ();
@@ -865,7 +851,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::ownershipStrengthQosPolicy, ACE_Null_Mutex> _ptr;
-
     // value
     public:
     bool value_p () const;
@@ -873,8 +858,8 @@ namespace dds
     void value (::XMLSchema::nonNegativeInteger const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::nonNegativeInteger) value_auto_ptr_type;
-    value_auto_ptr_type value_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::nonNegativeInteger) value_type;
+    value_type value_;
 
     public:
     ownershipStrengthQosPolicy ();
@@ -891,7 +876,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::partitionQosPolicy, ACE_Null_Mutex> _ptr;
-
     // name
     public:
     bool name_p () const;
@@ -899,8 +883,8 @@ namespace dds
     void name (::dds::stringSeq const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::stringSeq) name_auto_ptr_type;
-    name_auto_ptr_type name_;
+    typedef XML_XSC_SMART_PTR( ::dds::stringSeq) name_type;
+    name_type name_;
 
     public:
     partitionQosPolicy ();
@@ -917,7 +901,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::presentationQosPolicy, ACE_Null_Mutex> _ptr;
-
     // access_scope
     public:
     bool access_scope_p () const;
@@ -925,8 +908,8 @@ namespace dds
     void access_scope (::dds::presentationAccessScopeKind const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::presentationAccessScopeKind) access_scope_auto_ptr_type;
-    access_scope_auto_ptr_type access_scope_;
+    typedef XML_XSC_SMART_PTR( ::dds::presentationAccessScopeKind) access_scope_type;
+    access_scope_type access_scope_;
 
     // coherent_access
     public:
@@ -935,8 +918,8 @@ namespace dds
     void coherent_access (::XMLSchema::boolean const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::boolean) coherent_access_auto_ptr_type;
-    coherent_access_auto_ptr_type coherent_access_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::boolean) coherent_access_type;
+    coherent_access_type coherent_access_;
 
     // ordered_access
     public:
@@ -945,8 +928,8 @@ namespace dds
     void ordered_access (::XMLSchema::boolean const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::boolean) ordered_access_auto_ptr_type;
-    ordered_access_auto_ptr_type ordered_access_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::boolean) ordered_access_type;
+    ordered_access_type ordered_access_;
 
     public:
     presentationQosPolicy ();
@@ -963,7 +946,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::readerDataLifecycleQosPolicy, ACE_Null_Mutex> _ptr;
-
     // autopurge_nowriter_samples_delay
     public:
     bool autopurge_nowriter_samples_delay_p () const;
@@ -971,8 +953,8 @@ namespace dds
     void autopurge_nowriter_samples_delay (::dds::duration const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::duration) autopurge_nowriter_samples_delay_auto_ptr_type;
-    autopurge_nowriter_samples_delay_auto_ptr_type autopurge_nowriter_samples_delay_;
+    typedef XML_XSC_SMART_PTR( ::dds::duration) autopurge_nowriter_samples_delay_type;
+    autopurge_nowriter_samples_delay_type autopurge_nowriter_samples_delay_;
 
     // autopurge_disposed_samples_delay
     public:
@@ -981,8 +963,8 @@ namespace dds
     void autopurge_disposed_samples_delay (::dds::duration const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::duration) autopurge_disposed_samples_delay_auto_ptr_type;
-    autopurge_disposed_samples_delay_auto_ptr_type autopurge_disposed_samples_delay_;
+    typedef XML_XSC_SMART_PTR( ::dds::duration) autopurge_disposed_samples_delay_type;
+    autopurge_disposed_samples_delay_type autopurge_disposed_samples_delay_;
 
     public:
     readerDataLifecycleQosPolicy ();
@@ -999,7 +981,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::reliabilityQosPolicy, ACE_Null_Mutex> _ptr;
-
     // kind
     public:
     bool kind_p () const;
@@ -1007,8 +988,8 @@ namespace dds
     void kind (::dds::reliabilityKind const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::reliabilityKind) kind_auto_ptr_type;
-    kind_auto_ptr_type kind_;
+    typedef XML_XSC_SMART_PTR( ::dds::reliabilityKind) kind_type;
+    kind_type kind_;
 
     // max_blocking_time
     public:
@@ -1017,8 +998,8 @@ namespace dds
     void max_blocking_time (::dds::duration const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::duration) max_blocking_time_auto_ptr_type;
-    max_blocking_time_auto_ptr_type max_blocking_time_;
+    typedef XML_XSC_SMART_PTR( ::dds::duration) max_blocking_time_type;
+    max_blocking_time_type max_blocking_time_;
 
     public:
     reliabilityQosPolicy ();
@@ -1035,7 +1016,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::resourceLimitsQosPolicy, ACE_Null_Mutex> _ptr;
-
     // max_samples
     public:
     bool max_samples_p () const;
@@ -1043,8 +1023,8 @@ namespace dds
     void max_samples (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) max_samples_auto_ptr_type;
-    max_samples_auto_ptr_type max_samples_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) max_samples_type;
+    max_samples_type max_samples_;
 
     // max_instances
     public:
@@ -1053,8 +1033,8 @@ namespace dds
     void max_instances (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) max_instances_auto_ptr_type;
-    max_instances_auto_ptr_type max_instances_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) max_instances_type;
+    max_instances_type max_instances_;
 
     // max_samples_per_instance
     public:
@@ -1063,8 +1043,8 @@ namespace dds
     void max_samples_per_instance (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) max_samples_per_instance_auto_ptr_type;
-    max_samples_per_instance_auto_ptr_type max_samples_per_instance_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) max_samples_per_instance_type;
+    max_samples_per_instance_type max_samples_per_instance_;
 
     // initial_samples
     public:
@@ -1073,8 +1053,8 @@ namespace dds
     void initial_samples (::XMLSchema::positiveInteger const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::positiveInteger) initial_samples_auto_ptr_type;
-    initial_samples_auto_ptr_type initial_samples_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::positiveInteger) initial_samples_type;
+    initial_samples_type initial_samples_;
 
     // initial_instances
     public:
@@ -1083,8 +1063,8 @@ namespace dds
     void initial_instances (::XMLSchema::positiveInteger const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::positiveInteger) initial_instances_auto_ptr_type;
-    initial_instances_auto_ptr_type initial_instances_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::positiveInteger) initial_instances_type;
+    initial_instances_type initial_instances_;
 
     public:
     resourceLimitsQosPolicy ();
@@ -1101,7 +1081,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::timeBasedFilterQosPolicy, ACE_Null_Mutex> _ptr;
-
     // minimum_separation
     public:
     bool minimum_separation_p () const;
@@ -1109,8 +1088,8 @@ namespace dds
     void minimum_separation (::dds::duration const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::duration) minimum_separation_auto_ptr_type;
-    minimum_separation_auto_ptr_type minimum_separation_;
+    typedef XML_XSC_SMART_PTR( ::dds::duration) minimum_separation_type;
+    minimum_separation_type minimum_separation_;
 
     public:
     timeBasedFilterQosPolicy ();
@@ -1127,7 +1106,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::topicDataQosPolicy, ACE_Null_Mutex> _ptr;
-
     // value
     public:
     bool value_p () const;
@@ -1135,8 +1113,8 @@ namespace dds
     void value (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) value_auto_ptr_type;
-    value_auto_ptr_type value_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) value_type;
+    value_type value_;
 
     public:
     topicDataQosPolicy ();
@@ -1153,7 +1131,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::transportPriorityQosPolicy, ACE_Null_Mutex> _ptr;
-
     // value
     public:
     bool value_p () const;
@@ -1161,8 +1138,8 @@ namespace dds
     void value (::XMLSchema::nonNegativeInteger const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::nonNegativeInteger) value_auto_ptr_type;
-    value_auto_ptr_type value_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::nonNegativeInteger) value_type;
+    value_type value_;
 
     public:
     transportPriorityQosPolicy ();
@@ -1179,7 +1156,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::userDataQosPolicy, ACE_Null_Mutex> _ptr;
-
     // value
     public:
     bool value_p () const;
@@ -1187,8 +1163,8 @@ namespace dds
     void value (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) value_auto_ptr_type;
-    value_auto_ptr_type value_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) value_type;
+    value_type value_;
 
     public:
     userDataQosPolicy ();
@@ -1205,7 +1181,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::writerDataLifecycleQosPolicy, ACE_Null_Mutex> _ptr;
-
     // autodispose_unregistered_instances
     public:
     bool autodispose_unregistered_instances_p () const;
@@ -1213,8 +1188,8 @@ namespace dds
     void autodispose_unregistered_instances (::XMLSchema::boolean const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::boolean) autodispose_unregistered_instances_auto_ptr_type;
-    autodispose_unregistered_instances_auto_ptr_type autodispose_unregistered_instances_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::boolean) autodispose_unregistered_instances_type;
+    autodispose_unregistered_instances_type autodispose_unregistered_instances_;
 
     public:
     writerDataLifecycleQosPolicy ();
@@ -1231,7 +1206,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::dataRepresentationQosPolicy, ACE_Null_Mutex> _ptr;
-
     // value
     public:
     bool value_p () const;
@@ -1239,8 +1213,8 @@ namespace dds
     void value (::dds::dataRepresentationIdSeq const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::dataRepresentationIdSeq) value_auto_ptr_type;
-    value_auto_ptr_type value_;
+    typedef XML_XSC_SMART_PTR( ::dds::dataRepresentationIdSeq) value_type;
+    value_type value_;
 
     public:
     dataRepresentationQosPolicy ();
@@ -1257,7 +1231,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::typeConsistencyEnforcementQosPolicy, ACE_Null_Mutex> _ptr;
-
     // kind
     public:
     bool kind_p () const;
@@ -1265,8 +1238,8 @@ namespace dds
     void kind (::dds::typeConsistencyKind const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::typeConsistencyKind) kind_auto_ptr_type;
-    kind_auto_ptr_type kind_;
+    typedef XML_XSC_SMART_PTR( ::dds::typeConsistencyKind) kind_type;
+    kind_type kind_;
 
     // ignore_sequence_bounds
     public:
@@ -1275,8 +1248,8 @@ namespace dds
     void ignore_sequence_bounds (::XMLSchema::boolean const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::boolean) ignore_sequence_bounds_auto_ptr_type;
-    ignore_sequence_bounds_auto_ptr_type ignore_sequence_bounds_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::boolean) ignore_sequence_bounds_type;
+    ignore_sequence_bounds_type ignore_sequence_bounds_;
 
     // ignore_string_bounds
     public:
@@ -1285,8 +1258,8 @@ namespace dds
     void ignore_string_bounds (::XMLSchema::boolean const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::boolean) ignore_string_bounds_auto_ptr_type;
-    ignore_string_bounds_auto_ptr_type ignore_string_bounds_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::boolean) ignore_string_bounds_type;
+    ignore_string_bounds_type ignore_string_bounds_;
 
     // ignore_member_names
     public:
@@ -1295,8 +1268,8 @@ namespace dds
     void ignore_member_names (::XMLSchema::boolean const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::boolean) ignore_member_names_auto_ptr_type;
-    ignore_member_names_auto_ptr_type ignore_member_names_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::boolean) ignore_member_names_type;
+    ignore_member_names_type ignore_member_names_;
 
     // prevent_type_widening
     public:
@@ -1305,8 +1278,8 @@ namespace dds
     void prevent_type_widening (::XMLSchema::boolean const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::boolean) prevent_type_widening_auto_ptr_type;
-    prevent_type_widening_auto_ptr_type prevent_type_widening_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::boolean) prevent_type_widening_type;
+    prevent_type_widening_type prevent_type_widening_;
 
     // force_type_validation
     public:
@@ -1315,8 +1288,8 @@ namespace dds
     void force_type_validation (::XMLSchema::boolean const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::boolean) force_type_validation_auto_ptr_type;
-    force_type_validation_auto_ptr_type force_type_validation_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::boolean) force_type_validation_type;
+    force_type_validation_type force_type_validation_;
 
     public:
     typeConsistencyEnforcementQosPolicy ();
@@ -1333,7 +1306,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::domainparticipantQos, ACE_Null_Mutex> _ptr;
-
     // user_data
     public:
     bool user_data_p () const;
@@ -1341,8 +1313,8 @@ namespace dds
     void user_data (::dds::userDataQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::userDataQosPolicy) user_data_auto_ptr_type;
-    user_data_auto_ptr_type user_data_;
+    typedef XML_XSC_SMART_PTR( ::dds::userDataQosPolicy) user_data_type;
+    user_data_type user_data_;
 
     // entity_factory
     public:
@@ -1351,8 +1323,8 @@ namespace dds
     void entity_factory (::dds::entityFactoryQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::entityFactoryQosPolicy) entity_factory_auto_ptr_type;
-    entity_factory_auto_ptr_type entity_factory_;
+    typedef XML_XSC_SMART_PTR( ::dds::entityFactoryQosPolicy) entity_factory_type;
+    entity_factory_type entity_factory_;
 
     // name
     public:
@@ -1362,8 +1334,8 @@ namespace dds
     void name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) name_auto_ptr_type;
-    name_auto_ptr_type name_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) name_type;
+    name_type name_;
 
     // base_name
     public:
@@ -1373,8 +1345,8 @@ namespace dds
     void base_name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) base_name_auto_ptr_type;
-    base_name_auto_ptr_type base_name_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) base_name_type;
+    base_name_type base_name_;
 
     public:
     domainparticipantQos ();
@@ -1391,7 +1363,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::publisherQos, ACE_Null_Mutex> _ptr;
-
     // presentation
     public:
     bool presentation_p () const;
@@ -1399,8 +1370,8 @@ namespace dds
     void presentation (::dds::presentationQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::presentationQosPolicy) presentation_auto_ptr_type;
-    presentation_auto_ptr_type presentation_;
+    typedef XML_XSC_SMART_PTR( ::dds::presentationQosPolicy) presentation_type;
+    presentation_type presentation_;
 
     // partition
     public:
@@ -1409,8 +1380,8 @@ namespace dds
     void partition (::dds::partitionQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::partitionQosPolicy) partition_auto_ptr_type;
-    partition_auto_ptr_type partition_;
+    typedef XML_XSC_SMART_PTR( ::dds::partitionQosPolicy) partition_type;
+    partition_type partition_;
 
     // group_data
     public:
@@ -1419,8 +1390,8 @@ namespace dds
     void group_data (::dds::groupDataQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::groupDataQosPolicy) group_data_auto_ptr_type;
-    group_data_auto_ptr_type group_data_;
+    typedef XML_XSC_SMART_PTR( ::dds::groupDataQosPolicy) group_data_type;
+    group_data_type group_data_;
 
     // entity_factory
     public:
@@ -1429,8 +1400,8 @@ namespace dds
     void entity_factory (::dds::entityFactoryQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::entityFactoryQosPolicy) entity_factory_auto_ptr_type;
-    entity_factory_auto_ptr_type entity_factory_;
+    typedef XML_XSC_SMART_PTR( ::dds::entityFactoryQosPolicy) entity_factory_type;
+    entity_factory_type entity_factory_;
 
     // name
     public:
@@ -1440,8 +1411,8 @@ namespace dds
     void name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) name_auto_ptr_type;
-    name_auto_ptr_type name_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) name_type;
+    name_type name_;
 
     // base_name
     public:
@@ -1451,8 +1422,8 @@ namespace dds
     void base_name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) base_name_auto_ptr_type;
-    base_name_auto_ptr_type base_name_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) base_name_type;
+    base_name_type base_name_;
 
     public:
     publisherQos ();
@@ -1469,7 +1440,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::subscriberQos, ACE_Null_Mutex> _ptr;
-
     // presentation
     public:
     bool presentation_p () const;
@@ -1477,8 +1447,8 @@ namespace dds
     void presentation (::dds::presentationQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::presentationQosPolicy) presentation_auto_ptr_type;
-    presentation_auto_ptr_type presentation_;
+    typedef XML_XSC_SMART_PTR( ::dds::presentationQosPolicy) presentation_type;
+    presentation_type presentation_;
 
     // partition
     public:
@@ -1487,8 +1457,8 @@ namespace dds
     void partition (::dds::partitionQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::partitionQosPolicy) partition_auto_ptr_type;
-    partition_auto_ptr_type partition_;
+    typedef XML_XSC_SMART_PTR( ::dds::partitionQosPolicy) partition_type;
+    partition_type partition_;
 
     // group_data
     public:
@@ -1497,8 +1467,8 @@ namespace dds
     void group_data (::dds::groupDataQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::groupDataQosPolicy) group_data_auto_ptr_type;
-    group_data_auto_ptr_type group_data_;
+    typedef XML_XSC_SMART_PTR( ::dds::groupDataQosPolicy) group_data_type;
+    group_data_type group_data_;
 
     // entity_factory
     public:
@@ -1507,8 +1477,8 @@ namespace dds
     void entity_factory (::dds::entityFactoryQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::entityFactoryQosPolicy) entity_factory_auto_ptr_type;
-    entity_factory_auto_ptr_type entity_factory_;
+    typedef XML_XSC_SMART_PTR( ::dds::entityFactoryQosPolicy) entity_factory_type;
+    entity_factory_type entity_factory_;
 
     // name
     public:
@@ -1518,8 +1488,8 @@ namespace dds
     void name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) name_auto_ptr_type;
-    name_auto_ptr_type name_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) name_type;
+    name_type name_;
 
     // base_name
     public:
@@ -1529,8 +1499,8 @@ namespace dds
     void base_name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) base_name_auto_ptr_type;
-    base_name_auto_ptr_type base_name_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) base_name_type;
+    base_name_type base_name_;
 
     public:
     subscriberQos ();
@@ -1547,7 +1517,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::topicQos, ACE_Null_Mutex> _ptr;
-
     // topic_data
     public:
     bool topic_data_p () const;
@@ -1555,8 +1524,8 @@ namespace dds
     void topic_data (::dds::topicDataQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::topicDataQosPolicy) topic_data_auto_ptr_type;
-    topic_data_auto_ptr_type topic_data_;
+    typedef XML_XSC_SMART_PTR( ::dds::topicDataQosPolicy) topic_data_type;
+    topic_data_type topic_data_;
 
     // durability
     public:
@@ -1565,8 +1534,8 @@ namespace dds
     void durability (::dds::durabilityQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::durabilityQosPolicy) durability_auto_ptr_type;
-    durability_auto_ptr_type durability_;
+    typedef XML_XSC_SMART_PTR( ::dds::durabilityQosPolicy) durability_type;
+    durability_type durability_;
 
     // durability_service
     public:
@@ -1575,8 +1544,8 @@ namespace dds
     void durability_service (::dds::durabilityServiceQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::durabilityServiceQosPolicy) durability_service_auto_ptr_type;
-    durability_service_auto_ptr_type durability_service_;
+    typedef XML_XSC_SMART_PTR( ::dds::durabilityServiceQosPolicy) durability_service_type;
+    durability_service_type durability_service_;
 
     // deadline
     public:
@@ -1585,8 +1554,8 @@ namespace dds
     void deadline (::dds::deadlineQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::deadlineQosPolicy) deadline_auto_ptr_type;
-    deadline_auto_ptr_type deadline_;
+    typedef XML_XSC_SMART_PTR( ::dds::deadlineQosPolicy) deadline_type;
+    deadline_type deadline_;
 
     // latency_budget
     public:
@@ -1595,8 +1564,8 @@ namespace dds
     void latency_budget (::dds::latencyBudgetQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::latencyBudgetQosPolicy) latency_budget_auto_ptr_type;
-    latency_budget_auto_ptr_type latency_budget_;
+    typedef XML_XSC_SMART_PTR( ::dds::latencyBudgetQosPolicy) latency_budget_type;
+    latency_budget_type latency_budget_;
 
     // liveliness
     public:
@@ -1605,8 +1574,8 @@ namespace dds
     void liveliness (::dds::livelinessQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::livelinessQosPolicy) liveliness_auto_ptr_type;
-    liveliness_auto_ptr_type liveliness_;
+    typedef XML_XSC_SMART_PTR( ::dds::livelinessQosPolicy) liveliness_type;
+    liveliness_type liveliness_;
 
     // reliability
     public:
@@ -1615,8 +1584,8 @@ namespace dds
     void reliability (::dds::reliabilityQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::reliabilityQosPolicy) reliability_auto_ptr_type;
-    reliability_auto_ptr_type reliability_;
+    typedef XML_XSC_SMART_PTR( ::dds::reliabilityQosPolicy) reliability_type;
+    reliability_type reliability_;
 
     // destination_order
     public:
@@ -1625,8 +1594,8 @@ namespace dds
     void destination_order (::dds::destinationOrderQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::destinationOrderQosPolicy) destination_order_auto_ptr_type;
-    destination_order_auto_ptr_type destination_order_;
+    typedef XML_XSC_SMART_PTR( ::dds::destinationOrderQosPolicy) destination_order_type;
+    destination_order_type destination_order_;
 
     // history
     public:
@@ -1635,8 +1604,8 @@ namespace dds
     void history (::dds::historyQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::historyQosPolicy) history_auto_ptr_type;
-    history_auto_ptr_type history_;
+    typedef XML_XSC_SMART_PTR( ::dds::historyQosPolicy) history_type;
+    history_type history_;
 
     // resource_limits
     public:
@@ -1645,8 +1614,8 @@ namespace dds
     void resource_limits (::dds::resourceLimitsQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::resourceLimitsQosPolicy) resource_limits_auto_ptr_type;
-    resource_limits_auto_ptr_type resource_limits_;
+    typedef XML_XSC_SMART_PTR( ::dds::resourceLimitsQosPolicy) resource_limits_type;
+    resource_limits_type resource_limits_;
 
     // transport_priority
     public:
@@ -1655,8 +1624,8 @@ namespace dds
     void transport_priority (::dds::transportPriorityQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::transportPriorityQosPolicy) transport_priority_auto_ptr_type;
-    transport_priority_auto_ptr_type transport_priority_;
+    typedef XML_XSC_SMART_PTR( ::dds::transportPriorityQosPolicy) transport_priority_type;
+    transport_priority_type transport_priority_;
 
     // lifespan
     public:
@@ -1665,8 +1634,8 @@ namespace dds
     void lifespan (::dds::lifespanQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::lifespanQosPolicy) lifespan_auto_ptr_type;
-    lifespan_auto_ptr_type lifespan_;
+    typedef XML_XSC_SMART_PTR( ::dds::lifespanQosPolicy) lifespan_type;
+    lifespan_type lifespan_;
 
     // ownership
     public:
@@ -1675,8 +1644,8 @@ namespace dds
     void ownership (::dds::ownershipQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::ownershipQosPolicy) ownership_auto_ptr_type;
-    ownership_auto_ptr_type ownership_;
+    typedef XML_XSC_SMART_PTR( ::dds::ownershipQosPolicy) ownership_type;
+    ownership_type ownership_;
 
     // representation
     public:
@@ -1685,8 +1654,8 @@ namespace dds
     void representation (::dds::dataRepresentationQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::dataRepresentationQosPolicy) representation_auto_ptr_type;
-    representation_auto_ptr_type representation_;
+    typedef XML_XSC_SMART_PTR( ::dds::dataRepresentationQosPolicy) representation_type;
+    representation_type representation_;
 
     // name
     public:
@@ -1696,8 +1665,8 @@ namespace dds
     void name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) name_auto_ptr_type;
-    name_auto_ptr_type name_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) name_type;
+    name_type name_;
 
     // base_name
     public:
@@ -1707,8 +1676,8 @@ namespace dds
     void base_name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) base_name_auto_ptr_type;
-    base_name_auto_ptr_type base_name_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) base_name_type;
+    base_name_type base_name_;
 
     // topic_filter
     public:
@@ -1718,8 +1687,8 @@ namespace dds
     void topic_filter (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) topic_filter_auto_ptr_type;
-    topic_filter_auto_ptr_type topic_filter_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) topic_filter_type;
+    topic_filter_type topic_filter_;
 
     public:
     topicQos ();
@@ -1736,7 +1705,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex> _ptr;
-
     // durability
     public:
     bool durability_p () const;
@@ -1744,8 +1712,8 @@ namespace dds
     void durability (::dds::durabilityQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::durabilityQosPolicy) durability_auto_ptr_type;
-    durability_auto_ptr_type durability_;
+    typedef XML_XSC_SMART_PTR( ::dds::durabilityQosPolicy) durability_type;
+    durability_type durability_;
 
     // deadline
     public:
@@ -1754,8 +1722,8 @@ namespace dds
     void deadline (::dds::deadlineQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::deadlineQosPolicy) deadline_auto_ptr_type;
-    deadline_auto_ptr_type deadline_;
+    typedef XML_XSC_SMART_PTR( ::dds::deadlineQosPolicy) deadline_type;
+    deadline_type deadline_;
 
     // latency_budget
     public:
@@ -1764,8 +1732,8 @@ namespace dds
     void latency_budget (::dds::latencyBudgetQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::latencyBudgetQosPolicy) latency_budget_auto_ptr_type;
-    latency_budget_auto_ptr_type latency_budget_;
+    typedef XML_XSC_SMART_PTR( ::dds::latencyBudgetQosPolicy) latency_budget_type;
+    latency_budget_type latency_budget_;
 
     // liveliness
     public:
@@ -1774,8 +1742,8 @@ namespace dds
     void liveliness (::dds::livelinessQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::livelinessQosPolicy) liveliness_auto_ptr_type;
-    liveliness_auto_ptr_type liveliness_;
+    typedef XML_XSC_SMART_PTR( ::dds::livelinessQosPolicy) liveliness_type;
+    liveliness_type liveliness_;
 
     // reliability
     public:
@@ -1784,8 +1752,8 @@ namespace dds
     void reliability (::dds::reliabilityQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::reliabilityQosPolicy) reliability_auto_ptr_type;
-    reliability_auto_ptr_type reliability_;
+    typedef XML_XSC_SMART_PTR( ::dds::reliabilityQosPolicy) reliability_type;
+    reliability_type reliability_;
 
     // destination_order
     public:
@@ -1794,8 +1762,8 @@ namespace dds
     void destination_order (::dds::destinationOrderQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::destinationOrderQosPolicy) destination_order_auto_ptr_type;
-    destination_order_auto_ptr_type destination_order_;
+    typedef XML_XSC_SMART_PTR( ::dds::destinationOrderQosPolicy) destination_order_type;
+    destination_order_type destination_order_;
 
     // history
     public:
@@ -1804,8 +1772,8 @@ namespace dds
     void history (::dds::historyQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::historyQosPolicy) history_auto_ptr_type;
-    history_auto_ptr_type history_;
+    typedef XML_XSC_SMART_PTR( ::dds::historyQosPolicy) history_type;
+    history_type history_;
 
     // resource_limits
     public:
@@ -1814,8 +1782,8 @@ namespace dds
     void resource_limits (::dds::resourceLimitsQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::resourceLimitsQosPolicy) resource_limits_auto_ptr_type;
-    resource_limits_auto_ptr_type resource_limits_;
+    typedef XML_XSC_SMART_PTR( ::dds::resourceLimitsQosPolicy) resource_limits_type;
+    resource_limits_type resource_limits_;
 
     // user_data
     public:
@@ -1824,8 +1792,8 @@ namespace dds
     void user_data (::dds::userDataQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::userDataQosPolicy) user_data_auto_ptr_type;
-    user_data_auto_ptr_type user_data_;
+    typedef XML_XSC_SMART_PTR( ::dds::userDataQosPolicy) user_data_type;
+    user_data_type user_data_;
 
     // ownership
     public:
@@ -1834,8 +1802,8 @@ namespace dds
     void ownership (::dds::ownershipQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::ownershipQosPolicy) ownership_auto_ptr_type;
-    ownership_auto_ptr_type ownership_;
+    typedef XML_XSC_SMART_PTR( ::dds::ownershipQosPolicy) ownership_type;
+    ownership_type ownership_;
 
     // time_based_filter
     public:
@@ -1844,8 +1812,8 @@ namespace dds
     void time_based_filter (::dds::timeBasedFilterQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::timeBasedFilterQosPolicy) time_based_filter_auto_ptr_type;
-    time_based_filter_auto_ptr_type time_based_filter_;
+    typedef XML_XSC_SMART_PTR( ::dds::timeBasedFilterQosPolicy) time_based_filter_type;
+    time_based_filter_type time_based_filter_;
 
     // reader_data_lifecycle
     public:
@@ -1854,8 +1822,8 @@ namespace dds
     void reader_data_lifecycle (::dds::readerDataLifecycleQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::readerDataLifecycleQosPolicy) reader_data_lifecycle_auto_ptr_type;
-    reader_data_lifecycle_auto_ptr_type reader_data_lifecycle_;
+    typedef XML_XSC_SMART_PTR( ::dds::readerDataLifecycleQosPolicy) reader_data_lifecycle_type;
+    reader_data_lifecycle_type reader_data_lifecycle_;
 
     // representation
     public:
@@ -1864,8 +1832,8 @@ namespace dds
     void representation (::dds::dataRepresentationQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::dataRepresentationQosPolicy) representation_auto_ptr_type;
-    representation_auto_ptr_type representation_;
+    typedef XML_XSC_SMART_PTR( ::dds::dataRepresentationQosPolicy) representation_type;
+    representation_type representation_;
 
     // type_consistency
     public:
@@ -1874,8 +1842,8 @@ namespace dds
     void type_consistency (::dds::typeConsistencyEnforcementQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::typeConsistencyEnforcementQosPolicy) type_consistency_auto_ptr_type;
-    type_consistency_auto_ptr_type type_consistency_;
+    typedef XML_XSC_SMART_PTR( ::dds::typeConsistencyEnforcementQosPolicy) type_consistency_type;
+    type_consistency_type type_consistency_;
 
     // name
     public:
@@ -1885,8 +1853,8 @@ namespace dds
     void name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) name_auto_ptr_type;
-    name_auto_ptr_type name_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) name_type;
+    name_type name_;
 
     // base_name
     public:
@@ -1896,8 +1864,8 @@ namespace dds
     void base_name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) base_name_auto_ptr_type;
-    base_name_auto_ptr_type base_name_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) base_name_type;
+    base_name_type base_name_;
 
     // topic_filter
     public:
@@ -1907,8 +1875,8 @@ namespace dds
     void topic_filter (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) topic_filter_auto_ptr_type;
-    topic_filter_auto_ptr_type topic_filter_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) topic_filter_type;
+    topic_filter_type topic_filter_;
 
     public:
     datareaderQos ();
@@ -1925,7 +1893,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::datawriterQos, ACE_Null_Mutex> _ptr;
-
     // durability
     public:
     bool durability_p () const;
@@ -1933,8 +1900,8 @@ namespace dds
     void durability (::dds::durabilityQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::durabilityQosPolicy) durability_auto_ptr_type;
-    durability_auto_ptr_type durability_;
+    typedef XML_XSC_SMART_PTR( ::dds::durabilityQosPolicy) durability_type;
+    durability_type durability_;
 
     // durability_service
     public:
@@ -1943,8 +1910,8 @@ namespace dds
     void durability_service (::dds::durabilityServiceQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::durabilityServiceQosPolicy) durability_service_auto_ptr_type;
-    durability_service_auto_ptr_type durability_service_;
+    typedef XML_XSC_SMART_PTR( ::dds::durabilityServiceQosPolicy) durability_service_type;
+    durability_service_type durability_service_;
 
     // deadline
     public:
@@ -1953,8 +1920,8 @@ namespace dds
     void deadline (::dds::deadlineQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::deadlineQosPolicy) deadline_auto_ptr_type;
-    deadline_auto_ptr_type deadline_;
+    typedef XML_XSC_SMART_PTR( ::dds::deadlineQosPolicy) deadline_type;
+    deadline_type deadline_;
 
     // latency_budget
     public:
@@ -1963,8 +1930,8 @@ namespace dds
     void latency_budget (::dds::latencyBudgetQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::latencyBudgetQosPolicy) latency_budget_auto_ptr_type;
-    latency_budget_auto_ptr_type latency_budget_;
+    typedef XML_XSC_SMART_PTR( ::dds::latencyBudgetQosPolicy) latency_budget_type;
+    latency_budget_type latency_budget_;
 
     // liveliness
     public:
@@ -1973,8 +1940,8 @@ namespace dds
     void liveliness (::dds::livelinessQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::livelinessQosPolicy) liveliness_auto_ptr_type;
-    liveliness_auto_ptr_type liveliness_;
+    typedef XML_XSC_SMART_PTR( ::dds::livelinessQosPolicy) liveliness_type;
+    liveliness_type liveliness_;
 
     // reliability
     public:
@@ -1983,8 +1950,8 @@ namespace dds
     void reliability (::dds::reliabilityQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::reliabilityQosPolicy) reliability_auto_ptr_type;
-    reliability_auto_ptr_type reliability_;
+    typedef XML_XSC_SMART_PTR( ::dds::reliabilityQosPolicy) reliability_type;
+    reliability_type reliability_;
 
     // destination_order
     public:
@@ -1993,8 +1960,8 @@ namespace dds
     void destination_order (::dds::destinationOrderQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::destinationOrderQosPolicy) destination_order_auto_ptr_type;
-    destination_order_auto_ptr_type destination_order_;
+    typedef XML_XSC_SMART_PTR( ::dds::destinationOrderQosPolicy) destination_order_type;
+    destination_order_type destination_order_;
 
     // history
     public:
@@ -2003,8 +1970,8 @@ namespace dds
     void history (::dds::historyQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::historyQosPolicy) history_auto_ptr_type;
-    history_auto_ptr_type history_;
+    typedef XML_XSC_SMART_PTR( ::dds::historyQosPolicy) history_type;
+    history_type history_;
 
     // resource_limits
     public:
@@ -2013,8 +1980,8 @@ namespace dds
     void resource_limits (::dds::resourceLimitsQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::resourceLimitsQosPolicy) resource_limits_auto_ptr_type;
-    resource_limits_auto_ptr_type resource_limits_;
+    typedef XML_XSC_SMART_PTR( ::dds::resourceLimitsQosPolicy) resource_limits_type;
+    resource_limits_type resource_limits_;
 
     // transport_priority
     public:
@@ -2023,8 +1990,8 @@ namespace dds
     void transport_priority (::dds::transportPriorityQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::transportPriorityQosPolicy) transport_priority_auto_ptr_type;
-    transport_priority_auto_ptr_type transport_priority_;
+    typedef XML_XSC_SMART_PTR( ::dds::transportPriorityQosPolicy) transport_priority_type;
+    transport_priority_type transport_priority_;
 
     // lifespan
     public:
@@ -2033,8 +2000,8 @@ namespace dds
     void lifespan (::dds::lifespanQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::lifespanQosPolicy) lifespan_auto_ptr_type;
-    lifespan_auto_ptr_type lifespan_;
+    typedef XML_XSC_SMART_PTR( ::dds::lifespanQosPolicy) lifespan_type;
+    lifespan_type lifespan_;
 
     // user_data
     public:
@@ -2043,8 +2010,8 @@ namespace dds
     void user_data (::dds::userDataQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::userDataQosPolicy) user_data_auto_ptr_type;
-    user_data_auto_ptr_type user_data_;
+    typedef XML_XSC_SMART_PTR( ::dds::userDataQosPolicy) user_data_type;
+    user_data_type user_data_;
 
     // ownership
     public:
@@ -2053,8 +2020,8 @@ namespace dds
     void ownership (::dds::ownershipQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::ownershipQosPolicy) ownership_auto_ptr_type;
-    ownership_auto_ptr_type ownership_;
+    typedef XML_XSC_SMART_PTR( ::dds::ownershipQosPolicy) ownership_type;
+    ownership_type ownership_;
 
     // ownership_strength
     public:
@@ -2063,8 +2030,8 @@ namespace dds
     void ownership_strength (::dds::ownershipStrengthQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::ownershipStrengthQosPolicy) ownership_strength_auto_ptr_type;
-    ownership_strength_auto_ptr_type ownership_strength_;
+    typedef XML_XSC_SMART_PTR( ::dds::ownershipStrengthQosPolicy) ownership_strength_type;
+    ownership_strength_type ownership_strength_;
 
     // writer_data_lifecycle
     public:
@@ -2073,8 +2040,8 @@ namespace dds
     void writer_data_lifecycle (::dds::writerDataLifecycleQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::writerDataLifecycleQosPolicy) writer_data_lifecycle_auto_ptr_type;
-    writer_data_lifecycle_auto_ptr_type writer_data_lifecycle_;
+    typedef XML_XSC_SMART_PTR( ::dds::writerDataLifecycleQosPolicy) writer_data_lifecycle_type;
+    writer_data_lifecycle_type writer_data_lifecycle_;
 
     // representation
     public:
@@ -2083,8 +2050,8 @@ namespace dds
     void representation (::dds::dataRepresentationQosPolicy const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::dataRepresentationQosPolicy) representation_auto_ptr_type;
-    representation_auto_ptr_type representation_;
+    typedef XML_XSC_SMART_PTR( ::dds::dataRepresentationQosPolicy) representation_type;
+    representation_type representation_;
 
     // name
     public:
@@ -2094,8 +2061,8 @@ namespace dds
     void name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) name_auto_ptr_type;
-    name_auto_ptr_type name_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) name_type;
+    name_type name_;
 
     // base_name
     public:
@@ -2105,8 +2072,8 @@ namespace dds
     void base_name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) base_name_auto_ptr_type;
-    base_name_auto_ptr_type base_name_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) base_name_type;
+    base_name_type base_name_;
 
     // topic_filter
     public:
@@ -2116,8 +2083,8 @@ namespace dds
     void topic_filter (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) topic_filter_auto_ptr_type;
-    topic_filter_auto_ptr_type topic_filter_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) topic_filter_type;
+    topic_filter_type topic_filter_;
 
     public:
     datawriterQos ();
@@ -2134,7 +2101,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex> _ptr;
-
     // datareader_qos
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::datareaderQos, ACE_Null_Mutex> datareader_qos_value_type;
@@ -2244,8 +2210,8 @@ namespace dds
     void name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) name_auto_ptr_type;
-    name_auto_ptr_type name_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) name_type;
+    name_type name_;
 
     // base_name
     public:
@@ -2255,8 +2221,8 @@ namespace dds
     void base_name (::XMLSchema::string<ACE_TCHAR> const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) base_name_auto_ptr_type;
-    base_name_auto_ptr_type base_name_;
+    typedef XML_XSC_SMART_PTR( ::XMLSchema::string<ACE_TCHAR>) base_name_type;
+    base_name_type base_name_;
 
     public:
     qosProfile (::XMLSchema::string<ACE_TCHAR> const& name__);
@@ -2273,7 +2239,6 @@ namespace dds
 
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::qosProfile_seq, ACE_Null_Mutex> _ptr;
-
     // qos_profile
     public:
     typedef ACE_Refcounted_Auto_Ptr < ::dds::qosProfile, ACE_Null_Mutex> qos_profile_value_type;
