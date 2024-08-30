@@ -68,11 +68,6 @@ public:
     const ::OpenDDS::DCPS::SubscriptionLostStatus & status
   );
 
-  virtual void on_budget_exceeded(
-    ::DDS::DataReader_ptr reader,
-    const ::OpenDDS::DCPS::BudgetExceededStatus& status
-  );
-
   virtual void read(::DDS::DataReader_ptr reader) = 0;
 
   int num_samples() const { return num_samples_; }

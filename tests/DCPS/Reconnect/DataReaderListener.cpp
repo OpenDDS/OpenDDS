@@ -156,11 +156,3 @@ void DataReaderListenerImpl::on_subscription_lost (
     //  "(%P|%t) on_subscription_lost  writer %d\n", status.publication_handles[i]));
   }
 }
-
-
-void DataReaderListenerImpl::on_budget_exceeded (
-  ::DDS::DataReader_ptr,
-  const ::OpenDDS::DCPS::BudgetExceededStatus&)
-{
-  ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_budget_exceeded\n"));
-}

@@ -62,9 +62,6 @@ public:
   virtual void on_subscription_lost(DDS::DataReader_ptr,
                                     const ::OpenDDS::DCPS::SubscriptionLostStatus&) {}
 
-  virtual void on_budget_exceeded(DDS::DataReader_ptr,
-                                  const ::OpenDDS::DCPS::BudgetExceededStatus&) {}
-
   int read_count() const {
     return read_count_;
   }

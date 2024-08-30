@@ -30,7 +30,7 @@ public:
 
   MultiTopicDataReader_T() {}
 
-  void init_typed(DataReaderEx* dr);
+  void init_typed(DDS::DataReader* dr);
   const MetaStruct& getResultingMeta();
   void incoming_sample(void* sample, const DDS::SampleInfo& info,
                        const char* topic, const MetaStruct& meta);

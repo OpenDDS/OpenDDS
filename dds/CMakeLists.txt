@@ -224,9 +224,6 @@ target_sources(OpenDDS_Dcps
     DCPS/ContentFilteredTopicImpl.h
     DCPS/DCPS_Utils.h
     DCPS/DataBlockLockPool.h
-    DCPS/DataCollector_T.cpp
-    DCPS/DataCollector_T.h
-    DCPS/DataCollector_T.inl
     DCPS/DataDurabilityCache.h
     DCPS/DataReaderCallbacks.h
     DCPS/DataReaderImpl.h
@@ -361,7 +358,6 @@ target_sources(OpenDDS_Dcps
     DCPS/SporadicTask.h
     DCPS/StaticDiscovery.h
     DCPS/StaticIncludes.h
-    DCPS/Stats_T.h
     DCPS/StatusConditionImpl.h
     DCPS/SubscriberImpl.h
     DCPS/SubscriptionInstance.h
