@@ -167,20 +167,6 @@ Subscriber::Subscriber( const Options& options)
     throw BadServantException();
   }
 
-  // Configure the raw data gathering.
-  servant->raw_latency_buffer_size() = this->options_.raw_buffer_size();
-  servant->raw_latency_buffer_type() = this->options_.raw_buffer_type();
-  if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
-      ACE_TEXT("configured to capture %d latency measurements of type %d ")
-      ACE_TEXT("per writer to file %C.\n"),
-      this->options_.raw_buffer_size(),
-      this->options_.raw_buffer_type(),
-      this->options_.rawOutputFilename().c_str()
-    ));
-  }
-
   TheTransportRegistry->bind_config(transport, servant);
 
   if( this->options_.verbose()) {
@@ -240,7 +226,7 @@ Subscriber::Subscriber( const Options& options)
     ));
   }
 
-  this->reader_ = ::OpenDDS::DCPS::DataReaderEx::_narrow( reader.in());
+  this->reader_ = DDS::DataReader::_narrow( reader.in());
   if( CORBA::is_nil( this->reader_.in())) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
@@ -248,11 +234,6 @@ Subscriber::Subscriber( const Options& options)
     ));
     throw BadReaderException();
   }
-
-  // Clear and start statistics gathering.  Ideally we would want to
-  // configurably delay the start here to avoid edge effects.
-  this->reader_->reset_latency_stats();
-  this->reader_->statistics_enabled( true);
 
   // Set the listener mask here so that we don't conflict with the
   // StatusCondition(s) that we want to wait on in the main thread.
@@ -344,54 +325,3 @@ Subscriber::run()
 }
 
 }
-
-std::ostream&
-operator<<( std::ostream& str, const Test::Subscriber& value)
-{
-  ::OpenDDS::DCPS::LatencyStatisticsSeq statistics;
-  value.reader_->get_latency_stats( statistics);
-  str << " --- statistical summary ---" << std::endl;
-  for( unsigned long index = 0; index < statistics.length(); ++index) {
-    str << "  Writer[ " << OpenDDS::DCPS::LogGuid(statistics[ index].publication).conv_ << "]" << std::endl;
-    str << "     samples: " << statistics[ index].n << std::endl;
-    str << "        mean: " << statistics[ index].mean << std::endl;
-    str << "     minimum: " << statistics[ index].minimum << std::endl;
-    str << "     maximum: " << statistics[ index].maximum << std::endl;
-    str << "    variance: " << statistics[ index].variance << std::endl;
-  }
-
-  return str;
-}
-
-namespace Test
-{
-
-std::ostream&
-Subscriber::rawData( std::ostream& str) const
-{
-  // Configure the raw data gathering and extract the raw latency data
-  // container.
-  OpenDDS::DCPS::DataReaderImpl* readerImpl
-    = dynamic_cast< OpenDDS::DCPS::DataReaderImpl*>( this->reader_.in());
-  if( readerImpl == 0) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
-      ACE_TEXT("failed to derive reader implementation.\n")
-    ));
-    throw BadReaderException();
-  }
-
-  int index = 0;
-  for( OpenDDS::DCPS::DataReaderImpl::StatsMapType::const_iterator current
-         = readerImpl->raw_latency_statistics().begin();
-       current != readerImpl->raw_latency_statistics().end();
-       ++current, ++index) {
-    str << std::endl << "  Writer[ " << OpenDDS::DCPS::LogGuid(current->first).conv_ << "]" << std::endl;
-#ifndef OPENDDS_SAFETY_PROFILE
-    current->second.raw_data( str);
-#endif //OPENDDS_SAFETY_PROFILE
-  }
-  return str;
-}
-
-} // End of namespace Test

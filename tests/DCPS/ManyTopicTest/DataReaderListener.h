@@ -99,12 +99,6 @@ public:
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_lost\n")));
   }
 
-  virtual void on_budget_exceeded(::DDS::DataReader_ptr,
-    const ::OpenDDS::DCPS::BudgetExceededStatus&)
-  {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_budget_exceeded\n"));
-  }
-
   void read(::DDS::DataReader_ptr reader);
 
   int num_samples() const { return num_samples_ ; }

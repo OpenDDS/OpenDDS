@@ -127,7 +127,6 @@
 /OpenDDS_DCPS__ConnectionRecordDataReaderTAOPeer.h
 /OpenDDS_DCPS__ConnectionRecordDataWriterTAOPeer.h
 /OpenDDS_DCPS__ConnectionRecordTypeSupportTAOPeer.h
-/OpenDDS_DCPS__DataReaderExTAOPeer.h
 /OpenDDS_DCPS__DataReaderListenerTAOPeer.h
 /OpenDDS_DCPS__DataWriterListenerTAOPeer.h
 /OpenDDS_DCPS__InternalThreadBuiltinTopicDataDataReaderTAOPeer.h
@@ -143,7 +142,6 @@
 /OpenDDS_DCPS_ConnectionRecordDataWriterHelper.h
 /OpenDDS_DCPS_ConnectionRecordTypeSupportHelper.h
 /OpenDDS_DCPS_ConnectionRecordTypeSupportImpl.h
-/OpenDDS_DCPS_DataReaderExHelper.h
 /OpenDDS_DCPS_DataReaderListenerHelper.h
 /OpenDDS_DCPS_DataWriterListenerHelper.h
 /OpenDDS_DCPS_InternalThreadBuiltinTopicDataDataReaderHelper.h

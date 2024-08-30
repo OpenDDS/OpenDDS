@@ -9,7 +9,6 @@
 #include "DataReaderCallbacks.h"
 #include "EntityImpl.h"
 #include "Definitions.h"
-#include "DataCollector_T.h"
 #include "DataReaderImpl.h"
 #include "PoolAllocator.h"
 
@@ -125,17 +124,6 @@ public:
 
   DDS::SubscriberListener_ptr listener_for(DDS::StatusKind kind);
 
-  /// @name Raw Latency Statistics Configuration Interfaces
-  /// @{
-
-  /// Configure the size of the raw data collection buffer.
-  unsigned int& raw_latency_buffer_size();
-
-  /// Configure the type of the raw data collection buffer.
-  DataCollector<double>::OnFull& raw_latency_buffer_type();
-
-  /// @}
-
   typedef OPENDDS_VECTOR(GUID_t) SubscriptionIdVec;
   /// Populates a std::vector with the SubscriptionIds (GUIDs)
   /// of this Subscriber's Data Readers
@@ -196,12 +184,6 @@ private:
 
   DDS::DomainId_t              domain_id_;
   GUID_t                       dp_id_;
-
-  /// Bound (or initial reservation) of raw latency buffers.
-  unsigned int raw_latency_buffer_size_;
-
-  /// Type of raw latency data buffers.
-  DataCollector<double>::OnFull raw_latency_buffer_type_;
 
   /// This lock protects datareader_set_. Only this lock needs to
   /// be acquired if only datareader_set_ is accessed.
