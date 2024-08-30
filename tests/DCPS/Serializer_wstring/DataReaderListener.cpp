@@ -282,13 +282,6 @@ void DataReaderListenerImpl::on_subscription_lost (
   cerr << "DataReaderListenerImpl::on_subscription_lost" << endl;
 }
 
-void DataReaderListenerImpl::on_budget_exceeded (
-  DDS::DataReader_ptr,
-  const ::OpenDDS::DCPS::BudgetExceededStatus&)
-{
-  cerr << "DataReaderListenerImpl::on_budget_exceeded" << endl;
-}
-
 bool DataReaderListenerImpl::received_all ()
 {
   return this->num_reads_ == num_expected_messages;

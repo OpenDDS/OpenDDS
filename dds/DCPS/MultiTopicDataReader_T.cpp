@@ -21,7 +21,7 @@ namespace DCPS {
 
 template<typename Sample, typename TypedDataReader>
 void
-MultiTopicDataReader_T<Sample, TypedDataReader>::init_typed(DataReaderEx* dr)
+MultiTopicDataReader_T<Sample, TypedDataReader>::init_typed(DDS::DataReader* dr)
 {
   typed_reader_ = TypedDataReader::Interface::_narrow(dr);
 }

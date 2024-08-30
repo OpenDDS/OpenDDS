@@ -82,9 +82,6 @@ DataReaderImpl::DataReaderImpl()
   , deadline_task_(make_rch<DRISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &DataReaderImpl::deadline_task))
   , is_bit_(false)
   , always_get_history_(false)
-  , statistics_enabled_(false)
-  , raw_latency_buffer_size_(0)
-  , raw_latency_buffer_type_(DataCollector<double>::KeepOldest)
   , transport_disabled_(false)
   , mb_alloc_(DEFAULT_TRANSPORT_RECEIVE_BUFFERS)
 {
@@ -121,10 +118,6 @@ DataReaderImpl::DataReaderImpl()
   sample_rejected_status_.total_count_change = 0;
   sample_rejected_status_.last_reason = DDS::NOT_REJECTED;
   sample_rejected_status_.last_instance_handle = DDS::HANDLE_NIL;
-
-  this->budget_exceeded_status_.total_count = 0;
-  this->budget_exceeded_status_.total_count_change = 0;
-  this->budget_exceeded_status_.last_instance_handle = DDS::HANDLE_NIL;
 }
 
 // This method is called when there are no longer any reference to the
@@ -279,14 +272,6 @@ DataReaderImpl::add_association(const WriterAssociation& writer,
     //   - only need to check reader qos - we know the writer must be >= reader
     if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
       info->waiting_for_end_historic_samples(true);
-    }
-
-    {
-      ACE_Guard<ACE_Recursive_Thread_Mutex> guard(statistics_lock_);
-      statistics_.insert(
-        StatsMapType::value_type(
-          writer_id,
-          WriterStats(raw_latency_buffer_size_, raw_latency_buffer_type_)));
     }
 
     // If this is a durable reader
@@ -470,19 +455,6 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
   if (!get_deleted()) {
     // stop pending associations for these writer ids
     this->stop_associating(writers.get_buffer(), writers.length());
-
-    {
-      CORBA::ULong wr_len = writers.length();
-      ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
-
-      for (CORBA::ULong i = 0; i < wr_len; i++) {
-        const GUID_t writer_id = writers[i];
-        {
-          ACE_Guard<ACE_Recursive_Thread_Mutex> guard(statistics_lock_);
-          statistics_.erase(writer_id);
-        }
-      }
-    }
   }
 
   remove_associations_i(writers, notify_lost);
@@ -1394,11 +1366,6 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       subscriber->data_received(this);
     }
 
-    // Only gather statistics about real samples, not registration data, etc.
-    if (header.message_id_ == SAMPLE_DATA) {
-      this->process_latency(sample);
-    }
-
     // This also adds to the sample container and makes any callbacks
     // and condition modifications.
 
@@ -1956,47 +1923,6 @@ DataReaderImpl::state_updated(DDS::InstanceHandle_t handle)
   state_updated_i(handle);
 }
 
-OpenDDS::DCPS::WriterStats::WriterStats(
-    int amount,
-    DataCollector<double>::OnFull type) : stats_(amount, type)
-{
-}
-
-void OpenDDS::DCPS::WriterStats::add_stat(const TimeDuration& delay)
-{
-  double datum = static_cast<double>(delay.value().sec());
-  datum += delay.value().usec() / 1000000.0;
-  this->stats_.add(datum);
-}
-
-OpenDDS::DCPS::LatencyStatistics OpenDDS::DCPS::WriterStats::get_stats() const
-{
-  LatencyStatistics value;
-
-  value.publication = GUID_UNKNOWN;
-  value.n           = this->stats_.n();
-  value.maximum     = this->stats_.maximum();
-  value.minimum     = this->stats_.minimum();
-  value.mean        = static_cast<double>(this->stats_.mean());
-  value.variance    = static_cast<double>(this->stats_.var());
-
-  return value;
-}
-
-void OpenDDS::DCPS::WriterStats::reset_stats()
-{
-  this->stats_.reset();
-}
-
-#ifndef OPENDDS_SAFETY_PROFILE
-std::ostream& OpenDDS::DCPS::WriterStats::raw_data(std::ostream& str) const
-{
-  str << std::dec << this->stats_.size()
-                              << " samples out of " << this->stats_.n() << std::endl;
-  return str << this->stats_;
-}
-#endif //OPENDDS_SAFETY_PROFILE
-
 void
 DataReaderImpl::writer_removed(WriterInfo& info)
 {
@@ -2248,131 +2174,6 @@ void DataReaderImpl::dispose_unregister(const ReceivedDataSample&,
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::dispose_unregister()\n"));
   }
-}
-
-void DataReaderImpl::process_latency(const ReceivedDataSample& sample)
-{
-  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(statistics_lock_);
-  StatsMapType::iterator location = this->statistics_.find(sample.header_.publication_id_);
-
-  if (location != this->statistics_.end()) {
-    const DDS::Duration_t zero = { DDS::DURATION_ZERO_SEC, DDS::DURATION_ZERO_NSEC };
-
-    // Only when the user has specified a latency budget or statistics
-    // are enabled we need to calculate our latency
-    if ((this->statistics_enabled()) ||
-        (this->qos_.latency_budget.duration > zero)) {
-      const DDS::Time_t timestamp = {
-        sample.header_.source_timestamp_sec_,
-        sample.header_.source_timestamp_nanosec_
-      };
-      const TimeDuration latency = SystemTimePoint::now() - SystemTimePoint(timestamp);
-
-      if (this->statistics_enabled()) {
-        location->second.add_stat(latency);
-      }
-
-      if (DCPS_debug_level > 9) {
-        ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
-            ACE_TEXT("measured latency of %C for current sample.\n"),
-            latency.str().c_str()));
-      }
-
-      if (this->qos_.latency_budget.duration > zero) {
-        // Check latency against the budget.
-        if (latency > TimeDuration(this->qos_.latency_budget.duration)) {
-          this->notify_latency(sample.header_.publication_id_);
-        }
-      }
-    }
-  } else if (DCPS_debug_level > 0) {
-    /// NB: This message is generated contemporaneously with a similar
-    ///     message from writer_activity().  That message is not marked
-    ///     as an error, so we follow that lead and leave this as an
-    ///     informational message, guarded by debug level.  This seems
-    ///     to be due to late samples (samples delivered after an
-    ///     association has been torn down).  We may want to promote this
-    ///     to a warning if other conditions causing this symptom are
-    ///     discovered.
-    ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
-        ACE_TEXT("reader %C is not associated with writer %C (late sample?).\n"),
-        LogGuid(get_guid()).c_str(),
-        LogGuid(sample.header_.publication_id_).c_str()));
-  }
-}
-
-void DataReaderImpl::notify_latency(GUID_t writer)
-{
-  // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
-  // is given to this DataReader then narrow() fails.
-  DataReaderListener_var listener = get_ext_listener();
-
-  if (!CORBA::is_nil(listener.in())) {
-    WriterIdSeq writerIds;
-    writerIds.length(1);
-    writerIds[ 0] = writer;
-
-    DDS::InstanceHandleSeq handles;
-    this->lookup_instance_handles(writerIds, handles);
-
-    if (handles.length() >= 1) {
-      this->budget_exceeded_status_.last_instance_handle = handles[ 0];
-
-    } else {
-      this->budget_exceeded_status_.last_instance_handle = -1;
-    }
-
-    ++this->budget_exceeded_status_.total_count;
-    ++this->budget_exceeded_status_.total_count_change;
-
-    listener->on_budget_exceeded(this, this->budget_exceeded_status_);
-
-    this->budget_exceeded_status_.total_count_change = 0;
-  }
-}
-
-#ifndef OPENDDS_SAFETY_PROFILE
-void
-DataReaderImpl::get_latency_stats(
-    OpenDDS::DCPS::LatencyStatisticsSeq & stats)
-{
-  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(statistics_lock_);
-  stats.length(static_cast<CORBA::ULong>(this->statistics_.size()));
-  int index = 0;
-
-  for (StatsMapType::const_iterator current = this->statistics_.begin();
-      current != this->statistics_.end();
-      ++current, ++index) {
-    stats[ index] = current->second.get_stats();
-    stats[ index].publication = current->first;
-  }
-}
-#endif
-
-void
-DataReaderImpl::reset_latency_stats()
-{
-  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(statistics_lock_);
-  for (StatsMapType::iterator current = this->statistics_.begin();
-      current != this->statistics_.end();
-      ++current) {
-    current->second.reset_stats();
-  }
-}
-
-CORBA::Boolean
-DataReaderImpl::statistics_enabled()
-{
-  return statistics_enabled_;
-}
-
-void
-DataReaderImpl::statistics_enabled(
-    CORBA::Boolean statistics_enabled)
-{
-  statistics_enabled_ = statistics_enabled;
 }
 
 void

@@ -127,13 +127,6 @@ Test::DataReaderListener::on_subscription_lost (
 }
 
 void
-Test::DataReaderListener::on_budget_exceeded (
-    DDS::DataReader_ptr,
-    const ::OpenDDS::DCPS::BudgetExceededStatus&)
-{
-}
-
-void
 Test::DataReaderListener::display_partitions (
   DDS::DataReader_ptr reader) const
 {
