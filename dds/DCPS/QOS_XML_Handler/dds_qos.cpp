@@ -5873,11 +5873,11 @@ namespace dds
   // duration
 
   duration::
-  duration (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  duration (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -5905,11 +5905,11 @@ namespace dds
   // stringSeq
 
   stringSeq::
-  stringSeq (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  stringSeq (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -5931,11 +5931,11 @@ namespace dds
   // dataRepresentationIdSeq
 
   dataRepresentationIdSeq::
-  dataRepresentationIdSeq (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  dataRepresentationIdSeq (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -5957,11 +5957,11 @@ namespace dds
   // deadlineQosPolicy
 
   deadlineQosPolicy::
-  deadlineQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  deadlineQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -5983,11 +5983,11 @@ namespace dds
   // destinationOrderQosPolicy
 
   destinationOrderQosPolicy::
-  destinationOrderQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  destinationOrderQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6009,11 +6009,11 @@ namespace dds
   // durabilityQosPolicy
 
   durabilityQosPolicy::
-  durabilityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  durabilityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6035,11 +6035,11 @@ namespace dds
   // durabilityServiceQosPolicy
 
   durabilityServiceQosPolicy::
-  durabilityServiceQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  durabilityServiceQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6091,11 +6091,11 @@ namespace dds
   // entityFactoryQosPolicy
 
   entityFactoryQosPolicy::
-  entityFactoryQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  entityFactoryQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6117,11 +6117,11 @@ namespace dds
   // groupDataQosPolicy
 
   groupDataQosPolicy::
-  groupDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  groupDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6143,11 +6143,11 @@ namespace dds
   // historyQosPolicy
 
   historyQosPolicy::
-  historyQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  historyQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6175,11 +6175,11 @@ namespace dds
   // latencyBudgetQosPolicy
 
   latencyBudgetQosPolicy::
-  latencyBudgetQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  latencyBudgetQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6201,11 +6201,11 @@ namespace dds
   // lifespanQosPolicy
 
   lifespanQosPolicy::
-  lifespanQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  lifespanQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6227,11 +6227,11 @@ namespace dds
   // livelinessQosPolicy
 
   livelinessQosPolicy::
-  livelinessQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  livelinessQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6259,11 +6259,11 @@ namespace dds
   // ownershipQosPolicy
 
   ownershipQosPolicy::
-  ownershipQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  ownershipQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6285,11 +6285,11 @@ namespace dds
   // ownershipStrengthQosPolicy
 
   ownershipStrengthQosPolicy::
-  ownershipStrengthQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  ownershipStrengthQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6311,11 +6311,11 @@ namespace dds
   // partitionQosPolicy
 
   partitionQosPolicy::
-  partitionQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  partitionQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6337,11 +6337,11 @@ namespace dds
   // presentationQosPolicy
 
   presentationQosPolicy::
-  presentationQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  presentationQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6375,11 +6375,11 @@ namespace dds
   // readerDataLifecycleQosPolicy
 
   readerDataLifecycleQosPolicy::
-  readerDataLifecycleQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  readerDataLifecycleQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6407,11 +6407,11 @@ namespace dds
   // reliabilityQosPolicy
 
   reliabilityQosPolicy::
-  reliabilityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  reliabilityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6439,11 +6439,11 @@ namespace dds
   // resourceLimitsQosPolicy
 
   resourceLimitsQosPolicy::
-  resourceLimitsQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  resourceLimitsQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6489,11 +6489,11 @@ namespace dds
   // timeBasedFilterQosPolicy
 
   timeBasedFilterQosPolicy::
-  timeBasedFilterQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  timeBasedFilterQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6515,11 +6515,11 @@ namespace dds
   // topicDataQosPolicy
 
   topicDataQosPolicy::
-  topicDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  topicDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6541,11 +6541,11 @@ namespace dds
   // transportPriorityQosPolicy
 
   transportPriorityQosPolicy::
-  transportPriorityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  transportPriorityQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6567,11 +6567,11 @@ namespace dds
   // userDataQosPolicy
 
   userDataQosPolicy::
-  userDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  userDataQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6593,11 +6593,11 @@ namespace dds
   // writerDataLifecycleQosPolicy
 
   writerDataLifecycleQosPolicy::
-  writerDataLifecycleQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  writerDataLifecycleQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6619,11 +6619,11 @@ namespace dds
   // dataRepresentationQosPolicy
 
   dataRepresentationQosPolicy::
-  dataRepresentationQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  dataRepresentationQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6645,11 +6645,11 @@ namespace dds
   // typeConsistencyEnforcementQosPolicy
 
   typeConsistencyEnforcementQosPolicy::
-  typeConsistencyEnforcementQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  typeConsistencyEnforcementQosPolicy (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6701,11 +6701,11 @@ namespace dds
   // domainparticipantQos
 
   domainparticipantQos::
-  domainparticipantQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  domainparticipantQos (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6754,11 +6754,11 @@ namespace dds
   // publisherQos
 
   publisherQos::
-  publisherQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  publisherQos (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6819,11 +6819,11 @@ namespace dds
   // subscriberQos
 
   subscriberQos::
-  subscriberQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  subscriberQos (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -6884,11 +6884,11 @@ namespace dds
   // topicQos
 
   topicQos::
-  topicQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  topicQos (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -7015,11 +7015,11 @@ namespace dds
   // datareaderQos
 
   datareaderQos::
-  datareaderQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  datareaderQos (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -7146,11 +7146,11 @@ namespace dds
   // datawriterQos
 
   datawriterQos::
-  datawriterQos (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  datawriterQos (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -7289,11 +7289,11 @@ namespace dds
   // qosProfile
 
   qosProfile::
-  qosProfile (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  qosProfile (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
@@ -7366,11 +7366,11 @@ namespace dds
   // qosProfile_seq
 
   qosProfile_seq::
-  qosProfile_seq (::XSCRT::XML::Element<ACE_TCHAR> const& e)
-  :Base (e)
+  qosProfile_seq (::XSCRT::XML::Element<ACE_TCHAR> const& element)
+  :Base (element)
   {
 
-    ::XSCRT::Parser<ACE_TCHAR> p (e);
+    ::XSCRT::Parser<ACE_TCHAR> p (element);
 
     while (p.more_elements ())
     {
