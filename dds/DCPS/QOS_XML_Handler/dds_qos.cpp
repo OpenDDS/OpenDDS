@@ -11,10 +11,6 @@
 #include "dds_qos.hpp"
 
 #include "ace/ace_wchar.h"
-#include "ace/Null_Mutex.h"
-#include "ace/TSS_T.h"
-#include "ace/Singleton.h"
-
 namespace dds
 {
   // destinationOrderKind
@@ -260,27 +256,25 @@ namespace dds
 
   duration::duration (duration const& s) :
   ::XSCRT::Type (s)
-  , sec_ (s.sec_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.sec_) : 0)
-  , nanosec_ (s.nanosec_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.nanosec_) : 0)
+  , sec_ (s.sec_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.sec_) : nullptr)
+  , nanosec_ (s.nanosec_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.nanosec_) : nullptr)
   {
-    if (sec_.get ()) sec_->container (this);
-    if (nanosec_.get ()) nanosec_->container (this);
   }
 
   duration&
   duration::operator= (duration const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.sec_.get ())
+      if (s.sec_)
         sec (*(s.sec_));
       else
-        sec_.reset (0);
+        sec_.release ();
 
-      if (s.nanosec_.get ())
+      if (s.nanosec_)
         nanosec (*(s.nanosec_));
       else
-        nanosec_.reset (0);
+        nanosec_.release ();
     }
 
     return *this;
@@ -291,7 +285,7 @@ namespace dds
   bool duration::
   sec_p () const
   {
-    return sec_.get () != 0;
+    return !!sec_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& duration::
@@ -303,15 +297,14 @@ namespace dds
   void duration::
   sec (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (sec_.get ())
+    if (sec_)
     {
       *sec_ = e;
     }
 
     else
     {
-      sec_ = duration::sec_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      sec_->container (this);
+      sec_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -319,7 +312,7 @@ namespace dds
   bool duration::
   nanosec_p () const
   {
-    return nanosec_.get () != 0;
+    return !!nanosec_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& duration::
@@ -331,15 +324,14 @@ namespace dds
   void duration::
   nanosec (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (nanosec_.get ())
+    if (nanosec_)
     {
       *nanosec_ = e;
     }
 
     else
     {
-      nanosec_ = duration::nanosec_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      nanosec_->container (this);
+      nanosec_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -360,7 +352,7 @@ namespace dds
   stringSeq&
   stringSeq::operator= (stringSeq const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
       element_ = s.element_;
     }
@@ -370,40 +362,16 @@ namespace dds
 
 
   // stringSeq
-  stringSeq::element_iterator stringSeq::
-  begin_element ()
-  {
-    return element_.begin ();
-  }
-
-  stringSeq::element_iterator stringSeq::
-  end_element ()
-  {
-    return element_.end ();
-  }
-
   stringSeq::element_const_iterator stringSeq::
   begin_element () const
   {
-    return element_.begin ();
+    return element_.cbegin ();
   }
 
   stringSeq::element_const_iterator stringSeq::
   end_element () const
   {
-    return element_.end ();
-  }
-
-  void stringSeq::
-  add_element (stringSeq::element_value_type const& e)
-  {
-    element_.push_back (e);
-  }
-
-  void stringSeq::
-  del_element (stringSeq::element_value_type const& e)
-  {
-    element_.remove (e);
+    return element_.cend ();
   }
 
   size_t stringSeq::
@@ -429,7 +397,7 @@ namespace dds
   dataRepresentationIdSeq&
   dataRepresentationIdSeq::operator= (dataRepresentationIdSeq const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
       element_ = s.element_;
     }
@@ -439,40 +407,16 @@ namespace dds
 
 
   // dataRepresentationIdSeq
-  dataRepresentationIdSeq::element_iterator dataRepresentationIdSeq::
-  begin_element ()
-  {
-    return element_.begin ();
-  }
-
-  dataRepresentationIdSeq::element_iterator dataRepresentationIdSeq::
-  end_element ()
-  {
-    return element_.end ();
-  }
-
   dataRepresentationIdSeq::element_const_iterator dataRepresentationIdSeq::
   begin_element () const
   {
-    return element_.begin ();
+    return element_.cbegin ();
   }
 
   dataRepresentationIdSeq::element_const_iterator dataRepresentationIdSeq::
   end_element () const
   {
-    return element_.end ();
-  }
-
-  void dataRepresentationIdSeq::
-  add_element (dataRepresentationIdSeq::element_value_type const& e)
-  {
-    element_.push_back (e);
-  }
-
-  void dataRepresentationIdSeq::
-  del_element (dataRepresentationIdSeq::element_value_type const& e)
-  {
-    element_.remove (e);
+    return element_.cend ();
   }
 
   size_t dataRepresentationIdSeq::
@@ -491,20 +435,19 @@ namespace dds
 
   deadlineQosPolicy::deadlineQosPolicy (deadlineQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , period_ (s.period_.get () ? new ::dds::duration (*s.period_) : 0)
+  , period_ (s.period_ ? std::make_unique<::dds::duration> (*s.period_) : nullptr)
   {
-    if (period_.get ()) period_->container (this);
   }
 
   deadlineQosPolicy&
   deadlineQosPolicy::operator= (deadlineQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.period_.get ())
+      if (s.period_)
         period (*(s.period_));
       else
-        period_.reset (0);
+        period_.release ();
     }
 
     return *this;
@@ -515,7 +458,7 @@ namespace dds
   bool deadlineQosPolicy::
   period_p () const
   {
-    return period_.get () != 0;
+    return !!period_;
   }
 
   ::dds::duration const& deadlineQosPolicy::
@@ -527,15 +470,14 @@ namespace dds
   void deadlineQosPolicy::
   period (::dds::duration const& e)
   {
-    if (period_.get ())
+    if (period_)
     {
       *period_ = e;
     }
 
     else
     {
-      period_ = deadlineQosPolicy::period_type (new ::dds::duration (e));
-      period_->container (this);
+      period_ = std::make_unique<::dds::duration> (e);
     }
   }
 
@@ -549,20 +491,19 @@ namespace dds
 
   destinationOrderQosPolicy::destinationOrderQosPolicy (destinationOrderQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , kind_ (s.kind_.get () ? new ::dds::destinationOrderKind (*s.kind_) : 0)
+  , kind_ (s.kind_ ? std::make_unique<::dds::destinationOrderKind> (*s.kind_) : nullptr)
   {
-    if (kind_.get ()) kind_->container (this);
   }
 
   destinationOrderQosPolicy&
   destinationOrderQosPolicy::operator= (destinationOrderQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.kind_.get ())
+      if (s.kind_)
         kind (*(s.kind_));
       else
-        kind_.reset (0);
+        kind_.release ();
     }
 
     return *this;
@@ -573,7 +514,7 @@ namespace dds
   bool destinationOrderQosPolicy::
   kind_p () const
   {
-    return kind_.get () != 0;
+    return !!kind_;
   }
 
   ::dds::destinationOrderKind const& destinationOrderQosPolicy::
@@ -585,15 +526,14 @@ namespace dds
   void destinationOrderQosPolicy::
   kind (::dds::destinationOrderKind const& e)
   {
-    if (kind_.get ())
+    if (kind_)
     {
       *kind_ = e;
     }
 
     else
     {
-      kind_ = destinationOrderQosPolicy::kind_type (new ::dds::destinationOrderKind (e));
-      kind_->container (this);
+      kind_ = std::make_unique<::dds::destinationOrderKind> (e);
     }
   }
 
@@ -607,20 +547,19 @@ namespace dds
 
   durabilityQosPolicy::durabilityQosPolicy (durabilityQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , kind_ (s.kind_.get () ? new ::dds::durabilityKind (*s.kind_) : 0)
+  , kind_ (s.kind_ ? std::make_unique<::dds::durabilityKind> (*s.kind_) : nullptr)
   {
-    if (kind_.get ()) kind_->container (this);
   }
 
   durabilityQosPolicy&
   durabilityQosPolicy::operator= (durabilityQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.kind_.get ())
+      if (s.kind_)
         kind (*(s.kind_));
       else
-        kind_.reset (0);
+        kind_.release ();
     }
 
     return *this;
@@ -631,7 +570,7 @@ namespace dds
   bool durabilityQosPolicy::
   kind_p () const
   {
-    return kind_.get () != 0;
+    return !!kind_;
   }
 
   ::dds::durabilityKind const& durabilityQosPolicy::
@@ -643,15 +582,14 @@ namespace dds
   void durabilityQosPolicy::
   kind (::dds::durabilityKind const& e)
   {
-    if (kind_.get ())
+    if (kind_)
     {
       *kind_ = e;
     }
 
     else
     {
-      kind_ = durabilityQosPolicy::kind_type (new ::dds::durabilityKind (e));
-      kind_->container (this);
+      kind_ = std::make_unique<::dds::durabilityKind> (e);
     }
   }
 
@@ -665,55 +603,49 @@ namespace dds
 
   durabilityServiceQosPolicy::durabilityServiceQosPolicy (durabilityServiceQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , service_cleanup_delay_ (s.service_cleanup_delay_.get () ? new ::dds::duration (*s.service_cleanup_delay_) : 0)
-  , history_kind_ (s.history_kind_.get () ? new ::dds::historyKind (*s.history_kind_) : 0)
-  , history_depth_ (s.history_depth_.get () ? new ::XMLSchema::positiveInteger (*s.history_depth_) : 0)
-  , max_samples_ (s.max_samples_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_) : 0)
-  , max_instances_ (s.max_instances_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_instances_) : 0)
-  , max_samples_per_instance_ (s.max_samples_per_instance_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_per_instance_) : 0)
+  , service_cleanup_delay_ (s.service_cleanup_delay_ ? std::make_unique<::dds::duration> (*s.service_cleanup_delay_) : nullptr)
+  , history_kind_ (s.history_kind_ ? std::make_unique<::dds::historyKind> (*s.history_kind_) : nullptr)
+  , history_depth_ (s.history_depth_ ? std::make_unique<::XMLSchema::positiveInteger> (*s.history_depth_) : nullptr)
+  , max_samples_ (s.max_samples_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.max_samples_) : nullptr)
+  , max_instances_ (s.max_instances_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.max_instances_) : nullptr)
+  , max_samples_per_instance_ (s.max_samples_per_instance_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.max_samples_per_instance_) : nullptr)
   {
-    if (service_cleanup_delay_.get ()) service_cleanup_delay_->container (this);
-    if (history_kind_.get ()) history_kind_->container (this);
-    if (history_depth_.get ()) history_depth_->container (this);
-    if (max_samples_.get ()) max_samples_->container (this);
-    if (max_instances_.get ()) max_instances_->container (this);
-    if (max_samples_per_instance_.get ()) max_samples_per_instance_->container (this);
   }
 
   durabilityServiceQosPolicy&
   durabilityServiceQosPolicy::operator= (durabilityServiceQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.service_cleanup_delay_.get ())
+      if (s.service_cleanup_delay_)
         service_cleanup_delay (*(s.service_cleanup_delay_));
       else
-        service_cleanup_delay_.reset (0);
+        service_cleanup_delay_.release ();
 
-      if (s.history_kind_.get ())
+      if (s.history_kind_)
         history_kind (*(s.history_kind_));
       else
-        history_kind_.reset (0);
+        history_kind_.release ();
 
-      if (s.history_depth_.get ())
+      if (s.history_depth_)
         history_depth (*(s.history_depth_));
       else
-        history_depth_.reset (0);
+        history_depth_.release ();
 
-      if (s.max_samples_.get ())
+      if (s.max_samples_)
         max_samples (*(s.max_samples_));
       else
-        max_samples_.reset (0);
+        max_samples_.release ();
 
-      if (s.max_instances_.get ())
+      if (s.max_instances_)
         max_instances (*(s.max_instances_));
       else
-        max_instances_.reset (0);
+        max_instances_.release ();
 
-      if (s.max_samples_per_instance_.get ())
+      if (s.max_samples_per_instance_)
         max_samples_per_instance (*(s.max_samples_per_instance_));
       else
-        max_samples_per_instance_.reset (0);
+        max_samples_per_instance_.release ();
     }
 
     return *this;
@@ -724,7 +656,7 @@ namespace dds
   bool durabilityServiceQosPolicy::
   service_cleanup_delay_p () const
   {
-    return service_cleanup_delay_.get () != 0;
+    return !!service_cleanup_delay_;
   }
 
   ::dds::duration const& durabilityServiceQosPolicy::
@@ -736,15 +668,14 @@ namespace dds
   void durabilityServiceQosPolicy::
   service_cleanup_delay (::dds::duration const& e)
   {
-    if (service_cleanup_delay_.get ())
+    if (service_cleanup_delay_)
     {
       *service_cleanup_delay_ = e;
     }
 
     else
     {
-      service_cleanup_delay_ = durabilityServiceQosPolicy::service_cleanup_delay_type (new ::dds::duration (e));
-      service_cleanup_delay_->container (this);
+      service_cleanup_delay_ = std::make_unique<::dds::duration> (e);
     }
   }
 
@@ -752,7 +683,7 @@ namespace dds
   bool durabilityServiceQosPolicy::
   history_kind_p () const
   {
-    return history_kind_.get () != 0;
+    return !!history_kind_;
   }
 
   ::dds::historyKind const& durabilityServiceQosPolicy::
@@ -764,15 +695,14 @@ namespace dds
   void durabilityServiceQosPolicy::
   history_kind (::dds::historyKind const& e)
   {
-    if (history_kind_.get ())
+    if (history_kind_)
     {
       *history_kind_ = e;
     }
 
     else
     {
-      history_kind_ = durabilityServiceQosPolicy::history_kind_type (new ::dds::historyKind (e));
-      history_kind_->container (this);
+      history_kind_ = std::make_unique<::dds::historyKind> (e);
     }
   }
 
@@ -780,7 +710,7 @@ namespace dds
   bool durabilityServiceQosPolicy::
   history_depth_p () const
   {
-    return history_depth_.get () != 0;
+    return !!history_depth_;
   }
 
   ::XMLSchema::positiveInteger const& durabilityServiceQosPolicy::
@@ -792,15 +722,14 @@ namespace dds
   void durabilityServiceQosPolicy::
   history_depth (::XMLSchema::positiveInteger const& e)
   {
-    if (history_depth_.get ())
+    if (history_depth_)
     {
       *history_depth_ = e;
     }
 
     else
     {
-      history_depth_ = durabilityServiceQosPolicy::history_depth_type (new ::XMLSchema::positiveInteger (e));
-      history_depth_->container (this);
+      history_depth_ = std::make_unique<::XMLSchema::positiveInteger> (e);
     }
   }
 
@@ -808,7 +737,7 @@ namespace dds
   bool durabilityServiceQosPolicy::
   max_samples_p () const
   {
-    return max_samples_.get () != 0;
+    return !!max_samples_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& durabilityServiceQosPolicy::
@@ -820,15 +749,14 @@ namespace dds
   void durabilityServiceQosPolicy::
   max_samples (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (max_samples_.get ())
+    if (max_samples_)
     {
       *max_samples_ = e;
     }
 
     else
     {
-      max_samples_ = durabilityServiceQosPolicy::max_samples_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      max_samples_->container (this);
+      max_samples_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -836,7 +764,7 @@ namespace dds
   bool durabilityServiceQosPolicy::
   max_instances_p () const
   {
-    return max_instances_.get () != 0;
+    return !!max_instances_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& durabilityServiceQosPolicy::
@@ -848,15 +776,14 @@ namespace dds
   void durabilityServiceQosPolicy::
   max_instances (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (max_instances_.get ())
+    if (max_instances_)
     {
       *max_instances_ = e;
     }
 
     else
     {
-      max_instances_ = durabilityServiceQosPolicy::max_instances_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      max_instances_->container (this);
+      max_instances_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -864,7 +791,7 @@ namespace dds
   bool durabilityServiceQosPolicy::
   max_samples_per_instance_p () const
   {
-    return max_samples_per_instance_.get () != 0;
+    return !!max_samples_per_instance_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& durabilityServiceQosPolicy::
@@ -876,15 +803,14 @@ namespace dds
   void durabilityServiceQosPolicy::
   max_samples_per_instance (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (max_samples_per_instance_.get ())
+    if (max_samples_per_instance_)
     {
       *max_samples_per_instance_ = e;
     }
 
     else
     {
-      max_samples_per_instance_ = durabilityServiceQosPolicy::max_samples_per_instance_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      max_samples_per_instance_->container (this);
+      max_samples_per_instance_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -898,20 +824,19 @@ namespace dds
 
   entityFactoryQosPolicy::entityFactoryQosPolicy (entityFactoryQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , autoenable_created_entities_ (s.autoenable_created_entities_.get () ? new ::XMLSchema::boolean (*s.autoenable_created_entities_) : 0)
+  , autoenable_created_entities_ (s.autoenable_created_entities_ ? std::make_unique<::XMLSchema::boolean> (*s.autoenable_created_entities_) : nullptr)
   {
-    if (autoenable_created_entities_.get ()) autoenable_created_entities_->container (this);
   }
 
   entityFactoryQosPolicy&
   entityFactoryQosPolicy::operator= (entityFactoryQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.autoenable_created_entities_.get ())
+      if (s.autoenable_created_entities_)
         autoenable_created_entities (*(s.autoenable_created_entities_));
       else
-        autoenable_created_entities_.reset (0);
+        autoenable_created_entities_.release ();
     }
 
     return *this;
@@ -922,7 +847,7 @@ namespace dds
   bool entityFactoryQosPolicy::
   autoenable_created_entities_p () const
   {
-    return autoenable_created_entities_.get () != 0;
+    return !!autoenable_created_entities_;
   }
 
   ::XMLSchema::boolean const& entityFactoryQosPolicy::
@@ -934,15 +859,14 @@ namespace dds
   void entityFactoryQosPolicy::
   autoenable_created_entities (::XMLSchema::boolean const& e)
   {
-    if (autoenable_created_entities_.get ())
+    if (autoenable_created_entities_)
     {
       *autoenable_created_entities_ = e;
     }
 
     else
     {
-      autoenable_created_entities_ = entityFactoryQosPolicy::autoenable_created_entities_type (new ::XMLSchema::boolean (e));
-      autoenable_created_entities_->container (this);
+      autoenable_created_entities_ = std::make_unique<::XMLSchema::boolean> (e);
     }
   }
 
@@ -956,20 +880,19 @@ namespace dds
 
   groupDataQosPolicy::groupDataQosPolicy (groupDataQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , value_ (s.value_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.value_) : 0)
+  , value_ (s.value_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.value_) : nullptr)
   {
-    if (value_.get ()) value_->container (this);
   }
 
   groupDataQosPolicy&
   groupDataQosPolicy::operator= (groupDataQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.value_.get ())
+      if (s.value_)
         value (*(s.value_));
       else
-        value_.reset (0);
+        value_.release ();
     }
 
     return *this;
@@ -980,7 +903,7 @@ namespace dds
   bool groupDataQosPolicy::
   value_p () const
   {
-    return value_.get () != 0;
+    return !!value_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& groupDataQosPolicy::
@@ -992,15 +915,14 @@ namespace dds
   void groupDataQosPolicy::
   value (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (value_.get ())
+    if (value_)
     {
       *value_ = e;
     }
 
     else
     {
-      value_ = groupDataQosPolicy::value_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      value_->container (this);
+      value_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -1014,27 +936,25 @@ namespace dds
 
   historyQosPolicy::historyQosPolicy (historyQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , kind_ (s.kind_.get () ? new ::dds::historyKind (*s.kind_) : 0)
-  , depth_ (s.depth_.get () ? new ::XMLSchema::positiveInteger (*s.depth_) : 0)
+  , kind_ (s.kind_ ? std::make_unique<::dds::historyKind> (*s.kind_) : nullptr)
+  , depth_ (s.depth_ ? std::make_unique<::XMLSchema::positiveInteger> (*s.depth_) : nullptr)
   {
-    if (kind_.get ()) kind_->container (this);
-    if (depth_.get ()) depth_->container (this);
   }
 
   historyQosPolicy&
   historyQosPolicy::operator= (historyQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.kind_.get ())
+      if (s.kind_)
         kind (*(s.kind_));
       else
-        kind_.reset (0);
+        kind_.release ();
 
-      if (s.depth_.get ())
+      if (s.depth_)
         depth (*(s.depth_));
       else
-        depth_.reset (0);
+        depth_.release ();
     }
 
     return *this;
@@ -1045,7 +965,7 @@ namespace dds
   bool historyQosPolicy::
   kind_p () const
   {
-    return kind_.get () != 0;
+    return !!kind_;
   }
 
   ::dds::historyKind const& historyQosPolicy::
@@ -1057,15 +977,14 @@ namespace dds
   void historyQosPolicy::
   kind (::dds::historyKind const& e)
   {
-    if (kind_.get ())
+    if (kind_)
     {
       *kind_ = e;
     }
 
     else
     {
-      kind_ = historyQosPolicy::kind_type (new ::dds::historyKind (e));
-      kind_->container (this);
+      kind_ = std::make_unique<::dds::historyKind> (e);
     }
   }
 
@@ -1073,7 +992,7 @@ namespace dds
   bool historyQosPolicy::
   depth_p () const
   {
-    return depth_.get () != 0;
+    return !!depth_;
   }
 
   ::XMLSchema::positiveInteger const& historyQosPolicy::
@@ -1085,15 +1004,14 @@ namespace dds
   void historyQosPolicy::
   depth (::XMLSchema::positiveInteger const& e)
   {
-    if (depth_.get ())
+    if (depth_)
     {
       *depth_ = e;
     }
 
     else
     {
-      depth_ = historyQosPolicy::depth_type (new ::XMLSchema::positiveInteger (e));
-      depth_->container (this);
+      depth_ = std::make_unique<::XMLSchema::positiveInteger> (e);
     }
   }
 
@@ -1107,20 +1025,19 @@ namespace dds
 
   latencyBudgetQosPolicy::latencyBudgetQosPolicy (latencyBudgetQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , duration_ (s.duration_.get () ? new ::dds::duration (*s.duration_) : 0)
+  , duration_ (s.duration_ ? std::make_unique<::dds::duration> (*s.duration_) : nullptr)
   {
-    if (duration_.get ()) duration_->container (this);
   }
 
   latencyBudgetQosPolicy&
   latencyBudgetQosPolicy::operator= (latencyBudgetQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.duration_.get ())
+      if (s.duration_)
         duration (*(s.duration_));
       else
-        duration_.reset (0);
+        duration_.release ();
     }
 
     return *this;
@@ -1131,7 +1048,7 @@ namespace dds
   bool latencyBudgetQosPolicy::
   duration_p () const
   {
-    return duration_.get () != 0;
+    return !!duration_;
   }
 
   ::dds::duration const& latencyBudgetQosPolicy::
@@ -1143,15 +1060,14 @@ namespace dds
   void latencyBudgetQosPolicy::
   duration (::dds::duration const& e)
   {
-    if (duration_.get ())
+    if (duration_)
     {
       *duration_ = e;
     }
 
     else
     {
-      duration_ = latencyBudgetQosPolicy::duration_type (new ::dds::duration (e));
-      duration_->container (this);
+      duration_ = std::make_unique<::dds::duration> (e);
     }
   }
 
@@ -1165,20 +1081,19 @@ namespace dds
 
   lifespanQosPolicy::lifespanQosPolicy (lifespanQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , duration_ (s.duration_.get () ? new ::dds::duration (*s.duration_) : 0)
+  , duration_ (s.duration_ ? std::make_unique<::dds::duration> (*s.duration_) : nullptr)
   {
-    if (duration_.get ()) duration_->container (this);
   }
 
   lifespanQosPolicy&
   lifespanQosPolicy::operator= (lifespanQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.duration_.get ())
+      if (s.duration_)
         duration (*(s.duration_));
       else
-        duration_.reset (0);
+        duration_.release ();
     }
 
     return *this;
@@ -1189,7 +1104,7 @@ namespace dds
   bool lifespanQosPolicy::
   duration_p () const
   {
-    return duration_.get () != 0;
+    return !!duration_;
   }
 
   ::dds::duration const& lifespanQosPolicy::
@@ -1201,15 +1116,14 @@ namespace dds
   void lifespanQosPolicy::
   duration (::dds::duration const& e)
   {
-    if (duration_.get ())
+    if (duration_)
     {
       *duration_ = e;
     }
 
     else
     {
-      duration_ = lifespanQosPolicy::duration_type (new ::dds::duration (e));
-      duration_->container (this);
+      duration_ = std::make_unique<::dds::duration> (e);
     }
   }
 
@@ -1223,27 +1137,25 @@ namespace dds
 
   livelinessQosPolicy::livelinessQosPolicy (livelinessQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , kind_ (s.kind_.get () ? new ::dds::livelinessKind (*s.kind_) : 0)
-  , lease_duration_ (s.lease_duration_.get () ? new ::dds::duration (*s.lease_duration_) : 0)
+  , kind_ (s.kind_ ? std::make_unique<::dds::livelinessKind> (*s.kind_) : nullptr)
+  , lease_duration_ (s.lease_duration_ ? std::make_unique<::dds::duration> (*s.lease_duration_) : nullptr)
   {
-    if (kind_.get ()) kind_->container (this);
-    if (lease_duration_.get ()) lease_duration_->container (this);
   }
 
   livelinessQosPolicy&
   livelinessQosPolicy::operator= (livelinessQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.kind_.get ())
+      if (s.kind_)
         kind (*(s.kind_));
       else
-        kind_.reset (0);
+        kind_.release ();
 
-      if (s.lease_duration_.get ())
+      if (s.lease_duration_)
         lease_duration (*(s.lease_duration_));
       else
-        lease_duration_.reset (0);
+        lease_duration_.release ();
     }
 
     return *this;
@@ -1254,7 +1166,7 @@ namespace dds
   bool livelinessQosPolicy::
   kind_p () const
   {
-    return kind_.get () != 0;
+    return !!kind_;
   }
 
   ::dds::livelinessKind const& livelinessQosPolicy::
@@ -1266,15 +1178,14 @@ namespace dds
   void livelinessQosPolicy::
   kind (::dds::livelinessKind const& e)
   {
-    if (kind_.get ())
+    if (kind_)
     {
       *kind_ = e;
     }
 
     else
     {
-      kind_ = livelinessQosPolicy::kind_type (new ::dds::livelinessKind (e));
-      kind_->container (this);
+      kind_ = std::make_unique<::dds::livelinessKind> (e);
     }
   }
 
@@ -1282,7 +1193,7 @@ namespace dds
   bool livelinessQosPolicy::
   lease_duration_p () const
   {
-    return lease_duration_.get () != 0;
+    return !!lease_duration_;
   }
 
   ::dds::duration const& livelinessQosPolicy::
@@ -1294,15 +1205,14 @@ namespace dds
   void livelinessQosPolicy::
   lease_duration (::dds::duration const& e)
   {
-    if (lease_duration_.get ())
+    if (lease_duration_)
     {
       *lease_duration_ = e;
     }
 
     else
     {
-      lease_duration_ = livelinessQosPolicy::lease_duration_type (new ::dds::duration (e));
-      lease_duration_->container (this);
+      lease_duration_ = std::make_unique<::dds::duration> (e);
     }
   }
 
@@ -1316,20 +1226,19 @@ namespace dds
 
   ownershipQosPolicy::ownershipQosPolicy (ownershipQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , kind_ (s.kind_.get () ? new ::dds::ownershipKind (*s.kind_) : 0)
+  , kind_ (s.kind_ ? std::make_unique<::dds::ownershipKind> (*s.kind_) : nullptr)
   {
-    if (kind_.get ()) kind_->container (this);
   }
 
   ownershipQosPolicy&
   ownershipQosPolicy::operator= (ownershipQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.kind_.get ())
+      if (s.kind_)
         kind (*(s.kind_));
       else
-        kind_.reset (0);
+        kind_.release ();
     }
 
     return *this;
@@ -1340,7 +1249,7 @@ namespace dds
   bool ownershipQosPolicy::
   kind_p () const
   {
-    return kind_.get () != 0;
+    return !!kind_;
   }
 
   ::dds::ownershipKind const& ownershipQosPolicy::
@@ -1352,15 +1261,14 @@ namespace dds
   void ownershipQosPolicy::
   kind (::dds::ownershipKind const& e)
   {
-    if (kind_.get ())
+    if (kind_)
     {
       *kind_ = e;
     }
 
     else
     {
-      kind_ = ownershipQosPolicy::kind_type (new ::dds::ownershipKind (e));
-      kind_->container (this);
+      kind_ = std::make_unique<::dds::ownershipKind> (e);
     }
   }
 
@@ -1374,20 +1282,19 @@ namespace dds
 
   ownershipStrengthQosPolicy::ownershipStrengthQosPolicy (ownershipStrengthQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , value_ (s.value_.get () ? new ::XMLSchema::nonNegativeInteger (*s.value_) : 0)
+  , value_ (s.value_ ? std::make_unique<::XMLSchema::nonNegativeInteger> (*s.value_) : nullptr)
   {
-    if (value_.get ()) value_->container (this);
   }
 
   ownershipStrengthQosPolicy&
   ownershipStrengthQosPolicy::operator= (ownershipStrengthQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.value_.get ())
+      if (s.value_)
         value (*(s.value_));
       else
-        value_.reset (0);
+        value_.release ();
     }
 
     return *this;
@@ -1398,7 +1305,7 @@ namespace dds
   bool ownershipStrengthQosPolicy::
   value_p () const
   {
-    return value_.get () != 0;
+    return !!value_;
   }
 
   ::XMLSchema::nonNegativeInteger const& ownershipStrengthQosPolicy::
@@ -1410,15 +1317,14 @@ namespace dds
   void ownershipStrengthQosPolicy::
   value (::XMLSchema::nonNegativeInteger const& e)
   {
-    if (value_.get ())
+    if (value_)
     {
       *value_ = e;
     }
 
     else
     {
-      value_ = ownershipStrengthQosPolicy::value_type (new ::XMLSchema::nonNegativeInteger (e));
-      value_->container (this);
+      value_ = std::make_unique<::XMLSchema::nonNegativeInteger> (e);
     }
   }
 
@@ -1432,20 +1338,19 @@ namespace dds
 
   partitionQosPolicy::partitionQosPolicy (partitionQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , name_ (s.name_.get () ? new ::dds::stringSeq (*s.name_) : 0)
+  , name_ (s.name_ ? std::make_unique<::dds::stringSeq> (*s.name_) : nullptr)
   {
-    if (name_.get ()) name_->container (this);
   }
 
   partitionQosPolicy&
   partitionQosPolicy::operator= (partitionQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.name_.get ())
+      if (s.name_)
         name (*(s.name_));
       else
-        name_.reset (0);
+        name_.release ();
     }
 
     return *this;
@@ -1456,7 +1361,7 @@ namespace dds
   bool partitionQosPolicy::
   name_p () const
   {
-    return name_.get () != 0;
+    return !!name_;
   }
 
   ::dds::stringSeq const& partitionQosPolicy::
@@ -1468,15 +1373,14 @@ namespace dds
   void partitionQosPolicy::
   name (::dds::stringSeq const& e)
   {
-    if (name_.get ())
+    if (name_)
     {
       *name_ = e;
     }
 
     else
     {
-      name_ = partitionQosPolicy::name_type (new ::dds::stringSeq (e));
-      name_->container (this);
+      name_ = std::make_unique<::dds::stringSeq> (e);
     }
   }
 
@@ -1490,34 +1394,31 @@ namespace dds
 
   presentationQosPolicy::presentationQosPolicy (presentationQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , access_scope_ (s.access_scope_.get () ? new ::dds::presentationAccessScopeKind (*s.access_scope_) : 0)
-  , coherent_access_ (s.coherent_access_.get () ? new ::XMLSchema::boolean (*s.coherent_access_) : 0)
-  , ordered_access_ (s.ordered_access_.get () ? new ::XMLSchema::boolean (*s.ordered_access_) : 0)
+  , access_scope_ (s.access_scope_ ? std::make_unique<::dds::presentationAccessScopeKind> (*s.access_scope_) : nullptr)
+  , coherent_access_ (s.coherent_access_ ? std::make_unique<::XMLSchema::boolean> (*s.coherent_access_) : nullptr)
+  , ordered_access_ (s.ordered_access_ ? std::make_unique<::XMLSchema::boolean> (*s.ordered_access_) : nullptr)
   {
-    if (access_scope_.get ()) access_scope_->container (this);
-    if (coherent_access_.get ()) coherent_access_->container (this);
-    if (ordered_access_.get ()) ordered_access_->container (this);
   }
 
   presentationQosPolicy&
   presentationQosPolicy::operator= (presentationQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.access_scope_.get ())
+      if (s.access_scope_)
         access_scope (*(s.access_scope_));
       else
-        access_scope_.reset (0);
+        access_scope_.release ();
 
-      if (s.coherent_access_.get ())
+      if (s.coherent_access_)
         coherent_access (*(s.coherent_access_));
       else
-        coherent_access_.reset (0);
+        coherent_access_.release ();
 
-      if (s.ordered_access_.get ())
+      if (s.ordered_access_)
         ordered_access (*(s.ordered_access_));
       else
-        ordered_access_.reset (0);
+        ordered_access_.release ();
     }
 
     return *this;
@@ -1528,7 +1429,7 @@ namespace dds
   bool presentationQosPolicy::
   access_scope_p () const
   {
-    return access_scope_.get () != 0;
+    return !!access_scope_;
   }
 
   ::dds::presentationAccessScopeKind const& presentationQosPolicy::
@@ -1540,15 +1441,14 @@ namespace dds
   void presentationQosPolicy::
   access_scope (::dds::presentationAccessScopeKind const& e)
   {
-    if (access_scope_.get ())
+    if (access_scope_)
     {
       *access_scope_ = e;
     }
 
     else
     {
-      access_scope_ = presentationQosPolicy::access_scope_type (new ::dds::presentationAccessScopeKind (e));
-      access_scope_->container (this);
+      access_scope_ = std::make_unique<::dds::presentationAccessScopeKind> (e);
     }
   }
 
@@ -1556,7 +1456,7 @@ namespace dds
   bool presentationQosPolicy::
   coherent_access_p () const
   {
-    return coherent_access_.get () != 0;
+    return !!coherent_access_;
   }
 
   ::XMLSchema::boolean const& presentationQosPolicy::
@@ -1568,15 +1468,14 @@ namespace dds
   void presentationQosPolicy::
   coherent_access (::XMLSchema::boolean const& e)
   {
-    if (coherent_access_.get ())
+    if (coherent_access_)
     {
       *coherent_access_ = e;
     }
 
     else
     {
-      coherent_access_ = presentationQosPolicy::coherent_access_type (new ::XMLSchema::boolean (e));
-      coherent_access_->container (this);
+      coherent_access_ = std::make_unique<::XMLSchema::boolean> (e);
     }
   }
 
@@ -1584,7 +1483,7 @@ namespace dds
   bool presentationQosPolicy::
   ordered_access_p () const
   {
-    return ordered_access_.get () != 0;
+    return !!ordered_access_;
   }
 
   ::XMLSchema::boolean const& presentationQosPolicy::
@@ -1596,15 +1495,14 @@ namespace dds
   void presentationQosPolicy::
   ordered_access (::XMLSchema::boolean const& e)
   {
-    if (ordered_access_.get ())
+    if (ordered_access_)
     {
       *ordered_access_ = e;
     }
 
     else
     {
-      ordered_access_ = presentationQosPolicy::ordered_access_type (new ::XMLSchema::boolean (e));
-      ordered_access_->container (this);
+      ordered_access_ = std::make_unique<::XMLSchema::boolean> (e);
     }
   }
 
@@ -1618,27 +1516,25 @@ namespace dds
 
   readerDataLifecycleQosPolicy::readerDataLifecycleQosPolicy (readerDataLifecycleQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , autopurge_nowriter_samples_delay_ (s.autopurge_nowriter_samples_delay_.get () ? new ::dds::duration (*s.autopurge_nowriter_samples_delay_) : 0)
-  , autopurge_disposed_samples_delay_ (s.autopurge_disposed_samples_delay_.get () ? new ::dds::duration (*s.autopurge_disposed_samples_delay_) : 0)
+  , autopurge_nowriter_samples_delay_ (s.autopurge_nowriter_samples_delay_ ? std::make_unique<::dds::duration> (*s.autopurge_nowriter_samples_delay_) : nullptr)
+  , autopurge_disposed_samples_delay_ (s.autopurge_disposed_samples_delay_ ? std::make_unique<::dds::duration> (*s.autopurge_disposed_samples_delay_) : nullptr)
   {
-    if (autopurge_nowriter_samples_delay_.get ()) autopurge_nowriter_samples_delay_->container (this);
-    if (autopurge_disposed_samples_delay_.get ()) autopurge_disposed_samples_delay_->container (this);
   }
 
   readerDataLifecycleQosPolicy&
   readerDataLifecycleQosPolicy::operator= (readerDataLifecycleQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.autopurge_nowriter_samples_delay_.get ())
+      if (s.autopurge_nowriter_samples_delay_)
         autopurge_nowriter_samples_delay (*(s.autopurge_nowriter_samples_delay_));
       else
-        autopurge_nowriter_samples_delay_.reset (0);
+        autopurge_nowriter_samples_delay_.release ();
 
-      if (s.autopurge_disposed_samples_delay_.get ())
+      if (s.autopurge_disposed_samples_delay_)
         autopurge_disposed_samples_delay (*(s.autopurge_disposed_samples_delay_));
       else
-        autopurge_disposed_samples_delay_.reset (0);
+        autopurge_disposed_samples_delay_.release ();
     }
 
     return *this;
@@ -1649,7 +1545,7 @@ namespace dds
   bool readerDataLifecycleQosPolicy::
   autopurge_nowriter_samples_delay_p () const
   {
-    return autopurge_nowriter_samples_delay_.get () != 0;
+    return !!autopurge_nowriter_samples_delay_;
   }
 
   ::dds::duration const& readerDataLifecycleQosPolicy::
@@ -1661,15 +1557,14 @@ namespace dds
   void readerDataLifecycleQosPolicy::
   autopurge_nowriter_samples_delay (::dds::duration const& e)
   {
-    if (autopurge_nowriter_samples_delay_.get ())
+    if (autopurge_nowriter_samples_delay_)
     {
       *autopurge_nowriter_samples_delay_ = e;
     }
 
     else
     {
-      autopurge_nowriter_samples_delay_ = readerDataLifecycleQosPolicy::autopurge_nowriter_samples_delay_type (new ::dds::duration (e));
-      autopurge_nowriter_samples_delay_->container (this);
+      autopurge_nowriter_samples_delay_ = std::make_unique<::dds::duration> (e);
     }
   }
 
@@ -1677,7 +1572,7 @@ namespace dds
   bool readerDataLifecycleQosPolicy::
   autopurge_disposed_samples_delay_p () const
   {
-    return autopurge_disposed_samples_delay_.get () != 0;
+    return !!autopurge_disposed_samples_delay_;
   }
 
   ::dds::duration const& readerDataLifecycleQosPolicy::
@@ -1689,15 +1584,14 @@ namespace dds
   void readerDataLifecycleQosPolicy::
   autopurge_disposed_samples_delay (::dds::duration const& e)
   {
-    if (autopurge_disposed_samples_delay_.get ())
+    if (autopurge_disposed_samples_delay_)
     {
       *autopurge_disposed_samples_delay_ = e;
     }
 
     else
     {
-      autopurge_disposed_samples_delay_ = readerDataLifecycleQosPolicy::autopurge_disposed_samples_delay_type (new ::dds::duration (e));
-      autopurge_disposed_samples_delay_->container (this);
+      autopurge_disposed_samples_delay_ = std::make_unique<::dds::duration> (e);
     }
   }
 
@@ -1711,27 +1605,25 @@ namespace dds
 
   reliabilityQosPolicy::reliabilityQosPolicy (reliabilityQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , kind_ (s.kind_.get () ? new ::dds::reliabilityKind (*s.kind_) : 0)
-  , max_blocking_time_ (s.max_blocking_time_.get () ? new ::dds::duration (*s.max_blocking_time_) : 0)
+  , kind_ (s.kind_ ? std::make_unique<::dds::reliabilityKind> (*s.kind_) : nullptr)
+  , max_blocking_time_ (s.max_blocking_time_ ? std::make_unique<::dds::duration> (*s.max_blocking_time_) : nullptr)
   {
-    if (kind_.get ()) kind_->container (this);
-    if (max_blocking_time_.get ()) max_blocking_time_->container (this);
   }
 
   reliabilityQosPolicy&
   reliabilityQosPolicy::operator= (reliabilityQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.kind_.get ())
+      if (s.kind_)
         kind (*(s.kind_));
       else
-        kind_.reset (0);
+        kind_.release ();
 
-      if (s.max_blocking_time_.get ())
+      if (s.max_blocking_time_)
         max_blocking_time (*(s.max_blocking_time_));
       else
-        max_blocking_time_.reset (0);
+        max_blocking_time_.release ();
     }
 
     return *this;
@@ -1742,7 +1634,7 @@ namespace dds
   bool reliabilityQosPolicy::
   kind_p () const
   {
-    return kind_.get () != 0;
+    return !!kind_;
   }
 
   ::dds::reliabilityKind const& reliabilityQosPolicy::
@@ -1754,15 +1646,14 @@ namespace dds
   void reliabilityQosPolicy::
   kind (::dds::reliabilityKind const& e)
   {
-    if (kind_.get ())
+    if (kind_)
     {
       *kind_ = e;
     }
 
     else
     {
-      kind_ = reliabilityQosPolicy::kind_type (new ::dds::reliabilityKind (e));
-      kind_->container (this);
+      kind_ = std::make_unique<::dds::reliabilityKind> (e);
     }
   }
 
@@ -1770,7 +1661,7 @@ namespace dds
   bool reliabilityQosPolicy::
   max_blocking_time_p () const
   {
-    return max_blocking_time_.get () != 0;
+    return !!max_blocking_time_;
   }
 
   ::dds::duration const& reliabilityQosPolicy::
@@ -1782,15 +1673,14 @@ namespace dds
   void reliabilityQosPolicy::
   max_blocking_time (::dds::duration const& e)
   {
-    if (max_blocking_time_.get ())
+    if (max_blocking_time_)
     {
       *max_blocking_time_ = e;
     }
 
     else
     {
-      max_blocking_time_ = reliabilityQosPolicy::max_blocking_time_type (new ::dds::duration (e));
-      max_blocking_time_->container (this);
+      max_blocking_time_ = std::make_unique<::dds::duration> (e);
     }
   }
 
@@ -1804,48 +1694,43 @@ namespace dds
 
   resourceLimitsQosPolicy::resourceLimitsQosPolicy (resourceLimitsQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , max_samples_ (s.max_samples_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_) : 0)
-  , max_instances_ (s.max_instances_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_instances_) : 0)
-  , max_samples_per_instance_ (s.max_samples_per_instance_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.max_samples_per_instance_) : 0)
-  , initial_samples_ (s.initial_samples_.get () ? new ::XMLSchema::positiveInteger (*s.initial_samples_) : 0)
-  , initial_instances_ (s.initial_instances_.get () ? new ::XMLSchema::positiveInteger (*s.initial_instances_) : 0)
+  , max_samples_ (s.max_samples_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.max_samples_) : nullptr)
+  , max_instances_ (s.max_instances_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.max_instances_) : nullptr)
+  , max_samples_per_instance_ (s.max_samples_per_instance_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.max_samples_per_instance_) : nullptr)
+  , initial_samples_ (s.initial_samples_ ? std::make_unique<::XMLSchema::positiveInteger> (*s.initial_samples_) : nullptr)
+  , initial_instances_ (s.initial_instances_ ? std::make_unique<::XMLSchema::positiveInteger> (*s.initial_instances_) : nullptr)
   {
-    if (max_samples_.get ()) max_samples_->container (this);
-    if (max_instances_.get ()) max_instances_->container (this);
-    if (max_samples_per_instance_.get ()) max_samples_per_instance_->container (this);
-    if (initial_samples_.get ()) initial_samples_->container (this);
-    if (initial_instances_.get ()) initial_instances_->container (this);
   }
 
   resourceLimitsQosPolicy&
   resourceLimitsQosPolicy::operator= (resourceLimitsQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.max_samples_.get ())
+      if (s.max_samples_)
         max_samples (*(s.max_samples_));
       else
-        max_samples_.reset (0);
+        max_samples_.release ();
 
-      if (s.max_instances_.get ())
+      if (s.max_instances_)
         max_instances (*(s.max_instances_));
       else
-        max_instances_.reset (0);
+        max_instances_.release ();
 
-      if (s.max_samples_per_instance_.get ())
+      if (s.max_samples_per_instance_)
         max_samples_per_instance (*(s.max_samples_per_instance_));
       else
-        max_samples_per_instance_.reset (0);
+        max_samples_per_instance_.release ();
 
-      if (s.initial_samples_.get ())
+      if (s.initial_samples_)
         initial_samples (*(s.initial_samples_));
       else
-        initial_samples_.reset (0);
+        initial_samples_.release ();
 
-      if (s.initial_instances_.get ())
+      if (s.initial_instances_)
         initial_instances (*(s.initial_instances_));
       else
-        initial_instances_.reset (0);
+        initial_instances_.release ();
     }
 
     return *this;
@@ -1856,7 +1741,7 @@ namespace dds
   bool resourceLimitsQosPolicy::
   max_samples_p () const
   {
-    return max_samples_.get () != 0;
+    return !!max_samples_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& resourceLimitsQosPolicy::
@@ -1868,15 +1753,14 @@ namespace dds
   void resourceLimitsQosPolicy::
   max_samples (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (max_samples_.get ())
+    if (max_samples_)
     {
       *max_samples_ = e;
     }
 
     else
     {
-      max_samples_ = resourceLimitsQosPolicy::max_samples_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      max_samples_->container (this);
+      max_samples_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -1884,7 +1768,7 @@ namespace dds
   bool resourceLimitsQosPolicy::
   max_instances_p () const
   {
-    return max_instances_.get () != 0;
+    return !!max_instances_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& resourceLimitsQosPolicy::
@@ -1896,15 +1780,14 @@ namespace dds
   void resourceLimitsQosPolicy::
   max_instances (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (max_instances_.get ())
+    if (max_instances_)
     {
       *max_instances_ = e;
     }
 
     else
     {
-      max_instances_ = resourceLimitsQosPolicy::max_instances_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      max_instances_->container (this);
+      max_instances_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -1912,7 +1795,7 @@ namespace dds
   bool resourceLimitsQosPolicy::
   max_samples_per_instance_p () const
   {
-    return max_samples_per_instance_.get () != 0;
+    return !!max_samples_per_instance_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& resourceLimitsQosPolicy::
@@ -1924,15 +1807,14 @@ namespace dds
   void resourceLimitsQosPolicy::
   max_samples_per_instance (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (max_samples_per_instance_.get ())
+    if (max_samples_per_instance_)
     {
       *max_samples_per_instance_ = e;
     }
 
     else
     {
-      max_samples_per_instance_ = resourceLimitsQosPolicy::max_samples_per_instance_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      max_samples_per_instance_->container (this);
+      max_samples_per_instance_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -1940,7 +1822,7 @@ namespace dds
   bool resourceLimitsQosPolicy::
   initial_samples_p () const
   {
-    return initial_samples_.get () != 0;
+    return !!initial_samples_;
   }
 
   ::XMLSchema::positiveInteger const& resourceLimitsQosPolicy::
@@ -1952,15 +1834,14 @@ namespace dds
   void resourceLimitsQosPolicy::
   initial_samples (::XMLSchema::positiveInteger const& e)
   {
-    if (initial_samples_.get ())
+    if (initial_samples_)
     {
       *initial_samples_ = e;
     }
 
     else
     {
-      initial_samples_ = resourceLimitsQosPolicy::initial_samples_type (new ::XMLSchema::positiveInteger (e));
-      initial_samples_->container (this);
+      initial_samples_ = std::make_unique<::XMLSchema::positiveInteger> (e);
     }
   }
 
@@ -1968,7 +1849,7 @@ namespace dds
   bool resourceLimitsQosPolicy::
   initial_instances_p () const
   {
-    return initial_instances_.get () != 0;
+    return !!initial_instances_;
   }
 
   ::XMLSchema::positiveInteger const& resourceLimitsQosPolicy::
@@ -1980,15 +1861,14 @@ namespace dds
   void resourceLimitsQosPolicy::
   initial_instances (::XMLSchema::positiveInteger const& e)
   {
-    if (initial_instances_.get ())
+    if (initial_instances_)
     {
       *initial_instances_ = e;
     }
 
     else
     {
-      initial_instances_ = resourceLimitsQosPolicy::initial_instances_type (new ::XMLSchema::positiveInteger (e));
-      initial_instances_->container (this);
+      initial_instances_ = std::make_unique<::XMLSchema::positiveInteger> (e);
     }
   }
 
@@ -2002,20 +1882,19 @@ namespace dds
 
   timeBasedFilterQosPolicy::timeBasedFilterQosPolicy (timeBasedFilterQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , minimum_separation_ (s.minimum_separation_.get () ? new ::dds::duration (*s.minimum_separation_) : 0)
+  , minimum_separation_ (s.minimum_separation_ ? std::make_unique<::dds::duration> (*s.minimum_separation_) : nullptr)
   {
-    if (minimum_separation_.get ()) minimum_separation_->container (this);
   }
 
   timeBasedFilterQosPolicy&
   timeBasedFilterQosPolicy::operator= (timeBasedFilterQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.minimum_separation_.get ())
+      if (s.minimum_separation_)
         minimum_separation (*(s.minimum_separation_));
       else
-        minimum_separation_.reset (0);
+        minimum_separation_.release ();
     }
 
     return *this;
@@ -2026,7 +1905,7 @@ namespace dds
   bool timeBasedFilterQosPolicy::
   minimum_separation_p () const
   {
-    return minimum_separation_.get () != 0;
+    return !!minimum_separation_;
   }
 
   ::dds::duration const& timeBasedFilterQosPolicy::
@@ -2038,15 +1917,14 @@ namespace dds
   void timeBasedFilterQosPolicy::
   minimum_separation (::dds::duration const& e)
   {
-    if (minimum_separation_.get ())
+    if (minimum_separation_)
     {
       *minimum_separation_ = e;
     }
 
     else
     {
-      minimum_separation_ = timeBasedFilterQosPolicy::minimum_separation_type (new ::dds::duration (e));
-      minimum_separation_->container (this);
+      minimum_separation_ = std::make_unique<::dds::duration> (e);
     }
   }
 
@@ -2060,20 +1938,19 @@ namespace dds
 
   topicDataQosPolicy::topicDataQosPolicy (topicDataQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , value_ (s.value_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.value_) : 0)
+  , value_ (s.value_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.value_) : nullptr)
   {
-    if (value_.get ()) value_->container (this);
   }
 
   topicDataQosPolicy&
   topicDataQosPolicy::operator= (topicDataQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.value_.get ())
+      if (s.value_)
         value (*(s.value_));
       else
-        value_.reset (0);
+        value_.release ();
     }
 
     return *this;
@@ -2084,7 +1961,7 @@ namespace dds
   bool topicDataQosPolicy::
   value_p () const
   {
-    return value_.get () != 0;
+    return !!value_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& topicDataQosPolicy::
@@ -2096,15 +1973,14 @@ namespace dds
   void topicDataQosPolicy::
   value (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (value_.get ())
+    if (value_)
     {
       *value_ = e;
     }
 
     else
     {
-      value_ = topicDataQosPolicy::value_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      value_->container (this);
+      value_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -2118,20 +1994,19 @@ namespace dds
 
   transportPriorityQosPolicy::transportPriorityQosPolicy (transportPriorityQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , value_ (s.value_.get () ? new ::XMLSchema::nonNegativeInteger (*s.value_) : 0)
+  , value_ (s.value_ ? std::make_unique<::XMLSchema::nonNegativeInteger> (*s.value_) : nullptr)
   {
-    if (value_.get ()) value_->container (this);
   }
 
   transportPriorityQosPolicy&
   transportPriorityQosPolicy::operator= (transportPriorityQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.value_.get ())
+      if (s.value_)
         value (*(s.value_));
       else
-        value_.reset (0);
+        value_.release ();
     }
 
     return *this;
@@ -2142,7 +2017,7 @@ namespace dds
   bool transportPriorityQosPolicy::
   value_p () const
   {
-    return value_.get () != 0;
+    return !!value_;
   }
 
   ::XMLSchema::nonNegativeInteger const& transportPriorityQosPolicy::
@@ -2154,15 +2029,14 @@ namespace dds
   void transportPriorityQosPolicy::
   value (::XMLSchema::nonNegativeInteger const& e)
   {
-    if (value_.get ())
+    if (value_)
     {
       *value_ = e;
     }
 
     else
     {
-      value_ = transportPriorityQosPolicy::value_type (new ::XMLSchema::nonNegativeInteger (e));
-      value_->container (this);
+      value_ = std::make_unique<::XMLSchema::nonNegativeInteger> (e);
     }
   }
 
@@ -2176,20 +2050,19 @@ namespace dds
 
   userDataQosPolicy::userDataQosPolicy (userDataQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , value_ (s.value_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.value_) : 0)
+  , value_ (s.value_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.value_) : nullptr)
   {
-    if (value_.get ()) value_->container (this);
   }
 
   userDataQosPolicy&
   userDataQosPolicy::operator= (userDataQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.value_.get ())
+      if (s.value_)
         value (*(s.value_));
       else
-        value_.reset (0);
+        value_.release ();
     }
 
     return *this;
@@ -2200,7 +2073,7 @@ namespace dds
   bool userDataQosPolicy::
   value_p () const
   {
-    return value_.get () != 0;
+    return !!value_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& userDataQosPolicy::
@@ -2212,15 +2085,14 @@ namespace dds
   void userDataQosPolicy::
   value (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (value_.get ())
+    if (value_)
     {
       *value_ = e;
     }
 
     else
     {
-      value_ = userDataQosPolicy::value_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      value_->container (this);
+      value_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -2234,20 +2106,19 @@ namespace dds
 
   writerDataLifecycleQosPolicy::writerDataLifecycleQosPolicy (writerDataLifecycleQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , autodispose_unregistered_instances_ (s.autodispose_unregistered_instances_.get () ? new ::XMLSchema::boolean (*s.autodispose_unregistered_instances_) : 0)
+  , autodispose_unregistered_instances_ (s.autodispose_unregistered_instances_ ? std::make_unique<::XMLSchema::boolean> (*s.autodispose_unregistered_instances_) : nullptr)
   {
-    if (autodispose_unregistered_instances_.get ()) autodispose_unregistered_instances_->container (this);
   }
 
   writerDataLifecycleQosPolicy&
   writerDataLifecycleQosPolicy::operator= (writerDataLifecycleQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.autodispose_unregistered_instances_.get ())
+      if (s.autodispose_unregistered_instances_)
         autodispose_unregistered_instances (*(s.autodispose_unregistered_instances_));
       else
-        autodispose_unregistered_instances_.reset (0);
+        autodispose_unregistered_instances_.release ();
     }
 
     return *this;
@@ -2258,7 +2129,7 @@ namespace dds
   bool writerDataLifecycleQosPolicy::
   autodispose_unregistered_instances_p () const
   {
-    return autodispose_unregistered_instances_.get () != 0;
+    return !!autodispose_unregistered_instances_;
   }
 
   ::XMLSchema::boolean const& writerDataLifecycleQosPolicy::
@@ -2270,15 +2141,14 @@ namespace dds
   void writerDataLifecycleQosPolicy::
   autodispose_unregistered_instances (::XMLSchema::boolean const& e)
   {
-    if (autodispose_unregistered_instances_.get ())
+    if (autodispose_unregistered_instances_)
     {
       *autodispose_unregistered_instances_ = e;
     }
 
     else
     {
-      autodispose_unregistered_instances_ = writerDataLifecycleQosPolicy::autodispose_unregistered_instances_type (new ::XMLSchema::boolean (e));
-      autodispose_unregistered_instances_->container (this);
+      autodispose_unregistered_instances_ = std::make_unique<::XMLSchema::boolean> (e);
     }
   }
 
@@ -2292,20 +2162,19 @@ namespace dds
 
   dataRepresentationQosPolicy::dataRepresentationQosPolicy (dataRepresentationQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , value_ (s.value_.get () ? new ::dds::dataRepresentationIdSeq (*s.value_) : 0)
+  , value_ (s.value_ ? std::make_unique<::dds::dataRepresentationIdSeq> (*s.value_) : nullptr)
   {
-    if (value_.get ()) value_->container (this);
   }
 
   dataRepresentationQosPolicy&
   dataRepresentationQosPolicy::operator= (dataRepresentationQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.value_.get ())
+      if (s.value_)
         value (*(s.value_));
       else
-        value_.reset (0);
+        value_.release ();
     }
 
     return *this;
@@ -2316,7 +2185,7 @@ namespace dds
   bool dataRepresentationQosPolicy::
   value_p () const
   {
-    return value_.get () != 0;
+    return !!value_;
   }
 
   ::dds::dataRepresentationIdSeq const& dataRepresentationQosPolicy::
@@ -2328,15 +2197,14 @@ namespace dds
   void dataRepresentationQosPolicy::
   value (::dds::dataRepresentationIdSeq const& e)
   {
-    if (value_.get ())
+    if (value_)
     {
       *value_ = e;
     }
 
     else
     {
-      value_ = dataRepresentationQosPolicy::value_type (new ::dds::dataRepresentationIdSeq (e));
-      value_->container (this);
+      value_ = std::make_unique<::dds::dataRepresentationIdSeq> (e);
     }
   }
 
@@ -2350,55 +2218,49 @@ namespace dds
 
   typeConsistencyEnforcementQosPolicy::typeConsistencyEnforcementQosPolicy (typeConsistencyEnforcementQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , kind_ (s.kind_.get () ? new ::dds::typeConsistencyKind (*s.kind_) : 0)
-  , ignore_sequence_bounds_ (s.ignore_sequence_bounds_.get () ? new ::XMLSchema::boolean (*s.ignore_sequence_bounds_) : 0)
-  , ignore_string_bounds_ (s.ignore_string_bounds_.get () ? new ::XMLSchema::boolean (*s.ignore_string_bounds_) : 0)
-  , ignore_member_names_ (s.ignore_member_names_.get () ? new ::XMLSchema::boolean (*s.ignore_member_names_) : 0)
-  , prevent_type_widening_ (s.prevent_type_widening_.get () ? new ::XMLSchema::boolean (*s.prevent_type_widening_) : 0)
-  , force_type_validation_ (s.force_type_validation_.get () ? new ::XMLSchema::boolean (*s.force_type_validation_) : 0)
+  , kind_ (s.kind_ ? std::make_unique<::dds::typeConsistencyKind> (*s.kind_) : nullptr)
+  , ignore_sequence_bounds_ (s.ignore_sequence_bounds_ ? std::make_unique<::XMLSchema::boolean> (*s.ignore_sequence_bounds_) : nullptr)
+  , ignore_string_bounds_ (s.ignore_string_bounds_ ? std::make_unique<::XMLSchema::boolean> (*s.ignore_string_bounds_) : nullptr)
+  , ignore_member_names_ (s.ignore_member_names_ ? std::make_unique<::XMLSchema::boolean> (*s.ignore_member_names_) : nullptr)
+  , prevent_type_widening_ (s.prevent_type_widening_ ? std::make_unique<::XMLSchema::boolean> (*s.prevent_type_widening_) : nullptr)
+  , force_type_validation_ (s.force_type_validation_ ? std::make_unique<::XMLSchema::boolean> (*s.force_type_validation_) : nullptr)
   {
-    if (kind_.get ()) kind_->container (this);
-    if (ignore_sequence_bounds_.get ()) ignore_sequence_bounds_->container (this);
-    if (ignore_string_bounds_.get ()) ignore_string_bounds_->container (this);
-    if (ignore_member_names_.get ()) ignore_member_names_->container (this);
-    if (prevent_type_widening_.get ()) prevent_type_widening_->container (this);
-    if (force_type_validation_.get ()) force_type_validation_->container (this);
   }
 
   typeConsistencyEnforcementQosPolicy&
   typeConsistencyEnforcementQosPolicy::operator= (typeConsistencyEnforcementQosPolicy const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.kind_.get ())
+      if (s.kind_)
         kind (*(s.kind_));
       else
-        kind_.reset (0);
+        kind_.release ();
 
-      if (s.ignore_sequence_bounds_.get ())
+      if (s.ignore_sequence_bounds_)
         ignore_sequence_bounds (*(s.ignore_sequence_bounds_));
       else
-        ignore_sequence_bounds_.reset (0);
+        ignore_sequence_bounds_.release ();
 
-      if (s.ignore_string_bounds_.get ())
+      if (s.ignore_string_bounds_)
         ignore_string_bounds (*(s.ignore_string_bounds_));
       else
-        ignore_string_bounds_.reset (0);
+        ignore_string_bounds_.release ();
 
-      if (s.ignore_member_names_.get ())
+      if (s.ignore_member_names_)
         ignore_member_names (*(s.ignore_member_names_));
       else
-        ignore_member_names_.reset (0);
+        ignore_member_names_.release ();
 
-      if (s.prevent_type_widening_.get ())
+      if (s.prevent_type_widening_)
         prevent_type_widening (*(s.prevent_type_widening_));
       else
-        prevent_type_widening_.reset (0);
+        prevent_type_widening_.release ();
 
-      if (s.force_type_validation_.get ())
+      if (s.force_type_validation_)
         force_type_validation (*(s.force_type_validation_));
       else
-        force_type_validation_.reset (0);
+        force_type_validation_.release ();
     }
 
     return *this;
@@ -2409,7 +2271,7 @@ namespace dds
   bool typeConsistencyEnforcementQosPolicy::
   kind_p () const
   {
-    return kind_.get () != 0;
+    return !!kind_;
   }
 
   ::dds::typeConsistencyKind const& typeConsistencyEnforcementQosPolicy::
@@ -2421,15 +2283,14 @@ namespace dds
   void typeConsistencyEnforcementQosPolicy::
   kind (::dds::typeConsistencyKind const& e)
   {
-    if (kind_.get ())
+    if (kind_)
     {
       *kind_ = e;
     }
 
     else
     {
-      kind_ = typeConsistencyEnforcementQosPolicy::kind_type (new ::dds::typeConsistencyKind (e));
-      kind_->container (this);
+      kind_ = std::make_unique<::dds::typeConsistencyKind> (e);
     }
   }
 
@@ -2437,7 +2298,7 @@ namespace dds
   bool typeConsistencyEnforcementQosPolicy::
   ignore_sequence_bounds_p () const
   {
-    return ignore_sequence_bounds_.get () != 0;
+    return !!ignore_sequence_bounds_;
   }
 
   ::XMLSchema::boolean const& typeConsistencyEnforcementQosPolicy::
@@ -2449,15 +2310,14 @@ namespace dds
   void typeConsistencyEnforcementQosPolicy::
   ignore_sequence_bounds (::XMLSchema::boolean const& e)
   {
-    if (ignore_sequence_bounds_.get ())
+    if (ignore_sequence_bounds_)
     {
       *ignore_sequence_bounds_ = e;
     }
 
     else
     {
-      ignore_sequence_bounds_ = typeConsistencyEnforcementQosPolicy::ignore_sequence_bounds_type (new ::XMLSchema::boolean (e));
-      ignore_sequence_bounds_->container (this);
+      ignore_sequence_bounds_ = std::make_unique<::XMLSchema::boolean> (e);
     }
   }
 
@@ -2465,7 +2325,7 @@ namespace dds
   bool typeConsistencyEnforcementQosPolicy::
   ignore_string_bounds_p () const
   {
-    return ignore_string_bounds_.get () != 0;
+    return !!ignore_string_bounds_;
   }
 
   ::XMLSchema::boolean const& typeConsistencyEnforcementQosPolicy::
@@ -2477,15 +2337,14 @@ namespace dds
   void typeConsistencyEnforcementQosPolicy::
   ignore_string_bounds (::XMLSchema::boolean const& e)
   {
-    if (ignore_string_bounds_.get ())
+    if (ignore_string_bounds_)
     {
       *ignore_string_bounds_ = e;
     }
 
     else
     {
-      ignore_string_bounds_ = typeConsistencyEnforcementQosPolicy::ignore_string_bounds_type (new ::XMLSchema::boolean (e));
-      ignore_string_bounds_->container (this);
+      ignore_string_bounds_ = std::make_unique<::XMLSchema::boolean> (e);
     }
   }
 
@@ -2493,7 +2352,7 @@ namespace dds
   bool typeConsistencyEnforcementQosPolicy::
   ignore_member_names_p () const
   {
-    return ignore_member_names_.get () != 0;
+    return !!ignore_member_names_;
   }
 
   ::XMLSchema::boolean const& typeConsistencyEnforcementQosPolicy::
@@ -2505,15 +2364,14 @@ namespace dds
   void typeConsistencyEnforcementQosPolicy::
   ignore_member_names (::XMLSchema::boolean const& e)
   {
-    if (ignore_member_names_.get ())
+    if (ignore_member_names_)
     {
       *ignore_member_names_ = e;
     }
 
     else
     {
-      ignore_member_names_ = typeConsistencyEnforcementQosPolicy::ignore_member_names_type (new ::XMLSchema::boolean (e));
-      ignore_member_names_->container (this);
+      ignore_member_names_ = std::make_unique<::XMLSchema::boolean> (e);
     }
   }
 
@@ -2521,7 +2379,7 @@ namespace dds
   bool typeConsistencyEnforcementQosPolicy::
   prevent_type_widening_p () const
   {
-    return prevent_type_widening_.get () != 0;
+    return !!prevent_type_widening_;
   }
 
   ::XMLSchema::boolean const& typeConsistencyEnforcementQosPolicy::
@@ -2533,15 +2391,14 @@ namespace dds
   void typeConsistencyEnforcementQosPolicy::
   prevent_type_widening (::XMLSchema::boolean const& e)
   {
-    if (prevent_type_widening_.get ())
+    if (prevent_type_widening_)
     {
       *prevent_type_widening_ = e;
     }
 
     else
     {
-      prevent_type_widening_ = typeConsistencyEnforcementQosPolicy::prevent_type_widening_type (new ::XMLSchema::boolean (e));
-      prevent_type_widening_->container (this);
+      prevent_type_widening_ = std::make_unique<::XMLSchema::boolean> (e);
     }
   }
 
@@ -2549,7 +2406,7 @@ namespace dds
   bool typeConsistencyEnforcementQosPolicy::
   force_type_validation_p () const
   {
-    return force_type_validation_.get () != 0;
+    return !!force_type_validation_;
   }
 
   ::XMLSchema::boolean const& typeConsistencyEnforcementQosPolicy::
@@ -2561,15 +2418,14 @@ namespace dds
   void typeConsistencyEnforcementQosPolicy::
   force_type_validation (::XMLSchema::boolean const& e)
   {
-    if (force_type_validation_.get ())
+    if (force_type_validation_)
     {
       *force_type_validation_ = e;
     }
 
     else
     {
-      force_type_validation_ = typeConsistencyEnforcementQosPolicy::force_type_validation_type (new ::XMLSchema::boolean (e));
-      force_type_validation_->container (this);
+      force_type_validation_ = std::make_unique<::XMLSchema::boolean> (e);
     }
   }
 
@@ -2583,37 +2439,33 @@ namespace dds
 
   domainparticipantQos::domainparticipantQos (domainparticipantQos const& s) :
   ::XSCRT::Type (s)
-  , user_data_ (s.user_data_.get () ? new ::dds::userDataQosPolicy (*s.user_data_) : 0)
-  , entity_factory_ (s.entity_factory_.get () ? new ::dds::entityFactoryQosPolicy (*s.entity_factory_) : 0)
-  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
-  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
+  , user_data_ (s.user_data_ ? std::make_unique<::dds::userDataQosPolicy> (*s.user_data_) : nullptr)
+  , entity_factory_ (s.entity_factory_ ? std::make_unique<::dds::entityFactoryQosPolicy> (*s.entity_factory_) : nullptr)
+  , name_ (s.name_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.name_) : nullptr)
+  , base_name_ (s.base_name_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.base_name_) : nullptr)
   {
-    if (user_data_.get ()) user_data_->container (this);
-    if (entity_factory_.get ()) entity_factory_->container (this);
-    if (name_.get ()) name_->container (this);
-    if (base_name_.get ()) base_name_->container (this);
   }
 
   domainparticipantQos&
   domainparticipantQos::operator= (domainparticipantQos const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.user_data_.get ())
+      if (s.user_data_)
         user_data (*(s.user_data_));
       else
-        user_data_.reset (0);
+        user_data_.release ();
 
-      if (s.entity_factory_.get ())
+      if (s.entity_factory_)
         entity_factory (*(s.entity_factory_));
       else
-        entity_factory_.reset (0);
+        entity_factory_.release ();
 
-      if (s.name_.get ()) name (*(s.name_));
-      else name_.reset (0);
+      if (s.name_) name (*(s.name_));
+      else name_.release ();
 
-      if (s.base_name_.get ()) base_name (*(s.base_name_));
-      else base_name_.reset (0);
+      if (s.base_name_) base_name (*(s.base_name_));
+      else base_name_.release ();
     }
 
     return *this;
@@ -2624,7 +2476,7 @@ namespace dds
   bool domainparticipantQos::
   user_data_p () const
   {
-    return user_data_.get () != 0;
+    return !!user_data_;
   }
 
   ::dds::userDataQosPolicy const& domainparticipantQos::
@@ -2636,15 +2488,14 @@ namespace dds
   void domainparticipantQos::
   user_data (::dds::userDataQosPolicy const& e)
   {
-    if (user_data_.get ())
+    if (user_data_)
     {
       *user_data_ = e;
     }
 
     else
     {
-      user_data_ = domainparticipantQos::user_data_type (new ::dds::userDataQosPolicy (e));
-      user_data_->container (this);
+      user_data_ = std::make_unique<::dds::userDataQosPolicy> (e);
     }
   }
 
@@ -2652,7 +2503,7 @@ namespace dds
   bool domainparticipantQos::
   entity_factory_p () const
   {
-    return entity_factory_.get () != 0;
+    return !!entity_factory_;
   }
 
   ::dds::entityFactoryQosPolicy const& domainparticipantQos::
@@ -2664,15 +2515,14 @@ namespace dds
   void domainparticipantQos::
   entity_factory (::dds::entityFactoryQosPolicy const& e)
   {
-    if (entity_factory_.get ())
+    if (entity_factory_)
     {
       *entity_factory_ = e;
     }
 
     else
     {
-      entity_factory_ = domainparticipantQos::entity_factory_type (new ::dds::entityFactoryQosPolicy (e));
-      entity_factory_->container (this);
+      entity_factory_ = std::make_unique<::dds::entityFactoryQosPolicy> (e);
     }
   }
 
@@ -2680,7 +2530,7 @@ namespace dds
   bool domainparticipantQos::
   name_p () const
   {
-    return name_.get () != 0;
+    return !!name_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& domainparticipantQos::
@@ -2698,15 +2548,14 @@ namespace dds
   void domainparticipantQos::
   name (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (name_.get ())
+    if (name_)
     {
       *name_ = e;
     }
 
     else
     {
-      name_ = domainparticipantQos::name_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      name_->container (this);
+      name_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -2714,7 +2563,7 @@ namespace dds
   bool domainparticipantQos::
   base_name_p () const
   {
-    return base_name_.get () != 0;
+    return !!base_name_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& domainparticipantQos::
@@ -2732,15 +2581,14 @@ namespace dds
   void domainparticipantQos::
   base_name (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (base_name_.get ())
+    if (base_name_)
     {
       *base_name_ = e;
     }
 
     else
     {
-      base_name_ = domainparticipantQos::base_name_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      base_name_->container (this);
+      base_name_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -2754,51 +2602,45 @@ namespace dds
 
   publisherQos::publisherQos (publisherQos const& s) :
   ::XSCRT::Type (s)
-  , presentation_ (s.presentation_.get () ? new ::dds::presentationQosPolicy (*s.presentation_) : 0)
-  , partition_ (s.partition_.get () ? new ::dds::partitionQosPolicy (*s.partition_) : 0)
-  , group_data_ (s.group_data_.get () ? new ::dds::groupDataQosPolicy (*s.group_data_) : 0)
-  , entity_factory_ (s.entity_factory_.get () ? new ::dds::entityFactoryQosPolicy (*s.entity_factory_) : 0)
-  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
-  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
+  , presentation_ (s.presentation_ ? std::make_unique<::dds::presentationQosPolicy> (*s.presentation_) : nullptr)
+  , partition_ (s.partition_ ? std::make_unique<::dds::partitionQosPolicy> (*s.partition_) : nullptr)
+  , group_data_ (s.group_data_ ? std::make_unique<::dds::groupDataQosPolicy> (*s.group_data_) : nullptr)
+  , entity_factory_ (s.entity_factory_ ? std::make_unique<::dds::entityFactoryQosPolicy> (*s.entity_factory_) : nullptr)
+  , name_ (s.name_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.name_) : nullptr)
+  , base_name_ (s.base_name_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.base_name_) : nullptr)
   {
-    if (presentation_.get ()) presentation_->container (this);
-    if (partition_.get ()) partition_->container (this);
-    if (group_data_.get ()) group_data_->container (this);
-    if (entity_factory_.get ()) entity_factory_->container (this);
-    if (name_.get ()) name_->container (this);
-    if (base_name_.get ()) base_name_->container (this);
   }
 
   publisherQos&
   publisherQos::operator= (publisherQos const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.presentation_.get ())
+      if (s.presentation_)
         presentation (*(s.presentation_));
       else
-        presentation_.reset (0);
+        presentation_.release ();
 
-      if (s.partition_.get ())
+      if (s.partition_)
         partition (*(s.partition_));
       else
-        partition_.reset (0);
+        partition_.release ();
 
-      if (s.group_data_.get ())
+      if (s.group_data_)
         group_data (*(s.group_data_));
       else
-        group_data_.reset (0);
+        group_data_.release ();
 
-      if (s.entity_factory_.get ())
+      if (s.entity_factory_)
         entity_factory (*(s.entity_factory_));
       else
-        entity_factory_.reset (0);
+        entity_factory_.release ();
 
-      if (s.name_.get ()) name (*(s.name_));
-      else name_.reset (0);
+      if (s.name_) name (*(s.name_));
+      else name_.release ();
 
-      if (s.base_name_.get ()) base_name (*(s.base_name_));
-      else base_name_.reset (0);
+      if (s.base_name_) base_name (*(s.base_name_));
+      else base_name_.release ();
     }
 
     return *this;
@@ -2809,7 +2651,7 @@ namespace dds
   bool publisherQos::
   presentation_p () const
   {
-    return presentation_.get () != 0;
+    return !!presentation_;
   }
 
   ::dds::presentationQosPolicy const& publisherQos::
@@ -2821,15 +2663,14 @@ namespace dds
   void publisherQos::
   presentation (::dds::presentationQosPolicy const& e)
   {
-    if (presentation_.get ())
+    if (presentation_)
     {
       *presentation_ = e;
     }
 
     else
     {
-      presentation_ = publisherQos::presentation_type (new ::dds::presentationQosPolicy (e));
-      presentation_->container (this);
+      presentation_ = std::make_unique<::dds::presentationQosPolicy> (e);
     }
   }
 
@@ -2837,7 +2678,7 @@ namespace dds
   bool publisherQos::
   partition_p () const
   {
-    return partition_.get () != 0;
+    return !!partition_;
   }
 
   ::dds::partitionQosPolicy const& publisherQos::
@@ -2849,15 +2690,14 @@ namespace dds
   void publisherQos::
   partition (::dds::partitionQosPolicy const& e)
   {
-    if (partition_.get ())
+    if (partition_)
     {
       *partition_ = e;
     }
 
     else
     {
-      partition_ = publisherQos::partition_type (new ::dds::partitionQosPolicy (e));
-      partition_->container (this);
+      partition_ = std::make_unique<::dds::partitionQosPolicy> (e);
     }
   }
 
@@ -2865,7 +2705,7 @@ namespace dds
   bool publisherQos::
   group_data_p () const
   {
-    return group_data_.get () != 0;
+    return !!group_data_;
   }
 
   ::dds::groupDataQosPolicy const& publisherQos::
@@ -2877,15 +2717,14 @@ namespace dds
   void publisherQos::
   group_data (::dds::groupDataQosPolicy const& e)
   {
-    if (group_data_.get ())
+    if (group_data_)
     {
       *group_data_ = e;
     }
 
     else
     {
-      group_data_ = publisherQos::group_data_type (new ::dds::groupDataQosPolicy (e));
-      group_data_->container (this);
+      group_data_ = std::make_unique<::dds::groupDataQosPolicy> (e);
     }
   }
 
@@ -2893,7 +2732,7 @@ namespace dds
   bool publisherQos::
   entity_factory_p () const
   {
-    return entity_factory_.get () != 0;
+    return !!entity_factory_;
   }
 
   ::dds::entityFactoryQosPolicy const& publisherQos::
@@ -2905,15 +2744,14 @@ namespace dds
   void publisherQos::
   entity_factory (::dds::entityFactoryQosPolicy const& e)
   {
-    if (entity_factory_.get ())
+    if (entity_factory_)
     {
       *entity_factory_ = e;
     }
 
     else
     {
-      entity_factory_ = publisherQos::entity_factory_type (new ::dds::entityFactoryQosPolicy (e));
-      entity_factory_->container (this);
+      entity_factory_ = std::make_unique<::dds::entityFactoryQosPolicy> (e);
     }
   }
 
@@ -2921,7 +2759,7 @@ namespace dds
   bool publisherQos::
   name_p () const
   {
-    return name_.get () != 0;
+    return !!name_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& publisherQos::
@@ -2939,15 +2777,14 @@ namespace dds
   void publisherQos::
   name (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (name_.get ())
+    if (name_)
     {
       *name_ = e;
     }
 
     else
     {
-      name_ = publisherQos::name_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      name_->container (this);
+      name_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -2955,7 +2792,7 @@ namespace dds
   bool publisherQos::
   base_name_p () const
   {
-    return base_name_.get () != 0;
+    return !!base_name_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& publisherQos::
@@ -2973,15 +2810,14 @@ namespace dds
   void publisherQos::
   base_name (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (base_name_.get ())
+    if (base_name_)
     {
       *base_name_ = e;
     }
 
     else
     {
-      base_name_ = publisherQos::base_name_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      base_name_->container (this);
+      base_name_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -2995,51 +2831,45 @@ namespace dds
 
   subscriberQos::subscriberQos (subscriberQos const& s) :
   ::XSCRT::Type (s)
-  , presentation_ (s.presentation_.get () ? new ::dds::presentationQosPolicy (*s.presentation_) : 0)
-  , partition_ (s.partition_.get () ? new ::dds::partitionQosPolicy (*s.partition_) : 0)
-  , group_data_ (s.group_data_.get () ? new ::dds::groupDataQosPolicy (*s.group_data_) : 0)
-  , entity_factory_ (s.entity_factory_.get () ? new ::dds::entityFactoryQosPolicy (*s.entity_factory_) : 0)
-  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
-  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
+  , presentation_ (s.presentation_ ? std::make_unique<::dds::presentationQosPolicy> (*s.presentation_) : nullptr)
+  , partition_ (s.partition_ ? std::make_unique<::dds::partitionQosPolicy> (*s.partition_) : nullptr)
+  , group_data_ (s.group_data_ ? std::make_unique<::dds::groupDataQosPolicy> (*s.group_data_) : nullptr)
+  , entity_factory_ (s.entity_factory_ ? std::make_unique<::dds::entityFactoryQosPolicy> (*s.entity_factory_) : nullptr)
+  , name_ (s.name_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.name_) : nullptr)
+  , base_name_ (s.base_name_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.base_name_) : nullptr)
   {
-    if (presentation_.get ()) presentation_->container (this);
-    if (partition_.get ()) partition_->container (this);
-    if (group_data_.get ()) group_data_->container (this);
-    if (entity_factory_.get ()) entity_factory_->container (this);
-    if (name_.get ()) name_->container (this);
-    if (base_name_.get ()) base_name_->container (this);
   }
 
   subscriberQos&
   subscriberQos::operator= (subscriberQos const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.presentation_.get ())
+      if (s.presentation_)
         presentation (*(s.presentation_));
       else
-        presentation_.reset (0);
+        presentation_.release ();
 
-      if (s.partition_.get ())
+      if (s.partition_)
         partition (*(s.partition_));
       else
-        partition_.reset (0);
+        partition_.release ();
 
-      if (s.group_data_.get ())
+      if (s.group_data_)
         group_data (*(s.group_data_));
       else
-        group_data_.reset (0);
+        group_data_.release ();
 
-      if (s.entity_factory_.get ())
+      if (s.entity_factory_)
         entity_factory (*(s.entity_factory_));
       else
-        entity_factory_.reset (0);
+        entity_factory_.release ();
 
-      if (s.name_.get ()) name (*(s.name_));
-      else name_.reset (0);
+      if (s.name_) name (*(s.name_));
+      else name_.release ();
 
-      if (s.base_name_.get ()) base_name (*(s.base_name_));
-      else base_name_.reset (0);
+      if (s.base_name_) base_name (*(s.base_name_));
+      else base_name_.release ();
     }
 
     return *this;
@@ -3050,7 +2880,7 @@ namespace dds
   bool subscriberQos::
   presentation_p () const
   {
-    return presentation_.get () != 0;
+    return !!presentation_;
   }
 
   ::dds::presentationQosPolicy const& subscriberQos::
@@ -3062,15 +2892,14 @@ namespace dds
   void subscriberQos::
   presentation (::dds::presentationQosPolicy const& e)
   {
-    if (presentation_.get ())
+    if (presentation_)
     {
       *presentation_ = e;
     }
 
     else
     {
-      presentation_ = subscriberQos::presentation_type (new ::dds::presentationQosPolicy (e));
-      presentation_->container (this);
+      presentation_ = std::make_unique<::dds::presentationQosPolicy> (e);
     }
   }
 
@@ -3078,7 +2907,7 @@ namespace dds
   bool subscriberQos::
   partition_p () const
   {
-    return partition_.get () != 0;
+    return !!partition_;
   }
 
   ::dds::partitionQosPolicy const& subscriberQos::
@@ -3090,15 +2919,14 @@ namespace dds
   void subscriberQos::
   partition (::dds::partitionQosPolicy const& e)
   {
-    if (partition_.get ())
+    if (partition_)
     {
       *partition_ = e;
     }
 
     else
     {
-      partition_ = subscriberQos::partition_type (new ::dds::partitionQosPolicy (e));
-      partition_->container (this);
+      partition_ = std::make_unique<::dds::partitionQosPolicy> (e);
     }
   }
 
@@ -3106,7 +2934,7 @@ namespace dds
   bool subscriberQos::
   group_data_p () const
   {
-    return group_data_.get () != 0;
+    return !!group_data_;
   }
 
   ::dds::groupDataQosPolicy const& subscriberQos::
@@ -3118,15 +2946,14 @@ namespace dds
   void subscriberQos::
   group_data (::dds::groupDataQosPolicy const& e)
   {
-    if (group_data_.get ())
+    if (group_data_)
     {
       *group_data_ = e;
     }
 
     else
     {
-      group_data_ = subscriberQos::group_data_type (new ::dds::groupDataQosPolicy (e));
-      group_data_->container (this);
+      group_data_ = std::make_unique<::dds::groupDataQosPolicy> (e);
     }
   }
 
@@ -3134,7 +2961,7 @@ namespace dds
   bool subscriberQos::
   entity_factory_p () const
   {
-    return entity_factory_.get () != 0;
+    return !!entity_factory_;
   }
 
   ::dds::entityFactoryQosPolicy const& subscriberQos::
@@ -3146,15 +2973,14 @@ namespace dds
   void subscriberQos::
   entity_factory (::dds::entityFactoryQosPolicy const& e)
   {
-    if (entity_factory_.get ())
+    if (entity_factory_)
     {
       *entity_factory_ = e;
     }
 
     else
     {
-      entity_factory_ = subscriberQos::entity_factory_type (new ::dds::entityFactoryQosPolicy (e));
-      entity_factory_->container (this);
+      entity_factory_ = std::make_unique<::dds::entityFactoryQosPolicy> (e);
     }
   }
 
@@ -3162,7 +2988,7 @@ namespace dds
   bool subscriberQos::
   name_p () const
   {
-    return name_.get () != 0;
+    return !!name_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& subscriberQos::
@@ -3180,15 +3006,14 @@ namespace dds
   void subscriberQos::
   name (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (name_.get ())
+    if (name_)
     {
       *name_ = e;
     }
 
     else
     {
-      name_ = subscriberQos::name_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      name_->container (this);
+      name_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -3196,7 +3021,7 @@ namespace dds
   bool subscriberQos::
   base_name_p () const
   {
-    return base_name_.get () != 0;
+    return !!base_name_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& subscriberQos::
@@ -3214,15 +3039,14 @@ namespace dds
   void subscriberQos::
   base_name (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (base_name_.get ())
+    if (base_name_)
     {
       *base_name_ = e;
     }
 
     else
     {
-      base_name_ = subscriberQos::base_name_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      base_name_->container (this);
+      base_name_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -3236,126 +3060,109 @@ namespace dds
 
   topicQos::topicQos (topicQos const& s) :
   ::XSCRT::Type (s)
-  , topic_data_ (s.topic_data_.get () ? new ::dds::topicDataQosPolicy (*s.topic_data_) : 0)
-  , durability_ (s.durability_.get () ? new ::dds::durabilityQosPolicy (*s.durability_) : 0)
-  , durability_service_ (s.durability_service_.get () ? new ::dds::durabilityServiceQosPolicy (*s.durability_service_) : 0)
-  , deadline_ (s.deadline_.get () ? new ::dds::deadlineQosPolicy (*s.deadline_) : 0)
-  , latency_budget_ (s.latency_budget_.get () ? new ::dds::latencyBudgetQosPolicy (*s.latency_budget_) : 0)
-  , liveliness_ (s.liveliness_.get () ? new ::dds::livelinessQosPolicy (*s.liveliness_) : 0)
-  , reliability_ (s.reliability_.get () ? new ::dds::reliabilityQosPolicy (*s.reliability_) : 0)
-  , destination_order_ (s.destination_order_.get () ? new ::dds::destinationOrderQosPolicy (*s.destination_order_) : 0)
-  , history_ (s.history_.get () ? new ::dds::historyQosPolicy (*s.history_) : 0)
-  , resource_limits_ (s.resource_limits_.get () ? new ::dds::resourceLimitsQosPolicy (*s.resource_limits_) : 0)
-  , transport_priority_ (s.transport_priority_.get () ? new ::dds::transportPriorityQosPolicy (*s.transport_priority_) : 0)
-  , lifespan_ (s.lifespan_.get () ? new ::dds::lifespanQosPolicy (*s.lifespan_) : 0)
-  , ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0)
-  , representation_ (s.representation_.get () ? new ::dds::dataRepresentationQosPolicy (*s.representation_) : 0)
-  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
-  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
-  , topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0)
+  , topic_data_ (s.topic_data_ ? std::make_unique<::dds::topicDataQosPolicy> (*s.topic_data_) : nullptr)
+  , durability_ (s.durability_ ? std::make_unique<::dds::durabilityQosPolicy> (*s.durability_) : nullptr)
+  , durability_service_ (s.durability_service_ ? std::make_unique<::dds::durabilityServiceQosPolicy> (*s.durability_service_) : nullptr)
+  , deadline_ (s.deadline_ ? std::make_unique<::dds::deadlineQosPolicy> (*s.deadline_) : nullptr)
+  , latency_budget_ (s.latency_budget_ ? std::make_unique<::dds::latencyBudgetQosPolicy> (*s.latency_budget_) : nullptr)
+  , liveliness_ (s.liveliness_ ? std::make_unique<::dds::livelinessQosPolicy> (*s.liveliness_) : nullptr)
+  , reliability_ (s.reliability_ ? std::make_unique<::dds::reliabilityQosPolicy> (*s.reliability_) : nullptr)
+  , destination_order_ (s.destination_order_ ? std::make_unique<::dds::destinationOrderQosPolicy> (*s.destination_order_) : nullptr)
+  , history_ (s.history_ ? std::make_unique<::dds::historyQosPolicy> (*s.history_) : nullptr)
+  , resource_limits_ (s.resource_limits_ ? std::make_unique<::dds::resourceLimitsQosPolicy> (*s.resource_limits_) : nullptr)
+  , transport_priority_ (s.transport_priority_ ? std::make_unique<::dds::transportPriorityQosPolicy> (*s.transport_priority_) : nullptr)
+  , lifespan_ (s.lifespan_ ? std::make_unique<::dds::lifespanQosPolicy> (*s.lifespan_) : nullptr)
+  , ownership_ (s.ownership_ ? std::make_unique<::dds::ownershipQosPolicy> (*s.ownership_) : nullptr)
+  , representation_ (s.representation_ ? std::make_unique<::dds::dataRepresentationQosPolicy> (*s.representation_) : nullptr)
+  , name_ (s.name_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.name_) : nullptr)
+  , base_name_ (s.base_name_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.base_name_) : nullptr)
+  , topic_filter_ (s.topic_filter_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.topic_filter_) : nullptr)
   {
-    if (topic_data_.get ()) topic_data_->container (this);
-    if (durability_.get ()) durability_->container (this);
-    if (durability_service_.get ()) durability_service_->container (this);
-    if (deadline_.get ()) deadline_->container (this);
-    if (latency_budget_.get ()) latency_budget_->container (this);
-    if (liveliness_.get ()) liveliness_->container (this);
-    if (reliability_.get ()) reliability_->container (this);
-    if (destination_order_.get ()) destination_order_->container (this);
-    if (history_.get ()) history_->container (this);
-    if (resource_limits_.get ()) resource_limits_->container (this);
-    if (transport_priority_.get ()) transport_priority_->container (this);
-    if (lifespan_.get ()) lifespan_->container (this);
-    if (ownership_.get ()) ownership_->container (this);
-    if (representation_.get ()) representation_->container (this);
-    if (name_.get ()) name_->container (this);
-    if (base_name_.get ()) base_name_->container (this);
-    if (topic_filter_.get ()) topic_filter_->container (this);
   }
 
   topicQos&
   topicQos::operator= (topicQos const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.topic_data_.get ())
+      if (s.topic_data_)
         topic_data (*(s.topic_data_));
       else
-        topic_data_.reset (0);
+        topic_data_.release ();
 
-      if (s.durability_.get ())
+      if (s.durability_)
         durability (*(s.durability_));
       else
-        durability_.reset (0);
+        durability_.release ();
 
-      if (s.durability_service_.get ())
+      if (s.durability_service_)
         durability_service (*(s.durability_service_));
       else
-        durability_service_.reset (0);
+        durability_service_.release ();
 
-      if (s.deadline_.get ())
+      if (s.deadline_)
         deadline (*(s.deadline_));
       else
-        deadline_.reset (0);
+        deadline_.release ();
 
-      if (s.latency_budget_.get ())
+      if (s.latency_budget_)
         latency_budget (*(s.latency_budget_));
       else
-        latency_budget_.reset (0);
+        latency_budget_.release ();
 
-      if (s.liveliness_.get ())
+      if (s.liveliness_)
         liveliness (*(s.liveliness_));
       else
-        liveliness_.reset (0);
+        liveliness_.release ();
 
-      if (s.reliability_.get ())
+      if (s.reliability_)
         reliability (*(s.reliability_));
       else
-        reliability_.reset (0);
+        reliability_.release ();
 
-      if (s.destination_order_.get ())
+      if (s.destination_order_)
         destination_order (*(s.destination_order_));
       else
-        destination_order_.reset (0);
+        destination_order_.release ();
 
-      if (s.history_.get ())
+      if (s.history_)
         history (*(s.history_));
       else
-        history_.reset (0);
+        history_.release ();
 
-      if (s.resource_limits_.get ())
+      if (s.resource_limits_)
         resource_limits (*(s.resource_limits_));
       else
-        resource_limits_.reset (0);
+        resource_limits_.release ();
 
-      if (s.transport_priority_.get ())
+      if (s.transport_priority_)
         transport_priority (*(s.transport_priority_));
       else
-        transport_priority_.reset (0);
+        transport_priority_.release ();
 
-      if (s.lifespan_.get ())
+      if (s.lifespan_)
         lifespan (*(s.lifespan_));
       else
-        lifespan_.reset (0);
+        lifespan_.release ();
 
-      if (s.ownership_.get ())
+      if (s.ownership_)
         ownership (*(s.ownership_));
       else
-        ownership_.reset (0);
+        ownership_.release ();
 
-      if (s.representation_.get ())
+      if (s.representation_)
         representation (*(s.representation_));
       else
-        representation_.reset (0);
+        representation_.release ();
 
-      if (s.name_.get ()) name (*(s.name_));
-      else name_.reset (0);
+      if (s.name_) name (*(s.name_));
+      else name_.release ();
 
-      if (s.base_name_.get ()) base_name (*(s.base_name_));
-      else base_name_.reset (0);
+      if (s.base_name_) base_name (*(s.base_name_));
+      else base_name_.release ();
 
-      if (s.topic_filter_.get ()) topic_filter (*(s.topic_filter_));
-      else topic_filter_.reset (0);
+      if (s.topic_filter_) topic_filter (*(s.topic_filter_));
+      else topic_filter_.release ();
     }
 
     return *this;
@@ -3366,7 +3173,7 @@ namespace dds
   bool topicQos::
   topic_data_p () const
   {
-    return topic_data_.get () != 0;
+    return !!topic_data_;
   }
 
   ::dds::topicDataQosPolicy const& topicQos::
@@ -3378,15 +3185,14 @@ namespace dds
   void topicQos::
   topic_data (::dds::topicDataQosPolicy const& e)
   {
-    if (topic_data_.get ())
+    if (topic_data_)
     {
       *topic_data_ = e;
     }
 
     else
     {
-      topic_data_ = topicQos::topic_data_type (new ::dds::topicDataQosPolicy (e));
-      topic_data_->container (this);
+      topic_data_ = std::make_unique<::dds::topicDataQosPolicy> (e);
     }
   }
 
@@ -3394,7 +3200,7 @@ namespace dds
   bool topicQos::
   durability_p () const
   {
-    return durability_.get () != 0;
+    return !!durability_;
   }
 
   ::dds::durabilityQosPolicy const& topicQos::
@@ -3406,15 +3212,14 @@ namespace dds
   void topicQos::
   durability (::dds::durabilityQosPolicy const& e)
   {
-    if (durability_.get ())
+    if (durability_)
     {
       *durability_ = e;
     }
 
     else
     {
-      durability_ = topicQos::durability_type (new ::dds::durabilityQosPolicy (e));
-      durability_->container (this);
+      durability_ = std::make_unique<::dds::durabilityQosPolicy> (e);
     }
   }
 
@@ -3422,7 +3227,7 @@ namespace dds
   bool topicQos::
   durability_service_p () const
   {
-    return durability_service_.get () != 0;
+    return !!durability_service_;
   }
 
   ::dds::durabilityServiceQosPolicy const& topicQos::
@@ -3434,15 +3239,14 @@ namespace dds
   void topicQos::
   durability_service (::dds::durabilityServiceQosPolicy const& e)
   {
-    if (durability_service_.get ())
+    if (durability_service_)
     {
       *durability_service_ = e;
     }
 
     else
     {
-      durability_service_ = topicQos::durability_service_type (new ::dds::durabilityServiceQosPolicy (e));
-      durability_service_->container (this);
+      durability_service_ = std::make_unique<::dds::durabilityServiceQosPolicy> (e);
     }
   }
 
@@ -3450,7 +3254,7 @@ namespace dds
   bool topicQos::
   deadline_p () const
   {
-    return deadline_.get () != 0;
+    return !!deadline_;
   }
 
   ::dds::deadlineQosPolicy const& topicQos::
@@ -3462,15 +3266,14 @@ namespace dds
   void topicQos::
   deadline (::dds::deadlineQosPolicy const& e)
   {
-    if (deadline_.get ())
+    if (deadline_)
     {
       *deadline_ = e;
     }
 
     else
     {
-      deadline_ = topicQos::deadline_type (new ::dds::deadlineQosPolicy (e));
-      deadline_->container (this);
+      deadline_ = std::make_unique<::dds::deadlineQosPolicy> (e);
     }
   }
 
@@ -3478,7 +3281,7 @@ namespace dds
   bool topicQos::
   latency_budget_p () const
   {
-    return latency_budget_.get () != 0;
+    return !!latency_budget_;
   }
 
   ::dds::latencyBudgetQosPolicy const& topicQos::
@@ -3490,15 +3293,14 @@ namespace dds
   void topicQos::
   latency_budget (::dds::latencyBudgetQosPolicy const& e)
   {
-    if (latency_budget_.get ())
+    if (latency_budget_)
     {
       *latency_budget_ = e;
     }
 
     else
     {
-      latency_budget_ = topicQos::latency_budget_type (new ::dds::latencyBudgetQosPolicy (e));
-      latency_budget_->container (this);
+      latency_budget_ = std::make_unique<::dds::latencyBudgetQosPolicy> (e);
     }
   }
 
@@ -3506,7 +3308,7 @@ namespace dds
   bool topicQos::
   liveliness_p () const
   {
-    return liveliness_.get () != 0;
+    return !!liveliness_;
   }
 
   ::dds::livelinessQosPolicy const& topicQos::
@@ -3518,15 +3320,14 @@ namespace dds
   void topicQos::
   liveliness (::dds::livelinessQosPolicy const& e)
   {
-    if (liveliness_.get ())
+    if (liveliness_)
     {
       *liveliness_ = e;
     }
 
     else
     {
-      liveliness_ = topicQos::liveliness_type (new ::dds::livelinessQosPolicy (e));
-      liveliness_->container (this);
+      liveliness_ = std::make_unique<::dds::livelinessQosPolicy> (e);
     }
   }
 
@@ -3534,7 +3335,7 @@ namespace dds
   bool topicQos::
   reliability_p () const
   {
-    return reliability_.get () != 0;
+    return !!reliability_;
   }
 
   ::dds::reliabilityQosPolicy const& topicQos::
@@ -3546,15 +3347,14 @@ namespace dds
   void topicQos::
   reliability (::dds::reliabilityQosPolicy const& e)
   {
-    if (reliability_.get ())
+    if (reliability_)
     {
       *reliability_ = e;
     }
 
     else
     {
-      reliability_ = topicQos::reliability_type (new ::dds::reliabilityQosPolicy (e));
-      reliability_->container (this);
+      reliability_ = std::make_unique<::dds::reliabilityQosPolicy> (e);
     }
   }
 
@@ -3562,7 +3362,7 @@ namespace dds
   bool topicQos::
   destination_order_p () const
   {
-    return destination_order_.get () != 0;
+    return !!destination_order_;
   }
 
   ::dds::destinationOrderQosPolicy const& topicQos::
@@ -3574,15 +3374,14 @@ namespace dds
   void topicQos::
   destination_order (::dds::destinationOrderQosPolicy const& e)
   {
-    if (destination_order_.get ())
+    if (destination_order_)
     {
       *destination_order_ = e;
     }
 
     else
     {
-      destination_order_ = topicQos::destination_order_type (new ::dds::destinationOrderQosPolicy (e));
-      destination_order_->container (this);
+      destination_order_ = std::make_unique<::dds::destinationOrderQosPolicy> (e);
     }
   }
 
@@ -3590,7 +3389,7 @@ namespace dds
   bool topicQos::
   history_p () const
   {
-    return history_.get () != 0;
+    return !!history_;
   }
 
   ::dds::historyQosPolicy const& topicQos::
@@ -3602,15 +3401,14 @@ namespace dds
   void topicQos::
   history (::dds::historyQosPolicy const& e)
   {
-    if (history_.get ())
+    if (history_)
     {
       *history_ = e;
     }
 
     else
     {
-      history_ = topicQos::history_type (new ::dds::historyQosPolicy (e));
-      history_->container (this);
+      history_ = std::make_unique<::dds::historyQosPolicy> (e);
     }
   }
 
@@ -3618,7 +3416,7 @@ namespace dds
   bool topicQos::
   resource_limits_p () const
   {
-    return resource_limits_.get () != 0;
+    return !!resource_limits_;
   }
 
   ::dds::resourceLimitsQosPolicy const& topicQos::
@@ -3630,15 +3428,14 @@ namespace dds
   void topicQos::
   resource_limits (::dds::resourceLimitsQosPolicy const& e)
   {
-    if (resource_limits_.get ())
+    if (resource_limits_)
     {
       *resource_limits_ = e;
     }
 
     else
     {
-      resource_limits_ = topicQos::resource_limits_type (new ::dds::resourceLimitsQosPolicy (e));
-      resource_limits_->container (this);
+      resource_limits_ = std::make_unique<::dds::resourceLimitsQosPolicy> (e);
     }
   }
 
@@ -3646,7 +3443,7 @@ namespace dds
   bool topicQos::
   transport_priority_p () const
   {
-    return transport_priority_.get () != 0;
+    return !!transport_priority_;
   }
 
   ::dds::transportPriorityQosPolicy const& topicQos::
@@ -3658,15 +3455,14 @@ namespace dds
   void topicQos::
   transport_priority (::dds::transportPriorityQosPolicy const& e)
   {
-    if (transport_priority_.get ())
+    if (transport_priority_)
     {
       *transport_priority_ = e;
     }
 
     else
     {
-      transport_priority_ = topicQos::transport_priority_type (new ::dds::transportPriorityQosPolicy (e));
-      transport_priority_->container (this);
+      transport_priority_ = std::make_unique<::dds::transportPriorityQosPolicy> (e);
     }
   }
 
@@ -3674,7 +3470,7 @@ namespace dds
   bool topicQos::
   lifespan_p () const
   {
-    return lifespan_.get () != 0;
+    return !!lifespan_;
   }
 
   ::dds::lifespanQosPolicy const& topicQos::
@@ -3686,15 +3482,14 @@ namespace dds
   void topicQos::
   lifespan (::dds::lifespanQosPolicy const& e)
   {
-    if (lifespan_.get ())
+    if (lifespan_)
     {
       *lifespan_ = e;
     }
 
     else
     {
-      lifespan_ = topicQos::lifespan_type (new ::dds::lifespanQosPolicy (e));
-      lifespan_->container (this);
+      lifespan_ = std::make_unique<::dds::lifespanQosPolicy> (e);
     }
   }
 
@@ -3702,7 +3497,7 @@ namespace dds
   bool topicQos::
   ownership_p () const
   {
-    return ownership_.get () != 0;
+    return !!ownership_;
   }
 
   ::dds::ownershipQosPolicy const& topicQos::
@@ -3714,15 +3509,14 @@ namespace dds
   void topicQos::
   ownership (::dds::ownershipQosPolicy const& e)
   {
-    if (ownership_.get ())
+    if (ownership_)
     {
       *ownership_ = e;
     }
 
     else
     {
-      ownership_ = topicQos::ownership_type (new ::dds::ownershipQosPolicy (e));
-      ownership_->container (this);
+      ownership_ = std::make_unique<::dds::ownershipQosPolicy> (e);
     }
   }
 
@@ -3730,7 +3524,7 @@ namespace dds
   bool topicQos::
   representation_p () const
   {
-    return representation_.get () != 0;
+    return !!representation_;
   }
 
   ::dds::dataRepresentationQosPolicy const& topicQos::
@@ -3742,15 +3536,14 @@ namespace dds
   void topicQos::
   representation (::dds::dataRepresentationQosPolicy const& e)
   {
-    if (representation_.get ())
+    if (representation_)
     {
       *representation_ = e;
     }
 
     else
     {
-      representation_ = topicQos::representation_type (new ::dds::dataRepresentationQosPolicy (e));
-      representation_->container (this);
+      representation_ = std::make_unique<::dds::dataRepresentationQosPolicy> (e);
     }
   }
 
@@ -3758,7 +3551,7 @@ namespace dds
   bool topicQos::
   name_p () const
   {
-    return name_.get () != 0;
+    return !!name_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& topicQos::
@@ -3776,15 +3569,14 @@ namespace dds
   void topicQos::
   name (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (name_.get ())
+    if (name_)
     {
       *name_ = e;
     }
 
     else
     {
-      name_ = topicQos::name_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      name_->container (this);
+      name_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -3792,7 +3584,7 @@ namespace dds
   bool topicQos::
   base_name_p () const
   {
-    return base_name_.get () != 0;
+    return !!base_name_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& topicQos::
@@ -3810,15 +3602,14 @@ namespace dds
   void topicQos::
   base_name (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (base_name_.get ())
+    if (base_name_)
     {
       *base_name_ = e;
     }
 
     else
     {
-      base_name_ = topicQos::base_name_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      base_name_->container (this);
+      base_name_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -3826,7 +3617,7 @@ namespace dds
   bool topicQos::
   topic_filter_p () const
   {
-    return topic_filter_.get () != 0;
+    return !!topic_filter_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& topicQos::
@@ -3844,15 +3635,14 @@ namespace dds
   void topicQos::
   topic_filter (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (topic_filter_.get ())
+    if (topic_filter_)
     {
       *topic_filter_ = e;
     }
 
     else
     {
-      topic_filter_ = topicQos::topic_filter_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      topic_filter_->container (this);
+      topic_filter_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -3866,126 +3656,109 @@ namespace dds
 
   datareaderQos::datareaderQos (datareaderQos const& s) :
   ::XSCRT::Type (s)
-  , durability_ (s.durability_.get () ? new ::dds::durabilityQosPolicy (*s.durability_) : 0)
-  , deadline_ (s.deadline_.get () ? new ::dds::deadlineQosPolicy (*s.deadline_) : 0)
-  , latency_budget_ (s.latency_budget_.get () ? new ::dds::latencyBudgetQosPolicy (*s.latency_budget_) : 0)
-  , liveliness_ (s.liveliness_.get () ? new ::dds::livelinessQosPolicy (*s.liveliness_) : 0)
-  , reliability_ (s.reliability_.get () ? new ::dds::reliabilityQosPolicy (*s.reliability_) : 0)
-  , destination_order_ (s.destination_order_.get () ? new ::dds::destinationOrderQosPolicy (*s.destination_order_) : 0)
-  , history_ (s.history_.get () ? new ::dds::historyQosPolicy (*s.history_) : 0)
-  , resource_limits_ (s.resource_limits_.get () ? new ::dds::resourceLimitsQosPolicy (*s.resource_limits_) : 0)
-  , user_data_ (s.user_data_.get () ? new ::dds::userDataQosPolicy (*s.user_data_) : 0)
-  , ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0)
-  , time_based_filter_ (s.time_based_filter_.get () ? new ::dds::timeBasedFilterQosPolicy (*s.time_based_filter_) : 0)
-  , reader_data_lifecycle_ (s.reader_data_lifecycle_.get () ? new ::dds::readerDataLifecycleQosPolicy (*s.reader_data_lifecycle_) : 0)
-  , representation_ (s.representation_.get () ? new ::dds::dataRepresentationQosPolicy (*s.representation_) : 0)
-  , type_consistency_ (s.type_consistency_.get () ? new ::dds::typeConsistencyEnforcementQosPolicy (*s.type_consistency_) : 0)
-  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
-  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
-  , topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0)
+  , durability_ (s.durability_ ? std::make_unique<::dds::durabilityQosPolicy> (*s.durability_) : nullptr)
+  , deadline_ (s.deadline_ ? std::make_unique<::dds::deadlineQosPolicy> (*s.deadline_) : nullptr)
+  , latency_budget_ (s.latency_budget_ ? std::make_unique<::dds::latencyBudgetQosPolicy> (*s.latency_budget_) : nullptr)
+  , liveliness_ (s.liveliness_ ? std::make_unique<::dds::livelinessQosPolicy> (*s.liveliness_) : nullptr)
+  , reliability_ (s.reliability_ ? std::make_unique<::dds::reliabilityQosPolicy> (*s.reliability_) : nullptr)
+  , destination_order_ (s.destination_order_ ? std::make_unique<::dds::destinationOrderQosPolicy> (*s.destination_order_) : nullptr)
+  , history_ (s.history_ ? std::make_unique<::dds::historyQosPolicy> (*s.history_) : nullptr)
+  , resource_limits_ (s.resource_limits_ ? std::make_unique<::dds::resourceLimitsQosPolicy> (*s.resource_limits_) : nullptr)
+  , user_data_ (s.user_data_ ? std::make_unique<::dds::userDataQosPolicy> (*s.user_data_) : nullptr)
+  , ownership_ (s.ownership_ ? std::make_unique<::dds::ownershipQosPolicy> (*s.ownership_) : nullptr)
+  , time_based_filter_ (s.time_based_filter_ ? std::make_unique<::dds::timeBasedFilterQosPolicy> (*s.time_based_filter_) : nullptr)
+  , reader_data_lifecycle_ (s.reader_data_lifecycle_ ? std::make_unique<::dds::readerDataLifecycleQosPolicy> (*s.reader_data_lifecycle_) : nullptr)
+  , representation_ (s.representation_ ? std::make_unique<::dds::dataRepresentationQosPolicy> (*s.representation_) : nullptr)
+  , type_consistency_ (s.type_consistency_ ? std::make_unique<::dds::typeConsistencyEnforcementQosPolicy> (*s.type_consistency_) : nullptr)
+  , name_ (s.name_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.name_) : nullptr)
+  , base_name_ (s.base_name_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.base_name_) : nullptr)
+  , topic_filter_ (s.topic_filter_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.topic_filter_) : nullptr)
   {
-    if (durability_.get ()) durability_->container (this);
-    if (deadline_.get ()) deadline_->container (this);
-    if (latency_budget_.get ()) latency_budget_->container (this);
-    if (liveliness_.get ()) liveliness_->container (this);
-    if (reliability_.get ()) reliability_->container (this);
-    if (destination_order_.get ()) destination_order_->container (this);
-    if (history_.get ()) history_->container (this);
-    if (resource_limits_.get ()) resource_limits_->container (this);
-    if (user_data_.get ()) user_data_->container (this);
-    if (ownership_.get ()) ownership_->container (this);
-    if (time_based_filter_.get ()) time_based_filter_->container (this);
-    if (reader_data_lifecycle_.get ()) reader_data_lifecycle_->container (this);
-    if (representation_.get ()) representation_->container (this);
-    if (type_consistency_.get ()) type_consistency_->container (this);
-    if (name_.get ()) name_->container (this);
-    if (base_name_.get ()) base_name_->container (this);
-    if (topic_filter_.get ()) topic_filter_->container (this);
   }
 
   datareaderQos&
   datareaderQos::operator= (datareaderQos const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.durability_.get ())
+      if (s.durability_)
         durability (*(s.durability_));
       else
-        durability_.reset (0);
+        durability_.release ();
 
-      if (s.deadline_.get ())
+      if (s.deadline_)
         deadline (*(s.deadline_));
       else
-        deadline_.reset (0);
+        deadline_.release ();
 
-      if (s.latency_budget_.get ())
+      if (s.latency_budget_)
         latency_budget (*(s.latency_budget_));
       else
-        latency_budget_.reset (0);
+        latency_budget_.release ();
 
-      if (s.liveliness_.get ())
+      if (s.liveliness_)
         liveliness (*(s.liveliness_));
       else
-        liveliness_.reset (0);
+        liveliness_.release ();
 
-      if (s.reliability_.get ())
+      if (s.reliability_)
         reliability (*(s.reliability_));
       else
-        reliability_.reset (0);
+        reliability_.release ();
 
-      if (s.destination_order_.get ())
+      if (s.destination_order_)
         destination_order (*(s.destination_order_));
       else
-        destination_order_.reset (0);
+        destination_order_.release ();
 
-      if (s.history_.get ())
+      if (s.history_)
         history (*(s.history_));
       else
-        history_.reset (0);
+        history_.release ();
 
-      if (s.resource_limits_.get ())
+      if (s.resource_limits_)
         resource_limits (*(s.resource_limits_));
       else
-        resource_limits_.reset (0);
+        resource_limits_.release ();
 
-      if (s.user_data_.get ())
+      if (s.user_data_)
         user_data (*(s.user_data_));
       else
-        user_data_.reset (0);
+        user_data_.release ();
 
-      if (s.ownership_.get ())
+      if (s.ownership_)
         ownership (*(s.ownership_));
       else
-        ownership_.reset (0);
+        ownership_.release ();
 
-      if (s.time_based_filter_.get ())
+      if (s.time_based_filter_)
         time_based_filter (*(s.time_based_filter_));
       else
-        time_based_filter_.reset (0);
+        time_based_filter_.release ();
 
-      if (s.reader_data_lifecycle_.get ())
+      if (s.reader_data_lifecycle_)
         reader_data_lifecycle (*(s.reader_data_lifecycle_));
       else
-        reader_data_lifecycle_.reset (0);
+        reader_data_lifecycle_.release ();
 
-      if (s.representation_.get ())
+      if (s.representation_)
         representation (*(s.representation_));
       else
-        representation_.reset (0);
+        representation_.release ();
 
-      if (s.type_consistency_.get ())
+      if (s.type_consistency_)
         type_consistency (*(s.type_consistency_));
       else
-        type_consistency_.reset (0);
+        type_consistency_.release ();
 
-      if (s.name_.get ()) name (*(s.name_));
-      else name_.reset (0);
+      if (s.name_) name (*(s.name_));
+      else name_.release ();
 
-      if (s.base_name_.get ()) base_name (*(s.base_name_));
-      else base_name_.reset (0);
+      if (s.base_name_) base_name (*(s.base_name_));
+      else base_name_.release ();
 
-      if (s.topic_filter_.get ()) topic_filter (*(s.topic_filter_));
-      else topic_filter_.reset (0);
+      if (s.topic_filter_) topic_filter (*(s.topic_filter_));
+      else topic_filter_.release ();
     }
 
     return *this;
@@ -3996,7 +3769,7 @@ namespace dds
   bool datareaderQos::
   durability_p () const
   {
-    return durability_.get () != 0;
+    return !!durability_;
   }
 
   ::dds::durabilityQosPolicy const& datareaderQos::
@@ -4008,15 +3781,14 @@ namespace dds
   void datareaderQos::
   durability (::dds::durabilityQosPolicy const& e)
   {
-    if (durability_.get ())
+    if (durability_)
     {
       *durability_ = e;
     }
 
     else
     {
-      durability_ = datareaderQos::durability_type (new ::dds::durabilityQosPolicy (e));
-      durability_->container (this);
+      durability_ = std::make_unique<::dds::durabilityQosPolicy> (e);
     }
   }
 
@@ -4024,7 +3796,7 @@ namespace dds
   bool datareaderQos::
   deadline_p () const
   {
-    return deadline_.get () != 0;
+    return !!deadline_;
   }
 
   ::dds::deadlineQosPolicy const& datareaderQos::
@@ -4036,15 +3808,14 @@ namespace dds
   void datareaderQos::
   deadline (::dds::deadlineQosPolicy const& e)
   {
-    if (deadline_.get ())
+    if (deadline_)
     {
       *deadline_ = e;
     }
 
     else
     {
-      deadline_ = datareaderQos::deadline_type (new ::dds::deadlineQosPolicy (e));
-      deadline_->container (this);
+      deadline_ = std::make_unique<::dds::deadlineQosPolicy> (e);
     }
   }
 
@@ -4052,7 +3823,7 @@ namespace dds
   bool datareaderQos::
   latency_budget_p () const
   {
-    return latency_budget_.get () != 0;
+    return !!latency_budget_;
   }
 
   ::dds::latencyBudgetQosPolicy const& datareaderQos::
@@ -4064,15 +3835,14 @@ namespace dds
   void datareaderQos::
   latency_budget (::dds::latencyBudgetQosPolicy const& e)
   {
-    if (latency_budget_.get ())
+    if (latency_budget_)
     {
       *latency_budget_ = e;
     }
 
     else
     {
-      latency_budget_ = datareaderQos::latency_budget_type (new ::dds::latencyBudgetQosPolicy (e));
-      latency_budget_->container (this);
+      latency_budget_ = std::make_unique<::dds::latencyBudgetQosPolicy> (e);
     }
   }
 
@@ -4080,7 +3850,7 @@ namespace dds
   bool datareaderQos::
   liveliness_p () const
   {
-    return liveliness_.get () != 0;
+    return !!liveliness_;
   }
 
   ::dds::livelinessQosPolicy const& datareaderQos::
@@ -4092,15 +3862,14 @@ namespace dds
   void datareaderQos::
   liveliness (::dds::livelinessQosPolicy const& e)
   {
-    if (liveliness_.get ())
+    if (liveliness_)
     {
       *liveliness_ = e;
     }
 
     else
     {
-      liveliness_ = datareaderQos::liveliness_type (new ::dds::livelinessQosPolicy (e));
-      liveliness_->container (this);
+      liveliness_ = std::make_unique<::dds::livelinessQosPolicy> (e);
     }
   }
 
@@ -4108,7 +3877,7 @@ namespace dds
   bool datareaderQos::
   reliability_p () const
   {
-    return reliability_.get () != 0;
+    return !!reliability_;
   }
 
   ::dds::reliabilityQosPolicy const& datareaderQos::
@@ -4120,15 +3889,14 @@ namespace dds
   void datareaderQos::
   reliability (::dds::reliabilityQosPolicy const& e)
   {
-    if (reliability_.get ())
+    if (reliability_)
     {
       *reliability_ = e;
     }
 
     else
     {
-      reliability_ = datareaderQos::reliability_type (new ::dds::reliabilityQosPolicy (e));
-      reliability_->container (this);
+      reliability_ = std::make_unique<::dds::reliabilityQosPolicy> (e);
     }
   }
 
@@ -4136,7 +3904,7 @@ namespace dds
   bool datareaderQos::
   destination_order_p () const
   {
-    return destination_order_.get () != 0;
+    return !!destination_order_;
   }
 
   ::dds::destinationOrderQosPolicy const& datareaderQos::
@@ -4148,15 +3916,14 @@ namespace dds
   void datareaderQos::
   destination_order (::dds::destinationOrderQosPolicy const& e)
   {
-    if (destination_order_.get ())
+    if (destination_order_)
     {
       *destination_order_ = e;
     }
 
     else
     {
-      destination_order_ = datareaderQos::destination_order_type (new ::dds::destinationOrderQosPolicy (e));
-      destination_order_->container (this);
+      destination_order_ = std::make_unique<::dds::destinationOrderQosPolicy> (e);
     }
   }
 
@@ -4164,7 +3931,7 @@ namespace dds
   bool datareaderQos::
   history_p () const
   {
-    return history_.get () != 0;
+    return !!history_;
   }
 
   ::dds::historyQosPolicy const& datareaderQos::
@@ -4176,15 +3943,14 @@ namespace dds
   void datareaderQos::
   history (::dds::historyQosPolicy const& e)
   {
-    if (history_.get ())
+    if (history_)
     {
       *history_ = e;
     }
 
     else
     {
-      history_ = datareaderQos::history_type (new ::dds::historyQosPolicy (e));
-      history_->container (this);
+      history_ = std::make_unique<::dds::historyQosPolicy> (e);
     }
   }
 
@@ -4192,7 +3958,7 @@ namespace dds
   bool datareaderQos::
   resource_limits_p () const
   {
-    return resource_limits_.get () != 0;
+    return !!resource_limits_;
   }
 
   ::dds::resourceLimitsQosPolicy const& datareaderQos::
@@ -4204,15 +3970,14 @@ namespace dds
   void datareaderQos::
   resource_limits (::dds::resourceLimitsQosPolicy const& e)
   {
-    if (resource_limits_.get ())
+    if (resource_limits_)
     {
       *resource_limits_ = e;
     }
 
     else
     {
-      resource_limits_ = datareaderQos::resource_limits_type (new ::dds::resourceLimitsQosPolicy (e));
-      resource_limits_->container (this);
+      resource_limits_ = std::make_unique<::dds::resourceLimitsQosPolicy> (e);
     }
   }
 
@@ -4220,7 +3985,7 @@ namespace dds
   bool datareaderQos::
   user_data_p () const
   {
-    return user_data_.get () != 0;
+    return !!user_data_;
   }
 
   ::dds::userDataQosPolicy const& datareaderQos::
@@ -4232,15 +3997,14 @@ namespace dds
   void datareaderQos::
   user_data (::dds::userDataQosPolicy const& e)
   {
-    if (user_data_.get ())
+    if (user_data_)
     {
       *user_data_ = e;
     }
 
     else
     {
-      user_data_ = datareaderQos::user_data_type (new ::dds::userDataQosPolicy (e));
-      user_data_->container (this);
+      user_data_ = std::make_unique<::dds::userDataQosPolicy> (e);
     }
   }
 
@@ -4248,7 +4012,7 @@ namespace dds
   bool datareaderQos::
   ownership_p () const
   {
-    return ownership_.get () != 0;
+    return !!ownership_;
   }
 
   ::dds::ownershipQosPolicy const& datareaderQos::
@@ -4260,15 +4024,14 @@ namespace dds
   void datareaderQos::
   ownership (::dds::ownershipQosPolicy const& e)
   {
-    if (ownership_.get ())
+    if (ownership_)
     {
       *ownership_ = e;
     }
 
     else
     {
-      ownership_ = datareaderQos::ownership_type (new ::dds::ownershipQosPolicy (e));
-      ownership_->container (this);
+      ownership_ = std::make_unique<::dds::ownershipQosPolicy> (e);
     }
   }
 
@@ -4276,7 +4039,7 @@ namespace dds
   bool datareaderQos::
   time_based_filter_p () const
   {
-    return time_based_filter_.get () != 0;
+    return !!time_based_filter_;
   }
 
   ::dds::timeBasedFilterQosPolicy const& datareaderQos::
@@ -4288,15 +4051,14 @@ namespace dds
   void datareaderQos::
   time_based_filter (::dds::timeBasedFilterQosPolicy const& e)
   {
-    if (time_based_filter_.get ())
+    if (time_based_filter_)
     {
       *time_based_filter_ = e;
     }
 
     else
     {
-      time_based_filter_ = datareaderQos::time_based_filter_type (new ::dds::timeBasedFilterQosPolicy (e));
-      time_based_filter_->container (this);
+      time_based_filter_ = std::make_unique<::dds::timeBasedFilterQosPolicy> (e);
     }
   }
 
@@ -4304,7 +4066,7 @@ namespace dds
   bool datareaderQos::
   reader_data_lifecycle_p () const
   {
-    return reader_data_lifecycle_.get () != 0;
+    return !!reader_data_lifecycle_;
   }
 
   ::dds::readerDataLifecycleQosPolicy const& datareaderQos::
@@ -4316,15 +4078,14 @@ namespace dds
   void datareaderQos::
   reader_data_lifecycle (::dds::readerDataLifecycleQosPolicy const& e)
   {
-    if (reader_data_lifecycle_.get ())
+    if (reader_data_lifecycle_)
     {
       *reader_data_lifecycle_ = e;
     }
 
     else
     {
-      reader_data_lifecycle_ = datareaderQos::reader_data_lifecycle_type (new ::dds::readerDataLifecycleQosPolicy (e));
-      reader_data_lifecycle_->container (this);
+      reader_data_lifecycle_ = std::make_unique<::dds::readerDataLifecycleQosPolicy> (e);
     }
   }
 
@@ -4332,7 +4093,7 @@ namespace dds
   bool datareaderQos::
   representation_p () const
   {
-    return representation_.get () != 0;
+    return !!representation_;
   }
 
   ::dds::dataRepresentationQosPolicy const& datareaderQos::
@@ -4344,15 +4105,14 @@ namespace dds
   void datareaderQos::
   representation (::dds::dataRepresentationQosPolicy const& e)
   {
-    if (representation_.get ())
+    if (representation_)
     {
       *representation_ = e;
     }
 
     else
     {
-      representation_ = datareaderQos::representation_type (new ::dds::dataRepresentationQosPolicy (e));
-      representation_->container (this);
+      representation_ = std::make_unique<::dds::dataRepresentationQosPolicy> (e);
     }
   }
 
@@ -4360,7 +4120,7 @@ namespace dds
   bool datareaderQos::
   type_consistency_p () const
   {
-    return type_consistency_.get () != 0;
+    return !!type_consistency_;
   }
 
   ::dds::typeConsistencyEnforcementQosPolicy const& datareaderQos::
@@ -4372,15 +4132,14 @@ namespace dds
   void datareaderQos::
   type_consistency (::dds::typeConsistencyEnforcementQosPolicy const& e)
   {
-    if (type_consistency_.get ())
+    if (type_consistency_)
     {
       *type_consistency_ = e;
     }
 
     else
     {
-      type_consistency_ = datareaderQos::type_consistency_type (new ::dds::typeConsistencyEnforcementQosPolicy (e));
-      type_consistency_->container (this);
+      type_consistency_ = std::make_unique<::dds::typeConsistencyEnforcementQosPolicy> (e);
     }
   }
 
@@ -4388,7 +4147,7 @@ namespace dds
   bool datareaderQos::
   name_p () const
   {
-    return name_.get () != 0;
+    return !!name_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& datareaderQos::
@@ -4406,15 +4165,14 @@ namespace dds
   void datareaderQos::
   name (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (name_.get ())
+    if (name_)
     {
       *name_ = e;
     }
 
     else
     {
-      name_ = datareaderQos::name_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      name_->container (this);
+      name_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -4422,7 +4180,7 @@ namespace dds
   bool datareaderQos::
   base_name_p () const
   {
-    return base_name_.get () != 0;
+    return !!base_name_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& datareaderQos::
@@ -4440,15 +4198,14 @@ namespace dds
   void datareaderQos::
   base_name (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (base_name_.get ())
+    if (base_name_)
     {
       *base_name_ = e;
     }
 
     else
     {
-      base_name_ = datareaderQos::base_name_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      base_name_->container (this);
+      base_name_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -4456,7 +4213,7 @@ namespace dds
   bool datareaderQos::
   topic_filter_p () const
   {
-    return topic_filter_.get () != 0;
+    return !!topic_filter_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& datareaderQos::
@@ -4474,15 +4231,14 @@ namespace dds
   void datareaderQos::
   topic_filter (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (topic_filter_.get ())
+    if (topic_filter_)
     {
       *topic_filter_ = e;
     }
 
     else
     {
-      topic_filter_ = datareaderQos::topic_filter_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      topic_filter_->container (this);
+      topic_filter_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -4496,140 +4252,121 @@ namespace dds
 
   datawriterQos::datawriterQos (datawriterQos const& s) :
   ::XSCRT::Type (s)
-  , durability_ (s.durability_.get () ? new ::dds::durabilityQosPolicy (*s.durability_) : 0)
-  , durability_service_ (s.durability_service_.get () ? new ::dds::durabilityServiceQosPolicy (*s.durability_service_) : 0)
-  , deadline_ (s.deadline_.get () ? new ::dds::deadlineQosPolicy (*s.deadline_) : 0)
-  , latency_budget_ (s.latency_budget_.get () ? new ::dds::latencyBudgetQosPolicy (*s.latency_budget_) : 0)
-  , liveliness_ (s.liveliness_.get () ? new ::dds::livelinessQosPolicy (*s.liveliness_) : 0)
-  , reliability_ (s.reliability_.get () ? new ::dds::reliabilityQosPolicy (*s.reliability_) : 0)
-  , destination_order_ (s.destination_order_.get () ? new ::dds::destinationOrderQosPolicy (*s.destination_order_) : 0)
-  , history_ (s.history_.get () ? new ::dds::historyQosPolicy (*s.history_) : 0)
-  , resource_limits_ (s.resource_limits_.get () ? new ::dds::resourceLimitsQosPolicy (*s.resource_limits_) : 0)
-  , transport_priority_ (s.transport_priority_.get () ? new ::dds::transportPriorityQosPolicy (*s.transport_priority_) : 0)
-  , lifespan_ (s.lifespan_.get () ? new ::dds::lifespanQosPolicy (*s.lifespan_) : 0)
-  , user_data_ (s.user_data_.get () ? new ::dds::userDataQosPolicy (*s.user_data_) : 0)
-  , ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0)
-  , ownership_strength_ (s.ownership_strength_.get () ? new ::dds::ownershipStrengthQosPolicy (*s.ownership_strength_) : 0)
-  , writer_data_lifecycle_ (s.writer_data_lifecycle_.get () ? new ::dds::writerDataLifecycleQosPolicy (*s.writer_data_lifecycle_) : 0)
-  , representation_ (s.representation_.get () ? new ::dds::dataRepresentationQosPolicy (*s.representation_) : 0)
-  , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
-  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
-  , topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0)
+  , durability_ (s.durability_ ? std::make_unique<::dds::durabilityQosPolicy> (*s.durability_) : nullptr)
+  , durability_service_ (s.durability_service_ ? std::make_unique<::dds::durabilityServiceQosPolicy> (*s.durability_service_) : nullptr)
+  , deadline_ (s.deadline_ ? std::make_unique<::dds::deadlineQosPolicy> (*s.deadline_) : nullptr)
+  , latency_budget_ (s.latency_budget_ ? std::make_unique<::dds::latencyBudgetQosPolicy> (*s.latency_budget_) : nullptr)
+  , liveliness_ (s.liveliness_ ? std::make_unique<::dds::livelinessQosPolicy> (*s.liveliness_) : nullptr)
+  , reliability_ (s.reliability_ ? std::make_unique<::dds::reliabilityQosPolicy> (*s.reliability_) : nullptr)
+  , destination_order_ (s.destination_order_ ? std::make_unique<::dds::destinationOrderQosPolicy> (*s.destination_order_) : nullptr)
+  , history_ (s.history_ ? std::make_unique<::dds::historyQosPolicy> (*s.history_) : nullptr)
+  , resource_limits_ (s.resource_limits_ ? std::make_unique<::dds::resourceLimitsQosPolicy> (*s.resource_limits_) : nullptr)
+  , transport_priority_ (s.transport_priority_ ? std::make_unique<::dds::transportPriorityQosPolicy> (*s.transport_priority_) : nullptr)
+  , lifespan_ (s.lifespan_ ? std::make_unique<::dds::lifespanQosPolicy> (*s.lifespan_) : nullptr)
+  , user_data_ (s.user_data_ ? std::make_unique<::dds::userDataQosPolicy> (*s.user_data_) : nullptr)
+  , ownership_ (s.ownership_ ? std::make_unique<::dds::ownershipQosPolicy> (*s.ownership_) : nullptr)
+  , ownership_strength_ (s.ownership_strength_ ? std::make_unique<::dds::ownershipStrengthQosPolicy> (*s.ownership_strength_) : nullptr)
+  , writer_data_lifecycle_ (s.writer_data_lifecycle_ ? std::make_unique<::dds::writerDataLifecycleQosPolicy> (*s.writer_data_lifecycle_) : nullptr)
+  , representation_ (s.representation_ ? std::make_unique<::dds::dataRepresentationQosPolicy> (*s.representation_) : nullptr)
+  , name_ (s.name_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.name_) : nullptr)
+  , base_name_ (s.base_name_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.base_name_) : nullptr)
+  , topic_filter_ (s.topic_filter_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.topic_filter_) : nullptr)
   {
-    if (durability_.get ()) durability_->container (this);
-    if (durability_service_.get ()) durability_service_->container (this);
-    if (deadline_.get ()) deadline_->container (this);
-    if (latency_budget_.get ()) latency_budget_->container (this);
-    if (liveliness_.get ()) liveliness_->container (this);
-    if (reliability_.get ()) reliability_->container (this);
-    if (destination_order_.get ()) destination_order_->container (this);
-    if (history_.get ()) history_->container (this);
-    if (resource_limits_.get ()) resource_limits_->container (this);
-    if (transport_priority_.get ()) transport_priority_->container (this);
-    if (lifespan_.get ()) lifespan_->container (this);
-    if (user_data_.get ()) user_data_->container (this);
-    if (ownership_.get ()) ownership_->container (this);
-    if (ownership_strength_.get ()) ownership_strength_->container (this);
-    if (writer_data_lifecycle_.get ()) writer_data_lifecycle_->container (this);
-    if (representation_.get ()) representation_->container (this);
-    if (name_.get ()) name_->container (this);
-    if (base_name_.get ()) base_name_->container (this);
-    if (topic_filter_.get ()) topic_filter_->container (this);
   }
 
   datawriterQos&
   datawriterQos::operator= (datawriterQos const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
-      if (s.durability_.get ())
+      if (s.durability_)
         durability (*(s.durability_));
       else
-        durability_.reset (0);
+        durability_.release ();
 
-      if (s.durability_service_.get ())
+      if (s.durability_service_)
         durability_service (*(s.durability_service_));
       else
-        durability_service_.reset (0);
+        durability_service_.release ();
 
-      if (s.deadline_.get ())
+      if (s.deadline_)
         deadline (*(s.deadline_));
       else
-        deadline_.reset (0);
+        deadline_.release ();
 
-      if (s.latency_budget_.get ())
+      if (s.latency_budget_)
         latency_budget (*(s.latency_budget_));
       else
-        latency_budget_.reset (0);
+        latency_budget_.release ();
 
-      if (s.liveliness_.get ())
+      if (s.liveliness_)
         liveliness (*(s.liveliness_));
       else
-        liveliness_.reset (0);
+        liveliness_.release ();
 
-      if (s.reliability_.get ())
+      if (s.reliability_)
         reliability (*(s.reliability_));
       else
-        reliability_.reset (0);
+        reliability_.release ();
 
-      if (s.destination_order_.get ())
+      if (s.destination_order_)
         destination_order (*(s.destination_order_));
       else
-        destination_order_.reset (0);
+        destination_order_.release ();
 
-      if (s.history_.get ())
+      if (s.history_)
         history (*(s.history_));
       else
-        history_.reset (0);
+        history_.release ();
 
-      if (s.resource_limits_.get ())
+      if (s.resource_limits_)
         resource_limits (*(s.resource_limits_));
       else
-        resource_limits_.reset (0);
+        resource_limits_.release ();
 
-      if (s.transport_priority_.get ())
+      if (s.transport_priority_)
         transport_priority (*(s.transport_priority_));
       else
-        transport_priority_.reset (0);
+        transport_priority_.release ();
 
-      if (s.lifespan_.get ())
+      if (s.lifespan_)
         lifespan (*(s.lifespan_));
       else
-        lifespan_.reset (0);
+        lifespan_.release ();
 
-      if (s.user_data_.get ())
+      if (s.user_data_)
         user_data (*(s.user_data_));
       else
-        user_data_.reset (0);
+        user_data_.release ();
 
-      if (s.ownership_.get ())
+      if (s.ownership_)
         ownership (*(s.ownership_));
       else
-        ownership_.reset (0);
+        ownership_.release ();
 
-      if (s.ownership_strength_.get ())
+      if (s.ownership_strength_)
         ownership_strength (*(s.ownership_strength_));
       else
-        ownership_strength_.reset (0);
+        ownership_strength_.release ();
 
-      if (s.writer_data_lifecycle_.get ())
+      if (s.writer_data_lifecycle_)
         writer_data_lifecycle (*(s.writer_data_lifecycle_));
       else
-        writer_data_lifecycle_.reset (0);
+        writer_data_lifecycle_.release ();
 
-      if (s.representation_.get ())
+      if (s.representation_)
         representation (*(s.representation_));
       else
-        representation_.reset (0);
+        representation_.release ();
 
-      if (s.name_.get ()) name (*(s.name_));
-      else name_.reset (0);
+      if (s.name_) name (*(s.name_));
+      else name_.release ();
 
-      if (s.base_name_.get ()) base_name (*(s.base_name_));
-      else base_name_.reset (0);
+      if (s.base_name_) base_name (*(s.base_name_));
+      else base_name_.release ();
 
-      if (s.topic_filter_.get ()) topic_filter (*(s.topic_filter_));
-      else topic_filter_.reset (0);
+      if (s.topic_filter_) topic_filter (*(s.topic_filter_));
+      else topic_filter_.release ();
     }
 
     return *this;
@@ -4640,7 +4377,7 @@ namespace dds
   bool datawriterQos::
   durability_p () const
   {
-    return durability_.get () != 0;
+    return !!durability_;
   }
 
   ::dds::durabilityQosPolicy const& datawriterQos::
@@ -4652,15 +4389,14 @@ namespace dds
   void datawriterQos::
   durability (::dds::durabilityQosPolicy const& e)
   {
-    if (durability_.get ())
+    if (durability_)
     {
       *durability_ = e;
     }
 
     else
     {
-      durability_ = datawriterQos::durability_type (new ::dds::durabilityQosPolicy (e));
-      durability_->container (this);
+      durability_ = std::make_unique<::dds::durabilityQosPolicy> (e);
     }
   }
 
@@ -4668,7 +4404,7 @@ namespace dds
   bool datawriterQos::
   durability_service_p () const
   {
-    return durability_service_.get () != 0;
+    return !!durability_service_;
   }
 
   ::dds::durabilityServiceQosPolicy const& datawriterQos::
@@ -4680,15 +4416,14 @@ namespace dds
   void datawriterQos::
   durability_service (::dds::durabilityServiceQosPolicy const& e)
   {
-    if (durability_service_.get ())
+    if (durability_service_)
     {
       *durability_service_ = e;
     }
 
     else
     {
-      durability_service_ = datawriterQos::durability_service_type (new ::dds::durabilityServiceQosPolicy (e));
-      durability_service_->container (this);
+      durability_service_ = std::make_unique<::dds::durabilityServiceQosPolicy> (e);
     }
   }
 
@@ -4696,7 +4431,7 @@ namespace dds
   bool datawriterQos::
   deadline_p () const
   {
-    return deadline_.get () != 0;
+    return !!deadline_;
   }
 
   ::dds::deadlineQosPolicy const& datawriterQos::
@@ -4708,15 +4443,14 @@ namespace dds
   void datawriterQos::
   deadline (::dds::deadlineQosPolicy const& e)
   {
-    if (deadline_.get ())
+    if (deadline_)
     {
       *deadline_ = e;
     }
 
     else
     {
-      deadline_ = datawriterQos::deadline_type (new ::dds::deadlineQosPolicy (e));
-      deadline_->container (this);
+      deadline_ = std::make_unique<::dds::deadlineQosPolicy> (e);
     }
   }
 
@@ -4724,7 +4458,7 @@ namespace dds
   bool datawriterQos::
   latency_budget_p () const
   {
-    return latency_budget_.get () != 0;
+    return !!latency_budget_;
   }
 
   ::dds::latencyBudgetQosPolicy const& datawriterQos::
@@ -4736,15 +4470,14 @@ namespace dds
   void datawriterQos::
   latency_budget (::dds::latencyBudgetQosPolicy const& e)
   {
-    if (latency_budget_.get ())
+    if (latency_budget_)
     {
       *latency_budget_ = e;
     }
 
     else
     {
-      latency_budget_ = datawriterQos::latency_budget_type (new ::dds::latencyBudgetQosPolicy (e));
-      latency_budget_->container (this);
+      latency_budget_ = std::make_unique<::dds::latencyBudgetQosPolicy> (e);
     }
   }
 
@@ -4752,7 +4485,7 @@ namespace dds
   bool datawriterQos::
   liveliness_p () const
   {
-    return liveliness_.get () != 0;
+    return !!liveliness_;
   }
 
   ::dds::livelinessQosPolicy const& datawriterQos::
@@ -4764,15 +4497,14 @@ namespace dds
   void datawriterQos::
   liveliness (::dds::livelinessQosPolicy const& e)
   {
-    if (liveliness_.get ())
+    if (liveliness_)
     {
       *liveliness_ = e;
     }
 
     else
     {
-      liveliness_ = datawriterQos::liveliness_type (new ::dds::livelinessQosPolicy (e));
-      liveliness_->container (this);
+      liveliness_ = std::make_unique<::dds::livelinessQosPolicy> (e);
     }
   }
 
@@ -4780,7 +4512,7 @@ namespace dds
   bool datawriterQos::
   reliability_p () const
   {
-    return reliability_.get () != 0;
+    return !!reliability_;
   }
 
   ::dds::reliabilityQosPolicy const& datawriterQos::
@@ -4792,15 +4524,14 @@ namespace dds
   void datawriterQos::
   reliability (::dds::reliabilityQosPolicy const& e)
   {
-    if (reliability_.get ())
+    if (reliability_)
     {
       *reliability_ = e;
     }
 
     else
     {
-      reliability_ = datawriterQos::reliability_type (new ::dds::reliabilityQosPolicy (e));
-      reliability_->container (this);
+      reliability_ = std::make_unique<::dds::reliabilityQosPolicy> (e);
     }
   }
 
@@ -4808,7 +4539,7 @@ namespace dds
   bool datawriterQos::
   destination_order_p () const
   {
-    return destination_order_.get () != 0;
+    return !!destination_order_;
   }
 
   ::dds::destinationOrderQosPolicy const& datawriterQos::
@@ -4820,15 +4551,14 @@ namespace dds
   void datawriterQos::
   destination_order (::dds::destinationOrderQosPolicy const& e)
   {
-    if (destination_order_.get ())
+    if (destination_order_)
     {
       *destination_order_ = e;
     }
 
     else
     {
-      destination_order_ = datawriterQos::destination_order_type (new ::dds::destinationOrderQosPolicy (e));
-      destination_order_->container (this);
+      destination_order_ = std::make_unique<::dds::destinationOrderQosPolicy> (e);
     }
   }
 
@@ -4836,7 +4566,7 @@ namespace dds
   bool datawriterQos::
   history_p () const
   {
-    return history_.get () != 0;
+    return !!history_;
   }
 
   ::dds::historyQosPolicy const& datawriterQos::
@@ -4848,15 +4578,14 @@ namespace dds
   void datawriterQos::
   history (::dds::historyQosPolicy const& e)
   {
-    if (history_.get ())
+    if (history_)
     {
       *history_ = e;
     }
 
     else
     {
-      history_ = datawriterQos::history_type (new ::dds::historyQosPolicy (e));
-      history_->container (this);
+      history_ = std::make_unique<::dds::historyQosPolicy> (e);
     }
   }
 
@@ -4864,7 +4593,7 @@ namespace dds
   bool datawriterQos::
   resource_limits_p () const
   {
-    return resource_limits_.get () != 0;
+    return !!resource_limits_;
   }
 
   ::dds::resourceLimitsQosPolicy const& datawriterQos::
@@ -4876,15 +4605,14 @@ namespace dds
   void datawriterQos::
   resource_limits (::dds::resourceLimitsQosPolicy const& e)
   {
-    if (resource_limits_.get ())
+    if (resource_limits_)
     {
       *resource_limits_ = e;
     }
 
     else
     {
-      resource_limits_ = datawriterQos::resource_limits_type (new ::dds::resourceLimitsQosPolicy (e));
-      resource_limits_->container (this);
+      resource_limits_ = std::make_unique<::dds::resourceLimitsQosPolicy> (e);
     }
   }
 
@@ -4892,7 +4620,7 @@ namespace dds
   bool datawriterQos::
   transport_priority_p () const
   {
-    return transport_priority_.get () != 0;
+    return !!transport_priority_;
   }
 
   ::dds::transportPriorityQosPolicy const& datawriterQos::
@@ -4904,15 +4632,14 @@ namespace dds
   void datawriterQos::
   transport_priority (::dds::transportPriorityQosPolicy const& e)
   {
-    if (transport_priority_.get ())
+    if (transport_priority_)
     {
       *transport_priority_ = e;
     }
 
     else
     {
-      transport_priority_ = datawriterQos::transport_priority_type (new ::dds::transportPriorityQosPolicy (e));
-      transport_priority_->container (this);
+      transport_priority_ = std::make_unique<::dds::transportPriorityQosPolicy> (e);
     }
   }
 
@@ -4920,7 +4647,7 @@ namespace dds
   bool datawriterQos::
   lifespan_p () const
   {
-    return lifespan_.get () != 0;
+    return !!lifespan_;
   }
 
   ::dds::lifespanQosPolicy const& datawriterQos::
@@ -4932,15 +4659,14 @@ namespace dds
   void datawriterQos::
   lifespan (::dds::lifespanQosPolicy const& e)
   {
-    if (lifespan_.get ())
+    if (lifespan_)
     {
       *lifespan_ = e;
     }
 
     else
     {
-      lifespan_ = datawriterQos::lifespan_type (new ::dds::lifespanQosPolicy (e));
-      lifespan_->container (this);
+      lifespan_ = std::make_unique<::dds::lifespanQosPolicy> (e);
     }
   }
 
@@ -4948,7 +4674,7 @@ namespace dds
   bool datawriterQos::
   user_data_p () const
   {
-    return user_data_.get () != 0;
+    return !!user_data_;
   }
 
   ::dds::userDataQosPolicy const& datawriterQos::
@@ -4960,15 +4686,14 @@ namespace dds
   void datawriterQos::
   user_data (::dds::userDataQosPolicy const& e)
   {
-    if (user_data_.get ())
+    if (user_data_)
     {
       *user_data_ = e;
     }
 
     else
     {
-      user_data_ = datawriterQos::user_data_type (new ::dds::userDataQosPolicy (e));
-      user_data_->container (this);
+      user_data_ = std::make_unique<::dds::userDataQosPolicy> (e);
     }
   }
 
@@ -4976,7 +4701,7 @@ namespace dds
   bool datawriterQos::
   ownership_p () const
   {
-    return ownership_.get () != 0;
+    return !!ownership_;
   }
 
   ::dds::ownershipQosPolicy const& datawriterQos::
@@ -4988,15 +4713,14 @@ namespace dds
   void datawriterQos::
   ownership (::dds::ownershipQosPolicy const& e)
   {
-    if (ownership_.get ())
+    if (ownership_)
     {
       *ownership_ = e;
     }
 
     else
     {
-      ownership_ = datawriterQos::ownership_type (new ::dds::ownershipQosPolicy (e));
-      ownership_->container (this);
+      ownership_ = std::make_unique<::dds::ownershipQosPolicy> (e);
     }
   }
 
@@ -5004,7 +4728,7 @@ namespace dds
   bool datawriterQos::
   ownership_strength_p () const
   {
-    return ownership_strength_.get () != 0;
+    return !!ownership_strength_;
   }
 
   ::dds::ownershipStrengthQosPolicy const& datawriterQos::
@@ -5016,15 +4740,14 @@ namespace dds
   void datawriterQos::
   ownership_strength (::dds::ownershipStrengthQosPolicy const& e)
   {
-    if (ownership_strength_.get ())
+    if (ownership_strength_)
     {
       *ownership_strength_ = e;
     }
 
     else
     {
-      ownership_strength_ = datawriterQos::ownership_strength_type (new ::dds::ownershipStrengthQosPolicy (e));
-      ownership_strength_->container (this);
+      ownership_strength_ = std::make_unique<::dds::ownershipStrengthQosPolicy> (e);
     }
   }
 
@@ -5032,7 +4755,7 @@ namespace dds
   bool datawriterQos::
   writer_data_lifecycle_p () const
   {
-    return writer_data_lifecycle_.get () != 0;
+    return !!writer_data_lifecycle_;
   }
 
   ::dds::writerDataLifecycleQosPolicy const& datawriterQos::
@@ -5044,15 +4767,14 @@ namespace dds
   void datawriterQos::
   writer_data_lifecycle (::dds::writerDataLifecycleQosPolicy const& e)
   {
-    if (writer_data_lifecycle_.get ())
+    if (writer_data_lifecycle_)
     {
       *writer_data_lifecycle_ = e;
     }
 
     else
     {
-      writer_data_lifecycle_ = datawriterQos::writer_data_lifecycle_type (new ::dds::writerDataLifecycleQosPolicy (e));
-      writer_data_lifecycle_->container (this);
+      writer_data_lifecycle_ = std::make_unique<::dds::writerDataLifecycleQosPolicy> (e);
     }
   }
 
@@ -5060,7 +4782,7 @@ namespace dds
   bool datawriterQos::
   representation_p () const
   {
-    return representation_.get () != 0;
+    return !!representation_;
   }
 
   ::dds::dataRepresentationQosPolicy const& datawriterQos::
@@ -5072,15 +4794,14 @@ namespace dds
   void datawriterQos::
   representation (::dds::dataRepresentationQosPolicy const& e)
   {
-    if (representation_.get ())
+    if (representation_)
     {
       *representation_ = e;
     }
 
     else
     {
-      representation_ = datawriterQos::representation_type (new ::dds::dataRepresentationQosPolicy (e));
-      representation_->container (this);
+      representation_ = std::make_unique<::dds::dataRepresentationQosPolicy> (e);
     }
   }
 
@@ -5088,7 +4809,7 @@ namespace dds
   bool datawriterQos::
   name_p () const
   {
-    return name_.get () != 0;
+    return !!name_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& datawriterQos::
@@ -5106,15 +4827,14 @@ namespace dds
   void datawriterQos::
   name (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (name_.get ())
+    if (name_)
     {
       *name_ = e;
     }
 
     else
     {
-      name_ = datawriterQos::name_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      name_->container (this);
+      name_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -5122,7 +4842,7 @@ namespace dds
   bool datawriterQos::
   base_name_p () const
   {
-    return base_name_.get () != 0;
+    return !!base_name_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& datawriterQos::
@@ -5140,15 +4860,14 @@ namespace dds
   void datawriterQos::
   base_name (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (base_name_.get ())
+    if (base_name_)
     {
       *base_name_ = e;
     }
 
     else
     {
-      base_name_ = datawriterQos::base_name_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      base_name_->container (this);
+      base_name_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -5156,7 +4875,7 @@ namespace dds
   bool datawriterQos::
   topic_filter_p () const
   {
-    return topic_filter_.get () != 0;
+    return !!topic_filter_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& datawriterQos::
@@ -5174,15 +4893,14 @@ namespace dds
   void datawriterQos::
   topic_filter (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (topic_filter_.get ())
+    if (topic_filter_)
     {
       *topic_filter_ = e;
     }
 
     else
     {
-      topic_filter_ = datawriterQos::topic_filter_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      topic_filter_->container (this);
+      topic_filter_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -5191,9 +4909,8 @@ namespace dds
 
   qosProfile::qosProfile (::XMLSchema::string<ACE_TCHAR> const& name__)
   : ::XSCRT::Type ()
-  , name_ (new ::XMLSchema::string<ACE_TCHAR> (name__))
+  , name_ (std::make_unique<::XMLSchema::string<ACE_TCHAR>> (name__))
   {
-    name_->container (this);
   }
 
   qosProfile::qosProfile (qosProfile const& s) :
@@ -5204,17 +4921,15 @@ namespace dds
   , domainparticipant_qos_ (s.domainparticipant_qos_)
   , publisher_qos_ (s.publisher_qos_)
   , subscriber_qos_ (s.subscriber_qos_)
-  , name_ (new ::XMLSchema::string<ACE_TCHAR> (*s.name_))
-  , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
+  , name_ (std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.name_))
+  , base_name_ (s.base_name_ ? std::make_unique<::XMLSchema::string<ACE_TCHAR>> (*s.base_name_) : nullptr)
   {
-    name_->container (this);
-    if (base_name_.get ()) base_name_->container (this);
   }
 
   qosProfile&
   qosProfile::operator= (qosProfile const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
       datareader_qos_ = s.datareader_qos_;
 
@@ -5230,8 +4945,8 @@ namespace dds
 
       name (s.name ());
 
-      if (s.base_name_.get ()) base_name (*(s.base_name_));
-      else base_name_.reset (0);
+      if (s.base_name_) base_name (*(s.base_name_));
+      else base_name_.release ();
     }
 
     return *this;
@@ -5239,40 +4954,16 @@ namespace dds
 
 
   // qosProfile
-  qosProfile::datareader_qos_iterator qosProfile::
-  begin_datareader_qos ()
-  {
-    return datareader_qos_.begin ();
-  }
-
-  qosProfile::datareader_qos_iterator qosProfile::
-  end_datareader_qos ()
-  {
-    return datareader_qos_.end ();
-  }
-
   qosProfile::datareader_qos_const_iterator qosProfile::
   begin_datareader_qos () const
   {
-    return datareader_qos_.begin ();
+    return datareader_qos_.cbegin ();
   }
 
   qosProfile::datareader_qos_const_iterator qosProfile::
   end_datareader_qos () const
   {
-    return datareader_qos_.end ();
-  }
-
-  void qosProfile::
-  add_datareader_qos (qosProfile::datareader_qos_value_type const& e)
-  {
-    datareader_qos_.push_back (e);
-  }
-
-  void qosProfile::
-  del_datareader_qos (qosProfile::datareader_qos_value_type const& e)
-  {
-    datareader_qos_.remove (e);
+    return datareader_qos_.cend ();
   }
 
   size_t qosProfile::
@@ -5282,40 +4973,16 @@ namespace dds
   }
 
   // qosProfile
-  qosProfile::datawriter_qos_iterator qosProfile::
-  begin_datawriter_qos ()
-  {
-    return datawriter_qos_.begin ();
-  }
-
-  qosProfile::datawriter_qos_iterator qosProfile::
-  end_datawriter_qos ()
-  {
-    return datawriter_qos_.end ();
-  }
-
   qosProfile::datawriter_qos_const_iterator qosProfile::
   begin_datawriter_qos () const
   {
-    return datawriter_qos_.begin ();
+    return datawriter_qos_.cbegin ();
   }
 
   qosProfile::datawriter_qos_const_iterator qosProfile::
   end_datawriter_qos () const
   {
-    return datawriter_qos_.end ();
-  }
-
-  void qosProfile::
-  add_datawriter_qos (qosProfile::datawriter_qos_value_type const& e)
-  {
-    datawriter_qos_.push_back (e);
-  }
-
-  void qosProfile::
-  del_datawriter_qos (qosProfile::datawriter_qos_value_type const& e)
-  {
-    datawriter_qos_.remove (e);
+    return datawriter_qos_.cend ();
   }
 
   size_t qosProfile::
@@ -5325,40 +4992,16 @@ namespace dds
   }
 
   // qosProfile
-  qosProfile::topic_qos_iterator qosProfile::
-  begin_topic_qos ()
-  {
-    return topic_qos_.begin ();
-  }
-
-  qosProfile::topic_qos_iterator qosProfile::
-  end_topic_qos ()
-  {
-    return topic_qos_.end ();
-  }
-
   qosProfile::topic_qos_const_iterator qosProfile::
   begin_topic_qos () const
   {
-    return topic_qos_.begin ();
+    return topic_qos_.cbegin ();
   }
 
   qosProfile::topic_qos_const_iterator qosProfile::
   end_topic_qos () const
   {
-    return topic_qos_.end ();
-  }
-
-  void qosProfile::
-  add_topic_qos (qosProfile::topic_qos_value_type const& e)
-  {
-    topic_qos_.push_back (e);
-  }
-
-  void qosProfile::
-  del_topic_qos (qosProfile::topic_qos_value_type const& e)
-  {
-    topic_qos_.remove (e);
+    return topic_qos_.cend ();
   }
 
   size_t qosProfile::
@@ -5368,40 +5011,16 @@ namespace dds
   }
 
   // qosProfile
-  qosProfile::domainparticipant_qos_iterator qosProfile::
-  begin_domainparticipant_qos ()
-  {
-    return domainparticipant_qos_.begin ();
-  }
-
-  qosProfile::domainparticipant_qos_iterator qosProfile::
-  end_domainparticipant_qos ()
-  {
-    return domainparticipant_qos_.end ();
-  }
-
   qosProfile::domainparticipant_qos_const_iterator qosProfile::
   begin_domainparticipant_qos () const
   {
-    return domainparticipant_qos_.begin ();
+    return domainparticipant_qos_.cbegin ();
   }
 
   qosProfile::domainparticipant_qos_const_iterator qosProfile::
   end_domainparticipant_qos () const
   {
-    return domainparticipant_qos_.end ();
-  }
-
-  void qosProfile::
-  add_domainparticipant_qos (qosProfile::domainparticipant_qos_value_type const& e)
-  {
-    domainparticipant_qos_.push_back (e);
-  }
-
-  void qosProfile::
-  del_domainparticipant_qos (qosProfile::domainparticipant_qos_value_type const& e)
-  {
-    domainparticipant_qos_.remove (e);
+    return domainparticipant_qos_.cend ();
   }
 
   size_t qosProfile::
@@ -5411,40 +5030,16 @@ namespace dds
   }
 
   // qosProfile
-  qosProfile::publisher_qos_iterator qosProfile::
-  begin_publisher_qos ()
-  {
-    return publisher_qos_.begin ();
-  }
-
-  qosProfile::publisher_qos_iterator qosProfile::
-  end_publisher_qos ()
-  {
-    return publisher_qos_.end ();
-  }
-
   qosProfile::publisher_qos_const_iterator qosProfile::
   begin_publisher_qos () const
   {
-    return publisher_qos_.begin ();
+    return publisher_qos_.cbegin ();
   }
 
   qosProfile::publisher_qos_const_iterator qosProfile::
   end_publisher_qos () const
   {
-    return publisher_qos_.end ();
-  }
-
-  void qosProfile::
-  add_publisher_qos (qosProfile::publisher_qos_value_type const& e)
-  {
-    publisher_qos_.push_back (e);
-  }
-
-  void qosProfile::
-  del_publisher_qos (qosProfile::publisher_qos_value_type const& e)
-  {
-    publisher_qos_.remove (e);
+    return publisher_qos_.cend ();
   }
 
   size_t qosProfile::
@@ -5454,40 +5049,16 @@ namespace dds
   }
 
   // qosProfile
-  qosProfile::subscriber_qos_iterator qosProfile::
-  begin_subscriber_qos ()
-  {
-    return subscriber_qos_.begin ();
-  }
-
-  qosProfile::subscriber_qos_iterator qosProfile::
-  end_subscriber_qos ()
-  {
-    return subscriber_qos_.end ();
-  }
-
   qosProfile::subscriber_qos_const_iterator qosProfile::
   begin_subscriber_qos () const
   {
-    return subscriber_qos_.begin ();
+    return subscriber_qos_.cbegin ();
   }
 
   qosProfile::subscriber_qos_const_iterator qosProfile::
   end_subscriber_qos () const
   {
-    return subscriber_qos_.end ();
-  }
-
-  void qosProfile::
-  add_subscriber_qos (qosProfile::subscriber_qos_value_type const& e)
-  {
-    subscriber_qos_.push_back (e);
-  }
-
-  void qosProfile::
-  del_subscriber_qos (qosProfile::subscriber_qos_value_type const& e)
-  {
-    subscriber_qos_.remove (e);
+    return subscriber_qos_.cend ();
   }
 
   size_t qosProfile::
@@ -5519,7 +5090,7 @@ namespace dds
   bool qosProfile::
   base_name_p () const
   {
-    return base_name_.get () != 0;
+    return !!base_name_;
   }
 
   ::XMLSchema::string<ACE_TCHAR> const& qosProfile::
@@ -5537,15 +5108,14 @@ namespace dds
   void qosProfile::
   base_name (::XMLSchema::string<ACE_TCHAR> const& e)
   {
-    if (base_name_.get ())
+    if (base_name_)
     {
       *base_name_ = e;
     }
 
     else
     {
-      base_name_ = qosProfile::base_name_type (new ::XMLSchema::string<ACE_TCHAR> (e));
-      base_name_->container (this);
+      base_name_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (e);
     }
   }
 
@@ -5566,7 +5136,7 @@ namespace dds
   qosProfile_seq&
   qosProfile_seq::operator= (qosProfile_seq const& s)
   {
-    if (&s != this)
+    if (std::addressof(s) != this)
     {
       qos_profile_ = s.qos_profile_;
     }
@@ -5576,40 +5146,16 @@ namespace dds
 
 
   // qosProfile_seq
-  qosProfile_seq::qos_profile_iterator qosProfile_seq::
-  begin_qos_profile ()
-  {
-    return qos_profile_.begin ();
-  }
-
-  qosProfile_seq::qos_profile_iterator qosProfile_seq::
-  end_qos_profile ()
-  {
-    return qos_profile_.end ();
-  }
-
   qosProfile_seq::qos_profile_const_iterator qosProfile_seq::
   begin_qos_profile () const
   {
-    return qos_profile_.begin ();
+    return qos_profile_.cbegin ();
   }
 
   qosProfile_seq::qos_profile_const_iterator qosProfile_seq::
   end_qos_profile () const
   {
-    return qos_profile_.end ();
-  }
-
-  void qosProfile_seq::
-  add_qos_profile (qosProfile_seq::qos_profile_value_type const& e)
-  {
-    qos_profile_.push_back (e);
-  }
-
-  void qosProfile_seq::
-  del_qos_profile (qosProfile_seq::qos_profile_value_type const& e)
-  {
-    qos_profile_.remove (e);
+    return qos_profile_.cend ();
   }
 
   size_t qosProfile_seq::
@@ -5631,7 +5177,7 @@ namespace dds
 
     if (v == ACE_TEXT ("BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS")) v_ = BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS_l;
     else if (v == ACE_TEXT ("BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS")) v_ = BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5644,7 +5190,7 @@ namespace dds
 
     if (v == ACE_TEXT ("BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS")) v_ = BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS_l;
     else if (v == ACE_TEXT ("BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS")) v_ = BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5664,7 +5210,7 @@ namespace dds
     else if (v == ACE_TEXT ("TRANSIENT_LOCAL_DURABILITY_QOS")) v_ = TRANSIENT_LOCAL_DURABILITY_QOS_l;
     else if (v == ACE_TEXT ("TRANSIENT_DURABILITY_QOS")) v_ = TRANSIENT_DURABILITY_QOS_l;
     else if (v == ACE_TEXT ("PERSISTENT_DURABILITY_QOS")) v_ = PERSISTENT_DURABILITY_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5679,7 +5225,7 @@ namespace dds
     else if (v == ACE_TEXT ("TRANSIENT_LOCAL_DURABILITY_QOS")) v_ = TRANSIENT_LOCAL_DURABILITY_QOS_l;
     else if (v == ACE_TEXT ("TRANSIENT_DURABILITY_QOS")) v_ = TRANSIENT_DURABILITY_QOS_l;
     else if (v == ACE_TEXT ("PERSISTENT_DURABILITY_QOS")) v_ = PERSISTENT_DURABILITY_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5699,7 +5245,7 @@ namespace dds
 
     if (v == ACE_TEXT ("KEEP_LAST_HISTORY_QOS")) v_ = KEEP_LAST_HISTORY_QOS_l;
     else if (v == ACE_TEXT ("KEEP_ALL_HISTORY_QOS")) v_ = KEEP_ALL_HISTORY_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5712,7 +5258,7 @@ namespace dds
 
     if (v == ACE_TEXT ("KEEP_LAST_HISTORY_QOS")) v_ = KEEP_LAST_HISTORY_QOS_l;
     else if (v == ACE_TEXT ("KEEP_ALL_HISTORY_QOS")) v_ = KEEP_ALL_HISTORY_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5731,7 +5277,7 @@ namespace dds
     if (v == ACE_TEXT ("AUTOMATIC_LIVELINESS_QOS")) v_ = AUTOMATIC_LIVELINESS_QOS_l;
     else if (v == ACE_TEXT ("MANUAL_BY_PARTICIPANT_LIVELINESS_QOS")) v_ = MANUAL_BY_PARTICIPANT_LIVELINESS_QOS_l;
     else if (v == ACE_TEXT ("MANUAL_BY_TOPIC_LIVELINESS_QOS")) v_ = MANUAL_BY_TOPIC_LIVELINESS_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5745,7 +5291,7 @@ namespace dds
     if (v == ACE_TEXT ("AUTOMATIC_LIVELINESS_QOS")) v_ = AUTOMATIC_LIVELINESS_QOS_l;
     else if (v == ACE_TEXT ("MANUAL_BY_PARTICIPANT_LIVELINESS_QOS")) v_ = MANUAL_BY_PARTICIPANT_LIVELINESS_QOS_l;
     else if (v == ACE_TEXT ("MANUAL_BY_TOPIC_LIVELINESS_QOS")) v_ = MANUAL_BY_TOPIC_LIVELINESS_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5765,7 +5311,7 @@ namespace dds
     if (v == ACE_TEXT ("INSTANCE_PRESENTATION_QOS")) v_ = INSTANCE_PRESENTATION_QOS_l;
     else if (v == ACE_TEXT ("TOPIC_PRESENTATION_QOS")) v_ = TOPIC_PRESENTATION_QOS_l;
     else if (v == ACE_TEXT ("GROUP_PRESENTATION_QOS")) v_ = GROUP_PRESENTATION_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5779,7 +5325,7 @@ namespace dds
     if (v == ACE_TEXT ("INSTANCE_PRESENTATION_QOS")) v_ = INSTANCE_PRESENTATION_QOS_l;
     else if (v == ACE_TEXT ("TOPIC_PRESENTATION_QOS")) v_ = TOPIC_PRESENTATION_QOS_l;
     else if (v == ACE_TEXT ("GROUP_PRESENTATION_QOS")) v_ = GROUP_PRESENTATION_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5798,7 +5344,7 @@ namespace dds
 
     if (v == ACE_TEXT ("BEST_EFFORT_RELIABILITY_QOS")) v_ = BEST_EFFORT_RELIABILITY_QOS_l;
     else if (v == ACE_TEXT ("RELIABLE_RELIABILITY_QOS")) v_ = RELIABLE_RELIABILITY_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5811,7 +5357,7 @@ namespace dds
 
     if (v == ACE_TEXT ("BEST_EFFORT_RELIABILITY_QOS")) v_ = BEST_EFFORT_RELIABILITY_QOS_l;
     else if (v == ACE_TEXT ("RELIABLE_RELIABILITY_QOS")) v_ = RELIABLE_RELIABILITY_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5829,7 +5375,7 @@ namespace dds
 
     if (v == ACE_TEXT ("SHARED_OWNERSHIP_QOS")) v_ = SHARED_OWNERSHIP_QOS_l;
     else if (v == ACE_TEXT ("EXCLUSIVE_OWNERSHIP_QOS")) v_ = EXCLUSIVE_OWNERSHIP_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5842,7 +5388,7 @@ namespace dds
 
     if (v == ACE_TEXT ("SHARED_OWNERSHIP_QOS")) v_ = SHARED_OWNERSHIP_QOS_l;
     else if (v == ACE_TEXT ("EXCLUSIVE_OWNERSHIP_QOS")) v_ = EXCLUSIVE_OWNERSHIP_QOS_l;
-    else
+    else 
     {
     }
   }
@@ -5862,7 +5408,7 @@ namespace dds
     else if (v == ACE_TEXT ("XML_DATA_REPRESENTATION")) v_ = XML_DATA_REPRESENTATION_l;
     else if (v == ACE_TEXT ("XCDR2_DATA_REPRESENTATION")) v_ = XCDR2_DATA_REPRESENTATION_l;
     else if (v == ACE_TEXT ("UNALIGNED_CDR_DATA_REPRESENTATION")) v_ = UNALIGNED_CDR_DATA_REPRESENTATION_l;
-    else
+    else 
     {
     }
   }
@@ -5877,7 +5423,7 @@ namespace dds
     else if (v == ACE_TEXT ("XML_DATA_REPRESENTATION")) v_ = XML_DATA_REPRESENTATION_l;
     else if (v == ACE_TEXT ("XCDR2_DATA_REPRESENTATION")) v_ = XCDR2_DATA_REPRESENTATION_l;
     else if (v == ACE_TEXT ("UNALIGNED_CDR_DATA_REPRESENTATION")) v_ = UNALIGNED_CDR_DATA_REPRESENTATION_l;
-    else
+    else 
     {
     }
   }
@@ -5897,7 +5443,7 @@ namespace dds
 
     if (v == ACE_TEXT ("DISALLOW_TYPE_COERCION")) v_ = DISALLOW_TYPE_COERCION_l;
     else if (v == ACE_TEXT ("ALLOW_TYPE_COERCION")) v_ = ALLOW_TYPE_COERCION_l;
-    else
+    else 
     {
     }
   }
@@ -5910,7 +5456,7 @@ namespace dds
 
     if (v == ACE_TEXT ("DISALLOW_TYPE_COERCION")) v_ = DISALLOW_TYPE_COERCION_l;
     else if (v == ACE_TEXT ("ALLOW_TYPE_COERCION")) v_ = ALLOW_TYPE_COERCION_l;
-    else
+    else 
     {
     }
   }
@@ -5944,7 +5490,7 @@ namespace dds
         nanosec (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -5966,11 +5512,11 @@ namespace dds
 
       if (n == ACE_TEXT("element"))
       {
-        element_value_type t (new ::XMLSchema::string<ACE_TCHAR> (e));
-        add_element (t);
+        ::XMLSchema::string<ACE_TCHAR> t (e);
+        element_.push_back (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -5992,11 +5538,11 @@ namespace dds
 
       if (n == ACE_TEXT("element"))
       {
-        element_value_type t (new ::dds::dataRepresentationIdKind (e));
-        add_element (t);
+        ::dds::dataRepresentationIdKind t (e);
+        element_.push_back (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6022,7 +5568,7 @@ namespace dds
         period (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6048,7 +5594,7 @@ namespace dds
         kind (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6074,7 +5620,7 @@ namespace dds
         kind (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6130,7 +5676,7 @@ namespace dds
         max_samples_per_instance (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6156,7 +5702,7 @@ namespace dds
         autoenable_created_entities (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6182,7 +5728,7 @@ namespace dds
         value (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6214,7 +5760,7 @@ namespace dds
         depth (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6240,7 +5786,7 @@ namespace dds
         duration (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6266,7 +5812,7 @@ namespace dds
         duration (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6298,7 +5844,7 @@ namespace dds
         lease_duration (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6324,7 +5870,7 @@ namespace dds
         kind (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6350,7 +5896,7 @@ namespace dds
         value (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6376,7 +5922,7 @@ namespace dds
         name (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6414,7 +5960,7 @@ namespace dds
         ordered_access (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6446,7 +5992,7 @@ namespace dds
         autopurge_disposed_samples_delay (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6478,7 +6024,7 @@ namespace dds
         max_blocking_time (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6528,7 +6074,7 @@ namespace dds
         initial_instances (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6554,7 +6100,7 @@ namespace dds
         minimum_separation (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6580,7 +6126,7 @@ namespace dds
         value (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6606,7 +6152,7 @@ namespace dds
         value (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6632,7 +6178,7 @@ namespace dds
         value (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6658,7 +6204,7 @@ namespace dds
         autodispose_unregistered_instances (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6684,7 +6230,7 @@ namespace dds
         value (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6740,7 +6286,7 @@ namespace dds
         force_type_validation (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6772,7 +6318,7 @@ namespace dds
         entity_factory (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6793,7 +6339,7 @@ namespace dds
         base_name (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6837,7 +6383,7 @@ namespace dds
         entity_factory (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6858,7 +6404,7 @@ namespace dds
         base_name (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6902,7 +6448,7 @@ namespace dds
         entity_factory (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -6923,7 +6469,7 @@ namespace dds
         base_name (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -7027,7 +6573,7 @@ namespace dds
         representation (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -7054,7 +6600,7 @@ namespace dds
         topic_filter (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -7158,7 +6704,7 @@ namespace dds
         type_consistency (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -7185,7 +6731,7 @@ namespace dds
         topic_filter (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -7301,7 +6847,7 @@ namespace dds
         representation (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -7328,7 +6874,7 @@ namespace dds
         topic_filter (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -7350,41 +6896,41 @@ namespace dds
 
       if (n == ACE_TEXT("datareader_qos"))
       {
-        datareader_qos_value_type t (new ::dds::datareaderQos (e));
-        add_datareader_qos (t);
+        ::dds::datareaderQos t (e);
+        datareader_qos_.push_back (t);
       }
 
       else if (n == ACE_TEXT("datawriter_qos"))
       {
-        datawriter_qos_value_type t (new ::dds::datawriterQos (e));
-        add_datawriter_qos (t);
+        ::dds::datawriterQos t (e);
+        datawriter_qos_.push_back (t);
       }
 
       else if (n == ACE_TEXT("topic_qos"))
       {
-        topic_qos_value_type t (new ::dds::topicQos (e));
-        add_topic_qos (t);
+        ::dds::topicQos t (e);
+        topic_qos_.push_back (t);
       }
 
       else if (n == ACE_TEXT("domainparticipant_qos"))
       {
-        domainparticipant_qos_value_type t (new ::dds::domainparticipantQos (e));
-        add_domainparticipant_qos (t);
+        ::dds::domainparticipantQos t (e);
+        domainparticipant_qos_.push_back (t);
       }
 
       else if (n == ACE_TEXT("publisher_qos"))
       {
-        publisher_qos_value_type t (new ::dds::publisherQos (e));
-        add_publisher_qos (t);
+        ::dds::publisherQos t (e);
+        publisher_qos_.push_back (t);
       }
 
       else if (n == ACE_TEXT("subscriber_qos"))
       {
-        subscriber_qos_value_type t (new ::dds::subscriberQos (e));
-        add_subscriber_qos (t);
+        ::dds::subscriberQos t (e);
+        subscriber_qos_.push_back (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -7395,8 +6941,7 @@ namespace dds
       std::basic_string<ACE_TCHAR> n (::XSCRT::XML::uq_name (a.name ()));
       if (n == ACE_TEXT ("name"))
       {
-        name_ = qosProfile::name_type (new ::XMLSchema::string<ACE_TCHAR> (a));
-        name_->container (this);
+        name_ = std::make_unique<::XMLSchema::string<ACE_TCHAR>> (a);
       }
 
       else if (n == ACE_TEXT ("base_name"))
@@ -7405,7 +6950,7 @@ namespace dds
         base_name (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -7427,11 +6972,11 @@ namespace dds
 
       if (n == ACE_TEXT("qos_profile"))
       {
-        qos_profile_value_type t (new ::dds::qosProfile (e));
-        add_qos_profile (t);
+        ::dds::qosProfile t (e);
+        qos_profile_.push_back (t);
       }
 
-      else
+      else 
       {
       }
     }
@@ -7445,9 +6990,6 @@ namespace dds
     ::dds::qosProfile_seq
     dds (xercesc::DOMDocument const* d)
     {
-      // Initiate our Singleton as an ACE_TSS object (ensures thread
-      // specific storage
-      ID_Map::TSS_ID_Map* TSS_ID_Map (ACE_Singleton<ID_Map::TSS_ID_Map, ACE_Null_Mutex>::instance());
       xercesc::DOMElement* dom_element = d->getDocumentElement ();
       if (!dom_element)
       {
@@ -7458,8 +7000,6 @@ namespace dds
       if (e.name () == ACE_TEXT("dds"))
       {
         ::dds::qosProfile_seq r (e);
-
-        (*TSS_ID_Map)->resolve_idref();
 
         return r;
       }
