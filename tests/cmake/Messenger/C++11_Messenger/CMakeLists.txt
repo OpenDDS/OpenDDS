@@ -18,7 +18,7 @@ set(src "${CMAKE_CURRENT_SOURCE_DIR}/../../../DCPS/C++11/Messenger")
 set(dst ${CMAKE_CURRENT_BINARY_DIR})
 set(opendds_libs
   OpenDDS::Dcps
-  OpenDDS::InfoRepoDiscovery OpenDDS::Tcp
+  OpenDDS::InfoRepoDiscovery OpenDDS::Tcp OpenDDS::Rtps_Udp
 )
 
 # IDL Library

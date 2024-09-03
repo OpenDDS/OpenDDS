@@ -51,12 +51,12 @@ if ($debug_level) {
   $opts .= " -DCPSDebugLevel $debug_level -DCPSTransportDebugLevel $debug_level -ORBLogFile Thrasher.log";
 }
 
-my $ini_file = "thrasher.ini";
+my $ini_file = "ir_tcp_thrasher.ini";
 if ($test->flag('rtps')) {
-  $ini_file = "thrasher_rtps.ini";
+  $ini_file = "rtps_rtps_thrasher.ini";
 }
 $opts .= " -DCPSConfigFile $ini_file";
-if ("thrasher.ini" eq $ini_file) {
+if ("ir_tcp_thrasher.ini" eq $ini_file) {
   $test->setup_discovery();
 }
 

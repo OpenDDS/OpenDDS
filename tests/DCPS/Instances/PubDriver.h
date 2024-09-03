@@ -19,6 +19,8 @@
 #include <vector>
 #include <sstream>
 
+#include "tests/Utils/DistributedConditionSet.h"
+
 const int default_key = 101010;
 OpenDDS::DCPS::Atomic<CORBA::Long> key(0);
 
@@ -183,6 +185,11 @@ public:
                  writer_servant_->data_delivered_count_.load(),
                  writer_servant_->data_dropped_count_.load()));
     }
+
+    DistributedConditionSet_rch distributed_condition_set =
+      OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+
+    distributed_condition_set->wait_for("publisher", "subscriber", "done");
 
     finished_ = true;
 
