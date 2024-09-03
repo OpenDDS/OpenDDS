@@ -47,17 +47,12 @@ void RtpsUdpLoader::load()
     return;
   }
 
-  // Don't create a default for RTPS.  At least for the initial implementation,
-  // the user needs to explicitly configure it...
-#ifdef OPENDDS_SAFETY_PROFILE
-  // ...except for Safety Profile where RTPS is the only option.
   TransportInst_rch default_inst =
     registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX +
                           OPENDDS_STRING("0600_RTPS_UDP"),
-                          RTPS_UDP_NAME);
-  registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
-    ->sorted_insert(default_inst);
-#endif
+                          RTPS_UDP_NAME, true);
+  default_inst->instantiation_rule("per_participant");
+  registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)->sorted_insert(default_inst);
 }
 
 ACE_FACTORY_DEFINE(OpenDDS_Rtps_Udp, RtpsUdpLoader);

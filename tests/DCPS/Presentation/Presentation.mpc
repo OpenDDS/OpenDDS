@@ -1,7 +1,7 @@
 //
 //
 
-project: dcpsexe, dcps_test, dcps_tcp {
+project: dcpsexe, dcps_test, dcps_rtps_udp {
   exename   = test
 
   requires += object_model_profile
