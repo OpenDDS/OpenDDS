@@ -69,7 +69,7 @@ my $qos = {
 ##                      otherwise - the defaults);
 ## Protocol:        A list of transport names for the reader/writer entities,
 ##                  for which the test asserts are being supported. By default,
-##                  OpenDDS ships with _OPENDDS_0500_TCP.
+##                  OpenDDS ships with _OPENDDS_0600_RTPS_UDP.
 ## Compatibility: [true, false] - Whether to assert that the reader and the writer
 ##           have had their publications matched (via the info repo)
 ## QoS:             A set of quality of service options. Each executable can get
@@ -137,7 +137,7 @@ my @configuration_file_unused = (
     entity        => 'none',
     collocation   => 'none',
     configuration => 'whatever_just_to_ensure_there_is_a_config_file_on_the_command_line',
-    protocol      => ['_OPENDDS_0500_TCP'],
+    protocol      => ['_OPENDDS_0600_RTPS_UDP'],
     compatibility => 'true',
     publisher     => $qos,
     subscriber    => $qos,
@@ -154,7 +154,7 @@ my @without_configuration_file = (
     entity        => 'none',
     collocation   => 'none',
     configuration => undef,
-    protocol      => ['_OPENDDS_0500_TCP'],
+    protocol      => ['_OPENDDS_0600_RTPS_UDP'],
     compatibility => 'true',
     publisher     => $qos,
     subscriber    => $qos,

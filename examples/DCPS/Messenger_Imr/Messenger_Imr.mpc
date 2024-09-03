@@ -11,7 +11,7 @@ project(DDS*idl): dcps_idl_only_lib {
 }
 
 
-project(DDS*Publisher): dcpsexe, dcps_tcp {
+project(DDS*Publisher): dcpsexe, dcps_rtps_udp {
   requires += no_opendds_safety_profile
   exename   = publisher
   after    += DDS*idl
@@ -26,7 +26,7 @@ project(DDS*Publisher): dcpsexe, dcps_tcp {
   }
 }
 
-project(DDS*Subscriber): dcpsexe, dcps_tcp {
+project(DDS*Subscriber): dcpsexe, dcps_rtps_udp {
   requires += no_opendds_safety_profile
   exename   = subscriber
   after    += DDS*Publisher

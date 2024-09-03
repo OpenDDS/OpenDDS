@@ -40,8 +40,10 @@
 #    include "RTPS/RtpsDiscovery.h"
 #    include "transport/rtps_udp/RtpsUdp.h"
 #  else
-#    include "InfoRepoDiscovery/InfoRepoDiscovery.h"
+// tcp is needed for InfoRepoDiscovery
 #    include "transport/tcp/Tcp.h"
+#    include "InfoRepoDiscovery/InfoRepoDiscovery.h"
+#    include "transport/rtps_udp/RtpsUdp.h"
 #  endif
 #endif
 
