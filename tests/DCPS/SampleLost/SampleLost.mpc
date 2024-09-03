@@ -1,4 +1,4 @@
-project(DDS*PubSub) : dcpsexe, dcps_test, dcps_cm, dcps_tcp {
+project(DDS*PubSub) : dcpsexe, dcps_test, dcps_cm, dcps_rtps_udp {
   exename = pubsub
   requires += persistence_profile
 
