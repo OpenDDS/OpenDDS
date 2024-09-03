@@ -9,6 +9,7 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use File::Path;
 use strict;
 
 PerlDDS::add_lib_path('../../Utils');
@@ -70,7 +71,6 @@ if ($test->flag('debug')) {
 my $num_writes = $num_threads_to_write * $num_writes_per_thread * $num_writers;
 
 $test->setup_discovery($repo_bit_conf);
-$test->enable_console_logging();
 
 $test->process('pub', 'publisher', $app_bit_conf
                . " -DCPSDebugLevel $debug_level"
@@ -92,6 +92,8 @@ $test->process('sub', 'subscriber', $app_bit_conf
                . " -receive_delay_msec $receive_delay_msec"
                . " $config_file"
     );
+
+rmtree('./DCS');
 
 $test->start_process('pub');
 $test->start_process('sub');

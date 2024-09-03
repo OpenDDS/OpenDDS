@@ -5,6 +5,7 @@
 #include "tests/Utils/Options.h"
 #include "tests/Utils/ListenerRecorder.h"
 #include "tests/Utils/StatusMatching.h"
+#include "tests/Utils/DistributedConditionSet.h"
 #include "ace/OS_NS_unistd.h"
 #include <vector>
 
@@ -98,29 +99,20 @@ public:
                    ACE_TEXT("(%P|%t) Sub waiting for writer to come and go\n")));
       }
 
-      if (wait_match(reader, 1, Utils::EQ) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR, "ERROR: %N:%l: run: "
-                   "wait for publisher failed\n"));
-        return;
-      }
-      if (wait_match(reader, 0, Utils::EQ) != DDS::RETCODE_OK) {
+      if (wait_match(reader, 1, Utils::GTE) != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, "ERROR: %N:%l: run: "
                    "wait for publisher failed\n"));
         return;
       }
 
-      const typename ListenerRecorder::Messages msgs = listener_impl->messages();
-      if (msgs.empty()) {
-          ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) ERROR: no messages received\n")));
+      while (listener_impl->size() != num_writes_) {
+        ACE_OS::sleep(1);
       }
 
-      while ( msgs.empty() || msgs.size() != num_writes_) {
-          ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) STATUS: not enough messages seen\n")));
-          ACE_OS::sleep(1);
-      }
+      DistributedConditionSet_rch distributed_condition_set =
+        OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
 
+      distributed_condition_set->post("subscriber", "done");
     }
 
     size_t             num_writes_;

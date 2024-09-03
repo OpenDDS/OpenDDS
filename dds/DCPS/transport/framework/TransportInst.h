@@ -126,6 +126,9 @@ public:
   void receive_preallocated_data_blocks(size_t rpdb);
   size_t receive_preallocated_data_blocks() const;
 
+  void instantiation_rule(const String& rule);
+  String instantiation_rule() const;
+
   /// Does the transport as configured support RELIABLE_RELIABILITY_QOS?
   virtual bool is_reliable() const = 0;
 
@@ -229,8 +232,6 @@ private:
                              DomainParticipantImpl* participant);
  private:
   virtual TransportImpl_rch new_impl(DDS::DomainId_t domain) = 0;
-
-  String instantiation_rule() const;
 
   const String name_;
   const String config_prefix_;

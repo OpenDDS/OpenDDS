@@ -1904,7 +1904,7 @@ int
 Service_Participant::load_discovery_configuration(const String& discovery_type,
                                                   bool force)
 {
-  if (!force && !config_store_->has(discovery_type.c_str())) {
+  if (!force && !config_store_->has_prefix(discovery_type.c_str())) {
     return 0;
   }
 
