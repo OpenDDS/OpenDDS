@@ -32,17 +32,31 @@
 from itertools import islice
 from textwrap import wrap
 import socket
+import io
 
 import gdb
-import libstdcxx
+
+libstdcxx_imported = False
+try:
+    import libstdcxx
+    libstdcxx_imported = True
+except:
+    pass
+
+
+def gdb_print(*args, stream=gdb.STDOUT, **kw):
+    with io.StringIO() as f:
+        print(*args, file=f, **kw)
+        gdb.write(f.getvalue(), stream)
+
+def gdb_err_print(*args, **kw):
+    gdb_print(*args, stream=gdb.STDERR, **kw)
 
 
 line_len = 100
 
 def header(line, fill):
-    print(line, fill * (line_len - len(line) - 1))
-
-header('OpenDDS GDB Extension', '=')
+    gdb_print(line, fill * (line_len - len(line) - 1))
 
 
 def batched(iterable, n, t=tuple):
@@ -54,6 +68,71 @@ def batched(iterable, n, t=tuple):
         if not batch:
             break
         yield batch
+
+
+class OurCmd(gdb.Command):
+
+    our_cmds = []
+
+    def __init__(self):
+        self.__class__.__doc__ = self.our_help()
+        cmd_name, cmd_desc, required_args, optional_args = self.our_info()
+        super().__init__(cmd_name, gdb.COMMAND_USER)
+        self.__class__.our_cmds.append(self)
+
+    def our_info(self):
+        raise NotImplementedError()
+
+    def our_invoke(self, *args):
+        raise NotImplementedError()
+
+    def our_help(self):
+        cmd_name, cmd_desc, required_args, optional_args = self.our_info()
+        all_args = required_args + optional_args
+        h = ' '.join(['-', cmd_name,
+            ' '.join([f'<{a[0]}>' for a in required_args]),
+            ' '.join([f'[<{a[0]}>]' for a in optional_args]),
+            ':', cmd_desc]) + '\n'
+        for arg_name, arg_desc, arg_type, arg_cmp in all_args:
+            h += f'  <{arg_name}>: {arg_desc}\n'
+        return h
+
+    def our_error(self, what):
+        gdb_err_print('ERROR: ' + what + '\n' + self.our_help())
+        return ValueError()
+
+    def our_args(self, args_str, complete=False):
+        cmd_name, cmd_desc, required_args, optional_args = self.our_info()
+        all_args = required_args + optional_args
+        args = args_str.split(' ')
+        if len(args) > len(all_args):
+            if complete:
+                return []
+            else:
+                self.our_error('Too many args')
+        if len(args) < len(required_args) and not complete:
+            self.our_error('Not enough args')
+        results = []
+        for i, (arg_name, arg_desc, arg_type, arg_cmp) in enumerate(all_args):
+            if complete:
+                if len(args) == i:
+                    return arg_cmp
+            elif i < len(args):
+                arg = args[i]
+                try:
+                    results.append(arg_type(arg))
+                except Exception as ex:
+                    self.our_error(f'Issue with {arg_name} argument ({repr(arg)}): {ex}')
+            else:
+                break
+        return results
+
+    # TODO
+    # def complete(self, text, word):
+    #     return self.our_args(text, complete=True)
+
+    def invoke(self, args_str, from_tty):
+        self.our_invoke(*self.our_args(args_str))
 
 
 def value_is(value, *type_names):
@@ -106,35 +185,40 @@ def _std_values(StdPrinter, value):
         yield e[1]
 
 def std_vector_values(value):
+    import libstdcxx
     return _std_values(libstdcxx.v6.printers.StdVectorPrinter, value)
 
 def std_set_values(value):
+    import libstdcxx
     return _std_values(libstdcxx.v6.printers.StdSetPrinter, value)
 
 def _std_pairs(StdPrinter, value):
     return batched(_std_values(StdPrinter, value), 2)
 
 def std_map_values(value):
+    import libstdcxx
     return _std_pairs(libstdcxx.v6.printers.StdMapPrinter, value)
 
 def std_unordered_map_values(value):
+    import libstdcxx
     return _std_pairs(libstdcxx.v6.printers.Tr1UnorderedMapPrinter, value)
 
 
-def deref(ptr):
+def real_ptr(ptr):
+    try:
+        ptr = ptr['ptr_']
+    except:
+        pass
+
     if int(ptr) == 0:
         return None
     # I'd think this should be a dynamic_cast instead of cast, but dynamic_cast
     # doesn't seem to work.
-    return ptr.cast(ptr.dynamic_type).dereference()
-
-
-def deref_holder(value):
-    return deref(value['ptr_'])
+    return ptr.cast(ptr.dynamic_type)
 
 
 def get_singleton(name):
-    singleton_obj = deref(gdb.parse_and_eval(name + '::singleton_'))
+    singleton_obj = real_ptr(gdb.parse_and_eval(name + '::singleton_'))
     return None if singleton_obj is None else singleton_obj['instance_']
 
 
@@ -251,7 +335,7 @@ class GuidPrinter(GuidPrinterBase):
             self.entity = GuidEntityPrinter(value['entityId'])
             array = GuidPrefixPrinter(value['guidPrefix']).array + self.entity.array
         elif value_is(value, 'DDS::BuiltinTopicKey_t'):
-            array = self.get_byte_array(value['value'])
+            array = get_byte_array(value['value'])
             self.entity = GuidEntityPrinter(entity_key=array[12:16], entity_kind=array[15])
         else:
             raise TypeError('Not sure what type is')
@@ -354,44 +438,28 @@ def set_a_var(name, desc, value, indent=0):
     globals()[name] = value
 
 
-set_a_var('service_part', 'the service participant',
-    get_singleton('ACE_Singleton<OpenDDS::DCPS::Service_Participant,ACE_Thread_Mutex>'))
-
-set_a_var('part_factory', 'the participant factory',
-    None if service_part is None else deref_holder(service_part['dp_factory_servant_']))
-
-set_a_var('transport_reg', 'the transport registry',
-    get_singleton('ACE_Unmanaged_Singleton<OpenDDS::DCPS::TransportRegistry,ACE_Recursive_Thread_Mutex>'))
-
-
 def get_discoveries():
     header('Discoveries', '-')
     for name, disc_rc in std_map_values(service_part['discoveryMap_']):
-        disc = deref_holder(disc_rc)
-        set_a_var('disc_' + std_string_value(name), 'a ' + disc.type.name, disc)
+        disc = real_ptr(disc_rc)
+        set_a_var('disc_' + std_string_value(name), 'a ' + str(disc.type), disc)
 
-        if disc.type.name == 'OpenDDS::RTPS::RtpsDiscovery':
+        if 'OpenDDS::RTPS::RtpsDiscovery' in str(disc.type):
             for domain, part_map in std_map_values(disc['participants_']):
                 for part_guid, part_handle in std_map_values(part_map):
-                    spdp = deref_holder(part_handle)
+                    spdp = real_ptr(part_handle)
                     set_a_var('spdp_' + GuidPrinter(part_guid).to_id_string(),
                         'a ' + spdp.type.tag, spdp, 1)
-                    sedp = deref_holder(spdp['sedp_'])
+                    sedp = real_ptr(spdp['sedp_'])
                     set_a_var('sedp_' + GuidPrinter(part_guid).to_id_string(),
                         'a ' + sedp.type.tag, sedp, 1)
-
-if service_part:
-    get_discoveries()
 
 
 def get_transports():
     header('Transports', '-')
     for name, ti_rc in std_map_values(transport_reg['inst_map_']):
-        ti = deref_holder(ti_rc)
-        set_a_var('ti_' + std_string_value(name), 'a ' + ti.type.name, ti)
-
-if transport_reg:
-    get_transports()
+        ti = real_ptr(ti_rc)
+        set_a_var('ti_' + std_string_value(name), 'a ' + str(ti.type), ti)
 
 
 def get_entities():
@@ -402,7 +470,7 @@ def get_entities():
         header('domain ' + str(int(str(domain), base=0)), '-')
         part_count = 0
         for part_ptr in std_set_values(parts):
-            part = deref_holder(part_ptr)
+            part = real_ptr(part_ptr)
             gp = GuidPrinter(part['dp_id_'])
             all_part[gp.to_plain_string()] = part
             part_var_id = gp.to_id_string()
@@ -415,11 +483,11 @@ def get_entities():
                 set_a_var('pub_{}_{}'.format(part_var_id, pub_count), 'a publisher', pub, 1)
                 pub_count += 1
                 for topic_name, dw_ptr in std_map_values(pub['datawriter_map_']):
-                    dw = deref_holder(dw_ptr)
+                    dw = real_ptr(dw_ptr)
                     dw_gp = GuidPrinter(dw['publication_id_'])
                     all_dw[dw_gp.to_plain_string()] = dw
                     set_a_var('dw_' + dw_gp.to_id_string(),
-                        'a {} for {}'.format(dw.type.name, topic_name), dw, 2)
+                        'a {} for {}'.format(dw.type, topic_name), dw, 2)
 
             sub_count = 0
             for sub_ptr in std_set_values(part['subscribers_']):
@@ -427,14 +495,14 @@ def get_entities():
                 set_a_var('sub_{}_{}'.format(part_var_id, sub_count), 'a subscriber', sub, 1)
                 sub_count += 1
                 for topic_name, dr_ptr in std_map_values(sub['datareader_map_']):
-                    dr = deref_holder(dr_ptr)
+                    dr = real_ptr(dr_ptr)
                     dr_gp = GuidPrinter(dr['subscription_id_'])
                     if dr_gp.unknown():
                         # TODO: BIT Readers?
                         continue
                     all_dr[dr_gp.to_plain_string()] = dr
                     set_a_var('dr_' + dr_gp.to_id_string(),
-                        'a {} for topic {}'.format(dr.type.tag, topic_name), dr, 2)
+                        'a {} for topic {}'.format(dr.type, topic_name), dr, 2)
 
     if len(all_part) == 1:
         set_a_var('part', 'an alias to the only domain participant', list(all_part.values())[0])
@@ -445,5 +513,41 @@ def get_entities():
     if len(all_dr) == 1:
         set_a_var('dr', 'an alias to the only data reader', list(all_dr.values())[0])
 
-if part_factory:
-    get_entities()
+
+def opendds_init():
+    header('OpenDDS GDB Extension', '=')
+
+    set_a_var('service_part', 'the service participant',
+        get_singleton('ACE_Singleton<OpenDDS::DCPS::Service_Participant,ACE_Thread_Mutex>'))
+    if service_part:
+        get_discoveries()
+
+    set_a_var('part_factory', 'the participant factory',
+        None if service_part is None else real_ptr(service_part['dp_factory_servant_']))
+    if part_factory:
+        get_entities()
+
+    set_a_var('transport_reg', 'the transport registry',
+        get_singleton('ACE_Unmanaged_Singleton<OpenDDS::DCPS::TransportRegistry,ACE_Recursive_Thread_Mutex>'))
+    if transport_reg:
+        get_transports()
+
+
+class OpenddsCmd(OurCmd):
+
+    def our_info(self):
+        return ('opendds', 'Fully initialize (or reinitialize) the OpenDDS GDB extension', [], [])
+
+    def our_invoke(self):
+        self.dont_repeat()
+        opendds_init()
+
+
+for cmd in OurCmd.our_cmds:
+    gdb_print(cmd.our_help())
+
+
+if libstdcxx_imported:
+    opendds_init()
+else:
+    header(f'Run `{OpenddsCmd.name}` to initialize the OpenDDS GDB extension', '<')
