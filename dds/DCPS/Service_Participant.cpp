@@ -62,13 +62,13 @@
 extern char **environ;
 #endif
 
+#if OPENDDS_GCC
 // Embed GDB Extension
-#ifdef __GNUC__
 asm(
   ".pushsection \".debug_gdb_scripts\", \"MS\",@progbits,1\n"
   ".byte 4\n" // 4 means this is an embedded Python script
   ".ascii \"gdb.inlined-script\\n\"\n"
-  ".incbin \"tools/scripts/gdbext.py\"\n"
+  ".incbin \"../tools/scripts/gdbext.py\"\n"
   ".byte 0\n"
   ".popsection\n"
 );

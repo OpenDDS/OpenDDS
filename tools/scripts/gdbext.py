@@ -7,17 +7,23 @@
 #   - Shortcuts to all participants, discoveries, SPDP and SEDP instances, user
 #     readers, and user writers
 #   - Helpers to make it easier to work with data structures in Python:
-#     value_is, std_*_values, deref, deref_holder.
+#     value_is, std_*_values, real_ptr, etc.
 #
 # To use:
+#   - The script is embedded within the Dcps library, but by default, GDB will
+#     have to be configured to load it for safety reasons. You will also have
+#     to run the `opendds` GDB command to complete initialization.
 #   - Run `gdb -x path/to/gdbext.py ...` for a new session
 #   - `source path/to/gdbext.py` for an existing session
-#   - You might run into this python exception comming from libstdcpp.py:
+#   - You might run into this python exception coming from libstdcpp.py:
 #       'NoneType' object has no attribute 'pointer'
 #     This is a GDB patch that might fix it:
 #       https://sourceware.org/pipermail/libstdc++/2020-December/051773.html
 #     However it can also be fixed by switching to a frame of a C++ function
 #     and sourcing the file again.
+#   - If the extension failed to fully initialize automatically because of
+#     libstdcpp or another problem, it can be initialized or reinitialized using
+#     the `opendds` GDB command.
 #
 # Tested with Ubuntu 22.04 (GDB 12.1, gcc 11.4, and libstdc++ 3.4.30)
 # This script might break with changes to either OpenDDS, GDB, or gcc/libstdc++
