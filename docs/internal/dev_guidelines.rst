@@ -94,9 +94,10 @@ Debugging
 
 Here are a list of tools resources available to OpenDDS developers:
 
-- `Wireshark <https://objectcomputing.com/resources/publications/sett/october-2021-wireshark-and-opendds>`__ is a indispensable tool for debugging network applications.
+- `Wireshark <https://objectcomputing.com/resources/publications/sett/october-2021-wireshark-and-opendds>`__ is an indispensable tool for debugging network applications.
 - There is a :ghfile:`GDB extension <tools/scripts/gdbext.py>` to make working with a OpenDDS program/core file easier: .
-- :ghfile:`Notes on debugging DDS security <tools/scripts/gdbext.py>`.
+- :ghfile:`Notes on debugging DDS security <docs/design/security.md>`.
+- :ghfile:`inspect <tools/inspect>` and the `monitor <https://github.com/OpenDDS/opendds-monitor>`__ read samples from RTPS/UDP writers.
 
 .. _dev_guidelines-text_file_formating:
 
