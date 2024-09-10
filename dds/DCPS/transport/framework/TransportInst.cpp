@@ -313,7 +313,7 @@ TransportInst::get_or_create_impl(DDS::DomainId_t domain,
       }
       ParticipantMap::iterator pos2 = pos->second.find(participant);
       if (pos2 == pos->second.end()) {
-        pos2 = pos->second.insert(std::make_pair(participant, new_impl(domain))).first;
+        pos2 = pos->second.insert(std::make_pair(participant, new_impl(domain, participant))).first;
       }
       return pos2->second;
     } catch (const Transport::UnableToCreate&) {
@@ -347,6 +347,25 @@ TransportInst::remove_participant(DDS::DomainId_t domain,
     }
   }
 }
+
+NetworkAddress
+TransportInst::actual_local_address(DDS::DomainId_t domain,
+                                    DomainParticipantImpl* participant)
+{
+  const TransportImpl_rch temp = get_or_create_impl(domain, participant);
+  return temp ? temp->actual_local_address() : NetworkAddress::default_IPV4;
+
+}
+
+#ifdef ACE_HAS_IPV6
+NetworkAddress
+TransportInst::ipv6_actual_local_address(DDS::DomainId_t domain,
+                                         DomainParticipantImpl* participant)
+{
+  const TransportImpl_rch temp = get_or_create_impl(domain, participant);
+  return temp ? temp->ipv6_actual_local_address() : NetworkAddress::default_IPV6;
+}
+#endif
 
 TransportImpl_rch
 TransportInst::get_impl(DDS::DomainId_t domain,

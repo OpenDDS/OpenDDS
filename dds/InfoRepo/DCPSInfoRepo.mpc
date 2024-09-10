@@ -122,7 +122,7 @@ project(*Federator): dcpslib, dcps_inforepodiscovery, dcps_tcp, iortable, instal
 }
 
 
-project(*Main): dcpsexe, iortable, bidir_giop, DCPSInfoRepo_bits, imr_client, svc_utils, install {
+project(*Main): dcps, iortable, bidir_giop, DCPSInfoRepo_bits, imr_client, svc_utils, install, dcps_inforepodiscovery {
   exename = DCPSInfoRepo
   exeout  = $(DDS_ROOT)/bin
   requires += no_opendds_safety_profile

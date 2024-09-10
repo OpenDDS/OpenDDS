@@ -17,9 +17,12 @@
 
 #include <iostream>
 
-DataReaderListenerImpl::DataReaderListenerImpl()
-  : samples_read_(0),
-    samples_disposed_(0)
+DataReaderListenerImpl::DataReaderListenerImpl(DistributedConditionSet_rch dcs,
+                                               long num_writes)
+  : dcs_(dcs)
+  , num_writes_(num_writes)
+  , samples_read_(0)
+  , samples_disposed_(0)
 {
 }
 
@@ -46,7 +49,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     const DDS::ReturnCode_t status = foo_dr->take_next_sample(foo, si) ;
 
     if (status == DDS::RETCODE_OK) {
-      ++samples_read_;
+      increment_samples_read();
       std::cout << "SampleInfo.valid_data = " << si.valid_data << std::endl;
       std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
       std::cout << "SampleInfo.instance_state = " << OpenDDS::DCPS::InstanceState::instance_state_string(si.instance_state) << std::endl;

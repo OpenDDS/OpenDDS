@@ -138,14 +138,14 @@ my $sys3_parameters = "$opt $system3_config "
 # The monitor has 3 Writers and 3 Readers, which are to be connected with
 # the subsystems defined above.  The topology goes like this:
 #
-#   monitor writer [0]    --->   system1 reader
-#   monitor reader [0]   <---    system1 writer
+#   monitor writer [0]    --->   system1 reader domain 1
+#   monitor reader [0]   <---    system1 writer domain 5
 #
-#   monitor writer [1]    --->   system2 reader
-#   monitor reader [1]   <---    system2 writer
+#   monitor writer [1]    --->   system2 reader domain 7
+#   monitor reader [1]   <---    system2 writer domain 8
 #
-#   monitor writer [2]    --->   system3 reader
-#   monitor reader [2]   <---    system3 writer
+#   monitor writer [2]    --->   system3 reader domain 9
+#   monitor reader [2]   <---    system3 writer domain 9
 #
 
 $monitor_parameters = "$opt -Samples $samples -SampleInterval $sample_interval $monitor_config "

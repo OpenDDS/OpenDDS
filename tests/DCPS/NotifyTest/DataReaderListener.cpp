@@ -10,11 +10,14 @@
 using namespace Messenger;
 using namespace std;
 
-DataReaderListenerImpl::DataReaderListenerImpl()
-  : num_reads_(0),
-    num_received_dispose_(0),
-    num_received_unregister_(0),
-    shutdown_ (false)
+DataReaderListenerImpl::DataReaderListenerImpl(DistributedConditionSet_rch dcs,
+                                               int expected)
+  : dcs_(dcs)
+  , expected_(expected)
+  , num_reads_(0)
+  , num_received_dispose_(0)
+  , num_received_unregister_(0)
+  , shutdown_ (false)
 {
 }
 
@@ -24,9 +27,6 @@ DataReaderListenerImpl::~DataReaderListenerImpl ()
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
-  if (! shutdown_)
-    ++num_reads_;
-
   try {
     ::Messenger::MessageDataReader_var message_dr =
         ::Messenger::MessageDataReader::_narrow(reader);
@@ -37,12 +37,12 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
     Messenger::Message message;
     DDS::SampleInfo si ;
-    DDS::ReturnCode_t status = message_dr->take_next_sample(message, si) ;
-
-    if (status == DDS::RETCODE_OK) {
-
+    for (DDS::ReturnCode_t status = message_dr->take_next_sample(message, si);
+         status == DDS::RETCODE_OK;
+         status = message_dr->take_next_sample(message, si)) {
       cout << "SampleInfo.sample_rank = " << si.sample_rank << endl;
       cout << "SampleInfo.instance_state = " << OpenDDS::DCPS::InstanceState::instance_state_string(si.instance_state) << endl;
+      cout << "SampleInfo.valid_data = " << si.valid_data << endl;
 
       if (si.valid_data == 1)
       {
@@ -51,28 +51,36 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
           << "         from       = " << message.from.in()    << endl
           << "         count      = " << message.count        << endl
           << "         text       = " << message.text.in()    << endl;
+
+        if (! shutdown_) {
+          ++num_reads_;
+          cout << "progress " << num_reads_ << '/' << expected_ << endl;
+          if (num_reads_ == expected_) {
+            dcs_->post("sub", "data");
+          }
+        }
       }
       else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
       {
         cout << "instance is disposed" << endl;
-        if (! shutdown_)
+        if (! shutdown_) {
           ++ num_received_dispose_;
+          dcs_->post("sub", "dispose");
+        }
       }
       else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
       {
         cout << "instance is unregistered" << endl;
-        if (! shutdown_)
+        if (! shutdown_) {
           ++ num_received_unregister_;
+          dcs_->post("sub", "unregister");
+        }
       }
       else
       {
       ACE_ERROR ((LM_ERROR, "(%P|%t) DataReaderListenerImpl::on_data_available:"
                              " received unknown instance state %d\n", si.instance_state));
       }
-    } else if (status == DDS::RETCODE_NO_DATA) {
-      cerr << "ERROR: reader received DDS::RETCODE_NO_DATA!" << endl;
-    } else {
-      cerr << "ERROR: read Message: Error: " <<  status << endl;
     }
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in read:" << endl << e << endl;
