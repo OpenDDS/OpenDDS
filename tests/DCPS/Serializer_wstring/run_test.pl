@@ -9,6 +9,7 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use File::Path;
 use strict;
 
 my $test = new PerlDDS::TestFramework();
@@ -19,7 +20,9 @@ $test->process('pub', 'publisher');
 
 $test->setup_discovery();
 
+rmtree('./DCS');
+
 $test->start_process('pub');
 $test->start_process('sub');
 
-exit $test->finish(300);
+exit $test->finish(60);

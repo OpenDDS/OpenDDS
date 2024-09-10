@@ -65,6 +65,18 @@ DataReaderRemoteImpl::update_incompatible_qos(
   }
 }
 
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+void
+DataReaderRemoteImpl::update_ownership_strength(const GUID_t& publication_id,
+                                                CORBA::Long strength)
+{
+  RcHandle<DataReaderCallbacks> parent = parent_.lock();
+  if (parent) {
+    parent->update_ownership_strength(publication_id, strength);
+  }
+}
+#endif
+
 } // namespace DCPS
 } // namespace OpenDDS
 

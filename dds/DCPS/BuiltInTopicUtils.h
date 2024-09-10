@@ -293,14 +293,6 @@ public:
                                           const SystemTimePoint& timestamp);
   void remove_thread_status(const InternalThreadBuiltinTopicData& ts);
 
-  /*
-    The Ownership QoS is implemented by creating a listener for the
-    Publication BIT that reads the ownership strength and makes
-    adjustments.  This is bad (a hack) because it prevents the user
-    from installing a listener for the built-in topics.
-   */
-  void bit_pub_listener_hack(DomainParticipantImpl* participant);
-
 private:
   template <typename DataReaderImpl, typename Sample>
   DDS::InstanceHandle_t add_i(const char* topic_name,

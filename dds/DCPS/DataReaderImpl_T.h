@@ -1244,7 +1244,7 @@ protected:
 
   virtual void release_instance_i(DDS::InstanceHandle_t handle)
   {
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
     OwnershipManagerPtr owner_manager = ownership_manager();
     if (owner_manager) {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
@@ -1803,7 +1803,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
     {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
       SharedInstanceMap_rch inst;
       OwnershipManagerScopedAccess ownership_scoped_access;
       OwnershipManagerPtr owner_manager = ownership_manager();
@@ -1864,7 +1864,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       }
       update_lookup_maps(bpair.first);
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
       if (owner_manager) {
         if (!inst) {
           inst = make_rch<SharedInstanceMap>();

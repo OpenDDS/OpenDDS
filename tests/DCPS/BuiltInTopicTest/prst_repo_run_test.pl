@@ -60,8 +60,8 @@ my $info_prst_file = "info.pr";
 my $pub1_msg_count = 30;
 my $pub2_msg_count = 10;
 my $sub_msg_count = $pub1_msg_count + $pub2_msg_count - 5;
-my $pub_opts = "$client_args";
-my $sub_opts = "$client_args -n $sub_msg_count";
+my $pub_opts = "$client_args  -DCPSConfigFile ir_tcp.ini";
+my $sub_opts = "$client_args -n $sub_msg_count -DCPSConfigFile ir_tcp.ini";
 my $SRV_PORT = PerlACE::random_port();
 my $synch_file = "monitor1_done";
 
@@ -156,10 +156,10 @@ my $Publisher1 = PerlDDS::create_process("publisher",
   "$pub_opts -n $pub1_msg_count" . ($print_to_screen ? "" : " -ORBLogFile $pub1_log")
 );
 my $Monitor1 = PerlDDS::create_process("monitor",
-  "$common_args -l 5" . ($print_to_screen ? "" : " -ORBLogFile $mon1_log")
+  "$common_args -l 5 -DCPSConfigFile ir_tcp.ini" . ($print_to_screen ? "" : " -ORBLogFile $mon1_log")
 );
 my $Monitor2 = PerlDDS::create_process("monitor",
-  "$common_args -u" . ($print_to_screen ? "" : " -ORBLogFile $mon2_log")
+  "$common_args -u -DCPSConfigFile ir_tcp.ini" . ($print_to_screen ? "" : " -ORBLogFile $mon2_log")
 );
 my $Publisher2 = PerlDDS::create_process("publisher",
   "$pub_opts -n $pub2_msg_count" . ($print_to_screen ? "" : " -ORBLogFile $pub2_log")

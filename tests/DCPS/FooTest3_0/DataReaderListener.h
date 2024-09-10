@@ -10,6 +10,8 @@
 
 #include <dds/DdsDcpsSubscriptionC.h>
 
+#include <tests/Utils/DistributedConditionSet.h>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -17,7 +19,8 @@
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  DataReaderListenerImpl();
+  DataReaderListenerImpl(DistributedConditionSet_rch dcs,
+                         long num_writes);
 
   virtual ~DataReaderListenerImpl();
 
@@ -57,6 +60,16 @@ public:
   }
 
 protected:
+  void increment_samples_read()
+  {
+    ++samples_read_;
+    if (samples_read_ == num_writes_) {
+      dcs_->post("sub", "done");
+    }
+  }
+
+  DistributedConditionSet_rch dcs_;
+  long                 num_writes_;
   long                 samples_read_;
   long                 samples_disposed_;
 };

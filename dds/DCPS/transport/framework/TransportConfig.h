@@ -61,7 +61,8 @@ public:
   void sorted_insert(const TransportInst_rch& inst);
 
   void populate_locators(OpenDDS::DCPS::TransportLocatorSeq& trans_info,
-                         DDS::DomainId_t domain) const;
+                         DDS::DomainId_t domain,
+                         DomainParticipantImpl* participant) const;
 
   bool uses_template() const;
 

@@ -522,22 +522,22 @@ RtpsUdpDataLink::update_locators(const GUID_t& remote_id,
     ++info->ref_count_;
   }
 
-  g.release();
-
   if (log_unicast_change) {
-    for (NetworkAddressSet::const_iterator pos = unicast_addresses.begin(), limit = unicast_addresses.end();
+    for (NetworkAddressSet::const_iterator pos = info->unicast_addrs_.begin(), limit = info->unicast_addrs_.end();
          pos != limit; ++pos) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::update_locators %C is now at %C\n"),
                  LogGuid(remote_id).c_str(), LogAddr(*pos).c_str()));
     }
   }
   if (log_multicast_change) {
-    for (NetworkAddressSet::const_iterator pos = multicast_addresses.begin(), limit = multicast_addresses.end();
+    for (NetworkAddressSet::const_iterator pos = info->multicast_addrs_.begin(), limit = info->multicast_addrs_.end();
          pos != limit; ++pos) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::update_locators %C is now at %C\n"),
                  LogGuid(remote_id).c_str(), LogAddr(*pos).c_str()));
     }
   }
+
+  g.release();
 }
 
 void RtpsUdpDataLink::filterBestEffortReaders(const ReceivedDataSample& ds, RepoIdSet& selected, RepoIdSet& withheld)

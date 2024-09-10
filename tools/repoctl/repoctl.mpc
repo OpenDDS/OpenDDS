@@ -1,4 +1,4 @@
-project: dcpsexe, dcps_tcp  {
+project: dcpsexe, dcps_tcp, dcps_inforepodiscovery, dcps_rtps_udp  {
   requires += no_opendds_safety_profile
   exename   = repoctl
   exeout    = $(DDS_ROOT)/bin

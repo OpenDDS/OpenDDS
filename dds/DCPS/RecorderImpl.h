@@ -26,6 +26,7 @@
 #include <dds/DdsDcpsSubscriptionExtC.h>
 #include <dds/DdsDcpsDomainC.h>
 #include <dds/DdsDcpsTopicC.h>
+#include <dds/OpenDDSConfigWrapper.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -144,6 +145,11 @@ public:
 
   virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint() { return WeakRcHandle<ICE::Endpoint>(); }
 
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+  virtual void update_ownership_strength(const GUID_t&,
+                                         CORBA::Long) {}
+#endif
+
 protected:
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
 
@@ -170,7 +176,7 @@ private:
   DomainParticipantImpl* participant_servant_;
   TopicDescriptionPtr<TopicImpl> topic_servant_;
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   bool is_exclusive_ownership_;
 
   OwnershipManager* owner_manager_;

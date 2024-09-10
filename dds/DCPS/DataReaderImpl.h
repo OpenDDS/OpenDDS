@@ -40,11 +40,12 @@
 #include "transport/framework/TransportClient.h"
 #include "transport/framework/TransportReceiveListener.h"
 
-#include <dds/DdsDcpsTopicC.h>
-#include <dds/DdsDcpsSubscriptionExtC.h>
 #include <dds/DdsDcpsDomainC.h>
-#include <dds/DdsDcpsTopicC.h>
 #include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsSubscriptionExtC.h>
+#include <dds/DdsDcpsTopicC.h>
+#include <dds/DdsDcpsTopicC.h>
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <ace/String_Base.h>
 #include <ace/Reverse_Lock_T.h>
@@ -380,9 +381,9 @@ public:
   typedef OPENDDS_VECTOR(WriterStatePair) WriterStatePairVec;
   void get_writer_states(WriterStatePairVec& writer_states);
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  void update_ownership_strength (const GUID_t& pub_id,
-                                  const CORBA::Long& ownership_strength);
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+  void update_ownership_strength(const GUID_t& pub_id,
+                                 CORBA::Long ownership_strength);
 
   // Access to OwnershipManager is only valid when the domain participant is valid;
   // therefore, we must lock the domain pariticipant when using  OwnershipManager.
@@ -696,9 +697,8 @@ protected:
   TypeSupportImpl* type_support_;
   GUID_t topic_id_;
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   bool is_exclusive_ownership_;
-
 #endif
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC

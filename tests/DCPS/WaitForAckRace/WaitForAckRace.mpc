@@ -1,4 +1,4 @@
-project(*Publisher) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
+project(*Publisher) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_inforepodiscovery {
   exename = publisher
 
   Source_Files {
@@ -6,7 +6,7 @@ project(*Publisher) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
   }
 }
 
-project(*Subscriber) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test {
+project(*Subscriber) : dcpsexe, dcps_test, dcps_cm, dcps_transports_for_test, dcps_inforepodiscovery {
   exename = subscriber
 
   Source_Files {

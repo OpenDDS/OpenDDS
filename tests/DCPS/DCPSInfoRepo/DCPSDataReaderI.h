@@ -11,6 +11,8 @@
 
 #include "dds/DCPS/Discovery.h"
 
+#include "dds/OpenDDSConfigWrapper.h"
+
 #include <vector>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -58,6 +60,11 @@ public:
   ::OpenDDS::DCPS::GUID_t participantId_;
 
   OpenDDS::DCPS::WeakRcHandle<OpenDDS::ICE::Endpoint> get_ice_endpoint() { return OpenDDS::DCPS::WeakRcHandle<OpenDDS::ICE::Endpoint>(); }
+
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+  virtual void update_ownership_strength(const OpenDDS::DCPS::GUID_t&,
+                                         CORBA::Long) {}
+#endif
 
   const ::OpenDDS::DCPS::GUID_t& guid() const { return guid_; }
 
