@@ -163,11 +163,7 @@ Service_Participant::Service_Participant()
 #ifdef DDS_DEFAULT_DISCOVERY_METHOD
   , default_discovery_(DDS_DEFAULT_DISCOVERY_METHOD)
 #else
-# ifdef OPENDDS_SAFETY_PROFILE
   , default_discovery_(Discovery::DEFAULT_RTPS)
-# else
-  , default_discovery_(Discovery::DEFAULT_REPO)
-# endif
 #endif
 {
   config_topic_->connect(config_reader_);

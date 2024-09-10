@@ -6,6 +6,7 @@
 #include <dds/DdsDcpsSubscriptionExtC.h>
 #include <dds/DCPS/LocalObject.h>
 #include "MessengerC.h"
+#include "tests/Utils/DistributedConditionSet.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -15,7 +16,7 @@ class DataReaderListenerImpl
   : public virtual ::OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
 {
 public:
-  DataReaderListenerImpl ();
+  DataReaderListenerImpl(DistributedConditionSet_rch dcs);
 
   virtual ~DataReaderListenerImpl (void);
 
@@ -58,21 +59,10 @@ public:
     DDS::DataReader_ptr reader,
     const ::OpenDDS::DCPS::SubscriptionLostStatus & status);
 
-  long num_reads() const {
-    return num_reads_;
-  }
-
   bool verify_message (Messenger::Message& message);
 
-  bool received_all ();
-
-  bool passed ();
-
 private:
-
-  DDS::DataReader_var reader_;
-  long                num_reads_;
-  long                passed_count_;
+  DistributedConditionSet_rch dcs_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

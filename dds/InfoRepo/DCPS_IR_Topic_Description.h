@@ -100,6 +100,11 @@ public:
   /// the publications in all its maintained topics.
   void reevaluate_associations(DCPS_IR_Subscription* subscription);
 
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+  void update_ownership_strength(DCPS_IR_Publication* publication,
+                                 CORBA::Long strength);
+#endif
+
   const char* get_name() const ;
   const char* get_dataTypeName() const;
 

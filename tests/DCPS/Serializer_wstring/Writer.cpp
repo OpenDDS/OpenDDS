@@ -10,9 +10,6 @@
 using namespace Messenger;
 using namespace std;
 
-const int num_instances_per_writer = 1;
-const int num_messages = 10;
-
 CORBA::Char* charseq = (CORBA::Char*)("I'm char seq");
 CORBA::WChar* wcharseq = (CORBA::WChar*)(L"I'm wchar seq");
 const CORBA::Char* strseq = "I'm string seq";
@@ -21,9 +18,7 @@ const CORBA::Char* str = "I'm string";
 const CORBA::WChar* wstr = (const CORBA::WChar*)(L"I'm wstring");
 
 Writer::Writer(::DDS::DataWriter_ptr writer)
-: writer_ (::DDS::DataWriter::_duplicate (writer)),
-  finished_instances_ (0),
-  timeout_writes_ (0)
+: writer_ (::DDS::DataWriter::_duplicate (writer))
 {
 }
 
@@ -31,10 +26,9 @@ void
 Writer::start ()
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::start\n")));
-  // Lanuch num_instances_per_writer threads.
   // Each thread writes one instance which uses the thread id as the
   // key value.
-  if (activate (THR_NEW_LWP | THR_JOINABLE, num_instances_per_writer) == -1) {
+  if (activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1) {
     cerr << "Writer::start(): activate failed" << endl;
     exit(1);
   }
@@ -52,21 +46,8 @@ Writer::end ()
 int
 Writer::svc ()
 {
-  ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Writer::svc begins.\n")));
-
   ::DDS::InstanceHandleSeq handles;
   try {
-
-    while (1)
-    {
-      writer_->get_matched_subscriptions(handles);
-      if (handles.length() > 0)
-        break;
-      else
-        ACE_OS::sleep(ACE_Time_Value(0,200000));
-    }
-
     MessageDataWriter_var message_dw
       = MessageDataWriter::_narrow(writer_.in());
     if (CORBA::is_nil (message_dw.in ())) {
@@ -81,7 +62,7 @@ Writer::svc ()
 
     ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
-    for (int i = 0; i< num_messages; i ++) {
+    for (int i = 0; i != 10; ++i) {
       set_message (message, i);
       ::DDS::ReturnCode_t ret = message_dw->write(message, handle);
 
@@ -90,26 +71,13 @@ Writer::svc ()
                     ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
                     ACE_TEXT ("%dth write() returned %d.\n"),
                     i, ret));
-        if (ret == ::DDS::RETCODE_TIMEOUT) {
-          timeout_writes_ ++;
-        }
       }
     }
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in svc:" << endl << e << endl;
   }
 
-  while (1)
-    {
-      writer_->get_matched_subscriptions(handles);
-      if (handles.length() == 0)
-        break;
-      else
-        ACE_OS::sleep(1);
-    }
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc finished.\n")));
-
-  finished_instances_ ++;
 
   return 0;
 }
@@ -181,17 +149,4 @@ void Writer::set_message (Messenger::Message& message, int count)
                   "(%P|%t) ERROR: unknown message\n"));
     break;
   }
-}
-
-
-bool
-Writer::is_finished () const
-{
-  return finished_instances_ == num_instances_per_writer;
-}
-
-int
-Writer::get_timeout_writes () const
-{
-  return timeout_writes_;
 }

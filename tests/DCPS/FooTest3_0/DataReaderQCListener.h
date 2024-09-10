@@ -19,7 +19,8 @@
 class DataReaderQCListenerImpl
   : public virtual DataReaderListenerImpl {
 public:
-  DataReaderQCListenerImpl();
+  DataReaderQCListenerImpl(DistributedConditionSet_rch dcs,
+                           long num_writes);
 
   virtual ~DataReaderQCListenerImpl();
 
