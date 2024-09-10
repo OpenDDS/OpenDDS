@@ -18,7 +18,7 @@ macro(subtest name)
   set(target "${PROJECT_NAME}_${name}")
   # TODO: Add target when generation is per-target
   set(target_gen "${opendds_gen}")
-  # Directory has to exist for get_filename_component(REAPATH) to consistently
+  # Directory has to exist for get_filename_component(REALPATH) to consistently
   # resolve it.
   file(MAKE_DIRECTORY "${target_gen}")
   get_filename_component(target_gen "${target_gen}" REALPATH)
@@ -97,18 +97,19 @@ function(assert_generated_output file)
   if(arg_O_OPT)
     list(APPEND args O_OPT "${arg_O_OPT}")
   endif()
-  _opendds_get_generated_output(${target} "${file}"
-    DIR_PATH_VAR dir_path
-    FILE_PATH_VAR file_path
-    PREFIX_PATH_VAR prefix_path
-    FAIL_VAR failed
-    ${args})
-
   if(arg_EXPECT_FAIL)
     set(expect_failed TRUE)
   else()
     set(expect_failed FALSE)
   endif()
+  _opendds_get_generated_output(${target} "${file}"
+    DIR_PATH_VAR dir_path
+    FILE_PATH_VAR file_path
+    PREFIX_PATH_VAR prefix_path
+    FAIL_VAR failed
+    EXPECT_FAIL ${expect_failed}
+    ${args})
+
   get_filename_component(filename "${file}" NAME)
   set(expect_dir_path "${arg_EXPECT}")
   set(expect_file_path "${expect_dir_path}/${filename}")

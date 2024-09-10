@@ -45,7 +45,15 @@ endfunction()
 
 function(_opendds_get_generated_output target file)
   set(no_value_options MKDIR)
-  set(single_value_options INCLUDE_BASE O_OPT DIR_PATH_VAR FILE_PATH_VAR PREFIX_PATH_VAR FAIL_VAR)
+  set(single_value_options
+    INCLUDE_BASE
+    O_OPT
+    DIR_PATH_VAR
+    FILE_PATH_VAR
+    PREFIX_PATH_VAR
+    FAIL_VAR
+    EXPECT_FAIL
+  )
   set(multi_value_options)
   cmake_parse_arguments(arg
     "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
@@ -74,11 +82,16 @@ function(_opendds_get_generated_output target file)
     endif()
     file(RELATIVE_PATH rel_file "${real_include_base}" "${real_file}")
     if(rel_file MATCHES "^\\.\\.")
+      set(msg_type FATAL_ERROR)
       if(arg_FAIL_VAR)
         set(${arg_FAIL_VAR} TRUE PARENT_SCOPE)
-        return()
       endif()
-      message(FATAL_ERROR
+      if(arg_EXPECT_FAIL)
+        return()
+      else()
+        set(msg_type SEND_ERROR)
+      endif()
+      message(${msg_type}
         "  This file:\n"
         "  \n"
         "    ${rel_file}\n"
@@ -88,6 +101,7 @@ function(_opendds_get_generated_output target file)
         "  \n"
         "    ${arg_INCLUDE_BASE}\n"
         "    (${real_include_base})\n")
+      return()
     endif()
     get_filename_component(rel_dir "${rel_file}" DIRECTORY)
     set(output_dir "${output_dir}/${rel_dir}")
