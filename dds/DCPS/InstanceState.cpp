@@ -16,6 +16,8 @@
 #include "DomainParticipantImpl.h"
 #include "GuidConverter.h"
 
+#include "dds/OpenDDSConfigWrapper.h"
+
 #if !defined (__ACE_INLINE__)
 # include "InstanceState.inl"
 #endif /* !__ACE_INLINE__ */
@@ -41,7 +43,7 @@ InstanceState::InstanceState(const DataReaderImpl_rch& reader,
     reader_(reader),
     handle_(handle),
     owner_(GUID_UNKNOWN),
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
     exclusive_(reader->qos_.ownership.kind == DDS::EXCLUSIVE_OWNERSHIP_QOS),
 #endif
     registered_(false)
@@ -49,7 +51,7 @@ InstanceState::InstanceState(const DataReaderImpl_rch& reader,
 
 InstanceState::~InstanceState()
 {
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   if (registered_) {
     RcHandle<DataReaderImpl> reader = reader_.lock();
     if (reader) {
@@ -127,7 +129,7 @@ bool InstanceState::dispose_was_received(const GUID_t& writer_id)
   // If disposed by owner then the owner is not re-elected, it can
   // resume if the writer sends message again.
   if (instance_state_ & DDS::ALIVE_INSTANCE_STATE) {
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
     RcHandle<DataReaderImpl> reader = reader_.lock();
     if (reader) {
       DataReaderImpl::OwnershipManagerPtr owner_manager = reader->ownership_manager();
@@ -138,7 +140,7 @@ bool InstanceState::dispose_was_received(const GUID_t& writer_id)
         state_updated();
         schedule_release();
         return true;
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
       }
     }
 #endif
@@ -157,7 +159,7 @@ bool InstanceState::unregister_was_received(const GUID_t& writer_id)
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   writers_.erase(writer_id);
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   if (exclusive_) {
     // If unregistered by owner then the ownership should be transferred to another
     // writer.

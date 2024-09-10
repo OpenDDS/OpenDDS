@@ -38,6 +38,8 @@
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include <ace/Null_Mutex.h>
 #include <ace/Thread_Mutex.h>
 #include <ace/Recursive_Thread_Mutex.h>
@@ -354,20 +356,11 @@ public:
    */
   void get_topic_ids(TopicIdVec& topics);
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
 
   /** Accessor for ownership manager.
    */
   OwnershipManager* ownership_manager();
-
-
-  /**
-   * Called upon receiving new BIT publication data to
-   * update the ownership strength of a publication.
-   */
-  void update_ownership_strength(const GUID_t& pub_id,
-                                 const CORBA::Long&   ownership_strength);
-
 #endif
 
   bool federated() const {
@@ -549,7 +542,7 @@ private:
   /// Keep track of handles that can be reused (use handle_protector_)
   DisjointSequence::OrderedRanges<DDS::InstanceHandle_t> reusable_handles_;
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   OwnershipManager owner_man_;
 #endif
 

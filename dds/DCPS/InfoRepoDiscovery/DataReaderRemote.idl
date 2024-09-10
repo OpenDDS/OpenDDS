@@ -11,6 +11,8 @@
 #include "dds/DdsDcpsInfoUtils.idl"
 #include "dds/DdsDcpsSubscription.idl"
 
+#include "dds/OpenDDSConfigWrapper.idl"
+
 module OpenDDS {
   module DCPS {
 
@@ -39,6 +41,11 @@ module OpenDDS {
       oneway void update_incompatible_qos(
         in IncompatibleQosStatus status);
 
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+      oneway void update_ownership_strength(
+        in GUID_t publication_id,
+        in long strength);
+#endif
     };
   }; // module DDS
 }; // module OpenDDS

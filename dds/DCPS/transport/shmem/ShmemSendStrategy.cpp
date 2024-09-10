@@ -53,8 +53,12 @@ ShmemSendStrategy::start_i()
   data[limit].status_ = ShmemData::EndOfAlloc;
   alloc->bind(bound_name_.c_str(), mem);
 
-  ShmemAllocator* peer = link_->peer_allocator();
-  peer->find("Semaphore", mem);
+  {
+    ShmemDataLink::PeerAllocatorProxy proxy(*link_);
+    ShmemAllocator* alloc = proxy.peer_allocator();
+    alloc->find("Semaphore", mem);
+  }
+
   ShmemSharedSemaphore* sem = reinterpret_cast<ShmemSharedSemaphore*>(mem);
 #if defined OPENDDS_SHMEM_WINDOWS
   HANDLE srcProc = ::OpenProcess(PROCESS_DUP_HANDLE, false /*bInheritHandle*/,

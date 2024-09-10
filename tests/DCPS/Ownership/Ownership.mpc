@@ -24,7 +24,6 @@ project(DDS*Publisher) : dcpsexe, dcps_test, dcps_tcp, dcps_rtps_udp {
 
   Source_Files {
     publisher.cpp
-    Writer.cpp
   }
 }
 
