@@ -11,22 +11,27 @@ using std::endl;
 
 
 
-Test::DataReaderListener::DataReaderListener (long expected_matches)
-  : expected_matches_ (expected_matches)
+Test::DataReaderListener::DataReaderListener (DistributedConditionSet_rch dcs,
+                                              const Test::PartitionConfig& config)
+  : dcs_(dcs)
+  , config_(config)
   , subscription_matches_ (0)
 {
+  if (config.expected_matches == 0) {
+    dcs_->post(config_.actor, "done");
+  }
 }
 
 Test::DataReaderListener::~DataReaderListener ()
 {
   long const matches = this->subscription_matches_;
-  if (matches != this->expected_matches_)
+  if (matches != this->config_.expected_matches)
     {
       ACE_ERROR ((LM_ERROR,
                   ACE_TEXT ("(%P|%t) ERROR: Number of subscriptions (%d) ")
                   ACE_TEXT ("does not match expected (%d).\n"),
                   matches,
-                  this->expected_matches_));
+                  this->config_.expected_matches));
 
       exit (1);
     }
@@ -81,6 +86,10 @@ Test::DataReaderListener::on_subscription_matched (
     DDS::DataReader_ptr reader,
     const DDS::SubscriptionMatchedStatus& status)
 {
+  if (status.total_count == config_.expected_matches) {
+    dcs_->post(config_.actor, "done");
+  }
+
   if( status.total_count_change > 0) {
     this->subscription_matches_ += status.total_count_change;
   }

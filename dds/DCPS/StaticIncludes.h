@@ -35,15 +35,10 @@
 // Only for static builds, include default libraries for both discovery
 // and transport.  This file will be included by the code in the executable
 // so that the static link includes the initializers for these libraries.
+#  include "RTPS/RtpsDiscovery.h"
+#  include "transport/rtps_udp/RtpsUdp.h"
 #  ifdef OPENDDS_SAFETY_PROFILE
 #    include "StaticDiscovery.h"
-#    include "RTPS/RtpsDiscovery.h"
-#    include "transport/rtps_udp/RtpsUdp.h"
-#  else
-// tcp is needed for InfoRepoDiscovery
-#    include "transport/tcp/Tcp.h"
-#    include "InfoRepoDiscovery/InfoRepoDiscovery.h"
-#    include "transport/rtps_udp/RtpsUdp.h"
 #  endif
 #endif
 

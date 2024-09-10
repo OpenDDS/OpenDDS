@@ -255,7 +255,8 @@ private:
 class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl, public ConfigListener {
 public:
   RtpsUdpTransport(const RtpsUdpInst_rch& inst,
-                   DDS::DomainId_t domain);
+                   DDS::DomainId_t domain,
+                   DomainParticipantImpl* participant);
   RtpsUdpInst_rch config() const;
 #if OPENDDS_CONFIG_SECURITY
   DCPS::RcHandle<ICE::Agent> get_ice_agent() const;
@@ -322,6 +323,17 @@ private:
                                      const GUID_t& /*readerid*/,
                                      const GUID_t& /*writerid*/);
 
+  virtual NetworkAddress actual_local_address() const
+  {
+    return actual_local_address_;
+  }
+#ifdef ACE_HAS_IPV6
+  virtual NetworkAddress ipv6_actual_local_address() const
+  {
+    return ipv6_actual_local_address_;
+  }
+#endif
+
   virtual bool connection_info_i(TransportLocator& info, ConnectionInfoFlags flags) const;
 
   void get_connection_addrs(const TransportBLOB& data,
@@ -375,6 +387,8 @@ private:
 
   JobQueue_rch job_queue_;
 
+  DomainParticipantImpl* participant_;
+
 #if OPENDDS_CONFIG_SECURITY
 
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
@@ -420,6 +434,10 @@ private:
   friend class RtpsUdpReceiveStrategy;
 
   RtpsUdpCore core_;
+  NetworkAddress actual_local_address_;
+#ifdef ACE_HAS_IPV6
+  NetworkAddress ipv6_actual_local_address_;
+#endif
 };
 
 } // namespace DCPS

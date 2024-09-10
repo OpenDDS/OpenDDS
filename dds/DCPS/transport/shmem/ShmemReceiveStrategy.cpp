@@ -43,14 +43,18 @@ ShmemReceiveStrategy::read()
     bound_name_ = "Write-" + link_->local_address();
   }
 
-  ShmemAllocator* alloc = link_->peer_allocator();
   void* mem = 0;
-  if (alloc == 0 || -1 == alloc->find(bound_name_.c_str(), mem)) {
-    VDBG_LVL((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy::read link %@ "
-              "peer allocator not found, receive_bytes will close link\n",
-              link_), 1);
-    handle_dds_input(ACE_INVALID_HANDLE); // will return 0 to the TRecvStrateg.
-    return;
+  {
+    ShmemDataLink::PeerAllocatorProxy proxy(*link_);
+    ShmemAllocator* peer_allocator = proxy.peer_allocator();
+
+    if (peer_allocator == 0 || -1 == peer_allocator->find(bound_name_.c_str(), mem)) {
+      VDBG_LVL((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy::read link %@ "
+                "peer allocator not found, receive_bytes will close link\n",
+                link_), 1);
+      handle_dds_input(ACE_INVALID_HANDLE); // will return 0 to the TransportReceiveStrategy.
+      return;
+    }
   }
 
   if (!current_data_) {
@@ -88,9 +92,11 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
         "(%P|%t) ShmemReceiveStrategy::receive_bytes link %@\n", link_));
 
   // check that the writer's shared memory is still available
-  ShmemAllocator* alloc = link_->peer_allocator();
   void* mem;
-  if (!alloc || -1 == alloc->find(bound_name_.c_str(), mem) || !current_data_
+
+  ShmemDataLink::PeerAllocatorProxy proxy(*link_);
+  ShmemAllocator* peer_allocator = proxy.peer_allocator();
+  if (!peer_allocator || -1 == peer_allocator->find(bound_name_.c_str(), mem) || !current_data_
       || current_data_->status_ != ShmemData::InUse) {
     VDBG_LVL((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy::receive_bytes closing\n"),
              1);
@@ -142,7 +148,7 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
       chunk = std::min(space, remaining);
 
 #ifdef OPENDDS_SHMEM_WINDOWS
-    if (alloc->memory_pool().remap((void*)(src_iter + chunk - 1)) == -1) {
+    if (peer_allocator->memory_pool().remap((void*)(src_iter + chunk - 1)) == -1) {
       VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemReceiveStrategy::receive_bytes "
                 "shared memory pool couldn't be extended\n"), 0);
       errno = ENOMEM;

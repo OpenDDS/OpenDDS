@@ -27,6 +27,8 @@
 #include "dds/DCPS/StaticIncludes.h"
 #endif
 
+#include "dds/OpenDDSConfigWrapper.h"
+
 #include "ace/Get_Opt.h"
 #include "ace/High_Res_Timer.h"
 #include "ace/Arg_Shifter.h"
@@ -338,7 +340,7 @@ void test_bit_publication ()
       TEST_CHECK (the_pub_data.liveliness == dw_qos.liveliness);
       //TEST_CHECK (the_pub_data.lifespan == dw_qos.lifespan);
       TEST_CHECK (the_pub_data.user_data == dw_qos.user_data);
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
       TEST_CHECK (the_pub_data.ownership_strength == dw_qos.ownership_strength);
 #endif
       //the_pub_data.presentation

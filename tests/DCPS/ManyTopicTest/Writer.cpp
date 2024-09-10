@@ -15,12 +15,9 @@
 #include "ace/OS_NS_unistd.h"
 
 
-Writer::Writer(DDS::DataWriter* writer,
-               int num_thread_to_write,
-               int num_writes_per_thread)
-  : num_thread_to_write_(num_thread_to_write),
-    num_writes_per_thread_(num_writes_per_thread),
-    finished_sending_(false)
+Writer::Writer(DistributedConditionSet_rch dcs,
+               DDS::DataWriter* writer)
+  : dcs_(dcs)
 {
   ::DDS::DataWriterQos dw_qos;
   writer->get_qos(dw_qos);
@@ -32,7 +29,7 @@ Writer::start()
 {
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) Writer::start\n")));
-  if (activate(THR_NEW_LWP | THR_JOINABLE, num_thread_to_write_) == -1)
+  if (activate(THR_NEW_LWP | THR_JOINABLE, 1) == -1)
   {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) Writer::start, %p.\n"),
@@ -42,25 +39,20 @@ Writer::start()
 }
 
 int
-Writer::wait_match(const DDS::DataWriter_var& dw, unsigned int count)
+Writer::wait_match(const DDS::DataWriter_var& dw)
 {
-  return Utils::wait_match(dw, count, Utils::GTE);
+  return Utils::wait_match(dw, 2, Utils::EQ);
 }
 
 void
-Writer::end()
+Writer::wait_for_done()
 {
   ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) Writer::end\n")));
+             ACE_TEXT("(%P|%t) Writer::wait_for_done begin\n")));
   wait();
+    ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) Writer::wait_for_done end\n")));
 }
-
-bool
-Writer::is_finished() const
-{
-  return finished_sending_;
-}
-
 
 void Writer::rsleep(const int wait)
 {
