@@ -8,7 +8,9 @@
 #ifndef OPENDDS_DCPS_OWNERSHIP_MANAGER_H
 #define OPENDDS_DCPS_OWNERSHIP_MANAGER_H
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#include "dds/OpenDDSConfigWrapper.h"
+
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
 
 #include "Definitions.h"
 #include "GuidUtils.h"
@@ -151,7 +153,7 @@ public:
   * Update the ownership strength of a publication.
   */
   void update_ownership_strength(const GUID_t& pub_id,
-                                 const CORBA::Long& ownership_strength);
+                                 CORBA::Long ownership_strength);
 
 private:
 
@@ -181,6 +183,6 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE */
+#endif
 
 #endif /* OPENDDS_DCPS_OWNERSHIP_MANAGER_H  */

@@ -24,7 +24,7 @@ my $opts = "";
 my $debug_opt = ($debug eq '0') ? ''
     : "-ORBDebugLevel $debug -DCPSDebugLevel $debug";
 
-my $test_opts = "$opts $debug_opt -ORBLogFile test.log";
+my $test_opts = "$opts $debug_opt -ORBLogFile test.log -OpenDDS_COMMON_DCPS_DEFAULT_DISCOVERY DEFAULT_REPO";
 
 my $dcpsrepo_ior = "repo.ior";
 

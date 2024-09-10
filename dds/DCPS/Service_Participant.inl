@@ -101,7 +101,7 @@ Service_Participant::initial_OwnershipQosPolicy() const
   return initial_OwnershipQosPolicy_;
 }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
 ACE_INLINE
 const DDS::OwnershipStrengthQosPolicy&
 Service_Participant::initial_OwnershipStrengthQosPolicy() const

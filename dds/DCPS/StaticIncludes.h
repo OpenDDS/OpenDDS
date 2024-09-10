@@ -41,8 +41,7 @@
 #    include "transport/rtps_udp/RtpsUdp.h"
 #  else
 // tcp is needed for InfoRepoDiscovery
-#    include "transport/tcp/Tcp.h"
-#    include "InfoRepoDiscovery/InfoRepoDiscovery.h"
+#    include "RTPS/RtpsDiscovery.h"
 #    include "transport/rtps_udp/RtpsUdp.h"
 #  endif
 #endif
