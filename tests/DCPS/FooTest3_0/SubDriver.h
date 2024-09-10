@@ -4,6 +4,7 @@
 #include "dds/DdsDcpsC.h"
 #include "tests/DCPS/FooType3/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType3/FooDefTypeSupportImpl.h"
+#include <tests/Utils/DistributedConditionSet.h>
 #include "dds/DCPS/Definitions.h"
 #include "ace/INET_Addr.h"
 #include "ace/String_Base.h"
@@ -28,8 +29,8 @@ class SubDriver
   private:
 
     void parse_args(int& argc, ACE_TCHAR* argv[]);
-    void init(int& argc, ACE_TCHAR* argv[]);
-    void run();
+    void init(DistributedConditionSet_rch dcs, int& argc, ACE_TCHAR* argv[]);
+    void run(DistributedConditionSet_rch dcs);
 
     int               num_writes_;
     int               num_disposed_;
@@ -37,8 +38,6 @@ class SubDriver
     int               shutdown_pub_;
     int               add_new_subscription_;
     int               shutdown_delay_secs_;
-
-    ACE_TString       sub_ready_filename_;
 
     ::DDS::DomainParticipant_var participant_;
     ::DDS::Topic_var             topic_;

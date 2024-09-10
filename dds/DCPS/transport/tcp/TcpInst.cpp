@@ -26,7 +26,8 @@ OpenDDS::DCPS::TcpInst::~TcpInst()
 }
 
 OpenDDS::DCPS::TransportImpl_rch
-OpenDDS::DCPS::TcpInst::new_impl(DDS::DomainId_t domain)
+OpenDDS::DCPS::TcpInst::new_impl(DDS::DomainId_t domain,
+                                 DomainParticipantImpl* /*participant*/)
 {
   return make_rch<TcpTransport>(rchandle_from(this), domain);
 }
@@ -52,7 +53,8 @@ OpenDDS::DCPS::TcpInst::dump_to_str(DDS::DomainId_t domain) const
 size_t
 OpenDDS::DCPS::TcpInst::populate_locator(OpenDDS::DCPS::TransportLocator& local_info,
                                          ConnectionInfoFlags,
-                                         DDS::DomainId_t) const
+                                         DDS::DomainId_t,
+                                         DomainParticipantImpl*)
 {
   const std::string local_addr = local_address();
   const std::string locator_addr = get_locator_address();

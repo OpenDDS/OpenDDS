@@ -9,6 +9,7 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use File::Path;
 use strict;
 
 # Set the library path for the client to be able to load
@@ -25,7 +26,6 @@ my $n_chunks = 20; # Number of pre-allocated chunks for Dynamic_Cached_Allocator
 my $shutdown_pub = 1;
 my $add_new_subscription = 0;
 my $shutdown_delay_secs=10;
-my $sub_ready_file = "sub_ready.txt";
 my $use_qc = 0;
 
 if ($ARGV[0] eq 'unregister') {
@@ -72,45 +72,22 @@ else {
     exit 1;
 }
 
-my $dcpsrepo_ior = "repo.ior";
-
 my $history_depth=10;
-my $repo_bit_conf = "-NOBITS";
-my $app_bit_conf = "-DCPSBit 0";
-
-unlink $dcpsrepo_ior;
-unlink $sub_ready_file;
-
-my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                        "-o $dcpsrepo_ior $repo_bit_conf");
-print $DCPSREPO->CommandLine(), "\n";
 
 my $publisher = PerlDDS::create_process ("FooTest3_publisher",
-                                         "$app_bit_conf "
-                                         . " -DCPSInfoRepo file://$dcpsrepo_ior -d $history_depth"
-                                         . " -t $test_to_run -DCPSChunks $n_chunks"
-                                         . " -f $sub_ready_file");
+                                         "-d $history_depth"
+                                         . " -t $test_to_run -DCPSChunks $n_chunks");
 
 print $publisher->CommandLine(), "\n";
 
 my $subscriber = PerlDDS::create_process ("FooTest3_subscriber",
-                                          " -DCPSInfoRepo file://$dcpsrepo_ior "
-                                          . "$app_bit_conf -n $num_writes "
+                                          "-n $num_writes "
                                           . "-x $shutdown_pub "
-                                          . "-a $add_new_subscription -d $shutdown_delay_secs -i $num_disposed -q $use_qc"
-                                          . "-f $sub_ready_file");
+                                          . "-a $add_new_subscription -d $shutdown_delay_secs -i $num_disposed -q $use_qc");
 
 print $subscriber->CommandLine(), "\n";
 
-
-$DCPSREPO->Spawn ();
-
-if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for Info Repo IOR file\n";
-    $DCPSREPO->Kill ();
-    exit 1;
-}
-
+rmtree('./DCS');
 
 $subscriber->Spawn ();
 $publisher->Spawn ();
@@ -118,15 +95,11 @@ $publisher->Spawn ();
 $status |= PerlDDS::wait_kill($subscriber, 60, "subscriber");
 
 $status |= PerlDDS::wait_kill($publisher, 60, "publisher");
-$status |= PerlDDS::terminate_wait_kill($DCPSREPO);
 
 if ($status == 0) {
   print "test PASSED.\n";
 } else {
   print STDERR "test FAILED.\n";
 }
-
-unlink $dcpsrepo_ior;
-unlink $sub_ready_file;
 
 exit $status;

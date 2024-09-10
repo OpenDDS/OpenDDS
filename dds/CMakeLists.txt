@@ -13,7 +13,6 @@ find_package(OpenDDS REQUIRED NO_DEFAULTS TAO::tao_idl OpenDDS::opendds_idl ${dc
 include(opendds_build_helpers)
 
 add_library(OpenDDS_Dcps
-  DCPS/BitPubListenerImpl.cpp
   DCPS/BuiltInTopicUtils.cpp
   DCPS/CoherentChangeControl.cpp
   DCPS/ConditionImpl.cpp
@@ -211,7 +210,6 @@ target_sources(OpenDDS_Dcps
     DCPS/AstNodeWrapper.h
     DCPS/Atomic.h
     DCPS/AtomicBool.h
-    DCPS/BitPubListenerImpl.h
     DCPS/BuiltInTopicDataReaderImpls.h
     DCPS/BuiltInTopicUtils.h
     DCPS/Cached_Allocator_With_Overflow_T.h
