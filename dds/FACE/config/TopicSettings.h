@@ -14,6 +14,8 @@ class OpenDDS_FACE_Export TopicSettings {
 public:
   static const int TYPE_NAME_LEN = 128;
 
+  TopicSettings();
+
   int set(const char* name, const char* value);
 
   char type_name_[TYPE_NAME_LEN];

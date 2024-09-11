@@ -88,11 +88,13 @@ const DCPS::Encoding& get_locators_encoding();
 OpenDDS_Rtps_Export
 DDS::ReturnCode_t blob_to_locators(const DCPS::TransportBLOB& blob,
                                    DCPS::LocatorSeq& locators,
+                                   VendorId_t& vendor_id,
                                    bool* requires_inline_qos = 0,
                                    unsigned int* pBytesRead = 0);
 
 OpenDDS_Rtps_Export
 void locators_to_blob(const DCPS::LocatorSeq& locators,
+                      const VendorId_t& vendor_id,
                       DCPS::TransportBLOB& blob);
 
 OpenDDS_Rtps_Export

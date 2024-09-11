@@ -431,9 +431,7 @@ void Manager::updateLastPartId(PartIdType partId)
 int
 UpdateManagerSvc_Loader::init()
 {
-  return ACE_Service_Config::process_directive
-         (ace_svc_desc_UpdateManagerSvc);
-  return 0;
+  return ACE_Service_Config::process_directive(ace_svc_desc_UpdateManagerSvc);
 }
 
 ACE_FACTORY_DEFINE(ACE_Local_Service, UpdateManagerSvc)

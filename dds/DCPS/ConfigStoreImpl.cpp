@@ -75,11 +75,11 @@ String ConfigPair::canonicalize(const String& key)
         if (!retval.empty() && retval[retval.size() - 1] != '_') {
           retval += '_';
         }
-        retval += ACE_OS::ace_toupper(x);
+        retval += static_cast<char>(ACE_OS::ace_toupper(x));
         ++idx;
         continue;
       } else if (ACE_OS::ace_islower(x) && ACE_OS::ace_isupper(y)) {
-        retval += ACE_OS::ace_toupper(x);
+        retval += static_cast<char>(ACE_OS::ace_toupper(x));
         if (!retval.empty() && retval[retval.size() - 1] != '_') {
           retval += '_';
         }
@@ -90,7 +90,7 @@ String ConfigPair::canonicalize(const String& key)
 
     // Deal with non-punctuation.
     if (ACE_OS::ace_isalnum(x)) {
-      retval += ACE_OS::ace_toupper(x);
+      retval += static_cast<char>(ACE_OS::ace_toupper(x));
       ++idx;
       continue;
     }

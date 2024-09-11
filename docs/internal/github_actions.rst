@@ -53,7 +53,7 @@ Build Options
 * v1 - enables versioned namespace
 * cpp03 - ``--std=c++03``
 * j/j<N> - Java version default/N
-* ace7 - uses ace7tao3 rather than ace6tao2
+* acem - uses ACE_TAO's master branch instead of ace6tao2
 * xer0 - disables xerces
 * qt - enables ``--qt``
 * ws - enables ``--wireshark``

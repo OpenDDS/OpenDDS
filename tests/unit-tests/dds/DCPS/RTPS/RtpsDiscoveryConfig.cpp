@@ -108,17 +108,26 @@ TEST(dds_DCPS_RTPS_RtpsDiscoveryConfig, spdp_multicast_address)
 {
   const char* const default_addr = "239.255.0.1";
 
+  DDS::UInt16 d0 = 0;
+
+#if !defined ACE_LACKS_GETENV && !defined ACE_LACKS_ENV
+  const char* const from_env = ACE_OS::getenv("OPENDDS_RTPS_DEFAULT_D0");
+  if (from_env) {
+    d0 = static_cast<DDS::UInt16>(std::atoi(from_env));
+  }
+#endif
+
   {
     AddressTest t;
     ASSERT_TRUE(t.rtps.spdp_multicast_address(t.addr, 1));
-    EXPECT_ADDR_EQ(t.addr, NetworkAddress(7650, default_addr));
+    EXPECT_ADDR_EQ(t.addr, NetworkAddress(7650 + d0, default_addr));
     EXPECT_FALSE(t.fixed);
   }
 
   {
     AddressTest t;
     ASSERT_TRUE(t.rtps.spdp_multicast_address(t.addr, 2));
-    EXPECT_ADDR_EQ(t.addr, NetworkAddress(7900, default_addr));
+    EXPECT_ADDR_EQ(t.addr, NetworkAddress(7900 + d0, default_addr));
     EXPECT_FALSE(t.fixed);
   }
 

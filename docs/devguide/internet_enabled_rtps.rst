@@ -293,6 +293,12 @@ The command-line options for the RtpsRelay:
   New client participants in the :option:`admission control queue <-AdmissionControlQueueSize>` that are taking longer than this many seconds to perform discovery are removed from the queue.
   Default is 0.
 
+.. option:: -AdmissionMaxParticipantsRange <low>-<high>
+
+  If this option is used, the relay's "admitting" state will be set to false when the number of active participants
+  reaches the <high> value.  After the number of active participants falls below the <low> value, this metric will
+  cease to cause the "admitting" state to be false, although it may remain false due to other controls.
+
 .. option:: -PublishRelayStatus <seconds>
 
   Setting this to a positive integer causes the relay to publish its status at that interval.

@@ -747,8 +747,8 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
       md->name(cto.bitmask_type.flag_seq[i].detail.name.c_str());
       // Use Id to convey the position of bit flag.
       md->id(cto.bitmask_type.flag_seq[i].common.position);
-      const DDS::DynamicType_var temp = type_identifier_to_dynamic(TypeIdentifier(TK_BOOLEAN), guid);
-      md->type(temp);
+      const DDS::DynamicType_var temp2 = type_identifier_to_dynamic(TypeIdentifier(TK_BOOLEAN), guid);
+      md->type(temp2);
       md->index(i);
       dtm->set_descriptor(md);
       dt->insert_dynamic_member(dtm);

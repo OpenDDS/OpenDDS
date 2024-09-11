@@ -156,7 +156,7 @@ MulticastInst::port_offset(u_short po)
 u_short
 MulticastInst::port_offset() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("PORT_OFFSET").c_str(), DEFAULT_PORT_OFFSET);
+  return static_cast<u_short>(TheServiceParticipant->config_store()->get_uint32(config_key("PORT_OFFSET").c_str(), DEFAULT_PORT_OFFSET));
 }
 
 void
@@ -338,7 +338,7 @@ MulticastInst::ttl(unsigned char t)
 unsigned char
 MulticastInst::ttl() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("TTL").c_str(), DEFAULT_TTL);
+  return static_cast<unsigned char>(TheServiceParticipant->config_store()->get_uint32(config_key("TTL").c_str(), DEFAULT_TTL));
 }
 
 void

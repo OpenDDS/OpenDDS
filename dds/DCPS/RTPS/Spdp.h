@@ -212,6 +212,10 @@ public:
 
   void append_transport_statistics(DCPS::TransportStatisticsSequence& seq);
 
+  VendorId_t get_vendor_id(const GUID_t& guid) const;
+
+  VendorId_t get_vendor_id_i(const GUID_t& guid) const;
+
   void ignore_domain_participant(const GUID_t& ignoreId);
 
   void remove_domain_participant(const GUID_t& removeId);

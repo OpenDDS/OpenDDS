@@ -74,7 +74,7 @@ class TestStats
         ACE_Message_Block* header_block = *itr;
         TestData::Header* header = (TestData::Header*)(header_block->rd_ptr());
 
-        unsigned index = header->publisher_id_;
+        unsigned index = static_cast<unsigned>(header->publisher_id_);
 
         // Increment the appropriate publisher packet count.
         ++pub_stats_[index];

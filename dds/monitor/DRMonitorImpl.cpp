@@ -54,7 +54,7 @@ DRMonitorImpl::report() {
          iter != writer_states.end();
          ++iter) {
       report.associations[length].dw_id = iter->first;
-      report.associations[length].state = iter->second;
+      report.associations[length].state = static_cast<CORBA::Short>(iter->second);
       length++;
     }
     dr_writer_->write(report, DDS::HANDLE_NIL);

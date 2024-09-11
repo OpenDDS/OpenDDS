@@ -43,6 +43,8 @@ public:
   const char *filename() const;
   void filename(const char *fname);
 
+  const std::string& filebase() const { return filebase_; }
+
   bool do_included_files() const;
 
   bool do_server_side() const;
@@ -105,6 +107,7 @@ public:
 private:
   const char *filename_;
   // Name of the IDL file we are processing.
+  std::string filebase_;
 
   bool do_server_side_;
 

@@ -257,9 +257,11 @@ int DDS_TEST::test(ACE_TString host, u_short port)
 
   size_t size_locator = 0;
   serialized_size(locators_encoding, size_locator, locators);
+  serialized_size(locators_encoding, size_locator, VENDORID_OPENDDS);
   ACE_Message_Block mb_locator(size_locator + 1);
   Serializer ser_loc(&mb_locator, locators_encoding);
   if (!(ser_loc << locators) ||
+      !(ser_loc << VENDORID_OPENDDS) ||
       !(ser_loc << ACE_OutputCDR::from_boolean(false))) { // requires inline QoS
     std::cerr << "publisher serialize locators failed\n";
     return 1;

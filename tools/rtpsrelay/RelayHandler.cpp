@@ -288,6 +288,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
   const auto msg_len = msg->length();
   {
     GuidAddrSet::Proxy proxy(guid_addr_set_);
+    proxy.maintain_admission_queue(now);
     proxy.process_expirations(now);
     if (!proxy.check_address(remote_address)) {
       stats_reporter_.ignored_message(msg_len, now, type);

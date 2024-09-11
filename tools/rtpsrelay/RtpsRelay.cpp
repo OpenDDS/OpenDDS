@@ -203,6 +203,29 @@ int run(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-AdmissionControlQueueDuration"))) {
       config.admission_control_queue_duration(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-AdmissionMaxParticipantsRange"))) {
+      auto conv = std::atoi(arg);
+      if (conv <= 0) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Argument for -AdmissionMaxParticipantsRange option must be positive: %d\n", conv));
+        return EXIT_FAILURE;
+      }
+      config.admission_max_participants_low_water(conv);
+      const auto dash = std::strchr(arg, '-');
+      if (!dash) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Argument for -AdmissionMaxParticipantsRange option must contain a '-': %C\n", arg));
+        return EXIT_FAILURE;
+      }
+      conv = std::atoi(dash + 1);
+      if (conv <= 0) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Argument for -AdmissionMaxParticipantsRange option must be positive: %d\n", conv));
+        return EXIT_FAILURE;
+      }
+      if (static_cast<size_t>(conv) < config.admission_max_participants_low_water()) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: High value for -AdmissionMaxParticipantsRange option must be greater than or equal to low value\n"));
+        return EXIT_FAILURE;
+      }
+      config.admission_max_participants_high_water(conv);
+      args.consume_arg();
     } else if ((arg = args.get_the_parameter("-RunTime"))) {
       config.run_time(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
@@ -241,7 +264,7 @@ int run(int argc, ACE_TCHAR* argv[])
       args.consume_arg();
     } else {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Invalid option: %C\n", args.get_current()));
-      return 1;
+      return EXIT_FAILURE;
     }
   }
 

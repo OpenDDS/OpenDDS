@@ -177,8 +177,9 @@ idl2jni_visitor::visit_interface(AST_Interface *node)
   // dynamic cast for each element.
   //vector<AST_Interface *> inherits(node->inherits(),
   //                                 node->inherits() + node->n_inherits());
-  vector<AST_Interface *> inherits(node->n_inherits());
-  for (int i = 0; i < node->n_inherits(); i++) {
+  const size_t n_inherits = static_cast<size_t>(node->n_inherits());
+  vector<AST_Interface *> inherits(n_inherits);
+  for (size_t i = 0; i < n_inherits; i++) {
     inherits[i] = dynamic_cast<AST_Interface *>(*(node->inherits()+i));
   }
 

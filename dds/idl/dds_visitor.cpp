@@ -453,6 +453,10 @@ dds_visitor::visit_union(AST_Union* node)
                                      node->repoID());
   }
 
+  if (!node->imported() && be_global->java()) {
+    java_ts_generator::generate(node);
+  }
+
   return 0;
 }
 

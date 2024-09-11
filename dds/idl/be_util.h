@@ -40,6 +40,6 @@ namespace be_util {
 
   /// Report a miscellaneous error and abort.
   void misc_error_and_abort(const std::string& message, AST_Decl* node = 0);
-};
+}
 
 #endif // if !defined

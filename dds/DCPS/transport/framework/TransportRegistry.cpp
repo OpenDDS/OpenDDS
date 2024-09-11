@@ -429,7 +429,7 @@ TransportRegistry::release()
 
   {
     ACE_Reverse_Lock<LockType> rev_lock(lock_);
-    ACE_Guard<ACE_Reverse_Lock<LockType> > guard(rev_lock);
+    ACE_Guard<ACE_Reverse_Lock<LockType> > inner_guard(rev_lock);
     for (InstMap::iterator iter = inst_map_copy_.begin(); iter != inst_map_copy_.end(); ++iter) {
       iter->second->shutdown();
     }

@@ -977,10 +977,10 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
       // Compute the final type objects with the final type identifiers.
       for (List::const_iterator pos = scc.begin(); pos != scc.end(); ++pos) {
         generate_type_identifier(pos->type, true);
-        const OpenDDS::XTypes::TypeIdentifier& minimal_ti = hash_type_identifier_map_[pos->type].minimal;
-        const OpenDDS::XTypes::TypeIdentifier& complete_ti = hash_type_identifier_map_[pos->type].complete;
-        minimal_type_map_[minimal_ti] = type_object_map_[pos->type].minimal;
-        complete_type_map_[complete_ti] = type_object_map_[pos->type].complete;
+        const OpenDDS::XTypes::TypeIdentifier& minimal_tid = hash_type_identifier_map_[pos->type].minimal;
+        const OpenDDS::XTypes::TypeIdentifier& complete_tid = hash_type_identifier_map_[pos->type].complete;
+        minimal_type_map_[minimal_tid] = type_object_map_[pos->type].minimal;
+        complete_type_map_[complete_tid] = type_object_map_[pos->type].complete;
       }
     }
   }
@@ -1154,7 +1154,7 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
 
   for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
     AST_UnionBranch* branch = dynamic_cast<AST_UnionBranch*>(*i);
-    const TryConstructFailAction trycon = be_global->try_construct(branch);
+    const TryConstructFailAction try_con = be_global->try_construct(branch);
 
     bool is_default = false;
     for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
@@ -1167,7 +1167,7 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
 
     OpenDDS::XTypes::MinimalUnionMember minimal_member;
     minimal_member.common.member_id = be_global->get_id(branch);
-    minimal_member.common.member_flags = try_construct_to_member_flag(trycon);
+    minimal_member.common.member_flags = try_construct_to_member_flag(try_con);
 
     if (is_default) {
       minimal_member.common.member_flags |= OpenDDS::XTypes::IS_DEFAULT;
@@ -1316,7 +1316,8 @@ typeobject_generator::generate_array_type_identifier(AST_Type* type, bool force_
       minimal_ti.array_sdefn().header.equiv_kind = minimal_ek;
       minimal_ti.array_sdefn().header.element_flags = cef;
       for (ACE_CDR::ULong dim = 0; dim != n->n_dims(); ++dim) {
-        minimal_ti.array_sdefn().array_bound_seq.append(n->dims()[dim]->ev()->u.ulval);
+        minimal_ti.array_sdefn().array_bound_seq.append(
+          static_cast<OpenDDS::XTypes::SBound>(n->dims()[dim]->ev()->u.ulval));
       }
       minimal_ti.array_sdefn().element_identifier = minimal_elem_ti;
 
@@ -1403,7 +1404,7 @@ typeobject_generator::generate_sequence_type_identifier(AST_Type* type, bool for
       OpenDDS::XTypes::TypeIdentifier minimal_ti(OpenDDS::XTypes::TI_PLAIN_SEQUENCE_SMALL);
       minimal_ti.seq_sdefn().header.equiv_kind = minimal_ek;
       minimal_ti.seq_sdefn().header.element_flags = cef;
-      minimal_ti.seq_sdefn().bound = bound;
+      minimal_ti.seq_sdefn().bound = static_cast<OpenDDS::XTypes::SBound>(bound);
       minimal_ti.seq_sdefn().element_identifier = minimal_elem_ti;
 
       if (minimal_ek == OpenDDS::XTypes::EK_BOTH) {
@@ -1412,7 +1413,7 @@ typeobject_generator::generate_sequence_type_identifier(AST_Type* type, bool for
         OpenDDS::XTypes::TypeIdentifier complete_ti(OpenDDS::XTypes::TI_PLAIN_SEQUENCE_SMALL);
         complete_ti.seq_sdefn().header.equiv_kind = complete_ek;
         complete_ti.seq_sdefn().header.element_flags = cef;
-        complete_ti.seq_sdefn().bound = bound;
+        complete_ti.seq_sdefn().bound = static_cast<OpenDDS::XTypes::SBound>(bound);
         complete_ti.seq_sdefn().element_identifier = complete_elem_ti;
 
         const TypeIdentifierPair ti_pair = {minimal_ti, complete_ti};
@@ -1566,7 +1567,7 @@ typeobject_generator::generate_type_identifier(AST_Type* type, bool force_type_o
       ACE_CDR::ULong bound = n->max_size()->ev()->u.ulval;
       if (bound < 256) {
         OpenDDS::XTypes::TypeIdentifier ti(OpenDDS::XTypes::TI_STRING8_SMALL);
-        ti.string_sdefn().bound = bound;
+        ti.string_sdefn().bound = static_cast<OpenDDS::XTypes::SBound>(bound);
         fully_desc_type_identifier_map_[type] = ti;
       } else {
         OpenDDS::XTypes::TypeIdentifier ti(OpenDDS::XTypes::TI_STRING8_LARGE);
@@ -1582,7 +1583,7 @@ typeobject_generator::generate_type_identifier(AST_Type* type, bool force_type_o
       ACE_CDR::ULong bound = n->max_size()->ev()->u.ulval;
       if (bound < 256) {
         OpenDDS::XTypes::TypeIdentifier ti(OpenDDS::XTypes::TI_STRING16_SMALL);
-        ti.string_sdefn().bound = bound;
+        ti.string_sdefn().bound = static_cast<OpenDDS::XTypes::SBound>(bound);
         fully_desc_type_identifier_map_[type] = ti;
       } else {
         OpenDDS::XTypes::TypeIdentifier ti(OpenDDS::XTypes::TI_STRING16_LARGE);

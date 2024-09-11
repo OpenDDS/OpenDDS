@@ -150,7 +150,8 @@ OpenDDS::DCPS::InstanceState::empty(bool value)
   // Manage the instance state due to the DataReader becoming empty
   // here.
   //
-  if ((empty_ = value) && release_pending_) {
+  empty_ = value;
+  if (empty_ && release_pending_) {
     return release_if_empty();
   } else {
     return false;

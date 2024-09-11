@@ -112,12 +112,12 @@ TcpSubscriber::handle_input(ACE_HANDLE)
       // the remainder bytes, we need to move the remainder_ content
       // to the beginning of the underlying buffer - adjusting the
       // raw_block accordingly.
-      uintptr_t bytes_used = remainder_->wr_ptr() - remainder_->base();
+      uintptr_t bytes_used = static_cast<uintptr_t>(remainder_->wr_ptr() - remainder_->base());
       if (bytes_used > (TcpSubscriber::block_size_ / 2)) {
         raw_block->rd_ptr(raw_block->base());
         raw_block->wr_ptr(raw_block->base());
         raw_block->copy(remainder_->rd_ptr(),
-                        remainder_->wr_ptr() - remainder_->rd_ptr());
+                        static_cast<size_t>(remainder_->wr_ptr() - remainder_->rd_ptr()));
       }
     }
   }
@@ -128,7 +128,7 @@ TcpSubscriber::handle_input(ACE_HANDLE)
 
   // We need to receive as many bytes as possible into the raw block.
   uintptr_t num_bytes_left = TcpSubscriber::block_size_ -
-                            (raw_block->wr_ptr() - raw_block->base());
+    static_cast<uintptr_t>(raw_block->wr_ptr() - raw_block->base());
 
   ssize_t result;
 
@@ -166,7 +166,7 @@ TcpSubscriber::handle_input(ACE_HANDLE)
   while (1) {
     // Check if a complete header exists in the the raw_block.
     //   If not, we are done collecting pairs.
-    uintptr_t raw_size = raw_block->wr_ptr() - raw_block->rd_ptr();
+    uintptr_t raw_size = static_cast<uintptr_t>(raw_block->wr_ptr() - raw_block->rd_ptr());
 
     if (header_size > raw_size) {
       // We are done.

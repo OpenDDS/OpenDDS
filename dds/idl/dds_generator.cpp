@@ -471,8 +471,15 @@ std::string field_type_name(AST_Field* field, AST_Type* field_type)
     field_type = field->field_type();
   }
   const Classification cls = classify(field_type);
-  const std::string name = (cls & CL_STRING) ?
-    string_type(cls) : scoped(deepest_named_type(field_type)->name());
+  std::string name;
+  if (cls & CL_STRING) {
+    name = string_type(cls);
+  } else if (cls & CL_PRIMITIVE) {
+    size_t size = 0;
+    name = to_cxx_type(deepest_named_type(field_type), size);
+  } else {
+    name = scoped(deepest_named_type(field_type)->name());
+  }
   if (field) {
     FieldInfo af(*field);
     if (af.as_base_ && af.type_->anonymous()) {

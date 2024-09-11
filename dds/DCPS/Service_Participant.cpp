@@ -62,6 +62,18 @@
 extern char **environ;
 #endif
 
+#if OPENDDS_GCC
+// Embed GDB Extension
+asm(
+  ".pushsection \".debug_gdb_scripts\", \"MS\",@progbits,1\n"
+  ".byte 4\n" // 4 means this is an embedded Python script
+  ".ascii \"gdb.inlined-script\\n\"\n"
+  ".incbin \"../tools/scripts/gdbext.py\"\n"
+  ".byte 0\n"
+  ".popsection\n"
+);
+#endif
+
 namespace {
 
 void set_log_file_name(const char* fname)
@@ -126,7 +138,7 @@ String toupper(const String& x)
 {
   String retval;
   for (String::const_iterator pos = x.begin(), limit = x.end(); pos != limit; ++pos) {
-    retval.push_back(ACE_OS::ace_toupper(*pos));
+    retval.push_back(static_cast<char>(ACE_OS::ace_toupper(*pos)));
   }
   return retval;
 }
@@ -296,7 +308,7 @@ DDS::ReturnCode_t Service_Participant::shutdown()
       domainRepoMap_.clear();
 
       {
-        ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, network_config_monitor_lock_,
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, ncm_guard, network_config_monitor_lock_,
           DDS::RETCODE_OUT_OF_RESOURCES);
         if (network_config_monitor_) {
           network_config_monitor_->close();

@@ -8,6 +8,7 @@ project (OpenDDS_XML_QOS_XSC_Generation) : install, xscdefaults {
   xscflags += --cxx-export-header OpenDDS_XML_QOS_Handler_Export.h
   xscflags += --cxx-char-type ACE_TCHAR
   xscflags += --search-path "$(DDS_ROOT)/docs/schema"
+  xscflags += --cxx-header-guard OPENDDS_DCPS_QOS_XML_HANDLER_DDS_QOS_HPP
 
   custom_only = 1
 

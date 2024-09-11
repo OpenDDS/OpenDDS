@@ -236,6 +236,8 @@ Before Running the Release Script
 
         cpan -T -i Pithub Net::SFTP::Foreign Time::Piece LWP::UserAgent LWP::Protocol::https
 
+    If Pithub gives errors about https url not be supported, then it might be necessary to install `Net::SSLeay <https://metacpan.org/pod/Net::SSLeay>`__ which also requires openssl.
+
 - Choose a directory for the ``WORKSPACE`` argument.
   It doesn't have to exist but the release script must be able to create it if it doesn't.
   It should not contain files created by previous release (mocked or otherwise).
@@ -256,6 +258,37 @@ Before Running the Release Script
 
       export GITHUB_TOKEN=ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00
       export READ_THE_DOCS_TOKEN=ff00ff00ff00ff00ff00ff00ff00ff00ff00ff00
+
+Releasing from a Container
+==========================
+
+Performing the release from a container is recommended as it provides a standardized and repeatable environment.
+
+The following script demonstrates how to prepare a container to perform a release:
+
+.. code-block:: bash
+
+    podman run --rm -ti ubuntu /bin/bash
+    apt update
+    apt install zip git g++ make libssl-dev zlib1g-dev rustc cargo python3 python3-venv vim
+    cpan -T -i Pithub Net::SFTP::Foreign Time::Piece LWP::UserAgent LWP::Protocol::https Net::SSLeay
+    git config --global user.email "YOUR EMAIL"
+    git config --global user.name "YOUR NAME"
+    export GITHUB_TOKEN="YOUR GITHUB TOKEN"
+    export READ_THE_DOCS_TOKEN="YOUR READ THE DOCS TOKEN"
+    mkdir ~/.ssh
+    # Copy in your SSH private key for GitHub
+    vim ~/.ssh/id_rsa
+    # Copy in your SSH public key for GitHub
+    vim ~/.ssh/id_rsa.pub
+    chmod 400 ~/.ssh/id_rsa
+    # Create a workspace
+    mkdir workspace
+    # Clone OpenDDS
+    git clone git@github.com:OpenDDS/OpenDDS.git
+    cd OpenDDS
+
+Then, you can execute the release script or, for a micro release, check out the appropriate branch and then execute the release script.
 
 Running the Release Script
 ==========================
@@ -301,6 +334,13 @@ Here is an example of what to run for a version 1.0.0 release command assuming t
 
 Micro Releases
 --------------
+
+As stated earlier, a micro release only contains fixes.
+If a bug is found in a release version, the fix should first be applied to the development branch for the corresponding major version and the master branch if they are not the same.
+To start a micro release, cherry pick one or more fixes from the development branch to the release branch.
+See the ``--cherry-pick-prs`` option of the release script for help with this task.
+Release branches have the form ``branch-DDS-X.Y``.
+The cherry-picked commits should include the relevant news files.
 
 The release script has a ``--micro`` option which skips steps that probably are not relevant to :ref:`micro releases <release-micro-release>`.
 You must pass the ``--branch`` argument as you should be on the release branch for the minor release.

@@ -640,8 +640,8 @@ bool ts_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
 namespace java_ts_generator {
 
-  /// called directly by dds_visitor::visit_structure() if -Wb,java
-  void generate(AST_Structure* node) {
+  template <typename T>
+  void generate_common(T* node) {
     UTL_ScopedName* name = node->name();
 
     if (!(idl_global->is_dcps_type(name) || be_global->is_topic_type(node))) {
@@ -705,6 +705,15 @@ namespace java_ts_generator {
       "}\n\n";
   }
 
+  /// called by dds_visitor::visit_structure() if -Wb,java
+  void generate(AST_Structure* node) {
+    generate_common(node);
+  }
+
+  /// called by dds_visitor::visit_union() if -Wb,java
+  void generate(AST_Union* node) {
+    generate_common(node);
+  }
 }
 
 namespace face_ts_generator {

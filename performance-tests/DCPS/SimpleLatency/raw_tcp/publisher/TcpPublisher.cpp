@@ -34,7 +34,7 @@ add_stats (
     cout << static_cast<double> (ACE_UINT64_DBLCAST_ADAPTER (data))
               << endl;
 
-    stats.average = (stats.count * stats.average + data)/(stats.count + 1);
+    stats.average = static_cast<ACE_hrtime_t>((stats.count * stats.average + data)/(stats.count + 1));
     stats.min     = (stats.count == 0 || data < stats.min) ? data : stats.min;
     stats.max     = (stats.count == 0 || data > stats.max) ? data : stats.max;
     stats.sum = stats.sum + data;

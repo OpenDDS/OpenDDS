@@ -1233,6 +1233,8 @@ sub default_features {
     push(@feat, 'ipv6=1') if $opts{'ipv6'};
     my @normalized = map {/=/ ? $_ : "$_=1"} @features;
     push(@feat, @normalized) if @normalized;
+  } elsif ($opts{'java'}) {
+    push(@feat, 'java=1');
   }
   return @feat;
 }

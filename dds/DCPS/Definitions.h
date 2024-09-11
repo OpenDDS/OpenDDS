@@ -87,6 +87,12 @@
 #  define OPENDDS_HAS_EXPLICIT_INTS 0
 #endif
 
+#if defined __GNUC__ && !defined __clang__
+#  define OPENDDS_GCC 1
+#else
+#  define OPENDDS_GCC 0
+#endif
+
 #if defined __GNUC__ && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6) || defined __clang__)
 #  define OPENDDS_GCC_HAS_DIAG_PUSHPOP 1
 #else

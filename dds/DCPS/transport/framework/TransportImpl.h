@@ -109,6 +109,7 @@ public:
                                const TransportLocatorSeq& /*locators*/) { }
 
   virtual void get_last_recv_locator(const GUID_t& /*remote_id*/,
+                                     const GuidVendorId_t& /*vendor_id*/,
                                      TransportLocator& /*locators*/) {}
 
   virtual void append_transport_statistics(TransportStatisticsSequence& /*seq*/) {}

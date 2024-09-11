@@ -170,10 +170,10 @@ Serializer::ScopedAlignmentContext::ScopedAlignmentContext(Serializer& ser, size
   : ser_(ser)
   , max_align_(ser.encoding().max_align())
   , start_rpos_(ser.rpos())
-  , rblock_((max_align_ && ser.current_) ? (ptrdiff_t(ser.current_->rd_ptr()) - ser.align_rshift_) % max_align_ : 0)
+  , rblock_((max_align_ && ser.current_) ? (reinterpret_cast<size_t>(ser.current_->rd_ptr()) - ser.align_rshift_) % max_align_ : 0)
   , min_read_(min_read)
   , start_wpos_(ser.wpos())
-  , wblock_((max_align_ && ser.current_) ? (ptrdiff_t(ser.current_->wr_ptr()) - ser.align_wshift_) % max_align_ : 0)
+  , wblock_((max_align_ && ser.current_) ? (reinterpret_cast<size_t>(ser.current_->wr_ptr()) - ser.align_wshift_) % max_align_ : 0)
 {
   ser_.reset_alignment();
 }
@@ -214,7 +214,7 @@ Serializer::peek(ACE_CDR::ULong& t)
 void
 Serializer::reset_alignment()
 {
-  const ptrdiff_t align = encoding().max_align();
+  const size_t align = encoding().max_align();
   if (current_ && align) {
     align_rshift_ = offset(current_->rd_ptr(), 0, align);
     align_wshift_ = offset(current_->wr_ptr(), 0, align);
@@ -503,7 +503,7 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
       if (!(*this >> long_id) || !(*this >> long_size)) {
         return false;
       }
-      const unsigned short_size_left = short_size - 8;
+      const unsigned short_size_left = short_size - 8u;
       if (short_size_left) {
         skip(short_size_left);
       }

@@ -192,8 +192,8 @@ void RtpsDiscoveryConfig::sedp_port_mode(PortMode value)
 DDS::UInt16
 RtpsDiscoveryConfig::pb() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("PB").c_str(),
-                                                           default_port_base);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("PB").c_str(),
+                                                                                    default_port_base));
 }
 
 void
@@ -206,8 +206,8 @@ RtpsDiscoveryConfig::pb(DDS::UInt16 port_base)
 DDS::UInt16
 RtpsDiscoveryConfig::dg() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("DG").c_str(),
-                                                           default_domain_gain);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("DG").c_str(),
+                                                                                    default_domain_gain));
 }
 
 void
@@ -220,8 +220,8 @@ RtpsDiscoveryConfig::dg(DDS::UInt16 domain_gain)
 DDS::UInt16
 RtpsDiscoveryConfig::pg() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("PG").c_str(),
-                                                           default_part_gain);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("PG").c_str(),
+                                                                                    default_part_gain));
 }
 
 void
@@ -241,8 +241,8 @@ RtpsDiscoveryConfig::d0() const
     default_value = static_cast<DDS::UInt16>(std::atoi(from_env));
   }
 #endif
-  return TheServiceParticipant->config_store()->get_uint32(config_key("D0").c_str(),
-                                                           default_value);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("D0").c_str(),
+                                                                                    default_value));
 }
 
 void
@@ -255,8 +255,8 @@ RtpsDiscoveryConfig::d0(DDS::UInt16 spdp_multicast_offset)
 DDS::UInt16
 RtpsDiscoveryConfig::d1() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("D1").c_str(),
-                                                           default_spdp_unicast_offset);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("D1").c_str(),
+                                                                                    default_spdp_unicast_offset));
 }
 
 void
@@ -268,8 +268,8 @@ RtpsDiscoveryConfig::d1(DDS::UInt16 spdp_unicast_offset)
 DDS::UInt16
 RtpsDiscoveryConfig::dx() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("DX").c_str(),
-                                                           default_sedp_multicast_offset);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("DX").c_str(),
+                                                                                    default_sedp_multicast_offset));
 }
 
 void
@@ -282,8 +282,8 @@ RtpsDiscoveryConfig::dx(DDS::UInt16 sedp_multicast_offset)
 DDS::UInt16
 RtpsDiscoveryConfig::dy() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("DY").c_str(),
-                                                           default_sedp_unicast_offset);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("DY").c_str(),
+                                                                                    default_sedp_unicast_offset));
 }
 
 void
@@ -309,7 +309,7 @@ bool RtpsDiscoveryConfig::set_spdp_unicast_port(DCPS::NetworkAddress& addr, bool
 unsigned char
 RtpsDiscoveryConfig::ttl() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("TTL").c_str(), 1);
+  return static_cast<unsigned char>(TheServiceParticipant->config_store()->get_uint32(config_key("TTL").c_str(), 1));
 }
 
 void

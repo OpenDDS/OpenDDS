@@ -53,17 +53,15 @@ Dependencies
 
   :doc:`/devguide/building/dependencies` for all dependencies and details on how these are used in OpenDDS.
 
-*********************
 Dependency Management
-*********************
+=====================
 
 ACE/TAO
-=======
+-------
 
 By default, the :ghfile:`configure` script and :ref:`CMake support<cmake-building>` use released versions of ACE/TAO.
 The same versions are used for pull requests.
-The versions are documented in :ghfile:`acetao.ini`.
-Currently, the :ghfile:`configure` scripts uses a release of ACE6 and CMake uses a release of ACE7.
+The versions are listed :ref:`here <deps-ace-tao>` and defined in :ghfile:`acetao.ini`.
 
 The versions are updated by the GitHub Actions workflow in :ghfile:`.github/workflows/update-ace-tao.yml` for micro/patch releases.
 When a new version of ACE/TAO is available, the workflow creates a pull request based on the new version.
@@ -78,7 +76,7 @@ If this is not a release, then the PR would be merged after the necessary ACE/TA
 Ideally, the GitHub Actions files would be extended with variables that allow the default versions to be changed easily and a lint script would be added to prevent unintended changes.
 
 TODO
-====
+----
 
 * MPC
 * Perl
@@ -87,6 +85,19 @@ TODO
 * rapidjson
 * GoogleTest
 * vcpkg
+
+.. _dev_guidelines-debugging:
+
+*********
+Debugging
+*********
+
+Here are a list of tools resources available to OpenDDS developers:
+
+- `Wireshark <https://objectcomputing.com/resources/publications/sett/october-2021-wireshark-and-opendds>`__ is an indispensable tool for debugging network applications.
+- There is a :ghfile:`GDB extension <tools/scripts/gdbext.py>` to make working with a OpenDDS program/core file easier: .
+- :ghfile:`Notes on debugging DDS security <docs/design/security.md>`.
+- :ghfile:`inspect <tools/inspect>` and the `monitor <https://github.com/OpenDDS/opendds-monitor>`__ read samples from RTPS/UDP writers.
 
 .. _dev_guidelines-text_file_formating:
 

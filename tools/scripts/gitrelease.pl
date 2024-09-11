@@ -96,9 +96,12 @@ sub get_rtd_link {
 sub usage {
   return
     "gitrelease.pl WORKSPACE VERSION [options]\n" .
+    "gitrelease.pl WORKSPACE VERSION --upload-artifacts\n" .
     "gitrelease.pl --help | -h\n" .
     "gitrelease.pl --list-all\n" .
-    "gitrelease.pl --update-authors\n";
+    "gitrelease.pl --update-authors\n" .
+    "gitrelease.pl --update-ace-tao\n" .
+    "gitrelease.pl --cherry-pick-prs PR...\n";
 }
 
 sub arg_error {
@@ -113,10 +116,10 @@ sub help {
   return usage() .
     "\n" .
     "Positional Arguments:\n" .
-    "    WORKSPACE:           Path of intermediate files directory. If it doesn't\n" .
+    "  WORKSPACE:             Path of intermediate files directory. If it doesn't\n" .
     "                         exist, it will be created. This should a new one for\n" .
     "                         each release.\n" .
-    "    VERSION:             Release version in a.b or a.b.c notation\n" .
+    "  VERSION:               Release version in a.b or a.b.c notation\n" .
     "\n" .
     "Options:\n" .
     "  --help | -h            Print this message\n" .
@@ -126,12 +129,12 @@ sub help {
     "                         options. This doesn't require the WORKSPACE or VERSION\n" .
     "                         arguments\n" .
     "  --steps STEPS          Optional, Steps to perform, default is all\n" .
-    "                         See \"Step Expressions\" Below for what it accepts.\n" .
+    "                         See \"Step Expressions\" below for what it accepts.\n" .
     "  --remedy               Remediate problems where possible\n" .
     "  --force                Keep going if possible\n" .
     "  --remote=NAME          Valid git remote for OpenDDS (default: ${default_remote})\n" .
     "  --branch=NAME          Valid git branch for cloning (default: ${default_branch})\n" .
-    "  --github-user=NAME     User or organization name for github updates\n" .
+    "  --github-user=NAME     User or organization name for GitHub updates\n" .
     "                         (default: ${default_github_user})\n" .
     "  --download-url=URL     URL to verify SFTP uploads\n" .
     "                         (default: ${default_download_url})\n" .
@@ -142,16 +145,16 @@ sub help {
     "  --micro                Do a patch/micro level release. Requires --branch.\n" .
     "                         (default is no)\n" .
     "                         The difference from a regular release is that anything\n" .
-    "                         to do with the the the doxygen, the website, or\n" .
-    "                         creating or updating a release branch is skipped.\n" .
+    "                         to do with the Doxygen, the website, or creating or\n" .
+    "                         updating a release branch is skipped.\n" .
     "                         Run gitrelease.pl --list --micro to see the exact steps.\n" .
-    "  --next-version=VERSION What to set the verion to after release. Must be the\n" .
+    "  --next-version=VERSION What to set the version to after release. Must be the\n" .
     "                         same format as the VERSION positional argument.\n" .
     "                         (default is to increment the minor version field).\n" .
     "  --metadata=ID          What to append to the post-release version string like\n" .
     "                         X.Y.Z-ID (default: ${default_post_release_metadata})\n" .
     "  --skip-doxygen         Skip getting ACE/TAO and generating and including the\n" .
-    "                         doxygen docs\n" .
+    "                         Doxygen docs\n" .
     "  --skip-website         Skip updating the website\n" .
     "  --skip-sftp            Skip the SFTP upload\n" .
     "  --sftp-base-dir        Change to this directory before file operations.\n".
@@ -164,18 +167,19 @@ sub help {
     "                         micro series.\n" .
     "  --upload-artifacts     Check GitHub for finished workflows started during the\n" .
     "                         release. If any workflows are finished, download,\n" .
-    "                         repackage, and upload the results to Github. This\n" .
+    "                         repackage, and upload the results to GitHub. This\n" .
     "                         doesn't run any steps, but still requires the WORKSPACE\n" .
     "                         and VERSION arguments and accepts and uses other\n" .
     "                         relevant options.\n" .
-    "  --update-authors       Just update the AUTHORS files like in a release.\n" .
+    "  --update-authors       Just update the AUTHORS file like in a release.\n" .
     "                         This doesn't run any release steps and doesn't require\n" .
     "                         the WORKSPACE or VERSION arguments.\n" .
     "  --update-ace-tao       Update acetao.ini to the latest ACE/TAO releases.\n" .
     "                         This doesn't run any release steps or require the\n" .
-    "                         WORKSPACE or VERSION arguments, but does require the\n" .
-    "                         GITHUB_TOKEN environment variable\n" .
-    "  --cherry-pick-prs PR.. Use git cherry-pick from the given GitHub PRs.\n" .
+    "                         WORKSPACE or VERSION arguments.\n" .
+    "  --cherry-pick-prs PR.. git cherry-pick from the given GitHub PRs.\n" .
+    "                         This doesn't run any release steps or require the\n" .
+    "                         WORKSPACE or VERSION arguments.\n" .
     "\n" .
     "Environment Variables:\n" .
     "  GITHUB_TOKEN           GitHub token with repo access to publish release on\n" .
@@ -1297,7 +1301,7 @@ sub update_ace_tao {
       if (version_lesser($r->{version}, $ace_tao_version->{next_minor})) {
         my $version = $r->{version}->{string};
         if ($ace_tao_version->{version} ne $version) {
-          print("Will update to $ace_tao_version->{version}\n");
+          print("Will update to $version\n");
           push(@updated, $ace_tao_version);
         }
         else {
@@ -1387,7 +1391,7 @@ sub update_ace_tao {
     # Prepare Commit and PR Messages
     my $short_desc = 'Update ACE/TAO to ' . join(", ", @versions);
     my $full_desc = "$short_desc\n\n$long_desc";
-    print($full_desc);
+    print("Markdown summary for commit and PR:\n$full_desc");
     if ($ENV{GITHUB_WORKSPACE}) {
       # Write the commit/PR message only if the update branch doesn't already
       # exist or the acetao.ini on the update branch is different. We're

@@ -324,7 +324,7 @@ Config::processFile()
   }
 
   // Convert to numeric repository key value.
-  this->federationPort_ = ACE_OS::atoi(federationPortString.c_str());
+  this->federationPort_ = static_cast<short>(ACE_OS::atoi(federationPortString.c_str()));
 
   if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,

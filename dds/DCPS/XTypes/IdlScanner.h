@@ -73,10 +73,6 @@ public:
 
   IdlToken()
   : kind_(Error)
-  , signed_(false)
-  , integer_value_(0)
-  , exponent_signed_(false)
-  , exponent_value_(0)
   {}
 
   static IdlToken make_error()
@@ -121,8 +117,8 @@ public:
   {
     IdlToken token;
     token.kind_ = IntegerLiteral;
-    token.signed_ = is_signed;
-    token.integer_value_ = value;
+    token.numeric_value_.signed_ = is_signed;
+    token.numeric_value_.integer_value_ = value;
     return token;
   }
 
@@ -130,10 +126,10 @@ public:
   {
     IdlToken token;
     token.kind_ = FloatLiteral;
-    token.signed_ = is_signed;
-    token.integer_value_ = value;
-    token.exponent_signed_ = exponent_is_signed;
-    token.exponent_value_ = exponent_value;
+    token.numeric_value_.signed_ = is_signed;
+    token.numeric_value_.integer_value_ = value;
+    token.numeric_value_.exponent_signed_ = exponent_is_signed;
+    token.numeric_value_.exponent_value_ = exponent_value;
     return token;
   }
 
@@ -166,10 +162,13 @@ public:
     case BooleanLiteral:
       return boolean_value_ == other.boolean_value_;
     case IntegerLiteral:
-      return signed_ == other.signed_ && integer_value_ == other.integer_value_;
+      return numeric_value_.signed_ == other.numeric_value_.signed_
+        && numeric_value_.integer_value_ == other.numeric_value_.integer_value_;
     case FloatLiteral:
-      return signed_ == other.signed_ && integer_value_ == other.integer_value_
-        && exponent_signed_ == other.exponent_signed_ && exponent_value_ == other.exponent_value_;
+      return numeric_value_.signed_ == other.numeric_value_.signed_
+        && numeric_value_.integer_value_ == other.numeric_value_.integer_value_
+        && numeric_value_.exponent_signed_ == other.numeric_value_.exponent_signed_
+        && numeric_value_.exponent_value_ == other.numeric_value_.exponent_value_;
     case StringLiteral:
       return string_value_ == other.string_value_;
     case CharacterLiteral:
@@ -208,22 +207,22 @@ public:
 
   bool is_signed() const
   {
-    return signed_;
+    return numeric_value_.signed_;
   }
 
   ACE_UINT64 integer_value() const
   {
-    return integer_value_;
+    return numeric_value_.integer_value_;
   }
 
   bool exponent_is_signed() const
   {
-    return exponent_signed_;
+    return numeric_value_.exponent_signed_;
   }
 
   ACE_UINT64 exponent_value() const
   {
-    return exponent_value_;
+    return numeric_value_.exponent_value_;
   }
 
   const std::string& identifier_value() const
@@ -232,16 +231,18 @@ public:
   }
 
 private:
+  struct Numeric {
+    bool signed_;  // Integer or Float is signed.
+    ACE_UINT64 integer_value_; // Integer or Float.
+    bool exponent_signed_; // Exponent is signed for Float.
+    ACE_UINT64 exponent_value_; // Exponent value for Float.
+  };
+
   Kind kind_;
   union {
     bool boolean_value_;
     char character_value_;
-    struct {
-      bool signed_;  // Integer or Float is signed.
-      ACE_UINT64 integer_value_; // Integer or Float.
-      bool exponent_signed_; // Exponent is signed for Float.
-      ACE_UINT64 exponent_value_; // Exponent value for Float.
-    };
+    Numeric numeric_value_;
   };
   std::string string_value_;
   std::string identifier_value_;
@@ -549,11 +550,11 @@ private:
 
   IdlToken scan_numeric_literal()
   {
-    signed_ = false;
-    integer_value_ = 0;
-    digits_after_decimal_ = 0;
-    exponent_signed_ = false;
-    exponent_value_ = 0;
+    numeric_literal_.signed_ = false;
+    numeric_literal_.integer_value_ = 0;
+    numeric_literal_.digits_after_decimal_ = 0;
+    numeric_literal_.exponent_signed_ = false;
+    numeric_literal_.exponent_value_ = 0;
 
     if (scanner_.eoi()) {
       return IdlToken::make_error();
@@ -562,7 +563,7 @@ private:
     const char c = scanner_.peek();
     if (c == '-') {
       scanner_.match(c);
-      signed_ = true;
+      numeric_literal_.signed_ = true;
     }
 
     if (scanner_.eoi()) {
@@ -581,7 +582,7 @@ private:
       if (e >= '0' && e <= '7') {
         // Octal
         if (scan_numeric_octal()) {
-          return IdlToken::make_integer(signed_, integer_value_);
+          return IdlToken::make_integer(numeric_literal_.signed_, numeric_literal_.integer_value_);
         } else {
           return IdlToken::make_error();
         }
@@ -589,7 +590,7 @@ private:
         // Hex.
         scanner_.match(e);
         if (scan_numeric_hex()) {
-          return IdlToken::make_integer(signed_, integer_value_);
+          return IdlToken::make_integer(numeric_literal_.signed_, numeric_literal_.integer_value_);
         } else {
           return IdlToken::make_error();
         }
@@ -629,7 +630,7 @@ private:
 
     const char c = scanner_.peek();
     if (c >= '0' && c <= '7') {
-      return scanner_.match(c) && scale_integer(8, c - '0');
+      return scanner_.match(c) && scale_integer(8, static_cast<ACE_UINT64>(c - '0'));
     }
 
     return false;
@@ -643,7 +644,8 @@ private:
 
     const char c = scanner_.peek();
     if (c >= '0' && c <= '7') {
-      return scanner_.match(c) && scale_integer(8, c - '0') && scan_numeric_octal_optional_digits();
+      return scanner_.match(c) && scale_integer(8, static_cast<ACE_UINT64>(c - '0'))
+        && scan_numeric_octal_optional_digits();
     }
 
     return true;
@@ -707,7 +709,7 @@ private:
 
     const char c = scanner_.peek();
     if (c >= '0' && c <= '9') {
-      ++digits_after_decimal_;
+      ++numeric_literal_.digits_after_decimal_;
       return scanner_.match(c) && scale_integer(10, c - '0');
     } else {
       return false;
@@ -722,7 +724,7 @@ private:
 
     const char c = scanner_.peek();
     if (c >= '0' && c <= '9') {
-      ++digits_after_decimal_;
+      ++numeric_literal_.digits_after_decimal_;
       return scanner_.match(c) && scale_integer(10, c - '0') && scan_numeric_fraction_optional_digits();
     } else {
       return true;
@@ -752,7 +754,7 @@ private:
     const char c = scanner_.peek();
     if (c == '-') {
       scanner_.match(c);
-      exponent_signed_ = true;
+      numeric_literal_.exponent_signed_ = true;
     }
 
     return scan_numeric_exponent_digit() && scan_numeric_exponent_optional_digits();
@@ -790,7 +792,7 @@ private:
   {
     if (scan_numeric_integer_digit() && scan_numeric_integer_optional_digits()) {
       if (scanner_.eoi()) {
-        return IdlToken::make_integer(signed_, integer_value_);
+        return IdlToken::make_integer(numeric_literal_.signed_, numeric_literal_.integer_value_);
       }
 
       const char c = scanner_.peek();
@@ -807,7 +809,7 @@ private:
           return IdlToken::make_error();
         }
       } else {
-        return IdlToken::make_integer(signed_, integer_value_);
+        return IdlToken::make_integer(numeric_literal_.signed_, numeric_literal_.integer_value_);
       }
     } else {
       return IdlToken::make_error();
@@ -844,56 +846,59 @@ private:
 
   IdlToken make_float()
   {
-    while (digits_after_decimal_) {
-      if (exponent_signed_) {
-        ++exponent_value_;
-        if (exponent_value_ == 0) {
+    while (numeric_literal_.digits_after_decimal_) {
+      if (numeric_literal_.exponent_signed_) {
+        ++numeric_literal_.exponent_value_;
+        if (numeric_literal_.exponent_value_ == 0) {
           return IdlToken::make_error();
         }
       } else {
-        if (exponent_value_ > 0) {
-          --exponent_value_;
+        if (numeric_literal_.exponent_value_ > 0) {
+          --numeric_literal_.exponent_value_;
         } else {
-          exponent_signed_ = true;
-          exponent_value_ = 1;
+          numeric_literal_.exponent_signed_ = true;
+          numeric_literal_.exponent_value_ = 1;
         }
       }
-      --digits_after_decimal_;
+      --numeric_literal_.digits_after_decimal_;
     }
-    return IdlToken::make_float(signed_, integer_value_, exponent_signed_, exponent_value_);
+    return IdlToken::make_float(numeric_literal_.signed_, numeric_literal_.integer_value_,
+                                numeric_literal_.exponent_signed_, numeric_literal_.exponent_value_);
   }
 
   bool scale_integer(ACE_UINT64 base, ACE_UINT64 value)
   {
-    const ACE_UINT64 next = integer_value_ * base + value;
-    if (integer_value_ && next < integer_value_) {
+    const ACE_UINT64 next = numeric_literal_.integer_value_ * base + value;
+    if (numeric_literal_.integer_value_ && next < numeric_literal_.integer_value_) {
       return false;
     }
-    integer_value_ = next;
+    numeric_literal_.integer_value_ = next;
     return true;
   }
 
   bool scale_exponent(ACE_UINT64 value)
   {
-    const ACE_UINT64 next = exponent_value_ * 10 + value;
-    if (exponent_value_ && next < exponent_value_) {
+    const ACE_UINT64 next = numeric_literal_.exponent_value_ * 10 + value;
+    if (numeric_literal_.exponent_value_ && next < numeric_literal_.exponent_value_) {
       return false;
     }
-    exponent_value_ = next;
+    numeric_literal_.exponent_value_ = next;
     return true;
   }
+
+  struct Numeric {
+    bool signed_;
+    ACE_UINT64 integer_value_;
+    ACE_UINT64 digits_after_decimal_;
+    bool exponent_signed_;
+    ACE_UINT64 exponent_value_; // TODO:  Handle overflow.
+  };
 
   CharacterScanner& scanner_;
   union {
     bool boolean_literal_;
     char character_literal_;
-    struct {
-      bool signed_;
-      ACE_UINT64 integer_value_;
-      ACE_UINT64 digits_after_decimal_;
-      bool exponent_signed_;
-      ACE_UINT64 exponent_value_; // TODO:  Handle overflow.
-    };
+    Numeric numeric_literal_;
   };
   std::string string_literal_;
   std::string identifier_;

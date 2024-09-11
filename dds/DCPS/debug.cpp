@@ -72,7 +72,7 @@ namespace {
     {"info", "INFO", LogLevel::Info},
     {"debug", "DEBUG", LogLevel::Debug}
   };
-};
+}
 
 void LogLevel::set_from_string(const char* name)
 {

@@ -1852,7 +1852,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       const std::pair<typename SubscriptionInstanceMapType::iterator, bool> bpair =
         instances_.insert(typename SubscriptionInstanceMapType::value_type(handle, instance));
 
-      if (bpair.second == false) {
+      if (!bpair.second) {
         if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ")
@@ -1875,9 +1875,9 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
         }
 
         if (new_handle) {
-          const std::pair<typename InstanceMap::iterator, bool> bpair =
+          const std::pair<typename InstanceMap::iterator, bool> res =
             inst->insert(typename InstanceMap::value_type(*instance_data, handle));
-          if (!bpair.second) {
+          if (!res.second) {
             if (DCPS_debug_level > 0) {
               ACE_ERROR ((LM_ERROR,
                           ACE_TEXT("(%P|%t) ")
@@ -1908,7 +1908,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
     std::pair<typename InstanceMap::iterator, bool> bpair =
       instance_map_.insert(typename InstanceMap::value_type(*instance_data,
         handle));
-    if (bpair.second == false)
+    if (!bpair.second)
     {
       if (DCPS_debug_level > 0) {
         ACE_ERROR ((LM_ERROR,
