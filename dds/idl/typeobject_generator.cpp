@@ -1177,6 +1177,10 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
       minimal_member.common.member_flags |= OpenDDS::XTypes::IS_EXTERNAL;
     }
 
+    if (be_global->is_optional(branch)) {
+      minimal_member.common.member_flags |= OpenDDS::XTypes::IS_OPTIONAL;
+    }
+
     minimal_member.common.type_id = get_minimal_type_identifier(branch->field_type());
 
     for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
