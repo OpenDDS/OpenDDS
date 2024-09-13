@@ -542,6 +542,42 @@ void dump_bytes(const OpenDDS::XTypes::TypeObject& to)
   }
 }
 
+std::string get_type_name(const OpenDDS::XTypes::CompleteTypeObject& cto)
+{
+  switch (cto.kind) {
+  case OpenDDS::XTypes::TK_ALIAS:
+    return cto.alias_type.header.detail.type_name;
+  case OpenDDS::XTypes::TK_ANNOTATION:
+    return cto.annotation_type.header.annotation_name;
+  case OpenDDS::XTypes::TK_STRUCTURE:
+    return cto.struct_type.header.detail.type_name;
+  case OpenDDS::XTypes::TK_UNION:
+    return cto.union_type.header.detail.type_name;
+  case OpenDDS::XTypes::TK_BITSET:
+    return cto.bitset_type.header.detail.type_name;
+  case OpenDDS::XTypes::TK_SEQUENCE:
+    {
+      const OPENDDS_OPTIONAL_NS::optional<OpenDDS::XTypes::CompleteTypeDetail>& detail =
+        cto.sequence_type.header.detail;
+      return detail.has_value() ? detail->type_name : "anonymous sequence";
+    }
+  case OpenDDS::XTypes::TK_ARRAY:
+    return cto.array_type.header.detail.type_name;
+  case OpenDDS::XTypes::TK_MAP:
+    {
+      const OPENDDS_OPTIONAL_NS::optional<OpenDDS::XTypes::CompleteTypeDetail>& detail =
+        cto.map_type.header.detail;
+      return detail.has_value() ? detail->type_name : "anonymous map";
+    }
+  case OpenDDS::XTypes::TK_ENUM:
+    return cto.enumerated_type.header.detail.type_name;
+  case OpenDDS::XTypes::TK_BITMASK:
+    return cto.bitmask_type.header.detail.type_name;
+  default:
+    return "unknown type";
+  }
+}
+
 }
 
 void
@@ -645,7 +681,8 @@ typeobject_generator::gen_epilogue()
     idx = 0;
     for (OpenDDS::XTypes::TypeMap::const_iterator pos = complete_type_map_.begin();
          pos != complete_type_map_.end(); ++pos, ++idx) {
-      be_global->impl_ << "  tm[" << pos->first << "] = OPENDDS_IDL_FILE_SPECIFIC(complete_to, " << idx << ")();\n";
+      be_global->impl_ << "  tm[" << pos->first << "] = OPENDDS_IDL_FILE_SPECIFIC(complete_to, " <<
+        idx << ")(); // " << get_type_name(pos->second.complete) << "\n";
     }
 
     be_global->impl_ <<
