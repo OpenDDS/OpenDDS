@@ -365,6 +365,7 @@ class OmgSpecsDirective(SphinxDirective):
             node += section_list
 
     def run(self):
+        debug_links = 'debug-links' in self.options and self.env.app.config.gen_all_omg_spec_links
         specs_node = nodes.bullet_list()
         for spec_name, spec in self.env.app.config.omg_specs.items():
             spec_node = nodes.list_item()
@@ -375,7 +376,7 @@ class OmgSpecsDirective(SphinxDirective):
             p += nodes.literal('', spec_name)
             p += nodes.inline('', ')')
             spec_node += p
-            if 'debug-links' in self.options and not self.env.app.config.gen_all_omg_spec_links:
+            if debug_links:
                 self.spec_sections(spec, spec_node, spec['sections'])
             specs_node += spec_node
         return [specs_node]

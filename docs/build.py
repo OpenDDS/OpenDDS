@@ -118,11 +118,16 @@ class DocEnv:
 
     def do_strict(self):
         self.do(['test'], because_of='strict')
-        self.sphinx_build('dummy', '-W')
+        self.sphinx_build('dummy',
+            '--nitpicky',
+            '--fail-on-warning',
+            '--keep-going',
+            '--show-traceback',
+        )
         return None
 
     def do_linkcheck(self):
-        self.sphinx_build('linkcheck', defines=['gen_all_omg_spec_links=False'])
+        self.sphinx_build('linkcheck', defines=['gen_all_omg_spec_links=0'])
         return None
 
     def do_html(self):
