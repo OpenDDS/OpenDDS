@@ -324,7 +324,7 @@ private:
   mutable ACE_Thread_Mutex mutex_;
   const Config& config_;
 
-  typedef CommonIoStatsReportHelper<RelayStatistics> Helper;
+  using Helper = CommonIoStatsReportHelper<RelayStatistics>;
 
   RelayStatistics log_relay_statistics_;
   Helper log_helper_;

@@ -26,14 +26,15 @@ struct Identity {
 template<typename T, typename Transformer>
 class TrieNode {
 public:
-  typedef std::shared_ptr<TrieNode> NodePtr;
+  using NodePtr = std::shared_ptr<TrieNode>;
+  using Value = typename T::value_type;
 
-  static void insert(NodePtr node, const Name& name, const typename T::value_type& guid)
+  static void insert(NodePtr node, const Name& name, const Value& guid)
   {
     for (const auto& atom : name) {
       const auto iter = node->children_.find(atom);
       if (iter == node->children_.end()) {
-        NodePtr child(new TrieNode());
+        NodePtr child = std::make_shared<TrieNode>();
         node->children_[atom] = child;
         node = std::move(child);
       } else {
@@ -44,7 +45,7 @@ public:
     node->guids_.insert(guid);
   }
 
-  static void remove(NodePtr node, const Name& name, const typename T::value_type& guid)
+  static void remove(NodePtr node, const Name& name, const Value& guid)
   {
     remove(std::move(node), name.begin(), name.end(), guid);
   }
@@ -64,12 +65,11 @@ public:
   }
 
 private:
-  typedef std::unordered_map<Atom, NodePtr, AtomHash> ChildrenType;
+  using ChildrenType = std::unordered_map<Atom, NodePtr, AtomHash>;
   ChildrenType children_;
   T guids_;
 
-  static void insert_guids(NodePtr node,
-                           T& guids)
+  static void insert_guids(NodePtr node, T& guids)
   {
     std::transform(node->guids_.begin(), node->guids_.end(), std::inserter(guids, guids.begin()), Transformer());
   }
@@ -120,8 +120,7 @@ private:
     }
   }
 
-  static void lookup_globs(NodePtr node,
-                           T& guids)
+  static void lookup_globs(NodePtr node, T& guids)
   {
     for (const auto& pos : node->children_) {
       if (pos.first.kind() == Atom::GLOB) {
@@ -189,7 +188,7 @@ private:
   static void remove(NodePtr node,
                      Name::const_iterator begin,
                      Name::const_iterator end,
-                     const typename T::value_type& guid)
+                     const Value& guid)
   {
     if (begin == end) {
       node->guids_.erase(guid);
@@ -210,19 +209,20 @@ private:
 template <typename T, typename Transformer>
 class PartitionIndex {
 public:
-  typedef TrieNode<T, Transformer> TrieNodeT;
+  using TrieNodeT = TrieNode<T, Transformer>;
+  using Value = typename T::value_type;
 
   PartitionIndex()
-    : root_(new TrieNodeT())
+    : root_(std::make_shared<TrieNodeT>())
   {}
 
-  void insert(const std::string& name, const typename T::value_type& guid)
+  void insert(const std::string& name, const Value& guid)
   {
     TrieNodeT::insert(root_, Name(name), guid);
     cache_.clear();
   }
 
-  void remove(const std::string& name, const typename T::value_type& guid)
+  void remove(const std::string& name, const Value& guid)
   {
     TrieNodeT::remove(root_, Name(name), guid);
     cache_.clear();
@@ -269,7 +269,7 @@ public:
 
 private:
   typename TrieNodeT::NodePtr root_;
-  typedef std::unordered_map<std::string, T> Cache;
+  using Cache = std::unordered_map<std::string, T>;
   mutable Cache cache_;
 };
 

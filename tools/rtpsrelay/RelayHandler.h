@@ -75,7 +75,7 @@ private:
       , type(type)
     {}
   };
-  typedef std::queue<Element> OutgoingType;
+  using OutgoingType = std::queue<Element>;
   OutgoingType outgoing_;
   mutable ACE_Thread_Mutex outgoing_mutex_;
 
@@ -106,16 +106,14 @@ public:
                   const ACE_INET_Addr& application_participant_addr,
                   HandlerStatisticsReporter& stats_reporter,
                   OpenDDS::DCPS::Lockable_Message_Block_Ptr::Lock_Policy message_block_locking = OpenDDS::DCPS::Lockable_Message_Block_Ptr::Lock_Policy::No_Lock);
+
   void stop();
 
   void horizontal_handler(HorizontalHandler* horizontal_handler) { horizontal_handler_ = horizontal_handler; }
 
   void spdp_handler(SpdpHandler* spdp_handler) { spdp_handler_ = spdp_handler; }
 
-  GuidAddrSet& guid_addr_set()
-  {
-    return guid_addr_set_;
-  }
+  GuidAddrSet& guid_addr_set() { return guid_addr_set_; }
 
   void venqueue_message(const ACE_INET_Addr& addr,
                         ParticipantStatisticsReporter& stats_reporter,
@@ -237,7 +235,7 @@ public:
                                                const OpenDDS::DCPS::MonotonicTimePoint& now);
 
 private:
-  typedef std::vector<SpdpReplay> ReplayQueue;
+  using ReplayQueue = std::vector<SpdpReplay>;
   ReplayQueue replay_queue_;
   ACE_Thread_Mutex replay_queue_mutex_;
 

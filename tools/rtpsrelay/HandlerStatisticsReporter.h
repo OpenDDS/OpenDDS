@@ -143,7 +143,7 @@ private:
 
   const Config& config_;
 
-  typedef CommonIoStatsReportHelper<HandlerStatistics> Helper;
+  using Helper = CommonIoStatsReportHelper<HandlerStatistics>;
 
   HandlerStatistics log_handler_statistics_;
   Helper log_helper_;

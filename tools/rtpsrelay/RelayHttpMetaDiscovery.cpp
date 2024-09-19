@@ -17,7 +17,9 @@ const HttpStatus HTTP_OK(200, "OK");
 const HttpStatus HTTP_NOT_FOUND(404, "Not Found");
 const HttpStatus HTTP_SERVICE_UNAVAILABLE(503, "Service Unavailable");
 
-const int HANDLER_ERROR = -1, HANDLER_REMOVE = -1, HANDLER_OK = 0;
+namespace {
+  const int HANDLER_ERROR = -1, HANDLER_REMOVE = -1, HANDLER_OK = 0;
+}
 
 int HttpConnection::open(void* x)
 {
@@ -117,9 +119,9 @@ bool RelayHttpMetaDiscovery::requestIsComplete(const std::string& request,
 void RelayHttpMetaDiscovery::respond(std::stringstream& response) const
 {
   response << "HTTP/1.1 200 OK\r\n"
-           << "Content-Type: " << meta_discovery_content_type_ << "\r\n"
-           << "Content-Length: " << meta_discovery_content_.size() << "\r\n"
-           << "\r\n"
+           "Content-Type: " << meta_discovery_content_type_ << "\r\n"
+           "Content-Length: " << meta_discovery_content_.size() << "\r\n"
+           "\r\n"
            << meta_discovery_content_;
 }
 
@@ -133,9 +135,9 @@ void RelayHttpMetaDiscovery::respondStatus(std::stringstream& response,
                                            const HttpStatus& status) const
 {
   response << "HTTP/1.1 " << status.status() << " " << status.message() << "\r\n"
-           << "Content-Type: text/plain\r\n"
-           << "Content-Length: " << status.message().size() << "\r\n"
-           << "\r\n"
+           "Content-Type: text/plain\r\n"
+           "Content-Length: " << status.message().size() << "\r\n"
+           "\r\n"
            << status.message();
 }
 

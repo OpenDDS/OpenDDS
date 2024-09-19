@@ -41,67 +41,10 @@ public:
   Result insert(const OpenDDS::DCPS::GUID_t& guid,
                 const DDS::StringSeq& partitions);
 
-  void remove(const OpenDDS::DCPS::GUID_t& guid)
-  {
-    std::vector<RelayPartitions> relay_partitions;
-    {
-      ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  void remove(const OpenDDS::DCPS::GUID_t& guid);
 
-      StringSet defunct;
-
-      const auto pos = guid_to_partitions_.find(guid);
-      if (pos != guid_to_partitions_.end()) {
-        for (const auto& partition : pos->second) {
-          partition_index_.remove(partition, guid);
-          const auto pos2 = partition_to_guid_.find(partition);
-          if (pos2 != partition_to_guid_.end()) {
-            pos2->second.erase(guid);
-            if (pos2->second.empty()) {
-              defunct.insert(pos2->first);
-              partition_to_guid_.erase(pos2);
-            }
-          }
-        }
-        guid_to_partitions_.erase(pos);
-        remove_from_cache(guid);
-      }
-
-      remove_defunct(relay_partitions, defunct);
-    }
-
-    {
-      ACE_GUARD(ACE_Thread_Mutex, g, write_mutex_);
-      write_relay_partitions(relay_partitions);
-    }
-  }
-
-  // Look up the partitions for the participant from.
-  void lookup(StringSet& partitions, const OpenDDS::DCPS::GUID_t& from) const
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
-    // Match on the prefix.
-    const OpenDDS::DCPS::GUID_t prefix = make_id(from, OpenDDS::DCPS::ENTITYID_UNKNOWN);
-
-    const auto p = guid_to_partitions_cache_.find(prefix);
-    if (p != guid_to_partitions_cache_.end()) {
-      partitions.insert(p->second.begin(), p->second.end());
-      return;
-    }
-
-    auto& c = guid_to_partitions_cache_[prefix];
-
-    for (auto pos = guid_to_partitions_.lower_bound(prefix), limit = guid_to_partitions_.end();
-         pos != limit && std::memcmp(pos->first.guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) == 0; ++pos) {
-      partitions.insert(pos->second.begin(), pos->second.end());
-      c.insert(pos->second.begin(), pos->second.end());
-    }
-
-    if (!config_.allow_empty_partition()) {
-      partitions.erase("");
-      c.erase("");
-    }
-  }
+  // Look up the partitions for the participant "from".
+  void lookup(StringSet& partitions, const OpenDDS::DCPS::GUID_t& from) const;
 
   /// Add to 'guids' the GUIDs of participants that should receive messages based on 'partitions'.
   /// If 'allowed' is empty, it has no effect. Otherwise all entires added to 'guids' must be in 'allowed'.
@@ -122,38 +65,12 @@ private:
   void remove_from_cache(const OpenDDS::DCPS::GUID_t& guid)
   {
     // Invalidate the cache.
-    const OpenDDS::DCPS::GUID_t prefix = make_id(guid, OpenDDS::DCPS::ENTITYID_UNKNOWN);
-    guid_to_partitions_cache_.erase(prefix);
+    guid_to_partitions_cache_.erase(make_id(guid, OpenDDS::DCPS::ENTITYID_UNKNOWN));
   }
 
   void populate_replay(SpdpReplay& spdp_replay,
                        const OpenDDS::DCPS::GUID_t& guid,
-                       const std::vector<std::string>& to_add) const
-  {
-    // The partitions are new for this reader/writer.
-    // Check if they are new for the participant.
-
-    const OpenDDS::DCPS::GUID_t prefix = make_id(guid, OpenDDS::DCPS::ENTITYID_UNKNOWN);
-
-    for (const auto& part : to_add) {
-      const auto pos1 = partition_to_guid_.find(part);
-      if (pos1 == partition_to_guid_.end()) {
-        if (config_.allow_empty_partition() || !part.empty()) {
-          spdp_replay.partitions().push_back(part);
-        }
-        continue;
-      }
-
-      const auto pos2 = pos1->second.lower_bound(prefix);
-
-      if (pos2 == pos1->second.end() ||
-          std::memcmp(pos2->guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) != 0) {
-        if (config_.allow_empty_partition() || !part.empty()) {
-          spdp_replay.partitions().push_back(part);
-        }
-      }
-    }
-  }
+                       const std::vector<std::string>& to_add) const;
 
   void add_new(std::vector<RelayPartitions>& relay_partitions, const StringSet& partitions)
   {
@@ -245,22 +162,25 @@ private:
   const std::string address_;
   RelayPartitionsDataWriter_var relay_partitions_writer_;
 
-  typedef std::vector<StringSet> Slots;
+  using Slots = std::vector<StringSet>;
   Slots slots_;
-  typedef std::list<size_t> FreeSlotList;
+
+  using FreeSlotList = std::list<size_t>;
   FreeSlotList free_slot_list_;
-  typedef std::unordered_map<std::string, size_t> PartitionToSlot;
+
+  using PartitionToSlot = std::unordered_map<std::string, size_t>;
   PartitionToSlot partition_to_slot_;
 
   SpdpReplayDataWriter_var spdp_replay_writer_;
 
-  typedef std::map<OpenDDS::DCPS::GUID_t, StringSet, OpenDDS::DCPS::GUID_tKeyLessThan> GuidToPartitions;
+  using GuidToPartitions = std::map<OpenDDS::DCPS::GUID_t, StringSet, OpenDDS::DCPS::GUID_tKeyLessThan>;
   GuidToPartitions guid_to_partitions_;
-  typedef std::unordered_map<OpenDDS::DCPS::GUID_t, StringSet, GuidHash> GuidToPartitionsCache;
+
+  using GuidToPartitionsCache = std::unordered_map<OpenDDS::DCPS::GUID_t, StringSet, GuidHash>;
   mutable GuidToPartitionsCache guid_to_partitions_cache_;
 
-  typedef std::set<OpenDDS::DCPS::GUID_t, OpenDDS::DCPS::GUID_tKeyLessThan> OrderedGuidSet;
-  typedef std::unordered_map<std::string, OrderedGuidSet> PartitionToGuid;
+  using OrderedGuidSet = std::set<OpenDDS::DCPS::GUID_t, OpenDDS::DCPS::GUID_tKeyLessThan>;
+  using PartitionToGuid = std::unordered_map<std::string, OrderedGuidSet>;
   PartitionToGuid partition_to_guid_;
   PartitionIndex<GuidSet, GuidToParticipantGuid> partition_index_;
 

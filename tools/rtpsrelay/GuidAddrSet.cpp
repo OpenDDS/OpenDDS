@@ -7,6 +7,103 @@
 
 namespace RtpsRelay {
 
+bool AddrSetStats::upsert_address(const AddrPort& remote_address,
+                      const OpenDDS::DCPS::MonotonicTimePoint& now,
+                      const OpenDDS::DCPS::MonotonicTimePoint& expiration,
+                      size_t max_ip_addresses)
+{
+  ACE_INET_Addr addr_only(remote_address.addr);
+  addr_only.set_port_number(0);
+  auto iter = ip_to_ports.find(addr_only);
+  if (iter == ip_to_ports.end()) {
+    if (max_ip_addresses > 0 && ip_to_ports.size() == max_ip_addresses) {
+      return false;
+    }
+    iter = ip_to_ports.insert(std::make_pair(addr_only, PortSet())).first;
+  }
+
+  relay_stats_reporter_.max_ips_per_client(static_cast<uint32_t>(ip_to_ports.size()), now);
+
+  std::map<u_short, OpenDDS::DCPS::MonotonicTimePoint>* port_map = nullptr;
+  switch (remote_address.port) {
+  case SPDP:
+    port_map = &iter->second.spdp_ports;
+    break;
+  case SEDP:
+    port_map = &iter->second.sedp_ports;
+    break;
+  case DATA:
+    port_map = &iter->second.data_ports;
+    break;
+  }
+  if (!port_map) {
+    return false;
+  }
+  const auto pair = port_map->insert(std::make_pair(remote_address.addr.get_port_number(), expiration));
+  if (pair.second) {
+    return true;
+  }
+  pair.first->second = expiration;
+  return false;
+}
+
+bool AddrSetStats::remove_if_expired(const AddrPort& remote_address, const OpenDDS::DCPS::MonotonicTimePoint& now,
+                                     bool& ip_now_unused, OpenDDS::DCPS::MonotonicTimePoint& updated_expiration)
+{
+  ACE_INET_Addr addr_only(remote_address.addr);
+  addr_only.set_port_number(0);
+  const auto iter = ip_to_ports.find(addr_only);
+  if (iter == ip_to_ports.end()) {
+    return false;
+  }
+
+  std::map<u_short, OpenDDS::DCPS::MonotonicTimePoint>* port_map = nullptr;
+  switch (remote_address.port) {
+  case SPDP:
+    port_map = &iter->second.spdp_ports;
+    break;
+  case SEDP:
+    port_map = &iter->second.sedp_ports;
+    break;
+  case DATA:
+    port_map = &iter->second.data_ports;
+    break;
+  }
+
+  if (!port_map) {
+    return false;
+  }
+
+  const auto port_iter = port_map->find(remote_address.addr.get_port_number());
+  if (port_iter == port_map->end()) {
+    return false;
+  }
+
+  if (port_iter->second <= now) {
+    port_map->erase(port_iter);
+    if (iter->second.empty()) {
+      ip_to_ports.erase(addr_only);
+      ip_now_unused = true;
+    }
+    return true;
+  }
+  updated_expiration = port_iter->second;
+  return false;
+}
+
+GuidAddrSet::CreatedAddrSetStats GuidAddrSet::find_or_create(const OpenDDS::DCPS::GUID_t& guid,
+                                                             const OpenDDS::DCPS::MonotonicTimePoint& now)
+{
+  auto it = guid_addr_set_map_.find(guid);
+  const bool create = it == guid_addr_set_map_.end();
+  if (create) {
+    const auto it_bool_pair =
+      guid_addr_set_map_.insert(std::make_pair(guid, AddrSetStats(guid, now, relay_stats_reporter_)));
+    it = it_bool_pair.first;
+  }
+  return {create, it->second};
+}
+
 ParticipantStatisticsReporter&
 GuidAddrSet::record_activity(const AddrPort& remote_address,
                              const OpenDDS::DCPS::MonotonicTimePoint& now,

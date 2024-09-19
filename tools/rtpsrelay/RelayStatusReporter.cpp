@@ -15,10 +15,9 @@ RelayStatusReporter::RelayStatusReporter(const Config& config,
   if (config.publish_relay_status() != OpenDDS::DCPS::TimeDuration::zero_value) {
     this->reactor()->schedule_timer(this, 0, ACE_Time_Value(), config.publish_relay_status().value());
   }
-
 }
 
-int RelayStatusReporter::handle_timeout(const ACE_Time_Value& /*now*/, const void* /*token*/)
+int RelayStatusReporter::handle_timeout(const ACE_Time_Value&, const void*)
 {
   OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
 

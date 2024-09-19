@@ -10,11 +10,11 @@
 
 namespace RtpsRelay {
 
-typedef std::set<ACE_INET_Addr> AddressSet;
-typedef std::pair<std::string, size_t> SlotKey;
+using AddressSet = std::set<ACE_INET_Addr>;
+using SlotKey = std::pair<std::string, size_t>;
 
 struct SlotKeyHash {
-  std::size_t operator() (const SlotKey& slot_key) const
+  std::size_t operator()(const SlotKey& slot_key) const
   {
     return std::hash<std::string>()(slot_key.first) ^ std::hash<std::size_t>()(slot_key.second);
   }
@@ -65,12 +65,12 @@ public:
   }
 
 private:
-  typedef std::unordered_map<std::string, ACE_INET_Addr> NameToAddress;
-  typedef std::unordered_map<std::string, NameToAddress> RelayToAddress;
+  using NameToAddress = std::unordered_map<std::string, ACE_INET_Addr>;
+  using RelayToAddress = std::unordered_map<std::string, NameToAddress>;
   RelayToAddress relay_to_address_;
 
   struct Map {
-    Map(RelayToAddress& relay_to_address)
+    explicit Map(RelayToAddress& relay_to_address)
       : relay_to_address_(relay_to_address)
     {}
 
@@ -129,7 +129,7 @@ private:
 
     PartitionIndex<StringSet, Identity> partition_index_;
 
-    typedef std::unordered_map<SlotKey, StringSet, SlotKeyHash> RelayToPartitions;
+    using RelayToPartitions = std::unordered_map<SlotKey, StringSet, SlotKeyHash>;
     RelayToPartitions relay_to_partitions_;
   };
 
