@@ -406,7 +406,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       break;
     }
 
-    CORBA::ULong sent = bytes_sent ? 0 : 1;
+    CORBA::ULong messages_sent = bytes_sent ? 0 : 1;
 
     if (has_guid) {
       GuidAddrSet::Proxy proxy(guid_addr_set_);
@@ -423,11 +423,11 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       bool admitted = false;
       proxy.ignore_rtps(from_application_participant, src_guid, now, admitted);
       if (admitted && spdp_handler_) {
-        sent += spdp_handler_->send_to_application_participant(proxy, src_guid, now);
+        messages_sent += spdp_handler_->send_to_application_participant(proxy, src_guid, now);
       }
     }
 
-    return sent;
+    return messages_sent;
   }
 }
 
@@ -717,16 +717,14 @@ CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr& from,
   }
 
   const size_t size_after_header = mp.remaining();
-
   msg->rd_ptr(size_before_header - size_after_header);
-
-  GuidAddrSet::Proxy proxy(vertical_handler_->guid_addr_set());
-
-  CORBA::ULong sent = 0;
 
   GuidSet guids;
   const auto to_guids = relay_guids_to_set(relay_header.to_guids());
+
   guid_partition_table_.lookup(guids, relay_header.to_partitions(), to_guids);
+  GuidAddrSet::Proxy proxy(vertical_handler_->guid_addr_set());
+  CORBA::ULong sent = 0;
   for (const auto& guid : guids) {
     const auto p = proxy.find(guid);
     if (p != proxy.end()) {

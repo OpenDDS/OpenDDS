@@ -90,7 +90,7 @@ protected:
 class HorizontalHandler;
 class SpdpHandler;
 
-// Sends to and receives from peers.
+// Sends to and receives from applications.
 class VerticalHandler : public RelayHandler {
 public:
   VerticalHandler(const Config& config,

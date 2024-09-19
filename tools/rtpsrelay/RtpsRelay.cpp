@@ -49,7 +49,7 @@ namespace {
   void append(DDS::PropertySeq& props, const char* name, const std::string& value, bool propagate = false)
   {
     const DDS::Property_t prop = {name, value.c_str(), propagate};
-    const unsigned int len = props.length();
+    const auto len = props.length();
     props.length(len + 1);
     try {
       props[len] = prop;
@@ -63,7 +63,7 @@ namespace {
     std::vector<ACE_INET_Addr> nics;
     OpenDDS::DCPS::get_interface_addrs(nics);
 
-    for (auto nic : nics) {
+    for (auto& nic : nics) {
       if (nic.is_loopback()) {
         continue;
       }
@@ -269,7 +269,7 @@ int run(int argc, ACE_TCHAR* argv[])
   }
 
   if (!meta_discovery_content_path.empty()) {
-    std::ifstream in(meta_discovery_content_path.c_str());
+    std::ifstream in(meta_discovery_content_path);
     if (!in) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Could not open %C\n", meta_discovery_content_path.c_str()));
       return EXIT_FAILURE;
