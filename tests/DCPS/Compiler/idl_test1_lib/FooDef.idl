@@ -287,5 +287,5 @@ module Test_Module {
 };
 
 struct TestModuleStruct {
-  @id(1) sequence <Test_Module::A_Char100S> sequence_field;
+  @id(1) sequence<Test_Module::A_Char100S> sequence_field;
 };
