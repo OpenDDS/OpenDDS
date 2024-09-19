@@ -86,12 +86,15 @@ def get_cmakelists_from_testfile(testfile):
 dump_line_re = re.compile(r'.*?DUMP\[(?P<name>\w+)\]: (?P<value>.*)')
 
 
-def dump_ctest_info(cmake, build_path):
+def dump_ctest_info(cmake, build_path, defines):
     # This uses the scripts cmake sets up for ctest to run to get the CMakeList
     # files for the tests.
 
-    lines = subprocess.check_output([cmake, '-P', str(py_source_dir / 'dump_ctest_info.cmake')],
-        cwd=str(build_path)).decode('utf-8').splitlines()
+    cmake_cmd = [cmake]
+    for name, value in defines.items():
+        cmake_cmd.append('-D{}={}'.format(name, value))
+    cmake_cmd += ['-P', str(py_source_dir / 'dump_ctest_info.cmake')]
+    lines = subprocess.check_output(cmake_cmd, cwd=str(build_path)).decode('utf-8').splitlines()
     tests = {}
     stack = []
     for index, line in enumerate(lines):
@@ -133,7 +136,10 @@ def dump_ctest_info(cmake, build_path):
 
 def get_art_name(test_info):
     cmakelists = relative_to(test_info['cmakelists'], opendds_root).as_posix()
-    command_parts = [p for p in test_info['cmd'][1:] if p]
+    cmd = test_info['cmd']
+    if cmd == ['NOT_AVAILABLE']:
+        sys.exit('ERROR: Command from test missing, --config option is probably needed')
+    command_parts = [p for p in cmd[1:] if p]
     try:
         # Remove -ExeSubDir DIR to make the output consistent
         index = command_parts.index('-ExeSubDir')
@@ -166,6 +172,7 @@ def generate_test_results(tests, build_path, source_path, art_output, debug=Fals
     # Iterate over Test nodes
     test_xml_path = testing_path / test_run_name / 'Test.xml'
     root_node = xml.etree.ElementTree.parse(str(test_xml_path)).getroot()
+    art_names = set()
     for test_node in root_node.findall('./Testing/Test'):
         output_node = test_node.find('./Results/Measurement/Value')
         encoding = output_node.get('encoding')
@@ -203,7 +210,11 @@ def generate_test_results(tests, build_path, source_path, art_output, debug=Fals
             command=get_named_measurement(test_node, 'Command Line'),
         )
 
-        results['art_name'] = get_art_name(tests[results['cmake_name']])
+        art_name = get_art_name(tests[results['cmake_name']])
+        if art_name in art_names:
+            sys.exit('ERROR: ' + repr(art_name) + ' auto_run_test name already seen.')
+        art_names |= {art_name}
+        results['art_name'] = art_name
 
         # Exit Value isn't included if the test passed
         results['art_result'] = 0 if results['passed'] else results['exit_value']
@@ -239,12 +250,16 @@ if __name__ == "__main__":
     arg_parser.add_argument('--list', action='store_true')
     arg_parser.add_argument('--art-output', metavar='ART_OUTPUT_FILE', type=Path)
     arg_parser.add_argument('--cmake', metavar='CMAKE_CMD', default='cmake')
+    arg_parser.add_argument('--config', help='CMake build configuration used if applicable')
     args = arg_parser.parse_args()
 
     args.source_path = args.source_path.resolve()
     args.build_path = args.build_path.resolve()
 
-    tests = dump_ctest_info(args.cmake, args.build_path)
+    cmake_defines = {}
+    if args.config is not None:
+        cmake_defines['CTEST_CONFIGURATION_TYPE'] = args.config
+    tests = dump_ctest_info(args.cmake, args.build_path, cmake_defines)
 
     if args.list:
         for name, info in tests.items():
