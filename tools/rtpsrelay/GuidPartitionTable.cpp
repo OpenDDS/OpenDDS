@@ -79,14 +79,14 @@ GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_
       spdp_replay.address(address_);
       spdp_replay.guid(rtps_guid_to_relay_guid(OpenDDS::DCPS::make_id(guid, OpenDDS::DCPS::ENTITYID_PARTICIPANT)));
       if (spdp_replay_writer_->write(spdp_replay, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to write Relay Partitions\n")));
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to write Relay Partitions\n"));
       }
     }
   }
 
   if (!spdp_replay.partitions().empty() && config_.log_activity()) {
     const auto part_guid = make_id(guid, OpenDDS::DCPS::ENTITYID_PARTICIPANT);
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidPartitionTable::insert %C add partitions %C\n"), guid_to_string(part_guid).c_str(), OpenDDS::DCPS::to_json(spdp_replay).c_str()));
+    ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidPartitionTable::insert %C add partitions %C\n", guid_to_string(part_guid).c_str(), OpenDDS::DCPS::to_json(spdp_replay).c_str()));
   }
 
   return result;

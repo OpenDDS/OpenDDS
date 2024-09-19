@@ -77,7 +77,7 @@ bool RelayHttpMetaDiscovery::processRequest(ACE_SOCK_Stream& peer,
     if (config_.log_http()) {
       ACE_INET_Addr remote;
       if (peer.get_remote_addr(remote) == 0) {
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: Request from %C\n%C\n%C\n"), OpenDDS::DCPS::LogAddr(remote).c_str(), request.c_str(), r.c_str()));
+        ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Request from %C\n%C\n%C\n", OpenDDS::DCPS::LogAddr(remote).c_str(), request.c_str(), r.c_str()));
       }
     }
     return true;

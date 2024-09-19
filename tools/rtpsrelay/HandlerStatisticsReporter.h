@@ -119,7 +119,7 @@ private:
       return;
     }
 
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name_.in(), OpenDDS::DCPS::to_json(log_handler_statistics_).c_str()));
+    ACE_DEBUG((LM_INFO, "(%P|%t) STAT: %C %C\n", topic_name_.in(), OpenDDS::DCPS::to_json(log_handler_statistics_).c_str()));
 
     log_helper_.reset(log_handler_statistics_, now);
   }

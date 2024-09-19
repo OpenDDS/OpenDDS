@@ -28,7 +28,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
       relay_stats_reporter_.remote_map_size(static_cast<uint32_t>(remote_map_.size()), now);
     } else if (result.first->second != src_guid) {
       if (config_.log_activity()) {
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity change detected %C -> %C\n"),
+        ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::record_activity change detected %C -> %C\n",
                    guid_to_string(result.first->second).c_str(),
                    guid_to_string(src_guid).c_str()));
       }
@@ -55,8 +55,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
 
   if (created) {
     if (config_.log_activity()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity ")
-                 ACE_TEXT("%C added 0.000 s into session\n"),
+      ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::record_activity %C added 0.000 s into session\n",
                  guid_to_string(src_guid).c_str()));
     }
     relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
@@ -220,8 +219,7 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
     pos->second.allow_rtps = true;
 
     if (config_.log_activity()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::ignore_rtps ")
-                 ACE_TEXT("%C was admitted %C into session\n"),
+      ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::ignore_rtps %C was admitted %C into session\n",
                  guid_to_string(guid).c_str(),
                  pos->second.get_session_time(now).sec_str().c_str()));
     }
@@ -248,8 +246,7 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
   admitted = true;
 
   if (config_.log_activity()) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::ignore_rtps ")
-               ACE_TEXT("%C was admitted %C into session\n"),
+    ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::ignore_rtps %C was admitted %C into session\n",
                guid_to_string(guid).c_str(),
                pos->second.get_session_time(now).sec_str().c_str()));
   }
@@ -307,8 +304,7 @@ void GuidAddrSet::reject_address(const ACE_INET_Addr& addr,
   auto result = rejected_address_map_.insert(std::make_pair(OpenDDS::DCPS::NetworkAddress(addr), expiration));
   if (result.second) {
     if (config_.log_activity()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::reject_address ")
-                 "Adding %C to list of rejected addresses.\n",
+      ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::reject_address Adding %C to list of rejected addresses.\n",
                  OpenDDS::DCPS::LogAddr(addr).c_str()));
     }
     rejected_address_expiration_queue_.push_back(result.first);

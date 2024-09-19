@@ -286,7 +286,7 @@ private:
       return;
     }
 
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name_.in(), OpenDDS::DCPS::to_json(log_relay_statistics_).c_str()));
+    ACE_DEBUG((LM_INFO, "(%P|%t) STAT: %C %C\n", topic_name_.in(), OpenDDS::DCPS::to_json(log_relay_statistics_).c_str()));
 
     log_helper_.reset(log_relay_statistics_, now);
     log_relay_statistics_.new_address_count(0);

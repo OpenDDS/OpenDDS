@@ -196,7 +196,7 @@ private:
   {
     for (const auto& relay_partition : relay_partitions) {
       if (relay_partitions_writer_->write(relay_partition, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to write Relay Partitions\n")));
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to write Relay Partitions\n"));
       }
     }
   }
