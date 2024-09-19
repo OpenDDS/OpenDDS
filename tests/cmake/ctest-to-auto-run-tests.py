@@ -138,7 +138,7 @@ def get_art_name(test_info):
     cmakelists = relative_to(test_info['cmakelists'], opendds_root).as_posix()
     cmd = test_info['cmd']
     if cmd == ['NOT_AVAILABLE']:
-        sys.exit('ERROR: --config probably option is needed')
+        sys.exit('ERROR: Command from test missing, --config option is probably needed')
     command_parts = [p for p in cmd[1:] if p]
     try:
         # Remove -ExeSubDir DIR to make the output consistent
