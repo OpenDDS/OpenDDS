@@ -17,8 +17,6 @@ namespace RtpsRelay {
 // FUTURE: Make this configurable, adaptive, etc.
 const size_t MAX_SLOT_SIZE = 64;
 
-class GuidAddrSet;
-
 class GuidPartitionTable {
 public:
   enum Result {

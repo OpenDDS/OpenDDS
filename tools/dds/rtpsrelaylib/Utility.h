@@ -187,7 +187,7 @@ struct GuidHash {
       (static_cast<std::size_t>(guid.entityId.entityKind) << 0);
   }
 };
-typedef std::unordered_set<OpenDDS::DCPS::GUID_t, GuidHash> GuidSet;
+using GuidSet = std::unordered_set<OpenDDS::DCPS::GUID_t, GuidHash>;
 
 inline GuidSet relay_guids_to_set(const RtpsRelay::GuidSequence& seq)
 {
