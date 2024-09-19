@@ -381,7 +381,7 @@ foreach my $test_lst (@file_list) {
 }
 
 if ($cmake) {
-    my $fake_name = "Run CMake Tests";
+    my $fake_name = "tests/cmake/CMakeLists.txt";
     if (!$list_tests) {
         mark_test_start($fake_name);
     }
@@ -411,9 +411,12 @@ if ($cmake) {
             push(@run_test_cmd, "--build-config", $cmake_build_cfg);
         }
         run_test($fake_name, \@run_test_cmd, verbose => 1);
-        $process_name = "Process CMake Test Results";
+        $process_name = "tests/cmake/ctest-to-auto-run-tests.py";
         $process_func = \&run_test;
         push(@process_cmd, '--art-output', $art_output);
+        if (defined($cmake_build_cfg)) {
+            push(@process_cmd, '--config', $cmake_build_cfg);
+        }
         mark_test_start($process_name);
     }
     $process_func->($process_name, \@process_cmd);
