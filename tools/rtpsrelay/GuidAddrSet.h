@@ -246,29 +246,8 @@ public:
     , relay_participant_status_reporter_(relay_participant_status_reporter)
     , relay_stats_reporter_(relay_stats_reporter)
     , relay_thread_monitor_(relay_thread_monitor)
-    , spdp_vertical_handler_(0)
-    , sedp_vertical_handler_(0)
-    , data_vertical_handler_(0)
     , participant_admission_limit_reached_(false)
   {}
-
-  void spdp_vertical_handler(RelayHandler* spdp_vertical_handler)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    spdp_vertical_handler_ = spdp_vertical_handler;
-  }
-
-  void sedp_vertical_handler(RelayHandler* sedp_vertical_handler)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    sedp_vertical_handler_ = sedp_vertical_handler;
-  }
-
-  void data_vertical_handler(RelayHandler* data_vertical_handler)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    data_vertical_handler_ = data_vertical_handler;
-  }
 
   using CreatedAddrSetStats = std::pair<bool, AddrSetStats&>;
 

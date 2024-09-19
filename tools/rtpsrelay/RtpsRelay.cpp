@@ -772,10 +772,6 @@ int run(int argc, ACE_TCHAR* argv[])
   sedp_vertical_handler.horizontal_handler(&sedp_horizontal_handler);
   data_vertical_handler.horizontal_handler(&data_horizontal_handler);
 
-  guid_addr_set.spdp_vertical_handler(&spdp_vertical_handler);
-  guid_addr_set.sedp_vertical_handler(&sedp_vertical_handler);
-  guid_addr_set.data_vertical_handler(&data_vertical_handler);
-
   spdp_vertical_handler.spdp_handler(&spdp_vertical_handler);
   sedp_vertical_handler.spdp_handler(&spdp_vertical_handler);
 
