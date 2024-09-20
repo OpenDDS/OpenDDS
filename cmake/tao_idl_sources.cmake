@@ -85,11 +85,10 @@ function(_opendds_get_generated_output target file)
       set(msg_type FATAL_ERROR)
       if(arg_FAIL_VAR)
         set(${arg_FAIL_VAR} TRUE PARENT_SCOPE)
+        set(msg_type SEND_ERROR)
       endif()
       if(arg_EXPECT_FAIL)
         return()
-      else()
-        set(msg_type SEND_ERROR)
       endif()
       message(${msg_type}
         "  This file:\n"
