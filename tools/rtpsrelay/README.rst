@@ -3,7 +3,7 @@ RTPS Relay
 ==========
 
 Note: More up-to-date information about the RtpsRelay is in the OpenDDS Developer's Guide
-see docs/devguide/internet_enabled_rtps.rst
+see ``docs/devguide/internet_enabled_rtps.rst``
 
 Motivation
 ==========

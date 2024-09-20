@@ -15,8 +15,11 @@
 namespace RtpsRelay {
 
 struct PortSet {
-  std::map<u_short, OpenDDS::DCPS::MonotonicTimePoint> spdp_ports, sedp_ports, data_ports;
+  using PortToExpirationMap = std::map<u_short, OpenDDS::DCPS::MonotonicTimePoint>;
+  PortToExpirationMap spdp_ports, sedp_ports, data_ports;
   bool empty() const { return spdp_ports.empty() && sedp_ports.empty() && data_ports.empty(); }
+  PortToExpirationMap* select(Port p);
+  const PortToExpirationMap* select(Port p) const;
 };
 
 struct InetAddrHash {
@@ -58,18 +61,7 @@ struct AddrSetStats {
   {
     for (const auto& ip : ip_to_ports) {
       ACE_INET_Addr a = ip.first;
-      const std::map<u_short, OpenDDS::DCPS::MonotonicTimePoint>* port_map = nullptr;
-      switch (port) {
-      case SPDP:
-        port_map = &ip.second.spdp_ports;
-        break;
-      case SEDP:
-        port_map = &ip.second.sedp_ports;
-        break;
-      case DATA:
-        port_map = &ip.second.data_ports;
-        break;
-      }
+      const auto port_map = ip.second.select(port);
       if (port_map) {
         for (const auto& p : *port_map) {
           a.set_port_number(p.first);

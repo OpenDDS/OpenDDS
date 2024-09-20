@@ -128,7 +128,7 @@ void GuidPartitionTable::lookup(StringSet& partitions, const OpenDDS::DCPS::GUID
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
   // Match on the prefix.
-  const auto prefix = make_id(from, OpenDDS::DCPS::ENTITYID_UNKNOWN);
+  const auto prefix = make_unknown_guid(from);
 
   const auto p = guid_to_partitions_cache_.find(prefix);
   if (p != guid_to_partitions_cache_.end()) {
@@ -157,7 +157,7 @@ void GuidPartitionTable::populate_replay(SpdpReplay& spdp_replay,
   // The partitions are new for this reader/writer.
   // Check if they are new for the participant.
 
-  const auto prefix = make_id(guid, OpenDDS::DCPS::ENTITYID_UNKNOWN);
+  const auto prefix = make_unknown_guid(guid);
 
   for (const auto& part : to_add) {
     const auto pos1 = partition_to_guid_.find(part);
@@ -170,8 +170,7 @@ void GuidPartitionTable::populate_replay(SpdpReplay& spdp_replay,
 
     const auto pos2 = pos1->second.lower_bound(prefix);
 
-    if (pos2 == pos1->second.end() ||
-        std::memcmp(pos2->guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) != 0) {
+    if (pos2 == pos1->second.end() || equal_guid_prefixes(*pos2, prefix)) {
       if (config_.allow_empty_partition() || !part.empty()) {
         spdp_replay.partitions().push_back(part);
       }

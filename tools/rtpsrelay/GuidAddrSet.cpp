@@ -7,10 +7,36 @@
 
 namespace RtpsRelay {
 
+PortSet::PortToExpirationMap* PortSet::select(Port p)
+{
+  switch (p) {
+  case SPDP:
+    return &spdp_ports;
+  case SEDP:
+    return &sedp_ports;
+  case DATA:
+    return &data_ports;
+  }
+  return nullptr;
+}
+
+const PortSet::PortToExpirationMap* PortSet::select(Port p) const
+{
+  switch (p) {
+  case SPDP:
+    return &spdp_ports;
+  case SEDP:
+    return &sedp_ports;
+  case DATA:
+    return &data_ports;
+  }
+  return nullptr;
+}
+
 bool AddrSetStats::upsert_address(const AddrPort& remote_address,
-                      const OpenDDS::DCPS::MonotonicTimePoint& now,
-                      const OpenDDS::DCPS::MonotonicTimePoint& expiration,
-                      size_t max_ip_addresses)
+                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
+                                  const OpenDDS::DCPS::MonotonicTimePoint& expiration,
+                                  size_t max_ip_addresses)
 {
   ACE_INET_Addr addr_only(remote_address.addr);
   addr_only.set_port_number(0);
@@ -24,21 +50,11 @@ bool AddrSetStats::upsert_address(const AddrPort& remote_address,
 
   relay_stats_reporter_.max_ips_per_client(static_cast<uint32_t>(ip_to_ports.size()), now);
 
-  std::map<u_short, OpenDDS::DCPS::MonotonicTimePoint>* port_map = nullptr;
-  switch (remote_address.port) {
-  case SPDP:
-    port_map = &iter->second.spdp_ports;
-    break;
-  case SEDP:
-    port_map = &iter->second.sedp_ports;
-    break;
-  case DATA:
-    port_map = &iter->second.data_ports;
-    break;
-  }
+  const auto port_map = iter->second.select(remote_address.port);
   if (!port_map) {
     return false;
   }
+
   const auto pair = port_map->insert(std::make_pair(remote_address.addr.get_port_number(), expiration));
   if (pair.second) {
     return true;
@@ -57,19 +73,7 @@ bool AddrSetStats::remove_if_expired(const AddrPort& remote_address, const OpenD
     return false;
   }
 
-  std::map<u_short, OpenDDS::DCPS::MonotonicTimePoint>* port_map = nullptr;
-  switch (remote_address.port) {
-  case SPDP:
-    port_map = &iter->second.spdp_ports;
-    break;
-  case SEDP:
-    port_map = &iter->second.sedp_ports;
-    break;
-  case DATA:
-    port_map = &iter->second.data_ports;
-    break;
-  }
-
+  const auto port_map = iter->second.select(remote_address.port);
   if (!port_map) {
     return false;
   }
