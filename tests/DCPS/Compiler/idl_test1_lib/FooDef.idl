@@ -283,9 +283,11 @@ union B88 switch (long) {
 // Regression check that module and struct names containing '_' compile
 // correctly. https://github.com/OpenDDS/OpenDDS/pull/4800.
 module Test_Module {
-    typedef sequence<char, 100> A_Char100S;
+  typedef sequence<char, 100> A_Char100S;
 };
 
+typedef sequence<Test_Module::A_Char100S> Sequence_Type;
+
 struct TestModuleStruct {
-  @id(1) sequence<Test_Module::A_Char100S> sequence_field;
+  @id(1) Sequence_Type sequence_field;
 };
