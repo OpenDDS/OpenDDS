@@ -26,7 +26,7 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
 
   DDS::SubscriptionBuiltinTopicDataDataReader_var dr = DDS::SubscriptionBuiltinTopicDataDataReader::_narrow(reader);
   if (!dr) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SubscriptionListener::on_data_available failed to narrow SubscriptionBuiltinTopicDataDataReader\n")));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: SubscriptionListener::on_data_available failed to narrow SubscriptionBuiltinTopicDataDataReader\n"));
     return;
   }
 
@@ -42,7 +42,7 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
     return;
   }
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SubscriptionListener::on_data_available failed to take %C\n"), OpenDDS::DCPS::retcode_to_string(ret)));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: SubscriptionListener::on_data_available failed to take %C\n", OpenDDS::DCPS::retcode_to_string(ret)));
     return;
   }
 
