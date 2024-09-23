@@ -26,7 +26,7 @@ void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
 
   DDS::PublicationBuiltinTopicDataDataReader_var dr = DDS::PublicationBuiltinTopicDataDataReader::_narrow(reader);
   if (!dr) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: PublicationListener::on_data_available failed to narrow PublicationBuiltinTopicDataDataReader\n")));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: PublicationListener::on_data_available failed to narrow PublicationBuiltinTopicDataDataReader\n"));
     return;
   }
 
@@ -42,7 +42,7 @@ void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
     return;
   }
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: PublicationListener::on_data_available failed to take %C\n"), OpenDDS::DCPS::retcode_to_string(ret)));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: PublicationListener::on_data_available failed to take %C\n", OpenDDS::DCPS::retcode_to_string(ret)));
     return;
   }
 
@@ -69,7 +69,7 @@ void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
             stats_reporter_.local_writers(++count_, OpenDDS::DCPS::MonotonicTimePoint::now());
           } else if (r == GuidPartitionTable::UPDATED) {
             if (config_.log_discovery()) {
-              ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: PublicationListener::on_data_available update local writer %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
+              ACE_DEBUG((LM_INFO, "(%P|%t) INFO: PublicationListener::on_data_available update local writer %C %C\n", guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
             }
           }
         }
