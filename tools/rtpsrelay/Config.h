@@ -36,6 +36,7 @@ public:
     , max_ips_per_client_(0)
     , admission_max_participants_high_water_(0)
     , admission_max_participants_low_water_(0)
+    , handler_threads_(1)
   {}
 
   void relay_id(const std::string& value)
@@ -338,6 +339,16 @@ public:
     return admission_max_participants_low_water_;
   }
 
+  void handler_threads(size_t count)
+  {
+    handler_threads_ = count;
+  }
+
+  size_t handler_threads() const
+  {
+    return handler_threads_;
+  }
+
 private:
   std::string relay_id_;
   OpenDDS::DCPS::GUID_t application_participant_guid_;
@@ -369,6 +380,7 @@ private:
   OpenDDS::DCPS::TimeDuration rejected_address_duration_;
   size_t admission_max_participants_high_water_;
   size_t admission_max_participants_low_water_;
+  size_t handler_threads_;
 };
 
 }
