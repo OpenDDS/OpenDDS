@@ -336,9 +336,6 @@ private:
   RelayParticipantStatusReporter& relay_participant_status_reporter_;
   RelayStatisticsReporter& relay_stats_reporter_;
   RelayThreadMonitor& relay_thread_monitor_;
-  RelayHandler* spdp_vertical_handler_;
-  RelayHandler* sedp_vertical_handler_;
-  RelayHandler* data_vertical_handler_;
   GuidAddrSetMap guid_addr_set_map_;
 
   using RemoteMap = std::unordered_map<Remote, OpenDDS::DCPS::GUID_t, RemoteHash>;
