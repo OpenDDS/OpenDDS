@@ -331,6 +331,10 @@ The command-line options for the RtpsRelay:
   Amount of time to reject messages from client participants that show suspicious behavior, e.g., those that send messages from the RtpsRelay back to the RtpsRelay.
   The default is 0 (disabled).
 
+.. option:: -HandlerThreads <threads>
+
+  Use a thread pool with this many threads (default 1) to handle input/output/timer events.
+
 .. _internet_enabled_rtps--deployment-considerations:
 
 Deployment Considerations
