@@ -192,6 +192,7 @@ public:
 
   void pre_clear()
   {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     pre_seq_.clear();
   }
 

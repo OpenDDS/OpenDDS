@@ -943,9 +943,10 @@ RtpsUdpDataLink::RtpsWriter::pre_stop_helper(TqeVector& to_drop, bool true_stop)
     }
   }
 
+  g2.release();
+
   send_buff_->pre_clear();
 
-  g2.release();
   g.release();
 
   if (stopping_) {
