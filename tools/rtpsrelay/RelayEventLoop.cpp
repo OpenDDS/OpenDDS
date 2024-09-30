@@ -54,7 +54,7 @@ int ThreadPool::run()
 {
   RunThreadMonitor rtm{thread_status_manager_, monitor_};
   if (rtm.status_ != EXIT_SUCCESS) {
-    ACE_ERROR((LM_ERROR, "(%P:%t) ERROR: RtpsRelay::ThreadPool::run - failed to start Relay Thread Monitor\n"));
+    ACE_ERROR((LM_ERROR, "(%P:%t) ERROR: RtpsRelay::ThreadPool::run: failed to start Relay Thread Monitor\n"));
     return EXIT_FAILURE;
   }
 
@@ -65,7 +65,7 @@ int ThreadPool::run()
 
   const auto status = activate(THR_NEW_LWP | THR_JOINABLE | THR_INHERIT_SCHED, static_cast<int>(threads));
   if (status != EXIT_SUCCESS) {
-    ACE_ERROR((LM_ERROR, "(%P:%t) ERROR: RtpsRelay::ThreadPool::run - failed to start thread pool: %m\n"));
+    ACE_ERROR((LM_ERROR, "(%P:%t) ERROR: RtpsRelay::ThreadPool::run: failed to start thread pool: %m\n"));
     return status;
   }
 
