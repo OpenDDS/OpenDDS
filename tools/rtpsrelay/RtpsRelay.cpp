@@ -10,6 +10,7 @@
 #include "ParticipantStatisticsReporter.h"
 #include "PublicationListener.h"
 #include "RelayAddressListener.h"
+#include "RelayEventLoop.h"
 #include "RelayHandler.h"
 #include "RelayHttpMetaDiscovery.h"
 #include "RelayPartitionTable.h"
@@ -38,7 +39,6 @@
 #include <ace/Arg_Shifter.h>
 #include <ace/Argv_Type_Converter.h>
 #include <ace/Reactor.h>
-#include <ace/Select_Reactor.h>
 
 #include <cstdlib>
 #include <algorithm>
@@ -231,6 +231,9 @@ int run(int argc, ACE_TCHAR* argv[])
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-RunTime"))) {
       config.run_time(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-HandlerThreads"))) {
+      config.handler_threads(std::atoi(arg));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-MaxIpsPerClient"))) {
       config.max_ips_per_client(ACE_OS::atoi(arg));
@@ -741,7 +744,7 @@ int run(int argc, ACE_TCHAR* argv[])
   RelayParticipantStatusReporter relay_participant_status_reporter(config, relay_participant_status_writer, relay_statistics_reporter);
   RelayThreadMonitor* relay_thread_monitor = new RelayThreadMonitor(config);
   GuidAddrSet guid_addr_set(config, rtps_discovery, relay_participant_status_reporter, relay_statistics_reporter, *relay_thread_monitor);
-  ACE_Reactor reactor_(new ACE_Select_Reactor, true);
+  ACE_Reactor reactor_(RelayEventLoop::make_reactor_impl(config), true);
   const auto reactor = &reactor_;
   GuidPartitionTable guid_partition_table(config, spdp_horizontal_addr, relay_partitions_writer, spdp_replay_writer);
   RelayPartitionTable relay_partition_table;
@@ -965,37 +968,9 @@ int run(int argc, ACE_TCHAR* argv[])
   }
   ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Meta Discovery listening on %C\n", OpenDDS::DCPS::LogAddr(meta_discovery_addr).c_str()));
 
-  const bool has_run_time = !config.run_time().is_zero();
-  const OpenDDS::DCPS::MonotonicTimePoint end_time = OpenDDS::DCPS::MonotonicTimePoint::now() + config.run_time();
-
-  OpenDDS::DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-  if (thread_status_manager.update_thread_status()) {
-    if (relay_thread_monitor->start() == -1) {
-      ACE_ERROR((LM_ERROR, "(%P:%t) ERROR: failed to start Relay Thread Monitor\n"));
-      return EXIT_FAILURE;
-    }
-
-    OpenDDS::DCPS::ThreadStatusManager::Start thread_status_monitoring_active(thread_status_manager, "RtpsRelay Main");
-
-    while (!has_run_time || OpenDDS::DCPS::MonotonicTimePoint::now() < end_time) {
-      ACE_Time_Value t = thread_status_manager.thread_status_interval().value();
-      OpenDDS::DCPS::ThreadStatusManager::Sleeper s(thread_status_manager);
-      if (reactor->run_reactor_event_loop(t, 0) != 0) {
-        break;
-      }
-    }
-
-    relay_thread_monitor->stop();
-  } else if (has_run_time) {
-    while (OpenDDS::DCPS::MonotonicTimePoint::now() < end_time) {
-      ACE_Time_Value t = (end_time - OpenDDS::DCPS::MonotonicTimePoint::now()).value();
-      if (reactor->run_reactor_event_loop(t, 0) != 0) {
-        break;
-      }
-    }
-
-  } else {
-    reactor->run_reactor_event_loop();
+  const auto status = RelayEventLoop::run(config, *reactor, *relay_thread_monitor);
+  if (status != EXIT_SUCCESS) {
+    return status;
   }
 
   application_participant->delete_contained_entities();
