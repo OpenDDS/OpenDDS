@@ -1,14 +1,14 @@
 #include "ReadAction.h"
 
-#include "MemFunHandler.h"
+#include "MemFunEvent.h"
 #include "util.h"
 
 #include "dds/DCPS/WaitSet.h"
 
 namespace Bench {
 
-ReadAction::ReadAction(ACE_Proactor& proactor)
-: proactor_(proactor)
+ReadAction::ReadAction(OpenDDS::DCPS::EventDispatcher_rch event_dispatcher)
+: event_dispatcher_(event_dispatcher)
 , started_(false)
 , stopped_(false)
 , stop_condition_(new DDS::GuardCondition())
@@ -65,7 +65,7 @@ bool ReadAction::init(const ActionConfig& config, ActionReport& report, Builder:
     read_period_ = ACE_Time_Value(read_period_prop->value.time_prop().sec, static_cast<suseconds_t>(read_period_prop->value.time_prop().nsec / 1000u));
   }
 
-  handler_.reset(new MemFunHandler<ReadAction>(&ReadAction::do_read, *this));
+  event_ = OpenDDS::DCPS::make_rch<MemFunEvent<ReadAction> >(shared_from_this(), &ReadAction::do_read);
 
   return true;
 }
@@ -79,7 +79,7 @@ void ReadAction::test_start()
     ws_ = new DDS::WaitSet();
     ws_->attach_condition(stop_condition_);
     ws_->attach_condition(read_condition_);
-    proactor_.schedule_timer(*handler_, nullptr, ZERO_TIME, ZERO_TIME);
+    event_dispatcher_->dispatch(event_);
   }
 }
 
@@ -92,7 +92,7 @@ void ReadAction::action_stop()
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
     stopped_ = true;
-    proactor_.cancel_timer(*handler_);
+    event_dispatcher_->cancel(event_);
     ws_->detach_condition(stop_condition_);
     ws_->detach_condition(read_condition_);
     data_dr_->delete_readcondition(read_condition_);
@@ -126,7 +126,7 @@ void ReadAction::do_read()
       }
     }
 
-    proactor_.schedule_timer(*handler_, nullptr, ZERO_TIME, ZERO_TIME);
+    event_dispatcher_->dispatch(event_);
   }
 }
 

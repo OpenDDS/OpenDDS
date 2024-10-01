@@ -7,13 +7,13 @@
 
 #include "dds/DCPS/GuardCondition.h"
 
-#include "ace/Proactor.h"
+#include "dds/DCPS/EventDispatcher.h"
 
 namespace Bench {
 
-class ReadAction : public Action {
+class ReadAction : public virtual Action, public std::enable_shared_from_this<ReadAction> {
 public:
-  explicit ReadAction(ACE_Proactor& proactor);
+  explicit ReadAction(OpenDDS::DCPS::EventDispatcher_rch event_dispatcher);
 
   bool init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers,
     Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map) override;
@@ -26,7 +26,7 @@ public:
 
 protected:
   std::mutex mutex_;
-  ACE_Proactor& proactor_;
+  OpenDDS::DCPS::EventDispatcher_rch event_dispatcher_;
   bool started_, stopped_;
   DDS::GuardCondition_var stop_condition_;
   DDS::ReadCondition_var read_condition_;
@@ -34,7 +34,7 @@ protected:
   DDS::WaitSet_var ws_;
   WorkerDataReaderListener* dr_listener_;
   ACE_Time_Value read_period_;
-  std::shared_ptr<ACE_Handler> handler_;
+  OpenDDS::DCPS::EventBase_rch event_;
 };
 
 }

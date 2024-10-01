@@ -1,17 +1,16 @@
 #include "WriteAction.h"
 
-#include "MemFunHandler.h"
+#include "MemFunEvent.h"
 #include "util.h"
 
 namespace Bench {
 
-WriteAction::WriteAction(ACE_Proactor& proactor)
-: proactor_(proactor)
+WriteAction::WriteAction(OpenDDS::DCPS::EventDispatcher_rch event_dispatcher)
+: event_dispatcher_(event_dispatcher)
 , started_(false)
 , stopped_(false)
-, manual_rescheduling_(false)
+, relative_scheduling_(false)
 , write_period_(1, 0)
-, last_scheduled_time_(0, 0)
 , max_count_(0)
 , new_key_count_(0)
 , new_key_probability_(0)
@@ -74,11 +73,11 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
   new_key_count_ = new_key_count;
 
   bool relative_scheduling = false;
-  auto manual_rescheduling_prop = get_property(config.params, "relative_scheduling", Builder::PVK_ULL);
-  if (manual_rescheduling_prop) {
-    relative_scheduling = manual_rescheduling_prop->value.ull_prop() != 0u;
+  auto relative_scheduling_prop = get_property(config.params, "relative_scheduling", Builder::PVK_ULL);
+  if (relative_scheduling_prop) {
+    relative_scheduling = relative_scheduling_prop->value.ull_prop() != 0u;
   }
-  manual_rescheduling_ = relative_scheduling;
+  relative_scheduling_ = relative_scheduling;
 
   double new_key_probability = 0.0;
   auto new_key_probability_prop = get_property(config.params, "new_key_probability", Builder::PVK_DOUBLE);
@@ -159,7 +158,7 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
 
   data_.filter_class = static_cast<CORBA::ULong>(filter_class_start_value_);
 
-  handler_.reset(new MemFunHandler<WriteAction>(&WriteAction::do_write, *this));
+  event_ = OpenDDS::DCPS::make_rch<MemFunEvent<WriteAction> >(shared_from_this(), &WriteAction::do_write);
 
   return true;
 }
@@ -170,13 +169,9 @@ void WriteAction::test_start()
   if (!started_) {
     instance_ = data_dw_->register_instance(data_);
     started_ = true;
-    if (manual_rescheduling_) {
-      const auto now = Builder::get_hr_time();
-      last_scheduled_time_ = ACE_Time_Value(now.sec, static_cast<suseconds_t>(now.nsec / 1000u));
-      proactor_.schedule_timer(*handler_, nullptr, ZERO_TIME, ZERO_TIME);
-    } else {
-      proactor_.schedule_timer(*handler_, nullptr, ZERO_TIME, write_period_);
-    }
+
+    last_scheduled_time_ = OpenDDS::DCPS::MonotonicTimePoint::now();
+    event_dispatcher_->dispatch(event_);
   }
 }
 
@@ -185,7 +180,7 @@ void WriteAction::test_stop()
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
     stopped_ = true;
-    proactor_.cancel_timer(*handler_);
+    event_dispatcher_->cancel(event_);
     data_dw_->wait_for_acknowledgments(final_wait_for_ack_);
     data_dw_->unregister_instance(data_, instance_);
     data_dw_->wait_for_acknowledgments(final_wait_for_ack_);
@@ -215,20 +210,12 @@ void WriteAction::do_write()
         }
       }
 
-      if (manual_rescheduling_) {
-        const auto now = Builder::get_hr_time();
-        const ACE_Time_Value atv_now(now.sec, static_cast<suseconds_t>(now.nsec / 1000u));
-        const ACE_Time_Value diff = atv_now - last_scheduled_time_;
-
-        if (diff < write_period_) {
-          const ACE_Time_Value remaining = write_period_ - diff;
-          last_scheduled_time_ = atv_now + remaining;
-          proactor_.schedule_timer(*handler_, nullptr, remaining, ZERO_TIME);
-        } else {
-          last_scheduled_time_ = atv_now;
-          proactor_.schedule_timer(*handler_, nullptr, ZERO_TIME, ZERO_TIME);
-        }
+      if (relative_scheduling_) {
+        last_scheduled_time_ = OpenDDS::DCPS::MonotonicTimePoint::now() + OpenDDS::DCPS::TimeDuration(write_period_);
+      } else {
+        last_scheduled_time_ += OpenDDS::DCPS::TimeDuration(write_period_);
       }
+      event_dispatcher_->schedule(event_, last_scheduled_time_);
     }
   }
 }

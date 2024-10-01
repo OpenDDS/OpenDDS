@@ -1,6 +1,6 @@
 #include "ForwardAction.h"
 
-#include "MemFunHandler.h"
+#include "MemFunEvent.h"
 #include "util.h"
 
 namespace {
@@ -12,8 +12,8 @@ const size_t DEFAULT_QUEUE_SIZE(10u);
 
 namespace Bench {
 
-ForwardAction::ForwardAction(ACE_Proactor& proactor)
-: proactor_(proactor)
+ForwardAction::ForwardAction(OpenDDS::DCPS::EventDispatcher_rch event_dispatcher)
+: event_dispatcher_(event_dispatcher)
 , started_(false)
 , stopped_(false)
 , write_task_active_(false)
@@ -108,7 +108,7 @@ bool ForwardAction::init(const ActionConfig& config, ActionReport& report,
   // hence 0 and 1 are not valid vector sizes and will not work
   data_queue_.resize(queue_size > 0 ? queue_size + 1 : 2);
 
-  handler_.reset(new MemFunHandler<ForwardAction>(&ForwardAction::do_writes, *this));
+  event_ = OpenDDS::DCPS::make_rch<MemFunEvent<ForwardAction> >(shared_from_this(), &ForwardAction::do_writes);
 
   return true;
 }
@@ -159,7 +159,7 @@ void ForwardAction::on_data(const Data& data)
       queue_last_ = (queue_last_ + 1) % data_queue_.size();
       if (!write_task_active_) {
         write_task_active_ = true;
-        proactor_.schedule_timer(*handler_, nullptr, ZERO);
+        event_dispatcher_->dispatch(event_);
       }
     } else {
       for (auto it = data_dws_.begin(); it != data_dws_.end(); ++it) {
