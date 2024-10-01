@@ -26,6 +26,7 @@ public:
 
 protected:
   std::mutex mutex_;
+  std::condition_variable cv_;
   OpenDDS::DCPS::EventDispatcher_rch event_dispatcher_;
   bool started_, stopped_;
   DDS::GuardCondition_var stop_condition_;
@@ -35,6 +36,7 @@ protected:
   WorkerDataReaderListener* dr_listener_;
   ACE_Time_Value read_period_;
   OpenDDS::DCPS::EventBase_rch event_;
+  bool in_do_read_;
 };
 
 }
