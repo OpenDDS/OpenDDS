@@ -85,12 +85,14 @@ void ReadAction::test_start()
 
 void ReadAction::test_stop()
 {
+    Builder::Log::log() << Bench::iso8601() << ": ReadAction::test_stop" << std::endl;
 }
 
 void ReadAction::action_stop()
 {
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
+    Builder::Log::log() << Bench::iso8601() << ": ReadAction::action_stop - stopping" << std::endl;
     stopped_ = true;
     event_dispatcher_->cancel(event_);
     ws_->detach_condition(stop_condition_);
@@ -106,7 +108,9 @@ void ReadAction::do_read()
   if (started_ && !stopped_) {
     DDS::ConditionSeq active;
     const DDS::Duration_t duration = {static_cast<CORBA::Long>(read_period_.sec()), static_cast<CORBA::ULong>(read_period_.usec() * 1000)};
+    Builder::Log::log() << Bench::iso8601() << ": ReadAction::do_read START" << std::endl;
     DDS::ReturnCode_t ret = ws_->wait(active, duration);
+    Builder::Log::log() << Bench::iso8601() << ": ReadAction::do_read STOP" << std::endl;
 
     if (stopped_) {
       return;
