@@ -86,14 +86,12 @@ void ReadAction::test_start()
 
 void ReadAction::test_stop()
 {
-    //Builder::Log::log() << Bench::iso8601() << ": ReadAction::test_stop" << std::endl;
 }
 
 void ReadAction::action_stop()
 {
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
-    //Builder::Log::log() << Bench::iso8601() << ": ReadAction::action_stop - stopping" << std::endl;
     stopped_ = true;
     event_dispatcher_->cancel(event_);
     stop_condition_->set_trigger_value(true);
@@ -109,10 +107,16 @@ void ReadAction::action_stop()
 namespace {
 
 struct bool_guard {
-  explicit bool_guard(bool& val, std::condition_variable& cv) : val_(val), cv_(cv) { val_ = true; }
+  bool_guard(bool& val, std::condition_variable& cv) : val_(val), cv_(cv) { val_ = true; }
   ~bool_guard() { val_ = false; cv_.notify_all(); }
   bool& val_;
   std::condition_variable& cv_;
+};
+
+struct reverse_guard {
+  explicit reverse_guard(std::unique_lock<std::mutex>& val) : val_(val) { val_.unlock(); }
+  ~reverse_guard() { val_.lock(); }
+  std::unique_lock<std::mutex>& val_;
 };
 
 }
@@ -127,11 +131,10 @@ void ReadAction::do_read()
     DDS::WaitSet_var ws_copy= ws_;
     DDS::ReturnCode_t ret;
 
-    lock.unlock();
-    //Builder::Log::log() << Bench::iso8601() << ": ReadAction::do_read START" << std::endl;
-    ret = ws_->wait(active, duration);
-    //Builder::Log::log() << Bench::iso8601() << ": ReadAction::do_read STOP" << std::endl;
-    lock.lock();
+    {
+      reverse_guard rg(lock);
+      ret = ws_->wait(active, duration);
+    }
 
     if (stopped_) {
       return;
@@ -144,9 +147,8 @@ void ReadAction::do_read()
           DDS::SampleInfo si;
           while (!stopped_ && (ret = data_dr_->take_next_sample(data, si)) == DDS::RETCODE_OK) {
             if (si.valid_data && dr_listener_) {
-              lock.unlock();
+              reverse_guard rg(lock);
               dr_listener_->on_valid_data(data, si);
-              lock.lock();
             }
           }
         }
