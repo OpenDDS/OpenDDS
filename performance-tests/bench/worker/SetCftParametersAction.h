@@ -1,10 +1,11 @@
 #pragma once
 
-#include "dds/DdsDcpsTopicC.h"
-
 #include "Action.h"
-#include "dds/DCPS/EventDispatcher.h"
+
 #include "BenchTypeSupportImpl.h"
+
+#include <dds/DdsDcpsTopicC.h>
+#include <dds/DCPS/EventDispatcher.h>
 
 #include <random>
 #include <vector>
@@ -27,7 +28,7 @@ protected:
   std::mutex mutex_;
   OpenDDS::DCPS::EventDispatcher_rch event_dispatcher_;
   bool started_, stopped_;
-  ACE_Time_Value set_period_;
+  OpenDDS::DCPS::TimeDuration set_period_;
   size_t max_count_;
   size_t param_count_;
   bool random_order_;

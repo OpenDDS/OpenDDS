@@ -5,7 +5,6 @@
 
 namespace {
 
-const ACE_Time_Value ZERO(0, 0);
 const size_t DEFAULT_QUEUE_SIZE(10u);
 
 }
@@ -108,7 +107,7 @@ bool ForwardAction::init(const ActionConfig& config, ActionReport& report,
   // hence 0 and 1 are not valid vector sizes and will not work
   data_queue_.resize(queue_size > 0 ? queue_size + 1 : 2);
 
-  event_ = OpenDDS::DCPS::make_rch<MemFunEvent<ForwardAction> >(shared_from_this(), &ForwardAction::do_writes);
+  event_ = OpenDDS::DCPS::make_rch<MemFunEvent<ForwardAction>>(shared_from_this(), &ForwardAction::do_writes);
 
   return true;
 }

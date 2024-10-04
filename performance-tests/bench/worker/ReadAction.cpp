@@ -3,7 +3,7 @@
 #include "MemFunEvent.h"
 #include "util.h"
 
-#include "dds/DCPS/WaitSet.h"
+#include <dds/DCPS/WaitSet.h>
 
 namespace Bench {
 
@@ -48,7 +48,7 @@ bool ReadAction::init(const ActionConfig& config, ActionReport& report, Builder:
     double period = 1.0 / read_frequency_prop->value.double_prop();
     int64_t sec = static_cast<int64_t>(period);
     uint64_t usec = static_cast<uint64_t>((period - static_cast<double>(sec)) * 1000000u);
-    read_period_ = ACE_Time_Value(sec, static_cast<suseconds_t>(usec));
+    read_period_ = OpenDDS::DCPS::TimeDuration(sec, static_cast<suseconds_t>(usec));
   }
 
   // Then check period as double (seconds)
@@ -57,13 +57,13 @@ bool ReadAction::init(const ActionConfig& config, ActionReport& report, Builder:
     double period = read_period_prop->value.double_prop();
     int64_t sec = static_cast<int64_t>(period);
     uint64_t usec = static_cast<uint64_t>((period - static_cast<double>(sec)) * 1000000u);
-    read_period_ = ACE_Time_Value(sec, static_cast<suseconds_t>(usec));
+    read_period_ = OpenDDS::DCPS::TimeDuration(sec, static_cast<suseconds_t>(usec));
   }
 
   // Finally check period as TimeStamp
   read_period_prop = get_property(config.params, "read_period", Builder::PVK_TIME);
   if (read_period_prop) {
-    read_period_ = ACE_Time_Value(read_period_prop->value.time_prop().sec, static_cast<suseconds_t>(read_period_prop->value.time_prop().nsec / 1000u));
+    read_period_ = OpenDDS::DCPS::TimeDuration(read_period_prop->value.time_prop().sec, static_cast<suseconds_t>(read_period_prop->value.time_prop().nsec / 1000u));
   }
 
   event_ = OpenDDS::DCPS::make_rch<MemFunEvent<ReadAction> >(shared_from_this(), &ReadAction::do_read);
@@ -127,7 +127,7 @@ void ReadAction::do_read()
   bool_guard bg(in_do_read_, cv_);
   if (started_ && !stopped_) {
     DDS::ConditionSeq active;
-    const DDS::Duration_t duration = {static_cast<CORBA::Long>(read_period_.sec()), static_cast<CORBA::ULong>(read_period_.usec() * 1000)};
+    const DDS::Duration_t duration = read_period_.to_dds_duration();
     DDS::WaitSet_var ws_copy= ws_;
     DDS::ReturnCode_t ret;
 

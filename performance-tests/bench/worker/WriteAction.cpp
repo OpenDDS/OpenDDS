@@ -108,7 +108,7 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
     double period = 1.0 / write_frequency_prop->value.double_prop();
     int64_t sec = static_cast<int64_t>(period);
     uint64_t usec = static_cast<uint64_t>((period - static_cast<double>(sec)) * 1000000u);
-    write_period_ = ACE_Time_Value(sec, static_cast<suseconds_t>(usec));
+    write_period_ = OpenDDS::DCPS::TimeDuration(sec, static_cast<suseconds_t>(usec));
   }
 
   // Then check period as double (seconds)
@@ -117,13 +117,13 @@ bool WriteAction::init(const ActionConfig& config, ActionReport& report, Builder
     double period = write_period_prop->value.double_prop();
     int64_t sec = static_cast<int64_t>(period);
     uint64_t usec = static_cast<uint64_t>((period - static_cast<double>(sec)) * 1000000u);
-    write_period_ = ACE_Time_Value(sec, static_cast<suseconds_t>(usec));
+    write_period_ = OpenDDS::DCPS::TimeDuration(sec, static_cast<suseconds_t>(usec));
   }
 
   // Finally check period as TimeStamp
   write_period_prop = get_property(config.params, "write_period", Builder::PVK_TIME);
   if (write_period_prop) {
-    write_period_ = ACE_Time_Value(write_period_prop->value.time_prop().sec, static_cast<suseconds_t>(write_period_prop->value.time_prop().nsec / 1000u));
+    write_period_ = OpenDDS::DCPS::TimeDuration(write_period_prop->value.time_prop().sec, static_cast<suseconds_t>(write_period_prop->value.time_prop().nsec / 1000u));
   }
 
   auto final_wait_for_ack_prop = get_property(config.params, "final_wait_for_ack", Builder::PVK_DOUBLE);
@@ -211,10 +211,10 @@ void WriteAction::do_write()
       }
 
       if (relative_scheduling_) {
-        last_scheduled_time_ = OpenDDS::DCPS::MonotonicTimePoint::now() + OpenDDS::DCPS::TimeDuration(write_period_);
-      } else {
-        last_scheduled_time_ += OpenDDS::DCPS::TimeDuration(write_period_);
+        last_scheduled_time_ = OpenDDS::DCPS::MonotonicTimePoint::now();
       }
+      last_scheduled_time_ += write_period_;
+
       event_dispatcher_->schedule(event_, last_scheduled_time_);
     }
   }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "dds/DCPS/EventDispatcher.h"
+#include <dds/DCPS/EventDispatcher.h>
 
 #include "Action.h"
 #include "DataHandler.h"

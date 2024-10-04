@@ -5,9 +5,8 @@
 
 #include "BenchTypeSupportImpl.h"
 
-#include "dds/DCPS/GuardCondition.h"
-
-#include "dds/DCPS/EventDispatcher.h"
+#include <dds/DCPS/EventDispatcher.h>
+#include <dds/DCPS/GuardCondition.h>
 
 namespace Bench {
 
@@ -34,7 +33,7 @@ protected:
   DataDataReader_var data_dr_;
   DDS::WaitSet_var ws_;
   WorkerDataReaderListener* dr_listener_;
-  ACE_Time_Value read_period_;
+  OpenDDS::DCPS::TimeDuration read_period_;
   OpenDDS::DCPS::EventBase_rch event_;
   bool in_do_read_;
 };

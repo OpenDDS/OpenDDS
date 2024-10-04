@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Action.h"
-#include "dds/DCPS/EventDispatcher.h"
+#include <dds/DCPS/EventDispatcher.h>
 #include "BenchTypeSupportImpl.h"
 
 #include <random>
@@ -26,7 +26,7 @@ protected:
   bool started_, stopped_, relative_scheduling_;
   DataDataWriter_var data_dw_;
   Data data_;
-  ACE_Time_Value write_period_;
+  OpenDDS::DCPS::TimeDuration write_period_;
   OpenDDS::DCPS::MonotonicTimePoint last_scheduled_time_;
   size_t max_count_;
   size_t new_key_count_;

@@ -1,6 +1,6 @@
 #include "BuilderProcess.h"
 
-#include "dds/DCPS/Service_Participant.h"
+#include <dds/DCPS/Service_Participant.h>
 
 namespace Builder {
 
