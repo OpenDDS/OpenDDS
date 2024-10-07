@@ -46,6 +46,7 @@
 #include <dds/OpenDDSConfigWrapper.h>
 
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/ServiceEventDispatcher.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h>
@@ -60,10 +61,6 @@
 #  endif
 #endif
 
-#include <ace/Proactor.h>
-#ifdef ACE_HAS_AIO_CALLS
-#  include <ace/POSIX_CB_Proactor.h>
-#endif
 
 #include <algorithm>
 #include <cmath>
@@ -270,24 +267,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     return 4;
   }
 
-  // Disable some Proactor debug chatter to stdout (eventually make this configurable?)
+  // Disable some potential ACE debug chatter to stdout (eventually make this configurable?)
   ACE_Log_Category::ace_lib().priority_mask(0);
-
-#ifdef ACE_HAS_AIO_CALLS
-  Builder::ConstPropertyIndex use_aio_proactor_prop =
-    get_property(config.properties, "use_aio_proactor", Builder::PVK_ULL);
-#endif
-
-  std::shared_ptr<ACE_Proactor> proactor;
-#ifdef ACE_HAS_AIO_CALLS
-  if (use_aio_proactor_prop && use_aio_proactor_prop->value.ull_prop()) {
-    proactor.reset(new ACE_Proactor(new ACE_POSIX_AIOCB_Proactor()));
-  } else {
-#endif
-    proactor.reset(new ACE_Proactor());
-#ifdef ACE_HAS_AIO_CALLS
-  }
-#endif
 
   int max_decimal_places = DEFAULT_MAX_DECIMAL_PLACES;
   Builder::ConstPropertyIndex max_decimal_places_prop =
@@ -302,6 +283,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   if (action_thread_pool_size_prop) {
     action_thread_pool_size = static_cast<size_t>(action_thread_pool_size_prop->value.ull_prop());
   }
+
+  OpenDDS::DCPS::EventDispatcher_rch event_dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(action_thread_pool_size);
 
   size_t redirect_ace_log = 1;
   Builder::ConstPropertyIndex redirect_ace_log_prop =
@@ -324,19 +307,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   // Register actions
   Bench::ActionManager::Registration
     write_action_registration("write", [&](){
-      return std::shared_ptr<Bench::Action>(new Bench::WriteAction(*proactor));
+      return std::shared_ptr<Bench::Action>(new Bench::WriteAction(event_dispatcher));
     });
   Bench::ActionManager::Registration
     read_action_registration("read", [&](){
-      return std::shared_ptr<Bench::Action>(new Bench::ReadAction(*proactor));
+      return std::shared_ptr<Bench::Action>(new Bench::ReadAction(event_dispatcher));
     });
   Bench::ActionManager::Registration
     forward_action_registration("forward", [&](){
-      return std::shared_ptr<Bench::Action>(new Bench::ForwardAction(*proactor));
+      return std::shared_ptr<Bench::Action>(new Bench::ForwardAction(event_dispatcher));
     });
   Bench::ActionManager::Registration
     set_cft_parameters_action_registration("set_cft_parameters", [&]() {
-      return std::shared_ptr<Bench::Action>(new Bench::SetCftParametersAction(*proactor));
+      return std::shared_ptr<Bench::Action>(new Bench::SetCftParametersAction(event_dispatcher));
     });
 
   // Timestamps used to measure method call durations
@@ -351,12 +334,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   Bench::WorkerReport worker_report{};
   Builder::ProcessReport& process_report = worker_report.process_report;
-
-  const size_t thread_pool_size = static_cast<size_t>(action_thread_pool_size);
-  std::vector<std::shared_ptr<std::thread> > thread_pool;
-  for (size_t i = 0; i < thread_pool_size; ++i) {
-    thread_pool.emplace_back(std::make_shared<std::thread>([&](){ proactor->proactor_run_event_loop(); }));
-  }
 
   try {
     std::string line;
@@ -466,11 +443,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     am.action_stop();
 
-    proactor->proactor_end_event_loop();
-    for (size_t i = 0; i < thread_pool_size; ++i) {
-      thread_pool[i]->join();
-    }
-    thread_pool.clear();
+    event_dispatcher->shutdown();
 
     Log::log() << Bench::iso8601() << ": Detaching Listeners." << std::endl;
 
@@ -483,20 +456,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     process_destruction_begin_time = Builder::get_hr_time();
   } catch (const std::exception& e) {
     std::cerr << "Exception caught trying to execute test sequence: " << e.what() << std::endl;
-    proactor->proactor_end_event_loop();
-    for (size_t i = 0; i < thread_pool_size; ++i) {
-      thread_pool[i]->join();
-    }
-    thread_pool.clear();
+    event_dispatcher->shutdown();
     TheServiceParticipant->shutdown();
     return 1;
   } catch (...) {
     std::cerr << "Unknown exception caught trying to execute test sequence" << std::endl;
-    proactor->proactor_end_event_loop();
-    for (size_t i = 0; i < thread_pool_size; ++i) {
-      thread_pool[i]->join();
-    }
-    thread_pool.clear();
+    event_dispatcher->shutdown();
     TheServiceParticipant->shutdown();
     return 1;
   }
