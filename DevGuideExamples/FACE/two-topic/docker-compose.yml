@@ -1,0 +1,12 @@
+version: '2'
+services:
+  subscriber:
+    image: ghcr.io/opendds/opendds:latest-release
+    command: ["./build/subscriber", "-DCPSConfigFile",  "rtps.ini" ]
+    volumes:
+      - $PWD:/opt/workspace
+  publisher:
+    image: ghcr.io/opendds/opendds:latest-release
+    command: ["./build/publisher", "-DCPSConfigFile",  "rtps.ini" ]
+    volumes:
+      - $PWD:/opt/workspace

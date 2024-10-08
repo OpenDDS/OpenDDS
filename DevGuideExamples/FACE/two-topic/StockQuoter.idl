@@ -1,0 +1,25 @@
+#pragma FACE IDL_VERSION 3.1
+#include "orbsvcs/TimeBase.idl"
+module StockQuoter
+{
+  @topic  
+  struct Quote {
+    @key string ticker;
+    string exchange;
+    string full_name;
+    double value;
+    TimeBase::TimeT timestamp;
+  };
+
+  enum ExchangeEventType { TRADING_OPENED,
+                           TRADING_CLOSED,
+                           TRADING_SUSPENDED,
+                           TRADING_RESUMED };
+  @topic
+  struct ExchangeEvent {
+    @key string exchange;
+    ExchangeEventType event;
+    TimeBase::TimeT timestamp;
+  };
+  #pragma FACE ts_definitions Message
+};
