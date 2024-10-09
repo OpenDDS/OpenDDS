@@ -68,11 +68,6 @@ public:
       const ::OpenDDS::DCPS::SubscriptionLostStatus & status
     );
 
-  virtual void on_budget_exceeded (
-      ::DDS::DataReader_ptr,
-      const ::OpenDDS::DCPS::BudgetExceededStatus& status
-    );
-
   unsigned int deadline_missed() const
   {
     return deadline_missed_;

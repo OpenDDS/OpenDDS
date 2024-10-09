@@ -13,7 +13,6 @@
 #include "GuidConverter.h"
 #include "BuiltInTopicUtils.h"
 #include "TopicImpl.h"
-#include "MonitorFactory.h"
 #include "DataReaderImpl.h"
 #include "Service_Participant.h"
 #include "TopicDescriptionImpl.h"
@@ -49,14 +48,10 @@ SubscriberImpl::SubscriberImpl(DDS::InstanceHandle_t       handle,
   listener_mask_(mask),
   participant_(*participant),
   domain_id_(participant->get_domain_id()),
-  raw_latency_buffer_size_(0),
-  raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
   access_depth_ (0)
 {
   //Note: OK to duplicate a nil.
   listener_ = DDS::SubscriberListener::_duplicate(a_listener);
-
-  monitor_.reset(TheServiceParticipant->monitor_factory_->create_subscriber_monitor(this));
 }
 
 SubscriberImpl::~SubscriberImpl()
@@ -235,13 +230,6 @@ SubscriberImpl::create_datareader(
   }
 #endif
 
-  // Propagate the latency buffer data collection configuration.
-  // @TODO: Determine whether we want to exclude the Builtin Topic
-  //        readers from data gathering.
-  dr_servant->raw_latency_buffer_size() = this->raw_latency_buffer_size_;
-  dr_servant->raw_latency_buffer_type() = this->raw_latency_buffer_type_;
-
-
   dr_servant->init(topic_servant,
                    dr_qos,
                    a_listener,
@@ -375,10 +363,6 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
                      this->dr_set_lock_,
                      DDS::RETCODE_ERROR);
     datareader_set_.erase(dr_servant);
-  }
-
-  if (this->monitor_) {
-    this->monitor_->report();
   }
 
   const GUID_t subscription_id = dr_servant->subscription_id();
@@ -886,10 +870,6 @@ SubscriberImpl::enable()
 
   dp_id_ = participant->get_id();
 
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
-
   this->set_enabled();
 
   if (qos_.entity_factory.autoenable_created_entities) {
@@ -950,10 +930,6 @@ SubscriberImpl::reader_enabled(const char*     topic_name,
 
   this->datareader_map_.insert(DataReaderMap::value_type(topic_name, reader));
 
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
-
   return DDS::RETCODE_OK;
 }
 
@@ -995,18 +971,6 @@ SubscriberImpl::listener_for(::DDS::StatusKind kind)
   }
 }
 
-unsigned int&
-SubscriberImpl::raw_latency_buffer_size()
-{
-  return this->raw_latency_buffer_size_;
-}
-
-DataCollector<double>::OnFull&
-SubscriberImpl::raw_latency_buffer_type()
-{
-  return this->raw_latency_buffer_type_;
-}
-
 void
 SubscriberImpl::get_subscription_ids(SubscriptionIdVec& subs)
 {
@@ -1022,27 +986,6 @@ SubscriberImpl::get_subscription_ids(SubscriptionIdVec& subs)
     subs.push_back(iter->second->get_guid());
   }
 }
-
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-void
-SubscriberImpl::update_ownership_strength (const GUID_t& pub_id,
-                                           const CORBA::Long&   ownership_strength)
-{
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->si_lock_,
-                   );
-
-  for (DataReaderMap::iterator iter = datareader_map_.begin();
-       iter != datareader_map_.end();
-       ++iter) {
-    if (!iter->second->is_bit()) {
-      iter->second->update_ownership_strength(pub_id, ownership_strength);
-    }
-  }
-}
-#endif
-
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 void

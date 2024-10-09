@@ -22,8 +22,52 @@ my $num_readers = 1;
 
 my $use_take = 0;
 
-my $test = new PerlDDS::TestFramework();
-my $app_bit_conf = ($test->{'transport'} eq 'udp') ? '-DCPSBit 0' : '-r 1';
+my %configs = (
+    'ir_tcp' => {
+        'discovery' => 'info_repo',
+        'file' => {
+            'common' => {
+                'DCPSGlobalTransportConfig' => 'tcp'
+            },
+            'transport/tcp' => {
+                'transport_type' => 'tcp'
+            },
+            'config/tcp' => {
+                'transports' => 'tcp'
+            },
+        }
+    },
+    'rtps_rtps' => {
+        'discovery' => 'rtps',
+        'file' => {
+            'common' => {
+                'DCPSGlobalTransportConfig' => 'rtps',
+                'DCPSDefaultDiscovery' => 'uni_rtps'
+            },
+            'transport/rtps' => {
+                'transport_type' => 'rtps_udp',
+                'use_multicast' => '0'
+            },
+            'config/rtps' => {
+                'transports' => 'rtps'
+            },
+            'transport/rtps2' => {
+                'transport_type' => 'rtps_udp',
+                'use_multicast' => '0'
+            },
+            'config/rtps2' => {
+                'transports' => 'rtps2'
+            },
+            'rtps_discovery/uni_rtps' => {
+                'SedpMulticast' => '0',
+                'ResendPeriod' => '2'
+            }
+        }
+    }
+);
+
+my $test = new PerlDDS::TestFramework(configs => \%configs, config => 'ir_tcp');
+my $app_bit_conf = '-r 1';
 
 if ($test->flag('take')) {
   print "use_take !!!!!\n";

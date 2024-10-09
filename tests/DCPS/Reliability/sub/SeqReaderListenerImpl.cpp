@@ -11,8 +11,10 @@
 
 using namespace examples::boilerplate;
 
-SeqReaderListenerImpl::SeqReaderListenerImpl() :
-  messages_(10), infos_(10)
+SeqReaderListenerImpl::SeqReaderListenerImpl(DistributedConditionSet_rch dcs)
+  : DataReaderListenerImpl(dcs)
+  , messages_(10)
+  , infos_(10)
 {
   std::cout << "Using SeqReaderListenerImpl" << std::endl;
 }

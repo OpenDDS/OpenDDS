@@ -10,7 +10,8 @@
 #include "ZeroCopyReaderListenerImpl.h"
 #include "Boilerplate.h"
 #include <dds/DCPS/Service_Participant.h>
-#include <model/Sync.h>
+#include <tests/Utils/DistributedConditionSet.h>
+#include <tests/Utils/StatusMatching.h>
 #include <stdexcept>
 #include <ctime>
 #include <iostream>
@@ -28,8 +29,8 @@ namespace
   bool take_next = true;
   bool take = false;
   bool zero_copy = false;
-  int sleep_time = 0;
-  int num_sleeps = 0;
+  unsigned long long sleep_time = 0;
+  unsigned long long num_sleeps = 0;
 
   void
   parse_args(int& argc, ACE_TCHAR** argv)
@@ -40,12 +41,12 @@ namespace
       const ACE_TCHAR* arg;
       if ((arg = shifter.get_the_parameter(ACE_TEXT("-num_sleeps"))))
       {
-        num_sleeps = ACE_OS::atoi(arg);
+        num_sleeps = static_cast<unsigned long long>(ACE_OS::atoi(arg));
         shifter.consume_arg();
       }
       else if ((arg = shifter.get_the_parameter(ACE_TEXT("-sleep_secs"))))
       {
-        sleep_time = ACE_OS::atoi(arg);
+        sleep_time = static_cast<unsigned long long>(ACE_OS::atoi(arg));
         shifter.consume_arg();
       }
       else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-take-next")) == 0)
@@ -78,6 +79,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int status = -1;
   try {
+    // Coordination across processes.
+    DistributedConditionSet_rch distributed_condition_set =
+      OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+
     // Initialize DomainParticipantFactory, handling command line args
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
@@ -87,13 +92,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Create Listener
     DataReaderListenerImpl* listener_impl = NULL;
     if (take_next) {
-      listener_impl = new TakeNextReaderListenerImpl;
+      listener_impl = new TakeNextReaderListenerImpl(distributed_condition_set);
     } else if (take) {
-      listener_impl = new SeqReaderListenerImpl;
+      listener_impl = new SeqReaderListenerImpl(distributed_condition_set);
     } else if (zero_copy) {
-      listener_impl = new ZeroCopyReaderListenerImpl;
+      listener_impl = new ZeroCopyReaderListenerImpl(distributed_condition_set);
     } else {
-      listener_impl = new TakeNextReaderListenerImpl;
+      listener_impl = new TakeNextReaderListenerImpl(distributed_condition_set);
     }
 
     listener_impl->set_num_sleeps(num_sleeps);
@@ -114,11 +119,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DataReader_var reader = createDataReader(subscriber, topic, listener);
 
     std::cout << "Waiting for connection" << std::endl;
-    {
-      // Block until reader has associated with a writer
-      // but is no longer associated with any writer
-      OpenDDS::Model::ReaderSync rs(reader);
+    // Block until reader has associated with a writer
+    // but is no longer associated with any writer
+    if (wait_match(reader, 1, Utils::EQ) != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR: %N:%l: main: "
+                 "wait for publisher failed\n"));
+      return -1;
     }
+    distributed_condition_set->post("subscriber", "subscriber ready");
+    distributed_condition_set->wait_for("subscriber", "subscriber", "subscriber done");
 
     if (listener_impl->sample_count() == listener_impl->expected_count()) {
       std::cout << "Got all " << listener_impl->sample_count()

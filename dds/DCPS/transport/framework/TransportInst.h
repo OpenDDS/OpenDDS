@@ -126,6 +126,9 @@ public:
   void receive_preallocated_data_blocks(size_t rpdb);
   size_t receive_preallocated_data_blocks() const;
 
+  void instantiation_rule(const String& rule);
+  String instantiation_rule() const;
+
   /// Does the transport as configured support RELIABLE_RELIABILITY_QOS?
   virtual bool is_reliable() const = 0;
 
@@ -135,7 +138,8 @@ public:
   /// Populate a transport locator sequence.  Return the number of "locators."
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info,
                                   ConnectionInfoFlags flags,
-                                  DDS::DomainId_t domain) const = 0;
+                                  DDS::DomainId_t domain,
+                                  DomainParticipantImpl* participant) = 0;
 
   DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint(DDS::DomainId_t domain,
                                                      DomainParticipantImpl* participant);
@@ -205,6 +209,13 @@ public:
   void remove_participant(DDS::DomainId_t domain,
                           DomainParticipantImpl* participant);
 
+  NetworkAddress actual_local_address(DDS::DomainId_t /*domain*/,
+                                      DomainParticipantImpl* /*participant*/);
+#ifdef ACE_HAS_IPV6
+  NetworkAddress ipv6_actual_local_address(DDS::DomainId_t /*domain*/,
+                                           DomainParticipantImpl* /*participant*/);
+#endif
+
 protected:
 
   TransportInst(const char* type,
@@ -228,9 +239,8 @@ private:
   TransportImpl_rch get_impl(DDS::DomainId_t domain,
                              DomainParticipantImpl* participant);
  private:
-  virtual TransportImpl_rch new_impl(DDS::DomainId_t domain) = 0;
-
-  String instantiation_rule() const;
+  virtual TransportImpl_rch new_impl(DDS::DomainId_t domain,
+                                     DomainParticipantImpl* participant) = 0;
 
   const String name_;
   const String config_prefix_;

@@ -140,6 +140,23 @@ ConfigStoreImpl::has(const char* key)
   return false;
 }
 
+DDS::Boolean
+ConfigStoreImpl::has_prefix(const char* prefix)
+{
+  DCPS::InternalDataReader<ConfigPair>::SampleSequence samples;
+  DCPS::InternalSampleInfoSequence infos;
+  config_reader_->read(samples, infos, DDS::LENGTH_UNLIMITED,
+                       DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+  for (size_t idx = 0; idx != samples.size(); ++idx) {
+    const DDS::SampleInfo& info = infos[idx];
+    if (info.valid_data && samples[idx].key_has_prefix(prefix)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 void
 ConfigStoreImpl::set_boolean(const char* key,
                              DDS::Boolean value)
