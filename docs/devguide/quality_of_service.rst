@@ -544,6 +544,10 @@ The ``max_samples`` member specifies the maximum number of samples a single data
 The ``max_instances`` member specifies the maximum number of instances that a data writer or data reader can manage.
 The ``max_samples_per_instance`` member specifies the maximum number of samples that can be managed for an individual instance in a single data writer or data reader.
 
+.. warning::
+
+  Setting these to very high values may exhaust available memory.
+
 Resources are used by the data writer to queue samples written to the data writer but not yet sent to all data readers because of backpressure from the transport.
 Resources are used by the data reader to queue samples that have been received, but not yet read/taken from the data reader.
 
@@ -1226,6 +1230,10 @@ Reader Data Lifecycle QoS
 
 The reader data lifecycle QoS policy controls the lifecycle of :term:`instance`\s managed by a :term:`DataReader`.
 
+.. warning::
+
+  The default values (never purging) might result in increasing memory usage over time for each new instance received.
+
 .. important::
 
   This policy is :ref:`mutable <qos-changing>` and does not affect association.
@@ -1275,9 +1283,11 @@ This policy could, for example, permit a late-joining data writer to prolong the
 
 The ``autopurge_nowriter_samples_delay`` controls how long the data reader waits before reclaiming resources once an instance transitions to the ``NOT_ALIVE_NO_WRITERS`` state.
 By default, ``autopurge_nowriter_samples_delay`` is infinite.
+Use :cfg:prop:`bit_autopurge_nowriter_samples_delay` to set this for :ref:`built-in data readers <bit>`.
 
 The ``autopurge_disposed_samples_delay`` controls how long the data reader waits before reclaiming resources once an instance transitions to the ``NOT_ALIVE_DISPOSED`` state.
 By default, ``autopurge_disposed_samples_delay`` is infinite.
+Use :cfg:prop:`bit_autopurge_disposed_samples_delay` to set this for :ref:`built-in data readers <bit>`.
 
 .. _qos-time-based-filter:
 .. _quality_of_service--time-based-filter:
