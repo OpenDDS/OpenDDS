@@ -369,6 +369,16 @@ For example:
 
 .. sec:: common
 
+  .. prop:: bit_autopurge_nowriter_samples_delay
+    :default: ``DURATION_INFINITE_SEC`` (disabled)
+
+    Sets the ``autopurge_nowriter_samples_delay`` value of the :ref:`quality_of_service--reader-data-lifecycle` for :ref:`built-in data readers <bit>`.
+
+  .. prop:: bit_autopurge_disposed_samples_delay
+    :default: ``DURATION_INFINITE_SEC`` (disabled)
+
+    Sets the ``autopurge_disposed_samples_delay`` value of the :ref:`quality_of_service--reader-data-lifecycle` for :ref:`built-in data readers <bit>`.
+
   .. prop:: DCPSBidirGIOP=<boolean>
     :default: ``1`` (enabled)
 
@@ -3331,7 +3341,7 @@ See :ref:`config-common` for options controlling the destination and formatting 
 The highest level logging is controlled by the general log levels listed in the following table.
 
 .. list-table::
-   :header-rows: 1
+  :header-rows: 1
 
   * - Level
 
