@@ -215,7 +215,7 @@ def add_omg_spec(app, slug, version, our_name=None, display_name=None):
     display_name = slug.replace('-', ' ') if display_name is None else display_name
 
     # Get the PDF if we don't have it
-    dir_path = docs_path / Path('_build') / 'omg-specs'
+    dir_path = docs_path / '.omg-specs'
     dir_path.mkdir(parents=True, exist_ok=True)
     pdf_path = dir_path / '{}-{}.pdf'.format(slug, version)
     url = 'https://www.omg.org/spec/{}/{}'.format(slug, version)

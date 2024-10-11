@@ -1,5 +1,43 @@
 # OpenDDS Releases
 
+## Version 3.30.0 of OpenDDS
+
+Released 2024-10-11
+
+Download [this release on GitHub](https://github.com/OpenDDS/OpenDDS/releases/tag/DDS-3.30).
+
+Read [the documentation for this release on Read the Docs](https://opendds.readthedocs.io/en/dds-3.30).
+
+### Additions
+
+- Added [`RtpsRelay -AdmissionMaxParticipantsRange`](https://opendds.readthedocs.io/en/dds-3.30/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-AdmissionMaxParticipantsRange) to RtpsRelay options ([PR #4774](https://github.com/OpenDDS/OpenDDS/pull/4774))
+  - This option provides another mechanism for detecting load on each RtpsRelay instance
+- Improved RelayThreadMonitor error reporting ([PR #4778](https://github.com/OpenDDS/OpenDDS/pull/4778))
+  - All threads that have missed the deadline are reported before the process dies. These log messages include the timestamp of the most recent update for each thread that has missed the deadline.
+- Embedded a [GDB extension](https://github.com/OpenDDS/OpenDDS/blob/DDS-3.30/tools/scripts/gdbext.py) in `libOpenDDS_Dcps` to help make debugging OpenDDS in GDB a bit easier. ([PR #4791](https://github.com/OpenDDS/OpenDDS/pull/4791), [PR #4727](https://github.com/OpenDDS/OpenDDS/pull/4727))
+- Use a configurable thread pool for the RtpsRelay event handlers ([PR #4808](https://github.com/OpenDDS/OpenDDS/pull/4808))
+  - See [`RtpsRelay -HandlerThreads`](https://opendds.readthedocs.io/en/dds-3.30/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-HandlerThreads)
+
+### Platform Support and Dependencies
+
+- ACE/TAO
+  - Updated ACE 8/TAO 4 from 8.0.0 to [8.0.1](https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-8_0_1).
+- CMake
+  - Fixed issues using OpenDDS as a subproject with `add_subdirectory`. ([PR #4795](https://github.com/OpenDDS/OpenDDS/pull/4795))
+
+### Fixes
+
+- Fixed cross-compiled builds using Java ([PR #4763](https://github.com/OpenDDS/OpenDDS/pull/4763))
+- Fixed a memory leak in the address caches used by the RTPS/UDP transport. ([PR #4772](https://github.com/OpenDDS/OpenDDS/pull/4772))
+- Corrected implementation of [`RtpsRelay -AdmissionControlQueueSize`](https://opendds.readthedocs.io/en/dds-3.30/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-AdmissionControlQueueSize) and [`RtpsRelay -AdmissionControlQueueDuration`](https://opendds.readthedocs.io/en/dds-3.30/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-AdmissionControlQueueDuration) ([PR #4783](https://github.com/OpenDDS/OpenDDS/pull/4783))
+- Fix cleanup of pending associations in the RTPS/UDP transport. ([PR #4785](https://github.com/OpenDDS/OpenDDS/pull/4785))
+- Change the tag type separator in `opendds_idl` to allow underscores in identifiers. ([PR #4800](https://github.com/OpenDDS/OpenDDS/pull/4800))
+- Change “reallocating primary receive buffer” to transport debug logging level 3 ([PR #4810](https://github.com/OpenDDS/OpenDDS/pull/4810))
+
+### Documentation
+
+- Documented the [`bit_autopurge_nowriter_samples_delay`](https://opendds.readthedocs.io/en/dds-3.30/devguide/run_time_configuration.html#cfg-prop-common-bit_autopurge_nowriter_samples_delay) and [`bit_autopurge_disposed_samples_delay`](https://opendds.readthedocs.io/en/dds-3.30/devguide/run_time_configuration.html#cfg-prop-common-bit_autopurge_disposed_samples_delay) configuration properties. ([PR #4816](https://github.com/OpenDDS/OpenDDS/pull/4816))
+
 ## Version 3.29.1 of OpenDDS
 
 Released 2024-07-31

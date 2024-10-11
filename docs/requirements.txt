@@ -3,7 +3,7 @@ Sphinx>=7.2
 doc2dash
 furo
 sphinx-copybutton
-sphinx-markdown-builder @ git+https://github.com/liran-funaro/sphinx-markdown-builder
+sphinx-markdown-builder==0.6.6
 sphinx-inline-tabs
 PyMuPDF
 sphinxcontrib-svgbob
