@@ -68,8 +68,7 @@ function(_opendds_library target)
   endif()
   string(TOUPPER "${arg_EXPORT_SYMBOLS_NAME}" export_symbols_name)
   if(target_type STREQUAL "SHARED_LIBRARY")
-    # Define macro for export header
-    target_compile_definitions(${target} PRIVATE "${export_symbols_name}_BUILD_DLL")
+    _opendds_use_export(${target} "${export_symbols_name}")
   elseif(target_type STREQUAL "STATIC_LIBRARY")
     # Define macro for dds/DCPS/InitStaticLibs.h and other files
     string(REPLACE "OPENDDS_" "" short_export_symbols_name "${export_symbols_name}")
@@ -78,8 +77,8 @@ function(_opendds_library target)
     message(FATAL_ERROR "Target ${target} has unexpected type ${target_type}")
   endif()
 
-  if(MSVC AND arg_MSVC_BIGOBJ)
-    target_compile_options(${target} PRIVATE /bigobj)
+  if(arg_MSVC_BIGOBJ)
+    opendds_bigobj(${target})
   endif()
 
   if(NOT arg_NO_INSTALL)
