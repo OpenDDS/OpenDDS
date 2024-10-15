@@ -7,7 +7,7 @@
 
 #include "Boilerplate.h"
 #include <dds/DCPS/Service_Participant.h>
-#include <model/Sync.h>
+#include "tests/Utils/StatusMatching.h"
 #include <stdexcept>
 
 #include "dds/DCPS/StaticIncludes.h"
@@ -39,7 +39,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     {
       // Block until Subscriber is available
-      OpenDDS::Model::WriterSync ws(writer);
+      if (wait_match(writer, 1, Utils::EQ) != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, "ERROR: %N:%l: main: "
+                   "wait for subscriber failed\n"));
+        return -1;
+      }
 
       // Initialize samples
       Messenger::Message message;

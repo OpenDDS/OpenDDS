@@ -249,13 +249,11 @@ endif()
 if(NOT TARGET OpenDDS::OpenDDS)
   set(_opendds_core_libs
     OpenDDS::Dcps
-    OpenDDS::Multicast
     OpenDDS::Rtps
     OpenDDS::Rtps_Udp
     OpenDDS::InfoRepoDiscovery
     OpenDDS::Shmem
     OpenDDS::Tcp
-    OpenDDS::Udp
   )
   if(OPENDDS_SECURITY)
     list(APPEND _opendds_core_libs OpenDDS::Security)

@@ -12,9 +12,10 @@
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/StaticIncludes.h>
+#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/transport/tcp/Tcp.h>
+#endif
 #if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
-#  include <dds/DCPS/transport/udp/Udp.h>
-#  include <dds/DCPS/transport/multicast/Multicast.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 

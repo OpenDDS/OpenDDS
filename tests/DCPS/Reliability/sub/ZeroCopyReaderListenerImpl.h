@@ -10,12 +10,10 @@
 
 #include "DataReaderListenerImpl.h"
 
-using OpenDDS::Model::NullReaderListener;
-
 class ZeroCopyReaderListenerImpl : public DataReaderListenerImpl
 {
 public:
-  ZeroCopyReaderListenerImpl();
+  ZeroCopyReaderListenerImpl(DistributedConditionSet_rch dcs);
 
   virtual void take_samples(Reliability::MessageDataReader_var reader_i);
 

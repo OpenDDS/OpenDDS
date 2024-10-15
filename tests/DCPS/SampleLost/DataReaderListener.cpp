@@ -128,20 +128,3 @@ void DataReaderListenerImpl::on_subscription_lost (
 {
   cerr << "DataReaderListenerImpl::on_subscription_lost" << endl;
 }
-
-void DataReaderListenerImpl::on_budget_exceeded (
-  DDS::DataReader_ptr,
-  const ::OpenDDS::DCPS::BudgetExceededStatus& status)
-{
-  this->num_budget_exceeded_ += status.total_count_change;
-
-  cerr << "DataReaderListenerImpl::on_budget_exceeded, "
-       << " total_count <" << status.total_count
-       << "> total_count_change <" << status.total_count_change
-       << ">"
-       << endl;
-
-  if (this->num_budget_exceeded_ != status.total_count) {
-    cerr << "ERROR: Incorrected total_count_change <" << status.total_count_change << "> reported for budget exceeded" << endl;
-  }
-}

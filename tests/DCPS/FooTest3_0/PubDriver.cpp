@@ -17,6 +17,7 @@
 #include "PublisherListener.h"
 #include "tests/DCPS/common/TestSupport.h"
 #include "tests/Utils/ExceptionStreams.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 
 #include <ace/Arg_Shifter.h>
@@ -943,6 +944,17 @@ PubDriver::allocator_test ()
 
   const SerializedSizeBound bound = MarshalTraits< ::Xyz::Foo>::serialized_size_bound(encoding);
 
+  TransportConfig_rch tc;
+  RcHandle<EntityImpl> entity = dynamic_rchandle_cast<EntityImpl>(rchandle_from(foo_datawriter_servant_));
+  while (entity) {
+    tc = entity->transport_config();
+    entity = entity->parent();
+  }
+
+  if (!tc) {
+    tc = TheTransportRegistry->global_config();
+  }
+
   // Allocate serialized foo data from pre-allocated pool
   for (size_t i = 1; i <= n_chunks; i ++) {
     foo2.sample_sequence = static_cast<CORBA::Long>(i);
@@ -951,7 +963,7 @@ PubDriver::allocator_test ()
 
     TEST_CHECK(ret == ::DDS::RETCODE_OK);
 
-    if (bound) {
+    if (bound && tc->instances_[0]->transport_type_ != "rtps_udp") {
       TEST_CHECK(foo_datawriter_servant_->data_allocator() != 0);
       TEST_CHECK(foo_datawriter_servant_->data_allocator()->allocs_from_heap_ == 0);
       TEST_CHECK(foo_datawriter_servant_->data_allocator()->allocs_from_pool_ == static_cast<unsigned long>(i));
@@ -968,7 +980,7 @@ PubDriver::allocator_test ()
 
     TEST_CHECK(ret == ::DDS::RETCODE_OK);
 
-    if (bound) {
+    if (bound && tc->instances_[0]->transport_type_ != "rtps_udp") {
       TEST_CHECK(foo_datawriter_servant_->data_allocator() != 0);
       TEST_CHECK(foo_datawriter_servant_->data_allocator()->allocs_from_heap_ == static_cast<unsigned long>(i));
       TEST_CHECK(foo_datawriter_servant_->data_allocator()->allocs_from_pool_ == static_cast<unsigned long>(n_chunks));

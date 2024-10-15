@@ -16,6 +16,8 @@
 #include <ace/OS_main.h>
 #include <ace/streams.h>
 #include "tests/Utils/ExceptionStreams.h"
+#include "tests/Utils/DistributedConditionSet.h"
+#include "tests/Utils/StatusMatching.h"
 
 #include "dds/DCPS/StaticIncludes.h"
 
@@ -26,6 +28,9 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   try {
+    DistributedConditionSet_rch dcs =
+      OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
     DDS::DomainParticipant_var participant =
@@ -81,16 +86,16 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       cerr << "create_datawriter failed." << endl;
       exit(1);
     }
+
+    Utils::wait_match(dw, 1, Utils::EQ);
+    dcs->wait_for("publisher", "subscriber", "ready");
+
     Writer* writer = new Writer(dw.in());
 
     writer->start ();
-    while ( !writer->is_finished()) {
-      ACE_Time_Value delay(0, 250000);
-      ACE_OS::sleep(delay);
-    }
-
-    // Cleanup
     writer->end ();
+    dcs->wait_for("publisher", "subscriber", "done");
+
     delete writer;
     participant->delete_contained_entities();
     dpf->delete_participant(participant.in ());

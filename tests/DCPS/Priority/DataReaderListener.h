@@ -58,10 +58,6 @@ namespace Test {
         DDS::DataReader_ptr reader,
         const ::OpenDDS::DCPS::SubscriptionLostStatus & status);
 
-    virtual void on_budget_exceeded (
-        DDS::DataReader_ptr reader,
-        const ::OpenDDS::DCPS::BudgetExceededStatus& status);
-
     /// Current number of samples that have been received.
     unsigned int count() const;
 

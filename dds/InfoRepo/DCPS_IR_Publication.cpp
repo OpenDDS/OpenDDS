@@ -540,7 +540,11 @@ bool DCPS_IR_Publication::set_qos(const DDS::DataWriterQos & qos,
                                   Update::SpecificQos& specificQos)
 {
   bool need_evaluate = false;
-  bool u_dw_qos = !(qos_ == qos);
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+  const bool publish_ownership_strength = qos_.ownership.kind == DDS::EXCLUSIVE_OWNERSHIP_QOS
+    && qos_.ownership_strength.value != qos.ownership_strength.value;
+#endif
+  const bool u_dw_qos = !(qos_ == qos);
 
   if (u_dw_qos) {
     if (OpenDDS::DCPS::should_check_association_upon_change(qos_, qos)) {
@@ -559,6 +563,13 @@ bool DCPS_IR_Publication::set_qos(const DDS::DataWriterQos & qos,
 
     publisherQos_ = publisherQos;
   }
+
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+  if (publish_ownership_strength) {
+    DCPS_IR_Topic_Description* description = this->topic_->get_topic_description();
+    description->update_ownership_strength(this, qos_.ownership_strength.value);
+  }
+#endif
 
   if (need_evaluate) {
     // Check if any existing association need be removed first.

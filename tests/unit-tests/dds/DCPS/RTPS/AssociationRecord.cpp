@@ -11,6 +11,8 @@
 #include <dds/DCPS/RTPS/AssociationRecord.h>
 #include <dds/DCPS/RTPS/ICE/Ice.h>
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
 
@@ -211,6 +213,11 @@ public:
   {
     return WeakRcHandle<OpenDDS::ICE::Endpoint>();
   }
+
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+  virtual void update_ownership_strength(const GUID_t&,
+                                         CORBA::Long) {}
+#endif
 };
 
 TEST(dds_DCPS_RTPS_AssociationRecord, ReaderAssociationRecord_ctor)

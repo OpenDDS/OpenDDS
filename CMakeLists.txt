@@ -90,13 +90,11 @@ if(NOT CMAKE_CROSSCOMPILING)
 endif()
 
 add_subdirectory(dds) # OpenDDS_Dcps
-add_subdirectory(dds/DCPS/transport/multicast)
 add_subdirectory(dds/DCPS/RTPS)
 add_subdirectory(dds/DCPS/transport/rtps_udp)
 add_subdirectory(dds/DCPS/transport/shmem)
 add_subdirectory(dds/DCPS/transport/tcp)
 add_subdirectory(dds/DCPS/InfoRepoDiscovery)
-add_subdirectory(dds/DCPS/transport/udp)
 add_subdirectory(dds/InfoRepo)
 if(OPENDDS_XERCES3)
   add_subdirectory(dds/DCPS/QOS_XML_Handler)

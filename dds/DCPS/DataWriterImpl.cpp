@@ -13,7 +13,6 @@
 #include "DomainParticipantImpl.h"
 #include "FeatureDisabledQosCheck.h"
 #include "GuidConverter.h"
-#include "MonitorFactory.h"
 #include "PublicationInstance.h"
 #include "PublisherImpl.h"
 #include "SendStateDataSampleList.h"
@@ -103,9 +102,6 @@ DataWriterImpl::DataWriterImpl()
   publication_match_status_.current_count = 0;
   publication_match_status_.current_count_change = 0;
   publication_match_status_.last_subscription_handle = DDS::HANDLE_NIL;
-
-  monitor_.reset(TheServiceParticipant->monitor_factory_->create_data_writer_monitor(this));
-  periodic_monitor_.reset(TheServiceParticipant->monitor_factory_->create_data_writer_periodic_monitor(this));
 }
 
 // This method is called when there are no longer any reference to the
@@ -419,10 +415,6 @@ DataWriterImpl::association_complete_i(const GUID_t& remote_id)
       expression_params = it->second.expression_params_;
 #endif
     }
-  }
-
-  if (this->monitor_) {
-    this->monitor_->report();
   }
 
   if (!is_bit_) {
@@ -1548,10 +1540,6 @@ DataWriterImpl::enable()
   const DDS::ReturnCode_t writer_enabled_result =
     publisher->writer_enabled(topic_name_.in(), this);
 
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
-
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 
   // Move cached data from the durability cache to the unsent data
@@ -1622,10 +1610,6 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
                       ACE_TEXT("register instance with container failed, returned <%C>.\n"),
                       retcode_to_string(ret)),
                      ret);
-  }
-
-  if (this->monitor_) {
-    this->monitor_->report();
   }
 
   DataSampleElement* element = 0;

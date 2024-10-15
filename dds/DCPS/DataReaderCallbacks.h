@@ -12,6 +12,8 @@
 #include "DiscoveryListener.h"
 #include "RcObject.h"
 
+#include "dds/OpenDDSConfigWrapper.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -66,6 +68,11 @@ public:
                                const TransportLocatorSeq& /*locators*/) { }
 
   virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint() = 0;
+
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+  virtual void update_ownership_strength(const GUID_t& pub_id,
+                                         CORBA::Long ownership_strength) = 0;
+#endif
 };
 
 typedef RcHandle<DataReaderCallbacks> DataReaderCallbacks_rch;

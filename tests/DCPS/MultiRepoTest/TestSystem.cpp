@@ -61,10 +61,6 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
       this->config_.publisherDomain(),
       OpenDDS::DCPS::Discovery::DEFAULT_REPO
     );
-
-#if 1
-    TheServiceParticipant->monitor_factory_->initialize();
-#endif
   }
 
   //
@@ -316,9 +312,14 @@ TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
              CORBA::String_var(description->get_name()).in(),
              CORBA::String_var(description->get_type_name()).in()
   ));
+
+  DDS::DataReaderQos dr_qos;
+  this->subscriber_->get_default_datareader_qos(dr_qos);
+  dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+
   this->dataReader_ = this->subscriber_->create_datareader(
                         description.in(),
-                        DATAREADER_QOS_DEFAULT,
+                        dr_qos,
                         this->listener_.in (),
                         ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
                       );

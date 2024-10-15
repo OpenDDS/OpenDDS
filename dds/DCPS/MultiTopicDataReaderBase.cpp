@@ -94,7 +94,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
 {
   using namespace std;
   DDS::DataReader_var dr = multitopic->get_type_support()->create_datareader();
-  resulting_reader_ = DataReaderEx::_narrow(dr);
+  resulting_reader_ = DDS::DataReader::_narrow(dr);
   DataReaderImpl* resulting_impl =
     dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
 
@@ -105,8 +105,6 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
   }
 
   resulting_impl->enable_multi_topic(multitopic);
-  resulting_impl->raw_latency_buffer_size() = parent->raw_latency_buffer_size();
-  resulting_impl->raw_latency_buffer_type() = parent->raw_latency_buffer_type();
 
   DDS::DomainParticipant_var participant = parent->get_participant();
   DomainParticipantImpl* dpi = dynamic_cast<DomainParticipantImpl*>(participant.in());
@@ -466,27 +464,6 @@ DDS::ReturnCode_t MultiTopicDataReaderBase::get_matched_publication_data(
     publication_handle);
 }
 #endif
-
-void MultiTopicDataReaderBase::get_latency_stats(LatencyStatisticsSeq& stats)
-{
-  resulting_reader_->get_latency_stats(stats);
-}
-
-void MultiTopicDataReaderBase::reset_latency_stats()
-{
-  resulting_reader_->reset_latency_stats();
-}
-
-CORBA::Boolean MultiTopicDataReaderBase::statistics_enabled()
-{
-  return resulting_reader_->statistics_enabled();
-}
-
-void MultiTopicDataReaderBase::statistics_enabled(
-  CORBA::Boolean statistics_enabled)
-{
-  resulting_reader_->statistics_enabled(statistics_enabled);
-}
 
 }
 }

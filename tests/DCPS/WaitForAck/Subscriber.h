@@ -18,30 +18,30 @@ namespace Test {
 class Options;
 
 class Subscriber {
-  public:
-    /// Construct with option information.
-    Subscriber( const Options& options);
+public:
+  /// Construct with option information.
+  Subscriber( const Options& options);
 
-    ~Subscriber();
+  ~Subscriber();
 
-    /// Execute the test.
-    void run();
+  /// Execute the test.
+  void run();
 
-  private:
-    /// Test options.
-    const Options& options_;
+private:
+  /// Test options.
+  const Options& options_;
 
-    /// DomainParticipant.
-    DDS::DomainParticipant_var participant_;
+  /// DomainParticipant.
+  DDS::DomainParticipant_var participant_;
 
-    /// Two readers.
-    OpenDDS::DCPS::DataReaderEx_var reader_[ 2];
+  /// Two readers.
+  DDS::DataReader_var reader_[ 2];
 
-    /// Blocking object for test synchronization.
-    DDS::WaitSet_var waiter_;
+  /// Blocking object for test synchronization.
+  DDS::WaitSet_var waiter_;
 
-    /// Blocking condition for test synchronization.
-    DDS::StatusCondition_var status_;
+  /// Blocking condition for test synchronization.
+  DDS::StatusCondition_var status_;
 };
 
 } // End of namespace Test
