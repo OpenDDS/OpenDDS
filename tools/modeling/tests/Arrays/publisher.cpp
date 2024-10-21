@@ -42,7 +42,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
         message.subject    = CORBA::string_dup("Review");
         message.text       = CORBA::string_dup("Worst. Movie. Ever.");
         message.count      = 0;
-        // wchar array must be explictly cleared; otherwise, serialization error would occur when
+        // wchar array must be explicitly cleared; otherwise, serialization error would occur when
         // sizeof(wchar_t) > 2 and one of the value in the array could not fit into 16 bits.
         std::fill(message.wchars, message.wchars+sizeof(message.wchars)/sizeof(wchar_t), L'0');
 
