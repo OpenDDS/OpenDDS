@@ -4435,7 +4435,7 @@ Wed May 24 17:54:31 UTC 2017  Johnny Willemsen  <jwillemsen@remedy.nl>
         * dds/DCPS/transport/framework/TransportRegistry.cpp:
 
           Use an ACE_Unmanaged_Singleton because not the service
-          participant is explictly closing the transport registry, no need
+          participant is explicitly closing the transport registry, no need
           to redo this at process shutdown again
 
           * dds/DCPS/transport/framework/TransportRegistry.cpp:

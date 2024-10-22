@@ -290,7 +290,7 @@ Appendable Extensibility
 
 Mutable extensibility requires a certain amount of overhead both in terms of processing and network traffic.
 A more efficient but less flexible form of extensibility is :ref:`xtypes--appendable`.
-It's the default, but can be explictly declared using the :ref:`xtypes--anno-appendable` annotation.
+It's the default, but can be explicitly declared using the :ref:`xtypes--anno-appendable` annotation.
 Appendable is limited in that members can only be added to or removed from the end of the type.
 With appendable, the initial version of the weather station IDL would be:
 

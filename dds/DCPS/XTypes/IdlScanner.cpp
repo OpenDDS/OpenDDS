@@ -115,7 +115,7 @@ IdlScanner::scan_token(DDS::DynamicType_ptr type)
     break;
   }
   case TK_CHAR16:
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERRROR: IdlScanner::scan_token does not support wide characters\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: IdlScanner::scan_token does not support wide characters\n"));
     break;
   case TK_STRING8: {
     if (scan_string_value(false)) {
@@ -124,7 +124,7 @@ IdlScanner::scan_token(DDS::DynamicType_ptr type)
     break;
   }
   case TK_STRING16:
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERRROR: IdlScanner::scan_token does not support wide strings\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: IdlScanner::scan_token does not support wide strings\n"));
     break;
   case TK_ENUM: {
     const IdlToken token = scan_identifier();
