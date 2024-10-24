@@ -34,12 +34,6 @@ elsif ($test->flag('tcp')) {
 elsif ($test->flag('shmem')) {
     $pub_opts .= " -t shmem";
 }
-elsif ($test->flag('multicast')) {
-    $pub_opts .= " -t multicast";
-}
-elsif ($test->flag('udp')) {
-    $pub_opts .= " -t udp";
-}
 
 $test->process("containsentity", "containsentity", "$debugOpts $pub_opts");
 $test->start_process("containsentity");

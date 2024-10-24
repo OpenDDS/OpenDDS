@@ -131,38 +131,6 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
     }
   }
 #endif /* ZERO_COPY_TAKE */
-
-  if( this->verbose_ && BE_REALLY_VERBOSE) {
-    ::OpenDDS::DCPS::DataReaderEx_var readerex
-      = ::OpenDDS::DCPS::DataReaderEx::_narrow( reader);
-    if( !CORBA::is_nil( readerex.in())) {
-      ::OpenDDS::DCPS::LatencyStatisticsSeq statistics;
-      readerex->get_latency_stats( statistics);
-      std::stringstream buffer;
-      for( unsigned long index = 0; index < statistics.length(); ++index) {
-        buffer << "Writer[ " << to_string(statistics[ index].publication) << "] - ";
-        buffer << "samples==" << std::dec << statistics[ index].n;
-        buffer << ", mean==" << statistics[ index].mean;
-        buffer << ", minimum==" << statistics[ index].minimum;
-        buffer << ", maximum==" << statistics[ index].maximum;
-        buffer << ", variance==" << statistics[ index].variance;
-        buffer << std::endl;
-      }
-      ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DataReaderListener::on_data_available() - ")
-        ACE_TEXT("statistics for %d writers at sample %d:\n%C"),
-        statistics.length(),
-        this->total_messages_,
-        buffer.str().c_str()
-      ));
-
-    } else {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
-        ACE_TEXT("failed to narrow extended reader to gather statistics.\n")
-      ));
-    }
-  }
 }
 
 void
@@ -229,12 +197,5 @@ void
 Test::DataReaderListener::on_subscription_lost (
     DDS::DataReader_ptr,
     ::OpenDDS::DCPS::SubscriptionLostStatus const &)
-{
-}
-
-void
-Test::DataReaderListener::on_budget_exceeded (
-    DDS::DataReader_ptr,
-    const ::OpenDDS::DCPS::BudgetExceededStatus&)
 {
 }

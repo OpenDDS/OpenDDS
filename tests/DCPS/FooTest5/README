@@ -6,20 +6,13 @@ A basic system feature test:
 
   run_test.pl          - single instance, TCP
 
-  run_test.pl udp      - single instance, UDP
-
   run_test.pl mi       - multiple instances, TCP
-
-  run_test.pl udp mi   - multiple instances, UDP
 
   run_test.pl nokey mi - no key, TCP
 
     Note: No key tests just have one instance.
           We pass "mi" for using the same parameters as in multiple
           instances test.
-
-  run_test.pl nokey udp mi  - no key, UDP
-
 
   run_test.pl blocking          - long timeout of writes, TCP
 
@@ -35,9 +28,9 @@ A basic system feature test:
                                 two datawriters, two datareaders, TCP
 
   run_test.pl mixed_trans      - Two datawriters - one using TCP,
-                                                  one using UDP.
+                                                  one using RTPS.
                                 Two datareaders - one using TCP,
-                                                  one using UDP.
+                                                  one using RTPS.
 
 
 Note: This test can optionally use the MCast transport.

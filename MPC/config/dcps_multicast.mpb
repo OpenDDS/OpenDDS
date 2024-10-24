@@ -1,7 +1,0 @@
-//
-//
-
-project {
-  libs        += OpenDDS_Multicast
-  after       += OpenDDS_Multicast
-}

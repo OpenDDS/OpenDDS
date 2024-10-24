@@ -26,7 +26,6 @@ namespace { // anonymous namespace for file scope.
   enum { DEFAULT_TEST_DOMAIN     = 521};
   enum { DEFAULT_TEST_DURATION   =  60};
   const char DEFAULT_TRANSPORT_KEY[] = "tcp1";
-  enum { DEFAULT_RAW_BUFFER_SIZE = 500};
 
   // const unsigned long DEFAULT_TEST_DOMAIN    = 521;
   // const unsigned long DEFAULT_TEST_DURATION  =  -1;
@@ -34,11 +33,6 @@ namespace { // anonymous namespace for file scope.
                       DEFAULT_TRANSPORT_TYPE = Test::Options::TCP;
   // const unsigned int  DEFAULT_TRANSPORT_KEY  =   1;
   const char*         DEFAULT_TEST_TOPICNAME = "TestTopic";
-  const std::string   DEFAULT_RAW_OUTPUT_FILENAME = std::string();
-  const OpenDDS::DCPS::DataCollector< double>::OnFull
-                      DEFAULT_RAW_BUFFER_TYPE
-                        = OpenDDS::DCPS::DataCollector< double>::KeepNewest;
-//                      = OpenDDS::DCPS::DataCollector< double>::KeepOldest;
 
   // Command line argument definitions.
   const ACE_TCHAR* TRANSPORT_TYPE_ARGUMENT = ACE_TEXT("-t");
@@ -46,7 +40,6 @@ namespace { // anonymous namespace for file scope.
   const ACE_TCHAR* DURATION_ARGUMENT       = ACE_TEXT("-c");
   const ACE_TCHAR* SCENARIO_ARGUMENT       = ACE_TEXT("-f");
   const ACE_TCHAR* ID_ARGUMENT             = ACE_TEXT("-i");
-  const ACE_TCHAR* RAW_DATA_FILENAME_ARGUMENT = ACE_TEXT("-r");
 
   // Scenario configuration file section names.
   const ACE_TCHAR* PUBLICATION_SECTION_NAME = ACE_TEXT("publication");
@@ -100,10 +93,7 @@ Options::Options(int argc, ACE_TCHAR** argv, char** /* envp */)
    duration_(          DEFAULT_TEST_DURATION),
    transportType_(     DEFAULT_TRANSPORT_TYPE),
    transportKey_(      DEFAULT_TRANSPORT_KEY),
-   topicName_(         DEFAULT_TEST_TOPICNAME),
-   rawOutputFilename_( DEFAULT_RAW_OUTPUT_FILENAME),
-   raw_buffer_size_(   DEFAULT_RAW_BUFFER_SIZE),
-   raw_buffer_type_(   DEFAULT_RAW_BUFFER_TYPE)
+   topicName_(         DEFAULT_TEST_TOPICNAME)
 {
   ACE_Arg_Shifter parser( argc, argv);
   parser.ignore_arg(); // Ignore the first arg, it's executable path and name.
@@ -151,10 +141,6 @@ Options::Options(int argc, ACE_TCHAR** argv, char** /* envp */)
 
     } else if( 0 != (currentArg = parser.get_the_parameter( SCENARIO_ARGUMENT))) {
       this->configureScenarios( currentArg);
-      parser.consume_arg();
-
-    } else if( 0 != (currentArg = parser.get_the_parameter( RAW_DATA_FILENAME_ARGUMENT))) {
-      this->rawOutputFilename_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
       parser.consume_arg();
 
     } else if( 0 <= (parser.cur_arg_strncasecmp( VERBOSE_ARGUMENT))) {

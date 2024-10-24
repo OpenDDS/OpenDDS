@@ -35,13 +35,6 @@ namespace {
   {
     return lhs->name() < rhs->name();
   }
-
-  // transport type to try loading if none are loaded when DCPS attempts to use
-#ifdef OPENDDS_SAFETY_PROFILE
-  const char FALLBACK_TYPE[] = "rtps_udp";
-#else
-  const char FALLBACK_TYPE[] = "tcp";
-#endif
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -392,7 +385,7 @@ TransportRegistry::fix_empty_default()
     return global_config_;
   }
   TransportConfig_rch global_config = global_config_;
-  load_transport_lib_i(FALLBACK_TYPE);
+  load_transport_lib_i("rtps_udp");
   return global_config;
 }
 

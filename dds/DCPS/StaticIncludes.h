@@ -23,16 +23,8 @@
 #    include "transport/rtps_udp/RtpsUdp.h"
 #  endif
 
-#  if defined OPENDDS_UDP_HAS_DLL && !OPENDDS_UDP_HAS_DLL
-#    include "transport/udp/Udp.h"
-#  endif
-
 #  if defined OPENDDS_SHMEM_HAS_DLL && !OPENDDS_SHMEM_HAS_DLL
 #    include "transport/shmem/Shmem.h"
-#  endif
-
-#  if defined OPENDDS_MULTICAST_HAS_DLL && !OPENDDS_MULTICAST_HAS_DLL
-#    include "transport/multicast/Multicast.h"
 #  endif
 
 #  if defined OPENDDS_SECURITY_HAS_DLL && !OPENDDS_SECURITY_HAS_DLL
@@ -48,8 +40,9 @@
 #    include "RTPS/RtpsDiscovery.h"
 #    include "transport/rtps_udp/RtpsUdp.h"
 #  else
-#    include "InfoRepoDiscovery/InfoRepoDiscovery.h"
-#    include "transport/tcp/Tcp.h"
+// tcp is needed for InfoRepoDiscovery
+#    include "RTPS/RtpsDiscovery.h"
+#    include "transport/rtps_udp/RtpsUdp.h"
 #  endif
 #endif
 

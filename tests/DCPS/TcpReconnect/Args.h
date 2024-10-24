@@ -36,13 +36,7 @@ parse_args(int argc, ACE_TCHAR *argv[])
     switch (c) {
     case 't':
 
-      if (ACE_OS::strcmp(get_opts.opt_arg(), ACE_TEXT("udp")) == 0) {
-        transport_type = "udp";
-
-      } else if (ACE_OS::strcmp(get_opts.opt_arg(), ACE_TEXT("multicast")) == 0) {
-        transport_type = "multicast";
-
-      } else if (ACE_OS::strcmp(get_opts.opt_arg(), ACE_TEXT("tcp")) == 0) {
+      if (ACE_OS::strcmp(get_opts.opt_arg(), ACE_TEXT("tcp")) == 0) {
         transport_type = "tcp";
       }
 

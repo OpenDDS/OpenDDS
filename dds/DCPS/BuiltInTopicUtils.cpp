@@ -10,7 +10,6 @@
 #include "BuiltInTopicUtils.h"
 
 #include "BuiltInTopicDataReaderImpls.h"
-#include "BitPubListenerImpl.h"
 #include "Logging.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -250,39 +249,6 @@ void BitSubscriber::remove_thread_status(const InternalThreadBuiltinTopicData& t
   bit->set_instance_state(bit->lookup_instance(ts), DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
 #else
   ACE_UNUSED_ARG(ts);
-#endif
-}
-
-void BitSubscriber::bit_pub_listener_hack(DomainParticipantImpl* participant)
-{
-#ifndef DDS_HAS_MINIMUM_BIT
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
-  if (!bit_subscriber_) {
-    return;
-  }
-
-  DDS::DataReader_var dr =
-    bit_subscriber_->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
-  DDS::PublicationBuiltinTopicDataDataReader_var bit_pub_dr =
-    DDS::PublicationBuiltinTopicDataDataReader::_narrow(dr);
-
-  if (bit_pub_dr) {
-    DDS::DataReaderListener_var listener = bit_pub_dr->get_listener();
-    if (!listener) {
-      DDS::DataReaderListener_var bit_pub_listener =
-        new BitPubListenerImpl(participant);
-      bit_pub_dr->set_listener(bit_pub_listener, DDS::DATA_AVAILABLE_STATUS);
-      // Must call on_data_available when attaching a listener late - samples may be waiting
-      DataReaderImpl* reader = dynamic_cast<DataReaderImpl*>(bit_pub_dr.in());
-      if (!reader) {
-        return;
-      }
-      TheServiceParticipant->job_queue()->enqueue(make_rch<DataReaderImpl::OnDataAvailable>(bit_pub_listener, rchandle_from(reader), true, false, false));
-    }
-  }
-#else
-  ACE_UNUSED_ARG(participant);
 #endif
 }
 

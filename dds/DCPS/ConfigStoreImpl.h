@@ -120,6 +120,7 @@ public:
   ~ConfigStoreImpl();
 
   DDS::Boolean has(const char* key);
+  DDS::Boolean has_prefix(const char* prefix);
 
   void set_boolean(const char* key,
                    DDS::Boolean value);

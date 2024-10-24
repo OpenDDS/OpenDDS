@@ -1,6 +1,10 @@
 #include "PubDriver.h"
 #include "TestException.h"
 #include "tests/DCPS/FooType3/FooDefC.h"
+
+#include <tests/Utils/DistributedConditionSet.h>
+#include "tests/Utils/StatusMatching.h"
+
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/PublisherImpl.h"
@@ -17,6 +21,7 @@
 #include "PublisherListener.h"
 #include "tests/DCPS/common/TestSupport.h"
 #include "tests/Utils/ExceptionStreams.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 
 #include <ace/Arg_Shifter.h>
@@ -46,8 +51,7 @@ PubDriver::PubDriver()
   sub_handle_ (0),
   history_depth_ (1),
   test_to_run_ (REGISTER_TEST),
-  shutdown_ (0),
-  sub_ready_filename_(ACE_TEXT("sub_ready.txt"))
+  shutdown_ (0)
 {
 }
 
@@ -60,10 +64,13 @@ PubDriver::~PubDriver()
 void
 PubDriver::run(int& argc, ACE_TCHAR* argv[])
 {
-  parse_args(argc, argv);
-  initialize(argc, argv);
+  DistributedConditionSet_rch dcs =
+    OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
 
-  run();
+  parse_args(argc, argv);
+  initialize(dcs, argc, argv);
+
+  run(dcs);
 
   end();
 }
@@ -102,11 +109,6 @@ PubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
       test_to_run_ = ACE_OS::atoi (current_arg);
       arg_shifter.consume_arg ();
     }
-    else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-f"))) != 0)
-    {
-      sub_ready_filename_ = current_arg;
-      arg_shifter.consume_arg ();
-    }
     // The '-?' option
     else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0) {
       ACE_DEBUG((LM_DEBUG,
@@ -126,7 +128,7 @@ PubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
 
 
 void
-PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
+PubDriver::initialize(DistributedConditionSet_rch dcs, int& argc, ACE_TCHAR *argv[])
 {
   ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
@@ -217,7 +219,7 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
   publisher_->get_default_datawriter_qos (default_dw_qos);
 
   ::DDS::DataWriterQos new_default_dw_qos = default_dw_qos;
-  new_default_dw_qos.reliability.kind  = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
+  new_default_dw_qos.transport_priority.value = 7;
 
   TEST_CHECK (! (new_default_dw_qos == default_dw_qos));
   TEST_CHECK (publisher_->set_default_datawriter_qos (new_default_dw_qos)
@@ -313,6 +315,8 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
     dw_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   }
 
+  dcs->post("pub", "ready");
+
   datawriter_
     = publisher_->create_datawriter(topic_.in (),
                                     dw_qos,
@@ -360,7 +364,7 @@ PubDriver::end()
 }
 
 void
-PubDriver::run()
+PubDriver::run(DistributedConditionSet_rch dcs)
 {
   OpenDDS::DCPS::GUID_t pub_id = datawriter_servant_->get_guid ();
   std::stringstream buffer;
@@ -377,44 +381,18 @@ PubDriver::run()
               ACE_TEXT("(%P|%t) PubDriver::run, ")
               ACE_TEXT(" Wait for subscriber start.\n")));
 
-  // Wait for the sub to be ready.
-  FILE* sub_ready = 0;
-  do
-    {
-      ACE_Time_Value small_time(0,250000);
-      ACE_OS::sleep (small_time);
-      sub_ready = ACE_OS::fopen (sub_ready_filename_.c_str (), ACE_TEXT("r"));
-    } while (0 == sub_ready);
-
-  ACE_OS::fclose(sub_ready);
+  dcs->wait_for("pub", "sub", "ready");
 
   // Let the subscriber catch up before we broadcast.
-  ::DDS::InstanceHandleSeq handles;
-  while (1)
-    {
-      foo_datawriter_->get_matched_subscriptions(handles);
-      if (handles.length() > 0) {
-        sub_handle_ = handles[0];
-        break;
-      } else {
-        ACE_OS::sleep(ACE_Time_Value(0,200000));
-      }
-    }
+  Utils::wait_match(datawriter_, 1);
 
-  run_test (test_to_run_);
+  run_test (dcs, test_to_run_);
 
-  // Wait for the subscriber to go away...
-  while (1)
-    {
-      foo_datawriter_->get_matched_subscriptions(handles);
-      if (handles.length() == 0)
-        break;
-      else
-        ACE_OS::sleep(ACE_Time_Value(0,200000));
-    }
+  dcs->wait_for("pub", "sub", "done");
 }
 
-void PubDriver::run_test (int test_to_run)
+void PubDriver::run_test (DistributedConditionSet_rch dcs,
+                          int test_to_run)
 {
   // Only allow run one test at one time.
   switch (test_to_run)
@@ -435,7 +413,7 @@ void PubDriver::run_test (int test_to_run)
     resume_test ();
     break;
   case LISTENER_TEST :
-    listener_test ();
+    listener_test (dcs);
     break;
   case ALLOCATOR_TEST :
     allocator_test ();
@@ -697,7 +675,7 @@ PubDriver::resume_test ()
 
 // listener and status test
 void
-PubDriver::listener_test ()
+PubDriver::listener_test (DistributedConditionSet_rch dcs)
 {
   // Create DomainParticipantListener, PublisherListener and
   // DataWriterListener.
@@ -830,10 +808,7 @@ PubDriver::listener_test ()
   ::DDS::StatusMask changed_status
     = foo_datawriter_->get_status_changes ();
 
-  // Both OFFERED_INCOMPATIBLE_QOS_STATUS and PUBLICATION_MATCHED_STATUS status
-  // are changed.
   TEST_CHECK ((changed_status & ::DDS::OFFERED_INCOMPATIBLE_QOS_STATUS) != 0);
-  TEST_CHECK ((changed_status & ::DDS::PUBLICATION_MATCHED_STATUS) != 0);
 
   // Test get_matched_subscriptions.
 
@@ -855,17 +830,12 @@ PubDriver::listener_test ()
   TEST_CHECK (foo_datawriter_->get_publication_matched_status (match_status) == ::DDS::RETCODE_OK);
 
   TEST_CHECK (match_status.total_count == 1);
-  // The listener is set after add_association, so the total_count_change
-  // should be 1 since the datawriter is associated with one datareader.
-  TEST_CHECK (match_status.total_count_change == 1);
-  TEST_CHECK (match_status.last_subscription_handle == sub_handle_);
+  TEST_CHECK (match_status.total_count_change == 0);
 
   // Call register_test to send a few messages to remote subscriber.
   register_test ();
 
-  // Need a little sleep here to let the samples from register_test
-  // to get through before we do the remove_associations().
-  ACE_OS::sleep(2);
+  dcs->wait_for("pub", "sub", "done");
 
   //Test remove_associations
 
@@ -943,6 +913,17 @@ PubDriver::allocator_test ()
 
   const SerializedSizeBound bound = MarshalTraits< ::Xyz::Foo>::serialized_size_bound(encoding);
 
+  TransportConfig_rch tc;
+  RcHandle<EntityImpl> entity = dynamic_rchandle_cast<EntityImpl>(rchandle_from(foo_datawriter_servant_));
+  while (entity) {
+    tc = entity->transport_config();
+    entity = entity->parent();
+  }
+
+  if (!tc) {
+    tc = TheTransportRegistry->global_config();
+  }
+
   // Allocate serialized foo data from pre-allocated pool
   for (size_t i = 1; i <= n_chunks; i ++) {
     foo2.sample_sequence = static_cast<CORBA::Long>(i);
@@ -951,7 +932,7 @@ PubDriver::allocator_test ()
 
     TEST_CHECK(ret == ::DDS::RETCODE_OK);
 
-    if (bound) {
+    if (bound && tc->instances_[0]->transport_type_ != "rtps_udp") {
       TEST_CHECK(foo_datawriter_servant_->data_allocator() != 0);
       TEST_CHECK(foo_datawriter_servant_->data_allocator()->allocs_from_heap_ == 0);
       TEST_CHECK(foo_datawriter_servant_->data_allocator()->allocs_from_pool_ == static_cast<unsigned long>(i));
@@ -968,7 +949,7 @@ PubDriver::allocator_test ()
 
     TEST_CHECK(ret == ::DDS::RETCODE_OK);
 
-    if (bound) {
+    if (bound && tc->instances_[0]->transport_type_ != "rtps_udp") {
       TEST_CHECK(foo_datawriter_servant_->data_allocator() != 0);
       TEST_CHECK(foo_datawriter_servant_->data_allocator()->allocs_from_heap_ == static_cast<unsigned long>(i));
       TEST_CHECK(foo_datawriter_servant_->data_allocator()->allocs_from_pool_ == static_cast<unsigned long>(n_chunks));

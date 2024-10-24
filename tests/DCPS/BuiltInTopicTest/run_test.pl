@@ -13,7 +13,43 @@ use strict;
 
 PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
 
-my $test = new PerlDDS::TestFramework();
+
+
+my %configs = (
+  ir_tcp => {
+    discovery => 'info_repo',
+    file => {
+      common => {
+        DCPSDefaultDiscovery => 'DEFAULT_REPO',
+        DCPSGlobalTransportConfig => '$file'
+      },
+      'transport/tcp' => {
+        transport_type => 'tcp'
+      }
+    }
+  },
+  rtps_rtps => {
+    discovery => 'rtps',
+    file => {
+      common => {
+        DCPSGlobalTransportConfig => '$file'
+      },
+      'domain/111' => {
+        DiscoveryConfig => 'uni_rtps'
+      },
+      'rtps_discovery/uni_rtps' => {
+        SedpMulticast => '0',
+        ResendPeriod => '2'
+      },
+      'transport/the_rtps_transport' => {
+        transport_type => 'rtps_udp',
+        use_multicast => '0'
+      }
+    }
+  }
+);
+
+my $test = new PerlDDS::TestFramework(configs => \%configs, config => 'rtps_rtps');
 
 # Run at high debug level for additional function coverage.
 $test->{dcps_debug_level} = 8;
@@ -24,13 +60,13 @@ $test->{add_transport_config} = 0;
 $test->report_unused_flags(1);
 $test->setup_discovery();
 
-my ($rtps_cfg, $rtps_mon) = ($test->{info_repo}->{state} eq 'none') ?
-    ('-DCPSConfigFile rtps_disc.ini', '-t 0') : ('', '');
+my ($rtps_mon) = ($test->{discovery} eq 'rtps') ?
+    ('-t 0') : ('');
 
-$test->process("subscriber", "subscriber", $rtps_cfg);
-$test->process("publisher", "publisher", $rtps_cfg);
-$test->process("monitor1", "monitor", "-l 7 $rtps_mon $rtps_cfg");
-$test->process("monitor2", "monitor", "-u $rtps_mon $rtps_cfg");
+$test->process("subscriber", "subscriber");
+$test->process("publisher", "publisher");
+$test->process("monitor1", "monitor", "-l 7 $rtps_mon");
+$test->process("monitor2", "monitor", "-u $rtps_mon");
 
 $test->add_temporary_file("monitor1", "monitor1_done");
 $test->add_temporary_file("monitor2", "monitor2_done");

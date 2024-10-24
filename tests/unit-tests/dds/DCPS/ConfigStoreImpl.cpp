@@ -125,6 +125,18 @@ TEST(dds_DCPS_ConfigStoreImpl, has)
   EXPECT_TRUE(store.has("key"));
 }
 
+TEST(dds_DCPS_ConfigStoreImpl, has_prefix)
+{
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl store(topic);
+  EXPECT_FALSE(store.has_prefix("ke"));
+  store.set_boolean("key", true);
+  EXPECT_TRUE(store.has_prefix("k"));
+  EXPECT_TRUE(store.has_prefix("ke"));
+  EXPECT_TRUE(store.has_prefix("key"));
+  EXPECT_FALSE(store.has_prefix("keyv"));
+}
+
 TEST(dds_DCPS_ConfigStoreImpl, set_get_boolean)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();

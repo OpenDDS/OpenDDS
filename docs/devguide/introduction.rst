@@ -178,7 +178,7 @@ Section 2 of the DDS specification defines five compliance points for a DDS impl
 OpenDDS complies with the entire DDS specification (including all optional profiles).
 This includes the implementation of all Quality of Service policies with the following notes:
 
-* :ref:`qos-reliability` ``RELIABLE_RELIABILITY_QOS`` is supported by the :ref:`rtps-udp-transport`, the :ref:`tcp-transport`, and the :ref:`multicast-transport` (when configured as reliable).
+* :ref:`qos-reliability` ``RELIABLE_RELIABILITY_QOS`` is supported by the :ref:`rtps-udp-transport`, and the :ref:`tcp-transport` (when configured as reliable).
 
 * :ref:`qos-transport-priority` is not implemented as changeable.
 
@@ -316,7 +316,7 @@ Relative to :envvar:`DDS_ROOT`:
 
 * the :ghfile:`dds/` directory contains the source code for OpenDDS.
 * the :ghfile:`tests/` directory contains tests.
-* the :ghfile:`tools/` directory contains tools and libraries like the DCPSInfoRepo, RtpsRelay, and the Modeling SDK.
+* the :ghfile:`tools/` directory contains tools and libraries like the DCPSInfoRepo, and RtpsRelay.
 * the :ghfile:`DevGuideExamples/` directory contains examples used in this guide.
 * the :ghfile:`examples/` directory contains examples *not* used in this guide.
 * the :ghfile:`docs/` directory contains documentation for users and developers of OpenDDS.
@@ -349,8 +349,6 @@ It also makes it easier to replace these libraries with custom ones.
 
   - :ref:`tcp-transport`
   - :ref:`rtps-udp-transport`
-  - :ref:`udp-transport`
-  - :ref:`multicast-transport`
   - :ref:`shmem-transport`
 
 - :ref:`discovery <discovery>` [#plugins-static-disc]_:
@@ -457,50 +455,6 @@ It supports :ref:`reliability <qos-reliability>`.
   :doc:`internet_enabled_rtps`
     For using :ref:`rtps-disc` and the :ref:`rtps-udp-transport` over the internet
 
-.. _udp-transport:
-
-UDP Transport
--------------
-
-The UDP transport (``udp``) uses `unicasted <https://en.wikipedia.org/wiki/Unicast>`__ `UDP <https://en.wikipedia.org/wiki/User_Datagram_Protocol>`__ as the transmission mechanism.
-It doesn't support :ref:`reliability <qos-reliability>` at all.
-
-.. important::
-
-  Library filename: ``OpenDDS_Udp``
-
-  MPC base project name: :ghfile:`\`\`dcps_udp\`\` <MPC/config/dcps_udp.mpb>`
-
-  CMake target Name: :cmake:tgt:`OpenDDS::Udp`
-
-  :ref:`Initialization header <plugins>`: :ghfile:`dds/DCPS/transport/udp/Udp.h`
-
-  :cfg:prop:`[transport]transport_type`: :cfg:val:`udp <[transport]transport_type=udp>`
-
-  Configuration: :ref:`udp-transport-config`
-
-.. _multicast-transport:
-
-Multicast Transport
--------------------
-
-The multicast transport (``mutlicast``) uses `multicasted <https://en.wikipedia.org/wiki/Multicast>`__ `UDP <https://en.wikipedia.org/wiki/User_Datagram_Protocol>`__ as the transmission mechanism.
-It supports :ref:`reliability <qos-reliability>`.
-
-.. important::
-
-  Library filename: ``OpenDDS_Multicast``
-
-  MPC base project name: :ghfile:`\`\`dcps_multicast\`\` <MPC/config/dcps_multicast.mpb>`
-
-  CMake target Name: :cmake:tgt:`OpenDDS::Multicast`
-
-  :ref:`Initialization header <plugins>`: :ghfile:`dds/DCPS/transport/multicast/Multicast.h`
-
-  :cfg:prop:`[transport]transport_type`: :cfg:val:`multicast <[transport]transport_type=multicast>`
-
-  Configuration: :ref:`multicast-transport-config`
-
 .. _shmem-transport:
 
 Shared Memory Transport
@@ -534,8 +488,7 @@ Custom Transports
 
 The transport framework enables application developers to implement their own customized transports.
 Implementing a custom transport involves specializing a number of classes defined in the transport framework.
-The ``udp`` transport provides a good foundation developers may use when creating their own implementation.
-See the :ghfile:`dds/DCPS/transport/udp/` directory for details.
+See the subdirectories in :ghfile:`dds/DCPS/transport/` for details.
 
 .. _discovery:
 
@@ -687,8 +640,6 @@ The following are additional implementation limits that developers need to take 
    In each OpenDDS process, up to 120 domain participants are supported in each domain.
 
 #. Topic names and type identifiers are limited to 256 characters.
-
-#. The :ref:`multicast-transport` does not work with RTPS Discovery due to the way GUIDs are assigned (a warning will be issued if this is attempted).
 
 .. seealso::
 

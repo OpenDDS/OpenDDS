@@ -14,8 +14,8 @@ use strict;
 my $status = 0;
 my $debuglevel = 0;
 
-my $pub_opts = "-ORBDebugLevel $debuglevel -DCPSConfigFile pub.ini -DCPSDebugLevel $debuglevel -DCPSBits 0";
-my $sub_opts = "-DCPSTransportDebugLevel $debuglevel -ORBDebugLevel $debuglevel -DCPSConfigFile sub.ini -DCPSDebugLevel $debuglevel -DCPSBits 0";
+my $pub_opts = "-ORBDebugLevel $debuglevel -DCPSDebugLevel $debuglevel -DCPSBits 0";
+my $sub_opts = "-DCPSTransportDebugLevel $debuglevel -ORBDebugLevel $debuglevel -DCPSDebugLevel $debuglevel -DCPSBits 0";
 my $testcase = "";
 
 if ($ARGV[0] eq 'group') {
@@ -37,7 +37,29 @@ my $dcpsrepo_ior = "repo.ior";
 unlink $dcpsrepo_ior;
 unlink <*.log>;
 
-my $test = new PerlDDS::TestFramework();
+my %configs = (
+    'ir_tcp' => {
+        'discovery' => 'info_repo',
+        'file' => {
+            'common' => {
+                'DCPSGlobalTransportConfig' => 'tcp',
+                'DCPSDebugLevel' => '0',
+                'DCPSInfoRepo' => 'file://repo.ior',
+                'DCPSChunks' => '20',
+                'DCPSChunkAssociationMultiplier' => '10',
+                'DCPSLivelinessFactor' => '80'
+            },
+            'transport/tcp' => {
+                'transport_type' => 'tcp'
+            },
+            'config/tcp' => {
+                'transports' => 'tcp'
+            },
+        }
+    }
+);
+
+my $test = new PerlDDS::TestFramework(configs => \%configs, config => 'ir_tcp');
 
 $test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log ");
 

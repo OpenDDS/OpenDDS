@@ -483,7 +483,6 @@ The exact list of libraries to include depend on what features you're using but 
 
     - Depends on ``$DDS_ROOT/lib/libOpenDDS_Rtps.so``
 
-  - ``$DDS_ROOT/lib/libOpenDDS_Multicast.so``
   - ``$DDS_ROOT/lib/libOpenDDS_Shmem.so``
   - ``$DDS_ROOT/lib/libOpenDDS_Tcp.so``
   - ``$DDS_ROOT/lib/libOpenDDS_Udp.so``
