@@ -267,13 +267,13 @@ TEST_F(dds_DCPS_XTypes_Utils, member_path_resolve_string_path)
   }
 
   // TODO: path with subscript is not supported. Add these when it is supported.
-  // add_type<SimpleKeyArray>();
-  // DDS::DynamicType_var dt2 = get_dynamic_type<SimpleKeyArray>();
+  add_type<SimpleKeyArray>();
+  DDS::DynamicType_var dt2 = get_dynamic_type<SimpleKeyArray>();
 
-  // {
-  //   MemberPath path;
-  //   EXPECT_RC_EQ(path.resolve_string_path(dt2, "values[0].key"));
-  // }
+  {
+    MemberPath path;
+    EXPECT_RC_EQ(path.resolve_string_path(dt2, "values[0].key"), DDS::RETCODE_UNSUPPORTED);
+  }
 }
 
 TEST_F(dds_DCPS_XTypes_Utils, member_path_get_member_from_type)
