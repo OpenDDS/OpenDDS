@@ -106,7 +106,7 @@ TEST_F(dds_DCPS_XTypes_Utils, max_extensibility)
 }
 
 namespace {
-  struct GetKeysCheck{
+  struct GetKeysCheck {
     dds_DCPS_XTypes_Utils& t;
     MemberPathVec expected;
 
@@ -234,6 +234,46 @@ TEST_F(dds_DCPS_XTypes_Utils, get_keys)
     c.check<ImpliedKeys::StructC>();
   }
   */
+}
+
+TEST_F(dds_DCPS_XTypes_Utils, member_path_resolve_string_path)
+{
+  add_type<AppendableMaxAppendableStruct>();
+  DDS::DynamicType_var dt = get_dynamic_type<AppendableMaxAppendableStruct>();
+
+  {
+    MemberPath path;
+    EXPECT_RC_OK(path.resolve_string_path(dt, "fmas.fs.value"));
+    EXPECT_EQ(path.level(), 3u);
+    EXPECT_EQ(path.ids[0], 0u);
+    EXPECT_EQ(path.ids[1], 0u);
+    EXPECT_EQ(path.ids[2], 0u);
+  }
+  {
+    MemberPath path;
+    EXPECT_RC_OK(path.resolve_string_path(dt, "fmas.au.value"));
+    EXPECT_EQ(path.level(), 3u);
+    EXPECT_EQ(path.ids[0], 0u);
+    EXPECT_EQ(path.ids[1], 1u);
+    EXPECT_EQ(path.ids[2], 0u);
+  }
+  {
+    MemberPath path;
+    EXPECT_RC_EQ(path.resolve_string_path(dt, "fmas."), DDS::RETCODE_BAD_PARAMETER);
+  }
+  {
+    MemberPath path;
+    EXPECT_NE(path.resolve_string_path(dt, "fmas.fs.invalid"), DDS::RETCODE_OK);
+  }
+
+  // TODO: path with subscript is not supported. Add these when it is supported.
+  // add_type<SimpleKeyArray>();
+  // DDS::DynamicType_var dt2 = get_dynamic_type<SimpleKeyArray>();
+
+  // {
+  //   MemberPath path;
+  //   EXPECT_RC_EQ(path.resolve_string_path(dt2, "values[0].key"));
+  // }
 }
 
 TEST_F(dds_DCPS_XTypes_Utils, member_path_get_member_from_type)
