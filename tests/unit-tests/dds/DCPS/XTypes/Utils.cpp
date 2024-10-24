@@ -263,7 +263,7 @@ TEST_F(dds_DCPS_XTypes_Utils, member_path_resolve_string_path)
   }
   {
     MemberPath path;
-    EXPECT_NE(path.resolve_string_path(dt, "fmas.fs.invalid"), DDS::RETCODE_OK);
+    EXPECT_RC_EQ(path.resolve_string_path(dt, "fmas.fs.invalid"), DDS::RETCODE_ERROR);
   }
 
   // TODO: path with subscript is not supported. Add these when it is supported.
