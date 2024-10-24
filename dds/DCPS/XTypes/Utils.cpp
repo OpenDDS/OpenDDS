@@ -260,13 +260,15 @@ DDS::ReturnCode_t MemberPath::resolve_string_path(DDS::DynamicType_ptr type, con
     current_type = next;
   }
 
-  if (log_level >= LogLevel::Notice) {
-    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: MemberPath::resolve_string_path: "
-      "parser failed to parse \"%C\"\n", path.c_str()));
-    return DDS::RETCODE_OK;
+  if (parser.error) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: MemberPath::resolve_string_path: "
+                 "parser failed to parse \"%C\"\n", path.c_str()));
+    }
+    return DDS::RETCODE_BAD_PARAMETER;
   }
 
-  return DDS::RETCODE_BAD_PARAMETER;
+  return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t MemberPath::get_member_from_type(
