@@ -76,7 +76,7 @@ GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_
       spdp_replay.address(address_);
       spdp_replay.guid(rtps_guid_to_relay_guid(OpenDDS::DCPS::make_id(guid, OpenDDS::DCPS::ENTITYID_PARTICIPANT)));
       if (spdp_replay_writer_->write(spdp_replay, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: GuidPartitionTable::insert failed to write Relay Partitions\n"));
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: GuidPartitionTable::insert failed to write SPDP Replay\n"));
       }
     }
   }
