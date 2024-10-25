@@ -108,7 +108,7 @@ void ThreadStatusManager::add_thread(const String& name)
   map_.insert(std::make_pair(thread_id, Thread(bit_key)));
 }
 
-void ThreadStatusManager::active(bool nested)
+void ThreadStatusManager::update_current_thread(Thread::ThreadStatus status, bool nested)
 {
   if (!update_thread_status()) {
     return;
@@ -122,31 +122,12 @@ void ThreadStatusManager::active(bool nested)
 
   const Map::iterator pos = map_.find(thread_id);
   if (pos != map_.end()) {
-    pos->second.update(m_now, s_now, Thread::ThreadStatus_Active, bucket_limit_, nested);
+    pos->second.update(m_now, s_now, status, bucket_limit_, nested);
   }
 
   cleanup(m_now);
 }
 
-void ThreadStatusManager::idle(bool nested)
-{
-  if (!update_thread_status()) {
-    return;
-  }
-
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-
-  const MonotonicTimePoint m_now = MonotonicTimePoint::now();
-  const SystemTimePoint s_now = SystemTimePoint::now();
-  const ThreadId thread_id = get_thread_id();
-
-  const Map::iterator pos = map_.find(thread_id);
-  if (pos != map_.end()) {
-    pos->second.update(m_now, s_now, Thread::ThreadStatus_Idle, bucket_limit_, nested);
-  }
-
-  cleanup(m_now);
-}
 
 void ThreadStatusManager::finished()
 {

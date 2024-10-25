@@ -185,8 +185,11 @@ public:
 private:
   static ThreadId get_thread_id();
   void add_thread(const String& name);
-  void active(bool nested = false);
-  void idle(bool nested = false);
+
+  void update_current_thread(Thread::ThreadStatus status, bool nested = false);
+  void active(bool nested = false) { update_current_thread(Thread::ThreadStatus_Active, nested); }
+  void idle(bool nested = false) { update_current_thread(Thread::ThreadStatus_Idle, nested); }
+
   void finished();
 
   void cleanup(const MonotonicTimePoint& now);
