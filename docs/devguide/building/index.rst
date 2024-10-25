@@ -549,13 +549,25 @@ Configuring and Building
 
 To configure and build:
 
-.. tab:: Linux, macOS, BSDs, etc.
+.. tab:: Linux, BSDs, etc.
 
   .. code-block::
 
     cmake -B build -DCMAKE_UNITY_BUILD=TRUE
     cmake --build build -- -j 4
 
+  4 was used as an example for the max number of parallel jobs.
+  If unsure what this number should be, use the number of CPU cores on the machine.
+  This can be combined with unity builds.
+
+.. tab:: macOS
+
+  .. code-block::
+
+    cmake -B build -DCMAKE_CXX_STANDARD=14 -DCMAKE_UNITY_BUILD=TRUE
+    cmake --build build -- -j 4
+
+  The C++14 standard was specified since macOS defaults to C++03.
   4 was used as an example for the max number of parallel jobs.
   If unsure what this number should be, use the number of CPU cores on the machine.
   This can be combined with unity builds.
