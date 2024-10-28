@@ -34,7 +34,7 @@ int JobQueue::handle_exception(ACE_HANDLE /*fd*/)
   }
 
   for (Queue::const_iterator pos = q.begin(), limit = q.end(); pos != limit; ++pos) {
-    ThreadStatusManager::Event ev(thread_status_manager);
+    ThreadStatusManager::Event event(thread_status_manager);
     (*pos)->execute();
   }
 
