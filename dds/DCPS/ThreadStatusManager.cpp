@@ -53,16 +53,28 @@ void ThreadStatusManager::Thread::update(const MonotonicTimePoint& m_now,
       break;
     }
 
-    last_update_ = m_now;
+    last_status_change_ = m_now;
     status_ = next_status;
+  }
+  last_update_ = m_now;
+}
+
+namespace {
+  TimeDuration bonus_time(const MonotonicTimePoint& now, const MonotonicTimePoint& last_change,
+    ThreadStatusManager::Thread::ThreadStatus current_status, ThreadStatusManager::Thread::ThreadStatus target_status)
+  {
+    if (now > last_change && current_status == target_status) {
+      return now - last_change;
+    }
+    return TimeDuration::zero_value;
   }
 }
 
 double ThreadStatusManager::Thread::utilization(const MonotonicTimePoint& now) const
 {
-  const TimeDuration active_bonus = (now > last_update_ && status_ == ThreadStatus_Active) ? (now - last_update_) : TimeDuration::zero_value;
-  const TimeDuration idle_bonus = (now > last_update_ && status_ == ThreadStatus_Idle) ? (now - last_update_) : TimeDuration::zero_value;
-  const TimeDuration denom = total_.total_time() + active_bonus + idle_bonus;
+  const TimeDuration active_bonus = bonus_time(now, last_status_change_, status_, ThreadStatus_Active),
+    idle_bonus = bonus_time(now, last_status_change_, status_, ThreadStatus_Idle),
+    denom = total_.total_time() + active_bonus + idle_bonus;
 
   if (!denom.is_zero()) {
     return (total_.active_time + active_bonus) / denom;
@@ -72,17 +84,15 @@ double ThreadStatusManager::Thread::utilization(const MonotonicTimePoint& now) c
 
 ThreadStatusManager::ThreadId ThreadStatusManager::get_thread_id()
 {
-#if defined (ACE_WIN32)
+#ifdef ACE_WIN32
   return static_cast<unsigned>(ACE_Thread::self());
-#else
-#  ifdef ACE_HAS_GETTID
+#elif defined ACE_HAS_GETTID
   return ACE_OS::thr_gettid();
-#  else
+#else
   char buffer[32];
   const size_t len = ACE_OS::thr_id(buffer, 32);
   return String(buffer, len);
-#  endif
-#endif /* ACE_WIN32 */
+#endif
 }
 
 void ThreadStatusManager::add_thread(const String& name)
@@ -93,11 +103,7 @@ void ThreadStatusManager::add_thread(const String& name)
 
   const ThreadId thread_id = get_thread_id();
 
-  String bit_key = to_dds_string(thread_id);
-
-  if (name.length()) {
-    bit_key += " (" + name + ")";
-  }
+  const String bit_key = to_dds_string(thread_id) + (name.empty() ? "" : (" (" + name + ")"));
 
   if (DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatusManager::add_thread: "
@@ -108,7 +114,7 @@ void ThreadStatusManager::add_thread(const String& name)
   map_.insert(std::make_pair(thread_id, Thread(bit_key)));
 }
 
-void ThreadStatusManager::update_current_thread(Thread::ThreadStatus status, bool nested)
+void ThreadStatusManager::update_i(Thread::ThreadStatus status, bool finished, bool nested)
 {
   if (!update_thread_status()) {
     return;
@@ -123,32 +129,11 @@ void ThreadStatusManager::update_current_thread(Thread::ThreadStatus status, boo
   const Map::iterator pos = map_.find(thread_id);
   if (pos != map_.end()) {
     pos->second.update(m_now, s_now, status, bucket_limit_, nested);
+    if (finished) {
+      finished_.push_back(pos->second);
+      map_.erase(pos);
+    }
   }
-
-  cleanup(m_now);
-}
-
-
-void ThreadStatusManager::finished()
-{
-  if (!update_thread_status()) {
-    return;
-  }
-
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-
-  const MonotonicTimePoint m_now = MonotonicTimePoint::now();
-  const SystemTimePoint s_now = SystemTimePoint::now();
-  const ThreadId thread_id = get_thread_id();
-
-  const Map::iterator pos = map_.find(thread_id);
-  if (pos != map_.end()) {
-    pos->second.update(m_now, s_now, Thread::ThreadStatus_Idle, bucket_limit_, false);
-
-    list_.push_back(pos->second);
-    map_.erase(pos);
-  }
-
   cleanup(m_now);
 }
 
@@ -164,7 +149,7 @@ void ThreadStatusManager::harvest(const MonotonicTimePoint& start,
     }
   }
 
-  for (List::const_iterator pos = list_.begin(), limit = list_.end(); pos != limit; ++pos) {
+  for (List::const_iterator pos = finished_.begin(), limit = finished_.end(); pos != limit; ++pos) {
     if (pos->last_update() > start) {
       finished.push_back(*pos);
     }
@@ -175,8 +160,8 @@ void ThreadStatusManager::cleanup(const MonotonicTimePoint& now)
 {
   const MonotonicTimePoint cutoff = now - 10 * thread_status_interval_;
 
-  while (!list_.empty() && list_.front().last_update() < cutoff) {
-    list_.pop_front();
+  while (!finished_.empty() && finished_.front().last_update() < cutoff) {
+    finished_.pop_front();
   }
 }
 
