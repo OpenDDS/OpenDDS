@@ -412,14 +412,14 @@ int run(int argc, ACE_TCHAR* argv[])
   }
   CORBA::String_var relay_status_type_name = relay_status_ts->get_type_name();
 
-  DDS::Topic_var relay_statuss_topic =
+  DDS::Topic_var relay_status_topic =
     relay_participant->create_topic(RELAY_STATUS_TOPIC_NAME.c_str(),
                                     relay_status_type_name,
                                     TOPIC_QOS_DEFAULT, nullptr,
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-  if (!relay_statuss_topic) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Instances topic\n")));
+  if (!relay_status_topic) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Relay Instances topic\n"));
     return EXIT_FAILURE;
   }
 
@@ -945,7 +945,7 @@ int run(int argc, ACE_TCHAR* argv[])
 
   DDS::DataWriterListener_var relay_status_writer_listener =
     new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::relay_status_sub_count);
-  DDS::DataWriter_var relay_status_writer_var = relay_publisher->create_datawriter(relay_statuss_topic, relay_status_writer_qos, relay_status_writer_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  DDS::DataWriter_var relay_status_writer_var = relay_publisher->create_datawriter(relay_status_topic, relay_status_writer_qos, relay_status_writer_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!relay_status_writer_var) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Status data writer\n")));
     return EXIT_FAILURE;
