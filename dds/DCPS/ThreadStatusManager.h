@@ -41,10 +41,11 @@ public:
     Thread(const String& bit_key)
       : bit_key_(bit_key)
       , timestamp_(SystemTimePoint::now())
-      , status_(ThreadStatus_Active)
       , last_update_(MonotonicTimePoint::now())
-      , current_bucket_(0)
+      , last_status_change_(MonotonicTimePoint::now())
+      , status_(ThreadStatus_Active)
       , nesting_depth_(0)
+      , current_bucket_(0)
     {}
 
     const String& bit_key() const { return bit_key_; }
@@ -63,18 +64,18 @@ public:
   private:
     const String bit_key_;
     SystemTimePoint timestamp_;
+    MonotonicTimePoint last_update_, last_status_change_;
     ThreadStatus status_;
+    size_t nesting_depth_;
 
     struct OpenDDS_Dcps_Export Bucket {
       TimeDuration active_time;
       TimeDuration idle_time;
       TimeDuration total_time() const { return active_time + idle_time; }
     };
-    MonotonicTimePoint last_update_;
     Bucket total_;
     Bucket buckets_[bucket_count];
     size_t current_bucket_;
-    size_t nesting_depth_;
   };
   typedef OPENDDS_MAP(ThreadId, Thread) Map;
   typedef OPENDDS_LIST(Thread) List;
@@ -175,26 +176,28 @@ public:
                List& running,
                List& finished) const;
 
-#ifdef ACE_HAS_GETTID
-  static inline pid_t gettid()
-  {
-    return syscall(SYS_gettid);
-  }
-#endif
-
 private:
   static ThreadId get_thread_id();
   void add_thread(const String& name);
-  void active(bool nested = false);
-  void idle(bool nested = false);
-  void finished();
+
+  void update_current_thread(Thread::ThreadStatus status, bool nested = false)
+  {
+    update_i(status, false, nested);
+  }
+
+  void finished() { update_i(Thread::ThreadStatus_Idle, true, false); }
+
+  void update_i(Thread::ThreadStatus status, bool finished = false, bool nested = false);
+
+  void active(bool nested = false) { update_current_thread(Thread::ThreadStatus_Active, nested); }
+  void idle(bool nested = false) { update_current_thread(Thread::ThreadStatus_Idle, nested); }
 
   void cleanup(const MonotonicTimePoint& now);
 
   TimeDuration thread_status_interval_;
   TimeDuration bucket_limit_;
   Map map_;
-  List list_;
+  List finished_;
 
   mutable ACE_Thread_Mutex lock_;
 };
