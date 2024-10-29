@@ -158,6 +158,7 @@ ACE_THR_FUNC_RETURN DispatchService::run(void* arg)
 
 void DispatchService::run_event_loop()
 {
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   ++running_threads_;
@@ -189,9 +190,9 @@ void DispatchService::run_event_loop()
         cv_.notify_all();
       } else if (allow_dispatch_ && timer_queue_map_.size()) {
         MonotonicTimePoint deadline(timer_queue_map_.begin()->first);
-        cv_.wait_until(deadline, TheServiceParticipant->get_thread_status_manager());
+        cv_.wait_until(deadline, thread_status_manager);
       } else {
-        cv_.wait(TheServiceParticipant->get_thread_status_manager());
+        cv_.wait(thread_status_manager);
       }
     }
 
@@ -200,6 +201,7 @@ void DispatchService::run_event_loop()
     FunArgPair pair = event_queue_.front();
     event_queue_.pop_front();
     ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex> > rev_guard(rev_lock);
+    ThreadStatusManager::Event ev(thread_status_manager);
     pair.first(pair.second);
   }
   --running_threads_;

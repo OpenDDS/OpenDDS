@@ -348,13 +348,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
   CORBA::String_var relay_status_type_name = relay_status_ts->get_type_name();
 
-  DDS::Topic_var relay_statuss_topic =
+  DDS::Topic_var relay_status_topic =
     relay_participant->create_topic(RELAY_STATUS_TOPIC_NAME.c_str(),
                                     relay_status_type_name,
                                     TOPIC_QOS_DEFAULT, nullptr,
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-  if (!relay_statuss_topic) {
+  if (!relay_status_topic) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Instances topic\n")));
     return EXIT_FAILURE;
   }

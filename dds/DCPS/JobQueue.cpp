@@ -23,7 +23,8 @@ JobQueue::JobQueue(ACE_Reactor* reactor)
 
 int JobQueue::handle_exception(ACE_HANDLE /*fd*/)
 {
-  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
+  ThreadStatusManager::Event ev(thread_status_manager);
 
   Queue q;
 
@@ -31,7 +32,7 @@ int JobQueue::handle_exception(ACE_HANDLE /*fd*/)
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, -1);
   q.swap(job_queue_);
   for (Queue::const_iterator pos = q.begin(), limit = q.end(); pos != limit; ++pos) {
-    ACE_GUARD_RETURN(ACE_Reverse_Lock<ACE_Thread_Mutex>, rev_guard, rev_lock, -1);
+    ThreadStatusManager::Event event(thread_status_manager);
     (*pos)->execute();
   }
 
