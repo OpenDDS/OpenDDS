@@ -61,8 +61,3 @@ For UDP pub/sub:
 3)  Run the Publisher
 
        ./publisher -DCPSConfigFile dds_udp_conf.ini
-
-
-
--Don Busch
- busch_d@ociweb.com
