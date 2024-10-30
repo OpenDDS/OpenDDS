@@ -62,7 +62,3 @@ For UDP pub/sub:
 
        ./publisher -DCPSConfigFile dds_udp_conf.ini
 
-
-
--Don Busch
- busch_d@ociweb.com
