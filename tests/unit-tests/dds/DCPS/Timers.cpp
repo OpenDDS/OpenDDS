@@ -46,7 +46,7 @@ TEST(dds_DCPS_Timers, test_repeat)
   ACE_Time_Value one_sec(1);
   reactor.run_reactor_event_loop(one_sec);
 
-  ASSERT_GT(handler->calls_, 10);
+  ASSERT_GT(handler->calls_, 11);
   Timers::cancel(&reactor, id);
 }
 
