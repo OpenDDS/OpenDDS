@@ -53,11 +53,16 @@ WriterInfoListener::writer_removed(WriterInfo&)
 {
 }
 
+void
+WriterInfoListener::resume_sample_processing(WriterInfo&)
+{
+}
+
 WriterInfo::WriterInfo(const WriterInfoListener_rch& reader,
                        const GUID_t& writer_id,
                        const ::DDS::DataWriterQos& writer_qos)
   : last_liveliness_activity_time_(MonotonicTimePoint::now())
-  , historic_samples_timer_(NO_TIMER)
+  , historic_samples_sweeper_task_(make_rch<WriterInfoSporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &WriterInfo::sweep_historic_samples))
   , last_historic_seq_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , waiting_for_end_historic_samples_(false)
   , delivering_historic_samples_(false)
@@ -81,6 +86,11 @@ WriterInfo::WriterInfo(const WriterInfoListener_rch& reader,
   }
 }
 
+WriterInfo::~WriterInfo()
+{
+  historic_samples_sweeper_task_->cancel();
+}
+
 const char* WriterInfo::get_state_str() const
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -100,25 +110,22 @@ const char* WriterInfo::get_state_str() const
 }
 
 void
-WriterInfo::schedule_historic_samples_timer(EndHistoricSamplesMissedSweeper* sweeper, const ACE_Time_Value& ten_seconds)
+WriterInfo::schedule_historic_samples_timer()
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  const void* arg = reinterpret_cast<const void*>(this);
-  historic_samples_timer_ = sweeper->reactor()->schedule_timer(sweeper, arg, ten_seconds);
+  waiting_for_end_historic_samples(true);
+  const TimeDuration ten_seconds(10, 0);
+  historic_samples_sweeper_task_->schedule(ten_seconds);
 }
 
 void
-WriterInfo::cancel_historic_samples_timer(EndHistoricSamplesMissedSweeper* sweeper)
+WriterInfo::cancel_historic_samples_timer()
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (historic_samples_timer_ != WriterInfo::NO_TIMER) {
-    sweeper->reactor()->cancel_timer(historic_samples_timer_);
-    historic_samples_timer_ = WriterInfo::NO_TIMER;
-  }
+  waiting_for_end_historic_samples(false);
+  historic_samples_sweeper_task_->cancel();
 }
 
 bool
-WriterInfo::check_end_historic_samples(EndHistoricSamplesMissedSweeper* sweeper, OPENDDS_MAP(SequenceNumber, ReceivedDataSample)& to_deliver)
+WriterInfo::check_end_historic_samples(OPENDDS_MAP(SequenceNumber, ReceivedDataSample)& to_deliver)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   while (delivering_historic_samples_) {
@@ -133,11 +140,21 @@ WriterInfo::check_end_historic_samples(EndHistoricSamplesMissedSweeper* sweeper,
       to_deliver.swap(historic_samples_);
       result = true;
     }
+    waiting_for_end_historic_samples_ = false;
     guard.release();
-    sweeper->cancel_timer(info);
+    historic_samples_sweeper_task_->cancel();
     return result;
   }
   return false;
+}
+
+void
+WriterInfo::sweep_historic_samples(const MonotonicTimePoint&)
+{
+  WriterInfoListener_rch reader = reader_.lock();
+  if (reader) {
+    reader->resume_sample_processing(*this);
+  }
 }
 
 bool
