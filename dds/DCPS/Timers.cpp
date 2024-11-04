@@ -93,16 +93,9 @@ TimerId schedule(ACE_Reactor* reactor,
   static const timespec one_ns = {0, 1};
   itimerspec ts;
   ts.it_interval = interval.value();
-  if (delay < TimeDuration::zero_value) {
-    // expiration in the past, execute as soon as possible (see note about zeros below)
-    ts.it_value = one_ns;
-  } else if (delay == TimeDuration::zero_value) {
-    // avoid zeros since that would disarm the timer
-    // if the interval is positive, use that as the initial expiration
-    ts.it_value = (interval == TimeDuration::zero_value) ? one_ns : interval.value();
-  } else {
-    ts.it_value = delay.value();
-  }
+  // expiration in the past, execute as soon as possible
+  // avoid zeros since that would disarm the timer
+  ts.it_value = (delay <= TimeDuration::zero_value) ? one_ns : delay.value();
   if (timerfd_settime(fd, 0, &ts, 0) == -1) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: Timers::schedule: timerfd_settime %m\n"));
