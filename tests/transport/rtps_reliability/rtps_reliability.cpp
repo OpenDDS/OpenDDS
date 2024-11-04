@@ -20,13 +20,14 @@
 #include "dds/DCPS/RTPS/MessageUtils.h"
 #include "dds/DCPS/RTPS/GuidGenerator.h"
 
-#include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/AssociationData.h"
-#include "dds/DCPS/DisjointSequence.h"
-#include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/DataSampleElement.h"
-#include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/EncapsulationHeader.h"
+#include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/PublicationInstance.h"
+#include "dds/DCPS/SendStateDataSampleList.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 

@@ -5,7 +5,8 @@
 
 #include "Boilerplate.h"
 
-#include <model/Sync.h>
+#include <tests/Utils/StatusMatching.h>
+#include <tests/Utils/DistributedConditionSet.h>
 
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
@@ -22,6 +23,10 @@ using namespace examples::boilerplate;
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  // Coordination across processes.
+  DistributedConditionSet_rch distributed_condition_set =
+    OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+
   DDS::DomainParticipantFactory_var dpf;
   DDS::DomainParticipant_var participant;
 
@@ -55,38 +60,37 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Safely downcast data writer to type-specific data writer
     Reliability::MessageDataWriter_var msg_writer = narrow(writer);
 
-    {
-      // Block until Subscriber is available
-      OpenDDS::Model::WriterSync ws(writer);
+    // Block until Subscriber is available
+    distributed_condition_set->wait_for("publisher", "subscriber", "subscriber ready");
 
-      // Initialize samples
-      Reliability::Message message;
+    // Initialize samples
+    Reliability::Message message;
 
-      for (int i = 0; i < msg_count; ++i) {
-        // Prepare next sample
-        const OpenDDS::DCPS::String number = "foo " + OpenDDS::DCPS::to_dds_string(i);
-        message.id = CORBA::string_dup(number.c_str());
-        message.name = "foo";
-        message.count = (long)i;
-        message.expected = msg_count;
+    for (int i = 0; i < msg_count; ++i) {
+      // Prepare next sample
+      const OpenDDS::DCPS::String number = "foo " + OpenDDS::DCPS::to_dds_string(i);
+      message.id = CORBA::string_dup(number.c_str());
+      message.name = "foo";
+      message.count = (long)i;
+      message.expected = msg_count;
 
-        // Publish the message
-        DDS::ReturnCode_t error = DDS::RETCODE_TIMEOUT;
-        while (error == DDS::RETCODE_TIMEOUT) {
-          ACE_ERROR((LM_ERROR, "Trying to send: %d\n", i));
-          error = msg_writer->write(message, DDS::HANDLE_NIL);
-          if (error == DDS::RETCODE_TIMEOUT) {
-            ACE_ERROR((LM_ERROR, "Timeout, resending %d\n", i));
-          } else if (error != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("ERROR: %N:%l: main() -")
-                       ACE_TEXT(" write returned %d!\n"), error));
-          }
+      // Publish the message
+      DDS::ReturnCode_t error = DDS::RETCODE_TIMEOUT;
+      while (error == DDS::RETCODE_TIMEOUT) {
+        ACE_ERROR((LM_ERROR, "Trying to send: %d\n", i));
+        error = msg_writer->write(message, DDS::HANDLE_NIL);
+        if (error == DDS::RETCODE_TIMEOUT) {
+          ACE_ERROR((LM_ERROR, "Timeout, resending %d\n", i));
+        } else if (error != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("ERROR: %N:%l: main() -")
+                     ACE_TEXT(" write returned %d!\n"), error));
         }
       }
-
-      std::cout << "Waiting for acks from sub" << std::endl;
     }
+
+    distributed_condition_set->wait_for("publisher", "subscriber", "subscriber done");
+
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
     return -1;

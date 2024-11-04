@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <ace/streams.h>
 #include "tests/Utils/ExceptionStreams.h"
+#include <tests/Utils/DistributedConditionSet.h>
 
 using std::cerr;
 using std::endl;
@@ -22,6 +23,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   try
     {
+      DistributedConditionSet_rch dcs =
+        OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+
       DDS::DomainParticipantFactory_var dpf =
         TheParticipantFactoryWithArgs(argc, argv);
       DDS::DomainParticipant_var participant =
@@ -147,21 +151,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         }
       }
 
-//       // Wait for DataReaders to finish.
-//       writers_type::const_iterator zend (writers.end ());
-//       for (writers_type::const_iterator z (writers.begin ()); z != zend; ++z)
-//       {
-//         ::DDS::InstanceHandleSeq handles;
-//         while (1)
-//         {
-//           (*z)->get_matched_subscriptions (handles);
-//           if (handles.length () == 0)
-//             break;
-//           else
-//             ACE_OS::sleep (1);
-//         }
-//       }
-      ACE_OS::sleep (20);
+      for (size_t idx = 0; idx != 6; ++idx) {
+        dcs->wait_for("pub", Test::Requested::PartitionConfigs[idx].actor, "done");
+      }
+
       {
         // Force contents of writers vector to be destroyed now.
         writers_type tmp;

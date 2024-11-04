@@ -872,7 +872,7 @@ This policy applies to topic and data writer entities via the ``transport_priori
 
 .. important::
 
-  OpenDDS currently only implements this for the :ref:`tcp <tcp-transport>` and :ref:`udp <udp-transport>` transports.
+  OpenDDS currently only implements this for the :ref:`tcp <tcp-transport>` transport.
 
   This policy is :ref:`immutable <qos-changing>` and does not affect association.
   This is opposed to the DDS specification, which specifies that it's mutable.
@@ -969,11 +969,7 @@ This policy applies to topic, data reader, and data writer entities via the ``la
   Specification: :omgspec:`dds:2.2.3.8 LATENCY_BUDGET`
 
 The default value of ``duration`` is zero indicating that the delay should be minimized.
-OpenDDS uses the value to bound a delay interval for reporting unacceptable delay in transporting samples from publication to subscription.
-This policy is used for monitoring purposes only at this time.
 Use :ref:`qos-transport-priority` to modify the sending priority of samples.
-
-There is an OpenDDS-specific :ref:`conditions_and_listeners--budget-exceeded-status` that reports when the duration is exceeded.
 
 .. _qos-latency-budget-association:
 

@@ -13,7 +13,6 @@ find_package(OpenDDS REQUIRED NO_DEFAULTS TAO::tao_idl OpenDDS::opendds_idl ${dc
 include(opendds_build_helpers)
 
 add_library(OpenDDS_Dcps
-  DCPS/BitPubListenerImpl.cpp
   DCPS/BuiltInTopicUtils.cpp
   DCPS/CoherentChangeControl.cpp
   DCPS/ConditionImpl.cpp
@@ -55,7 +54,6 @@ add_library(OpenDDS_Dcps
   DCPS/MemoryPool.cpp
   DCPS/MessageBlock.cpp
   DCPS/MessageTracker.cpp
-  DCPS/MonitorFactory.cpp
   DCPS/MultiTask.cpp
   DCPS/MultiTopicDataReaderBase.cpp
   DCPS/MultiTopicImpl.cpp
@@ -212,7 +210,6 @@ target_sources(OpenDDS_Dcps
     DCPS/AstNodeWrapper.h
     DCPS/Atomic.h
     DCPS/AtomicBool.h
-    DCPS/BitPubListenerImpl.h
     DCPS/BuiltInTopicDataReaderImpls.h
     DCPS/BuiltInTopicUtils.h
     DCPS/Cached_Allocator_With_Overflow_T.h
@@ -226,9 +223,6 @@ target_sources(OpenDDS_Dcps
     DCPS/ContentFilteredTopicImpl.h
     DCPS/DCPS_Utils.h
     DCPS/DataBlockLockPool.h
-    DCPS/DataCollector_T.cpp
-    DCPS/DataCollector_T.h
-    DCPS/DataCollector_T.inl
     DCPS/DataDurabilityCache.h
     DCPS/DataReaderCallbacks.h
     DCPS/DataReaderImpl.h
@@ -293,7 +287,6 @@ target_sources(OpenDDS_Dcps
     DCPS/MessageBlock.h
     DCPS/MessageTracker.h
     DCPS/Message_Block_Ptr.h
-    DCPS/MonitorFactory.h
     DCPS/MultiTask.h
     DCPS/MultiTopicDataReaderBase.h
     DCPS/MultiTopicDataReader_T.cpp
@@ -363,7 +356,6 @@ target_sources(OpenDDS_Dcps
     DCPS/SporadicTask.h
     DCPS/StaticDiscovery.h
     DCPS/StaticIncludes.h
-    DCPS/Stats_T.h
     DCPS/StatusConditionImpl.h
     DCPS/SubscriberImpl.h
     DCPS/SubscriptionInstance.h

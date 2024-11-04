@@ -20,7 +20,7 @@ project(*Common) : dcps_idl_only_lib {
   }
 }
 
-project(*Publisher) : dcpsexe, dcps_tcp, svc_utils {
+project(*Publisher) : dcpsexe, dcps_rtps_udp, svc_utils {
   after    += *Common
   exename   = publisher
   requires += tao_orbsvcs
@@ -49,7 +49,7 @@ project(*Publisher) : dcpsexe, dcps_tcp, svc_utils {
 }
 
 
-project(*Subscriber) : dcpsexe, dcps_tcp {
+project(*Subscriber) : dcpsexe, dcps_rtps_udp {
   after    += *Common
   exename   = subscriber
   requires += tao_orbsvcs

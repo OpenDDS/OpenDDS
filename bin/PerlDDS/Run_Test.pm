@@ -374,7 +374,16 @@ use File::Spec::Functions qw(catfile catdir);
 
 sub new {
   my $class = shift;
-  my $self = bless {}, $class;
+
+  my %valid_args = (
+    configs => {},
+    config => undef,
+  );
+
+  my %args = (%valid_args, @_);
+  my @invalid_args = grep { !exists($valid_args{$_}) } keys(%args);
+  print STDERR ("invalid arguments: ", join(', ', @invalid_args)) if (scalar(@invalid_args));
+  my $self = bless(\%args, $class);
 
   $self->{processes} = {};
   $self->{_flags} = {};
@@ -387,7 +396,7 @@ sub new {
   $self->{info_repo}->{file} = "repo.ior";
   $self->{processes}->{process} = {};
   $self->{processes}->{order} = [];
-  $self->{discovery} = "info_repo";
+  $self->{discovery} = "rtps";
   $self->{test_verbose} = 0;
   $self->{add_transport_config} = 1;
   $self->{nobits} = 0;
@@ -420,6 +429,7 @@ sub new {
     my $flag_value_str = defined($flag_value) ? "\"$flag_value\"" : 'undef';
     $self->_info("TestFramework storing \"$flag_name\"=$flag_value_str\n");
     $self->{_flags}->{$flag_name} = $flag_value;
+
     my $transport = _is_transport($arg);
     if ($transport && $self->{transport} eq "") {
       $self->{transport} = $arg;
@@ -429,7 +439,10 @@ sub new {
       $transport = 0;
     }
 
-    if ($arg =~ /^rtps_disc(?:_tcp)?$/) {
+    if (exists $self->{configs}->{$flag_name}) {
+      $self->_info("TestFramework switching to config $flag_name\n");
+      $self->{config} = $flag_name;
+    } elsif ($arg =~ /^rtps_disc(?:_tcp)?$/) {
       $self->{discovery} = "rtps";
     } elsif ($arg eq "--test_verbose") {
       $self->{test_verbose} = 1;
@@ -452,6 +465,11 @@ sub new {
       $self->{_flags}->{unused}->{$flag_name} = $flag_value;
     }
     ++$index;
+  }
+
+  if (defined $self->{configs} && defined $self->{config}) {
+    # Export what is in the config.
+    $self->{discovery} = $self->{configs}{$self->{config}}{discovery};
   }
 
   return $self;
@@ -685,8 +703,31 @@ sub process {
 
   $self->_process_common($name, \$params);
 
+  my %envvars = ();
+  if (defined $self->{configs} && defined $self->{config}) {
+    # Export what is in the config.
+    my $config = $self->{configs}{$self->{config}}{file};
+    keys %$config;
+    while (my ($s, $t) = each %$config) {
+      keys %$t;
+
+      if ($s =~ /\//) {
+        my @parts = split /\//, $s;
+        my $key = "OPENDDS_${s}";
+        my $value = "\@$parts[1]";
+        $envvars{$key} = $value;
+      }
+
+      while (my ($k, $v) = each %$t) {
+        my $key = "OPENDDS_${s}_${k}";
+        my $value = $v;
+        $envvars{$key} = $value;
+      }
+    }
+  }
+
   $self->{processes}->{process}->{$name}->{process} =
-    $self->_create_process($executable, $params);
+    $self->_create_process($executable, $params, \%envvars);
 }
 
 sub java_process {
@@ -1048,6 +1089,7 @@ sub _create_process {
   my $self = shift;
   my $executable = shift;
   my $params = shift;
+  my $envvars = shift;
 
   $self->_info("TestFramework::_create_process creating executable="
     . "$executable w/ params=$params\n");
@@ -1061,7 +1103,7 @@ sub _create_process {
       . ($self->{add_pending_timeout} ? "0" : "1") . "\n");
     $params .= $flag if $self->{add_pending_timeout};
   }
-  my $proc = PerlDDS::create_process($executable, $params);
+  my $proc = PerlDDS::create_process($executable, $params, undef, $envvars);
   $self->_track_log_files($params, $proc);
   return $proc;
 }

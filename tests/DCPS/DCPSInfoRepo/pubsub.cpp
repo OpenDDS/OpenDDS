@@ -6,7 +6,6 @@
 #include "dds/DCPS/InfoRepoDiscovery/InfoC.h"
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/MonitorFactory.h"
 
 #include "dds/DCPS/RTPS/RtpsDiscovery.h"
 #include "dds/DCPS/XTypes/TypeObject.h"

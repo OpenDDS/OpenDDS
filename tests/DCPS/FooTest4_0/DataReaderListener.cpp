@@ -131,15 +131,3 @@ void DataReaderListenerImpl::on_subscription_matched (
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_lost\n")));
   }
-
-
-  void DataReaderListenerImpl::on_budget_exceeded (
-    ::DDS::DataReader_ptr reader,
-    const ::OpenDDS::DCPS::BudgetExceededStatus&
-  )
-  {
-    ACE_UNUSED_ARG(reader) ;
-
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_budget_exceeded\n")));
-  }

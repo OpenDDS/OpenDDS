@@ -40,7 +40,6 @@ class TransportClient;
 class TransportReceiveListener;
 class DataLink;
 class TransportInst;
-class Monitor;
 struct AssociationData;
 typedef RcHandle<TransportClient> TransportClient_rch;
 typedef WeakRcHandle<TransportClient> TransportClient_wrch;
@@ -85,6 +84,15 @@ public:
   /// TransportLocator object.
   virtual bool connection_info_i(TransportLocator& local_info, ConnectionInfoFlags flags) const = 0;
 
+  virtual NetworkAddress actual_local_address() const {
+    return NetworkAddress::default_IPV4;
+  }
+#ifdef ACE_HAS_IPV6
+  virtual NetworkAddress ipv6_actual_local_address() const {
+    return NetworkAddress::default_IPV6;
+  }
+#endif
+
   virtual void register_for_reader(const GUID_t& /*participant*/,
                                    const GUID_t& /*writerid*/,
                                    const GUID_t& /*readerid*/,
@@ -128,8 +136,6 @@ public:
   /// Diagnostic aid.
   void dump();
   OPENDDS_STRING dump_to_str();
-
-  void report();
 
   struct ConnectionAttribs {
     GUID_t local_id_;
@@ -301,9 +307,6 @@ private:
 
   /// smart ptr to the associated DL cleanup task
   EventDispatcher_rch event_dispatcher_;
-
-  /// Monitor object for this entity
-  unique_ptr<Monitor> monitor_;
 
 protected:
   /// Id of the last link established.

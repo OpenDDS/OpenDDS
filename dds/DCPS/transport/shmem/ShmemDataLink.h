@@ -69,7 +69,30 @@ public:
   pid_t peer_pid();
 
   ShmemAllocator* local_allocator();
-  ShmemAllocator* peer_allocator();
+
+  class PeerAllocatorProxy {
+  public:
+    PeerAllocatorProxy(ShmemDataLink& link)
+      : link_(link)
+    {
+      link_.peer_alloc_mutex_.acquire();
+    }
+
+    ~PeerAllocatorProxy()
+    {
+      link_.peer_alloc_mutex_.release();
+    }
+
+    ShmemAllocator* peer_allocator()
+    {
+      return link_.peer_alloc_;
+    }
+
+  private:
+    ShmemDataLink& link_;
+
+    OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(PeerAllocatorProxy)
+  };
 
   void read() { recv_strategy_->read(); }
   void signal_semaphore();

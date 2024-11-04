@@ -40,7 +40,8 @@ public:
 
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info,
                                   ConnectionInfoFlags flags,
-                                  DDS::DomainId_t domain) const;
+                                  DDS::DomainId_t domain,
+                                  DomainParticipantImpl* participant);
 
   void hostname(const String& h);
   String hostname() const;
@@ -56,7 +57,8 @@ private:
   friend RcHandle<T> OpenDDS::DCPS::make_rch(U const&);
   explicit ShmemInst(const std::string& name);
 
-  TransportImpl_rch new_impl(DDS::DomainId_t domain);
+  TransportImpl_rch new_impl(DDS::DomainId_t domain,
+                             DomainParticipantImpl* participant);
   std::string poolname_;
 };
 

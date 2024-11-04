@@ -14,6 +14,7 @@ sub create_process {
     # indicates that the created process will be the only process running
     # so coverage can be run on all lone processes
     my $lone_process = shift;
+    my $envvars = shift;
     my $created;
 
     # identify the test target component extenstion corresponding to the
@@ -30,6 +31,12 @@ sub create_process {
     }
 
     my $target = PerlDDS::create_test_target($config_name, $os);
+    if (defined $envvars) {
+        keys %$envvars;
+        while (my ($k, $v) = each %$envvars) {
+            $target->SetEnv($k, $v);
+        }
+    }
 
     if (defined($target) && defined($target->{IP_ADDRESS}) && $arguments !~ /-DCPSDefaultAddress /) {
         $arguments .= " -DCPSDefaultAddress $target->{IP_ADDRESS}";

@@ -1,4 +1,4 @@
-project(*): dcpsexe {
+project(*): dcpsexe, dcps_inforepodiscovery, dcps_rtps_udp {
   requires += no_opendds_safety_profile
   exename  = dcpsinfo_dump
   exeout    = $(DDS_ROOT)/bin

@@ -147,18 +147,6 @@ FailoverListener::on_subscription_lost(
   TheServiceParticipant->repository_lost(this->key_);
 }
 
-
-void
-FailoverListener::on_budget_exceeded(
-  DDS::DataReader_ptr /* reader */,
-  const OpenDDS::DCPS::BudgetExceededStatus& /* status */)
-{
-  if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) FailoverListener::on_budget_exceeded\n")));
-  }
-}
-
 } // namespace DCPS
 } // namespace OpenDDS
 

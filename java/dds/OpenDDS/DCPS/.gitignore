@@ -14,8 +14,6 @@
 /_ConnectionRecordDataWriterTAOPeer.java
 /_ConnectionRecordTypeSupportLocalBase.java
 /_ConnectionRecordTypeSupportTAOPeer.java
-/_DataReaderExLocalBase.java
-/_DataReaderExTAOPeer.java
 /_DataReaderListenerLocalBase.java
 /_DataReaderListenerTAOPeer.java
 /_DataWriterListenerLocalBase.java
@@ -96,10 +94,6 @@
 /ContentFilterProperty_t.java
 /ContentFilterProperty_tHelper.java
 /ContentFilterProperty_tHolder.java
-/DataReaderEx.java
-/DataReaderExHelper.java
-/DataReaderExHolder.java
-/DataReaderExOperations.java
 /DataReaderListener.java
 /DataReaderListenerHelper.java
 /DataReaderListenerHolder.java

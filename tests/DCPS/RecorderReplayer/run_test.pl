@@ -35,30 +35,10 @@ if ($ARGV[0] eq 'thread_per' || $#ARGV > 0 && $ARGV[1] eq 'thread_per') {
     $arg = 1 if ($ARGV[0] eq 'thread_per');
 }
 
-if ($ARGV[$arg] eq 'udp') {
-    $pub_opts .= " -DCPSConfigFile pub_udp.ini";
-    $sub_opts .= " -DCPSConfigFile sub_udp.ini";
-    $relay_opts .= " -DCPSConfigFile relay_udp.ini";
-}
-elsif ($ARGV[$arg] eq 'multicast') {
-    $pub_opts .= " -DCPSConfigFile pub_multicast.ini";
-    $sub_opts .= " -DCPSConfigFile sub_multicast.ini";
-    $relay_opts .= " -DCPSConfigFile relay_multicast.ini";
-}
-elsif ($ARGV[$arg] eq 'default_tcp') {
+if ($ARGV[$arg] eq 'default_tcp') {
     $pub_opts .= " -t tcp";
     $sub_opts .= " -t tcp";
     $relay_opts .= " -t tcp";
-}
-elsif ($ARGV[$arg] eq 'default_udp') {
-    $pub_opts .= " -t udp";
-    $sub_opts .= " -t udp";
-    $relay_opts .= " -t udp";
-}
-elsif ($ARGV[$arg] eq 'default_multicast') {
-    $pub_opts .= " -t multicast";
-    $sub_opts .= " -t multicast";
-    $relay_opts .= " -t multicast";
 }
 elsif ($ARGV[$arg] eq 'nobits') {
     $repo_bit_opt = '-NOBITS';
@@ -106,7 +86,7 @@ elsif ($ARGV[$arg] eq 'shmem') {
 }
 elsif ($ARGV[$arg] eq 'all') {
     @original_ARGV = grep { $_ ne 'all' } @original_ARGV;
-    my @tests = ('', qw/udp multicast default_tcp default_udp default_multicast
+    my @tests = ('', qw/default_tcp
                         nobits shmem
                         rtps rtps_disc rtps_unicast rtps_disc_tcp/);
     push(@tests, 'ipv6') if new PerlACE::ConfigList->check_config('IPV6');

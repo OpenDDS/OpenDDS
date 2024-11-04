@@ -19,10 +19,11 @@
 #  include <dds/DCPS/security/framework/Properties.h>
 #endif
 #include <dds/DCPS/StaticIncludes.h>
+#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/transport/tcp/Tcp.h>
+#endif
 #if OPENDDS_DO_MANUAL_STATIC_INCLUDES
 #  ifndef OPENDDS_SAFETY_PROFILE
-#    include <dds/DCPS/transport/udp/Udp.h>
-#    include <dds/DCPS/transport/multicast/Multicast.h>
 #    include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #    include <dds/DCPS/transport/shmem/Shmem.h>
 #    if OPENDDS_CONFIG_SECURITY
@@ -41,9 +42,7 @@
 
 bool dw_reliable()
 {
-  OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
-  return gc->instances_[0]->transport_type_ != "udp" &&
-         !(gc->instances_[0]->transport_type_ == "multicast" && !gc->instances_[0]->is_reliable());
+  return true;
 }
 
 using OpenDDS::DCPS::String;

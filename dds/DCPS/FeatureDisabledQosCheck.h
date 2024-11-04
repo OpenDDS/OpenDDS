@@ -10,6 +10,8 @@
 
 #include "Qos_Helper.h"
 
+#include "dds/OpenDDSConfigWrapper.h"
+
 #ifdef  OPENDDS_NO_OWNERSHIP_PROFILE
 #define OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, error_rtn_value) \
   if (qos.history.kind == ::DDS::KEEP_ALL_HISTORY_QOS || qos.history.depth > 1) { \
@@ -23,7 +25,10 @@
 #define OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, error_rtn_value)
 #endif
 
-#ifdef  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+#define OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, error_rtn_value)
+#define OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos, error_rtn_value)
+#else
 #define OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, error_rtn_value) \
   if (qos.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS) { \
     ACE_ERROR((LM_ERROR, \
@@ -40,9 +45,6 @@
               ACE_TEXT("therefore ownership strength must be the default.\n"))); \
     return error_rtn_value; \
   }
-#else
-#define OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, error_rtn_value)
-#define OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos, error_rtn_value)
 #endif
 
 #ifdef  OPENDDS_NO_OBJECT_MODEL_PROFILE

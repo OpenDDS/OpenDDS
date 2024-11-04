@@ -15,9 +15,6 @@
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/StaticIncludes.h>
 #include <dds/DCPS/WaitSet.h>
-#if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
-#include <dds/DCPS/transport/udp/Udp.h>
-#endif
 
 #include <dds/DdsDcpsSubscriptionC.h>
 
@@ -40,7 +37,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth            defaults to 1
     //  -z                          verbose transport debug
-    //  -r reliable                 0 for udp transport 1 for others
+    //  -r reliable                 defaults to 0 (false)
 
     const ACE_TCHAR *currentArg = 0;
 

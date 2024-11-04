@@ -156,7 +156,7 @@ Subscriber::Subscriber( const Options& options)
       ));
     }
 
-    this->reader_[ index] = ::OpenDDS::DCPS::DataReaderEx::_narrow( reader.in());
+    this->reader_[ index] = DDS::DataReader::_narrow( reader.in());
     if( CORBA::is_nil( this->reader_[ index].in())) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
