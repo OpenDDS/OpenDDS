@@ -292,7 +292,7 @@ RecorderImpl::add_association(const WriterAssociation& writer,
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
       const GUID_t& writer_id = writer.writerId;
-      RcHandle<WriterInfo> info ( make_rch<WriterInfo>(rchandle_from<WriterInfoListener>(this), writer_id, writer.writerQos));
+      RcHandle<WriterInfo> info (make_rch<WriterInfo>(rchandle_from<WriterInfoListener>(this), writer_id, writer.writerQos, qos_.liveliness.lease_duration));
       /*std::pair<WriterMapType::iterator, bool> bpair =*/
       writers_.insert(
         // This insertion is idempotent.
