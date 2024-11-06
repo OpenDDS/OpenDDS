@@ -264,12 +264,6 @@ public:
   bool invoke_on_start_callbacks(const GUID_t& local, const GUID_t& remote, bool success);
   void remove_startup_callbacks(const GUID_t& local, const GUID_t& remote);
 
-  class Interceptor : public ReactorInterceptor {
-  public:
-    Interceptor(ACE_Reactor* reactor, ACE_thread_t owner) : ReactorInterceptor(reactor, owner) {}
-    bool reactor_is_shut_down() const;
-  };
-
   class ImmediateStart : public virtual ReactorInterceptor::Command {
   public:
     ImmediateStart(RcHandle<DataLink> link, WeakRcHandle<TransportClient> client, const GUID_t& remote) : link_(link), client_(client), remote_(remote) {}
@@ -466,8 +460,6 @@ protected:
 
   /// Listener for TransportSendControlElements created in send_control
   SendResponseListener send_response_listener_;
-
-  Interceptor interceptor_;
 };
 
 } // namespace DCPS
