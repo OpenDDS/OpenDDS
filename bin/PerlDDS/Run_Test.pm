@@ -13,6 +13,7 @@ use PerlDDS::ProcessFactory;
 use Cwd;
 use POSIX qw(strftime);
 use File::Spec::Functions qw(catfile catdir);
+use File::Path qw(rmtree);
 
 sub is_executable {
   my $path = shift;
@@ -452,7 +453,36 @@ sub new {
     ++$index;
   }
 
+  PerlDDS::rmtree('./DCS');
+
   return $self;
+}
+
+sub log_wait_for {
+  my $waiting_actor = shift;
+  my $posting_actor = shift;
+  my $condition = shift;
+  my $message = shift // "";
+  return "TestFramework " . $waiting_actor . " wait_for " . $posting_actor . " " . $condition . " " . $message;
+}
+
+sub wait_for {
+  my $self = shift;
+  my $waiting_actor = shift;
+  my $posting_actor = shift;
+  my $condition = shift;
+  my $maxwait = shift;
+
+  $self->_info(log_wait_for($waiting_actor, $posting_actor, $condition));
+  my $path = '.DCS/' . $posting_actor . "/" . $condition;
+  for (my $i = 0; $i < $maxwait && ! -e $path; $i = $i + 1) {
+    sleep(1);
+  }
+  if (-e $path) {
+    $self->_info(log_wait_for($waiting_actor, $posting_actor, $condition, "done"));
+  } else {
+    $self->_info(log_wait_for($waiting_actor, $posting_actor, $condition, "timeout"));
+  }
 }
 
 sub wait_kill {

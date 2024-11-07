@@ -122,62 +122,6 @@ public:
 
 #endif
 
-// Class to cleanup in case EndHistoricSamples is missed
-class EndHistoricSamplesMissedSweeper : public ReactorInterceptor {
-public:
-  EndHistoricSamplesMissedSweeper(ACE_Reactor* reactor,
-                                  ACE_thread_t owner,
-                                  DataReaderImpl* reader);
-
-  void schedule_timer(WriterInfo_rch& info);
-  void cancel_timer(WriterInfo_rch& info);
-
-  // Arg will be PublicationId
-  int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
-
-  virtual bool reactor_is_shut_down() const
-  {
-    return TheServiceParticipant->is_shut_down();
-  }
-
-private:
-  ~EndHistoricSamplesMissedSweeper();
-
-  WeakRcHandle<DataReaderImpl> reader_;
-  OPENDDS_SET(WriterInfo_rch) info_set_;
-
-  class CommandBase : public Command {
-  public:
-    CommandBase(EndHistoricSamplesMissedSweeper* sweeper,
-                WriterInfo_rch& info)
-      : sweeper_(sweeper)
-      , info_(info)
-    { }
-
-  protected:
-    EndHistoricSamplesMissedSweeper* sweeper_;
-    WriterInfo_rch info_;
-  };
-
-  class ScheduleCommand : public CommandBase {
-  public:
-    ScheduleCommand(EndHistoricSamplesMissedSweeper* sweeper,
-                    WriterInfo_rch& info)
-      : CommandBase(sweeper, info)
-    { }
-    virtual void execute();
-  };
-
-  class CancelCommand : public CommandBase {
-  public:
-    CancelCommand(EndHistoricSamplesMissedSweeper* sweeper,
-                  WriterInfo_rch& info)
-      : CommandBase(sweeper, info)
-    { }
-    virtual void execute();
-  };
-};
-
 class MessageHolder : public virtual RcObject {
 public:
   virtual const void* get() const = 0;
@@ -842,6 +786,7 @@ private:
 
   /// when done handling historic samples, resume
   void resume_sample_processing(const PublicationId& pub_id);
+  void resume_sample_processing(WriterInfo& info);
 
   /// collect samples received before END_HISTORIC_SAMPLES
   /// returns false if normal processing of this sample should be skipped
@@ -851,7 +796,6 @@ private:
   void deliver_historic(OPENDDS_MAP(SequenceNumber, ReceivedDataSample)& samples);
 
   friend class InstanceState;
-  friend class EndHistoricSamplesMissedSweeper;
 
   friend class ::DDS_TEST; //allows tests to get at private data
 
@@ -865,7 +809,6 @@ private:
   // transport reactor thread and that thread doesn't have the owenership of the
   // the subscriber_servant_ object.
   WeakRcHandle<SubscriberImpl>              subscriber_servant_;
-  RcHandle<EndHistoricSamplesMissedSweeper> end_historic_sweeper_;
 
   CORBA::Long                  depth_;
   size_t                       n_chunks_;

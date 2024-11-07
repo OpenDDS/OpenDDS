@@ -71,7 +71,6 @@ DataReaderImpl::DataReaderImpl()
   , topic_desc_(0)
   , listener_mask_(DEFAULT_STATUS_MASK)
   , domain_id_(0)
-  , end_historic_sweeper_(make_rch<EndHistoricSamplesMissedSweeper>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this))
   , n_chunks_(TheServiceParticipant->n_chunks())
   , reactor_(0)
   , liveliness_timer_(make_rch<LivelinessTimer>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this))
@@ -528,7 +527,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
 
       if (it != this->writers_.end()) {
         removed_writers.insert(*it);
-        end_historic_sweeper_->cancel_timer(it->second);
+        it->second->cancel_historic_samples_timer();
       }
 
       if (this->writers_.erase(writer_id) == 0) {
@@ -3119,12 +3118,18 @@ DataReaderImpl::resume_sample_processing(const PublicationId& pub_id)
   }
 
   if (info) {
-    OPENDDS_MAP(SequenceNumber, ReceivedDataSample) to_deliver;
-    // Stop filtering these
-    if (info->check_end_historic_samples(end_historic_sweeper_.in(), to_deliver)) {
-      deliver_historic(to_deliver);
-      info->finished_delivering_historic();
-    }
+    resume_sample_processing(*info);
+  }
+}
+
+void
+DataReaderImpl::resume_sample_processing(WriterInfo& info)
+{
+  OPENDDS_MAP(SequenceNumber, ReceivedDataSample) to_deliver;
+  // Stop filtering these
+  if (info.check_end_historic_samples(to_deliver)) {
+    deliver_historic(to_deliver);
+    info.finished_delivering_historic();
   }
 }
 
@@ -3169,7 +3174,7 @@ DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
     if (it != writers_.end()) {
       // Schedule timer if necessary
       //   - only need to check reader qos - we know the writer must be >= reader
-      end_historic_sweeper_->schedule_timer(it->second);
+      it->second->schedule_historic_samples_timer();
     }
   }
   TransportClient::add_link(link, peer);
@@ -3344,78 +3349,6 @@ DDS::Security::ParticipantCryptoHandle DataReaderImpl::get_crypto_handle() const
   return participant ? participant->crypto_handle() : DDS::HANDLE_NIL;
 }
 #endif
-
-EndHistoricSamplesMissedSweeper::EndHistoricSamplesMissedSweeper(ACE_Reactor* reactor,
-                                                                 ACE_thread_t owner,
-                                                                 DataReaderImpl* reader)
-  : ReactorInterceptor (reactor, owner)
-  , reader_(*reader)
-{ }
-
-EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper()
-{ }
-
-void EndHistoricSamplesMissedSweeper::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
-{
-  info->waiting_for_end_historic_samples(true);
-  execute_or_enqueue(make_rch<ScheduleCommand>(this, ref(info)));
-}
-
-void EndHistoricSamplesMissedSweeper::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
-{
-  info->waiting_for_end_historic_samples(false);
-  execute_or_enqueue(make_rch<CancelCommand>(this, ref(info)));
-}
-
-int EndHistoricSamplesMissedSweeper::handle_timeout(
-    const ACE_Time_Value& ,
-    const void* arg)
-{
-  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
-
-  WriterInfo* const info =
-    const_cast<WriterInfo*>(reinterpret_cast<const WriterInfo*>(arg));
-  const PublicationId pub_id = info->writer_id();
-
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(this->mutex_);
-    info_set_.erase(rchandle_from(info));
-  }
-
-  RcHandle<DataReaderImpl> reader = reader_.lock();
-  if (!reader)
-    return 0;
-
-  if (DCPS_debug_level >= 1) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::handle_timeout reader: %C waiting on writer: %C\n",
-               LogGuid(reader->get_repo_id()).c_str(),
-               LogGuid(pub_id).c_str()));
-  }
-
-  reader->resume_sample_processing(pub_id);
-  return 0;
-}
-
-void EndHistoricSamplesMissedSweeper::ScheduleCommand::execute()
-{
-  static const ACE_Time_Value ten_seconds(10);
-  info_->schedule_historic_samples_timer(sweeper_, ten_seconds);
-  sweeper_->info_set_.insert(info_);
-
-  if (DCPS_debug_level) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::ScheduleCommand::execute() - Scheduled sweeper %@\n", info_.in()));
-  }
-}
-
-void EndHistoricSamplesMissedSweeper::CancelCommand::execute()
-{
-  info_->cancel_historic_samples_timer(sweeper_);
-  sweeper_->info_set_.erase(info_);
-
-  if (DCPS_debug_level) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::CancelCommand::execute() - Unscheduled sweeper %@\n", info_.in()));
-  }
-}
 
 void DataReaderImpl::transport_discovery_change()
 {
