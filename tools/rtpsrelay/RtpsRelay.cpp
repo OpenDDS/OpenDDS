@@ -865,7 +865,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     relay_status_writer_qos.liveliness.kind = DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
   }
 
-  DDS::DataWriter_var relay_status_writer_var = relay_publisher->create_datawriter(relay_statuss_topic, relay_status_writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  DDS::DataWriter_var relay_status_writer_var = relay_publisher->create_datawriter(relay_status_topic, relay_status_writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!relay_status_writer_var) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Status data writer\n")));
     return EXIT_FAILURE;
