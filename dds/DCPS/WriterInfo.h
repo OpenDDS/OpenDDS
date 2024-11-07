@@ -16,7 +16,9 @@
 #include "DisjointSequence.h"
 #include "PoolAllocator.h"
 #include "RcObject.h"
+#include "SporadicTask.h"
 #include "TimeTypes.h"
+
 #include "transport/framework/ReceivedDataSample.h"
 
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -33,7 +35,6 @@ namespace OpenDDS {
 namespace DCPS {
 
 class WriterInfo;
-class EndHistoricSamplesMissedSweeper;
 
 class OpenDDS_Dcps_Export WriterInfoListener: public virtual RcObject
 {
@@ -65,6 +66,8 @@ public:
   /// tell instance when a DataWriter is removed.
   /// The liveliness status need update.
   virtual void writer_removed(WriterInfo& info);
+
+  virtual void resume_sample_processing(WriterInfo& info);
 };
 
 typedef RcHandle<WriterInfoListener> WriterInfoListener_rch;
@@ -79,8 +82,6 @@ enum Coherent_State {
 
 /// Keeps track of a DataWriter's liveliness for a DataReader.
 class OpenDDS_Dcps_Export WriterInfo : public virtual RcObject {
-  friend class WriteInfoListner;
-
 public:
   enum WriterState { NOT_SET, ALIVE, DEAD };
   enum TimerState { NO_TIMER = -1 };
@@ -88,6 +89,7 @@ public:
   WriterInfo(const WriterInfoListener_rch& reader,
              const GUID_t& writer_id,
              const DDS::DataWriterQos& writer_qos);
+  ~WriterInfo();
 
   /// check to see if this writer is alive (called by handle_timeout).
   /// @param now next monotonic time this DataWriter will become not active (not alive)
@@ -195,9 +197,9 @@ public:
   bool is_owner_evaluated(DDS::InstanceHandle_t instance);
 
   void remove_instance(DDS::InstanceHandle_t instance);
-  void schedule_historic_samples_timer(EndHistoricSamplesMissedSweeper* sweeper, const ACE_Time_Value& ten_seconds);
-  void cancel_historic_samples_timer(EndHistoricSamplesMissedSweeper* sweeper);
-  bool check_end_historic_samples(EndHistoricSamplesMissedSweeper* sweeper, OPENDDS_MAP(SequenceNumber, ReceivedDataSample)& to_deliver);
+  void schedule_historic_samples_timer();
+  void cancel_historic_samples_timer();
+  bool check_end_historic_samples(OPENDDS_MAP(SequenceNumber, ReceivedDataSample)& to_deliver);
   bool check_historic(const SequenceNumber& seq, const ReceivedDataSample& sample, SequenceNumber& last_historic_seq);
   void finished_delivering_historic();
 
@@ -208,8 +210,10 @@ private:
   /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
   MonotonicTimePoint last_liveliness_activity_time_;
 
-  // Non-negative if this a durable writer which has a timer scheduled
-  long historic_samples_timer_;
+  typedef PmfSporadicTask<WriterInfo> WriterInfoSporadicTask;
+  RcHandle<WriterInfoSporadicTask> historic_samples_sweeper_task_;
+
+  void sweep_historic_samples(const MonotonicTimePoint& now);
 
   /// Temporary holding place for samples received before
   /// the END_HISTORIC_SAMPLES control message.

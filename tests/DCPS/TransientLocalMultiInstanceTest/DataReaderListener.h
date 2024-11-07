@@ -3,6 +3,8 @@
 #ifndef DATAREADER_LISTENER_IMPL
 #define DATAREADER_LISTENER_IMPL
 
+#include <tests/Utils/DistributedConditionSet.h>
+
 #include <dds/DdsDcpsSubscriptionExtC.h>
 #include <dds/DCPS/LocalObject.h>
 #include <map>
@@ -15,7 +17,9 @@ class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
-  DataReaderListenerImpl();
+  DataReaderListenerImpl(DistributedConditionSet_rch dcs,
+                         const OpenDDS::DCPS::String& actor,
+                         long expected);
   virtual ~DataReaderListenerImpl();
 
   virtual void on_requested_deadline_missed (
@@ -45,10 +49,6 @@ public:
     DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status);
 
-  long num_reads() const;
-
-  bool received_all_expected_messages() const;
-
   bool ok() const
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -56,9 +56,15 @@ public:
   }
 
 private:
+  long num_reads() const;
+  bool received_all_expected_messages() const;
+
+  DistributedConditionSet_rch dcs_;
+  const OpenDDS::DCPS::String actor_;
+  const long expected_;
   mutable ACE_Thread_Mutex mutex_;
   bool ok_;
-  std::map<int, int> read_intances_message_count_;
+  std::map<int, int> read_instances_message_count_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

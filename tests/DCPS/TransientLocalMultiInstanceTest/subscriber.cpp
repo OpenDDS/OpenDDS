@@ -8,6 +8,9 @@
 
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportImpl.h"
+
+#include <tests/Utils/DistributedConditionSet.h>
+
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 
@@ -21,6 +24,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   bool ok = true;
   try {
+    DistributedConditionSet_rch dcs =
+      OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
     DDS::DomainParticipant_var participant =
@@ -32,6 +38,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) create_participant failed.\n")));
       return 1;
     }
+
+    const OpenDDS::DCPS::String actor = TheServiceParticipant->config_store()->get("APP_NAME", "");
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) actor = %C\n", actor.c_str()));
 
     DDS::TypeSupport_var ts = new Messenger::MessageTypeSupportImpl;
 
@@ -65,7 +74,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
     // activate the listener
-    DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
+    DDS::DataReaderListener_var listener(new DataReaderListenerImpl(dcs, actor, 4));
     DataReaderListenerImpl* listener_servant =
       dynamic_cast<DataReaderListenerImpl*>(listener.in());
 
@@ -96,11 +105,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) create_datareader durable success.\n")));
     }
 
-    const int expected = 4;
-    while (listener_servant->num_reads() < expected || !listener_servant->received_all_expected_messages()) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) listener current has read: %d samples. (waiting for %d)\n"), listener_servant->num_reads(), expected));
-      ACE_OS::sleep(1);
-    }
+    dcs->post(actor, "ready");
+    dcs->wait_for(actor, actor, "read done");
 
     ok = listener_servant->ok();
     if (ok)
