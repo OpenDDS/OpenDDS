@@ -499,7 +499,7 @@ bool to_param_list(const ParticipantProxy_t& proxy,
 
   if (proxy.expectsInlineQos) {
     Parameter eiq_param; // Default is false
-    eiq_param.expects_inline_qos(proxy.expectsInlineQos);
+    eiq_param.expects_inline_qos(true);
     DCPS::push_back(param_list, eiq_param);
   }
 

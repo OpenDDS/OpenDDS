@@ -8,9 +8,11 @@
 
 #include "dcps_export.h"
 #include "Definitions.h"
+#include "Discovery.h"
 #include "LocalObject.h"
 #include "Serializer.h"
 #include "SafetyProfileStreams.h"
+
 #include "XTypes/TypeObject.h"
 #include "XTypes/TypeLookupService.h"
 
@@ -126,7 +128,7 @@ public:
   virtual const XTypes::TypeIdentifier& getCompleteTypeIdentifier() const = 0;
   virtual const XTypes::TypeMap& getCompleteTypeMap() const = 0;
 
-  void to_type_info(XTypes::TypeInformation& type_info) const;
+  virtual void to_type_info(TypeInformation& type_info) const;
   virtual const XTypes::TypeInformation* preset_type_info() const
   {
     return 0;

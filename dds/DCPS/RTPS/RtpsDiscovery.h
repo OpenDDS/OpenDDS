@@ -261,7 +261,7 @@ public:
     const DDS::DataWriterQos& qos,
     const DCPS::TransportLocatorSeq& transInfo,
     const DDS::PublisherQos& publisherQos,
-    const XTypes::TypeInformation& type_info);
+    const DCPS::TypeInformation& type_info);
 
   bool remove_publication(DDS::DomainId_t domainId, const GUID_t& participantId,
     const GUID_t& publicationId);
@@ -293,7 +293,7 @@ public:
     const char* filterClassName,
     const char* filterExpr,
     const DDS::StringSeq& params,
-    const XTypes::TypeInformation& type_info);
+    const DCPS::TypeInformation& type_info);
 
   bool remove_subscription(DDS::DomainId_t domainId, const GUID_t& participantId,
     const GUID_t& subscriptionId);

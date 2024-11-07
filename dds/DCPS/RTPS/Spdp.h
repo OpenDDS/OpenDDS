@@ -259,7 +259,7 @@ public:
     const DDS::DataWriterQos& qos,
     const DCPS::TransportLocatorSeq& transInfo,
     const DDS::PublisherQos& publisherQos,
-    const XTypes::TypeInformation& type_info)
+    const DCPS::TypeInformation& type_info)
   {
     return endpoint_manager().add_publication(topicId, publication, qos, transInfo, publisherQos, type_info);
   }
@@ -298,7 +298,7 @@ public:
     const char* filterClassName,
     const char* filterExpr,
     const DDS::StringSeq& params,
-    const XTypes::TypeInformation& type_info)
+    const DCPS::TypeInformation& type_info)
   {
     return endpoint_manager().add_subscription(topicId,
                                                subscription,

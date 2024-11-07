@@ -43,6 +43,10 @@ void TypeObjReqCond::done(DDS::ReturnCode_t retcode)
   cond.notify_all();
 }
 
+TypeInformation::TypeInformation()
+  : flags_(Flags_None)
+{}
+
 const char* Discovery::DEFAULT_REPO = "DEFAULT_REPO";
 const char* Discovery::DEFAULT_RTPS = "DEFAULT_RTPS";
 const char* Discovery::DEFAULT_STATIC = "DEFAULT_STATIC";

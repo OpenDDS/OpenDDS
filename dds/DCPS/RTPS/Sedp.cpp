@@ -4964,7 +4964,7 @@ Sedp::write_publication_data_unsecure(
     populate_discovered_writer_msg(dwd, rid, lp);
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, lp.type_info_, false)) {
+    if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, lp.type_info_.xtypes_type_info_, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data_unsecure: ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -5018,7 +5018,7 @@ Sedp::write_publication_data_secure(
     dwd.security_info.plugin_endpoint_security_attributes = lp.security_attribs_.plugin_endpoint_attributes;
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, lp.type_info_, false)) {
+    if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, lp.type_info_.xtypes_type_info_, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data_secure: ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -5116,7 +5116,7 @@ Sedp::write_subscription_data_unsecure(
     populate_discovered_reader_msg(drd, rid, ls);
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(drd, plist, use_xtypes_, ls.type_info_, false)) {
+    if (!ParameterListConverter::to_param_list(drd, plist, use_xtypes_, ls.type_info_.xtypes_type_info_, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data_unsecure: ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")
@@ -5170,7 +5170,7 @@ Sedp::write_subscription_data_secure(
     drd.security_info.plugin_endpoint_security_attributes = ls.security_attribs_.plugin_endpoint_attributes;
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(drd, plist, use_xtypes_, ls.type_info_, false)) {
+    if (!ParameterListConverter::to_param_list(drd, plist, use_xtypes_, ls.type_info_.xtypes_type_info_, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data_secure: ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")
@@ -6228,7 +6228,7 @@ bool Sedp::add_publication(
   const DDS::DataWriterQos& qos,
   const DCPS::TransportLocatorSeq& transInfo,
   const DDS::PublisherQos& publisherQos,
-  const XTypes::TypeInformation& type_info)
+  const DCPS::TypeInformation& type_info)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
 
@@ -6371,7 +6371,7 @@ bool Sedp::add_subscription(
   const char* filterClassName,
   const char* filterExpr,
   const DDS::StringSeq& params,
-  const XTypes::TypeInformation& type_info)
+  const DCPS::TypeInformation& type_info)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
 
@@ -6941,7 +6941,7 @@ void Sedp::match(const GUID_t& writer, const GUID_t& reader)
   bool writer_local = false;
   if (lpi != local_publications_.end()) {
     writer_local = true;
-    writer_type_info = &lpi->second.type_info_;
+    writer_type_info = &lpi->second.type_info_.xtypes_type_info_;
   } else if ((dpi = discovered_publications_.find(writer))
              != discovered_publications_.end()) {
     writer_type_info = &dpi->second.type_info_;
@@ -6960,7 +6960,7 @@ void Sedp::match(const GUID_t& writer, const GUID_t& reader)
   bool reader_local = false;
   if (lsi != local_subscriptions_.end()) {
     reader_local = true;
-    reader_type_info = &lsi->second.type_info_;
+    reader_type_info = &lsi->second.type_info_.xtypes_type_info_;
   } else if ((dsi = discovered_subscriptions_.find(reader))
              != discovered_subscriptions_.end()) {
     reader_type_info = &dsi->second.type_info_;
@@ -7126,7 +7126,7 @@ void Sedp::populate_origination_locator(const GUID_t& id, DCPS::TransportLocator
   if (conv.isBuiltinDomainEntity()) {
     DCPS::LocatorSeq locators;
     bool expects_inline_qos = false;
-    bool found = spdp_.get_last_recv_locator(make_id(id, ENTITYID_PARTICIPANT), locators, expects_inline_qos);
+    const bool found = spdp_.get_last_recv_locator(make_id(id, ENTITYID_PARTICIPANT), locators, expects_inline_qos);
 
     if (!found || !locators.length()) {
       return;
@@ -7183,7 +7183,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
   const DDS::PublisherQos* pubQos = 0;
   DCPS::TransportLocatorSeq* wTls = 0;
   ACE_CDR::ULong wTransportContext = 0;
-  XTypes::TypeInformation* writer_type_info = 0;
+  const XTypes::TypeInformation* writer_type_info = 0;
   String topic_name;
   DCPS::MonotonicTime_t writer_participant_discovered_at;
 
@@ -7196,7 +7196,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
     wTls = &lpi->second.trans_info_;
     wTransportContext = lpi->second.transport_context_;
     already_matched = lpi->second.matched_endpoints_.count(reader);
-    writer_type_info = &lpi->second.type_info_;
+    writer_type_info = &lpi->second.type_info_.xtypes_type_info_;
     topic_name = topic_names_[lpi->second.topic_id_];
     writer_participant_discovered_at = lpi->second.participant_discovered_at_;
   } else if (dpi != discovered_publications_.end()) {
@@ -7249,7 +7249,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   const DCPS::ContentFilterProperty_t* cfProp = 0;
 #endif
-  XTypes::TypeInformation* reader_type_info = 0;
+  const XTypes::TypeInformation* reader_type_info = 0;
   DCPS::MonotonicTime_t reader_participant_discovered_at;
 
   const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
@@ -7260,7 +7260,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
     subQos = &lsi->second.subscriber_qos_;
     rTls = &lsi->second.trans_info_;
     rTransportContext = lsi->second.transport_context_;
-    reader_type_info = &lsi->second.type_info_;
+    reader_type_info = &lsi->second.type_info_.xtypes_type_info_;
     if (lsi->second.filterProperties.filterExpression[0] != 0) {
       tempCfp.filterExpression = lsi->second.filterProperties.filterExpression;
       tempCfp.expressionParameters = lsi->second.filterProperties.expressionParameters;

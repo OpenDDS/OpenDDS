@@ -1250,7 +1250,7 @@ DataReaderImpl::enable()
       return DDS::RETCODE_ERROR;
     }
 
-    XTypes::TypeInformation type_info;
+    TypeInformation type_info;
     typesupport->to_type_info(type_info);
 
     XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();

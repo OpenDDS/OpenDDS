@@ -917,7 +917,7 @@ RecorderImpl::enable()
       ACE_DEBUG((LM_DEBUG, "(%P|%t) RecorderImpl::enable: add_subscription\n"));
     }
 
-    XTypes::TypeInformation type_info;
+    TypeInformation type_info;
 
     const bool success =
       disco->add_subscription(domain_id_,

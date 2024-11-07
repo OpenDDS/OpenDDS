@@ -587,7 +587,7 @@ bool RtpsDiscovery::add_publication(
   const DDS::DataWriterQos& qos,
   const DCPS::TransportLocatorSeq& transInfo,
   const DDS::PublisherQos& publisherQos,
-  const XTypes::TypeInformation& type_info)
+  const DCPS::TypeInformation& type_info)
 {
   return get_part(domainId, participantId)->add_publication(topicId,
                                                             publication,
@@ -648,7 +648,7 @@ bool RtpsDiscovery::add_subscription(
   const char* filterClassName,
   const char* filterExpr,
   const DDS::StringSeq& params,
-  const XTypes::TypeInformation& type_info)
+  const DCPS::TypeInformation& type_info)
 {
   return get_part(domainId, participantId)->add_subscription(topicId,
                                                              subscription,

@@ -63,7 +63,7 @@ struct LocalEntity {
   // This is the sequence number assigned to this "sample" for durable replay.
   DCPS::SequenceNumber sequence_;
   DCPS::RepoIdSet remote_expectant_opendds_associations_;
-  XTypes::TypeInformation type_info_;
+  DCPS::TypeInformation type_info_;
 #if OPENDDS_CONFIG_SECURITY
   bool have_ice_agent_info;
   ICE::AgentInfo ice_agent_info;

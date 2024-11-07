@@ -63,6 +63,13 @@ struct OpenDDS_Dcps_Export TypeObjReqCond {
   void done(DDS::ReturnCode_t retcode);
 };
 
+struct OpenDDS_Dcps_Export TypeInformation {
+  TypeInformation();
+
+  XTypes::TypeInformation xtypes_type_info_;
+  enum { Flags_None, Flags_FlexibleTypeSupport } flags_;
+};
+
 /**
  * @class Discovery
  *
@@ -191,7 +198,7 @@ public:
                                const DDS::DataWriterQos& qos,
                                const TransportLocatorSeq& transInfo,
                                const DDS::PublisherQos& publisherQos,
-                               const XTypes::TypeInformation& type_info) = 0;
+                               const TypeInformation& type_info) = 0;
 
   virtual bool remove_publication(
     DDS::DomainId_t domainId,
@@ -236,7 +243,7 @@ public:
                                 const char* filterClassName,
                                 const char* filterExpression,
                                 const DDS::StringSeq& exprParams,
-                                const XTypes::TypeInformation& type_info) = 0;
+                                const TypeInformation& type_info) = 0;
 
   virtual bool remove_subscription(
     DDS::DomainId_t domainId,
