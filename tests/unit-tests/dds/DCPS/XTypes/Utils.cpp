@@ -929,17 +929,18 @@ TEST_F(dds_DCPS_XTypes_Utils, remove_enumerators)
   // Modified: enum Enu_t { X, Z };
 
   TypeMap miniAdded, compAdded;
-  const TypeIdentifier newEnumM = remove_enumerators(getMinimalTypeIdentifier<XTypesUtils_TestEnums_xtag>(),
-                                                     getMinimalTypeIdentifier<XTypesUtils_Enu_t_xtag>(),
-                                                     values_to_remove, *tls_, miniAdded);
-  EXPECT_NE(newEnumM, TypeIdentifier());
+  TypeIdentifier newEnumM, newEnumC;
+  const TypeIdentifier newStructM = remove_enumerators(getMinimalTypeIdentifier<XTypesUtils_TestEnums_xtag>(),
+                                                       getMinimalTypeIdentifier<XTypesUtils_Enu_t_xtag>(),
+                                                       values_to_remove, newEnumM, *tls_, miniAdded);
+  EXPECT_NE(newStructM, TypeIdentifier());
   checkTI(newEnumM, miniAdded);
   EXPECT_EQ(miniAdded.size(), 6);
   checkAdded(miniAdded);
-  const TypeIdentifier newEnumC = remove_enumerators(getCompleteTypeIdentifier<XTypesUtils_TestEnums_xtag>(),
-                                                     getCompleteTypeIdentifier<XTypesUtils_Enu_t_xtag>(),
-                                                     values_to_remove, *tls_, compAdded);
-  EXPECT_NE(newEnumC, TypeIdentifier());
+  const TypeIdentifier newStructC = remove_enumerators(getCompleteTypeIdentifier<XTypesUtils_TestEnums_xtag>(),
+                                                       getCompleteTypeIdentifier<XTypesUtils_Enu_t_xtag>(),
+                                                       values_to_remove, newEnumC, *tls_, compAdded);
+  EXPECT_NE(newStructC, TypeIdentifier());
   checkTI(newEnumC, compAdded);
   EXPECT_EQ(compAdded.size(), 6);
   checkAdded(compAdded);

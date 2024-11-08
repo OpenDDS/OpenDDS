@@ -267,12 +267,13 @@ inline bool check_rc_from_get(DDS::ReturnCode_t rc, DDS::MemberId id, DDS::TypeK
  * represents the orignal enum_type with certain enumerators (represented by the
  * values sequence) removed.  All newly-generated TypeObjects are inserted into
  * the type_map with their repsective TypeIdentifiers.
- * The returned TypeIdentifier represents the modified enum_type.
+ * The returned TypeIdentifier represents the modified top_level.
  */
 OpenDDS_Dcps_Export
 TypeIdentifier remove_enumerators(const TypeIdentifier& top_level,
                                   const TypeIdentifier& enum_type,
                                   const Sequence<DDS::Int32>& values,
+                                  TypeIdentifier& modified_enum,
                                   const TypeLookupService& lookup,
                                   TypeMap& type_map);
 

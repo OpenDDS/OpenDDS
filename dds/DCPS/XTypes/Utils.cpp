@@ -1879,6 +1879,7 @@ namespace { // helpers for XTypes::remove_enumerators (below)
 TypeIdentifier remove_enumerators(const TypeIdentifier& top_level,
                                   const TypeIdentifier& enum_type,
                                   const Sequence<DDS::Int32>& values,
+                                  TypeIdentifier& modified_enum,
                                   const TypeLookupService& lookup,
                                   TypeMap& type_map)
 {
@@ -1892,12 +1893,11 @@ TypeIdentifier remove_enumerators(const TypeIdentifier& top_level,
     return TypeIdentifier();
   }
 
-  const TypeIdentifier modified_enum = makeTypeIdentifier(to_modified_enum);
+  modified_enum = makeTypeIdentifier(to_modified_enum);
   type_map[modified_enum] = to_modified_enum;
 
   ReplaceEnums re(enum_type, modified_enum, lookup, type_map);
-  re.replace_object(top_level);
-  return modified_enum;
+  return re.replace_object(top_level);
 }
 
 } // namespace XTypes
