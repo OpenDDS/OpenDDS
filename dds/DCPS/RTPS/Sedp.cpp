@@ -6306,6 +6306,14 @@ bool Sedp::add_publication(
     return false;
   }
 
+  if (type_info.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport) {
+    if (DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::add_publication: "
+                 "skipping write and match due to FlexibleTypeSupport\n"));
+    }
+    return true;
+  }
+
   if (DDS::RETCODE_OK != write_publication_data(rid, pb)) {
     return false;
   }
@@ -6451,6 +6459,14 @@ bool Sedp::add_subscription(
 
   if (DDS::RETCODE_OK != add_subscription_i(rid, sb)) {
     return false;
+  }
+
+  if (type_info.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport) {
+    if (DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::add_subscription: "
+                 "skipping write and match due to FlexibleTypeSupport\n"));
+    }
+    return true;
   }
 
   if (DDS::RETCODE_OK != write_subscription_data(rid, sb)) {

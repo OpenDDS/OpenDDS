@@ -10,6 +10,7 @@
 
 #include <dds/DCPS/DataReaderCallbacks.h>
 #include <dds/DCPS/DataWriterCallbacks.h>
+#include <dds/DCPS/Discovery.h>
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/SequenceNumber.h>
 #include <dds/DCPS/Time_Helper.h>
