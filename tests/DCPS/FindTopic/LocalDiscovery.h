@@ -117,7 +117,7 @@ private:
     const DDS::DataWriterQos& qos,
     const TransportLocatorSeq& transInfo,
     const DDS::PublisherQos& publisherQos,
-    const OpenDDS::XTypes::TypeInformation& type_info);
+    const TypeInformation& type_info);
 
   bool remove_publication(
     DDS::DomainId_t domainId,
@@ -147,7 +147,7 @@ private:
     const char* filterClassName,
     const char* filterExpression,
     const DDS::StringSeq& exprParams,
-    const OpenDDS::XTypes::TypeInformation& type_info);
+    const TypeInformation& type_info);
 
   bool remove_subscription(
     DDS::DomainId_t domainId,
