@@ -932,14 +932,14 @@ TEST_F(dds_DCPS_XTypes_Utils, remove_enumerators)
   TypeIdentifier newEnumM, newEnumC;
   const TypeIdentifier newStructM = remove_enumerators(getMinimalTypeIdentifier<XTypesUtils_TestEnums_xtag>(),
                                                        getMinimalTypeIdentifier<XTypesUtils_Enu_t_xtag>(),
-                                                       values_to_remove, newEnumM, *tls_, miniAdded);
+                                                       values_to_remove, *tls_, miniAdded, &newEnumM);
   EXPECT_NE(newStructM, TypeIdentifier());
   checkTI(newEnumM, miniAdded);
   EXPECT_EQ(miniAdded.size(), 6);
   checkAdded(miniAdded);
   const TypeIdentifier newStructC = remove_enumerators(getCompleteTypeIdentifier<XTypesUtils_TestEnums_xtag>(),
                                                        getCompleteTypeIdentifier<XTypesUtils_Enu_t_xtag>(),
-                                                       values_to_remove, newEnumC, *tls_, compAdded);
+                                                       values_to_remove, *tls_, compAdded, &newEnumC);
   EXPECT_NE(newStructC, TypeIdentifier());
   checkTI(newEnumC, compAdded);
   EXPECT_EQ(compAdded.size(), 6);

@@ -273,9 +273,9 @@ OpenDDS_Dcps_Export
 TypeIdentifier remove_enumerators(const TypeIdentifier& top_level,
                                   const TypeIdentifier& enum_type,
                                   const Sequence<DDS::Int32>& values,
-                                  TypeIdentifier& modified_enum,
                                   const TypeLookupService& lookup,
-                                  TypeMap& type_map);
+                                  TypeMap& type_map,
+                                  TypeIdentifier* modified_enum = 0);
 
 } // namespace XTypes
 } // namespace OpenDDS
