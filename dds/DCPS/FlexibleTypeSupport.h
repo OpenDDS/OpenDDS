@@ -21,16 +21,21 @@ namespace DCPS {
 
 class OpenDDS_Dcps_Export FlexibleTypeSupport : public TypeSupportImpl {
 public:
-  FlexibleTypeSupport(const RcHandle<TypeSupportImpl>& baseTypeSupport,
+  FlexibleTypeSupport(TypeSupport& baseTypeSupport,
                       const String& name)
-    : base_(baseTypeSupport)
+    : base_(dynamic_rchandle_cast<TypeSupportImpl>(
+        RcHandle<TypeSupport>(&baseTypeSupport, inc_count())))
     , name_(name)
   {}
 
   const char* name() const { return name_.c_str(); }
   char* get_type_name();
 
-  DDS::ReturnCode_t add(const RcHandle<TypeSupportImpl>& alternativeTypeSupport);
+  DDS::ReturnCode_t add(const String& name,
+                        const XTypes::TypeIdentifier& minimalTypeIdentifier,
+                        const XTypes::TypeMap& minimalTypeMap,
+                        const XTypes::TypeIdentifier& completeTypeIdentifier,
+                        const XTypes::TypeMap& completeTypeMap);
 
   void to_type_info(TypeInformation& type_info) const;
   const XTypes::TypeIdentifier& getMinimalTypeIdentifier() const;
@@ -39,6 +44,10 @@ public:
   const XTypes::TypeMap& getCompleteTypeMap() const;
 
   // the following functions simply delegate to base_
+  DDS::DataWriter* create_datawriter() { return base_->create_datawriter(); }
+  DDS::DataReader* create_datareader() { return base_->create_datareader(); }
+  DDS::DataReader* create_multitopic_datareader() { return base_->create_multitopic_datareader(); }
+  void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq) { representations_allowed_by_type(seq); }
   const MetaStruct& getMetaStructForType() const { return base_->getMetaStructForType(); }
   size_t key_count() const { return base_->key_count(); }
   bool is_dcps_key(const char* fieldname) const { return base_->is_dcps_key(fieldname); }
@@ -50,7 +59,15 @@ public:
 private:
   RcHandle<TypeSupportImpl> base_;
   String name_;
-  OPENDDS_MAP(String, RcHandle<TypeSupportImpl>) map_;
+
+  struct Alternative {
+    Alternative() {}
+    Alternative(const XTypes::TypeIdentifier& minimalTypeIdentifier,
+                const XTypes::TypeMap& minimalTypeMap,
+                const XTypes::TypeIdentifier& completeTypeIdentifier,
+                const XTypes::TypeMap& completeTypeMap);
+  };
+  OPENDDS_MAP(String, Alternative) map_;
 
   OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(FlexibleTypeSupport)
 };

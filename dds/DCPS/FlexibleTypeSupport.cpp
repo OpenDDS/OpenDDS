@@ -17,9 +17,13 @@ char* FlexibleTypeSupport::get_type_name()
   return CORBA::string_dup(name_.c_str());
 }
 
-DDS::ReturnCode_t FlexibleTypeSupport::add(const RcHandle<TypeSupportImpl>& alternativeTypeSupport)
+DDS::ReturnCode_t FlexibleTypeSupport::add(const String& name,
+                                           const XTypes::TypeIdentifier& minimalTypeIdentifier,
+                                           const XTypes::TypeMap& minimalTypeMap,
+                                           const XTypes::TypeIdentifier& completeTypeIdentifier,
+                                           const XTypes::TypeMap& completeTypeMap)
 {
-  map_[alternativeTypeSupport->name()] = alternativeTypeSupport;
+  map_[name] = Alternative(minimalTypeIdentifier, minimalTypeMap, completeTypeIdentifier, completeTypeMap);
   return DDS::RETCODE_OK;
 }
 
@@ -51,6 +55,13 @@ const XTypes::TypeIdentifier& FlexibleTypeSupport::getCompleteTypeIdentifier() c
 const XTypes::TypeMap& FlexibleTypeSupport::getCompleteTypeMap() const
 {
   return tmEmpty;
+}
+
+FlexibleTypeSupport::Alternative::Alternative(const XTypes::TypeIdentifier& minimalTypeIdentifier,
+                                              const XTypes::TypeMap& minimalTypeMap,
+                                              const XTypes::TypeIdentifier& completeTypeIdentifier,
+                                              const XTypes::TypeMap& completeTypeMap)
+{ //TODO
 }
 
 }

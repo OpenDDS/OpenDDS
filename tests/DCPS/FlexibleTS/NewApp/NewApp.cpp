@@ -3,13 +3,43 @@
 #include <tests/Utils/DistributedConditionSet.h>
 #include <tests/Utils/StatusMatching.h>
 
-#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/DomainParticipantImpl.h>
+#include <dds/DCPS/FlexibleTypeSupport.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/Service_Participant.h>
+
 #include <dds/DCPS/StaticIncludes.h>
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
+
+std::string setup_typesupport(HelloWorld::MessageTypeSupport& base, const DDS::DomainParticipant_var& participant)
+{
+  using namespace OpenDDS::DCPS;
+  using namespace OpenDDS::XTypes;
+  static const char typeName[] = "newType";
+  RcHandle<FlexibleTypeSupport> flex(make_rch<FlexibleTypeSupport>(ref(base), typeName));
+  flex->register_type(participant, typeName);
+
+  Sequence<DDS::Int32> valuesToRemove;
+  valuesToRemove.append(HelloWorld::State::Intermediate);
+
+  DomainParticipantImpl* participantImpl = dynamic_cast<DomainParticipantImpl*>(participant.in());
+  TypeLookupService_rch lookup = participantImpl->get_type_lookup_service();
+
+  TypeSupportImpl& baseImpl = dynamic_cast<TypeSupportImpl&>(base);
+  TypeMap minTm, cmpTm;
+  TypeIdentifier minOldTi = remove_enumerators(baseImpl.getMinimalTypeIdentifier(),
+                                               getMinimalTypeIdentifier<HelloWorld_State_xtag>(),
+                                               valuesToRemove, *lookup, minTm);
+  TypeIdentifier cmpOldTi = remove_enumerators(baseImpl.getCompleteTypeIdentifier(),
+                                               getCompleteTypeIdentifier<HelloWorld_State_xtag>(),
+                                               valuesToRemove, *lookup, cmpTm);
+  flex->add("oldType", minOldTi, minTm, cmpOldTi, cmpTm);
+
+  return typeName;
+}
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
@@ -23,10 +53,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                                    PARTICIPANT_QOS_DEFAULT, 0, 0);
 
   HelloWorld::MessageTypeSupport_var type_support = new HelloWorld::MessageTypeSupportImpl;
-  type_support->register_type(participant, "");
-  CORBA::String_var type_name = type_support->get_type_name();
+  //CORBA::String_var type_name = type_support->get_type_name();
+  //type_support->register_type(participant, "");
+  std::string type_name = setup_typesupport(*type_support, participant);
 
-  DDS::Topic_var topic = participant->create_topic(HelloWorld::MESSAGE_TOPIC1_NAME, type_name,
+  DDS::Topic_var topic = participant->create_topic(HelloWorld::MESSAGE_TOPIC1_NAME, type_name.c_str(),
                                                    TOPIC_QOS_DEFAULT, 0, 0);
 
   DDS::Subscriber_var subscriber = participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0, 0);
@@ -39,7 +70,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   HelloWorld::MessageDataReader_var message_data_reader = HelloWorld::MessageDataReader::_narrow(data_reader);
 
-  DDS::Topic_var topic2 = participant->create_topic(HelloWorld::MESSAGE_TOPIC2_NAME, type_name,
+  DDS::Topic_var topic2 = participant->create_topic(HelloWorld::MESSAGE_TOPIC2_NAME, type_name.c_str(),
                                                     TOPIC_QOS_DEFAULT, 0, 0);
 
   DDS::Publisher_var publisher = participant->create_publisher(PUBLISHER_QOS_DEFAULT, 0, 0);

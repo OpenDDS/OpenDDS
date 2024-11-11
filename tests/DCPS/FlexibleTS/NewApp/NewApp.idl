@@ -2,7 +2,7 @@ module HelloWorld {
 
   const long HELLO_WORLD_DOMAIN = 1;
 
-  enum State { Initial, /*Intermediate,*/ Complete };
+  enum State { Initial, Intermediate, Complete };
 
   @topic
   struct Message {
