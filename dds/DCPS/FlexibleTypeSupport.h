@@ -46,9 +46,13 @@ public:
   // the following functions simply delegate to base_
   DDS::DataWriter* create_datawriter() { return base_->create_datawriter(); }
   DDS::DataReader* create_datareader() { return base_->create_datareader(); }
+#ifndef OPENDDS_NO_MULTI_TOPIC
   DDS::DataReader* create_multitopic_datareader() { return base_->create_multitopic_datareader(); }
+#endif
   void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq) { representations_allowed_by_type(seq); }
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   const MetaStruct& getMetaStructForType() const { return base_->getMetaStructForType(); }
+#endif
   size_t key_count() const { return base_->key_count(); }
   bool is_dcps_key(const char* fieldname) const { return base_->is_dcps_key(fieldname); }
   SerializedSizeBound serialized_size_bound(const Encoding& encoding) const { return base_->serialized_size_bound(encoding); }
