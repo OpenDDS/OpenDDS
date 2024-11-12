@@ -3240,6 +3240,11 @@ DataReaderImpl::add_link(const DataLink_rch& link, const GUID_t& peer)
   }
 }
 
+void DataReaderImpl::get_flexible_types(const char* key, XTypes::TypeInformation& type_info)
+{
+  type_support_->get_flexible_types(key, type_info);
+}
+
 void
 DataReaderImpl::register_for_writer(const GUID_t& participant,
                                     const GUID_t& readerid,

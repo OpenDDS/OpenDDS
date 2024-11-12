@@ -1971,6 +1971,11 @@ DataWriterImpl::write(Message_Block_Ptr data,
   return DDS::RETCODE_OK;
 }
 
+void DataWriterImpl::get_flexible_types(const char* key, XTypes::TypeInformation& type_info)
+{
+  type_support_->get_flexible_types(key, type_info);
+}
+
 void
 DataWriterImpl::track_sequence_number(GUIDSeq* filter_out)
 {

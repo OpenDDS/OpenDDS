@@ -17,13 +17,13 @@ char* FlexibleTypeSupport::get_type_name()
   return CORBA::string_dup(name_.c_str());
 }
 
-DDS::ReturnCode_t FlexibleTypeSupport::add(const String& name,
+DDS::ReturnCode_t FlexibleTypeSupport::add(const String& typeKey,
                                            const XTypes::TypeIdentifier& minimalTypeIdentifier,
                                            const XTypes::TypeMap& minimalTypeMap,
                                            const XTypes::TypeIdentifier& completeTypeIdentifier,
                                            const XTypes::TypeMap& completeTypeMap)
 {
-  map_[name] = Alternative(minimalTypeIdentifier, minimalTypeMap, completeTypeIdentifier, completeTypeMap);
+  map_[typeKey] = Alternative(minimalTypeIdentifier, minimalTypeMap, completeTypeIdentifier, completeTypeMap);
   return DDS::RETCODE_OK;
 }
 
@@ -32,36 +32,43 @@ void FlexibleTypeSupport::to_type_info(TypeInformation& type_info) const
   type_info.flags_ = TypeInformation::Flags_FlexibleTypeSupport;
 }
 
-namespace {
-  const XTypes::TypeIdentifier tiEmpty;
-  const XTypes::TypeMap tmEmpty;
-}
-
 const XTypes::TypeIdentifier& FlexibleTypeSupport::getMinimalTypeIdentifier() const
 {
-  return tiEmpty;
+  return XTypes::TypeIdentifier::None;
 }
 
 const XTypes::TypeMap& FlexibleTypeSupport::getMinimalTypeMap() const
 {
-  return tmEmpty;
+  return XTypes::TypeMapBuilder::EmptyMap;
 }
 
 const XTypes::TypeIdentifier& FlexibleTypeSupport::getCompleteTypeIdentifier() const
 {
-  return tiEmpty;
+  return XTypes::TypeIdentifier::None;
 }
 
 const XTypes::TypeMap& FlexibleTypeSupport::getCompleteTypeMap() const
 {
-  return tmEmpty;
+  return XTypes::TypeMapBuilder::EmptyMap;
+}
+
+void FlexibleTypeSupport::get_flexible_types(const char* key, XTypes::TypeInformation& type_info)
+{
+  OPENDDS_MAP(String, Alternative)::const_iterator iter = map_.find(key);
+  const Alternative& alt = iter->second;
+  to_type_info_i(type_info.minimal, alt.minimalId_, alt.minimalMap_);
+  to_type_info_i(type_info.complete, alt.completeId_, alt.completeMap_);
 }
 
 FlexibleTypeSupport::Alternative::Alternative(const XTypes::TypeIdentifier& minimalTypeIdentifier,
                                               const XTypes::TypeMap& minimalTypeMap,
                                               const XTypes::TypeIdentifier& completeTypeIdentifier,
                                               const XTypes::TypeMap& completeTypeMap)
-{ //TODO
+  : minimalId_(minimalTypeIdentifier)
+  , completeId_(completeTypeIdentifier)
+  , minimalMap_(minimalTypeMap)
+  , completeMap_(completeTypeMap)
+{
 }
 
 }

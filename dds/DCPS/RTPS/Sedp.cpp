@@ -4898,6 +4898,19 @@ Sedp::write_dcps_participant_dispose(const GUID_t& part)
 }
 #endif
 
+bool Sedp::enable_flexible_types(const GUID_t& remoteParticipantId, const char* typeKey)
+{
+  // Add remoteParticipantId -> typeKey mapping to use with yet-to-be discovered endpoints.
+
+  // Search discovered_publications_ and discovered_subscriptions_ for existing endpoints
+  // that belong to remoteParticipantId.
+  // Find their potentially-matched local sub/pub entities.
+  // Get TypeInfo from those entities via DataWriter/ReaderCallbacks using typeKey.
+  // Proceed with matching the 'discovered' to the 'local' using the new types for 'local'.
+  // Announce 'local' with a directed SEDP to 'discovered' including this TypeInfo.
+  return false;
+}
+
 DDS::ReturnCode_t
 Sedp::add_publication_i(const DCPS::GUID_t& rid,
                         LocalPublication& pub)

@@ -1,4 +1,4 @@
-project: dcpsexe, dcps_test, dcps_rtps_udp {
+project: dcps_test, dcps_rtps_udp {
   requires += no_opendds_safety_profile
   idlflags += -SS
   TypeSupport_Files {

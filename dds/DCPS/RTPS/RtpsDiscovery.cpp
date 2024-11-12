@@ -511,6 +511,12 @@ bool RtpsDiscovery::update_domain_participant_qos(
   return get_part(domain, participant)->update_domain_participant_qos(qos);
 }
 
+bool RtpsDiscovery::enable_flexible_types(DDS::DomainId_t domain, const GUID_t& myParticipantId,
+                                          const GUID_t& remoteParticipantId, const char* typeKey)
+{
+  return get_part(domain, myParticipantId)->enable_flexible_types(remoteParticipantId, typeKey);
+}
+
 bool RtpsDiscovery::has_domain_participant(DDS::DomainId_t domain, const GUID_t& local, const GUID_t& remote) const
 {
   return get_part(domain, local)->has_domain_participant(remote);

@@ -3,8 +3,10 @@
 #include <tests/Utils/DistributedConditionSet.h>
 #include <tests/Utils/StatusMatching.h>
 
+#include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/DomainParticipantImpl.h>
 #include <dds/DCPS/FlexibleTypeSupport.h>
+#include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
 
@@ -14,16 +16,18 @@
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
+static const char NEW_TYPE[] = "newType";
+static const char OLD_TYPE[] = "oldType";
+
 std::string setup_typesupport(HelloWorld::MessageTypeSupport& base, const DDS::DomainParticipant_var& participant)
 {
   using namespace OpenDDS::DCPS;
   using namespace OpenDDS::XTypes;
-  static const char typeName[] = "newType";
-  RcHandle<FlexibleTypeSupport> flex(make_rch<FlexibleTypeSupport>(ref(base), typeName));
-  flex->register_type(participant, typeName);
+  RcHandle<FlexibleTypeSupport> flex(make_rch<FlexibleTypeSupport>(ref(base), NEW_TYPE));
+  flex->register_type(participant, NEW_TYPE);
 
   Sequence<DDS::Int32> valuesToRemove;
-  valuesToRemove.append(HelloWorld::State::Intermediate);
+  valuesToRemove.append(HelloWorld::Intermediate);
 
   DomainParticipantImpl* participantImpl = dynamic_cast<DomainParticipantImpl*>(participant.in());
   TypeLookupService_rch lookup = participantImpl->get_type_lookup_service();
@@ -36,9 +40,43 @@ std::string setup_typesupport(HelloWorld::MessageTypeSupport& base, const DDS::D
   TypeIdentifier cmpOldTi = remove_enumerators(baseImpl.getCompleteTypeIdentifier(),
                                                getCompleteTypeIdentifier<HelloWorld_State_xtag>(),
                                                valuesToRemove, *lookup, cmpTm);
-  flex->add("oldType", minOldTi, minTm, cmpOldTi, cmpTm);
+  flex->add(OLD_TYPE, minOldTi, minTm, cmpOldTi, cmpTm);
+  return NEW_TYPE;
+}
 
-  return typeName;
+void read_message(const HelloWorld::MessageDataReader_var& message_data_reader, bool& done)
+{
+  HelloWorld::MessageSeq messages;
+  DDS::SampleInfoSeq infos;
+  message_data_reader->take(messages, infos, DDS::LENGTH_UNLIMITED,
+                            DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+  for (unsigned int idx = 0; idx != messages.length(); ++idx) {
+    if (infos[idx].valid_data) {
+      ACE_DEBUG((LM_DEBUG, "received %C\n", messages[idx].value.in()));
+      done = true;
+      return;
+    }
+  }
+}
+
+void read_pbit(const DDS::DataReader_var& reader)
+{
+  using namespace OpenDDS::DCPS;
+  DDS::ParticipantBuiltinTopicDataDataReader_var bit_reader =
+    DDS::ParticipantBuiltinTopicDataDataReader::_narrow(reader);
+  DDS::ParticipantBuiltinTopicData bitSample;
+  DDS::SampleInfo sampleInfo;
+  while (bit_reader->read_next_sample(bitSample, sampleInfo) == DDS::RETCODE_OK) {
+    if (sampleInfo.sample_state == DDS::NOT_READ_SAMPLE_STATE && sampleInfo.valid_data) {
+      const GUID_t guidRemote = bit_key_to_guid(bitSample.key);
+      ACE_DEBUG((LM_DEBUG, "Enable FlexibleTS for %C\n", LogGuid(guidRemote).c_str()));
+      DDS::Subscriber_var sub = reader->get_subscriber();
+      DDS::DomainParticipant_var participant = sub->get_participant();
+      DomainParticipantImpl* participantImpl = dynamic_cast<DomainParticipantImpl*>(participant.in());
+      Discovery_rch disco = TheServiceParticipant->get_discovery(HelloWorld::HELLO_WORLD_DOMAIN);
+      disco->enable_flexible_types(HelloWorld::HELLO_WORLD_DOMAIN, participantImpl->get_id(), guidRemote, OLD_TYPE);
+    }
+  }
 }
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
@@ -51,6 +89,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::DomainParticipant_var participant =
     domain_participant_factory->create_participant(HelloWorld::HELLO_WORLD_DOMAIN,
                                                    PARTICIPANT_QOS_DEFAULT, 0, 0);
+
+  DDS::Subscriber_var builtin_sub = participant->get_builtin_subscriber();
+  DDS::DataReader_var pbit_reader = builtin_sub->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
+  DDS::ReadCondition_var pbit_condition = pbit_reader->create_readcondition(DDS::NOT_READ_SAMPLE_STATE,
+                                                                            DDS::ANY_VIEW_STATE,
+                                                                            DDS::ALIVE_INSTANCE_STATE);
 
   HelloWorld::MessageTypeSupport_var type_support = new HelloWorld::MessageTypeSupportImpl;
   //CORBA::String_var type_name = type_support->get_type_name();
@@ -88,27 +132,29 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::WaitSet_var wait_set = new DDS::WaitSet;
   wait_set->attach_condition(read_condition);
+  wait_set->attach_condition(pbit_condition);
 
   bool done = false;
   while (!done) {
     DDS::ConditionSeq conditions;
     const DDS::Duration_t timeout = { 1, 0 };
-    wait_set->wait(conditions, timeout);
+    const DDS::ReturnCode_t ret = wait_set->wait(conditions, timeout);
 
-    HelloWorld::MessageSeq messages;
-    DDS::SampleInfoSeq infos;
-    message_data_reader->take(messages, infos, DDS::LENGTH_UNLIMITED,
-                              DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
-    for (unsigned int idx = 0; idx != messages.length(); ++idx) {
-      if (infos[idx].valid_data) {
-        ACE_DEBUG((LM_DEBUG, "received %C\n", messages[idx].value.in()));
-        done = true;
-        break;
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "WaitSet::wait() returned %d\n", ret));
+      done = true;
+    }
+    for (unsigned int i = 0; i < conditions.length(); ++i) {
+      if (conditions[i] == read_condition) {
+        read_message(message_data_reader, done);
+      } else if (conditions[i] == pbit_condition) {
+        read_pbit(pbit_reader);
       }
     }
   }
 
   wait_set->detach_condition(read_condition);
+  wait_set->detach_condition(pbit_condition);
 
   HelloWorld::Message message;
   message.value = "Hello World!";

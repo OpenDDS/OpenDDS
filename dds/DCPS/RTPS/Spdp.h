@@ -222,6 +222,8 @@ public:
 
   bool update_domain_participant_qos(const DDS::DomainParticipantQos& qos);
 
+  bool enable_flexible_types(const GUID_t& remoteParticipantId, const char* typeKey);
+
   bool has_domain_participant(const GUID_t& ignoreId) const;
 
   DCPS::TopicStatus assert_topic(GUID_t& topicId, const char* topicName,

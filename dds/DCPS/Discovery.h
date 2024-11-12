@@ -143,6 +143,12 @@ public:
     const GUID_t& participantId,
     const DDS::DomainParticipantQos& qos) = 0;
 
+  virtual bool enable_flexible_types(
+    DDS::DomainId_t /*domain*/,
+    const GUID_t& /*myParticipantId*/,
+    const GUID_t& /*remoteParticipantId*/,
+    const char* /*typeKey*/)
+  { return false; }
 
   // Topic operations:
 

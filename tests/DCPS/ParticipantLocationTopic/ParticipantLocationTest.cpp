@@ -9,6 +9,7 @@
 #include <tests/Utils/StatusMatching.h>
 
 #include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/Logging.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
@@ -89,6 +90,7 @@ void participants_done_callback()
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
+  OpenDDS::DCPS::log_bits = true;
   int status = EXIT_SUCCESS;
 
   try {

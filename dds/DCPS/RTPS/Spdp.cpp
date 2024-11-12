@@ -4726,6 +4726,12 @@ bool Spdp::update_domain_participant_qos(const DDS::DomainParticipantQos& qos)
   return announce_domain_participant_qos();
 }
 
+bool Spdp::enable_flexible_types(const GUID_t& remoteParticipantId, const char* typeKey)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  return endpoint_manager().enable_flexible_types(remoteParticipantId, typeKey);
+}
+
 bool Spdp::has_domain_participant(const GUID_t& remote) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);

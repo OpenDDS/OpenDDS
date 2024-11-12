@@ -134,6 +134,9 @@ public:
     return 0;
   }
 
+  virtual void get_flexible_types(const char* /*key*/,
+                                  XTypes::TypeInformation& /*type_info*/) {}
+
   void add_types(const XTypes::TypeLookupService_rch& tls) const;
 
   RepresentationFormat* make_format(DDS::DataRepresentationId_t representation);
@@ -145,13 +148,13 @@ protected:
   DDS::DynamicType_var type_;
 #endif
 
-private:
   static const ACE_CDR::Long TYPE_INFO_DEPENDENT_COUNT_NOT_PROVIDED;
 
   void to_type_info_i(XTypes::TypeIdentifierWithDependencies& ti_with_deps,
                       const XTypes::TypeIdentifier& ti,
                       const XTypes::TypeMap& type_map) const;
 
+private:
   void populate_dependencies_i(const XTypes::TypeLookupService_rch& tls,
                                XTypes::EquivalenceKind ek) const;
 

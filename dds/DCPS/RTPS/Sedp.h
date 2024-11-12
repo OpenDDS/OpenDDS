@@ -393,6 +393,8 @@ public:
 
   DDS::ReturnCode_t write_dcps_participant_dispose(const DCPS::GUID_t& part);
 
+  bool enable_flexible_types(const GUID_t& remoteParticipantId, const char* typeKey);
+
   // Topic
   bool update_topic_qos(const DCPS::GUID_t& topicId, const DDS::TopicQos& qos);
 

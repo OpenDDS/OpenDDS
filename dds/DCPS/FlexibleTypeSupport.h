@@ -31,7 +31,7 @@ public:
   const char* name() const { return name_.c_str(); }
   char* get_type_name();
 
-  DDS::ReturnCode_t add(const String& name,
+  DDS::ReturnCode_t add(const String& typeKey,
                         const XTypes::TypeIdentifier& minimalTypeIdentifier,
                         const XTypes::TypeMap& minimalTypeMap,
                         const XTypes::TypeIdentifier& completeTypeIdentifier,
@@ -61,6 +61,8 @@ public:
   Extensibility max_extensibility() const { return base_->max_extensibility(); }
 
 private:
+  void get_flexible_types(const char* key, XTypes::TypeInformation& type_info);
+
   RcHandle<TypeSupportImpl> base_;
   String name_;
 
@@ -70,6 +72,8 @@ private:
                 const XTypes::TypeMap& minimalTypeMap,
                 const XTypes::TypeIdentifier& completeTypeIdentifier,
                 const XTypes::TypeMap& completeTypeMap);
+    XTypes::TypeIdentifier minimalId_, completeId_;
+    XTypes::TypeMap minimalMap_, completeMap_;
   };
   OPENDDS_MAP(String, Alternative) map_;
 
