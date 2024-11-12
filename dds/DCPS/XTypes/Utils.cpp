@@ -1862,11 +1862,11 @@ namespace { // helpers for XTypes::remove_enumerators (below)
         replaced = replace_mcto(copy.complete);
         break;
       default:
-        return TypeIdentifier();
+        return TypeIdentifier::None;
       }
 
       if (!replaced) {
-        return TypeIdentifier();
+        return TypeIdentifier::None;
       }
 
       const TypeIdentifier copyId = makeTypeIdentifier(copy);
@@ -1885,12 +1885,12 @@ TypeIdentifier remove_enumerators(const TypeIdentifier& top_level,
 {
   const TypeObject& to_enum_type = lookup.get_type_object(enum_type);
   if (to_enum_type.kind == TK_NONE) {
-    return TypeIdentifier();
+    return TypeIdentifier::None;
   }
 
   const TypeObject to_modified_enum = remove_enumerators(to_enum_type, values);
   if (to_modified_enum.kind == TK_NONE) {
-    return TypeIdentifier();
+    return TypeIdentifier::None;
   }
 
   TypeIdentifier ti_modified_enum = makeTypeIdentifier(to_modified_enum);

@@ -75,7 +75,7 @@ void TypeSupportImpl::to_type_info_i(XTypes::TypeIdentifierWithDependencies& ti_
 
   if (pos == type_map.end()) {
     log_ti_not_found("to_type_info_i", name(), ti);
-    ti_with_deps.typeid_with_size.type_id = XTypes::TypeIdentifier();
+    ti_with_deps.typeid_with_size.type_id = XTypes::TypeIdentifier::None;
     ti_with_deps.typeid_with_size.typeobject_serialized_size = 0;
   } else if (TheServiceParticipant->type_object_encoding() == Service_Participant::Encoding_WriteOldFormat) {
     Encoding encoding = XTypes::get_typeobject_encoding();

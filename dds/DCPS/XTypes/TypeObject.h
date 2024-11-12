@@ -728,6 +728,8 @@ namespace XTypes {
       return *this < other || other < *this;
     }
 
+    static const TypeIdentifier None;
+
   private:
     ACE_CDR::Octet kind_;
     void* active_;
@@ -3360,6 +3362,8 @@ namespace XTypes {
     }
 
     operator TypeMap&() { return type_map_; }
+
+    static const TypeMap EmptyMap;
   };
 
   void compute_dependencies(const TypeMap& type_map,
@@ -3394,10 +3398,14 @@ template<typename T>
 const XTypes::TypeMap& getMinimalTypeMap();
 
 template<typename T>
-const XTypes::TypeIdentifier& getCompleteTypeIdentifier();
+const XTypes::TypeIdentifier& getCompleteTypeIdentifier() {
+  return XTypes::TypeIdentifier::None;
+}
 
 template<typename T>
-const XTypes::TypeMap& getCompleteTypeMap();
+const XTypes::TypeMap& getCompleteTypeMap() {
+  return XTypes::TypeMapBuilder::EmptyMap;
+}
 
 template<typename T>
 void serialized_size(const Encoding& encoding, size_t& size,

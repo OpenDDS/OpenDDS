@@ -68,6 +68,8 @@ TypeIdentifier::TypeIdentifier(ACE_CDR::Octet kind)
   activate();
 }
 
+const TypeIdentifier TypeIdentifier::None;
+
 void TypeIdentifier::activate(const TypeIdentifier* other)
 {
 #define OPENDDS_BRANCH_ACTIVATE(T, N) \
@@ -463,6 +465,8 @@ bool has_type_object(const TypeIdentifier& ti)
   return !is_fully_descriptive(ti) && !is_plain_collection(ti) &&
     ti.kind() != TK_NONE;
 }
+
+const TypeMap TypeMapBuilder::EmptyMap;
 
 namespace {
 template <typename T>

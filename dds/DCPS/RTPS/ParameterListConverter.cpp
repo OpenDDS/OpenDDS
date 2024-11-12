@@ -34,8 +34,8 @@ namespace {
   void extract_type_info_param(const Parameter& param, XTypes::TypeInformation& type_info)
   {
     if (!XTypes::deserialize_type_info(type_info, param.type_information())) {
-      type_info.minimal.typeid_with_size.type_id = XTypes::TypeIdentifier();
-      type_info.complete.typeid_with_size.type_id = XTypes::TypeIdentifier();
+      type_info.minimal.typeid_with_size.type_id = XTypes::TypeIdentifier::None;
+      type_info.complete.typeid_with_size.type_id = XTypes::TypeIdentifier::None;
     }
   }
 
