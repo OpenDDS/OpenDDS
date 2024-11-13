@@ -4898,12 +4898,24 @@ Sedp::write_dcps_participant_dispose(const GUID_t& part)
 }
 #endif
 
-bool Sedp::enable_flexible_types(const GUID_t& remoteParticipantId, const char* typeKey)
+bool Sedp::enable_flexible_types(const GUID_t& remoteParticipantId, const char* /*typeKey -- needed?*/)
 {
-  // Add remoteParticipantId -> typeKey mapping to use with yet-to-be discovered endpoints.
-
   // Search discovered_publications_ and discovered_subscriptions_ for existing endpoints
   // that belong to remoteParticipantId.
+
+  for (DiscoveredPublicationMap::iterator i = discovered_publications_.lower_bound(remoteParticipantId);
+       i != discovered_publications_.end() && 0 == std::memcmp(i->first.guidPrefix,
+                                                               remoteParticipantId.guidPrefix,
+                                                               sizeof(GuidPrefix_t)); ++i) {
+    match_endpoints_flex_ts(*i);
+  }
+  for (DiscoveredSubscriptionMap::iterator i = discovered_subscriptions_.lower_bound(remoteParticipantId);
+       i != discovered_subscriptions_.end() && 0 == std::memcmp(i->first.guidPrefix,
+                                                               remoteParticipantId.guidPrefix,
+                                                               sizeof(GuidPrefix_t)); ++i) {
+    match_endpoints_flex_ts(*i);
+  }
+
   // Find their potentially-matched local sub/pub entities.
   // Get TypeInfo from those entities via DataWriter/ReaderCallbacks using typeKey.
   // Proceed with matching the 'discovered' to the 'local' using the new types for 'local'.
@@ -4977,7 +4989,7 @@ Sedp::write_publication_data_unsecure(
     populate_discovered_writer_msg(dwd, rid, lp);
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, lp.type_info_.xtypes_type_info_, false)) {
+    if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, lp.type_info_, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data_unsecure: ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -5031,7 +5043,7 @@ Sedp::write_publication_data_secure(
     dwd.security_info.plugin_endpoint_security_attributes = lp.security_attribs_.plugin_endpoint_attributes;
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, lp.type_info_.xtypes_type_info_, false)) {
+    if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, lp.type_info_, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data_secure: ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -5129,7 +5141,7 @@ Sedp::write_subscription_data_unsecure(
     populate_discovered_reader_msg(drd, rid, ls);
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(drd, plist, use_xtypes_, ls.type_info_.xtypes_type_info_, false)) {
+    if (!ParameterListConverter::to_param_list(drd, plist, use_xtypes_, ls.type_info_, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data_unsecure: ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")
@@ -5183,7 +5195,7 @@ Sedp::write_subscription_data_secure(
     drd.security_info.plugin_endpoint_security_attributes = ls.security_attribs_.plugin_endpoint_attributes;
 
     // Convert to parameter list
-    if (!ParameterListConverter::to_param_list(drd, plist, use_xtypes_, ls.type_info_.xtypes_type_info_, false)) {
+    if (!ParameterListConverter::to_param_list(drd, plist, use_xtypes_, ls.type_info_, false)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data_secure: ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")
@@ -6322,8 +6334,9 @@ bool Sedp::add_publication(
   if (type_info.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport) {
     if (DCPS_debug_level > 3) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::add_publication: "
-                 "skipping write and match due to FlexibleTypeSupport\n"));
+                 "skipping write_publication_data due to FlexibleTypeSupport\n"));
     }
+    match_endpoints_flex_ts(rid, pb, td);
     return true;
   }
 
@@ -6477,8 +6490,9 @@ bool Sedp::add_subscription(
   if (type_info.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport) {
     if (DCPS_debug_level > 3) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::add_subscription: "
-                 "skipping write and match due to FlexibleTypeSupport\n"));
+                 "skipping write due to FlexibleTypeSupport\n"));
     }
+    match_endpoints_flex_ts(rid, sb, td);
     return true;
   }
 
@@ -6537,6 +6551,22 @@ void Sedp::update_subscription_locators(
     iter->second.trans_info_ = transInfo;
     write_subscription_data(subscriptionId, iter->second);
   }
+}
+
+void Sedp::match_endpoints_flex_ts(const DiscoveredPublicationMap::value_type&)
+{
+}
+
+void Sedp::match_endpoints_flex_ts(const DiscoveredSubscriptionMap::value_type&)
+{
+}
+
+void Sedp::match_endpoints_flex_ts(const GUID_t& id, const LocalPublication&, const DCPS::TopicDetails&)
+{
+}
+
+void Sedp::match_endpoints_flex_ts(const GUID_t& id, const LocalSubscription&, const DCPS::TopicDetails&)
+{
 }
 
 bool Sedp::remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote) const
@@ -6804,7 +6834,7 @@ void Sedp::cleanup_secure_reader(const GUID_t& subscriptionId)
 #endif
 
 // TODO: This is perhaps too generic since the context probably has the details this function computes.
-void Sedp::match_endpoints(GUID_t repoId, const DCPS::TopicDetails& td, bool remove)
+void Sedp::match_endpoints(const GUID_t& repoId, const DCPS::TopicDetails& td, bool remove)
 {
   if (DCPS_debug_level >= 4) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::match_endpoints %C%C\n",

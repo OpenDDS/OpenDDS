@@ -1298,7 +1298,7 @@ protected:
     }
   }
 
-  void match_endpoints(GUID_t repoId, const DCPS::TopicDetails& td,
+  void match_endpoints(const GUID_t& repoId, const DCPS::TopicDetails& td,
                        bool remove = false);
 
   void remove_assoc(const GUID_t& remove_from, const GUID_t& removing);
@@ -1390,6 +1390,11 @@ protected:
   void match_continue_security_enabled(
     const GUID_t& writer, const GUID_t& reader, bool call_writer, bool call_reader);
 #endif
+
+  void match_endpoints_flex_ts(const DiscoveredPublicationMap::value_type&);
+  void match_endpoints_flex_ts(const DiscoveredSubscriptionMap::value_type&);
+  void match_endpoints_flex_ts(const GUID_t& id, const LocalPublication&, const DCPS::TopicDetails&);
+  void match_endpoints_flex_ts(const GUID_t& id, const LocalSubscription&, const DCPS::TopicDetails&);
 
   void remove_from_bit(const DiscoveredPublication& pub)
   {
