@@ -34,7 +34,8 @@ WriterInfoListener::~WriterInfoListener()
 /// handle_timeout is called since some subroutine use the state.
 void
 WriterInfoListener::writer_became_alive(WriterInfo&,
-                                        const MonotonicTimePoint&)
+                                        const MonotonicTimePoint&,
+                                        WriterState)
 {
 }
 
@@ -42,7 +43,8 @@ WriterInfoListener::writer_became_alive(WriterInfo&,
 /// The writer state is inout parameter, the state is set to DEAD
 /// when it returns.
 void
-WriterInfoListener::writer_became_dead(WriterInfo&)
+WriterInfoListener::writer_became_dead(WriterInfo&,
+                                       WriterState)
 {
 }
 
@@ -58,11 +60,12 @@ WriterInfoListener::resume_sample_processing(WriterInfo&)
 {
 }
 
-WriterInfo::WriterInfo(WriterInfoListener* reader,
+WriterInfo::WriterInfo(const WriterInfoListener_rch& reader,
                        const PublicationId& writer_id,
-                       const ::DDS::DataWriterQos& writer_qos)
-  : last_liveliness_activity_time_(MonotonicTimePoint::now())
-  , historic_samples_sweeper_task_(make_rch<WriterInfoSporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &WriterInfo::sweep_historic_samples))
+                       const ::DDS::DataWriterQos& writer_qos,
+                       const DDS::Duration_t& reader_liveliness_lease_duration)
+  : historic_samples_sweeper_task_(make_rch<WriterInfoSporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &WriterInfo::sweep_historic_samples))
+  , liveliness_check_task_(make_rch<WriterInfoSporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &WriterInfo::check_liveliness))
   , last_historic_seq_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , waiting_for_end_historic_samples_(false)
   , delivering_historic_samples_(false)
@@ -71,6 +74,8 @@ WriterInfo::WriterInfo(WriterInfoListener* reader,
   , reader_(reader)
   , writer_id_(writer_id)
   , writer_qos_(writer_qos)
+  , reader_liveliness_lease_duration_(reader_liveliness_lease_duration)
+  , reader_liveliness_lease_duration_is_finite_(!is_infinite(reader_liveliness_lease_duration))
   , handle_(DDS::HANDLE_NIL)
 {
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
@@ -89,12 +94,12 @@ WriterInfo::WriterInfo(WriterInfoListener* reader,
 WriterInfo::~WriterInfo()
 {
   historic_samples_sweeper_task_->cancel();
+  liveliness_check_task_->cancel();
 }
 
-const char* WriterInfo::get_state_str() const
+const char* get_state_str(WriterState state)
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  switch (state_) {
+  switch (state) {
   case NOT_SET:
     return "NOT_SET";
   case ALIVE:
@@ -102,9 +107,9 @@ const char* WriterInfo::get_state_str() const
   case DEAD:
     return "DEAD";
   default:
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriterInfo::get_state_str: ")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR:get_state_str(WriterState): ")
       ACE_TEXT("%d is either invalid or not recognized.\n"),
-      state_));
+      state));
     return "Invalid state";
   }
 }
@@ -151,7 +156,10 @@ WriterInfo::check_end_historic_samples(OPENDDS_MAP(SequenceNumber, ReceivedDataS
 void
 WriterInfo::sweep_historic_samples(const MonotonicTimePoint&)
 {
-  reader_->resume_sample_processing(*this);
+  WriterInfoListener_rch reader = reader_.lock();
+  if (reader) {
+    reader->resume_sample_processing(*this);
+  }
 }
 
 bool
@@ -230,36 +238,53 @@ WriterInfo::is_owner_evaluated(::DDS::InstanceHandle_t instance)
     return iter->second;
 }
 
-MonotonicTimePoint
-WriterInfo::check_activity(const MonotonicTimePoint& now)
+void
+WriterInfo::start_liveliness_timer()
 {
-  MonotonicTimePoint expires_at(MonotonicTimePoint::max_value);
-
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  last_liveliness_activity_time_ = MonotonicTimePoint::now();
+  if (reader_liveliness_lease_duration_is_finite_) {
+    liveliness_check_task_->schedule(reader_liveliness_lease_duration_);
+  }
+}
 
-  // We only need check the liveliness with the non-zero liveliness_lease_duration_.
-  if (state_ == ALIVE && !reader_->liveliness_lease_duration_.is_zero()) {
-    expires_at = last_liveliness_activity_time_ + reader_->liveliness_lease_duration_;
+void
+WriterInfo::check_liveliness(const MonotonicTimePoint& now)
+{
+  bool became_dead = false;
+  WriterState previous_state;
 
-    if (expires_at <= now) {
-      // let all instances know this write is not alive.
-      WriterInfoListener* reader = reader_;
-      guard.release();
-      reader->writer_became_dead(*this);
-      expires_at = MonotonicTimePoint::max_value;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    previous_state = state_;
+    if (state_ == ALIVE) {
+      const TimeDuration elapsed = now - last_liveliness_activity_time_;
+      became_dead = elapsed > reader_liveliness_lease_duration_;
+      if (became_dead) {
+        state_ = DEAD;
+      } else {
+        liveliness_check_task_->schedule(reader_liveliness_lease_duration_ - elapsed);
+      }
     }
   }
 
-  return expires_at;
+  WriterInfoListener_rch reader = reader_.lock();
+  if (reader && became_dead) {
+    reader->writer_became_dead(*this, previous_state);
+  }
 }
 
 void
 WriterInfo::removed()
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  WriterInfoListener* reader = reader_;
+  WriterInfoListener_rch reader = reader_.lock();
   guard.release();
-  reader->writer_removed(*this);
+  if (reader) {
+    reader->writer_removed(*this);
+  }
+  historic_samples_sweeper_task_->cancel();
+  liveliness_check_task_->cancel();
 }
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
@@ -304,10 +329,11 @@ WriterInfo::set_group_info(const CoherentChangeControl& info)
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   if (!(publisher_id_ == info.publisher_id_)
       || group_coherent_ != info.group_coherent_) {
+    WriterInfoListener_rch reader = reader_.lock();
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: WriterInfo::set_group_info()")
                ACE_TEXT(" reader %C writer %C incorrect coherent info !\n"),
-               LogGuid(reader_->subscription_id_).c_str(),
+               LogGuid(reader->subscription_id_).c_str(),
                LogGuid(writer_id_).c_str()));
   }
 
