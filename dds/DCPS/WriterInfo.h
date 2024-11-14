@@ -36,6 +36,10 @@ namespace DCPS {
 
 class WriterInfo;
 
+enum WriterState { NOT_SET, ALIVE, DEAD };
+
+OpenDDS_Dcps_Export const char* get_state_str(WriterState state);
+
 class OpenDDS_Dcps_Export WriterInfoListener: public virtual RcObject
 {
 public:
@@ -44,24 +48,18 @@ public:
 
   GUID_t subscription_id_;
 
-  /// The time interval for checking liveliness.
-  /// TBD: Should this be initialized with
-  ///      DDS::DURATION_INFINITE_SEC and DDS::DURATION_INFINITE_NSEC
-  ///      instead of ACE_Time_Value::zero to be consistent with default
-  ///      duration qos ? Or should we simply use the ACE_Time_Value::zero
-  ///      to indicate the INFINITY duration ?
-  TimeDuration liveliness_lease_duration_;
-
   /// tell instances when a DataWriter transitions to being alive
   /// The writer state is inout parameter, it has to be set ALIVE before
   /// handle_timeout is called since some subroutine use the state.
   virtual void writer_became_alive(WriterInfo& info,
-                                   const MonotonicTimePoint& when);
+                                   const MonotonicTimePoint& when,
+                                   WriterState previous_state);
 
   /// tell instances when a DataWriter transitions to DEAD
   /// The writer state is inout parameter, the state is set to DEAD
   /// when it returns.
-  virtual void writer_became_dead(WriterInfo& info);
+  virtual void writer_became_dead(WriterInfo& info,
+                                  WriterState previous_state);
 
   /// tell instance when a DataWriter is removed.
   /// The liveliness status need update.
@@ -83,20 +81,11 @@ enum Coherent_State {
 /// Keeps track of a DataWriter's liveliness for a DataReader.
 class OpenDDS_Dcps_Export WriterInfo : public virtual RcObject {
 public:
-  enum WriterState { NOT_SET, ALIVE, DEAD };
-  enum TimerState { NO_TIMER = -1 };
-
   WriterInfo(const WriterInfoListener_rch& reader,
              const GUID_t& writer_id,
-             const DDS::DataWriterQos& writer_qos);
+             const DDS::DataWriterQos& writer_qos,
+             const DDS::Duration_t& reader_liveliness_lease_duration);
   ~WriterInfo();
-
-  /// check to see if this writer is alive (called by handle_timeout).
-  /// @param now next monotonic time this DataWriter will become not active (not alive)
-  ///      if no sample or liveliness message is received.
-  /// @returns montonic time when the Writer will become not active (if no activity)
-  ///          of MonotonicTimePoint::max_value if the writer is already or became not alive
-  MonotonicTimePoint check_activity(const MonotonicTimePoint& now);
 
   /// called when a sample or other activity is received from this writer.
   void received_activity(const MonotonicTimePoint& when);
@@ -106,12 +95,6 @@ public:
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return state_;
-  };
-
-  void state(WriterState state)
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    state_ = state;
   };
 
   DDS::InstanceHandle_t handle() const
@@ -168,8 +151,6 @@ public:
     last_historic_seq_ = last_historic_seq;
   }
 
-  const char* get_state_str() const;
-
   /// update liveliness when remove_association is called.
   void removed();
 
@@ -203,6 +184,7 @@ public:
   bool check_historic(const SequenceNumber& seq, const ReceivedDataSample& sample, SequenceNumber& last_historic_seq);
   void finished_delivering_historic();
 
+  void start_liveliness_timer();
 private:
 
   mutable ACE_Thread_Mutex mutex_;
@@ -211,9 +193,12 @@ private:
   MonotonicTimePoint last_liveliness_activity_time_;
 
   typedef PmfSporadicTask<WriterInfo> WriterInfoSporadicTask;
-  RcHandle<WriterInfoSporadicTask> historic_samples_sweeper_task_;
 
+  const RcHandle<WriterInfoSporadicTask> historic_samples_sweeper_task_;
   void sweep_historic_samples(const MonotonicTimePoint& now);
+
+  const RcHandle<WriterInfoSporadicTask> liveliness_check_task_;
+  void check_liveliness(const MonotonicTimePoint& now);
 
   /// Temporary holding place for samples received before
   /// the END_HISTORIC_SAMPLES control message.
@@ -231,13 +216,15 @@ private:
   WriterState state_;
 
   /// The DataReader owning this WriterInfo
-  WeakRcHandle<WriterInfoListener> reader_;
+  const WeakRcHandle<WriterInfoListener> reader_;
 
   /// DCPSInfoRepo ID of the DataWriter
-  GUID_t writer_id_;
+  const GUID_t writer_id_;
 
   /// Writer qos
   DDS::DataWriterQos writer_qos_;
+  const TimeDuration reader_liveliness_lease_duration_;
+  const bool reader_liveliness_lease_duration_is_finite_;
 
   /// The publication entity instance handle.
   DDS::InstanceHandle_t handle_;
@@ -262,17 +249,23 @@ private:
 
 inline
 void
-WriterInfo::received_activity(const MonotonicTimePoint& when)
+WriterInfo::received_activity(const MonotonicTimePoint& now)
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  WriterState prev;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    last_liveliness_activity_time_ = now;
+    prev = state_;
+    state_ = ALIVE;
+    if (prev != ALIVE && reader_liveliness_lease_duration_is_finite_) {
+      liveliness_check_task_->schedule(reader_liveliness_lease_duration_);
+    }
+  }
 
-  last_liveliness_activity_time_ = when;
-
-  if (state_ != ALIVE) { // NOT_SET || DEAD
+  if (prev != ALIVE) { // NOT_SET || DEAD
     RcHandle<WriterInfoListener> reader = reader_.lock();
-    guard.release();
     if (reader) {
-      reader->writer_became_alive(*this, when);
+      reader->writer_became_alive(*this, now, prev);
     }
   }
 }
