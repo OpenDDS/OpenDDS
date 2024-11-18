@@ -74,10 +74,8 @@ DataReaderImpl::DataReaderImpl()
   , topic_desc_(0)
   , listener_mask_(DEFAULT_STATUS_MASK)
   , domain_id_(0)
-  , end_historic_sweeper_(make_rch<EndHistoricSamplesMissedSweeper>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this))
   , n_chunks_(TheServiceParticipant->n_chunks())
   , reactor_(0)
-  , liveliness_timer_(make_rch<LivelinessTimer>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this))
   , last_deadline_missed_total_count_(0)
   , deadline_queue_enabled_(false)
   , deadline_task_(make_rch<DRISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &DataReaderImpl::deadline_task))
@@ -272,7 +270,7 @@ DataReaderImpl::add_association(const WriterAssociation& writer,
     ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
     const GUID_t& writer_id = writer.writerId;
-    WriterInfo_rch info = make_rch<WriterInfo>(rchandle_from<WriterInfoListener>(this), writer_id, writer.writerQos);
+    WriterInfo_rch info = make_rch<WriterInfo>(rchandle_from<WriterInfoListener>(this), writer_id, writer.writerQos, qos_.liveliness.lease_duration);
     std::pair<WriterMapType::iterator, bool> bpair = writers_.insert(
         // This insertion is idempotent.
         WriterMapType::value_type(
@@ -365,18 +363,6 @@ DataReaderImpl::transport_assoc_done(int flags, const GUID_t& remote_id)
     return;
   }
 
-  // LIVELINESS policy timers are managed here.
-  if (!liveliness_lease_duration_.is_zero()) {
-    if (DCPS_debug_level >= 5) {
-      ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) DataReaderImpl::transport_assoc_done: ")
-          ACE_TEXT("starting/resetting liveliness timer for reader %C\n"),
-          LogGuid(get_guid()).c_str()));
-    }
-    // this call will start the timer if it is not already set
-    liveliness_timer_->check_liveliness();
-  }
-
   const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
 
   if (!participant)
@@ -437,10 +423,12 @@ DataReaderImpl::transport_assoc_done(int flags, const GUID_t& remote_id)
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
-      if (!writers_.count(remote_id)) {
+      WriterMapType::iterator pos = writers_.find(remote_id);
+      if (pos == writers_.end()) {
         return;
       }
-      writers_[remote_id]->handle(handle);
+      pos->second->handle(handle);
+      pos->second->start_liveliness_timer();
     }
   }
 
@@ -544,7 +532,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
 
       if (it != this->writers_.end()) {
         removed_writers.insert(*it);
-        end_historic_sweeper_->cancel_timer(it->second);
+        it->second->cancel_historic_samples_timer();
       }
 
       if (this->writers_.erase(writer_id) == 0) {
@@ -1186,13 +1174,6 @@ DataReaderImpl::enable()
         " Cached_Allocator_With_Overflow %x with %d chunks\n",
         rd_allocator_.get(), n_chunks_));
 
-  if ((qos_.liveliness.lease_duration.sec !=
-      DDS::DURATION_INFINITE_SEC) &&
-      (qos_.liveliness.lease_duration.nanosec !=
-          DDS::DURATION_INFINITE_NSEC)) {
-    liveliness_lease_duration_ = TimeDuration(qos_.liveliness.lease_duration);
-  }
-
   // Setup the requested deadline watchdog if the configured deadline
   // period is not the default (infinite).
   DDS::Duration_t const deadline_period = this->qos_.deadline.period;
@@ -1796,131 +1777,6 @@ CORBA::Long DataReaderImpl::total_samples() const
 }
 
 void
-DataReaderImpl::LivelinessTimer::check_liveliness()
-{
-  execute_or_enqueue(make_rch<CheckLivelinessCommand>(this));
-}
-
-int
-DataReaderImpl::LivelinessTimer::handle_timeout(const ACE_Time_Value& tv,
-                                                const void * /*arg*/)
-{
-  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
-
-  check_liveliness_i(false, MonotonicTimePoint(tv));
-  return 0;
-}
-
-void
-DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
-                                                    const MonotonicTimePoint& now)
-{
-  // Working copy of the active timer Id.
-
-  RcHandle<DataReaderImpl> data_reader = data_reader_.lock();
-  if (! data_reader) {
-    this->reactor()->purge_pending_notifications(this);
-    return;
-  }
-
-  long local_timer_id = liveliness_timer_id_;
-  bool timer_was_reset = false;
-
-  if (local_timer_id != -1 && cancel) {
-    if (DCPS_debug_level >= 5) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DataReaderImpl::LivelinessTimer::check_liveliness_i: ")
-                 ACE_TEXT(" canceling timer for reader %C.\n"),
-                 LogGuid(data_reader->get_guid()).c_str()));
-    }
-
-    // called from add_associations and there is already a timer
-    // so cancel the existing timer.
-    if (this->reactor()->cancel_timer(local_timer_id) == -1) {
-      // this could fail because the reactor's call and
-      // the add_associations' call to this could overlap
-      // so it is not a failure.
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::LivelinessTimer::check_liveliness_i: ")
-                 ACE_TEXT(" %p.\n"), ACE_TEXT("cancel_timer")));
-    }
-
-    timer_was_reset = true;
-  }
-
-  // Used after the lock scope ends.
-  MonotonicTimePoint smallest(MonotonicTimePoint::max_value);
-  int alive_writers = 0;
-
-  // This is a bit convoluted.  The reasoning goes as follows:
-  // 1) We grab the current timer Id value when we enter the method.
-  // 2) We *might* cancel the timer if it is active.
-  // 3) The timer *might* be rescheduled while we do not hold the sample lock.
-  // 4) If we (or another thread) canceled the timer that we can tell, then
-  // 5) we should clear the Id value,
-  // 6) unless it has been rescheduled.
-  // We are using a changed timer Id value as a proxy for having been
-  // rescheduled.
-  if( timer_was_reset && (liveliness_timer_id_ == local_timer_id)) {
-    liveliness_timer_id_ = -1;
-  }
-
-  // Iterate over each writer to this reader
-  {
-    ACE_READ_GUARD(ACE_RW_Thread_Mutex,
-        read_guard,
-        data_reader->writers_lock_);
-    WriterMapType writers = data_reader->writers_;
-    read_guard.release();
-
-    for (WriterMapType::iterator iter = writers.begin();
-        iter != writers.end();
-        ++iter) {
-      // deal with possibly not being alive or
-      // tell when it will not be alive next (if no activity)
-      const MonotonicTimePoint next_absolute(iter->second->check_activity(now));
-      if (!next_absolute.is_max()) {
-        alive_writers++;
-        smallest = std::min(smallest, next_absolute);
-      }
-    }
-  }
-
-  if (!alive_writers) {
-    // no live writers so no need to schedule a timer
-    // but be sure we don't try to cancel the timer later.
-    liveliness_timer_id_ = -1;
-  }
-
-  if (DCPS_debug_level >= 5) {
-    ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DataReaderImpl::LivelinessTimer::check_liveliness_i: ")
-        ACE_TEXT("reader %C has %d live writers; from_reactor=%d\n"),
-        LogGuid(data_reader->get_guid()).c_str(),
-        alive_writers,
-        !cancel));
-  }
-
-  // Call into the reactor after releasing the sample lock.
-  if (alive_writers) {
-    // compare the time now with the earliest(smallest) deadline we found
-    TimeDuration relative;
-    if (now < smallest) {
-      relative = smallest - now;
-    } else {
-      relative = TimeDuration(0, 1); // ASAP
-    }
-    liveliness_timer_id_ = this->reactor()->schedule_timer(this, 0, relative.value());
-
-    if (liveliness_timer_id_ == -1) {
-      ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::LivelinessTimer::check_liveliness_i: ")
-          ACE_TEXT(" %p.\n"), ACE_TEXT("schedule_timer")));
-    }
-  }
-}
-
-void
 DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
 {
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -2051,15 +1907,15 @@ DataReaderImpl::writer_removed(WriterInfo& info)
 
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
-    const WriterInfo::WriterState info_state = info.state();
+    const WriterState info_state = info.state();
 
-    if (info_state == WriterInfo::ALIVE) {
+    if (info_state == ALIVE) {
       --liveliness_changed_status_.alive_count;
       --liveliness_changed_status_.alive_count_change;
       liveliness_changed = true;
     }
 
-    if (info_state == WriterInfo::DEAD) {
+    if (info_state == DEAD) {
       --liveliness_changed_status_.not_alive_count;
       --liveliness_changed_status_.not_alive_count_change;
       liveliness_changed = true;
@@ -2076,7 +1932,9 @@ DataReaderImpl::writer_removed(WriterInfo& info)
 }
 
 void
-DataReaderImpl::writer_became_alive(WriterInfo& info, const MonotonicTimePoint& /* when */)
+DataReaderImpl::writer_became_alive(WriterInfo& info,
+                                    const MonotonicTimePoint& /* when */,
+                                    WriterState previous_state)
 {
   const GUID_t info_writer_id = info.writer_id();
 
@@ -2085,25 +1943,23 @@ DataReaderImpl::writer_became_alive(WriterInfo& info, const MonotonicTimePoint& 
                ACE_TEXT("reader %C from writer %C previous state %C.\n"),
                LogGuid(get_guid()).c_str(),
                LogGuid(info_writer_id).c_str(),
-               info.get_state_str()));
+               get_state_str(previous_state)));
   }
 
   // NOTE: each instance will change to ALIVE_STATE when they receive a sample
-
-  const WriterInfo::WriterState info_state = info.state();
 
   {
     bool liveliness_changed = false;
 
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
-    if (info_state != WriterInfo::ALIVE) {
+    if (previous_state != ALIVE) {
       liveliness_changed_status_.alive_count++;
       liveliness_changed_status_.alive_count_change++;
       liveliness_changed = true;
     }
 
-    if (info_state == WriterInfo::DEAD) {
+    if (previous_state == DEAD) {
       liveliness_changed_status_.not_alive_count--;
       liveliness_changed_status_.not_alive_count_change--;
     }
@@ -2126,10 +1982,6 @@ DataReaderImpl::writer_became_alive(WriterInfo& info, const MonotonicTimePoint& 
 
     liveliness_changed_status_.last_publication_handle = info.handle();
 
-    // Change the state to ALIVE since handle_timeout may call writer_became_dead
-    // which need the current state info.
-    info.state(WriterInfo::ALIVE);
-
     if (this->monitor_) {
       this->monitor_->report();
     }
@@ -2140,13 +1992,11 @@ DataReaderImpl::writer_became_alive(WriterInfo& info, const MonotonicTimePoint& 
       this->notify_liveliness_change();
     }
   }
-
-  // this call will start the liveliness timer if it is not already set
-  liveliness_timer_->check_liveliness();
 }
 
 void
-DataReaderImpl::writer_became_dead(WriterInfo& info)
+DataReaderImpl::writer_became_dead(WriterInfo& info,
+                                   WriterState previous_state)
 {
   const GUID_t info_writer_id = info.writer_id();
 
@@ -2155,7 +2005,7 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
                ACE_TEXT("reader %C from writer %C previous state %C.\n"),
                LogGuid(get_guid()).c_str(),
                LogGuid(info_writer_id).c_str(),
-               info.get_state_str()));
+               get_state_str(previous_state)));
   }
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -2167,8 +2017,6 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
 #endif
 
   bool liveliness_changed = false;
-
-  const WriterInfo::WriterState info_state = info.state();
 
   DDS::InstanceHandle_t publication_handle = DDS::HANDLE_NIL;
   {
@@ -2182,13 +2030,13 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
-    if (info_state != WriterInfo::DEAD) {
+    if (previous_state != DEAD) {
       ++liveliness_changed_status_.not_alive_count;
       ++liveliness_changed_status_.not_alive_count_change;
       liveliness_changed = true;
     }
 
-    if (info_state == WriterInfo::ALIVE) {
+    if (previous_state == ALIVE) {
       --liveliness_changed_status_.alive_count;
       --liveliness_changed_status_.alive_count_change;
     }
@@ -2210,8 +2058,6 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
     }
 
     liveliness_changed_status_.last_publication_handle = info.handle();
-
-    info.state(WriterInfo::DEAD);
 
     if (this->monitor_) {
       this->monitor_->report();
@@ -2774,7 +2620,7 @@ void DataReaderImpl::notify_liveliness_change()
       output_str += "\n\tNOTIFY: writer[ ";
       output_str += LogGuid(id).conv_;
       output_str += "] == ";
-      output_str += current->second->get_state_str();
+      output_str += get_state_str(current->second->state());
     }
 
     ACE_DEBUG((LM_DEBUG,
@@ -3180,12 +3026,18 @@ DataReaderImpl::resume_sample_processing(const GUID_t& pub_id)
   }
 
   if (info) {
-    OPENDDS_MAP(SequenceNumber, ReceivedDataSample) to_deliver;
-    // Stop filtering these
-    if (info->check_end_historic_samples(end_historic_sweeper_.in(), to_deliver)) {
-      deliver_historic(to_deliver);
-      info->finished_delivering_historic();
-    }
+    resume_sample_processing(*info);
+  }
+}
+
+void
+DataReaderImpl::resume_sample_processing(WriterInfo& info)
+{
+  OPENDDS_MAP(SequenceNumber, ReceivedDataSample) to_deliver;
+  // Stop filtering these
+  if (info.check_end_historic_samples(to_deliver)) {
+    deliver_historic(to_deliver);
+    info.finished_delivering_historic();
   }
 }
 
@@ -3230,7 +3082,7 @@ DataReaderImpl::add_link(const DataLink_rch& link, const GUID_t& peer)
     if (it != writers_.end()) {
       // Schedule timer if necessary
       //   - only need to check reader qos - we know the writer must be >= reader
-      end_historic_sweeper_->schedule_timer(it->second);
+      it->second->schedule_historic_samples_timer();
     }
   }
   TransportClient::add_link(link, peer);
@@ -3402,75 +3254,6 @@ DDS::Security::ParticipantCryptoHandle DataReaderImpl::get_crypto_handle() const
   return participant ? participant->crypto_handle() : DDS::HANDLE_NIL;
 }
 #endif
-
-EndHistoricSamplesMissedSweeper::EndHistoricSamplesMissedSweeper(ACE_Reactor* reactor,
-                                                                 ACE_thread_t owner,
-                                                                 DataReaderImpl* reader)
-  : ReactorInterceptor (reactor, owner)
-  , reader_(*reader)
-{ }
-
-void EndHistoricSamplesMissedSweeper::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
-{
-  info->waiting_for_end_historic_samples(true);
-  execute_or_enqueue(make_rch<ScheduleCommand>(this, ref(info)));
-}
-
-void EndHistoricSamplesMissedSweeper::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
-{
-  info->waiting_for_end_historic_samples(false);
-  execute_or_enqueue(make_rch<CancelCommand>(this, ref(info)));
-}
-
-int EndHistoricSamplesMissedSweeper::handle_timeout(
-    const ACE_Time_Value& ,
-    const void* arg)
-{
-  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
-
-  WriterInfo* const info =
-    const_cast<WriterInfo*>(reinterpret_cast<const WriterInfo*>(arg));
-  const GUID_t pub_id = info->writer_id();
-
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(this->mutex_);
-    info_set_.erase(rchandle_from(info));
-  }
-
-  RcHandle<DataReaderImpl> reader = reader_.lock();
-  if (!reader)
-    return 0;
-
-  if (DCPS_debug_level >= 1) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::handle_timeout reader: %C waiting on writer: %C\n",
-               LogGuid(reader->get_guid()).c_str(),
-               LogGuid(pub_id).c_str()));
-  }
-
-  reader->resume_sample_processing(pub_id);
-  return 0;
-}
-
-void EndHistoricSamplesMissedSweeper::ScheduleCommand::execute()
-{
-  static const ACE_Time_Value ten_seconds(10);
-  info_->schedule_historic_samples_timer(sweeper_, ten_seconds);
-  const bool insert_result = sweeper_->info_set_.insert(info_).second;
-
-  if (insert_result && DCPS_debug_level) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::ScheduleCommand::execute() - sweeper %@ is now scheduled\n", info_.in()));
-  }
-}
-
-void EndHistoricSamplesMissedSweeper::CancelCommand::execute()
-{
-  info_->cancel_historic_samples_timer(sweeper_);
-  const bool erase_result = sweeper_->info_set_.erase(info_) > 0;
-
-  if (erase_result && DCPS_debug_level) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::CancelCommand::execute() - sweeper %@ is no longer scheduled\n", info_.in()));
-  }
-}
 
 void DataReaderImpl::transport_discovery_change()
 {
