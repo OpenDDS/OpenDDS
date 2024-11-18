@@ -65,6 +65,7 @@ struct OpenDDS_Dcps_Export TypeObjReqCond {
 
 struct OpenDDS_Dcps_Export TypeInformation {
   TypeInformation();
+  TypeInformation(const XTypes::TypeInformation& typeinfo);
 
   XTypes::TypeInformation xtypes_type_info_;
   enum { Flags_None, Flags_FlexibleTypeSupport } flags_;

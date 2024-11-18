@@ -713,7 +713,8 @@ private:
 
     DDS::ReturnCode_t write_parameter_list(const ParameterList& plist,
       const DCPS::GUID_t& reader,
-      DCPS::SequenceNumber& sequence);
+      DCPS::SequenceNumber& sequence,
+      bool historic = false);
 
     void end_historic_samples(const DCPS::GUID_t& reader);
     void request_ack(const DCPS::GUID_t& reader);
@@ -1372,9 +1373,9 @@ protected:
 
   void match(const GUID_t& writer, const GUID_t& reader);
 
-  bool need_minimal_and_or_complete_types(const XTypes::TypeInformation* type_info,
-                                          bool& need_minimal,
-                                          bool& need_complete) const;
+  bool need_type_info(const XTypes::TypeInformation* type_info,
+                      bool& need_minimal,
+                      bool& need_complete) const;
 
   void remove_expired_endpoints(const MonotonicTimePoint& /*now*/);
 
@@ -1391,10 +1392,14 @@ protected:
     const GUID_t& writer, const GUID_t& reader, bool call_writer, bool call_reader);
 #endif
 
-  void match_endpoints_flex_ts(const DiscoveredPublicationMap::value_type&);
-  void match_endpoints_flex_ts(const DiscoveredSubscriptionMap::value_type&);
-  void match_endpoints_flex_ts(const GUID_t& id, const LocalPublication&, const DCPS::TopicDetails&);
-  void match_endpoints_flex_ts(const GUID_t& id, const LocalSubscription&, const DCPS::TopicDetails&);
+  void match_endpoints_flex_ts(const DiscoveredPublicationMap::value_type& discPub,
+                               const char* typeKey);
+  void match_endpoints_flex_ts(const DiscoveredSubscriptionMap::value_type& discSub,
+                               const char* typeKey);
+  void match_endpoints_flex_ts(const GUID_t& id, const LocalPublication& localPub,
+                               const DCPS::TopicDetails& topic);
+  void match_endpoints_flex_ts(const GUID_t& id, const LocalSubscription& localSub,
+                               const DCPS::TopicDetails& topic);
 
   void remove_from_bit(const DiscoveredPublication& pub)
   {

@@ -56,6 +56,28 @@ struct LocalEntity {
   {}
 #endif
 
+  bool isDiscoveryProtected() const
+  {
+#if OPENDDS_CONFIG_SECURITY
+    return security_attribs_.base.is_discovery_protected;
+#else
+    return false;
+#endif
+  }
+
+  const XTypes::TypeInformation* typeInfoFor(const DCPS::GUID_t& remote,
+                                             bool* usedFlexible = 0) const
+  {
+    const FlexibleTypeMap::const_iterator found = flexible_types_.find(remote);
+    if (found == flexible_types_.end()) {
+      return &type_info_.xtypes_type_info_;
+    }
+    if (usedFlexible) {
+      *usedFlexible = true;
+    }
+    return &found->second;
+  }
+
   DCPS::GUID_t topic_id_;
   DCPS::TransportLocatorSeq trans_info_;
   DCPS::MonotonicTime_t participant_discovered_at_;
@@ -70,6 +92,8 @@ struct LocalEntity {
   ICE::AgentInfo ice_agent_info;
   DDS::Security::EndpointSecurityAttributes security_attribs_;
 #endif
+  typedef OPENDDS_MAP_CMP(DCPS::GUID_t, XTypes::TypeInformation, DCPS::GUID_tKeyLessThan) FlexibleTypeMap;
+  FlexibleTypeMap flexible_types_;
 };
 
 struct LocalPublication : LocalEntity {
