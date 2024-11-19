@@ -3534,7 +3534,7 @@ Sedp::DiscoveryWriter::write_dcps_participant_secure(const Security::SPDPdiscove
     return DDS::RETCODE_ERROR;
   }
 
-  return write_parameter_list(plist, reader, sequence);
+  return write_parameter_list(plist, reader, sequence, reader != GUID_UNKNOWN);
 }
 #endif
 
@@ -4737,6 +4737,7 @@ Sedp::populate_discovered_reader_msg(
 void
 Sedp::write_durable_publication_data(const GUID_t& reader, bool secure)
 {
+  ACE_UNUSED_ARG(secure);
   if (!(spdp_.available_builtin_endpoints() & (DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER
 #if OPENDDS_CONFIG_SECURITY
                                                | DDS::Security::SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER
@@ -4745,34 +4746,34 @@ Sedp::write_durable_publication_data(const GUID_t& reader, bool secure)
     return;
   }
 
-  if (secure) {
+  for (LocalPublicationIter pub = local_publications_.begin(); pub != local_publications_.end(); ++pub) {
+    if (pub->second.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport) {
+      continue;
+    }
 #if OPENDDS_CONFIG_SECURITY
-    LocalPublicationIter pub, end = local_publications_.end();
-    for (pub = local_publications_.begin(); pub != end; ++pub) {
+    if (secure) {
       if (pub->second.isDiscoveryProtected()) {
         write_publication_data_secure(pub->first, pub->second, reader);
       }
-    }
-    publications_secure_writer_->end_historic_samples(reader);
+    } else
 #endif
-  } else {
-    LocalPublicationIter pub, end = local_publications_.end();
-    for (pub = local_publications_.begin(); pub != end; ++pub) {
-#if OPENDDS_CONFIG_SECURITY
-      if (!pub->second.isDiscoveryProtected()) {
-        write_publication_data(pub->first, pub->second, reader);
-      }
-#else
+    if (!pub->second.isDiscoveryProtected()) {
       write_publication_data(pub->first, pub->second, reader);
-#endif
     }
-    publications_writer_->end_historic_samples(reader);
   }
+
+#if OPENDDS_CONFIG_SECURITY
+  if (secure) {
+    publications_secure_writer_->end_historic_samples(reader);
+  } else
+#endif
+  publications_writer_->end_historic_samples(reader);
 }
 
 void
 Sedp::write_durable_subscription_data(const GUID_t& reader, bool secure)
 {
+  ACE_UNUSED_ARG(secure);
   if (!(spdp_.available_builtin_endpoints() & (DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER
 #if OPENDDS_CONFIG_SECURITY
                                                | DDS::Security::SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER
@@ -4781,29 +4782,28 @@ Sedp::write_durable_subscription_data(const GUID_t& reader, bool secure)
     return;
   }
 
-  if (secure) {
+  for (LocalSubscriptionIter sub = local_subscriptions_.begin(); sub != local_subscriptions_.end(); ++sub) {
+    if (sub->second.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport) {
+      continue;
+    }
 #if OPENDDS_CONFIG_SECURITY
-    LocalSubscriptionIter sub, end = local_subscriptions_.end();
-    for (sub = local_subscriptions_.begin(); sub != end; ++sub) {
-      if (is_security_enabled() && sub->second.isDiscoveryProtected()) {
+    if (secure) {
+      if (sub->second.isDiscoveryProtected()) {
         write_subscription_data_secure(sub->first, sub->second, reader);
       }
-    }
-    subscriptions_secure_writer_->end_historic_samples(reader);
+    } else
 #endif
-  } else {
-    LocalSubscriptionIter sub, end = local_subscriptions_.end();
-    for (sub = local_subscriptions_.begin(); sub != end; ++sub) {
-#if OPENDDS_CONFIG_SECURITY
-      if (!(is_security_enabled() && sub->second.isDiscoveryProtected())) {
-        write_subscription_data(sub->first, sub->second, reader);
-      }
-#else
+    if (!sub->second.isDiscoveryProtected()) {
       write_subscription_data(sub->first, sub->second, reader);
-#endif
     }
-    subscriptions_writer_->end_historic_samples(reader);
   }
+
+#if OPENDDS_CONFIG_SECURITY
+  if (secure) {
+    subscriptions_secure_writer_->end_historic_samples(reader);
+  } else
+#endif
+  subscriptions_writer_->end_historic_samples(reader);
 }
 
 void
@@ -6383,11 +6383,7 @@ bool Sedp::add_publication(
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::add_publication: "
                  "skipping write_publication_data due to FlexibleTypeSupport\n"));
     }
-    match_endpoints_flex_ts(rid, pb, td);
-    return true;
-  }
-
-  if (DDS::RETCODE_OK != write_publication_data(rid, pb)) {
+  } else if (DDS::RETCODE_OK != write_publication_data(rid, pb)) {
     return false;
   }
 
@@ -6539,11 +6535,7 @@ bool Sedp::add_subscription(
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::add_subscription: "
                  "skipping write due to FlexibleTypeSupport\n"));
     }
-    match_endpoints_flex_ts(rid, sb, td);
-    return true;
-  }
-
-  if (DDS::RETCODE_OK != write_subscription_data(rid, sb)) {
+  } else if (DDS::RETCODE_OK != write_subscription_data(rid, sb)) {
     return false;
   }
 
@@ -6608,7 +6600,8 @@ void Sedp::match_endpoints_flex_ts(const DiscoveredPublicationMap::value_type& d
   for (RepoIdSet::const_iterator iter = localSubs.begin(); iter != localSubs.end(); ++iter) {
     const GUID_t& subId = *iter;
     const LocalSubscriptionIter lsi = local_subscriptions_.find(subId);
-    if (lsi == local_subscriptions_.end()) {
+    if (lsi == local_subscriptions_.end() ||
+        0 == (lsi->second.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)) {
       continue;
     }
     const DCPS::DataReaderCallbacks_rch callbacks = lsi->second.subscription_.lock();
@@ -6635,7 +6628,8 @@ void Sedp::match_endpoints_flex_ts(const DiscoveredSubscriptionMap::value_type& 
   for (RepoIdSet::const_iterator iter = localPubs.begin(); iter != localPubs.end(); ++iter) {
     const GUID_t& pubId = *iter;
     const LocalPublicationIter lpi = local_publications_.find(pubId);
-    if (lpi == local_publications_.end()) {
+    if (lpi == local_publications_.end() ||
+        0 == (lpi->second.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)) {
       continue;
     }
     const DCPS::DataWriterCallbacks_rch callbacks = lpi->second.publication_.lock();
@@ -6652,16 +6646,6 @@ void Sedp::match_endpoints_flex_ts(const DiscoveredSubscriptionMap::value_type& 
       }
     }
   }
-}
-
-void Sedp::match_endpoints_flex_ts(const GUID_t& id, const LocalPublication& localPub, const DCPS::TopicDetails& topic)
-{
-  //TODO (enum-replacement)
-}
-
-void Sedp::match_endpoints_flex_ts(const GUID_t& id, const LocalSubscription& localSub, const DCPS::TopicDetails& topic)
-{
-  //TODO (enum-replacement)
 }
 
 bool Sedp::remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote) const
@@ -7151,6 +7135,7 @@ void Sedp::match(const GUID_t& writer, const GUID_t& reader)
       }
     }
   } else if (reader_local && !writer_local && use_xtypes_ &&
+             0 == (lsi->second.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport) &&
              writer_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE) {
     // We are a recorder trying to associate with a remote xtypes writer
     if (need_type_info(writer_type_info, need_minimal, need_complete)) {
@@ -7332,7 +7317,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
   const XTypes::TypeInformation* writer_type_info = 0;
   String topic_name;
   DCPS::MonotonicTime_t writer_participant_discovered_at;
-  bool usedFlexibleTypes = false;
+  bool writerUsedFlexibleTypes = false;
 
   const LocalPublicationIter lpi = local_publications_.find(writer);
   bool writer_local = false, already_matched = false;
@@ -7343,7 +7328,11 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
     wTls = &lpi->second.trans_info_;
     wTransportContext = lpi->second.transport_context_;
     already_matched = lpi->second.matched_endpoints_.count(reader);
-    writer_type_info = lpi->second.typeInfoFor(reader, &usedFlexibleTypes);
+    writer_type_info = lpi->second.typeInfoFor(reader, &writerUsedFlexibleTypes);
+    if (!writerUsedFlexibleTypes && (lpi->second.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)) {
+      // needed TypeInfo is not yet provided, a later call to  match_endpoints_flex_ts will try again
+      return;
+    }
     topic_name = topic_names_[lpi->second.topic_id_];
     writer_participant_discovered_at = lpi->second.participant_discovered_at_;
   } else if (dpi != discovered_publications_.end()) {
@@ -7398,6 +7387,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
 #endif
   const XTypes::TypeInformation* reader_type_info = 0;
   DCPS::MonotonicTime_t reader_participant_discovered_at;
+  bool readerUsedFlexibleTypes = false;
 
   const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
   bool reader_local = false;
@@ -7407,7 +7397,11 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
     subQos = &lsi->second.subscriber_qos_;
     rTls = &lsi->second.trans_info_;
     rTransportContext = lsi->second.transport_context_;
-    reader_type_info = lsi->second.typeInfoFor(writer, &usedFlexibleTypes);
+    reader_type_info = lsi->second.typeInfoFor(writer, &readerUsedFlexibleTypes);
+    if (!readerUsedFlexibleTypes && (lsi->second.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)) {
+      // needed TypeInfo is not yet provided, a later call to  match_endpoints_flex_ts will try again
+      return;
+    }
     if (lsi->second.filterProperties.filterExpression[0] != 0) {
       tempCfp.filterExpression = lsi->second.filterProperties.filterExpression;
       tempCfp.expressionParameters = lsi->second.filterProperties.expressionParameters;
@@ -7677,7 +7671,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
         iter->second.reader_pending_records_.push_back(rar);
         process_association_records_i(iter->second);
       }
-      if (!writer_local && usedFlexibleTypes) {
+      if (!writer_local && readerUsedFlexibleTypes) {
         write_publication_data(writer, lpi->second, reader);
       }
     } else if (call_writer) {
@@ -7686,7 +7680,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
         iter->second.writer_pending_records_.push_back(war);
         process_association_records_i(iter->second);
       }
-      if (!reader_local && usedFlexibleTypes) {
+      if (!reader_local && writerUsedFlexibleTypes) {
         write_subscription_data(reader, lsi->second, writer);
       }
     }

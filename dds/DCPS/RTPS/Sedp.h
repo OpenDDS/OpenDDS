@@ -714,7 +714,7 @@ private:
     DDS::ReturnCode_t write_parameter_list(const ParameterList& plist,
       const DCPS::GUID_t& reader,
       DCPS::SequenceNumber& sequence,
-      bool historic = false);
+      bool historic);
 
     void end_historic_samples(const DCPS::GUID_t& reader);
     void request_ack(const DCPS::GUID_t& reader);
@@ -1396,10 +1396,6 @@ protected:
                                const char* typeKey);
   void match_endpoints_flex_ts(const DiscoveredSubscriptionMap::value_type& discSub,
                                const char* typeKey);
-  void match_endpoints_flex_ts(const GUID_t& id, const LocalPublication& localPub,
-                               const DCPS::TopicDetails& topic);
-  void match_endpoints_flex_ts(const GUID_t& id, const LocalSubscription& localSub,
-                               const DCPS::TopicDetails& topic);
 
   void remove_from_bit(const DiscoveredPublication& pub)
   {

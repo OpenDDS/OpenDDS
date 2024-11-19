@@ -49,7 +49,7 @@ public:
 #ifndef OPENDDS_NO_MULTI_TOPIC
   DDS::DataReader* create_multitopic_datareader() { return base_->create_multitopic_datareader(); }
 #endif
-  void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq) { representations_allowed_by_type(seq); }
+  void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq) { base_->representations_allowed_by_type(seq); }
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   const MetaStruct& getMetaStructForType() const { return base_->getMetaStructForType(); }
 #endif
