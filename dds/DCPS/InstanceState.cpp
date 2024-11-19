@@ -28,27 +28,27 @@ namespace DCPS {
 InstanceState::InstanceState(const DataReaderImpl_rch& reader,
                              ACE_Recursive_Thread_Mutex& lock,
                              DDS::InstanceHandle_t handle)
-  : ReactorInterceptor(TheServiceParticipant->reactor(),
-                       TheServiceParticipant->reactor_owner()),
-    lock_(lock),
-    instance_state_(0),
-    view_state_(0),
-    disposed_generation_count_(0),
-    no_writers_generation_count_(0),
-    empty_(true),
-    release_pending_(false),
-    release_timer_id_(-1),
-    reader_(reader),
-    handle_(handle),
-    owner_(GUID_UNKNOWN),
+  : lock_(lock)
+  , instance_state_(0)
+  , view_state_(0)
+  , disposed_generation_count_(0)
+  , no_writers_generation_count_(0)
+  , empty_(true)
+  , release_pending_(false)
+  , release_timer_id_(-1)
+  , reader_(reader)
+  , handle_(handle)
+  , owner_(GUID_UNKNOWN)
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-    exclusive_(reader->qos_.ownership.kind == DDS::EXCLUSIVE_OWNERSHIP_QOS),
+  , exclusive_(reader->qos_.ownership.kind == DDS::EXCLUSIVE_OWNERSHIP_QOS)
 #endif
-    registered_(false)
+  , registered_(false)
+  , release_task_(make_rch<PmfSporadicTask<InstanceState> >(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &InstanceState::do_release))
 {}
 
 InstanceState::~InstanceState()
 {
+  release_task_->cancel();
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (registered_) {
     RcHandle<DataReaderImpl> reader = reader_.lock();
@@ -100,20 +100,16 @@ void InstanceState::sample_info(DDS::SampleInfo& si, const ReceivedDataElement* 
 
 // cannot ACE_INLINE because of #include loop
 
-int InstanceState::handle_timeout(const ACE_Time_Value&, const void*)
+void InstanceState::do_release(const MonotonicTimePoint&)
 {
-  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
-
   if (DCPS_debug_level) {
     ACE_DEBUG((LM_NOTICE,
                ACE_TEXT("(%P|%t) NOTICE:")
-               ACE_TEXT(" InstanceState::handle_timeout:")
+               ACE_TEXT(" InstanceState::do_release:")
                ACE_TEXT(" autopurging samples with instance handle 0x%x!\n"),
                handle_));
   }
   release();
-
-  return 0;
 }
 
 bool InstanceState::dispose_was_received(const GUID_t& writer_id)
@@ -226,7 +222,8 @@ void InstanceState::schedule_release()
   if (delay.sec != DDS::DURATION_INFINITE_SEC &&
       delay.nanosec != DDS::DURATION_INFINITE_NSEC) {
 
-    execute_or_enqueue(make_rch<ScheduleCommand>(this, TimeDuration(delay)));
+    release_task_->cancel();
+    release_task_->schedule(TimeDuration(delay));
 
   } else {
     // N.B. instance transitions are always followed by a non-valid
@@ -240,7 +237,7 @@ void InstanceState::schedule_release()
 void InstanceState::cancel_release()
 {
   release_pending_ = false;
-  execute_or_enqueue(make_rch<CancelCommand>(this));
+  release_task_->cancel();
 }
 
 bool InstanceState::release_if_empty()
@@ -315,30 +312,6 @@ bool InstanceState::most_recent_generation(ReceivedDataElement* item) const
 bool InstanceState::reactor_is_shut_down() const
 {
   return TheServiceParticipant->is_shut_down();
-}
-
-void InstanceState::CancelCommand::execute()
-{
-  if (instance_state_->release_timer_id_ != -1) {
-    instance_state_->reactor()->cancel_timer(instance_state_);
-    instance_state_->release_timer_id_ = -1;
-  }
-}
-
-void InstanceState::ScheduleCommand::execute()
-{
-  if (instance_state_->release_timer_id_ != -1) {
-    instance_state_->reactor()->cancel_timer(instance_state_);
-  }
-
-  instance_state_->release_timer_id_ =
-    instance_state_->reactor()->schedule_timer(instance_state_, 0, delay_.value());
-
-  if (instance_state_->release_timer_id_ == -1) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: InstanceState::ScheduleCommand::execute:")
-               ACE_TEXT(" Unable to schedule timer!\n")));
-  }
 }
 
 const char* InstanceState::instance_state_string(DDS::InstanceStateKind value)
