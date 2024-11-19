@@ -204,7 +204,7 @@ public:
 
 class OpenDDS_Dcps_Export ReceivedDataElementList {
 public:
-  explicit ReceivedDataElementList(DataReaderImpl*, InstanceState_rch instance_state = InstanceState_rch());
+  explicit ReceivedDataElementList(const DataReaderImpl_rch& reader, InstanceState_rch instance_state = InstanceState_rch());
 
   ~ReceivedDataElementList();
 
@@ -237,7 +237,7 @@ public:
 #endif
 
 private:
-  DataReaderImpl* reader_;
+  DataReaderImpl_wrch reader_;
 
   /// The first element of the list.
   ReceivedDataElement* head_;

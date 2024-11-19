@@ -8,15 +8,17 @@
 #ifndef OPENDDS_DCPS_INSTANCESTATE_H
 #define OPENDDS_DCPS_INSTANCESTATE_H
 
-#include "dcps_export.h"
-#include "ace/Time_Value.h"
-#include "dds/DdsDcpsInfrastructureC.h"
 #include "Definitions.h"
 #include "GuidUtils.h"
 #include "PoolAllocator.h"
-#include "ReactorInterceptor.h"
+#include "SporadicTask.h"
 #include "RepoIdTypes.h"
 #include "TimeTypes.h"
+#include "dcps_export.h"
+
+#include <dds/DdsDcpsInfrastructureC.h>
+
+#include <ace/Time_Value.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -28,10 +30,13 @@ namespace OpenDDS {
 namespace DCPS {
 
 class DataReaderImpl;
-class ReceivedDataElement;
+typedef RcHandle<DataReaderImpl> DataReaderImpl_rch;
+typedef WeakRcHandle<DataReaderImpl> DataReaderImpl_wrch;
 
 class InstanceState;
 typedef RcHandle<InstanceState> InstanceState_rch;
+
+class ReceivedDataElement;
 
 /**
  * @class InstanceState
@@ -44,9 +49,9 @@ typedef RcHandle<InstanceState> InstanceState_rch;
  * Accessors are provided to query the current value of each of
  * these states.
  */
-class OpenDDS_Dcps_Export InstanceState : public ReactorInterceptor {
+class OpenDDS_Dcps_Export InstanceState : public RcObject {
 public:
-  InstanceState(DataReaderImpl* reader,
+  InstanceState(const DataReaderImpl_rch& reader,
                 ACE_Recursive_Thread_Mutex& lock,
                 DDS::InstanceHandle_t handle);
 
@@ -124,9 +129,6 @@ public:
 
   WeakRcHandle<DataReaderImpl> data_reader() const;
   void state_updated() const;
-
-  virtual int handle_timeout(const ACE_Time_Value& current_time,
-                             const void* arg);
 
   void set_owner (const PublicationId& owner);
   PublicationId get_owner ();
@@ -225,32 +227,9 @@ private:
   /// the owner is updated.
   bool registered_;
 
-  struct CommandBase : Command {
-    explicit CommandBase(InstanceState* instance_state)
-      : instance_state_(instance_state)
-    {}
+  RcHandle<SporadicTask> release_task_;
 
-    InstanceState* instance_state_;
-  };
-
-  struct CancelCommand : CommandBase {
-    explicit CancelCommand(InstanceState* instance_state)
-      : CommandBase(instance_state)
-    {}
-
-    void execute();
-  };
-
-  struct ScheduleCommand : CommandBase {
-    ScheduleCommand(InstanceState* instance_state, const TimeDuration& delay)
-      : CommandBase(instance_state)
-      , delay_(delay)
-    {}
-
-    const TimeDuration delay_;
-    void execute();
-  };
-
+  void do_release(const MonotonicTimePoint& now);
 };
 
 } // namespace DCPS

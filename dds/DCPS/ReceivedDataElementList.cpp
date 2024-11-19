@@ -54,7 +54,7 @@ void OpenDDS::DCPS::ReceivedDataElement::operator delete(void* memory, ACE_New_A
   operator delete(memory);
 }
 
-OpenDDS::DCPS::ReceivedDataElementList::ReceivedDataElementList(DataReaderImpl* reader, InstanceState_rch instance_state)
+OpenDDS::DCPS::ReceivedDataElementList::ReceivedDataElementList(const DataReaderImpl_rch& reader, InstanceState_rch instance_state)
   : reader_(reader), head_(0), tail_(0), size_(0)
   , read_sample_count_(0), not_read_sample_count_(0), sample_states_(0)
   , instance_state_(instance_state)
@@ -270,7 +270,10 @@ void OpenDDS::DCPS::ReceivedDataElementList::increment_read_count()
 {
   if (!read_sample_count_) {
     sample_states_ |= DDS::READ_SAMPLE_STATE;
-    reader_->state_updated(instance_state_->instance_handle());
+    DataReaderImpl_rch reader(reader_.lock());
+    if (reader) {
+      reader->state_updated(instance_state_->instance_handle());
+    }
   }
   ++read_sample_count_;
 }
@@ -281,7 +284,10 @@ void OpenDDS::DCPS::ReceivedDataElementList::decrement_read_count()
   --read_sample_count_;
   if (!read_sample_count_) {
     sample_states_ &= (~DDS::READ_SAMPLE_STATE);
-    reader_->state_updated(instance_state_->instance_handle());
+    DataReaderImpl_rch reader(reader_.lock());
+    if (reader) {
+      reader->state_updated(instance_state_->instance_handle());
+    }
   }
 }
 
@@ -289,7 +295,10 @@ void OpenDDS::DCPS::ReceivedDataElementList::increment_not_read_count()
 {
   if (!not_read_sample_count_) {
     sample_states_ |= DDS::NOT_READ_SAMPLE_STATE;
-    reader_->state_updated(instance_state_->instance_handle());
+    DataReaderImpl_rch reader(reader_.lock());
+    if (reader) {
+      reader->state_updated(instance_state_->instance_handle());
+    }
   }
   ++not_read_sample_count_;
 }
@@ -300,7 +309,10 @@ void OpenDDS::DCPS::ReceivedDataElementList::decrement_not_read_count()
   --not_read_sample_count_;
   if (!not_read_sample_count_) {
     sample_states_ &= (~DDS::NOT_READ_SAMPLE_STATE);
-    reader_->state_updated(instance_state_->instance_handle());
+    DataReaderImpl_rch reader(reader_.lock());
+    if (reader) {
+      reader->state_updated(instance_state_->instance_handle());
+    }
   }
 }
 

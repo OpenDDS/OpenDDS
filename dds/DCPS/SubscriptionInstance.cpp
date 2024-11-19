@@ -14,7 +14,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-SubscriptionInstance::SubscriptionInstance(DataReaderImpl* reader,
+SubscriptionInstance::SubscriptionInstance(const DataReaderImpl_rch& reader,
                                            const DDS::DataReaderQos& qos,
                                            ACE_Recursive_Thread_Mutex& lock,
                                            DDS::InstanceHandle_t handle,
