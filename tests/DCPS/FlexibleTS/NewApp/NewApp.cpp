@@ -33,6 +33,7 @@ std::string setup_typesupport(HelloWorld::MessageTypeSupport& base, const DDS::D
   TypeLookupService_rch lookup = participantImpl->get_type_lookup_service();
 
   TypeSupportImpl& baseImpl = dynamic_cast<TypeSupportImpl&>(base);
+  baseImpl.add_types(lookup);
   TypeMap minTm, cmpTm;
   TypeIdentifier minOldTi = remove_enumerators(baseImpl.getMinimalTypeIdentifier(),
                                                getMinimalTypeIdentifier<HelloWorld_State_xtag>(),
@@ -158,7 +159,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   HelloWorld::Message message;
   message.value = "Hello World!";
-  message.current = HelloWorld::Complete;
+  message.current = HelloWorld::Initial;
   message_data_writer->write(message, DDS::HANDLE_NIL);
 
   distributed_condition_set->wait_for(HelloWorld::NEWAPP, HelloWorld::OLDAPP, HelloWorld::OLDAPP_DONE);

@@ -54,10 +54,18 @@ const XTypes::TypeMap& FlexibleTypeSupport::getCompleteTypeMap() const
 
 void FlexibleTypeSupport::get_flexible_types(const char* key, XTypes::TypeInformation& type_info)
 {
-  OPENDDS_MAP(String, Alternative)::const_iterator iter = map_.find(key);
+  const OPENDDS_MAP(String, Alternative)::const_iterator iter = map_.find(key);
+  if (iter == map_.end()) {
+    TypeInformation dcps_type_info;
+    TypeSupportImpl::to_type_info(dcps_type_info);
+    type_info = dcps_type_info.xtypes_type_info_;
+    return;
+  }
   const Alternative& alt = iter->second;
   to_type_info_i(type_info.minimal, alt.minimalId_, alt.minimalMap_);
-  to_type_info_i(type_info.complete, alt.completeId_, alt.completeMap_);
+  if (alt.completeId_.kind() != XTypes::TK_NONE) {
+    to_type_info_i(type_info.complete, alt.completeId_, alt.completeMap_);
+  }
 }
 
 FlexibleTypeSupport::Alternative::Alternative(const XTypes::TypeIdentifier& minimalTypeIdentifier,

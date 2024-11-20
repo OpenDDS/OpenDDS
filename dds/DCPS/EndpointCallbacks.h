@@ -45,6 +45,7 @@ namespace OpenDDS {
       virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint() = 0;
     };
 
+    typedef RcHandle<EndpointCallbacks> EndpointCallbacks_rch;
   }
 }
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

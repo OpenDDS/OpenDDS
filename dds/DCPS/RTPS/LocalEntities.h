@@ -68,7 +68,7 @@ struct LocalEntity {
   const XTypes::TypeInformation* typeInfoFor(const DCPS::GUID_t& remote,
                                              bool* usedFlexible = 0) const
   {
-    const FlexibleTypeMap::const_iterator found = flexible_types_.find(remote);
+    const FlexibleTypeMap::const_iterator found = flexible_types_.find(make_id(remote, DCPS::ENTITYID_PARTICIPANT));
     if (found == flexible_types_.end()) {
       return &type_info_.xtypes_type_info_;
     }
@@ -76,6 +76,17 @@ struct LocalEntity {
       *usedFlexible = true;
     }
     return &found->second;
+  }
+
+  XTypes::TypeInformation* getFlexibleTypes(const DCPS::EndpointCallbacks_rch& callbacks,
+                                            const DCPS::GUID_t& discovered,
+                                            const char* typeKey)
+  {
+    std::pair<DCPS::GUID_t, XTypes::TypeInformation> val;
+    val.first = make_id(discovered, DCPS::ENTITYID_PARTICIPANT);
+    callbacks->get_flexible_types(typeKey, val.second);
+    const std::pair<FlexibleTypeMap::iterator, bool> inserted = flexible_types_.insert(val);
+    return &inserted.first->second;
   }
 
   DCPS::GUID_t topic_id_;

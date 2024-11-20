@@ -5012,7 +5012,7 @@ Sedp::write_publication_data_unsecure(
 #endif
 
     if (DDS::RETCODE_OK == result) {
-      GUID_t effective_reader(reader);
+      GUID_t effective_reader = reader;
       if (reader != GUID_UNKNOWN) {
         effective_reader.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
       }
@@ -5191,12 +5191,12 @@ Sedp::write_subscription_data_unsecure(
     }
 #endif
     if (DDS::RETCODE_OK == result) {
-      GUID_t effective_reader(reader);
+      GUID_t effective_reader = reader;
       if (reader != GUID_UNKNOWN) {
         effective_reader.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
       }
       DCPS::SequenceNumber seq = DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN();
-      result = subscriptions_writer_->write_parameter_list(plist, reader,
+      result = subscriptions_writer_->write_parameter_list(plist, effective_reader,
                                                            useFlexibleTypes ? seq : ls.sequence_,
                                                            !useFlexibleTypes && reader != GUID_UNKNOWN);
     }
@@ -6606,9 +6606,7 @@ void Sedp::match_endpoints_flex_ts(const DiscoveredPublicationMap::value_type& d
     }
     const DCPS::DataReaderCallbacks_rch callbacks = lsi->second.subscription_.lock();
     if (callbacks) {
-      XTypes::TypeInformation tiLocalSub;
-      callbacks->get_flexible_types(typeKey, tiLocalSub);
-      lsi->second.flexible_types_[discPub.first] = tiLocalSub;
+      lsi->second.getFlexibleTypes(callbacks, discPub.first, typeKey);
       bool minimalNeeded, completeNeeded;
       if (need_type_info(&discPub.second.type_info_, minimalNeeded, completeNeeded)) {
         request_type_objects(&discPub.second.type_info_, MatchingPair(subId, discPub.first, true),
@@ -6634,9 +6632,7 @@ void Sedp::match_endpoints_flex_ts(const DiscoveredSubscriptionMap::value_type& 
     }
     const DCPS::DataWriterCallbacks_rch callbacks = lpi->second.publication_.lock();
     if (callbacks) {
-      XTypes::TypeInformation tiLocalSub;
-      callbacks->get_flexible_types(typeKey, tiLocalSub);
-      lpi->second.flexible_types_[discSub.first] = tiLocalSub;
+      lpi->second.getFlexibleTypes(callbacks, discSub.first, typeKey);
       bool minimalNeeded, completeNeeded;
       if (need_type_info(&discSub.second.type_info_, minimalNeeded, completeNeeded)) {
         request_type_objects(&discSub.second.type_info_, MatchingPair(discSub.first, pubId, false),
@@ -7277,11 +7273,8 @@ void Sedp::populate_origination_locator(const GUID_t& id, DCPS::TransportLocator
     tl.transport_type = "rtps_udp";
     RTPS::message_block_to_sequence(mb_locator, tl.data);
   } else {
-    if (conv.isReader()) {
-      transport_inst_->get_last_recv_locator(make_id(id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER), vendor_id.vendorId, tl, get_domain_id(), 0);
-    } else {
-      transport_inst_->get_last_recv_locator(make_id(id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER), vendor_id.vendorId, tl, get_domain_id(), 0);
-    }
+    const EntityId_t entity = conv.isReader() ? ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER : ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
+    transport_inst_->get_last_recv_locator(make_id(id, entity), vendor_id.vendorId, tl, get_domain_id(), 0);
   }
 }
 
@@ -7330,8 +7323,14 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
     already_matched = lpi->second.matched_endpoints_.count(reader);
     writer_type_info = lpi->second.typeInfoFor(reader, &writerUsedFlexibleTypes);
     if (!writerUsedFlexibleTypes && (lpi->second.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)) {
-      // needed TypeInfo is not yet provided, a later call to  match_endpoints_flex_ts will try again
-      return;
+      const String key = spdp_.find_flexible_types_key_i(reader);
+      DCPS::EndpointCallbacks_rch callbacks = lpi->second.publication_.lock();
+      if (key == "" || !callbacks) {
+        // needed TypeInfo is not yet provided, a later call to match_endpoints_flex_ts will try again
+        return;
+      }
+      writer_type_info = lpi->second.getFlexibleTypes(callbacks, reader, key.c_str());
+      writerUsedFlexibleTypes = true;
     }
     topic_name = topic_names_[lpi->second.topic_id_];
     writer_participant_discovered_at = lpi->second.participant_discovered_at_;
@@ -7399,8 +7398,14 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
     rTransportContext = lsi->second.transport_context_;
     reader_type_info = lsi->second.typeInfoFor(writer, &readerUsedFlexibleTypes);
     if (!readerUsedFlexibleTypes && (lsi->second.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)) {
-      // needed TypeInfo is not yet provided, a later call to  match_endpoints_flex_ts will try again
-      return;
+      const String key = spdp_.find_flexible_types_key_i(writer);
+      DCPS::EndpointCallbacks_rch callbacks = lsi->second.subscription_.lock();
+      if (key == "" || !callbacks) {
+        // needed TypeInfo is not yet provided, a later call to match_endpoints_flex_ts will try again
+        return;
+      }
+      reader_type_info = lsi->second.getFlexibleTypes(callbacks, writer, key.c_str());
+      readerUsedFlexibleTypes = true;
     }
     if (lsi->second.filterProperties.filterExpression[0] != 0) {
       tempCfp.filterExpression = lsi->second.filterProperties.filterExpression;
@@ -7533,9 +7538,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
     if (!consistent) {
       td_iter->second.increment_inconsistent();
       if (DCPS::DCPS_debug_level) {
-        ACE_DEBUG((LM_WARNING,
-                  ACE_TEXT("(%P|%t) Sedp::match_continue - WARNING ")
-                  ACE_TEXT("Data types of topic %C does not match (inconsistent)\n"),
+        ACE_DEBUG((LM_WARNING, "(%P|%t) Sedp::match_continue - WARNING Data types of topic %C do not match (inconsistent)\n",
                   topic_name.c_str()));
       }
       return;
@@ -7672,7 +7675,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
         process_association_records_i(iter->second);
       }
       if (!writer_local && readerUsedFlexibleTypes) {
-        write_publication_data(writer, lpi->second, reader);
+        write_subscription_data(reader, lsi->second, writer);
       }
     } else if (call_writer) {
       Spdp::DiscoveredParticipantIter iter = spdp_.participants_.find(make_id(reader, ENTITYID_PARTICIPANT));
@@ -7681,7 +7684,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
         process_association_records_i(iter->second);
       }
       if (!reader_local && writerUsedFlexibleTypes) {
-        write_subscription_data(reader, lsi->second, writer);
+        write_publication_data(writer, lpi->second, reader);
       }
     }
 
