@@ -34,22 +34,22 @@ void FlexibleTypeSupport::to_type_info(TypeInformation& type_info) const
 
 const XTypes::TypeIdentifier& FlexibleTypeSupport::getMinimalTypeIdentifier() const
 {
-  return XTypes::TypeIdentifier::None;
+  return base_->getMinimalTypeIdentifier();
 }
 
 const XTypes::TypeMap& FlexibleTypeSupport::getMinimalTypeMap() const
 {
-  return XTypes::TypeMapBuilder::EmptyMap;
+  return base_->getMinimalTypeMap();
 }
 
 const XTypes::TypeIdentifier& FlexibleTypeSupport::getCompleteTypeIdentifier() const
 {
-  return XTypes::TypeIdentifier::None;
+  return base_->getCompleteTypeIdentifier();
 }
 
 const XTypes::TypeMap& FlexibleTypeSupport::getCompleteTypeMap() const
 {
-  return XTypes::TypeMapBuilder::EmptyMap;
+  return base_->getCompleteTypeMap();
 }
 
 void FlexibleTypeSupport::get_flexible_types(const char* key, XTypes::TypeInformation& type_info)

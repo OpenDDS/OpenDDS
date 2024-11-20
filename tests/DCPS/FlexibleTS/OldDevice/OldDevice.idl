@@ -1,0 +1,10 @@
+module HelloWorld {
+
+  enum State { Initial, Complete };
+
+  @topic
+  struct Message {
+    string deviceId;
+    State st;
+  };
+};

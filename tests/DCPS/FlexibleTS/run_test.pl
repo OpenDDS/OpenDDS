@@ -12,12 +12,14 @@ use strict;
 
 my $test = new PerlDDS::TestFramework();
 
-$test->process('old', 'OldApp/OldApp');
-$test->process('new', 'NewApp/NewApp');
+$test->process('old', 'OldDevice/OldDevice');
+$test->process('new', 'NewDevice/NewDevice');
+$test->process('ctrl', 'Controller/Controller');
 
 rmtree('DCS');
 
 $test->start_process('old');
 $test->start_process('new');
+$test->start_process('ctrl');
 
 exit($test->finish(60));

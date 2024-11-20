@@ -1,4 +1,4 @@
-#include "NewAppTypeSupportImpl.h"
+#include "NewDeviceTypeSupportImpl.h"
 
 #include <tests/Utils/DistributedConditionSet.h>
 #include <tests/Utils/StatusMatching.h>
@@ -15,6 +15,8 @@
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
+
+#include "../Common.h"
 
 static const char NEW_TYPE[] = "newType";
 static const char OLD_TYPE[] = "oldType";
@@ -45,7 +47,9 @@ std::string setup_typesupport(HelloWorld::MessageTypeSupport& base, const DDS::D
   return NEW_TYPE;
 }
 
-bool read_pbit(const DDS::DataReader_var& reader)
+int matched_participants = 0;
+
+void read_pbit(const DDS::DataReader_var& reader)
 {
   using namespace OpenDDS::DCPS;
   DDS::ParticipantBuiltinTopicDataDataReader_var bit_reader =
@@ -60,14 +64,16 @@ bool read_pbit(const DDS::DataReader_var& reader)
       DDS::DomainParticipant_var participant = sub->get_participant();
       DomainParticipantImpl* participantImpl = dynamic_cast<DomainParticipantImpl*>(participant.in());
       Discovery_rch disco = TheServiceParticipant->get_discovery(HelloWorld::HELLO_WORLD_DOMAIN);
-      disco->enable_flexible_types(HelloWorld::HELLO_WORLD_DOMAIN, participantImpl->get_id(), guidRemote, OLD_TYPE);
-      return true;
+      const char* const typeKey =
+        (0 == std::memcmp(bitSample.user_data.value.get_buffer(), HelloWorld::OLDDEV, sizeof HelloWorld::OLDDEV))
+        ? OLD_TYPE : NEW_TYPE;
+      disco->enable_flexible_types(HelloWorld::HELLO_WORLD_DOMAIN, participantImpl->get_id(), guidRemote, typeKey);
+      ++matched_participants;
     }
   }
-  return false;
 }
 
-void read_message(const HelloWorld::MessageDataReader_var& message_data_reader, bool& done)
+void read_message(const HelloWorld::MessageDataReader_var& message_data_reader, bool& oldDone, bool& newDone)
 {
   HelloWorld::MessageSeq messages;
   DDS::SampleInfoSeq infos;
@@ -75,9 +81,12 @@ void read_message(const HelloWorld::MessageDataReader_var& message_data_reader, 
                             DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
   for (unsigned int idx = 0; idx != messages.length(); ++idx) {
     if (infos[idx].valid_data) {
-      ACE_DEBUG((LM_DEBUG, "received %C\n", messages[idx].value.in()));
-      done = true;
-      return;
+      ACE_DEBUG((LM_DEBUG, "received %C %d\n", messages[idx].deviceId.in(), messages[idx].st));
+      if (0 == std::strcmp(messages[idx].deviceId.in(), HelloWorld::OLDDEV)) {
+        oldDone = true;
+      } else if (0 == std::strcmp(messages[idx].deviceId.in(), HelloWorld::NEWDEV)) {
+        newDone = true;
+      }
     }
   }
 }
@@ -102,7 +111,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   HelloWorld::MessageTypeSupport_var type_support = new HelloWorld::MessageTypeSupportImpl;
   std::string type_name = setup_typesupport(*type_support, participant);
 
-  DDS::Topic_var topic = participant->create_topic(HelloWorld::MESSAGE_TOPIC1_NAME, type_name.c_str(),
+  DDS::Topic_var topic = participant->create_topic(HelloWorld::STATUS_TOPIC_NAME, type_name.c_str(),
                                                    TOPIC_QOS_DEFAULT, 0, 0);
 
   DDS::Subscriber_var subscriber = participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0, 0);
@@ -115,7 +124,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   HelloWorld::MessageDataReader_var message_data_reader = HelloWorld::MessageDataReader::_narrow(data_reader);
 
-  DDS::Topic_var topic2 = participant->create_topic(HelloWorld::MESSAGE_TOPIC2_NAME, type_name.c_str(),
+  DDS::Topic_var topic2 = participant->create_topic(HelloWorld::COMMAND_TOPIC_NAME, type_name.c_str(),
                                                     TOPIC_QOS_DEFAULT, 0, 0);
 
   DDS::Publisher_var publisher = participant->create_publisher(PUBLISHER_QOS_DEFAULT, 0, 0);
@@ -131,7 +140,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   wait_set->attach_condition(read_condition);
   wait_set->attach_condition(pbit_condition);
 
-  bool done = false;
+  bool done = false, oldDone = false, newDone = false;
   while (!done) {
     DDS::ConditionSeq conditions;
     const DDS::Duration_t timeout = { 60, 0 };
@@ -143,12 +152,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
     for (unsigned int i = 0; i < conditions.length(); ++i) {
       if (conditions[i] == read_condition) {
-        read_message(message_data_reader, done);
+        read_message(message_data_reader, oldDone, newDone);
+        done = oldDone && newDone;
       } else if (conditions[i] == pbit_condition) {
-        if (read_pbit(pbit_reader)) {
-          Utils::wait_match(data_reader, 1);
-          Utils::wait_match(data_writer, 1);
-          distributed_condition_set->post(HelloWorld::NEWAPP, HelloWorld::NEWAPP_READY);
+        read_pbit(pbit_reader);
+        if (matched_participants == 2) {
+          Utils::wait_match(data_reader, 2);
+          Utils::wait_match(data_writer, 2);
+          distributed_condition_set->post(HelloWorld::CONTROLLER, HelloWorld::CONTROLLER_READY);
         }
       }
     }
@@ -158,11 +169,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   wait_set->detach_condition(pbit_condition);
 
   HelloWorld::Message message;
-  message.value = "Hello World!";
-  message.current = HelloWorld::Initial;
+  message.deviceId = HelloWorld::OLDDEV;
+  message.st = HelloWorld::Intermediate;
   message_data_writer->write(message, DDS::HANDLE_NIL);
 
-  distributed_condition_set->wait_for(HelloWorld::NEWAPP, HelloWorld::OLDAPP, HelloWorld::OLDAPP_DONE);
+  message.deviceId = HelloWorld::NEWDEV;
+  message.st = HelloWorld::Initial;
+  message_data_writer->write(message, DDS::HANDLE_NIL);
+
+  distributed_condition_set->wait_for(HelloWorld::CONTROLLER, HelloWorld::OLDDEV, HelloWorld::OLDDEV_DONE);
+  distributed_condition_set->wait_for(HelloWorld::CONTROLLER, HelloWorld::NEWDEV, HelloWorld::NEWDEV_DONE);
 
   participant->delete_contained_entities();
   domain_participant_factory->delete_participant(participant);
