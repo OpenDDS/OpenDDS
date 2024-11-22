@@ -147,7 +147,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     const DDS::ReturnCode_t ret = wait_set->wait(conditions, timeout);
 
     if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, "WaitSet::wait() returned %d\n", ret));
+      ACE_ERROR((LM_ERROR, "WaitSet::wait() returned %C\n", OpenDDS::DCPS::retcode_to_string(ret)));
       done = true;
     }
     for (unsigned int i = 0; i < conditions.length(); ++i) {
