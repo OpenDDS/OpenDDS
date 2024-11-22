@@ -34,8 +34,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 TransportClient::TransportClient()
-  : pending_assoc_timer_(make_rch<PendingAssocTimer> (TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner()))
-  , expected_transaction_id_(1)
+  : expected_transaction_id_(1)
   , max_transaction_id_seen_(0)
   , max_transaction_tail_(0)
   , swap_bytes_(false)
@@ -322,7 +321,7 @@ TransportClient::associate(const AssociationData& data, bool active)
             if (res.link_.is_nil()) {
               // In this case, it may be waiting for the TCP connection to be
               // established.  Just wait without trying other transports.
-              pending_assoc_timer_->schedule_timer(rchandle_from(this), iter->second);
+              iter->second->schedule(passive_connect_duration_);
             } else {
               use_datalink_i(data.remote_id_, res.link_, guard);
               return true;
@@ -332,7 +331,7 @@ TransportClient::associate(const AssociationData& data, bool active)
       }
     }
 
-    pending_assoc_timer_->schedule_timer(rchandle_from(this), iter->second);
+    iter->second->schedule(passive_connect_duration_);
   }
 
   return true;
@@ -353,39 +352,8 @@ TransportClient::PendingAssoc::safe_to_remove()
 }
 
 void
-TransportClient::PendingAssocTimer::ScheduleCommand::execute()
+TransportClient::PendingAssoc::timeout(const MonotonicTimePoint&)
 {
-  if (timer_->reactor()) {
-    const TransportClient_rch client = transport_client_.lock();
-    if (client) {
-      ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
-      assoc_->scheduled_ = true;
-      const Timers::TimerId id = Timers::schedule(timer_->reactor(), *assoc_, client.in(),
-                                                  client->passive_connect_duration_);
-      if (id != Timers::InvalidTimerId) {
-        timer_->set_id(id);
-      }
-    }
-  }
-}
-
-void
-TransportClient::PendingAssocTimer::CancelCommand::execute()
-{
-  if (timer_->reactor() && timer_->get_id() != Timers::InvalidTimerId) {
-    ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
-    Timers::cancel(timer_->reactor(), timer_->get_id());
-    timer_->set_id(Timers::InvalidTimerId);
-    assoc_->scheduled_ = false;
-  }
-}
-
-int
-TransportClient::PendingAssoc::handle_timeout(const ACE_Time_Value&,
-                                              const void* arg)
-{
-  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
-
   RcHandle<TransportClient> client;
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -393,10 +361,9 @@ TransportClient::PendingAssoc::handle_timeout(const ACE_Time_Value&,
     scheduled_ = false;
   }
 
-  if (client && client.get() == static_cast<TransportClient*>(const_cast<void*>(arg))) {
+  if (client) {
     client->use_datalink(data_.remote_id_, DataLink_rch());
   }
-  return 0;
 }
 
 bool
@@ -607,7 +574,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   }
 
   iter->second->reset_client();
-  pending_assoc_timer_->cancel_timer(pend);
+  pend->cancel();
   prev_pending_.insert(std::make_pair(iter->first, iter->second));
   pending_.erase(iter);
 
@@ -645,7 +612,7 @@ TransportClient::stop_associating()
       }
     }
     it->second->reset_client();
-    pending_assoc_timer_->cancel_timer(it->second);
+    it->second->cancel();
     prev_pending_.insert(std::make_pair(it->first, it->second));
   }
   pending_.clear();
@@ -670,7 +637,7 @@ TransportClient::stop_associating(const GUID_t* repos, CORBA::ULong length)
           }
         }
         iter->second->reset_client();
-        pending_assoc_timer_->cancel_timer(iter->second);
+        iter->second->cancel();
         prev_pending_.insert(std::make_pair(iter->first, iter->second));
         pending_.erase(iter);
       }
@@ -705,7 +672,7 @@ TransportClient::disassociate(const RepoId& peerId)
       }
     }
     iter->second->reset_client();
-    pending_assoc_timer_->cancel_timer(iter->second);
+    iter->second->cancel();
     prev_pending_.insert(std::make_pair(iter->first, iter->second));
     pending_.erase(iter);
     return;
