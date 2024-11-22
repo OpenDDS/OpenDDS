@@ -1100,8 +1100,9 @@ private:
   void assign_bit_key(DiscoveredPublication& pub);
   void assign_bit_key(DiscoveredSubscription& sub);
 
-  template<typename Map>
-  void remove_entities_belonging_to(Map& m, DCPS::GUID_t participant, bool subscription, OPENDDS_VECTOR(typename Map::mapped_type)& to_remove_from_bit);
+  template <typename Map>
+  void remove_entities_belonging_to(Map& m, const DCPS::GUID_t& participant, bool subscription,
+                                    OPENDDS_VECTOR(typename Map::mapped_type)& to_remove_from_bit);
 
   void remove_from_bit_i(const DiscoveredPublication& pub);
   void remove_from_bit_i(const DiscoveredSubscription& sub);
@@ -1111,7 +1112,7 @@ private:
 
   // Topic:
 
-  // FURTURE: Remove this member.
+  // FUTURE: Remove this member.
   DCPS::RepoIdSet associated_participants_;
 
   virtual bool shutting_down() const;

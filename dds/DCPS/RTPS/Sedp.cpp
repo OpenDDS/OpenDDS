@@ -1825,15 +1825,12 @@ Sedp::update_locators(const ParticipantData_t& pdata)
 #endif
 }
 
-template<typename Map>
+template <typename Map>
 void Sedp::remove_entities_belonging_to(
-  Map& m, GUID_t participant, bool subscription, OPENDDS_VECTOR(typename Map::mapped_type)& to_remove_from_bit)
+  Map& m, const GUID_t& participant, bool subscription, OPENDDS_VECTOR(typename Map::mapped_type)& to_remove_from_bit)
 {
-  participant.entityId = ENTITYID_UNKNOWN;
-  for (typename Map::iterator i = m.lower_bound(participant);
-       i != m.end() && 0 == std::memcmp(i->first.guidPrefix,
-                                        participant.guidPrefix,
-                                        sizeof(GuidPrefix_t));) {
+  for (typename Map::iterator i = m.lower_bound(make_id(participant, ENTITYID_UNKNOWN));
+       i != m.end() && equal_guid_prefixes(i->first, participant);) {
     String topic_name = i->second.get_topic_name();
     DCPS::TopicDetailsMap::iterator top_it = topics_.find(topic_name);
     if (top_it != topics_.end()) {
@@ -4901,16 +4898,12 @@ Sedp::write_dcps_participant_dispose(const GUID_t& part)
 
 bool Sedp::enable_flexible_types(const GUID_t& remoteParticipantId, const char* typeKey)
 {
-  for (DiscoveredPublicationMap::iterator i = discovered_publications_.lower_bound(remoteParticipantId);
-       i != discovered_publications_.end() && 0 == std::memcmp(i->first.guidPrefix,
-                                                               remoteParticipantId.guidPrefix,
-                                                               sizeof(GuidPrefix_t)); ++i) {
+  for (DiscoveredPublicationMap::iterator i = discovered_publications_.lower_bound(make_id(remoteParticipantId, ENTITYID_UNKNOWN));
+       i != discovered_publications_.end() && equal_guid_prefixes(i->first, remoteParticipantId); ++i) {
     match_endpoints_flex_ts(*i, typeKey);
   }
-  for (DiscoveredSubscriptionMap::iterator i = discovered_subscriptions_.lower_bound(remoteParticipantId);
-       i != discovered_subscriptions_.end() && 0 == std::memcmp(i->first.guidPrefix,
-                                                                remoteParticipantId.guidPrefix,
-                                                                sizeof(GuidPrefix_t)); ++i) {
+  for (DiscoveredSubscriptionMap::iterator i = discovered_subscriptions_.lower_bound(make_id(remoteParticipantId, ENTITYID_UNKNOWN));
+       i != discovered_subscriptions_.end() && equal_guid_prefixes(i->first, remoteParticipantId); ++i) {
     match_endpoints_flex_ts(*i, typeKey);
   }
   return true;
@@ -6533,7 +6526,7 @@ bool Sedp::add_subscription(
   if (type_info.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport) {
     if (DCPS_debug_level > 3) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::add_subscription: "
-                 "skipping write due to FlexibleTypeSupport\n"));
+                 "skipping write_subscription_data due to FlexibleTypeSupport\n"));
     }
   } else if (DDS::RETCODE_OK != write_subscription_data(rid, sb)) {
     return false;
