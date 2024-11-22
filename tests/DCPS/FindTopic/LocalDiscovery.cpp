@@ -173,7 +173,7 @@ RepoId LocalDiscovery::add_publication(
   const DDS::DataWriterQos&,
   const TransportLocatorSeq&,
   const DDS::PublisherQos&,
-  const OpenDDS::XTypes::TypeInformation&)
+  const TypeInformation&)
 {
   GUID_t guid = GUID_UNKNOWN;
   guid.guidPrefix[0] = 1;
@@ -218,7 +218,7 @@ RepoId LocalDiscovery::add_subscription(
   const char*,
   const char*,
   const DDS::StringSeq&,
-  const OpenDDS::XTypes::TypeInformation&)
+  const TypeInformation&)
 {
   return GUID_UNKNOWN;
 }

@@ -34,7 +34,10 @@ namespace {
 
   void extract_type_info_param(const Parameter& param, XTypes::TypeInformation& type_info)
   {
-    XTypes::deserialize_type_info(type_info, param.type_information());
+    if (!XTypes::deserialize_type_info(type_info, param.type_information())) {
+      type_info.minimal.typeid_with_size.type_id = XTypes::TypeIdentifier::None;
+      type_info.complete.typeid_with_size.type_id = XTypes::TypeIdentifier::None;
+    }
   }
 
   void add_type_info_param(ParameterList& param_list, const XTypes::TypeInformation& type_info)
@@ -487,7 +490,7 @@ bool to_param_list(const ParticipantProxy_t& proxy,
 
   if (proxy.expectsInlineQos) {
     Parameter eiq_param; // Default is false
-    eiq_param.expects_inline_qos(proxy.expectsInlineQos);
+    eiq_param.expects_inline_qos(true);
     DCPS::push_back(param_list, eiq_param);
   }
 
@@ -797,7 +800,7 @@ void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataReprese
 bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
                    ParameterList& param_list,
                    bool use_xtypes,
-                   const XTypes::TypeInformation& type_info,
+                   const DCPS::TypeInformation& type_info,
                    bool map)
 {
   // Ignore builtin topic key
@@ -816,8 +819,8 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     DCPS::push_back(param_list, param);
   }
 
-  if (use_xtypes) {
-    add_type_info_param(param_list, type_info);
+  if (use_xtypes && type_info.flags_ == DCPS::TypeInformation::Flags_None) {
+    add_type_info_param(param_list, type_info.xtypes_type_info_);
   }
 
   if (not_default(writer_data.ddsPublicationData.durability)) {
@@ -1130,7 +1133,7 @@ bool from_param_list(const ParameterList& param_list,
 bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
                    ParameterList& param_list,
                    bool use_xtypes,
-                   const XTypes::TypeInformation& type_info,
+                   const DCPS::TypeInformation& type_info,
                    bool map)
 {
   // Ignore builtin topic key
@@ -1141,8 +1144,8 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     DCPS::push_back(param_list, param);
   }
 
-  if (use_xtypes) {
-    add_type_info_param(param_list, type_info);
+  if (use_xtypes && type_info.flags_ == DCPS::TypeInformation::Flags_None) {
+    add_type_info_param(param_list, type_info.xtypes_type_info_);
   }
 
   {
@@ -1538,15 +1541,12 @@ bool from_param_list(const ParameterList& param_list,
 bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
                    ParameterList& param_list,
                    bool use_xtypes,
-                   const XTypes::TypeInformation& type_info,
+                   const DCPS::TypeInformation& type_info,
                    bool map)
 {
-  bool result = to_param_list(wrapper.data, param_list, use_xtypes, type_info, map);
-
-  to_param_list(wrapper.security_info, param_list);
-  to_param_list(wrapper.data_tags, param_list);
-
-  return result;
+  return to_param_list(wrapper.data, param_list, use_xtypes, type_info, map)
+    && to_param_list(wrapper.security_info, param_list)
+    && to_param_list(wrapper.data_tags, param_list);
 }
 
 bool from_param_list(const ParameterList& param_list,
@@ -1554,25 +1554,20 @@ bool from_param_list(const ParameterList& param_list,
                      bool use_xtypes,
                      XTypes::TypeInformation& type_info)
 {
-  bool result = from_param_list(param_list, wrapper.data, use_xtypes, type_info) &&
+  return from_param_list(param_list, wrapper.data, use_xtypes, type_info) &&
     from_param_list(param_list, wrapper.security_info) &&
     from_param_list(param_list, wrapper.data_tags);
-
-  return result;
 }
 
 bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
                    ParameterList& param_list,
                    bool use_xtypes,
-                   const XTypes::TypeInformation& type_info,
+                   const DCPS::TypeInformation& type_info,
                    bool map)
 {
-  bool result = to_param_list(wrapper.data, param_list, use_xtypes, type_info, map);
-
-  to_param_list(wrapper.security_info, param_list);
-  to_param_list(wrapper.data_tags, param_list);
-
-  return result;
+  return to_param_list(wrapper.data, param_list, use_xtypes, type_info, map)
+    && to_param_list(wrapper.security_info, param_list)
+    && to_param_list(wrapper.data_tags, param_list);
 }
 
 bool from_param_list(const ParameterList& param_list,

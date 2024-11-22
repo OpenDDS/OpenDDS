@@ -382,7 +382,7 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
     dr = bit_subscriber->create_datareader(bit_pub_topic,
                                            dr_qos,
                                            DDS::DataReaderListener::_nil(),
-                                           OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                           DEFAULT_STATUS_MASK);
 
     DDS::TopicDescription_var bit_sub_topic =
       participant->lookup_topicdescription(BUILT_IN_SUBSCRIPTION_TOPIC);
@@ -390,7 +390,7 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
     dr = bit_subscriber->create_datareader(bit_sub_topic,
                                            dr_qos,
                                            DDS::DataReaderListener::_nil(),
-                                           OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                           DEFAULT_STATUS_MASK);
 
     const DDS::ReturnCode_t ret = bit_subscriber->enable();
     if (ret != DDS::RETCODE_OK) {
@@ -461,7 +461,7 @@ InfoRepoDiscovery::add_domain_participant(DDS::DomainId_t domainId,
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::add_domain_participant: ");
   }
-  const DCPS::AddDomainStatus ads = {OpenDDS::DCPS::GUID_UNKNOWN, false /*federated*/};
+  const DCPS::AddDomainStatus ads = {GUID_UNKNOWN, false /*federated*/};
   return ads;
 }
 
@@ -476,7 +476,7 @@ InfoRepoDiscovery::add_domain_participant_secure(
   DDS::Security::PermissionsHandle /*perm*/,
   DDS::Security::ParticipantCryptoHandle /*part_crypto*/)
 {
-  const DCPS::AddDomainStatus ads = {OpenDDS::DCPS::GUID_UNKNOWN, false /*federated*/};
+  const DCPS::AddDomainStatus ads = {GUID_UNKNOWN, false /*federated*/};
   return ads;
 }
 #endif
@@ -602,7 +602,7 @@ InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
                                    const DDS::DataWriterQos& qos,
                                    const DCPS::TransportLocatorSeq& transInfo,
                                    const DDS::PublisherQos& publisherQos,
-                                   const XTypes::TypeInformation& type_info)
+                                   const TypeInformation& type_info)
 {
   RepoId pubId;
 
@@ -616,11 +616,11 @@ InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
     PortableServer::ServantBase_var writer_remote(writer_remote_impl);
 
     //this is the client reference to the DataWriterRemoteImpl
-    OpenDDS::DCPS::DataWriterRemote_var dr_remote_obj =
+    DataWriterRemote_var dr_remote_obj =
       servant_to_remote_reference(writer_remote_impl, orb_);
     //turn into a octet seq to pass through generated files
     DDS::OctetSeq serializedTypeInfo;
-    XTypes::serialize_type_info(type_info, serializedTypeInfo);
+    XTypes::serialize_type_info(type_info.xtypes_type_info_, serializedTypeInfo);
 
     pubId = get_dcps_info()->add_publication(domainId, participantId, topicId,
       dr_remote_obj, qos, transInfo, publisherQos, serializedTypeInfo);
@@ -701,7 +701,7 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
                                     const char* filterClassName,
                                     const char* filterExpr,
                                     const DDS::StringSeq& params,
-                                    const XTypes::TypeInformation& type_info)
+                                    const TypeInformation& type_info)
 {
   RepoId subId;
 
@@ -715,11 +715,11 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
     PortableServer::ServantBase_var reader_remote(reader_remote_impl);
 
     //this is the client reference to the DataReaderRemoteImpl
-    OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj =
+    DataReaderRemote_var dr_remote_obj =
       servant_to_remote_reference(reader_remote_impl, orb_);
     //turn into a octet seq to pass through generated files
     DDS::OctetSeq serializedTypeInfo;
-    XTypes::serialize_type_info(type_info, serializedTypeInfo);
+    XTypes::serialize_type_info(type_info.xtypes_type_info_, serializedTypeInfo);
 
     subId = get_dcps_info()->add_subscription(domainId, participantId, topicId,
                                               dr_remote_obj, qos, transInfo, subscriberQos,

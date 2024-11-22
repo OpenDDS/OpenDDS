@@ -10,9 +10,11 @@
 
 #include "dcps_export.h"
 #include "Definitions.h"
+#include "Discovery.h"
 #include "LocalObject.h"
 #include "Serializer.h"
 #include "SafetyProfileStreams.h"
+
 #include "XTypes/TypeObject.h"
 
 #include <dds/DdsDcpsTypeSupportExtC.h>
@@ -24,13 +26,15 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace XTypes {
-class TypeLookupService;
-}
+  namespace XTypes {
+    class TypeLookupService;
+    typedef DCPS::RcHandle<TypeLookupService> TypeLookupService_rch;
+  }
 
 namespace DCPS {
 
 class MetaStruct;
+struct TypeInformation;
 
 template <typename Message> struct DDSTraits;
 
@@ -100,15 +104,17 @@ public:
   virtual const XTypes::TypeMap& getCompleteTypeMap() const = 0;
 
   virtual Extensibility getExtensibility() const = 0;
+  virtual void to_type_info(TypeInformation& type_info) const;
 
-  void to_type_info(XTypes::TypeInformation& type_info) const;
+  virtual void get_flexible_types(const char* /*key*/,
+                                  XTypes::TypeInformation& /*type_info*/) {}
+
+  void add_types(const XTypes::TypeLookupService_rch& tls) const;
 
   RepresentationFormat* make_format(DDS::DataRepresentationId_t representation);
 
-  void add_types(const RcHandle<XTypes::TypeLookupService>& tls) const;
   void populate_dependencies(const RcHandle<XTypes::TypeLookupService>& tls) const;
 
-private:
   static const ACE_CDR::Long TYPE_INFO_DEPENDENT_COUNT_NOT_PROVIDED;
 
   virtual const char* default_type_name() const = 0;
@@ -117,8 +123,13 @@ private:
                       const XTypes::TypeIdentifier& ti,
                       const XTypes::TypeMap& type_map) const;
 
-  void populate_dependencies_i(const RcHandle<XTypes::TypeLookupService>& tls,
+private:
+  void populate_dependencies_i(const XTypes::TypeLookupService_rch& tls,
                                XTypes::EquivalenceKind ek) const;
+
+#ifndef OPENDDS_SAFETY_PROFILE
+  XTypes::TypeLookupService_rch type_lookup_service_;
+#endif
 
   OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(TypeSupportImpl)
 

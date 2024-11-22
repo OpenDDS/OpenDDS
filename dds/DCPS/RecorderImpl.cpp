@@ -913,7 +913,7 @@ RecorderImpl::enable()
       ACE_DEBUG((LM_DEBUG, "(%P|%t) RecorderImpl::enable: add_subscription\n"));
     }
 
-    XTypes::TypeInformation type_info;
+    TypeInformation type_info;
 
     this->subscription_id_ =
       disco->add_subscription(this->domain_id_,

@@ -799,6 +799,9 @@ protected:
 
 private:
 
+  void get_flexible_types(const char* key,
+                          XTypes::TypeInformation& type_info);
+
   virtual void set_instance_state_i(DDS::InstanceHandle_t instance,
                                     DDS::InstanceStateKind state,
                                     const SystemTimePoint& timestamp,

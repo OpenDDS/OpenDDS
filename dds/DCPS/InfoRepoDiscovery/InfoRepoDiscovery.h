@@ -86,13 +86,13 @@ public:
 
   virtual OpenDDS::DCPS::RepoId generate_participant_guid();
 
-  virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant(
+  virtual AddDomainStatus add_domain_participant(
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos,
     XTypes::TypeLookupService_rch tls);
 
 #if defined(OPENDDS_SECURITY)
-  virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant_secure(
+  virtual AddDomainStatus add_domain_participant_secure(
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos,
     XTypes::TypeLookupService_rch tls,
@@ -119,7 +119,7 @@ public:
 
   // Topic operations:
 
-  virtual OpenDDS::DCPS::TopicStatus assert_topic(
+  virtual TopicStatus assert_topic(
     OpenDDS::DCPS::RepoId_out topicId,
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
@@ -129,7 +129,7 @@ public:
     bool hasDcpsKey,
     TopicCallbacks* topic_callbacks);
 
-  virtual OpenDDS::DCPS::TopicStatus find_topic(
+  virtual TopicStatus find_topic(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const char* topicName,
@@ -137,7 +137,7 @@ public:
     DDS::TopicQos_out qos,
     OpenDDS::DCPS::RepoId_out topicId);
 
-  virtual OpenDDS::DCPS::TopicStatus remove_topic(
+  virtual TopicStatus remove_topic(
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& topicId);
@@ -160,11 +160,11 @@ public:
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& topicId,
-    OpenDDS::DCPS::DataWriterCallbacks_rch publication,
+    DataWriterCallbacks_rch publication,
     const DDS::DataWriterQos& qos,
-    const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
+    const TransportLocatorSeq& transInfo,
     const DDS::PublisherQos& publisherQos,
-    const XTypes::TypeInformation& type_info);
+    const TypeInformation& type_info);
 
   virtual bool remove_publication(
     DDS::DomainId_t domainId,
@@ -190,14 +190,14 @@ public:
     DDS::DomainId_t domainId,
     const OpenDDS::DCPS::RepoId& participantId,
     const OpenDDS::DCPS::RepoId& topicId,
-    OpenDDS::DCPS::DataReaderCallbacks_rch subscription,
+    DataReaderCallbacks_rch subscription,
     const DDS::DataReaderQos& qos,
-    const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
+    const TransportLocatorSeq& transInfo,
     const DDS::SubscriberQos& subscriberQos,
     const char* filterClassName,
     const char* filterExpression,
     const DDS::StringSeq& exprParams,
-    const XTypes::TypeInformation& type_info);
+    const TypeInformation& type_info);
 
   virtual bool remove_subscription(
     DDS::DomainId_t domainId,

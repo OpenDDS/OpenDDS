@@ -131,6 +131,7 @@ namespace XTypes {
 
   // ---------- Equivalence Kinds -------------------
   typedef ACE_CDR::Octet EquivalenceKind;
+  const EquivalenceKind EK_NONE      = 0;
   const EquivalenceKind EK_MINIMAL   = 0xF1; // 0x1111 0001
   const EquivalenceKind EK_COMPLETE  = 0xF2; // 0x1111 0010
   const EquivalenceKind EK_BOTH      = 0xF3; // 0x1111 0011
@@ -227,6 +228,16 @@ namespace XTypes {
   typedef ACE_CDR::Octet NameHash_slice;
   typedef Fake_TAO_Array_Forany_T<NameHash, NameHash_slice, NameHash_tag> NameHash_forany;
 
+  inline bool name_hash_equal(const NameHash& x, const NameHash& y)
+  {
+    return x[0] == y[0] && x[1] == y[1] && x[2] == y[2] && x[3] == y[3];
+  }
+
+  inline bool name_hash_not_equal(const NameHash& x, const NameHash& y)
+  {
+    return !name_hash_equal(x, y);
+  }
+
   // Long Bound of a collection type
   typedef ACE_CDR::ULong LBound;
   typedef Sequence<LBound> LBoundSeq;
@@ -259,7 +270,7 @@ namespace XTypes {
     EquivalenceHash hash;
 
     TypeObjectHashId()
-      : kind(0)
+      : kind(EK_NONE)
     {}
 
     TypeObjectHashId(const EquivalenceKind& a_kind,
@@ -379,7 +390,7 @@ namespace XTypes {
     CollectionElementFlag element_flags;
 
     PlainCollectionHeader()
-      : equiv_kind(0)
+      : equiv_kind(EK_NONE)
       , element_flags(0)
     {}
 
@@ -722,6 +733,13 @@ namespace XTypes {
     {
       return !(*this < other) && !(other < *this);
     }
+
+    bool operator!=(const TypeIdentifier& other) const
+    {
+      return *this < other || other < *this;
+    }
+
+    static const TypeIdentifier None;
 
   private:
     ACE_CDR::Octet kind_;
@@ -2063,7 +2081,7 @@ namespace XTypes {
   // };
 
   struct CompleteTypeObject {
-    ACE_CDR::Octet kind;
+    TypeKind kind;
     CompleteAliasType alias_type;
     CompleteAnnotationType annotation_type;
     CompleteStructType struct_type;
@@ -2166,7 +2184,7 @@ namespace XTypes {
   // };
 
   struct MinimalTypeObject {
-    ACE_CDR::Octet kind;
+    TypeKind kind;
     MinimalAliasType alias_type;
     MinimalAnnotationType annotation_type;
     MinimalStructType struct_type;
@@ -2245,12 +2263,12 @@ namespace XTypes {
   // };
 
   struct TypeObject {
-    ACE_CDR::Octet kind;
+    EquivalenceKind kind;
     CompleteTypeObject complete;
     MinimalTypeObject minimal;
 
     TypeObject()
-      : kind(0)
+      : kind(EK_NONE)
     {}
 
     explicit TypeObject(const CompleteTypeObject& a_complete)
@@ -2353,14 +2371,16 @@ namespace XTypes {
   }
 
   template <typename T>
-  void deserialize_type_info(TypeInformation& type_info, const T& seq)
+  bool deserialize_type_info(TypeInformation& type_info, const T& seq)
   {
     DCPS::MessageBlockHelper<T> helper(seq);
     DCPS::Serializer serializer(helper, XTypes::get_typeobject_encoding());
     if (!(serializer >> type_info)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: deserialize_type_info ")
                  ACE_TEXT("deserialization of type information failed.\n")));
+      return false;
     }
+    return true;
   }
 
   OpenDDS_Dcps_Export
@@ -2390,6 +2410,8 @@ namespace XTypes {
     }
 
     operator TypeMap&() { return type_map_; }
+
+    static const TypeMap EmptyMap;
   };
 
   void compute_dependencies(const TypeMap& type_map,
@@ -2407,10 +2429,14 @@ template<typename T>
 const XTypes::TypeMap& getMinimalTypeMap();
 
 template<typename T>
-const XTypes::TypeIdentifier& getCompleteTypeIdentifier();
+const XTypes::TypeIdentifier& getCompleteTypeIdentifier() {
+  return XTypes::TypeIdentifier::None;
+}
 
 template<typename T>
-const XTypes::TypeMap& getCompleteTypeMap();
+const XTypes::TypeMap& getCompleteTypeMap() {
+  return XTypes::TypeMapBuilder::EmptyMap;
+}
 
 template<typename T>
 void serialized_size(const Encoding& encoding, size_t& size,

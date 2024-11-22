@@ -1482,12 +1482,11 @@ DataWriterImpl::enable()
 
   TypeSupportImpl* const typesupport =
     dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
-  XTypes::TypeInformation type_info;
+  TypeInformation type_info;
   typesupport->to_type_info(type_info);
 
   XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
   typesupport->add_types(type_lookup_service);
-  typesupport->populate_dependencies(type_lookup_service);
 
   const RepoId publication_id =
     disco->add_publication(this->domain_id_,
@@ -1911,6 +1910,12 @@ DataWriterImpl::write(Message_Block_Ptr data,
   }
 
   return DDS::RETCODE_OK;
+}
+
+void DataWriterImpl::get_flexible_types(const char* key, XTypes::TypeInformation& type_info)
+{
+  TypeSupportImpl* const typesupport = dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
+  typesupport->get_flexible_types(key, type_info);
 }
 
 void

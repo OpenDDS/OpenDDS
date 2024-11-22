@@ -71,16 +71,19 @@ void TypeSupportImpl::to_type_info_i(XTypes::TypeIdentifierWithDependencies& ti_
   ti_with_deps.dependent_typeid_count = TYPE_INFO_DEPENDENT_COUNT_NOT_PROVIDED;
 }
 
-void TypeSupportImpl::to_type_info(XTypes::TypeInformation& type_info) const
+void TypeSupportImpl::to_type_info(TypeInformation& type_info) const
 {
-  to_type_info_i(type_info.minimal, getMinimalTypeIdentifier(), getMinimalTypeMap());
+  XTypes::TypeInformation& xtypeinfo = type_info.xtypes_type_info_;
+  type_info.flags_ = TypeInformation::Flags_None;
+
+  to_type_info_i(xtypeinfo.minimal, getMinimalTypeIdentifier(), getMinimalTypeMap());
 
   // Properly populate the complete member if complete TypeObjects are generated.
   const XTypes::TypeIdentifier& complete_ti = getCompleteTypeIdentifier();
   if (complete_ti.kind() != XTypes::TK_NONE) {
-    to_type_info_i(type_info.complete, complete_ti, getCompleteTypeMap());
+    to_type_info_i(xtypeinfo.complete, complete_ti, getCompleteTypeMap());
   } else {
-    type_info.complete = XTypes::TypeIdentifierWithDependencies();
+    xtypeinfo.complete = XTypes::TypeIdentifierWithDependencies();
   }
 }
 

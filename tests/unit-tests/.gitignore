@@ -43,3 +43,14 @@ UnitTests
 /Xcdr2ValueWriterTypeSupportImpl.cpp
 /Xcdr2ValueWriterTypeSupportImpl.h
 /Xcdr2ValueWriterTypeSupportS.h
+/XTypesUtilsC.cpp
+/XTypesUtilsC.h
+/XTypesUtilsC.inl
+/XTypesUtilsS.h
+/XTypesUtilsTypeSupport.idl
+/XTypesUtilsTypeSupportC.cpp
+/XTypesUtilsTypeSupportC.h
+/XTypesUtilsTypeSupportC.inl
+/XTypesUtilsTypeSupportImpl.cpp
+/XTypesUtilsTypeSupportImpl.h
+/XTypesUtilsTypeSupportS.h

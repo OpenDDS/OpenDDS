@@ -3003,10 +3003,9 @@ GUID_t StaticDiscovery::add_publication(
   const DDS::DataWriterQos& qos,
   const DCPS::TransportLocatorSeq& transInfo,
   const DDS::PublisherQos& publisherQos,
-  const XTypes::TypeInformation& type_info)
+  const TypeInformation& type_info)
 {
-  return get_part(domainId, participantId)->add_publication(
-    topicId, publication, qos, transInfo, publisherQos, type_info);
+  return get_part(domainId, participantId)->add_publication(topicId, publication, qos, transInfo, publisherQos, type_info.xtypes_type_info_);
 }
 
 bool StaticDiscovery::remove_publication(
@@ -3052,11 +3051,11 @@ GUID_t StaticDiscovery::add_subscription(
   const char* filterClassName,
   const char* filterExpr,
   const DDS::StringSeq& params,
-  const XTypes::TypeInformation& type_info)
+  const TypeInformation& type_info)
 {
   return get_part(domainId, participantId)->add_subscription(
     topicId, subscription, qos, transInfo, subscriberQos, filterClassName,
-    filterExpr, params, type_info);
+    filterExpr, params, type_info.xtypes_type_info_);
 }
 
 bool StaticDiscovery::remove_subscription(

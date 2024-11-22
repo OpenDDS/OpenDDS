@@ -1322,6 +1322,12 @@ bool RtpsDiscovery::update_domain_participant_qos(
   return get_part(domain, participant)->update_domain_participant_qos(qos);
 }
 
+bool RtpsDiscovery::enable_flexible_types(DDS::DomainId_t domain, const GUID_t& myParticipantId,
+                                          const GUID_t& remoteParticipantId, const char* typeKey)
+{
+  return get_part(domain, myParticipantId)->enable_flexible_types(remoteParticipantId, typeKey);
+}
+
 bool RtpsDiscovery::has_domain_participant(DDS::DomainId_t domain, const GUID_t& local, const GUID_t& remote) const
 {
   return get_part(domain, local)->has_domain_participant(remote);
@@ -1398,7 +1404,7 @@ GUID_t RtpsDiscovery::add_publication(
   const DDS::DataWriterQos& qos,
   const DCPS::TransportLocatorSeq& transInfo,
   const DDS::PublisherQos& publisherQos,
-  const XTypes::TypeInformation& type_info)
+  const DCPS::TypeInformation& type_info)
 {
   return get_part(domainId, participantId)->add_publication(
     topicId, publication, qos, transInfo, publisherQos, type_info);
@@ -1447,7 +1453,7 @@ GUID_t RtpsDiscovery::add_subscription(
   const char* filterClassName,
   const char* filterExpr,
   const DDS::StringSeq& params,
-  const XTypes::TypeInformation& type_info)
+  const DCPS::TypeInformation& type_info)
 {
   return get_part(domainId, participantId)->add_subscription(
     topicId, subscription, qos, transInfo, subscriberQos, filterClassName,

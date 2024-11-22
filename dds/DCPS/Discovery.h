@@ -38,12 +38,25 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
+  namespace XTypes {
+    class TypeLookupService;
+    typedef DCPS::RcHandle<TypeLookupService> TypeLookupService_rch;
+  }
+
 namespace DCPS {
 
 class DomainParticipantImpl;
 class DataWriterImpl;
 class DataReaderImpl;
 class BitSubscriber;
+
+struct OpenDDS_Dcps_Export TypeInformation {
+  TypeInformation();
+  TypeInformation(const XTypes::TypeInformation& typeinfo);
+
+  XTypes::TypeInformation xtypes_type_info_;
+  enum { Flags_None, Flags_FlexibleTypeSupport } flags_;
+};
 
 /**
  * @class Discovery
@@ -120,6 +133,12 @@ public:
     const RepoId& participantId,
     const DDS::DomainParticipantQos& qos) = 0;
 
+  virtual bool enable_flexible_types(
+    DDS::DomainId_t /*domain*/,
+    const GUID_t& /*myParticipantId*/,
+    const GUID_t& /*remoteParticipantId*/,
+    const char* /*typeKey*/)
+  { return false; }
 
   // Topic operations:
 
@@ -175,7 +194,7 @@ public:
     const DDS::DataWriterQos& qos,
     const TransportLocatorSeq& transInfo,
     const DDS::PublisherQos& publisherQos,
-    const XTypes::TypeInformation& type_info) = 0;
+    const TypeInformation& type_info) = 0;
 
   virtual bool remove_publication(
     DDS::DomainId_t domainId,
@@ -220,7 +239,7 @@ public:
     const char* filterClassName,
     const char* filterExpression,
     const DDS::StringSeq& exprParams,
-    const XTypes::TypeInformation& type_info) = 0;
+    const TypeInformation& type_info) = 0;
 
   virtual bool remove_subscription(
     DDS::DomainId_t domainId,

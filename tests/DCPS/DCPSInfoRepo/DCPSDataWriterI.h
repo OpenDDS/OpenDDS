@@ -14,7 +14,9 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "DiscReceivedCalls.h"
+
 #include "dds/DCPS/RcObject.h"
+#include "dds/DdsDcpsGuidC.h"
 
 class TAO_DDS_DCPSDataWriter_i
   : public OpenDDS::DCPS::DataWriterCallbacks

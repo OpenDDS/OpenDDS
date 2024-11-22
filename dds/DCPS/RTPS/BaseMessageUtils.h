@@ -101,8 +101,8 @@ DCPS::LocatorSeq transport_locator_to_locator_seq(const DCPS::TransportLocator& 
 template <typename T>
 void message_block_to_sequence(const ACE_Message_Block& mb_locator, T& out)
 {
-  out.length (CORBA::ULong(mb_locator.length()));
-  std::memcpy (out.get_buffer(), mb_locator.rd_ptr(), mb_locator.length());
+  out.length(CORBA::ULong(mb_locator.length()));
+  std::memcpy(out.get_buffer(), mb_locator.rd_ptr(), mb_locator.length());
 }
 
 #ifndef OPENDDS_SAFETY_PROFILE
@@ -114,14 +114,14 @@ inline bool operator==(const Duration_t& x, const Duration_t& y)
 
 inline bool operator==(const VendorId_t& v1, const VendorId_t& v2)
 {
-  return (v1.vendorId[0] == v2.vendorId[0] && v1.vendorId[1] == v2.vendorId[1]);
+  return v1.vendorId[0] == v2.vendorId[0] && v1.vendorId[1] == v2.vendorId[1];
 }
 
 #endif
 
 inline bool operator<(const ProtocolVersion_t& v1, const ProtocolVersion_t& v2)
 {
-  return (v1.major < v2.major || (v1.major == v2.major && v1.minor < v2.minor));
+  return v1.major < v2.major || (v1.major == v2.major && v1.minor < v2.minor);
 }
 
 OpenDDS_Rtps_Export
