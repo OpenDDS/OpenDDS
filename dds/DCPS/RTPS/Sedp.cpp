@@ -4627,7 +4627,7 @@ Sedp::write_durable_publication_data(const RepoId& reader, bool secure)
     if (pub->second.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport) {
       continue;
     }
-#if OPENDDS_CONFIG_SECURITY
+#ifdef OPENDDS_SECURITY
     if (secure) {
       if (pub->second.isDiscoveryProtected()) {
         write_publication_data_secure(pub->first, pub->second, reader);
@@ -4639,7 +4639,7 @@ Sedp::write_durable_publication_data(const RepoId& reader, bool secure)
     }
   }
 
-#if OPENDDS_CONFIG_SECURITY
+#ifdef OPENDDS_SECURITY
   if (secure) {
     publications_secure_writer_->end_historic_samples(reader);
   } else
@@ -4663,7 +4663,7 @@ Sedp::write_durable_subscription_data(const RepoId& reader, bool secure)
     if (sub->second.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport) {
       continue;
     }
-#if OPENDDS_CONFIG_SECURITY
+#ifdef OPENDDS_SECURITY
     if (secure) {
       if (sub->second.isDiscoveryProtected()) {
         write_subscription_data_secure(sub->first, sub->second, reader);
@@ -4675,7 +4675,7 @@ Sedp::write_durable_subscription_data(const RepoId& reader, bool secure)
     }
   }
 
-#if OPENDDS_CONFIG_SECURITY
+#ifdef OPENDDS_SECURITY
   if (secure) {
     subscriptions_secure_writer_->end_historic_samples(reader);
   } else

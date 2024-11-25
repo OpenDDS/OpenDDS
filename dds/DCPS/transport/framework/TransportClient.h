@@ -152,6 +152,11 @@ protected:
     cdr_encapsulation_ = encap;
   }
 
+  void set_repo_id(const DCPS::RepoId& repo_id)
+  {
+    repo_id_ = repo_id;
+  }
+
 private:
 
   // Implemented by derived classes (DataReaderImpl/DataWriterImpl)

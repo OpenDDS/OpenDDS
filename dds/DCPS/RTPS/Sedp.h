@@ -374,7 +374,9 @@ private:
       , participant_crypto_handle_(DDS::HANDLE_NIL)
       , endpoint_crypto_handle_(DDS::HANDLE_NIL)
 #endif
-    {}
+    {
+      set_repo_id(repo_id);
+    }
 
     virtual ~Endpoint();
 
