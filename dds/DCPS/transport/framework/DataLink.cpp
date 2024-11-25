@@ -41,15 +41,14 @@ namespace DCPS {
 /// Only called by our TransportImpl object.
 DataLink::DataLink(const TransportImpl_rch& impl, Priority priority, bool is_loopback,
                    bool is_active)
-  : stopped_(false),
-    impl_(impl),
-    transport_priority_(priority),
-    scheduling_release_(false),
-    is_loopback_(is_loopback),
-    is_active_(is_active),
-    started_(false),
-    send_response_listener_("DataLink"),
-    interceptor_(impl->reactor(), impl->reactor_owner())
+  : stopped_(false)
+  , impl_(impl)
+  , transport_priority_(priority)
+  , scheduling_release_(false)
+  , is_loopback_(is_loopback)
+  , is_active_(is_active)
+  , started_(false)
+  , send_response_listener_("DataLink")
 {
   DBG_ENTRY_LVL("DataLink", "DataLink", 6);
 
@@ -127,7 +126,10 @@ DataLink::add_on_start_callback(const TransportClient_wrch& client, const GUID_t
           pending_on_starts_.erase(it);
         }
         guard.release();
-        interceptor_.execute_or_enqueue(make_rch<ImmediateStart>(link, client, remote));
+        TransportImpl_rch impl = impl_.lock();
+        if (impl) {
+          impl->reactor_task()->interceptor()->execute_or_enqueue(make_rch<ImmediateStart>(link, client, remote));
+        }
       } else {
         on_start_callbacks_[remote][client_id] = client;
       }
@@ -1202,11 +1204,6 @@ DataLink::handle_send_request_ack(TransportQueueElement* element)
 {
   element->data_delivered();
   return true;
-}
-
-bool
-DataLink::Interceptor::reactor_is_shut_down() const {
-  return false;
 }
 
 void
