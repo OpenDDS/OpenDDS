@@ -8,6 +8,8 @@
 
 #include "TypeObject.h"
 
+#include <dds/DdsDcpsCoreC.h>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
