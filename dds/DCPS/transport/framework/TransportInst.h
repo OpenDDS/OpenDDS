@@ -62,6 +62,9 @@ namespace DCPS {
 class OpenDDS_Dcps_Export TransportInst : public virtual RcObject {
 public:
 
+  static const long DEFAULT_DATALINK_RELEASE_DELAY = 10000;
+  static const size_t DEFAULT_DATALINK_CONTROL_CHUNKS = 32u;
+
   const OPENDDS_STRING& name() const { return name_; }
 
   /// Overwrite the default configurations with the configuration from the

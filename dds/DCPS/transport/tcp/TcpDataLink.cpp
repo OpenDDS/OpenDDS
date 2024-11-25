@@ -29,8 +29,8 @@ namespace {
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 OpenDDS::DCPS::TcpDataLink::TcpDataLink(
+  const OpenDDS::DCPS::TcpTransport_rch& transport_impl,
   const ACE_INET_Addr& remote_address,
-  OpenDDS::DCPS::TcpTransport&  transport_impl,
   Priority priority,
   bool        is_loopback,
   bool        is_active)
@@ -270,11 +270,15 @@ OpenDDS::DCPS::TcpDataLink::reconnect(const TcpConnection_rch& connection)
   }
 
   if (released) {
-    int result = static_cast<TcpTransport&>(impl()).connect_tcp_datalink(*this, connection);
-    if (result == 0) {
-      do_association_actions();
+    RcHandle<TcpTransport> transport = dynamic_rchandle_cast<TcpTransport>(impl());
+    if (transport) {
+      const int result = transport->connect_tcp_datalink(*this, connection);
+      if (result == 0) {
+        do_association_actions();
+      }
+      return result;
     }
-    return result;
+    return -1;
   }
 
   this->connection_ = connection;

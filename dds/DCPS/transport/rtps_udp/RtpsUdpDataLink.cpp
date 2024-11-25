@@ -68,7 +68,7 @@ using RTPS::to_rtps_seqnum;
 
 const size_t ONE_SAMPLE_PER_PACKET = 1;
 
-RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
+RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
                                  const GuidPrefix_t& local_prefix,
                                  const RtpsUdpInst& config,
                                  const ReactorTask_rch& reactor_task,
@@ -80,7 +80,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
              false)     // is_active
   , reactor_task_(reactor_task)
   , job_queue_(make_rch<JobQueue>(reactor_task->get_reactor()))
-  , event_dispatcher_(transport.event_dispatcher())
+  , event_dispatcher_(transport->event_dispatcher())
   , mb_allocator_(TheServiceParticipant->association_chunk_multiplier())
   , db_allocator_(TheServiceParticipant->association_chunk_multiplier())
   , custom_allocator_(TheServiceParticipant->association_chunk_multiplier() * config.anticipated_fragments_, RtpsSampleHeader::FRAG_SIZE)
@@ -121,7 +121,7 @@ RtpsUdpDataLink::~RtpsUdpDataLink()
 RtpsUdpInst&
 RtpsUdpDataLink::config() const
 {
-  return static_cast<RtpsUdpTransport&>(impl()).config();
+  return static_cast<RtpsUdpInst&>(impl()->config());
 }
 
 bool
@@ -4666,7 +4666,7 @@ RtpsUdpDataLink::DeliverHeldData::~DeliverHeldData()
 RtpsUdpTransport&
 RtpsUdpDataLink::transport()
 {
-  return static_cast<RtpsUdpTransport&>(impl());
+  return static_cast<RtpsUdpTransport&>(*impl());
 }
 
 RtpsUdpSendStrategy_rch
@@ -4878,7 +4878,7 @@ RtpsUdpDataLink::get_ice_agent() const
 
 DCPS::WeakRcHandle<ICE::Endpoint>
 RtpsUdpDataLink::get_ice_endpoint() const {
-  return impl().get_ice_endpoint();
+  return impl()->get_ice_endpoint();
 }
 
 bool RtpsUdpDataLink::is_leading(const GUID_t& writer_id,

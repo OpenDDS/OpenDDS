@@ -88,6 +88,7 @@ TimerId schedule(ACE_Reactor* reactor,
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: Timers::schedule: register_handler %m\n"));
     }
+    close(fd);
     return InvalidTimerId;
   }
   static const timespec one_ns = {0, 1};
@@ -100,6 +101,7 @@ TimerId schedule(ACE_Reactor* reactor,
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: Timers::schedule: timerfd_settime %m\n"));
     }
+    close(fd);
     return InvalidTimerId;
   }
   return fd;

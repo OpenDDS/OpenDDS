@@ -24,7 +24,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ShmemDataLink::ShmemDataLink(ShmemTransport& transport)
+ShmemDataLink::ShmemDataLink(const RcHandle<ShmemTransport>& transport)
   : DataLink(transport,
              0,     // priority
              false, // is_loopback,
@@ -112,10 +112,10 @@ ShmemDataLink::stop_i()
   peer_alloc_ = 0;
 }
 
-ShmemTransport&
-ShmemDataLink::impl() const
+RcHandle<ShmemTransport>
+ShmemDataLink::transport() const
 {
-  return static_cast<ShmemTransport&>(DataLink::impl());
+  return dynamic_rchandle_cast<ShmemTransport>(impl());
 }
 
 ShmemAllocator*
@@ -128,19 +128,23 @@ ShmemDataLink::peer_allocator()
 ShmemAllocator*
 ShmemDataLink::local_allocator()
 {
-  return impl().alloc();
+  ShmemAllocator* result = 0;
+  OPENDDS_TEST_AND_CALL_ASSIGN(ShmemTransport_rch, transport(), alloc(), result);
+  return result;
 }
 
 std::string
 ShmemDataLink::local_address()
 {
-  return impl().address();
+  std::string result;
+  OPENDDS_TEST_AND_CALL_ASSIGN(ShmemTransport_rch, transport(), address(), result);
+  return result;
 }
 
 void
 ShmemDataLink::signal_semaphore()
 {
-  return impl().signal_semaphore();
+  OPENDDS_TEST_AND_CALL(ShmemTransport_rch, transport(), signal_semaphore());
 }
 
 pid_t
@@ -148,6 +152,13 @@ ShmemDataLink::peer_pid()
 {
   return std::atoi(peer_address_.c_str() + peer_address_.find('-') + 1);
 }
+
+ShmemInst&
+ShmemDataLink::config() const
+{
+  return static_cast<ShmemInst&>(transport()->config());
+}
+
 
 } // namespace DCPS
 } // namespace OpenDDS

@@ -67,7 +67,7 @@ MulticastTransport::make_datalink(const RepoId& local_id,
             this->config().name().c_str(), (unsigned int)(local_peer >> 32), (unsigned int)local_peer,
             priority, active), 2);
 
-  MulticastDataLink_rch link(make_rch<MulticastDataLink>(ref(*this),
+  MulticastDataLink_rch link(make_rch<MulticastDataLink>(rchandle_from(this),
                                    session_factory,
                                    local_peer,
                                    ref(config()),

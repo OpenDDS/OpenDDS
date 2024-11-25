@@ -29,11 +29,11 @@ class TcpReceiveStrategy;
 class TcpDataLink : public DataLink {
 public:
 
-  TcpDataLink(const ACE_INET_Addr& remote_address,
-                    TcpTransport&  transport_impl,
-                    Priority           priority,
-                    bool               is_loopback,
-                    bool               is_active);
+  TcpDataLink(const TcpTransport_rch& transport_impl,
+              const ACE_INET_Addr& remote_address,
+              Priority priority,
+              bool is_loopback,
+              bool is_active);
   virtual ~TcpDataLink();
 
   /// Accessor for the remote address.

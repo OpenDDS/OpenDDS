@@ -95,7 +95,7 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink
 {
 public:
 
-  RtpsUdpDataLink(RtpsUdpTransport& transport,
+  RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
                   const GuidPrefix_t& local_prefix,
                   const RtpsUdpInst& config,
                   const ReactorTask_rch& reactor_task,

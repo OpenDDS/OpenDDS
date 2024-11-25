@@ -16,6 +16,7 @@
 #include "ReceiveListenerSetMap.h"
 #include "SendResponseListener.h"
 #include "TransportDefs.h"
+#include "TransportImpl_rch.h"
 #include "TransportSendStrategy.h"
 #include "TransportSendStrategy_rch.h"
 #include "TransportStrategy.h"
@@ -54,7 +55,6 @@ class ReceivedDataSample;
 class DataSampleElement;
 class ThreadPerConnectionSendTask;
 class TransportClient;
-class TransportImpl;
 
 typedef OPENDDS_MAP_CMP(RepoId, DataLinkSet_rch, GUID_tKeyLessThan) DataLinkSetMap;
 
@@ -88,7 +88,7 @@ public:
   /// created this DataLink.  The ability to specify a priority
   /// for individual links is included for construction so its
   /// value can be available for activating any threads.
-  DataLink(TransportImpl& impl, Priority priority, bool is_loopback, bool is_active);
+  DataLink(const TransportImpl_rch& impl, Priority priority, bool is_loopback, bool is_active);
   virtual ~DataLink();
 
   /// Reactor invokes this after being notified in schedule_stop or cancel_release
@@ -194,7 +194,7 @@ public:
   // The connection has been broken. No locks are being held.
   // Take a snapshot of current associations which will be removed
   // by DataLinkCleanupTask.
-  bool release_resources();
+  void release_resources();
 
   // Used by to inform the send strategy to clear all unsent samples upon
   // backpressure timed out.
@@ -250,7 +250,7 @@ public:
   /// targets of this DataLink (see is_target()).
   GUIDSeq* target_intersection(const RepoId& pub_id, const GUIDSeq& in, size_t& n_subs);
 
-  TransportImpl& impl() const;
+  TransportImpl_rch impl() const;
 
   void default_listener(const TransportReceiveListener_wrch& trl);
   TransportReceiveListener_wrch default_listener() const;
@@ -263,12 +263,6 @@ public:
   void invoke_on_start_callbacks(bool success);
   void invoke_on_start_callbacks(const RepoId& local, const RepoId& remote, bool success);
   void remove_startup_callbacks(const RepoId& local, const RepoId& remote);
-
-  class Interceptor : public ReactorInterceptor {
-  public:
-    Interceptor(ACE_Reactor* reactor, ACE_thread_t owner) : ReactorInterceptor(reactor, owner) {}
-    bool reactor_is_shut_down() const;
-  };
 
   class ImmediateStart : public virtual ReactorInterceptor::Command {
   public:
@@ -414,7 +408,7 @@ private:
   AssocByLocal assoc_by_local_;
 
   /// A reference to the TransportImpl that created this DataLink.
-  TransportImpl& impl_;
+  WeakRcHandle<TransportImpl> impl_;
 
   /// The id for this DataLink
   ACE_UINT64 id_;
@@ -465,8 +459,6 @@ protected:
 
   /// Listener for TransportSendControlElements created in send_control
   SendResponseListener send_response_listener_;
-
-  Interceptor interceptor_;
 };
 
 } // namespace DCPS
