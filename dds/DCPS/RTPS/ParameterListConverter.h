@@ -148,7 +148,7 @@ OpenDDS_Rtps_Export
 bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
                    ParameterList& param_list,
                    bool use_xtypes,
-                   const XTypes::TypeInformation& type_info,
+                   const DCPS::TypeInformation& type_info,
                    bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
@@ -164,7 +164,7 @@ OpenDDS_Rtps_Export
 bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
                    ParameterList& param_list,
                    bool use_xtypes,
-                   const XTypes::TypeInformation& type_info,
+                   const DCPS::TypeInformation& type_info,
                    bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
@@ -201,7 +201,7 @@ OpenDDS_Rtps_Export
 bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
                    ParameterList& param_list,
                    bool use_xtypes,
-                   const XTypes::TypeInformation& type_info,
+                   const DCPS::TypeInformation& type_info,
                    bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
@@ -217,7 +217,7 @@ OpenDDS_Rtps_Export
 bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
                    ParameterList& param_list,
                    bool use_xtypes,
-                   const XTypes::TypeInformation& type_info,
+                   const DCPS::TypeInformation& type_info,
                    bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export

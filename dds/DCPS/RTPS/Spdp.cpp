@@ -4726,6 +4726,24 @@ bool Spdp::update_domain_participant_qos(const DDS::DomainParticipantQos& qos)
   return announce_domain_participant_qos();
 }
 
+bool Spdp::enable_flexible_types(const GUID_t& remoteParticipantId, const char* typeKey)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  const DiscoveredParticipantIter iter = participants_.find(remoteParticipantId);
+  if (iter != participants_.end()) {
+    iter->second.flexible_types_key_ = typeKey;
+    return endpoint_manager().enable_flexible_types(remoteParticipantId, typeKey);
+  }
+  return false;
+}
+
+DCPS::String Spdp::find_flexible_types_key_i(const GUID_t& remoteEndpointId)
+{
+  const DiscoveredParticipantConstIter iter =
+    participants_.find(make_id(remoteEndpointId, ENTITYID_PARTICIPANT));
+  return iter == participants_.end() ? "" : iter->second.flexible_types_key_;
+}
+
 bool Spdp::has_domain_participant(const GUID_t& remote) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);

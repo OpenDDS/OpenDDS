@@ -20,6 +20,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
+class TypeLookupService;
+
 inline bool dynamic_type_is_valid(DDS::DynamicType_ptr type)
 {
   DDS::TypeDescriptor_var td;
@@ -258,6 +260,22 @@ inline bool check_rc_from_get(DDS::ReturnCode_t rc, DDS::MemberId id, DDS::TypeK
   }
   return true;
 }
+
+/**
+ * Walk the TypeObject graph starting at top_level looking for all TypeIdentifiers
+ * that match enum_type and replacing each of those with a new TypeIdentifier that
+ * represents the orignal enum_type with certain enumerators (represented by the
+ * values sequence) removed.  All newly-generated TypeObjects are inserted into
+ * the type_map with their respective TypeIdentifiers.
+ * The returned TypeIdentifier represents the modified top_level.
+ */
+OpenDDS_Dcps_Export
+TypeIdentifier remove_enumerators(const TypeIdentifier& top_level,
+                                  const TypeIdentifier& enum_type,
+                                  const Sequence<DDS::Int32>& values,
+                                  const TypeLookupService& lookup,
+                                  TypeMap& type_map,
+                                  TypeIdentifier* modified_enum = 0);
 
 } // namespace XTypes
 } // namespace OpenDDS

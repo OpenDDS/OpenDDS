@@ -1231,7 +1231,7 @@ DataReaderImpl::enable()
       return DDS::RETCODE_ERROR;
     }
 
-    XTypes::TypeInformation type_info;
+    TypeInformation type_info;
     typesupport->to_type_info(type_info);
 
     XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
@@ -3090,6 +3090,11 @@ DataReaderImpl::add_link(const DataLink_rch& link, const GUID_t& peer)
   if (!link->uses_end_historic_control_messages()) {
     resume_sample_processing(peer);
   }
+}
+
+void DataReaderImpl::get_flexible_types(const char* key, XTypes::TypeInformation& type_info)
+{
+  type_support_->get_flexible_types(key, type_info);
 }
 
 void

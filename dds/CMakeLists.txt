@@ -38,6 +38,7 @@ add_library(OpenDDS_Dcps
   DCPS/EventDispatcher.cpp
   DCPS/FileSystemStorage.cpp
   DCPS/FilterEvaluator.cpp
+  DCPS/FlexibleTypeSupport.cpp
   DCPS/GroupRakeData.cpp
   DCPS/GuardCondition.cpp
   DCPS/GuidBuilder.cpp
@@ -257,6 +258,7 @@ target_sources(OpenDDS_Dcps
     DCPS/DurabilityQueue.h
     DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h
     DCPS/EncapsulationHeader.h
+    DCPS/EndpointCallbacks.h
     DCPS/EntityImpl.h
     DCPS/EventDispatcher.h
     DCPS/FeatureDisabledQosCheck.h
@@ -264,6 +266,7 @@ target_sources(OpenDDS_Dcps
     DCPS/FileSystemStorage.h
     DCPS/FilterEvaluator.h
     DCPS/FilterExpressionGrammar.h
+    DCPS/FlexibleTypeSupport.h
     DCPS/GroupRakeData.h
     DCPS/GuardCondition.h
     DCPS/GuidBuilder.h

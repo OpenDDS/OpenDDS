@@ -1493,7 +1493,7 @@ DataWriterImpl::enable()
   DDS::PublisherQos pub_qos;
   publisher->get_qos(pub_qos);
 
-  XTypes::TypeInformation type_info;
+  TypeInformation type_info;
   type_support_->to_type_info(type_info);
 
   XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
@@ -1969,6 +1969,11 @@ DataWriterImpl::write(Message_Block_Ptr data,
   }
 
   return DDS::RETCODE_OK;
+}
+
+void DataWriterImpl::get_flexible_types(const char* key, XTypes::TypeInformation& type_info)
+{
+  type_support_->get_flexible_types(key, type_info);
 }
 
 void
