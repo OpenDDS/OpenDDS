@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_REACTORTASK_RCH_H
 
 #include "RcHandle_T.h"
+#include "RcObject.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -35,6 +36,7 @@ class ReactorTask;
 
 /// The type definition for the smart-pointer to the underlying type.
 typedef RcHandle<ReactorTask> ReactorTask_rch;
+typedef WeakRcHandle<ReactorTask> ReactorTask_wrch;
 
 } // namespace DCPS
 } // namespace OpenDDS

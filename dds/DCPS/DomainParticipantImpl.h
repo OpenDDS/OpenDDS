@@ -651,7 +651,17 @@ private:
 
   MonotonicTimePoint last_liveliness_activity_;
 
-  virtual int handle_exception(ACE_HANDLE fd);
+  class ShutdownHandler : public ReactorTask::Command {
+  public:
+    ShutdownHandler(DomainParticipantImpl* dpi)
+      : dpi_(dpi)
+    {}
+
+    void execute(ACE_Reactor* reactor);
+
+  private:
+    DomainParticipantImpl* dpi_;
+  };
 
   XTypes::TypeLookupService_rch type_lookup_service_;
 };

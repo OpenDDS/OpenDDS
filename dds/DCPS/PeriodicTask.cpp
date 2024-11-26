@@ -20,9 +20,9 @@ void PeriodicTask::enable(bool reenable, const TimeDuration& period)
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     user_enabled_ = true;
   }
-  RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
-  if (interceptor) {
-    interceptor->execute_or_enqueue(make_rch<ScheduleEnableCommand>(rchandle_from(this), reenable, period));
+  ReactorTask_rch reactor_task = reactor_task_.lock();
+  if (reactor_task) {
+    reactor_task->execute_or_enqueue(make_rch<ScheduleEnableCommand>(rchandle_from(this), reenable, period));
   }
 }
 
@@ -32,9 +32,9 @@ void PeriodicTask::disable()
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     user_enabled_ = false;
   }
-  RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
-  if (interceptor) {
-    interceptor->execute_or_enqueue(make_rch<ScheduleDisableCommand>(rchandle_from(this)));
+  ReactorTask_rch reactor_task = reactor_task_.lock();
+  if (reactor_task) {
+    reactor_task->execute_or_enqueue(make_rch<ScheduleDisableCommand>(rchandle_from(this)));
   }
 }
 
