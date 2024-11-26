@@ -1303,7 +1303,7 @@ AccessControlBuiltInImpl::RevokePermissionsTask_rch&
 AccessControlBuiltInImpl::make_task(RevokePermissionsTask_rch& task)
 {
   if (!task) {
-    task = DCPS::make_rch<RevokePermissionsTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), DCPS::ref(*this));
+    task = DCPS::make_rch<RevokePermissionsTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), DCPS::ref(*this));
   }
   return task;
 }
@@ -1563,9 +1563,9 @@ void AccessControlBuiltInImpl::parse_class_id(
 }
 
 AccessControlBuiltInImpl::RevokePermissionsTask::RevokePermissionsTask(const DCPS::TimeSource& time_source,
-                                                                       DCPS::ReactorInterceptor_rch interceptor,
+                                                                       DCPS::ReactorTask_rch reactor_task,
                                                                        AccessControlBuiltInImpl& impl)
-  : SporadicTask(time_source, interceptor)
+  : SporadicTask(time_source, reactor_task)
   , impl_(impl)
 { }
 

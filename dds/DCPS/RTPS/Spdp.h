@@ -457,7 +457,7 @@ private:
     static const WriteFlags SEND_RELAY = (1 << 1);
     static const WriteFlags SEND_DIRECT = (1 << 2);
 
-    class RegisterHandlers : public DCPS::ReactorInterceptor::Command {
+    class RegisterHandlers : public DCPS::ReactorTask::Command {
     public:
       RegisterHandlers(const DCPS::RcHandle<SpdpTransport>& tport,
         const DCPS::ReactorTask_rch& reactor_task)
@@ -466,7 +466,7 @@ private:
       {
       }
 
-      void execute()
+      void execute(ACE_Reactor*)
       {
         DCPS::RcHandle<SpdpTransport> tport = tport_.lock();
         if (!tport) {
