@@ -41,12 +41,6 @@ OpenDDS::DCPS::TransportImpl::reactor() const
   return task.is_nil() ? 0 : task->get_reactor();
 }
 
-ACE_INLINE ACE_thread_t
-OpenDDS::DCPS::TransportImpl::reactor_owner() const
-{
-  return reactor_task_ ? reactor_task_->get_reactor_owner() : ACE_OS::NULL_thread;
-}
-
 ACE_INLINE bool
 OpenDDS::DCPS::TransportImpl::connection_info
   (TransportLocator& local_info, ConnectionInfoFlags flags) const

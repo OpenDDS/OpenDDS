@@ -986,7 +986,7 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
 int
 RtpsUdpReceiveStrategy::start_i()
 {
-  ReactorInterceptor_rch ri = link_->get_reactor_interceptor();
+  ReactorTask_rch ri = link_->get_reactor_task();
   ri->execute_or_enqueue(make_rch<RegisterHandler>(link_->unicast_socket().get_handle(), this, static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
   ri->execute_or_enqueue(make_rch<RegisterHandler>(link_->ipv6_unicast_socket().get_handle(), this, static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
@@ -998,7 +998,7 @@ RtpsUdpReceiveStrategy::start_i()
 void
 RtpsUdpReceiveStrategy::stop_i()
 {
-  ReactorInterceptor_rch ri = link_->get_reactor_interceptor();
+  ReactorTask_rch ri = link_->get_reactor_task();
   ri->execute_or_enqueue(make_rch<RemoveHandler>(link_->unicast_socket().get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
   ri->execute_or_enqueue(make_rch<RemoveHandler>(link_->ipv6_unicast_socket().get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));

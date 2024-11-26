@@ -111,7 +111,7 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 #if OPENDDS_CONFIG_SECURITY
   {
     if (core_.use_ice()) {
-      ReactorInterceptor_rch ri = reactor_task()->interceptor();
+      ReactorTask_rch ri = reactor_task();
       ri->execute_or_enqueue(make_rch<RemoveHandler>(unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
       ri->execute_or_enqueue(make_rch<RemoveHandler>(ipv6_unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
@@ -670,7 +670,7 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
     start_ice();
   }
 
-  relay_stun_task_= make_rch<Sporadic>(TheServiceParticipant->time_source(), reactor_task()->interceptor(), rchandle_from(this), &RtpsUdpTransport::relay_stun_task);
+  relay_stun_task_= make_rch<Sporadic>(TheServiceParticipant->time_source(), reactor_task(), rchandle_from(this), &RtpsUdpTransport::relay_stun_task);
 #endif
 
   if (config->opendds_discovery_default_listener_) {
@@ -999,7 +999,7 @@ RtpsUdpTransport::start_ice()
   GuardThreadType guard_links(links_lock_);
 
   if (!link_) {
-    ReactorInterceptor_rch ri = reactor_task()->interceptor();
+    ReactorTask_rch ri = reactor_task();
     ri->execute_or_enqueue(make_rch<RegisterHandler>(unicast_socket_.get_handle(), ice_endpoint_.get(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
     ri->execute_or_enqueue(make_rch<RegisterHandler>(ipv6_unicast_socket_.get_handle(), ice_endpoint_.get(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
@@ -1017,7 +1017,7 @@ RtpsUdpTransport::stop_ice()
   GuardThreadType guard_links(links_lock_);
 
   if (!link_) {
-    ReactorInterceptor_rch ri = reactor_task()->interceptor();
+    ReactorTask_rch ri = reactor_task();
     ri->execute_or_enqueue(make_rch<RemoveHandler>(unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
     ri->execute_or_enqueue(make_rch<RemoveHandler>(ipv6_unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));

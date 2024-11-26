@@ -64,8 +64,8 @@ WriterInfo::WriterInfo(const WriterInfoListener_rch& reader,
                        const GUID_t& writer_id,
                        const ::DDS::DataWriterQos& writer_qos,
                        const DDS::Duration_t& reader_liveliness_lease_duration)
-  : historic_samples_sweeper_task_(make_rch<WriterInfoSporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &WriterInfo::sweep_historic_samples))
-  , liveliness_check_task_(make_rch<WriterInfoSporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &WriterInfo::check_liveliness))
+  : historic_samples_sweeper_task_(make_rch<WriterInfoSporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &WriterInfo::sweep_historic_samples))
+  , liveliness_check_task_(make_rch<WriterInfoSporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &WriterInfo::check_liveliness))
   , last_historic_seq_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , waiting_for_end_historic_samples_(false)
   , delivering_historic_samples_(false)

@@ -530,7 +530,7 @@ Sedp::init(const GUID_t& guid,
   ACE_Reactor* reactor = reactor_task_->get_reactor();
   job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
   event_dispatcher_ = transport_inst_->event_dispatcher(domainId, 0);
-  type_lookup_init(reactor_task_->interceptor());
+  type_lookup_init(reactor_task_);
 
   // Configure and enable each reader/writer
   const bool reliable = true;
