@@ -31,7 +31,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
 
-    const OpenDDS::DCPS::String actor = TheServiceParticipant->config_store()->get("APP_NAME", "");
+    const OpenDDS::DCPS::String actor = "publisher";
     ACE_DEBUG((LM_DEBUG, "(%P|%t) actor = %C\n", actor.c_str()));
 
     DDS::DomainParticipant_var participant =

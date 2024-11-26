@@ -39,7 +39,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       return 1;
     }
 
-    const OpenDDS::DCPS::String actor = TheServiceParticipant->config_store()->get("APP_NAME", "");
+    const OpenDDS::DCPS::String actor = "subscriber";
     ACE_DEBUG((LM_DEBUG, "(%P|%t) actor = %C\n", actor.c_str()));
 
     DDS::TypeSupport_var ts = new Messenger::MessageTypeSupportImpl;
