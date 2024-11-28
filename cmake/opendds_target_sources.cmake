@@ -236,7 +236,7 @@ function(opendds_export_header target)
 
   # Make sure the export header can be used properly and installed.
   _opendds_add_idl_or_header_files(${target} PUBLIC TRUE "${export_header_path}")
-  target_compile_definitions(${target} PRIVATE "${uppercase_target}_BUILD_DLL")
+  _opendds_use_export(${target} "${uppercase_target}")
   set(use_export "${export_header};${export_macro}")
   set_target_properties(${target}
     PROPERTIES
