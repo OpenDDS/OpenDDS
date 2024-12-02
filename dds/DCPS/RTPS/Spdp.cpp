@@ -870,9 +870,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
           }
         } else if (iter->second.auth_state_ == AUTH_STATE_AUTHENTICATED) {
           if (!match_authenticated(guid, iter)) {
-            purge_discovered_participant(iter);
-            participants_.erase(iter);
-            iter = participants_.end();
+            erase_participant(iter);
           }
         }
         // otherwise just return, since we're waiting for input to finish authentication
@@ -2566,8 +2564,7 @@ void Spdp::SpdpTransport::register_handlers(DCPS::ReactorWrapper& reactor_wrappe
     return;
   }
 
-  ACE_Reactor* const reactor = reactor_task->get_reactor();
-  register_unicast_socket(reactor, unicast_socket_, "IPV4");
+  register_unicast_socket(reactor_wrapper, unicast_socket_, "IPV4");
 #ifdef ACE_HAS_IPV6
   register_unicast_socket(reactor_wrapper, unicast_ipv6_socket_, "IPV6");
 #endif
@@ -4644,12 +4641,6 @@ void Spdp::process_participant_ice(const ParameterList& plist,
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     if (!initialized_flag_ || shutdown_flag_) {
       return;
-    }
-    if (sedp_) {
-      sedp_endpoint = sedp_->get_ice_endpoint();
-    }
-    if (tport_) {
-      spdp_endpoint = tport_->get_ice_endpoint();
     }
     DiscoveredParticipantIter iter = participants_.find(guid);
     if (iter != participants_.end()) {

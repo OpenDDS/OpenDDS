@@ -67,8 +67,7 @@ void AgentImpl::process_tasks(const DCPS::MonotonicTimePoint& now)
 }
 
 AgentImpl::AgentImpl()
-  : ReactorInterceptor(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner())
-  , unfreeze_(false)
+  : unfreeze_(false)
   , ncm_listener_added_(false)
   , remote_peer_reflexive_counter_(0)
   , task_task_(DCPS::make_rch<DCPS::PmfSporadicTask<AgentImpl> >(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), DCPS::rchandle_from(this), &AgentImpl::process_tasks))

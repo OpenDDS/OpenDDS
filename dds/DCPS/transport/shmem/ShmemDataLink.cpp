@@ -91,15 +91,6 @@ ShmemDataLink::open(const std::string& peer_address)
 
   VDBG_LVL((LM_INFO, "(%P|%t) ShmemDataLink link %@ open to peer %C\n",
             this, peer_address_.c_str()), 1);
-
-  assoc_resends_task_ = make_rch<SmPeriodicTask>(reactor_task_,
-    ref(*this), &ShmemDataLink::resend_association_msgs);
-  ShmemInst_rch cfg = config();
-  if (!cfg) {
-    return false;
-  }
-  assoc_resends_task_->enable(false, cfg->association_resend_period());
-
   return true;
 }
 

@@ -558,7 +558,7 @@ public:
 
   bool use_ncm() const
   {
-    return use_ncm_.value();
+    return use_ncm_;
   }
   void use_ncm(bool ui)
   {
@@ -808,6 +808,7 @@ private:
   ACE_INET_Addr spdp_stun_server_address_;
   ACE_INET_Addr sedp_stun_server_address_;
   AtomicBool use_ice_;
+  AtomicBool use_ncm_;
   size_t sedp_max_message_size_;
   AtomicBool undirected_spdp_;
   AtomicBool periodic_directed_spdp_;

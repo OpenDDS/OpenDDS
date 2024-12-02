@@ -21,6 +21,7 @@
 #include "dds/DCPS/NetworkConfigMonitor.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/SporadicTask.h"
+
 #include "dds/Versioned_Namespace.h"
 
 #include <ace/Time_Value.h>
@@ -32,7 +33,11 @@ namespace ICE {
 
 typedef std::vector<FoundationType> FoundationList;
 
-class AgentImpl : public virtual Agent, public virtual DCPS::ShutdownListener, public virtual DCPS::NetworkConfigListener, public DCPS::ReactorInterceptor {
+class AgentImpl
+  : public virtual Agent
+  , public virtual DCPS::ShutdownListener
+  , public virtual DCPS::NetworkConfigListener
+{
 public:
   AgentImpl();
 
