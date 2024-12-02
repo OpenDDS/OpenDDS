@@ -828,7 +828,7 @@ template <typename MCTO> // Minimal/Complete TypeObject
 void checkTO(const MCTO& mcto)
 {
   EXPECT_EQ(mcto.kind, TK_ENUM);
-  EXPECT_EQ(mcto.enumerated_type.literal_seq.length(), 2);
+  EXPECT_EQ(mcto.enumerated_type.literal_seq.length(), 2u);
   EXPECT_EQ(mcto.enumerated_type.literal_seq[0].common.value, 0);
   nameMatches(mcto.enumerated_type.literal_seq[0].detail, "X");
   EXPECT_EQ(mcto.enumerated_type.literal_seq[1].common.value, 1);
@@ -855,19 +855,19 @@ void checkStructMembers(const CMSMS& cmsms, const TypeMap& map)
   if (cmsms.length() == 1) {
     return; // nested struct UsesEnumS
   }
-  EXPECT_EQ(8, cmsms.length());
+  EXPECT_EQ(8u, cmsms.length());
   for (DDS::UInt32 i = 0; i < cmsms.length(); ++i) {
     const TypeIdentifier& ti = cmsms[i].common.member_type_id;
     switch (ti.kind()) {
     case EK_MINIMAL:
     case EK_COMPLETE:
-      EXPECT_EQ(1, map.count(ti));
+      EXPECT_EQ(1u, map.count(ti));
       break;
     case TI_PLAIN_SEQUENCE_SMALL:
-      EXPECT_EQ(1, map.count(*ti.seq_sdefn().element_identifier));
+      EXPECT_EQ(1u, map.count(*ti.seq_sdefn().element_identifier));
       break;
     case TI_PLAIN_ARRAY_SMALL:
-      EXPECT_EQ(1, map.count(*ti.array_sdefn().element_identifier));
+      EXPECT_EQ(1u, map.count(*ti.array_sdefn().element_identifier));
       break;
     default:
       EXPECT_TRUE(false);
@@ -910,10 +910,10 @@ void checkAdded(const TypeMap& map)
       break;
     }
   }
-  EXPECT_EQ(1, enums); // Enu_t
-  EXPECT_EQ(2, aliases); // UsesEnumA, EnuSeq
-  EXPECT_EQ(2, structs); // UsesEnumS, TestEnums
-  EXPECT_EQ(1, unions); // UsesEnumU
+  EXPECT_EQ(1u, enums); // Enu_t
+  EXPECT_EQ(2u, aliases); // UsesEnumA, EnuSeq
+  EXPECT_EQ(2u, structs); // UsesEnumS, TestEnums
+  EXPECT_EQ(1u, unions); // UsesEnumU
 }
 
 TEST_F(dds_DCPS_XTypes_Utils, remove_enumerators)
@@ -935,14 +935,14 @@ TEST_F(dds_DCPS_XTypes_Utils, remove_enumerators)
                                                        values_to_remove, *tls_, miniAdded, &newEnumM);
   EXPECT_NE(newStructM, TypeIdentifier::None);
   checkTI(newEnumM, miniAdded);
-  EXPECT_EQ(miniAdded.size(), 6);
+  EXPECT_EQ(miniAdded.size(), 6u);
   checkAdded(miniAdded);
   const TypeIdentifier newStructC = remove_enumerators(getCompleteTypeIdentifier<XTypesUtils_TestEnums_xtag>(),
                                                        getCompleteTypeIdentifier<XTypesUtils_Enu_t_xtag>(),
                                                        values_to_remove, *tls_, compAdded, &newEnumC);
   EXPECT_NE(newStructC, TypeIdentifier::None);
   checkTI(newEnumC, compAdded);
-  EXPECT_EQ(compAdded.size(), 6);
+  EXPECT_EQ(compAdded.size(), 6u);
   checkAdded(compAdded);
 }
 
