@@ -248,45 +248,76 @@ TEST(dds_DCPS_XTypes_IdlScanner, IdlScanner)
     EXPECT_EQ(is.scan_token(), IdlToken::make_identifier("my_member_name_99"));
     EXPECT_TRUE(is.eoi());
   }
+}
 
-  DDS::DynamicType_var boolean_type = make_primitive(TK_BOOLEAN, "Boolean");
-  DDS::DynamicType_var byte_type = make_primitive(TK_BYTE, "Byte");
-  DDS::DynamicType_var int16_type = make_primitive(TK_INT16, "Int16");
-  DDS::DynamicType_var int32_type = make_primitive(TK_INT32, "Int32");
-  DDS::DynamicType_var int64_type = make_primitive(TK_INT64, "Int64");
-  DDS::DynamicType_var uint16_type = make_primitive(TK_UINT16, "UInt16");
-  DDS::DynamicType_var uint32_type = make_primitive(TK_UINT32, "UInt32");
-  DDS::DynamicType_var uint64_type = make_primitive(TK_UINT64, "UInt64");
-  DDS::DynamicType_var float32_type = make_primitive(TK_FLOAT32, "Float32");
-  DDS::DynamicType_var float64_type = make_primitive(TK_FLOAT64, "Float64");
-  DDS::DynamicType_var float128_type = make_primitive(TK_FLOAT128, "Float128");
-  DDS::DynamicType_var int8_type = make_primitive(TK_INT8, "Int8");
-  DDS::DynamicType_var uint8_type = make_primitive(TK_UINT8, "Uint8");
-  DDS::DynamicType_var char8_type = make_primitive(TK_CHAR8, "Char8");
-  DDS::DynamicType_var string8_type = make_primitive(TK_STRING8, "String8");
+struct dds_DCPS_XTypes_IdlScanner : testing::Test {
+  dds_DCPS_XTypes_IdlScanner()
+    : boolean_type(make_primitive(TK_BOOLEAN, "Boolean"))
+    , byte_type(make_primitive(TK_BYTE, "Byte"))
+    , int16_type(make_primitive(TK_INT16, "Int16"))
+    , int32_type(make_primitive(TK_INT32, "Int32"))
+    , int64_type(make_primitive(TK_INT64, "Int64"))
+    , uint16_type(make_primitive(TK_UINT16, "UInt16"))
+    , uint32_type(make_primitive(TK_UINT32, "UInt32"))
+    , uint64_type(make_primitive(TK_UINT64, "UInt64"))
+    , float32_type(make_primitive(TK_FLOAT32, "Float32"))
+    , float64_type(make_primitive(TK_FLOAT64, "Float64"))
+    , float128_type(make_primitive(TK_FLOAT128, "Float128"))
+    , int8_type(make_primitive(TK_INT8, "Int8"))
+    , uint8_type(make_primitive(TK_UINT8, "Uint8"))
+    , char8_type(make_primitive(TK_CHAR8, "Char8"))
+    , string8_type(make_primitive(TK_STRING8, "String8"))
+  {
+    TypeDescriptorImpl* tdi = new TypeDescriptorImpl();
+    tdi->kind(TK_ENUM);
+    tdi->name("MyEnumType");
+    DDS::TypeDescriptor_var td = tdi;
+    DynamicTypeImpl* dti = new DynamicTypeImpl();
+    enum_type = dti;
+    dti->set_descriptor(td);
 
-  TypeDescriptorImpl* tdi = new TypeDescriptorImpl();
-  tdi->kind(TK_ENUM);
-  tdi->name("MyEnumType");
-  DDS::TypeDescriptor_var td = tdi;
-  DynamicTypeImpl* dti = new DynamicTypeImpl();
-  DDS::DynamicType_var enum_type = dti;
-  dti->set_descriptor(td);
+    DynamicTypeMemberImpl* dtmi = new DynamicTypeMemberImpl();
+    DDS::DynamicTypeMember_var dtm = dtmi;
 
-  DynamicTypeMemberImpl* dtmi = new DynamicTypeMemberImpl();
-  DDS::DynamicTypeMember_var dtm = dtmi;
+    mdi = new MemberDescriptorImpl();
+    DDS::MemberDescriptor_var md = mdi;
+    mdi->name("A_MEMBER");
+    mdi->id(0);
+    mdi->type(enum_type);
+    mdi->index(0);
 
-  MemberDescriptorImpl* mdi = new MemberDescriptorImpl();
-  DDS::MemberDescriptor_var md = mdi;
-  mdi->name("A_MEMBER");
-  mdi->id(0);
-  mdi->type(enum_type);
-  mdi->index(0);
+    dtmi->set_descriptor(md);
 
-  dtmi->set_descriptor(md);
+    dti->insert_dynamic_member(dtm);
+  }
 
-  dti->insert_dynamic_member(dtm);
+  ~dds_DCPS_XTypes_IdlScanner()
+  {
+    // Break the circular reference.
+    mdi->type(0);
+  }
 
+  DDS::DynamicType_var boolean_type;
+  DDS::DynamicType_var byte_type;
+  DDS::DynamicType_var int16_type;
+  DDS::DynamicType_var int32_type;
+  DDS::DynamicType_var int64_type;
+  DDS::DynamicType_var uint16_type;
+  DDS::DynamicType_var uint32_type;
+  DDS::DynamicType_var uint64_type;
+  DDS::DynamicType_var float32_type;
+  DDS::DynamicType_var float64_type;
+  DDS::DynamicType_var float128_type;
+  DDS::DynamicType_var int8_type;
+  DDS::DynamicType_var uint8_type;
+  DDS::DynamicType_var char8_type;
+  DDS::DynamicType_var string8_type;
+  DDS::DynamicType_var enum_type;
+  MemberDescriptorImpl* mdi;
+};
+
+TEST_F(dds_DCPS_XTypes_IdlScanner, IdlScanner_DynamicType1)
+{
   {
     CharacterScanner cs("TRUE");
     IdlScanner is(cs);
@@ -528,7 +559,10 @@ TEST(dds_DCPS_XTypes_IdlScanner, IdlScanner)
     IdlScanner is(cs);
     EXPECT_EQ(is.scan_token(uint64_type), IdlToken::make_error());
   }
+}
 
+TEST_F(dds_DCPS_XTypes_IdlScanner, IdlScanner_DynamicType2)
+{
   {
     CharacterScanner cs("-1.5e-10");
     IdlScanner is(cs);
@@ -771,9 +805,6 @@ TEST(dds_DCPS_XTypes_IdlScanner, IdlScanner)
     IdlScanner is(cs);
     EXPECT_EQ(is.scan_token(enum_type), IdlToken::make_error());
   }
-
-  // Break the circular reference.
-  mdi->type(0);
 }
 
 #endif // OPENDDS_SAFETY_PROFILE
