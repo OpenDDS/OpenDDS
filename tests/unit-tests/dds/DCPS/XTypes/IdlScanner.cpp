@@ -12,7 +12,7 @@ using namespace DDS;
 
 struct dds_DCPS_XTypes_IdlScanner : testing::Test {
 
-  static DynamicType* make_primitive(TypeKind tk, const char* name)
+  static DynamicType* make_primitive(OpenDDS::XTypes::TypeKind tk, const char* name)
   {
     TypeDescriptorImpl* tdi = new TypeDescriptorImpl();
     tdi->kind(tk);
