@@ -243,16 +243,10 @@ Service_Participant::reactor()
   return reactor_task_.get_reactor();
 }
 
-ACE_thread_t
-Service_Participant::reactor_owner() const
+ReactorTask_rch
+Service_Participant::reactor_task()
 {
-  return reactor_task_.get_reactor_owner();
-}
-
-ReactorInterceptor_rch
-Service_Participant::interceptor() const
-{
-  return reactor_task_.interceptor();
+  return rchandle_from(&reactor_task_);
 }
 
 JobQueue_rch
@@ -491,7 +485,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
       ACE_DEBUG((LM_DEBUG,
                  "(%P|%t) Service_Participant::get_domain_participant_factory: Creating LinuxNetworkConfigMonitor\n"));
     }
-    network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_.interceptor());
+    network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(rchandle_from(&reactor_task_));
 #elif defined(OPENDDS_NETWORK_CONFIG_MODIFIER)
     if (DCPS_debug_level >= 1) {
       ACE_DEBUG((LM_DEBUG,

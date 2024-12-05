@@ -2,6 +2,8 @@
 
 #include <dds/DCPS/ReactorTask.h>
 
+#include <ace/Reactor.h>
+
 namespace Utils {
 
 TimingChecker::TimingChecker() : cv_(mutex_), timeout_(OpenDDS::DCPS::MonotonicTimePoint::zero_value)

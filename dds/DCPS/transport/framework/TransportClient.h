@@ -221,7 +221,7 @@ private:
       , scheduled_(false)
       , blob_index_(0)
       , client_(tc_rch)
-      , timeout_task_(make_rch<PendingAssocSporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &PendingAssoc::timeout))
+      , timeout_task_(make_rch<PendingAssocSporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &PendingAssoc::timeout))
     {}
 
     ~PendingAssoc()
