@@ -406,7 +406,7 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
   }
 
   {
-    ACE_Guard<ACE_Thread_Mutex> identity_data_guard(handshake_mutex_);
+    ACE_Guard<ACE_Thread_Mutex> handshake_guard(handshake_mutex_);
     handshake_data_[handshake_handle] = handshake_data;
 
     if (DCPS::security_debug.bookkeeping) {
@@ -707,30 +707,19 @@ static void make_final_signature_sequence(const DDS::OctetSeq& hash_c1,
 
   /* Compute hash_c1 and store for later */
 
-  {
-    CredentialHash hash(*remote_cert,
-                        *diffie_hellman,
-                        cpdata,
-                        cperm);
-    int err = hash(hash_c1);
-    if (err) {
-      set_security_error(ex, -1, 0, "Failed to compute hash_c1.");
-      return Failure;
-    }
+  if (CredentialHash(*remote_cert, *diffie_hellman, cpdata, cperm)(hash_c1)) {
+    set_security_error(ex, -1, 0, "Failed to compute hash_c1.");
+    return Failure;
   }
 
   /* Compute hash_c2 and store for later */
 
-  {
-    CredentialHash hash(local_credential_data.get_participant_cert(),
-                        *diffie_hellman,
-                        serialized_local_participant_data,
-                        local_credential_data.get_access_permissions());
-    int err = hash(hash_c2);
-    if (err) {
-      set_security_error(ex, -1, 0, "Failed to compute hash_c2.");
-      return Failure;
-    }
+  if (CredentialHash(local_credential_data.get_participant_cert(),
+                     *diffie_hellman,
+                     serialized_local_participant_data,
+                     local_credential_data.get_access_permissions())(hash_c2)) {
+    set_security_error(ex, -1, 0, "Failed to compute hash_c2.");
+    return Failure;
   }
 
   // TODO: Currently support for OCSP is optional in the security spec and
@@ -1171,16 +1160,9 @@ DDS::Security::ValidationResult_t AuthenticationBuiltInImpl::process_handshake_r
 
   /* Compute hash_c2 and store for later (hash_c1 was already computed in request) */
 
-  {
-    CredentialHash hash(*remote_cert,
-                        *remote_data.diffie_hellman,
-                        cpdata,
-                        cperm);
-    int err = hash(hash_c2);
-    if (err) {
-      set_security_error(ex, -1, 0, "Computing hash_c2 failed");
-      return Failure;
-    }
+  if (CredentialHash(*remote_cert, *remote_data.diffie_hellman, cpdata, cperm)(hash_c2)) {
+    set_security_error(ex, -1, 0, "Computing hash_c2 failed");
+    return Failure;
   }
 
   /* Validate Signature field */

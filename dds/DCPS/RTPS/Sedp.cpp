@@ -3642,7 +3642,7 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
                                 bool historic_sample,
                                 DCPS::MessageId id)
 {
-  dsh.message_id_ = id;
+  dsh.message_id_ = static_cast<char>(id);
   dsh.byte_order_ = ACE_CDR_BYTE_ORDER;
   dsh.message_length_ = static_cast<ACE_UINT32>(size);
   dsh.publication_id_ = repo_id_;
@@ -7102,8 +7102,7 @@ void Sedp::match(const GUID_t& writer, const GUID_t& reader)
   // request only the remote complete TypeObject (if it's not already in the cache).
   // The following code assumes when the "minimal" part is not included in the discovered
   // endpoint's TypeInformation, then the "complete" part also is not included.
-  bool request = false;
-  bool need_minimal, need_complete;
+  bool request = false, need_minimal = false, need_complete = false;
   if ((writer_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE) &&
       (reader_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE)) {
     if (!writer_local && reader_local) {

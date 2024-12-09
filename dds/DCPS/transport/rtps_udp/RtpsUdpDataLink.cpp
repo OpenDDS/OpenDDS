@@ -1302,7 +1302,7 @@ RtpsUdpDataLink::customize_queue_element_non_reliable_i(
   const GUID_t pub_id = element->publication_id();
 
   {
-    GuardType guard(strategy_lock_);
+    GuardType guard2(strategy_lock_);
     if (send_strategy_) {
       send_strategy()->encode_payload(pub_id, data, subm);
     }
@@ -2130,7 +2130,7 @@ RtpsUdpDataLink::RtpsWriter::remove_reader(const GUID_t& id)
           !reader->pvs_outstanding_.empty()) {
         const OPENDDS_VECTOR(SequenceRange) psr = reader->pvs_outstanding_.present_sequence_ranges();
         for (OPENDDS_VECTOR(SequenceRange)::const_iterator pos = psr.begin(), limit = psr.end(); pos != limit; ++pos) {
-          ACE_GUARD_RETURN(ACE_Thread_Mutex, g, elems_not_acked_mutex_, result);
+          ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, elems_not_acked_mutex_, result);
           for (SequenceNumber seq = pos->first; seq <= pos->second; ++seq) {
             OPENDDS_MULTIMAP(SequenceNumber, TransportQueueElement*)::iterator iter = elems_not_acked_.find(seq);
             if (iter != elems_not_acked_.end()) {
@@ -3396,7 +3396,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     const OPENDDS_VECTOR(SequenceRange) psr = reader->pvs_outstanding_.present_sequence_ranges();
     for (OPENDDS_VECTOR(SequenceRange)::const_iterator pos = psr.begin(), limit = psr.end();
          pos != limit && pos->first < reader->cur_cumulative_ack_; ++pos) {
-      ACE_GUARD(ACE_Thread_Mutex, g, elems_not_acked_mutex_);
+      ACE_GUARD(ACE_Thread_Mutex, guard, elems_not_acked_mutex_);
       for (SequenceNumber seq = pos->first; seq <= pos->second && seq < reader->cur_cumulative_ack_; ++seq) {
         reader->pvs_outstanding_.erase(seq);
         OPENDDS_MULTIMAP(SequenceNumber, TransportQueueElement*)::iterator iter = elems_not_acked_.find(seq);

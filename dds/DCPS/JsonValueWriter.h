@@ -265,7 +265,7 @@ template <typename Writer>
 bool JsonValueWriter<Writer>::write_float128(ACE_CDR::LongDouble value)
 {
   // TODO
-  return writer_.Double(value);
+  return writer_.Double(static_cast<double>(value));
 }
 
 template <typename Writer>
