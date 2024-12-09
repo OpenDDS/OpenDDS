@@ -869,9 +869,17 @@ if ($compile_warnings eq 'WARNING' or $compile_warnings eq 'ERROR') {
   }
   my $warning_flags = $sections->{$section}{'warning'};
   my $error_flags = $sections->{$section}{'error'};
-  push(@mpcopts, '-value_template', "compile_flags+=${warning_flags}");
-  if ($compile_warnings eq 'ERROR') {
-    push(@mpcopts, '-value_template', "compile_flags+=${error_flags}");
+  if ($section eq 'MSVC') {
+    $warning_flags =~ s/^\/W//;
+    push(@mpcopts, '-value_template', "warning_level+=${warning_flags}");
+    if ($compile_warnings eq 'ERROR') {
+      push(@mpcopts, '-value_template', 'WarnAsError=1');
+    }
+  } else {
+    push(@mpcopts, '-value_template', "compile_flags+=${warning_flags}");
+    if ($compile_warnings eq 'ERROR') {
+      push(@mpcopts, '-value_template', "compile_flags+=${error_flags}");
+    }
   }
 }
 

@@ -534,7 +534,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  Permissions::PublishSubscribe_t denied_type;
+  Permissions::PublishSubscribe_t denied_type = Permissions::PUBLISH;
   bool found_deny = false;
   // Iterate over allow / deny rules
   for (perm_topic_rules_iter ptr_iter = grant->rules.begin(); ptr_iter != grant->rules.end(); ++ptr_iter) {
@@ -906,7 +906,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return false;
   }
 
-  Permissions::PublishSubscribe_t denied_type;
+  Permissions::PublishSubscribe_t denied_type = Permissions::PUBLISH;
   bool found_deny = false;
   for (perm_topic_rules_iter ptr_iter = grant->rules.begin(); ptr_iter != grant->rules.end(); ++ptr_iter) {
 
