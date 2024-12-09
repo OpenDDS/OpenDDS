@@ -23,9 +23,9 @@ void MultiTask::enable(const TimeDuration& delay)
       ((MonotonicTimePoint::now() + delay + cancel_estimate_) < next_time_);
   }
   if (worth_passing_along) {
-    RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
-    if (interceptor) {
-      interceptor->execute_or_enqueue(make_rch<ScheduleEnableCommand>(rchandle_from(this), delay));
+    ReactorTask_rch reactor_task= reactor_task_.lock();
+    if (reactor_task) {
+      reactor_task->execute_or_enqueue(make_rch<ScheduleEnableCommand>(rchandle_from(this), delay));
     }
   }
 }

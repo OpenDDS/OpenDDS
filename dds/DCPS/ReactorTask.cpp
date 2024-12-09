@@ -40,6 +40,7 @@ ReactorTask::ReactorTask(bool useAsyncSend)
   , use_async_send_(useAsyncSend)
 #endif
   , timer_queue_(0)
+  , reactor_state_(RS_NONE)
   , thread_status_manager_(0)
 {
   ACE_UNUSED_ARG(useAsyncSend);
@@ -78,7 +79,8 @@ void ReactorTask::cleanup()
 }
 
 int ReactorTask::open_reactor_task(ThreadStatusManager* thread_status_manager,
-                                   const String& name)
+                                   const String& name,
+                                   ACE_Reactor* reactor)
 {
   GuardType guard(lock_);
 
@@ -88,6 +90,7 @@ int ReactorTask::open_reactor_task(ThreadStatusManager* thread_status_manager,
   // thread status reporting support
   thread_status_manager_ = thread_status_manager;
   name_ = name;
+  reactor_ = reactor;
 
   // Set our reactor and proactor pointers to a new reactor/proactor objects.
 #ifdef OPENDDS_REACTOR_TASK_ASYNC
@@ -153,7 +156,7 @@ int ReactorTask::svc()
     }
     reactor_owner_ = ACE_Thread_Manager::instance()->thr_self();
 
-    interceptor_ = make_rch<Interceptor>(this, reactor_, reactor_owner_);
+    ACE_Event_Handler::reactor(reactor_);
 
     // Advance the state.
     state_ = STATE_RUNNING;
@@ -236,7 +239,7 @@ void ReactorTask::stop()
 
   // In the future, we will likely want to replace this assert with a new "SHUTTING_DOWN" state
   // which can be used to delay any potential new calls to open_reactor_task()
-  OPENDDS_ASSERT(state() == STATE_SHUT_DOWN);
+  OPENDDS_ASSERT(state_ == STATE_SHUT_DOWN);
 
   // Let's wait for the reactor task's thread to complete before we
   // leave this stop method.
@@ -247,14 +250,124 @@ void ReactorTask::stop()
   thr_mgr(0);
 }
 
+bool ReactorTask::on_thread() const
+{
+  GuardType guard(lock_);
+  return ACE_OS::thr_equal(reactor_owner_, ACE_Thread::self());
+}
+
 void ReactorTask::reactor(ACE_Reactor* reactor)
 {
+  GuardType guard(lock_);
   ACE_Event_Handler::reactor(reactor);
 }
 
 ACE_Reactor* ReactorTask::reactor() const
 {
+  GuardType guard(lock_);
   return ACE_Event_Handler::reactor();
+}
+
+ReactorTask::CommandPtr ReactorTask::execute_or_enqueue(CommandPtr command)
+{
+  OPENDDS_ASSERT(command);
+
+  GuardType guard(lock_);
+
+  // Only allow immediate execution if running on the reactor thread, otherwise we risk deadlock
+  // when calling into the reactor object.
+  const bool is_owner = ACE_OS::thr_equal(reactor_owner_, ACE_Thread::self());
+
+  // If state is set to processing, the conents of command_queue_ have been swapped out
+  // so immediate execution may run jobs out of the expected order.
+  const bool is_not_processing = reactor_state_ != RS_PROCESSING;
+
+  // If the command_queue_ is not empty, allowing execution will potentially run unexpected code
+  // which is problematic since we may be holding locks used by the unexpected code.
+  const bool is_empty = command_queue_.empty();
+
+  // If all three of these conditions are met, it should be safe to execute
+  const bool is_safe_to_execute = is_owner && is_not_processing && is_empty;
+
+  // Even if it's not normally safe to execute, allow immediate execution if the reactor is shut down
+  const bool immediate = is_safe_to_execute || (state_ == STATE_SHUT_DOWN);
+
+  // Always set reactor and push to the queue
+  ACE_Reactor* local_reactor = reactor_;
+  command_queue_.push_back(command);
+
+  // But depending on whether we're running it immediately or not, we either process or notify
+  if (immediate) {
+    process_command_queue_i(guard, local_reactor);
+  } else if (reactor_state_ == RS_NONE) {
+    reactor_state_ = RS_NOTIFIED;
+    guard.release();
+    local_reactor->notify(this);
+  }
+  return command;
+}
+
+void ReactorTask::wait_until_empty()
+{
+  GuardType guard(lock_);
+  while (reactor_state_ != RS_NONE || !command_queue_.empty()) {
+    condition_.wait(*thread_status_manager_);
+  }
+}
+
+int ReactorTask::handle_exception(ACE_HANDLE /*fd*/)
+{
+  ThreadStatusManager::Event ev(*thread_status_manager_);
+
+  GuardType guard(lock_);
+  process_command_queue_i(guard, reactor_);
+  return 0;
+}
+
+void ReactorTask::process_command_queue_i(ACE_Guard<ACE_Thread_Mutex>& guard,
+                                          ACE_Reactor* reactor)
+{
+  Queue cq;
+  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+
+  reactor_state_ = RS_PROCESSING;
+  if (!command_queue_.empty()) {
+    cq.swap(command_queue_);
+    ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex> > rev_guard(rev_lock);
+    for (Queue::const_iterator pos = cq.begin(), limit = cq.end(); pos != limit; ++pos) {
+      (*pos)->execute(reactor);
+    }
+  }
+  if (!command_queue_.empty()) {
+    reactor_state_ = RS_NOTIFIED;
+    guard.release();
+    reactor->notify(this);
+  } else {
+    reactor_state_ = RS_NONE;
+    condition_.notify_all();
+  }
+}
+
+void RegisterHandler::execute(ACE_Reactor* reactor)
+{
+  if (reactor->register_handler(io_handle_, event_handler_, mask_) != 0) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: RegisterHandler::execute: failed to register handler for socket %d\n",
+                 io_handle_));
+    }
+  }
+}
+
+  void RemoveHandler::execute(ACE_Reactor* reactor)
+{
+  if (reactor->remove_handler(io_handle_, mask_) != 0) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: RemoveHandler::execute: failed to remove handler for socket %d\n",
+                 io_handle_));
+    }
+  }
 }
 
 } // namespace DCPS

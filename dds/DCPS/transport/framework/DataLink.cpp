@@ -128,7 +128,7 @@ DataLink::add_on_start_callback(const TransportClient_wrch& client, const GUID_t
         guard.release();
         TransportImpl_rch impl = impl_.lock();
         if (impl) {
-          impl->reactor_task()->interceptor()->execute_or_enqueue(make_rch<ImmediateStart>(link, client, remote));
+          impl->reactor_task()->execute_or_enqueue(make_rch<ImmediateStart>(link, client, remote));
         }
       } else {
         on_start_callbacks_[remote][client_id] = client;
@@ -1207,7 +1207,7 @@ DataLink::handle_send_request_ack(TransportQueueElement* element)
 }
 
 void
-DataLink::ImmediateStart::execute() {
+DataLink::ImmediateStart::execute(ACE_Reactor*) {
   TransportClient_rch client_lock = client_.lock();
   if (client_lock) {
     client_lock->use_datalink(remote_, link_);

@@ -84,7 +84,7 @@ AgentImpl::AgentImpl()
   , reader_(DCPS::make_rch<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> >(DCPS::DataReaderQosBuilder().reliability_reliable().durability_transient_local(), DCPS::rchandle_from(this)))
   , reader_added_(false)
   , remote_peer_reflexive_counter_(0)
-  , task_task_(DCPS::make_rch<DCPS::PmfSporadicTask<AgentImpl> >(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), DCPS::rchandle_from(this), &AgentImpl::process_tasks))
+  , task_task_(DCPS::make_rch<DCPS::PmfSporadicTask<AgentImpl> >(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), DCPS::rchandle_from(this), &AgentImpl::process_tasks))
 {
   // Bind the lifetime of this to the service participant.
   TheServiceParticipant->set_shutdown_listener(DCPS::static_rchandle_cast<ShutdownListener>(rchandle_from(this)));
