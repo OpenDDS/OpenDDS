@@ -9,9 +9,9 @@
 #define OPENDDS_DCPS_SPORADIC_TASK_H
 
 #include "RcEventHandler.h"
-#include "ReactorInterceptor.h"
-#include "TimeSource.h"
+#include "ReactorTask_rch.h"
 #include "Service_Participant.h"
+#include "TimeSource.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -21,14 +21,14 @@ namespace DCPS {
 class OpenDDS_Dcps_Export SporadicTask : public virtual RcEventHandler {
 public:
   SporadicTask(const TimeSource& time_source,
-               RcHandle<ReactorInterceptor> interceptor)
+               ReactorTask_rch reactor_task)
     : time_source_(time_source)
-    , interceptor_(interceptor)
+    , reactor_task_(reactor_task)
     , desired_scheduled_(false)
     , timer_id_(-1)
     , sporadic_command_(make_rch<SporadicCommand>(rchandle_from(this)))
   {
-    reactor(interceptor->reactor());
+    reactor(reactor_task->get_reactor());
   }
 
   virtual ~SporadicTask() {}
@@ -43,12 +43,12 @@ protected:
   long get_timer_id() const { return timer_id_; }
 
 private:
-  struct SporadicCommand : ReactorInterceptor::Command {
+  struct SporadicCommand : ReactorTask::Command {
     explicit SporadicCommand(WeakRcHandle<SporadicTask> sporadic_task)
       : sporadic_task_(sporadic_task)
     {}
 
-    virtual void execute()
+    virtual void execute(ACE_Reactor*)
     {
       RcHandle<SporadicTask> st = sporadic_task_.lock();
       if (st) {
@@ -60,7 +60,7 @@ private:
   };
 
   const TimeSource& time_source_;
-  const WeakRcHandle<ReactorInterceptor> interceptor_;
+  const ReactorTask_wrch reactor_task_;
   bool desired_scheduled_;
   MonotonicTimePoint desired_next_time_;
   TimeDuration desired_delay_;
@@ -92,10 +92,10 @@ public:
   typedef void (Delegate::*PMF)(const MonotonicTimePoint&);
 
   PmfSporadicTask(const TimeSource& time_source,
-                  RcHandle<ReactorInterceptor> interceptor,
+                  ReactorTask_rch reactor_task,
                   RcHandle<Delegate> delegate,
                   PMF function)
-    : SporadicTask(time_source, interceptor)
+    : SporadicTask(time_source, reactor_task)
     , delegate_(delegate)
     , function_(function)
   {}

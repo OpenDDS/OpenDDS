@@ -28,21 +28,16 @@ namespace DCPS {
 
 const size_t MAX_NETLINK_MESSAGE_SIZE = 4096;
 
-LinuxNetworkConfigMonitor::LinuxNetworkConfigMonitor(ReactorInterceptor_rch interceptor)
-  : interceptor_(interceptor)
+LinuxNetworkConfigMonitor::LinuxNetworkConfigMonitor(ReactorTask_rch reactor_task)
+  : reactor_task_(reactor_task)
 {
-  reactor(interceptor->reactor());
+  reactor(reactor_task_->get_reactor());
 }
 
 bool LinuxNetworkConfigMonitor::open()
 {
-  ReactorInterceptor_rch interceptor = interceptor_.lock();
-  if (!interceptor) {
-    return false;
-  }
-
   RcHandle<OpenHandler> oh = make_rch<OpenHandler>(rchandle_from(this));
-  interceptor->execute_or_enqueue(oh);
+  reactor_task_->execute_or_enqueue(oh);
   return oh->wait();
 }
 
@@ -55,7 +50,7 @@ bool LinuxNetworkConfigMonitor::OpenHandler::wait() const
   return retval_;
 }
 
-void LinuxNetworkConfigMonitor::OpenHandler::execute()
+void LinuxNetworkConfigMonitor::OpenHandler::execute(ACE_Reactor*)
 {
   RcHandle<LinuxNetworkConfigMonitor> lncm = lncm_.lock();
   if (!lncm) {
@@ -145,13 +140,8 @@ bool LinuxNetworkConfigMonitor::open_i()
 
 bool LinuxNetworkConfigMonitor::close()
 {
-  ReactorInterceptor_rch interceptor = interceptor_.lock();
-  if (!interceptor) {
-    return false;
-  }
-
   RcHandle<CloseHandler> ch = make_rch<CloseHandler>(rchandle_from(this));
-  interceptor->execute_or_enqueue(ch);
+  reactor_task_->execute_or_enqueue(ch);
   return ch->wait();
 }
 
@@ -164,7 +154,7 @@ bool LinuxNetworkConfigMonitor::CloseHandler::wait() const
   return retval_;
 }
 
-void LinuxNetworkConfigMonitor::CloseHandler::execute()
+void LinuxNetworkConfigMonitor::CloseHandler::execute(ACE_Reactor*)
 {
   RcHandle<LinuxNetworkConfigMonitor> lncm = lncm_.lock();
   if (!lncm) {

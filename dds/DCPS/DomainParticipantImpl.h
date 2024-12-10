@@ -535,12 +535,6 @@ private:
 
   mutable ConditionVariable<ACE_Thread_Mutex> handle_waiters_;
 
-  /// Protect the shutdown.
-  ACE_Thread_Mutex shutdown_mutex_;
-  ConditionVariable<ACE_Thread_Mutex> shutdown_condition_;
-  DDS::ReturnCode_t shutdown_result_;
-  bool shutdown_complete_;
-
   /// The built in topic subscriber.
   RcHandle<BitSubscriber> bit_subscriber_;
 
@@ -651,7 +645,30 @@ private:
 
   MonotonicTimePoint last_liveliness_activity_;
 
-  virtual int handle_exception(ACE_HANDLE fd);
+  class ShutdownHandler : public ReactorTask::Command {
+  public:
+    ShutdownHandler(RcHandle<DomainParticipantImpl> dpi)
+      : dpi_(dpi)
+      , shutdown_condition_(shutdown_mutex_)
+      , shutdown_result_(DDS::RETCODE_OK)
+      , shutdown_complete_(false)
+    {}
+
+    void execute(ACE_Reactor* reactor);
+    void wait();
+    DDS::ReturnCode_t shutdown_result() const
+    {
+      return shutdown_result_;
+    }
+
+  private:
+    WeakRcHandle<DomainParticipantImpl> dpi_;
+    /// Protect the shutdown.
+    ACE_Thread_Mutex shutdown_mutex_;
+    ConditionVariable<ACE_Thread_Mutex> shutdown_condition_;
+    DDS::ReturnCode_t shutdown_result_;
+    bool shutdown_complete_;
+  };
 
   XTypes::TypeLookupService_rch type_lookup_service_;
 };

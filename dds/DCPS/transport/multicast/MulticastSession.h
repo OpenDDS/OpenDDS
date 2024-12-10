@@ -81,7 +81,7 @@ protected:
 
   MulticastPeer remote_peer_;
 
-  MulticastSession(RcHandle<ReactorInterceptor> interceptor,
+  MulticastSession(RcHandle<ReactorTask> reactor_task,
                    MulticastDataLink* link,
                    MulticastPeer remote_peer);
 

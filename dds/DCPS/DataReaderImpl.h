@@ -8,8 +8,6 @@
 #ifndef OPENDDS_DCPS_DATAREADERIMPL_H
 #define OPENDDS_DCPS_DATAREADERIMPL_H
 
-#include "dcps_export.h"
-
 #include "AssociationData.h"
 #include "AtomicBool.h"
 #include "Cached_Allocator_With_Overflow_T.h"
@@ -28,7 +26,6 @@
 #include "RcEventHandler.h"
 #include "RcHandle_T.h"
 #include "RcObject.h"
-#include "ReactorInterceptor.h"
 #include "Service_Participant.h"
 #include "Stats_T.h"
 #include "SubscriptionInstance.h"
@@ -36,6 +33,7 @@
 #include "TopicImpl.h"
 #include "WriterInfo.h"
 #include "ZeroCopyInfoSeq_T.h"
+#include "dcps_export.h"
 
 #include "transport/framework/ReceivedDataSample.h"
 #include "transport/framework/TransportClient.h"

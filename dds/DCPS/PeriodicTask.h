@@ -10,7 +10,6 @@
 
 #include "Service_Participant.h"
 #include "RcEventHandler.h"
-#include "ReactorInterceptor.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -19,13 +18,13 @@ namespace DCPS {
 
 class OpenDDS_Dcps_Export PeriodicTask : public virtual RcEventHandler {
 public:
-  explicit PeriodicTask(RcHandle<ReactorInterceptor> interceptor)
+  explicit PeriodicTask(ReactorTask_rch reactor_task)
     : user_enabled_(false)
     , enabled_(false)
-    , interceptor_(interceptor)
+    , reactor_task_(reactor_task)
     , timer_(-1)
   {
-    reactor(interceptor->reactor());
+    reactor(reactor_task->get_reactor());
   }
 
   virtual ~PeriodicTask() {}
@@ -46,17 +45,17 @@ private:
   mutable ACE_Thread_Mutex mutex_;
   bool user_enabled_;
   bool enabled_;
-  const WeakRcHandle<ReactorInterceptor> interceptor_;
+  const ReactorTask_wrch reactor_task_;
   long timer_;
 
-  struct ScheduleEnableCommand : public ReactorInterceptor::Command {
+  struct ScheduleEnableCommand : public ReactorTask::Command {
     ScheduleEnableCommand(WeakRcHandle<PeriodicTask> hb, bool reenable, const TimeDuration& period)
       : periodic_task_(hb)
       , reenable_(reenable)
       , period_(period)
     {}
 
-    virtual void execute()
+    virtual void execute(ACE_Reactor*)
     {
       RcHandle<PeriodicTask> periodic_task = periodic_task_.lock();
       if (periodic_task) {
@@ -69,12 +68,12 @@ private:
     const TimeDuration period_;
   };
 
-  struct ScheduleDisableCommand : public ReactorInterceptor::Command {
+  struct ScheduleDisableCommand : public ReactorTask::Command {
     explicit ScheduleDisableCommand(WeakRcHandle<PeriodicTask> hb)
       : periodic_task_(hb)
     {}
 
-    virtual void execute()
+    virtual void execute(ACE_Reactor*)
     {
       RcHandle<PeriodicTask> periodic_task = periodic_task_.lock();
       if (periodic_task) {
@@ -104,8 +103,8 @@ class PmfPeriodicTask : public PeriodicTask {
 public:
   typedef void (Delegate::*PMF)(const MonotonicTimePoint&);
 
-  PmfPeriodicTask(RcHandle<ReactorInterceptor> interceptor, const Delegate& delegate, PMF function)
-    : PeriodicTask(interceptor)
+  PmfPeriodicTask(ReactorTask_rch reactor_task, const Delegate& delegate, PMF function)
+    : PeriodicTask(reactor_task)
     , delegate_(delegate)
     , function_(function)
     {}

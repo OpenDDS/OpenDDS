@@ -118,7 +118,6 @@ public:
   ACE_Reactor_Timer_Interface* timer() const;
 
   ACE_Reactor* reactor() const;
-  ACE_thread_t reactor_owner() const;
   bool is_shut_down() const;
 
   /// Create the reactor task using sync send or optionally async send
