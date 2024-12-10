@@ -283,7 +283,7 @@ bool operator>>(DCPS::Serializer& serializer, AttributeHolder& holder)
       return false;
     }
 
-    ACE_UINT16 code = static_cast<ACE_UINT16>(class_ * 100 + num);
+    const ACE_UINT16 code = static_cast<ACE_UINT16>(class_ * 100 + num);
 
     const ACE_CDR::ULong reason_length = attribute_length - 4;
 
