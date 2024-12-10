@@ -16,6 +16,8 @@
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsTopicC.h"
 
+#include <algorithm>
+#include <cctype>
 #include <iostream>
 #include <map>
 #include <string>
@@ -45,10 +47,10 @@ public:
     return ValueAndType(default_value_as_str, type);
   }
 
-  static Type get_type(std::string ) { return STRING; }
-  static Type get_type(bool ) { return BOOL; }
-  static Type get_type(long ) { return LONG; }
-  static Type get_type(double ) { return DOUBLE; }
+  static Type get_type(std::string) { return STRING; }
+  static Type get_type(bool) { return BOOL; }
+  static Type get_type(long) { return LONG; }
+  static Type get_type(double) { return DOUBLE; }
 
   static std::string get_type_str(Type type);
 
@@ -187,20 +189,20 @@ Options::get_value<double>(const std::string& str_val)
   return val;
 }
 
+struct ToLower {
+  char operator()(char ch) const
+  {
+    return static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+  }
+};
+
 template<>
 inline bool
 Options::get_value<bool>(const std::string& str_val)
 {
   std::string lower = str_val;
-  std::transform(lower.begin(), lower.end(), lower.begin(),::tolower);
-  if (lower == "true")
-    return true;
-  else if (lower == "false")
-    return false;
-  else if (lower == "1")
-    return true;
-
-  return false;
+  std::transform(lower.begin(), lower.end(), lower.begin(), ToLower());
+  return lower == "true" || lower == "1";
 }
 
 } // End namespaces
