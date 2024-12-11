@@ -296,14 +296,14 @@ RtpsDiscoveryConfig::dy(DDS::UInt16 sedp_unicast_offset)
 bool RtpsDiscoveryConfig::set_spdp_multicast_port(DCPS::NetworkAddress& addr,
   DDS::DomainId_t domain) const
 {
-  return set_rtps_multicast_port(addr, "SPDP multicast", pb(), d0(), domain, dg());
+  return set_rtps_multicast_port(addr, "SPDP multicast", pb(), d0(), static_cast<DDS::UInt16>(domain), dg());
 }
 
 bool RtpsDiscoveryConfig::set_spdp_unicast_port(DCPS::NetworkAddress& addr, bool& fixed_port,
   DDS::DomainId_t domain, DDS::UInt16 part_id) const
 {
   return set_rtps_unicast_port(addr, fixed_port, "SPDP unicast", spdp_port_mode(),
-    pb(), d1(), domain, dg(), part_id, pg());
+    pb(), d1(), static_cast<DDS::UInt16>(domain), dg(), part_id, pg());
 }
 
 unsigned char
@@ -715,8 +715,8 @@ RtpsDiscoveryConfig::auth_resend_period(const DCPS::TimeDuration& x)
 u_short
 RtpsDiscoveryConfig::max_spdp_sequence_msg_reset_checks() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("MAX_SPDP_SEQUENCE_MSG_RESET_CHECKS").c_str(),
-                                                           3);
+  const DDS::UInt32 val = TheServiceParticipant->config_store()->get_uint32(config_key("MAX_SPDP_SEQUENCE_MSG_RESET_CHECKS").c_str(), 3);
+  return static_cast<u_short>(val);
 }
 
 void

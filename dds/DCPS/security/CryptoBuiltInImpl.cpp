@@ -121,7 +121,7 @@ namespace {
     RAND_bytes(k.master_salt.get_buffer(), KEY_LEN_BYTES);
 
     for (unsigned int i = 0; i < sizeof k.sender_key_id; ++i) {
-      k.sender_key_id[i] = key_id >> (8 * i);
+      k.sender_key_id[i] = static_cast<ACE_CDR::Octet>(key_id >> (8 * i));
     }
 
     k.master_sender_key.length(KEY_LEN_BYTES);
@@ -1091,7 +1091,7 @@ namespace {
         return false;
       }
     }
-    std::fill(a, a + 4, 0);
+    std::fill(a, a + 4, static_cast<unsigned char>(0));
     return true;
   }
 
@@ -1969,7 +1969,7 @@ bool CryptoBuiltInImpl::decode_rtps_message(
   CryptoFooter cf;
   bool haveCryptoHeader = false, haveCryptoFooter = false;
   const char* afterSrtpsPrefix = 0;
-  unsigned int sizeOfAuthenticated, sizeOfEncrypted;
+  unsigned int sizeOfAuthenticated = 0, sizeOfEncrypted = 0;
   const char* encrypted = 0;
 
   for (int i = 0; parser.remaining(); ++i) {

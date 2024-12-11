@@ -1613,7 +1613,7 @@ bool to_param_list(const ICE::AgentInfoMap& ai_map,
     DCPS::push_back(param_list, param_general);
 
     for (ICE::AgentInfo::CandidatesType::const_iterator pos = agent_info.candidates.begin(),
-           limit = agent_info.candidates.end(); pos != limit; ++pos) {
+           ai_limit = agent_info.candidates.end(); pos != ai_limit; ++pos) {
       IceCandidate_t ice_candidate;
       ice_candidate.key = map_pos->first.c_str();
       address_to_locator(ice_candidate.locator, pos->address);
