@@ -40,19 +40,12 @@ class AST_Annotation_Decl;
 
 class BE_GlobalData {
 public:
-  // = TITLE
-  //    BE_GlobalData
-  //
-  // = DESCRIPTION
-  //    Storage of global data specific to the compiler back end
-  //
+
   BE_GlobalData();
 
   virtual ~BE_GlobalData();
 
   // Data accessors.
-
-  const char* holding_scope_name() const;
 
   void destroy();
   // Cleanup function.
@@ -179,13 +172,6 @@ public:
    * Does not check for specific types of types (struct vs array).
    */
   bool is_topic_type(AST_Decl* node);
-
-  /**
-   * Nested property of the root module. Assuming there are no annotations, all
-   * potential topic types inherit this value. True by default unless
-   * --no-default-nested was passed.
-   */
-  bool root_default_nested() const;
 
   /**
    * If node has the key annotation, this sets value to the key annotation

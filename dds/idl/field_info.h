@@ -41,7 +41,6 @@ struct FieldInfo {
   const std::string name_;
   const std::string scoped_type_;
   const std::string underscored_;
-  const std::string struct_name_;
   const std::string type_name_;
   AST_Type* act_;
   const AstTypeClassification::Classification cls_;

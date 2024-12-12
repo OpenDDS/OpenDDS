@@ -1732,8 +1732,7 @@ typeobject_generator::get_minimal_type_identifier(AST_Type* type)
   }
 
   HashTypeIdentifierMap::const_iterator pos = hash_type_identifier_map_.find(type);
-  OPENDDS_ASSERT(pos != hash_type_identifier_map_.end());
-  return pos->second.minimal;
+  return pos == hash_type_identifier_map_.end() ? OpenDDS::XTypes::TypeIdentifier() : pos->second.minimal;
 }
 
 // Get complete or fully descriptive type identifier
@@ -1760,8 +1759,7 @@ typeobject_generator::get_complete_type_identifier(AST_Type* type)
   }
 
   HashTypeIdentifierMap::const_iterator pos = hash_type_identifier_map_.find(type);
-  OPENDDS_ASSERT(pos != hash_type_identifier_map_.end());
-  return pos->second.complete;
+  return pos == hash_type_identifier_map_.end() ? OpenDDS::XTypes::TypeIdentifier() : pos->second.complete;
 }
 
 bool
