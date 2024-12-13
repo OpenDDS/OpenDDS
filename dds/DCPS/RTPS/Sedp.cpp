@@ -6472,7 +6472,7 @@ void Sedp::match_endpoints_flex_ts(const DiscoveredPublicationMap::value_type& d
       bool minimalNeeded, completeNeeded;
       MatchingData md;
       if (need_type_info(&discPub.second.type_info_, minimalNeeded, completeNeeded)) {
-        save_matching_data_and_get_typeobjects(&discPub.second.type_info_, md, MatchingPair(subId, discPub.first),
+        save_matching_data_and_get_typeobjects(&discPub.second.type_info_, md, MatchingPair(discPub.first, subId),
                                                discPub.first, lsi->second.isDiscoveryProtected(), minimalNeeded, completeNeeded);
       } else {
         match_continue(discPub.first, subId);
@@ -6499,7 +6499,7 @@ void Sedp::match_endpoints_flex_ts(const DiscoveredSubscriptionMap::value_type& 
       bool minimalNeeded, completeNeeded;
       MatchingData md;
       if (need_type_info(&discSub.second.type_info_, minimalNeeded, completeNeeded)) {
-        save_matching_data_and_get_typeobjects(&discSub.second.type_info_, md, MatchingPair(discSub.first, pubId),
+        save_matching_data_and_get_typeobjects(&discSub.second.type_info_, md, MatchingPair(pubId, discSub.first),
                                                discSub.first, lpi->second.isDiscoveryProtected(), minimalNeeded, completeNeeded);
       } else {
         match_continue(pubId, discSub.first);
