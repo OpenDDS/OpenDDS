@@ -26,7 +26,7 @@ class OpenDDS_Multicast_Export BestEffortSessionFactory
 public:
   virtual int requires_send_buffer() const;
 
-  virtual MulticastSession_rch create(RcHandle<ReactorInterceptor> interceptor,
+  virtual MulticastSession_rch create(RcHandle<ReactorTask> reactor_task,
                                       MulticastDataLink* link,
                                       MulticastPeer remote_peer);
 };

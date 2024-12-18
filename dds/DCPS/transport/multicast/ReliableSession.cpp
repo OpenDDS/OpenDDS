@@ -30,12 +30,12 @@ namespace {
   const Encoding encoding_unaligned_native(reliable_session_encoding_kind);
 }
 
-ReliableSession::ReliableSession(RcHandle<ReactorInterceptor> interceptor,
+ReliableSession::ReliableSession(RcHandle<ReactorTask> reactor_task,
                                  MulticastDataLink* link,
                                  MulticastPeer remote_peer)
-  : MulticastSession(interceptor, link, remote_peer)
+  : MulticastSession(reactor_task, link, remote_peer)
   , nak_watchdog_(make_rch<Sporadic>(TheServiceParticipant->time_source(),
-                                     interceptor,
+                                     reactor_task,
                                      rchandle_from(this),
                                      &ReliableSession::process_naks))
   , nak_timeout_(link->config()->nak_timeout())

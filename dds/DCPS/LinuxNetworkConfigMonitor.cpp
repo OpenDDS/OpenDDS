@@ -28,21 +28,14 @@ namespace DCPS {
 
 const size_t MAX_NETLINK_MESSAGE_SIZE = 4096;
 
-LinuxNetworkConfigMonitor::LinuxNetworkConfigMonitor(ReactorInterceptor_rch interceptor)
-  : interceptor_(interceptor)
-{
-  reactor(interceptor->reactor());
-}
+LinuxNetworkConfigMonitor::LinuxNetworkConfigMonitor(ReactorTask_rch reactor_task)
+  : reactor_task_(reactor_task)
+{}
 
 bool LinuxNetworkConfigMonitor::open()
 {
-  ReactorInterceptor_rch interceptor = interceptor_.lock();
-  if (!interceptor) {
-    return false;
-  }
-
   RcHandle<OpenHandler> oh = make_rch<OpenHandler>(rchandle_from(this));
-  interceptor->execute_or_enqueue(oh);
+  reactor_task_->execute_or_enqueue(oh);
   return oh->wait();
 }
 
@@ -55,19 +48,19 @@ bool LinuxNetworkConfigMonitor::OpenHandler::wait() const
   return retval_;
 }
 
-void LinuxNetworkConfigMonitor::OpenHandler::execute()
+void LinuxNetworkConfigMonitor::OpenHandler::execute(ReactorWrapper& reactor_wrapper)
 {
   RcHandle<LinuxNetworkConfigMonitor> lncm = lncm_.lock();
   if (!lncm) {
     return;
   }
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  retval_ = lncm->open_i();
+  retval_ = lncm->open_i(reactor_wrapper);
   done_ = true;
   condition_.notify_all();
 }
 
-bool LinuxNetworkConfigMonitor::open_i()
+bool LinuxNetworkConfigMonitor::open_i(ReactorWrapper& reactor_wrapper)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, socket_mutex_, false);
 
@@ -136,7 +129,7 @@ bool LinuxNetworkConfigMonitor::open_i()
 
   read_messages();
 
-  if (reactor()->register_handler(this, READ_MASK) != 0) {
+  if (reactor_wrapper.register_handler(this, READ_MASK) != 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open_i: could not register for input: %m\n")));
   }
 
@@ -145,13 +138,8 @@ bool LinuxNetworkConfigMonitor::open_i()
 
 bool LinuxNetworkConfigMonitor::close()
 {
-  ReactorInterceptor_rch interceptor = interceptor_.lock();
-  if (!interceptor) {
-    return false;
-  }
-
   RcHandle<CloseHandler> ch = make_rch<CloseHandler>(rchandle_from(this));
-  interceptor->execute_or_enqueue(ch);
+  reactor_task_->execute_or_enqueue(ch);
   return ch->wait();
 }
 
@@ -164,22 +152,22 @@ bool LinuxNetworkConfigMonitor::CloseHandler::wait() const
   return retval_;
 }
 
-void LinuxNetworkConfigMonitor::CloseHandler::execute()
+void LinuxNetworkConfigMonitor::CloseHandler::execute(ReactorWrapper& reactor_wrapper)
 {
   RcHandle<LinuxNetworkConfigMonitor> lncm = lncm_.lock();
   if (!lncm) {
     return;
   }
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  retval_ = lncm->close_i();
+  retval_ = lncm->close_i(reactor_wrapper);
   done_ = true;
   condition_.notify_all();
 }
 
-bool LinuxNetworkConfigMonitor::close_i()
+bool LinuxNetworkConfigMonitor::close_i(ReactorWrapper& reactor_wrapper)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, socket_mutex_, false);
-  reactor()->remove_handler(this, READ_MASK);
+  reactor_wrapper.remove_handler(this, READ_MASK);
 
   if (socket_.close() != 0) {
     if (log_level >= LogLevel::Error) {

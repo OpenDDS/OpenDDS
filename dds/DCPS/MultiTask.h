@@ -9,7 +9,6 @@
 #define OPENDDS_DCPS_MULTI_TASK_H
 
 #include "RcEventHandler.h"
-#include "ReactorInterceptor.h"
 #include "Service_Participant.h"
 #include "TimeTypes.h"
 
@@ -20,15 +19,13 @@ namespace DCPS {
 
 class OpenDDS_Dcps_Export MultiTask : public virtual RcEventHandler {
 public:
-  MultiTask(RcHandle<ReactorInterceptor> interceptor, const TimeDuration& delay)
-    : interceptor_(interceptor)
+  MultiTask(ReactorTask_rch reactor_task, const TimeDuration& delay)
+    : reactor_task_(reactor_task)
     , delay_(delay)
     , timer_(-1)
     , next_time_()
     , cancel_estimate_()
-  {
-    reactor(interceptor->reactor());
-  }
+  { }
 
   virtual ~MultiTask() {}
 
@@ -36,33 +33,33 @@ public:
 
   void disable()
   {
-    RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
-    if (interceptor) {
-      interceptor->execute_or_enqueue(make_rch<ScheduleDisableCommand>(rchandle_from(this)));
+    ReactorTask_rch reactor_task = reactor_task_.lock();
+    if (reactor_task) {
+      reactor_task->execute_or_enqueue(make_rch<ScheduleDisableCommand>(rchandle_from(this)));
     }
   }
 
   virtual void execute(const MonotonicTimePoint& now) = 0;
 
 private:
-  const WeakRcHandle<ReactorInterceptor> interceptor_;
+  const ReactorTask_wrch reactor_task_;
   const TimeDuration delay_;
   long timer_;
   MonotonicTimePoint next_time_;
   TimeDuration cancel_estimate_;
   mutable ACE_Thread_Mutex mutex_;
 
-  struct ScheduleEnableCommand : public ReactorInterceptor::Command {
+  struct ScheduleEnableCommand : public ReactorTask::Command {
     ScheduleEnableCommand(WeakRcHandle<MultiTask> multi_task, const TimeDuration& delay)
       : multi_task_(multi_task)
       , delay_(delay)
     {}
 
-    virtual void execute()
+    virtual void execute(ReactorWrapper& reactor_wrapper)
     {
       RcHandle<MultiTask> multi_task = multi_task_.lock();
       if (multi_task) {
-        multi_task->enable_i(delay_);
+        multi_task->enable_i(delay_, reactor_wrapper);
       }
     }
 
@@ -70,16 +67,16 @@ private:
     const TimeDuration delay_;
   };
 
-  struct ScheduleDisableCommand : public ReactorInterceptor::Command {
+  struct ScheduleDisableCommand : public ReactorTask::Command {
     explicit ScheduleDisableCommand(WeakRcHandle<MultiTask> multi_task)
       : multi_task_(multi_task)
     {}
 
-    virtual void execute()
+    virtual void execute(ReactorWrapper& reactor_wrapper)
     {
       RcHandle<MultiTask> multi_task = multi_task_.lock();
       if (multi_task) {
-        multi_task->disable_i();
+        multi_task->disable_i(reactor_wrapper);
       }
     }
 
@@ -88,9 +85,9 @@ private:
 
   int handle_timeout(const ACE_Time_Value& tv, const void*);
 
-  void enable_i(const TimeDuration& per);
+  void enable_i(const TimeDuration& per, ReactorWrapper& reactor_wrapper);
 
-  void disable_i();
+  void disable_i(ReactorWrapper& reactor_wrapper);
 };
 
 template <typename Delegate>
@@ -98,11 +95,11 @@ class PmfMultiTask : public MultiTask {
 public:
   typedef void (Delegate::*PMF)(const MonotonicTimePoint&);
 
-  PmfMultiTask(RcHandle<ReactorInterceptor> interceptor,
+  PmfMultiTask(ReactorTask_rch reactor_task,
                const TimeDuration& delay,
                RcHandle<Delegate> delegate,
                PMF function)
-    : MultiTask(interceptor, delay)
+    : MultiTask(reactor_task, delay)
     , delegate_(delegate)
     , function_(function) {}
 

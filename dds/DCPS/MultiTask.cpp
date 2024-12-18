@@ -7,8 +7,6 @@
 
 #include "MultiTask.h"
 
-#include "Timers.h"
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -19,25 +17,27 @@ void MultiTask::enable(const TimeDuration& delay)
   bool worth_passing_along = false;
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    worth_passing_along = (timer_ == Timers::InvalidTimerId) ||
+    worth_passing_along = (timer_ == ReactorWrapper::InvalidTimerId) ||
       ((MonotonicTimePoint::now() + delay + cancel_estimate_) < next_time_);
   }
   if (worth_passing_along) {
-    RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
-    if (interceptor) {
-      interceptor->execute_or_enqueue(make_rch<ScheduleEnableCommand>(rchandle_from(this), delay));
+    ReactorTask_rch reactor_task= reactor_task_.lock();
+    if (reactor_task) {
+      reactor_task->execute_or_enqueue(make_rch<ScheduleEnableCommand>(rchandle_from(this), delay));
     }
   }
 }
 
-void MultiTask::enable_i(const TimeDuration& per)
+void MultiTask::enable_i(const TimeDuration& per,
+                         ReactorWrapper& reactor_wrapper)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  const MonotonicTimePoint now = MonotonicTimePoint::now();
-  if (timer_ == Timers::InvalidTimerId) {
-    timer_ = Timers::schedule(reactor(), *this, 0, per, delay_);
 
-    if (timer_ == Timers::InvalidTimerId) {
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
+  if (timer_ == ReactorWrapper::InvalidTimerId) {
+    timer_ = reactor_wrapper.schedule(*this, 0, per, delay_);
+
+    if (timer_ == ReactorWrapper::InvalidTimerId) {
       if (log_level >= LogLevel::Error) {
         ACE_ERROR((LM_ERROR, "(%P|%t) MultiTask::enable_i: "
                    "failed to schedule timer %p\n", ACE_TEXT("")));
@@ -48,12 +48,12 @@ void MultiTask::enable_i(const TimeDuration& per)
   } else {
     const MonotonicTimePoint estimated_next_time = now + per + cancel_estimate_;
     if (estimated_next_time < next_time_) {
-      Timers::cancel(reactor(), timer_);
+      reactor_wrapper.cancel(timer_);
       const MonotonicTimePoint now2 = MonotonicTimePoint::now();
-      timer_ = Timers::schedule(reactor(), *this, 0, per, delay_);
+      timer_ = reactor_wrapper.schedule(*this, 0, per, delay_);
       cancel_estimate_ = now2 - now;
 
-      if (timer_ == Timers::InvalidTimerId) {
+      if (timer_ == ReactorWrapper::InvalidTimerId) {
         if (log_level >= LogLevel::Error) {
           ACE_ERROR((LM_ERROR, "(%P|%t) MultiTask::enable_i: "
                      "failed to reschedule timer %p\n", ACE_TEXT("")));
@@ -78,12 +78,13 @@ int MultiTask::handle_timeout(const ACE_Time_Value& tv, const void*)
   return 0;
 }
 
-void MultiTask::disable_i()
+void MultiTask::disable_i(ReactorWrapper& reactor_wrapper)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (timer_ != Timers::InvalidTimerId) {
-    Timers::cancel(reactor(), timer_);
-    timer_ = Timers::InvalidTimerId;
+
+  if (timer_ != ReactorWrapper::InvalidTimerId) {
+    reactor_wrapper.cancel(timer_);
+    timer_ = ReactorWrapper::InvalidTimerId;
   }
 }
 
