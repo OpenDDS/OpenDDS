@@ -17,7 +17,6 @@
 #include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/SendStateDataSampleList.h>
-#include <dds/DCPS/Timers.h>
 
 #include <dds/DCPS/RTPS/ICE/Ice.h>
 

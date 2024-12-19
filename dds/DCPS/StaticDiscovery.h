@@ -361,7 +361,7 @@ public:
   SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-  void type_lookup_init(ReactorInterceptor_rch reactor_interceptor);
+  void type_lookup_init(ReactorTask_rch reactor_task);
   void type_lookup_fini();
   void type_lookup_service(const XTypes::TypeLookupService_rch type_lookup_service);
 

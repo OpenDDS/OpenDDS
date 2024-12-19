@@ -2454,7 +2454,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
 #endif
 
   reactor(reactor_task->get_reactor());
-  reactor_task->interceptor()->execute_or_enqueue(DCPS::make_rch<RegisterHandlers>(rchandle_from(this), reactor_task));
+  reactor_task->execute_or_enqueue(DCPS::make_rch<RegisterHandlers>(rchandle_from(this)));
 
 #if OPENDDS_CONFIG_SECURITY
   // Now that the endpoint is added, SEDP can write the SPDP info.
@@ -2463,38 +2463,38 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
   }
 #endif
 
-  local_send_task_ = DCPS::make_rch<SpdpMulti>(reactor_task->interceptor(), outer->config_->resend_period(), rchandle_from(this), &SpdpTransport::send_local);
+  local_send_task_ = DCPS::make_rch<SpdpMulti>(reactor_task, outer->config_->resend_period(), rchandle_from(this), &SpdpTransport::send_local);
 
   if (outer->config_->periodic_directed_spdp()) {
     directed_send_task_ =
-      DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(),
+      DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task,
                                    rchandle_from(this), &SpdpTransport::send_directed);
   }
 
   lease_expiration_task_ =
-    DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(),
+    DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task,
                                  rchandle_from(this), &SpdpTransport::process_lease_expirations);
 
 #if OPENDDS_CONFIG_SECURITY
   handshake_deadline_task_ =
-    DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(),
+    DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task,
                                  rchandle_from(this), &SpdpTransport::process_handshake_deadlines);
   handshake_resend_task_ =
-    DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(),
+    DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task,
                                  rchandle_from(this), &SpdpTransport::process_handshake_resends);
 
   relay_spdp_task_ =
-    DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(),
+    DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task,
                                  rchandle_from(this), &SpdpTransport::send_relay);
   relay_stun_task_ =
-    DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(),
+    DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task,
                                  rchandle_from(this), &SpdpTransport::relay_stun_task);
 #endif
 
 #ifndef DDS_HAS_MINIMUM_BIT
   // internal thread bit reporting
   if (TheServiceParticipant->get_thread_status_manager().update_thread_status()) {
-    thread_status_task_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::thread_status_task);
+    thread_status_task_ = DCPS::make_rch<SpdpPeriodic>(reactor_task, ref(*this), &SpdpTransport::thread_status_task);
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
@@ -2533,8 +2533,9 @@ Spdp::SpdpTransport::~SpdpTransport()
 #endif
 }
 
-void Spdp::SpdpTransport::register_unicast_socket(
-  ACE_Reactor* reactor, ACE_SOCK_Dgram& socket, const char* what)
+void Spdp::SpdpTransport::register_unicast_socket(DCPS::ReactorWrapper& reactor_wrapper,
+                                                  ACE_SOCK_Dgram& socket,
+                                                  const char* what)
 {
 #ifdef ACE_WIN32
   // By default Winsock will cause reads to fail with "connection reset"
@@ -2548,14 +2549,14 @@ void Spdp::SpdpTransport::register_unicast_socket(
   }
 #endif
 
-  if (reactor->register_handler(socket.get_handle(),
-                                this, ACE_Event_Handler::READ_MASK) != 0) {
+  if (reactor_wrapper.register_handler(socket.get_handle(),
+                                       this, ACE_Event_Handler::READ_MASK) != 0) {
     throw std::runtime_error(
       (DCPS::String("failed to register ") + what + " unicast input handler").c_str());
   }
 }
 
-void Spdp::SpdpTransport::register_handlers(const DCPS::ReactorTask_rch& reactor_task)
+void Spdp::SpdpTransport::register_handlers(DCPS::ReactorWrapper& reactor_wrapper)
 {
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) {
@@ -2567,10 +2568,9 @@ void Spdp::SpdpTransport::register_handlers(const DCPS::ReactorTask_rch& reactor
     return;
   }
 
-  ACE_Reactor* const reactor = reactor_task->get_reactor();
-  register_unicast_socket(reactor, unicast_socket_, "IPV4");
+  register_unicast_socket(reactor_wrapper, unicast_socket_, "IPV4");
 #ifdef ACE_HAS_IPV6
-  register_unicast_socket(reactor, unicast_ipv6_socket_, "IPV6");
+  register_unicast_socket(reactor_wrapper, unicast_ipv6_socket_, "IPV6");
 #endif
 }
 

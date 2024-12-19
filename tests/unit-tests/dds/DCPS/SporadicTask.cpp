@@ -29,20 +29,11 @@ namespace {
     MOCK_METHOD3(cancel_timer, int(long, const void**, int));
   };
 
-  class MyReactorInterceptor : public ReactorInterceptor {
-  public:
-    MyReactorInterceptor(ACE_Reactor* reactor)
-      : ReactorInterceptor(reactor, ACE_Thread_Manager::instance()->thr_self())
-    {}
-
-    bool reactor_is_shut_down() const { return false; }
-  };
-
   class MySporadicTask : public SporadicTask {
   public:
     MySporadicTask(const TimeSource& time_source,
-                   RcHandle<ReactorInterceptor> interceptor)
-      : SporadicTask(time_source, interceptor)
+                   RcHandle<ReactorTask> reactor_task)
+      : SporadicTask(time_source, reactor_task)
     {}
     long timer_id() const { return get_timer_id(); }
 
@@ -52,70 +43,83 @@ namespace {
   class MyTestClass : public virtual RcObject {
   public:
     MyTestClass(const TimeSource& time_source,
-                RcHandle<ReactorInterceptor> interceptor)
-      : sporadic_task_(time_source, interceptor, rchandle_from(this), &MyTestClass::myfunc)
-    {}
+                RcHandle<ReactorTask> reactor_task)
+    {
+      sporadic_task_ = make_rch<PmfSporadicTask<MyTestClass> >(time_source, reactor_task, rchandle_from(this), &MyTestClass::myfunc);
+    }
 
     MOCK_METHOD1(myfunc, void(const MonotonicTimePoint&));
-    PmfSporadicTask<MyTestClass> sporadic_task_;
+    RcHandle<SporadicTask> sporadic_task_;
   };
 }
 
 TEST(dds_DCPS_SporadicTask, schedule)
 {
   MyTimeSource time_source;
-  MyReactor reactor;
-  RcHandle<MyReactorInterceptor> reactor_interceptor = make_rch<MyReactorInterceptor>(&reactor);
-  RcHandle<MySporadicTask> sporadic_task = make_rch<MySporadicTask>(time_source, reactor_interceptor);
+  MyReactor* reactor = new MyReactor;
+  ThreadStatusManager tsm;
+  ReactorTask reactor_task(false);
+  reactor_task.open_reactor_task(&tsm, "test", reactor);
+  RcHandle<MySporadicTask> sporadic_task = make_rch<MySporadicTask>(time_source, rchandle_from(&reactor_task));
   const TimeDuration one_second(1);
   const ACE_Time_Value now(7);
 
   EXPECT_CALL(time_source, monotonic_time_point_now())
     .Times(1)
     .WillOnce(testing::Return(MonotonicTimePoint::zero_value));
-  EXPECT_CALL(reactor, schedule_timer(sporadic_task.get(), 0, one_second.value(), ACE_Time_Value::zero))
+  EXPECT_CALL(*reactor, schedule_timer(sporadic_task.get(), 0, one_second.value(), ACE_Time_Value::zero))
     .Times(1)
     .WillOnce(testing::Return(1));
   EXPECT_CALL(*sporadic_task.get(), execute(MonotonicTimePoint(now)));
 
   sporadic_task->schedule(one_second);
+  reactor_task.wait_until_empty();
 
   // Execute.
   RcHandle<RcEventHandler> eh = sporadic_task;
   eh->handle_timeout(now);
+
+  reactor_task.stop();
 }
 
 TEST(dds_DCPS_SporadicTask, schedule_pmf)
 {
   MyTimeSource time_source;
-  MyReactor reactor;
-  RcHandle<MyReactorInterceptor> reactor_interceptor = make_rch<MyReactorInterceptor>(&reactor);
-  MyTestClass mtc(time_source, reactor_interceptor);
+  MyReactor* reactor = new MyReactor;
+  ThreadStatusManager tsm;
+  ReactorTask reactor_task(false);
+  reactor_task.open_reactor_task(&tsm, "test", reactor);
+  MyTestClass mtc(time_source, rchandle_from(&reactor_task));
   const TimeDuration one_second(1);
   const ACE_Time_Value now(7);
 
   EXPECT_CALL(time_source, monotonic_time_point_now())
     .Times(1)
     .WillOnce(testing::Return(MonotonicTimePoint::zero_value));
-  EXPECT_CALL(reactor, schedule_timer(&mtc.sporadic_task_, 0, one_second.value(), ACE_Time_Value::zero))
+  EXPECT_CALL(*reactor, schedule_timer(mtc.sporadic_task_.get(), 0, one_second.value(), ACE_Time_Value::zero))
     .Times(1)
     .WillOnce(testing::Return(1));
   EXPECT_CALL(mtc, myfunc(MonotonicTimePoint(now)));
 
-  mtc.sporadic_task_.schedule(one_second);
+  mtc.sporadic_task_->schedule(one_second);
+  reactor_task.wait_until_empty();
 
   // Execute.
-  RcEventHandler* eh = &mtc.sporadic_task_;
+  RcEventHandler* eh = mtc.sporadic_task_.get();
   eh->handle_timeout(now);
+
+  reactor_task.stop();
 }
 
 TEST(dds_DCPS_SporadicTask, schedule_error)
 {
   OpenDDS::Test::MockLogger logger;
   MyTimeSource time_source;
-  MyReactor reactor;
-  RcHandle<MyReactorInterceptor> reactor_interceptor = make_rch<MyReactorInterceptor>(&reactor);
-  RcHandle<MySporadicTask> sporadic_task = make_rch<MySporadicTask>(time_source, reactor_interceptor);
+  MyReactor* reactor = new MyReactor;
+  ThreadStatusManager tsm;
+  ReactorTask reactor_task(false);
+  reactor_task.open_reactor_task(&tsm, "test", reactor);
+  RcHandle<MySporadicTask> sporadic_task = make_rch<MySporadicTask>(time_source, rchandle_from(&reactor_task));
   const TimeDuration one_second(1);
 
   EXPECT_CALL(logger, log(testing::_))
@@ -125,19 +129,24 @@ TEST(dds_DCPS_SporadicTask, schedule_error)
   EXPECT_CALL(time_source, monotonic_time_point_now())
     .Times(1)
     .WillOnce(testing::Return(MonotonicTimePoint::zero_value));
-  EXPECT_CALL(reactor, schedule_timer(sporadic_task.get(), 0, one_second.value(), ACE_Time_Value::zero))
+  EXPECT_CALL(*reactor, schedule_timer(sporadic_task.get(), 0, one_second.value(), ACE_Time_Value::zero))
     .Times(1)
     .WillOnce(testing::Return(-1));
 
   sporadic_task->schedule(one_second);
+  reactor_task.wait_until_empty();
+
+  reactor_task.stop();
 }
 
 TEST(dds_DCPS_SporadicTask, schedule_earlier)
 {
   MyTimeSource time_source;
-  MyReactor reactor;
-  RcHandle<MyReactorInterceptor> reactor_interceptor = make_rch<MyReactorInterceptor>(&reactor);
-  RcHandle<MySporadicTask> sporadic_task = make_rch<MySporadicTask>(time_source, reactor_interceptor);
+  MyReactor* reactor = new MyReactor;
+  ThreadStatusManager tsm;
+  ReactorTask reactor_task(false);
+  reactor_task.open_reactor_task(&tsm, "test", reactor);
+  RcHandle<MySporadicTask> sporadic_task = make_rch<MySporadicTask>(time_source, rchandle_from(&reactor_task));
   const TimeDuration one_second(1);
   const TimeDuration two_seconds(2);
 
@@ -146,45 +155,61 @@ TEST(dds_DCPS_SporadicTask, schedule_earlier)
     .WillOnce(testing::Return(MonotonicTimePoint::zero_value))
     .WillOnce(testing::Return(MonotonicTimePoint::zero_value));
 
-  EXPECT_CALL(reactor, schedule_timer(sporadic_task.get(), 0, two_seconds.value(), ACE_Time_Value::zero))
+  EXPECT_CALL(*reactor, schedule_timer(sporadic_task.get(), 0, two_seconds.value(), ACE_Time_Value::zero))
     .WillOnce(testing::Return(1));
   sporadic_task->schedule(two_seconds);
+  reactor_task.wait_until_empty();
 
-  EXPECT_CALL(reactor, cancel_timer(sporadic_task->timer_id(), 0, 1))
+  EXPECT_CALL(*reactor, cancel_timer(sporadic_task->timer_id(), 0, 1))
     .WillOnce(testing::Return(1));
-  EXPECT_CALL(reactor, schedule_timer(sporadic_task.get(), 0, one_second.value(), ACE_Time_Value::zero))
+  EXPECT_CALL(*reactor, schedule_timer(sporadic_task.get(), 0, one_second.value(), ACE_Time_Value::zero))
     .WillOnce(testing::Return(1));
 
   sporadic_task->schedule(one_second);
+  reactor_task.wait_until_empty();
+
+  reactor_task.stop();
 }
 
 TEST(dds_DCPS_SporadicTask, schedule_later)
 {
   MyTimeSource time_source;
-  MyReactor reactor;
-  RcHandle<MyReactorInterceptor> reactor_interceptor = make_rch<MyReactorInterceptor>(&reactor);
-  RcHandle<MySporadicTask> sporadic_task = make_rch<MySporadicTask>(time_source, reactor_interceptor);
+  MyReactor* reactor = new MyReactor;
+  ThreadStatusManager tsm;
+  ReactorTask reactor_task(false);
+  reactor_task.open_reactor_task(&tsm, "test", reactor);
+  RcHandle<MySporadicTask> sporadic_task = make_rch<MySporadicTask>(time_source, rchandle_from(&reactor_task));
+  const TimeDuration one_second(1);
   const TimeDuration two_seconds(2);
 
   EXPECT_CALL(time_source, monotonic_time_point_now())
     .WillOnce(testing::Return(MonotonicTimePoint::zero_value))
     .WillOnce(testing::Return(MonotonicTimePoint::zero_value));
 
-  EXPECT_CALL(reactor, schedule_timer(sporadic_task.get(), 0, two_seconds.value(), ACE_Time_Value::zero))
+  EXPECT_CALL(*reactor, schedule_timer(sporadic_task.get(), 0, one_second.value(), ACE_Time_Value::zero))
     .Times(1)
     .WillOnce(testing::Return(1));
 
+  sporadic_task->schedule(one_second);
   sporadic_task->schedule(two_seconds);
-  sporadic_task->schedule(two_seconds);
+  reactor_task.wait_until_empty();
+
+  reactor_task.stop();
 }
 
-TEST(dds_DCPS_SporadicTask, schedule_no_interceptor)
+TEST(dds_DCPS_SporadicTask, schedule_no_reactor_task)
 {
   OpenDDS::Test::MockLogger logger;
   MyTimeSource time_source;
-  MyReactor reactor;
-  RcHandle<MyReactorInterceptor> reactor_interceptor = make_rch<MyReactorInterceptor>(&reactor);
-  RcHandle<MySporadicTask> sporadic_task = make_rch<MySporadicTask>(time_source, reactor_interceptor);
+  RcHandle<MySporadicTask> sporadic_task;
+  {
+    MyReactor* reactor = new MyReactor;
+    ThreadStatusManager tsm;
+    ReactorTask_rch reactor_task = make_rch<ReactorTask>(false);
+    reactor_task->open_reactor_task(&tsm, "test", reactor);
+    sporadic_task = make_rch<MySporadicTask>(time_source, reactor_task);
+    reactor_task->stop();
+  }
   const TimeDuration two_seconds(2);
 
   EXPECT_CALL(logger, log(testing::_))
@@ -194,50 +219,63 @@ TEST(dds_DCPS_SporadicTask, schedule_no_interceptor)
   EXPECT_CALL(time_source, monotonic_time_point_now())
     .WillOnce(testing::Return(MonotonicTimePoint::zero_value));
 
-  reactor_interceptor.reset();
   sporadic_task->schedule(two_seconds);
 }
 
 TEST(dds_DCPS_SporadicTask, cancel_not_scheduled)
 {
   MyTimeSource time_source;
-  MyReactor reactor;
-  RcHandle<MyReactorInterceptor> reactor_interceptor = make_rch<MyReactorInterceptor>(&reactor);
-  RcHandle<MySporadicTask> sporadic_task = make_rch<MySporadicTask>(time_source, reactor_interceptor);
+  MyReactor* reactor = new MyReactor;
+  ThreadStatusManager tsm;
+  ReactorTask reactor_task(false);
+  reactor_task.open_reactor_task(&tsm, "test", reactor);
+  RcHandle<MySporadicTask> sporadic_task = make_rch<MySporadicTask>(time_source, rchandle_from(&reactor_task));
 
   sporadic_task->cancel();
+  reactor_task.wait_until_empty();
+
+  reactor_task.stop();
 }
 
 TEST(dds_DCPS_SporadicTask, cancel_scheduled)
 {
   MyTimeSource time_source;
-  MyReactor reactor;
-  RcHandle<MyReactorInterceptor> reactor_interceptor = make_rch<MyReactorInterceptor>(&reactor);
-  RcHandle<MySporadicTask> sporadic_task = make_rch<MySporadicTask>(time_source, reactor_interceptor);
+  MyReactor* reactor = new MyReactor;
+  ThreadStatusManager tsm;
+  ReactorTask reactor_task(false);
+  reactor_task.open_reactor_task(&tsm, "test", reactor);
+  RcHandle<MySporadicTask> sporadic_task = make_rch<MySporadicTask>(time_source, rchandle_from(&reactor_task));
   const TimeDuration two_seconds(2);
 
   EXPECT_CALL(time_source, monotonic_time_point_now())
     .WillOnce(testing::Return(MonotonicTimePoint::zero_value));
 
-  EXPECT_CALL(reactor, schedule_timer(sporadic_task.get(), 0, two_seconds.value(), ACE_Time_Value::zero))
+  EXPECT_CALL(*reactor, schedule_timer(sporadic_task.get(), 0, two_seconds.value(), ACE_Time_Value::zero))
     .Times(1)
     .WillOnce(testing::Return(1));
 
   sporadic_task->schedule(two_seconds);
+  reactor_task.wait_until_empty();
 
-  EXPECT_CALL(reactor, cancel_timer(sporadic_task->timer_id(), 0, 1))
+  EXPECT_CALL(*reactor, cancel_timer(sporadic_task->timer_id(), 0, 1))
     .WillOnce(testing::Return(1));
 
   sporadic_task->cancel();
+  reactor_task.wait_until_empty();
+
+  reactor_task.stop();
 }
 
-TEST(dds_DCPS_SporadicTask, cancel_no_interceptor)
+TEST(dds_DCPS_SporadicTask, cancel_no_reactor_task)
 {
   OpenDDS::Test::MockLogger logger;
   MyTimeSource time_source;
-  MyReactor reactor;
-  RcHandle<MyReactorInterceptor> reactor_interceptor = make_rch<MyReactorInterceptor>(&reactor);
-  RcHandle<MySporadicTask> sporadic_task = make_rch<MySporadicTask>(time_source, reactor_interceptor);
+  RcHandle<MySporadicTask> sporadic_task;
+  MyReactor* reactor = new MyReactor;
+  ThreadStatusManager tsm;
+  ReactorTask_rch reactor_task = make_rch<ReactorTask>(false);
+  reactor_task->open_reactor_task(&tsm, "test", reactor);
+  sporadic_task = make_rch<MySporadicTask>(time_source, reactor_task);
   const TimeDuration two_seconds(2);
 
   EXPECT_CALL(logger, log(testing::_))
@@ -247,12 +285,16 @@ TEST(dds_DCPS_SporadicTask, cancel_no_interceptor)
   EXPECT_CALL(time_source, monotonic_time_point_now())
     .WillOnce(testing::Return(MonotonicTimePoint::zero_value));
 
-  EXPECT_CALL(reactor, schedule_timer(sporadic_task.get(), 0, two_seconds.value(), ACE_Time_Value::zero))
+  EXPECT_CALL(*reactor, schedule_timer(sporadic_task.get(), 0, two_seconds.value(), ACE_Time_Value::zero))
     .Times(1)
     .WillOnce(testing::Return(1));
 
   sporadic_task->schedule(two_seconds);
-  reactor_interceptor.reset();
+  reactor_task->wait_until_empty();
+
+  reactor_task->stop();
+  reactor_task.reset();
+
   sporadic_task->cancel();
 }
 #endif
