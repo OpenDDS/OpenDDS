@@ -19,11 +19,10 @@ RtpsUdpDataLink::get_reactor()
   return reactor_task_->get_reactor();
 }
 
-ACE_INLINE bool
-RtpsUdpDataLink::reactor_is_shut_down()
+ACE_INLINE ReactorTask_rch
+RtpsUdpDataLink::get_reactor_task() const
 {
-  if (!reactor_task_) return true;
-  return reactor_task_->is_shut_down();
+  return reactor_task_;
 }
 
 ACE_INLINE ACE_SOCK_Dgram&

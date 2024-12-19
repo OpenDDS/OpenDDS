@@ -23,10 +23,10 @@ struct TestObj : public virtual RcObject
 {
   typedef PmfMultiTask<TestObj> Multi;
 
-  TestObj(RcHandle<ReactorInterceptor> reactor_interceptor)
+  TestObj(RcHandle<ReactorTask> reactor_task)
     : do_enable_(false)
   {
-    multi_ = make_rch<Multi>(reactor_interceptor, TimeDuration::from_msec(2000), rchandle_from(this), &TestObj::execute);
+    multi_ = make_rch<Multi>(reactor_task, TimeDuration::from_msec(2000), rchandle_from(this), &TestObj::execute);
   }
 
   void execute(const MonotonicTimePoint&) {
@@ -54,7 +54,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   ReactorTask reactor_task(false);
   reactor_task.open_reactor_task(0, &tsm);
 
-  RcHandle<TestObj> obj = make_rch<TestObj>(reactor_task.interceptor());
+  RcHandle<TestObj> obj = make_rch<TestObj>(rchandle_from(&reactor_task));
   obj->multi_->enable(TimeDuration::from_msec(2000)); // 2.0 seconds
   ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
   TEST_CHECK(total_count == 0);

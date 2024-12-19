@@ -29,7 +29,6 @@
 #include <dds/DCPS/DataBlockLockPool.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/DiscoveryListener.h>
-#include <dds/DCPS/ReactorInterceptor.h>
 #include <dds/DCPS/RcEventHandler.h>
 #include <dds/DCPS/JobQueue.h>
 #include <dds/DCPS/SequenceNumber.h>
@@ -112,7 +111,7 @@ public:
   RtpsUdpInst& config() const;
 
   ACE_Reactor* get_reactor();
-  bool reactor_is_shut_down();
+  ReactorTask_rch get_reactor_task() const;
 
   ACE_SOCK_Dgram& unicast_socket();
   ACE_SOCK_Dgram_Mcast& multicast_socket();

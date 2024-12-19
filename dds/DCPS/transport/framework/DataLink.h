@@ -8,25 +8,24 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_DATALINK_H
 #define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_DATALINK_H
 
-#include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/RcObject.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/RcEventHandler.h"
+#include "QueueTaskBase_T.h"
 #include "ReceiveListenerSetMap.h"
 #include "SendResponseListener.h"
 #include "TransportDefs.h"
-#include "TransportImpl_rch.h"
+#include "TransportReceiveListener.h"
+#include "TransportSendControlElement.h"
+#include "TransportSendListener.h"
 #include "TransportSendStrategy.h"
 #include "TransportSendStrategy_rch.h"
 #include "TransportStrategy.h"
 #include "TransportStrategy_rch.h"
-#include "TransportSendControlElement.h"
-#include "TransportSendListener.h"
-#include "TransportReceiveListener.h"
-#include "QueueTaskBase_T.h"
-#include "dds/DCPS/ReactorInterceptor.h"
+
+#include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/RcEventHandler.h"
+#include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/TimeTypes.h"
+#include "dds/DCPS/dcps_export.h"
 
 #include "ace/Event_Handler.h"
 #include "ace/Synch_Traits.h"
@@ -264,10 +263,10 @@ public:
   void invoke_on_start_callbacks(const RepoId& local, const RepoId& remote, bool success);
   void remove_startup_callbacks(const RepoId& local, const RepoId& remote);
 
-  class ImmediateStart : public virtual ReactorInterceptor::Command {
+  class ImmediateStart : public virtual ReactorTask::Command {
   public:
     ImmediateStart(RcHandle<DataLink> link, WeakRcHandle<TransportClient> client, const RepoId& remote) : link_(link), client_(client), remote_(remote) {}
-    void execute();
+    void execute(ReactorWrapper& reactor_wrapper);
   private:
     RcHandle<DataLink> link_;
     WeakRcHandle<TransportClient> client_;

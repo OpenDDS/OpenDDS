@@ -28,14 +28,16 @@ namespace DCPS {
 
 const size_t MAX_NETLINK_MESSAGE_SIZE = 4096;
 
-LinuxNetworkConfigMonitor::LinuxNetworkConfigMonitor(ReactorInterceptor_rch interceptor)
-  : interceptor_(interceptor)
-{
-  reactor(interceptor->reactor());
-}
+LinuxNetworkConfigMonitor::LinuxNetworkConfigMonitor(ReactorTask_rch reactor_task)
+  : reactor_task_(reactor_task)
+{}
 
 bool LinuxNetworkConfigMonitor::open()
 {
+  reactor_task_->execute_or_enqueue(oh);
+void LinuxNetworkConfigMonitor::OpenHandler::execute(ReactorWrapper& reactor_wrapper)
+  retval_ = lncm->open_i(reactor_wrapper);
+bool LinuxNetworkConfigMonitor::open_i(ReactorWrapper& reactor_wrapper)
   // Listen to changes in links and IPV4 and IPV6 addresses.
   const pid_t pid = 0;
   ACE_Netlink_Addr addr;
@@ -91,7 +93,7 @@ bool LinuxNetworkConfigMonitor::open()
 
   read_messages();
 
-  ReactorInterceptor_rch interceptor = interceptor_.lock();
+  if (reactor_wrapper.register_handler(this, READ_MASK) != 0) {
   if (interceptor) {
     interceptor->execute_or_enqueue(make_rch<RegisterHandler>(rchandle_from(this)));
   }
@@ -101,10 +103,14 @@ bool LinuxNetworkConfigMonitor::open()
 
 bool LinuxNetworkConfigMonitor::close()
 {
-  bool retval = true;
+  reactor_task_->execute_or_enqueue(ch);
+void LinuxNetworkConfigMonitor::CloseHandler::execute(ReactorWrapper& reactor_wrapper)
+  retval_ = lncm->close_i(reactor_wrapper);
 
+bool LinuxNetworkConfigMonitor::close_i(ReactorWrapper& reactor_wrapper)
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, socket_mutex_, false);
+  reactor_wrapper.remove_handler(this, READ_MASK);
     if (socket_.close() != 0) {
       if (log_level >= LogLevel::Error) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::close: could not close socket: %m\n"));

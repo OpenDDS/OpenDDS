@@ -79,8 +79,11 @@ DataWriterImpl::DataWriterImpl()
     is_bit_(false),
     min_suspended_transaction_id_(0),
     max_suspended_transaction_id_(0),
-    liveliness_asserted_(false),
-    liveness_timer_(make_rch<LivenessTimer>(ref(*this)))
+  , liveliness_send_task_(make_rch<DWISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &DataWriterImpl::liveliness_send_task))
+  , liveliness_lost_task_(make_rch<DWISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &DataWriterImpl::liveliness_lost_task))
+  , liveliness_send_interval_(TimeDuration::max_value)
+  , liveliness_lost_interval_(TimeDuration::max_value)
+  , liveliness_lost_(false)
 {
   liveliness_lost_status_.total_count = 0;
   liveliness_lost_status_.total_count_change = 0;

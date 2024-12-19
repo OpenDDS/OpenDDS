@@ -827,7 +827,7 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
 int
 RtpsUdpReceiveStrategy::start_i()
 {
-  ACE_Reactor* reactor = link_->get_reactor();
+  ReactorTask_rch ri = link_->get_reactor_task();
   if (reactor == 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -866,7 +866,7 @@ RtpsUdpReceiveStrategy::start_i()
 void
 RtpsUdpReceiveStrategy::stop_i()
 {
-  ACE_Reactor* reactor = link_->get_reactor();
+  ReactorTask_rch ri = link_->get_reactor_task();
   if (reactor == 0) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")

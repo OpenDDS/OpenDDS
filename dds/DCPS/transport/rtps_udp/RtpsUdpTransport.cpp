@@ -624,7 +624,7 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
     start_ice();
   }
 
-  relay_stun_task_= make_rch<Sporadic>(TheServiceParticipant->time_source(), reactor_task()->interceptor(), rchandle_from(this), &RtpsUdpTransport::relay_stun_task);
+  relay_stun_task_= make_rch<Sporadic>(TheServiceParticipant->time_source(), reactor_task(), rchandle_from(this), &RtpsUdpTransport::relay_stun_task);
 #endif
 
   if (config.opendds_discovery_default_listener_) {
@@ -875,25 +875,10 @@ RtpsUdpTransport::start_ice()
   ice_agent_->add_endpoint(static_rchandle_cast<ICE::Endpoint>(ice_endpoint_));
 
   if (!link_) {
-    if (reactor()->register_handler(unicast_socket_.get_handle(), ice_endpoint_.get(),
-                                    ACE_Event_Handler::READ_MASK) != 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("RtpsUdpTransport::start_ice: ")
-                 ACE_TEXT("failed to register handler for unicast ")
-                 ACE_TEXT("socket %d\n"),
-                 unicast_socket_.get_handle()));
-    }
+    ReactorTask_rch ri = reactor_task();
+    ri->execute_or_enqueue(make_rch<RegisterHandler>(unicast_socket_.get_handle(), ice_endpoint_.get(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
-    if (reactor()->register_handler(ipv6_unicast_socket_.get_handle(), ice_endpoint_.get(),
-                                    ACE_Event_Handler::READ_MASK) != 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("RtpsUdpTransport::start_ice: ")
-                 ACE_TEXT("failed to register handler for ipv6 unicast ")
-                 ACE_TEXT("socket %d\n"),
-                 ipv6_unicast_socket_.get_handle()));
-    }
+    ri->execute_or_enqueue(make_rch<RegisterHandler>(ipv6_unicast_socket_.get_handle(), ice_endpoint_.get(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #endif
   }
 }
@@ -906,23 +891,10 @@ RtpsUdpTransport::stop_ice()
   }
 
   if (!link_) {
-    if (reactor()->remove_handler(unicast_socket_.get_handle(), ACE_Event_Handler::READ_MASK) != 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("RtpsUdpTransport::stop_ice: ")
-                 ACE_TEXT("failed to unregister handler for unicast ")
-                 ACE_TEXT("socket %d\n"),
-                 unicast_socket_.get_handle()));
-    }
+    ReactorTask_rch ri = reactor_task();
+    ri->execute_or_enqueue(make_rch<RemoveHandler>(unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
-    if (reactor()->remove_handler(ipv6_unicast_socket_.get_handle(), ACE_Event_Handler::READ_MASK) != 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("RtpsUdpTransport::stop_ice: ")
-                 ACE_TEXT("failed to unregister handler for ipv6 unicast ")
-                 ACE_TEXT("socket %d\n"),
-                 ipv6_unicast_socket_.get_handle()));
-    }
+    ri->execute_or_enqueue(make_rch<RemoveHandler>(ipv6_unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #endif
   }
 

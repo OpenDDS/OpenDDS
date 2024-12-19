@@ -313,11 +313,11 @@ private:
                                          const GUID_t& remote) const;
 #endif
 
-  void type_lookup_init(DCPS::ReactorInterceptor_rch reactor_interceptor)
+  void type_lookup_init(DCPS::ReactorTask_rch reactor_task)
   {
     if (!type_lookup_reply_deadline_processor_) {
       type_lookup_reply_deadline_processor_ =
-        DCPS::make_rch<EndpointManagerSporadic>(TheServiceParticipant->time_source(), reactor_interceptor,
+        DCPS::make_rch<EndpointManagerSporadic>(TheServiceParticipant->time_source(), reactor_task,
                                                 rchandle_from(this), &Sedp::remove_expired_endpoints);
     }
   }

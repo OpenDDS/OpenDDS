@@ -17,6 +17,7 @@
 #include "JobQueue.h"
 #include "NetworkConfigMonitor.h"
 #include "NetworkConfigModifier.h"
+#include "ReactorTask_rch.h"
 #include "Recorder.h"
 #include "Replayer.h"
 #include "TimeSource.h"
@@ -86,9 +87,7 @@ public:
 
   ACE_Reactor* reactor();
 
-  ACE_thread_t reactor_owner() const;
-
-  ReactorInterceptor_rch interceptor() const;
+  ReactorTask_rch reactor_task();
 
   JobQueue_rch job_queue() const;
 

@@ -20,7 +20,7 @@ namespace DCPS {
 class OpenDDS_Multicast_Export BestEffortSession
   : public MulticastSession {
 public:
-  BestEffortSession(RcHandle<ReactorInterceptor> interceptor,
+  BestEffortSession(RcHandle<ReactorTask> reactor_task,
                     MulticastDataLink* link,
                     MulticastPeer remote_peer);
 

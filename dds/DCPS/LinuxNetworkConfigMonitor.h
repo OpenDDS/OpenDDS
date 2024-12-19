@@ -16,7 +16,8 @@
 
 #include "NetworkConfigMonitor.h"
 #include "RcEventHandler.h"
-#include "ReactorInterceptor.h"
+#include "ReactorTask.h"
+#include "ReactorTask_rch.h"
 #include "dcps_export.h"
 
 #include <ace/SOCK_Netlink.h>
@@ -28,19 +29,19 @@ namespace DCPS {
 
 class OpenDDS_Dcps_Export LinuxNetworkConfigMonitor : public RcEventHandler, public NetworkConfigMonitor {
 public:
-  explicit LinuxNetworkConfigMonitor(ReactorInterceptor_rch interceptor);
+  explicit LinuxNetworkConfigMonitor(ReactorTask_rch reactor_task);
   bool open();
   bool close();
 
 private:
-  class RegisterHandler : public ReactorInterceptor::Command {
+  class OpenHandler : public ReactorTask::Command {
   public:
     RegisterHandler(WeakRcHandle<LinuxNetworkConfigMonitor> lncm)
       : lncm_(lncm)
     {}
 
   private:
-    void execute()
+    void execute(ReactorWrapper& reactor_wrapper);
     {
       RcHandle<LinuxNetworkConfigMonitor> lncm = lncm_.lock();
       if (!lncm) {
@@ -55,7 +56,8 @@ private:
     WeakRcHandle<LinuxNetworkConfigMonitor> lncm_;
   };
 
-  class RemoveHandler : public ReactorInterceptor::Command {
+  bool open_i(ReactorWrapper& reactor_wrapper);
+  class CloseHandler : public ReactorTask::Command {
   public:
     RemoveHandler(WeakRcHandle<LinuxNetworkConfigMonitor> lncm)
       : lncm_(lncm)
@@ -66,7 +68,7 @@ private:
       RcHandle<LinuxNetworkConfigMonitor> lncm = lncm_.lock();
       if (!lncm) {
         return;
-      }
+    void execute(ReactorWrapper& reactor_wrapper);
       ACE_GUARD(ACE_Thread_Mutex, g, lncm->socket_mutex_);
       reactor()->remove_handler(lncm.get(), READ_MASK);
     }
@@ -74,6 +76,7 @@ private:
     WeakRcHandle<LinuxNetworkConfigMonitor> lncm_;
   };
 
+  bool close_i(ReactorWrapper& reactor_wrapper);
   ACE_HANDLE get_handle() const;
   int handle_input(ACE_HANDLE);
   void read_messages();
@@ -81,7 +84,7 @@ private:
 
   ACE_SOCK_Netlink socket_;
   ACE_Thread_Mutex socket_mutex_;
-  ReactorInterceptor_wrch interceptor_;
+  ReactorTask_rch reactor_task_;
 };
 
 } // DCPS
