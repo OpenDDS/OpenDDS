@@ -180,6 +180,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   HelloWorld::Message message;
   message.deviceId = HelloWorld::OLDDEV;
   message.st = HelloWorld::Intermediate;
+  message.added = true;
   message_data_writer->write(message, DDS::HANDLE_NIL);
 
   message.deviceId = HelloWorld::NEWDEV;
