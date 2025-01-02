@@ -6,5 +6,6 @@ module HelloWorld {
   struct Message {
     @key string deviceId;
     State st;
+    boolean added;
   };
 };
