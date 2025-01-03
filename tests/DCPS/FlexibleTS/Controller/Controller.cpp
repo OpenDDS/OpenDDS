@@ -44,6 +44,8 @@ std::string setup_typesupport(HelloWorld::MessageTypeSupport& base, const DDS::D
                                                getCompleteTypeIdentifier<HelloWorld_State_xtag>(),
                                                valuesToRemove, *lookup, cmpTm);
   flex->add(OLD_TYPE, minOldTi, minTm, cmpOldTi, cmpTm);
+  lookup->add(minTm.begin(), minTm.end());
+  lookup->add(cmpTm.begin(), cmpTm.end());
   return NEW_TYPE;
 }
 
@@ -124,6 +126,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   HelloWorld::MessageDataReader_var message_data_reader = HelloWorld::MessageDataReader::_narrow(data_reader);
 
+  DDS::ReadCondition_var read_condition =
+    data_reader->create_readcondition(DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+
   DDS::Topic_var topic2 = participant->create_topic(HelloWorld::COMMAND_TOPIC_NAME, type_name.c_str(),
                                                     TOPIC_QOS_DEFAULT, 0, 0);
 
@@ -132,9 +137,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::DataWriter_var data_writer = publisher->create_datawriter(topic2, DATAWRITER_QOS_DEFAULT, 0, 0);
 
   HelloWorld::MessageDataWriter_var message_data_writer = HelloWorld::MessageDataWriter::_narrow(data_writer);
-
-  DDS::ReadCondition_var read_condition =
-    data_reader->create_readcondition(DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
 
   DDS::WaitSet_var wait_set = new DDS::WaitSet;
   wait_set->attach_condition(read_condition);
@@ -171,6 +173,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   HelloWorld::Message message;
   message.deviceId = HelloWorld::OLDDEV;
   message.st = HelloWorld::Intermediate;
+  message.added = true;
   message_data_writer->write(message, DDS::HANDLE_NIL);
 
   message.deviceId = HelloWorld::NEWDEV;

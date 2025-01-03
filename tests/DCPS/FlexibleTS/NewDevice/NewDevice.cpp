@@ -59,6 +59,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   HelloWorld::Message message;
   message.deviceId = HelloWorld::NEWDEV;
   message.st = HelloWorld::Initial;
+  message.added = true;
   message_data_writer->write(message, DDS::HANDLE_NIL);
 
   DDS::ReadCondition_var read_condition =

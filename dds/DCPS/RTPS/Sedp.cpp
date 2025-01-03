@@ -7068,6 +7068,19 @@ void Sedp::match(const GUID_t& writer, const GUID_t& reader)
   if (lpi != local_publications_.end()) {
     writer_local = true;
     writer_type_info = lpi->second.typeInfoFor(reader);
+    if ((lpi->second.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)
+        && writer_type_info->minimal.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {
+      if (DCPS_debug_level >= 4) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::match: Local writer with Flexible TS and no type\n"));
+      }
+      const DCPS::DataWriterCallbacks_rch callbacks = lpi->second.publication_.lock();
+      if (callbacks) {
+        const DCPS::String typeKey = spdp_.find_flexible_types_key_i(reader);
+        if (typeKey != "") {
+          writer_type_info = lpi->second.getFlexibleTypes(callbacks, reader, typeKey.c_str());
+        }
+      }
+    }
   } else if ((dpi = discovered_publications_.find(writer))
              != discovered_publications_.end()) {
     writer_type_info = &dpi->second.type_info_;
@@ -7086,6 +7099,19 @@ void Sedp::match(const GUID_t& writer, const GUID_t& reader)
   if (lsi != local_subscriptions_.end()) {
     reader_local = true;
     reader_type_info = lsi->second.typeInfoFor(writer);
+    if ((lsi->second.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)
+        && reader_type_info->minimal.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {
+      if (DCPS_debug_level >= 4) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::match: Local reader with Flexible TS and no type\n"));
+      }
+      const DCPS::DataReaderCallbacks_rch callbacks = lsi->second.subscription_.lock();
+      if (callbacks) {
+        const DCPS::String typeKey = spdp_.find_flexible_types_key_i(writer);
+        if (typeKey != "") {
+          reader_type_info = lsi->second.getFlexibleTypes(callbacks, writer, typeKey.c_str());
+        }
+      }
+    }
   } else if ((dsi = discovered_subscriptions_.find(reader))
              != discovered_subscriptions_.end()) {
     reader_type_info = &dsi->second.type_info_;
