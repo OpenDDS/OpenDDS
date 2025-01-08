@@ -41,7 +41,8 @@ TEST(dds_DCPS_ReactorWrapper, test_oneshot)
 {
   RcHandle<TestEventHandler> handler = make_rch<TestEventHandler>();
   ACE_Reactor reactor(new ACE_Select_Reactor, true);
-  ReactorWrapper reactor_wrapper(&reactor);
+  ReactorWrapper reactor_wrapper;
+  reactor_wrapper.open(&reactor);
 
   const ReactorWrapper::TimerId id = reactor_wrapper.schedule(*handler, 0, TimeDuration::from_msec(10));
   ASSERT_NE(id, ReactorWrapper::InvalidTimerId);
@@ -51,13 +52,15 @@ TEST(dds_DCPS_ReactorWrapper, test_oneshot)
 
   ASSERT_EQ(handler->calls_, 1);
   reactor_wrapper.cancel(id);
+  reactor_wrapper.close();
 }
 
 TEST(dds_DCPS_ReactorWrapper, test_repeat)
 {
   RcHandle<TestEventHandler> handler = make_rch<TestEventHandler>();
   ACE_Reactor reactor(new ACE_Select_Reactor, true);
-  ReactorWrapper reactor_wrapper(&reactor);
+  ReactorWrapper reactor_wrapper;
+  reactor_wrapper.open(&reactor);
 
   const ReactorWrapper::TimerId id = reactor_wrapper.schedule(*handler, 0, TimeDuration(), TimeDuration::from_msec(10));
   ASSERT_NE(id, ReactorWrapper::InvalidTimerId);
@@ -67,13 +70,15 @@ TEST(dds_DCPS_ReactorWrapper, test_repeat)
 
   ASSERT_GT(handler->calls_, 11);
   reactor_wrapper.cancel(id);
+  reactor_wrapper.close();
 }
 
 TEST(dds_DCPS_ReactorWrapper, test_immediate)
 {
   RcHandle<TestEventHandler> handler = make_rch<TestEventHandler>();
   ACE_Reactor reactor(new ACE_Select_Reactor, true);
-  ReactorWrapper reactor_wrapper(&reactor);
+  ReactorWrapper reactor_wrapper;
+  reactor_wrapper.open(&reactor);
 
   const ReactorWrapper::TimerId id = reactor_wrapper.schedule(*handler, 0, TimeDuration(), TimeDuration());
   ASSERT_NE(id, ReactorWrapper::InvalidTimerId);
@@ -83,13 +88,15 @@ TEST(dds_DCPS_ReactorWrapper, test_immediate)
 
   ASSERT_EQ(handler->calls_, 1);
   reactor_wrapper.cancel(id);
+  reactor_wrapper.close();
 }
 
 TEST(dds_DCPS_ReactorWrapper, test_negative)
 {
   RcHandle<TestEventHandler> handler = make_rch<TestEventHandler>();
   ACE_Reactor reactor(new ACE_Select_Reactor, true);
-  ReactorWrapper reactor_wrapper(&reactor);
+  ReactorWrapper reactor_wrapper;
+  reactor_wrapper.open(&reactor);
 
   const ReactorWrapper::TimerId id = reactor_wrapper.schedule(*handler, 0, TimeDuration(-23));
   ASSERT_NE(id, ReactorWrapper::InvalidTimerId);
@@ -99,4 +106,5 @@ TEST(dds_DCPS_ReactorWrapper, test_negative)
 
   ASSERT_EQ(handler->calls_, 1);
   reactor_wrapper.cancel(id);
+  reactor_wrapper.close();
 }
