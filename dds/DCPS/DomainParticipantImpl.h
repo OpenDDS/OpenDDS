@@ -644,13 +644,14 @@ private:
     void wait();
     DDS::ReturnCode_t shutdown_result() const
     {
+      ACE_Guard<ACE_Thread_Mutex> guard(shutdown_mutex_);
       return shutdown_result_;
     }
 
   private:
     WeakRcHandle<DomainParticipantImpl> dpi_;
     /// Protect the shutdown.
-    ACE_Thread_Mutex shutdown_mutex_;
+    mutable ACE_Thread_Mutex shutdown_mutex_;
     ConditionVariable<ACE_Thread_Mutex> shutdown_condition_;
     DDS::ReturnCode_t shutdown_result_;
     bool shutdown_complete_;
