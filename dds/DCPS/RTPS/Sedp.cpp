@@ -4976,7 +4976,10 @@ Sedp::write_publication_data_unsecure(
     populate_discovered_writer_msg(dwd, rid, lp);
 
     // Convert to parameter list
-    if (reader != GUID_UNKNOWN && use_xtypes_ && (lp.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)) {
+    if (use_xtypes_ && (lp.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)) {
+      if (reader == GUID_UNKNOWN) {
+        return DDS::RETCODE_PRECONDITION_NOT_MET;
+      }
       const DCPS::TypeInformation typeinfo(*lp.typeInfoFor(reader, &useFlexibleTypes));
       if (!ParameterListConverter::to_param_list(dwd, plist, true, typeinfo)) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::write_publication_data_unsecure: "
@@ -5045,7 +5048,10 @@ Sedp::write_publication_data_secure(
     dwd.security_info.plugin_endpoint_security_attributes = lp.security_attribs_.plugin_endpoint_attributes;
 
     // Convert to parameter list
-    if (reader != GUID_UNKNOWN && use_xtypes_ && (lp.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)) {
+    if (use_xtypes_ && (lp.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)) {
+      if (reader == GUID_UNKNOWN) {
+        return DDS::RETCODE_PRECONDITION_NOT_MET;
+      }
       const DCPS::TypeInformation typeinfo(*lp.typeInfoFor(reader, &useFlexibleTypes));
       if (!ParameterListConverter::to_param_list(dwd, plist, true, typeinfo)) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::write_publication_data_secure: "
@@ -5155,7 +5161,10 @@ Sedp::write_subscription_data_unsecure(
     populate_discovered_reader_msg(drd, rid, ls);
 
     // Convert to parameter list
-    if (reader != GUID_UNKNOWN && use_xtypes_ && (ls.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)) {
+    if (use_xtypes_ && (ls.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)) {
+      if (reader == GUID_UNKNOWN) {
+        return DDS::RETCODE_PRECONDITION_NOT_MET;
+      }
       const DCPS::TypeInformation typeinfo(*ls.typeInfoFor(reader, &useFlexibleTypes));
       if (!ParameterListConverter::to_param_list(drd, plist, true, typeinfo)) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::write_subscription_data_unsecure: "
@@ -5224,7 +5233,10 @@ Sedp::write_subscription_data_secure(
     drd.security_info.plugin_endpoint_security_attributes = ls.security_attribs_.plugin_endpoint_attributes;
 
     // Convert to parameter list
-    if (reader != GUID_UNKNOWN && use_xtypes_ && (ls.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)) {
+    if (use_xtypes_ && (ls.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)) {
+      if (reader == GUID_UNKNOWN) {
+        return DDS::RETCODE_PRECONDITION_NOT_MET;
+      }
       const DCPS::TypeInformation typeinfo(*ls.typeInfoFor(reader, &useFlexibleTypes));
       if (!ParameterListConverter::to_param_list(drd, plist, true, typeinfo)) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::write_subscription_data_secure: "
