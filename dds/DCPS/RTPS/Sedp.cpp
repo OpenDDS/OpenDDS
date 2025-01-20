@@ -4848,7 +4848,6 @@ Sedp::write_publication_data_unsecure(
   }
 
   bool useFlexibleTypes = false;
-  DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
     DCPS::DiscoveredWriterData dwd;
@@ -4861,17 +4860,22 @@ Sedp::write_publication_data_unsecure(
         return DDS::RETCODE_PRECONDITION_NOT_MET;
       }
       const DCPS::TypeInformation typeinfo(*lp.typeInfoFor(reader, &useFlexibleTypes));
+      if (typeinfo.xtypes_type_info_.minimal.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::write_publication_data_unsecure: "
+                   "TypeInfo with minimal TypeIdentifier TK_NONE\n"));
+        return DDS::RETCODE_ERROR;
+      }
       if (!ParameterListConverter::to_param_list(dwd, plist, true, typeinfo)) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::write_publication_data_unsecure: "
                    "Failed to convert DiscoveredWriterData to ParameterList (Flags_FlexibleTypeSupport)\n"));
-        result = DDS::RETCODE_ERROR;
+        return DDS::RETCODE_ERROR;
       }
     } else if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, lp.type_info_)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data_unsecure - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
                  ACE_TEXT(" to ParameterList\n")));
-      result = DDS::RETCODE_ERROR;
+      return DDS::RETCODE_ERROR;
     }
 #ifdef OPENDDS_SECURITY
     if (lp.have_ice_agent_info) {
@@ -4882,26 +4886,24 @@ Sedp::write_publication_data_unsecure(
                    ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data_unsecure - ")
                    ACE_TEXT("Failed to convert ICE Agent info ")
                    ACE_TEXT("to ParameterList\n")));
-        result = DDS::RETCODE_ERROR;
+        return DDS::RETCODE_ERROR;
       }
     }
 #endif
 
-    if (DDS::RETCODE_OK == result) {
-      GUID_t effective_reader = reader;
-      if (reader != GUID_UNKNOWN) {
-        effective_reader.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
-      }
-      DCPS::SequenceNumber seq = DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN();
-      result = publications_writer_->write_parameter_list(plist, effective_reader,
-                                                          useFlexibleTypes ? seq : lp.sequence_,
-                                                          !useFlexibleTypes && reader != GUID_UNKNOWN);
+    GUID_t effective_reader = reader;
+    if (reader != GUID_UNKNOWN) {
+      effective_reader.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER;
     }
+    DCPS::SequenceNumber seq = DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+    return publications_writer_->write_parameter_list(plist, effective_reader,
+                                                      useFlexibleTypes ? seq : lp.sequence_,
+                                                      !useFlexibleTypes && reader != GUID_UNKNOWN);
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_publication_data_unsecure - ")
                ACE_TEXT("not currently associated, dropping msg.\n")));
   }
-  return result;
+  return DDS::RETCODE_OK;
 }
 
 #ifdef OPENDDS_SECURITY
@@ -4916,7 +4918,6 @@ Sedp::write_publication_data_secure(
   }
 
   bool useFlexibleTypes = false;
-  DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
 
@@ -4933,17 +4934,22 @@ Sedp::write_publication_data_secure(
         return DDS::RETCODE_PRECONDITION_NOT_MET;
       }
       const DCPS::TypeInformation typeinfo(*lp.typeInfoFor(reader, &useFlexibleTypes));
+      if (typeinfo.xtypes_type_info_.minimal.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::write_publication_data_secure: "
+                   "TypeInfo with minimal TypeIdentifier TK_NONE\n"));
+        return DDS::RETCODE_ERROR;
+      }
       if (!ParameterListConverter::to_param_list(dwd, plist, true, typeinfo)) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::write_publication_data_secure: "
                              "Failed to convert DiscoveredWriterData to ParameterList (Flags_FlexibleTypeSupport)\n"));
-        result = DDS::RETCODE_ERROR;
+        return DDS::RETCODE_ERROR;
       }
     } else if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, lp.type_info_)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data_secure - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
                  ACE_TEXT("to ParameterList\n")));
-      result = DDS::RETCODE_ERROR;
+      return DDS::RETCODE_ERROR;
     }
     if (lp.have_ice_agent_info) {
       ICE::AgentInfoMap ai_map;
@@ -4953,24 +4959,23 @@ Sedp::write_publication_data_secure(
                    ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data_secure - ")
                    ACE_TEXT("Failed to convert ICE Agent info ")
                    ACE_TEXT("to ParameterList\n")));
-        result = DDS::RETCODE_ERROR;
+        return DDS::RETCODE_ERROR;
       }
     }
-    if (DDS::RETCODE_OK == result) {
-      RepoId effective_reader = reader;
-      if (reader != GUID_UNKNOWN) {
-        effective_reader.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
-      }
-      DCPS::SequenceNumber seq = DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN();
-      result = publications_secure_writer_->write_parameter_list(plist, effective_reader,
-                                                                 useFlexibleTypes ? seq : lp.sequence_,
-                                                                 !useFlexibleTypes && reader != GUID_UNKNOWN);
+
+    RepoId effective_reader = reader;
+    if (reader != GUID_UNKNOWN) {
+      effective_reader.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER;
     }
+    DCPS::SequenceNumber seq = DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+    return publications_secure_writer_->write_parameter_list(plist, effective_reader,
+                                                             useFlexibleTypes ? seq : lp.sequence_,
+                                                             !useFlexibleTypes && reader != GUID_UNKNOWN);
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_publication_data_secure - ")
                ACE_TEXT("not currently associated, dropping msg.\n")));
   }
-  return result;
+  return DDS::RETCODE_OK;
 }
 #endif
 
@@ -5033,7 +5038,6 @@ Sedp::write_subscription_data_unsecure(
   }
 
   bool useFlexibleTypes = false;
-  DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
     DCPS::DiscoveredReaderData drd;
@@ -5046,17 +5050,22 @@ Sedp::write_subscription_data_unsecure(
         return DDS::RETCODE_PRECONDITION_NOT_MET;
       }
       const DCPS::TypeInformation typeinfo(*ls.typeInfoFor(reader, &useFlexibleTypes));
+      if (typeinfo.xtypes_type_info_.minimal.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::write_subscription_data_unsecure: "
+                   "TypeInfo with minimal TypeIdentifier TK_NONE\n"));
+        return DDS::RETCODE_ERROR;
+      }
       if (!ParameterListConverter::to_param_list(drd, plist, true, typeinfo)) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::write_subscription_data_unsecure: "
                    "Failed to convert DiscoveredReaderData to ParameterList (Flags_FlexibleTypeSupport)\n"));
-        result = DDS::RETCODE_ERROR;
+        return DDS::RETCODE_ERROR;
       }
     } else if (!ParameterListConverter::to_param_list(drd, plist, use_xtypes_, ls.type_info_)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data_unsecure - ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")
                  ACE_TEXT("to ParameterList\n")));
-      result = DDS::RETCODE_ERROR;
+      return DDS::RETCODE_ERROR;
     }
 
 #ifdef OPENDDS_SECURITY
@@ -5068,25 +5077,24 @@ Sedp::write_subscription_data_unsecure(
                    ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data_unsecure - ")
                    ACE_TEXT("Failed to convert ICE Agent info ")
                    ACE_TEXT("to ParameterList\n")));
-        result = DDS::RETCODE_ERROR;
+        return DDS::RETCODE_ERROR;
       }
     }
 #endif
-    if (DDS::RETCODE_OK == result) {
-      GUID_t effective_reader = reader;
-      if (reader != GUID_UNKNOWN) {
-        effective_reader.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
-      }
-      DCPS::SequenceNumber seq = DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN();
-      result = subscriptions_writer_->write_parameter_list(plist, effective_reader,
-                                                           useFlexibleTypes ? seq : ls.sequence_,
-                                                           !useFlexibleTypes && reader != GUID_UNKNOWN);
+
+    GUID_t effective_reader = reader;
+    if (reader != GUID_UNKNOWN) {
+      effective_reader.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
     }
+    DCPS::SequenceNumber seq = DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+    return subscriptions_writer_->write_parameter_list(plist, effective_reader,
+                                                       useFlexibleTypes ? seq : ls.sequence_,
+                                                       !useFlexibleTypes && reader != GUID_UNKNOWN);
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_subscription_data_unsecure - ")
                ACE_TEXT("not currently associated, dropping msg.\n")));
   }
-  return result;
+  return DDS::RETCODE_OK;
 }
 
 #ifdef OPENDDS_SECURITY
@@ -5101,7 +5109,6 @@ Sedp::write_subscription_data_secure(
   }
 
   bool useFlexibleTypes = false;
-  DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
 
@@ -5118,17 +5125,22 @@ Sedp::write_subscription_data_secure(
         return DDS::RETCODE_PRECONDITION_NOT_MET;
       }
       const DCPS::TypeInformation typeinfo(*ls.typeInfoFor(reader, &useFlexibleTypes));
+      if (typeinfo.xtypes_type_info_.minimal.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::write_subscription_data_secure: "
+                   "TypeInfo with minimal TypeIdentifier TK_NONE\n"));
+        return DDS::RETCODE_ERROR;
+      }
       if (!ParameterListConverter::to_param_list(drd, plist, true, typeinfo)) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::write_subscription_data_secure: "
                    "Failed to convert DiscoveredReaderData to ParameterList (Flags_FlexibleTypeSupport)\n"));
-        result = DDS::RETCODE_ERROR;
+        return DDS::RETCODE_ERROR;
       }
     } else if (!ParameterListConverter::to_param_list(drd, plist, use_xtypes_, ls.type_info_)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data_secure - ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")
                  ACE_TEXT("to ParameterList\n")));
-      result = DDS::RETCODE_ERROR;
+      return DDS::RETCODE_ERROR;
     }
     if (ls.have_ice_agent_info) {
       ICE::AgentInfoMap ai_map;
@@ -5138,24 +5150,23 @@ Sedp::write_subscription_data_secure(
                    ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data_secure - ")
                    ACE_TEXT("Failed to convert ICE Agent info ")
                    ACE_TEXT("to ParameterList\n")));
-        result = DDS::RETCODE_ERROR;
+        return DDS::RETCODE_ERROR;
       }
     }
-    if (DDS::RETCODE_OK == result) {
-      RepoId effective_reader = reader;
-      if (reader != GUID_UNKNOWN) {
-        effective_reader.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
-      }
-      DCPS::SequenceNumber seq = DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN();
-      result = subscriptions_secure_writer_->write_parameter_list(plist, effective_reader,
-                                                                  useFlexibleTypes ? seq : ls.sequence_,
-                                                                  !useFlexibleTypes && reader != GUID_UNKNOWN);
+
+    RepoId effective_reader = reader;
+    if (reader != GUID_UNKNOWN) {
+      effective_reader.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER;
     }
+    DCPS::SequenceNumber seq = DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+    return subscriptions_secure_writer_->write_parameter_list(plist, effective_reader,
+                                                              useFlexibleTypes ? seq : ls.sequence_,
+                                                              !useFlexibleTypes && reader != GUID_UNKNOWN);
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_subscription_data_secure - ")
                         ACE_TEXT("not currently associated, dropping msg.\n")));
   }
-  return result;
+  return DDS::RETCODE_OK;
 }
 #endif
 
