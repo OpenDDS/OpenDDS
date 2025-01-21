@@ -353,6 +353,39 @@ bool has_type_object(const TypeIdentifier& ti)
     ti.kind() != TK_NONE;
 }
 
+LogTypeIdentifier::LogTypeIdentifier(const TypeIdentifier& ti)
+  : conv_("Kind 0x" + DCPS::to_dds_string(static_cast<unsigned int>(ti.kind()), true))
+{
+  switch (ti.kind()) {
+  // case TI_STRING8_SMALL:
+  // case TI_STRING8_LARGE:
+  //   break;
+  // case TI_STRING16_SMALL:
+  // case TI_STRING16_LARGE:
+  //   break;
+  // case TI_PLAIN_SEQUENCE_SMALL:
+  //   break;
+  // case TI_PLAIN_SEQUENCE_LARGE:
+  //   break;
+  // case TI_PLAIN_ARRAY_SMALL:
+  //   break;
+  // case TI_PLAIN_ARRAY_LARGE:
+  //   break;
+  // case TI_PLAIN_MAP_SMALL:
+  //   break;
+  // case TI_PLAIN_MAP_LARGE:
+  //   break;
+  // case TI_STRONGLY_CONNECTED_COMPONENT:
+  //   break;
+  case EK_COMPLETE:
+  case EK_MINIMAL:
+    conv_ += " Hash " + equivalence_hash_to_string(ti.equivalence_hash());
+    break;
+  default:
+    break;
+  }
+}
+
 const TypeMap TypeMapBuilder::EmptyMap;
 
 namespace {

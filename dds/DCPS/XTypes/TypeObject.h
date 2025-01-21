@@ -764,6 +764,12 @@ namespace XTypes {
     void reset();
   };
 
+  struct OpenDDS_Dcps_Export LogTypeIdentifier {
+    explicit LogTypeIdentifier(const TypeIdentifier& ti);
+    const char* c_str() const { return conv_.c_str(); }
+    DCPS::String conv_;
+  };
+
   typedef Sequence<TypeIdentifier> TypeIdentifierSeq;
 
   // Operators less-than of member types of TypeIdentifier

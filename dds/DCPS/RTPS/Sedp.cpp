@@ -4870,6 +4870,11 @@ Sedp::write_publication_data_unsecure(
                    "Failed to convert DiscoveredWriterData to ParameterList (Flags_FlexibleTypeSupport)\n"));
         return DDS::RETCODE_ERROR;
       }
+      if (DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::write_publication_data_unsecure: FlexibleTypeSupport %C to %C TypeId %C\n",
+          LogGuid(rid).c_str(), LogGuid(reader).c_str(),
+          XTypes::LogTypeIdentifier(typeinfo.xtypes_type_info_.minimal.typeid_with_size.type_id).c_str()));
+      }
     } else if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, lp.type_info_)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data_unsecure - ")
@@ -4943,6 +4948,11 @@ Sedp::write_publication_data_secure(
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::write_publication_data_secure: "
                              "Failed to convert DiscoveredWriterData to ParameterList (Flags_FlexibleTypeSupport)\n"));
         return DDS::RETCODE_ERROR;
+      }
+      if (DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::write_publication_data_secure: FlexibleTypeSupport %C to %C TypeId %C\n",
+          LogGuid(rid).c_str(), LogGuid(reader).c_str(),
+          XTypes::LogTypeIdentifier(typeinfo.xtypes_type_info_.minimal.typeid_with_size.type_id).c_str()));
       }
     } else if (!ParameterListConverter::to_param_list(dwd, plist, use_xtypes_, lp.type_info_)) {
       ACE_ERROR((LM_ERROR,
@@ -5060,6 +5070,11 @@ Sedp::write_subscription_data_unsecure(
                    "Failed to convert DiscoveredReaderData to ParameterList (Flags_FlexibleTypeSupport)\n"));
         return DDS::RETCODE_ERROR;
       }
+      if (DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::write_subscription_data_unsecure: FlexibleTypeSupport %C to %C TypeId %C\n",
+          LogGuid(rid).c_str(), LogGuid(reader).c_str(),
+          XTypes::LogTypeIdentifier(typeinfo.xtypes_type_info_.minimal.typeid_with_size.type_id).c_str()));
+      }
     } else if (!ParameterListConverter::to_param_list(drd, plist, use_xtypes_, ls.type_info_)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data_unsecure - ")
@@ -5134,6 +5149,11 @@ Sedp::write_subscription_data_secure(
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::write_subscription_data_secure: "
                    "Failed to convert DiscoveredReaderData to ParameterList (Flags_FlexibleTypeSupport)\n"));
         return DDS::RETCODE_ERROR;
+      }
+      if (DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::write_subscription_data_secure: FlexibleTypeSupport %C to %C TypeId %C\n",
+          LogGuid(rid).c_str(), LogGuid(reader).c_str(),
+          XTypes::LogTypeIdentifier(typeinfo.xtypes_type_info_.minimal.typeid_with_size.type_id).c_str()));
       }
     } else if (!ParameterListConverter::to_param_list(drd, plist, use_xtypes_, ls.type_info_)) {
       ACE_ERROR((LM_ERROR,
@@ -6958,15 +6978,15 @@ void Sedp::match(const GUID_t& writer, const GUID_t& reader)
     writer_type_info = lpi->second.typeInfoFor(reader);
     if ((lpi->second.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)
         && writer_type_info->minimal.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {
-      if (DCPS_debug_level >= 4) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::match: Local writer with Flexible TS and no type\n"));
-      }
       const DCPS::DataWriterCallbacks_rch callbacks = lpi->second.publication_.lock();
-      if (callbacks) {
-        const DCPS::String typeKey = spdp_.find_flexible_types_key_i(reader);
-        if (typeKey != "") {
-          writer_type_info = lpi->second.getFlexibleTypes(callbacks, reader, typeKey.c_str());
+      DCPS::String typeKey;
+      if (callbacks && (typeKey = spdp_.find_flexible_types_key_i(reader)) != "") {
+        writer_type_info = lpi->second.getFlexibleTypes(callbacks, reader, typeKey.c_str());
+      } else {
+        if (DCPS_debug_level >= 4) {
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::match: Local writer with Flexible TS and no type\n"));
         }
+        return;
       }
     }
   } else if ((dpi = discovered_publications_.find(writer))
@@ -6989,15 +7009,15 @@ void Sedp::match(const GUID_t& writer, const GUID_t& reader)
     reader_type_info = lsi->second.typeInfoFor(writer);
     if ((lsi->second.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)
         && reader_type_info->minimal.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {
-      if (DCPS_debug_level >= 4) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::match: Local reader with Flexible TS and no type\n"));
-      }
       const DCPS::DataReaderCallbacks_rch callbacks = lsi->second.subscription_.lock();
-      if (callbacks) {
-        const DCPS::String typeKey = spdp_.find_flexible_types_key_i(writer);
-        if (typeKey != "") {
-          reader_type_info = lsi->second.getFlexibleTypes(callbacks, writer, typeKey.c_str());
+      DCPS::String typeKey;
+      if (callbacks && (typeKey = spdp_.find_flexible_types_key_i(writer)) != "") {
+        reader_type_info = lsi->second.getFlexibleTypes(callbacks, writer, typeKey.c_str());
+      } else {
+        if (DCPS_debug_level >= 4) {
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::match: Local reader with Flexible TS and no type\n"));
         }
+        return;
       }
     }
   } else if ((dsi = discovered_subscriptions_.find(reader))
