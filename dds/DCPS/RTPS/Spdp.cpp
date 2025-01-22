@@ -4885,7 +4885,7 @@ bool Spdp::enable_flexible_types(const GUID_t& remoteParticipantId, const char* 
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
   const DiscoveredParticipantIter iter = participants_.find(remoteParticipantId);
-  if (iter != participants_.end()) {
+  if (iter != participants_.end() && iter->second.flexible_types_key_ == "") {
     iter->second.flexible_types_key_ = typeKey;
     return endpoint_manager().enable_flexible_types(remoteParticipantId, typeKey);
   }

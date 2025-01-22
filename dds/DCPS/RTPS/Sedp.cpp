@@ -2186,8 +2186,8 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
       if (spdp_.shutting_down()) { return; }
 
       if (DCPS::DCPS_debug_level > 3) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_writer_data - ")
-                   ACE_TEXT("calling match_endpoints new\n")));
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::process_discovered_writer_data - calling match_endpoints new %C %C\n",
+          LogGuid(guid).c_str(), XTypes::LogTypeIdentifier(type_info.minimal.typeid_with_size.type_id).c_str()));
       }
       if (DCPS::transport_debug.log_progress) {
         DCPS::log_progress("discovered writer data new", participant_id_, participant_id, spdp_.get_participant_discovered_at(participant_id), guid);
@@ -2487,8 +2487,8 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
       if (spdp_.shutting_down()) { return; }
 
       if (DCPS::DCPS_debug_level > 3) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_reader_data - ")
-                   ACE_TEXT("calling match_endpoints new\n")));
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::process_discovered_reader_data - calling match_endpoints new %C %C\n",
+          LogGuid(guid).c_str(), XTypes::LogTypeIdentifier(type_info.minimal.typeid_with_size.type_id).c_str()));
       }
       if (DCPS::transport_debug.log_progress) {
         DCPS::log_progress("discovered reader data new", participant_id_, participant_id, spdp_.get_participant_discovered_at(participant_id), guid);
@@ -3951,6 +3951,18 @@ bool Sedp::TypeLookupReplyReader::process_get_types_reply(const XTypes::TypeLook
     return false;
   }
 
+  if (DCPS_debug_level > 3) {
+    DCPS::String details;
+    for (int i = 0; i < reply._cxx_return.getType.result.types.length(); ++i) {
+      const TypeIdentifierTypeObjectPair& pair = reply._cxx_return.getType.result.types[i];
+      details += XTypes::LogTypeIdentifier(pair.type_identifier);// + " => " + hexobj;
+      if (i < reply._cxx_return.getType.result.types.length() - 1) {
+        details += ", ";
+      }
+    }
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_get_types_reply %C\n", details.c_str()));
+  }
+
   sedp_.type_lookup_service_->add_type_objects_to_cache(reply._cxx_return.getType.result.types);
 
   if (reply._cxx_return.getType.result.complete_to_minimal.length() != 0) {
@@ -4778,6 +4790,9 @@ Sedp::write_dcps_participant_dispose(const RepoId& part)
 
 bool Sedp::enable_flexible_types(const GUID_t& remoteParticipantId, const char* typeKey)
 {
+  if (DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::enable_flexible_types: %C %C\n", LogGuid(remoteParticipantId).c_str(), typeKey));
+  }
   for (DiscoveredPublicationMap::iterator i = discovered_publications_.lower_bound(make_id(remoteParticipantId, ENTITYID_UNKNOWN));
        i != discovered_publications_.end() && equal_guid_prefixes(i->first, remoteParticipantId); ++i) {
     match_endpoints_flex_ts(*i, typeKey);
