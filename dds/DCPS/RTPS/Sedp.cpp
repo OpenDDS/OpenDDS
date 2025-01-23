@@ -3953,9 +3953,9 @@ bool Sedp::TypeLookupReplyReader::process_get_types_reply(const XTypes::TypeLook
 
   if (DCPS_debug_level > 3) {
     DCPS::String details;
-    for (int i = 0; i < reply._cxx_return.getType.result.types.length(); ++i) {
-      const TypeIdentifierTypeObjectPair& pair = reply._cxx_return.getType.result.types[i];
-      details += XTypes::LogTypeIdentifier(pair.type_identifier);// + " => " + hexobj;
+    for (ACE_CDR::ULong i = 0; i < reply._cxx_return.getType.result.types.length(); ++i) {
+      const XTypes::TypeIdentifierTypeObjectPair& pair = reply._cxx_return.getType.result.types[i];
+      details += XTypes::LogTypeIdentifier(pair.type_identifier).c_str();// + " => " + hexobj;
       if (i < reply._cxx_return.getType.result.types.length() - 1) {
         details += ", ";
       }
