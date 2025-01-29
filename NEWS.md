@@ -1,5 +1,38 @@
 # OpenDDS Releases
 
+## Version 3.31.0 of OpenDDS
+
+Released 2025-01-29
+
+Download [this release on GitHub](https://github.com/OpenDDS/OpenDDS/releases/tag/v3.31.0).
+
+Read [the documentation for this release on Read the Docs](https://opendds.readthedocs.io/en/v3.31.0).
+
+### Additions
+
+- Improve `--boottime` timers to not use a file descriptor per timer. ([PR #4835](https://github.com/OpenDDS/OpenDDS/pull/4835), [PR #4871](https://github.com/OpenDDS/OpenDDS/pull/4871))
+
+### Platform Support and Dependencies
+
+- ACE/TAO
+  - Updated ACE 8/TAO 4 from 8.0.1 to [8.0.2](https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-8_0_2).
+- CMake
+  - Fixed an issue [where OpenDDS won’t build ACE/TAO with Visual Studio 2015](https://github.com/OpenDDS/OpenDDS/issues/4842). ([PR #4843](https://github.com/OpenDDS/OpenDDS/pull/4843))
+
+### Fixes
+
+- Updated ThreadStatusManager for iterative event handling ([PR #4830](https://github.com/OpenDDS/OpenDDS/pull/4830))
+- Fix periodic timers with `--boottime` so that the initial delay is honored. ([PR #4835](https://github.com/OpenDDS/OpenDDS/pull/4835), [PR #4871](https://github.com/OpenDDS/OpenDDS/pull/4871))
+
+### Notes
+
+- Releases will now use a [new git tagging and branching strategy](https://github.com/OpenDDS/OpenDDS/issues/4761).
+  - Previously releases were tagged as either `DDS-X.Y` or `DDS-X.Y.Z`.
+    Release tags from now on will also be tagged as `vX.Y.Z`.
+    Any future OpenDDS 3 releases will be tagged both ways, while OpenDDS 4 releases will only be tagged in the new way.
+  - New branches can now be used for following specific release series.
+    For example v3 will always be updated to the latest 3 release and `v3.31` will be used for any future 3.31 releases.
+
 ## Version 3.30.0 of OpenDDS
 
 Released 2024-10-11
