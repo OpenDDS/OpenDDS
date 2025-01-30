@@ -36,6 +36,7 @@ public:
                         const XTypes::TypeMap& minimalTypeMap,
                         const XTypes::TypeIdentifier& completeTypeIdentifier,
                         const XTypes::TypeMap& completeTypeMap);
+  void populate_dependencies(const RcHandle<XTypes::TypeLookupService>& tls) const;
 
   void to_type_info(TypeInformation& type_info) const;
   const XTypes::TypeIdentifier& getMinimalTypeIdentifier() const;
@@ -59,6 +60,9 @@ public:
 
 private:
   void get_flexible_types(const char* key, XTypes::TypeInformation& type_info);
+  void populate_dependencies_i(const XTypes::TypeLookupService_rch& tls,
+                               const XTypes::TypeIdentifier& tid,
+                               const XTypes::TypeMap& tm) const;
 
   RcHandle<TypeSupportImpl> base_;
   String name_;
@@ -72,7 +76,8 @@ private:
     XTypes::TypeIdentifier minimalId_, completeId_;
     XTypes::TypeMap minimalMap_, completeMap_;
   };
-  OPENDDS_MAP(String, Alternative) map_;
+  typedef OPENDDS_MAP(String, Alternative) MapType;
+  MapType map_;
 
   OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(FlexibleTypeSupport)
 };

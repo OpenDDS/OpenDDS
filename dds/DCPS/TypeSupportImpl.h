@@ -113,7 +113,7 @@ public:
 
   RepresentationFormat* make_format(DDS::DataRepresentationId_t representation);
 
-  void populate_dependencies(const RcHandle<XTypes::TypeLookupService>& tls) const;
+  virtual void populate_dependencies(const RcHandle<XTypes::TypeLookupService>& tls) const;
 
   static const ACE_CDR::Long TYPE_INFO_DEPENDENT_COUNT_NOT_PROVIDED;
 
