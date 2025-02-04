@@ -800,46 +800,9 @@ namespace {
     compute_dependencies_i(type_map, type.flag_seq, dependencies);
   }
 
+  template <typename T>
   void compute_dependencies_i(const TypeMap& type_map,
-                              const MinimalTypeObject& type_object,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
-  {
-    switch (type_object.kind) {
-    case TK_ALIAS:
-      compute_dependencies_i(type_map, type_object.alias_type, dependencies);
-      break;
-    case TK_ANNOTATION:
-      compute_dependencies_i(type_map, type_object.annotation_type, dependencies);
-      break;
-    case TK_STRUCTURE:
-      compute_dependencies_i(type_map, type_object.struct_type, dependencies);
-      break;
-    case TK_UNION:
-      compute_dependencies_i(type_map, type_object.union_type, dependencies);
-      break;
-    case TK_BITSET:
-      compute_dependencies_i(type_map, type_object.bitset_type, dependencies);
-      break;
-    case TK_SEQUENCE:
-      compute_dependencies_i(type_map, type_object.sequence_type, dependencies);
-      break;
-    case TK_ARRAY:
-      compute_dependencies_i(type_map, type_object.array_type, dependencies);
-      break;
-    case TK_MAP:
-      compute_dependencies_i(type_map, type_object.map_type, dependencies);
-      break;
-    case TK_ENUM:
-      compute_dependencies_i(type_map, type_object.enumerated_type, dependencies);
-      break;
-    case TK_BITMASK:
-      compute_dependencies_i(type_map, type_object.bitmask_type, dependencies);
-      break;
-    }
-  }
-
-  void compute_dependencies_i(const TypeMap& type_map,
-                              const CompleteTypeObject& type_object,
+                              const T& type_object, // MinimalTypeObject, CompleteTypeObject
                               OPENDDS_SET(TypeIdentifier)& dependencies)
   {
     switch (type_object.kind) {
