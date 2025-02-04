@@ -36,7 +36,6 @@ public:
                         const XTypes::TypeMap& minimalTypeMap,
                         const XTypes::TypeIdentifier& completeTypeIdentifier,
                         const XTypes::TypeMap& completeTypeMap);
-  void populate_dependencies(const RcHandle<XTypes::TypeLookupService>& tls) const;
 
   void to_type_info(TypeInformation& type_info) const;
   const XTypes::TypeIdentifier& getMinimalTypeIdentifier() const;

@@ -101,9 +101,11 @@ void FlexibleTypeSupport::populate_dependencies_i(const XTypes::TypeLookupServic
       XTypes::TypeIdentifierWithSize ti_with_size(*it, static_cast<ACE_CDR::ULong>(tobj_size));
       deps_with_size.append(ti_with_size);
     } else if (XTypes::has_type_object(*it)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: FlexibleTypeSupport::populate_dependencies_io, ")
-                 ACE_TEXT("local TypeIdentifier (%C) not found in local type map.\n"),
-                 XTypes::equivalence_hash_to_string(it->equivalence_hash()).c_str()));
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: FlexibleTypeSupport::populate_dependencies_i: "
+                   "local TypeIdentifier (%C) not found in local type map.\n",
+                   XTypes::equivalence_hash_to_string(it->equivalence_hash()).c_str()));
+      }
     }
   }
   tls->add_type_dependencies(type_id, deps_with_size);
