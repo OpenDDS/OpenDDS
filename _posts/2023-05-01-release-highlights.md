@@ -20,8 +20,6 @@ The relevant points from the transition are:
 * Systems and processes administered by OCI on behalf of the OpenDDS Foundation will no longer be maintained.
   Unity Foundation will take over some of these systems and processes while others will be deprecated and eliminated to reduce overhead.
 
-For more on OCI's role, see {% link foundation/minutes/2023-04-12.html %}.
-
 As part of the transition, OpenDDS Foundation has adopted the following (tentative) calendar:
 
 | Month     | Activity                |
@@ -39,7 +37,6 @@ As part of the transition, OpenDDS Foundation has adopted the following (tentati
 | November  | Release Article         |
 | December  | Year in Review Webinar  |
 
-The general plan is to have one release and [Technical Advisory Board (TAB) Meeting]({% link foundation/index.html %}) every quarter.
 This will be followed by a news article (like this one) that goes over the highlights of current release.
 In June and December, there will be webinars to get feedback from the community and reflect on progress.
 In March and September, there will an article or webinar on some aspect of OpenDDS.
