@@ -128,7 +128,9 @@
           {% endunless %}
         {% endfor %}
         {% assign terminate_ul_count = level | minus: start_level %}
-        {% for i in (0..terminate_ul_count) %}</ul>{% endfor %}
+        {% if terminate_ul_count > 0 %}
+          {% for i in (0..terminate_ul_count) %}</ul><!-- bang -->{% endfor %}
+        {% endif %}
       </ul>
     </nav>
   </div>
