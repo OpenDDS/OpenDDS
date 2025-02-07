@@ -67,7 +67,6 @@ if(MSVC AND OPENDDS_STATIC)
   _opendds_vs_force_static()
 endif()
 
-enable_language(C)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
