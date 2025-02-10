@@ -137,7 +137,7 @@ public:
   virtual void get_flexible_types(const char* /*key*/,
                                   XTypes::TypeInformation& /*type_info*/) {}
 
-  void add_types(const XTypes::TypeLookupService_rch& tls) const;
+  virtual void add_types(const XTypes::TypeLookupService_rch& tls) const;
 
   RepresentationFormat* make_format(DDS::DataRepresentationId_t representation);
 

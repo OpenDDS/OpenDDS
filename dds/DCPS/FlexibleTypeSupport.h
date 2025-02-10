@@ -60,8 +60,13 @@ public:
   Extensibility base_extensibility() const { return base_->base_extensibility(); }
   Extensibility max_extensibility() const { return base_->max_extensibility(); }
 
-private:
   void get_flexible_types(const char* key, XTypes::TypeInformation& type_info);
+  void add_types(const XTypes::TypeLookupService_rch& tls) const;
+
+private:
+  void populate_dependencies_i(const XTypes::TypeLookupService_rch& tls,
+                               const XTypes::TypeIdentifier& tid,
+                               const XTypes::TypeMap& tm) const;
 
   RcHandle<TypeSupportImpl> base_;
   String name_;
@@ -75,7 +80,8 @@ private:
     XTypes::TypeIdentifier minimalId_, completeId_;
     XTypes::TypeMap minimalMap_, completeMap_;
   };
-  OPENDDS_MAP(String, Alternative) map_;
+  typedef OPENDDS_MAP(String, Alternative) MapType;
+  MapType map_;
 
   OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(FlexibleTypeSupport)
 };
