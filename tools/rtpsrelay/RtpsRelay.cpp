@@ -624,6 +624,7 @@ int run(int argc, ACE_TCHAR* argv[])
   append(application_properties, OpenDDS::RTPS::RTPS_DISCOVERY_TYPE_LOOKUP_SERVICE, "false");
   append(application_properties, OpenDDS::RTPS::RTPS_REFLECT_HEARTBEAT_COUNT, "true");
   append(application_properties, OpenDDS::RTPS::RTPS_RELAY_APPLICATION_PARTICIPANT, "true");
+  append(application_properties, OpenDDS::RTPS::RTPS_HARVEST_THREAD_STATUS, "true");
 
   if (secure) {
     append(application_properties, DDS::Security::Properties::AuthIdentityCA, identity_ca_file);

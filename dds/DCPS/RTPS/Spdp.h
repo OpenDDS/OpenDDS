@@ -411,6 +411,7 @@ private:
   DCPS::GUID_t guid_;
   const DCPS::MonotonicTime_t participant_discovered_at_;
   bool is_application_participant_;
+  bool harvest_thread_status_;
   DDS::UInt16 ipv4_participant_port_id_;
 #ifdef ACE_HAS_IPV6
   DDS::UInt16 ipv6_participant_port_id_;
