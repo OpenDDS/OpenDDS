@@ -250,6 +250,11 @@ public:
 
   static bool copy_from_topic_qos(DDS::DataWriterQos& a_datareader_qos,
                                   const DDS::TopicQos& a_topic_qos);
+
+  static void append(DDS::PropertySeq& props,
+                     const char* name,
+                     const std::string& value,
+                     bool propagate = false);
 };
 
 #ifndef OPENDDS_SAFETY_PROFILE
