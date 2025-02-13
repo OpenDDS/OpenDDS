@@ -159,6 +159,8 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
       const CORBA::ULong old_flags = config_->participant_flags();
       const CORBA::ULong new_flags = prop_to_bool(prop) ? (old_flags | PFLAGS_REFLECT_HEARTBEAT_COUNT) : (old_flags & ~PFLAGS_REFLECT_HEARTBEAT_COUNT);
       config_->participant_flags(new_flags);
+    } else if (std::strcmp(RTPS_HARVEST_THREAD_STATUS, prop.name.in()) == 0) {
+      harvest_thread_status_ = prop_to_bool(prop);
     }
   }
 
@@ -249,6 +251,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , guid_(guid)
   , participant_discovered_at_(MonotonicTimePoint::now().to_idl_struct())
   , is_application_participant_(false)
+  , harvest_thread_status_(false)
   , ipv4_participant_port_id_(0)
 #ifdef ACE_HAS_IPV6
   , ipv6_participant_port_id_(0)
@@ -312,6 +315,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , guid_(guid)
   , participant_discovered_at_(MonotonicTimePoint::now().to_idl_struct())
   , is_application_participant_(false)
+  , harvest_thread_status_(false)
   , ipv4_participant_port_id_(0)
 #ifdef ACE_HAS_IPV6
   , ipv6_participant_port_id_(0)
@@ -2493,7 +2497,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
 
 #ifndef DDS_HAS_MINIMUM_BIT
   // internal thread bit reporting
-  if (TheServiceParticipant->get_thread_status_manager().update_thread_status()) {
+  if (TheServiceParticipant->get_thread_status_manager().update_thread_status() && outer->harvest_thread_status_) {
     thread_status_task_ = DCPS::make_rch<SpdpPeriodic>(reactor_task->interceptor(), ref(*this), &SpdpTransport::thread_status_task);
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
@@ -2581,8 +2585,8 @@ Spdp::SpdpTransport::enable_periodic_tasks()
     local_send_task_->enable(TimeDuration::zero_value);
   }
 
-#if OPENDDS_CONFIG_SECURITY
   DCPS::RcHandle<Spdp> outer = outer_.lock();
+#if OPENDDS_CONFIG_SECURITY
   if (!outer) return;
 
   outer->sedp_->core().reset_relay_spdp_task_falloff();
@@ -2594,7 +2598,7 @@ Spdp::SpdpTransport::enable_periodic_tasks()
 
 #ifndef DDS_HAS_MINIMUM_BIT
   const DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-  if (thread_status_manager.update_thread_status()) {
+  if (thread_status_manager.update_thread_status() && outer->harvest_thread_status_) {
     thread_status_task_->enable(false, thread_status_manager.thread_status_interval());
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
