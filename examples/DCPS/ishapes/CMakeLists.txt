@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.3...3.27)
-find_package(OpenDDS REQUIRED)
+include("${CMAKE_CURRENT_LIST_DIR}/../../../cmake/opendds_version.cmake")
 project(ishapes VERSION ${OpenDDS_VERSION} LANGUAGES CXX)
+find_package(OpenDDS REQUIRED)
 
 # Make sure the MPC-generated headers are gone so the CMake build will use the
 # right ones. This is not needed in a real project.

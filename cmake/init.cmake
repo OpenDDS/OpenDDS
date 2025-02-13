@@ -15,6 +15,8 @@ include(CMakeParseArguments)
 
 include("${CMAKE_CURRENT_LIST_DIR}/opendds_version.cmake")
 
+enable_language(C CXX)
+
 function(_opendds_detect_ace)
   if(OPENDDS_CMAKE_VERBOSE)
     set(path "${OPENDDS_ACE}/bin/MakeProjectCreator/config/default.features")
@@ -169,20 +171,33 @@ function(_opendds_cxx_std_from_year out_var year)
   set(${out_var} ${std} PARENT_SCOPE)
 endfunction()
 
+function(_opendds_try_compile_cplusplus compiled_var temp_dir test_cxx_std cplusplus)
+  try_compile(compiled
+    "${temp_dir}/cplusplus_${cplusplus}"
+    SOURCES "${test_cxx_std}"
+    COMPILE_DEFINITIONS "-DOPENDDS_TEST_CPLUSPLUS=${cplusplus}L"
+  )
+  set(${compiled_var} "${compiled}" PARENT_SCOPE)
+endfunction()
+
 function(_opendds_set_cxx_std)
+  set(default_cxx_std_year 1998)
   set(cplusplus_values 201103 201402 201703 202002 202302)
+  set(compiler_info "compiler ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+
   set(test_cxx_std "${CMAKE_CURRENT_LIST_DIR}/test_cxx_std.cpp")
   set(temp_dir "${CMAKE_CURRENT_BINARY_DIR}/opendds_test_cxx_std")
   file(MAKE_DIRECTORY "${temp_dir}")
 
+  # Make sure try_compile works at all
+  _opendds_try_compile_cplusplus(compiled "${temp_dir}" "${test_cxx_std}" ${default_cxx_std_year})
+  if(NOT compiled)
+    message(FATAL_ERROR "try_compile using ${compiler_info} failed for ${default_cxx_std_year}")
+  endif()
+
   # Get the latest known default compiler C++ standard
-  set(default_cxx_std_year 1998)
   foreach(cplusplus IN LISTS cplusplus_values)
-    try_compile(compiled
-      "${temp_dir}/cplusplus_${cplusplus}"
-      SOURCES "${test_cxx_std}"
-      COMPILE_DEFINITIONS "-DOPENDDS_TEST_CPLUSPLUS=${cplusplus}L"
-    )
+    _opendds_try_compile_cplusplus(compiled "${temp_dir}" "${test_cxx_std}" ${cplusplus})
     if(compiled)
       _opendds_cplusplus_to_year(default_cxx_std_year ${cplusplus})
     else()
@@ -218,7 +233,6 @@ function(_opendds_set_cxx_std)
 
   # Get the C++ standard ACE requires
   set(ace_info "ACE ${OPENDDS_ACE_VERSION}")
-  set(compiler_info "compiler ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
   set(existing_cxx11 FALSE)
   if(OPENDDS_CXX11 OR (DEFINED _opendds_default_features_no_cxx11 AND
       _opendds_default_features_no_cxx11 STREQUAL "0"))
