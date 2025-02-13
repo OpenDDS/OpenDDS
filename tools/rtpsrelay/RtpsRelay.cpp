@@ -170,6 +170,9 @@ int run(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-UtilizationLimit"))) {
       config.utilization_limit(ACE_OS::atof(arg));
       args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-LogUtilizationChanges"))) {
+      config.log_utilization_changes(ACE_OS::atoi(arg));
+      args.consume_arg();
     } else if ((arg = args.get_the_parameter("-LogRelayStatistics"))) {
       config.log_relay_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
