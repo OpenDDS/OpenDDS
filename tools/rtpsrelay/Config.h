@@ -29,6 +29,7 @@ public:
     , log_thread_status_(false)
     , thread_status_safety_factor_(3)
     , utilization_limit_(.95)
+    , log_utilization_changes_(false)
     , log_participant_statistics_(false)
     , publish_participant_statistics_(false)
     , restart_detection_(false)
@@ -176,6 +177,16 @@ public:
   double utilization_limit() const
   {
     return utilization_limit_;
+  }
+
+  void log_utilization_changes(bool value)
+  {
+    log_utilization_changes_ = value;
+  }
+
+  bool log_utilization_changes() const
+  {
+    return log_utilization_changes_;
   }
 
   void log_relay_statistics(OpenDDS::DCPS::TimeDuration value)
@@ -353,6 +364,7 @@ private:
   bool log_thread_status_;
   int thread_status_safety_factor_;
   double utilization_limit_;
+  bool log_utilization_changes_;
   OpenDDS::DCPS::TimeDuration log_relay_statistics_;
   OpenDDS::DCPS::TimeDuration log_handler_statistics_;
   bool log_participant_statistics_;

@@ -76,7 +76,16 @@ int RelayThreadMonitor::svc()
 
     for (CORBA::ULong idx = 0; idx != infos.length(); ++idx) {
       if (infos[idx].valid_data) {
-        utilization_[datas[idx].thread_id.in()] = datas[idx].utilization;
+        const auto& bit_sample = datas[idx];
+        const auto thread_id = bit_sample.thread_id.in();
+        auto& utilization = utilization_[thread_id];
+        const auto old_utilization = utilization;
+        utilization = bit_sample.utilization;
+        if (config_.log_utilization_changes() && std::abs(utilization - old_utilization) > 0.2) { // 20% change
+          ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Thread %C utilization changed significantly: %.2f%% -> %.2f%%\n",
+            thread_id, old_utilization * 100, utilization * 100));
+        }
+
       } else if (infos[idx].instance_state != DDS::ALIVE_INSTANCE_STATE) {
         utilization_.erase(datas[idx].thread_id.in());
       }

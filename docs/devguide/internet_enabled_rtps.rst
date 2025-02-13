@@ -254,6 +254,10 @@ The command-line options for the RtpsRelay:
 
   Enable/disable logging in the :ref:`meta discovery HTTP server <internet_enabled_rtps--metadisc-server>`.
 
+.. option:: -LogUtilizationChanges 0|1
+
+  Enable/disable logging of thread utilization changes that exceed a certain threshhold.
+
 .. option:: -LogRelayStatistics <seconds>
 
 .. option:: -LogHandlerStatistics <seconds>
