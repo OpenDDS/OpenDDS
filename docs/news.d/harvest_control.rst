@@ -10,5 +10,5 @@
 
   - This addresses erroneous results from multiple participants harvesting thread status.
 
-  - See :ref:`_built_in_topics--openddsinternalthread-topic` for usage.
+  - See :ref:`built_in_topics--openddsinternalthread-topic` for usage.
 .. news-end-section
