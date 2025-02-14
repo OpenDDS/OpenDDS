@@ -170,6 +170,9 @@ public:
   bool suppress_typecode() const { return suppress_typecode_; }
   bool suppress_xtypes() const { return suppress_xtypes_; }
 
+  bool gen_typeobject_override() const { return gen_typeobject_override_; }
+  void gen_typeobject_override(bool value) { gen_typeobject_override_ = value; }
+
   static bool writeFile(const char* fileName, const std::string& content);
 
   /**
@@ -242,11 +245,14 @@ public:
 
   bool is_nested(AST_Decl* node);
 
+  std::ostream* typeobject_stream() const { return typeobject_stream_; }
+
 private:
   /// Name of the IDL file we are processing.
   const char* filename_;
 
   bool java_, suppress_idl_, suppress_typecode_, suppress_xtypes_,
+    gen_typeobject_override_,
     no_default_gen_, generate_itl_, generate_v8_,
     generate_value_reader_writer_,
     generate_xtypes_complete_, face_ts_;
@@ -270,6 +276,7 @@ private:
   typedef std::map<AST_Field*, OpenDDS::XTypes::MemberId> MemberIdMap;
   MemberIdMap member_id_map_;
   bool old_typeobject_encoding_;
+  std::ostream* typeobject_stream_;
 
   bool is_default_nested(UTL_Scope* scope);
   AutoidKind scoped_autoid(UTL_Scope* scope) const;

@@ -48,6 +48,7 @@ BE_GlobalData::BE_GlobalData()
   , suppress_idl_(false)
   , suppress_typecode_(false)
   , suppress_xtypes_(false)
+  , gen_typeobject_override_(false)
   , no_default_gen_(false)
   , generate_itl_(false)
   , generate_v8_(false)
@@ -63,6 +64,7 @@ BE_GlobalData::BE_GlobalData()
   , root_default_autoid_(autoidkind_sequential)
   , default_try_construct_(tryconstructfailaction_discard)
   , old_typeobject_encoding_(false)
+  , typeobject_stream_(0)
 {
   default_data_representation_.set_all(true);
 
@@ -73,6 +75,7 @@ BE_GlobalData::BE_GlobalData()
 
 BE_GlobalData::~BE_GlobalData()
 {
+  delete typeobject_stream_;
 }
 
 void
@@ -386,6 +389,8 @@ BE_GlobalData::parse_args(long& i, char** av)
       v8(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-Gxtypes-complete")) {
       xtypes_complete(true);
+    } else if (0 == ACE_OS::strcasecmp(av[i], "-Gtypeobject")) {
+      gen_typeobject_override(true);
     } else {
       invalid_option(av[i]);
     }
@@ -489,6 +494,8 @@ BE_GlobalData::parse_args(long& i, char** av)
       }
     } else if (!strcmp(av[i], "--old-typeobject-encoding")) {
       old_typeobject_encoding_ = true;
+    } else if (!strcmp(av[i], "--append-typeobjects")) {
+      typeobject_stream_ = new std::ofstream(av[++i], std::ios::app);
     } else {
       invalid_option(av[i]);
     }

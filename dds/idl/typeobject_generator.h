@@ -88,6 +88,10 @@ private:
   bool generate(AST_Type* node, UTL_ScopedName* name);
   void declare_get_type_map();
 
+  void gen_epilogue_type_map(const std::string& label,
+    const OpenDDS::XTypes::TypeMap& type_map,
+    const std::string& file);
+
   // Both fields must be constructed when an object is created.
   struct TypeObjectPair {
     OpenDDS::XTypes::TypeObject minimal;
@@ -124,6 +128,8 @@ private:
   typedef std::map<std::string, ACE_CDR::Long> EnumValues;
   typedef std::map<AST_Enum*, EnumValues> EnumValueMap;
   EnumValueMap enum_values_;
+
+  std::map<OpenDDS::XTypes::TypeIdentifier, std::string> type_identifier_index_;
 };
 
 #endif
