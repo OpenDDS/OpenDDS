@@ -16,7 +16,7 @@ Fully managed project delivery is also available.
 
 ### [Remedy IT](https://www.remedy.nl)
 
-[Remedy's RS_Year support](https://www.remedy.nl/services/opensource-support.html) provides you and your team the assistance you need using a pre-purchased pool of hours.
+[Remedy's Open Source Support](https://www.remedy.nl/services/opensource-support.html) provides you and your team the assistance you need using a pre-purchased pool of hours.
 
 Remedy IT also offers [training courses](https://www.remedy.nl/training/overview.html) in communication middleware and frameworks, including the OpenDDS project. Courses are offered as open enrollment, but on request, can also be delivered at your location.
 
