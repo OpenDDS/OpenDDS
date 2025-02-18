@@ -3,6 +3,8 @@ project: dcpsexe, dcps_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, qt5_widgets
   exename = *
   includes += .
 
+  dcps_ts_flags += -Gxtypes-complete
+
   TypeSupport_Files {
     ShapeType.idl
   }
