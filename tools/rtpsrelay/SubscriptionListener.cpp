@@ -47,6 +47,7 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
   }
 
   for (CORBA::ULong idx = 0; idx != infos.length(); ++idx) {
+    OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
     const auto& data = datas[idx];
     const auto& info = infos[idx];
 
@@ -63,14 +64,16 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
             GuidAddrSet::Proxy proxy(guid_addr_set_);
             ACE_DEBUG((LM_INFO,
                        "(%P|%t) INFO: SubscriptionListener::on_data_available "
-                       "add local reader %C %C %C into session\n",
+                       "add local reader %C %C %C into session [%u/%u]\n",
                        guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str(),
-                       proxy.get_session_time(make_part_guid(repoid), now).sec_str().c_str()));
+                       proxy.get_session_time(make_part_guid(repoid), now).sec_str().c_str(),
+                       idx, infos.length()));
           }
           stats_reporter_.local_readers(++count_, OpenDDS::DCPS::MonotonicTimePoint::now());
         } else if (r == GuidPartitionTable::UPDATED) {
           if (config_.log_discovery()) {
-            ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SubscriptionListener::on_data_available update local reader %C %C\n"), guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
+            ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SubscriptionListener::on_data_available update local reader %C %C [%u/%u]\n", guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str(),
+                       idx, infos.length()));
           }
         }
       }
@@ -83,9 +86,10 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
         if (config_.log_discovery()) {
           GuidAddrSet::Proxy proxy(guid_addr_set_);
           ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SubscriptionListener::on_data_available "
-                     "remove local reader %C %C into session\n",
+                     "remove local reader %C %C into session [%u/%u]\n",
                      guid_to_string(repoid).c_str(),
-                     proxy.get_session_time(make_part_guid(repoid), now).sec_str().c_str()));
+                     proxy.get_session_time(make_part_guid(repoid), now).sec_str().c_str(),
+                     idx, infos.length()));
         }
 
         guid_partition_table_.remove(repoid);

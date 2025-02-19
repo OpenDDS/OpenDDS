@@ -35,20 +35,21 @@ void ParticipantListener::on_data_available(DDS::DataReader_ptr reader)
   }
 
   for (CORBA::ULong idx = 0; idx != infos.length(); ++idx) {
+    OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
     const auto& data = datas[idx];
     const auto& info = infos[idx];
 
     switch (info.instance_state) {
     case DDS::ALIVE_INSTANCE_STATE:
       if (info.valid_data) {
-        participant_status_reporter_.add_participant(participant_->get_repoid(info.instance_handle), data);
+        participant_status_reporter_.add_participant(participant_->get_repoid(info.instance_handle), data, idx, infos.length());
       }
       break;
     case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
     case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
       {
         GuidAddrSet::Proxy proxy(guid_addr_set_);
-        participant_status_reporter_.remove_participant(proxy, participant_->get_repoid(info.instance_handle));
+        participant_status_reporter_.remove_participant(proxy, participant_->get_repoid(info.instance_handle), idx, infos.length());
       }
       break;
     }
