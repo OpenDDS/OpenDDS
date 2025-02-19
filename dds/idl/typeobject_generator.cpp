@@ -657,7 +657,11 @@ typeobject_generator::gen_epilogue_type_map(const std::string& label,
   idx = 0;
   for (OpenDDS::XTypes::TypeMap::const_iterator pos = type_map.begin();
        pos != type_map.end(); ++pos, ++idx) {
-    be_global->impl_ << "  tm[" << pos->first << "] = OPENDDS_IDL_FILE_SPECIFIC(" << label << "_to, " << idx << ")();\n";
+    const std::string comment = (pos->second.kind == OpenDDS::XTypes::EK_COMPLETE) ?
+      " // " + get_type_name(pos->second.complete) : "";
+    be_global->impl_ <<
+      "  tm[" << pos->first << "] = OPENDDS_IDL_FILE_SPECIFIC(" << label << "_to, " << idx << ")();"
+      << comment << '\n';
   }
 
   be_global->impl_ <<
