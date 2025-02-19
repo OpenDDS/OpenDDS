@@ -159,6 +159,9 @@ endfunction()
 
 function(_opendds_cplusplus_to_year out_var cplusplus)
   math(EXPR year "${cplusplus} / 100")
+  if(year MATCHES 1997)
+    set(year 1998)
+  endif()
   set(${out_var} ${year} PARENT_SCOPE)
 endfunction()
 
@@ -172,27 +175,39 @@ function(_opendds_cxx_std_from_year out_var year)
 endfunction()
 
 function(_opendds_try_compile_cplusplus compiled_var temp_dir test_cxx_std cplusplus)
-  try_compile(compiled
+  unset(_opendds_try_compile_cplusplus_compiled CACHE)
+  try_compile(_opendds_try_compile_cplusplus_compiled
     "${temp_dir}/cplusplus_${cplusplus}"
     SOURCES "${test_cxx_std}"
     COMPILE_DEFINITIONS "-DOPENDDS_TEST_CPLUSPLUS=${cplusplus}L"
+    OUTPUT_VARIABLE compile_output
   )
-  set(${compiled_var} "${compiled}" PARENT_SCOPE)
+  set(${compiled_var} "${_opendds_try_compile_cplusplus_compiled}" PARENT_SCOPE)
 endfunction()
 
 function(_opendds_set_cxx_std)
-  set(default_cxx_std_year 1998)
+  set(min_cplusplus_value 199711)
+  _opendds_cplusplus_to_year(default_cxx_std_year ${min_cplusplus_value})
   set(cplusplus_values 201103 201402 201703 202002 202302)
+  set(invalid_cplusplus_value 999999)
+  _opendds_cplusplus_to_year(invalid_cxx_std_year ${invalid_cplusplus_value})
+  # (Assuming we're not running in the year 10,000 and there's still C++ standards coming out)
   set(compiler_info "compiler ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
 
   set(test_cxx_std "${CMAKE_CURRENT_LIST_DIR}/test_cxx_std.cpp")
   set(temp_dir "${CMAKE_CURRENT_BINARY_DIR}/opendds_test_cxx_std")
   file(MAKE_DIRECTORY "${temp_dir}")
 
-  # Make sure try_compile works at all
-  _opendds_try_compile_cplusplus(compiled "${temp_dir}" "${test_cxx_std}" ${default_cxx_std_year})
+  # Make sure try_compile works correctly
+  _opendds_try_compile_cplusplus(compiled "${temp_dir}" "${test_cxx_std}" ${min_cplusplus_value})
   if(NOT compiled)
-    message(FATAL_ERROR "try_compile using ${compiler_info} failed for ${default_cxx_std_year}")
+    message(FATAL_ERROR "try_compile using ${compiler_info} failed for C++ ${default_cxx_std_year}")
+  endif()
+  _opendds_try_compile_cplusplus(
+    compiled "${temp_dir}" "${test_cxx_std}" ${invalid_cplusplus_value})
+  if(compiled)
+    message(FATAL_ERROR
+      "try_compile using ${compiler_info} shouldn't have worked for C++ ${invalid_cxx_std_year}")
   endif()
 
   # Get the latest known default compiler C++ standard
@@ -205,7 +220,7 @@ function(_opendds_set_cxx_std)
     endif()
   endforeach()
 
-  # Get the max C++ standard supported by the compiler
+  # Get the max C++ standard and supported by the compiler and CMake
   set(max_cxx_std_year ${default_cxx_std_year})
   if(NOT CMAKE_VERSION VERSION_LESS "3.8.0")
     foreach(feature IN LISTS CMAKE_CXX_COMPILE_FEATURES)
@@ -268,8 +283,13 @@ function(_opendds_set_cxx_std)
     endif()
     foreach(try_cplusplus IN LISTS cplusplus_values)
       _opendds_cplusplus_to_year(try_year ${try_cplusplus})
+      if(try_year GREATER ${max_cxx_std_year})
+        # Can't go higher than what compiler or CMake support
+        break()
+      endif()
       _opendds_cxx_std_from_year(try_std ${try_year})
-      try_compile(compiled
+      unset(_opendds_try_compile_compiled CACHE)
+      try_compile(_opendds_try_compile_compiled
         "${temp_dir}/ace_cxx_std_${try_cplusplus}"
         SOURCES "${test_cxx_std}"
         COMPILE_DEFINITIONS "-DOPENDDS_TEST_ACE_CXX_STD"
@@ -278,7 +298,7 @@ function(_opendds_set_cxx_std)
           "-DINCLUDE_DIRECTORIES=${includes}"
         OUTPUT_VARIABLE build_output
       )
-      if(compiled)
+      if(_opendds_try_compile_compiled)
         set(ace_min_cxx_std_year ${try_year})
         break()
       endif()
