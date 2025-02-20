@@ -1297,7 +1297,7 @@ void Qos_Helper::append(DDS::PropertySeq& props,
                         bool propagate)
 {
   const DDS::Property_t prop = {name, value.c_str(), propagate};
-  const size_t len = props.length();
+  const DDS::UInt32 len = props.length();
   props.length(len + 1);
   props[len] = prop;
 }
