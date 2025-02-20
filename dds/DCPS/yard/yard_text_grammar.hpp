@@ -136,9 +136,9 @@ namespace text_grammar
                 template<typename ParserState_T>
                 static bool Match(ParserState_T& p) {
                   if (p.AtEnd()) { return false; }
-                  if (IdentFirstChar::template Match(p))
+                  if (IdentFirstChar::Match(p))
                   {
-                        while (IdentNextChar::template Match(p)) { }
+                        while (IdentNextChar::Match(p)) { }
                         return true;
                   }
                   return false;
