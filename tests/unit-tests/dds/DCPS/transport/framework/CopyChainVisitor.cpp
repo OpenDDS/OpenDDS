@@ -21,7 +21,7 @@ TEST(copy_chain_visitor, simple_copy)
   amb->cont()->cont(new ACE_Message_Block(16));
 
   DataSampleElement* dse = new DataSampleElement(GUID_UNKNOWN, 0, PublicationInstance_rch());
-  dse->set_sample(move(amb));
+  dse->set_sample(OpenDDS::DCPS::move(amb));
 
   ASSERT_EQ(dse->get_sample()->reference_count(), 1);
 
@@ -71,7 +71,7 @@ TEST(copy_chain_visitor, simple_duplicate)
   amb->cont()->cont(new ACE_Message_Block(16));
 
   DataSampleElement* dse = new DataSampleElement(GUID_UNKNOWN, 0, PublicationInstance_rch());
-  dse->set_sample(move(amb));
+  dse->set_sample(OpenDDS::DCPS::move(amb));
 
   ASSERT_EQ(dse->get_sample()->reference_count(), 1);
 
