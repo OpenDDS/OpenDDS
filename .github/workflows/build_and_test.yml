@@ -3308,6 +3308,12 @@ jobs:
         cd OpenDDS/tests/cmake/build
         cmake ..
         cmake --build . -- -j4
+    - name: Build iShapes with CMake
+      run: |
+        source OpenDDS/setenv.sh
+        cd OpenDDS/examples/DCPS/ishapes
+        cmake -S . -B build
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |

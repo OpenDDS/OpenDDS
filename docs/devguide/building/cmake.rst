@@ -820,7 +820,7 @@ Dependencies
 .. cmake:var:: OPENDDS_QT
   :no-contents-entry:
 
-  Path to :ref:`deps-qt`
+  If ``TRUE``, try to build Qt applications, currently only the :ref:`shapes-demo`.
 
 .. cmake:var:: OPENDDS_RAPIDJSON
   :no-contents-entry:

@@ -15,6 +15,8 @@ include(CMakeParseArguments)
 
 include("${CMAKE_CURRENT_LIST_DIR}/opendds_version.cmake")
 
+enable_language(C CXX)
+
 function(_opendds_detect_ace)
   if(OPENDDS_CMAKE_VERBOSE)
     set(path "${OPENDDS_ACE}/bin/MakeProjectCreator/config/default.features")
@@ -157,6 +159,9 @@ endfunction()
 
 function(_opendds_cplusplus_to_year out_var cplusplus)
   math(EXPR year "${cplusplus} / 100")
+  if(year MATCHES 1997)
+    set(year 1998)
+  endif()
   set(${out_var} ${year} PARENT_SCOPE)
 endfunction()
 
@@ -169,28 +174,75 @@ function(_opendds_cxx_std_from_year out_var year)
   set(${out_var} ${std} PARENT_SCOPE)
 endfunction()
 
+set(_opendds_try_compile_dir "${CMAKE_CURRENT_BINARY_DIR}/opendds_try_compile")
+file(MAKE_DIRECTORY "${_opendds_try_compile_dir}")
+
+function(_opendds_try_compile compiled_var output_var name source)
+  set(no_value_options)
+  set(single_value_options OUTPUT_VAR)
+  set(multi_value_options COMPILE_DEFINITIONS CMAKE_FLAGS)
+  cmake_parse_arguments(arg
+    "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
+
+  unset(_opendds_try_compile_compiled CACHE)
+  try_compile(_opendds_try_compile_compiled
+    "${_opendds_try_compile_dir}/${name}"
+    SOURCES "${source}"
+    COMPILE_DEFINITIONS ${arg_COMPILE_DEFINITIONS}
+    CMAKE_FLAGS ${arg_CMAKE_FLAGS}
+    OUTPUT_VARIABLE output
+  )
+  set(${compiled_var} "${_opendds_try_compile_compiled}" PARENT_SCOPE)
+  set(${output_var} "${output}" PARENT_SCOPE)
+endfunction()
+
+set(_opendds_test_cxx_std "${CMAKE_CURRENT_LIST_DIR}/test_cxx_std.cpp")
+
+function(_opendds_try_compile_cplusplus compiled_var output_var cplusplus)
+  _opendds_try_compile(compiled output
+    "cplusplus_${cplusplus}" "${_opendds_test_cxx_std}"
+    COMPILE_DEFINITIONS "-DOPENDDS_TEST_CPLUSPLUS=${cplusplus}L")
+  set(${compiled_var} "${compiled}" PARENT_SCOPE)
+  set(${output_var} "${output}" PARENT_SCOPE)
+endfunction()
+
 function(_opendds_set_cxx_std)
+  set(min_cplusplus_value 199711)
+  _opendds_cplusplus_to_year(default_cxx_std_year ${min_cplusplus_value})
   set(cplusplus_values 201103 201402 201703 202002 202302)
-  set(test_cxx_std "${CMAKE_CURRENT_LIST_DIR}/test_cxx_std.cpp")
-  set(temp_dir "${CMAKE_CURRENT_BINARY_DIR}/opendds_test_cxx_std")
-  file(MAKE_DIRECTORY "${temp_dir}")
+  set(invalid_cplusplus_value 999999)
+  _opendds_cplusplus_to_year(invalid_cxx_std_year ${invalid_cplusplus_value})
+  # (Assuming we're not running in the year 10,000 and there's still C++ standards coming out)
+  set(compiler_info "compiler ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+
+  # Make sure try_compile works correctly
+  _opendds_try_compile_cplusplus(compiled output ${min_cplusplus_value})
+  if(NOT compiled)
+    message(FATAL_ERROR
+      " try_compile using ${compiler_info} failed for C++ ${default_cxx_std_year}:\n"
+      " \n"
+      " ${output}")
+  endif()
+  _opendds_try_compile_cplusplus(compiled output ${invalid_cplusplus_value})
+  if(compiled)
+    message(FATAL_ERROR
+      "try_compile using ${compiler_info} shouldn't have worked for C++ ${invalid_cxx_std_year}")
+  endif()
 
   # Get the latest known default compiler C++ standard
-  set(default_cxx_std_year 1998)
   foreach(cplusplus IN LISTS cplusplus_values)
-    try_compile(compiled
-      "${temp_dir}/cplusplus_${cplusplus}"
-      SOURCES "${test_cxx_std}"
-      COMPILE_DEFINITIONS "-DOPENDDS_TEST_CPLUSPLUS=${cplusplus}L"
-    )
+    _opendds_try_compile_cplusplus(compiled output ${cplusplus})
     if(compiled)
       _opendds_cplusplus_to_year(default_cxx_std_year ${cplusplus})
     else()
       break()
     endif()
   endforeach()
+  if(OPENDDS_CMAKE_VERBOSE)
+    message(STATUS "default_cxx_std_year: ${default_cxx_std_year}")
+  endif()
 
-  # Get the max C++ standard supported by the compiler
+  # Get the max C++ standard supported by the compiler and/or CMake
   set(max_cxx_std_year ${default_cxx_std_year})
   if(NOT CMAKE_VERSION VERSION_LESS "3.8.0")
     foreach(feature IN LISTS CMAKE_CXX_COMPILE_FEATURES)
@@ -202,23 +254,31 @@ function(_opendds_set_cxx_std)
       endif()
     endforeach()
   endif()
+  if(OPENDDS_CMAKE_VERBOSE)
+    message(STATUS "max_cxx_std_year: ${max_cxx_std_year}")
+  endif()
 
   # Get the min C++ standard that might be used
   set(explicit TRUE)
   if(DEFINED OPENDDS_CXX_STD)
     # User is overriding the standard for OpenDDS specifically
     _opendds_cxx_std_to_year(cxx_std_year ${OPENDDS_CXX_STD})
+    set(cxx_std_year_source "OPENDDS_CXX_STD")
   elseif(DEFINED CMAKE_CXX_STANDARD)
     # User is overriding the standard globally
     _opendds_cxx_std_to_year(cxx_std_year ${CMAKE_CXX_STANDARD})
+    set(cxx_std_year_source "CMAKE_CXX_STANDARD")
   else()
     set(explicit FALSE)
     set(cxx_std_year ${default_cxx_std_year})
+    set(cxx_std_year_source "compiler default")
+  endif()
+  if(OPENDDS_CMAKE_VERBOSE)
+    message(STATUS "cxx_std_year: ${cxx_std_year} (${cxx_std_year_source})")
   endif()
 
   # Get the C++ standard ACE requires
   set(ace_info "ACE ${OPENDDS_ACE_VERSION}")
-  set(compiler_info "compiler ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
   set(existing_cxx11 FALSE)
   if(OPENDDS_CXX11 OR (DEFINED _opendds_default_features_no_cxx11 AND
       _opendds_default_features_no_cxx11 STREQUAL "0"))
@@ -246,23 +306,29 @@ function(_opendds_set_cxx_std)
         message(FATAL_ERROR "ACE doesn't have a config.h.")
       endif()
       # Won't compile without a config.h, so make a fake one.
-      set(include_dir "${temp_dir}/include")
+      set(include_dir "${_opendds_try_compile_dir}/ace_cxx_std_include")
       list(APPEND includes "${include_dir}")
       set(ace_dir "${include_dir}/ace")
       file(MAKE_DIRECTORY "${ace_dir}")
       file(WRITE "${ace_dir}/config.h" "#include <ace/${_OPENDDS_ACE_CONFIG_FILE}>\n")
     endif()
     foreach(try_cplusplus IN LISTS cplusplus_values)
-      _opendds_cplusplus_to_year(try_year ${try_cplusplus})
+      _opendds_cplusplus_to_year(check_year ${try_cplusplus})
+      if(check_year GREATER ${max_cxx_std_year})
+        message(STATUS "Had to stop probing ACE C++ standard, C++ ${check_year} is greater than "
+          "the max supported C++ ${max_cxx_std_year}. ACE might require a higher standard than "
+          "what is supported by the compiler and/or CMake.")
+        break()
+      endif()
+      set(try_year ${check_year})
       _opendds_cxx_std_from_year(try_std ${try_year})
-      try_compile(compiled
-        "${temp_dir}/ace_cxx_std_${try_cplusplus}"
-        SOURCES "${test_cxx_std}"
+      string(REPLACE ";" "\\\;" includes "${includes}") # Needed because this will be a nested list
+      _opendds_try_compile(compiled build_output
+        "ace_cxx_std_${try_cplusplus}" "${_opendds_test_cxx_std}"
         COMPILE_DEFINITIONS "-DOPENDDS_TEST_ACE_CXX_STD"
         CMAKE_FLAGS
           "-DCMAKE_CXX_STANDARD=${try_std}"
           "-DINCLUDE_DIRECTORIES=${includes}"
-        OUTPUT_VARIABLE build_output
       )
       if(compiled)
         set(ace_min_cxx_std_year ${try_year})
@@ -279,9 +345,6 @@ function(_opendds_set_cxx_std)
   endif()
 
   if(OPENDDS_CMAKE_VERBOSE)
-    message(STATUS "default_cxx_std_year: ${default_cxx_std_year}")
-    message(STATUS "max_cxx_std_year: ${max_cxx_std_year}")
-    message(STATUS "cxx_std_year: ${cxx_std_year}")
     message(STATUS "existing_cxx11: ${existing_cxx11}")
     message(STATUS "can_build_cxx11: ${can_build_cxx11}")
     message(STATUS "ace_min_cxx_std_year: ${ace_min_cxx_std_year}")
@@ -297,14 +360,13 @@ function(_opendds_set_cxx_std)
     message(STATUS "${compiler_info} would use ${cxx_std_year}, but ${msg}. Raising "
       "requirment to that.")
     set(cxx_std_year ${ace_min_cxx_std_year})
+    set(cxx_std_year_source "ACE")
   endif()
 
   _opendds_cxx_std_from_year(cxx_std ${cxx_std_year})
   set(OPENDDS_CXX_STD ${cxx_std} CACHE STRING
     "Minimum required C++ standard (same values as CMAKE_CXX_STANDARD)" FORCE)
-  if(OPENDDS_CMAKE_VERBOSE)
-    message(STATUS "OPENDDS_CXX_STD: ${OPENDDS_CXX_STD}")
-  endif()
+  message(STATUS "OPENDDS_CXX_STD: ${OPENDDS_CXX_STD} (from ${cxx_std_year_source})")
   set(OPENDDS_CXX_STD_YEAR ${cxx_std_year} CACHE STRING
     "Minimum required C++ standard year (do not set mannually)" FORCE)
 endfunction()
