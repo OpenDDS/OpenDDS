@@ -34,6 +34,9 @@ public:
   virtual ~SporadicTask() {}
 
   void schedule(const TimeDuration& delay);
+  // Schedule task execution for the maximum of release_time and now plus the minimum_delay.
+  void schedule_max(const MonotonicTimePoint& release_time,
+                    const TimeDuration& minimum_delay);
 
   void cancel();
 
@@ -69,6 +72,8 @@ private:
   const RcHandle<SporadicCommand> sporadic_command_;
   mutable ACE_Thread_Mutex mutex_;
 
+  void schedule_i(const MonotonicTimePoint& next_time,
+                  const TimeDuration& delay);
   void update_schedule();
 
   int handle_timeout(const ACE_Time_Value& tv, const void*)

@@ -105,6 +105,22 @@ RtpsDiscoveryConfig::max_lease_duration(const DCPS::TimeDuration& period)
                                              DCPS::ConfigStoreImpl::Format_IntegerSeconds);
 }
 
+DCPS::TimeDuration
+RtpsDiscoveryConfig::minimum_cleanup_separation() const
+{
+  return TheServiceParticipant->config_store()->get(config_key("MINIMUM_CLEANUP_SEPARATION").c_str(),
+                                                    TimeDuration::from_msec(1),
+                                                    DCPS::ConfigStoreImpl::Format_IntegerMilliseconds);
+}
+
+void
+RtpsDiscoveryConfig::minimum_cleanup_separation(const DCPS::TimeDuration& period)
+{
+  TheServiceParticipant->config_store()->set(config_key("MINIMUM_CLEANUP_SEPARATION").c_str(),
+                                             period,
+                                             DCPS::ConfigStoreImpl::Format_IntegerMilliseconds);
+}
+
 #if OPENDDS_CONFIG_SECURITY
 DCPS::TimeDuration
 RtpsDiscoveryConfig::security_unsecure_lease_duration() const

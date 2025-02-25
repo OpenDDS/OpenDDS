@@ -16,7 +16,24 @@ namespace DCPS {
 
 void SporadicTask::schedule(const TimeDuration& delay)
 {
-  const MonotonicTimePoint next_time = time_source_.monotonic_time_point_now() + delay;
+  schedule_i(time_source_.monotonic_time_point_now() + delay, delay);
+}
+
+void SporadicTask::schedule_max(const MonotonicTimePoint& release_time,
+                                const TimeDuration& minimum_delay)
+{
+  const MonotonicTimePoint now = time_source_.monotonic_time_point_now();
+  const MonotonicTimePoint now_delay = now + minimum_delay;
+  if (now_delay > release_time) {
+    schedule_i(now_delay, minimum_delay);
+  } else {
+    schedule_i(release_time, release_time - now);
+  }
+}
+
+void SporadicTask::schedule_i(const MonotonicTimePoint& next_time,
+                              const TimeDuration& delay)
+{
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     if (!desired_scheduled_ || next_time < desired_next_time_) {

@@ -391,6 +391,7 @@ private:
   const DCPS::TimeDuration lease_duration_;
   const DCPS::TimeDuration lease_extension_;
   const DCPS::TimeDuration max_lease_duration_;
+  const DCPS::TimeDuration minimum_cleanup_separation_;
   const u_short max_spdp_sequence_msg_reset_checks_;
   const bool check_source_ip_;
   const bool undirected_spdp_;

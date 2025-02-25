@@ -237,6 +237,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , lease_duration_(disco_->config()->lease_duration())
   , lease_extension_(disco_->config()->lease_extension())
   , max_lease_duration_(disco_->config()->max_lease_duration())
+  , minimum_cleanup_separation_(disco_->config()->minimum_cleanup_separation())
   , max_spdp_sequence_msg_reset_checks_(disco->config()->max_spdp_sequence_msg_reset_checks())
   , check_source_ip_(disco->config()->check_source_ip())
   , undirected_spdp_(disco->config()->undirected_spdp())
@@ -303,6 +304,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , lease_duration_(disco_->config()->lease_duration())
   , lease_extension_(disco_->config()->lease_extension())
   , max_lease_duration_(disco_->config()->max_lease_duration())
+  , minimum_cleanup_separation_(disco_->config()->minimum_cleanup_separation())
   , max_spdp_sequence_msg_reset_checks_(disco->config()->max_spdp_sequence_msg_reset_checks())
   , check_source_ip_(disco->config()->check_source_ip())
   , undirected_spdp_(disco->config()->undirected_spdp())
@@ -820,15 +822,14 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         effective_lease = security_unsecure_lease_duration_;
       } else {
 #endif
-        const TimeDuration maxLeaseDuration = max_lease_duration_;
-        if (maxLeaseDuration && effective_lease > maxLeaseDuration) {
+        if (max_lease_duration_ && effective_lease > max_lease_duration_) {
           if (DCPS::DCPS_debug_level >= 2) {
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) Spdp::handle_participant_data - overwriting %C lease %C from %C with %C\n"),
               DCPS::LogGuid(guid).c_str(), effective_lease.str(0).c_str(),
-              DCPS::LogAddr(from).c_str(), maxLeaseDuration.str(0).c_str()));
+              DCPS::LogAddr(from).c_str(), max_lease_duration_.str(0).c_str()));
           }
-          effective_lease = maxLeaseDuration;
+          effective_lease = max_lease_duration_;
         }
 #if OPENDDS_CONFIG_SECURITY
       }
@@ -3921,41 +3922,39 @@ Spdp::process_lease_expirations(const DCPS::MonotonicTimePoint& now)
 {
   ACE_GUARD (ACE_Thread_Mutex, g, lock_);
 
-  for (TimeQueue::iterator pos = lease_expirations_.begin(), limit = lease_expirations_.end();
-       pos != limit && pos->first <= now;) {
+  // Process one at a time to keep the thread responsive.
+  const TimeQueue::iterator pos = lease_expirations_.begin();
+  if (pos != lease_expirations_.end() && pos->first <= now) {
     DiscoveredParticipantIter part = participants_.find(pos->second);
     // Pre-emptively erase so purge_discovered_participant will not modify lease_expirations_.
-    lease_expirations_.erase(pos++);
+    lease_expirations_.erase(pos);
 
-    if (part == participants_.end()) {
-      continue;
-    }
-
-    if (DCPS::DCPS_debug_level) {
-      ACE_DEBUG((LM_WARNING,
-                 ACE_TEXT("(%P|%t) Spdp::process_lease_expirations() - ")
-                 ACE_TEXT("participant %C exceeded lease duration, removing\n"),
-                 DCPS::LogGuid(part->first).c_str()));
-    }
+    if (part != participants_.end()) {
+      if (DCPS::DCPS_debug_level) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Spdp::process_lease_expirations: "
+                   "participant %C exceeded lease duration, removing\n",
+                   DCPS::LogGuid(part->first).c_str()));
+      }
 
 #if OPENDDS_CONFIG_SECURITY
-    DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
-    if (sedp_endpoint) {
-      stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints,
-               part->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
-    }
-    DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = tport_->get_ice_endpoint();
-    if (spdp_endpoint) {
-      ice_agent_->stop_ice(spdp_endpoint, guid_, part->first);
-    }
-    purge_handshake_deadlines(part);
+      DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
+      if (sedp_endpoint) {
+        stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints,
+                 part->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
+      }
+      DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = tport_->get_ice_endpoint();
+      if (spdp_endpoint) {
+        ice_agent_->stop_ice(spdp_endpoint, guid_, part->first);
+      }
+      purge_handshake_deadlines(part);
 #endif
-    purge_discovered_participant(part);
-    participants_.erase(part);
+      purge_discovered_participant(part);
+      participants_.erase(part);
+    }
   }
 
   if (!lease_expirations_.empty()) {
-    tport_->lease_expiration_task_->schedule(lease_expirations_.begin()->first - now);
+    tport_->lease_expiration_task_->schedule_max(lease_expirations_.begin()->first, minimum_cleanup_separation_);
   }
 }
 
