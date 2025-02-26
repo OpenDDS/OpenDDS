@@ -57,7 +57,7 @@ env:
   TRIGGERING_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
   VCPKG_INSTALLED_DIR: ${{ github.workspace }}\vcpkg\installed
   CTEST_OUTPUT_ON_FAILURE: ON
-  VCPKG_GIT_COMMIT: f7423ee180c4b7f40d43402c2feb3859161ef625
+  VCPKG_GIT_COMMIT: d5ec528843d29e3a52d745a64b469f810b2cedbf
   SCOREBOARD_UPLOAD_BRANCH: refs/heads/v4
 
 jobs:
