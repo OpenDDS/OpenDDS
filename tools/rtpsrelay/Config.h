@@ -38,6 +38,7 @@ public:
     , admission_max_participants_high_water_(0)
     , admission_max_participants_low_water_(0)
     , handler_threads_(1)
+    , synchronous_output_(false)
   {}
 
   void relay_id(const std::string& value)
@@ -360,6 +361,16 @@ public:
     return handler_threads_;
   }
 
+  void synchronous_output(bool flag)
+  {
+    synchronous_output_ = flag;
+  }
+
+  bool synchronous_output() const
+  {
+    return synchronous_output_;
+  }
+
 private:
   std::string relay_id_;
   OpenDDS::DCPS::GUID_t application_participant_guid_;
@@ -393,6 +404,7 @@ private:
   size_t admission_max_participants_high_water_;
   size_t admission_max_participants_low_water_;
   size_t handler_threads_;
+  bool synchronous_output_;
 };
 
 }

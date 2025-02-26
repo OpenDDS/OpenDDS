@@ -175,39 +175,16 @@ int RelayHandler::handle_output(ACE_HANDLE)
 
   if (!outgoing_.empty()) {
     const auto& out = outgoing_.front();
+    size_t total_bytes;
 
-    const int BUFFERS_SIZE = 2;
-    iovec buffers[BUFFERS_SIZE];
-    size_t total_bytes = 0;
-
-    int idx = 0;
-    for (ACE_Message_Block* block = out.message_block.get(); block && idx < BUFFERS_SIZE; block = block->cont(), ++idx) {
-      buffers[idx].iov_base = block->rd_ptr();
-#ifdef _MSC_VER
-#pragma warning(push)
-      // iov_len is 32-bit on 64-bit VC++, but we don't want a cast here
-      // since on other platforms iov_len is 64-bit
-#pragma warning(disable : 4267)
-#endif
-      buffers[idx].iov_len = block->length();
-      total_bytes += buffers[idx].iov_len;
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-    }
-
-    const auto bytes = socket_.send(buffers, idx, out.address, 0);
-
-    if (bytes < 0) {
+    if (send_i(out, total_bytes) < 0) {
       HANDLER_ERROR((LM_ERROR, "(%P|%t) ERROR: RelayHandler::handle_output %C failed to send to %C: %m\n",
                      name_.c_str(), OpenDDS::DCPS::LogAddr(out.address).c_str()));
       const auto new_now = OpenDDS::DCPS::MonotonicTimePoint::now();
-      stats_reporter_.dropped_message(
-        total_bytes, new_now - now, new_now - out.timestamp, now, out.type);
+      stats_reporter_.dropped_message(total_bytes, new_now - now, new_now - out.timestamp, now, out.type);
     } else {
       const auto new_now = OpenDDS::DCPS::MonotonicTimePoint::now();
-      stats_reporter_.output_message(
-        total_bytes, new_now - now, new_now - out.timestamp, now, out.type);
+      stats_reporter_.output_message(total_bytes, new_now - now, new_now - out.timestamp, now, out.type);
     }
 
     outgoing_.pop();
@@ -225,15 +202,55 @@ void RelayHandler::enqueue_message(const ACE_INET_Addr& addr,
                                    const OpenDDS::DCPS::MonotonicTimePoint& now,
                                    MessageType type)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, outgoing_mutex_);
+  const Element out(addr, msg, now, type);
+  if (config_.synchronous_output()) {
+    size_t total_bytes;
 
-  const auto empty = outgoing_.empty();
+    if (send_i(out, total_bytes) < 0) {
+      HANDLER_ERROR((LM_ERROR, "(%P|%t) ERROR: RelayHandler::enqueue_message %C failed to send to %C: %m\n",
+                     name_.c_str(), OpenDDS::DCPS::LogAddr(out.address).c_str()));
+      stats_reporter_.dropped_message(total_bytes, OpenDDS::DCPS::TimeDuration::zero_value, OpenDDS::DCPS::TimeDuration::zero_value, now, out.type);
+    } else {
+      stats_reporter_.output_message(total_bytes, OpenDDS::DCPS::TimeDuration::zero_value, OpenDDS::DCPS::TimeDuration::zero_value, now, out.type);
+    }
 
-  outgoing_.push(Element(addr, msg, now, type));
-  stats_reporter_.max_queue_size(outgoing_.size(), now);
-  if (empty) {
-    reactor()->register_handler(this, WRITE_MASK);
+  } else {
+    ACE_GUARD(ACE_Thread_Mutex, g, outgoing_mutex_);
+
+    const auto empty = outgoing_.empty();
+
+    outgoing_.push(out);
+    stats_reporter_.max_queue_size(outgoing_.size(), now);
+    if (empty) {
+      reactor()->register_handler(this, WRITE_MASK);
+    }
   }
+}
+
+ssize_t RelayHandler::send_i(const Element& out,
+                             size_t& total_bytes)
+{
+  const int BUFFERS_SIZE = 2;
+  iovec buffers[BUFFERS_SIZE];
+  total_bytes = 0;
+
+  int idx = 0;
+  for (ACE_Message_Block* block = out.message_block.get(); block && idx < BUFFERS_SIZE; block = block->cont(), ++idx) {
+    buffers[idx].iov_base = block->rd_ptr();
+#ifdef _MSC_VER
+#pragma warning(push)
+    // iov_len is 32-bit on 64-bit VC++, but we don't want a cast here
+    // since on other platforms iov_len is 64-bit
+#pragma warning(disable : 4267)
+#endif
+    buffers[idx].iov_len = block->length();
+    total_bytes += buffers[idx].iov_len;
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+  }
+
+  return socket_.send(buffers, idx, out.address, 0);
 }
 
 VerticalHandler::VerticalHandler(const Config& config,
@@ -595,7 +612,7 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
   CORBA::ULong sent = 0;
   for (const auto& addr : address_set) {
     if (addr != horizontal_address_) {
-      horizontal_handler_->enqueue_message(addr, to_partitions, to_guids, msg, now);
+      horizontal_handler_->enqueue_or_send_message(addr, to_partitions, to_guids, msg, now);
       ++sent;
     } else {
       // Local recipients.
@@ -641,8 +658,6 @@ size_t VerticalHandler::send(const ACE_INET_Addr& addr,
   message.block = block.get();
   serializer << message;
   RelayHandler::enqueue_message(addr, block, now, type);
-  const auto new_now = OpenDDS::DCPS::MonotonicTimePoint::now();
-  stats_reporter_.output_message(length, new_now - now, new_now - now, now, type);
   return length;
 }
 
@@ -663,11 +678,11 @@ HorizontalHandler::HorizontalHandler(const Config& config,
   , vertical_handler_(nullptr)
 {}
 
-void HorizontalHandler::enqueue_message(const ACE_INET_Addr& addr,
-                                        const StringSet& to_partitions,
-                                        const GuidSet& to_guids,
-                                        const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
-                                        const OpenDDS::DCPS::MonotonicTimePoint& now)
+void HorizontalHandler::enqueue_or_send_message(const ACE_INET_Addr& addr,
+                                                const StringSet& to_partitions,
+                                                const GuidSet& to_guids,
+                                                const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
+                                                const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
   using namespace OpenDDS::DCPS;
 
@@ -984,7 +999,7 @@ int SpdpHandler::handle_exception(ACE_HANDLE /*fd*/)
       const auto pos = proxy.find(fan_in_from_guid);
       if (pos != proxy.end() && pos->second.spdp_message) {
         // Send the SPDP message horizontally.  We may be sending to ourselves which is okay.
-        horizontal_handler_->enqueue_message(fan_in_replay_address, StringSet(), fan_in_to_guid_set, pos->second.spdp_message, now);
+        horizontal_handler_->enqueue_or_send_message(fan_in_replay_address, StringSet(), fan_in_to_guid_set, pos->second.spdp_message, now);
       }
     }
 
