@@ -17,11 +17,24 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
+    # - name: checkout dds-rtps
+    #   uses: actions/checkout@v4
+    #   with:
+    #     repository: omg-dds/dds-rtps
+    #     path: dds-rtps
+    #     ref: adding_new_options_shape_0225
+    # - name: checkout dds-rtps
+    #   uses: actions/checkout@v4
+    #   with:
+    #     repository: jrw972/dds-rtps
+    #     path: dds-rtps
+    #     ref: opendds-changes
     - name: checkout dds-rtps
       uses: actions/checkout@v4
       with:
-        repository: omg-dds/dds-rtps
+        repository: eProsima/dds-rtps
         path: dds-rtps
+        ref: adding_new_options_shape_0225
     - name: checkout ACE_TAO
       uses: actions/checkout@v4
       with:
