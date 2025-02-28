@@ -42,12 +42,15 @@ class GlobalSubstitutions(Transform):
                     pass
 
 
+autotab = 'autotab.js'
+
+
 def setup(app):
     app.add_config_value('global_substitutions', vars(opendds_version_info), True)
     app.add_config_value('is_release', False, True)
     app.add_lexer('mpc', MpcLexer)
     app.add_transform(GlobalSubstitutions)
-    app.add_js_file("autotab.js")
+    app.add_js_file(autotab)
 
     add_omg_spec(app, 'DDS', '1.4')
     add_omg_spec(app, 'DDSI-RTPS', '2.3', our_name='rtps', display_name='RTPS')
@@ -179,7 +182,12 @@ markdown_uri_doc_suffix = '.html'
 
 # -- Options for HTML output -------------------------------------------------
 
-html_static_path = ['.']
+logo = 'logo_with_name.svg'
+
+html_static_path = [
+    logo,
+    autotab,
+]
 
 html_css_files = [
     'custom.css',
@@ -192,8 +200,8 @@ html_theme = 'furo'
 html_title = project + ' ' + release
 
 html_theme_options = {
-    'light_logo': 'logo_with_name.svg',
-    'dark_logo': 'logo_with_name.svg',
+    'light_logo': logo,
+    'dark_logo': logo,
     'sidebar_hide_name': True, # Logo has the name in it
     # furo doesn't support a view source link for some reason, force edit
     # button to do that.
