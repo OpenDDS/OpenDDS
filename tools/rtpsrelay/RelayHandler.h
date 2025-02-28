@@ -75,6 +75,8 @@ private:
       , type(type)
     {}
   };
+  ssize_t send_i(const Element& out,
+                 size_t& total_bytes);
   using OutgoingType = std::queue<Element>;
   OutgoingType outgoing_;
   mutable ACE_Thread_Mutex outgoing_mutex_;
@@ -199,11 +201,11 @@ public:
 
   void vertical_handler(VerticalHandler* vertical_handler) { vertical_handler_ = vertical_handler; }
 
-  void enqueue_message(const ACE_INET_Addr& addr,
-                       const StringSet& to_partitions,
-                       const GuidSet& to_guids,
-                       const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
-                       const OpenDDS::DCPS::MonotonicTimePoint& now);
+  void enqueue_or_send_message(const ACE_INET_Addr& addr,
+                               const StringSet& to_partitions,
+                               const GuidSet& to_guids,
+                               const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
+                               const OpenDDS::DCPS::MonotonicTimePoint& now);
 
 private:
   const GuidPartitionTable& guid_partition_table_;
