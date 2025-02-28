@@ -3694,6 +3694,9 @@ bool Sedp::TypeLookupReplyWriter::send_type_lookup_reply(
       "to %C seq: %q\n", DCPS::LogGuid(reader).c_str(),
       to_opendds_seqnum(id.sequence_number).getValue()));
   }
+  if (DCPS::transport_debug.log_progress) {
+    log_progress("send type lookup reply", get_repo_id(), reader, sedp_.spdp_.get_participant_discovered_at(reader));
+  }
 
   type_lookup_reply.header.remote_ex = DDS::RPC::REMOTE_EX_OK;
 
@@ -3743,6 +3746,10 @@ bool Sedp::TypeLookupRequestReader::process_type_lookup_request(
       "from %C seq: %q\n",
       DCPS::LogGuid(request_id.writer_guid).c_str(),
       to_opendds_seqnum(request_id.sequence_number).getValue()));
+  }
+  if (DCPS::transport_debug.log_progress) {
+    const OpenDDS::DCPS::GUID_t& remote = type_lookup_request.header.request_id.writer_guid;
+    log_progress("receive type lookup request", get_repo_id(), remote, sedp_.spdp_.get_participant_discovered_at(remote));
   }
 
   if (OPENDDS_STRING(type_lookup_request.header.instance_name) != instance_name_) {
