@@ -872,7 +872,7 @@ This policy applies to topic and data writer entities via the ``transport_priori
 
 .. important::
 
-  OpenDDS currently only implements this for the :ref:`tcp <tcp-transport>` and :ref:`udp <udp-transport>` transports.
+  OpenDDS currently only implements this for the :ref:`tcp <tcp-transport>` transport.
 
   This policy is :ref:`immutable <qos-changing>` and does not affect association.
   This is opposed to the DDS specification, which specifies that it's mutable.

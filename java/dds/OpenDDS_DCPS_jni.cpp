@@ -10,7 +10,6 @@
 #include "OpenDDS_DCPS_transport_TheTransportRegistry.h"
 #include "OpenDDS_DCPS_transport_TransportConfig.h"
 #include "OpenDDS_DCPS_transport_TcpInst.h"
-#include "OpenDDS_DCPS_transport_UdpInst.h"
 #include "OpenDDS_DCPS_transport_MulticastInst.h"
 #include "OpenDDS_DCPS_transport_RtpsUdpInst.h"
 #include "OpenDDS_DCPS_transport_TransportInst.h"
@@ -36,11 +35,9 @@
 #include <dds/DCPS/transport/framework/PoolSynchStrategy.h>
 #include <dds/DCPS/transport/framework/NullSynchStrategy.h>
 #include <dds/DCPS/transport/tcp/TcpInst.h>
-#include <dds/DCPS/transport/udp/UdpInst.h>
 #include <dds/DCPS/transport/multicast/MulticastInst.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
 #include <dds/DCPS/transport/tcp/TcpInst_rch.h>
-#include <dds/DCPS/transport/udp/UdpInst_rch.h>
 #include <dds/DCPS/transport/multicast/MulticastInst_rch.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h>
 #include <dds/DCPS/transport/framework/TransportInst_rch.h>
@@ -271,8 +268,6 @@ jobject constructTransportInst(JNIEnv *jni,
     jclass instClazz = 0;
     if (inst->transport_type_ == "tcp") {
       instClazz = findClass(jni, "OpenDDS/DCPS/transport/TcpInst");
-    } else if (inst->transport_type_ == "udp") {
-      instClazz = findClass(jni, "OpenDDS/DCPS/transport/UdpInst");
     } else if (inst->transport_type_ == "multicast") {
       instClazz = findClass(jni, "OpenDDS/DCPS/transport/MulticastInst");
     } else if (inst->transport_type_ == "rtps_udp") {
@@ -822,26 +817,6 @@ void JNICALL Java_OpenDDS_DCPS_transport_TcpInst_setPassiveReconnectDuration
 {
   OpenDDS::DCPS::TcpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis));
   inst->passive_reconnect_duration_ = val;
-}
-
-// UdpInst
-
-// UdpInst::getLocalAddress
-jstring JNICALL Java_OpenDDS_DCPS_transport_UdpInst_getLocalAddress
-(JNIEnv * jni, jobject jthis)
-{
-  OpenDDS::DCPS::UdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: UdpInst>(jni, jthis)); // Don't take ownership
-  jstring retStr = jni->NewStringUTF(inst->local_address().c_str());
-  return retStr;
-}
-
-// UdpInst::setLocalAddress
-void JNICALL Java_OpenDDS_DCPS_transport_UdpInst_setLocalAddress
-(JNIEnv * jni, jobject jthis, jstring val)
-{
-  OpenDDS::DCPS::UdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: UdpInst>(jni, jthis)); // Don't take ownership
-  JStringMgr jsm_val(jni, val);
-  inst->local_address(jsm_val.c_str());
 }
 
 // MulticastInst

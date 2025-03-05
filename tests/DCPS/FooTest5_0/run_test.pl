@@ -26,11 +26,8 @@ $parameters .= " -r $num_readers -t $use_take"
 
 my $test = new PerlDDS::TestFramework();
 
-if ($test->flag('udp')) {
-  $parameters .= ' -us -up';
-}
-elsif ($test->flag('diff_trans')) {
-  $parameters .= ' -up';
+if ($test->flag('diff_trans')) {
+  $parameters .= ' -rp';
 }
 elsif ($test->flag('rtps')) {
   $parameters .= ' -rs -rp';

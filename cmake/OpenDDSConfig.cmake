@@ -255,7 +255,6 @@ if(NOT TARGET OpenDDS::OpenDDS)
     OpenDDS::InfoRepoDiscovery
     OpenDDS::Shmem
     OpenDDS::Tcp
-    OpenDDS::Udp
   )
   if(OPENDDS_SECURITY)
     list(APPEND _opendds_core_libs OpenDDS::Security)

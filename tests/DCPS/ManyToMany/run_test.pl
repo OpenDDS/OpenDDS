@@ -24,10 +24,7 @@ my $sub_opts = "";
 my $reliable = 1;
 
 my $config_opts = "";
-if ($test->flag('udp')) {
-  $reliable = 0;
-}
-elsif ($test->flag('multicast_async')) {
+if ($test->flag('multicast_async')) {
   $config_opts .= "-DCPSConfigFile pub_multicast_async.ini ";
 }
 
