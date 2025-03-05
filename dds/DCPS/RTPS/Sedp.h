@@ -145,7 +145,8 @@ public:
   bool ready(const DiscoveredParticipant& participant,
              const GUID_t& local_id,
              const GUID_t& remote_id,
-             bool local_tokens_sent) const;
+             bool local_tokens_sent,
+             const DCPS::SequenceNumber& local_sn) const;
   void process_association_records_i(DiscoveredParticipant& participant);
   void generate_remote_matched_crypto_handles(DiscoveredParticipant& participant);
 
@@ -300,7 +301,9 @@ public:
   RcHandle<DCPS::TransportInst> transport_inst() const { return transport_inst_; }
 
 private:
-  bool remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote) const;
+  bool remote_knows_about_local_i(const GUID_t& local,
+                                  const GUID_t& remote,
+                                  const DCPS::SequenceNumber& local_sn) const;
 #ifdef OPENDDS_SECURITY
   bool remote_is_authenticated_i(const GUID_t& local, const GUID_t& remote, const DiscoveredParticipant& participant) const;
   bool local_has_remote_participant_token_i(const GUID_t& local, const GUID_t& remote) const;
@@ -918,6 +921,8 @@ private:
 
   static void set_inline_qos(DCPS::TransportLocatorSeq& locators);
 
+  typedef OPENDDS_MAP(DiscoveryWriter_rch, GUID_t) UsedEndpoints;
+
   void write_durable_publication_data(const DCPS::RepoId& reader, bool secure);
   void write_durable_subscription_data(const DCPS::RepoId& reader, bool secure);
 
@@ -930,36 +935,49 @@ private:
   DDS::ReturnCode_t add_publication_i(const DCPS::RepoId& rid,
                                       LocalPublication& pub);
 
-  DDS::ReturnCode_t write_publication_data(const DCPS::RepoId& rid,
+  DDS::ReturnCode_t write_publication_data(UsedEndpoints& ue,
+                                           const DCPS::RepoId& rid,
                                            LocalPublication& pub,
+                                           DCPS::SequenceNumber& publication_sn,
                                            const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
 #ifdef OPENDDS_SECURITY
-  DDS::ReturnCode_t write_publication_data_secure(const DCPS::RepoId& rid,
+  DDS::ReturnCode_t write_publication_data_secure(UsedEndpoints& ue,
+                                                  const DCPS::RepoId& rid,
                                                   LocalPublication& pub,
+                                                  DCPS::SequenceNumber& publication_sn,
                                                   const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 #endif
 
-  DDS::ReturnCode_t write_publication_data_unsecure(const DCPS::RepoId& rid,
+
+  DDS::ReturnCode_t write_publication_data_unsecure(UsedEndpoints& ue,
+                                                    const DCPS::RepoId& rid,
                                                     LocalPublication& pub,
+                                                    DCPS::SequenceNumber& publication_sn,
                                                     const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
   DDS::ReturnCode_t add_subscription_i(const DCPS::RepoId& rid,
                                        LocalSubscription& sub);
 
 
-  DDS::ReturnCode_t write_subscription_data(const DCPS::RepoId& rid,
+  DDS::ReturnCode_t write_subscription_data(UsedEndpoints& ue,
+                                            const DCPS::RepoId& rid,
                                             LocalSubscription& sub,
+                                            DCPS::SequenceNumber& subscription_sn,
                                             const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
 #ifdef OPENDDS_SECURITY
-  DDS::ReturnCode_t write_subscription_data_secure(const DCPS::RepoId& rid,
+  DDS::ReturnCode_t write_subscription_data_secure(UsedEndpoints& ue,
+                                                   const DCPS::RepoId& rid,
                                                    LocalSubscription& sub,
+                                                   DCPS::SequenceNumber& subscription_sn,
                                                    const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 #endif
 
-  DDS::ReturnCode_t write_subscription_data_unsecure(const DCPS::RepoId& rid,
+  DDS::ReturnCode_t write_subscription_data_unsecure(UsedEndpoints& ue,
+                                                     const DCPS::RepoId& rid,
                                                      LocalSubscription& sub,
+                                                     DCPS::SequenceNumber& subscription_sn,
                                                      const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
   DDS::ReturnCode_t write_participant_message_data(const DCPS::RepoId& rid,
@@ -1152,7 +1170,8 @@ protected:
 
   void remove_expired_endpoints(const MonotonicTimePoint& /*now*/);
 
-  void match_continue(const GUID_t& writer, const GUID_t& reader);
+  void match_continue(UsedEndpoints& ue,
+                      const GUID_t& writer, const GUID_t& reader);
 
   void save_matching_data_and_get_typeobjects(const XTypes::TypeInformation* type_info,
                                               MatchingData& md, const MatchingPair& mp,
@@ -1167,9 +1186,11 @@ protected:
     const GUID_t& writer, const GUID_t& reader, bool call_writer, bool call_reader);
 #endif
 
-  void match_endpoints_flex_ts(const DiscoveredPublicationMap::value_type& discPub,
+  void match_endpoints_flex_ts(UsedEndpoints& ue,
+                               const DiscoveredPublicationMap::value_type& discPub,
                                const char* typeKey);
-  void match_endpoints_flex_ts(const DiscoveredSubscriptionMap::value_type& discSub,
+  void match_endpoints_flex_ts(UsedEndpoints& ue,
+                               const DiscoveredSubscriptionMap::value_type& discSub,
                                const char* typeKey);
 
   void remove_from_bit(const DiscoveredPublication& pub)

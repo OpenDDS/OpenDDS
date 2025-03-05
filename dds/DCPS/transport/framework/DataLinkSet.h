@@ -87,6 +87,9 @@ public:
 
   void terminate_send_if_suspended();
 
+  SequenceNumber cur_cumulative_ack(const GUID_t& writer_id,
+                                    const GUID_t& reader_id) const;
+
   bool is_leading(const GUID_t& writer_id,
                   const GUID_t& reader_id) const;
 

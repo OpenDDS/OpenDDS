@@ -90,10 +90,12 @@ class WriterAssociationRecord : public DCPS::RcObject {
 public:
   WriterAssociationRecord(DCPS::DataWriterCallbacks_wrch callbacks,
                           const DCPS::GUID_t& writer_id,
-                          const DCPS::ReaderAssociation& reader_association)
+                          const DCPS::ReaderAssociation& reader_association,
+                          const DCPS::SequenceNumber& publication_sn = DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
     : callbacks_(callbacks)
     , writer_id_(writer_id)
     , reader_association_(reader_association)
+    , publication_sn_(publication_sn)
   {}
 
   const DCPS::GUID_t& writer_id() const { return writer_id_; }
@@ -102,6 +104,7 @@ public:
   const DCPS::DataWriterCallbacks_wrch callbacks_;
   const DCPS::GUID_t writer_id_;
   const DCPS::ReaderAssociation reader_association_;
+  DCPS::SequenceNumber publication_sn_;
 };
 typedef DCPS::RcHandle<WriterAssociationRecord> WriterAssociationRecord_rch;
 
@@ -109,10 +112,12 @@ class ReaderAssociationRecord : public DCPS::RcObject {
 public:
   ReaderAssociationRecord(DCPS::DataReaderCallbacks_wrch callbacks,
                           const DCPS::GUID_t& reader_id,
-                          const DCPS::WriterAssociation& writer_association)
+                          const DCPS::WriterAssociation& writer_association,
+                          const DCPS::SequenceNumber& subscription_sn = DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
     : callbacks_(callbacks)
     , reader_id_(reader_id)
     , writer_association_(writer_association)
+    , subscription_sn_(subscription_sn)
   {}
 
   const DCPS::GUID_t& reader_id() const { return reader_id_; }
@@ -121,6 +126,7 @@ public:
   const DCPS::DataReaderCallbacks_wrch callbacks_;
   const DCPS::GUID_t reader_id_;
   const DCPS::WriterAssociation writer_association_;
+  DCPS::SequenceNumber subscription_sn_;
 };
 typedef DCPS::RcHandle<ReaderAssociationRecord> ReaderAssociationRecord_rch;
 

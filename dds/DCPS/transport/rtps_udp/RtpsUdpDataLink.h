@@ -216,6 +216,9 @@ public:
 #endif
   virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint() const;
 
+  virtual SequenceNumber cur_cumulative_ack(const GUID_t& writer,
+                                            const GUID_t& reader) const;
+
   virtual bool is_leading(const GUID_t& writer_id,
                           const GUID_t& reader_id) const;
 
@@ -261,6 +264,9 @@ private:
   AddrSet get_addresses_i(const RepoId& local) const;
 
   virtual void stop_i();
+
+  // Force path through customize_queue_element.
+  virtual bool handle_send_request_ack(TransportQueueElement*) { return false; }
 
   virtual TransportQueueElement* customize_queue_element(
     TransportQueueElement* element);
@@ -388,6 +394,7 @@ private:
     void expunge_durable_data();
     bool expecting_durable_data() const;
     SequenceNumber acked_sn() const { return cur_cumulative_ack_.previous(); }
+    SequenceNumber cur_cumulative_ack () const { return cur_cumulative_ack_; }
     bool reflects_heartbeat_count() const;
   };
 
@@ -548,6 +555,7 @@ private:
     bool add_reader(const ReaderInfo_rch& reader);
     bool has_reader(const RepoId& id) const;
     bool is_leading(const RepoId& id) const;
+    SequenceNumber cur_cumulative_ack(const RepoId& id) const;
     bool remove_reader(const RepoId& id);
     size_t reader_count() const;
     CORBA::Long inc_heartbeat_count();

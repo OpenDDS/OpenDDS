@@ -280,6 +280,9 @@ public:
 
   virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint() const { return WeakRcHandle<ICE::Endpoint>(); }
 
+  virtual SequenceNumber cur_cumulative_ack(const GUID_t& /*writer*/,
+                                            const GUID_t& /*reader*/) const { return SequenceNumber::ZERO(); }
+
   virtual bool is_leading(const GUID_t& /*writer*/,
                           const GUID_t& /*reader*/) const { return false; }
 
