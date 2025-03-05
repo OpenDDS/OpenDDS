@@ -639,7 +639,7 @@ if(NOT DEFINED OPENDDS_SUPPORTS_SHMEM)
 endif()
 
 function(_opendds_find_xerces_for_ace)
-  # ACE needs the root of Xerces. find_pacakge doesn't seems like it can
+  # ACE needs the root of Xerces. find_package doesn't seems like it can
   # provide it, so need to extract the root from XercesC_INCLUDE_DIR or
   # XercesC_INCLUDE_DIRS and XercesC_LIBRARY
   foreach(include IN LISTS XercesC_INCLUDE_DIR XercesC_INCLUDE_DIRS)
