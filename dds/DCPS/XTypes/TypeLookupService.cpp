@@ -57,11 +57,31 @@ TypeLookupService::~TypeLookupService()
 void TypeLookupService::get_type_objects(const TypeIdentifierSeq& type_ids,
                                          TypeIdentifierTypeObjectPairSeq& types) const
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  TypeIdentifierSet tids;
+
   for (unsigned i = 0; i < type_ids.length(); ++i) {
-    TypeMap::const_iterator pos = type_map_.find(type_ids[i]);
-    if (pos != type_map_.end()) {
-      types.append(TypeIdentifierTypeObjectPair(pos->first, pos->second));
+    const TypeIdentifier& tid = type_ids[i];
+    if (tid.kind() != TI_STRONGLY_CONNECTED_COMPONENT) {
+      tids.insert(tid);
+    } else {
+      TypeIdentifier scc_id(tid);
+      for (ACE_CDR::Long j = 1; j <= scc_id.sc_component_id().scc_length; ++j) {
+        scc_id.sc_component_id().scc_index = j;
+        tids.insert(scc_id);
+      }
+    }
+  }
+
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  for (TypeIdentifierSet::const_iterator pos = tids.begin(), limit = tids.end(); pos != limit; ++pos) {
+    const TypeIdentifier& tid = *pos;
+    TypeMap::const_iterator pos2 = type_map_.find(tid);
+    if (pos2 != type_map_.end()) {
+      types.append(TypeIdentifierTypeObjectPair(tid, pos2->second));
+    } else if (DCPS::log_level >= DCPS::LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING,
+                 "(%P|%t) WARNING: TypeLookupService::set_type_objects: "
+                 "unknown type\n"));
     }
   }
 }
