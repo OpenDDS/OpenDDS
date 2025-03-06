@@ -260,7 +260,9 @@ namespace XTypes {
 
     TypeObjectHashId()
       : kind(EK_NONE)
-    {}
+    {
+      std::memset(hash, 0, sizeof(hash));
+    }
 
     TypeObjectHashId(const EquivalenceKind& a_kind,
                      const EquivalenceHashWrapper& a_hash)
@@ -3366,9 +3368,15 @@ namespace XTypes {
     static const TypeMap EmptyMap;
   };
 
+  typedef OPENDDS_SET(TypeIdentifier) TypeIdentifierSet;
+
+  OpenDDS_Dcps_Export
+  TypeIdentifier make_scc_id_or_default(const TypeIdentifier& tid);
+
+  OpenDDS_Dcps_Export
   void compute_dependencies(const TypeMap& type_map,
                             const TypeIdentifier& type_identifier,
-                            OPENDDS_SET(TypeIdentifier)& dependencies);
+                            TypeIdentifierSet& dependencies);
 
   OpenDDS_Dcps_Export
   const char* typekind_to_string(TypeKind tk);

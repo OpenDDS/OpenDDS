@@ -7843,16 +7843,16 @@ void Sedp::get_remote_type_objects(const XTypes::TypeIdentifierWithDependencies&
   XTypes::TypeIdentifierSeq type_ids;
   if (tid_with_deps.dependent_typeid_count == -1 ||
       tid_with_deps.dependent_typeids.length() < (CORBA::ULong)tid_with_deps.dependent_typeid_count) {
-    type_ids.append(tid_with_deps.typeid_with_size.type_id);
+    type_ids.append(make_scc_id_or_default(tid_with_deps.typeid_with_size.type_id));
 
     // Get dependencies of the topic type. TypeObjects of both topic type and
     // its dependencies are obtained in subsequent type lookup requests.
     send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false, orig_req_data.seq_number);
   } else {
     type_ids.length(tid_with_deps.dependent_typeid_count + 1);
-    type_ids[0] = tid_with_deps.typeid_with_size.type_id;
+    type_ids[0] = make_scc_id_or_default(tid_with_deps.typeid_with_size.type_id);
     for (unsigned i = 1; i <= (unsigned)tid_with_deps.dependent_typeid_count; ++i) {
-      type_ids[i] = tid_with_deps.dependent_typeids[i - 1].type_id;
+      type_ids[i] = make_scc_id_or_default(tid_with_deps.dependent_typeids[i - 1].type_id);
     }
 
     // Get TypeObjects of topic type and all of its dependencies.
