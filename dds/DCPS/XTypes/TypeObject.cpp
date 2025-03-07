@@ -1068,6 +1068,11 @@ void compute_dependencies(const TypeMap& type_map,
     break;
   case TI_STRONGLY_CONNECTED_COMPONENT:
     compute_dependencies_i(type_map, type_identifier.sc_component_id(), dependencies);
+    for (ACE_CDR::Long i = 1; i <= type_identifier.sc_component_id().scc_length; ++i) {
+      TypeIdentifier tmp(type_identifier);
+      tmp.sc_component_id().scc_index = i;
+      dependencies.insert(tmp);
+    }
     break;
   case EK_COMPLETE:
   case EK_MINIMAL:
