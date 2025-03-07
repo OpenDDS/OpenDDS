@@ -27,9 +27,7 @@ class Options  {
     /// Types of transport implementations supported.
     enum TransportType {
       TRANSPORT_NONE,     // Unsupported (NONE is a macro on VxWorks)
-      TCP,      // Tcp
-      UDP,      // udp
-      MC        // multicast
+      TCP      // Tcp
     };
     friend std::ostream& operator<<( std::ostream& str, TransportType value);
 

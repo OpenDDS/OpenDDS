@@ -240,7 +240,7 @@ Options:
 
   -t NAME | --transport=NAME
                          use NAME transport for test execution - one of
-                         (tcp, udp, multicast), default tcp
+                         (tcp), default tcp
 
   -p NUMBER | --priority=NUMBER
                          comma separated list of priority to publish
@@ -311,8 +311,6 @@ Establishes the transport type to use for the current test execution.
 
 Accepted values are:
   tcp       - use the SimpleTCP transport;
-  udp       - use the udp transport;
-  multicast - use the multicast transport;
 
 The default value is 'tcp'.
 

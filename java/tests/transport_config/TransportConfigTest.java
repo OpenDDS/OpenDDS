@@ -17,7 +17,6 @@ import OpenDDS.DCPS.transport.TransportConfig;
 import OpenDDS.DCPS.transport.TransportException;
 import OpenDDS.DCPS.transport.TransportInst;
 import OpenDDS.DCPS.transport.TcpInst;
-import OpenDDS.DCPS.transport.MulticastInst;
 
 public class TransportConfigTest {
 
@@ -36,7 +35,6 @@ public class TransportConfigTest {
 
         testConfigStore();
         testModifyTransportFromFileTCP();
-        testCreateNewTransportMulticast();
         testConfigCreation();
 
         tearDown();
@@ -66,47 +64,6 @@ public class TransportConfigTest {
         assert ti2.getMaxSamplesPerPacket() == 6;
         TcpInst ti_tcp2 = (TcpInst) ti2;
         assert ti_tcp2.getConnRetryAttempts() == 49;
-    }
-
-    protected static void testCreateNewTransportMulticast() throws Exception {
-        final String ID = "multicast3";
-        TransportInst ti =
-            TheTransportRegistry.create_inst(ID,
-                                             TheTransportRegistry.TRANSPORT_MULTICAST);
-        ti.setOptimumPacketSize(999);
-        MulticastInst mi = (MulticastInst) ti;
-        mi.setDefaultToIPv6(true);
-        mi.setPortOffset((short) 9000);
-        mi.setGroupAddress("224.0.0.1:1234");
-        mi.setReliable(false);
-        mi.setSynBackoff(0.5);
-        mi.setSynInterval(100);
-        mi.setSynTimeout(100);
-        mi.setNakDepth(16);
-        mi.setNakInterval(100);
-        mi.setNakDelayInterval(123);
-        mi.setNakMax(5);
-        mi.setNakTimeout(100);
-        mi.setTimeToLive((byte) 21);
-        mi.setRcvBufferSize(1023);
-
-        TransportInst ti2 = TheTransportRegistry.get_inst(ID);
-        assert ti2.getOptimumPacketSize() == 999;
-        MulticastInst mi2 = (MulticastInst) ti2;
-        assert mi2.getDefaultToIPv6() == true;
-        assert mi2.getPortOffset() == 9000;
-        assert mi2.getGroupAddress().equals("224.0.0.1:1234");
-        assert mi2.getReliable() == false;
-        assert mi2.getSynBackoff() == 0.5;
-        assert mi2.getSynInterval() == 100;
-        assert mi2.getSynTimeout() == 100;
-        assert mi2.getNakDepth() == 16;
-        assert mi2.getNakInterval() == 100;
-        assert mi2.getNakDelayInterval() == 123;
-        assert mi2.getNakMax() == 5;
-        assert mi2.getNakTimeout() == 100;
-        assert mi2.getTimeToLive() == 21;
-        assert mi2.getRcvBufferSize() == 1023;
     }
 
     protected static void testConfigCreation() throws Exception {

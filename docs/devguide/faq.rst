@@ -106,12 +106,8 @@ Configuring OpenDDS
 Does OpenDDS support broadcast or multicast? If so, how do you set it up?
 =========================================================================
 
-Reliable multicast has been available in OpenDDS since the 0.12 release (unreliable multicast since 0.11 release).
 A broadcast based transport is currently not available.
-Please see :ref:`run_time_configuration--ip-multicast-transport-configuration-options` for how to configure the multicast transport.
-See the :ghfile:`tests/DCPS/Messenger` test for an example that can use the multicast transport.
-Using ``run_test.pl multicast`` to run the test with the multicast transport.
-Also, see :ref:`run_time_configuration--rtps-udp-transport-configuration-options` for details of the interoperable RTPS transport that supports multicast and unicast.
+See :ref:`run_time_configuration--rtps-udp-transport-configuration-options` for details of the interoperable RTPS transport that supports multicast and unicast.
 
 =======================================================================
 Why did a subscriber did not receive all samples sent by the publisher?
