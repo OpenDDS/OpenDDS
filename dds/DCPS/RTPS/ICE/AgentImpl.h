@@ -21,8 +21,8 @@
 
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/InternalDataReader.h"
-#include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/SporadicTask.h"
 
 #include "dds/Versioned_Namespace.h"
 
@@ -39,7 +39,6 @@ class AgentImpl
   : public virtual Agent
   , public virtual DCPS::ShutdownListener
   , public virtual DCPS::InternalDataReaderListener<DCPS::NetworkInterfaceAddress>
-  , public DCPS::ReactorInterceptor
 {
 public:
   AgentImpl();
@@ -150,9 +149,10 @@ private:
   };
   std::priority_queue<Item> tasks_;
   DCPS::MonotonicTimePoint last_execute_;
+  DCPS::RcHandle<DCPS::SporadicTask> task_task_;
 
   bool reactor_is_shut_down() const;
-  int handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/);
+  void process_tasks(const DCPS::MonotonicTimePoint& now);
 
   void check_invariants() const;
 };

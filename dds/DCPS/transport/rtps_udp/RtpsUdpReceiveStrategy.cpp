@@ -185,9 +185,7 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
   // If newly selected buffer index still has a reference count, we'll need to allocate a new one for the read
   if (receive_buffers_[INDEX]->data_block()->reference_count() > 1) {
 
-    if (log_level >= LogLevel::Info) {
-      ACE_DEBUG((LM_INFO, "(%P|%t) INFO: RtpsUdpReceiveStrategy::handle_input: reallocating primary receive buffer based on reference count\n"));
-    }
+    VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: RtpsUdpReceiveStrategy::handle_input: reallocating primary receive buffer based on reference count\n"), 5);
 
     ACE_DES_FREE(
       receive_buffers_[INDEX],
@@ -988,7 +986,7 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
 int
 RtpsUdpReceiveStrategy::start_i()
 {
-  ReactorInterceptor_rch ri = link_->get_reactor_interceptor();
+  ReactorTask_rch ri = link_->get_reactor_task();
   ri->execute_or_enqueue(make_rch<RegisterHandler>(link_->unicast_socket().get_handle(), this, static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
   ri->execute_or_enqueue(make_rch<RegisterHandler>(link_->ipv6_unicast_socket().get_handle(), this, static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
@@ -1000,7 +998,7 @@ RtpsUdpReceiveStrategy::start_i()
 void
 RtpsUdpReceiveStrategy::stop_i()
 {
-  ReactorInterceptor_rch ri = link_->get_reactor_interceptor();
+  ReactorTask_rch ri = link_->get_reactor_task();
   ri->execute_or_enqueue(make_rch<RemoveHandler>(link_->unicast_socket().get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
   ri->execute_or_enqueue(make_rch<RemoveHandler>(link_->ipv6_unicast_socket().get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));

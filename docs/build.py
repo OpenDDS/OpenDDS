@@ -19,6 +19,7 @@ abs_docs_path = docs_path.resolve()
 reqs_path = abs_docs_path / 'requirements.txt'
 default_venv_path = docs_path / '.venv'
 default_build_path = docs_path / '_build'
+python = 'python3'
 
 
 def log(*args, **kwargs):
@@ -77,17 +78,17 @@ class DocEnv:
 
         if install_deps:
             log('Install Dependencies...')
-            self.run('python', '-m', 'pip', 'install', '-r', str(reqs_path))
+            self.run(python, '-m', 'pip', 'install', '-r', str(reqs_path))
             self.venv_path.touch()
             self.rm_build()
 
     def sphinx_build(self, builder, *args, defines=[]):
-        args = list(args)
+        args = ['-M', builder, '.', str(self.abs_build_path)] + list(args)
         for define in itertools.chain(self.conf_defines, defines):
             args.append('-D' + define)
         if self.debug:
-            args.append('-vv')
-        self.run('sphinx-build', '-M', builder, '.', str(self.abs_build_path), *args)
+            args += ['-vv', '--jobs', '1', '--pdb']
+        self.run('sphinx-build', *args)
 
     def do(self, actions, because_of=None, open_result=False):
         for action in actions:
@@ -110,7 +111,7 @@ class DocEnv:
         return [k[3:] for k, v in vars(cls).items() if k.startswith('do_')]
 
     def do_test(self):
-        self.run('python3', '-m', 'unittest', 'discover', '--verbose',
+        self.run(python, '-m', 'unittest', 'discover', '--verbose',
             '--start-directory', 'sphinx_extensions',
             '--pattern', '*.py',
             cwd=abs_docs_path)
@@ -118,11 +119,16 @@ class DocEnv:
 
     def do_strict(self):
         self.do(['test'], because_of='strict')
-        self.sphinx_build('dummy', '-W')
+        self.sphinx_build('dummy',
+            '--nitpicky',
+            '--fail-on-warning',
+            '--keep-going',
+            '--show-traceback',
+        )
         return None
 
     def do_linkcheck(self):
-        self.sphinx_build('linkcheck', defines=['gen_all_omg_spec_links=False'])
+        self.sphinx_build('linkcheck', defines=['gen_all_omg_spec_links=0'])
         return None
 
     def do_html(self):

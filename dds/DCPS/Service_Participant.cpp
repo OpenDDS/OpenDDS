@@ -62,6 +62,18 @@
 extern char **environ;
 #endif
 
+#if OPENDDS_GCC
+// Embed GDB Extension
+asm(
+  ".pushsection \".debug_gdb_scripts\", \"MS\",@progbits,1\n"
+  ".byte 4\n" // 4 means this is an embedded Python script
+  ".ascii \"gdb.inlined-script\\n\"\n"
+  ".incbin \"../tools/scripts/gdbext.py\"\n"
+  ".byte 0\n"
+  ".popsection\n"
+);
+#endif
+
 namespace {
 
 void set_log_file_name(const char* fname)
@@ -126,7 +138,7 @@ String toupper(const String& x)
 {
   String retval;
   for (String::const_iterator pos = x.begin(), limit = x.end(); pos != limit; ++pos) {
-    retval.push_back(ACE_OS::ace_toupper(*pos));
+    retval.push_back(static_cast<char>(ACE_OS::ace_toupper(*pos)));
   }
   return retval;
 }
@@ -231,16 +243,10 @@ Service_Participant::reactor()
   return reactor_task_.get_reactor();
 }
 
-ACE_thread_t
-Service_Participant::reactor_owner() const
+ReactorTask_rch
+Service_Participant::reactor_task()
 {
-  return reactor_task_.get_reactor_owner();
-}
-
-ReactorInterceptor_rch
-Service_Participant::interceptor() const
-{
-  return reactor_task_.interceptor();
+  return rchandle_from(&reactor_task_);
 }
 
 JobQueue_rch
@@ -296,7 +302,7 @@ DDS::ReturnCode_t Service_Participant::shutdown()
       domainRepoMap_.clear();
 
       {
-        ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, network_config_monitor_lock_,
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, ncm_guard, network_config_monitor_lock_,
           DDS::RETCODE_OUT_OF_RESOURCES);
         if (network_config_monitor_) {
           network_config_monitor_->close();
@@ -479,7 +485,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
       ACE_DEBUG((LM_DEBUG,
                  "(%P|%t) Service_Participant::get_domain_participant_factory: Creating LinuxNetworkConfigMonitor\n"));
     }
-    network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_.interceptor());
+    network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(rchandle_from(&reactor_task_));
 #elif defined(OPENDDS_NETWORK_CONFIG_MODIFIER)
     if (DCPS_debug_level >= 1) {
       ACE_DEBUG((LM_DEBUG,

@@ -258,7 +258,7 @@ std::string param_type(AST_Type *t, AST_Argument::Direction dir)
     break;
   }
 
-  if (capitalize) type[0] = toupper(type[0]);
+  if (capitalize) type[0] = static_cast<char>(toupper(type[0]));
 
   if (builtin) type = "org.omg.CORBA." + type;
 
@@ -340,23 +340,23 @@ namespace { //"ju" helper functions: Java Unsigned type conversion
 
 ACE_CDR::Char ju_c(ACE_CDR::Octet u)
 {
-  return (u > 0x7F) ? -static_cast<ACE_CDR::Char>(~u+1) : u;
+  return (u > 0x7F) ? -static_cast<ACE_CDR::Char>(~u+1) : static_cast<ACE_CDR::Char>(u);
 }
 
 ACE_CDR::Short ju_s(ACE_CDR::UShort u)
 {
-  return (u > 0x7FFF) ? -static_cast<ACE_CDR::Short>(~u+1) : u;
+  return (u > 0x7FFF) ? -static_cast<ACE_CDR::Short>(~u+1) : static_cast<ACE_CDR::Short>(u);
 }
 
 ACE_CDR::Long ju_l(ACE_CDR::ULong u)
 {
-  return (u > 0x7FFFFFFFUL) ? -static_cast<ACE_CDR::Long>(~u+1) : u;
+  return (u > 0x7FFFFFFFUL) ? -static_cast<ACE_CDR::Long>(~u+1) : static_cast<ACE_CDR::Long>(u);
 }
 
 ACE_CDR::LongLong ju_ll(ACE_CDR::ULongLong u)
 {
   return (u > 0x7FFFFFFFFFFFFFFFULL)
-         ? -static_cast<ACE_CDR::LongLong>(~u+1) : u;
+    ? -static_cast<ACE_CDR::LongLong>(~u+1) : static_cast<ACE_CDR::LongLong>(u);
 }
 
 string unicode_escape(int in, bool char_literal = false)
@@ -398,8 +398,8 @@ string unicode_escape(int in, bool char_literal = false)
 
   // Java uses a UTF-16 Surrogate Pair to represent larger characters, with
   // each surrogate represented as its own \uXXXX escape in the source code.
-  const unsigned int lead = 0xd7c0 + (in >> 10);
-  const unsigned int trail = 0xdc0 + (in & 0x3ff);
+  const unsigned int lead = 0xd7c0 + static_cast<unsigned>(in >> 10);
+  const unsigned int trail = 0xdc0 + static_cast<unsigned>(in & 0x3ff);
   string escaped(13, '\0');
   ACE_OS::snprintf(&escaped[0], escaped.size(), "\\u%04x\\u%04x", lead, trail);
   return escaped;
@@ -748,11 +748,11 @@ bool idl_mapping_java::gen_interf(UTL_ScopedName *name, bool local,
       "  public native " + signature + ";\n\n";
 
     if (!attr->readonly()) {
-      string signature = attr_signature_w(attr);
+      string signature_w = attr_signature_w(attr);
       body_ops +=
-        "  " + signature + ";\n";
+        "  " + signature_w + ";\n";
       body_stub +=
-        "  public native " + signature + ";\n\n";
+        "  public native " + signature_w + ";\n\n";
     }
   }
 
@@ -785,9 +785,9 @@ bool idl_mapping_java::gen_interf(UTL_ScopedName *name, bool local,
           "  public native " + signature + ";\n\n";
 
         if (!attr->readonly()) {
-          string signature = attr_signature_w(attr);
+          string signature_w = attr_signature_w(attr);
           body_stub +=
-            "  public native " + signature + ";\n\n";
+            "  public native " + signature_w + ";\n\n";
         }
 
       } else if (item->node_type() == AST_Decl::NT_op) {

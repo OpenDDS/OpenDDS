@@ -26,10 +26,10 @@ struct TestObj : public virtual RcObject
   typedef PmfSporadicTask<TestObj> Sporadic;
 
   TestObj(const TimeSource& time_source,
-          RcHandle<ReactorInterceptor> reactor_interceptor)
+          RcHandle<ReactorTask> reactor_task)
     : do_schedule_(false)
   {
-    sporadic_ = make_rch<Sporadic>(time_source, reactor_interceptor, rchandle_from(this), &TestObj::execute);
+    sporadic_ = make_rch<Sporadic>(time_source, reactor_task, rchandle_from(this), &TestObj::execute);
   }
 
   void execute(const MonotonicTimePoint&) {
@@ -62,7 +62,7 @@ TEST(dds_DCPS_SporadicTask, TimingChecker)
   // Note: This test is modeled directly on the MultiTask stress test, which has a "fallback" timer
   // Since SporadicTask doesn't have this, we expect the number of total executions to be different
 
-  RcHandle<TestObj> obj = make_rch<TestObj>(time_source, reactor_task.interceptor());
+  RcHandle<TestObj> obj = make_rch<TestObj>(time_source, rchandle_from(&reactor_task));
   obj->sporadic_->schedule(TimeDuration::from_msec(2000));
   ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.load()));
   EXPECT_EQ(total_count, 0u);

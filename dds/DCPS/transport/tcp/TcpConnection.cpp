@@ -906,7 +906,7 @@ OpenDDS::DCPS::TcpConnection::tear_link()
 {
   DBG_ENTRY_LVL("TcpConnection","tear_link",6);
 
-  return link_->release_resources();
+  link_->release_resources();
 }
 
 void

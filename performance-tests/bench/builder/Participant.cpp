@@ -2,8 +2,8 @@
 
 #include "ParticipantListener.h"
 
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
 
 namespace Builder {
 

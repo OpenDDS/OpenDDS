@@ -49,6 +49,7 @@ BE_GlobalData::BE_GlobalData()
   , suppress_idl_(false)
   , suppress_typecode_(false)
   , suppress_xtypes_(false)
+  , gen_typeobject_override_(false)
   , no_default_gen_(false)
   , generate_itl_(false)
   , generate_value_reader_writer_(true)
@@ -66,6 +67,7 @@ BE_GlobalData::BE_GlobalData()
   , default_try_construct_(tryconstructfailaction_discard)
   , old_typeobject_encoding_(false)
   , old_typeobject_member_order_(false)
+  , typeobject_stream_(0)
 {
   default_data_representation_.set_all(true);
 
@@ -76,6 +78,7 @@ BE_GlobalData::BE_GlobalData()
 
 BE_GlobalData::~BE_GlobalData()
 {
+  delete typeobject_stream_;
 }
 
 void
@@ -379,6 +382,8 @@ BE_GlobalData::parse_args(long& i, char** av)
       xtypes_complete(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-Gequality")) {
       generate_equality(true);
+    } else if (0 == ACE_OS::strcasecmp(av[i], "-Gtypeobject")) {
+      gen_typeobject_override(true);
     } else {
       invalid_option(av[i]);
     }
@@ -486,6 +491,8 @@ BE_GlobalData::parse_args(long& i, char** av)
       old_typeobject_encoding_ = true;
     } else if (!strcmp(av[i], "--old-typeobject-member-order")) {
       old_typeobject_member_order_ = true;
+    } else if (!strcmp(av[i], "--append-typeobjects")) {
+      typeobject_stream_ = new std::ofstream(av[++i], std::ios::app);
     } else {
       invalid_option(av[i]);
     }

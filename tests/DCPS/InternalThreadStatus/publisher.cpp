@@ -13,11 +13,13 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #endif
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+
 #include <dds/DCPS/DCPS_Utils.h>
 
 #include <ace/Get_Opt.h>
@@ -52,11 +54,45 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   try {
     std::cout << "Starting publisher" << std::endl;
 
+    DistributedConditionSet_rch dcs = OpenDDS::DCPS::make_rch<InMemoryDistributedConditionSet>();
+
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
-    DDS::DomainParticipantQos part_qos;
+    DDS::DomainParticipantQos part_qos, part_qos2;
     dpf->get_default_participant_qos(part_qos);
+    dpf->get_default_participant_qos(part_qos2);
+
+    OpenDDS::DCPS::Qos_Helper::append(part_qos2.property.value, OpenDDS::RTPS::RTPS_HARVEST_THREAD_STATUS, "true");
+
+    // Create 2nd participant to witness disposes of the 1st participant's threads.
+    DDS::DomainParticipant_var part2 = dpf->create_participant(
+      42, part_qos2, DDS::DomainParticipantListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (!part2) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("%N:%l: main()")
+                        ACE_TEXT(" ERROR: create_participant (2nd) failed!\n")),
+                       EXIT_FAILURE);
+    }
+
+    DDS::Subscriber_var bit_subscriber2 = part2->get_builtin_subscriber();
+    DDS::DataReader_var thread_reader2 =
+      bit_subscriber2->lookup_datareader(OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC);
+    if (!thread_reader2) {
+      std::cerr << "ERROR: Could not get 2nd " << OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC
+                << " DataReader." << std::endl;
+      return EXIT_FAILURE;
+    }
+
+    InternalThreadStatusListenerImpl* listener2 =
+      new InternalThreadStatusListenerImpl("Publisher part2", dcs);
+    DDS::DataReaderListener_var listener2_var(listener2);
+    if (thread_reader2->set_listener(listener2, OpenDDS::DCPS::DEFAULT_STATUS_MASK) != DDS::RETCODE_OK) {
+      std::cerr << "ERROR: set_listener for " << OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC
+        << " failed." << std::endl;
+      return EXIT_FAILURE;
+    }
+    // Don't invoke on_data_available as samples are forthcoming.
 
     // Create DomainParticipant
     DDS::DomainParticipant_var participant = dpf->create_participant(42,
@@ -139,29 +175,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     Messenger::MessageDataWriter_var message_writer =
       Messenger::MessageDataWriter::_narrow(dw);
 
-    // Get the Built-In Subscriber for Built-In Topics
-    DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
-
-    DDS::DataReader_var thread_reader =
-      bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC);
-    if (!thread_reader) {
-      std::cerr << "Could not get " << OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC
-                << " DataReader." << std::endl;
-      return EXIT_FAILURE;
-    }
-
-    DistributedConditionSet_rch dcs = OpenDDS::DCPS::make_rch<InMemoryDistributedConditionSet>();
-    InternalThreadStatusListenerImpl* listener = new InternalThreadStatusListenerImpl("Publisher", dcs);
-    DDS::DataReaderListener_var listener_var(listener);
-
-    const DDS::ReturnCode_t retcode =
-      thread_reader->set_listener(listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (retcode != DDS::RETCODE_OK) {
-      std::cerr << "set_listener for " << OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC << " failed." << std::endl;
-      return EXIT_FAILURE;
-    }
-    // Don't invoke on_data_available as samples are forthcoming.
-
     // wait for subscriber
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter is waiting for subscriber\n"));
     Utils::wait_match(dw, 1);
@@ -196,7 +209,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // wait for internal thread status reports
     ACE_OS::sleep(3);
 
-    int count = listener->get_count();
+    int count = listener2->get_count();
     if (count < 3 ) {
       // in 3 seconds with multiple threads, there should be more than 3 status reports.
       ACE_ERROR((LM_ERROR,
@@ -206,41 +219,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       std::cout << "Publisher received " << count << " internal thread status messages." << std::endl;
     }
 
-    // Create 2nd participant to witness disposes of the 1st participant's threads.
-    DDS::DomainParticipant_var part2 = dpf->create_participant(
-      42, part_qos, DDS::DomainParticipantListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (!part2) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" ERROR: create_participant (2nd) failed!\n")),
-                       EXIT_FAILURE);
-    }
-
-    DDS::Subscriber_var bit_subscriber2 = part2->get_builtin_subscriber();
-    DDS::DataReader_var thread_reader2 =
-      bit_subscriber2->lookup_datareader(OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC);
-    if (!thread_reader2) {
-      std::cerr << "ERROR: Could not get 2nd " << OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC
-                << " DataReader." << std::endl;
-      return EXIT_FAILURE;
-    }
-
-    InternalThreadStatusListenerImpl* listener2 =
-      new InternalThreadStatusListenerImpl("Publisher part2", dcs);
-    DDS::DataReaderListener_var listener2_var(listener2);
-    if (thread_reader2->set_listener(listener2, OpenDDS::DCPS::DEFAULT_STATUS_MASK) != DDS::RETCODE_OK) {
-      std::cerr << "ERROR: set_listener for " << OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC
-        << " failed." << std::endl;
-      return EXIT_FAILURE;
-    }
-    // Don't invoke on_data_available as samples are forthcoming.
-
     // Wait for valid thread status to come into the 2nd thread reader
     if (!wait_for_samples(thread_reader2, false)) {
       ACE_ERROR((LM_ERROR, "ERROR: wait for part2 thread status failed\n"));
       return EXIT_FAILURE;
     }
-    if (listener->disposes() > 0 || listener2->disposes() > 0) {
+    if (listener2->disposes() > 0) {
       ACE_ERROR((LM_ERROR, "ERROR: thread listener has disposes before participant deletes\n"));
       return EXIT_FAILURE;
     }

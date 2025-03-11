@@ -368,11 +368,7 @@ ReplayerImpl::enable()
     return DDS::RETCODE_ERROR;
   }
 
-  XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  TypeInformation type_info;
 
   const bool success =
     disco->add_publication(this->domain_id_,
@@ -871,7 +867,7 @@ ReplayerImpl::write (const RawDataSample*   samples,
 {
   DBG_ENTRY_LVL("ReplayerImpl","write",6);
 
-  OpenDDS::DCPS::GUID_t repo_id;
+  OpenDDS::DCPS::GUID_t repo_id = GUID_UNKNOWN;
   if (reader_ih_ptr) {
     repo_id = this->participant_servant_->get_repoid(*reader_ih_ptr);
     if (repo_id == GUID_UNKNOWN) {

@@ -3,7 +3,9 @@
 namespace RtpsRelay {
 
 void RelayParticipantStatusReporter::add_participant(const OpenDDS::DCPS::GUID_t& repoid,
-                                                     const DDS::ParticipantBuiltinTopicData& data)
+                                                     const DDS::ParticipantBuiltinTopicData& data,
+                                                     CORBA::ULong idx,
+                                                     CORBA::ULong total)
 {
   const auto monotonic_now = OpenDDS::DCPS::MonotonicTimePoint::now();
   const auto system_now = OpenDDS::DCPS::SystemTimePoint::now();
@@ -31,8 +33,9 @@ void RelayParticipantStatusReporter::add_participant(const OpenDDS::DCPS::GUID_t
     if (p.second) {
       if (config_.log_discovery()) {
         ACE_DEBUG((LM_INFO, "(%P|%t) INFO: RelayParticipantStatusReporter::add_participant "
-                   "add local participant %C %C\n",
-                   guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str()));
+                   "add local participant %C %C [%u/%u]\n",
+                   guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str(),
+                   idx, total));
       }
     } else {
       p.first->second = std::move(status);
@@ -43,7 +46,9 @@ void RelayParticipantStatusReporter::add_participant(const OpenDDS::DCPS::GUID_t
 }
 
 void RelayParticipantStatusReporter::remove_participant(GuidAddrSet::Proxy& proxy,
-                                                        const OpenDDS::DCPS::GUID_t& repoid)
+                                                        const OpenDDS::DCPS::GUID_t& repoid,
+                                                        CORBA::ULong idx,
+                                                        CORBA::ULong total)
 {
   const auto monotonic_now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
@@ -64,9 +69,10 @@ void RelayParticipantStatusReporter::remove_participant(GuidAddrSet::Proxy& prox
 
   if (config_.log_discovery()) {
     ACE_DEBUG((LM_INFO, "(%P|%t) INFO: RelayParticipantStatusReporter::remove_participant "
-               "remove local participant %C %C into session\n",
+               "remove local participant %C %C into session [%u/%u]\n",
                guid_to_string(repoid).c_str(),
-               proxy.get_session_time(repoid, monotonic_now).sec_str().c_str()));
+               proxy.get_session_time(repoid, monotonic_now).sec_str().c_str(),
+               idx, total));
   }
 
   proxy.remove(repoid, monotonic_now, nullptr);

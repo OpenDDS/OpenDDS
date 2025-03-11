@@ -29,11 +29,16 @@ public:
     , log_thread_status_(false)
     , thread_status_safety_factor_(3)
     , utilization_limit_(.95)
+    , log_utilization_changes_(false)
     , log_participant_statistics_(false)
     , publish_participant_statistics_(false)
     , restart_detection_(false)
     , admission_control_queue_size_(0)
     , max_ips_per_client_(0)
+    , admission_max_participants_high_water_(0)
+    , admission_max_participants_low_water_(0)
+    , handler_threads_(1)
+    , synchronous_output_(false)
   {}
 
   void relay_id(const std::string& value)
@@ -176,6 +181,16 @@ public:
     return utilization_limit_;
   }
 
+  void log_utilization_changes(bool value)
+  {
+    log_utilization_changes_ = value;
+  }
+
+  bool log_utilization_changes() const
+  {
+    return log_utilization_changes_;
+  }
+
   void log_relay_statistics(OpenDDS::DCPS::TimeDuration value)
   {
     log_relay_statistics_ = value;
@@ -316,6 +331,46 @@ public:
     rejected_address_duration_ = value;
   }
 
+  void admission_max_participants_high_water(size_t count)
+  {
+    admission_max_participants_high_water_ = count;
+  }
+
+  size_t admission_max_participants_high_water() const
+  {
+    return admission_max_participants_high_water_;
+  }
+
+  void admission_max_participants_low_water(size_t count)
+  {
+    admission_max_participants_low_water_ = count;
+  }
+
+  size_t admission_max_participants_low_water() const
+  {
+    return admission_max_participants_low_water_;
+  }
+
+  void handler_threads(size_t count)
+  {
+    handler_threads_ = count;
+  }
+
+  size_t handler_threads() const
+  {
+    return handler_threads_;
+  }
+
+  void synchronous_output(bool flag)
+  {
+    synchronous_output_ = flag;
+  }
+
+  bool synchronous_output() const
+  {
+    return synchronous_output_;
+  }
+
 private:
   std::string relay_id_;
   OpenDDS::DCPS::GUID_t application_participant_guid_;
@@ -331,6 +386,7 @@ private:
   bool log_thread_status_;
   int thread_status_safety_factor_;
   double utilization_limit_;
+  bool log_utilization_changes_;
   OpenDDS::DCPS::TimeDuration log_relay_statistics_;
   OpenDDS::DCPS::TimeDuration log_handler_statistics_;
   bool log_participant_statistics_;
@@ -345,6 +401,10 @@ private:
   OpenDDS::DCPS::TimeDuration run_time_;
   size_t max_ips_per_client_;
   OpenDDS::DCPS::TimeDuration rejected_address_duration_;
+  size_t admission_max_participants_high_water_;
+  size_t admission_max_participants_low_water_;
+  size_t handler_threads_;
+  bool synchronous_output_;
 };
 
 }

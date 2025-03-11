@@ -675,6 +675,9 @@ protected:
 
 private:
 
+  void get_flexible_types(const char* key,
+                          XTypes::TypeInformation& type_info);
+
   void track_sequence_number(GUIDSeq* filter_out);
 
   void notify_publication_lost(const DDS::InstanceHandleSeq& handles);

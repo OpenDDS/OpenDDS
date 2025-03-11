@@ -55,11 +55,11 @@ These are the versions of ACE/TAO that are officially supported by OpenDDS in th
 
 DOC Group :acetaorel:`ace6tao2`
   The configure script will download this version by default.
-  :ref:`CMake <cmake-building>` will download this version if :cmake:var:`OPENDDS_ACE_TAO_KIND` is set to ``ace6tao``.
+  :ref:`CMake <cmake-building>` will download this version if :cmake:var:`OPENDDS_ACE_TAO_KIND` is set to ``ace6tao2``.
 
   Pass ``--ace-github-latest`` to the configure script to clone the ``ace6tao2`` branch of ACE/TAO as is.
   This also clones the ``master`` branch of MPC as is.
-  :ref:`CMake <cmake-building>` will do the same if :cmake:var:`OPENDDS_ACE_TAO_KIND` is set to ``ace6tao`` and :cmake:var:`OPENDDS_ACE_TAO_GIT` is set to ``TRUE``.
+  :ref:`CMake <cmake-building>` will do the same if :cmake:var:`OPENDDS_ACE_TAO_KIND` is set to ``ace6tao2`` and :cmake:var:`OPENDDS_ACE_TAO_GIT` is set to ``TRUE``.
 
 .. _ace7tao3:
 
@@ -124,7 +124,7 @@ TAO is a C++ CORBA Implementation built on ACE.
 
   - This is the only library which depends on ``TAO_PortableServer``.
 
-The TAO Developer's Guide book can be requested for free from https://objectcomputing.com/platforms/tao/tao-developers-guide.
+The TAO Developer's Guide book can be requested for free from https://objectcomputing.com/how-we-serve/accelerators/tao/tao-developers-guide.
 The CORBA Programmers Guide can be downloaded for free from https://www.remedy.nl/opensource/corbapg.html.
 
 .. _deps-optional:

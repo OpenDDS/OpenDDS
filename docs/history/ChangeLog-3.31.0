@@ -1,0 +1,1210 @@
+Mon Jan 27 19:32:07 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 1886c60ae2865b580391059b41d4ee5f2077fe5c
+
+          Merge pull request #4880 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-6.13.0
+
+          Bump docker/build-push-action from 6.12.0 to 6.13.0
+
+Mon Jan 27 07:59:48 UTC 2025  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit f5cac07219eba015bfc81518564c4fba4c541469
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 6.12.0 to 6.13.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 6.12.0 to 6.13.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/67a2d409c0a876cbe6b11854e3e25193efe4e62d...ca877d9245402d1537745e0e356eab47c3520991)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Tue Jan 21 19:32:28 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 4c03c6c5f78a341fb40cb9c42929c1e4ea1c458c
+
+          Merge pull request #4879 from
+          iguessthislldo/igtd/md-builder-fixed
+
+          Update Sphinx Markdown Builder
+
+Mon Jan 20 23:20:44 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 50b4550d2f11bed42133577e0ad89784a5ccb32c
+
+        * docs/requirements.txt:
+
+          Update Sphinx Markdown Builder
+
+          Fixes https://github.com/OpenDDS/OpenDDS/issues/4822 by updating
+          to a
+          version with a fix for
+          https://github.com/liran-funaro/sphinx-markdown-builder/issues/25.
+
+Mon Jan 20 19:32:05 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 0c2e1b740b922ceac781f7f988186d3372788b9c
+
+          Merge pull request #4878 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-6.12.0
+
+          Bump docker/build-push-action from 6.11.0 to 6.12.0
+
+Mon Jan 20 07:11:30 UTC 2025  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 0e157e0241422b82b52099fb210194aed0d9afcf
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 6.11.0 to 6.12.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 6.11.0 to 6.12.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/b32b51a8eda65d6793cd0494a773d4f6bcef32dc...67a2d409c0a876cbe6b11854e3e25193efe4e62d)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Mon Jan 13 19:34:46 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit b44a33ba67cd08d0a88f4672bf62c14f2c2c5d49
+
+          Merge pull request #4876 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-6.11.0
+
+          Bump docker/build-push-action from 6.10.0 to 6.11.0
+
+Mon Jan 13 07:56:22 UTC 2025  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 392419268f7ced41ef1cc98873c276d76ed8e76a
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 6.10.0 to 6.11.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 6.10.0 to 6.11.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/48aba3b46d1b1fec4febb7c5d0c644b249a11355...b32b51a8eda65d6793cd0494a773d4f6bcef32dc)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Fri Jan 10 21:18:26 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit fb8dac87e515a76161a27d7a6b1ffb39056e0138
+
+          Merge pull request #4875 from mitza-oci/test-flextls
+
+          Updates from testing Flexible Type Support
+
+Fri Jan 10 16:09:25 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1f7b7a6d78d568f49b9ee17d3b85b9486867a5ee
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Updates from testing Flexible Type Support
+
+Wed Jan 08 19:32:35 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 971741ca6c1bae727b7a2b16b2d83d6a81a9a015
+
+          Merge pull request #4871 from jrw972/boottime-timer-heap
+
+          BOOTTIME timers use too many file descriptors
+
+Fri Dec 20 22:57:06 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 03d03d19872546e5d11dbf5b1a160fd119b9a9dd
+
+        * .github/workflows/build_and_test.yml:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/ReactorTask.cpp:
+        * dds/DCPS/ReactorTask.h:
+        * docs/news.d/boottime-timers.rst:
+        * tests/dcps_tests.lst:
+        * tests/unit-tests/dds/DCPS/ReactorTask.cpp:
+
+          BOOTTIME timers use too many file descriptors
+
+          Problem
+          -------
+
+          OpenDDS applications use a lot of timers. The BOOTTIME timer
+          support
+          allocates a file descriptor for each timer. When the number of
+          timers
+          exceeds the limit for `select` system calls, then things stop
+          working
+          correctly.
+
+          Solution
+          --------
+
+          Allocate a single file descriptor and use a timer heap.
+
+Fri Jan 03 22:43:41 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8717e3ce87931f95988be7dc21cd8e1faf281b68
+
+          Merge pull request #4873 from mitza-oci/test-flextls
+
+          Update FlexibleTypeSupport to handle an additional order of
+          events
+
+Thu Jan 02 22:14:30 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 75b27d8267164c489acf0735db8e4fb5b33f0232
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Check for another case of needing flexible types
+
+Thu Jan 02 20:15:54 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit d80b3589c211d569e82630113400fe5470b2aa06
+
+        * tests/DCPS/FlexibleTS/Controller/Controller.cpp:
+        * tests/DCPS/FlexibleTS/NewDevice/NewDevice.cpp:
+        * tests/DCPS/FlexibleTS/NewDevice/NewDevice.idl:
+
+          Updated test
+
+Thu Dec 19 19:33:42 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit f02076c0be68e8e5d27590c73b86ff368d60301c
+
+          Merge pull request #4862 from
+          jrw972/reactor-interceptor-to-reactor-task
+
+          ReactorInterceptor exists
+
+Tue Nov 26 19:50:10 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit f218f1c261414f820011652d0fef4c53dd2c8a1f
+
+        * dds/CMakeLists.txt:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/LinuxNetworkConfigMonitor.cpp:
+        * dds/DCPS/LinuxNetworkConfigMonitor.h:
+        * dds/DCPS/MultiTask.cpp:
+        * dds/DCPS/MultiTask.h:
+        * dds/DCPS/PeriodicTask.cpp:
+        * dds/DCPS/PeriodicTask.h:
+        * dds/DCPS/RTPS/ICE/AgentImpl.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/ReactorInterceptor.cpp:
+        * dds/DCPS/ReactorInterceptor.h:
+        * dds/DCPS/ReactorTask.cpp:
+        * dds/DCPS/ReactorTask.h:
+        * dds/DCPS/ReactorTask.inl:
+        * dds/DCPS/ReactorTask_rch.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/SporadicTask.cpp:
+        * dds/DCPS/SporadicTask.h:
+        * dds/DCPS/StaticDiscovery.cpp:
+        * dds/DCPS/StaticDiscovery.h:
+        * dds/DCPS/Timers.cpp:
+        * dds/DCPS/Timers.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriterInfo.cpp:
+        * dds/DCPS/security/AccessControlBuiltInImpl.cpp:
+        * dds/DCPS/security/AccessControlBuiltInImpl.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+        * dds/DCPS/transport/multicast/BestEffortSession.h:
+        * dds/DCPS/transport/multicast/BestEffortSessionFactory.cpp:
+        * dds/DCPS/transport/multicast/BestEffortSessionFactory.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/multicast/MulticastSessionFactory.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/multicast/ReliableSessionFactory.cpp:
+        * dds/DCPS/transport/multicast/ReliableSessionFactory.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * tests/stress-tests/dds/DCPS/MultiTask.cpp:
+        * tests/stress-tests/dds/DCPS/SporadicTask.cpp:
+        * tests/stress-tests/dds/DCPS/TimingChecker.cpp:
+        * tests/unit-tests/dds/DCPS/ReactorTask.cpp:
+        * tests/unit-tests/dds/DCPS/SporadicTask.cpp:
+        * tests/unit-tests/dds/DCPS/Timers.cpp:
+
+          ReactorInterceptor exists
+
+          Problem
+          -------
+
+          The ReactorInterceptor is a leaky abstraction in that it still
+          exposes
+          the ACE_Reactor. Ideally, the scope of the ACE_Reactor would be
+          very
+          small to prevent misuse.
+
+          Solution
+          --------
+
+          Move the functionality of ReactorInterceptor to ReactorTask. The
+          eventual goal will be to isolate the ACE_Reactor to
+          ReactorWrapper.
+
+Thu Dec 12 18:52:40 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3aeb0e0652abaa265f28c14b2cee5c13257ef78a
+
+          Merge pull request #4867 from mitza-oci/idl-warning-error
+
+          opendds_idl: error for struct member with unsupported type
+
+Wed Dec 11 20:56:02 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1cd06b3483bad782ccd6414bc82b43c76364580d
+
+        * dds/idl/be_global.h:
+        * dds/idl/field_info.cpp:
+        * dds/idl/field_info.h:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/typeobject_generator.cpp:
+
+          opendds_idl: error for struct member w/ unsupported type
+
+          These are cases with valid IDL syntax but types that aren't
+          (yet) supported in DDS topic structs, such as maps.
+
+Wed Dec 11 15:02:26 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 303b617d49967601e92ea62b35d6c00ef53c1344
+
+          Merge pull request #4864 from mitza-oci/warnings
+
+          Fixed some warnings
+
+Tue Dec 10 20:42:43 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit c3cb87fc04108eb8af4f430ecf9a6adbe307b97b
+
+        * dds/DCPS/RTPS/ICE/Stun.cpp:
+
+          Added const
+
+Mon Dec 09 19:53:00 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 75dc659688b5ed3f3b791bf811d15c3df0fca5b2
+
+        * configure:
+        * dds/DCPS/JsonValueReader.h:
+        * dds/DCPS/JsonValueWriter.h:
+        * dds/DCPS/RTPS/ICE/Checklist.cpp:
+        * dds/DCPS/RTPS/ICE/Stun.cpp:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/RTPS/RtpsDiscoveryConfig.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/security/AccessControlBuiltInImpl.cpp:
+        * dds/DCPS/security/AuthenticationBuiltInImpl.cpp:
+        * dds/DCPS/security/CryptoBuiltInImpl.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * tests/Utils/Options.h:
+
+          Fixed some warnings
+
+          Also improved configure script's use of warning settings on VC++.
+          This avoids "warning D9025: overriding '/W3' with '/W4'"
+
+Fri Dec 06 16:34:58 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit a5c8849bcc54653266cc7093a50881e55e57a663
+
+          Merge pull request #4863 from OpenDDS/workflows/update-ace-tao
+
+          Update ACE/TAO to 8.0.2
+
+Fri Dec 06 12:37:18 UTC 2024  Johnny Willemsen  <johnny@jwillemsen.nl>
+        commit 02a260a3ce2a2ac4d8a49f1f9fea0578e07e9fa0
+
+        * acetao.ini:
+        * docs/news.d/automated-update-ace8tao4.rst:
+
+          Update ACE/TAO to 8.0.2
+
+          Updated:
+          - ACE 8/TAO 4 from 8.0.1 to
+          [8.0.2](https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-8_0_2).
+
+Mon Dec 02 21:20:14 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit e651349274a5dd3b0a79448bf03f67536394e986
+
+          Merge pull request #4860 from mitza-oci/enum-replacement
+
+          fixed warnings
+
+Mon Dec 02 19:35:34 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 7f9677467d3d612a2adf0a29ae85e1a72ad1b80a
+
+          Merge pull request #4857 from jrw972/large-sample-faq
+
+          Add https://github.com/OpenDDS/OpenDDS/discussions/4853 to FAQ
+
+Mon Dec 02 19:35:04 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 0f095e5ecdce36fd973fd78efc97b44f40e11383
+
+          Merge pull request #4858 from
+          jrw972/agent-impl-reactor-interceptor
+
+          ICE::AgentImpl is a ReactorInterceptor
+
+Mon Dec 02 19:34:49 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 08af11e8868f09447ac0a8c91d4a181b3083cf56
+
+          Merge pull request #4859 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-6.10.0
+
+          Bump docker/build-push-action from 6.9.0 to 6.10.0
+
+Mon Dec 02 19:33:50 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit d7c49666ddd139d1cefc588d8643b1c58fac3a82
+
+          Merge pull request #4861 from mitza-oci/docs-links
+
+          Updated links in documentation
+
+Mon Dec 02 18:14:56 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4913a51743391d30124ac857f4d351bb514383a0
+
+        * docs/devguide/building/dependencies.rst:
+        * docs/devguide/internet_enabled_rtps.rst:
+
+          Updated links in documentation
+
+Mon Dec 02 16:55:06 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit a2fa96f54efbaa736f3419387a90e83d1bd2b41c
+
+        * tests/unit-tests/dds/DCPS/XTypes/IdlScanner.cpp:
+
+          fixed compile error
+
+Mon Dec 02 16:09:53 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3e98a289faf866749d23a92fdc84c682e7996a75
+
+        * tests/unit-tests/dds/DCPS/XTypes/IdlScanner.cpp:
+
+          Updated test to avoid GoogleTest error
+
+          Includes changes to how MemberDescriptor is stored by the fixture
+
+Mon Dec 02 14:58:02 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1600203199df106d5e74f39765c5b4081a73a260
+
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/IdlScanner.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/Utils.cpp:
+
+          fixed warnings
+
+Mon Dec 02 07:45:13 UTC 2024  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 3d9a1ad9c2c34eddba7ff70ba8a41f80ac0ea2a7
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 6.9.0 to 6.10.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 6.9.0 to 6.10.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/4f58ea79222b3b9dc2c8bbdd6debcef730109a75...48aba3b46d1b1fec4febb7c5d0c644b249a11355)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Mon Nov 25 20:56:17 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 7137265cde5e438c82ad65f0ca0a37181a98acbb
+
+        * docs/devguide/faq.rst:
+
+          Add https://github.com/OpenDDS/OpenDDS/discussions/4853 to FAQ
+
+Tue Nov 26 17:09:55 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit fda32c628d43e01a99785bf6bcd7ebdb00b8c649
+
+        * dds/DCPS/RTPS/ICE/AgentImpl.cpp:
+        * dds/DCPS/RTPS/ICE/AgentImpl.h:
+
+          ICE::AgentImpl is a ReactorInterceptor
+
+          Problem
+          -------
+
+          Custom implementations of ReactorInterceptor duplicate code which
+          makes maintenance difficult.
+
+          Solution
+          --------
+
+          To make the code easier to maintain, replace custom
+          implementations of
+          ReactorInterceptor with helper classes.
+
+Mon Nov 25 19:38:42 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit b65e784a1665dafd25f7c2216ee0e37f5c67ae3d
+
+          Merge pull request #4852 from mitza-oci/enum-replacement
+
+          Flexible TypeSupport: allow certain incompatibilities in
+          TypeObjects used on the same topic
+
+Mon Nov 25 19:36:24 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit f5695824a98f8f9cb325864d52201afd5648599d
+
+          Merge pull request #4854 from
+          jrw972/remove-datalink-reactor-interceptor
+
+          DataLink Interceptor is a ReactorInterceptor
+
+Mon Nov 25 19:32:52 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 9de88a8a2e4b931b10db9b90fc8c11c8ee64d117
+
+          Merge pull request #4855 from
+          OpenDDS/dependabot/github_actions/docker/metadata-action-5.6.1
+
+          Bump docker/metadata-action from 5.5.1 to 5.6.1
+
+Mon Nov 25 15:49:21 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 9d5676b58356c8fc44de864a1261bcb26efbe7cd
+
+        * tests/DCPS/FlexibleTS/NewDevice/NewDevice.idl:
+        * tests/DCPS/FlexibleTS/OldDevice/OldDevice.idl:
+
+          Use keys to keep both instances received by controller
+
+Mon Nov 25 07:16:38 UTC 2024  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit a85447ef1e159671b9d24716c60af157a32c5c99
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/metadata-action from 5.5.1 to 5.6.1
+
+          Bumps
+          [docker/metadata-action](https://github.com/docker/metadata-action)
+          from 5.5.1 to 5.6.1.
+          - [Release
+          notes](https://github.com/docker/metadata-action/releases)
+          -
+          [Commits](https://github.com/docker/metadata-action/compare/8e5442c4ef9f78752691e2d8f8d19755c6f78e81...369eb591f429131d6889c46b94e711f089e6ca96)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/metadata-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Wed Nov 06 19:25:59 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 876e170d7d6b9a193ce1ee3455e248f1d1f7ebd9
+
+        * dds/DCPS/Timers.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+
+          DataLink Interceptor is a ReactorInterceptor
+
+          Problem
+          -------
+
+          Custom implementations of ReactorInterceptor duplicate code which
+          makes maintenance difficult.
+
+          Solution
+          --------
+
+          To make the code easier to maintain, replace custom
+          implementations of
+          ReactorInterceptor with helper classes.
+
+Fri Nov 22 17:27:26 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 31de731d7153be148ba73c2e244325a765aeb439
+
+        * dds/DCPS/XTypes/Utils.h:
+        * tests/DCPS/FlexibleTS/Controller/Controller.cpp:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Son Dinh <technology789@gmail.com>
+
+Fri Nov 22 17:12:35 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit b5b979e56a47a72ed6fc2d4bcb59b0133f173894
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * tests/DCPS/FlexibleTS/run_test.pl:
+
+          fixed bug in SEDP
+
+Fri Nov 22 16:32:17 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit f2e29213d1f191b970051405ead2c51ccd2d2aa3
+
+          Merge pull request #4851 from jrw972/remove-pending-assoc-timer
+
+          PendingAssocTimer is a ReactorInterceptor
+
+Thu Nov 21 15:12:17 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 20bb5595fee745d786afd1672588543f66cd3c2e
+
+        * tests/DCPS/ParticipantLocationTopic/ParticipantLocationTest.cpp:
+
+          Reverted accidental commit
+
+Wed Nov 20 22:23:17 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 43bcedf5688e92b9ab83543b4048430fb03355cc
+
+        * dds/DCPS/FlexibleTypeSupport.cpp:
+        * tests/DCPS/FlexibleTS/Common.h:
+        * tests/DCPS/FlexibleTS/Controller/.gitignore:
+        * tests/DCPS/FlexibleTS/NewApp/NewApp.cpp  tests/DCPS/FlexibleTS/Controller/Controller.cpp:
+        * tests/DCPS/FlexibleTS/Controller/FlexibleTS_Controller.mpc:
+        * tests/DCPS/FlexibleTS/NewApp/.gitignore:
+        * tests/DCPS/FlexibleTS/NewApp/NewApp.idl:
+        * tests/DCPS/FlexibleTS/NewDevice/.gitignore:
+        * tests/DCPS/FlexibleTS/OldApp/FlexibleTS_OldApp.mpc  tests/DCPS/FlexibleTS/NewDevice/FlexibleTS_NewDevice.mpc:
+        * tests/DCPS/FlexibleTS/OldApp/OldApp.cpp  tests/DCPS/FlexibleTS/NewDevice/NewDevice.cpp:
+        * tests/DCPS/FlexibleTS/NewDevice/NewDevice.idl:
+        * tests/DCPS/FlexibleTS/OldApp/.gitignore:
+        * tests/DCPS/FlexibleTS/OldApp/OldApp.idl:
+        * tests/DCPS/FlexibleTS/OldDevice/.gitignore:
+        * tests/DCPS/FlexibleTS/NewApp/FlexibleTS_NewApp.mpc  tests/DCPS/FlexibleTS/OldDevice/FlexibleTS_OldDevice.mpc:
+        * tests/DCPS/FlexibleTS/OldDevice/OldDevice.cpp:
+        * tests/DCPS/FlexibleTS/OldDevice/OldDevice.idl:
+        * tests/DCPS/FlexibleTS/README.rst:
+        * tests/DCPS/FlexibleTS/run_test.pl:
+
+          Extended test
+
+Wed Nov 20 19:47:26 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 9d366037acf49a5f412757a592ddda779997da62
+
+        * dds/DCPS/EndpointCallbacks.h:
+        * dds/DCPS/FlexibleTypeSupport.cpp:
+        * dds/DCPS/RTPS/LocalEntities.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * tests/DCPS/FlexibleTS/NewApp/NewApp.cpp:
+        * tests/dcps_tests.lst:
+
+          fixed bugs and extended implementation
+
+          enabled test
+
+Wed Nov 06 18:47:33 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 74b447f44426f863ce4574797b481f686e0bebeb
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+
+          PendingAssocTimer is a ReactorInterceptor
+
+          Problem
+          -------
+
+          Custom implementations of ReactorInterceptor duplicate code which
+          makes maintenance difficult.
+
+          Solution
+          --------
+
+          To make the code easier to maintain, replace custom
+          implementations of
+          ReactorInterceptor with helper classes.
+
+Tue Nov 19 21:29:21 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 659623c376eab05284e8f9177df6771fb12bc458
+
+        * dds/DCPS/FlexibleTypeSupport.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * tests/DCPS/FlexibleTS/NewApp/NewApp.cpp:
+
+          fixed bugs and extended implementation
+
+Tue Nov 19 19:33:32 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit a1978eafee3a99007dba5cdfabca5187ea0928ab
+
+          Merge pull request #4844 from jrw972/gh-actions-flag-cleanup
+
+          GH_ACTIONS flags out of date
+
+Tue Nov 19 19:31:59 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit a16af0163b318bc004dbe5792e7dbe5cb3dd28be
+
+          Merge pull request #4846 from
+          jrw972/remove-instance-state-reactor-interceptor
+
+          InstanceState is a ReactorInterceptor
+
+Wed Nov 06 15:42:50 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 0de452d92bcbafbb64cb08806366771c5b497b8d
+
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/InstanceState.h:
+
+          InstanceState is a ReactorInterceptor
+
+          Problem
+          -------
+
+          Custom implementations of ReactorInterceptor duplicate code which
+          makes maintenance difficult.
+
+          Solution
+          --------
+
+          To make the code easier to maintain, replace custom
+          implementations of
+          ReactorInterceptor with helper classes.
+
+Wed Nov 13 22:32:30 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit f77c96b0b3aa881a585877dc7da1482de2fccb2e
+
+        * .github/workflows/build_and_test.yml:
+        * docs/internal/github_actions.rst:
+        * tests/core_ci_tests.lst:
+        * tests/dcps_tests.lst:
+        * tests/security/security_tests.lst:
+
+          GH_ACTIONS flags out of date
+
+          Problem
+          -------
+
+          Various GH_ACTIONS flags are out of date.
+
+          Solution
+          --------
+
+          Remove the unused flags and update documentation.
+
+          Closes #4838
+
+Mon Nov 18 21:48:57 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit db4d056e55f54f20b8cdd99e6c4fe145b50b89a8
+
+        * dds/DCPS/Discovery.cpp:
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/RTPS/LocalEntities.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+
+          Continued SEDP flexible type support features
+
+Mon Nov 18 19:33:14 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 587260a35ae67bf9cfb819375e96a08379228864
+
+          Merge pull request #4848 from iguessthislldo/igtd/art-exclude
+
+          Fix Documentation of `auto_run_tests.pl -Exclude`
+
+Mon Nov 18 16:12:01 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit c23cc7686be5e7b7b9d6efb8b721cd34505c96ea
+
+          Merge remote-tracking branch 'upstream/master' into
+          enum-replacement
+
+Sat Nov 16 02:29:01 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 9dec6c0d630f50c8abfacad70d519384422c4f7b
+
+        * docs/internal/running_tests.rst:
+        * tests/auto_run_tests.pl:
+
+          Fix Documentation of `auto_run_tests.pl -Exclude`
+
+Thu Nov 14 19:35:24 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 1aa7ae051187ead26b76513eded98666c6052b62
+
+          Merge pull request #4840 from jrw972/remove-liveliness-timer
+
+          LivelinessTimer is a ReactorInterceptor
+
+Wed Nov 13 22:37:43 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit db65650f0cb220f762824c42531a55f6c0094237
+
+        * dds/DCPS/RTPS/DiscoveredEntities.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/RTPS/ParameterListConverter.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * tests/unit-tests/dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Updated RTPS Discovery
+
+Wed Nov 13 21:06:43 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit c09c0dd0a414f7d1eff15220a4154230b45d8911
+
+        * tests/DCPS/FlexibleTS/NewApp/FlexibleTS_NewApp.mpc:
+        * tests/DCPS/FlexibleTS/OldApp/FlexibleTS_OldApp.mpc:
+
+          New test requires built_in_topics
+
+Wed Nov 13 19:34:51 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 4235bc3bbadcb753e4a3575fc44f5bd920f0f89e
+
+          Merge pull request #4843 from hyh19962008/master
+
+          fix VisualStudio 2015 cmake check error
+
+Tue Nov 12 21:23:21 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1764c322dadd67b1c620248566a3c8b1c2b04c26
+
+        * dds/CMakeLists.txt:
+        * dds/DCPS/DataReaderCallbacks.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataWriterCallbacks.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/EndpointCallbacks.h:
+        * dds/DCPS/FlexibleTypeSupport.cpp:
+        * dds/DCPS/FlexibleTypeSupport.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/TypeSupportImpl.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/FlexibleTS/NewApp/FlexibleTS_NewApp.mpc:
+        * tests/DCPS/FlexibleTS/NewApp/NewApp.cpp:
+        * tests/DCPS/FlexibleTS/OldApp/FlexibleTS_OldApp.mpc:
+        * tests/DCPS/ParticipantLocationTopic/ParticipantLocationTest.cpp:
+
+          connect Discovery to FlexibleTypeSupport
+
+Tue Nov 05 21:46:46 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit b09f9639557b0e73629039a4910ad82bb03318dc
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/WriterInfo.cpp:
+        * dds/DCPS/WriterInfo.h:
+
+          LivelinessTimer is a ReactorInterceptor
+
+          Problem
+          -------
+
+          Custom implementations of ReactorInterceptor duplicate code which
+          makes maintenance difficult.
+
+          Solution
+          --------
+
+          To make the code easier to maintain, replace custom
+          implementations of
+          ReactorInterceptor with helper classes.
+
+Wed Nov 13 07:57:10 UTC 2024  Demon  <hyh19962008@gmail.com>
+        commit 7d73e33129f6c43bf0cca87129989389151c356e
+
+        * docs/news.d/cmake-vs2015.rst:
+
+          add news file for PR#4843
+
+Tue Nov 12 16:53:18 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7c100cf64276d774f0377c2dd6f8bac8267b85d9
+
+        * dds/DCPS/FlexibleTypeSupport.h:
+        * tests/DCPS/FlexibleTS/NewApp/FlexibleTS_NewApp.mpc:
+        * tests/DCPS/FlexibleTS/OldApp/FlexibleTS_OldApp.mpc:
+
+          Updates for conditional compilation
+
+Tue Nov 12 16:37:03 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 4586d55eb01f632664002eecad49888072db8a6e
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/TypeSupportImpl.cpp:
+        * dds/DCPS/XTypes/TypeObject.cpp:
+        * dds/DCPS/XTypes/TypeObject.h:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/Utils.cpp:
+
+          Provide default implementations of the complete TypeIdentifer
+
+          functions since they are not always generated.
+
+Tue Nov 12 06:31:19 UTC 2024  Demon  <hyh19962008@gmail.com>
+        commit e2f7d1b1196ada710cc08ba2d697d32035c3dd00
+
+        * cmake/build_ace_tao.cmake:
+
+          fix VisualStudio 2015 cmake check error
+
+Mon Nov 11 18:29:51 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 8a66916cf94a710237dc2e81adaf5c1000cabb30
+
+        * dds/DCPS/FlexibleTypeSupport.cpp:
+        * dds/DCPS/FlexibleTypeSupport.h:
+        * tests/DCPS/FlexibleTS/NewApp/NewApp.cpp:
+        * tests/DCPS/FlexibleTS/NewApp/NewApp.idl:
+        * tests/DCPS/FlexibleTS/README.rst:
+
+          Updated FlexibleTypeSupport and its test
+
+Mon Nov 11 18:28:27 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit b7f7a41f9a9e58f5bc4b8ab4ed4ac1091c9fd301
+
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * tests/unit-tests/dds/DCPS/XTypes/Utils.cpp:
+
+          Rearrange arguments to remove_enumerators to make one optional
+
+Mon Nov 11 16:00:05 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 50349dc27de0d990b7008f05f96920f80b717453
+
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+        * tests/DCPS/FindTopic/LocalDiscovery.cpp:
+        * tests/DCPS/FindTopic/LocalDiscovery.h:
+
+          Updated other tests for Discovery API change
+
+Fri Nov 08 22:31:20 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit c20a299b6b168310a7b227c91b962485f5b0a49b
+
+        * tests/DCPS/FlexibleTS/.gitignore:
+        * tests/DCPS/FlexibleTS/NewApp/.gitignore:
+        * tests/DCPS/FlexibleTS/NewApp/FlexibleTS_NewApp.mpc:
+        * tests/DCPS/FlexibleTS/NewApp/NewApp.cpp:
+        * tests/DCPS/FlexibleTS/NewApp/NewApp.idl:
+        * tests/DCPS/FlexibleTS/OldApp/.gitignore:
+        * tests/DCPS/FlexibleTS/OldApp/FlexibleTS_OldApp.mpc:
+        * tests/DCPS/FlexibleTS/OldApp/OldApp.cpp:
+        * tests/DCPS/FlexibleTS/OldApp/OldApp.idl:
+        * tests/DCPS/FlexibleTS/rtps.ini:
+        * tests/DCPS/FlexibleTS/run_test.pl:
+
+          started test
+
+Fri Nov 08 19:19:23 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit e99c06bff6580e8fb4c5d69637861b9dd9988e33
+
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * tests/unit-tests/dds/DCPS/XTypes/Utils.cpp:
+
+          Updated remove_enumerators
+
+Fri Nov 08 19:16:45 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit c8e97da3d1b237d165947edfdae44e4a1d5e0354
+
+        * dds/DCPS/RTPS/LocalEntities.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          continued discovery
+
+Thu Nov 07 21:26:44 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 6b19e6ad8a9ef2a20a6a0955ed3f002b7e9839f7
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Discovery.cpp:
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/FlexibleTypeSupport.cpp:
+        * dds/DCPS/FlexibleTypeSupport.h:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+        * dds/DCPS/RTPS/LocalEntities.h:
+        * dds/DCPS/RTPS/MessageUtils.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/StaticDiscovery.cpp:
+        * dds/DCPS/StaticDiscovery.h:
+        * dds/DCPS/TypeSupportImpl.cpp:
+        * dds/DCPS/TypeSupportImpl.h:
+
+          Introduce FlexibleTypeSupport and connect it to Discovery
+
+Thu Nov 07 19:34:19 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 9597435af567bd6e470dc97895a318eceae9fc60
+
+          Merge pull request #4836 from
+          jrw972/remove-EndHistoricSamplesMissedSweeper
+
+          EndHistoricSamplesMissedSweeper is a ReactorInterceptor
+
+Mon Nov 04 16:06:12 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 95e6203ec1ca1eeefc098dc9fcf68a302cd1594b
+
+        * bin/PerlDDS/Run_Test.pm:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/WriterInfo.cpp:
+        * dds/DCPS/WriterInfo.h:
+        * tests/DCPS/TransientLocalMultiInstanceTest/.gitignore:
+        * tests/DCPS/TransientLocalMultiInstanceTest/DataReaderListener.cpp:
+        * tests/DCPS/TransientLocalMultiInstanceTest/DataReaderListener.h:
+        * tests/DCPS/TransientLocalMultiInstanceTest/publisher.cpp:
+        * tests/DCPS/TransientLocalMultiInstanceTest/run_test.pl:
+        * tests/DCPS/TransientLocalMultiInstanceTest/subscriber.cpp:
+
+          EndHistoricSamplesMissedSweeper is a ReactorInterceptor
+
+          Problem
+          -------
+
+          Custom implementations of ReactorInterceptor duplicate code which
+          makes maintenance difficult.
+
+          Solution
+          --------
+
+          To make the code easier to maintain, replace custom
+          implementations of
+          ReactorInterceptor with helper classes.
+
+Wed Nov 06 19:33:47 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 2896ae8a692e96085f37832dd00d66e68ca37984
+
+          Merge pull request #4837 from jrw972/macos14-gha
+
+          MacOS 12 is deprecated in GHA
+
+Mon Nov 04 20:49:51 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 711c412dcd521619f2da420cac4fbc87f48b2e70
+
+        * .github/workflows/build_and_test.yml:
+
+          MacOS 12 is deprecated in GHA
+
+          Problem
+          -------
+
+          The MacOS 12 runners are going away in GHA.
+
+          Solution
+          --------
+
+          Upgrade the MacOS 12 jobs to use MacOS 14.
+
+Mon Nov 04 18:36:29 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 3b8997fd86fa295bbef74bd13d9e47ce7ffcd473
+
+          Merge pull request #4835 from jrw972/boottime-delay
+
+          CLOCK_BOOTTIME timers ignore zero delay with interval
+
+Fri Nov 01 21:56:18 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 50c9e888cc42c2cf8e3b53ed764659719b0435bf
+
+        * dds/DCPS/XTypes/TypeObject.h:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * tests/unit-tests/dds/DCPS/XTypes/Utils.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/XTypesUtils.idl:
+
+          XTypes utility for modifying enums and updating their uses
+
+Fri Nov 01 14:38:27 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 0672f80e89b7984d8e0615676b76e57db84ae331
+
+        * dds/DCPS/Timers.cpp:
+        * docs/news.d/boottime-timers.rst:
+        * tests/unit-tests/dds/DCPS/Timers.cpp:
+
+          CLOCK_BOOTTIME timers ignore zero delay with interval
+
+          Problem
+          -------
+
+          Scheduling a timer with an interval but no delay causes the first
+          firing of the timer to occur after the interval instead of as
+          soon as
+          possible. Without CLOCK_BOOTTIME, the timer fires immediately and
+          then starts to fire on the requested interval.
+
+          Solution
+          --------
+
+          Address the delay independent of the interval.
+
+Tue Oct 29 18:32:19 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 8b7266b64fe7fdc1617b42d264900744010f27a5
+
+          Merge pull request #4830 from mitza-oci/thread-status-manager
+
+          Updated ThreadStatusManager for iterative event handling
+
+Mon Oct 28 15:29:17 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit c5c5a5e2d107990a01151e9f6251c1f01c087b96
+
+        * dds/DCPS/ThreadStatusManager.cpp:
+        * dds/DCPS/ThreadStatusManager.h:
+
+          cleanup and refactor ThreadStatusManager
+
+Mon Oct 28 14:26:40 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 52188cbebab686cfd837153ddb1a8449106e84cc
+
+        * dds/DCPS/JobQueue.cpp:
+
+          fixed warning
+
+Fri Oct 25 19:14:54 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 20292a272d04913965800036a819be2991175812
+
+        * docs/news.d/thread-status-manager.rst:
+
+          NEWS
+
+Fri Oct 25 19:08:29 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit f2529af4a7e143d9b31a094a4d552af057ddb002
+
+        * tools/dds/rtpsrelaylib/Relay.idl:
+        * tools/rtpsrelay/GuidPartitionTable.cpp:
+        * tools/rtpsrelay/RtpsRelay.cpp:
+
+          minor updates in RtpsRelay
+
+Fri Oct 25 17:46:30 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7612cabb30dd2f7ba3369438e74ea3d5598ba8ef
+
+        * dds/DCPS/DispatchService.cpp:
+        * dds/DCPS/JobQueue.cpp:
+        * dds/DCPS/ThreadStatusManager.cpp:
+        * dds/DCPS/ThreadStatusManager.h:
+
+          Updated ThreadStatusManager for iterative event handling
+
+          Some event loop process entire batches of events at once.
+          Before this change, the batch of data would be considered an
+          "Event"
+          for the ThreadStatusManager. With this change, each element
+          within
+          the batch counts as its own event for the ThreadStatusManager.
+          That way the thread appears to be active and not stuck.
+
+Fri Oct 25 16:34:12 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 6870cb436d26a135b65ca0db272ee12e7e722989
+
+          Merge pull request #4828 from sonndinh/remove-spurious-log
+
+          Remove Spurious Error Message When Parsing Member Path
+
+Thu Oct 24 20:11:14 UTC 2024  Son Dinh  <technology789@gmail.com>
+        commit 439bb0c94c1a198a440510e8161068af04280d72
+
+        * tests/unit-tests/dds/DCPS/XTypes/Utils.cpp:
+
+          Path with subscript is not supported
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Thu Oct 24 20:08:45 UTC 2024  Son Dinh  <technology789@gmail.com>
+        commit 44bc538746fea20bc39c5d49d3a8fd174807ffce
+
+        * tests/unit-tests/dds/DCPS/XTypes/Utils.cpp:
+
+          Use exact error code
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Thu Oct 24 15:35:32 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 05f58cc64026f21479c34fa3ea7fa2ea41b73123
+
+        * tests/unit-tests/dds/DCPS/XTypes/Utils.cpp:
+
+          Add unit test
+
+Tue Oct 22 22:51:29 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 815e87b10fe0580600cba817f074ceabc3d67d32
+
+        * dds/DCPS/XTypes/Utils.cpp:
+
+          Update log
+
+Tue Oct 22 18:33:20 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit ddc09245245df9d043776766542816d90bd5e45e
+
+          Merge pull request #4827 from vermaete/master
+
+          fixed some typos
+
+Mon Oct 21 18:31:32 UTC 2024  Jan Vermaete  <jan.vermaete@gmail.com>
+        commit 7f9d3dca5c12bc517660f52a714d2259807257ca
+
+        * dds/DCPS/XTypes/IdlScanner.cpp:
+        * docs/devguide/xtypes.rst:
+        * docs/history/ChangeLog-3.12:
+        * docs/history/ChangeLog-3.5.1:
+        * tools/modeling/tests/Arrays/publisher.cpp:
+
+          fixed some typos
+
+          ERRROR -> ERROR
+          explictly -> explicitly
+
+          Found with Lintian when making deb package.
+
+          Signed-off-by: Jan Vermaete <jan.vermaete@gmail.com>
+
+Fri Oct 11 22:21:32 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+
+        * PROBLEM-REPORT-FORM:
+        * VERSION.txt:
+        * dds/Version.h:
+
+          OpenDDS Post Release 3.30.0
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

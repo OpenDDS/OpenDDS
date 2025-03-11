@@ -9,4 +9,4 @@ opendds_target_sources(${PROJECT_NAME}
   "subdir/b.idl"
   OPENDDS_IDL_OPTIONS "-Isubdir"
 )
-target_link_libraries(${PROJECT_NAME} OpenDDS::Dcps)
+target_link_libraries(${PROJECT_NAME} PUBLIC OpenDDS::Dcps)

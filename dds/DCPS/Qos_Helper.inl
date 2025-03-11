@@ -1290,6 +1290,18 @@ bool Qos_Helper::copy_from_topic_qos(DDS::DataWriterQos& a_datawriter_qos,
   return true;
 }
 
+ACE_INLINE
+void Qos_Helper::append(DDS::PropertySeq& props,
+                        const char* name,
+                        const std::string& value,
+                        bool propagate)
+{
+  const DDS::Property_t prop = {name, value.c_str(), propagate};
+  const DDS::UInt32 len = props.length();
+  props.length(len + 1);
+  props[len] = prop;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

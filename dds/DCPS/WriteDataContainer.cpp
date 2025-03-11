@@ -108,7 +108,7 @@ WriteDataContainer::WriteDataContainer(
   , durability_cache_(durability_cache)
   , durability_service_(durability_service)
 #endif
-  , deadline_task_(DCPS::make_rch<DCPS::PmfSporadicTask<WriteDataContainer> >(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &WriteDataContainer::process_deadlines))
+  , deadline_task_(DCPS::make_rch<DCPS::PmfSporadicTask<WriteDataContainer> >(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &WriteDataContainer::process_deadlines))
   , deadline_period_(TimeDuration::max_value)
   , deadline_status_lock_(deadline_status_lock)
   , deadline_status_(deadline_status)
@@ -366,7 +366,7 @@ WriteDataContainer::reenqueue_all(const GUID_t& reader_id,
                    total_size);
 
   {
-    ACE_Guard<ACE_SYNCH_MUTEX> guard(wfa_lock_);
+    ACE_Guard<ACE_SYNCH_MUTEX> wfa_guard(wfa_lock_);
     cached_cumulative_ack_valid_ = false;
     DisjointSequence& ds = acked_sequences_[reader_id];
     ds = acked_sequences_[GUID_UNKNOWN];

@@ -3,6 +3,8 @@
 
 #include "export.h"
 
+#include <cstddef>
+#include <iosfwd>
 #include <set>
 #include <string>
 #include <vector>
@@ -73,7 +75,7 @@ private:
 };
 
 struct AtomHash {
-  std::size_t operator() (const Atom& atom) const
+  std::size_t operator()(const Atom& atom) const
   {
     std::size_t result = atom.kind();
     result ^= (atom.character() << 8);
@@ -88,12 +90,12 @@ OpenDDS_RtpsRelayLib_Export std::ostream& operator<<(std::ostream& out, const At
 
 class OpenDDS_RtpsRelayLib_Export Name {
 public:
-  typedef std::vector<Atom> Atoms;
-  typedef Atoms::const_iterator const_iterator;
+  using Atoms = std::vector<Atom>;
+  using const_iterator = Atoms::const_iterator;
 
-  Name() : is_pattern_(false), is_valid_(true) {}
+  Name() = default;
 
-  explicit Name(const std::string& name) : is_pattern_(false), is_valid_(true)
+  explicit Name(const std::string& name)
   {
     size_t idx = 0;
     parse(*this, name, idx);
@@ -129,8 +131,8 @@ public:
 
 private:
   Atoms atoms_;
-  bool is_pattern_;
-  bool is_valid_;
+  bool is_pattern_ = false;
+  bool is_valid_ = true;
 
   static void parse(Name& name, const std::string& buffer, size_t& idx);
   static char parse_character(Name& name, const std::string& buffer, size_t& idx);

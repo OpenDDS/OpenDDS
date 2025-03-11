@@ -15,9 +15,9 @@ public:
                       RelayStatusDataWriter_var writer,
                       ACE_Reactor* reactor);
 
+private:
   int handle_timeout(const ACE_Time_Value& now, const void* token) override;
 
-private:
   GuidAddrSet& guid_addr_set_;
   RelayStatusDataWriter_var writer_;
   RelayStatus relay_status_;

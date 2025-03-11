@@ -47,13 +47,13 @@ public:
     participant_statistics_.session_time(time_diff_to_duration(now - session_start));
 
     if (config->log_participant_statistics()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name.in(), OpenDDS::DCPS::to_json(participant_statistics_).c_str()));
+      ACE_DEBUG((LM_INFO, "(%P|%t) STAT: %C %C\n", topic_name.in(), OpenDDS::DCPS::to_json(participant_statistics_).c_str()));
     }
 
     if (config->publish_participant_statistics()) {
       const auto ret = writer->write(participant_statistics_, DDS::HANDLE_NIL);
       if (ret != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: writing participant %C statistics\n"), guid_to_string(relay_guid_to_rtps_guid(participant_statistics_.guid())).c_str()));
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: writing participant %C statistics\n", guid_to_string(relay_guid_to_rtps_guid(participant_statistics_.guid())).c_str()));
       }
     }
   }
@@ -63,7 +63,7 @@ public:
     if (config->publish_participant_statistics()) {
       const auto ret = writer->unregister_instance(participant_statistics_, DDS::HANDLE_NIL);
       if (ret != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: unregistering participant %C statistics\n"), guid_to_string(relay_guid_to_rtps_guid(participant_statistics_.guid())).c_str()));
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: unregistering participant %C statistics\n", guid_to_string(relay_guid_to_rtps_guid(participant_statistics_.guid())).c_str()));
       }
     }
   }

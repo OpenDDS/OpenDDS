@@ -13,7 +13,7 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
-PerlDDS::add_lib_path('./lib');
+PerlDDS::add_lib_path("$DDS_ROOT/performance-tests/bench/lib");
 
 my $status = 0;
 
