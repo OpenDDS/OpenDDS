@@ -12,6 +12,7 @@
 #include "ThreadSynchStrategy_rch.h"
 #include "ThreadSynchWorker.h"
 #include "TransportDefs.h"
+#include "TransportHeader.h"
 #include "TransportImpl_rch.h"
 #include "TransportReplacedElement.h"
 #include "TransportRetainedElement.h"

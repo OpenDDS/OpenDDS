@@ -63,11 +63,9 @@ DataWriterImpl::DataWriterImpl()
   , n_chunks_(TheServiceParticipant->n_chunks())
   , association_chunk_multiplier_(TheServiceParticipant->association_chunk_multiplier())
   , qos_(TheServiceParticipant->initial_DataWriterQos())
-  , skip_serialize_(false)
   , db_lock_pool_(new DataBlockLockPool((unsigned long)TheServiceParticipant->n_chunks()))
   , topic_id_(GUID_UNKNOWN)
   , topic_servant_(0)
-  , type_support_(0)
   , listener_mask_(DEFAULT_STATUS_MASK)
   , domain_id_(0)
   , publication_id_(GUID_UNKNOWN)
@@ -78,8 +76,8 @@ DataWriterImpl::DataWriterImpl()
   , is_bit_(false)
   , min_suspended_transaction_id_(0)
   , max_suspended_transaction_id_(0)
-  , liveliness_send_task_(make_rch<DWISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &DataWriterImpl::liveliness_send_task))
-  , liveliness_lost_task_(make_rch<DWISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &DataWriterImpl::liveliness_lost_task))
+  , liveliness_send_task_(make_rch<DWISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &DataWriterImpl::liveliness_send_task))
+  , liveliness_lost_task_(make_rch<DWISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &DataWriterImpl::liveliness_lost_task))
   , liveliness_send_interval_(TimeDuration::max_value)
   , liveliness_lost_interval_(TimeDuration::max_value)
   , liveliness_lost_(false)
@@ -114,16 +112,6 @@ DataWriterImpl::~DataWriterImpl()
 
   liveliness_send_task_->cancel();
   liveliness_lost_task_->cancel();
-
-#ifndef OPENDDS_SAFETY_PROFILE
-  RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
-  if (participant) {
-    XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
-    if (type_lookup_service) {
-      type_lookup_service->remove_guid_from_dynamic_map(publication_id_);
-    }
-  }
-#endif
 }
 
 // this method is called when delete_datawriter is called.
@@ -1507,8 +1495,9 @@ DataWriterImpl::enable()
 
   {
     ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
+    publication_id_ = publication_id;
 
-    if (!success || publication_id_ == GUID_UNKNOWN) {
+    if (publication_id_ == GUID_UNKNOWN) {
       if (DCPS_debug_level >= 1) {
         ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: DataWriterImpl::enable: "
                    "add_publication failed\n"));
@@ -1516,12 +1505,6 @@ DataWriterImpl::enable()
       data_container_->shutdown_ = true;
       return DDS::RETCODE_ERROR;
     }
-
-#if defined(OPENDDS_SECURITY)
-    security_config_ = participant->get_security_config();
-    participant_permissions_handle_ = participant->permissions_handle();
-    dynamic_type_ = type_support_->get_type();
-#endif
 
     if (DCPS_debug_level >= 2) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriterImpl::enable: "

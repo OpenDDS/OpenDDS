@@ -9,7 +9,6 @@
 #define OPENDDS_DCPS_DATAWRITERIMPL_H
 
 #include "Atomic.h"
-#include "Sample.h"
 #include "DataWriterCallbacks.h"
 #include "Definitions.h"
 #include "GuidUtils.h"
@@ -17,7 +16,6 @@
 #include "Message_Block_Ptr.h"
 #include "PoolAllocator.h"
 #include "RcEventHandler.h"
-#include "Sample.h"
 #include "SporadicTask.h"
 #include "TimeTypes.h"
 #include "Time_Helper.h"
@@ -684,7 +682,6 @@ private:
   unique_ptr<DataBlockAllocator>        db_allocator_;
   /// The header data allocator.
   unique_ptr<DataSampleHeaderAllocator> header_allocator_;
-  unique_ptr<DataAllocator> data_allocator_;
 
   /// Total number of offered deadlines missed during last offered
   /// deadline status check.

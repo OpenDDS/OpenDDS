@@ -24,6 +24,14 @@ DDS::ReturnCode_t FlexibleTypeSupport::add(const String& typeKey,
                                            const XTypes::TypeMap& completeTypeMap)
 {
   map_[typeKey] = Alternative(minimalTypeIdentifier, minimalTypeMap, completeTypeIdentifier, completeTypeMap);
+
+  std::string typeId;
+  for (const auto& i : minimalTypeIdentifier.equivalence_hash()) {
+    if (typeId.size()) typeId += ", ";
+    typeId += std::to_string(i);
+  }
+  ACE_DEBUG((LM_DEBUG, "FTS %C %C %C\n", name_.c_str(), typeKey.c_str(), typeId.c_str()));
+
   return DDS::RETCODE_OK;
 }
 
