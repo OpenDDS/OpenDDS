@@ -1133,6 +1133,21 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     Sent as part of the :ref:`SPDP participant announcement <spdp>`.
     It tells the peer participants that if they don't hear from this participant for the specified duration, then this participant can be considered "not alive".
 
+  .. prop:: MaxLeaseDuration=<sec>
+    :default: ``300`` (5 minutes)
+
+    If set, limit the lease duration requested by a discovered participant to this value.
+
+  .. prop:: MinimumCleanupSeparation=<msec>
+    :default: ``1`` (1 millisecond)
+
+    Ensure that attempts to clean up expired participants are separated by this amount of time.
+
+  .. prop:: SecurityUnsecureLeaseDuration=<sec>
+    :default: ``30`` (30 seconds)
+
+    Limit the lease duration requested by a discovered participant when bootstrapping discovery from an SPDP message.
+
   .. prop:: LeaseExtension=<sec>
     :default: ``0``
 

@@ -339,6 +339,10 @@ The command-line options for the RtpsRelay:
 
   Use a thread pool with this many threads (default 1) to handle input/output/timer events.
 
+.. option:: -SynchronousOutput 0|1
+
+  Send messages immediately, defaults to 0 (disabled).
+
 .. _internet_enabled_rtps--deployment-considerations:
 
 Deployment Considerations

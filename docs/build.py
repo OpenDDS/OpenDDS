@@ -83,7 +83,7 @@ class DocEnv:
             self.rm_build()
 
     def sphinx_build(self, builder, *args, defines=[]):
-        args = ['-M', builder, '.', str(self.abs_build_path)]
+        args = ['-M', builder, '.', str(self.abs_build_path)] + list(args)
         for define in itertools.chain(self.conf_defines, defines):
             args.append('-D' + define)
         if self.debug:
