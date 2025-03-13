@@ -4541,6 +4541,19 @@ RtpsUdpDataLink::RtpsWriter::add_elem_awaiting_ack(TransportQueueElement* elemen
   elems_not_acked_.insert(SnToTqeMap::value_type(element->sequence(), element));
 }
 
+SequenceNumber
+RtpsUdpDataLink::RtpsWriter::cur_cumulative_ack(const GUID_t& reader_id) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+
+  ReaderInfoMap::const_iterator iter = remote_readers_.find(reader_id);
+  if (iter != remote_readers_.end()) {
+    return iter->second->cur_cumulative_ack();
+  }
+
+  return SequenceNumber::ZERO();
+}
+
 bool
 RtpsUdpDataLink::RtpsWriter::is_leading(const GUID_t& reader_id) const
 {
@@ -4829,6 +4842,24 @@ RtpsUdpDataLink::get_ice_endpoint() const
 {
   TransportImpl_rch ti = impl();
   return ti ? ti->get_ice_endpoint() : WeakRcHandle<ICE::Endpoint>();
+}
+
+SequenceNumber
+RtpsUdpDataLink::cur_cumulative_ack(const GUID_t& writer_id,
+                                    const GUID_t& reader_id) const
+{
+  RtpsWriterMap::mapped_type writer;
+
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, writers_lock_, false);
+    RtpsWriterMap::const_iterator pos = writers_.find(writer_id);
+    if (pos == writers_.end()) {
+      return false;
+    }
+    writer = pos->second;
+  }
+
+  return writer->cur_cumulative_ack(reader_id);
 }
 
 bool RtpsUdpDataLink::is_leading(const GUID_t& writer_id,
