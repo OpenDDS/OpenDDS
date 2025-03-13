@@ -13,7 +13,7 @@ This package bridges the gap between the MPC build system used by OpenDDS and CM
 Requirements
 ************
 
-CMake version 3.3.2 or greater is required to use the CMake package, but some some features require newer versions.
+CMake version 3.3.2 or greater is required to use the CMake package, but some features require newer versions.
 
 *******************************
 Using the OpenDDS CMake Package
@@ -424,7 +424,7 @@ Functions
 
   .. cmake:func:arg:: ALWAYS_GENERATE_LIB_EXPORT_HEADER TRUE|FALSE
 
-    If ``TRUE``, a header for exporting symbols in a shared library will be always generated as long the target is `some sort of library <https://cmake.org/cmake/help/latest/prop_tgt/TYPE.html>`__.
+    If ``TRUE``, a header for exporting symbols in a shared library will be always generated as long as the target is `some sort of library <https://cmake.org/cmake/help/latest/prop_tgt/TYPE.html>`__.
     If ``FALSE``, then it will only be done if the target is a shared library.
     The default is set by :cmake:var:`OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER`.
 
@@ -606,7 +606,7 @@ Functions
     )
 
   Generates a header that is compatible with `ACE's generate_export_file.pl <https://github.com/DOCGroup/ACE_TAO/blob/master/ACE/bin/generate_export_file.pl>`__ for exporting symbols in shared libraries.
-  The header will able to be included as ``<target>_export.h`` and the macro that can be used to export symbols will be named ``<target>_Export``.
+  The header will be able to be included as ``<target>_export.h`` and the macro that can be used to export symbols will be named ``<target>_Export``.
   It is the same function :cmake:func:`opendds_target_sources` uses so all the same info about :ref:`generated files <cmake-files-props>` applies.
 
   .. cmake:func:arg:: USE_EXPORT_VAR <use-export-var-name>
