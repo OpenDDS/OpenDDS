@@ -6,7 +6,7 @@ This document organizes our current thoughts around development guidelines in a 
 It's expected to evolve as different maintainers get a chance to review and contribute to it.
 
 Although ideally all code in the repository would already follow these guidelines, in reality the code has evolved over many years by a diverse group of developers.
-At one point an automated re-formatter was run on the codebase, migrating from the `GNU C style <https://www.gnu.org/prep/standards/html_node/Writing-C.html>`_ to the current, more conventional style, but automated tools can only cover a subset of the guidelines.
+At one point an automated re-formatter was run on the codebase, migrating from the GNU C style to the current, more conventional style, but automated tools can only cover a subset of the guidelines.
 
 **********
 Repository

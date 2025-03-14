@@ -235,6 +235,9 @@ int run(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-HandlerThreads"))) {
       config.handler_threads(std::atoi(arg));
       args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-SynchronousOutput"))) {
+      config.synchronous_output(ACE_OS::atoi(arg));
+      args.consume_arg();
     } else if ((arg = args.get_the_parameter("-MaxIpsPerClient"))) {
       config.max_ips_per_client(ACE_OS::atoi(arg));
       args.consume_arg();

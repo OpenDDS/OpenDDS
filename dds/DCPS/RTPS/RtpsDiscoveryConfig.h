@@ -50,6 +50,9 @@ public:
   DCPS::TimeDuration max_lease_duration() const;
   void max_lease_duration(const DCPS::TimeDuration& period);
 
+  DCPS::TimeDuration minimum_cleanup_separation() const;
+  void minimum_cleanup_separation(const DCPS::TimeDuration& period);
+
 #if OPENDDS_CONFIG_SECURITY
   DCPS::TimeDuration security_unsecure_lease_duration() const;
   void security_unsecure_lease_duration(const DCPS::TimeDuration& period);

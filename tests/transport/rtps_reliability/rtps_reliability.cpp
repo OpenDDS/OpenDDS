@@ -173,7 +173,7 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
     dsle_.get_header().sequence_ = seq;
     Message_Block_Ptr sample(
       new ACE_Message_Block(DataSampleHeader::get_max_serialized_size()));
-    dsle_.set_sample(move(sample));
+    dsle_.set_sample(OpenDDS::DCPS::move(sample));
     *dsle_.get_sample() << dsle_.get_header();
     dsle_.get_sample()->cont(payload_.duplicate());
     ACE_DEBUG((LM_INFO, "sending with seq#: %q\n", seq.getValue()));
