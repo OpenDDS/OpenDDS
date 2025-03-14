@@ -15,7 +15,6 @@
 #include "FeatureDisabledQosCheck.h"
 #include "GuidConverter.h"
 #include "Marked_Default_Qos.h"
-#include "MonitorFactory.h"
 #include "MultiTopicImpl.h"
 #include "PublisherImpl.h"
 #include "Qos_Helper.h"
@@ -129,7 +128,6 @@ DomainParticipantImpl::DomainParticipantImpl(
     &LivelinessTimer::execute))
 {
   (void) this->set_listener(a_listener, mask);
-  monitor_.reset(TheServiceParticipant->monitor_factory_->create_dp_monitor(this));
   type_lookup_service_ = make_rch<XTypes::TypeLookupService>();
 }
 
@@ -1771,14 +1769,6 @@ DomainParticipantImpl::enable()
   dp_id_ = value.id;
   federated_ = value.federated;
 
-  if (monitor_) {
-    monitor_->report();
-  }
-
-  if (TheServiceParticipant->monitor_) {
-    TheServiceParticipant->monitor_->report();
-  }
-
   const DDS::ReturnCode_t ret = this->set_enabled();
 
   if (DCPS_debug_level > 1) {
@@ -2007,10 +1997,6 @@ DomainParticipantImpl::create_new_topic(
   // this object will also act as a guard against leaking the new TopicImpl
   RefCounted_Topic refCounted_topic(Topic_Pair(topic_servant, obj, false));
   topics_.insert(std::make_pair(topic_name, refCounted_topic));
-
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
 
   // the topics_ map has one reference and we duplicate to give
   // the caller another reference.

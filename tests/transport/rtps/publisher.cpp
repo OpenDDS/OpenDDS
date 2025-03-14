@@ -12,16 +12,17 @@
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/MessageUtils.h>
-#include <dds/DCPS/RepoIdBuilder.h>
-#include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/AssociationData.h>
-#include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/SendStateDataSampleList.h>
 #include <dds/DCPS/DataSampleElement.h>
-#include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/EncapsulationHeader.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
-#include <dds/DCPS/EncapsulationHeader.h>
+#include <dds/DCPS/PublicationInstance.h>
+#include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/RepoIdBuilder.h>
+#include <dds/DCPS/SendStateDataSampleList.h>
+#include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/Service_Participant.h>
 
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 

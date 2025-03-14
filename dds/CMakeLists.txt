@@ -56,7 +56,6 @@ add_library(OpenDDS_Dcps
   DCPS/MemoryPool.cpp
   DCPS/MessageBlock.cpp
   DCPS/MessageTracker.cpp
-  DCPS/MonitorFactory.cpp
   DCPS/MultiTask.cpp
   DCPS/MultiTopicDataReaderBase.cpp
   DCPS/MultiTopicImpl.cpp
@@ -294,7 +293,6 @@ target_sources(OpenDDS_Dcps
     DCPS/MessageBlock.h
     DCPS/MessageTracker.h
     DCPS/Message_Block_Ptr.h
-    DCPS/MonitorFactory.h
     DCPS/MultiTask.h
     DCPS/MultiTopicDataReaderBase.h
     DCPS/MultiTopicDataReader_T.cpp
