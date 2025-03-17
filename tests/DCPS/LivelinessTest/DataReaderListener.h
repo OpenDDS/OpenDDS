@@ -65,10 +65,6 @@ public:
       ::DDS::DataReader_ptr reader,
       const ::OpenDDS::DCPS::SubscriptionLostStatus & status);
 
-  virtual void on_budget_exceeded(
-      ::DDS::DataReader_ptr,
-      const ::OpenDDS::DCPS::BudgetExceededStatus& status);
-
   int liveliness_changed_count() const { return liveliness_changed_count_; }
   void reset_liveliness_changed_count() { liveliness_changed_count_ = 0; }
 

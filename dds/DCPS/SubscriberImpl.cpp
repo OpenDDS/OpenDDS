@@ -48,8 +48,6 @@ SubscriberImpl::SubscriberImpl(DDS::InstanceHandle_t       handle,
   listener_mask_(mask),
   participant_(*participant),
   domain_id_(participant->get_domain_id()),
-  raw_latency_buffer_size_(0),
-  raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
   access_depth_ (0)
 {
   //Note: OK to duplicate a nil.
@@ -231,13 +229,6 @@ SubscriberImpl::create_datareader(
     dr_servant->enable_filtering(cft);
   }
 #endif
-
-  // Propagate the latency buffer data collection configuration.
-  // @TODO: Determine whether we want to exclude the Builtin Topic
-  //        readers from data gathering.
-  dr_servant->raw_latency_buffer_size() = this->raw_latency_buffer_size_;
-  dr_servant->raw_latency_buffer_type() = this->raw_latency_buffer_type_;
-
 
   dr_servant->init(topic_servant,
                    dr_qos,
@@ -978,18 +969,6 @@ SubscriberImpl::listener_for(::DDS::StatusKind kind)
   } else {
     return DDS::SubscriberListener::_duplicate(listener_.in());
   }
-}
-
-unsigned int&
-SubscriberImpl::raw_latency_buffer_size()
-{
-  return this->raw_latency_buffer_size_;
-}
-
-DataCollector<double>::OnFull&
-SubscriberImpl::raw_latency_buffer_type()
-{
-  return this->raw_latency_buffer_type_;
 }
 
 void

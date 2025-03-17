@@ -28,7 +28,7 @@ namespace DCPS {
 class SubscriberImpl;
 
 class OpenDDS_Dcps_Export MultiTopicDataReaderBase
-  : public virtual LocalObject<DataReaderEx> {
+  : public virtual LocalObject<DDS::DataReader> {
 public:
   MultiTopicDataReaderBase() {}
 
@@ -112,24 +112,14 @@ public:
     DDS::InstanceHandle_t publication_handle);
 #endif
 
-  // OpenDDS::DCPS::DataReaderEx interface
-
-  void get_latency_stats(LatencyStatisticsSeq& stats);
-
-  void reset_latency_stats();
-
-  CORBA::Boolean statistics_enabled();
-
-  void statistics_enabled(CORBA::Boolean statistics_enabled);
-
 private:
-  virtual void init_typed(DataReaderEx* dr) = 0;
+  virtual void init_typed(DDS::DataReader* dr) = 0;
   virtual const MetaStruct& getResultingMeta() = 0;
   virtual void incoming_sample(void* sample, const DDS::SampleInfo& info,
                                const char* topic, const MetaStruct& meta) = 0;
 
   unique_ptr<OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> > listener_;
-  DataReaderEx_var resulting_reader_;
+  DDS::DataReader_var resulting_reader_;
 
 protected:
 

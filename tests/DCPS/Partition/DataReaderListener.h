@@ -57,10 +57,6 @@ namespace Test
         DDS::DataReader_ptr reader,
         const ::OpenDDS::DCPS::SubscriptionLostStatus & status);
 
-    virtual void on_budget_exceeded (
-        DDS::DataReader_ptr reader,
-        const ::OpenDDS::DCPS::BudgetExceededStatus& status);
-
   protected:
 
     virtual ~DataReaderListener (void);

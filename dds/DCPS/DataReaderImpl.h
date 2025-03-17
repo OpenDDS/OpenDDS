@@ -27,7 +27,6 @@
 #include "RcHandle_T.h"
 #include "RcObject.h"
 #include "Service_Participant.h"
-#include "Stats_T.h"
 #include "SubscriptionInstance.h"
 #include "TimeTypes.h"
 #include "TopicImpl.h"
@@ -78,36 +77,6 @@ enum MarshalingType {
   KEY_ONLY_MARSHALING
 };
 
-/// Elements stored for managing statistical data.
-class OpenDDS_Dcps_Export WriterStats {
-public:
-  /// Default constructor.
-  WriterStats(
-    int amount = 0,
-    DataCollector<double>::OnFull type = DataCollector<double>::KeepOldest);
-#ifdef ACE_HAS_CPP11
-  WriterStats(const WriterStats&) = default;
-#endif
-
-  /// Add a datum to the latency statistics.
-  void add_stat(const TimeDuration& delay);
-
-  /// Extract the current latency statistics for this writer.
-  LatencyStatistics get_stats() const;
-
-  /// Reset the latency statistics for this writer.
-  void reset_stats();
-
-#ifndef OPENDDS_SAFETY_PROFILE
-  /// Dump any raw data.
-  std::ostream& raw_data(std::ostream& str) const;
-#endif
-
-private:
-  /// Latency statistics for the DataWriter to this DataReader.
-  Stats<double> stats_;
-};
-
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 class OpenDDS_Dcps_Export AbstractSamples
@@ -133,7 +102,7 @@ public:
 *
 */
 class OpenDDS_Dcps_Export DataReaderImpl
-  : public virtual LocalObject<DataReaderEx>,
+  : public virtual LocalObject<DDS::DataReader>,
     public virtual DataReaderCallbacks,
     public virtual EntityImpl,
     public virtual TransportClient,
@@ -147,8 +116,6 @@ public:
   typedef OPENDDS_MAP(DDS::InstanceHandle_t, SubscriptionInstance_rch) SubscriptionInstanceMapType;
   typedef OPENDDS_SET(DDS::InstanceHandle_t) InstanceSet;
   typedef OPENDDS_SET(SubscriptionInstance_rch) SubscriptionInstanceSet;
-  /// Type of collection of statistics for writers to this reader.
-  typedef OPENDDS_MAP_CMP(GUID_t, WriterStats, GUID_tKeyLessThan) StatsMapType;
 
   DataReaderImpl();
 
@@ -274,32 +241,6 @@ public:
 
   virtual DDS::ReturnCode_t enable();
 
-#ifndef OPENDDS_SAFETY_PROFILE
-  virtual void get_latency_stats(
-    LatencyStatisticsSeq & stats);
-#endif
-
-  virtual void reset_latency_stats();
-
-  virtual CORBA::Boolean statistics_enabled();
-
-  virtual void statistics_enabled(
-    CORBA::Boolean statistics_enabled);
-
-  /// @name Raw Latency Statistics Interfaces
-  /// @{
-
-  /// Expose the statistics container.
-  const StatsMapType& raw_latency_statistics() const;
-
-  /// Configure the size of the raw data collection buffer.
-  unsigned int& raw_latency_buffer_size();
-
-  /// Configure the type of the raw data collection buffer.
-  DataCollector<double>::OnFull& raw_latency_buffer_type();
-
-  /// @}
-
   /// update liveliness info for this writer.
   void writer_activity(const DataSampleHeader& header);
 
@@ -335,9 +276,6 @@ public:
   virtual void dispose_unregister(const ReceivedDataSample& sample,
                                   DDS::InstanceHandle_t publication_handle,
                                   SubscriptionInstance_rch& instance);
-
-  void process_latency(const ReceivedDataSample& sample);
-  void notify_latency(GUID_t writer);
 
   size_t get_depth() const
   {
@@ -815,9 +753,6 @@ private:
   DDS::RequestedIncompatibleQosStatus  requested_incompatible_qos_status_;
   DDS::SubscriptionMatchedStatus       subscription_match_status_;
 
-  // OpenDDS extended status.  This is only available via listener.
-  BudgetExceededStatus                 budget_exceeded_status_;
-
   /**
    * @todo The subscription_lost_status_ and
    *       subscription_reconnecting_status_ are left here for
@@ -862,9 +797,6 @@ private:
 
   bool always_get_history_;
 
-  /// Flag indicating status of statistics gathering.
-  AtomicBool statistics_enabled_;
-
   /// publications writing to this reader.
   typedef OPENDDS_MAP_CMP(GUID_t, WriterInfo_rch,
                    GUID_tKeyLessThan) WriterMapType;
@@ -873,16 +805,6 @@ private:
 
   /// RW lock for reading/writing publications.
   ACE_RW_Thread_Mutex writers_lock_;
-
-  /// Statistics for this reader, collected for each writer.
-  StatsMapType statistics_;
-  ACE_Recursive_Thread_Mutex statistics_lock_;
-
-  /// Bound (or initial reservation) of raw latency buffer.
-  unsigned int raw_latency_buffer_size_;
-
-  /// Type of raw latency data buffer.
-  DataCollector<double>::OnFull raw_latency_buffer_type_;
 
   typedef VarLess<DDS::ReadCondition> RCCompLess;
   typedef OPENDDS_SET_CMP(DDS::ReadCondition_var,  RCCompLess) ReadConditionSet;
