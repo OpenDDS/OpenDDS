@@ -2,7 +2,7 @@
 
 namespace RtpsRelay {
 
-void RelayParticipantStatusReporter::add_participant(GuidAddrSet::Proxy& proxy,
+void RelayParticipantStatusReporter::add_participant(GuidAddrSet::Proxy&,
                                                      const OpenDDS::DCPS::GUID_t& repoid,
                                                      const DDS::ParticipantBuiltinTopicData& data)
 {
