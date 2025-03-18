@@ -1013,7 +1013,6 @@ Spdp::data_received(const DataSubmessage& data,
                     const ParameterList& plist,
                     const ACE_INET_Addr& from)
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
   if (!initialized_flag_ || shutdown_flag_) {
     return;
   }
