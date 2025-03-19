@@ -7067,9 +7067,9 @@ void Sedp::match(const GUID_t& writer, const GUID_t& reader)
   bool writer_local = false;
   if (lpi != local_publications_.end()) {
     writer_local = true;
-    writer_type_info = lpi->second.typeInfoFor(reader);
-    if ((lpi->second.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)
-        && writer_type_info->minimal.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {
+    bool used_flexible_types = false;
+    writer_type_info = lpi->second.typeInfoFor(reader, &used_flexible_types);
+    if (!used_flexible_types && (lpi->second.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)) {
       const DCPS::DataWriterCallbacks_rch callbacks = lpi->second.publication_.lock();
       DCPS::String typeKey;
       if (callbacks && (typeKey = spdp_.find_flexible_types_key_i(reader)) != "") {
@@ -7098,9 +7098,9 @@ void Sedp::match(const GUID_t& writer, const GUID_t& reader)
   bool reader_local = false;
   if (lsi != local_subscriptions_.end()) {
     reader_local = true;
-    reader_type_info = lsi->second.typeInfoFor(writer);
-    if ((lsi->second.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)
-        && reader_type_info->minimal.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {
+    bool used_flexible_types = false;
+    reader_type_info = lsi->second.typeInfoFor(writer, &used_flexible_types);
+    if (!used_flexible_types && (lsi->second.type_info_.flags_ & DCPS::TypeInformation::Flags_FlexibleTypeSupport)) {
       const DCPS::DataReaderCallbacks_rch callbacks = lsi->second.subscription_.lock();
       DCPS::String typeKey;
       if (callbacks && (typeKey = spdp_.find_flexible_types_key_i(writer)) != "") {

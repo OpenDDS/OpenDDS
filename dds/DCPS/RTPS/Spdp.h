@@ -388,6 +388,9 @@ private:
   DCPS::TimeDuration lease_extension_;
   XTypes::TypeLookupService_rch type_lookup_service_;
 
+  typedef OPENDDS_MAP_CMP(GUID_t, DCPS::String, GUID_tKeyLessThan) GuidToString;
+  GuidToString flexible_types_pre_discovery_;
+
   // Participant:
   const DDS::DomainId_t domain_;
   DCPS::RepoId guid_;
