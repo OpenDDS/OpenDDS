@@ -218,11 +218,7 @@ function(opendds_export_header target)
     return()
   endif()
 
-  # These values are used in configure_file for the export header.
-  string(TOUPPER ${target} uppercase_target)
-  set(export_macro "${target}_Export")
-
-  # Geneate the export header
+  # Figure out the header path
   _opendds_get_generated_output_dir(${target} gendir MKDIR)
   set(export_header "${target}_export.h")
   if(arg_DIR)
@@ -230,18 +226,18 @@ function(opendds_export_header target)
   endif()
   _opendds_get_generated_output(${target} "${gendir}/${export_header}"
     INCLUDE_BASE "${gendir}" MKDIR FILE_PATH_VAR export_header_path)
-  if(NOT EXISTS "${export_header_path}")
-    configure_file("${_OPENDDS_CMAKE_DIR}/export.h.in" "${export_header_path}")
-  endif()
 
-  # Make sure the export header can be used properly and installed.
+  # Generate the export header
+  opendds_use_existing_export_header(${target} INCLUDE "${export_header}")
+  string(TOUPPER uppercase_target "${target}")
+  get_target_property(export_macro ${target} OPENDDS_EXPORT_MACRO)
+  get_target_property(header_macro ${target} OPENDDS_HEADER_MACRO)
+  get_target_property(source_macro ${target} OPENDDS_SOURCE_MACRO)
+  configure_file("${_OPENDDS_CMAKE_DIR}/export.h.in" "${export_header_path}")
   _opendds_add_idl_or_header_files(${target} PUBLIC TRUE "${export_header_path}")
-  target_compile_definitions(${target} PRIVATE "${uppercase_target}_BUILD_DLL")
-  set(use_export "${export_header};${export_macro}")
-  set_target_properties(${target}
-    PROPERTIES
-      OPENDDS_USE_EXPORT "${use_export}")
+
   if(DEFINED arg_USE_EXPORT_VAR)
+    get_target_property(use_export ${target} OPENDDS_USE_EXPORT)
     set(${arg_USE_EXPORT_VAR} "${use_export}" PARENT_SCOPE)
   endif()
 endfunction()

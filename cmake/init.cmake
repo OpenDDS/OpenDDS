@@ -595,6 +595,94 @@ function(_opendds_path_list path_list_var)
   set("${path_list_var}" "${path_list}" PARENT_SCOPE)
 endfunction()
 
+function(opendds_msvc_bigobj target)
+  if(MSVC)
+    target_compile_options(${target} PRIVATE /bigobj)
+  endif()
+endfunction()
+
+function(opendds_use_existing_export_header target)
+  set(no_value_options)
+  set(single_value_options
+    INCLUDE
+    MACRO_PREFIX
+    EXPORT_MACRO
+    HEADER_MACRO
+    SOURCE_MACRO
+    FORCE_EXPORT
+  )
+  set(multi_value_options)
+  cmake_parse_arguments(arg
+    "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
+
+  if(NOT DEFINED arg_MACRO_PREFIX)
+    set(arg_MACRO_PREFIX ${target})
+  endif()
+  string(TOUPPER uppercase_macro_prefix "${arg_MACRO_PREFIX}")
+
+  # The include and export macro are optional beccause it's only needed for the
+  # IDL compilers and not all libraries have IDL.
+  if(DEFINED arg_INCLUDE)
+    if(NOT DEFINED arg_EXPORT_MACRO)
+      set(arg_EXPORT_MACRO "${arg_MACRO_PREFIX}_Export")
+    endif()
+
+    set_target_properties(${target}
+      PROPERTIES
+        OPENDDS_EXPORT_INCLUDE "${arg_INCLUDE}"
+        OPENDDS_EXPORT_MACRO "${arg_EXPORT_MACRO}"
+        OPENDDS_USE_EXPORT "${arg_INCLUDE};${arg_EXPORT_MACRO}"
+    )
+  endif()
+
+  if(NOT DEFINED arg_HEADER_MACRO)
+    set(arg_HEADER_MACRO "${uppercase_macro_prefix}_HAS_DLL")
+  endif()
+
+  if(NOT DEFINED arg_SOURCE_MACRO)
+    set(arg_SOURCE_MACRO "${uppercase_macro_prefix}_BUILD_DLL")
+  endif()
+
+  if(DEFINED arg_FORCE_EXPORT)
+    if(arg_FORCE_EXPORT)
+      set(export 1)
+    else()
+      set(export 0)
+    endif()
+  else()
+    get_target_property(target_type ${target} TYPE)
+    if(target_type STREQUAL "SHARED_LIBRARY")
+      set(export 1)
+    elseif(target_type STREQUAL "STATIC_LIBRARY")
+      set(export 0)
+    else()
+      message(FATAL_ERROR "Target ${target} has unexpected type ${target_type}")
+    endif()
+  endif()
+
+  # Set macro for library source files. This is the same thing as dynamicflags
+  # in MPC.
+  if(export)
+    target_compile_definitions(${target} PRIVATE "${arg_SOURCE_MACRO}")
+  endif()
+
+  # Set macro for library header files that determines if symbols are exported.
+  # It doesn't have to be explicitly set in MPC because usually static and
+  # shared libraries are not mixed. CMake easily allows this though, so we have
+  # to explicitly tell the export headers files if symbols should be exported
+  # because otherwise it will default based on ACE_AS_STATIC_LIBS.
+  #
+  # This macro is also used by dds/DCPS/InitStaticLibs.h in user targets using
+  # OpenDDS to include static initialization headers when needed.
+  target_compile_definitions(${target} PUBLIC "${arg_HEADER_MACRO}=${export}")
+
+  set_target_properties(${target}
+    PROPERTIES
+      OPENDDS_HEADER_MACRO "${arg_HEADER_MACRO}"
+      OPENDDS_SOURCE_MACRO "${arg_SOURCE_MACRO}"
+  )
+endfunction()
+
 if(OPENDDS_STATIC)
   set(OPENDDS_LIBRARY_TYPE STATIC)
 else()
