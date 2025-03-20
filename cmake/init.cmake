@@ -618,7 +618,7 @@ function(opendds_use_existing_export_header target)
   if(NOT DEFINED arg_MACRO_PREFIX)
     set(arg_MACRO_PREFIX ${target})
   endif()
-  string(TOUPPER uppercase_macro_prefix "${arg_MACRO_PREFIX}")
+  string(TOUPPER "${arg_MACRO_PREFIX}" uppercase_macro_prefix)
 
   # The include and export macro are optional beccause it's only needed for the
   # IDL compilers and not all libraries have IDL.
