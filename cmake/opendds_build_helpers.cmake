@@ -66,7 +66,6 @@ function(_opendds_library target)
   if(DEFINED arg_EXPORT_MACRO_PREFIX)
     list(APPEND export_args MACRO_PREFIX "${arg_EXPORT_MACRO_PREFIX}")
   endif()
-  string(REPLACE ";" " " export_args "${export_args}")
   opendds_use_existing_export_header(${target} ${export_args})
 
   if(arg_MSVC_BIGOBJ)
