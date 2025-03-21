@@ -68,8 +68,8 @@ pygments_style = 'manni'
 nitpicky = True
 
 project = 'OpenDDS'
-copyright = '2024 OpenDDS Foundation'
 author = 'OpenDDS Foundation'
+copyright = author
 github_links_repo = 'OpenDDS/OpenDDS'
 github_main_branch = 'master'
 github_repo = 'https://github.com/' + github_links_repo
@@ -83,6 +83,8 @@ if is_release:
     github_links_release_tag = opendds_version_info.tag
 ace6tao2_version = opendds_version_info.ace6tao2_version
 ace7tao3_version = opendds_version_info.ace7tao3_version
+if opendds_version_info.release_year:
+    copyright = f'{opendds_version_info.release_year} {copyright}'
 
 # Generate news for all releases
 with (docs_path / 'news.rst').open('w') as f:

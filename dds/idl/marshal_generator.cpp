@@ -1695,10 +1695,11 @@ namespace {
     } else if (fld_cls & CL_PRIMITIVE) {
       return "(strm " + shift + ' ' + getWrapper(expr, actual_type, dir) + ')';
     } else if (fld_cls == CL_UNKNOWN) {
-      if (dir == WD_INPUT) { // no need to warn twice
-        std::cerr << "WARNING: field " << name << " can not be serialized.  "
-          "The struct or union it belongs to (" << stru <<
-          ") can not be used in an OpenDDS topic type." << std::endl;
+      if (dir == WD_INPUT) {
+        be_global->error(("Field \"" + name + "\" can not be serialized.  "
+                          "The struct or union it belongs to (" + stru +
+                          ") can not be used in an OpenDDS topic type.").c_str(),
+                         field->file_name().c_str(), field->line());
       }
       return "false";
     } else { // sequence, struct, union, array, enum, string(insertion)
@@ -1737,7 +1738,7 @@ namespace {
 
   std::string generate_field_stream(
     const std::string& indent, AST_Field* field, const std::string& prefix, const std::string& field_name,
-    bool wrap_nested_key_only, Intro& intro)
+    bool wrap_nested_key_only, Intro& intro, const std::string& structName = "")
   {
     FieldInfo af(*field);
 
@@ -1751,7 +1752,7 @@ namespace {
     }
     return streamCommon(
       indent, field, field_name, field->field_type(), prefix,
-      wrap_nested_key_only, intro);
+      wrap_nested_key_only, intro, structName);
   }
 
   bool genBinaryProperty_t(const string& cxx)
@@ -2524,8 +2525,8 @@ namespace {
             string("stru") + value_access + "." + field->local_name()->get_string();
           cases <<
             "      case " << id << ": {\n"
-            "        if (!" << generate_field_stream(
-                                                     indent, field, ">> stru" + value_access, field->local_name()->get_string(), wrap_nested_key_only, intro) << ") {\n";
+            "        if (!" << generate_field_stream(indent, field, ">> stru" + value_access, field->local_name()->get_string(),
+                                                     wrap_nested_key_only, intro, cpp_name) << ") {\n";
           AST_Type* const field_type = resolveActualType(field->field_type());
           const Classification fld_cls = classify(field_type);
 
@@ -2689,8 +2690,8 @@ namespace {
           }
           expr += "(strm >> " + strm_name + ")";
         } else {
-          expr += generate_field_stream(
-                                        indent, field, ">> stru" + value_access, field->local_name()->get_string(), wrap_nested_key_only, intro);
+          expr += generate_field_stream(indent, field, ">> stru" + value_access, field->local_name()->get_string(),
+                                        wrap_nested_key_only, intro, cpp_name);
         }
         if (is_appendable) {
           expr += ") {\n"

@@ -361,7 +361,7 @@ public:
   SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-  void type_lookup_init(ReactorInterceptor_rch reactor_interceptor);
+  void type_lookup_init(ReactorTask_rch reactor_task);
   void type_lookup_fini();
   void type_lookup_service(const XTypes::TypeLookupService_rch type_lookup_service);
 
@@ -940,7 +940,7 @@ public:
                        const DDS::DataWriterQos& qos,
                        const DCPS::TransportLocatorSeq& transInfo,
                        const DDS::PublisherQos& publisherQos,
-                       const XTypes::TypeInformation& type_info);
+                       const TypeInformation& type_info);
 
   bool remove_publication(DDS::DomainId_t domainId, const GUID_t& participantId,
     const GUID_t& publicationId);
@@ -971,7 +971,7 @@ public:
                         const char* filterClassName,
                         const char* filterExpr,
                         const DDS::StringSeq& params,
-                        const XTypes::TypeInformation& type_info);
+                        const TypeInformation& type_info);
 
   bool remove_subscription(DDS::DomainId_t domainId, const GUID_t& participantId,
     const GUID_t& subscriptionId);

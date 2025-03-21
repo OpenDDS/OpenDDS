@@ -26,27 +26,12 @@ namespace ICE {
 using DCPS::TimeDuration;
 using DCPS::MonotonicTimePoint;
 
-struct ScheduleTimerCommand : public DCPS::ReactorInterceptor::Command {
-  ACE_Reactor* reactor;
-  ACE_Event_Handler* event_handler;
-  TimeDuration delay;
-
-  ScheduleTimerCommand(ACE_Reactor* a_reactor, ACE_Event_Handler* a_event_handler, const TimeDuration& a_delay) :
-    reactor(a_reactor), event_handler(a_event_handler), delay(a_delay) {}
-
-  void execute()
-  {
-    reactor->cancel_timer(event_handler, 0);
-    reactor->schedule_timer(event_handler, 0, delay.value());
-  }
-};
-
 void AgentImpl::enqueue(const DCPS::MonotonicTimePoint& a_release_time,
                         WeakTaskPtr wtask)
 {
   if (tasks_.empty() || a_release_time < tasks_.top().release_time_) {
     const MonotonicTimePoint release = std::max(last_execute_ + T_a_, a_release_time);
-    execute_or_enqueue(DCPS::make_rch<ScheduleTimerCommand>(reactor(), this, release - MonotonicTimePoint::now()));
+    task_task_->schedule(release - MonotonicTimePoint::now());
   }
   tasks_.push(Item(a_release_time, wtask));
 }
@@ -56,16 +41,13 @@ bool AgentImpl::reactor_is_shut_down() const
   return TheServiceParticipant->is_shut_down();
 }
 
-int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
+void AgentImpl::process_tasks(const DCPS::MonotonicTimePoint& now)
 {
-  DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
-
-  const MonotonicTimePoint now(a_now);
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, mutex, 0);
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   check_invariants();
 
   if (tasks_.empty()) {
-    return 0;
+    return;
   }
 
   if (tasks_.top().release_time_ <= now) {
@@ -83,15 +65,12 @@ int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
 
   if (!tasks_.empty()) {
     const MonotonicTimePoint release = std::max(last_execute_ + T_a_, tasks_.top().release_time_);
-    execute_or_enqueue(DCPS::make_rch<ScheduleTimerCommand>(reactor(), this, release - now));
+    task_task_->schedule(release - now);
   }
-
-  return 0;
 }
 
 AgentImpl::AgentImpl()
   : DCPS::InternalDataReaderListener<DCPS::NetworkInterfaceAddress>(TheServiceParticipant->job_queue())
-  , ReactorInterceptor(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner())
   , T_a_(ICE::Configuration::instance()->T_a())
   , connectivity_check_ttl_(ICE::Configuration::instance()->connectivity_check_ttl())
   , checklist_period_(ICE::Configuration::instance()->checklist_period())
@@ -105,6 +84,7 @@ AgentImpl::AgentImpl()
   , reader_(DCPS::make_rch<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> >(DCPS::DataReaderQosBuilder().reliability_reliable().durability_transient_local(), DCPS::rchandle_from(this)))
   , reader_added_(false)
   , remote_peer_reflexive_counter_(0)
+  , task_task_(DCPS::make_rch<DCPS::PmfSporadicTask<AgentImpl> >(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), DCPS::rchandle_from(this), &AgentImpl::process_tasks))
 {
   // Bind the lifetime of this to the service participant.
   TheServiceParticipant->set_shutdown_listener(DCPS::static_rchandle_cast<ShutdownListener>(rchandle_from(this)));
@@ -262,7 +242,7 @@ void AgentImpl::check_invariants() const
 
 void AgentImpl::shutdown()
 {
-  reactor()->cancel_timer(this, 0);
+  task_task_->cancel();
 }
 
 void AgentImpl::notify_shutdown()

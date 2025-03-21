@@ -14,7 +14,6 @@
 
 #include <dds/DCPS/dcps_export.h>
 #include <dds/DCPS/AssociationData.h>
-#include <dds/DCPS/ReactorInterceptor.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/PoolAllocationBase.h>
@@ -207,9 +206,10 @@ private:
   typedef OPENDDS_VECTOR(WeakRcHandle<TransportImpl>) ImplsType;
 
   typedef ACE_Reverse_Lock<ACE_Thread_Mutex> Reverse_Lock_t;
-  struct PendingAssoc : RcEventHandler {
+  struct PendingAssoc : RcObject {
     ACE_Thread_Mutex mutex_;
-    bool active_, scheduled_;
+    bool active_;
+    bool scheduled_;
     ImplsType impls_;
     CORBA::ULong blob_index_;
     AssociationData data_;
@@ -221,12 +221,36 @@ private:
       , scheduled_(false)
       , blob_index_(0)
       , client_(tc_rch)
+      , timeout_task_(make_rch<PendingAssocSporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &PendingAssoc::timeout))
     {}
+
+    ~PendingAssoc()
+    {
+      timeout_task_->cancel();
+    }
 
     void reset_client();
     bool safe_to_remove();
     bool initiate_connect(TransportClient* tc, Guard& guard);
-    int handle_timeout(const ACE_Time_Value& time, const void* arg);
+
+    void schedule(const TimeDuration& delay)
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+      timeout_task_->schedule(delay);
+      scheduled_ = true;
+    }
+
+    void cancel()
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+      timeout_task_->cancel();
+      scheduled_ = false;
+    }
+
+  private:
+    typedef PmfSporadicTask<PendingAssoc> PendingAssocSporadicTask;
+    RcHandle<PendingAssocSporadicTask> timeout_task_;
+    void timeout(const MonotonicTimePoint& now);
   };
 
   typedef RcHandle<PendingAssoc> PendingAssoc_rch;
@@ -235,65 +259,6 @@ private:
   typedef OPENDDS_MULTIMAP_CMP(GUID_t, PendingAssoc_rch, GUID_tKeyLessThan) PrevPendingMap;
 
   void clean_prev_pending();
-
-  class PendingAssocTimer : public ReactorInterceptor {
-  public:
-    PendingAssocTimer(ACE_Reactor* reactor,
-                      ACE_thread_t owner)
-      : ReactorInterceptor(reactor, owner)
-      , timer_id_(-1)
-    { }
-
-    void schedule_timer(TransportClient_rch transport_client, const PendingAssoc_rch& pend)
-    {
-      execute_or_enqueue(make_rch<ScheduleCommand>(this, transport_client, pend));
-    }
-
-    ReactorInterceptor::CommandPtr cancel_timer(const PendingAssoc_rch& pend)
-    {
-      return execute_or_enqueue(make_rch<CancelCommand>(this, pend));
-    }
-
-    void set_id(long id) { timer_id_ = id; }
-    long get_id() const { return timer_id_; }
-
-    virtual bool reactor_is_shut_down() const
-    {
-      return TheServiceParticipant->is_shut_down();
-    }
-
-  private:
-    class CommandBase : public Command {
-    public:
-      CommandBase(PendingAssocTimer* timer,
-                  const PendingAssoc_rch& assoc)
-        : timer_(timer)
-        , assoc_(assoc)
-      { }
-    protected:
-      PendingAssocTimer* timer_;
-      PendingAssoc_rch assoc_;
-    };
-    struct ScheduleCommand : public CommandBase {
-      ScheduleCommand(PendingAssocTimer* timer,
-                      TransportClient_rch transport_client,
-                      const PendingAssoc_rch& assoc)
-        : CommandBase(timer, assoc)
-        , transport_client_(transport_client)
-      { }
-      virtual void execute();
-      const WeakRcHandle<TransportClient> transport_client_;
-    };
-    struct CancelCommand : public CommandBase {
-      CancelCommand(PendingAssocTimer* timer,
-                    const PendingAssoc_rch& assoc)
-        : CommandBase(timer, assoc)
-      { }
-      virtual void execute();
-    };
-    long timer_id_;
-  };
-  RcHandle<PendingAssocTimer> pending_assoc_timer_;
 
   // Associated Impls and DataLinks:
 

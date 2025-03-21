@@ -96,7 +96,7 @@ if(_OPENDDS_MPC_TYPE STREQUAL gnuace)
     USES_TERMINAL_BUILD TRUE # Needed for Ninja to show the ACE/TAO build
     INSTALL_COMMAND "${CMAKE_COMMAND}" -E echo "No install step"
   )
-elseif(_OPENDDS_MPC_TYPE MATCHES "^vs")
+elseif(_OPENDDS_MPC_TYPE MATCHES "^vs" OR _OPENDDS_MPC_TYPE MATCHES "^vc")
   set(sln ACE_TAO_for_OpenDDS.sln)
   execute_process(
     COMMAND

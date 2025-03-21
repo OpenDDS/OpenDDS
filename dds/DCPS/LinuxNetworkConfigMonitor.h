@@ -16,7 +16,8 @@
 
 #include "NetworkConfigMonitor.h"
 #include "RcEventHandler.h"
-#include "ReactorInterceptor.h"
+#include "ReactorTask.h"
+#include "ReactorTask_rch.h"
 #include "dcps_export.h"
 
 #include <ace/SOCK_Netlink.h>
@@ -31,12 +32,12 @@ class OpenDDS_Dcps_Export LinuxNetworkConfigMonitor
   , public virtual NetworkConfigMonitor
 {
 public:
-  explicit LinuxNetworkConfigMonitor(ReactorInterceptor_rch interceptor);
+  explicit LinuxNetworkConfigMonitor(ReactorTask_rch reactor_task);
   bool open();
   bool close();
 
 private:
-  class OpenHandler : public ReactorInterceptor::Command {
+  class OpenHandler : public ReactorTask::Command {
   public:
     OpenHandler(const RcHandle<LinuxNetworkConfigMonitor>& lncm)
       : lncm_(lncm)
@@ -50,7 +51,7 @@ private:
     bool wait() const;
 
   private:
-    void execute();
+    void execute(ReactorWrapper& reactor_wrapper);
 
     WeakRcHandle<LinuxNetworkConfigMonitor> lncm_;
     mutable ACE_Thread_Mutex mutex_;
@@ -59,9 +60,9 @@ private:
     bool retval_;
   };
 
-  bool open_i();
+  bool open_i(ReactorWrapper& reactor_wrapper);
 
-  class CloseHandler : public ReactorInterceptor::Command {
+  class CloseHandler : public ReactorTask::Command {
   public:
     CloseHandler(const RcHandle<LinuxNetworkConfigMonitor>& lncm)
       : lncm_(lncm)
@@ -75,7 +76,7 @@ private:
     bool wait() const;
 
   private:
-    void execute();
+    void execute(ReactorWrapper& reactor_wrapper);
 
     WeakRcHandle<LinuxNetworkConfigMonitor> lncm_;
     mutable ACE_Thread_Mutex mutex_;
@@ -84,7 +85,7 @@ private:
     bool retval_;
   };
 
-  bool close_i();
+  bool close_i(ReactorWrapper& reactor_wrapper);
 
   ACE_HANDLE get_handle() const;
   int handle_input(ACE_HANDLE);
@@ -93,7 +94,7 @@ private:
 
   ACE_SOCK_Netlink socket_;
   ACE_Thread_Mutex socket_mutex_;
-  ReactorInterceptor_wrch interceptor_;
+  ReactorTask_rch reactor_task_;
 
   struct NetworkInterface {
     OPENDDS_STRING name;

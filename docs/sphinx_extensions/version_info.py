@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 
 import re
-from pathlib import Path
 import configparser
+from pathlib import Path
 
 
 opendds_root_path = Path(__file__).parent.parent.parent
 
 with (opendds_root_path / 'dds/Version.h').open() as f:
-    version_file = f.read()
+    version_h_file = f.read()
 
+with (opendds_root_path / 'VERSION.txt').open() as f:
+    version_txt_file = f.read()
 
 class VersionInfo:
 
@@ -27,12 +29,13 @@ class VersionInfo:
             cast = lambda v: v
         else:
             raise TypeError('Unexpected kind: ' + repr(kind))
-        m = re.search(r'#define {} {}'.format(macro, regex), version_file)
+        m = re.search(r'#define {} {}'.format(macro, regex), version_h_file)
         if m:
             return cast(m[1])
         raise KeyError('Could not find ' + macro)
 
     def __init__(self):
+        # Read values from Version.h
         self.version = self.get(str, 'version')
         self.is_release = self.get(bool, 'is_release')
         self.tag = None
@@ -47,6 +50,7 @@ class VersionInfo:
                 fmt_str += '.{micro}'
             self.tag = fmt_str.format(**vparts)
 
+        # Read values from acetao.ini
         ini = configparser.ConfigParser(interpolation=None)
         ini.read(opendds_root_path / 'acetao.ini')
         for sec in [ini[sn] for sn in ini.sections()]:
@@ -54,6 +58,13 @@ class VersionInfo:
                 name = f'{sec.name}_{k}'.replace('-', '_').replace('.', '_')
                 setattr(self, name, sec[k])
 
+        # Get release year from VERSION.txt
+        self.release_year = None
+        if self.is_release:
+            m = re.search(r'released \w+ \d+ (\d+)', version_txt_file)
+            if not m:
+                raise ValueError('Could not find release date in VERSION.txt')
+            self.release_year = int(m[1])
 
 if __name__ == '__main__':
     for k, v in vars(VersionInfo()).items():

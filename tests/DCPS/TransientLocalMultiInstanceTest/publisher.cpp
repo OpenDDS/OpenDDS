@@ -8,6 +8,8 @@
 #include "MessengerTypeSupportImpl.h"
 #include "DataReaderListener.h"
 
+#include <tests/Utils/DistributedConditionSet.h>
+
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 
@@ -23,8 +25,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   bool ok = true;
 
   try {
+    DistributedConditionSet_rch dcs =
+      OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
+
+    const OpenDDS::DCPS::String actor = TheServiceParticipant->config_store()->get("APP_NAME", "");
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) actor = %C\n", actor.c_str()));
+
     DDS::DomainParticipant_var participant =
       dpf->create_participant(4,
         PARTICIPANT_QOS_DEFAULT,
@@ -67,7 +76,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
     // activate the listener
-    DDS::DataReaderListener_var listener1(new DataReaderListenerImpl);
+    DDS::DataReaderListener_var listener1(new DataReaderListenerImpl(dcs, "pub sub 1", 4));
     DataReaderListenerImpl* listener_servant1 =
       dynamic_cast<DataReaderListenerImpl*>(listener1.in());
 
@@ -127,8 +136,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
     MessageDataWriter_var message_dw = MessageDataWriter::_narrow(dw1);
-
-    const ACE_Time_Value writer_delay(0, 100 * 1000);
 
     Message message_instance1;
     message_instance1.subject_id = 1;
@@ -222,10 +229,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         message_instance4.subject_id, message_instance4.count));
     }
 
-    const int expected = 4;
-    while (listener_servant1->num_reads() < expected || !listener_servant1->received_all_expected_messages()) {
-      ACE_OS::sleep(1);
-    }
+    dcs->post(actor, "write done");
+    dcs->wait_for(actor, "pub sub 1", "read done");
 
     ok = listener_servant1->ok();
     if (ok) {
@@ -236,7 +241,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
     // activate the second listener
-    DDS::DataReaderListener_var listener2(new DataReaderListenerImpl);
+    DDS::DataReaderListener_var listener2(new DataReaderListenerImpl(dcs, "pub sub 2", 4));
     DataReaderListenerImpl* listener_servant2 =
       dynamic_cast<DataReaderListenerImpl*>(listener2.in());
 
@@ -262,9 +267,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) create_datareader dr2 durable success.\n")));
     }
 
-    while (listener_servant2->num_reads() < expected || !listener_servant2->received_all_expected_messages()) {
-      ACE_OS::sleep(1);
-    }
+    dcs->wait_for(actor, "pub sub 2", "read done");
 
     if (ok) {
       ok = listener_servant2->ok();
@@ -276,21 +279,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       }
     }
 
-    while (true) {
-      DDS::PublicationMatchedStatus pubmatched, pubmatched2;
-      if (dw1->get_publication_matched_status(pubmatched) != DDS::RETCODE_OK || dw2->get_publication_matched_status(pubmatched2) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: get_publication_matched_status\n")));
-        break;
-      }
-      else if (pubmatched.current_count == 2 && pubmatched.total_count == 4 && pubmatched2.current_count == 2 && pubmatched2.total_count == 4) {
-        // subscriber has come and gone
-        break;
-      }
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) pubmatched current_count : %d total_count : %d pubmatched2 current_count : %d total_count : %d\n"),
-        pubmatched.current_count, pubmatched.total_count, pubmatched2.current_count, pubmatched2.total_count));
-      ACE_OS::sleep(ACE_Time_Value(0, 200000));
-    }
+    dcs->wait_for(actor, "sub1", "read done");
+    dcs->wait_for(actor, "sub2", "read done");
+
     participant->delete_contained_entities();
     dpf->delete_participant(participant);
     TheServiceParticipant->shutdown();

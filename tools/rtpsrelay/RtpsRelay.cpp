@@ -170,6 +170,9 @@ int run(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-UtilizationLimit"))) {
       config.utilization_limit(ACE_OS::atof(arg));
       args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-LogUtilizationChanges"))) {
+      config.log_utilization_changes(ACE_OS::atoi(arg));
+      args.consume_arg();
     } else if ((arg = args.get_the_parameter("-LogRelayStatistics"))) {
       config.log_relay_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
@@ -415,13 +418,13 @@ int run(int argc, ACE_TCHAR* argv[])
   }
   CORBA::String_var relay_status_type_name = relay_status_ts->get_type_name();
 
-  DDS::Topic_var relay_statuss_topic =
+  DDS::Topic_var relay_status_topic =
     relay_participant->create_topic(RELAY_STATUS_TOPIC_NAME.c_str(),
                                     relay_status_type_name,
                                     TOPIC_QOS_DEFAULT, nullptr,
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-  if (!relay_statuss_topic) {
+  if (!relay_status_topic) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Relay Instances topic\n"));
     return EXIT_FAILURE;
   }
@@ -624,6 +627,7 @@ int run(int argc, ACE_TCHAR* argv[])
   append(application_properties, OpenDDS::RTPS::RTPS_DISCOVERY_TYPE_LOOKUP_SERVICE, "false");
   append(application_properties, OpenDDS::RTPS::RTPS_REFLECT_HEARTBEAT_COUNT, "true");
   append(application_properties, OpenDDS::RTPS::RTPS_RELAY_APPLICATION_PARTICIPANT, "true");
+  append(application_properties, OpenDDS::RTPS::RTPS_HARVEST_THREAD_STATUS, "true");
 
   if (secure) {
     append(application_properties, DDS::Security::Properties::AuthIdentityCA, identity_ca_file);
@@ -943,7 +947,7 @@ int run(int argc, ACE_TCHAR* argv[])
 
   DDS::DataWriterListener_var relay_status_writer_listener =
     new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::relay_status_sub_count);
-  DDS::DataWriter_var relay_status_writer_var = relay_publisher->create_datawriter(relay_statuss_topic, relay_status_writer_qos, relay_status_writer_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  DDS::DataWriter_var relay_status_writer_var = relay_publisher->create_datawriter(relay_status_topic, relay_status_writer_qos, relay_status_writer_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!relay_status_writer_var) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Relay Status data writer\n"));
     return EXIT_FAILURE;

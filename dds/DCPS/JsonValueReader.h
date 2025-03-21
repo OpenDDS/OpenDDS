@@ -366,7 +366,7 @@ template <typename InputStream>
 bool JsonValueReader<InputStream>::read_byte(ACE_CDR::Octet& value)
 {
   if (peek() == kUint) {
-    value = uint_value_;
+    value = static_cast<ACE_CDR::Octet>(uint_value_);
     return consume(kUint);
   }
   return false;
@@ -378,10 +378,10 @@ bool JsonValueReader<InputStream>::read_int8(ACE_CDR::Int8& value)
 {
   switch (peek()) {
   case kInt:
-    value = int_value_;
+    value = static_cast<ACE_CDR::Int8>(int_value_);
     return consume(kInt);
   case kUint:
-    value = uint_value_;
+    value = static_cast<ACE_CDR::Int8>(uint_value_);
     return consume(kUint);
   default:
     return false;
@@ -392,7 +392,7 @@ template <typename InputStream>
 bool JsonValueReader<InputStream>::read_uint8(ACE_CDR::UInt8& value)
 {
   if (peek() == kUint) {
-    value = uint_value_;
+    value = static_cast<ACE_CDR::UInt8>(uint_value_);
     return consume(kUint);
   }
   return false;
@@ -405,10 +405,10 @@ bool JsonValueReader<InputStream>::read_int16(ACE_CDR::Short& value)
   peek();
   switch (peek())  {
   case kInt:
-    value = int_value_;
+    value = static_cast<ACE_CDR::Short>(int_value_);
     return consume(kInt);
   case kUint:
-    value = uint_value_;
+    value = static_cast<ACE_CDR::Short>(uint_value_);
     return consume(kUint);
   default:
     return false;
@@ -419,7 +419,7 @@ template <typename InputStream>
 bool JsonValueReader<InputStream>::read_uint16(ACE_CDR::UShort& value)
 {
   if (peek() == kUint) {
-    value = uint_value_;
+    value = static_cast<ACE_CDR::UShort>(uint_value_);
     return consume(kUint);
   }
   return false;

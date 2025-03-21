@@ -369,6 +369,16 @@ For example:
 
 .. sec:: common
 
+  .. prop:: bit_autopurge_nowriter_samples_delay
+    :default: ``DURATION_INFINITE_SEC`` (disabled)
+
+    Sets the ``autopurge_nowriter_samples_delay`` value of the :ref:`quality_of_service--reader-data-lifecycle` for :ref:`built-in data readers <bit>`.
+
+  .. prop:: bit_autopurge_disposed_samples_delay
+    :default: ``DURATION_INFINITE_SEC`` (disabled)
+
+    Sets the ``autopurge_disposed_samples_delay`` value of the :ref:`quality_of_service--reader-data-lifecycle` for :ref:`built-in data readers <bit>`.
+
   .. prop:: DCPSBidirGIOP=<boolean>
     :default: ``1`` (enabled)
 
@@ -1126,6 +1136,21 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
 
     Sent as part of the :ref:`SPDP participant announcement <spdp>`.
     It tells the peer participants that if they don't hear from this participant for the specified duration, then this participant can be considered "not alive".
+
+  .. prop:: MaxLeaseDuration=<sec>
+    :default: ``300`` (5 minutes)
+
+    If set, limit the lease duration requested by a discovered participant to this value.
+
+  .. prop:: MinimumCleanupSeparation=<msec>
+    :default: ``1`` (1 millisecond)
+
+    Ensure that attempts to clean up expired participants are separated by this amount of time.
+
+  .. prop:: SecurityUnsecureLeaseDuration=<sec>
+    :default: ``30`` (30 seconds)
+
+    Limit the lease duration requested by a discovered participant when bootstrapping discovery from an SPDP message.
 
   .. prop:: LeaseExtension=<sec>
     :default: ``0``
@@ -3331,7 +3356,7 @@ See :ref:`config-common` for options controlling the destination and formatting 
 The highest level logging is controlled by the general log levels listed in the following table.
 
 .. list-table::
-   :header-rows: 1
+  :header-rows: 1
 
   * - Level
 

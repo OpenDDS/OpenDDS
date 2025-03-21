@@ -34,7 +34,6 @@
 #include <dds/DCPS/PeriodicEvent.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/RcEventHandler.h>
-#include <dds/DCPS/ReactorInterceptor.h>
 #include <dds/DCPS/ReactorTask.h>
 #include <dds/DCPS/ReactorTask_rch.h>
 #include <dds/DCPS/SequenceNumber.h>
@@ -113,8 +112,7 @@ public:
   RtpsUdpInst_rch config() const;
 
   ACE_Reactor* get_reactor();
-  ReactorInterceptor_rch get_reactor_interceptor() const;
-  bool reactor_is_shut_down();
+  ReactorTask_rch get_reactor_task() const;
 
   ACE_SOCK_Dgram& unicast_socket();
   ACE_SOCK_Dgram_Mcast& multicast_socket();

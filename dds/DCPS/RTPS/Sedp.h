@@ -393,6 +393,8 @@ public:
 
   DDS::ReturnCode_t write_dcps_participant_dispose(const DCPS::GUID_t& part);
 
+  bool enable_flexible_types(const GUID_t& remoteParticipantId, const char* typeKey);
+
   // Topic
   bool update_topic_qos(const DCPS::GUID_t& topicId, const DDS::TopicQos& qos);
 
@@ -464,7 +466,7 @@ public:
     const DDS::DataWriterQos& qos,
     const DCPS::TransportLocatorSeq& transInfo,
     const DDS::PublisherQos& publisherQos,
-    const XTypes::TypeInformation& type_info);
+    const DCPS::TypeInformation& type_info);
 
   void remove_publication(const GUID_t& publicationId);
 
@@ -480,7 +482,7 @@ public:
     const char* filterClassName,
     const char* filterExpr,
     const DDS::StringSeq& params,
-    const XTypes::TypeInformation& type_info);
+    const DCPS::TypeInformation& type_info);
 
   void remove_subscription(const GUID_t& subscriptionId);
 
@@ -531,11 +533,11 @@ private:
   void rtps_relay_address(const DCPS::NetworkAddress& address);
   void stun_server_address(const DCPS::NetworkAddress& address);
 
-  void type_lookup_init(DCPS::ReactorInterceptor_rch reactor_interceptor)
+  void type_lookup_init(DCPS::ReactorTask_rch reactor_task)
   {
     if (!type_lookup_reply_deadline_processor_) {
       type_lookup_reply_deadline_processor_ =
-        DCPS::make_rch<EndpointManagerSporadic>(TheServiceParticipant->time_source(), reactor_interceptor,
+        DCPS::make_rch<EndpointManagerSporadic>(TheServiceParticipant->time_source(), reactor_task,
                                                 rchandle_from(this), &Sedp::remove_expired_endpoints);
     }
   }
@@ -711,7 +713,8 @@ private:
 
     DDS::ReturnCode_t write_parameter_list(const ParameterList& plist,
       const DCPS::GUID_t& reader,
-      DCPS::SequenceNumber& sequence);
+      DCPS::SequenceNumber& sequence,
+      bool historic);
 
     void end_historic_samples(const DCPS::GUID_t& reader);
     void request_ack(const DCPS::GUID_t& reader);
@@ -1097,8 +1100,9 @@ private:
   void assign_bit_key(DiscoveredPublication& pub);
   void assign_bit_key(DiscoveredSubscription& sub);
 
-  template<typename Map>
-  void remove_entities_belonging_to(Map& m, DCPS::GUID_t participant, bool subscription, OPENDDS_VECTOR(typename Map::mapped_type)& to_remove_from_bit);
+  template <typename Map>
+  void remove_entities_belonging_to(Map& m, const DCPS::GUID_t& participant, bool subscription,
+                                    OPENDDS_VECTOR(typename Map::mapped_type)& to_remove_from_bit);
 
   void remove_from_bit_i(const DiscoveredPublication& pub);
   void remove_from_bit_i(const DiscoveredSubscription& sub);
@@ -1108,7 +1112,7 @@ private:
 
   // Topic:
 
-  // FURTURE: Remove this member.
+  // FUTURE: Remove this member.
   DCPS::RepoIdSet associated_participants_;
 
   virtual bool shutting_down() const;
@@ -1296,7 +1300,7 @@ protected:
     }
   }
 
-  void match_endpoints(GUID_t repoId, const DCPS::TopicDetails& td,
+  void match_endpoints(const GUID_t& repoId, const DCPS::TopicDetails& td,
                        bool remove = false);
 
   void remove_assoc(const GUID_t& remove_from, const GUID_t& removing);
@@ -1370,9 +1374,9 @@ protected:
 
   void match(const GUID_t& writer, const GUID_t& reader);
 
-  bool need_minimal_and_or_complete_types(const XTypes::TypeInformation* type_info,
-                                          bool& need_minimal,
-                                          bool& need_complete) const;
+  bool need_type_info(const XTypes::TypeInformation* type_info,
+                      bool& need_minimal,
+                      bool& need_complete) const;
 
   void remove_expired_endpoints(const MonotonicTimePoint& /*now*/);
 
@@ -1388,6 +1392,11 @@ protected:
   void match_continue_security_enabled(
     const GUID_t& writer, const GUID_t& reader, bool call_writer, bool call_reader);
 #endif
+
+  void match_endpoints_flex_ts(const DiscoveredPublicationMap::value_type& discPub,
+                               const char* typeKey);
+  void match_endpoints_flex_ts(const DiscoveredSubscriptionMap::value_type& discSub,
+                               const char* typeKey);
 
   void remove_from_bit(const DiscoveredPublication& pub)
   {

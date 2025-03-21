@@ -152,17 +152,16 @@ sub print_help {
 
         # These two are processed by PerlACE/ConfigList.pm
         "    -Config <cfg>            Include tests with <cfg> configuration\n" .
-        "    -Exclude <cfg>           Exclude tests with <cfg> configuration\n" .
-        "                             This is parsed as a Perl regex and will always\n" .
-        "                             override -Config regardless of the order\n" .
+        "    -Exclude <match>         Excludes tests paths and arguments that match this\n" .
+        "                             regex.\n" .
 
         # This one is processed by PerlACE/Process.pm
         "    -ExeSubDir <dir>         Subdirectory for finding the executables\n" .
 
         "    --sandbox | -s <sandbox> Runs each program using a sandbox program\n" .
         "    --dry-run | -z           Do everything except run the tests\n" .
-        "    --show-configs           Print possible values for -Config and -Excludes\n" .
-        "                             broken down by list file\n" .
+        "    --show-configs           Print possible values for -Config broken down by\n" .
+        "                             list file\n" .
         "    --show-all-configs       Same as --show-configs, but for all list files\n" .
         "    --list-configs           Print combined set of the configs from the list\n" .
         "                             files\n" .

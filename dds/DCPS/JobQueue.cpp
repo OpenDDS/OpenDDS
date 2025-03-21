@@ -23,7 +23,8 @@ JobQueue::JobQueue(ACE_Reactor* reactor)
 
 int JobQueue::handle_exception(ACE_HANDLE /*fd*/)
 {
-  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
+  ThreadStatusManager::Event ev(thread_status_manager);
 
   Queue q;
 
@@ -33,6 +34,7 @@ int JobQueue::handle_exception(ACE_HANDLE /*fd*/)
   }
 
   for (Queue::const_iterator pos = q.begin(), limit = q.end(); pos != limit; ++pos) {
+    ThreadStatusManager::Event event(thread_status_manager);
     (*pos)->execute();
   }
 
