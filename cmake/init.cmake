@@ -665,6 +665,10 @@ function(opendds_use_existing_export_header target)
   if(export)
     target_compile_definitions(${target} PRIVATE "${arg_SOURCE_MACRO}")
     set_target_properties(${target} PROPERTIES CXX_VISIBILITY_PRESET hidden)
+    if(APPLE)
+      # Override ACE's config-macosx-mavericks.h
+      target_compile_definitions(${target} PRIVATE "ACE_HAS_CUSTOM_EXPORT_MACROS=1")
+    endif()
   endif()
 
   # Set macro for library header files that determines if symbols are exported.
