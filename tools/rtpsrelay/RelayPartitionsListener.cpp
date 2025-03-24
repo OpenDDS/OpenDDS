@@ -36,6 +36,7 @@ void RelayPartitionsListener::on_data_available(DDS::DataReader_ptr reader)
   }
 
   for (CORBA::ULong idx = 0; idx != infos.length(); ++idx) {
+    OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
     const auto& data = datas[idx];
     const auto& info = infos[idx];
 
