@@ -27,4 +27,9 @@
 #  define OPENDDS_CONFIG_SECURITY 0
 #endif
 
+// Needed to avoid packing warnings on Visual Studio.
+#ifdef _MSC_VER
+#pragma pointers_to_members(full_generality, virtual_inheritance)
+#endif
+
 #endif
