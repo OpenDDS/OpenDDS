@@ -11,5 +11,6 @@ module Messenger {
     @key long subject_id;
     string text;
     unsigned long count;
+    long arr[5];
   };
 };
