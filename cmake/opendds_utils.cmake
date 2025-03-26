@@ -220,13 +220,18 @@ function(opendds_export_header target)
     endif()
   endif()
 
-  # Set macro for library source files. This is the same thing as dynamicflags
-  # in MPC.
   if(export)
+    # Set macro for library source files. This is the same thing as dynamicflags
+    # in MPC.
     target_compile_definitions(${target} PRIVATE "${arg_SOURCE_MACRO}")
-    set_target_properties(${target} PROPERTIES CXX_VISIBILITY_PRESET hidden)
+
+    set_target_properties(${target} PROPERTIES
+      CXX_VISIBILITY_PRESET hidden
+      VISIBILITY_INLINES_HIDDEN TRUE
+    )
+
+    # Override ACE's config-macosx-mavericks.h
     if(APPLE)
-      # Override ACE's config-macosx-mavericks.h
       target_compile_definitions(${target} PRIVATE "ACE_HAS_CUSTOM_EXPORT_MACROS=1")
     endif()
   endif()
