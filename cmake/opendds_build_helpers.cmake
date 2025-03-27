@@ -50,7 +50,7 @@ function(_opendds_target target)
 endfunction()
 
 function(_opendds_library target)
-  set(no_value_options MSVC_BIGOBJ NO_INSTALL)
+  set(no_value_options BIGOBJ NO_INSTALL)
   set(single_value_options EXPORT_MACRO_PREFIX)
   set(multi_value_options)
   cmake_parse_arguments(arg
@@ -75,8 +75,8 @@ function(_opendds_library target)
   endif()
   opendds_export_header(${target} EXISTING ${export_args})
 
-  if(arg_MSVC_BIGOBJ)
-    opendds_msvc_bigobj(${target})
+  if(arg_BIGOBJ)
+    opendds_bigobj(${target})
   endif()
 
   if(NOT arg_NO_INSTALL)

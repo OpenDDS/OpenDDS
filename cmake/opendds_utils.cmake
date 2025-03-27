@@ -318,7 +318,7 @@ function(_opendds_path_list path_list_var)
   set("${path_list_var}" "${path_list}" PARENT_SCOPE)
 endfunction()
 
-function(opendds_msvc_bigobj target)
+function(opendds_bigobj target)
   if(MSVC)
     target_compile_options(${target} PRIVATE /bigobj)
   endif()
