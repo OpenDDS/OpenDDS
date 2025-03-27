@@ -86,7 +86,7 @@ function(_opendds_get_sources_and_options
         "The opendds_target_sources USE_EXPORT option takes a header path and macro name, "
         "but was passed ${use_export_len} values")
     endif()
-    set(use_export "${arg_USE_EXPORT}" PARENT_SCOPE)
+    set(${use_export} "${arg_USE_EXPORT}" PARENT_SCOPE)
   else()
     if(NOT DEFINED arg_ALWAYS_GENERATE_LIB_EXPORT_HEADER)
       set(arg_ALWAYS_GENERATE_LIB_EXPORT_HEADER ${OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER})
@@ -95,9 +95,9 @@ function(_opendds_get_sources_and_options
   endif()
 
   if(DEFINED arg_EXPORT_HEADER_DIR)
-    set(export_header_dir "${arg_EXPORT_HEADER_DIR}" PARENT_SCOPE)
+    set(${export_header_dir} "${arg_EXPORT_HEADER_DIR}" PARENT_SCOPE)
   else()
-    set(export_header_dir "" PARENT_SCOPE)
+    set(${export_header_dir} "" PARENT_SCOPE)
   endif()
 
   if(arg_USE_VERSIONED_NAMESPACE)
@@ -107,7 +107,7 @@ function(_opendds_get_sources_and_options
         "The opendds_target_sources USE_VERSIONED_NAMESPACE option takes a header path and "
         "macro prefix, but was passed ${use_versioned_namespace_len} values")
     endif()
-    set(use_versioned_namespace "${arg_USE_VERSIONED_NAMESPACE}" PARENT_SCOPE)
+    set(${use_versioned_namespace} "${arg_USE_VERSIONED_NAMESPACE}" PARENT_SCOPE)
   endif()
 
   set(${skip_tao_idl} ${arg_SKIP_TAO_IDL} PARENT_SCOPE)
