@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import sys
+import re
 from typing import Any
 
 from sphinx import addnodes
@@ -37,7 +38,7 @@ class CMakeFunctionArgument(CustomDomainObject):
     our_ref_role_type = None
 
     def parse_sig(self, ctx, sig, options):
-        name, *arguments = sig.split(' ', maxsplit=1)
+        name, *arguments = re.split(r'\s+', sig, maxsplit=1)
         if arguments:
             arguments = arguments[0]
         ctx.push(self, name, options, ctx.get_full_name() + f'({name})')
