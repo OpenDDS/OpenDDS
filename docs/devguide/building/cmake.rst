@@ -109,7 +109,7 @@ Components
 .. versionadded:: 3.25
 
 By default the package will search for all libraries and executables, but only require the bare minimum for ACE/TAO and OpenDDS.
-Arguments can be passed to ``find_package(OpenDDS COMPONENTS <argument>...)`` (or alternatively ``find_package(OpenDDS REQUIRED [COMPONENTS] <argument>...)``) require additional executives, libraries, and features.
+Arguments can be passed to ``find_package(OpenDDS COMPONENTS <argument>...)`` (or alternatively ``find_package(OpenDDS REQUIRED [COMPONENTS] <argument>...)``) require additional executables, libraries, and features.
 These can be:
 
 - :ref:`Executables <cmake-executables>` and :ref:`Libraries <cmake-libraries>`
@@ -644,7 +644,7 @@ Functions
 
   .. cmake:func:arg:: EXISTING
 
-    By default a header file will generated, but the IDL-generated code can also use an existing compatible export header if that is preferred.
+    By default a header file will be generated, but the IDL-generated code can also use an existing compatible export header if that is preferred.
     The header will be included in IDL-generated using :cmake:func:`opendds_export_header(INCLUDE)`.
 
     .. versionadded:: 4.0
@@ -744,7 +744,7 @@ Functions
 
     opendds_bigobj(<target>)
 
-  A small function that adds `/bigobj <https://learn.microsoft.com/en-us/cpp/build/reference/bigobj-increase-number-of-sections-in-dot-obj-file>`__ to the compile options of the targets when using Visual Studio.
+  A function that adds `/bigobj <https://learn.microsoft.com/en-us/cpp/build/reference/bigobj-increase-number-of-sections-in-dot-obj-file>`__ to the compile options of the targets when using Visual Studio.
   Targets with a large amount of IDL files may require this because of the size of the generated code.
 
 Variables
