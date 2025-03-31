@@ -652,6 +652,7 @@ my %all_checks = (
       my $full_filename = shift;
       my $line_numbers = shift;
 
+      my $expected_policy_max = '4.0';
       my $ver_re = qr/\d+\.\d+(?:\.\d+)?/;
       my $missing = 1;
       my $fixed = 0;
@@ -663,7 +664,6 @@ my %all_checks = (
         if ($line =~ /^cmake_minimum_required\(VERSION ($ver_re)\.\.\.($ver_re)\)$/) {
           my $policy_min = $1;
           my $policy_max = $2;
-          my $expected_policy_max = '4.0';
           $missing = $policy_max ne $expected_policy_max;
           if ($missing) {
             if ($fix) {
@@ -687,7 +687,7 @@ my %all_checks = (
           write_for_fix($filename, $full_filename, 'cmake_minimum_required', \@lines);
           $missing = 0;
         }
-        else {
+        elsif ($missing) {
           print_warning("Tried to fix cmake_minimum_required for $filename, but it " .
             "doesn't have an existing one to modify");
         }
