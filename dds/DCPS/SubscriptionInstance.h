@@ -33,7 +33,7 @@ class DataReaderImpl;
   * @brief Struct that has information about an instance and the instance
   *        sample list.
   */
-class OpenDDS_Dcps_Export SubscriptionInstance : public virtual RcObject {
+class OpenDDS_Dcps_Export SubscriptionInstance : public RcObject {
 public:
   SubscriptionInstance(const DataReaderImpl_rch& reader,
                        const DDS::DataReaderQos& qos,

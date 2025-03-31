@@ -184,7 +184,7 @@ class ThreadStatusManager;
 
 const char DEFAULT_ORB_NAME[] = "OpenDDS_DCPS";
 
-class ShutdownListener : public virtual RcObject {
+class ShutdownListener : public RcObject {
 public:
   virtual ~ShutdownListener() {}
   virtual void notify_shutdown() = 0;

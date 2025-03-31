@@ -2499,7 +2499,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
 #ifndef DDS_HAS_MINIMUM_BIT
   // internal thread bit reporting
   if (TheServiceParticipant->get_thread_status_manager().update_thread_status() && outer->harvest_thread_status_) {
-    thread_status_task_ = DCPS::make_rch<SpdpPeriodic>(reactor_task, ref(*this), &SpdpTransport::thread_status_task);
+    thread_status_task_ = DCPS::make_rch<PeriodicThreadStatus>(reactor_task, ref(*this));
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
 

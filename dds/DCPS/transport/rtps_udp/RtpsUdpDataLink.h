@@ -347,7 +347,7 @@ private:
   typedef OPENDDS_MAP(FragmentNumberValue, RTPS::FragmentNumberSet) RequestedFragMap;
   typedef OPENDDS_MAP(SequenceNumber, RequestedFragMap) RequestedFragSeqMap;
 
-  struct ReaderInfo : public virtual RcObject {
+  struct ReaderInfo : public RcObject {
     const GUID_t id_;
     const MonotonicTime_t participant_discovered_at_;
     CORBA::Long acknack_recvd_count_, nackfrag_recvd_count_;
@@ -429,7 +429,7 @@ private:
     }
   };
 
-  class RtpsWriter : public virtual RcObject {
+  class RtpsWriter : public RcObject {
   private:
     ReaderInfoMap remote_readers_;
     RcHandle<ConstSharedRepoIdSet> remote_reader_guids_;
@@ -646,7 +646,7 @@ private:
 #endif
   typedef OPENDDS_SET(WriterInfo_rch) WriterInfoSet;
 
-  class RtpsReader : public virtual RcObject {
+  class RtpsReader : public RcObject {
   public:
     RtpsReader(const RtpsUdpDataLink_rch& link, const GUID_t& id);
     virtual ~RtpsReader();

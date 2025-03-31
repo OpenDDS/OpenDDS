@@ -16,7 +16,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-struct ConstSharedRepoIdSet : public virtual RcObject {
+struct ConstSharedRepoIdSet : public RcObject {
   ConstSharedRepoIdSet()
     : guids_()
 #if defined ACE_HAS_CPP11

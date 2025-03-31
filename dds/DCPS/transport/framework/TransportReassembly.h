@@ -62,7 +62,7 @@ struct FragKey {
 
 typedef std::pair<FragmentNumber, FragmentNumber> FragmentRange;
 
-class OpenDDS_Dcps_Export TransportReassembly : public virtual RcObject {
+class OpenDDS_Dcps_Export TransportReassembly : public RcObject {
 public:
   explicit TransportReassembly(const TimeDuration& timeout = TimeDuration(300));
 

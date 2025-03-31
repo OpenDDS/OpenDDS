@@ -22,7 +22,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class ComparatorBase : public virtual RcObject {
+class ComparatorBase : public RcObject {
 public:
   typedef RcHandle<ComparatorBase> Ptr;
 
