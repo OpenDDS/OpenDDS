@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8...3.27)
+cmake_minimum_required(VERSION 3.8...4.0)
 project(opendds_idl_compiler_tests CXX)
 
 find_package(OpenDDS REQUIRED)
@@ -98,6 +98,7 @@ function(assert_generated_output file)
     list(APPEND args O_OPT "${arg_O_OPT}")
   endif()
   if(arg_EXPECT_FAIL)
+    list(APPEND args EXPECT_FAIL)
     set(expect_failed TRUE)
   else()
     set(expect_failed FALSE)
@@ -107,7 +108,6 @@ function(assert_generated_output file)
     FILE_PATH_VAR file_path
     PREFIX_PATH_VAR prefix_path
     FAIL_VAR failed
-    EXPECT_FAIL ${expect_failed}
     ${args})
 
   get_filename_component(filename "${file}" NAME)

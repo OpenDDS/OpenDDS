@@ -352,7 +352,9 @@ my %path_conditions = (
   cpp_source_file => qr/\.cpp$/,
   cpp_file => ['cpp_public_file', 'cpp_source_file'],
   idl_file => qr/\.idl$/,
-  cmake_file => qr/(CMakeLists\.txt|\.cmake)$/,
+  cmakelists => qr/CMakeLists\.txt$/,
+  cmake_ext => qr/\.cmake$/,
+  cmake_file => ['cmakelists', 'cmake_ext'],
   md_file => qr/\.md$/,
   rst_file => qr/\.rst$/,
   p7s_file => qr/\.p7s$/,
@@ -639,6 +641,62 @@ my %all_checks = (
     },
   },
 
+  cmake_minimum_required => {
+    message => [
+      'CMakeLists.txt is missing cmake_minimum_required with correct policy max version',
+    ],
+    can_fix => 1,
+    path_matches_all_of => ['cmakelists'],
+    file_matches => sub {
+      my $filename = shift;
+      my $full_filename = shift;
+      my $line_numbers = shift;
+
+      my $ver_re = qr/\d+\.\d+(?:\.\d+)?/;
+      my $missing = 1;
+      my $fixed = 0;
+      my @lines;
+
+      open(my $fd, $full_filename);
+      while (my $line = <$fd>) {
+        $line =~ s/\R//g;
+        if ($line =~ /^cmake_minimum_required\(VERSION ($ver_re)\.\.\.($ver_re)\)$/) {
+          my $policy_min = $1;
+          my $policy_max = $2;
+          my $expected_policy_max = '4.0';
+          $missing = $policy_max ne $expected_policy_max;
+          if ($missing) {
+            if ($fix) {
+              $fixed = 1;
+              $line = "cmake_minimum_required(VERSION $policy_min...$expected_policy_max)";
+            }
+            else {
+              print("$line has a policy max of $1, but expected $expected_policy_max\n");
+            }
+          }
+          last unless ($fix);
+        }
+        if ($fix) {
+          push(@lines, "$line\n");
+        }
+      }
+      close($fd);
+
+      if ($fix) {
+        if ($fixed) {
+          write_for_fix($filename, $full_filename, 'cmake_minimum_required', \@lines);
+          $missing = 0;
+        }
+        else {
+          print_warning("Tried to fix cmake_minimum_required for $filename, but it " .
+            "doesn't have an existing one to modify");
+        }
+      }
+
+      return $missing;
+    }
+  },
+
   missing_include_guard => {
     message => [
       'File is missing include guard with correct name',
@@ -824,6 +882,10 @@ sub write_for_fix {
   my $full_filename = shift;
   my $check = shift;
   my $lines = shift;
+
+  if (!$fix) {
+    die("$check just tried to write a fix for $filename without --try-fix!");
+  }
 
   print_note("writing fixed version of $filename for $check");
   open(my $fd, '>', $full_filename) or die("${\error()} $filename: $!");
