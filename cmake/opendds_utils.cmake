@@ -28,8 +28,91 @@ function(_opendds_get_generated_output_dir target output_dir_var)
   set(${output_dir_var} "${output_dir}" PARENT_SCOPE)
 endfunction()
 
+function(_opendds_path_append a b output_var)
+  if(a MATCHES "^\\.?$")
+    set("${output_var}" "${b}" PARENT_SCOPE)
+  elseif(b MATCHES "^\\.?$")
+    set("${output_var}" "${a}" PARENT_SCOPE)
+  else()
+    if(NOT a MATCHES "[\\/]$")
+      set(a "${a}/")
+    endif()
+    set("${output_var}" "${a}${b}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(_opendds_sep_path_exists input exists_var rest_var)
+  set(exists "${input}")
+  set(rest "")
+  while(NOT EXISTS "${exists}")
+    get_filename_component(name "${exists}" NAME)
+    if(name MATCHES "^$")
+      break()
+    endif()
+    _opendds_path_append("${name}" "${rest}" rest)
+    get_filename_component(exists "${exists}" DIRECTORY)
+  endwhile()
+  set("${exists_var}" "${exists}" PARENT_SCOPE)
+  set("${rest_var}" "${rest}" PARENT_SCOPE)
+endfunction()
+
+function(_opendds_real_path path output_var)
+  # get_filename_component(REALPATH) doesn't seem to work when given a path
+  # that doesn't exist within a symlinked directory that does exist:
+  # /<symlinked-path-that-exists>/<path-that-doesnt-exist-yet>. First separate
+  # out the part that exists, resolve that, then add the rest back afterwards.
+  _opendds_sep_path_exists("${path}" path_exists path_rest)
+  get_filename_component(real_path_exists "${path_exists}" REALPATH)
+  _opendds_path_append("${real_path_exists}" "${path_rest}" real_path)
+  set("${output_var}" "${real_path}" PARENT_SCOPE)
+endfunction()
+
+function(_opendds_relative_path base dest output_var)
+  set(no_value_options
+    EXPECT_FAIL
+  )
+  set(single_value_options
+    FAIL_VAR
+  )
+  cmake_parse_arguments(arg
+    "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
+
+  if(DEFINED arg_FAIL_VAR)
+    set(${arg_FAIL_VAR} FALSE PARENT_SCOPE)
+  endif()
+
+  _opendds_real_path("${base}" real_base)
+  _opendds_real_path("${file}" real_dest)
+  file(RELATIVE_PATH rel_dest "${real_base}" "${real_dest}")
+  if(rel_dest MATCHES "^\\.\\.")
+    set(msg_type FATAL_ERROR)
+    if(DEFINED arg_FAIL_VAR)
+      set(${arg_FAIL_VAR} TRUE PARENT_SCOPE)
+      set(msg_type SEND_ERROR)
+    endif()
+    if(arg_EXPECT_FAIL)
+      return()
+    endif()
+    message(${msg_type}
+      "  This file:\n"
+      "  \n"
+      "    ${rel_dest}\n"
+      "    (${dest})\n"
+      "  \n"
+      "  is outside the base:\n"
+      "  \n"
+      "    ${base}\n"
+      "    (${real_base})\n")
+    return()
+  endif()
+  set("${output_var}" "${rel_dest}" PARENT_SCOPE)
+endfunction()
+
 function(_opendds_get_generated_output target file)
-  set(no_value_options MKDIR)
+  set(no_value_options
+    MKDIR
+    EXPECT_FAIL
+  )
   set(single_value_options
     INCLUDE_BASE
     O_OPT
@@ -37,13 +120,12 @@ function(_opendds_get_generated_output target file)
     FILE_PATH_VAR
     PREFIX_PATH_VAR
     FAIL_VAR
-    EXPECT_FAIL
   )
   set(multi_value_options)
   cmake_parse_arguments(arg
     "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
 
-  if(arg_FAIL_VAR)
+  if(DEFINED arg_FAIL_VAR)
     set(${arg_FAIL_VAR} FALSE PARENT_SCOPE)
   endif()
 
@@ -59,33 +141,17 @@ function(_opendds_get_generated_output target file)
   if(arg_INCLUDE_BASE AND NOT OPENDDS_FILENAME_ONLY_INCLUDES AND NOT arg_O_OPT)
     # We need to recreate the directory structure of the source IDL with the
     # include base as the root.
-    get_filename_component(real_include_base "${arg_INCLUDE_BASE}" REALPATH)
-    if(IS_ABSOLUTE "${file}")
-      get_filename_component(real_file "${file}" REALPATH)
-    else()
-      get_filename_component(real_file "${CMAKE_CURRENT_SOURCE_DIR}/${file}" REALPATH)
+    set(rel_path_args)
+    if(arg_EXPECT_FAIL)
+      list(APPEND rel_path_args EXPECT_FAIL)
     endif()
-    file(RELATIVE_PATH rel_file "${real_include_base}" "${real_file}")
-    if(rel_file MATCHES "^\\.\\.")
-      set(msg_type FATAL_ERROR)
-      if(arg_FAIL_VAR)
-        set(${arg_FAIL_VAR} TRUE PARENT_SCOPE)
-        set(msg_type SEND_ERROR)
-      endif()
-      if(arg_EXPECT_FAIL)
-        return()
-      endif()
-      message(${msg_type}
-        "  This file:\n"
-        "  \n"
-        "    ${rel_file}\n"
-        "    (${file})\n"
-        "  \n"
-        "  is outside the INCLUDE_BASE:\n"
-        "  \n"
-        "    ${arg_INCLUDE_BASE}\n"
-        "    (${real_include_base})\n")
-      return()
+    set(failed FALSE)
+    if(DEFINED arg_FAIL_VAR)
+      list(APPEND rel_path_args FAIL_VAR failed)
+    endif()
+    _opendds_relative_path("${arg_INCLUDE_BASE}" "${file}" rel_file ${rel_path_args})
+    if(DEFINED arg_FAIL_VAR)
+      set(${arg_FAIL_VAR} "${failed}" PARENT_SCOPE)
     endif()
     get_filename_component(rel_dir "${rel_file}" DIRECTORY)
     set(output_dir "${output_dir}/${rel_dir}")
@@ -151,6 +217,41 @@ function(_opendds_add_idl_or_header_files target scope is_generated files)
       _opendds_add_to_interface_files_prop(${target} "ALL_${file_kind}" ${file})
       _opendds_add_to_interface_files_prop(${target} "ALL" ${file})
     endif()
+  endforeach()
+endfunction()
+
+function(opendds_install_interface_files target)
+  set(no_value_options NO_PASSED NO_GENERATED)
+  set(single_value_options DEST INCLUDE_BASE)
+  set(multi_value_options EXTRA_GENERATED_FILES)
+  cmake_parse_arguments(arg
+    "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
+
+  if(NOT DEFINED arg_INCLUDE_BASE)
+    set(arg_INCLUDE_BASE "${CMAKE_CURRENT_SOURCE_DIR}")
+  endif()
+  if(NOT DEFINED arg_DEST)
+    set(arg_DEST "${CMAKE_INSTALL_INCLUDEDIR}")
+  endif()
+
+  if(NOT arg_NO_PASSED)
+    get_target_property(passed ${target} OPENDDS_ALL_PASSED_INTERFACE_FILES)
+    foreach(file ${passed})
+      _opendds_relative_path("${arg_INCLUDE_BASE}" "${file}" dest)
+      get_filename_component(dest ${dest} DIRECTORY)
+      install(FILES ${file} DESTINATION "${arg_DEST}/${dest}")
+    endforeach()
+  endif()
+
+  get_target_property(generated ${target} OPENDDS_ALL_GENERATED_INTERFACE_FILES)
+  if(arg_NO_GENERATED)
+    unset(generated)
+  endif()
+  get_target_property(gendir ${target} OPENDDS_GENERATED_DIRECTORY)
+  foreach(file ${generated} ${arg_EXTRA_GENERATED_FILES})
+    _opendds_relative_path("${gendir}" "${file}" dest)
+    get_filename_component(dest ${dest} DIRECTORY)
+    install(FILES ${file} DESTINATION "${arg_DEST}/${dest}")
   endforeach()
 endfunction()
 
