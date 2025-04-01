@@ -148,7 +148,11 @@ if(NOT DEFINED OPENDDS_ACE_TAO_SRC)
     SOURCE_DIR "${OPENDDS_ACE_TAO_SRC}"
     ${fetch_args}
   )
-  FetchContent_Populate(ace_tao_dl)
+  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.30)
+    FetchContent_MakeAvailable(ace_tao_dl)
+  else()
+    FetchContent_Populate(ace_tao_dl)
+  endif()
 endif()
 
 if(EXISTS "${OPENDDS_ACE_TAO_SRC}/ace/Version.h")
