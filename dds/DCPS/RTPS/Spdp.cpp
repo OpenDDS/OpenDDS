@@ -867,6 +867,12 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       iter->second.last_recv_address_ = from;
     }
 
+    const GuidToString::iterator flex_iter = flexible_types_pre_discovery_.find(guid);
+    if (flex_iter != flexible_types_pre_discovery_.end()) {
+      iter->second.flexible_types_key_ = flex_iter->second;
+      flexible_types_pre_discovery_.erase(flex_iter);
+    }
+
     if (DCPS::transport_debug.log_progress) {
       log_progress("participant discovery", guid_, guid, iter->second.discovered_at_.to_idl_struct());
     }
@@ -4733,7 +4739,10 @@ bool Spdp::enable_flexible_types(const GUID_t& remoteParticipantId, const char* 
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
   const DiscoveredParticipantIter iter = participants_.find(remoteParticipantId);
-  if (iter != participants_.end()) {
+  if (iter == participants_.end()) {
+    flexible_types_pre_discovery_[remoteParticipantId] = typeKey;
+    return true;
+  } else if (iter->second.flexible_types_key_ == "") {
     iter->second.flexible_types_key_ = typeKey;
     return endpoint_manager().enable_flexible_types(remoteParticipantId, typeKey);
   }
