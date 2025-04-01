@@ -153,6 +153,7 @@ public:
 
   void data_acked(const GUID_t& remote);
 
+  SequenceNumber cur_cumulative_ack(const GUID_t& reader_id) const;
   bool is_leading(const GUID_t& reader_id) const;
 
 protected:

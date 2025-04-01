@@ -1,52 +1,58 @@
-#ifndef ${uppercase_target}_EXPORT_H
-#define ${uppercase_target}_EXPORT_H
+/**
+ * \file
+ * This file helps export symbols in shared libraries. It was generated
+ * automatically by OpenDDS for ${target} in CMake.
+ */
+
+#ifndef ${uppercase_macro_prefix}_EXPORT_H
+#define ${uppercase_macro_prefix}_EXPORT_H
 
 #include <ace/config-all.h>
 
-#if !defined ${uppercase_target}_HAS_DLL
+#if !defined ${header_macro}
 #  if defined ACE_AS_STATIC_LIBS
-#    define ${uppercase_target}_HAS_DLL 0
+#    define ${header_macro} 0
 #  else
-#    define ${uppercase_target}_HAS_DLL 1
+#    define ${header_macro} 1
 #  endif
 #endif
 
-#if ${uppercase_target}_HAS_DLL
-#  if defined ${uppercase_target}_BUILD_DLL
+#if ${header_macro}
+#  if defined ${source_macro}
 #    define ${export_macro} ACE_Proper_Export_Flag
-#    define ${uppercase_target}_SINGLETON_DECLARATION(T) ACE_EXPORT_SINGLETON_DECLARATION (T)
-#    define ${uppercase_target}_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK) \
+#    define ${uppercase_macro_prefix}_SINGLETON_DECLARATION(T) ACE_EXPORT_SINGLETON_DECLARATION (T)
+#    define ${uppercase_macro_prefix}_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK) \
         ACE_EXPORT_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK)
 #  else
 #    define ${export_macro} ACE_Proper_Import_Flag
-#    define ${uppercase_target}_SINGLETON_DECLARATION(T) ACE_IMPORT_SINGLETON_DECLARATION (T)
-#    define ${uppercase_target}_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK) \
+#    define ${uppercase_macro_prefix}_SINGLETON_DECLARATION(T) ACE_IMPORT_SINGLETON_DECLARATION (T)
+#    define ${uppercase_macro_prefix}_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK) \
         ACE_IMPORT_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK)
 #  endif
 #else
 #  define ${export_macro}
-#  define ${uppercase_target}_SINGLETON_DECLARATION(T)
-#  define ${uppercase_target}_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK)
+#  define ${uppercase_macro_prefix}_SINGLETON_DECLARATION(T)
+#  define ${uppercase_macro_prefix}_SINGLETON_DECLARE(SINGLETON_TYPE, CLASS, LOCK)
 #endif
 
-// Set ${uppercase_target}_NTRACE = 0 to turn on library specific tracing even if
+// Set ${uppercase_macro_prefix}_NTRACE = 0 to turn on library specific tracing even if
 // tracing is turned off for ACE.
-#if !defined ${uppercase_target}_NTRACE
+#if !defined ${uppercase_macro_prefix}_NTRACE
 #  if ACE_NTRACE == 1
-#    define ${uppercase_target}_NTRACE 1
+#    define ${uppercase_macro_prefix}_NTRACE 1
 #  else
-#    define ${uppercase_target}_NTRACE 0
+#    define ${uppercase_macro_prefix}_NTRACE 0
 #  endif
 #endif
 
-#if ${uppercase_target}_NTRACE
-#  define ${uppercase_target}_TRACE(X)
+#if ${uppercase_macro_prefix}_NTRACE
+#  define ${uppercase_macro_prefix}_TRACE(X)
 #else
 #  if !defined ACE_HAS_TRACE
 #    define ACE_HAS_TRACE
 #  endif
-#  define ${uppercase_target}_TRACE(X) ACE_TRACE_IMPL(X)
+#  define ${uppercase_macro_prefix}_TRACE(X) ACE_TRACE_IMPL(X)
 #  include <ace/Trace.h>
 #endif
 
-#endif /* ${uppercase_target}_EXPORT_H */
+#endif /* ${uppercase_macro_prefix}_EXPORT_H */

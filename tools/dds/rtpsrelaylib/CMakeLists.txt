@@ -18,7 +18,7 @@ target_sources(OpenDDS_RtpsRelayLib
     Utility.h
     export.h
 )
-_opendds_library(OpenDDS_RtpsRelayLib MSVC_BIGOBJ)
+_opendds_library(OpenDDS_RtpsRelayLib BIGOBJ)
 target_link_libraries(OpenDDS_RtpsRelayLib PUBLIC ${deps})
 
 opendds_target_sources(OpenDDS_RtpsRelayLib

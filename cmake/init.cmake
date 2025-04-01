@@ -14,6 +14,7 @@ set(_OPENDDS_INIT_CMAKE TRUE)
 include(CMakeParseArguments)
 
 include("${CMAKE_CURRENT_LIST_DIR}/opendds_version.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/opendds_utils.cmake")
 
 enable_language(C CXX)
 
@@ -543,57 +544,6 @@ option(OPENDDS_AUTO_LINK_DCPS
 # TODO: Make this default ON in v4.0
 option(OPENDDS_USE_CORRECT_INCLUDE_SCOPE
   "Include using SCOPE specified in opendds_target_sources" OFF)
-
-macro(_opendds_save_cache name type value)
-  list(APPEND _opendds_save_cache_vars ${name})
-  set(_opendds_save_cache_${name}_type ${type})
-  set(_opendds_save_cache_${name}_value "${${name}}")
-  set(${name} "${value}" CACHE ${type} "" FORCE)
-endmacro()
-
-macro(_opendds_restore_cache)
-  foreach(name ${_opendds_save_cache_vars})
-    set(${name} "${_opendds_save_cache_${name}_value}" CACHE
-      "${_opendds_save_cache_${name}_type}" "" FORCE)
-    unset(_opendds_save_cache_${name}_type)
-    unset(_opendds_save_cache_${name}_value)
-  endforeach()
-  unset(_opendds_save_cache_vars)
-endmacro()
-
-function(_opendds_pop_list list_var)
-  set(list "${${list_var}}")
-  list(LENGTH list len)
-  if(len GREATER 0)
-    math(EXPR last "${len} - 1")
-    list(REMOVE_AT list "${last}")
-    set("${list_var}" "${list}" PARENT_SCOPE)
-  endif()
-endfunction()
-
-function(_opendds_path_list path_list_var)
-  if("APPEND" IN_LIST ARGN)
-    set(path_list "${${path_list_var}}")
-    list(REMOVE_ITEM ARGN APPEND)
-  else()
-    set(path_list)
-  endif()
-
-  if(WIN32)
-    set(delimiter ";")
-  else()
-    set(delimiter ":")
-  endif()
-
-  foreach(path ${ARGN})
-    if(path_list AND NOT path_list MATCHES "${delimiter}$")
-      set(path_list "${path_list}${delimiter}")
-    endif()
-    set(path_list "${path_list}${path}")
-  endforeach()
-
-  set("${path_list_var}" "${path_list}" PARENT_SCOPE)
-endfunction()
 
 if(OPENDDS_STATIC)
   set(OPENDDS_LIBRARY_TYPE STATIC)

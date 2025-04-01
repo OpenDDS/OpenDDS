@@ -559,7 +559,7 @@ target_sources(OpenDDS_Dcps
     OpenDDSConfigWrapper.idl
 )
 target_compile_definitions(OpenDDS_Dcps PUBLIC ${OPENDDS_DCPS_COMPILE_DEFINITIONS})
-_opendds_library(OpenDDS_Dcps MSVC_BIGOBJ)
+_opendds_library(OpenDDS_Dcps BIGOBJ)
 target_include_directories(OpenDDS_Dcps
   PUBLIC
     "$<BUILD_INTERFACE:${OPENDDS_SOURCE_DIR}>"

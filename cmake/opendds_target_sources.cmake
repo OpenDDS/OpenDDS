@@ -86,7 +86,7 @@ function(_opendds_get_sources_and_options
         "The opendds_target_sources USE_EXPORT option takes a header path and macro name, "
         "but was passed ${use_export_len} values")
     endif()
-    set(use_export "${arg_USE_EXPORT}" PARENT_SCOPE)
+    set(${use_export} "${arg_USE_EXPORT}" PARENT_SCOPE)
   else()
     if(NOT DEFINED arg_ALWAYS_GENERATE_LIB_EXPORT_HEADER)
       set(arg_ALWAYS_GENERATE_LIB_EXPORT_HEADER ${OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER})
@@ -95,9 +95,9 @@ function(_opendds_get_sources_and_options
   endif()
 
   if(DEFINED arg_EXPORT_HEADER_DIR)
-    set(export_header_dir "${arg_EXPORT_HEADER_DIR}" PARENT_SCOPE)
+    set(${export_header_dir} "${arg_EXPORT_HEADER_DIR}" PARENT_SCOPE)
   else()
-    set(export_header_dir "" PARENT_SCOPE)
+    set(${export_header_dir} "" PARENT_SCOPE)
   endif()
 
   if(arg_USE_VERSIONED_NAMESPACE)
@@ -107,7 +107,7 @@ function(_opendds_get_sources_and_options
         "The opendds_target_sources USE_VERSIONED_NAMESPACE option takes a header path and "
         "macro prefix, but was passed ${use_versioned_namespace_len} values")
     endif()
-    set(use_versioned_namespace "${arg_USE_VERSIONED_NAMESPACE}" PARENT_SCOPE)
+    set(${use_versioned_namespace} "${arg_USE_VERSIONED_NAMESPACE}" PARENT_SCOPE)
   endif()
 
   set(${skip_tao_idl} ${arg_SKIP_TAO_IDL} PARENT_SCOPE)
@@ -196,54 +196,6 @@ function(_opendds_get_sources_and_options
 
   set(${tao_options} ${arg_TAO_IDL_OPTIONS} ${extra_tao_idl_options} PARENT_SCOPE)
   set(${opendds_options} ${arg_OPENDDS_IDL_OPTIONS} ${extra_opendds_idl_options} PARENT_SCOPE)
-endfunction()
-
-function(opendds_export_header target)
-  set(no_value_options)
-  set(single_value_options
-    DIR
-    INCLUDE_BASE
-    USE_EXPORT_VAR
-  )
-  set(multi_value_options)
-  cmake_parse_arguments(arg
-    "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
-
-  # Get existing export header and macro for target.
-  get_target_property(use_export ${target} OPENDDS_USE_EXPORT)
-  if(use_export)
-    if(DEFINED arg_USE_EXPORT_VAR)
-      set(${arg_USE_EXPORT_VAR} "${use_export}" PARENT_SCOPE)
-    endif()
-    return()
-  endif()
-
-  # These values are used in configure_file for the export header.
-  string(TOUPPER ${target} uppercase_target)
-  set(export_macro "${target}_Export")
-
-  # Geneate the export header
-  _opendds_get_generated_output_dir(${target} gendir MKDIR)
-  set(export_header "${target}_export.h")
-  if(arg_DIR)
-    set(export_header "${arg_DIR}/${export_header}")
-  endif()
-  _opendds_get_generated_output(${target} "${gendir}/${export_header}"
-    INCLUDE_BASE "${gendir}" MKDIR FILE_PATH_VAR export_header_path)
-  if(NOT EXISTS "${export_header_path}")
-    configure_file("${_OPENDDS_CMAKE_DIR}/export.h.in" "${export_header_path}")
-  endif()
-
-  # Make sure the export header can be used properly and installed.
-  _opendds_add_idl_or_header_files(${target} PUBLIC TRUE "${export_header_path}")
-  target_compile_definitions(${target} PRIVATE "${uppercase_target}_BUILD_DLL")
-  set(use_export "${export_header};${export_macro}")
-  set_target_properties(${target}
-    PROPERTIES
-      OPENDDS_USE_EXPORT "${use_export}")
-  if(DEFINED arg_USE_EXPORT_VAR)
-    set(${arg_USE_EXPORT_VAR} "${use_export}" PARENT_SCOPE)
-  endif()
 endfunction()
 
 function(opendds_target_sources target)
@@ -417,40 +369,5 @@ function(opendds_target_sources target)
   endif()
   foreach(include ${includes})
     target_include_directories(${target} ${inc_scope} "$<BUILD_INTERFACE:${include}>")
-  endforeach()
-endfunction()
-
-function(opendds_install_interface_files target)
-  set(no_value_options NO_PASSED NO_GENERATED)
-  set(single_value_options DEST INCLUDE_BASE)
-  set(multi_value_options EXTRA_GENERATED_FILES)
-  cmake_parse_arguments(arg
-    "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
-
-  if(NOT DEFINED arg_INCLUDE_BASE)
-    set(arg_INCLUDE_BASE "${CMAKE_CURRENT_SOURCE_DIR}")
-  endif()
-  if(NOT DEFINED arg_DEST)
-    set(arg_DEST "${CMAKE_INSTALL_INCLUDEDIR}")
-  endif()
-
-  if(NOT arg_NO_PASSED)
-    get_target_property(passed ${target} OPENDDS_ALL_PASSED_INTERFACE_FILES)
-    foreach(file ${passed})
-      file(RELATIVE_PATH dest ${arg_INCLUDE_BASE} ${file})
-      get_filename_component(dest ${dest} DIRECTORY)
-      install(FILES ${file} DESTINATION "${arg_DEST}/${dest}")
-    endforeach()
-  endif()
-
-  get_target_property(generated ${target} OPENDDS_ALL_GENERATED_INTERFACE_FILES)
-  if(arg_NO_GENERATED)
-    unset(generated)
-  endif()
-  get_target_property(gendir ${target} OPENDDS_GENERATED_DIRECTORY)
-  foreach(file ${generated} ${arg_EXTRA_GENERATED_FILES})
-    file(RELATIVE_PATH dest ${gendir} ${file})
-    get_filename_component(dest ${dest} DIRECTORY)
-    install(FILES ${file} DESTINATION "${arg_DEST}/${dest}")
   endforeach()
 endfunction()

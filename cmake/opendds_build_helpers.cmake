@@ -1,4 +1,11 @@
+if(_OPENDDS_BUILD_HELPERS_CMAKE)
+  return()
+endif()
+set(_OPENDDS_BUILD_HELPERS_CMAKE TRUE)
+
 include(GNUInstallDirs)
+
+include("${CMAKE_CURRENT_LIST_DIR}/opendds_utils.cmake")
 
 set(_opendds_exec_perms
   OWNER_READ OWNER_WRITE OWNER_EXECUTE
@@ -43,8 +50,8 @@ function(_opendds_target target)
 endfunction()
 
 function(_opendds_library target)
-  set(no_value_options MSVC_BIGOBJ NO_INSTALL)
-  set(single_value_options EXPORT_SYMBOLS_NAME)
+  set(no_value_options BIGOBJ NO_INSTALL)
+  set(single_value_options EXPORT_MACRO_PREFIX)
   set(multi_value_options)
   cmake_parse_arguments(arg
     "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
@@ -62,24 +69,14 @@ function(_opendds_library target)
     BUILD_RPATH "${OPENDDS_LIB_DIR}"
   )
 
-  get_target_property(target_type ${target} TYPE)
-  if(NOT DEFINED arg_EXPORT_SYMBOLS_NAME)
-    set(arg_EXPORT_SYMBOLS_NAME "${target}")
+  set(export_args)
+  if(DEFINED arg_EXPORT_MACRO_PREFIX)
+    list(APPEND export_args MACRO_PREFIX "${arg_EXPORT_MACRO_PREFIX}")
   endif()
-  string(TOUPPER "${arg_EXPORT_SYMBOLS_NAME}" export_symbols_name)
-  if(target_type STREQUAL "SHARED_LIBRARY")
-    # Define macro for export header
-    target_compile_definitions(${target} PRIVATE "${export_symbols_name}_BUILD_DLL")
-  elseif(target_type STREQUAL "STATIC_LIBRARY")
-    # Define macro for dds/DCPS/InitStaticLibs.h and other files
-    string(REPLACE "OPENDDS_" "" short_export_symbols_name "${export_symbols_name}")
-    target_compile_definitions(${target} PUBLIC "OPENDDS_${short_export_symbols_name}_HAS_DLL=0")
-  else()
-    message(FATAL_ERROR "Target ${target} has unexpected type ${target_type}")
-  endif()
+  opendds_export_header(${target} EXISTING ${export_args})
 
-  if(MSVC AND arg_MSVC_BIGOBJ)
-    target_compile_options(${target} PRIVATE /bigobj)
+  if(arg_BIGOBJ)
+    opendds_bigobj(${target})
   endif()
 
   if(NOT arg_NO_INSTALL)
