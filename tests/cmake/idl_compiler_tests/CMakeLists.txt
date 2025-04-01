@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8...4.0)
+cmake_minimum_required(VERSION 3.8...3.27)
 project(opendds_idl_compiler_tests CXX)
 
 find_package(OpenDDS REQUIRED)

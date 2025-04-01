@@ -4,7 +4,7 @@
 # This file is setup the way it is for testing purposes. For a cleaner example
 # see DevGuideExamples/DCPS/Messenger/CMakeLists.txt
 
-cmake_minimum_required(VERSION 3.8...4.0)
+cmake_minimum_required(VERSION 3.8...3.27)
 project(opendds_generated_global_idl CXX)
 
 find_package(OpenDDS REQUIRED)

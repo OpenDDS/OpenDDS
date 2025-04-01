@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3...4.0)
+cmake_minimum_required(VERSION 3.3...3.27)
 include("${CMAKE_CURRENT_LIST_DIR}/../../../cmake/opendds_version.cmake")
 project(ishapes VERSION ${OpenDDS_VERSION} LANGUAGES CXX)
 find_package(OpenDDS REQUIRED)

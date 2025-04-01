@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8...4.0)
+cmake_minimum_required(VERSION 3.8...3.27)
 project(opendds_cpp11_messenger CXX)
 enable_testing()
 

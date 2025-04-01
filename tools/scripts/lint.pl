@@ -652,7 +652,7 @@ my %all_checks = (
       my $full_filename = shift;
       my $line_numbers = shift;
 
-      my $expected_policy_max = '4.0';
+      my $expected_policy_max = '3.27';
       my $ver_re = qr/\d+\.\d+(?:\.\d+)?/;
       my $missing = 1;
       my $fixed = 0;

@@ -1,5 +1,5 @@
 # CMakeLists for OpenDDS_Dcps
-cmake_minimum_required(VERSION 3.23...4.0)
+cmake_minimum_required(VERSION 3.23...3.27)
 project(opendds_dcps CXX)
 
 set(dcps_lib_deps
