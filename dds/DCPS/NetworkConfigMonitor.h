@@ -75,7 +75,7 @@ struct NetworkInterfaceAddressKeyEqual {
   const NetworkInterfaceAddress& nia_;
 };
 
-class OpenDDS_Dcps_Export NetworkConfigMonitor : public RcObject {
+class OpenDDS_Dcps_Export NetworkConfigMonitor : public virtual RcObject {
 public:
   typedef OPENDDS_LIST(NetworkInterfaceAddress) List;
 
