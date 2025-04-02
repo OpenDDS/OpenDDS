@@ -30,6 +30,13 @@ public:
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, Messages());
     return messages_;
   }
+
+  size_t size() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, 0);
+    return messages_.size();
+  }
+
 protected:
   virtual void on_sample(const Message& msg)
   {

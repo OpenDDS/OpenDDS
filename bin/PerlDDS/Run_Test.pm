@@ -375,7 +375,16 @@ use File::Spec::Functions qw(catfile catdir);
 
 sub new {
   my $class = shift;
-  my $self = bless {}, $class;
+
+  my %valid_args = (
+    configs => {},
+    config => undef,
+  );
+
+  my %args = (%valid_args, @_);
+  my @invalid_args = grep { !exists($valid_args{$_}) } keys(%args);
+  die("invalid arguments: ", join(', ', @invalid_args)) if (scalar(@invalid_args));
+  my $self = bless(\%args, $class);
 
   $self->{processes} = {};
   $self->{_flags} = {};
@@ -421,6 +430,12 @@ sub new {
     my $flag_value_str = defined($flag_value) ? "\"$flag_value\"" : 'undef';
     $self->_info("TestFramework storing \"$flag_name\"=$flag_value_str\n");
     $self->{_flags}->{$flag_name} = $flag_value;
+
+    if (exists $self->{configs}->{$flag_name}) {
+      $self->_info("TestFramework switching to config $flag_name\n");
+      $self->{config} = $flag_name;
+    }
+
     my $transport = _is_transport($arg);
     if ($transport && $self->{transport} eq "") {
       $self->{transport} = $arg;
@@ -456,6 +471,29 @@ sub new {
   }
 
   PerlDDS::rmtree('./DCS');
+
+  if (defined $self->{configs} && defined $self->{config}) {
+    # Export what is in the config.
+    $self->{discovery} = $self->{configs}{$self->{config}}{discovery};
+    my $config = $self->{configs}{$self->{config}}{file};
+    keys %$config;
+    while (my ($s, $t) = each %$config) {
+      keys %$t;
+
+      if ($s =~ /\//) {
+        my @parts = split /\//, $s;
+        my $key = "OPENDDS_${s}";
+        my $value = "\@$parts[1]";
+        $ENV{$key} = $value;
+      }
+
+      while (my ($k, $v) = each %$t) {
+        my $key = "OPENDDS_${s}_${k}";
+        my $value = $v;
+        $ENV{$key} = $value;
+      }
+    }
+  }
 
   return $self;
 }

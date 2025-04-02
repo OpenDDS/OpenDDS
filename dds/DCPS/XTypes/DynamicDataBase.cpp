@@ -347,6 +347,7 @@ DDS::ReturnCode_t DynamicDataBase::unsupported_method(const char* method_name, b
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 namespace {
+
   template <typename T>
   DDS::ReturnCode_t get_some_value(DCPS::Value& value, DDS::MemberId id, DDS::DynamicData& dyn,
                                    DDS::ReturnCode_t (DDS::DynamicData::* pmf)(T&, DDS::MemberId))

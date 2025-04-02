@@ -275,6 +275,12 @@ TransportInst::shutdown()
   }
 }
 
+void
+TransportInst::instantiation_rule(const String& rule)
+{
+  TheServiceParticipant->config_store()->set(config_key("INSTANTIATION_RULE").c_str(), rule);
+}
+
 String
 TransportInst::instantiation_rule() const
 {
