@@ -139,6 +139,27 @@ function(assert_generated_output file)
   endforeach()
 endfunction()
 
+function(assert_file_exists path expected)
+  if(expected STREQUAL IF_SHARED)
+    if(BUILD_SHARED_LIBS)
+      set(expected TRUE)
+    else()
+      set(expected FALSE)
+    endif()
+  endif()
+  if(expected)
+    if(NOT EXISTS "${path}")
+      message(SEND_ERROR "${path} expected to exist!")
+    endif()
+  elseif(EXISTS "${path}")
+    message(SEND_ERROR "${path} expected to NOT exist!")
+  endif()
+endfunction()
+
+function(assert_export_header target gen expected)
+  assert_file_exists("${gen}/${target}_export.h" ${expected})
+endfunction()
+
 subtest(generated_output DUMMY)
 # Legacy flat case
 assert_generated_output("file.ext" EXPECT "${target_gen}")
@@ -182,27 +203,28 @@ assert_generated_output("file.ext" INCLUDE_BASE "${target_gen}" EXPECT_FAIL)
 subtest(no_scope)
 opendds_target_sources(${target} "${idl_file}")
 assert_includes(${target} PRIVATE "${target_gen}")
+assert_export_header(${target} "${target_gen}" FALSE)
 
 subtest(public)
 opendds_target_sources(${target} PUBLIC "${idl_file}")
 assert_includes(${target} INTERFACE "${target_gen}" PRIVATE "${target_gen}")
+assert_export_header(${target} "${target_gen}" IF_SHARED)
 
 subtest(interface)
 opendds_target_sources(${target} INTERFACE "${idl_file}")
 assert_includes(${target} INTERFACE "${target_gen}" PRIVATE "${target_gen}")
+assert_export_header(${target} "${target_gen}" IF_SHARED)
 
 subtest(private)
 opendds_target_sources(${target} PRIVATE "${idl_file}")
 assert_includes(${target} PRIVATE "${target_gen}")
+assert_export_header(${target} "${target_gen}" FALSE)
 
 subtest(export_header)
 opendds_target_sources(${target} PUBLIC "${idl_file}"
   ALWAYS_GENERATE_LIB_EXPORT_HEADER TRUE)
 assert_includes(${target} INTERFACE "${target_gen}" PRIVATE "${target_gen}")
-set(export_header "${target_gen}/${target}_export.h")
-if(NOT EXISTS "${export_header}")
-  message(SEND_ERROR "${export_header} is missing")
-endif()
+assert_export_header(${target} "${target_gen}" TRUE)
 
 subtest(idl_and_export_header_in_subdir)
 opendds_target_sources(${target} PUBLIC "dir/test2.idl"
@@ -212,10 +234,7 @@ opendds_target_sources(${target} PUBLIC "dir/test2.idl"
 assert_includes(${target}
   INTERFACE "${target_gen}" "${target_gen}/dir"
   PRIVATE "${target_gen}" "${target_gen}/dir")
-set(export_header "${target_gen}/dir/${target}_export.h")
-if(NOT EXISTS "${export_header}")
-  message(SEND_ERROR "${export_header} is missing")
-endif()
+assert_export_header(${target} "${target_gen}/dir" TRUE)
 
 subtest(o_opt)
 opendds_target_sources(${target} "${idl_file}"

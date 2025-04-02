@@ -246,24 +246,10 @@ function(opendds_target_sources target)
   endif()
 
   get_target_property(target_type ${target} TYPE)
-  if((target_type STREQUAL "SHARED_LIBRARY" AND max_scope STREQUAL "PUBLIC")
-      OR (always_generate_lib_export_header AND target_type MATCHES "LIBRARY"))
+  if((target_type STREQUAL "SHARED_LIBRARY" AND max_scope STREQUAL PUBLIC)
+    OR (always_generate_lib_export_header AND target_type MATCHES "LIBRARY"))
     if(NOT use_export)
       opendds_export_header(${target} USE_EXPORT_VAR use_export DIR "${export_header_dir}")
-    endif()
-    list(GET use_export 0 export_header)
-    list(GET use_export 1 export_macro)
-    if(NOT "${tao_options}" MATCHES "-Wb,export_include")
-      list(APPEND tao_options "-Wb,export_include=${export_header}")
-    endif()
-    if(NOT "${tao_options}" MATCHES "-Wb,export_macro")
-      list(APPEND tao_options "-Wb,export_macro=${export_macro}")
-    endif()
-    if(NOT "${opendds_options}" MATCHES "-Wb,export_include")
-      list(APPEND opendds_options "-Wb,export_include=${export_header}")
-    endif()
-    if(NOT "${opendds_options}" MATCHES "-Wb,export_macro")
-      list(APPEND opendds_options "-Wb,export_macro=${export_macro}")
     endif()
   endif()
 
@@ -316,15 +302,35 @@ function(opendds_target_sources target)
 
   foreach(scope PUBLIC PRIVATE INTERFACE)
     if(idl_sources_${scope})
+      set(this_scope_tao_options ${tao_options})
+      set(this_scope_opendds_options ${opendds_options})
+      if(use_export AND NOT scope STREQUAL "PRIVATE")
+        list(GET use_export 0 export_header)
+        list(GET use_export 1 export_macro)
+        if(NOT "${tao_options}" MATCHES "-Wb,export_include")
+          list(APPEND this_scope_tao_options "-Wb,export_include=${export_header}")
+        endif()
+        if(NOT "${tao_options}" MATCHES "-Wb,export_macro")
+          list(APPEND this_scope_tao_options "-Wb,export_macro=${export_macro}")
+        endif()
+        if(NOT "${opendds_options}" MATCHES "-Wb,export_include")
+          list(APPEND this_scope_opendds_options "-Wb,export_include=${export_header}")
+        endif()
+        if(NOT "${opendds_options}" MATCHES "-Wb,export_macro")
+          list(APPEND this_scope_opendds_options "-Wb,export_macro=${export_macro}")
+        endif()
+      endif()
+
       _opendds_target_idl_sources(${target}
-        TAO_IDL_FLAGS ${tao_options}
-        DDS_IDL_FLAGS ${opendds_options}
+        TAO_IDL_FLAGS ${this_scope_tao_options}
+        DDS_IDL_FLAGS ${this_scope_opendds_options}
         SKIP_TAO_IDL ${skip_tao_idl}
         SKIP_OPENDDS_IDL ${skip_opendds_idl}
         IDL_FILES ${idl_sources_${scope}}
         SCOPE ${scope}
         INCLUDE_BASE "${include_base}"
-        AUTO_INCLUDES auto_includes)
+        AUTO_INCLUDES auto_includes
+        USE_EXPORT ${use_export})
       list(APPEND includes ${auto_includes})
     endif()
 
