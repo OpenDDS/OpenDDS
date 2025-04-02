@@ -6,8 +6,6 @@ if(_OPENDDS_TARGET_SOURCES_CMAKE)
 endif()
 set(_OPENDDS_TARGET_SOURCES_CMAKE TRUE)
 
-include(GNUInstallDirs)
-
 include("${CMAKE_CURRENT_LIST_DIR}/opendds_group.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/dds_idl_sources.cmake")
 
@@ -236,11 +234,19 @@ function(opendds_target_sources target)
   endif()
 
   _opendds_get_generated_output_dir(${target} generated_directory MKDIR)
+  _opendds_real_path("${generated_directory}" generated_directory)
   set_target_properties(${target} PROPERTIES OPENDDS_GENERATED_DIRECTORY "${generated_directory}")
   set(includes "${generated_directory}")
 
+  if(idl_sources_PUBLIC OR idl_sources_INTERFACE)
+    # Need to include and link internally even if it's just interface files.
+    set(max_scope PUBLIC)
+  elseif(idl_sources_PRIVATE)
+    set(max_scope PRIVATE)
+  endif()
+
   get_target_property(target_type ${target} TYPE)
-  if(target_type STREQUAL "SHARED_LIBRARY"
+  if((target_type STREQUAL "SHARED_LIBRARY" AND max_scope STREQUAL "PUBLIC")
       OR (always_generate_lib_export_header AND target_type MATCHES "LIBRARY"))
     if(NOT use_export)
       opendds_export_header(${target} USE_EXPORT_VAR use_export DIR "${export_header_dir}")
@@ -326,13 +332,6 @@ function(opendds_target_sources target)
     # regular c/cpp/h files specified by the user are added.
     target_sources(${target} ${scope} ${non_idl_sources_${scope}})
   endforeach()
-
-  if(idl_sources_PUBLIC OR idl_sources_INTERFACE)
-    # Need to include and link internally even if it's just interface files.
-    set(max_scope PUBLIC)
-  elseif(idl_sources_PRIVATE)
-    set(max_scope PRIVATE)
-  endif()
 
   if(auto_link)
     if(NOT skip_opendds_idl)

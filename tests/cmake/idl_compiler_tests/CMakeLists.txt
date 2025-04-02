@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8...3.27)
+cmake_minimum_required(VERSION 3.8...4.0)
 project(opendds_idl_compiler_tests CXX)
 
 find_package(OpenDDS REQUIRED)
@@ -16,8 +16,7 @@ macro(subtest name)
     "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
 
   set(target "${PROJECT_NAME}_${name}")
-  # TODO: Add target when generation is per-target
-  set(target_gen "${opendds_gen}")
+  set(target_gen "${opendds_gen}/${target}")
   # Directory has to exist for get_filename_component(REALPATH) to consistently
   # resolve it.
   file(MAKE_DIRECTORY "${target_gen}")
