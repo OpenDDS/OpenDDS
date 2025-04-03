@@ -3,63 +3,6 @@
 
 include(${CMAKE_CURRENT_LIST_DIR}/tao_idl_sources.cmake)
 
-function(_opendds_target_generated_dependencies target idl_file scope)
-  get_source_file_property(idl_ts_files ${idl_file} OPENDDS_TYPESUPPORT_IDLS)
-  set(all_idl_files ${idl_file})
-  if(idl_ts_files)
-    list(APPEND all_idl_files ${idl_ts_files})
-  endif()
-
-  foreach(file ${all_idl_files})
-    get_source_file_property(cpps ${file} OPENDDS_CPP_FILES)
-    if(cpps)
-      list(APPEND cpp_files ${cpps})
-    endif()
-    get_source_file_property(hdrs ${file} OPENDDS_HEADER_FILES)
-    if(hdrs)
-      list(APPEND hdr_files ${hdrs})
-    endif()
-  endforeach()
-
-  set(all_gen_files ${cpp_files} ${hdr_files})
-  set(idl_or_header_gen_files ${hdr_files})
-  if(idl_ts_files)
-    list(APPEND all_gen_files ${idl_ts_files})
-    list(APPEND idl_or_header_gen_files ${idl_ts_files})
-  endif()
-  set(all_files ${all_gen_files} ${idl_file})
-
-  get_source_file_property(bridge_target ${idl_file} OPENDDS_IDL_BRIDGE_TARGET)
-  if(NOT bridge_target)
-    # Each IDL file corresponds to one bridge target. All targets which depend
-    # upon the C/C++ files generated from IDL compilation will also depend upon
-    # the bridge target to guarantee that IDL files will compile prior to the
-    # dependent targets. This is simply set to the first IDL-Dependent target.
-    set(bridge_target ${target})
-
-    set_source_files_properties(${idl_file}
-      PROPERTIES
-        OPENDDS_IDL_BRIDGE_TARGET ${bridge_target})
-
-    set_source_files_properties(${all_idl_files} ${hdr_files}
-      PROPERTIES
-        HEADER_FILE_ONLY ON)
-
-    set_source_files_properties(${cpp_files} ${hdr_files}
-      PROPERTIES
-        SKIP_AUTOGEN ON)
-
-    source_group("Generated Files" FILES ${all_gen_files})
-    source_group("IDL Files" FILES ${idl_file})
-  else()
-    add_dependencies(${target} ${bridge_target})
-  endif()
-
-  _opendds_add_idl_or_header_files(${target} ${scope} TRUE "${idl_or_header_gen_files}")
-  _opendds_add_idl_or_header_files(${target} ${scope} FALSE "${idl_file}")
-  target_sources(${target} PRIVATE ${cpp_files})
-endfunction()
-
 function(_opendds_export_target_property target property_name)
   if(NOT ${CMAKE_VERSION} VERSION_LESS "3.12.0")
     get_property(target_export_properties TARGET ${target} PROPERTY "EXPORT_PROPERTIES")
@@ -93,41 +36,6 @@ function(_opendds_target_idl_sources target)
   _opendds_export_target_property(${target} OPENDDS_LANGUAGE_MAPPINGS)
 
   set(all_auto_includes)
-  foreach(idl_file ${arg_IDL_FILES})
-    get_property(generated_dependencies SOURCE ${idl_file}
-      PROPERTY OPENDDS_IDL_GENERATED_DEPENDENCIES SET)
-
-    # TODO: This breaks the OpenDDS build because must be able to call
-    # opendds_target_sources on the same IDL files with different options.
-    if(generated_dependencies AND FALSE)
-      # If an IDL-Generation command was already created this file can safely be
-      # skipped; however, the dependencies still need to be added to the target.
-      _opendds_target_generated_dependencies(${target} ${idl_file} ${arg_SCOPE})
-
-      get_property(file_mappings SOURCE ${idl_file}
-        PROPERTY OPENDDS_LANGUAGE_MAPPINGS)
-      list(APPEND all_mappings ${file_mappings})
-
-      get_property(file_auto_includes SOURCE ${idl_file}
-        PROPERTY OPENDDS_IDL_AUTO_INCLUDES)
-      list(APPEND all_auto_includes ${file_auto_includes})
-    else()
-      list(APPEND non_generated_idl_files ${idl_file})
-    endif()
-  endforeach()
-
-  if(NOT non_generated_idl_files)
-    list(REMOVE_DUPLICATES all_mappings)
-    set_property(TARGET ${target}
-      PROPERTY OPENDDS_LANGUAGE_MAPPINGS "${all_mappings}")
-
-    if(arg_AUTO_INCLUDES)
-      list(REMOVE_DUPLICATES all_auto_includes)
-      set("${arg_AUTO_INCLUDES}" "${all_auto_includes}" PARENT_SCOPE)
-    endif()
-
-    return()
-  endif()
 
   get_property(target_link_libs TARGET ${target} PROPERTY LINK_LIBRARIES)
   if("OpenDDS::FACE" IN_LIST target_link_libs)
@@ -202,7 +110,7 @@ function(_opendds_target_idl_sources target)
     message(STATUS "IDL files:")
     list(APPEND CMAKE_MESSAGE_INDENT "  ")
   endif()
-  foreach(input ${non_generated_idl_files})
+  foreach(input IN LISTS arg_IDL_FILES)
     if(debug)
       string(REPLACE "${CMAKE_CURRENT_SOURCE_DIR}/" "" show_idl "${input}")
       message(STATUS "${show_idl}")
@@ -212,15 +120,17 @@ function(_opendds_target_idl_sources target)
     get_filename_component(file_ext ${input} EXT)
     get_filename_component(idl_file_dir ${abs_filename} DIRECTORY)
 
-    set(idl_files)
-    set(ts_idl_files)
+    set(idl_files "${input}")
+    set(ts_idl_file)
     set(h_files)
     set(cpp_files)
     set(run_tao_idl_on_input FALSE)
     set(file_auto_includes "${gen_out}")
     set(file_mappings)
     set(tao_idl_opts ${arg_TAO_IDL_FLAGS})
-    set(generated_files)
+    set(opendds_idl_generated_files)
+    set(tao_idl_generated_files)
+    set(generated_idl_or_header_files)
     set(extra_options)
 
     if(arg_SKIP_OPENDDS_IDL)
@@ -235,11 +145,8 @@ function(_opendds_target_idl_sources target)
       _opendds_get_generated_output_dir(${target} file_auto_includes O_OPT "${o_opt}")
 
       if(NOT opendds_idl_opt_-SI)
-        set(type_support_idl_file "${output_prefix}TypeSupport.idl")
-        list(APPEND ts_idl_files ${type_support_idl_file})
-        list(APPEND generated_files ${type_support_idl_file})
-        set_property(SOURCE ${abs_filename} APPEND PROPERTY
-          OPENDDS_TYPESUPPORT_IDLS "${type_support_idl_file}")
+        set(ts_idl_file "${output_prefix}TypeSupport.idl")
+        list(APPEND idl_files "${ts_idl_file}")
       endif()
 
       list(APPEND h_files "${output_prefix}TypeSupportImpl.h")
@@ -260,94 +167,110 @@ function(_opendds_target_idl_sources target)
         set(run_tao_idl_on_input TRUE)
       endif()
 
+      set(opendds_idl_generated_files ${ts_idl_file} ${h_files} ${cpp_files})
+      set(generated_idl_or_header_files ${ts_idl_file} ${h_files})
+
       if(opendds_idl_opt_-Wb,java)
-        set(java_list "${output_prefix}${file_ext}.TypeSupportImpl.java.list")
-        set_property(SOURCE ${abs_filename} APPEND PROPERTY
-          OPENDDS_JAVA_OUTPUTS "@${java_list}")
-        list(APPEND generated_files ${java_list})
-        list(APPEND extra_options "-j")
+        # set(java_list "${output_prefix}${file_ext}.TypeSupportImpl.java.list")
+        # list(APPEND opendds_idl_generated_files ${java_list})
+        # list(APPEND extra_options "-j")
         list(APPEND file_mappings "Java")
       endif()
-
-      list(APPEND generated_files ${h_files} ${cpp_files})
-
-      _opendds_tao_append_runtime_lib_dir_to_path(extra_lib_dirs)
 
       set(opendds_idl_args
         "-I${idl_file_dir}"
         ${opendds_idl_opts} ${extra_options}
-        ${abs_filename} -o "${output_dir}"
+        -o "${output_dir}"
       )
       if(debug)
         message(STATUS "opendds_idl ${opendds_idl_args}")
-        foreach(generated_file ${generated_files})
+        foreach(generated_file ${opendds_idl_generated_files})
           string(REPLACE "${output_dir}/" "" generated_file "${generated_file}")
           message(STATUS "${generated_file}")
         endforeach()
       endif()
-      add_custom_command(
-        OUTPUT ${generated_files}
+      _opendds_compile_idl($<TARGET_FILE:OpenDDS::opendds_idl> "${abs_filename}"
+        OUTPUT ${opendds_idl_generated_files}
+        OPTS ${opendds_idl_args}
         DEPENDS OpenDDS::opendds_idl "${DDS_ROOT}/dds/idl/IDLTemplate.txt"
-        MAIN_DEPENDENCY ${abs_filename}
-        COMMAND
-          ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_INCLUDE_DIR}"
-          "${extra_lib_dirs}" $<TARGET_FILE:OpenDDS::opendds_idl> ${opendds_idl_args}
       )
 
       list(APPEND tao_idl_opts
         "-I${DDS_ROOT}"
         "-I${idl_file_dir}" # The type-support IDL will include the primary IDL file
       )
-
-      set_property(SOURCE ${abs_filename} APPEND PROPERTY OPENDDS_CPP_FILES ${cpp_files})
-      set_property(SOURCE ${abs_filename} APPEND PROPERTY OPENDDS_HEADER_FILES ${h_files})
     endif()
 
     if(NOT arg_SKIP_TAO_IDL)
       if(run_tao_idl_on_input)
-        list(APPEND idl_files ${input})
         list(APPEND file_mappings "C++03")
-      endif()
-      if(idl_files)
         _opendds_tao_idl(${target}
           IDL_FLAGS ${tao_idl_opts}
-          IDL_FILES ${idl_files}
+          IDL_FILES ${input}
           INCLUDE_BASE "${include_base}"
-          AUTO_INCLUDES tao_idl_auto_includes
+          AUTO_INCLUDES_VAR tao_idl_auto_includes
+          H_FILES_VAR tao_idl_h_files
+          CPP_FILES_VAR tao_idl_cpp_files
         )
-        list(APPEND file_auto_includes "${tao_idl_auto_includes}")
+        list(APPEND file_auto_includes ${tao_idl_auto_includes})
+        list(APPEND h_files ${tao_idl_h_files})
+        list(APPEND cpp_files ${tao_idl_cpp_files})
+        list(APPEND tao_idl_generated_files ${tao_idl_h_files} ${tao_idl_cpp_files})
+        list(APPEND generated_idl_or_header_files ${tao_idl_h_files})
       endif()
-      if(ts_idl_files)
+      if(ts_idl_file)
         _opendds_tao_idl(${target}
           IDL_FLAGS ${tao_idl_opts}
-          IDL_FILES ${ts_idl_files}
+          IDL_FILES ${ts_idl_file}
           INCLUDE_BASE "${gen_out}" # Generated files must be relative to generated output
-          AUTO_INCLUDES tao_idl_ts_auto_includes
+          AUTO_INCLUDES_VAR tao_idl_ts_auto_includes
+          H_FILES_VAR tao_idl_ts_h_files
+          CPP_FILES_VAR tao_idl_ts_cpp_files
         )
-        list(APPEND file_auto_includes "${tao_idl_auto_includes}")
+        list(APPEND file_auto_includes ${tao_idl_ts_auto_includes})
+        list(APPEND h_files ${tao_idl_ts_h_files})
+        list(APPEND cpp_files ${tao_idl_ts_cpp_files})
+        list(APPEND tao_idl_generated_files ${tao_idl_ts_h_files} ${tao_idl_ts_cpp_files})
+        list(APPEND generated_idl_or_header_files ${tao_idl_ts_h_files})
       endif()
-    elseif(arg_SKIP_TAO_IDL)
-      if(debug)
-        message(STATUS "SKIP_TAO_IDL")
-      endif()
-    elseif(NOT idl_files)
-      if(debug)
-        message(STATUS "No IDL files for tao_idl")
-      endif()
+    elseif(debug)
+      message(STATUS "SKIP_TAO_IDL")
     endif()
 
-    set_property(SOURCE ${abs_filename} PROPERTY
-      OPENDDS_IDL_GENERATED_DEPENDENCIES TRUE)
-
     list(REMOVE_DUPLICATES file_auto_includes)
-    set_property(SOURCE ${abs_filename} PROPERTY
-      OPENDDS_IDL_AUTO_INCLUDES "${file_auto_includes}")
     list(APPEND all_auto_includes "${file_auto_includes}")
 
-    _opendds_target_generated_dependencies(${target} ${abs_filename} ${arg_SCOPE})
+    set(generated_files ${opendds_idl_generated_files} ${tao_idl_generated_files})
 
-    set_property(SOURCE ${abs_filename} APPEND PROPERTY
-      OPENDDS_LANGUAGE_MAPPINGS ${file_mappings})
+    # IDL compilation depends on custom targets to guarantee that IDL files
+    # will compile prior to the dependent target. The target used to depend on
+    # the files directly and other targets depending on that target, but
+    # https://cmake.org/cmake/help/latest/policy/CMP0154.html broke the
+    # compilation in Ninja by trying to compile C++ files before IDL files.
+    # This method also allows for multiple targets to use the same IDL file
+    # with different options.
+    get_target_property(idl_file_count ${target} _OPENDDS_IDL_FILE_COUNT)
+    if(NOT idl_file_count)
+      set(idl_file_count 0)
+    endif()
+    math(EXPR idl_file_count "${idl_file_count} + 1")
+    set_target_properties(${target} PROPERTIES _OPENDDS_IDL_FILE_COUNT ${idl_file_count})
+    set(idl_target "_opendds_codegen_${idl_file_count}_for_${target}")
+    add_custom_target(${idl_target} DEPENDS ${generated_files})
+    add_dependencies(${target} ${idl_target})
+
+    set_source_files_properties(${idl_files} ${h_files}
+      PROPERTIES
+        HEADER_FILE_ONLY ON)
+    set_source_files_properties(${h_files} ${cpp_files}
+      PROPERTIES
+        SKIP_AUTOGEN ON)
+    source_group("IDL Files" FILES ${idl_file})
+    source_group("Generated Files" FILES ${generated_files})
+
+    _opendds_add_idl_or_header_files(${target} ${arg_SCOPE} TRUE "${generated_idl_or_header_files}")
+    _opendds_add_idl_or_header_files(${target} ${arg_SCOPE} FALSE "${input}")
+    target_sources(${target} PRIVATE ${cpp_files})
 
     list(APPEND all_mappings ${file_mappings})
     list(REMOVE_DUPLICATES all_mappings)

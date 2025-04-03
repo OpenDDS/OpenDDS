@@ -1,7 +1,14 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-function(_opendds_tao_append_runtime_lib_dir_to_path dst)
+function(_opendds_compile_idl compiler idl_file)
+  set(no_value_options)
+  set(single_value_options)
+  set(multi_value_options OUTPUT DEPENDS OPTS)
+  cmake_parse_arguments(arg
+    "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
+
+  # Add TAO lib directory to path
   if(MSVC)
     set(env_var_name PATH)
   else()
@@ -15,11 +22,32 @@ function(_opendds_tao_append_runtime_lib_dir_to_path dst)
   if(NOT MSVC)
     string(REPLACE "\\" "/" path_list "${path_list}")
   endif()
-  set(${dst} "${env_var_name}=${path_list}" PARENT_SCOPE)
+
+  # If supported, make this as part of the codegen target.
+  set(extra)
+  if(POLICY CMP0171)
+    cmake_policy(SET CMP0171 NEW)
+    list(APPEND extra CODEGEN)
+  endif()
+
+  add_custom_command(
+    OUTPUT ${arg_OUTPUT}
+    MAIN_DEPENDENCY "${idl_file}"
+    DEPENDS ${arg_DEPENDS}
+    ${extra}
+    COMMAND ${CMAKE_COMMAND} -E env
+      "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_INCLUDE_DIR}" "${env_var_name}=${path_list}"
+      "${compiler}" ${arg_OPTS} "${idl_file}"
+  )
 endfunction()
 
 function(_opendds_tao_idl target)
-  set(one_value_args AUTO_INCLUDES INCLUDE_BASE)
+  set(one_value_args
+    INCLUDE_BASE
+    AUTO_INCLUDES_VAR
+    H_FILES_VAR
+    CPP_FILES_VAR
+  )
   set(multi_value_args IDL_FLAGS IDL_FILES)
   cmake_parse_arguments(arg "" "${one_value_args}" "${multi_value_args}" ${ARGN})
 
@@ -81,6 +109,8 @@ function(_opendds_tao_idl target)
     list(APPEND converted_flags "-I${arg_INCLUDE_BASE}")
   endif()
 
+  set(all_h_files)
+  set(all_cpp_files)
   foreach(idl_file ${arg_IDL_FILES})
     set(added_output_args)
     _opendds_get_generated_output(${target} "${idl_file}"
@@ -164,8 +194,6 @@ function(_opendds_tao_idl target)
       set(tao_idl_shared_libs TAO_IDL_BE TAO_IDL_FE)
     endif()
 
-    _opendds_tao_append_runtime_lib_dir_to_path(extra_lib_dirs)
-
     set(tao_idl "$<TARGET_FILE:TAO::tao_idl>")
     if(CMAKE_GENERATOR STREQUAL "Ninja" AND TAO_IS_BEING_BUILT)
       if(CMAKE_VERSION VERSION_LESS 3.24)
@@ -183,16 +211,20 @@ function(_opendds_tao_idl target)
       -I${TAO_INCLUDE_DIR} -I${working_source_dir}
       ${converted_flags}
       ${added_output_args}
-      ${idl_file_path}
     )
-    set(generated_files
+    set(h_files
       ${stub_header_files}
       ${skel_header_files}
       ${anyop_header_files}
+    )
+    list(APPEND all_h_files ${h_files})
+    set(cpp_files
       ${stub_cpp_files}
       ${skel_cpp_files}
       ${anyop_cpp_files}
     )
+    list(APPEND all_cpp_files ${cpp_files})
+    set(generated_files ${h_files} ${cpp_files})
     if(debug)
       message(STATUS "tao_idl ${tao_idl_args}")
       foreach(generated_file ${generated_files})
@@ -202,28 +234,22 @@ function(_opendds_tao_idl target)
         message(STATUS "${generated_file}")
       endforeach()
     endif()
-    add_custom_command(
+    _opendds_compile_idl("${tao_idl}" "${idl_file_path}"
       OUTPUT ${generated_files}
+      OPTS ${tao_idl_args}
       DEPENDS TAO::tao_idl ${tao_idl_shared_libs} ACE::ace_gperf
-      MAIN_DEPENDENCY ${idl_file_path}
-      COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_INCLUDE_DIR}"
-        "${extra_lib_dirs}" "${tao_idl}" ${tao_idl_args}
     )
-
-    set_property(SOURCE ${idl_file_path} APPEND PROPERTY
-      OPENDDS_CPP_FILES
-        ${stub_cpp_files}
-        ${skel_cpp_files}
-        ${anyop_cpp_files})
-
-    set_property(SOURCE ${idl_file_path} APPEND PROPERTY
-      OPENDDS_HEADER_FILES
-        ${stub_header_files}
-        ${skel_header_files}
-        ${anyop_header_files})
   endforeach()
 
-  if(arg_AUTO_INCLUDES)
-    set("${arg_AUTO_INCLUDES}" "${auto_includes}" PARENT_SCOPE)
+  if(arg_H_FILES_VAR)
+    set("${arg_H_FILES_VAR}" "${h_files}" PARENT_SCOPE)
+  endif()
+
+  if(arg_CPP_FILES_VAR)
+    set("${arg_CPP_FILES_VAR}" "${cpp_files}" PARENT_SCOPE)
+  endif()
+
+  if(arg_AUTO_INCLUDES_VAR)
+    set("${arg_AUTO_INCLUDES_VAR}" "${auto_includes}" PARENT_SCOPE)
   endif()
 endfunction()
