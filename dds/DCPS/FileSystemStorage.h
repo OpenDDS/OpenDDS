@@ -95,7 +95,7 @@ using OpenDDS::DCPS::RcHandle;
 
 class File;
 
-class OpenDDS_Dcps_Export Directory : public virtual RcObject {
+class OpenDDS_Dcps_Export Directory : public RcObject {
 public:
   typedef RcHandle<Directory> Ptr;
 
@@ -221,7 +221,7 @@ private:
   // phys. prefix (before '.') -> next available counter #
 };
 
-class OpenDDS_Dcps_Export File : public virtual RcObject {
+class OpenDDS_Dcps_Export File : public RcObject {
 public:
   typedef RcHandle<File> Ptr;
 

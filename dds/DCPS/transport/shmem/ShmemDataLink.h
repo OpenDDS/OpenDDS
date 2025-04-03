@@ -94,8 +94,28 @@ private:
   ACE_Thread_Mutex assoc_resends_mutex_;
   typedef std::set<GuidPair> AssocResends;
   AssocResends assoc_resends_;
-  typedef PmfPeriodicTask<ShmemDataLink> SmPeriodicTask;
-  DCPS::RcHandle<SmPeriodicTask> assoc_resends_task_;
+
+  // This is essentially PmfPeriodicTask<ShmemDataLink>, but using that
+  // directly was causing warnings on MSVC x86.  There is only one member
+  // function that's used with a PeriodicTask.
+  struct PeriodicAssocResend : DCPS::PeriodicTask {
+    PeriodicAssocResend(DCPS::ReactorTask_rch reactor_task, const ShmemDataLink& delegate)
+      : PeriodicTask(reactor_task)
+      , delegate_(delegate)
+    {}
+
+    void execute(const MonotonicTimePoint& now)
+    {
+      const DCPS::RcHandle<ShmemDataLink> handle = delegate_.lock();
+      if (handle) {
+        handle->resend_association_msgs(now);
+      }
+    }
+
+    const DCPS::WeakRcHandle<ShmemDataLink> delegate_;
+  };
+
+  DCPS::RcHandle<PeriodicAssocResend> assoc_resends_task_;
 };
 
 } // namespace DCPS

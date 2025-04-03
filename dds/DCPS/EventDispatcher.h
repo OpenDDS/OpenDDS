@@ -103,7 +103,7 @@ private:
  * or for future scheduled dispatch (schedule). Scheduled dispatches return id
  * values which can be used to cancel the dispatch before the scheduled time.
  */
-class OpenDDS_Dcps_Export EventDispatcher : public virtual RcObject {
+class OpenDDS_Dcps_Export EventDispatcher : public RcObject {
 public:
 
   EventDispatcher();
