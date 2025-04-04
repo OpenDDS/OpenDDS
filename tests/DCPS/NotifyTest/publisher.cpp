@@ -17,6 +17,8 @@
 
 #include <ace/streams.h>
 #include "tests/Utils/ExceptionStreams.h"
+#include <tests/Utils/DistributedConditionSet.h>
+#include <tests/Utils/StatusMatching.h>
 #include "ace/Get_Opt.h"
 
 using namespace Messenger;
@@ -60,6 +62,9 @@ parse_args (int argc, ACE_TCHAR *argv[])
 int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
   try
     {
+      DistributedConditionSet_rch dcs =
+        OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+
       DDS::DomainParticipantFactory_var dpf =
         TheParticipantFactoryWithArgs(argc, argv);
       DDS::DomainParticipant_var participant =
@@ -106,22 +111,27 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       }
 
       // Create the datawriter
+      DDS::DataWriterQos dw_qos;
+      pub->get_default_datawriter_qos(dw_qos);
+      dw_qos.writer_data_lifecycle.autodispose_unregistered_instances = false;
+
       DDS::DataWriter_var dw =
         pub->create_datawriter(topic.in (),
-                               DATAWRITER_QOS_DEFAULT,
+                               dw_qos,
                                DDS::DataWriterListener::_nil(),
                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (dw.in ())) {
         cerr << "create_datawriter failed." << endl;
         exit(1);
       }
-      Writer* writer = new Writer(dw.in());
+
+      Utils::wait_match(dw, 1);
+      dcs->wait_for("pub", "sub", "ready");
+
+      Writer* writer = new Writer(dcs, dw.in());
 
       writer->start ();
-      while ( !writer->is_finished()) {
-        ACE_Time_Value small_time(0,250000);
-        ACE_OS::sleep (small_time);
-      }
+      dcs->wait_for("pub", "sub", "done");
 
       // Cleanup
       writer->end ();

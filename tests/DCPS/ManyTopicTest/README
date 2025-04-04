@@ -1,21 +1,10 @@
 Test Case 11 Multiple topics published simultaneously
 
-3 topic and 3 type
+4 topics and 3 types
 
 T1 foo1
 T2 foo2
 T3 foo3
+T4 foo3
 
-We create a datareader and datawriter for each topic.
-
-run_test.pl: 3 writers in one publisher process and 3 readers in one subscriber
-             process.
-
-run_test1.pl: 3 publisher processes (one for each topic) and 3 readers in
-              one subscriber process.
-
-run_test2.pl: 3 writers in one publisher process and 3 subscriber
-              processes.
-
-run_test3.pl: 3 publisher process (one for each topic) and 3 subscriber
-              processes.
+run_test.pl: 4 writers in one publisher process and 4 readers in 2 subscriber processes.

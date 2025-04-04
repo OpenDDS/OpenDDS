@@ -47,6 +47,11 @@ public:
 
   virtual void update_incompatible_qos(const IncompatibleQosStatus& status);
 
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+  virtual void update_ownership_strength(const GUID_t& publication_id,
+                                         CORBA::Long strength);
+#endif
+
   void detach_parent();
 
 private:

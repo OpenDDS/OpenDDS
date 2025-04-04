@@ -14,10 +14,10 @@ const int num_messages = 10;
 extern bool unregister_notify_test;
 extern bool dispose_notify_test;
 
-Writer::Writer(::DDS::DataWriter_ptr writer)
-: writer_ (::DDS::DataWriter::_duplicate (writer)),
-  finished_instances_ (0),
-  timeout_writes_ (0)
+Writer::Writer(DistributedConditionSet_rch dcs,
+               ::DDS::DataWriter_ptr writer)
+  : dcs_(dcs)
+  , writer_ (::DDS::DataWriter::_duplicate (writer))
 {
 }
 
@@ -29,7 +29,7 @@ Writer::start ()
   // Each thread writes one instance which uses the thread id as the
   // key value.
   if (activate (THR_NEW_LWP | THR_JOINABLE, num_instances_per_writer) == -1) {
-    cerr << "Writer::start(): activate failed" << endl;
+    ACE_ERROR((LM_ERROR, "Writer::start(): activate failed\n"));
     exit(1);
   }
 }
@@ -50,20 +50,10 @@ Writer::svc ()
 
   ::DDS::InstanceHandleSeq handles;
   try {
-
-    while (1)
-    {
-      writer_->get_matched_subscriptions(handles);
-      if (handles.length() > 0)
-        break;
-      else
-        ACE_OS::sleep(ACE_Time_Value(0,200000));
-    }
-
     ::Messenger::MessageDataWriter_var message_dw
       = ::Messenger::MessageDataWriter::_narrow(writer_.in());
     if (CORBA::is_nil (message_dw.in ())) {
-      cerr << "Data Writer could not be narrowed"<< endl;
+      ACE_ERROR((LM_ERROR, "Data Writer could not be narrowed\n"));
       exit(1);
     }
 
@@ -86,13 +76,12 @@ Writer::svc ()
                     ACE_TEXT("(%P|%t) ERROR: Writer::svc, ")
                     ACE_TEXT ("%dth write() returned %d.\n"),
                     i, ret));
-        if (ret == ::DDS::RETCODE_TIMEOUT) {
-          timeout_writes_ ++;
-        }
       }
       if (unregister_notify_test && i == num_messages/2)
       {
+        ACE_DEBUG((LM_DEBUG, "unregistering instance\n"));
         message_dw->unregister_instance(message, handle);
+        dcs_->wait_for("pub", "sub", "unregister");
         handle = message_dw->register_instance(message);
       }
 
@@ -101,38 +90,19 @@ Writer::svc ()
 
     if (dispose_notify_test)
     {
+      ACE_DEBUG((LM_DEBUG, "disposing instance\n"));
       message_dw->dispose (message, handle);
+      dcs_->wait_for("pub", "sub", "dispose");
     }
+
+    dcs_->wait_for("pub", "sub", "data");
 
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in svc:" << endl
          << e << endl;
   }
 
-  while (1)
-    {
-      writer_->get_matched_subscriptions(handles);
-      if (handles.length() == 0)
-        break;
-      else
-        ACE_OS::sleep(1);
-    }
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc finished.\n")));
 
-  finished_instances_ ++;
-
   return 0;
-}
-
-
-bool
-Writer::is_finished () const
-{
-  return finished_instances_ == num_instances_per_writer;
-}
-
-int
-Writer::get_timeout_writes () const
-{
-  return timeout_writes_;
 }

@@ -8,10 +8,11 @@
  */
 // ============================================================================
 
-#include "SyncClientExt_i.h"
-
 #include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
+
+#include <tests/Utils/DistributedConditionSet.h>
+
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
@@ -42,10 +43,7 @@ private:
   size_t participant_count_;
   size_t writer_count_;
 
-  std::string control_file_;
   size_t subscriber_count_;
-
-  std::string sync_server_;
 
   DDS::DomainParticipantFactory_var dpf_;
   std::vector<DDS::DomainParticipant_var> participant_;
@@ -53,23 +51,34 @@ private:
   std::vector<DDS::Publisher_var> pub_;
   std::vector<DDS::DataWriter_var> dw_;
 
-  OpenDDS::DCPS::unique_ptr<SyncClientExt_i> sync_client_;
+  DistributedConditionSet_rch dcs_;
+  OpenDDS::DCPS::String actor_;
+  typedef std::vector<OpenDDS::DCPS::String> Actors;
+  Actors actors_;
 };
 
 bool
 Publisher::parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("t:n:p:c:s:i:"));
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("a:A:t:n:p:s:"));
   int c;
-  std::string usage = " -t <topic count>\n"
-    " -n <participant count>\n -p <publisher count>\n"
-    " -c <control file>\n -s <subscriber count>\n"
-    " -y <syncServer ior>";
+  std::string usage = " -a <actor>\n"
+    " -A <actors>\n"
+    " -t <topic count>\n"
+    " -n <participant count>\n"
+    " -p <publisher count>\n"
+    " -s <subscriber count>";
 
   while ((c = get_opts ()) != -1)
   {
     switch (c)
       {
+      case 'a':
+        actor_ = ACE_TEXT_ALWAYS_CHAR(get_opts.opt_arg());
+        break;
+      case 'A':
+        actors_.push_back(ACE_TEXT_ALWAYS_CHAR(get_opts.opt_arg()));
+        break;
       case 't':
         topic_count_ = ACE_OS::atoi (get_opts.opt_arg ());
         break;
@@ -79,14 +88,8 @@ Publisher::parse_args (int argc, ACE_TCHAR *argv[])
       case 'p':
         writer_count_ = ACE_OS::atoi (get_opts.opt_arg ());
         break;
-      case 'c':
-        control_file_ = ACE_TEXT_ALWAYS_CHAR (get_opts.opt_arg ());
-        break;
       case 's':
         subscriber_count_ = ACE_OS::atoi (get_opts.opt_arg ());
-        break;
-      case 'y':
-        sync_server_ = ACE_TEXT_ALWAYS_CHAR (get_opts.opt_arg ());
         break;
       case '?':
       default:
@@ -103,10 +106,12 @@ Publisher::parse_args (int argc, ACE_TCHAR *argv[])
 
 Publisher::Publisher (int argc, ACE_TCHAR *argv[])
   : topic_count_ (1), participant_count_ (1), writer_count_ (1)
-  , control_file_ ("barrier_file"), subscriber_count_(1)
+  , subscriber_count_(1)
 {
   try
     {
+      dcs_ = OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+
       dpf_ = TheParticipantFactoryWithArgs (argc, argv);
       if( this->dpf_.in () == 0) {
         throw InitError ("Publisher::ctor> Failed to obtain the participant factory.");
@@ -115,17 +120,6 @@ Publisher::Publisher (int argc, ACE_TCHAR *argv[])
       if (!this->parse_args (argc, argv)) {
         throw InitError ("Publisher::ctor> Failed to parse args.");
       }
-
-      //ACE_DEBUG ((LM_DEBUG, "(%P|%t) Publisher> Creating SyncClient_i\n"));
-      sync_client_.reset (new SyncClientExt_i (sync_server_, CORBA::ORB::_nil()
-                                            , SyncClient_i::Pub));
-      //ACE_DEBUG ((LM_DEBUG, "(%P|%t) Publisher> SyncClient_i created\n"));
-    }
-  catch (SyncClient_i::InitError& er)
-    {
-      std::cerr << "Exception in SyncClient_i initialization."
-                << std::endl;
-      throw InitError (er);
     }
   catch (CORBA::Exception& ex)
     {
@@ -152,8 +146,10 @@ Publisher::run (void)
 
   try
     {
-      sync_client_->way_point_reached (1);
-      sync_client_->get_notification ();
+      dcs_->post(actor_, "way_point_reached_1");
+      for (Actors::const_iterator pos = actors_.begin(), limit = actors_.end(); pos != limit; ++pos) {
+        dcs_->wait_for(actor_, *pos, "way_point_reached_1");
+      }
 
       ACE_High_Res_Timer participant_timer;
       participant_timer.start();
@@ -250,27 +246,23 @@ Publisher::run (void)
       pub_timer.stop ();
 
       // sync up
-      sync_client_->way_point_reached (2);
-      sync_client_->get_notification ();
-
+      dcs_->post(actor_, "way_point_reached_2");
+      for (Actors::const_iterator pos = actors_.begin(), limit = actors_.end(); pos != limit; ++pos) {
+        dcs_->wait_for(actor_, *pos, "way_point_reached_2");
+      }
 
       ACE_Time_Value tv;
       participant_timer.elapsed_time (tv);
-      sync_client_->publish (SyncExt::Topic, static_cast<int>(topic_count_), tv.msec());
-      //ACE_DEBUG ((LM_DEBUG, "(%P|%t) Created %d participants in %d secs.\n"
-      //, participant_count_, tv.sec()));
+      ACE_DEBUG ((LM_DEBUG, "(%P|%t) Created %d participants in %d secs.\n"
+                  , participant_count_, tv.sec()));
 
       topic_timer.elapsed_time (tv);
-      sync_client_->publish (SyncExt::Participant, static_cast<int>(participant_count_),
-                             tv.msec());
-      //ACE_DEBUG ((LM_DEBUG, "(%P|%t) Created %d topics in %d secs.\n"
-      //, topic_count_, tv.sec()));
+      ACE_DEBUG ((LM_DEBUG, "(%P|%t) Created %d topics in %d secs.\n"
+                  , topic_count_, tv.sec()));
 
       pub_timer.elapsed_time (tv);
-      sync_client_->publish (SyncExt::Publisher, static_cast<int>(writer_count_),
-                             tv.msec());
-      //ACE_DEBUG ((LM_DEBUG, "(%P|%t) Created %d publishers in %d secs.\n"
-      //, writer_count_, tv.sec()));
+      ACE_DEBUG ((LM_DEBUG, "(%P|%t) Created %d publishers in %d secs.\n"
+                  , writer_count_, tv.sec()));
 
 
       for (size_t count = 0; count < participant_count_; count++)
