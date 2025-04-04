@@ -3061,19 +3061,19 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 #else
   ACE_INET_Addr local;
 
-  iovec iov[1];
-  iov[0].iov_base = buff_.wr_ptr();
+  iovec iov;
+  iov.iov_base = buff_.wr_ptr();
 #ifdef _MSC_VER
 #pragma warning(push)
   // iov_len is 32-bit on 64-bit VC++, but we don't want a cast here
   // since on other platforms iov_len is 64-bit
 #pragma warning(disable : 4267)
 #endif
-  iov[0].iov_len = buff_.space();
+  iov.iov_len = buff_.space();
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
-  const ssize_t bytes = socket.recv(iov, 1, remote, 0
+  const ssize_t bytes = socket.recv(&iov, 1, remote, 0
 #if defined(ACE_RECVPKTINFO) || defined(ACE_RECVPKTINFO6)
                                     , &local
 #endif
