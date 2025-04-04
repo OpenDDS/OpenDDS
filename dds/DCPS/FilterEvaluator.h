@@ -89,7 +89,7 @@ struct OpenDDS_Dcps_Export Value {
   bool conversion_preferred_;
 };
 
-class OpenDDS_Dcps_Export FilterEvaluator : public virtual RcObject {
+class OpenDDS_Dcps_Export FilterEvaluator : public RcObject {
 public:
 
   struct AstNodeWrapper;

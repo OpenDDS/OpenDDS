@@ -3,6 +3,8 @@ if(_OPENDDS_UTILS_CMAKE)
 endif()
 set(_OPENDDS_UTILS_CMAKE TRUE)
 
+include(GNUInstallDirs)
+
 function(_opendds_get_generated_output_dir target output_dir_var)
   set(no_value_options MKDIR)
   set(single_value_options O_OPT)
@@ -10,8 +12,7 @@ function(_opendds_get_generated_output_dir target output_dir_var)
   cmake_parse_arguments(arg
     "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
 
-  # TODO base output_dir_var on target
-  set(output_dir "${CMAKE_CURRENT_BINARY_DIR}/opendds_generated")
+  set(output_dir "${CMAKE_CURRENT_BINARY_DIR}/opendds_generated/${target}")
   get_filename_component(output_dir "${output_dir}" REALPATH)
   if(arg_O_OPT)
     if(IS_ABSOLUTE "${arg_O_OPT}")
@@ -359,6 +360,7 @@ function(opendds_export_header target)
     set(source_macro "${arg_SOURCE_MACRO}")
     configure_file("${_OPENDDS_CMAKE_DIR}/export.h.in" "${export_header_path}")
     _opendds_add_idl_or_header_files(${target} PUBLIC TRUE "${export_header_path}")
+    target_include_directories(${target} PUBLIC "$<BUILD_INTERFACE:${gendir}>")
   endif()
 
   set(use_export "${arg_INCLUDE};${arg_EXPORT_MACRO}")
