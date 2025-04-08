@@ -9768,7 +9768,7 @@ jobs:
       with:
         repository: lexxmark/winflexbison
         path: winflexbison
-        ref: v2.5.24
+        ref: 300f48ba3e598e7a6600d724b58541fbcc3c2fa6
     - name: set up msvc env
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: ilammy/msvc-dev-cmd@v1

@@ -122,8 +122,7 @@ namespace {
     } else {
       if (!sequence->unbounded()) {
         be_global->impl_ << indent << "  if (" << idx << " >= " << expression << ".maximum()) return false;\n";
-        be_global->impl_ << indent << "  const ACE_CDR::ULong len = " << expression << ".length();\n";
-        be_global->impl_ << indent << "  " << expression << ".length(len + 1);\n";
+        be_global->impl_ << indent << "  " << expression << ".length(" << expression << ".length() + 1);\n";
       } else {
         be_global->impl_ << indent << " OpenDDS::DCPS::grow(" << expression << ");\n";
       }

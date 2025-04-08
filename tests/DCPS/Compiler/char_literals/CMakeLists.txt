@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8...3.27)
+cmake_minimum_required(VERSION 3.8...4.0)
 project(opendds_compiler_char_literals CXX)
 enable_testing()
 

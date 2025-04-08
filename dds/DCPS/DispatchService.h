@@ -21,7 +21,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export DispatchService : public virtual RcObject {
+class OpenDDS_Dcps_Export DispatchService : public RcObject {
 public:
 
   /// Helper function for adapting arbitrary function objects (with operator())

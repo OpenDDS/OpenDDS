@@ -867,6 +867,12 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       iter->second.last_recv_address_ = from;
     }
 
+    const GuidToString::iterator flex_iter = flexible_types_pre_discovery_.find(guid);
+    if (flex_iter != flexible_types_pre_discovery_.end()) {
+      iter->second.flexible_types_key_ = flex_iter->second;
+      flexible_types_pre_discovery_.erase(flex_iter);
+    }
+
     if (DCPS::transport_debug.log_progress) {
       log_progress("participant discovery", guid_, guid, iter->second.discovered_at_.to_idl_struct());
     }
@@ -2499,7 +2505,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
 #ifndef DDS_HAS_MINIMUM_BIT
   // internal thread bit reporting
   if (TheServiceParticipant->get_thread_status_manager().update_thread_status() && outer->harvest_thread_status_) {
-    thread_status_task_ = DCPS::make_rch<SpdpPeriodic>(reactor_task, ref(*this), &SpdpTransport::thread_status_task);
+    thread_status_task_ = DCPS::make_rch<PeriodicThreadStatus>(reactor_task, ref(*this));
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
@@ -3055,19 +3061,19 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 #else
   ACE_INET_Addr local;
 
-  iovec iov[1];
-  iov[0].iov_base = buff_.wr_ptr();
+  iovec iov;
+  iov.iov_base = buff_.wr_ptr();
 #ifdef _MSC_VER
 #pragma warning(push)
   // iov_len is 32-bit on 64-bit VC++, but we don't want a cast here
   // since on other platforms iov_len is 64-bit
 #pragma warning(disable : 4267)
 #endif
-  iov[0].iov_len = buff_.space();
+  iov.iov_len = buff_.space();
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
-  const ssize_t bytes = socket.recv(iov, 1, remote, 0
+  const ssize_t bytes = socket.recv(&iov, 1, remote, 0
 #if defined(ACE_RECVPKTINFO) || defined(ACE_RECVPKTINFO6)
                                     , &local
 #endif
@@ -4733,7 +4739,10 @@ bool Spdp::enable_flexible_types(const GUID_t& remoteParticipantId, const char* 
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
   const DiscoveredParticipantIter iter = participants_.find(remoteParticipantId);
-  if (iter != participants_.end()) {
+  if (iter == participants_.end()) {
+    flexible_types_pre_discovery_[remoteParticipantId] = typeKey;
+    return true;
+  } else if (iter->second.flexible_types_key_ == "") {
     iter->second.flexible_types_key_ = typeKey;
     return endpoint_manager().enable_flexible_types(remoteParticipantId, typeKey);
   }

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23...3.27)
+cmake_minimum_required(VERSION 3.23...4.0)
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/opendds_version.cmake")
 project(opendds
   DESCRIPTION

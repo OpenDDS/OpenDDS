@@ -59,7 +59,7 @@ class DomainParticipantImpl;
  * The TransportInst object is supplied to the
  * TransportImpl::configure() method.
  */
-class OpenDDS_Dcps_Export TransportInst : public virtual RcObject {
+class OpenDDS_Dcps_Export TransportInst : public RcObject {
 public:
 
   static const long DEFAULT_DATALINK_RELEASE_DELAY = 10000;
