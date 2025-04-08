@@ -404,12 +404,11 @@ void DCPS_IR_Topic_Description::reevaluate_associations(DCPS_IR_Publication* pub
 void DCPS_IR_Topic_Description::update_ownership_strength(DCPS_IR_Publication* publication,
                                                           CORBA::Long strength)
 {
-  DCPS_IR_Subscription * sub = 0;
   DCPS_IR_Subscription_Set::ITERATOR iter = subscriptionRefs_.begin();
   DCPS_IR_Subscription_Set::ITERATOR end = subscriptionRefs_.end();
 
   while (iter != end) {
-    sub = *iter;
+    DCPS_IR_Subscription * sub = *iter;
     ++iter;
     sub->update_ownership_strength(publication, strength);
   }

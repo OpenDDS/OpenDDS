@@ -8,7 +8,7 @@
 
 #include "EndpointCallbacks.h"
 
-#include "dds/OpenDDSConfigWrapper.h"
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <tao/Basic_Types.h>
 

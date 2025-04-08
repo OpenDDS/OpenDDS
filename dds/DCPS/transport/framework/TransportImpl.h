@@ -84,11 +84,14 @@ public:
   /// TransportLocator object.
   virtual bool connection_info_i(TransportLocator& local_info, ConnectionInfoFlags flags) const = 0;
 
-  virtual NetworkAddress actual_local_address() const {
+  virtual NetworkAddress actual_local_address() const
+  {
     return NetworkAddress::default_IPV4;
   }
+
 #ifdef ACE_HAS_IPV6
-  virtual NetworkAddress ipv6_actual_local_address() const {
+  virtual NetworkAddress ipv6_actual_local_address() const
+  {
     return NetworkAddress::default_IPV6;
   }
 #endif

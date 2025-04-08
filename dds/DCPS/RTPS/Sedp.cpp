@@ -46,9 +46,9 @@
 #  include <dds/DdsSecurityCoreTypeSupportImpl.h>
 #endif
 
-#include <cstring>
-
 #include <dds/OpenDDSConfigWrapper.h>
+
+#include <cstring>
 
 namespace {
 
@@ -2291,10 +2291,7 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
         for (RepoIdSet::const_iterator i = assoc.begin(); i != assoc.end(); ++i) {
           LocalSubscriptionIter lsi = local_subscriptions_.find(*i);
           if (lsi != local_subscriptions_.end()) {
-            DCPS::DataReaderCallbacks_rch sl = lsi->second.subscription_.lock();
-            if (sl) {
-              sl->update_ownership_strength(guid, wdata.ddsPublicationData.ownership_strength.value);
-            }
+            event_dispatcher_->dispatch(DCPS::make_rch<UpdateOwnershipStrength>(lsi->second.subscription_, guid, wdata.ddsPublicationData.ownership_strength.value));
           }
         }
       }
@@ -8081,6 +8078,14 @@ void Sedp::ReaderRemoveAssociations::handle_event()
     writer_seq.length(1);
     writer_seq[0] = record_->writer_id();
     lock->remove_associations(writer_seq, false);
+  }
+}
+
+void Sedp::UpdateOwnershipStrength::handle_event()
+{
+  DCPS::DataReaderCallbacks_rch lock = drc_.lock();
+  if (lock) {
+    lock->update_ownership_strength(pub_id_, strength_);
   }
 }
 

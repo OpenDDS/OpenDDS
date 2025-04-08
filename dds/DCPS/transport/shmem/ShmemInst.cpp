@@ -33,7 +33,7 @@ ShmemInst::ShmemInst(const std::string& name)
 
 TransportImpl_rch
 ShmemInst::new_impl(DDS::DomainId_t domain,
-                    DomainParticipantImpl* participant)
+                    DomainParticipantImpl*)
 {
   return make_rch<ShmemTransport>(rchandle_from(this), domain);
 }

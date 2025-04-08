@@ -1659,6 +1659,24 @@ protected:
     const ReaderAssociationRecord_rch record_;
   };
 
+  class UpdateOwnershipStrength : public DCPS::EventBase {
+  public:
+    UpdateOwnershipStrength(DCPS::DataReaderCallbacks_wrch drc,
+                            const GUID_t& pub_id,
+                            CORBA::Long strength)
+      : drc_(drc)
+      , pub_id_(pub_id)
+      , strength_(strength)
+    {}
+
+  private:
+    virtual void handle_event();
+
+    DCPS::DataReaderCallbacks_wrch drc_;
+    const GUID_t& pub_id_;
+    CORBA::Long strength_;
+  };
+
   RtpsDiscoveryCore core_;
 };
 

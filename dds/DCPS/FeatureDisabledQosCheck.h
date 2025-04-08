@@ -10,7 +10,7 @@
 
 #include "Qos_Helper.h"
 
-#include "dds/OpenDDSConfigWrapper.h"
+#include <dds/OpenDDSConfigWrapper.h>
 
 #ifdef  OPENDDS_NO_OWNERSHIP_PROFILE
 #define OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, error_rtn_value) \
@@ -26,8 +26,8 @@
 #endif
 
 #if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
-#define OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, error_rtn_value)
-#define OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos, error_rtn_value)
+#  define OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, error_rtn_value)
+#  define OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos, error_rtn_value)
 #else
 #define OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, error_rtn_value) \
   if (qos.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS) { \
