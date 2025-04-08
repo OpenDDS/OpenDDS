@@ -17,12 +17,9 @@
 
 #include <iostream>
 
-DataReaderListenerImpl::DataReaderListenerImpl()
-  : num_reads_(0)
+DataReaderListenerImpl::DataReaderListenerImpl(DistributedConditionSet_rch dcs)
+  : dcs_(dcs)
   , valid_(true)
-  , rediscovered_(false)
-  , initial_discovery_data_(false)
-  , rediscovery_data_(false)
 {}
 
 DataReaderListenerImpl::~DataReaderListenerImpl()
@@ -31,89 +28,60 @@ DataReaderListenerImpl::~DataReaderListenerImpl()
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
-  ++num_reads_;
+  Messenger::MessageDataReader_var message_dr = Messenger::MessageDataReader::_narrow(reader);
+  Messenger::Message message;
+  DDS::SampleInfo si;
+  DDS::ReturnCode_t status;
+  while ((status = message_dr->take_next_sample(message, si)) == DDS::RETCODE_OK) {
+    ACE_DEBUG((LM_DEBUG, "SampleInfo.sample_rank = %d\n", si.sample_rank));
+    ACE_DEBUG((LM_DEBUG, "SampleInfo.instance_state = %C\n", OpenDDS::DCPS::InstanceState::instance_state_string(si.instance_state)));
 
-  try {
-    Messenger::MessageDataReader_var message_dr =
-      Messenger::MessageDataReader::_narrow(reader);
+    if (si.valid_data) {
 
-    if (CORBA::is_nil(message_dr.in())) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("%N:%l: on_data_available()")
-                 ACE_TEXT(" ERROR: _narrow failed!\n")));
-      ACE_OS::exit(-1);
-    }
-
-    Messenger::Message message;
-    DDS::SampleInfo si;
-
-    DDS::ReturnCode_t status = message_dr->take_next_sample(message, si) ;
-
-    if (status == DDS::RETCODE_OK) {
-      std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
-      std::cout << "SampleInfo.instance_state = " << OpenDDS::DCPS::InstanceState::instance_state_string(si.instance_state) << std::endl;
-
-      if (si.valid_data) {
-
-        if (rediscovered_) {
-          rediscovery_data_ = true;
-        } else {
-          initial_discovery_data_ = true;
-        }
-
-        if (!counts_.insert(message.count).second) {
-          std::cout << "ERROR: Repeat ";
-          valid_ = false;
-        }
-
-        std::cout << "Message: subject    = " << message.subject.in() << std::endl
-                  << "         subject_id = " << message.subject_id   << std::endl
-                  << "         from       = " << message.from.in()    << std::endl
-                  << "         count      = " << message.count        << std::endl
-                  << "         text       = " << message.text.in()    << std::endl;
-
-        if (std::string("Comic Book Guy") != message.from.in() &&
-            std::string("OpenDDS-Java") != message.from.in()) {
-          std::cout << "ERROR: Invalid message.from" << std::endl;
-          valid_ = false;
-        }
-        if (std::string("Review") != message.subject.in()) {
-          std::cout << "ERROR: Invalid message.subject" << std::endl;
-          valid_ = false;
-        }
-        if (std::string("Worst. Movie. Ever.") != message.text.in()) {
-          std::cout << "ERROR: Invalid message.text" << std::endl;
-          valid_ = false;
-        }
-        if (message.subject_id != 99) {
-          std::cout << "ERROR: Invalid message.subject_id" << std::endl;
-          valid_ = false;
-        }
-      } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
-
-      } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
-
-      } else {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("%N:%l: on_data_available()")
-                   ACE_TEXT(" ERROR: unknown instance state: %d\n"),
-                   si.instance_state));
+      if (dcs_ && !counts_.insert(message.count).second) {
+        ACE_DEBUG((LM_ERROR, "ERROR: Repeat\n"));
         valid_ = false;
       }
+
+      ACE_DEBUG((LM_DEBUG, "Message: subject    = %C\n", message.subject.in()));
+      ACE_DEBUG((LM_DEBUG, "         subject_id = %d\n", message.subject_id));
+      ACE_DEBUG((LM_DEBUG, "         from       = %C\n", message.from.in()));
+      ACE_DEBUG((LM_DEBUG, "         count      = %d\n", message.count));
+      ACE_DEBUG((LM_DEBUG, "         text       = %C\n", message.text.in()));
+      if (dcs_) {
+        dcs_->post("Subscriber", "count_" + OpenDDS::DCPS::to_dds_string(message.count));
+      }
+
+      if (std::string("Comic Book Guy") != message.from.in() &&
+          std::string("OpenDDS-Java") != message.from.in()) {
+        ACE_ERROR((LM_ERROR, "ERROR: Invalid message.from\n"));
+        valid_ = false;
+      }
+      if (std::string("Review") != message.subject.in()) {
+        ACE_ERROR((LM_ERROR, "ERROR: Invalid message.subject\n"));
+        valid_ = false;
+      }
+      if (dcs_ && std::string("Worst. Movie. Ever.") != message.text.in()) {
+        ACE_ERROR((LM_ERROR, "ERROR: Invalid message.text\n"));
+        valid_ = false;
+      }
+      if (dcs_ && message.subject_id != 99) {
+        ACE_ERROR((LM_ERROR, "ERROR: Invalid message.subject_id\n"));
+        valid_ = false;
+      }
+    } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
+
+    } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
 
     } else {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("%N:%l: on_data_available()")
-                 ACE_TEXT(" ERROR: unexpected status: %d\n"),
-                 status));
+                 ACE_TEXT(" ERROR: unknown instance state: %d\n"),
+                 si.instance_state));
       valid_ = false;
     }
-
-  } catch (const CORBA::Exception& e) {
-    e._tao_print_exception("Exception caught in on_data_available():");
-    ACE_OS::exit(-1);
   }
 }
 
@@ -142,6 +110,14 @@ void DataReaderListenerImpl::on_subscription_matched(
   DDS::DataReader_ptr,
   const DDS::SubscriptionMatchedStatus& status)
 {
+  if (dcs_) {
+    dcs_->post("Subscriber", OpenDDS::DCPS::String("on_subscription_matched")
+               + "_" + OpenDDS::DCPS::to_dds_string(status.total_count)
+               + "_" + OpenDDS::DCPS::to_dds_string(status.total_count_change)
+               + "_" + OpenDDS::DCPS::to_dds_string(status.current_count)
+               + "_" + OpenDDS::DCPS::to_dds_string(status.current_count_change));
+  }
+
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_subscription_matched()\n")));
   // For the reverse lease test, the DataReader will rediscover the DataWriter.
   // The DataWriter may have some unacknowledged samples that it will send again.
@@ -166,63 +142,7 @@ void DataReaderListenerImpl::on_sample_lost(
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_lost()\n")));
 }
 
-void DataReaderListenerImpl::mark_rediscovered()
+bool DataReaderListenerImpl::is_valid() const
 {
-  rediscovered_ = true;
-}
-
-bool DataReaderListenerImpl::is_valid(bool check_lease_recovery, bool expect_unmatch) const
-{
-  if (check_lease_recovery) {
-    return valid_ && initial_discovery_data_ &&
-      ( (expect_unmatch && rediscovery_data_) ||
-        (!expect_unmatch && *(counts_.begin()) == 0 && *(counts_.rbegin()) == 29));
-  }
-
-  CORBA::Long expected = 0;
-  Counts::const_iterator count = counts_.begin();
-  bool valid_count = true;
-  while (count != counts_.end() && expected < 10) {
-    if (expected != *count) {
-      if (expected < *count) {
-        // if missing multiple
-        const bool multi = (expected + 1 < *count);
-        std::cout << "ERROR: missing message" << (multi ? "s" : "")
-                  << " with count=" << expected;
-        if (multi) {
-          std::cout << " to count=" << (*count - 1);
-        }
-        std::cout << std::endl;
-        expected = *count;
-        // don't increment count;
-        valid_count = false;
-        continue;
-      }
-      else {
-        bool multi = false;
-        while (++count != counts_.end() && *count < expected) {
-          multi = true;
-        }
-        std::cout << "ERROR: received message" << (multi ? "s" : "")
-                  << " with a negative count" << std::endl;
-        valid_count = false;
-        continue;
-      }
-    }
-
-    ++expected;
-    ++count;
-  }
-
-  if (count != counts_.end()) {
-    std::cout << "ERROR: received messages with count higher than expected values" << std::endl;
-    valid_count = false;
-  }
-  // if didn't receive all the messages (for reliable transport) or didn't receive even get 1/4, then report error
-  else if ((int)counts_.size() < 10) {
-    std::cout << "ERROR: received " << counts_.size() << " messages, but expected " << 10 << std::endl;
-    valid_count = false;
-  }
-
-  return valid_ && valid_count;
+  return valid_;
 }
