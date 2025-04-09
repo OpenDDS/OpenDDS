@@ -1,6 +1,5 @@
 project(*idl) : dcps_test {
   requires += no_opendds_safety_profile
-  idlflags += -I$(DDS_ROOT)
 
   TypeSupport_Files {
     Messenger.idl

@@ -8081,6 +8081,7 @@ void Sedp::ReaderRemoveAssociations::handle_event()
   }
 }
 
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
 void Sedp::UpdateOwnershipStrength::handle_event()
 {
   DCPS::DataReaderCallbacks_rch lock = drc_.lock();
@@ -8088,6 +8089,7 @@ void Sedp::UpdateOwnershipStrength::handle_event()
     lock->update_ownership_strength(pub_id_, strength_);
   }
 }
+#endif
 
 } // namespace RTPS
 } // namespace OpenDDS

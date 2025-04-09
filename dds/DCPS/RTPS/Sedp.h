@@ -1659,6 +1659,7 @@ protected:
     const ReaderAssociationRecord_rch record_;
   };
 
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   class UpdateOwnershipStrength : public DCPS::EventBase {
   public:
     UpdateOwnershipStrength(DCPS::DataReaderCallbacks_wrch drc,
@@ -1676,6 +1677,7 @@ protected:
     const GUID_t& pub_id_;
     CORBA::Long strength_;
   };
+#endif
 
   RtpsDiscoveryCore core_;
 };
