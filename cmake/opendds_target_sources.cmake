@@ -254,7 +254,7 @@ function(opendds_target_sources target)
     string(SUBSTRING ${existing_macro} 0 ${index} macro_prefix)
     opendds_export_header(${target} EXISTING INCLUDE ${existing_header} MACRO_PREFIX ${macro_prefix})
   elseif((target_type STREQUAL "SHARED_LIBRARY" AND max_scope STREQUAL "PUBLIC")
-    OR (target_type MATCHES "LIBRARY" AND always_generate_lib_export_header))
+      OR (target_type MATCHES "LIBRARY" AND always_generate_lib_export_header))
     opendds_export_header(${target} USE_EXPORT_VAR use_export DIR "${export_header_dir}")
   endif()
 
