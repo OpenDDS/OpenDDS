@@ -373,16 +373,16 @@ if __name__ == '__main__':
         '-e',
         type=int,
         default=0,
-        help='Skip this many snapshots after parsing a snapshots, default is 0',
+        help='Skip this many snapshots after parsing a snapshot, default is 0',
     )
     arg_parser.add_argument(
-        '--just-count', action='store_true', help='Just count the number of sections'
+        '--just-count', action='store_true', help='Just parse the input and count the number of sections'
     )
     arg_parser.add_argument(
-        '--no-allocs', action='store_false', dest='allocs', help="Don't start massif-visualizer"
+        '--no-allocs', action='store_false', dest='allocs', help="Don't make allocation output"
     )
     arg_parser.add_argument(
-        '--no-frees', action='store_false', dest='frees', help="Don't start massif-visualizer"
+        '--no-frees', action='store_false', dest='frees', help="Don't make deallocation output"
     )
     arg_parser.add_argument(
         '--no-vis', action='store_false', dest='vis', help="Don't start massif-visualizer"
