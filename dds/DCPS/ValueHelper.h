@@ -57,7 +57,7 @@ std::ostream& hex_value(std::ostream& o, unsigned value, size_t bytes)
 template <typename CharType>
 unsigned char_value(CharType value)
 {
-  return value;
+  return static_cast<unsigned>(value);
 }
 
 #if CHAR_MIN < 0

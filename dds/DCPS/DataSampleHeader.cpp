@@ -160,13 +160,15 @@ bool DataSampleHeader::partial(const ACE_Message_Block& mb)
     return true;
   }
 
-  size_t expected = get_max_serialized_size();
-  if (!(flags & LIFESPAN_MASK)) expected -= LIFESPAN_LENGTH;
-  if (!(flags & COHERENT_MASK)) expected -= COHERENT_LENGTH;
+  const unsigned int flags_ext = static_cast<unsigned int>(flags);
 
-  if (flags & CONTENT_FILT_MASK) {
+  size_t expected = get_max_serialized_size();
+  if (!(flags_ext & LIFESPAN_MASK)) expected -= LIFESPAN_LENGTH;
+  if (!(flags_ext & COHERENT_MASK)) expected -= COHERENT_LENGTH;
+
+  if (flags_ext & CONTENT_FILT_MASK) {
     CORBA::ULong seqLen;
-    encoding.endianness(static_cast<Endianness>(flags & BYTE_ORDER_MASK));
+    encoding.endianness(static_cast<Endianness>(flags_ext & BYTE_ORDER_MASK));
     if (!mb_peek(seqLen, mb, expected, encoding)) {
       return true;
     }

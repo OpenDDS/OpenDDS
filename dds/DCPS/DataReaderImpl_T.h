@@ -1380,7 +1380,7 @@ private:
   }
 #endif
 
-  RakeResults<MessageType> results(this, received_data, info_seq, max_samples, subqos_.presentation,
+  RakeResults<MessageType> results(this, received_data, info_seq, static_cast< ::CORBA::ULong>(max_samples), subqos_.presentation,
 #ifndef OPENDDS_NO_QUERY_CONDITION
                                    a_condition,
 #endif
@@ -1467,7 +1467,7 @@ DDS::ReturnCode_t take_i(MessageSequenceType& received_data,
   }
 #endif
 
-  RakeResults<MessageType> results(this, received_data, info_seq, max_samples, subqos_.presentation,
+  RakeResults<MessageType> results(this, received_data, info_seq, static_cast< ::CORBA::ULong>(max_samples), subqos_.presentation,
 #ifndef OPENDDS_NO_QUERY_CONDITION
                                    a_condition,
 #endif
@@ -1536,7 +1536,7 @@ DDS::ReturnCode_t read_instance_i(MessageSequenceType& received_data,
 
   typename DDSTraits<MessageType>::MessageSequenceAdapterType received_data_p(received_data);
 
-  RakeResults<MessageType> results(this, received_data, info_seq, max_samples, subqos_.presentation,
+  RakeResults<MessageType> results(this, received_data, info_seq, static_cast< ::CORBA::ULong>(max_samples), subqos_.presentation,
 #ifndef OPENDDS_NO_QUERY_CONDITION
                                    a_condition,
 #endif
@@ -1603,7 +1603,7 @@ DDS::ReturnCode_t take_instance_i(MessageSequenceType& received_data,
 
   typename DDSTraits<MessageType>::MessageSequenceAdapterType received_data_p(received_data);
 
-  RakeResults<MessageType> results(this, received_data, info_seq, max_samples, subqos_.presentation,
+  RakeResults<MessageType> results(this, received_data, info_seq, static_cast< ::CORBA::ULong>(max_samples), subqos_.presentation,
 #ifndef OPENDDS_NO_QUERY_CONDITION
                                    a_condition,
 #endif
@@ -2283,7 +2283,7 @@ DDS::ReturnCode_t check_inputs(const char* method_name,
       if (max_samples == DDS::LENGTH_UNLIMITED)
         {
           //SPEC ref v1.2 7.1.2.5.3.8 #5a
-          max_samples = received_data.maximum();
+          max_samples = static_cast< ::CORBA::Long>(received_data.maximum());
         }
       else if (
                max_samples > static_cast< ::CORBA::Long> (received_data.maximum()))

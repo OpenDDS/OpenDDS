@@ -181,12 +181,12 @@ void TypeSupportImpl::populate_dependencies_i(const XTypes::TypeLookupService_rc
     } else if (it->kind() == XTypes::TI_STRONGLY_CONNECTED_COMPONENT) {
       XTypes::TypeIdentifier scc_id(*it);
       XTypes::TypeObjectSeq seq;
-      seq.length(scc_id.sc_component_id().scc_length);
+      seq.length(static_cast<DDS::UInt32>(scc_id.sc_component_id().scc_length));
       for (ACE_CDR::Long i = 1; i <= scc_id.sc_component_id().scc_length; ++i) {
         scc_id.sc_component_id().scc_index = i;
         XTypes::TypeMap::const_iterator pos = type_map.find(scc_id);
         if (pos != type_map.end()) {
-          seq[i - 1] = pos->second;
+          seq[static_cast<DDS::UInt32>(i - 1)] = pos->second;
         } else {
           log_ti_not_found("populate_dependencies_i", name(), scc_id);
         }

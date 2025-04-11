@@ -1093,7 +1093,7 @@ bool DynamicDataXcdrReadImpl::skip_to_sequence_element(MemberId id, DDS::Dynamic
     ACE_CDR::ULong length, index;
     return (strm_ >> length) &&
       get_index_from_id(id, index, length) &&
-      strm_.skip(index, size);
+      strm_.skip(index, static_cast<int>(size));
   } else {
     ACE_CDR::ULong length, index;
     if (!strm_.skip_delimiter() || !(strm_ >> length)) {
@@ -1133,7 +1133,7 @@ bool DynamicDataXcdrReadImpl::skip_to_array_element(MemberId id, DDS::DynamicTyp
   ACE_CDR::ULong size;
   if (get_primitive_size(elem_type, size)) {
     ACE_CDR::ULong index;
-    return get_index_from_id(id, index, length) && strm_.skip(index, size);
+    return get_index_from_id(id, index, length) && strm_.skip(index, static_cast<int>(size));
   } else {
     if (!strm_.skip_delimiter()) {
       return false;
@@ -1167,11 +1167,12 @@ bool DynamicDataXcdrReadImpl::skip_to_map_element(MemberId id)
     }
 
     for (ACE_CDR::ULong i = 0; i < index; ++i) {
-      if (!strm_.skip(1, key_size) || !strm_.skip(1, elem_size)) {
+      if (!strm_.skip(1, static_cast<int>(key_size))
+          || !strm_.skip(1, static_cast<int>(elem_size))) {
         return false;
       }
     }
-    return strm_.skip(1, key_size);
+    return strm_.skip(1, static_cast<int>(key_size));
   } else {
     size_t dheader;
     ACE_CDR::ULong index;
@@ -2508,7 +2509,7 @@ bool DynamicDataXcdrReadImpl::skip_sequence_member(DDS::DynamicType_ptr seq_type
     }
 
     return skip("skip_sequence_member", "Failed to skip a primitive sequence member",
-                length, primitive_size);
+                length, static_cast<int>(primitive_size));
   } else {
     return skip_collection_member(seq_type);
   }
@@ -2525,7 +2526,7 @@ bool DynamicDataXcdrReadImpl::skip_array_member(DDS::DynamicType_ptr array_type)
   ACE_CDR::ULong primitive_size = 0;
   if (get_primitive_size(elem_type, primitive_size)) {
     return skip("skip_array_member", "Failed to skip a primitive array member",
-                bound_total(descriptor), primitive_size);
+                bound_total(descriptor), static_cast<int>(primitive_size));
   } else {
     return skip_collection_member(array_type);
   }
@@ -2554,11 +2555,11 @@ bool DynamicDataXcdrReadImpl::skip_map_member(DDS::DynamicType_ptr map_type)
 
     for (unsigned i = 0; i < length; ++i) {
       if (!skip("skip_map_member", "Failed to skip a key of a primitive map member",
-                1, key_primitive_size)) {
+                1, static_cast<int>(key_primitive_size))) {
         return false;
       }
       if (!skip("skip_map_member", "Failed to skip an element of a primitive map member",
-                1, elem_primitive_size)) {
+                1, static_cast<int>(elem_primitive_size))) {
         return false;
       }
     }

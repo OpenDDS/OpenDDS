@@ -1192,7 +1192,7 @@ DDS::ReturnCode_t set_enum_value(
   if (rc != DDS::RETCODE_OK) {
     return rc;
   }
-  return set_enum_value(type, dest, id, md->id());
+  return set_enum_value(type, dest, id, static_cast<DDS::Int32>(md->id()));
 }
 
 DDS::ReturnCode_t copy_member(
