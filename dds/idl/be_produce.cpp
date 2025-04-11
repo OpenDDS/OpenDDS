@@ -132,7 +132,9 @@ string to_macro(const char* fn)
   ACE_UINT64 msec;
   now.msec(msec);
 
-  msec += static_cast<ACE_UINT64>(ACE_OS::getpid()) + ACE_OS::thr_self();
+  msec += static_cast<ACE_UINT64>(ACE_OS::getpid()) +
+    // On some platforms, the type of ACE_thread_t is a pointer instead of an integer:
+   (ACE_UINT64) ACE_OS::thr_self();
 
   unsigned int seed = static_cast<unsigned int>(msec);
 
