@@ -263,6 +263,120 @@ public:
     report(guard, now);
   }
 
+  void deactivation_queue_size(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.deactivation_queue_size() = count32;
+    publish_relay_statistics_.deactivation_queue_size() = count32;
+    report(guard, now);
+  }
+
+  void expiration_queue_size(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.expiration_queue_size() = count32;
+    publish_relay_statistics_.expiration_queue_size() = count32;
+    report(guard, now);
+  }
+
+  void admission_queue_size(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.admission_queue_size() = count32;
+    publish_relay_statistics_.admission_queue_size() = count32;
+    report(guard, now);
+  }
+
+  void partition_slots(size_t used, size_t free)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto used32 = static_cast<uint32_t>(used),
+      free32 = static_cast<uint32_t>(free);
+    log_relay_statistics_.client_partitions().slots() = used32;
+    publish_relay_statistics_.client_partitions().slots() = used32;
+    log_relay_statistics_.client_partitions().free_slots() = free32;
+    publish_relay_statistics_.client_partitions().free_slots() = free32;
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
+  }
+
+  void partitions(size_t count)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.client_partitions().count() = count32;
+    publish_relay_statistics_.client_partitions().count() = count32;
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
+  }
+
+  void partition_index_cache(size_t count)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.client_partitions().partition_index_cache() = count32;
+    publish_relay_statistics_.client_partitions().partition_index_cache() = count32;
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
+  }
+
+  void partition_index_nodes(size_t count)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.client_partitions().partition_index_nodes() = count32;
+    publish_relay_statistics_.client_partitions().partition_index_nodes() = count32;
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
+  }
+
+  void partition_guids(size_t count_main, size_t count_cache)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count_main),
+      cache32 = static_cast<uint32_t>(count_cache);
+    log_relay_statistics_.client_partitions().guids() = count32;
+    publish_relay_statistics_.client_partitions().guids() = count32;
+    log_relay_statistics_.client_partitions().guids_cache() = cache32;
+    publish_relay_statistics_.client_partitions().guids_cache() = cache32;
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
+  }
+
+  void relay_partition_addresses(size_t count)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.relay_partitions().addresses() = count32;
+    publish_relay_statistics_.relay_partitions().addresses() = count32;
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
+  }
+
+  void relay_partition_index_cache(size_t count)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.relay_partitions().partition_index_cache() = count32;
+    publish_relay_statistics_.relay_partitions().partition_index_cache() = count32;
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
+  }
+
+  void relay_partition_index_nodes(size_t count)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.relay_partitions().partition_index_nodes() = count32;
+    publish_relay_statistics_.relay_partitions().partition_index_nodes() = count32;
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
+  }
+
+  void relay_partition_slots(size_t count)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.relay_partitions().partition_index_nodes() = count32;
+    publish_relay_statistics_.relay_partitions().partition_index_nodes() = count32;
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
+  }
+
   void report()
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);

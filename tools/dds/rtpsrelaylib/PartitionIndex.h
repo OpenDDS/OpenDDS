@@ -29,25 +29,28 @@ public:
   using NodePtr = std::shared_ptr<TrieNode>;
   using Value = typename T::value_type;
 
-  static void insert(NodePtr node, const Name& name, const Value& guid)
+  static size_t insert(NodePtr node, const Name& name, const Value& guid)
   {
+    size_t nodes_added = 0;
     for (const auto& atom : name) {
       const auto iter = node->children_.find(atom);
       if (iter == node->children_.end()) {
         NodePtr child = std::make_shared<TrieNode>();
         node->children_[atom] = child;
         node = std::move(child);
+        ++nodes_added;
       } else {
         node = iter->second;
       }
     }
 
     node->guids_.insert(guid);
+    return nodes_added;
   }
 
-  static void remove(NodePtr node, const Name& name, const Value& guid)
+  static size_t remove(NodePtr node, const Name& name, const Value& guid)
   {
-    remove(std::move(node), name.begin(), name.end(), guid);
+    return remove(std::move(node), name.begin(), name.end(), guid);
   }
 
   bool empty() const
@@ -185,24 +188,27 @@ private:
     }
   }
 
-  static void remove(NodePtr node,
-                     Name::const_iterator begin,
-                     Name::const_iterator end,
-                     const Value& guid)
+  static size_t remove(NodePtr node,
+                       Name::const_iterator begin,
+                       Name::const_iterator end,
+                       const Value& guid)
   {
     if (begin == end) {
       node->guids_.erase(guid);
-      return;
+      return 0;
     }
 
+    size_t nodes_removed = 0;
     const auto& atom = *begin;
     const auto pos = node->children_.find(atom);
     if (pos != node->children_.end()) {
-      remove(pos->second, std::next(begin), end, guid);
+      nodes_removed += remove(pos->second, std::next(begin), end, guid);
       if (pos->second->empty()) {
         node->children_.erase(pos);
+        ++nodes_removed;
       }
     }
+    return nodes_removed;
   }
 };
 
@@ -214,17 +220,21 @@ public:
 
   PartitionIndex()
     : root_(std::make_shared<TrieNodeT>())
+    , size_(1u)
   {}
+
+  size_t cache_size() const { return cache_.size(); }
+  size_t size() const { return size_; }
 
   void insert(const std::string& name, const Value& guid)
   {
-    TrieNodeT::insert(root_, Name(name), guid);
+    size_ += TrieNodeT::insert(root_, Name(name), guid);
     cache_.clear();
   }
 
   void remove(const std::string& name, const Value& guid)
   {
-    TrieNodeT::remove(root_, Name(name), guid);
+    size_ -= TrieNodeT::remove(root_, Name(name), guid);
     cache_.clear();
   }
 
@@ -269,6 +279,7 @@ public:
 
 private:
   typename TrieNodeT::NodePtr root_;
+  size_t size_;
   using Cache = std::unordered_map<std::string, T>;
   mutable Cache cache_;
 };

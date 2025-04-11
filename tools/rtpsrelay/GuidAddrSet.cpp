@@ -150,6 +150,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
             break;
           }
         }
+        relay_stats_reporter_.admission_queue_size(admission_control_queue_.size(), now);
       }
     }
   }
@@ -165,6 +166,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
 
   if (addr_set_stats.deactivation == OpenDDS::DCPS::MonotonicTimePoint::zero_value) {
     deactivation_guid_queue_.push_back(std::make_pair(deactivation, src_guid));
+    relay_stats_reporter_.deactivation_queue_size(deactivation_guid_queue_.size(), now);
   }
   addr_set_stats.deactivation = deactivation;
   relay_participant_status_reporter_.set_alive_active(src_guid, true, true);
@@ -187,6 +189,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
     relay_stats_reporter_.new_address(now);
     const GuidAddr ga(src_guid, remote_address);
     expiration_guid_addr_queue_.push_back(std::make_pair(expiration, ga));
+    relay_stats_reporter_.expiration_queue_size(expiration_guid_addr_queue_.size(), now);
   }
 
   ParticipantStatisticsReporter& stats_reporter =
@@ -237,6 +240,7 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
       continue;
     }
   }
+  relay_stats_reporter_.deactivation_queue_size(deactivation_guid_queue_.size(), now);
 
   while (!expiration_guid_addr_queue_.empty() && expiration_guid_addr_queue_.front().first <= now) {
     const OpenDDS::DCPS::MonotonicTimePoint expiration = expiration_guid_addr_queue_.front().first;
@@ -287,6 +291,7 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
       remove(ga.guid, pos, now, &relay_participant_status_reporter_);
     }
   }
+  relay_stats_reporter_.expiration_queue_size(expiration_guid_addr_queue_.size(), now);
 }
 
 void GuidAddrSet::maintain_admission_queue(const OpenDDS::DCPS::MonotonicTimePoint& now)
@@ -299,6 +304,7 @@ void GuidAddrSet::maintain_admission_queue(const OpenDDS::DCPS::MonotonicTimePoi
     }
     admission_control_queue_.erase(admission_control_queue_.begin(), limit);
   }
+  relay_stats_reporter_.admission_queue_size(admission_control_queue_.size(), now);
 }
 
 bool GuidAddrSet::ignore_rtps(bool from_application_participant,
@@ -341,6 +347,7 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
 
   if (config_.admission_control_queue_size()) {
     admission_control_queue_.emplace_back(guid.guidPrefix, now);
+    relay_stats_reporter_.admission_queue_size(admission_control_queue_.size(), now);
   }
 
   pos->second.allow_rtps = true;
