@@ -46,13 +46,13 @@ ShmemReceiveStrategy::read()
   void* mem = 0;
   {
     ShmemDataLink::PeerAllocatorProxy proxy(*link_);
-    ShmemAllocator* alloc = proxy.peer_allocator();
+    ShmemAllocator* peer_allocator = proxy.peer_allocator();
 
-    if (alloc == 0 || -1 == alloc->find(bound_name_.c_str(), mem)) {
+    if (peer_allocator == 0 || -1 == peer_allocator->find(bound_name_.c_str(), mem)) {
       VDBG_LVL((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy::read link %@ "
                 "peer allocator not found, receive_bytes will close link\n",
                 link_), 1);
-      handle_dds_input(ACE_INVALID_HANDLE); // will return 0 to the TRecvStrateg.
+      handle_dds_input(ACE_INVALID_HANDLE); // will return 0 to the TransportReceiveStrategy.
       return;
     }
   }
@@ -95,8 +95,8 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
   void* mem;
 
   ShmemDataLink::PeerAllocatorProxy proxy(*link_);
-  ShmemAllocator* alloc = proxy.peer_allocator();
-  if (!alloc || -1 == alloc->find(bound_name_.c_str(), mem) || !current_data_
+  ShmemAllocator* peer_allocator = proxy.peer_allocator();
+  if (!peer_allocator || -1 == peer_allocator->find(bound_name_.c_str(), mem) || !current_data_
       || current_data_->status_ != ShmemData::InUse) {
     VDBG_LVL((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy::receive_bytes closing\n"),
              1);
@@ -148,7 +148,7 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
       chunk = std::min(space, remaining);
 
 #ifdef OPENDDS_SHMEM_WINDOWS
-    if (alloc->memory_pool().remap((void*)(src_iter + chunk - 1)) == -1) {
+    if (peer_allocator->memory_pool().remap((void*)(src_iter + chunk - 1)) == -1) {
       VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemReceiveStrategy::receive_bytes "
                 "shared memory pool couldn't be extended\n"), 0);
       errno = ENOMEM;
