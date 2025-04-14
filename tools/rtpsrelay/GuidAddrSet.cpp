@@ -46,6 +46,8 @@ bool AddrSetStats::upsert_address(const AddrPort& remote_address,
       return false;
     }
     iter = ip_to_ports.insert(std::make_pair(addr_only, PortSet())).first;
+    ++total_ips;
+    relay_stats_reporter_.total_client_ips(total_ips, now);
   }
 
   relay_stats_reporter_.max_ips_per_client(static_cast<uint32_t>(ip_to_ports.size()), now);
@@ -57,6 +59,8 @@ bool AddrSetStats::upsert_address(const AddrPort& remote_address,
 
   const auto pair = port_map->insert(std::make_pair(remote_address.addr.get_port_number(), expiration));
   if (pair.second) {
+    ++total_ports;
+    relay_stats_reporter_.total_client_ports(total_ports, now);
     return true;
   }
   pair.first->second = expiration;
@@ -85,9 +89,13 @@ bool AddrSetStats::remove_if_expired(const AddrPort& remote_address, const OpenD
 
   if (port_iter->second <= now) {
     port_map->erase(port_iter);
+    --total_ports;
+    relay_stats_reporter_.total_client_ports(total_ports, now);
     if (iter->second.empty()) {
       ip_to_ports.erase(addr_only);
       ip_now_unused = true;
+      --total_ips;
+      relay_stats_reporter_.total_client_ips(total_ips, now);
     }
     return true;
   }
@@ -102,8 +110,9 @@ GuidAddrSet::CreatedAddrSetStats GuidAddrSet::find_or_create(const OpenDDS::DCPS
   const bool create = it == guid_addr_set_map_.end();
   if (create) {
     const auto it_bool_pair =
-      guid_addr_set_map_.insert(std::make_pair(guid, AddrSetStats(guid, now, relay_stats_reporter_)));
+      guid_addr_set_map_.insert(std::make_pair(guid, AddrSetStats(guid, now, relay_stats_reporter_, total_ips_, total_ports_)));
     it = it_bool_pair.first;
+    relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
   }
   return {create, it->second};
 }
@@ -160,7 +169,6 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
       ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::record_activity %C added 0.000 s into session\n",
                  guid_to_string(src_guid).c_str()));
     }
-    relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
     check_participants_limit();
   }
 

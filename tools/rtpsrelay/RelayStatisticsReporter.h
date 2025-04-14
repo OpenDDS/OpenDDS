@@ -255,6 +255,24 @@ public:
     report(guard, now);
   }
 
+  void total_client_ips(size_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto size32 = static_cast<uint32_t>(size);
+    log_relay_statistics_.total_client_ips(size32);
+    publish_relay_statistics_.total_client_ips(size32);
+    report(guard, now);
+  }
+
+  void total_client_ports(size_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto size32 = static_cast<uint32_t>(size);
+    log_relay_statistics_.total_client_ports(size32);
+    publish_relay_statistics_.total_client_ports(size32);
+    report(guard, now);
+  }
+
   void rejected_address_map_size(uint32_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
