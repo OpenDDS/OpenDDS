@@ -390,8 +390,8 @@ public:
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     const auto count32 = static_cast<uint32_t>(count);
-    log_relay_statistics_.relay_partitions().partition_index_nodes() = count32;
-    publish_relay_statistics_.relay_partitions().partition_index_nodes() = count32;
+    log_relay_statistics_.relay_partitions().slots() = count32;
+    publish_relay_statistics_.relay_partitions().slots() = count32;
     report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
   }
 
