@@ -238,11 +238,11 @@ DisjointSequence::fill_bitmap_range(ACE_CDR::ULong low, ACE_CDR::ULong high,
                                     ACE_CDR::Long bitmap[], ACE_CDR::ULong length,
                                     ACE_CDR::ULong& num_bits, ACE_CDR::ULong& cumulative_bits_added)
 {
-  bool clamped = false;
-  if ((low / 32) >= length) {
+  if (low / 32 >= length) {
     return false;
   }
-  if ((high / 32) >= length) {
+  bool clamped = false;
+  if (high / 32 >= length) {
     high = length * 32 - 1;
     clamped = true;
   }
@@ -267,11 +267,12 @@ DisjointSequence::fill_bitmap_range(ACE_CDR::ULong low, ACE_CDR::ULong high,
 
   // handle idx_nb ones
   if (bit_low) {
+    const ACE_CDR::ULong value = (1u << (32 - bit_low)) - 1;
     if (idx_low > idx_nb) {
-      bitmap[idx_low] = static_cast<ACE_CDR::Long>(0x1u << (32 - bit_low)) - 1;
+      bitmap[idx_low] = static_cast<ACE_CDR::Long>(value);
     } else {
       ACE_CDR::ULong entry = static_cast<ACE_CDR::ULong>(bitmap[idx_low]);
-      entry |= (0x1u << (32 - bit_low)) - 1;
+      entry |= value;
       bitmap[idx_low] = static_cast<ACE_CDR::Long>(entry);
     }
   } else {
@@ -284,11 +285,12 @@ DisjointSequence::fill_bitmap_range(ACE_CDR::ULong low, ACE_CDR::ULong high,
   }
 
   // handle idx_high
+  const ACE_CDR::ULong value = ~((1u << (31 - bit_high)) - 1);
   if (idx_high > idx_low) {
-    bitmap[idx_high] = static_cast<ACE_CDR::Long>(~((0x1u << (31 - bit_high)) - 1));
+    bitmap[idx_high] = static_cast<ACE_CDR::Long>(value);
   } else if (bit_high < 31) {
     ACE_CDR::ULong entry = static_cast<ACE_CDR::ULong>(bitmap[idx_high]);
-    entry &= ~((0x1u << (31 - bit_high)) - 1);
+    entry &= value;
     bitmap[idx_high] = static_cast<ACE_CDR::Long>(entry);
   }
 
