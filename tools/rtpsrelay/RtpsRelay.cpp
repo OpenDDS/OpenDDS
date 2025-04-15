@@ -749,8 +749,8 @@ int run(int argc, ACE_TCHAR* argv[])
   GuidAddrSet guid_addr_set(config, rtps_discovery, relay_participant_status_reporter, relay_statistics_reporter, *relay_thread_monitor);
   ACE_Reactor reactor_(RelayEventLoop::make_reactor_impl(config), true);
   const auto reactor = &reactor_;
-  GuidPartitionTable guid_partition_table(config, spdp_horizontal_addr, relay_partitions_writer, spdp_replay_writer);
-  RelayPartitionTable relay_partition_table;
+  GuidPartitionTable guid_partition_table(config, spdp_horizontal_addr, relay_partitions_writer, spdp_replay_writer, relay_statistics_reporter);
+  RelayPartitionTable relay_partition_table(relay_statistics_reporter);
   relay_statistics_reporter.report();
 
   HandlerStatisticsReporter spdp_vertical_reporter(config, VSPDP, handler_statistics_writer, relay_statistics_reporter);
