@@ -10,6 +10,8 @@
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
+#include <typeinfo>
+
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
@@ -23,8 +25,6 @@
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
-
-#include <typeinfo>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

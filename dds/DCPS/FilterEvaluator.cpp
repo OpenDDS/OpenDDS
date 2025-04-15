@@ -780,7 +780,7 @@ namespace {
   struct Equals : VisitorBase<bool> {
     explicit Equals(const Value& lhs) : lhs_(lhs) {}
 
-    bool operator()(const char* s) const
+    bool operator()(char* s) const
     {
       return std::strcmp(lhs_.s_, s) == 0;
     }
@@ -796,7 +796,7 @@ namespace {
   struct Less : VisitorBase<bool> {
     explicit Less(const Value& lhs) : lhs_(lhs) {}
 
-    bool operator()(const char* s) const
+    bool operator()(char* s) const
     {
       return std::strcmp(lhs_.s_, s) < 0;
     }
