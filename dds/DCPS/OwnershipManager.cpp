@@ -138,7 +138,7 @@ OwnershipManager::remove_instance(InstanceState* instance_state)
     InstanceStateVec& states = i->second.instance_states_;
     for (size_t j = 0; j < states.size(); ++j) {
       if (states[j].in() == instance_state) {
-        states.erase(states.begin() + j);
+        states.erase(states.begin() + static_cast<InstanceStateVec::difference_type>(j));
         break;
       }
     }

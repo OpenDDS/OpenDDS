@@ -550,9 +550,10 @@ void
 BE_GlobalData::set_inc_paths(const char* cmdline)
 {
   ACE_ARGV argv(ACE_TEXT_CHAR_TO_TCHAR(cmdline), false);
-  for (int i = 0; i < argv.argc(); ++i) {
+  const size_t argc = static_cast<size_t>(argv.argc());
+  for (size_t i = 0; i < argc; ++i) {
     string arg = ACE_TEXT_ALWAYS_CHAR(argv[i]);
-    if (arg == "-I" && i + 1 < argv.argc()) {
+    if (arg == "-I" && i + 1 < argc) {
       add_inc_path(ACE_TEXT_ALWAYS_CHAR(argv[++i]));
     } else if (arg.substr(0, 2) == "-I") {
       add_inc_path(arg.c_str() + 2);

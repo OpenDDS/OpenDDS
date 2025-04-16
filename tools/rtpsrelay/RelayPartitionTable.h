@@ -1,6 +1,8 @@
 #ifndef RTPSRELAY_RELAY_PARTITION_TABLE_H_
 #define RTPSRELAY_RELAY_PARTITION_TABLE_H_
 
+#include "RelayStatisticsReporter.h"
+
 #include <dds/rtpsrelaylib/PartitionIndex.h>
 #include <dds/rtpsrelaylib/Utility.h>
 
@@ -22,8 +24,9 @@ struct SlotKeyHash {
 
 class RelayPartitionTable {
 public:
-  RelayPartitionTable()
-    : complete_(relay_to_address_)
+  explicit RelayPartitionTable(RelayStatisticsReporter& relay_stats_reporter)
+    : address_count_(0)
+    , complete_(relay_to_address_, relay_stats_reporter)
   {}
 
   void insert(const std::string& relay_id,
@@ -32,7 +35,13 @@ public:
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
-    relay_to_address_[relay_id][name] = address;
+    const auto pair = relay_to_address_[relay_id].insert(std::make_pair(name, address));
+    if (pair.second) {
+      ++address_count_;
+      relay_stats_reporter().relay_partition_addresses(address_count_);
+    } else {
+      pair.first->second = address;
+    }
   }
 
   void remove(const std::string& relay_id,
@@ -46,6 +55,8 @@ public:
       if (pos1->second.empty()) {
         relay_to_address_.erase(pos1);
       }
+      --address_count_;
+      relay_stats_reporter().relay_partition_addresses(address_count_);
     }
   }
 
@@ -68,10 +79,12 @@ private:
   using NameToAddress = std::unordered_map<std::string, ACE_INET_Addr>;
   using RelayToAddress = std::unordered_map<std::string, NameToAddress>;
   RelayToAddress relay_to_address_;
+  size_t address_count_;
 
   struct Map {
-    explicit Map(RelayToAddress& relay_to_address)
+    Map(const RelayToAddress& relay_to_address, RelayStatisticsReporter& relay_stats_reporter)
       : relay_to_address_(relay_to_address)
+      , relay_stats_reporter_(relay_stats_reporter)
     {}
 
     void insert(const SlotKey& slot_key,
@@ -88,24 +101,26 @@ private:
       std::set_difference(x.begin(), x.end(), parts.begin(), parts.end(), std::back_inserter(to_remove));
 
       if (to_add.empty() && to_remove.empty()) {
+        relay_stats_reporter_.relay_partition_slots(relay_to_partitions_.size());
         // No change.
         return;
       }
 
-      {
-        const auto r = relay_to_partitions_.insert(std::make_pair(slot_key, StringSet()));
-        r.first->second.insert(to_add.begin(), to_add.end());
-        for (const auto& part : to_add) {
-          partition_index_.insert(part, slot_key.first);
-        }
-        for (const auto& part : to_remove) {
-          r.first->second.erase(part);
-          partition_index_.remove(part, slot_key.first);
-        }
-        if (r.first->second.empty()) {
-          relay_to_partitions_.erase(r.first);
-        }
+      const auto r = relay_to_partitions_.insert(std::make_pair(slot_key, StringSet()));
+      r.first->second.insert(to_add.begin(), to_add.end());
+      for (const auto& part : to_add) {
+        partition_index_.insert(part, slot_key.first);
       }
+      for (const auto& part : to_remove) {
+        r.first->second.erase(part);
+        partition_index_.remove(part, slot_key.first);
+      }
+      if (r.first->second.empty()) {
+        relay_to_partitions_.erase(r.first);
+      }
+      relay_stats_reporter_.relay_partition_index_nodes(partition_index_.size());
+      relay_stats_reporter_.relay_partition_index_cache(partition_index_.cache_size());
+      relay_stats_reporter_.relay_partition_slots(relay_to_partitions_.size());
     }
 
     void lookup(AddressSet& address_set, const StringSet& partitions, const std::string& name) const
@@ -123,9 +138,11 @@ private:
           }
         }
       }
+      relay_stats_reporter_.relay_partition_index_cache(partition_index_.cache_size());
     }
 
-    RelayToAddress& relay_to_address_;
+    const RelayToAddress& relay_to_address_;
+    RelayStatisticsReporter& relay_stats_reporter_;
 
     PartitionIndex<StringSet, Identity> partition_index_;
 
@@ -133,8 +150,9 @@ private:
     RelayToPartitions relay_to_partitions_;
   };
 
-  Map complete_;
+  RelayStatisticsReporter& relay_stats_reporter() { return complete_.relay_stats_reporter_; }
 
+  Map complete_;
   mutable ACE_Thread_Mutex mutex_;
 };
 

@@ -2,6 +2,7 @@
 #define RTPSRELAY_GUID_PARTITION_TABLE_H_
 
 #include "Config.h"
+#include "RelayStatisticsReporter.h"
 
 #include <dds/rtpsrelaylib/PartitionIndex.h>
 #include <dds/rtpsrelaylib/RelayTypeSupportImpl.h>
@@ -28,9 +29,11 @@ public:
   GuidPartitionTable(const Config& config,
                      const ACE_INET_Addr& address,
                      RelayPartitionsDataWriter_var relay_partitions_writer,
-                     SpdpReplayDataWriter_var spdp_replay_writer)
+                     SpdpReplayDataWriter_var spdp_replay_writer,
+                     RelayStatisticsReporter& relay_stats_reporter)
     : config_(config)
     , address_(OpenDDS::DCPS::LogAddr(address).c_str())
+    , relay_stats_reporter_(relay_stats_reporter)
     , relay_partitions_writer_(relay_partitions_writer)
     , spdp_replay_writer_(spdp_replay_writer)
   {}
@@ -57,6 +60,7 @@ public:
         partition_index_.lookup(part, guids, limits);
       }
     }
+    relay_stats_reporter_.partition_index_cache(partition_index_.cache_size());
   }
 
 private:
@@ -79,6 +83,9 @@ private:
       slots_to_write.insert(slot);
     }
 
+    relay_stats_reporter_.partition_slots(slots_.size(), free_slot_list_.size());
+    relay_stats_reporter_.partitions(partition_to_slot_.size());
+
     prepare_relay_partitions(relay_partitions, slots_to_write);
   }
 
@@ -90,6 +97,9 @@ private:
       remove_from_slot(slot, partition);
       slots_to_write.insert(slot);
     }
+
+    relay_stats_reporter_.partition_slots(slots_.size(), free_slot_list_.size());
+    relay_stats_reporter_.partitions(partition_to_slot_.size());
 
     prepare_relay_partitions(relay_partitions, slots_to_write);
   }
@@ -158,6 +168,7 @@ private:
 
   const Config& config_;
   const std::string address_;
+  RelayStatisticsReporter& relay_stats_reporter_;
   RelayPartitionsDataWriter_var relay_partitions_writer_;
 
   using Slots = std::vector<StringSet>;

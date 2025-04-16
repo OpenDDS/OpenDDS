@@ -312,7 +312,7 @@ ReplayerImpl::enable()
   const bool reliable = qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS;
 
   if (qos_.resource_limits.max_samples != DDS::LENGTH_UNLIMITED) {
-    n_chunks_ = qos_.resource_limits.max_samples;
+    n_chunks_ = static_cast<size_t>(qos_.resource_limits.max_samples);
   }
   // +1 because we might allocate one before releasing another
   // TBD - see if this +1 can be removed.
@@ -694,10 +694,9 @@ void ReplayerImpl::remove_all_associations()
     readers.length(size);
 
     RepoIdSet::iterator itEnd = readers_.end();
-    int i = 0;
-
-    for (RepoIdSet::iterator it = readers_.begin(); it != itEnd; ++it) {
-      readers[i++] = *it;
+    DDS::UInt32 i = 0;
+    for (RepoIdSet::iterator it = readers_.begin(); it != itEnd; ++it, ++i) {
+      readers[i] = *it;
     }
   }
 

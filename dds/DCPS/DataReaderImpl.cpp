@@ -592,22 +592,18 @@ DataReaderImpl::remove_all_associations()
   stop_associating();
 
   OpenDDS::DCPS::WriterIdSeq writers;
-  int size;
+  DDS::UInt32 size;
 
   {
     ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
-    size = static_cast<int>(writers_.size());
+    size = static_cast<DDS::UInt32>(writers_.size());
     writers.length(size);
 
     WriterMapType::iterator curr_writer = writers_.begin();
     WriterMapType::iterator end_writer = writers_.end();
-
-    int i = 0;
-
-    while (curr_writer != end_writer) {
-      writers[i++] = curr_writer->first;
-      ++curr_writer;
+    for (DDS::UInt32 i = 0; curr_writer != end_writer; ++i, ++curr_writer) {
+      writers[i] = curr_writer->first;
     }
   }
 
@@ -1015,9 +1011,9 @@ DataReaderImpl::get_matched_publications(
       DDS::RETCODE_ERROR);
 
   // Copy out the handles for the current set of publications.
-  int index = 0;
   publication_handles.length(static_cast<CORBA::ULong>(this->publication_id_to_handle_map_.size()));
 
+  DDS::UInt32 index = 0;
   for (RepoIdToHandleMap::iterator
       current = this->publication_id_to_handle_map_.begin();
       current != this->publication_id_to_handle_map_.end();
@@ -1117,7 +1113,7 @@ DataReaderImpl::enable()
   }
 
   if (qos_.resource_limits.max_samples != DDS::LENGTH_UNLIMITED) {
-    n_chunks_ = qos_.resource_limits.max_samples;
+    n_chunks_ = static_cast<size_t>(qos_.resource_limits.max_samples);
   }
 
   //else using value from Service_Participant

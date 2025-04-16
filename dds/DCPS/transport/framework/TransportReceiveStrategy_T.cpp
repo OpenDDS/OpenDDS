@@ -370,7 +370,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
   // Adjust the message block chain pointers to account for the new
   // data.
   //
-  size_t bytes = bytes_remaining;
+  size_t bytes = static_cast<size_t>(bytes_remaining);
 
   if (!this->pdu_remaining_) {
     this->receive_transport_header_.length_ = static_cast<ACE_UINT32>(bytes);

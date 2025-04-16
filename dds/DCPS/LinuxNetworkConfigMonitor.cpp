@@ -251,7 +251,7 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
       default:
         return;
       }
-      int rta_length = IFA_PAYLOAD(header);
+      unsigned int rta_length = IFA_PAYLOAD(header);
       for (const rtattr* attr = reinterpret_cast<const rtattr*>(IFA_RTA(msg));
            RTA_OK(attr, rta_length);
            attr = RTA_NEXT(attr, rta_length)) {
@@ -264,7 +264,7 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
           }
           ACE_INET_Addr addr;
           addr.set_address(reinterpret_cast<const char*>(RTA_DATA(attr)), address_length, 0);
-          NetworkInterfaceMap::const_iterator pos = network_interface_map_.find(msg->ifa_index);
+          NetworkInterfaceMap::const_iterator pos = network_interface_map_.find(static_cast<int>(msg->ifa_index));
           if (pos != network_interface_map_.end()) {
             set(NetworkInterfaceAddress(pos->second.name, pos->second.can_multicast, NetworkAddress(addr)));
           } else if (log_level >= LogLevel::Warning) {
@@ -288,7 +288,7 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
       default:
         return;
       }
-      int rta_length = IFA_PAYLOAD(header);
+      unsigned int rta_length = IFA_PAYLOAD(header);
       for (const rtattr* attr = reinterpret_cast<const rtattr*>(IFA_RTA(msg));
            RTA_OK(attr, rta_length);
            attr = RTA_NEXT(attr, rta_length)) {
@@ -300,7 +300,7 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
             return;
           }
 
-          NetworkInterfaceMap::iterator pos = network_interface_map_.find(msg->ifa_index);
+          NetworkInterfaceMap::iterator pos = network_interface_map_.find(static_cast<int>(msg->ifa_index));
           if (pos != network_interface_map_.end()) {
             ACE_INET_Addr addr;
             addr.set_address(reinterpret_cast<const char*>(RTA_DATA(attr)), address_length, 0);
@@ -314,7 +314,7 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
     {
       OPENDDS_STRING name;
       const ifinfomsg* msg = reinterpret_cast<ifinfomsg*>(NLMSG_DATA(header));
-      int rta_length = IFLA_PAYLOAD(header);
+      unsigned int rta_length = IFLA_PAYLOAD(header);
       for (const rtattr* attr = reinterpret_cast<const rtattr*>(IFLA_RTA(msg));
            RTA_OK(attr, rta_length);
            attr = RTA_NEXT(attr, rta_length)) {

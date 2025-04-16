@@ -130,7 +130,7 @@ DDS::ReturnCode_t instance_handle_to_bit_data(
   }
 
   const MonotonicTimePoint due(MonotonicTimePoint::now() +
-    TimeDuration::from_msec(TheServiceParticipant->bit_lookup_duration_msec()));
+    TimeDuration::from_msec(static_cast<ACE_UINT64>(TheServiceParticipant->bit_lookup_duration_msec())));
 
   // Look for the data from builtin topic datareader until we get results or
   // timeout.

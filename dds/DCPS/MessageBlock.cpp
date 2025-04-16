@@ -42,8 +42,8 @@ MessageBlock::MessageBlock(const char* data, size_t size)
 
 MessageBlock::MessageBlock(const ACE_Message_Block& amb)
   : data_(amb.data_block()->duplicate())
-  , rd_ptr_(amb.rd_ptr() - amb.base())
-  , wr_ptr_(amb.wr_ptr() - amb.base())
+  , rd_ptr_(static_cast<size_t>(amb.rd_ptr() - amb.base()))
+  , wr_ptr_(static_cast<size_t>(amb.wr_ptr() - amb.base()))
 {}
 
 MessageBlock::MessageBlock(const MessageBlock& rhs)

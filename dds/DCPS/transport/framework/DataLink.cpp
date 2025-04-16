@@ -78,7 +78,7 @@ DataLink::DataLink(const TransportImpl_rch& impl, Priority priority, bool is_loo
   }
 
   // Initialize transport control sample allocators:
-  datalink_release_delay_ = TimeDuration::from_msec(datalink_release_delay);
+  datalink_release_delay_ = TimeDuration::from_msec(static_cast<ACE_UINT64>(datalink_release_delay));
 
   this->mb_allocator_.reset(new MessageBlockAllocator(control_chunks));
   this->db_allocator_.reset(new DataBlockAllocator(control_chunks));
