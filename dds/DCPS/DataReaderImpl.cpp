@@ -65,7 +65,7 @@ DataReaderImpl::DataReaderImpl()
   , topic_servant_(0)
   , type_support_(0)
   , topic_id_(GUID_UNKNOWN)
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   , is_exclusive_ownership_(false)
 #endif
   , coherent_(false)
@@ -146,7 +146,7 @@ DataReaderImpl::cleanup()
   // deleted
   set_listener(0, NO_STATUS_MASK);
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   OwnershipManagerPtr owner_manager = this->ownership_manager();
   if (owner_manager) {
     owner_manager->unregister_reader(topic_servant_->type_name(), this);
@@ -195,7 +195,7 @@ void DataReaderImpl::init(
   qos_ = qos;
   passed_qos_ = qos;
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   is_exclusive_ownership_ = this->qos_.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
 #endif
 
@@ -1459,7 +1459,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // not be accessed.
       ReceivedDataSample dup(sample);
       this->lookup_instance(dup, instance);
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
       OwnershipManagerPtr owner_manager = this->ownership_manager();
 
       if (! this->is_exclusive_ownership_
@@ -1469,7 +1469,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
                   sample.header_.publication_id_)))) {
 #endif
         cancel_deadline(instance);
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
       }
 #endif
     }
@@ -1491,13 +1491,13 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       ReceivedDataSample dup(sample);
       this->lookup_instance(dup, instance);
       if (instance) {
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
         if (! this->is_exclusive_ownership_
             || (this->is_exclusive_ownership_
                 && instance->instance_state_->is_last(sample.header_.publication_id_))) {
 #endif
           cancel_deadline(instance);
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
         }
 #endif
       }
@@ -1519,7 +1519,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // not be accessed.
       ReceivedDataSample dup(sample);
       this->lookup_instance(dup, instance);
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
       OwnershipManagerPtr owner_manager = this->ownership_manager();
       if (! this->is_exclusive_ownership_
           || (owner_manager
@@ -1533,7 +1533,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         if (instance) {
           cancel_deadline(instance);
         }
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
       }
 #endif
     }
@@ -1726,7 +1726,7 @@ CORBA::Long DataReaderImpl::total_samples() const
 void
 DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
 {
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   OwnershipManagerPtr owner_manager = this->ownership_manager();
   if (owner_manager) {
     owner_manager->remove_writers(handle);
@@ -1749,7 +1749,7 @@ DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
     instances_.erase(handle);
   }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   if (this->is_exclusive_ownership_ && instance->instance_state_->is_exclusive()) {
     if (owner_manager) {
       owner_manager->remove_writers(instance->instance_handle_);
@@ -1788,7 +1788,7 @@ DataReaderImpl::writer_removed(WriterInfo& info)
         LogGuid(info_writer_id).c_str()));
   }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   OwnershipManagerPtr owner_manager = this->ownership_manager();
   if (owner_manager) {
     owner_manager->remove_writer(info_writer_id);
@@ -1907,7 +1907,7 @@ DataReaderImpl::writer_became_dead(WriterInfo& info,
                get_state_str(previous_state)));
   }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   OwnershipManagerPtr owner_manager = this->ownership_manager();
   if (owner_manager) {
     owner_manager->remove_writer(info_writer_id);
@@ -2243,7 +2243,7 @@ bool
 DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instance,
   const GUID_t& pubid)
 {
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   if (this->is_exclusive_ownership_) {
 
     ACE_WRITE_GUARD_RETURN(ACE_RW_Thread_Mutex, write_guard, writers_lock_, true);
@@ -2264,7 +2264,7 @@ DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instan
     }
 
 
-    // Evaulate the owner of the instance if not selected and filter
+    // Evaluate the owner of the instance if not selected and filter
     // current message if it's not from owner writer.
     if ( instance->instance_state_->get_owner() == GUID_UNKNOWN
         || ! iter->second->is_owner_evaluated(instance->instance_handle_)) {
@@ -2457,10 +2457,10 @@ DataReaderImpl::get_writer_states(WriterStatePairVec& writer_states)
   }
 }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
 void
 DataReaderImpl::update_ownership_strength(const GUID_t& pub_id,
-    const CORBA::Long& ownership_strength)
+                                          CORBA::Long ownership_strength)
 {
   ACE_READ_GUARD(ACE_RW_Thread_Mutex,
       read_guard,
@@ -3188,7 +3188,7 @@ void DataReaderImpl::process_deadline(SubscriptionInstance_rch instance,
 
         DDS::DataReaderListener_var listener = listener_for(DDS::REQUESTED_DEADLINE_MISSED_STATUS);
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
         if (instance->instance_state_->is_exclusive()) {
           DataReaderImpl::OwnershipManagerPtr owner_manager = ownership_manager();
           if (owner_manager)

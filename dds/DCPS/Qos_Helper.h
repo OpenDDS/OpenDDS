@@ -12,6 +12,7 @@
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsTopicC.h"
+#include "dds/OpenDDSConfigWrapper.h"
 #include "Time_Helper.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -108,7 +109,7 @@ public:
 
   static bool valid(const DDS::OwnershipQosPolicy& qos);
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   static bool valid(const DDS::OwnershipStrengthQosPolicy& qos);
 #endif
 
@@ -185,7 +186,7 @@ public:
   static bool changeable(const DDS::OwnershipQosPolicy& qos1,
                          const DDS::OwnershipQosPolicy& qos2);
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   static bool changeable(const DDS::OwnershipStrengthQosPolicy& qos1,
                          const DDS::OwnershipStrengthQosPolicy& qos2);
 #endif

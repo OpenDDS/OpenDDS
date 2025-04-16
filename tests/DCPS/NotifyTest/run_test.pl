@@ -9,6 +9,7 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use File::Path;
 use strict;
 
 PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
@@ -31,8 +32,10 @@ my $test = new PerlDDS::TestFramework();
 $test->process('pub', 'publisher', $opts);
 $test->process('sub', 'subscriber', $opts);
 
+rmtree('./DCS');
+
 $test->setup_discovery();
 $test->start_process('pub');
 $test->start_process('sub');
 
-exit $test->finish(300);
+exit $test->finish(60);

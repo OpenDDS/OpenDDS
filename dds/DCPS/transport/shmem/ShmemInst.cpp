@@ -32,7 +32,8 @@ ShmemInst::ShmemInst(const std::string& name)
 }
 
 TransportImpl_rch
-ShmemInst::new_impl(DDS::DomainId_t domain)
+ShmemInst::new_impl(DDS::DomainId_t domain,
+                    DomainParticipantImpl*)
 {
   return make_rch<ShmemTransport>(rchandle_from(this), domain);
 }
@@ -53,7 +54,8 @@ ShmemInst::dump_to_str(DDS::DomainId_t domain) const
 size_t
 ShmemInst::populate_locator(OpenDDS::DCPS::TransportLocator& info,
                             ConnectionInfoFlags,
-                            DDS::DomainId_t) const
+                            DDS::DomainId_t,
+                            DomainParticipantImpl*)
 {
   info.transport_type = "shmem";
 

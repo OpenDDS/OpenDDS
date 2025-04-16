@@ -8,6 +8,10 @@
 
 #include "EndpointCallbacks.h"
 
+#include <dds/OpenDDSConfigWrapper.h>
+
+#include <tao/Basic_Types.h>
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -50,6 +54,11 @@ public:
   virtual void unregister_for_writer(const GUID_t& /*participant*/,
                                      const GUID_t& /*readerid*/,
                                      const GUID_t& /*writerid*/) { }
+
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+  virtual void update_ownership_strength(const GUID_t& pub_id,
+                                         CORBA::Long ownership_strength) = 0;
+#endif
 };
 
 typedef RcHandle<DataReaderCallbacks> DataReaderCallbacks_rch;

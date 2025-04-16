@@ -7,12 +7,15 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#include "dds/OpenDDSConfigWrapper.h"
+
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
 
 #include "OwnershipManager.h"
 #include "GuidConverter.h"
 #include "Util.h"
 #include "DataReaderImpl.h"
+
 #include <algorithm>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -423,4 +426,4 @@ OwnershipManager::remove_owner(const DDS::InstanceHandle_t& instance_handle)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#endif

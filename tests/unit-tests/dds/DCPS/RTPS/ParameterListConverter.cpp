@@ -25,6 +25,8 @@
 #include "dds/DdsDcpsInfoUtilsTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 
+#include "dds/OpenDDSConfigWrapper.h"
+
 #include "gtest/gtest.h"
 
 #include <cstring>
@@ -186,7 +188,7 @@ namespace {
           TheServiceParticipant->initial_UserDataQosPolicy();
       writer_data.ddsPublicationData.ownership =
           TheServiceParticipant->initial_OwnershipQosPolicy();
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
       writer_data.ddsPublicationData.ownership_strength =
           TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
 #endif
@@ -314,7 +316,7 @@ namespace {
 
       }
       result.ddsPublicationData.ownership.kind = ownership;
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
       result.ddsPublicationData.ownership_strength.value = ownership_strength;
 #else
       ACE_UNUSED_ARG(ownership_strength);
@@ -2051,14 +2053,14 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_ownership_strength)
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   EXPECT_TRUE(is_present(param_list, PID_OWNERSHIP_STRENGTH));
   Parameter param = get(param_list, PID_OWNERSHIP_STRENGTH);
   EXPECT_TRUE(param.ownership_strength().value == 29);
 #endif
 }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
 TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_ownership_strength)
 { // Should decode writer ownership strength
   DiscoveredWriterData writer_data = Factory::writer_data(
@@ -3438,7 +3440,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, dont_encode_writer_default_data)
   EXPECT_TRUE(!is_present(param_list, PID_LIFESPAN));
   EXPECT_TRUE(!is_present(param_list, PID_USER_DATA));
   EXPECT_TRUE(!is_present(param_list, PID_OWNERSHIP));
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   EXPECT_TRUE(!is_present(param_list, PID_OWNERSHIP_STRENGTH));
 #endif
   EXPECT_TRUE(!is_present(param_list, PID_DESTINATION_ORDER));

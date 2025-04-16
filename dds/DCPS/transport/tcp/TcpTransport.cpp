@@ -446,7 +446,7 @@ TcpTransport::connection_info_i(TransportLocator& local_info, ConnectionInfoFlag
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport public address string <%C>\n",
               cfg->get_locator_address().c_str()), 2);
 
-    cfg->populate_locator(local_info, flags, domain_);
+    cfg->populate_locator(local_info, flags, domain_, 0);
     return true;
   }
 
