@@ -487,6 +487,13 @@ _opendds_feature(SAFETY_PROFILE OFF CONFIG MPC_INVERTED_NAME no_opendds_safety_p
   DOC "Build using Safety Profile (Not for CMake-built OpenDDS)")
 _opendds_feature(COVERAGE OFF MPC_INVERTED_NAME dds_non_coverage)
 _opendds_feature(BOOTTIME_TIMERS OFF CONFIG DOC "Use CLOCK_BOOTTIME for timers")
+if(OPENDDS_CXX_STD_YEAR LESS 2017)
+  set(_opendds_cxx17 OFF)
+else()
+  set(_opendds_cxx17 ON)
+endif()
+_opendds_feature(CXX17 "${_opendds_cxx17}" MPC_INVERTED_NAME no_cxx17 DOC "Build assumes C++17 support")
+_opendds_feature(STD_OPTIONAL "${OPENDDS_CXX17}" CONFIG DOC "Use C++17's std::optional")
 
 # ACE Features
 _opendds_feature(VERSIONED_NAMESPACE OFF MPC DOC "Namespaces include versions")
