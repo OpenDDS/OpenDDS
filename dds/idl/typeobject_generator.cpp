@@ -70,7 +70,7 @@ to_long(const AST_Expression::AST_ExprValue& ev)
   case AST_Expression::EV_long:
     return ev.u.lval;
   case AST_Expression::EV_ulong:
-    return ev.u.ulval;
+    return static_cast<ACE_CDR::Long>(ev.u.ulval);
   case AST_Expression::EV_wchar:
     return ev.u.wcval;
   case AST_Expression::EV_char:
@@ -78,7 +78,7 @@ to_long(const AST_Expression::AST_ExprValue& ev)
   case AST_Expression::EV_bool:
     return ev.u.bval;
   case AST_Expression::EV_enum:
-    return ev.u.eval;
+    return static_cast<ACE_CDR::Long>(ev.u.eval);
   default:
     // Spec issue DDSXTY14-36 (64-bit integers as case labels in TypeObject)
     be_util::misc_error_and_abort("Illegal conversion to long");

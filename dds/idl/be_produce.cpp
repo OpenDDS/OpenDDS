@@ -132,7 +132,9 @@ string to_macro(const char* fn)
   ACE_UINT64 msec;
   now.msec(msec);
 
-  msec += ACE_OS::getpid() + (size_t) ACE_OS::thr_self();
+  msec += static_cast<ACE_UINT64>(ACE_OS::getpid()) +
+    // On some platforms, the type of ACE_thread_t is a pointer instead of an integer:
+   (ACE_UINT64) ACE_OS::thr_self();
 
   unsigned int seed = static_cast<unsigned int>(msec);
 
@@ -142,7 +144,7 @@ string to_macro(const char* fn)
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
   for (unsigned int n = 0; n < NUM_CHARS; ++n) {
-    ret += alphanum[ACE_OS::rand_r(&seed) % (sizeof(alphanum) - 1)];
+    ret += alphanum[ACE_OS::rand_r(&seed) % static_cast<int>(sizeof(alphanum) - 1)];
   }
 
   return ret;

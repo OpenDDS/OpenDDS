@@ -66,7 +66,7 @@ namespace {
                     const std::string& idx, int level, FieldFilter filter_kind)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    const std::string indent(level * 2, ' ');
+    const std::string indent(size_t(level) * 2, ' ');
     const Classification c = classify(array->base_type());
     const bool primitive = c & CL_PRIMITIVE;
     // When we have a primitive type the last dimension is written using the write_*_array
@@ -126,7 +126,7 @@ namespace {
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const char* const length_func = use_cxx11 ? "size" : "length";
-    const std::string indent(level * 2, ' ');
+    const std::string indent(size_t(level) * 2, ' ');
     AST_Type* const base_type = sequence->base_type();
     const std::string elem_tk = type_kind(base_type);
     be_global->impl_ <<
@@ -194,7 +194,7 @@ namespace {
       return;
     }
 
-    const std::string indent(level * 2, ' ');
+    const std::string indent(size_t(level) * 2, ' ');
 
     if (c & CL_FIXED) {
       be_global->impl_ <<

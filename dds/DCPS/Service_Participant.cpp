@@ -1296,7 +1296,7 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
       }
 
       // Wait to traverse the list and try again.
-      ACE_OS::sleep(backoff);
+      ACE_OS::sleep(static_cast<unsigned int>(backoff));
 
       // Exponentially backoff delay.
       backoff *= this->federation_backoff_multiplier();
@@ -2347,9 +2347,9 @@ Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_
       if (p.key() == COMMON_ORB_LOG_FILE) {
         set_log_file_name(p.value().c_str());
       } else if (p.key() == COMMON_ORB_VERBOSE_LOGGING) {
-        set_log_verbose(ACE_OS::atoi(p.value().c_str()));
+        set_log_verbose(static_cast<unsigned long>(ACE_OS::atoi(p.value().c_str())));
       } else if (p.key() == COMMON_DCPS_DEBUG_LEVEL) {
-        set_DCPS_debug_level(ACE_OS::atoi(p.value().c_str()));
+        set_DCPS_debug_level(static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str())));
       } else if (p.key() == COMMON_DCPSRTI_SERIALIZATION) {
         if (ACE_OS::atoi(p.value().c_str()) == 0 && log_level >= LogLevel::Warning) {
           ACE_ERROR((LM_WARNING,
@@ -2357,12 +2357,12 @@ Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_
                      ACE_TEXT("Argument ignored: DCPSRTISerialization is required to be enabled\n")));
         }
       } else if (p.key() == COMMON_DCPS_TRANSPORT_DEBUG_LEVEL) {
-        OpenDDS::DCPS::Transport_debug_level = ACE_OS::atoi(p.value().c_str());
+        Transport_debug_level = static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str()));
       } else if (p.key() == COMMON_DCPS_THREAD_STATUS_INTERVAL) {
         service_participant_.thread_status_manager_.thread_status_interval(TimeDuration(ACE_OS::atoi(p.value().c_str())));
 #if OPENDDS_CONFIG_SECURITY
       } else if (p.key() == COMMON_DCPS_SECURITY_DEBUG_LEVEL) {
-        security_debug.set_debug_level(ACE_OS::atoi(p.value().c_str()));
+        security_debug.set_debug_level(static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str())));
       } else if (p.key() == COMMON_DCPS_SECURITY_DEBUG) {
         security_debug.parse_flags(p.value().c_str());
       } else if (p.key() == COMMON_DCPS_SECURITY_FAKE_ENCRYPTION) {

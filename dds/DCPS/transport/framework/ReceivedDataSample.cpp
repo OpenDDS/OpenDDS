@@ -111,7 +111,7 @@ unsigned char ReceivedDataSample::peek(size_t offset) const
     const MessageBlock& element = blocks_[i];
     const size_t len = element.len();
     if (remain < len) {
-      return element.rd_ptr()[remain];
+      return static_cast<unsigned char>(element.rd_ptr()[remain]);
     }
     remain -= len;
   }

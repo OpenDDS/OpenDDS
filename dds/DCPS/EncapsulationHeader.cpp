@@ -71,7 +71,9 @@ EncapsulationHeader::set_encapsulation_options(Message_Block_Ptr& mb)
     return false;
   }
 
-  mb->rd_ptr()[padding_marker_byte_index] |= ((padding_marker_alignment - mb->length() % padding_marker_alignment) & 0x03);
+  unsigned char byte = static_cast<unsigned char>(mb->rd_ptr()[padding_marker_byte_index]);
+  byte |= (padding_marker_alignment - mb->length() % padding_marker_alignment) & 0x03;
+  mb->rd_ptr()[padding_marker_byte_index] = static_cast<char>(byte);
   return true;
 }
 

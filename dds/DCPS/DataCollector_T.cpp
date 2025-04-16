@@ -77,15 +77,15 @@ DataCollector<DatumType>::insert(std::ostream& str) const
   }
 
   // Bounded case.
-  int end = this->writeAt_;
+  size_t end = this->writeAt_;
 
   if (end == 0) {
     // Unbounded case.
-    end = static_cast<int>(this->buffer_.size());
+    end = this->buffer_.size();
   }
 
   // Newest data last.
-  for (int index = 0; index < end; ++index) {
+  for (size_t index = 0; index < end; ++index) {
     str << this->buffer_[ index] << std::endl;
   }
 

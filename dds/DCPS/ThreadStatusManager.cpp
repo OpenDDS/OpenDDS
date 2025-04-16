@@ -25,7 +25,7 @@ void ThreadStatusManager::Thread::update(const MonotonicTimePoint& m_now,
   timestamp_ = s_now;
 
   if (nested) {
-    nesting_depth_ += (next_status == ThreadStatus_Active) ? 1 : -1;
+    (next_status == ThreadStatus_Active) ? ++nesting_depth_ : --nesting_depth_;
   }
 
   if (!nested ||
