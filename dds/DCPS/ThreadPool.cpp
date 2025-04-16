@@ -10,8 +10,6 @@
 #include "Definitions.h"
 #include "ThreadPool.h"
 
-#include "Definitions.h"
-
 #include <ace/Guard_T.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

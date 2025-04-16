@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include <dds/OpenDDSConfigWrapper.idl>
+
 // Struct with no keys
 module Messenger1 {
 
@@ -74,7 +76,7 @@ module Messenger4 {
 #pragma DCPS_DATA_KEY "Messenger4::Message enum_field"
 #pragma DCPS_DATA_KEY "Messenger4::Message string_field"
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #pragma DCPS_DATA_KEY "Messenger4::Message wstring_field"
 #endif
 
@@ -94,7 +96,7 @@ module Messenger4 {
     octet octet_field;
     EnumType enum_field;
     string string_field;
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
     wstring wstring_field;
 #endif
   };
@@ -115,7 +117,7 @@ module Messenger4 {
 #pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.octet_field"
 #pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.enum_field"
 #pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.string_field"
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.wstring_field"
 #endif
 
@@ -132,7 +134,7 @@ module Messenger5 {
 
   struct HeaderType {
     string from;
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
     wstring wsubject;
 #endif
     long subject_id;
@@ -140,7 +142,7 @@ module Messenger5 {
 
 #pragma DCPS_DATA_TYPE "Messenger5::Message"
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #pragma DCPS_DATA_KEY "Messenger5::Message header.wsubject"
 #endif
 

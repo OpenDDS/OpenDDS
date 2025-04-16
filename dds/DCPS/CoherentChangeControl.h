@@ -8,9 +8,10 @@
 #ifndef OPENDDS_DCPS_COHERENTCHANGECONTROL_H
 #define OPENDDS_DCPS_COHERENTCHANGECONTROL_H
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-
 #include "Definitions.h"
+
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
+
 #include "GuidUtils.h"
 #include "Serializer.h"
 #include "SequenceNumber.h"

@@ -3,8 +3,11 @@
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
-#include "dds/DCPS/RepoIdBuilder.h"
+
+#include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidConverter.h"
+#include "dds/DCPS/RepoIdBuilder.h"
+
 #include "dds/DCPS/RTPS/MessageUtils.h"
 #include <ace/Basic_Types.h>
 #include <ace/Get_Opt.h>
@@ -41,7 +44,7 @@ AppConfig::AppConfig(int argc, ACE_TCHAR* argv[]) :
         break;
       }
     }
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
     if (host == ACE_TEXT("localhost")) {
       host = "127.0.0.1";
     }

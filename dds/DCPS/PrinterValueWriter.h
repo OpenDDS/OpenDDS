@@ -6,12 +6,13 @@
 #ifndef OPENDDS_DCPS_PRINTER_VALUE_WRITER_H
 #define OPENDDS_DCPS_PRINTER_VALUE_WRITER_H
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include "Definitions.h"
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include "ValueWriter.h"
 #include "ValueHelper.h"
 #include "dcps_export.h"
-#include "Definitions.h"
 
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #include <dds/DdsDcpsTopicC.h>

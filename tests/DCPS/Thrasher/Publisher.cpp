@@ -15,6 +15,8 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include <string>
 #include <stdexcept>
 
@@ -59,7 +61,7 @@ Publisher::Publisher(const long domain_id, std::size_t samples_per_thread, bool 
     if (durable_) {
       qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
     }
-#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+#if OPENDDS_CONFIG_OWNERSHIP_PROFILE
     qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
     qos.history.depth = static_cast<CORBA::Long>(samples_per_thread_ * 2);
 #endif

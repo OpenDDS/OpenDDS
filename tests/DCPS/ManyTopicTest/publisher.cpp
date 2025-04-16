@@ -29,6 +29,8 @@
 #include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
 #endif
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include "ace/Arg_Shifter.h"
 #include "ace/OS_NS_time.h"
 #include "ace/Atomic_Op_T.h"
@@ -40,7 +42,7 @@ static int topics = 0;
 
 static int max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
 
-#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+#if OPENDDS_CONFIG_OWNERSHIP_PROFILE
 static int history_depth = 100;
 #endif
 
@@ -219,7 +221,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ::DDS::DataWriterQos dw_qos;
       pub->get_default_datawriter_qos(dw_qos);
 
-#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+#if OPENDDS_CONFIG_OWNERSHIP_PROFILE
       dw_qos.history.depth = history_depth;
 #endif
       dw_qos.resource_limits.max_samples_per_instance =

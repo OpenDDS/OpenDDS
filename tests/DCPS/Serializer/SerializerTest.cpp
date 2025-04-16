@@ -1,7 +1,6 @@
 #include "common.h"
 
 #include <dds/DCPS/Definitions.h>
-
 #include <dds/DCPS/EncapsulationHeader.h>
 #include <dds/DCPS/GuidUtils.h>
 
@@ -39,12 +38,12 @@ struct Values {
   ACE_CDR::Char charValue;
   ACE_CDR::WChar wcharValue;
   ACE_CDR::Char* stringValue;
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   std::string stdstringValue;
 #endif
 #ifdef DDS_HAS_WCHAR
   ACE_CDR::WChar* wstringValue;
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   std::wstring stdwstringValue;
 #endif
 #endif
@@ -95,12 +94,12 @@ void insertions(ACE_Message_Block* chain, const Values& values,
   serializer << values.charValue;
   serializer << ACE_OutputCDR::from_wchar(values.wcharValue);
   serializer << ACE_OutputCDR::from_string(values.stringValue, 0);
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   serializer << values.stdstringValue;
 #endif
 #ifdef DDS_HAS_WCHAR
   serializer << ACE_OutputCDR::from_wstring(values.wstringValue, 0);
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   serializer << values.stdwstringValue;
 #endif
 #endif
@@ -283,7 +282,7 @@ bool extractions(Serializer& serializer, Values& values,
     pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "string");
   }
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   serializer >> values.stdstringValue;
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::uint32_cdr_size, encoding.max_align()) +
@@ -301,7 +300,7 @@ bool extractions(Serializer& serializer, Values& values,
     pos = serializer.rpos();
     print(pos, expectedPos, prevPos, readPosOk, "wstring");
   }
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   serializer >> values.stdwstringValue;
   if (checkPos) {
     expectedPos += skip(pos, OpenDDS::DCPS::uint32_cdr_size, encoding.max_align()) +
@@ -486,7 +485,7 @@ checkValues(const Values& expected, const Values& observed)
     std::cout << ")." << std::endl;
     failed = true;
   }
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   if(expected.stdstringValue != observed.stdstringValue) {
     ACE::format_hexdump(expected.stdstringValue.c_str(), expected.stdstringValue.length(), ebuffer, sizeof(ebuffer));
     ACE::format_hexdump(observed.stdstringValue.c_str(), observed.stdstringValue.length(), obuffer, sizeof(obuffer));
@@ -507,7 +506,7 @@ checkValues(const Values& expected, const Values& observed)
     std::cout << ")." << std::endl;
     failed = true;
   }
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   if(expected.stdwstringValue != observed.stdwstringValue) {
     ACE::format_hexdump(reinterpret_cast<const char*>(expected.stdwstringValue.c_str()), expected.stdwstringValue.length(), ebuffer, sizeof(ebuffer));
     ACE::format_hexdump(reinterpret_cast<const char*>(observed.stdwstringValue.c_str()), observed.stdwstringValue.length(), obuffer, sizeof(obuffer));
@@ -688,12 +687,12 @@ void runTest(const Values& expected, const ArrayValues& expectedArray,
 #endif
     0, 0, 0, 0, 0,
     ACE_CDR_LONG_DOUBLE_INITIALIZER, 0, 0, 0
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
     , ""
 #endif
 #ifdef DDS_HAS_WCHAR
     , 0
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
     , L""
 #endif
 #endif
@@ -868,7 +867,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 #ifdef DDS_HAS_WCHAR
   const ACE_CDR::WChar wstring[] = L"This is a test of the wstring serialization.";
 #endif
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   std::string stdstring = "This is a test of the std string serialization.";
 #ifdef DDS_HAS_WCHAR
   std::wstring stdwstring = L"This is a test of the std wstring serialization.";
@@ -899,12 +898,12 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     0x1a,
     0xb2,
     const_cast<ACE_CDR::Char*>(string)
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
     , stdstring
 #endif
 #ifdef DDS_HAS_WCHAR
     , const_cast<ACE_CDR::WChar*>(wstring)
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
     , stdwstring
 #endif
 #endif

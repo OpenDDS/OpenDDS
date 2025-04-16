@@ -6,6 +6,7 @@
 #ifndef OPENDDS_DCPS_TIME_HELPER_H
 #define OPENDDS_DCPS_TIME_HELPER_H
 
+#include "Definitions.h"
 #include "PoolAllocator.h"
 #include "dcps_export.h"
 
@@ -70,7 +71,7 @@ bool valid_duration(DDS::Duration_t const & t);
 ACE_INLINE OpenDDS_Dcps_Export
 bool non_negative_duration(const DDS::Duration_t& t);
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator==(const DDS::Duration_t& t1, const DDS::Duration_t& t2);
 
@@ -93,7 +94,7 @@ bool operator>=(const DDS::Duration_t& t1, const DDS::Duration_t& t2);
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator!(const DDS::Time_t& t);
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator==(const DDS::Time_t& t1, const DDS::Time_t& t2);
 
@@ -128,7 +129,7 @@ DDS::Duration_t operator-(const MonotonicTime_t& t1, const MonotonicTime_t& t2);
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator<(const MonotonicTime_t& t1, const MonotonicTime_t& t2);
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator==(const MonotonicTime_t& t1, const MonotonicTime_t& t2);
 #endif

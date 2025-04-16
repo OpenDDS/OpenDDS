@@ -22,6 +22,7 @@
 
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/DataSampleElement.h"
+#include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/EncapsulationHeader.h"
 #include "dds/DCPS/GuidUtils.h"
@@ -725,7 +726,7 @@ bool run_test()
     exit(1);
   }
   part1_sock.get_local_addr(part1_addr);
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
   part1_addr.set(part1_addr.get_port_number(), "127.0.0.1");
 #else
   part1_addr.set(part1_addr.get_port_number(), "localhost");

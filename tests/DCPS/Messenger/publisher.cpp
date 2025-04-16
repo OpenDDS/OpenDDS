@@ -9,21 +9,20 @@
 #include <tests/Utils/StatusMatching.h>
 
 #include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
-
-#include <dds/OpenDDSConfigWrapper.h>
 
 #if OPENDDS_CONFIG_SECURITY
 #  include <dds/DCPS/security/framework/Properties.h>
 #endif
 #include <dds/DCPS/StaticIncludes.h>
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 #if OPENDDS_DO_MANUAL_STATIC_INCLUDES
-#  ifndef OPENDDS_SAFETY_PROFILE
+#  if !OPENDDS_CONFIG_SAFETY_PROFILE
 #    include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #    include <dds/DCPS/transport/shmem/Shmem.h>
 #    if OPENDDS_CONFIG_SECURITY

@@ -7,9 +7,9 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#ifndef OPENDDS_SAFETY_PROFILE
-
 #include "FileSystemStorage.h"
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include "DirentWrapper.h"
 

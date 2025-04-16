@@ -74,14 +74,14 @@ void MyTypeSupportImpl::representations_allowed_by_type(
   seq.length(0); // Let OpenDDS Default
 }
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
 ::DDS::DataReader_ptr MyTypeSupportImpl::create_multitopic_datareader()
 {
   return 0;
 }
 #endif
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
 const OpenDDS::DCPS::MetaStruct&
 MyTypeSupportImpl::getMetaStructForType() const

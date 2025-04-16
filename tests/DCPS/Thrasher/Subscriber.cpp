@@ -12,6 +12,8 @@
 # include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include <ace/Log_Msg.h>
 
 #include <stdexcept>
@@ -57,7 +59,7 @@ Subscriber::Subscriber(DDS::DomainId_t domainId, size_t n_pub_threads, size_t ex
     if (durable_) {
       qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
     }
-#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+#if OPENDDS_CONFIG_OWNERSHIP_PROFILE
     qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
     qos.history.depth = static_cast<CORBA::Long>(expected_samples * 2);
 #endif

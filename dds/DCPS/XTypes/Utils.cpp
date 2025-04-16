@@ -5,8 +5,9 @@
 
 #include <DCPS/DdsDcps_pch.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
-#  include "Utils.h"
+#include "Utils.h"
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #  include "DynamicDataImpl.h"
 
@@ -1907,4 +1908,4 @@ TypeIdentifier remove_enumerators(const TypeIdentifier& top_level,
 } // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

@@ -5,8 +5,9 @@
 
 #include <DCPS/DdsDcps_pch.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
-#  include "DynamicVwrite.h"
+#include "DynamicVwrite.h"
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include "Utils.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -1448,4 +1449,4 @@ bool vwrite(ValueWriter& vw, DDS::DynamicData_ptr value)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

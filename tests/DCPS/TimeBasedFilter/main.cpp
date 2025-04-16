@@ -8,13 +8,16 @@
 #include <tao/Basic_Types.h>
 
 #include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DCPS/Service_Participant.h>
+
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
+#include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/SubscriptionInstance.h>
 #include <dds/DCPS/WaitSet.h>
+
 #include <dds/DCPS/transport/framework/TransportDefs.h>
 
 #include "FooTypeTypeSupportImpl.h"
@@ -72,7 +75,7 @@ public:
   , condition_(lock_)
   , num_samples_(0)
   , expected_num_samples_(expected_num_samples)
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
   , first_sample_(true)
 #endif
   {
@@ -101,7 +104,7 @@ public:
       DDS::ReturnCode_t error = message_dr->take(foos, info, DDS::LENGTH_UNLIMITED,
         DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
 
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
       // discard the first sample. necessary for reliable safety profile.
       if (first_sample_) {
         first_sample_ = false;
@@ -216,7 +219,7 @@ private:
   ACE_Condition<ACE_SYNCH_MUTEX> condition_;
   size_t num_samples_;
   const size_t expected_num_samples_;
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
   bool first_sample_;
 #endif
 };
@@ -592,7 +595,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     SampleMap send_map;
 
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
     // receiving the first safety profile sample takes longer than
     // subsequent samples, so write a throwaway
     Foo f = { 0, 0, 0, 0 };

@@ -2,15 +2,17 @@
 
 #include "../common/TestSupport.h"
 
-#include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DCPS/WriteDataContainer.h>
-#include <dds/DCPS/Qos_Helper.h>
-#include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DCPS/InstanceHandle.h>
-#include <dds/DCPS/DomainParticipantImpl.h>
-#include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/DataWriterImpl_T.h>
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/DomainParticipantImpl.h>
+#include <dds/DCPS/InstanceHandle.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
+#include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/WriteDataContainer.h>
+
+#include <dds/DdsDcpsInfrastructureC.h>
 
 #include <ace/Task.h>
 #include <ace/Arg_Shifter.h>
@@ -166,7 +168,7 @@ public:
               (dw_qos.resource_limits.max_instances * depth));
       }
     }
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
     // Get data durability cache if DataWriter QoS requires durable
     // samples.  Publisher servant retains ownership of the cache.
     DataDurabilityCache* const durability_cache =
@@ -194,7 +196,7 @@ public:
                                   MY_DOMAIN,
                                   MY_TOPIC,
                                   MY_TYPE,
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
                                   durability_cache,
                                   dw_qos.durability_service,
 #endif
@@ -359,9 +361,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
     try { // the real testing.
 
       { //Test Case 1 scope
-#ifdef OPENDDS_NO_OWNERSHIP_PROFILE
-        ACE_DEBUG((LM_INFO, ACE_TEXT("\n\n==== Skipping TEST case 1 due to ownership_profile disabled\n")));
-#else
+#if OPENDDS_CONFIG_OWNERSHIP_PROFILE
         ACE_DEBUG((LM_INFO,
           ACE_TEXT("\n\n==== TEST case 1 : Reliable, Keep All, max_samples_per_instance = 2, max samples = 3.\n")
           ACE_TEXT("Single instance: Should block on third obtain buffer due to max_samples_per_instance\n")
@@ -475,7 +475,9 @@ int run_test(int argc, ACE_TCHAR *argv[])
         test_data_container->unregister_all();
         guard.release();
         delete test_data_container;
-#endif // OPENDDS_NO_OWNERSHIP_PROFILE
+#else
+        ACE_DEBUG((LM_INFO, ACE_TEXT("\n\n==== Skipping TEST case 1 due to ownership_profile disabled\n")));
+#endif
       } //End Test Case 1 scope
 
       { //Test Case 2 scope
@@ -487,7 +489,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
         test->get_default_datawriter_qos(dw_qos);
 
-#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+#if OPENDDS_CONFIG_OWNERSHIP_PROFILE
         dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
         dw_qos.history.depth = DDS::LENGTH_UNLIMITED;
 #endif
@@ -761,7 +763,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
         test->get_default_datawriter_qos(dw_qos);
 
-#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+#if OPENDDS_CONFIG_OWNERSHIP_PROFILE
         dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 #endif
         dw_qos.resource_limits.max_samples = MAX_SAMPLES;
@@ -857,7 +859,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
         DataSampleElement* element_2 = 0;
         ret = test_data_container->obtain_buffer(element_2, handle1);
-#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+#if OPENDDS_CONFIG_OWNERSHIP_PROFILE
         test->log_send_state_lists("After obtain buffer which should block", test_data_container);
 
         TEST_ASSERT(ret != DDS::RETCODE_OK && errno == ETIME);
@@ -868,7 +870,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
         test_data_container->release_buffer(element_0);
         test_data_container->release_buffer(element_1);
-#ifdef OPENDDS_NO_OWNERSHIP_PROFILE
+#if !OPENDDS_CONFIG_OWNERSHIP_PROFILE
         test_data_container->release_buffer(element_2);
 #endif
         test_data_container->unregister_all();

@@ -87,7 +87,7 @@ OpenDDS::DCPS::ReceivedDataElementList::add_by_timestamp(ReceivedDataElement *da
       it->previous_data_sample_ = data_sample;
 
       ++size_;
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
       if (!data_sample->coherent_change_)
 #endif
       {
@@ -150,7 +150,7 @@ OpenDDS::DCPS::ReceivedDataElementList::remove(ReceivedDataElement* item)
   bool released = false;
 
   size_--;
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   if (!item->coherent_change_)
 #endif
   {
@@ -224,7 +224,7 @@ OpenDDS::DCPS::ReceivedDataElementList::get_next_match(CORBA::ULong sample_state
   ReceivedDataElement* item = prev ? prev->next_data_sample_ : head_;
   for (; item != 0; item = item->next_data_sample_) {
     if ((item->sample_state_ & sample_states)
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
       && !item->coherent_change_
 #endif
       ) {
@@ -238,7 +238,7 @@ void
 OpenDDS::DCPS::ReceivedDataElementList::mark_read(ReceivedDataElement* item)
 {
   OPENDDS_ASSERT(sanity_check(item));
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   if (!item->coherent_change_)
 #endif
   {
@@ -250,7 +250,7 @@ OpenDDS::DCPS::ReceivedDataElementList::mark_read(ReceivedDataElement* item)
   }
 }
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 void
 OpenDDS::DCPS::ReceivedDataElementList::accept_coherent_change(OpenDDS::DCPS::ReceivedDataElement* item)
 {

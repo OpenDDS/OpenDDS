@@ -1,4 +1,6 @@
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include <DynamicDataAdapterTypeSupportImpl.h>
 
 #  include <tests/Utils/GtestRc.h>
@@ -372,4 +374,4 @@ TEST_F(dds_DCPS_XTypes_DynamicDataAdapter, null_get_dynamic_data_adapter)
 }
 #  endif
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

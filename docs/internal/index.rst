@@ -13,3 +13,4 @@ This documentation is for those who want to contribute to OpenDDS and those who 
   running_tests
   bench
   release
+  configuration_header

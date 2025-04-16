@@ -1,11 +1,13 @@
 #ifndef EXCEPTION_STREAMS_H
 #define EXCEPTION_STREAMS_H
 
+#include <dds/DCPS/Definitions.h>
+
 //In case we are lacking iostreams due to Safety Profile, include header
 //for tests to still have access to iostreams
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
 #include <iostream>
-#endif //OPENDDS_SAFETY_PROFILE
+#endif
 
 #ifdef ACE_LACKS_IOSTREAM_TOTALLY
 

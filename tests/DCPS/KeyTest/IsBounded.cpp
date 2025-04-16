@@ -54,14 +54,14 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   failed |= assert_bounded<Bound::SimpleBoundedMessage>("Bound::SimpleBoundedMessage", 65);
   failed |= assert_unbounded<Bound::StringMessage>("Bound::StringMessage");
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   failed |= assert_unbounded<Bound::WStringMessage>("Bound::WStringMessage");
 #endif
 
   failed |= assert_bounded<Bound::SimpleBoundedArrayMessage>("Bound::SimpleBoundedArrayMessage", 7350);
   failed |= assert_unbounded<Bound::StringArrayMessage>("Bound::StringArrayMessage");
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   failed |= assert_unbounded<Bound::WStringArrayMessage>("Bound::WStringArrayMessage");
 #endif
 

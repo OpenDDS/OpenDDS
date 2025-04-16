@@ -6,10 +6,15 @@
  */
 
 #include "DCPS/DdsDcps_pch.h"  ////Only the _pch include should start with DCPS/
+
 #include "MemoryPool.h"
+
+#include "Definitions.h"
 #include "PoolAllocator.h"
+
 #include "ace/Log_Msg.h"
 #include "ace/OS_NS_stdio.h"
+
 #include <stdexcept>
 #include <limits>
 #include <map>
@@ -319,7 +324,7 @@ MemoryPool::MemoryPool(unsigned int pool_size, size_t granularity)
 
 MemoryPool::~MemoryPool()
 {
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   delete [] pool_ptr_;
 #endif
 }

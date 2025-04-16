@@ -5,23 +5,23 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "ace/OS_main.h"
-#include <dds/DCPS/Service_Participant.h>
-#include "ace/Configuration_Import_Export.h"
-#include "tao/corba.h"
+#include "../common/TestSupport.h"
 
+#include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
+#include "dds/DCPS/RTPS/RtpsDiscovery.h"
+#include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/StaticIncludes.h"
+#include "dds/DCPS/debug.h"
+#include "dds/DCPS/transport/framework/TransportDebug.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/tcp/TcpInst_rch.h"
-#include "dds/DCPS/debug.h"
-#include "dds/DCPS/transport/framework/TransportDebug.h"
 
-#include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
-#include "dds/DCPS/RTPS/RtpsDiscovery.h"
+#include "tao/corba.h"
 
-#include "dds/DCPS/StaticIncludes.h"
-
-#include "../common/TestSupport.h"
+#include "ace/OS_main.h"
+#include "ace/Configuration_Import_Export.h"
 
 #include <iostream>
 
@@ -93,10 +93,10 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(config->passive_connect_duration_ == TimeDuration::from_msec(20000));
 
     TransportConfig_rch default_config =
-#ifdef DDS_HAS_MINIMUM_BIT
-      TransportRegistry::instance()->get_config("test1_nobits.ini");
-#else
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
       TransportRegistry::instance()->get_config("test1.ini");
+#else
+      TransportRegistry::instance()->get_config("test1_nobits.ini");
 #endif
     TEST_CHECK(default_config);
     //std::cout << "size=" << default_config->instances_.size() << std::endl;
@@ -155,7 +155,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       TEST_CHECK(ird->bit_transport_port() == 4321);
     }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
     {
       DDS::DomainId_t domain = 21;
       OpenDDS::DCPS::Discovery::RepoKey key = "DEFAULT_RTPS";

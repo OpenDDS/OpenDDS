@@ -2,6 +2,8 @@
 #include "../idl_test3_lib/FooDef2TypeSupportImpl.h"
 #include "../idl_test3_lib/FooDef3TypeSupportImpl.h"
 
+#include <dds/DCPS/Definitions.h>
+
 #include <tao/CDR.h>
 #include <ace/ACE.h>
 
@@ -611,11 +613,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   Xyz::Foo ss_foo;
 
   const size_t sz = 3625 // see running totals above
-#if defined OPENDDS_SAFETY_PROFILE || defined NO_TEST_WSTRING
+#if OPENDDS_CONFIG_SAFETY_PROFILE || defined NO_TEST_WSTRING
     - 4 // theWString is gone
 #endif
     , pad = 511
-#if defined OPENDDS_SAFETY_PROFILE || defined NO_TEST_WSTRING
+#if OPENDDS_CONFIG_SAFETY_PROFILE || defined NO_TEST_WSTRING
     + 4 // theWString is gone, long double is aligned to 8
 #endif
     ;

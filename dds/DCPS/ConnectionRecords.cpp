@@ -5,9 +5,9 @@
 
 #include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
-#ifndef DDS_HAS_MINIMUM_BIT
-
 #include "ConnectionRecords.h"
+
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -35,4 +35,4 @@ void WriteConnectionRecords::execute()
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif

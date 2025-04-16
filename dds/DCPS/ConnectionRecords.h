@@ -6,7 +6,9 @@
 #ifndef OPENDDS_DCPS_CONNECTION_RECORDS_H
 #define OPENDDS_DCPS_CONNECTION_RECORDS_H
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#include "Definitions.h"
+
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
 #include "JobQueue.h"
 #include "dcps_export.h"
@@ -50,6 +52,6 @@ class OpenDDS_Dcps_Export WriteConnectionRecords : public DCPS::Job {
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 
 #endif  /* OPENDDS_DCPS_CONNECTION_RECORDS_H */

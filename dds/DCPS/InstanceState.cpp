@@ -37,7 +37,6 @@ InstanceState::InstanceState(const DataReaderImpl_rch& reader,
   , no_writers_generation_count_(0)
   , empty_(true)
   , release_pending_(false)
-  , release_timer_id_(-1)
   , reader_(reader)
   , handle_(handle)
   , owner_(GUID_UNKNOWN)

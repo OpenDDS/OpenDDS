@@ -9,6 +9,7 @@
 #ifndef OPENDDS_DCPS_RECORDER_H
 #define OPENDDS_DCPS_RECORDER_H
 
+#include "Definitions.h"
 #include "LocalObject.h"
 #include "PoolAllocator.h"
 #include "RawDataSample.h"
@@ -68,7 +69,7 @@ public:
 
   static Recorder_ptr _duplicate(Recorder_ptr obj);
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   /**
    *  Find the bit key for a given repo id.
    */
@@ -103,7 +104,7 @@ public:
    */
   virtual RecorderListener_rch get_listener() = 0;
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   virtual DDS::DynamicData_ptr get_dynamic_data(const RawDataSample& sample) = 0;
 #endif
 

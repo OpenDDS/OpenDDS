@@ -5,9 +5,11 @@
 #include "Common.h"
 #include "ListenerFactory.h"
 
+#include <dds/DCPS/Definitions.h>
+
 namespace Builder {
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   using ContentFilteredTopicMap = std::map<std::string, DDS::ContentFilteredTopic_var>;
 #else
   class ContentFilteredTopic_var_stub

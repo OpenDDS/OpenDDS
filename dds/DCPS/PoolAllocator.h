@@ -2,7 +2,9 @@
 #define OPENDDS_DCPS_POOL_ALLOCATOR_H
 
 #include <ace/config-macros.h>
-#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+#include "Definitions.h"
+
+#if OPENDDS_CONFIG_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
 #  define OPENDDS_POOL_ALLOCATOR 1
 #else
 #  define OPENDDS_POOL_ALLOCATOR 0

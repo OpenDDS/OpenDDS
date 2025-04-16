@@ -1,12 +1,15 @@
 #include <gtest/gtest.h>
 
 #include "dds/DCPS/SafetyProfilePool.h"
+
+#include "dds/DCPS/Definitions.h"
+
 #include "ace/Log_Msg.h"
 
 #include <string.h>
 #include <iostream>
 
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
 using namespace OpenDDS::DCPS;
 
 // Malloc should return pointer

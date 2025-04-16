@@ -129,7 +129,7 @@ sub do_cached_parse {
     }
     foreach my $arg (split /\s+/, $flags) {
       if ($arg =~ /^\-D(\w+)(?:=(.+))?/) {
-        $macros{$1} = $2 || 1;
+        $macros{$1} = ($2 eq '') ? 1 : $2;
       }
       elsif ($arg =~ /^\-I(.+)/) {
         push(@include, $1);
@@ -792,7 +792,7 @@ sub preprocess {
             elsif ($pline =~ /^define\s+(([a-z_]\w+)(\(([^\)]+)\))?)(\s+(.*))?$/i) {
               my $name   = $2;
               my $params = $4;
-              my $value  = $6 || 1;
+              my $value  = ($6 eq '') ? 1 : $6;
 
               ## Define the macro and save the parameters (if there were
               ## any).  We will use it later on in the replace_macros()
@@ -839,13 +839,27 @@ sub preprocess {
   return $contents, $ts_str, $ts_pragma;
 }
 
+# expand $(TAO_ROOT) and $(DDS_ROOT).
+sub expand {
+  my($self, $path) = @_;
+
+  if ($path =~ m/^\$\(([^)]+)\)/ && exists $ENV{$1}) {
+      my $replacement = $ENV{$1};
+      $path =~ s/^\$\([^)]+\)/$replacement/;
+  }
+
+  return $path;
+}
+
 sub include_file {
   my($self, $file, $includes, $macros, $mparams) = @_;
 
   ## Look for the include file in the user provided include paths
   foreach my $incpath ('.', @$includes) {
-    if (-r "$incpath/$file") {
-      return $self->preprocess(($incpath eq '.' ? '' : "$incpath/") . $file,
+
+    my $path = $self->expand("$incpath");
+    if (-r "$path/$file") {
+      return $self->preprocess(($incpath eq '.' ? '' : "$path/") . $file,
                                $includes, $macros, $mparams, 1);
     }
   }

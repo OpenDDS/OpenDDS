@@ -203,7 +203,7 @@ void TypeSupportImpl::populate_dependencies_i(const XTypes::TypeLookupService_rc
 }
 
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 void TypeSupportImpl::get_type_from_type_lookup_service()
 {
   if (!type_) {

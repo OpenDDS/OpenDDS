@@ -1,8 +1,10 @@
 #include <TryConstructBaseTypes.idl>
 
+#include <dds/OpenDDSConfigWrapper.idl>
+
 // nested struct for use in struct, union, and sequence
 struct NestedStruct2 {
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   @try_construct(USE_DEFAULT) wstr64 wstr64_ud;
 #endif
   @try_construct(USE_DEFAULT) ShortSeqUnbound psu_ud;
@@ -13,7 +15,7 @@ struct NestedStruct2 {
   @try_construct(USE_DEFAULT) EnumSeqBound esb_ud;
   @try_construct(USE_DEFAULT) StringSeqUnbound strsu_ud;
   @try_construct(USE_DEFAULT) StringSeqBound strsb_ud;
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   @try_construct(USE_DEFAULT) WideStringSeqUnbound wstrsu_ud;
   @try_construct(USE_DEFAULT) WideStringSeqBound wstrsb_ud;
 #endif
@@ -39,7 +41,7 @@ struct NestedStruct2 {
 
 // nested struct for use in struct, union, and sequence
 struct NestedStruct3 {
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   @try_construct(USE_DEFAULT) wstr64 wstr64_ud;
 #endif
   @try_construct(USE_DEFAULT) ShortSeqUnbound psu_ud;
@@ -50,7 +52,7 @@ struct NestedStruct3 {
   @try_construct(USE_DEFAULT) EnumSeqBound esb_ud;
   @try_construct(USE_DEFAULT) StringSeqUnbound strsu_ud;
   @try_construct(USE_DEFAULT) StringSeqBound strsb_ud;
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   @try_construct(USE_DEFAULT) WideStringSeqUnbound wstrsu_ud;
   @try_construct(USE_DEFAULT) WideStringSeqBound wstrsb_ud;
 #endif
@@ -89,7 +91,7 @@ module TryCon {
   @mutable
   struct TrimStruct1 {
     str64 str64_t;
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
     wstr64 wstr64_t;
 #endif
     ShortSeqUnbound psu_t;
@@ -100,7 +102,7 @@ module TryCon {
     EnumSeqBound2 esb_t;
     StringSeqUnbound strsu_t;
     StringSeqBound2 strsb_t;
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
     WideStringSeqUnbound wstrsu_t;
     WideStringSeqBound2 wstrsb_t;
 #endif
@@ -117,7 +119,7 @@ module TryCon {
   @mutable
   struct TrimStruct2 {
     @try_construct(TRIM) str20 str20_t;
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
     @try_construct(TRIM) wstr20 wstr20_t;
 #endif
     @try_construct(TRIM) ShortSeqUnbound psu_t;
@@ -128,7 +130,7 @@ module TryCon {
     @try_construct(TRIM) EnumSeqBound esb_t;
     @try_construct(TRIM) StringSeqUnbound strsu_t;
     @try_construct(TRIM) StringSeqBound strsb_t;
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
     @try_construct(TRIM) WideStringSeqUnbound wstrsu_t;
     @try_construct(TRIM) WideStringSeqBound wstrsb_t;
 #endif
