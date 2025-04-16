@@ -3,13 +3,14 @@
 #include "CommonTypeSupportImpl.h"
 
 #include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/Definitions.h>
 
 struct ReadTest {
   DDS::TypeSupport* ts;
   DDS::DataReader* dr;
   const std::string& topic_name;
   bool dynamic;
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   DDS::DynamicData_var dd;
 #endif
   CORBA::String_var type_name;
@@ -20,7 +21,7 @@ struct ReadTest {
     , dr(dr)
     , topic_name(topic_name)
     , dynamic(dynamic)
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
     , dd(0)
 #endif
     , type_name(ts->get_type_name())
@@ -39,7 +40,7 @@ struct ReadTest {
 
   void check_int32(const std::string& path, CORBA::Int32 expected)
   {
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
     ACE_UNUSED_ARG(path);
     ACE_UNUSED_ARG(expected);
     success = false;
@@ -71,7 +72,7 @@ struct ReadTest {
 
   void check_string(const std::string& path, const std::string& expected)
   {
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
     ACE_UNUSED_ARG(path);
     ACE_UNUSED_ARG(expected);
     success = false;
@@ -122,7 +123,7 @@ struct ReadTest {
 
   bool read_dynamic()
   {
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
     success = false;
     return false;
 #else

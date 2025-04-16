@@ -5,6 +5,8 @@
 #include "BenchTypeSupportImpl.h"
 
 #include <dds/DdsDcpsTopicC.h>
+
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/EventDispatcher.h>
 
 #include <random>
@@ -37,7 +39,7 @@ protected:
   OpenDDS::DCPS::EventBase_rch event_;
   std::mt19937_64 mt_;
   size_t set_call_count_;
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   DDS::ContentFilteredTopic_var content_filtered_topic_;
 #endif
   Builder::StringSeqSeq acceptable_param_values_;

@@ -1,4 +1,6 @@
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include <dds/DCPS/XTypes/IdlScanner.h>
 
 #  include <dds/DCPS/XTypes/TypeDescriptorImpl.h>
@@ -804,4 +806,4 @@ TEST_F(dds_DCPS_XTypes_IdlScanner, IdlScanner_DynamicType2)
   }
 }
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

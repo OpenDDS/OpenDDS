@@ -6,11 +6,12 @@
 #ifndef OPENDDS_DCPS_XTYPES_IDL_SCANNER_H
 #define OPENDDS_DCPS_XTYPES_IDL_SCANNER_H
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #  include <dds/DCPS/dcps_export.h>
 
-#  include <dds/DCPS/Definitions.h>
 #  include <dds/DdsDynamicDataC.h>
 
 #  include <string>
@@ -908,5 +909,5 @@ private:
 } // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif
 #endif // OPENDDS_DCPS_XTYPES_IDL_SCANNER_H

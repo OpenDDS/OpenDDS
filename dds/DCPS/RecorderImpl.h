@@ -26,7 +26,6 @@
 #include <dds/DdsDcpsSubscriptionExtC.h>
 #include <dds/DdsDcpsDomainC.h>
 #include <dds/DdsDcpsTopicC.h>
-#include <dds/OpenDDSConfigWrapper.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -98,11 +97,11 @@ public:
 
   void remove_all_associations();
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   void add_to_dynamic_type_map(const GUID_t& pub_id, const XTypes::TypeIdentifier& ti);
 #endif
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   // implement Recoder
   virtual DDS::ReturnCode_t repoid_to_bit_key(const DCPS::GUID_t&     id,
                                               DDS::BuiltinTopicKey_t& key);
@@ -161,7 +160,7 @@ private:
   void lookup_instance_handles(const WriterIdSeq&      ids,
                                DDS::InstanceHandleSeq& hdls);
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   DDS::DynamicData_ptr get_dynamic_data(const RawDataSample& sample);
 #endif
   void check_encap(bool b) { check_encap_ = b; }
@@ -211,7 +210,7 @@ private:
   /// RW lock for reading/writing publications.
   ACE_RW_Thread_Mutex writers_lock_;
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   typedef OPENDDS_MAP(GUID_t, DDS::DynamicType_var) DynamicTypeByPubId;
   DynamicTypeByPubId dt_map_;
 #endif

@@ -1,4 +1,6 @@
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/OpenDDSConfigWrapper.idl>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include <tao/LongSeq.pidl>
 #  include <tao/ULongSeq.pidl>
 #  include <tao/Int8Seq.pidl>
@@ -313,4 +315,4 @@ case TypeUint32:
 
 };
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

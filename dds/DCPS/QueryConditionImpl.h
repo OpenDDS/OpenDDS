@@ -8,12 +8,15 @@
 #ifndef OPENDDS_DCPS_QUERYCONDITIONIMPL_H
 #define OPENDDS_DCPS_QUERYCONDITIONIMPL_H
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#include "Definitions.h"
+
+#if OPENDDS_CONFIG_QUERY_CONDITION
 
 #include "dds/DdsDcpsSubscriptionC.h"
-#include "ReadConditionImpl.h"
+
 #include "FilterEvaluator.h"
 #include "PoolAllocator.h"
+#include "ReadConditionImpl.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -92,6 +95,6 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_NO_QUERY_CONDITION
+#endif
 
 #endif

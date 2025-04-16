@@ -7,6 +7,7 @@
 #include "tests/Utils/ExceptionStreams.h"
 #include "tests/Utils/DistributedConditionSet.h"
 
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
@@ -215,7 +216,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     writer.end();
   }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (reader_handle_1 == reader_handle_2) {
     cerr << "ERROR: readers have the same handle" << endl;
     return 1;

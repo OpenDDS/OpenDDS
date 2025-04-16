@@ -12,8 +12,10 @@
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/MessageUtils.h>
+
 #include <dds/DCPS/AssociationData.h>
 #include <dds/DCPS/DataSampleElement.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/EncapsulationHeader.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
@@ -25,8 +27,6 @@
 #include <dds/DCPS/Service_Participant.h>
 
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
-
-#include <dds/OpenDDSConfigWrapper.h>
 
 #include <tao/CORBA_String.h>
 
@@ -211,7 +211,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
 
   // 0. initialization
 
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
   if (host == "localhost") {
     host = "127.0.0.1";
   }

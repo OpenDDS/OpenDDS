@@ -11,6 +11,7 @@
 #include "RtpsUdpDataLink.h"
 
 #include <dds/DCPS/ConnectionRecords.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/FibonacciSequence.h>
 #include <dds/DCPS/PeriodicTask.h>
 #include <dds/DCPS/PoolAllocator.h>
@@ -24,8 +25,6 @@
 #include <dds/DCPS/transport/framework/TransportImpl.h>
 #include <dds/DCPS/transport/framework/TransportStatistics.h>
 #include <dds/DCPS/transport/framework/MessageDropper.h>
-
-#include <dds/OpenDDSConfigWrapper.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -396,7 +395,7 @@ private:
 
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   ConnectionRecords deferred_connection_records_;
 #endif
 

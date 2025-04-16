@@ -171,7 +171,7 @@ GuidConverter::operator std::wstring() const
 }
 #endif
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 std::ostream&
 operator<<(std::ostream& os, const GuidConverter& rhs)
@@ -186,7 +186,7 @@ operator<<(std::wostream& os, const GuidConverter& rhs)
   return os << std::wstring(rhs);
 }
 #endif //DDS_HAS_WCHAR
-#endif //OPENDDS_SAFETY_PROFILE
+#endif
 
 OPENDDS_STRING
 GuidConverter::uniqueParticipantId() const

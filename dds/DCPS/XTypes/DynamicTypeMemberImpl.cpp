@@ -1,8 +1,8 @@
 #include <DCPS/DdsDcps_pch.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
-
 #include "DynamicTypeMemberImpl.h"
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include "DynamicTypeImpl.h"
 
@@ -92,4 +92,4 @@ char* DynamicTypeMemberImpl::get_name()
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

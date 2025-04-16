@@ -375,7 +375,7 @@ private:
   typedef ACE_SYNCH_MUTEX     LockType;
 
   /// Convenience function for diagnostic information.
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   friend OpenDDS_Dcps_Export
   std::ostream& operator<<(std::ostream& str, const DataLink& value);
 #endif

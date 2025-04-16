@@ -1,8 +1,8 @@
 #include <DCPS/DdsDcps_pch.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
-
 #include "DynamicTypeImpl.h"
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include "DynamicTypeMemberImpl.h"
 
@@ -304,4 +304,4 @@ bool test_equality(DynamicTypeMembersByIdImpl* lhs, DynamicTypeMembersByIdImpl* 
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

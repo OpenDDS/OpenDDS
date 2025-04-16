@@ -1,7 +1,9 @@
-#include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/DCPS_Utils.h>
-#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Registered_Data_Types.h>
+#include <dds/DCPS/Service_Participant.h>
+
 #include <dds/DCPS/XTypes/DynamicTypeSupport.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportConfig.h>
@@ -39,7 +41,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ts_name.in(), type_name));
   }
 
-#  ifndef OPENDDS_SAFETY_PROFILE
+#  if !OPENDDS_CONFIG_SAFETY_PROFILE
   // Set default to RTPS, create DynamicDataWriter from dlopened TypeSupport
   TheServiceParticipant->set_default_discovery(OpenDDS::DCPS::Discovery::DEFAULT_RTPS);
   OpenDDS::DCPS::TransportConfig_rch transport_config =
@@ -88,7 +90,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   dp->delete_contained_entities();
   dpf->delete_participant(dp);
   TheServiceParticipant->shutdown();
-#  endif // OPENDDS_SAFETY_PROFILE
+#  endif
 #endif // ACE_AS_STATIC_LIBS
 
   return 0;

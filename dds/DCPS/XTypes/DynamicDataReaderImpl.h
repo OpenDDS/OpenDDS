@@ -6,7 +6,9 @@
 #ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_READER_IMPL_H
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_READER_IMPL_H
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include <dds/DCPS/DataReaderImpl_T.h>
 
@@ -19,7 +21,7 @@ namespace OpenDDS {
 
 namespace DCPS {
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   template <> OpenDDS_Dcps_Export
   DDS::ReturnCode_t
   DataReaderImpl_T<XTypes::DynamicSample>::read_generic(GenericBundle& gen,

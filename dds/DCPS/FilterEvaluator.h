@@ -10,7 +10,7 @@
 
 #include "Definitions.h"
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "PoolAllocator.h"
@@ -197,7 +197,7 @@ public:
   ComparatorBase::Ptr create_qc_comparator(const char* fieldSpec) const
   { return create_qc_comparator(fieldSpec, ComparatorBase::Ptr()); }
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
   virtual size_t numDcpsKeys() const = 0;
 
   virtual bool compare(const void* lhs, const void* rhs,
@@ -214,7 +214,7 @@ public:
 
   virtual void* allocate() const = 0;
   virtual void deallocate(void* stru) const = 0;
-#endif /* OPENDDS_NO_MULTI_TOPIC */
+#endif
 };
 
 /// Each user-defined struct type will have an instantiation of this template
@@ -226,5 +226,5 @@ struct MetaStructImpl;
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif
 #endif

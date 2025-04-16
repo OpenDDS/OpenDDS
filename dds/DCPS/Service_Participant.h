@@ -59,10 +59,10 @@ const char COMMON_DCPS_BIDIR_GIOP[] = "COMMON_DCPS_BIDIR_GIOP";
 const bool COMMON_DCPS_BIDIR_GIOP_default = true;
 
 const char COMMON_DCPS_BIT[] = "COMMON_DCPS_BIT";
-#ifdef DDS_HAS_MINIMUM_BIT
-const bool COMMON_DCPS_BIT_default = false;
-#else
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 const bool COMMON_DCPS_BIT_default = true;
+#else
+const bool COMMON_DCPS_BIT_default = false;
 #endif
 
 const char COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC[] = "COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC";
@@ -91,7 +91,7 @@ const char COMMON_DCPS_DEFAULT_DISCOVERY[] = "COMMON_DCPS_DEFAULT_DISCOVERY";
 #ifdef DDS_DEFAULT_DISCOVERY_METHOD
 const Discovery::RepoKey COMMON_DCPS_DEFAULT_DISCOVERY_default = DDS_DEFAULT_DISCOVERY_METHOD;
 #else
-# ifdef OPENDDS_SAFETY_PROFILE
+# if OPENDDS_CONFIG_SAFETY_PROFILE
 const Discovery::RepoKey COMMON_DCPS_DEFAULT_DISCOVERY_default = Discovery::DEFAULT_RTPS;
 # else
 const Discovery::RepoKey COMMON_DCPS_DEFAULT_DISCOVERY_default = Discovery::DEFAULT_REPO;
@@ -115,7 +115,7 @@ const char COMMON_DCPS_PENDING_TIMEOUT[] = "COMMON_DCPS_PENDING_TIMEOUT";
 // Can't use TimeDuration::zero_value since initialization order is undefined.
 const TimeDuration COMMON_DCPS_PENDING_TIMEOUT_default(0, 0);
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 const char COMMON_DCPS_PERSISTENT_DATA_DIR[] = "COMMON_DCPS_PERSISTENT_DATA_DIR";
 const String COMMON_DCPS_PERSISTENT_DATA_DIR_default = "OpenDDS-durable-data-dir";
 #endif
@@ -180,7 +180,7 @@ const char COMMON_POOL_SIZE[] = "COMMON_POOL_SIZE";
 const size_t COMMON_POOL_SIZE_default = 1024 * 1024 * 16;
 #endif
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 class DataDurabilityCache;
 #endif
 class ThreadStatusManager;
@@ -462,7 +462,7 @@ public:
 
   NetworkAddress default_address() const;
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
   /// Get the data durability cache corresponding to the given
   /// DurabilityQosPolicy and sample list depth.
   DataDurabilityCache * get_data_durability_cache(
@@ -478,7 +478,7 @@ public:
   void register_discovery_type(const char* section_name,
                                Discovery::Config* cfg);
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   ACE_ARGV* ORB_argv() { return &ORB_argv_; }
 #endif
 
@@ -534,7 +534,7 @@ public:
                          const ACE_TCHAR* filename,
                          bool allow_overwrite = false);
 
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
   /**
    * Configure the safety profile pool
    */
@@ -564,7 +564,7 @@ public:
   XTypes::TypeInformation get_type_information(DDS::DomainParticipant_ptr participant,
                                                const DDS::BuiltinTopicKey_t& key) const;
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   DDS::ReturnCode_t get_dynamic_type(DDS::DynamicType_var& type,
     DDS::DomainParticipant_ptr participant, const DDS::BuiltinTopicKey_t& key) const;
 #endif
@@ -659,7 +659,7 @@ private:
   typedef OPENDDS_MAP(OPENDDS_STRING, container_supported_unique_ptr<Discovery::Config>) DiscoveryTypes;
   DiscoveryTypes discovery_types_;
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   ACE_ARGV ORB_argv_;
 #endif
 
@@ -833,7 +833,7 @@ private:
   /// Maximum priority value for the current scheduling policy.
   int priority_max_;
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 
   /// The @c TRANSIENT data durability cache.
   unique_ptr<DataDurabilityCache> transient_data_cache_;

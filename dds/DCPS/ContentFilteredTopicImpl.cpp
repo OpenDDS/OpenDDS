@@ -7,8 +7,9 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 #include "ContentFilteredTopicImpl.h"
+
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
 #include "DataReaderImpl.h"
 
 #include <cstring>
@@ -143,4 +144,4 @@ ContentFilteredTopicImpl::remove_reader(DataReaderImpl& reader)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#endif

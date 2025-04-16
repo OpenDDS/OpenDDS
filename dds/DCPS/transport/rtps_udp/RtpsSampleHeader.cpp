@@ -10,6 +10,7 @@
 #include "RtpsUdpSendStrategy.h"
 
 #include <dds/DCPS/DataSampleElement.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/DisjointSequence.h>
 #include <dds/DCPS/EncapsulationHeader.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -45,7 +46,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace RTPS {
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 inline bool
 operator==(const StatusInfo_t& lhs, const StatusInfo_t& rhs)
 {

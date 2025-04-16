@@ -22,7 +22,7 @@ OpenDDS::DCPS::ReceivedDataElementList::add(ReceivedDataElement *data_sample)
 
   ++size_;
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   if (!data_sample->coherent_change_)
 #endif
   {

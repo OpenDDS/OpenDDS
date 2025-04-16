@@ -10,6 +10,7 @@
 #include "DataWriterImpl.h"
 
 #include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <ace/Reverse_Lock_T.h>
 
@@ -84,7 +85,7 @@ public:
 
   virtual DDS::ReturnCode_t resume_publications();
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 
   virtual DDS::ReturnCode_t begin_coherent_changes();
 
@@ -185,7 +186,7 @@ private:
   /// This map is used to support datawriter lookup by datawriter
   /// repository id.
   PublicationMap               publication_map_;
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   /// The number of times begin_coherent_changes as been called.
   std::size_t                  change_depth_;
 #endif

@@ -10,7 +10,9 @@
 
 #include "ace/config.h"
 
-#if (defined(ACE_LINUX) || defined(ACE_ANDROID)) && !defined(OPENDDS_SAFETY_PROFILE)
+#include "Definitions.h"
+
+#if (defined(ACE_LINUX) || defined(ACE_ANDROID)) && !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #define OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
 

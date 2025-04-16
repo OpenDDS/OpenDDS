@@ -104,6 +104,68 @@ If configure runs successfully it will end with a message about the next steps f
 
     setenv
 
+.. _building--configuration-header:
+
+The Configuration Header
+========================
+
+The :ghfile:`configure` script and CMake generate a header ``$DDS_ROOT/OpenDDSConfig.h`` (see :envvar:`DDS_ROOT`).
+The header defines macros that determine the features and capabilities that are built into OpenDDS.
+Users using a custom build environment must ensure that ``$DDS_ROOT/OpenDDSConfig.h`` exists.
+A template can be found in :ghfile:`dds/OpenDDSConfig.h.in`.
+
+The configuration header is not used directly.
+Instead, :ghfile:`dds/OpenDDSConfigWrapper.h` includes it, provides defaults and backwards compatibility, and performs some sanity checks.
+For consistency and to avoid build errors, applications that have code that is conditioned on OpenDDS features should include :ghfile:`dds/OpenDDSConfigWrapper.h`.
+
+The following macros are available in the config header:
+
+``OPENDDS_CONFIG_AUTO_STATIC_INCLUDES``
+    TODO
+
+``OPENDDS_CONFIG_BOOTTIME_TIMERS``
+    Use Linux ``CLOCK_BOOTTIME`` when setting timers.
+    This makes the timers more accurate when systems do a hardware sleep.
+
+``OPENDDS_CONFIG_BUILT_IN_TOPICS``
+    Enable full support for the :ref:`built_in_topics`.
+
+``OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC``
+    Enable :ref:`content_subscription_profile--content-filtered-topic`.
+
+``OPENDDS_CONFIG_CONTENT_SUBSCRIPTION``
+    Enable :ref:`content_subscription_profile`.
+
+``OPENDDS_CONFIG_MULTI_TOPIC``
+    Enable :ref:`content_subscription_profile--multi-topic`.
+
+``OPENDDS_CONFIG_OBJECT_MODEL_PROFILE``
+    Enable :ref:`building--object-model-profile`.
+
+``OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE``
+    Enable exclusive ownership as part of :ref:`building--ownership-profile`.
+
+``OPENDDS_CONFIG_OWNERSHIP_PROFILE``
+    Enable :ref:`building--ownership-profile`.
+
+``OPENDDS_CONFIG_PERSISTENCE_PROFILE``
+    Enable :ref:`building--persistence-profile`.
+
+``OPENDDS_CONFIG_QUERY_CONDITION``
+    Enable :ref:`content_subscription_profile--query-condition`.
+
+``OPENDDS_CONFIG_RAPIDJSON``
+    Enable JSON features.
+
+``OPENDDS_CONFIG_SAFETY_PROFILE``
+    Enable :ref:`safety_profile`.
+
+``OPENDDS_CONFIG_SECURITY``
+    Enable :ref:`dds_security`.
+
+``OPENDDS_CONFIG_STD_OPTIONAL``
+    Use ``std::optional``.
+
 Java
 ====
 

@@ -1,6 +1,5 @@
 project(*idl) : dcps_test {
   requires += no_opendds_safety_profile
-
   TypeSupport_Files {
     Messenger.idl
   }
@@ -11,6 +10,7 @@ project(*idl) : dcps_test {
 project(*Publisher) : dcpsexe, dcps_test, dcps_rtps_udp {
   requires += no_opendds_safety_profile
   exename   = publisher
+  after    += *idl
 
   TypeSupport_Files {
     Messenger.idl
@@ -25,6 +25,7 @@ project(*Publisher) : dcpsexe, dcps_test, dcps_rtps_udp {
 project(*Subscriber) : dcpsexe, dcps_test, dcps_rtps_udp {
   requires += no_opendds_safety_profile
   exename   = subscriber
+  after    += *Publisher
 
   TypeSupport_Files {
     Messenger.idl

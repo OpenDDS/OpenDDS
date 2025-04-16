@@ -8,6 +8,7 @@
 
 #include "BuiltInTopicDataReaderImpls.h"
 #include "DCPS_Utils.h"
+#include "Definitions.h"
 #include "GuidUtils.h"
 #include "Marked_Default_Qos.h"
 #include "PoolAllocator.h"
@@ -15,8 +16,6 @@
 #include "TopicDetails.h"
 #include "WaitSet.h"
 #include "dcps_export.h"
-
-#include <dds/OpenDDSConfigWrapper.h>
 
 #include <ace/Configuration.h>
 
@@ -356,10 +355,10 @@ public:
                                 const XTypes::TypeIdentifier& ti,
                                 bool secure);
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
   SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 
   void type_lookup_init(ReactorTask_rch reactor_task);
   void type_lookup_fini();
@@ -454,7 +453,7 @@ private:
   OPENDDS_SET(OPENDDS_STRING) ignored_topics_;
   OPENDDS_SET_CMP(GUID_t, GUID_tKeyLessThan) relay_only_readers_;
   const EndpointRegistry& registry_;
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   StaticParticipant& participant_;
 #endif
 
@@ -805,7 +804,7 @@ private:
 
   virtual void remove_discovered_participant_i(DiscoveredParticipantIter&) {}
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   ParticipantBuiltinTopicDataDataReaderImpl* part_bit()
   {
     DDS::Subscriber_var bit_sub(bit_subscriber());
@@ -849,7 +848,7 @@ private:
       bit_sub->lookup_datareader(BUILT_IN_INTERNAL_THREAD_TOPIC);
     return dynamic_cast<InternalThreadBuiltinTopicDataDataReaderImpl*>(d.in());
   }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 
   StaticEndpointManager& endpoint_manager() { return *endpoint_manager_; }
 

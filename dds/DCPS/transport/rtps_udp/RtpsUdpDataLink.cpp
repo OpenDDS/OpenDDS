@@ -3928,7 +3928,7 @@ RtpsUdpDataLink::RtpsWriter::is_leading(const ReaderInfo_rch& reader) const
 void
 RtpsUdpDataLink::RtpsWriter::check_leader_lagger() const
 {
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #ifndef NDEBUG
   static const SequenceNumber negative_one = SequenceNumber::ZERO().previous();
   for (SNRIS::const_iterator pos1 = lagging_readers_.begin(), limit = lagging_readers_.end();
@@ -4959,7 +4959,10 @@ void RtpsUdpDataLink::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
   stats[idx++].value = readers_of_writer_.size();
   stats[idx++].value = writer_to_seq_best_effort_readers_.size();
   stats[idx++].value = sq_.size();
-  stats[idx++].value = fsq_vec_size_;
+  {
+    ACE_Guard<ACE_Thread_Mutex> fsq_guard(fsq_mutex_);
+    stats[idx++].value = fsq_vec_size_;
+  }
   const RtpsUdpSendStrategy_rch send = send_strategy();
   if (send) {
     send->fill_stats(stats, idx);

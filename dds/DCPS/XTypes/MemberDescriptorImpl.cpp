@@ -1,8 +1,8 @@
 #include <DCPS/DdsDcps_pch.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
-
 #include "MemberDescriptorImpl.h"
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include "DynamicTypeImpl.h"
 #include "IdlScanner.h"
@@ -210,4 +210,4 @@ bool test_equality(DDS::MemberDescriptor* lhs, DDS::MemberDescriptor* rhs, Dynam
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

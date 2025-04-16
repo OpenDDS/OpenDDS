@@ -470,7 +470,7 @@ function(_opendds_feature name default_value)
 
   # Set values for OpenDDSConfig.h
   if(arg_CONFIG)
-    if(arg_TYPE STREQUAL BOOL)
+    if(arg_TYPE STREQUAL BOOL OR arg_TYPE STREQUAL PATH)
       if(value)
         set(config_value 1)
       else()
@@ -520,6 +520,7 @@ else()
 endif()
 _opendds_feature(CXX17 "${_opendds_cxx17}" MPC_INVERTED_NAME no_cxx17 DOC "Build assumes C++17 support")
 _opendds_feature(STD_OPTIONAL "${OPENDDS_CXX17}" CONFIG DOC "Use C++17's std::optional")
+_opendds_feature(RAPIDJSON "${OPENDDS_RAPIDJSON}" CONFIG DOC "Enable rapidjson features" TYPE PATH)
 
 # ACE Features
 _opendds_feature(VERSIONED_NAMESPACE OFF MPC DOC "Namespaces include versions")
@@ -544,7 +545,7 @@ if(OPENDDS_CXX_STD_YEAR LESS 2011)
 else()
   set(_opendds_cxx11_default ON)
 endif()
-_opendds_feature(CXX11 "${_opendds_cxx11_default}" MPC_INVERTED_NAME no_cxx11
+_opendds_feature(CXX11 "${_opendds_cxx11_default}" CONFIG MPC_INVERTED_NAME no_cxx11
   DOC "Build assumes C++11 support")
 
 # TAO Features

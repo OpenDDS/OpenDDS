@@ -8,6 +8,7 @@
 #include "RecorderImpl.h"
 
 #include "DCPS_Utils.h"
+#include "Definitions.h"
 #include "DomainParticipantImpl.h"
 #include "EncapsulationHeader.h"
 #include "FeatureDisabledQosCheck.h"
@@ -26,7 +27,7 @@
 #include "TypeSupportImpl.h"
 #include "Util.h"
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include "BuiltInTopicUtils.h"
 #endif
 
@@ -37,11 +38,9 @@
 
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif
-
-#include <dds/OpenDDSConfigWrapper.h>
 
 #include <tao/ORB_Core.h>
 
@@ -229,7 +228,7 @@ void RecorderImpl::notify_subscription_lost(const WriterIdSeq&)
 {
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 void
 RecorderImpl::add_to_dynamic_type_map(const GUID_t& pub_id, const XTypes::TypeIdentifier& ti)
 {
@@ -545,7 +544,7 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
     for (CORBA::ULong i = 0; i < wr_len; i++) {
       GUID_t writer_id = writers[i];
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
       if (dt_map_.erase(writer_id) == 0) {
         if (DCPS_debug_level >= 4) {
           ACE_DEBUG((LM_DEBUG, "(%P|%t) RecorderImpl::remove_associations_i: -"
@@ -965,7 +964,7 @@ RecorderImpl::unregister_for_writer(const GUID_t& participant,
   TransportClient::unregister_for_writer(participant, readerid, writerid);
 }
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 DDS::ReturnCode_t
 RecorderImpl::repoid_to_bit_key(const GUID_t& id,
                                 DDS::BuiltinTopicKey_t& key)
@@ -991,9 +990,9 @@ RecorderImpl::repoid_to_bit_key(const GUID_t& id,
 
   return ret;
 }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 DDS::DynamicData_ptr RecorderImpl::get_dynamic_data(const RawDataSample& sample)
 {
   const Encoding enc(sample.encoding_kind_, sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);

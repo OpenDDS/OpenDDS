@@ -3,18 +3,19 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/GuardCondition.h>
-#include <dds/DCPS/WaitSet.h>
-#include <dds/DCPS/Recorder.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/Recorder.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/RTPS/RtpsDiscoveryConfig.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/framework/TransportInst.h>
-#if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
+#if defined ACE_AS_STATIC_LIBS && !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 

@@ -8,6 +8,7 @@
 #include "DataReaderImpl.h"
 
 #include "DCPS_Utils.h"
+#include "Definitions.h"
 #include "DomainParticipantImpl.h"
 #include "FeatureDisabledQosCheck.h"
 #include "GuidConverter.h"
@@ -30,12 +31,11 @@
 
 #include "XTypes/TypeObject.h"
 
-#include <dds/OpenDDSConfigWrapper.h>
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include "BuiltInTopicUtils.h"
 #endif
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif
 #include <dds/DdsDcpsCoreC.h>
@@ -46,7 +46,7 @@
 
 #include <cstdio>
 #include <stdexcept>
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 #  include <sstream>
 #endif
 
@@ -126,7 +126,7 @@ DataReaderImpl::~DataReaderImpl()
 
   deadline_task_->cancel();
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
   if (participant) {
     XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
@@ -158,14 +158,14 @@ DataReaderImpl::cleanup()
 
   topic_servant_ = 0;
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   {
     ACE_Guard<ACE_Thread_Mutex> guard_cft(content_filtered_topic_mutex_);
     content_filtered_topic_ = 0;
   }
 #endif
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
   multi_topic_ = 0;
 #endif
 
@@ -186,11 +186,11 @@ void DataReaderImpl::init(
     topic_id_ = topic->get_id();
   }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   CORBA::String_var topic_name = topic_desc->get_name();
   CORBA::String_var topic_type_name = topic_desc->get_type_name();
   is_bit_ = topicIsBIT(topic_name, topic_type_name);
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
   qos_ = qos;
   passed_qos_ = qos;
@@ -714,7 +714,7 @@ DDS::ReadCondition_ptr DataReaderImpl::create_readcondition(
   return rc._retn();
 }
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
 DDS::QueryCondition_ptr DataReaderImpl::create_querycondition(
     DDS::SampleStateMask sample_states,
     DDS::ViewStateMask view_states,
@@ -878,7 +878,7 @@ DataReaderListener_ptr DataReaderImpl::get_ext_listener()
 
 DDS::TopicDescription_ptr DataReaderImpl::get_topicdescription()
 {
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   {
     ACE_Guard<ACE_Thread_Mutex> guard(content_filtered_topic_mutex_);
     if (content_filtered_topic_) {
@@ -1024,7 +1024,7 @@ DataReaderImpl::get_matched_publications(
   return DDS::RETCODE_OK;
 }
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 DDS::ReturnCode_t
 DataReaderImpl::get_matched_publication_data(
     DDS::PublicationBuiltinTopicData & publication_data,
@@ -1056,7 +1056,7 @@ DataReaderImpl::get_matched_publication_data(
 
   return ret;
 }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
 DDS::ReturnCode_t
 DataReaderImpl::enable()
@@ -1167,7 +1167,7 @@ DataReaderImpl::enable()
     CORBA::String_var filterClassName = "";
     CORBA::String_var filterExpression = "";
     DDS::StringSeq exprParams;
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
     {
       ACE_Guard<ACE_Thread_Mutex> guard(content_filtered_topic_mutex_);
       if (content_filtered_topic_) {
@@ -1287,7 +1287,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
         (header.message_id_ == DISPOSE_INSTANCE) ||
         (header.message_id_ == DISPOSE_UNREGISTER_INSTANCE)) {
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
       if (header.coherent_change_) {
         writer->add_coherent_samples(header.sequence_);
       }
@@ -1368,7 +1368,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   }
   break;
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   case END_COHERENT_CHANGES: {
     CoherentChangeControl control;
 
@@ -1421,7 +1421,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     }
   }
   break;
-#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
+#endif
 
   case DATAWRITER_LIVELINESS: {
     if (DCPS_debug_level >= 4) {
@@ -2487,7 +2487,7 @@ DataReaderImpl::update_ownership_strength(const GUID_t& pub_id,
 }
 #endif
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 bool DataReaderImpl::verify_coherent_changes_completion(WriterInfo* writer)
 {
   Coherent_State state = COMPLETED;
@@ -2723,7 +2723,7 @@ void DataReaderImpl::get_ordered_data(GroupRakeData& data,
   }
 }
 
-#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
+#endif
 
 void
 DataReaderImpl::set_subscriber_qos(
@@ -2732,7 +2732,7 @@ DataReaderImpl::set_subscriber_qos(
   this->subqos_ = qos;
 }
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
 void
 DataReaderImpl::enable_filtering(ContentFilteredTopicImpl* cft)
 {
@@ -2751,7 +2751,7 @@ DataReaderImpl::get_cf_topic() const
 }
 #endif
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
 void
 DataReaderImpl::enable_multi_topic(MultiTopicImpl* mt)
 {
@@ -2759,7 +2759,7 @@ DataReaderImpl::enable_multi_topic(MultiTopicImpl* mt)
 }
 #endif
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
 void
 DataReaderImpl::update_subscription_params(const DDS::StringSeq& params) const
@@ -2964,7 +2964,7 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
                                               bool is_new_instance)
 {
   bool accepted = true;
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   bool verify_coherent = false;
 #endif
   WriterInfo_rch writer;
@@ -2977,7 +2977,7 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
     if (where != writers_.end()) {
       if (header.coherent_change_) {
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
         // Received coherent change
         where->second->coherent_change(header.group_coherent_, header.publisher_id_);
         verify_coherent = true;
@@ -2995,7 +2995,7 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
     }
   }
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   if (verify_coherent) {
     accepted = verify_coherent_changes_completion(writer.in());
   }
