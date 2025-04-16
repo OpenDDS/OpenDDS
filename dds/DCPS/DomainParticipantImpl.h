@@ -34,7 +34,7 @@
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDynamicDataC.h>
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif
 
@@ -60,7 +60,7 @@ class BitSubscriber;
 class RecorderImpl;
 class ReplayerImpl;
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 class FilterEvaluator;
 #endif
 
@@ -175,7 +175,7 @@ public:
   virtual DDS::TopicDescription_ptr lookup_topicdescription(
     const char * name);
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
 
   virtual DDS::ContentFilteredTopic_ptr create_contentfilteredtopic(
     const char *           name,
@@ -200,7 +200,7 @@ public:
 
 #endif
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
   RcHandle<FilterEvaluator> get_filter_eval(const char* filter);
   void deref_filter_eval(const char* filter);
@@ -262,7 +262,7 @@ public:
    */
   virtual DDS::ReturnCode_t get_current_time(DDS::Time_t& current_time);
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
   virtual DDS::ReturnCode_t get_discovered_participants(
     DDS::InstanceHandleSeq & participant_handles);
@@ -503,7 +503,7 @@ private:
   SubscriberSet subscribers_;
   /// Collection of topics.
   TopicMap topics_;
-#if !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC || !defined(OPENDDS_NO_MULTI_TOPIC)
   /// Collection of TopicDescriptions which are not also Topics
   TopicDescriptionMap topic_descrs_;
 #endif
@@ -550,7 +550,7 @@ private:
   /// Publisher ID generator.
   RepoIdSequence pub_id_gen_;
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   ACE_Thread_Mutex filter_cache_lock_;
   OPENDDS_MAP(OPENDDS_STRING, RcHandle<FilterEvaluator> ) filter_cache_;
 #endif

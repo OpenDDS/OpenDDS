@@ -345,7 +345,7 @@ DDS::ReturnCode_t DynamicDataBase::unsupported_method(const char* method_name, b
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 namespace {
 
   template <typename T>

@@ -9,6 +9,7 @@
 #ifndef OPENDDS_DCPS_RECORDER_H
 #define OPENDDS_DCPS_RECORDER_H
 
+#include "Definitions.h"
 #include "LocalObject.h"
 #include "PoolAllocator.h"
 #include "RawDataSample.h"
@@ -68,7 +69,7 @@ public:
 
   static Recorder_ptr _duplicate(Recorder_ptr obj);
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   /**
    *  Find the bit key for a given repo id.
    */

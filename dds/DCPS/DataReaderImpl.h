@@ -77,7 +77,7 @@ enum MarshalingType {
   KEY_ONLY_MARSHALING
 };
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
 class OpenDDS_Dcps_Export AbstractSamples
 {
@@ -179,7 +179,7 @@ public:
     DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states);
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
   virtual DDS::QueryCondition_ptr create_querycondition(
     DDS::SampleStateMask sample_states,
     DDS::ViewStateMask view_states,
@@ -233,11 +233,11 @@ public:
   virtual DDS::ReturnCode_t get_matched_publications(
     DDS::InstanceHandleSeq & publication_handles);
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   virtual DDS::ReturnCode_t get_matched_publication_data(
     DDS::PublicationBuiltinTopicData & publication_data,
     DDS::InstanceHandle_t publication_handle);
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
   virtual DDS::ReturnCode_t enable();
 
@@ -258,7 +258,7 @@ public:
                        DDS::ViewStateMask view_states,
                        DDS::InstanceStateMask instance_states);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   virtual bool contains_sample_filtered(DDS::SampleStateMask sample_states,
                                         DDS::ViewStateMask view_states,
                                         DDS::InstanceStateMask instance_states,
@@ -383,9 +383,9 @@ public:
   virtual void lookup_instance(const ReceivedDataSample& sample,
                                SubscriptionInstance_rch& instance) = 0;
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
 
   void enable_filtering(ContentFilteredTopicImpl* cft);
 
@@ -647,7 +647,7 @@ protected:
 
 #endif
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   mutable ACE_Thread_Mutex content_filtered_topic_mutex_;
   TopicDescriptionPtr<ContentFilteredTopicImpl> content_filtered_topic_;
 #endif

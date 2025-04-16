@@ -8,10 +8,11 @@
 #ifndef OPENDDS_DCPS_BITPUBLISTENERIMPL_H
 #define OPENDDS_DCPS_BITPUBLISTENERIMPL_H
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#include "Definitions.h"
+
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
 #include "dds/DdsDcpsSubscriptionC.h"
-#include "Definitions.h"
 #include "LocalObject.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -69,6 +70,6 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // DDS_HAS_MINIMUM_BIT
+#endif
 
 #endif // OPENDDS_DCPS_BITPUBLISTENERIMPL_H

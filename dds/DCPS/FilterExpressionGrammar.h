@@ -8,7 +8,7 @@
 
 #include "Definitions.h"
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
 #include <typeinfo>
 

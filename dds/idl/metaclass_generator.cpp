@@ -21,7 +21,7 @@ namespace {
   class ContentSubscriptionGuard : public PreprocessorIfGuard {
   public:
     ContentSubscriptionGuard()
-      : PreprocessorIfGuard("ndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE")
+      : PreprocessorIfGuard(" OPENDDS_CONFIG_CONTENT_SUBSCRIPTION")
     {
     }
   };

@@ -6,6 +6,8 @@
 #ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_SUPPORT_H
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_SUPPORT_H
 
+#include <dds/DCPS/Definitions.h>
+
 #ifndef OPENDDS_SAFETY_PROFILE
 
 #include <dds/DdsDynamicTypeSupportC.h>
@@ -138,7 +140,7 @@ namespace DDS {
       return DynamicType::_duplicate(type_);
     }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
     const OpenDDS::DCPS::MetaStruct& getMetaStructForType() const;
 #endif
 

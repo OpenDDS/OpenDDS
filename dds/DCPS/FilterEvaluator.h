@@ -10,7 +10,7 @@
 
 #include "Definitions.h"
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "PoolAllocator.h"
@@ -226,5 +226,5 @@ struct MetaStructImpl;
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif
 #endif

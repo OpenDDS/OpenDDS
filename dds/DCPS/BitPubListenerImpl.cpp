@@ -7,7 +7,9 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#include "Definitions.h"
+
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
 #include "BitPubListenerImpl.h"
 #include "DomainParticipantImpl.h"
@@ -126,4 +128,4 @@ void BitPubListenerImpl::on_sample_lost(
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // DDS_HAS_MINIMUM_BIT
+#endif

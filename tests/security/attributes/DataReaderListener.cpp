@@ -10,12 +10,13 @@
 #include "SecurityAttributesMessageTypeSupportImpl.h"
 
 #include <dds/DCPS/DCPS_Utils.h>
-#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 
 #include <dds/DdsDcpsSubscriptionC.h>
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif
 
@@ -51,9 +52,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   ACE_Guard<ACE_Thread_Mutex> g(mutex_);
 
   try {
-#ifdef DDS_HAS_MINIMUM_BIT
-    ACE_UNUSED_ARG(reader);
-#else
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
     if (reader == part_reader_) {
       DDS::ParticipantBuiltinTopicDataDataReader_var part_reader_impl =
         DDS::ParticipantBuiltinTopicDataDataReader::_narrow(reader);
@@ -98,6 +97,8 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
       return;
     }
+#else
+    ACE_UNUSED_ARG(reader);
 #endif
 
     ++num_reads_;

@@ -8,6 +8,7 @@
 #include "RtpsDiscoveryConfig.h"
 
 #include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/DomainParticipantImpl.h>
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -372,7 +373,7 @@ RtpsDiscovery::append_transport_statistics(DDS::DomainId_t domain,
 RcHandle<DCPS::BitSubscriber> RtpsDiscovery::init_bit(DCPS::DomainParticipantImpl* participant)
 {
   DDS::Subscriber_var bit_subscriber;
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (!TheServiceParticipant->get_BIT()) {
     DCPS::RcHandle<DCPS::BitSubscriber> bit_subscriber_rch = DCPS::make_rch<DCPS::BitSubscriber>();
     get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber_rch);
@@ -446,7 +447,7 @@ RcHandle<DCPS::BitSubscriber> RtpsDiscovery::init_bit(DCPS::DomainParticipantImp
     }
     return RcHandle<DCPS::BitSubscriber>();
   }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 
   DCPS::RcHandle<DCPS::BitSubscriber> bit_subscriber_rch = DCPS::make_rch<DCPS::BitSubscriber>(bit_subscriber);
   get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber_rch);
