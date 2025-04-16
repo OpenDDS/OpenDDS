@@ -11,6 +11,7 @@
 #include "Definitions.h"
 #include "Discovery.h"
 #include "DomainParticipantFactoryImpl.h"
+#include "InternalStatistics.h"
 #include "JobQueue.h"
 #include "MonitorFactory.h"
 #include "NetworkConfigModifier.h"
@@ -579,13 +580,18 @@ public:
   void type_object_encoding(TypeObjectEncoding encoding);
   void type_object_encoding(const char* encoding);
 
+  unsigned int printer_value_writer_indent() const;
+  void printer_value_writer_indent(unsigned int value);
+
   RcHandle<InternalTopic<NetworkInterfaceAddress> > network_interface_address_topic() const
   {
     return network_interface_address_topic_;
   }
 
-  unsigned int printer_value_writer_indent() const;
-  void printer_value_writer_indent(unsigned int value);
+  InternalStatisticsTopic_rch internal_statistics_topic() const
+  {
+    return internal_statistics_topic_;
+  }
 
   ConfigTopic_rch config_topic() const
   {
@@ -860,6 +866,8 @@ private:
   mutable ACE_Thread_Mutex network_config_monitor_lock_;
 
   RcHandle<InternalTopic<NetworkInterfaceAddress> > network_interface_address_topic_;
+
+  InternalStatisticsTopic_rch internal_statistics_topic_;
 
   ConfigTopic_rch config_topic_;
   RcHandle<ConfigStoreImpl> config_store_;

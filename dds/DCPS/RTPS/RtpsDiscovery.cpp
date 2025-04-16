@@ -9,8 +9,10 @@
 
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/DomainParticipantImpl.h>
+#include <dds/DCPS/InternalStatistics.h>
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/Registered_Data_Types.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/SubscriberImpl.h>
@@ -34,11 +36,14 @@ using DCPS::TimeDuration;
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   : key_(key)
   , config_(DCPS::make_rch<RtpsDiscoveryConfig>(key))
+  , stats_writer_(DCPS::make_rch<DCPS::InternalStatisticsDataWriter>(DCPS::DataWriterQosBuilder().durability_transient_local()))
 {
+  TheServiceParticipant->internal_statistics_topic()->connect(stats_writer_);
 }
 
 RtpsDiscovery::~RtpsDiscovery()
 {
+  TheServiceParticipant->internal_statistics_topic()->disconnect(stats_writer_);
 }
 
 int
