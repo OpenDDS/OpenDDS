@@ -14,8 +14,17 @@ include(GNUInstallDirs)
 include(FetchContent)
 include(CPack)
 
-set(OPENDDS_IS_BEING_BUILT TRUE CACHE INTERNAL "")
 set(OPENDDS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE INTERNAL "")
+set(_OPENDDS_CMAKE_DIR "${OPENDDS_SOURCE_DIR}/cmake" CACHE INTERNAL "")
+
+if(OPENDDS_JUST_BUILD_TESTS)
+  find_package(OpenDDS REQUIRED)
+  set(_OPENDDS_BUILD_TESTS_DEFAULT TRUE)
+  include("${OPENDDS_SOURCE_DIR}/examples_and_tests.cmake")
+  return()
+endif()
+
+set(OPENDDS_IS_BEING_BUILT TRUE CACHE INTERNAL "")
 if(EXISTS "${OPENDDS_SOURCE_DIR}/dds/DdsDcpsC.h")
   message(FATAL_ERROR "It looks like OpenDDS was already built here using MPC. This could cause "
     "issues with a CMake build. Please clean this source tree or use a separate one.")
@@ -31,7 +40,6 @@ set(OPENDDS_BIN_DIR "${OPENDDS_BUILD_DIR}/bin" CACHE INTERNAL "")
 set(OPENDDS_LIB_DIR "${OPENDDS_BUILD_DIR}/lib" CACHE INTERNAL "")
 list(APPEND CMAKE_PREFIX_PATH "${OPENDDS_SOURCE_DIR}")
 list(APPEND CMAKE_FIND_ROOT_PATH "${OPENDDS_SOURCE_DIR}")
-set(_OPENDDS_CMAKE_DIR "${OPENDDS_SOURCE_DIR}/cmake" CACHE INTERNAL "")
 
 # Get and build ACE/TAO if OPENDDS_ACE wasn't defined and initialize the core
 # of the CMake support in init.cmake.
@@ -140,6 +148,7 @@ install(
     cmake/opendds_group.cmake
     cmake/opendds_target_sources.cmake
     cmake/opendds_testing.cmake
+    cmake/opendds_utils.cmake
     cmake/opendds_version.cmake
     cmake/tao_group.cmake
     cmake/tao_idl_sources.cmake
@@ -153,19 +162,10 @@ if(OPENDDS_INSTALL_RAPIDJSON)
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif()
 
-# Examples and Tests
 if(BUILD_TESTING)
   set(_OPENDDS_BUILD_TESTS_DEFAULT TRUE)
 else()
   set(_OPENDDS_BUILD_TESTS_DEFAULT FALSE)
 endif()
-set(OPENDDS_BUILD_TESTS ${_OPENDDS_BUILD_TESTS_DEFAULT} CACHE BOOL "Build OpenDDS Tests")
-set(OPENDDS_BUILD_EXAMPLES TRUE CACHE BOOL "Build OpenDDS Examples")
-if(OPENDDS_BUILD_EXAMPLES OR OPENDDS_BUILD_TESTS)
-  enable_testing()
-  add_subdirectory(DevGuideExamples/DCPS/Messenger)
-  add_subdirectory(examples)
-endif()
-if(OPENDDS_BUILD_TESTS)
-  add_subdirectory(tests)
-endif()
+
+include("${OPENDDS_SOURCE_DIR}/examples_and_tests.cmake")

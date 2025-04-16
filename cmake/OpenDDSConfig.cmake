@@ -277,7 +277,8 @@ if(NOT TARGET OpenDDS::OpenDDS)
   endif()
 endif()
 
-if(NOT TARGET OpenDDS::TestUtils AND DEFINED OPENDDS_SOURCE_DIR)
+if(NOT TARGET OpenDDS::TestUtils AND DEFINED OPENDDS_SOURCE_DIR
+    AND IS_DIRECTORY "${OPENDDS_SOURCE_DIR}")
   add_library(OpenDDS::TestUtils INTERFACE IMPORTED)
   target_include_directories(OpenDDS::TestUtils INTERFACE "${OPENDDS_SOURCE_DIR}")
 endif()

@@ -41,7 +41,6 @@ add_executable(subscriber
 target_link_libraries(subscriber ${opendds_libs})
 
 # Testing
-configure_file(run_test.pl . COPYONLY)
 configure_file(rtps.ini . COPYONLY)
-opendds_add_test(NAME info_repo COMMAND perl run_test.pl)
-opendds_add_test(NAME rtps COMMAND perl run_test.pl --rtps)
+opendds_add_test(NAME info_repo)
+opendds_add_test(NAME rtps ARGS --rtps)
