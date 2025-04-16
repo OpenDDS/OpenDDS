@@ -90,7 +90,14 @@ function(_opendds_target_idl_sources target)
   endforeach()
 
   set(opendds_idl_opt_var_prefix "opendds_idl_opt")
-  set(opendds_idl_no_value_opts "-SI" "-GfaceTS" "-Wb,java" "-Lc++11" "-Lface")
+  set(opendds_idl_no_value_opts
+    "-SI"
+    "-GfaceTS"
+    "-Wb,java"
+    "-Lc++11"
+    "-Lface"
+    "-Lspcpp"
+  )
   set(opendds_idl_one_value_opts "")
   set(opendds_idl_multi_value_opts)
   foreach(opt ${opendds_idl_all_opts})
@@ -102,6 +109,11 @@ function(_opendds_target_idl_sources target)
     "${opendds_idl_multi_value_opts}"
     "${opendds_idl_opts}"
   )
+  foreach(arg IN LISTS opendds_idl_opt_UNPARSED_ARGUMENTS)
+    if(arg MATCHES "^-L")
+      message(FATAL_ERROR "Unknown lanaguage mapping: ${arg}")
+    endif()
+  endforeach()
 
   _opendds_get_generated_output_dir(${target} gen_out)
 
@@ -163,6 +175,9 @@ function(_opendds_target_idl_sources target)
       elseif(opendds_idl_opt_-Lc++11)
         list(APPEND h_files "${output_prefix}C.h")
         list(APPEND file_mappings "C++11")
+      elseif(opendds_idl_opt_-Lspcpp)
+        list(APPEND h_files "${output_prefix}C.h")
+        list(APPEND file_mappings "SPCPP")
       else()
         set(run_tao_idl_on_input TRUE)
       endif()
@@ -196,9 +211,11 @@ function(_opendds_target_idl_sources target)
       )
 
       list(APPEND tao_idl_opts
-        "-I${DDS_ROOT}"
         "-I${idl_file_dir}" # The type-support IDL will include the primary IDL file
       )
+      foreach(include_dir IN LISTS OPENDDS_INCLUDE_DIRS)
+        list(APPEND tao_idl_opts "-I${include_dir}")
+      endforeach()
     endif()
 
     if(NOT arg_SKIP_TAO_IDL)
