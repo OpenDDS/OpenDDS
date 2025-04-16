@@ -54,9 +54,15 @@ if(NOT DEFINED OPENDDS_RAPIDJSON)
       GIT_REPOSITORY https://github.com/Tencent/rapidjson.git
       GIT_TAG fd3dc29a5c2852df569e1ea81dbde2c412ac5051
     )
-    FetchContent_Populate(rapidjson)
+    FetchContent_MakeAvailable(rapidjson)
     set(OPENDDS_RAPIDJSON "${rapidjson_SOURCE_DIR}")
   endif()
+  if(NOT DEFINED OPENDDS_INSTALL_RAPIDJSON)
+    set(OPENDDS_INSTALL_RAPIDJSON TRUE)
+  endif()
+endif()
+if(OPENDDS_RAPIDJSON)
+  set(OPENDDS_HAS_RAPIDJSON TRUE)
 endif()
 
 # Generate OpenDDSConfig.h, make it available for all targets (see
@@ -81,7 +87,7 @@ install(TARGETS OpenDDS_Config
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-if(NOT CMAKE_CROSSCOMPILING)
+if(NOT CMAKE_CROSSCOMPILING OR OPENDDS_JUST_BUILD_HOST_TOOLS)
   add_subdirectory(dds/DCPS) # OpenDDS_Util
   add_subdirectory(dds/idl) # opendds_idl
   if(OPENDDS_JUST_BUILD_HOST_TOOLS)
@@ -142,7 +148,7 @@ install(
   DESTINATION "${cmake_dest}"
 )
 install(FILES VERSION.txt DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/dds/")
-if(OPENDDS_RAPIDJSON)
+if(OPENDDS_INSTALL_RAPIDJSON)
   install(DIRECTORY "${OPENDDS_RAPIDJSON}/include/rapidjson"
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif()
