@@ -561,7 +561,7 @@ module DDS {
   const InstanceStateMask NOT_ALIVE_INSTANCE_STATE = 0x006;
 
   struct Time_t {
-    long sec;
+    long long sec;
     unsigned long nanosec;
   };
 
