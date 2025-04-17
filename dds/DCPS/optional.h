@@ -11,11 +11,7 @@
 #  pragma once
 #endif
 
-#ifdef ACE_HAS_CPP17
-#  define OPENDDS_HAS_STD_OPTIONAL
-#endif
-
-#ifdef OPENDDS_HAS_STD_OPTIONAL
+#if OPENDDS_CONFIG_STD_OPTIONAL
 #  include <optional>
 #  define OPENDDS_OPTIONAL_NS std
 #else

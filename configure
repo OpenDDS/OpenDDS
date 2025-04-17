@@ -188,6 +188,7 @@ my @specs =
     'host=s', 'Host (auto detect: linux, win32, macosx)',
     'compiler=s', 'Compiler (auto detect / guess by searching PATH)',
     'std=s', 'C++ standard version (compiler default)',
+    'std-optional!', 'Use std::optional (if supported)',
     'target=s', 'Cross-compile target (none): see --target-help',
     'target-arch=s', 'Architecture for target (none): see --target-help',
     'target-compiler=s', 'Compiler for target (if req\'d): see --target-help',
@@ -1454,6 +1455,9 @@ EOT
 
 sub write_opendds_configh {
   my %buildEnv = %{shift()};
+  my $has_cxx17 = grep /no_cxx17=0/, @features;
+  my $use_optional = $has_cxx17 && !(exists $opts{'std-optional'} && $opts{'std-optional'} == 0);
+
   my $CFGH = backup_and_open("$buildEnv{'DDS_ROOT'}/dds/OpenDDSConfig.h");
   my $CFGIN = new FileHandle;
   open($CFGIN, 'dds/OpenDDSConfig.h.in') or die("Can't open OpenDDSConfig.h.in for reading: $!\nStopped");
@@ -1462,6 +1466,7 @@ sub write_opendds_configh {
     'OPENDDS_CONFIG_AUTO_STATIC_INCLUDES' => 0,
     'OPENDDS_CONFIG_BOOTTIME_TIMERS' => $opts{'boottime'} // 0,
     'OPENDDS_CONFIG_SECURITY' => $opts{'security'} // 0,
+    'OPENDDS_CONFIG_STD_OPTIONAL' => $use_optional,
   );
 
   my $replace_value = sub {
