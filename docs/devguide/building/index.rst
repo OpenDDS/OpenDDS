@@ -691,6 +691,14 @@ These are all the variables that are exclusive to building OpenDDS with CMake:
 
   .. versionadded:: 3.28
 
+.. cmake:var:: OPENDDS_STD_OPTIONAL
+
+  If set to ``ON``, OpenDDS uses C++17's ``std::optional`` template in its API.
+  If set to ``OFF``, OpenDDS emulates ``std::optional`` with its own data type.
+  Default is ``ON`` when the compiler supports C++17 or higher.
+
+  .. versionadded:: 3.32
+
 .. _cmake-building-speed:
 
 Speeding up the Build
