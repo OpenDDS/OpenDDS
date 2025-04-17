@@ -144,7 +144,7 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
     return 0;
   }
 
-  bytes_remaining_unsigned = receive_transport_header_.length_;
+  bytes_remaining_unsigned = static_cast<ACE_UINT32>(receive_transport_header_.length_);
   if (!check_header(receive_transport_header_)) {
     return 0;
   }
@@ -154,7 +154,7 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
     while (bytes_remaining_unsigned > 0) {
       data_sample_header_.pdu_remaining(bytes_remaining_unsigned);
       data_sample_header_ = *cur_rb;
-      bytes_remaining_unsigned -= data_sample_header_.get_serialized_size();
+      bytes_remaining_unsigned -= static_cast<ACE_UINT32>(data_sample_header_.get_serialized_size());
       if (!check_header(data_sample_header_)) {
         return 0;
       }
@@ -176,7 +176,7 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
         }
       }
       cur_rb->rd_ptr(data_sample_header_.message_length());
-      bytes_remaining_unsigned -= data_sample_header_.message_length();
+      bytes_remaining_unsigned -= static_cast<ACE_UINT32>(data_sample_header_.message_length());
 
       // For the reassembly algorithm, the 'last_fragment_' header bit only
       // applies to the first DataSampleHeader in the TransportHeader
