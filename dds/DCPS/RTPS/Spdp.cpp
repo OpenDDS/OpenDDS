@@ -3003,7 +3003,7 @@ Spdp::SpdpTransport::send(const DCPS::NetworkAddress& addr)
   const ssize_t res = socket.send(wbuff_.rd_ptr(), wbuff_.length(), addr.to_addr());
   outer->sedp_->core().writer_resend_count(make_id(outer->guid_, ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER), 1);
   if (res < 0) {
-    outer->sedp_->core().send_fail(addr, DCPS::MCK_RTPS, wbuff_.length());
+    outer->sedp_->core().send_fail(addr, DCPS::MCK_RTPS, static_cast<ssize_t>(wbuff_.length()));
     const int err = errno;
     if (err != ENETUNREACH || !network_is_unreachable_) {
       errno = err;
@@ -3017,7 +3017,7 @@ Spdp::SpdpTransport::send(const DCPS::NetworkAddress& addr)
       network_is_unreachable_ = true;
     }
   } else {
-    outer->sedp_->core().send(addr, DCPS::MCK_RTPS, wbuff_.length());
+    outer->sedp_->core().send(addr, DCPS::MCK_RTPS, static_cast<ssize_t>(wbuff_.length()));
     network_is_unreachable_ = false;
   }
 
@@ -3086,7 +3086,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   }
 
   if (bytes > 0) {
-    buff_.wr_ptr(bytes);
+    buff_.wr_ptr(static_cast<size_t>(bytes));
   } else if (bytes == 0) {
     return 0;
   } else {
@@ -3412,7 +3412,7 @@ Spdp::SendStun::execute()
   const ACE_SOCK_Dgram& socket = tport->choose_send_socket(address_);
   const ssize_t res = socket.send(tport->wbuff_.rd_ptr(), tport->wbuff_.length(), address_.to_addr());
   if (res < 0) {
-    outer->sedp_->core().send_fail(address_, DCPS::MCK_STUN, tport->wbuff_.length());
+    outer->sedp_->core().send_fail(address_, DCPS::MCK_STUN, static_cast<ssize_t>(tport->wbuff_.length()));
     const int err = errno;
     if (err != ENETUNREACH || !tport->network_is_unreachable_) {
       errno = err;
@@ -3426,7 +3426,7 @@ Spdp::SendStun::execute()
       tport->network_is_unreachable_ = true;
     }
   } else {
-    outer->sedp_->core().send(address_, DCPS::MCK_STUN, tport->wbuff_.length());
+    outer->sedp_->core().send(address_, DCPS::MCK_STUN, static_cast<ssize_t>(tport->wbuff_.length()));
     tport->network_is_unreachable_ = false;
   }
 }
