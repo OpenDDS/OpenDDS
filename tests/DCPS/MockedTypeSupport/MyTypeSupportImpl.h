@@ -60,7 +60,7 @@ public:
   virtual ::DDS::DataReader_ptr create_multitopic_datareader();
 #endif
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType() const;
 #endif
 
@@ -148,7 +148,7 @@ public:
   virtual void lookup_instance(const OpenDDS::DCPS::ReceivedDataSample&,
                                OpenDDS::DCPS::SubscriptionInstance_rch&) {}
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   DDS::ReturnCode_t read_generic(
     OpenDDS::DCPS::DataReaderImpl::GenericBundle&, DDS::SampleStateMask,
     DDS::ViewStateMask, DDS::InstanceStateMask, bool);

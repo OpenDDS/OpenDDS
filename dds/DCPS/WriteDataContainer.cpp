@@ -325,7 +325,7 @@ WriteDataContainer::enqueue(
 DDS::ReturnCode_t
 WriteDataContainer::reenqueue_all(const GUID_t& reader_id,
                                   const DDS::LifespanQosPolicy& lifespan
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
                                   ,
                                   const OPENDDS_STRING& filterClassName,
                                   const FilterEvaluator* eval,
@@ -351,7 +351,7 @@ WriteDataContainer::reenqueue_all(const GUID_t& reader_id,
                    sending_data_,
                    reader_id,
                    lifespan,
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
                    filterClassName, eval, expression_params,
 #endif
                    total_size);
@@ -360,7 +360,7 @@ WriteDataContainer::reenqueue_all(const GUID_t& reader_id,
                    sent_data_,
                    reader_id,
                    lifespan,
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
                    filterClassName, eval, expression_params,
 #endif
                    total_size);
@@ -1370,7 +1370,7 @@ WriteDataContainer::copy_and_prepend(SendStateDataSampleList& list,
                                      const SendStateDataSampleList& appended,
                                      const GUID_t& reader_id,
                                      const DDS::LifespanQosPolicy& lifespan,
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
                                      const OPENDDS_STRING& filterClassName,
                                      const FilterEvaluator* eval,
                                      const DDS::StringSeq& params,
@@ -1383,7 +1383,7 @@ WriteDataContainer::copy_and_prepend(SendStateDataSampleList& list,
     if (resend_data_expired(*cur, lifespan))
       continue;
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
     if (eval && writer_->filter_out(*cur, filterClassName, *eval, params))
       continue;
 #endif

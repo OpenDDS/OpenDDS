@@ -8,6 +8,7 @@
 #endif
 
 #include "BuiltInTopicUtils.h"
+#include "Definitions.h"
 #include "EncapsulationHeader.h"
 #include "GuidConverter.h"
 #include "MultiTopicImpl.h"
@@ -235,7 +236,7 @@ namespace OpenDDS {
                     a_condition->get_sample_state_mask(),
                     a_condition->get_view_state_mask(),
                     a_condition->get_instance_state_mask(),
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
                     dynamic_cast< DDS::QueryCondition_ptr >(a_condition));
 #else
       0);
@@ -267,7 +268,7 @@ namespace OpenDDS {
                     a_condition->get_sample_state_mask(),
                     a_condition->get_view_state_mask(),
                     a_condition->get_instance_state_mask(),
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
                     dynamic_cast< DDS::QueryCondition_ptr >(a_condition)
 #else
                     0
@@ -457,7 +458,7 @@ namespace OpenDDS {
         return DDS::RETCODE_PRECONDITION_NOT_MET;
       }
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
     DDS::QueryCondition_ptr query_condition =
         dynamic_cast< DDS::QueryCondition_ptr >(a_condition);
 #endif
@@ -466,7 +467,7 @@ namespace OpenDDS {
                            a_condition->get_sample_state_mask(),
                            a_condition->get_view_state_mask(),
                            a_condition->get_instance_state_mask(),
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
                            query_condition
 #else
                            0
@@ -497,7 +498,7 @@ namespace OpenDDS {
         return DDS::RETCODE_PRECONDITION_NOT_MET;
       }
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
     DDS::QueryCondition_ptr query_condition =
         dynamic_cast< DDS::QueryCondition_ptr >(a_condition);
 #endif
@@ -506,7 +507,7 @@ namespace OpenDDS {
                            a_condition->get_sample_state_mask(),
                            a_condition->get_view_state_mask(),
                            a_condition->get_instance_state_mask(),
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
                            query_condition
 #else
                            0
@@ -577,7 +578,7 @@ namespace OpenDDS {
         return DDS::RETCODE_PRECONDITION_NOT_MET;
       }
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
     DDS::QueryCondition_ptr query_condition =
         dynamic_cast< DDS::QueryCondition_ptr >(a_condition);
 #endif
@@ -586,7 +587,7 @@ namespace OpenDDS {
                                 a_condition->get_sample_state_mask(),
                                 a_condition->get_view_state_mask(),
                                 a_condition->get_instance_state_mask(),
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
                                 query_condition
 #else
                                 0
@@ -617,7 +618,7 @@ namespace OpenDDS {
         return DDS::RETCODE_PRECONDITION_NOT_MET;
       }
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
     DDS::QueryCondition_ptr query_condition =
         dynamic_cast< DDS::QueryCondition_ptr >(a_condition);
 #endif
@@ -626,7 +627,7 @@ namespace OpenDDS {
                                 a_condition->get_sample_state_mask(),
                                 a_condition->get_view_state_mask(),
                                 a_condition->get_instance_state_mask(),
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
                                 query_condition
 #else
                                 0
@@ -701,7 +702,7 @@ namespace OpenDDS {
     received_data.length(0);
   }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   bool contains_sample_filtered(DDS::SampleStateMask sample_states,
                                 DDS::ViewStateMask view_states,
                                 DDS::InstanceStateMask instance_states,
@@ -1175,7 +1176,7 @@ protected:
       return;
     }
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
     /*
      * If sample.header_.content_filter_ is true, the writer has already
      * filtered.
@@ -1356,7 +1357,7 @@ private:
                            DDS::SampleStateMask sample_states,
                            DDS::ViewStateMask view_states,
                            DDS::InstanceStateMask instance_states,
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
                            DDS::QueryCondition_ptr a_condition)
 #else
     int)
@@ -1381,7 +1382,7 @@ private:
 #endif
 
   RakeResults<MessageType> results(this, received_data, info_seq, static_cast< ::CORBA::ULong>(max_samples), subqos_.presentation,
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
                                    a_condition,
 #endif
                                    DDS_OPERATION_READ);
@@ -1444,7 +1445,7 @@ DDS::ReturnCode_t take_i(MessageSequenceType& received_data,
                          DDS::SampleStateMask sample_states,
                          DDS::ViewStateMask view_states,
                          DDS::InstanceStateMask instance_states,
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
                          DDS::QueryCondition_ptr a_condition)
 #else
   int)
@@ -1468,7 +1469,7 @@ DDS::ReturnCode_t take_i(MessageSequenceType& received_data,
 #endif
 
   RakeResults<MessageType> results(this, received_data, info_seq, static_cast< ::CORBA::ULong>(max_samples), subqos_.presentation,
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
                                    a_condition,
 #endif
                                    DDS_OPERATION_TAKE);
@@ -1525,7 +1526,7 @@ DDS::ReturnCode_t read_instance_i(MessageSequenceType& received_data,
                                   DDS::SampleStateMask sample_states,
                                   DDS::ViewStateMask view_states,
                                   DDS::InstanceStateMask instance_states,
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
                                   DDS::QueryCondition_ptr a_condition)
 #else
   int)
@@ -1537,7 +1538,7 @@ DDS::ReturnCode_t read_instance_i(MessageSequenceType& received_data,
   typename DDSTraits<MessageType>::MessageSequenceAdapterType received_data_p(received_data);
 
   RakeResults<MessageType> results(this, received_data, info_seq, static_cast< ::CORBA::ULong>(max_samples), subqos_.presentation,
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
                                    a_condition,
 #endif
                                    DDS_OPERATION_READ);
@@ -1592,7 +1593,7 @@ DDS::ReturnCode_t take_instance_i(MessageSequenceType& received_data,
                                   DDS::SampleStateMask sample_states,
                                   DDS::ViewStateMask view_states,
                                   DDS::InstanceStateMask instance_states,
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
                                   DDS::QueryCondition_ptr a_condition)
 #else
   int)
@@ -1604,7 +1605,7 @@ DDS::ReturnCode_t take_instance_i(MessageSequenceType& received_data,
   typename DDSTraits<MessageType>::MessageSequenceAdapterType received_data_p(received_data);
 
   RakeResults<MessageType> results(this, received_data, info_seq, static_cast< ::CORBA::ULong>(max_samples), subqos_.presentation,
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
                                    a_condition,
 #endif
                                    DDS_OPERATION_TAKE);
@@ -1645,7 +1646,7 @@ DDS::ReturnCode_t read_next_instance_i(MessageSequenceType& received_data,
                                        DDS::SampleStateMask sample_states,
                                        DDS::ViewStateMask view_states,
                                        DDS::InstanceStateMask instance_states,
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
                                        DDS::QueryCondition_ptr a_condition)
 #else
   int)
@@ -1671,7 +1672,7 @@ DDS::ReturnCode_t read_next_instance_i(MessageSequenceType& received_data,
     const DDS::ReturnCode_t status =
       read_instance_i(received_data, info_seq, max_samples, handle,
                       sample_states, view_states, instance_states,
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
                       a_condition);
 #else
       0);
@@ -1693,7 +1694,7 @@ DDS::ReturnCode_t take_next_instance_i(MessageSequenceType& received_data,
                                        DDS::SampleStateMask sample_states,
                                        DDS::ViewStateMask view_states,
                                        DDS::InstanceStateMask instance_states,
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
                                        DDS::QueryCondition_ptr a_condition)
 #else
   int)
@@ -1719,7 +1720,7 @@ DDS::ReturnCode_t take_next_instance_i(MessageSequenceType& received_data,
     const DDS::ReturnCode_t status =
       take_instance_i(received_data, info_seq, max_samples, handle,
                       sample_states, view_states, instance_states,
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
                       a_condition);
 #else
       0);

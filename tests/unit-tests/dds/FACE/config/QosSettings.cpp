@@ -6,7 +6,7 @@
 #include "dds/DCPS/Definitions.h"
 
 #ifndef DDS_HAS_WCHAR
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
 #include <gtest/gtest.h>
 

@@ -35,7 +35,7 @@ namespace OpenDDS {
       return sample.value.deserialize(strm);
     }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
     static ComparatorBase::Ptr make_nested_cmp(const std::string& field, ComparatorBase::Ptr inner,
                                                ComparatorBase::Ptr next);
 
@@ -209,7 +209,7 @@ namespace OpenDDS {
   }
 
   namespace DCPS {
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
     template <>
     DDS::ReturnCode_t DataReaderImpl_T<XTypes::DynamicSample>::read_generic(
       GenericBundle&,
@@ -351,7 +351,7 @@ namespace DDS {
     return dti->get_preset_type_info();
   }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   const OpenDDS::DCPS::MetaStruct& DynamicTypeSupport::getMetaStructForType() const
   {
     return getMetaStruct<OpenDDS::XTypes::DynamicSample>();

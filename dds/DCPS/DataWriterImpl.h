@@ -29,7 +29,7 @@
 #include "transport/framework/TransportClient.h"
 #include "transport/framework/TransportSendListener.h"
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
 #  include "FilterEvaluator.h"
 #endif
 
@@ -185,11 +185,11 @@ public:
   virtual DDS::ReturnCode_t get_matched_subscriptions(
     DDS::InstanceHandleSeq & subscription_handles);
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   virtual DDS::ReturnCode_t get_matched_subscription_data(
     DDS::SubscriptionBuiltinTopicData & subscription_data,
     DDS::InstanceHandle_t subscription_handle);
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
   virtual DDS::ReturnCode_t enable();
 
@@ -466,7 +466,7 @@ public:
 
   virtual RcHandle<EntityImpl> parent() const;
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   bool filter_out(const DataSampleElement& elt,
                   const OPENDDS_STRING& filterClassName,
                   const FilterEvaluator& evaluator,
@@ -568,7 +568,7 @@ protected:
   ACE_Thread_Mutex reader_info_lock_;
 
   struct ReaderInfo {
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
     WeakRcHandle<DomainParticipantImpl> participant_;
     OPENDDS_STRING filter_class_name_;
     OPENDDS_STRING filter_;

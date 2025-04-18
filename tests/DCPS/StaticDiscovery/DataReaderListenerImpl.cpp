@@ -12,9 +12,9 @@
 #include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/GuidConverter.h"
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #include "dds/DdsDcpsCoreTypeSupportC.h"
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
 DataReaderListenerImpl::~DataReaderListenerImpl()
 {
@@ -131,7 +131,7 @@ DataReaderListenerImpl::on_subscription_matched(
   }
   OPENDDS_ASSERT(previous_count_ + status.current_count_change == status.current_count);
   previous_count_ = status.current_count;
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (check_bits_ && status.current_count_change > 0) {
     DDS::PublicationBuiltinTopicDataDataReader_var rdr =
       DDS::PublicationBuiltinTopicDataDataReader::_narrow(builtin_);
@@ -170,7 +170,7 @@ DataReaderListenerImpl::on_subscription_matched(
   }
 #else
 ACE_UNUSED_ARG(status);
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 }
 
 void
@@ -180,10 +180,10 @@ DataReaderListenerImpl::on_sample_lost(
 {
 }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 void DataReaderListenerImpl::set_builtin_datareader (
   DDS::DataReader_ptr builtin)
 {
   builtin_ = DDS::DataReader::_duplicate(builtin);
 }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif

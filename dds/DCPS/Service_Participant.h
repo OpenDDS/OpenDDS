@@ -58,10 +58,10 @@ const char COMMON_DCPS_BIDIR_GIOP[] = "COMMON_DCPS_BIDIR_GIOP";
 const bool COMMON_DCPS_BIDIR_GIOP_default = true;
 
 const char COMMON_DCPS_BIT[] = "COMMON_DCPS_BIT";
-#ifdef DDS_HAS_MINIMUM_BIT
-const bool COMMON_DCPS_BIT_default = false;
-#else
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 const bool COMMON_DCPS_BIT_default = true;
+#else
+const bool COMMON_DCPS_BIT_default = false;
 #endif
 
 const char COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC[] = "COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC";

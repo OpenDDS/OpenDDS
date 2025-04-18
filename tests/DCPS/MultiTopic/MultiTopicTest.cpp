@@ -2,15 +2,16 @@
 #include <ace/OS_NS_string.h>
 
 #include <dds/DCPS/BuiltInTopicUtils.h>
-#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/StaticIncludes.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/WaitSet.h>
-#include <dds/DCPS/StaticIncludes.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
-#include <dds/DCPS/SafetyProfileStreams.h>
-#include <dds/DCPS/DCPS_Utils.h>
 
 #include <MultiTopicTestTypeSupportImpl.h>
 
@@ -368,10 +369,7 @@ struct Writer {
 
 bool check_bits(const Publisher_var& pub)
 {
-#ifdef DDS_HAS_MINIMUM_BIT
-  ACE_UNUSED_ARG(pub);
-  return true;
-#else
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   DomainParticipant_var pub_dp = pub->get_participant();
   Subscriber_var bit_sub = pub_dp->get_builtin_subscriber();
   DataReader_var bit_dr = bit_sub->lookup_datareader(BUILT_IN_SUBSCRIPTION_TOPIC);
@@ -393,6 +391,9 @@ bool check_bits(const Publisher_var& pub)
   }
   std::cerr << "ERROR: Built-In DataReader Location topic not found\n";
   return false;
+#else
+  ACE_UNUSED_ARG(pub);
+  return true;
 #endif
 }
 

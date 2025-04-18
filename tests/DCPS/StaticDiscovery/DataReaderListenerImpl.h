@@ -9,6 +9,7 @@
 #include <ace/Global_Macros.h>
 
 #include <dds/DdsDcpsSubscriptionC.h>
+
 #include <dds/DCPS/LocalObject.h>
 #include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/GuidUtils.h>
@@ -34,11 +35,11 @@ public:
     , received_samples_(0)
     , done_callback_(done_callback)
     , builtin_read_error_(false)
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
     , check_bits_(check_bits)
 #endif
   {
-#ifdef DDS_HAS_MINIMUM_BIT
+#if !OPENDDS_CONFIG_BUILT_IN_TOPICS
     ACE_UNUSED_ARG(check_bits);
 #endif
   }
@@ -74,13 +75,13 @@ public:
     DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status);
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   void set_builtin_datareader (DDS::DataReader_ptr builtin);
 
   bool builtin_read_errors () const {
     return builtin_read_error_;
   }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 
 private:
   OpenDDS::DCPS::GUID_t reader_guid_;
@@ -96,10 +97,10 @@ private:
   SampleSetMap guid_received_samples_;
   callback_t done_callback_;
   bool builtin_read_error_;
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   bool check_bits_;
   DDS::DataReader_var builtin_;
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 };
 
 #endif /* DATAREADER_LISTENER_IMPL_H */

@@ -81,7 +81,7 @@ void MyTypeSupportImpl::representations_allowed_by_type(
 }
 #endif
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
 const OpenDDS::DCPS::MetaStruct&
 MyTypeSupportImpl::getMetaStructForType() const

@@ -8,16 +8,17 @@
 #ifndef OPENDDS_DCPS_WRITE_DATA_CONTAINER_H
 #define OPENDDS_DCPS_WRITE_DATA_CONTAINER_H
 
-#include "DataSampleElement.h"
-#include "SendStateDataSampleList.h"
-#include "WriterDataSampleList.h"
-#include "DisjointSequence.h"
-#include "PoolAllocator.h"
-#include "PoolAllocationBase.h"
-#include "Message_Block_Ptr.h"
-#include "SporadicTask.h"
 #include "ConditionVariable.h"
+#include "DataSampleElement.h"
+#include "Definitions.h"
+#include "DisjointSequence.h"
+#include "Message_Block_Ptr.h"
+#include "PoolAllocationBase.h"
+#include "PoolAllocator.h"
+#include "SendStateDataSampleList.h"
+#include "SporadicTask.h"
 #include "TimeTypes.h"
+#include "WriterDataSampleList.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsCoreC.h>
@@ -182,7 +183,7 @@ public:
    */
   DDS::ReturnCode_t reenqueue_all(const GUID_t& reader_id,
                                   const DDS::LifespanQosPolicy& lifespan
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
                                   ,
                                   const OPENDDS_STRING& filterClassName,
                                   const FilterEvaluator* eval,
@@ -372,7 +373,7 @@ private:
                         const SendStateDataSampleList& appended,
                         const GUID_t& reader_id,
                         const DDS::LifespanQosPolicy& lifespan,
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
                         const OPENDDS_STRING& filterClassName,
                         const FilterEvaluator* eval,
                         const DDS::StringSeq& params,

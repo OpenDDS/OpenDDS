@@ -8,6 +8,7 @@
 #include "RecorderImpl.h"
 
 #include "DCPS_Utils.h"
+#include "Definitions.h"
 #include "DomainParticipantImpl.h"
 #include "EncapsulationHeader.h"
 #include "FeatureDisabledQosCheck.h"
@@ -26,7 +27,7 @@
 #include "TypeSupportImpl.h"
 #include "Util.h"
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include "BuiltInTopicUtils.h"
 #endif
 
@@ -37,7 +38,7 @@
 
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif
 
@@ -963,7 +964,7 @@ RecorderImpl::unregister_for_writer(const GUID_t& participant,
   TransportClient::unregister_for_writer(participant, readerid, writerid);
 }
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 DDS::ReturnCode_t
 RecorderImpl::repoid_to_bit_key(const GUID_t& id,
                                 DDS::BuiltinTopicKey_t& key)
@@ -989,7 +990,7 @@ RecorderImpl::repoid_to_bit_key(const GUID_t& id,
 
   return ret;
 }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
 #ifndef OPENDDS_SAFETY_PROFILE
 DDS::DynamicData_ptr RecorderImpl::get_dynamic_data(const RawDataSample& sample)

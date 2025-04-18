@@ -5,28 +5,30 @@
 
 #include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
-#include "debug.h"
-#include "SubscriberImpl.h"
-#include "FeatureDisabledQosCheck.h"
-#include "DomainParticipantImpl.h"
-#include "Qos_Helper.h"
-#include "GuidConverter.h"
 #include "BuiltInTopicUtils.h"
-#include "TopicImpl.h"
-#include "DataReaderImpl.h"
-#include "Service_Participant.h"
-#include "TopicDescriptionImpl.h"
-#include "Marked_Default_Qos.h"
-#include "Transient_Kludge.h"
 #include "ContentFilteredTopicImpl.h"
-#include "MultiTopicImpl.h"
-#include "GroupRakeData.h"
-#include "MultiTopicDataReaderBase.h"
-#include "Util.h"
-#include "transport/framework/TransportImpl.h"
-#include "transport/framework/DataLinkSet.h"
 #include "DCPS_Utils.h"
+#include "DataReaderImpl.h"
+#include "Definitions.h"
+#include "DomainParticipantImpl.h"
+#include "FeatureDisabledQosCheck.h"
+#include "GroupRakeData.h"
+#include "GuidConverter.h"
+#include "Marked_Default_Qos.h"
+#include "MultiTopicDataReaderBase.h"
+#include "MultiTopicImpl.h"
 #include "PoolAllocator.h"
+#include "Qos_Helper.h"
+#include "Service_Participant.h"
+#include "SubscriberImpl.h"
+#include "TopicDescriptionImpl.h"
+#include "TopicImpl.h"
+#include "Transient_Kludge.h"
+#include "Util.h"
+#include "debug.h"
+
+#include "transport/framework/DataLinkSet.h"
+#include "transport/framework/TransportImpl.h"
 
 #include <dds/DdsDcpsTypeSupportExtC.h>
 
@@ -131,7 +133,7 @@ SubscriberImpl::create_datareader(
 
   TopicImpl* topic_servant = dynamic_cast<TopicImpl*>(a_topic_desc);
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   ContentFilteredTopicImpl* cft = 0;
 #endif
 #ifndef OPENDDS_NO_MULTI_TOPIC
@@ -141,7 +143,7 @@ SubscriberImpl::create_datareader(
 #endif
 
   if (!topic_servant) {
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
     cft = dynamic_cast<ContentFilteredTopicImpl*>(a_topic_desc);
     if (cft) {
       DDS::Topic_var related;
@@ -224,7 +226,7 @@ SubscriberImpl::create_datareader(
     return DDS::DataReader::_nil();
   }
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   if (cft) {
     dr_servant->enable_filtering(cft);
   }

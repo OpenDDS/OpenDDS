@@ -8,6 +8,7 @@
 
 #include "dcps_export.h"
 
+#include "Definitions.h"
 #include "TypeSupportImpl.h"
 
 #ifndef ACE_LACKS_PRAGMA_ONCE
@@ -50,7 +51,7 @@ public:
   DDS::DataReader* create_multitopic_datareader() { return base_->create_multitopic_datareader(); }
 #endif
   void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq) { base_->representations_allowed_by_type(seq); }
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   const MetaStruct& getMetaStructForType() const { return base_->getMetaStructForType(); }
 #endif
   size_t key_count() const { return base_->key_count(); }

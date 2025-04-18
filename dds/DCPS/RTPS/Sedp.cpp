@@ -7491,7 +7491,7 @@ void Sedp::match_continue(UsedEndpoints& ue,
   const DDS::SubscriberQos* subQos = 0;
   DCPS::TransportLocatorSeq* rTls = 0;
   ACE_CDR::ULong rTransportContext = 0;
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   const DCPS::ContentFilterProperty_t* cfProp = 0;
 #endif
   const XTypes::TypeInformation* reader_type_info = 0;
@@ -7521,7 +7521,7 @@ void Sedp::match_continue(UsedEndpoints& ue,
       tempCfp.filterExpression = lsi->second.filterProperties.filterExpression;
       tempCfp.expressionParameters = lsi->second.filterProperties.expressionParameters;
     }
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
     cfProp = &tempCfp;
 #endif
     if (!already_matched) {
@@ -7561,7 +7561,7 @@ void Sedp::match_continue(UsedEndpoints& ue,
       TheServiceParticipant->initial_EntityFactoryQosPolicy();
     subQos = &tempSubQos;
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
     cfProp = &dsi->second.reader_data_.contentFilterProperty;
 #endif
     reader_type_info = &dsi->second.type_info_;
@@ -7717,7 +7717,7 @@ void Sedp::match_continue(UsedEndpoints& ue,
       ra.readerId = reader;
       ra.subQos = *subQos;
       ra.readerQos = *drQos;
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
       ra.filterClassName = cfProp->filterClassName;
       ra.filterExpression = cfProp->filterExpression;
       ra.exprParams = cfProp->expressionParameters;

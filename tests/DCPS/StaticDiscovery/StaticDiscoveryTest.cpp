@@ -3,14 +3,15 @@
 
 #include <tests/Utils/StatusMatching.h>
 
-#include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
-#include <dds/DCPS/WaitSet.h>
-#include <dds/DCPS/SafetyProfileStreams.h>
-#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/DataReaderImpl.h>
 #include <dds/DCPS/DataWriterImpl.h>
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 
@@ -331,7 +332,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DataReaderListenerImpl* drl_impl = new DataReaderListenerImpl(*pos, reliable, true, total_writers, n_msgs, reader_done_callback, check_bits);
       DDS::DataReaderListener_var listener(drl_impl);
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
       DataReaderListenerImpl* listener_servant =
         dynamic_cast<DataReaderListenerImpl*>(listener.in());
 
@@ -345,7 +346,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DDS::DataReader_var bitdr =
         builtin->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
       listener_servant->set_builtin_datareader(bitdr.in());
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 
       unsigned long binary_id = static_cast<unsigned long>(fromhex(*pos, 2))
                               + (256 * static_cast<unsigned long>(fromhex(*pos, 1)))

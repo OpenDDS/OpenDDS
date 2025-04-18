@@ -8,6 +8,7 @@
 #include "DataReaderImpl.h"
 
 #include "DCPS_Utils.h"
+#include "Definitions.h"
 #include "DomainParticipantImpl.h"
 #include "FeatureDisabledQosCheck.h"
 #include "GuidConverter.h"
@@ -31,11 +32,11 @@
 #include "XTypes/TypeObject.h"
 
 #include <dds/OpenDDSConfigWrapper.h>
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include "BuiltInTopicUtils.h"
 #endif
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif
 #include <dds/DdsDcpsCoreC.h>
@@ -158,7 +159,7 @@ DataReaderImpl::cleanup()
 
   topic_servant_ = 0;
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   {
     ACE_Guard<ACE_Thread_Mutex> guard_cft(content_filtered_topic_mutex_);
     content_filtered_topic_ = 0;
@@ -186,11 +187,11 @@ void DataReaderImpl::init(
     topic_id_ = topic->get_id();
   }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   CORBA::String_var topic_name = topic_desc->get_name();
   CORBA::String_var topic_type_name = topic_desc->get_type_name();
   is_bit_ = topicIsBIT(topic_name, topic_type_name);
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
   qos_ = qos;
   passed_qos_ = qos;
@@ -714,7 +715,7 @@ DDS::ReadCondition_ptr DataReaderImpl::create_readcondition(
   return rc._retn();
 }
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
 DDS::QueryCondition_ptr DataReaderImpl::create_querycondition(
     DDS::SampleStateMask sample_states,
     DDS::ViewStateMask view_states,
@@ -878,7 +879,7 @@ DataReaderListener_ptr DataReaderImpl::get_ext_listener()
 
 DDS::TopicDescription_ptr DataReaderImpl::get_topicdescription()
 {
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   {
     ACE_Guard<ACE_Thread_Mutex> guard(content_filtered_topic_mutex_);
     if (content_filtered_topic_) {
@@ -1024,7 +1025,7 @@ DataReaderImpl::get_matched_publications(
   return DDS::RETCODE_OK;
 }
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 DDS::ReturnCode_t
 DataReaderImpl::get_matched_publication_data(
     DDS::PublicationBuiltinTopicData & publication_data,
@@ -1056,7 +1057,7 @@ DataReaderImpl::get_matched_publication_data(
 
   return ret;
 }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
 DDS::ReturnCode_t
 DataReaderImpl::enable()
@@ -1167,7 +1168,7 @@ DataReaderImpl::enable()
     CORBA::String_var filterClassName = "";
     CORBA::String_var filterExpression = "";
     DDS::StringSeq exprParams;
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
     {
       ACE_Guard<ACE_Thread_Mutex> guard(content_filtered_topic_mutex_);
       if (content_filtered_topic_) {
@@ -2732,7 +2733,7 @@ DataReaderImpl::set_subscriber_qos(
   this->subqos_ = qos;
 }
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
 void
 DataReaderImpl::enable_filtering(ContentFilteredTopicImpl* cft)
 {
@@ -2759,7 +2760,7 @@ DataReaderImpl::enable_multi_topic(MultiTopicImpl* mt)
 }
 #endif
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
 void
 DataReaderImpl::update_subscription_params(const DDS::StringSeq& params) const

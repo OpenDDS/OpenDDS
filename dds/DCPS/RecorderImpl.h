@@ -101,7 +101,7 @@ public:
   void add_to_dynamic_type_map(const GUID_t& pub_id, const XTypes::TypeIdentifier& ti);
 #endif
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   // implement Recoder
   virtual DDS::ReturnCode_t repoid_to_bit_key(const DCPS::GUID_t&     id,
                                               DDS::BuiltinTopicKey_t& key);

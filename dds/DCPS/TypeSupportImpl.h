@@ -82,7 +82,7 @@ public:
 
   virtual ~TypeSupportImpl();
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   virtual const MetaStruct& getMetaStructForType() const = 0;
 #endif
 

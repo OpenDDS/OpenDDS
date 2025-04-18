@@ -6,6 +6,8 @@
 #ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_SAMPLE_H
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_SAMPLE_H
 
+#include <dds/DCPS/Definitions.h>
+
 #ifndef OPENDDS_SAFETY_PROFILE
 
 #include <dds/DCPS/Sample.h>
@@ -81,7 +83,7 @@ public:
     return 0;
   }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   bool eval(DCPS::FilterEvaluator& evaluator, const DDS::StringSeq& params) const
   {
     return evaluator.eval(*this, params);
