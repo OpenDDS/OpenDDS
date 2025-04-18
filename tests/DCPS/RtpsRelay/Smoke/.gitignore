@@ -1,4 +1,8 @@
+/DCS
+/DPM
 /metachecker
 /monitor
+/stress_governance.xml
+/stress_permissions.xml
 /publisher
 /subscriber
