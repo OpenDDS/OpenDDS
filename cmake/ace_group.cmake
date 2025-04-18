@@ -63,7 +63,7 @@ function(_opendds_vs_force_static)
   endif()
 endfunction()
 
-if(MSVC AND OPENDDS_STATIC)
+if(MSVC AND OPENDDS_STATIC AND NOT ${OPENDDS_STATIC_RUNTIME} STREQUAL "OFF")
   _opendds_vs_force_static()
 endif()
 
