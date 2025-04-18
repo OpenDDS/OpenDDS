@@ -79,7 +79,7 @@ RtpsUdpSendStrategy::send_bytes_i(const iovec iov[], int n)
     // is enabled, the data may be resent later.
     ssize_t b = 0;
     for (int i = 0; i < n; ++i) {
-      b += iov[i].iov_len;
+      b += static_cast<ssize_t>(iov[i].iov_len);
     }
     result = b;
   }
@@ -116,7 +116,7 @@ RtpsUdpSendStrategy::send_bytes_i_helper(const iovec iov[], int n)
   if (addrs.empty()) {
     ssize_t result = 0;
     for (int i = 0; i < n; ++i) {
-      result += iov[i].iov_len;
+      result += static_cast<ssize_t>(iov[i].iov_len);
     }
     return result;
   }
@@ -760,7 +760,7 @@ RtpsUdpSendStrategy::replace_chunks(const ACE_Message_Block* plain,
       return 0;
     }
 
-    const size_t prefix = c.start_ - cur->rd_ptr();
+    const size_t prefix = static_cast<size_t>(c.start_ - cur->rd_ptr());
     out->copy(cur->rd_ptr(), prefix);
     cur->rd_ptr(prefix);
 

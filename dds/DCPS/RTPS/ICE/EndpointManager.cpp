@@ -201,7 +201,7 @@ void EndpointManager::set_host_addresses(const AddressListType& a_host_addresses
       continue;
     }
 
-#if ACE_HAS_IPV6
+#if defined ACE_HAS_IPV6 && ACE_HAS_IPV6
     if (pos->is_ipv4_compat_ipv6()) {
       continue;
     }

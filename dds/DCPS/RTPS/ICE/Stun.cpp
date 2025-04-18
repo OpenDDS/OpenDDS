@@ -25,7 +25,7 @@ ACE_UINT16 Attribute::length() const
 {
   switch (type) {
   case MAPPED_ADDRESS:
-#if ACE_HAS_IPV6
+#if defined ACE_HAS_IPV6 && ACE_HAS_IPV6
     if (mapped_address.get_type() == AF_INET6) {
       return 20;
     }
@@ -45,7 +45,7 @@ ACE_UINT16 Attribute::length() const
     return static_cast<ACE_UINT16>(2 * unknown_attributes.size());
 
   case XOR_MAPPED_ADDRESS:
-#if ACE_HAS_IPV6
+#if defined ACE_HAS_IPV6 && ACE_HAS_IPV6
     if (mapped_address.get_type() == AF_INET6) {
       return 20;
     }
@@ -454,7 +454,7 @@ bool operator>>(DCPS::Serializer& serializer, AttributeHolder& holder)
   }
 
   // All attributes are aligned on 32-bit boundaries.
-  if (!serializer.skip((4 - (attribute_length & 0x3)) % 4)) {
+  if (!serializer.skip(static_cast<size_t>(4 - (attribute_length & 0x3)) % 4)) {
     return false;
   }
 

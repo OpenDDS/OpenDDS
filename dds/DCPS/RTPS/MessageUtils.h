@@ -231,7 +231,7 @@ handle_to_octets(DDS::Security::NativeCryptoHandle handle)
   DDS::OctetSeq handleOctets(sizeof handle);
   handleOctets.length(handleOctets.maximum());
   unsigned char* rawHandleOctets = handleOctets.get_buffer();
-  unsigned int handleTmp = handle;
+  unsigned int handleTmp = static_cast<unsigned int>(handle);
   for (unsigned int j = sizeof handle; j > 0; --j) {
     rawHandleOctets[j - 1] = handleTmp & 0xff;
     handleTmp >>= 8;
