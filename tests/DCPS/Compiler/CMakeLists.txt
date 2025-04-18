@@ -6,4 +6,5 @@ find_package(OpenDDS REQUIRED)
 
 if(NOT OPENDDS_CXX_STD_YEAR LESS 2011)
   add_subdirectory(char_literals)
+  add_subdirectory(xcdr)
 endif()

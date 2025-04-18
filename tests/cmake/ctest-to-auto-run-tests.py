@@ -94,6 +94,7 @@ def dump_ctest_info(cmake, build_path, defines):
     for name, value in defines.items():
         cmake_cmd.append('-D{}={}'.format(name, value))
     cmake_cmd += ['-P', str(py_source_dir / 'dump_ctest_info.cmake')]
+    print(cmake_cmd)
     lines = subprocess.check_output(cmake_cmd, cwd=str(build_path)).decode('utf-8').splitlines()
     tests = {}
     stack = []
@@ -124,6 +125,8 @@ def dump_ctest_info(cmake, build_path, defines):
                     raise ValueError(
                         'Got END_SUBDIRS {}, but {} is what was at the top of the stack!'.format(
                             value, current['test_file']))
+            elif name == 'MISSING_SUBDIRS':
+                print(f'No test file {value}')
             else:
                 raise ValueError('Unexpected info name: {}'.format(name))
         else:

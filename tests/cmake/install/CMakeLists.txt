@@ -3,11 +3,16 @@ project(opendds_install_test)
 enable_testing()
 
 find_package(OpenDDS REQUIRED)
+include(opendds_testing)
 
 include(ExternalProject)
 
+if(OPENDDS_IS_BEING_BUILT)
+  message(FATAL_ERROR "This test doesn't work when building OpenDDS at the same time yet.")
+endif()
+
 set(INSTALL_IMPORTED_RUNTIME_ARTIFACTS TRUE)
-if(${CMAKE_VERSION} VERSION_LESS "3.21.0" OR OPENDDS_STATIC)
+if(${CMAKE_VERSION} VERSION_LESS "3.21.0" OR OPENDDS_STATIC OR _OPENDDS_CMAKE_BUILT_AND_INSTALLED)
   set(INSTALL_IMPORTED_RUNTIME_ARTIFACTS FALSE)
 endif()
 
@@ -17,6 +22,8 @@ set(common_cmake_args
   "-DCMAKE_PREFIX_PATH:PATH=${_OPENDDS_ROOT}$<SEMICOLON>${dest_install_prefix}"
   "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
   "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+  "-DOPENDDS_ACE=${OPENDDS_ACE}"
+  "-DOPENDDS_TAO=${OPENDDS_TAO}"
 )
 if(DEFINED CMAKE_CXX_STANDARD)
   list(APPEND common_cmake_args "-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}")
@@ -44,13 +51,8 @@ ExternalProject_Add(
   DEPENDS ${lib}
 )
 
-# Testing
-configure_file("run_test.pl" "." COPYONLY)
-
 # Test in current environment
-add_test(NAME "${PROJECT_NAME}_current_env"
-  COMMAND perl run_test.pl
-)
+opendds_add_test(NAME current_env)
 
 if(UNIX AND INSTALL_IMPORTED_RUNTIME_ARTIFACTS)
   # IMPORTED_RUNTIME_ARTIFACTS was introduced in CMake 3.21, and to test it we
@@ -65,7 +67,6 @@ if(UNIX AND INSTALL_IMPORTED_RUNTIME_ARTIFACTS)
   if(NOT rc STREQUAL "0")
     message(FATAL_ERROR "install_test_framework.pl failed: ${rc}")
   endif()
-  add_test(NAME "${PROJECT_NAME}_clean_env"
-    COMMAND perl run_test.pl clean-env
-  )
+
+  opendds_add_test(NAME clean_env ARGS clean-env)
 endif()

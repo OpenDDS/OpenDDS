@@ -148,11 +148,7 @@ if(NOT DEFINED OPENDDS_ACE_TAO_SRC)
     SOURCE_DIR "${OPENDDS_ACE_TAO_SRC}"
     ${fetch_args}
   )
-  if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.30)
-    FetchContent_MakeAvailable(ace_tao_dl)
-  else()
-    FetchContent_Populate(ace_tao_dl)
-  endif()
+  FetchContent_MakeAvailable(ace_tao_dl)
 endif()
 
 if(EXISTS "${OPENDDS_ACE_TAO_SRC}/ace/Version.h")
@@ -190,7 +186,7 @@ if(NOT DEFINED OPENDDS_MPC)
       GIT_PROGRESS TRUE
       USES_TERMINAL_DOWNLOAD TRUE
     )
-    FetchContent_Populate(mpc_dl)
+    FetchContent_MakeAvailable(mpc_dl)
   else()
     message(FATAL_ERROR "Can't find MPC in ${OPENDDS_ACE}, set OPENDDS_MPC or OPENDDS_MPC_GIT")
   endif()

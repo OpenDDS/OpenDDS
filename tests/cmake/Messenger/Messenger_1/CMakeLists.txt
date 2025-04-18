@@ -5,10 +5,10 @@
 # see DevGuideExamples/DCPS/Messenger/CMakeLists.txt
 
 cmake_minimum_required(VERSION 3.8...4.0)
-project(opendds_messenger_1 CXX)
+project(opendds_tests_cmake_messenger_1 CXX)
 enable_testing()
 
-find_package(OpenDDS REQUIRED)
+find_package(OpenDDS REQUIRED ownership_profile)
 include(opendds_testing)
 
 if(NOT OPENDDS_OWNERSHIP_PROFILE)
@@ -36,7 +36,6 @@ add_executable(${publisher}
 set_target_properties(${publisher}
   PROPERTIES OUTPUT_NAME publisher
 )
-target_include_directories(${publisher} PRIVATE "${src}/../../../")
 opendds_target_sources(${publisher} "${dst}/Messenger.idl")
 
 # Subscriber
@@ -54,7 +53,7 @@ foreach(t ${all_targets})
   # Using explicit scope here is a regression test for
   # https://github.com/OpenDDS/OpenDDS/issues/1336
   # See https://cmake.org/cmake/help/latest/policy/CMP0023.html
-  target_link_libraries(${t} PUBLIC OpenDDS::OpenDDS)
+  target_link_libraries(${t} PUBLIC OpenDDS::OpenDDS OpenDDS::TestUtils)
 
   # Assert the mapping used was C++03
   get_property(mappings TARGET ${t} PROPERTY OPENDDS_LANGUAGE_MAPPINGS)
@@ -65,4 +64,4 @@ endforeach()
 
 # Testing
 configure_file("${src}/run_test.pl" . COPYONLY)
-opendds_add_test(COMMAND perl run_test.pl)
+opendds_add_test(ASSUME_RUN_TEST)

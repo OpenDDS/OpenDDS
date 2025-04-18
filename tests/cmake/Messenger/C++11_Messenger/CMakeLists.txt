@@ -1,13 +1,9 @@
 cmake_minimum_required(VERSION 3.8...4.0)
-project(opendds_cpp11_messenger CXX)
+project(opendds_tests_cmake_cpp11_messenger CXX)
 enable_testing()
 
-find_package(OpenDDS REQUIRED)
+find_package(OpenDDS REQUIRED ownership_profile)
 include(opendds_testing)
-
-if(NOT OPENDDS_OWNERSHIP_PROFILE)
-  message(FATAL_ERROR "This test requires OpenDDS to be built with Ownership Profile enabled")
-endif()
 
 if(NOT OPENDDS_CXX11)
   message(FATAL_ERROR "This test requires OpenDDS to be built with C++11 Support")
@@ -62,4 +58,4 @@ target_link_libraries(${subscriber} ${opendds_libs} ${idl})
 
 # run_test.pl
 configure_file("${src}/run_test.pl" "." COPYONLY)
-opendds_add_test(COMMAND perl run_test.pl EXTRA_LIB_DIRS "${idl_dir}")
+opendds_add_test(ASSUME_RUN_TEST EXTRA_LIB_DIRS "${idl_dir}")
