@@ -150,6 +150,9 @@ const char COMMON_ORB_VERBOSE_LOGGING[] = "COMMON_ORB_VERBOSE_LOGGING";
 const char COMMON_PRINTER_VALUE_WRITER_INDENT[] = "COMMON_PRINTER_VALUE_WRITER_INDENT";
 const unsigned int COMMON_PRINTER_VALUE_WRITER_INDENT_default = 4;
 
+const char COMMON_INTERNAL_STATISTICS_PERIOD[] = "COMMON_INTERNAL_STATISTICS_PERIOD";
+const TimeDuration COMMON_INTERNAL_STATISTICS_PERIOD_default;
+
 const char COMMON_SCHEDULER[] = "COMMON_SCHEDULER";
 const String COMMON_SCHEDULER_default = "";
 
@@ -366,8 +369,6 @@ public:
   void set_default_discovery(const Discovery::RepoKey& defaultDiscovery);
   Discovery::RepoKey get_default_discovery();
 
-
-
   /// Convert domainId to repository key.
   Discovery::RepoKey domain_to_repo(const DDS::DomainId_t domain) const;
 
@@ -582,6 +583,9 @@ public:
 
   unsigned int printer_value_writer_indent() const;
   void printer_value_writer_indent(unsigned int value);
+
+  TimeDuration internal_statistics_period() const;
+  void internal_statistics_period(const TimeDuration& value);
 
   RcHandle<InternalTopic<NetworkInterfaceAddress> > network_interface_address_topic() const
   {

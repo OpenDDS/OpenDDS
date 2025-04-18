@@ -358,6 +358,10 @@ private:
                      const DDS::DataReaderQos& qos);
 
   DCPS::InternalStatisticsDataWriter_rch stats_writer_;
+  typedef DCPS::PmfPeriodicTask<RtpsDiscovery> PeriodicTask;
+  DCPS::RcHandle<PeriodicTask> stats_task_;
+
+  void write_stats(const MonotonicTimePoint&);
 
 public:
   class Config : public Discovery::Config {

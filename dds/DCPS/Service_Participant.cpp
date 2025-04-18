@@ -2334,6 +2334,22 @@ Service_Participant::printer_value_writer_indent(unsigned int value)
   config_store_->set_uint32(COMMON_PRINTER_VALUE_WRITER_INDENT, value);
 }
 
+TimeDuration
+Service_Participant::internal_statistics_period() const
+{
+  return config_store_->get(COMMON_INTERNAL_STATISTICS_PERIOD,
+                            COMMON_INTERNAL_STATISTICS_PERIOD_default,
+                            ConfigStoreImpl::Format_FractionalSeconds);
+}
+
+void
+Service_Participant::internal_statistics_period(const TimeDuration& value)
+{
+  config_store_->set(COMMON_INTERNAL_STATISTICS_PERIOD,
+                     value,
+                     ConfigStoreImpl::Format_FractionalSeconds);
+}
+
 void
 Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_rch reader)
 {

@@ -21,6 +21,7 @@ add_executable(RtpsRelay
   RelayHttpMetaDiscovery.cpp
   RelayParticipantStatusReporter.cpp
   RelayPartitionsListener.cpp
+  RelayStatisticsReporter.cpp
   RelayStatusReporter.cpp
   RelayThreadMonitor.cpp
   RtpsRelay.cpp
