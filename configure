@@ -2992,7 +2992,6 @@ sub write_cmake_file {
     for my $opt (sort(keys(%opts_to_use))) {
       print_cmake_config($fh, $opt, exists($opts{$opt}) ? $opts{$opt} : $opts_to_use{$opt});
     }
-    print_cmake_config($fh, 'RAPIDJSON_USE_PREFIX_PATH', exists($opts{'rapidjson'}) ? 1 : 0);
     print_cmake_config($fh, 'features', \@features);
     print_cmake_config($fh, 'mpcopts', \@mpcopts);
 

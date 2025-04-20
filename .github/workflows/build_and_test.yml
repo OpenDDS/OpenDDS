@@ -190,9 +190,8 @@ jobs:
       run: |
         cd OpenDDS
         source setenv.sh
-        cmake -S . -B build \
-          -DOPENDDS_JUST_BUILD_TESTS=TRUE
-        cmake --build build -- -j
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: gitclean
       shell: bash
       run: |
@@ -1310,9 +1309,8 @@ jobs:
       run: |
         cd OpenDDS
         source setenv.sh
-        cmake -S . -B build \
-          -DOPENDDS_JUST_BUILD_TESTS=TRUE
-        cmake --build build -j 4
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -2801,8 +2799,7 @@ jobs:
       run: |
         cd OpenDDS
         source setenv.sh
-        cmake -S . -B build \
-          -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
         cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -3312,8 +3309,7 @@ jobs:
       run: |
         cd OpenDDS
         source setenv.sh
-        cmake -S . -B build \
-          -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
         cmake --build build -- -j4
     - name: Build iShapes with CMake
       run: |
@@ -4560,8 +4556,7 @@ jobs:
       run: |
         cd OpenDDS
         source setenv.sh
-        cmake -S . -B build \
-          -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
         cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -4923,8 +4918,7 @@ jobs:
       run: |
         cd OpenDDS
         source setenv.sh
-        cmake -S . -B build \
-          -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
         cmake --build build -- -j4
     - name: set up Modeling tests
       shell: bash
@@ -5228,8 +5222,7 @@ jobs:
       run: |
         cd OpenDDS
         source setenv.sh
-        cmake -S . -B build \
-          -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
         cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -5439,8 +5432,7 @@ jobs:
       run: |
         cd OpenDDS
         source setenv.sh
-        cmake -S . -B build \
-          -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
         cmake --build build -- -j4
     - name: set up Modeling tests
       shell: bash
@@ -5841,8 +5833,7 @@ jobs:
       run: |
         cd OpenDDS
         source setenv.sh
-        cmake -S . -B build \
-          -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
         cmake --build build -- -j4
     - name: run OpenDDS tests
       shell: bash
@@ -6714,8 +6705,7 @@ jobs:
       run: |
         cd OpenDDS
         source setenv.sh
-        cmake -S . -B build \
-          -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
         cmake --build build -- -j4
     - name: set up Modeling tests
       shell: bash
@@ -11700,7 +11690,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE  -DCMAKE_CXX_STANDARD=20
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE -DCMAKE_CXX_STANDARD=20
         cmake --build build
     - name: check build configuration
       shell: cmd
@@ -13486,7 +13476,7 @@ jobs:
       run: |
         cd OpenDDS
         XERCESC_ROOT=$(find /opt/homebrew/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
-        ./configure  --no-inline --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/opt/homebrew/opt/openssl@1.1 --compile-warnings=WARNING
+        ./configure --no-inline --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/opt/homebrew/opt/openssl@1.1 --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
