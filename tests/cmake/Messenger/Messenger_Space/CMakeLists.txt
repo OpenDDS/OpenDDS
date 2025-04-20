@@ -41,7 +41,7 @@ foreach(t ${all_targets})
   # Using explicit scope here is a regression test for
   # https://github.com/OpenDDS/OpenDDS/issues/1336
   # See https://cmake.org/cmake/help/latest/policy/CMP0023.html
-  target_link_libraries(${t} PUBLIC OpenDDS::OpenDDS OpenDDS::TestUtils)
+  target_link_libraries(${t} PUBLIC OpenDDS::OpenDDS OpenDDS_TestUtils)
 
   # Assert the mapping used was C++03
   get_property(mappings TARGET ${t} PROPERTY OPENDDS_LANGUAGE_MAPPINGS)

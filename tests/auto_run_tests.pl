@@ -173,8 +173,6 @@ sub print_help {
     exit(0);
 }
 
-my $cmake_tests = "$DDS_ROOT/tests/cmake";
-
 # Parse Options
 my $help = 0;
 my $auto_config = 1;
@@ -380,7 +378,7 @@ foreach my $test_lst (@file_list) {
 }
 
 if ($cmake) {
-    my $fake_name = "tests/cmake/CMakeLists.txt";
+    my $fake_name = "CMakeLists.txt";
     if (!$list_tests) {
         mark_test_start($fake_name);
     }
@@ -391,9 +389,9 @@ if ($cmake) {
     my $process_func;
     my @process_cmd = (
         $python,
-        "$cmake_tests/ctest-to-auto-run-tests.py",
+        "$DDS_ROOT/tests/cmake/ctest-to-auto-run-tests.py",
         '--cmake', $cmake_cmd,
-        $cmake_tests, '.'
+        $DDS_ROOT, '.'
     );
     my $art_output = 'art-output';
     if ($list_tests) {

@@ -1,18 +1,16 @@
-cmake_minimum_required(VERSION 3.23...4.0)
+cmake_minimum_required(VERSION 3.3...4.0)
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/opendds_version.cmake")
-project(opendds
-  DESCRIPTION
-    "OpenDDS is an open-source C++ framework for exchanging data in distributed systems."
-  VERSION "${OPENDDS_VERSION}"
-  HOMEPAGE_URL "https://opendds.org/"
-  LANGUAGES CXX
-)
+if(CMAKE_VERSION VERSION_LESS 3.9)
+  project(opendds VERSION "${OPENDDS_VERSION}" LANGUAGES CXX )
+else()
+  project(opendds
+    DESCRIPTION
+      "OpenDDS is an open-source C++ framework for exchanging data in distributed systems."
+    VERSION "${OPENDDS_VERSION}"
+    HOMEPAGE_URL "https://opendds.org/"
+  )
+endif()
 set(CPACK_PACKAGE_CONTACT info@opendds.org)
-
-include(CMakePackageConfigHelpers)
-include(GNUInstallDirs)
-include(FetchContent)
-include(CPack)
 
 set(OPENDDS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE INTERNAL "")
 set(_OPENDDS_CMAKE_DIR "${OPENDDS_SOURCE_DIR}/cmake" CACHE INTERNAL "")
@@ -22,7 +20,14 @@ if(OPENDDS_JUST_BUILD_TESTS)
   set(_OPENDDS_BUILD_TESTS_DEFAULT TRUE)
   include("${OPENDDS_SOURCE_DIR}/examples_and_tests.cmake")
   return()
+elseif(CMAKE_VERSION VERSION_LESS 3.23)
+  message(FATAL_ERROR "Building OpenDDS with CMake requires CMake 3.23 or later")
 endif()
+
+include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
+include(FetchContent)
+include(CPack)
 
 set(OPENDDS_IS_BEING_BUILT TRUE CACHE INTERNAL "")
 if(EXISTS "${OPENDDS_SOURCE_DIR}/dds/DdsDcpsC.h")

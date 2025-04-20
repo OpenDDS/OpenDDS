@@ -277,10 +277,10 @@ if(NOT TARGET OpenDDS::OpenDDS)
   endif()
 endif()
 
-if(NOT TARGET OpenDDS::TestUtils AND DEFINED OPENDDS_SOURCE_DIR
+if(NOT TARGET OpenDDS_TestUtils AND DEFINED OPENDDS_SOURCE_DIR
     AND IS_DIRECTORY "${OPENDDS_SOURCE_DIR}")
-  add_library(OpenDDS::TestUtils INTERFACE IMPORTED)
-  target_include_directories(OpenDDS::TestUtils INTERFACE "${OPENDDS_SOURCE_DIR}")
+  add_library(OpenDDS_TestUtils INTERFACE)
+  target_include_directories(OpenDDS_TestUtils INTERFACE "${OPENDDS_SOURCE_DIR}")
 endif()
 
 if(TARGET TAO::tao_idl OR TARGET OpenDDS::opendds_idl)

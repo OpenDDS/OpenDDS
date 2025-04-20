@@ -1,7 +1,7 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-cmake_minimum_required(VERSION 3.8...4.0)
+cmake_minimum_required(VERSION 3.3...4.0)
 project(opendds_tests_dcps_messenger CXX)
 enable_testing()
 
@@ -27,7 +27,7 @@ add_executable(${publisher} publisher.cpp)
 set_target_properties(${publisher}
   PROPERTIES OUTPUT_NAME publisher
 )
-target_link_libraries(${publisher} ${messenger} OpenDDS::OpenDDS OpenDDS::TestUtils)
+target_link_libraries(${publisher} ${messenger} OpenDDS::OpenDDS OpenDDS_TestUtils)
 
 # Subscriber with heap-allocated entities
 add_executable(${subscriber}

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8...3.27)
+cmake_minimum_required(VERSION 3.3...4.0)
 project(opendds_compiler_xcdr CXX)
 enable_testing()
 
@@ -26,7 +26,7 @@ target_link_libraries(${PROJECT_NAME}
   PRIVATE
     OpenDDS::Dcps
     OpenDDS_GoogleTest
-    OpenDDS::TestUtils
+    OpenDDS_TestUtils
 )
 
 opendds_add_test(NAME static)

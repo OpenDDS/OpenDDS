@@ -25,5 +25,5 @@ set_target_properties(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
   opendds_tests_cmake_generated_global_idl
   OpenDDS::OpenDDS
-  OpenDDS::TestUtils
+  OpenDDS_TestUtils
 )

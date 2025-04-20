@@ -17,7 +17,7 @@ set(opendds_libs
   OpenDDS::Dcps
   OpenDDS::InfoRepoDiscovery OpenDDS::Tcp
   OpenDDS::Rtps OpenDDS::Rtps_Udp
-  OpenDDS::TestUtils
+  OpenDDS_TestUtils
   ${idl}
 )
 
