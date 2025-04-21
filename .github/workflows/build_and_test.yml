@@ -7284,7 +7284,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Messenger
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
@@ -7299,7 +7299,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\C++11
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
     - name: make C++11 messenger test
       shell: cmd
       run: |
@@ -7466,7 +7466,7 @@ jobs:
         rm -rf underscore_fields
         rm -rf xcdr
         rm -rf XTypesExtensibility
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
@@ -7637,7 +7637,7 @@ jobs:
         rm -rf idl_test_nested_types_lib
         rm -rf isolated_types
         rm -rf is_topic_type
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
@@ -7804,7 +7804,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\unit-tests
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
