@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.3...4.0)
-project(opendds_tests_dcps_c++11)
+project(opendds_tests_dcps_cxx11)
 enable_testing()
 
 find_package(OpenDDS REQUIRED)

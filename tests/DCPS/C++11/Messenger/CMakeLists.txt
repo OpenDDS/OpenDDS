@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.3...4.0)
-project(opendds_tests_c++11_messenger CXX)
+project(opendds_tests_cxx11_messenger CXX)
 enable_testing()
 
 find_package(OpenDDS REQUIRED ownership_profile cxx11)
