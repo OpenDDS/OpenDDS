@@ -68,7 +68,7 @@ void writer_test(DistributedConditionSet_rch dcs,
     if (error != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("%N:%l: svc()")
-                 ACE_TEXT(" ERROR: write returned %d!\n"), error));
+                 ACE_TEXT(" ERROR: write returned %C!\n"), OpenDDS::DCPS::retcode_to_string(error)));
     }
   }
 
@@ -87,7 +87,7 @@ void writer_test(DistributedConditionSet_rch dcs,
     if (error != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("%N:%l: svc()")
-                 ACE_TEXT(" ERROR: write returned %d!\n"), error));
+                 ACE_TEXT(" ERROR: write returned %C!\n"), OpenDDS::DCPS::retcode_to_string(error)));
     }
   }
   dcs->wait_for("Publisher", "Subscriber", "count_1");;
@@ -120,17 +120,17 @@ void stress_test(const DDS::DataWriter_var& dw,
                                 DDS::TopicListener::_nil(),
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    DDS::DataWriter_var dw =
+    DDS::DataWriter_var local_dw =
       publisher->create_datawriter(topic.in(),
                                    qos,
                                    0,
                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    Messenger::MessageDataWriter_var message_dw = Messenger::MessageDataWriter::_narrow(dw.in());
+    Messenger::MessageDataWriter_var message_local_dw = Messenger::MessageDataWriter::_narrow(local_dw.in());
 
     for (std::size_t instance = 0, instance_limit = rand() % 26; instance != instance_limit; ++instance) {
       message.subject_id = instance;
       message.text = std::string(rand() % (1400 * 6), 'c').c_str();
-      message_dw->write(message, DDS::HANDLE_NIL);
+      message_local_dw->write(message, DDS::HANDLE_NIL);
     }
   }
 

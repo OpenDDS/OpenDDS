@@ -129,10 +129,11 @@ emailAddress        = info@objectcomputing.com
     def gencert(self, name, sn):
         identity_path = dpm_path / 'identity'
         path = identity_path / name
-        if os.path.isdir(path):
+        try:
+            path.mkdir(parents=True)
+        except FileExistsError:
             print(f'{path} already exists')
             return
-        os.makedirs(path)
         key_path = path / 'key.pem'
         csr_path = path / 'csr'
         cert_path = path / 'cert.pem'

@@ -73,7 +73,7 @@ void stress_test(const DDS::DataReader_var& dr,
     DataReaderListenerImpl* const listener_servant = new DataReaderListenerImpl(DistributedConditionSet_rch());
     DDS::DataReaderListener_var listener(listener_servant);
 
-    DDS::DataReader_var dw =
+    DDS::DataReader_var local_dr =
       subscriber->create_datareader(topic.in(),
                                     qos,
                                     listener,

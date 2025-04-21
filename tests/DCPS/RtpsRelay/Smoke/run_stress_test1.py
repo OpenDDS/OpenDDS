@@ -17,11 +17,10 @@ from time import time, sleep
 from heapq import heappush, heappop
 from pathlib import Path
 from shutil import rmtree
-from pathlib import Path
 
 # From PerlACE
 def concat_path(pathlist, path):
-    return pathlist + (';' if platform.system() == 'MSWin32' else ':') + str(path)
+    return pathlist + os.pathsep + str(path)
 
 def add_path(name, value):
     if name in os.environ:
