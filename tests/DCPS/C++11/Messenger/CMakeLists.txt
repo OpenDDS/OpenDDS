@@ -1,16 +1,11 @@
-cmake_minimum_required(VERSION 3.8...4.0)
-project(opendds_tests_cmake_cpp11_messenger CXX)
+cmake_minimum_required(VERSION 3.3...4.0)
+project(opendds_tests_c++11_messenger CXX)
 enable_testing()
 
-find_package(OpenDDS REQUIRED ownership_profile)
+find_package(OpenDDS REQUIRED ownership_profile cxx11)
 include(opendds_testing)
 
-if(NOT OPENDDS_CXX11)
-  message(FATAL_ERROR "This test requires OpenDDS to be built with C++11 Support")
-endif()
-
 set(target_prefix "${PROJECT_NAME}_")
-set(src "${CMAKE_CURRENT_SOURCE_DIR}/../../../DCPS/C++11/Messenger")
 set(dst ${CMAKE_CURRENT_BINARY_DIR})
 set(opendds_libs
   OpenDDS::Dcps
@@ -20,7 +15,7 @@ set(opendds_libs
 # IDL Library
 set(idl "${target_prefix}idl")
 add_library(${idl})
-opendds_target_sources(${idl} PUBLIC "${src}/Idl/Messenger.idl" OPENDDS_IDL_OPTIONS "-Lc++11")
+opendds_target_sources(${idl} PUBLIC Idl/Messenger.idl OPENDDS_IDL_OPTIONS -Lc++11)
 target_link_libraries(${idl} PUBLIC OpenDDS::Dcps)
 set(idl_dir "${dst}/Idl")
 set_target_properties(${idl} PROPERTIES
@@ -37,7 +32,7 @@ endif()
 # Publisher
 set(publisher "${target_prefix}publisher")
 add_executable(${publisher}
-  "${src}/Publisher/publisher.cpp"
+  Publisher/publisher.cpp
 )
 set_target_properties(${publisher} PROPERTIES
   OUTPUT_NAME "publisher"
@@ -48,7 +43,7 @@ target_link_libraries(${publisher} ${opendds_libs} ${idl})
 # Subscriber
 set(subscriber "${target_prefix}subscriber")
 add_executable(${subscriber}
-  "${src}/Subscriber/subscriber.cpp"
+  Subscriber/subscriber.cpp
 )
 set_target_properties(${subscriber} PROPERTIES
   OUTPUT_NAME "subscriber"
@@ -56,6 +51,5 @@ set_target_properties(${subscriber} PROPERTIES
 )
 target_link_libraries(${subscriber} ${opendds_libs} ${idl})
 
-# run_test.pl
-configure_file("${src}/run_test.pl" "." COPYONLY)
-opendds_add_test(ASSUME_RUN_TEST EXTRA_LIB_DIRS "${idl_dir}")
+# Testing
+opendds_add_test(EXTRA_LIB_DIRS "${idl_dir}")

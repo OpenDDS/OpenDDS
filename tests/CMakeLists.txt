@@ -2,25 +2,34 @@ cmake_minimum_required(VERSION 3.3...4.0)
 project(opendds_tests)
 enable_testing()
 
+set(has_fetch_content FALSE)
+if(NOT CMAKE_VERSION VERSION_LESS 3.11)
+  set(has_fetch_content TRUE)
+  include(FetchContent)
+endif()
+
 find_package(OpenDDS REQUIRED)
 
 find_package(GTest QUIET PATHS "${OPENDDS_GTEST}")
 if(NOT GTest_FOUND)
   set(gtestsm "${OPENDDS_SOURCE_DIR}/tests/googletest")
-  if(EXISTS "${gtestsm}/CMakeLists.txt")
-    message("GTest not found, using submodule")
-    set(fetch_args SOURCE_DIR "${gtestsm}")
-  else()
-    message("GTest not found, using clone")
-    set(fetch_args
-      GIT_REPOSITORY "https://github.com/OpenDDS/googletest"
-      GIT_TAG "v1.8.x"
-      GIT_SHALLOW TRUE
-      GIT_PROGRESS TRUE
-      USES_TERMINAL_DOWNLOAD TRUE
-    )
+  set(gtestsm_cmakelists "${gtestsm}/CMakeLists.txt")
+  if(has_fetch_content)
+    if(EXISTS "${gtestsm_cmakelists}")
+      message("GoogleTest not found, using submodule")
+      set(fetch_args SOURCE_DIR "${gtestsm}")
+    else()
+      message("GoogleTest not found, using clone")
+      set(fetch_args
+        GIT_REPOSITORY "https://github.com/OpenDDS/googletest"
+        GIT_TAG "v1.8.x"
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
+        USES_TERMINAL_DOWNLOAD TRUE
+      )
+    endif()
+    FetchContent_Declare(googletest ${fetch_args})
   endif()
-  FetchContent_Declare(googletest ${fetch_args})
   # Prevent overriding the parent project's compiler/linker
   # settings on Windows
   if(NOT DEFINED gtest_force_shared_crt)
@@ -30,7 +39,13 @@ if(NOT GTest_FOUND)
   if(NOT DEFINED INSTALL_GTEST)
     set(INSTALL_GTEST FALSE CACHE BOOL "" FORCE)
   endif()
-  FetchContent_MakeAvailable(googletest)
+  if(has_fetch_content)
+    FetchContent_MakeAvailable(googletest)
+  elseif(EXISTS "${gtestsm_cmakelists}")
+    add_subdirectory("${gtestsm}")
+  else()
+    message(FATAL_ERROR "GoogleTest not found and can't fetch it")
+  endif()
 endif()
 if(TARGET GTest::gtest)
   set(_opendds_googletest GTest::gtest CACHE INTERNAL "" FORCE)

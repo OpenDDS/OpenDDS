@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 3.3...4.0)
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/opendds_version.cmake")
 if(CMAKE_VERSION VERSION_LESS 3.9)
-  project(opendds VERSION "${OPENDDS_VERSION}" LANGUAGES CXX )
+  project(opendds VERSION "${OPENDDS_VERSION}" LANGUAGES CXX)
 else()
   project(opendds
     DESCRIPTION
       "OpenDDS is an open-source C++ framework for exchanging data in distributed systems."
     VERSION "${OPENDDS_VERSION}"
     HOMEPAGE_URL "https://opendds.org/"
+    LANGUAGES CXX
   )
 endif()
 set(CPACK_PACKAGE_CONTACT info@opendds.org)
@@ -15,10 +16,27 @@ set(CPACK_PACKAGE_CONTACT info@opendds.org)
 set(OPENDDS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE INTERNAL "")
 set(_OPENDDS_CMAKE_DIR "${OPENDDS_SOURCE_DIR}/cmake" CACHE INTERNAL "")
 
+macro(_opendds_add_examples_and_tests)
+  if(NOT DEFINED _opendds_build_tests_default)
+    set(_opendds_build_tests_default TRUE)
+  endif()
+  set(OPENDDS_BUILD_TESTS ${_opendds_build_tests_default} CACHE BOOL "Build OpenDDS Tests")
+  set(OPENDDS_BUILD_EXAMPLES TRUE CACHE BOOL "Build OpenDDS Examples")
+  if(OPENDDS_BUILD_EXAMPLES OR OPENDDS_BUILD_TESTS)
+    enable_testing()
+    configure_file("cmake/CTestCustom.cmake" "." COPYONLY)
+
+    add_subdirectory(DevGuideExamples/DCPS/Messenger)
+    add_subdirectory(examples)
+  endif()
+  if(OPENDDS_BUILD_TESTS)
+    add_subdirectory(tests)
+  endif()
+endmacro()
+
 if(OPENDDS_JUST_BUILD_TESTS)
   find_package(OpenDDS REQUIRED)
-  set(_OPENDDS_BUILD_TESTS_DEFAULT TRUE)
-  include("${OPENDDS_SOURCE_DIR}/examples_and_tests.cmake")
+  _opendds_add_examples_and_tests()
   return()
 elseif(CMAKE_VERSION VERSION_LESS 3.23)
   message(FATAL_ERROR "Building OpenDDS with CMake requires CMake 3.23 or later")
@@ -167,10 +185,7 @@ if(OPENDDS_INSTALL_RAPIDJSON)
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 endif()
 
-if(BUILD_TESTING)
-  set(_OPENDDS_BUILD_TESTS_DEFAULT TRUE)
-else()
-  set(_OPENDDS_BUILD_TESTS_DEFAULT FALSE)
+if(NOT BUILD_TESTING)
+  set(_opendds_build_tests_default FALSE)
 endif()
-
-include("${OPENDDS_SOURCE_DIR}/examples_and_tests.cmake")
+_opendds_add_examples_and_tests()
