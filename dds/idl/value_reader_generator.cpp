@@ -137,6 +137,27 @@ namespace {
       indent << "if (!value_reader.end_sequence()) return false;\n";
   }
 
+  void map_helper(const std::string& expression, AST_Map* map, int level, FieldFilter filter_kind)
+  {
+    const std::string indent(level * 2, ' ');
+    AST_Type* const actualKey = resolveActualType(map->key_type());
+    const Classification clsKey = classify(actualKey);
+    const std::string key_tk = type_kind(map->key_type()),
+      value_tk = type_kind(map->value_type()),
+      localKeyType = (clsKey & CL_STRING) ? "String" : scoped(map->key_type()->name());
+    be_global->impl_ <<
+      indent << "if (!value_reader.begin_map(" << key_tk << ", " << value_tk << ")) return false;\n" <<
+      indent << "while (value_reader.elements_remaining()) {\n" <<
+      indent << "  if (!value_reader.begin_element()) return false;\n" <<
+      indent << "  " << localKeyType << " key;\n";
+    generate_read("key", "", "", map->key_type(), "", level + 1, nested(filter_kind));
+    generate_read(expression + "[key]", "", "value", map->value_type(), "", level + 1, nested(filter_kind));
+    be_global->impl_ <<
+      indent << "  if (!value_reader.end_element()) return false;\n" <<
+      indent << "}\n" <<
+      indent << "if (!value_reader.end_map()) return false;\n";
+  }
+
   void generate_read(const std::string& expression, const std::string& accessor,
                      const std::string& field_name, AST_Type* type, const std::string& idx,
                      int level, FieldFilter filter_kind, bool optional)
@@ -152,7 +173,7 @@ namespace {
     }
 
     // If the field is optional we need to create a temporary to read the value into before we can assign it to the optional
-    const bool create_tmp  = optional && !(c & CL_STRING);
+    const bool create_tmp = optional && !(c & CL_STRING);
     const std::string var_name = create_tmp ? "tmp" : expression + accessor;
     if (create_tmp) {
       std::string tmp_type = scoped(type->name());
@@ -170,6 +191,9 @@ namespace {
     } else if (c & CL_ARRAY) {
       AST_Array* const array = dynamic_cast<AST_Array*>(actual);
       array_helper(var_name, array, 0, idx, level, filter_kind);
+    } else if (c & CL_MAP) {
+      AST_Map* const map = dynamic_cast<AST_Map*>(actual);
+      map_helper(var_name, map, level, filter_kind);
     } else if (c & CL_FIXED) {
       be_global->impl_ <<
         indent << "::ACE_CDR::Fixed fixed;\n" <<

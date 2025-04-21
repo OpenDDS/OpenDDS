@@ -177,6 +177,23 @@ namespace {
       indent << "}\n";
   }
 
+  void map_helper(const std::string& expression, AST_Map* map, int level, FieldFilter filter_kind)
+  {
+    const std::string indent(level * 2, ' ');
+    const std::string key_tk = type_kind(map->key_type()),
+      value_tk = type_kind(map->value_type());
+    be_global->impl_ <<
+      indent << "if (!value_writer.begin_map(" << key_tk << ", " << value_tk << ")) return false;\n" <<
+      indent << "for (const auto& elt : " << expression << ") {\n" <<
+      indent << "  if (!value_writer.begin_element(0)) return false;\n";
+    generate_write("elt.first", "?", map->key_type(), "", level + 1, nested(filter_kind));
+    generate_write("elt.second", "?", map->value_type(), "", level + 1, nested(filter_kind));
+    be_global->impl_ <<
+      indent << "  if (!value_writer.end_element()) return false;\n" <<
+      indent << "}\n" <<
+      indent << "if (!value_writer.end_map()) return false;\n";
+  }
+
   void generate_write(const std::string& expression, const std::string& field_name,
                       AST_Type* type, const std::string& idx, int level, FieldFilter field_filter)
   {
@@ -187,10 +204,17 @@ namespace {
       AST_Sequence* const sequence = dynamic_cast<AST_Sequence*>(actual);
       sequence_helper(expression, sequence, idx, level, field_filter);
       return;
+    }
 
-    } else if (c & CL_ARRAY) {
+    if (c & CL_ARRAY) {
       AST_Array* const array = dynamic_cast<AST_Array*>(actual);
       array_helper(expression, array, 0, idx, level, field_filter);
+      return;
+    }
+
+    if (c & CL_MAP) {
+      AST_Map* const map = dynamic_cast<AST_Map*>(actual);
+      map_helper(expression, map, level, field_filter);
       return;
     }
 

@@ -101,6 +101,8 @@ public:
   virtual bool end_sequence() = 0;
   virtual bool begin_element(ACE_CDR::ULong idx) = 0;
   virtual bool end_element() = 0;
+  virtual bool begin_map(XTypes::TypeKind key_kind, XTypes::TypeKind value_kind) = 0;
+  virtual bool end_map() = 0;
 
   virtual bool write_boolean(ACE_CDR::Boolean value) = 0;
   virtual bool write_byte(ACE_CDR::Octet value) = 0;

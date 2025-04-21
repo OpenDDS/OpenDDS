@@ -72,6 +72,8 @@ public:
   bool end_sequence();
   bool begin_element();
   bool end_element();
+  bool begin_map(XTypes::TypeKind key_kind, XTypes::TypeKind value_kind);
+  bool end_map();
 
   bool read_boolean(ACE_CDR::Boolean& value);
   bool read_byte(ACE_CDR::Octet& value);

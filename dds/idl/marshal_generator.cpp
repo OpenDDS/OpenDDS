@@ -1614,7 +1614,9 @@ namespace {
       }
     } else if (fld_cls == CL_UNKNOWN) {
       return ""; // warning will be issued for the serialize functions
-    } else { // sequence, struct, union, array
+    } else if ((fld_cls & CL_MAP) && type->anonymous()) {
+      return "//TODO: serialized size\n";
+    } else { // sequence, struct, union, array, named maps
       RefWrapper wrapper(type, field_type_name(dynamic_cast<AST_Field*>(field), type),
         prefix + "." + insert_cxx11_accessor_parens(name, is_union_member) + (is_optional ? ".value()" : ""));
       wrapper.nested_key_only_ = wrap_nested_key_only;
@@ -1660,6 +1662,7 @@ namespace {
       }
       return line;
     }
+
     return findSizeCommon(
       indent, field, field->local_name()->get_string(), field->field_type(), prefix,
       wrap_nested_key_only, intro);
