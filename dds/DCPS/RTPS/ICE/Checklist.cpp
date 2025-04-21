@@ -115,7 +115,7 @@ void Checklist::generate_candidate_pairs()
     AgentInfo::CandidatesType::const_iterator remote_pos = remote_agent_info_.candidates.begin();
     AgentInfo::CandidatesType::const_iterator remote_limit = remote_agent_info_.candidates.end();
     for (; remote_pos != remote_limit; ++remote_pos) {
-#if ACE_HAS_IPV6
+#if defined ACE_HAS_IPV6 && ACE_HAS_IPV6
       if ((local_pos->address.is_linklocal() && remote_pos->address.is_linklocal()) ||
           (!local_pos->address.is_linklocal() && !remote_pos->address.is_linklocal())) {
         frozen_.push_back(CandidatePair(*local_pos, *remote_pos, local_is_controlling_));

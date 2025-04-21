@@ -151,7 +151,7 @@ bool bitmapNonEmpty(const SequenceNumberSet& snSet)
 
   const CORBA::ULong mod = snSet.numBits % 32;
   const CORBA::ULong mask = mod ? (1 + ~(1u << (32 - mod))) : 0xFFFFFFFF;
-  return (bool)(snSet.bitmap[last_index] & mask);
+  return static_cast<CORBA::ULong>(snSet.bitmap[last_index]) & mask;
 }
 
 bool get_rtps_port(DDS::UInt16& port_result, const char* what,
