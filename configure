@@ -206,6 +206,7 @@ my @specs =
     'optimize!', 'Optimization (no)',
     'inline!', 'Inlining (yes)',
     'static!', 'Static libraries (no)',
+    'static-runtime!', 'Link to static platform runtime libraries',
     'ipv6!', 'IPv6 support (no)',
     'sanitize=s@', 'Build with a sanitizer, can pass multiple times' .
       $argIndent . 'or one list separated by commas, combining asan' .
@@ -216,8 +217,8 @@ my @specs =
     'compile-warnings=s', 'Enable additional compiler warnings' .
       $argIndent . '(default compiler warnings)' .
       $argIndent . '  WARNING: enable additional warnings' .
-      $argIndent . '  ERROR: enable additional warnings that are' .
-      $argIndent . '    treated as errors',
+      $argIndent . '  ERROR: enable additional warnings and treat' .
+      $argIndent . '    warnings as errors',
    ],
    ['Required dependencies for OpenDDS:',
     'ace=s', 'ACE (use ACE_ROOT, ACE_wrappers, or download)',
@@ -810,6 +811,13 @@ EOF
     $ENV{'PATH'} = $savepath;
     print "Detected Visual C++ version: $opts{'compiler_version'}\n"
       if $opts{'verbose'};
+
+    if ($opts{'static'} && exists $opts{'static-runtime'} && $opts{'static-runtime'} == 0) {
+      push(@mpcopts, '-value_template', 'Debug::runtime_library=MultiThreadedDebugDLL',
+                     '-value_template', 'Release::runtime_library=MultiThreadedDLL');
+      print "Set Visual C++ runtime library to MultiThreaded(Debug)DLL with static build\n"
+        if $opts{'verbose'};
+    }
   }
   elsif ($opts{'compiler'} =~ /g\+\+|clang/) {
     my $version_string = `$opts{'compiler'} --version`;
@@ -1364,6 +1372,11 @@ sub write_platform_macros {
           my $macro = ($key eq 'static') ? 'static_libs_only' : $key;
           print $PMG "$macro = $opts{$key}\n";
         }
+      }
+      if ($opts{'static-runtime'}) {
+        print $PMG "static_stdlibs = 1\n";
+        print "Added static_stdlibs to platform_macros.GNU due to --static-runtime\n"
+          if $opts{'verbose'};
       }
       if ($cross_compile) {
         print $PMG "CROSS-COMPILE = 1\n";
@@ -2990,6 +3003,7 @@ sub write_cmake_file {
       'rapidjson' => '',
       'security' => 0,
       'static' => 0,
+      'static-runtime' => '',
       'std' => '',
       'xerces3' => '',
     );
