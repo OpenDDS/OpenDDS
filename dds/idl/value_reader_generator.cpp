@@ -106,6 +106,52 @@ namespace {
     }
   }
 
+#if OPENDDS_HAS_IDL_MAP
+  void map_helper(const std::string& expression, AST_Map* map,
+                       const std::string& idx, int level)
+  {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const std::string indent(level * 2, ' ');
+    const std::string kidx = "k" + idx;
+    be_global->impl_ <<
+      indent << "if (!value_reader.begin_map()) return false;\n" <<
+      indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
+        "value_reader.pairs_remaining(); ++" << idx << ") {\n";
+
+    const std::string key_name = scoped(map->key_type()->name());
+
+    be_global->impl_ <<
+      indent << "  if (!value_reader.begin_pair()) return false;\n";
+
+    Classification key_cls = classify(map->key_type());
+
+    if (key_cls & CL_STRING) {
+      be_global->impl_ <<
+        indent << "  std::string " << kidx << ";\n";
+    }
+    else {
+      be_global->impl_ <<
+        indent << " " << key_name << " " << kidx << ";\n";
+    }
+
+    // TODO (tyler) Is there a better way to do this
+    be_global->impl_ <<
+      indent << "  if (!value_reader.begin_pair_key()) return false;\n";
+    generate_read(kidx, "", "key", map->key_type(), idx + "i", level + 1);
+    be_global->impl_ <<
+      indent << "  if (!value_reader.end_pair_key()) return false;\n";
+
+    be_global->impl_ <<
+      indent << "  if (!value_reader.begin_pair_value()) return false;\n";
+    generate_read(expression + "[" + kidx + "]", "", "value", map->value_type(), idx + "i", level + 1);
+    be_global->impl_ <<
+      indent << "  if (!value_reader.end_pair_value()) return false;\n" <<
+      indent << "  if (!value_reader.end_pair()) return false;\n" <<
+      indent << "}\n" <<
+      indent << "if (!value_reader.end_map()) return false;\n";
+  }
+#endif
+
   void sequence_helper(const std::string& expression, AST_Sequence* sequence,
                        const std::string& idx, int level, FieldFilter filter_kind)
   {
@@ -183,6 +229,13 @@ namespace {
       be_global->impl_ <<
         indent << tmp_type << " tmp;\n";
     }
+#if OPENDDS_HAS_IDL_MAP
+    if (c & CL_MAP) {
+      AST_Map* const map = dynamic_cast<AST_Map*>(actual);
+      map_helper(expression + accessor, map, idx, level);
+      return;
+    }
+#endif
 
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     if (c & CL_SEQUENCE) {

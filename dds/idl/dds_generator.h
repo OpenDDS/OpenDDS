@@ -455,6 +455,10 @@ namespace AstTypeClassification {
         ((dynamic_cast<AST_String*>(type)->max_size()->ev()->u.ulval == 0)
         ? 0 : CL_BOUNDED) |
         ((type->node_type() == AST_Decl::NT_wstring) ? CL_WIDE : 0);
+#if OPENDDS_HAS_IDL_MAP
+    case AST_Decl::NT_map:
+      return CL_MAP;
+#endif
     case AST_Decl::NT_sequence:
       return CL_SEQUENCE |
         ((dynamic_cast<AST_Sequence*>(type)->unbounded()) ? 0 : CL_BOUNDED);
@@ -1683,6 +1687,17 @@ struct RefWrapper {
   std::string seq_get_buffer() const
   {
     return value_access() + (cpp11_ ? ".data()" : ".get_buffer()");
+  }
+
+  std::string map_check_empty() const
+  {
+    return value_access() + ".empty()";
+  }
+
+  std::string map_get_length() const
+  {
+    const std::string value = value_access();
+    return "static_cast<uint32_t>(" + value + ".size())";
   }
 
   std::string flat_collection_access(std::string index) const

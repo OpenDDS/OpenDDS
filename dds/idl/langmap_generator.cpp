@@ -108,7 +108,7 @@ struct GeneratorBase {
         ? AST_PredefinedType::PT_wchar : AST_PredefinedType::PT_char;
       return map_type_string(chartype, false);
     }
-    if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_ARRAY | CL_ENUM | CL_FIXED)) {
+    if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_MAP | CL_ARRAY | CL_ENUM | CL_FIXED)) {
       return scoped(type->name());
     }
     if (cls & CL_MAP) {
@@ -128,6 +128,12 @@ struct GeneratorBase {
       mt = "OPENDDS_OPTIONAL_NS::optional<" + mt + ">";
     }
     return mt;
+    if (af.map_) {
+      return af.type_name_;
+    }
+#endif
+
+    return map_type(af.type_);
   }
 
   virtual std::string map_type_string(AST_PredefinedType::PredefinedType chartype, bool constant)
@@ -1462,6 +1468,13 @@ struct Cxx11Generator : GeneratorBase {
     return "std::map<" + map_type(map->key_type()) + ", " + map_type(map->value_type()) + '>';
   }
 
+#if OPENDDS_HAS_IDL_MAP
+  void gen_map(UTL_ScopedName* tdname, AST_Map* map)
+  {
+    gen_map(tdname->last_component()->get_string(), map_type(map->key_type()), map_type(map->value_type()));
+  }
+#endif
+
   static void gen_common_strunion_pre(const char* nm)
   {
     be_global->lang_header_ <<
@@ -1489,6 +1502,14 @@ struct Cxx11Generator : GeneratorBase {
         gen_sequence(af.type_name_, elem_type, "  ");
       }
     }
+
+#if OPENDDS_HAS_IDL_MAP
+    if (af.map_) {
+      const std::string key_type = generator_->map_type(af.map_->key_type());
+      const std::string value_type = generator_->map_type(af.map_->value_type());
+      gen_map(af.type_name_, key_type, value_type, "  ");
+    }
+#endif
 
     const std::string lang_field_type = generator_->map_type(field);
     if (be_global->is_optional(field)) {
@@ -1969,6 +1990,11 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
     case AST_Decl::NT_sequence:
       generator_->gen_sequence(name, dynamic_cast<AST_Sequence*>(base));
       break;
+#if OPENDDS_HAS_IDL_MAP
+    case AST_Decl::NT_map:
+      generator_->gen_map(name, dynamic_cast<AST_Map*>(base));
+      break;
+#endif
     case AST_Decl::NT_array:
       generator_->gen_array(name, arr = dynamic_cast<AST_Array*>(base));
       break;

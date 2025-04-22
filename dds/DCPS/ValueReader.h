@@ -95,6 +95,17 @@ public:
   virtual bool begin_map(XTypes::TypeKind key_kind, XTypes::TypeKind value_kind) = 0;
   virtual bool end_map() = 0;
 
+  virtual bool begin_map() = 0;
+  virtual bool pairs_remaining() = 0;
+  virtual bool end_map() = 0;
+
+  virtual bool begin_pair() = 0;
+  virtual bool begin_pair_key() = 0;
+  virtual bool end_pair_key() = 0;
+  virtual bool begin_pair_value() = 0;
+  virtual bool end_pair_value() = 0;
+  virtual bool end_pair() = 0;
+
   virtual bool read_boolean(ACE_CDR::Boolean& value) = 0;
   virtual bool read_byte(ACE_CDR::Octet& value) = 0;
 #if OPENDDS_HAS_EXPLICIT_INTS

@@ -1,0 +1,27 @@
+/*
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+#if defined __TAO_IDL_FEATURES
+#  include __TAO_IDL_FEATURES
+#  if TAO_IDL_HAS_MAP
+module MapsTest {
+
+  const long MAPS_DOMAIN = 111;
+
+  @topic
+  struct Message {
+    map<int32, int32> intIntMap;
+  };
+
+  const string MESSAGE_TOPIC_NAME = "Message";
+
+  const string PUBLISHER = "PUBLISHER";
+  const string SUBSCRIBER = "SUBSCRIBER";
+  const string SUBSCRIBER_READY = "SUBSCRIBER_READY";
+  const string SUBSCRIBER_DONE = "SUBSCRIBER_DONE";
+};
+#  endif
+#endif

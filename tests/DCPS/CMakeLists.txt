@@ -6,3 +6,4 @@ find_package(OpenDDS REQUIRED)
 
 add_subdirectory(Compiler)
 add_subdirectory(HelloWorld)
+add_subdirectory(Maps)
