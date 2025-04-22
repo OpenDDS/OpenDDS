@@ -18,29 +18,26 @@ int check_participant_bit(DDS::DomainParticipant* participant, int expected_inst
        static_cast<int>(handles.length()) < expected_instances && retries < limit;
        ++retries) {
     if (participant->get_discovered_participants(handles) != DDS::RETCODE_OK) {
-      std::cerr << "ERROR: " << user_data << " failed to get_discovered_participants\n";
+      ACE_ERROR((LM_ERROR, "ERROR: %C failed to get_discovered_participants\n", user_data));
       return EXIT_FAILURE;
     }
-    std::cerr << user_data << ": waiting for discovery\n";
+    ACE_DEBUG((LM_DEBUG, "%C: waiting for discovery\n", user_data));;
     ACE_OS::sleep(1);
   }
 
   if (static_cast<int>(handles.length()) != expected_instances) {
-    std::cerr << "ERROR: " << user_data << " discovered " << handles.length() <<
-      " participants but expected " << expected_instances << '\n';
+    ACE_ERROR((LM_ERROR, "ERROR: %C discovered %d participants but expected %d\n", user_data, handles.length(), expected_instances));
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;
 }
 
 inline
-int test_participant_discovery(DDS::DomainParticipant* participant, int expected_instances,
+int test_participant_discovery(DistributedConditionSet_rch distributed_condition_set,
+                               DDS::DomainParticipant* participant, int expected_instances,
                                const char* user_data, const char* other_user_data,
                                const OpenDDS::DCPS::TimeDuration& resend)
 {
-  DistributedConditionSet_rch distributed_condition_set =
-    OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
-
   static const auto barrier_entities_created = "entities created";
   distributed_condition_set->post(user_data, barrier_entities_created);
   distributed_condition_set->wait_for(user_data, other_user_data, barrier_entities_created);
@@ -50,7 +47,7 @@ int test_participant_discovery(DDS::DomainParticipant* participant, int expected
     return status;
   }
 
-  std::cerr << user_data << ": Discovered " << expected_instances << " participant(s)\n";
+  ACE_ERROR((LM_ERROR, "%C: Discovered %d participant(s)\n",  user_data, expected_instances));
 
   static const auto barrier_check1_done = "check1 done";
   distributed_condition_set->post(user_data, barrier_check1_done);
