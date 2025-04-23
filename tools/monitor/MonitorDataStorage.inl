@@ -117,12 +117,12 @@ MonitorDataStorage::update<OpenDDS::DCPS::ServiceParticipantReport>(
   //       added to the host/pid as they are received by this update.  It
   //       does *not* remove any deleted participants.  This is left for
   //       the DomainParticipantReport updates.
-  int size = data.domain_participants.length();
-  for( int index = 0; index < size; ++index) {
+  DDS::UInt32 size = data.domain_participants.length();
+  for (DDS::UInt32 index = 0; index < size; ++index) {
     create = true;
     (void)this->getParticipantNode(
       pid,
-      data.domain_participants[ index],
+      data.domain_participants[index],
       create
     );
     layoutChanged |= create;
@@ -130,11 +130,11 @@ MonitorDataStorage::update<OpenDDS::DCPS::ServiceParticipantReport>(
 
   // TRANSPORTS
   size = data.transports.length();
-  for( int index = 0; index < size; ++index) {
+  for (DDS::UInt32 index = 0; index < size; ++index) {
     create = true;
-    int transport = data.transports[ index];
-    TransportKey key( host, data.pid, transport);
-    (void)this->getTransportNode( key, create);
+    const DDS::UInt32 transport = data.transports[index];
+    TransportKey key(host, data.pid, static_cast<int>(transport));
+    (void)this->getTransportNode(key, create);
     layoutChanged |= create;
   }
 
@@ -207,13 +207,13 @@ MonitorDataStorage::update<OpenDDS::DCPS::DomainParticipantReport>(
   //       the DomainParticipant as they are received by this update.
   //       It does *not* remove any deleted topics.  This is left for
   //       the TopicReport updates.
-  int size = data.topics.length();
-  for( int index = 0; index < size; ++index) {
+  const DDS::UInt32 size = data.topics.length();
+  for (DDS::UInt32 index = 0; index < size; ++index) {
     bool create = true;
     (void)this->getNode(
-      std::string( "Topic"),
+      std::string("Topic"),
       data.dp_id,
-      data.topics[ index],
+      data.topics[index],
       create
     );
     layoutChanged |= create;
@@ -360,7 +360,7 @@ MonitorDataStorage::update<OpenDDS::DCPS::PublisherReport>(
   // TRANSPORT
   create = true;
   if (data.transport_id != 0) {
-    this->manageTransportLink( node, data.transport_id, create);
+    this->manageTransportLink( node, static_cast<int>(data.transport_id), create);
   }
   layoutChanged |= create;
 
@@ -369,16 +369,16 @@ MonitorDataStorage::update<OpenDDS::DCPS::PublisherReport>(
   //       the Publisher as they are received by this update.  It does
   //       *not* remove any deleted writers.  This is left for the
   //       DataWriterReport updates.
-  int size = data.writers.length();
-  for( int index = 0; index < size; ++index) {
-    bool create = true;
+  const DDS::UInt32 size = data.writers.length();
+  for (DDS::UInt32 index = 0; index < size; ++index) {
+    bool createEndpointNode = true;
     (void)this->getEndpointNode(
-      std::string( "Writer"),
+      std::string("Writer"),
       key,
-      data.writers[ index],
-      create
+      data.writers[index],
+      createEndpointNode
     );
-    layoutChanged |= create;
+    layoutChanged |= createEndpointNode;
   }
 
   // NAME / VALUE DATA, notify GUI of changes.
@@ -436,7 +436,7 @@ MonitorDataStorage::update<OpenDDS::DCPS::SubscriberReport>(
   // TRANSPORT
   create = true;
   if (data.transport_id != 0) {
-    this->manageTransportLink( node, data.transport_id, create);
+    this->manageTransportLink(node, static_cast<int>(data.transport_id), create);
   }
   layoutChanged |= create;
 
@@ -445,13 +445,13 @@ MonitorDataStorage::update<OpenDDS::DCPS::SubscriberReport>(
   //       the Subscriber as they are received by this update.  It does
   //       *not* remove any deleted writers.  This is left for the
   //       DataReaderReport updates.
-  int size = data.readers.length();
-  for( int index = 0; index < size; ++index) {
+  const DDS::UInt32 size = data.readers.length();
+  for (DDS::UInt32 index = 0; index < size; ++index) {
     create = true;
     (void)this->getEndpointNode(
-      std::string( "Reader"),
+      std::string("Reader"),
       key,
-      data.readers[ index],
+      data.readers[index],
       create
     );
     layoutChanged |= create;
@@ -528,18 +528,18 @@ MonitorDataStorage::update<OpenDDS::DCPS::DataWriterReport>(
   layoutChanged |= create;
 
   // ASSOCIATIONS
-  int size = data.associations.length();
-  for( int index = 0; index < size; ++index) {
+  const DDS::UInt32 size = data.associations.length();
+  for (DDS::UInt32 index = 0; index < size; ++index) {
     // Create a child node to hold the association if its not already in
     // the tree.
     QString reader(OpenDDS::DCPS::LogGuid(data.associations[index].dr_id).c_str());
-    int row = node->indexOf( 1, reader);
-    if( row == -1) {
+    const int row = node->indexOf(1, reader);
+    if (row == -1) {
       // New data, insert.
       QList<QVariant> list;
-      list << QString( QObject::tr("Reader")) << reader;
-      TreeNode* valueNode = new TreeNode( list, node);
-      node->append( valueNode);
+      list << QString(QObject::tr("Reader")) << reader;
+      TreeNode* valueNode = new TreeNode(list, node);
+      node->append(valueNode);
       layoutChanged = true;
     }
   }
@@ -658,43 +658,39 @@ MonitorDataStorage::update<OpenDDS::DCPS::DataWriterPeriodicReport>(
   }
 
   // ASSOCIATIONS
-  int size = data.associations.length();
-  for( int index = 0; index < size; ++index) {
+  const DDS::UInt32 size = data.associations.length();
+  for (DDS::UInt32 index = 0; index < size; ++index) {
     // Create a child node to hold the association if its not already in
     // the tree.
     TreeNode* readerNode = 0;
-    QString reader( OpenDDS::DCPS::LogGuid(data.associations[index].dr_id).c_str());
-    int row = node->indexOf( 1, reader);
-    if( row == -1) {
+    QString reader(OpenDDS::DCPS::LogGuid(data.associations[index].dr_id).c_str());
+    const int row = node->indexOf(1, reader);
+    if (row == -1) {
       // New data, insert.
       QList<QVariant> list;
-      list << QString( QObject::tr("Reader")) << reader;
-      readerNode = new TreeNode( list, node);
-      node->append( readerNode);
+      list << QString(QObject::tr("Reader")) << reader;
+      readerNode = new TreeNode(list, node);
+      node->append(readerNode);
       layoutChanged = true;
 
     } else {
       // Existing data, use it.
-      readerNode = (*node)[ row];
+      readerNode = (*node)[row];
     }
 
     // Add or update the current sequence number for this association.
-    TreeNode* child = 0;
-    QString sequenceLabel( QObject::tr("sequence number"));
-    QString sequenceValue
-      = QString::number( data.associations[ index].sequence_number);
-    if( this->manageChildValue(
-          readerNode, child, sequenceLabel, sequenceValue
-      )) {
+    TreeNode* child2 = 0;
+    QString sequenceLabel(QObject::tr("sequence number"));
+    QString sequenceValue = QString::number(data.associations[index].sequence_number);
+    if (this->manageChildValue(readerNode, child2, sequenceLabel, sequenceValue)) {
       layoutChanged = true;
-
     } else {
       dataChanged = true;
     }
   }
 
   // NAME / VALUE DATA, notify GUI of changes.
-  this->displayNvp( node, data.values, layoutChanged, dataChanged);
+  this->displayNvp(node, data.values, layoutChanged, dataChanged);
 }
 
 template<>
@@ -765,24 +761,24 @@ MonitorDataStorage::update<OpenDDS::DCPS::DataReaderReport>(
   layoutChanged |= create;
 
   // ASSOCIATIONS
-  int size = data.associations.length();
-  for( int index = 0; index < size; ++index) {
+  const DDS::UInt32 size = data.associations.length();
+  for (DDS::UInt32 index = 0; index < size; ++index) {
     // Create a child node to hold the association if its not already in
     // the tree.
-    QString writer( OpenDDS::DCPS::LogGuid(data.associations[index].dw_id).c_str());
-    int row = node->indexOf( 1, writer);
-    if( row == -1) {
+    QString writer(OpenDDS::DCPS::LogGuid(data.associations[index].dw_id).c_str());
+    const int row = node->indexOf(1, writer);
+    if (row == -1) {
       // New data, insert.
       QList<QVariant> list;
-      list << QString( QObject::tr("Writer")) << writer;
-      TreeNode* valueNode = new TreeNode( list, node);
-      node->append( valueNode);
+      list << QString(QObject::tr("Writer")) << writer;
+      TreeNode* valueNode = new TreeNode(list, node);
+      node->append(valueNode);
       layoutChanged = true;
     }
   }
 
   // NAME / VALUE DATA, notify GUI of changes.
-  this->displayNvp( node, data.values, layoutChanged, dataChanged);
+  this->displayNvp(node, data.values, layoutChanged, dataChanged);
 }
 
 template<>
@@ -836,43 +832,39 @@ MonitorDataStorage::update<OpenDDS::DCPS::DataReaderPeriodicReport>(
   }
 
   // ASSOCIATIONS
-  int size = data.associations.length();
-  for( int index = 0; index < size; ++index) {
+  const DDS::UInt32 size = data.associations.length();
+  for (DDS::UInt32 index = 0; index < size; ++index) {
     // Create a child node to hold the association if its not already in
     // the tree.
     TreeNode* writerNode = 0;
-    QString writer( OpenDDS::DCPS::LogGuid(data.associations[index].dw_id).c_str());
-    int row = node->indexOf( 1, writer);
-    if( row == -1) {
+    QString writer(OpenDDS::DCPS::LogGuid(data.associations[index].dw_id).c_str());
+    const int row = node->indexOf(1, writer);
+    if (row == -1) {
       // New data, insert.
       QList<QVariant> list;
-      list << QString( QObject::tr("Writer")) << writer;
-      writerNode = new TreeNode( list, node);
-      node->append( writerNode);
+      list << QString(QObject::tr("Writer")) << writer;
+      writerNode = new TreeNode(list, node);
+      node->append(writerNode);
       layoutChanged = true;
 
     } else {
       // Existing data, use it.
-      writerNode = (*node)[ row];
+      writerNode = (*node)[row];
     }
 
     // Add or update the current number of samples available for this association.
     TreeNode* child = 0;
-    QString samplesLabel( QObject::tr("samples available"));
-    QString samplesValue
-      = QString::number( data.associations[ index].samples_available);
-    if( this->manageChildValue(
-          writerNode, child, samplesLabel, samplesValue
-      )) {
+    QString samplesLabel(QObject::tr("samples available"));
+    QString samplesValue = QString::number(data.associations[index].samples_available);
+    if (this->manageChildValue(writerNode, child, samplesLabel, samplesValue)) {
       layoutChanged = true;
-
     } else {
       dataChanged = true;
     }
   }
 
   // NAME / VALUE DATA, notify GUI of changes.
-  this->displayNvp( node, data.values, layoutChanged, dataChanged);
+  this->displayNvp(node, data.values, layoutChanged, dataChanged);
 }
 
 template<>
@@ -906,7 +898,7 @@ MonitorDataStorage::update<OpenDDS::DCPS::TransportReport>(
   // Retain knowledge of node insertions, updates, and deletions.
   bool layoutChanged = !remove; // Updated by getTransportNode()
 
-  TransportKey key( std::string(data.host), data.pid, data.transport_id);
+  TransportKey key(std::string(data.host), data.pid, static_cast<int>(data.transport_id));
   TreeNode* node = this->getTransportNode( key, layoutChanged);
   if( !node) {
     return;

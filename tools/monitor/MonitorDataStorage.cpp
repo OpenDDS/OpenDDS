@@ -709,50 +709,50 @@ Monitor::MonitorDataStorage::displayNvp(
 )
 {
   // NAME / VALUE DATA
-  int size = data.length();
-  for( int index = 0; index < size; ++index) {
-    QString name( data[ index].name);
-    int row = parent->indexOf( 0, name);
-    if( row == -1) {
+  const DDS::UInt32 size = data.length();
+  for (DDS::UInt32 index = 0; index < size; ++index) {
+    QString name(data[index].name);
+    const int row = parent->indexOf(0, name);
+    if (row == -1) {
       // This is new data, insert it.
       QList<QVariant> list;
       list << name;
-      switch( data[ index].value._d()) {
+      switch (data[ index].value._d()) {
         case OpenDDS::DCPS::INTEGER_TYPE:
-          list << QString::number( data[ index].value.integer_value());
+          list << QString::number(data[index].value.integer_value());
           break;
 
         case OpenDDS::DCPS::DOUBLE_TYPE:
-          list << QString::number( data[ index].value.double_value());
+          list << QString::number(data[index].value.double_value());
           break;
 
         case OpenDDS::DCPS::STRING_TYPE:
-          list << QString( data[ index].value.string_value());
+          list << QString(data[index].value.string_value());
           break;
 
         case OpenDDS::DCPS::STATISTICS_TYPE:
         case OpenDDS::DCPS::STRING_LIST_TYPE:
-          list << QString( QObject::tr("<display unimplemented>"));
+          list << QString(QObject::tr("<display unimplemented>"));
           break;
       }
-      TreeNode* node = new TreeNode( list, parent);
-      parent->append( node);
+      TreeNode* node = new TreeNode(list, parent);
+      parent->append(node);
       layoutChanged = true;
 
     } else {
       // This is existing data, update the value.
-      TreeNode* node = (*parent)[ row];
-      switch( data[ index].value._d()) {
+      TreeNode* node = (*parent)[row];
+      switch (data[ index].value._d()) {
         case OpenDDS::DCPS::INTEGER_TYPE:
-          node->setData( 1, QString::number( data[ index].value.integer_value()));
+          node->setData(1, QString::number(data[index].value.integer_value()));
           break;
 
         case OpenDDS::DCPS::DOUBLE_TYPE:
-          node->setData( 1, QString::number( data[ index].value.double_value()));
+          node->setData(1, QString::number(data[index].value.double_value()));
           break;
 
         case OpenDDS::DCPS::STRING_TYPE:
-          node->setData( 1, QString( data[ index].value.string_value()));
+          node->setData(1, QString(data[index].value.string_value()));
           break;
 
         case OpenDDS::DCPS::STATISTICS_TYPE:
@@ -764,12 +764,12 @@ Monitor::MonitorDataStorage::displayNvp(
   }
 
   // Notify the GUI if we have changed the underlying model.
-  if( layoutChanged) {
+  if (layoutChanged) {
     /// @TODO: Check that we really do not need to do updated here.
     this->model_->changed();
 
-  } else if( dataChanged) {
-    this->model_->updated( parent, 1, (*parent)[ parent->size()-1], 1);
+  } else if (dataChanged) {
+    this->model_->updated(parent, 1, (*parent)[parent->size() - 1], 1);
   }
 }
 

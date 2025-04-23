@@ -14,6 +14,7 @@
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wdeprecated-copy"
 #  pragma GCC diagnostic ignored "-Wsign-conversion"
+#  pragma GCC diagnostic ignored "-Wdeprecated-enum-enum-conversion"
 #endif
 
 #include <QtCore/QList>

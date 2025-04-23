@@ -78,9 +78,9 @@ struct AtomHash {
   std::size_t operator()(const Atom& atom) const
   {
     std::size_t result = atom.kind();
-    result ^= (static_cast<unsigned char>(atom.character()) << 8);
+    result ^= static_cast<unsigned char>(atom.character() << 8);
     for (const auto c : atom.characters()) {
-      result ^= (static_cast<unsigned char>(c) << 16);
+      result ^= static_cast<unsigned char>(c << 16);
     }
     return result;
   }
