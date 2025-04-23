@@ -145,7 +145,7 @@ void GuidPartitionTable::lookup(StringSet& partitions, const OpenDDS::DCPS::GUID
     return;
   }
 
-  auto& c = guid_to_partitions_cache_[prefix];
+  StringSet c;
 
   for (auto pos = guid_to_partitions_.lower_bound(prefix), limit = guid_to_partitions_.end();
         pos != limit && std::memcmp(pos->first.guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) == 0; ++pos) {
@@ -158,7 +158,11 @@ void GuidPartitionTable::lookup(StringSet& partitions, const OpenDDS::DCPS::GUID
     c.erase("");
   }
 
-  relay_stats_reporter_.partition_guids(guid_to_partitions_.size(), guid_to_partitions_cache_.size());
+  // Only create a cache entry if there is something to cache.
+  if (!c.empty()) {
+    guid_to_partitions_cache_[prefix] = c;
+    relay_stats_reporter_.partition_guids(guid_to_partitions_.size(), guid_to_partitions_cache_.size());
+  }
 }
 
 void GuidPartitionTable::populate_replay(SpdpReplay& spdp_replay,
