@@ -907,7 +907,6 @@ namespace {
     }
   }
 
-#if OPENDDS_HAS_IDL_MAP
   void skip_to_end_map(const std::string& indent,
     std::string start, std::string end, std::string map_type_name,
     bool use_cxx11, Classification cls, AST_Map* map)
@@ -1297,7 +1296,6 @@ namespace {
       gen_map_i(0, 0, true, &sf);
     }
   }
-#endif
 
   void gen_array_i(
     UTL_ScopedName* name, AST_Array* arr, bool nested_key_only, const FieldInfo* anonymous = 0)
@@ -1954,11 +1952,9 @@ bool marshal_generator::gen_typedef(AST_Typedef* node, UTL_ScopedName* name, AST
   case AST_Decl::NT_array:
     gen_array(name, dynamic_cast<AST_Array*>(base));
     break;
-#if OPENDDS_HAS_IDL_MAP
   case AST_Decl::NT_map:
     gen_map(name, dynamic_cast<AST_Map*>(base));
     break;
-#endif
   default:
     return true;
   }
@@ -3364,13 +3360,9 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         gen_anonymous_array(af);
       } else if (af.seq_ && af.is_new(anonymous_seq_generated)) {
         gen_anonymous_sequence(af);
-      }
-#if OPENDDS_HAS_IDL_MAP
-      if (af.map_) {
-        // TODO
+      } else if (af.map_) {
         gen_anonymous_map(af);
       }
-#endif
     }
   }
 

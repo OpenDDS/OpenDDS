@@ -65,8 +65,6 @@ public:
   bool begin_map(XTypes::TypeKind key_kind, XTypes::TypeKind value_kind);
   bool end_map();
 
-  void begin_map();
-  void end_map();
   void begin_pair();
   void end_pair();
   void write_key();
@@ -185,15 +183,15 @@ bool JsonValueWriter<Writer>::end_sequence()
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_map()
+bool JsonValueWriter<Writer>::begin_map(XTypes::TypeKind key_kind, XTypes::TypeKind value_kind)
 {
-  writer_.StartArray();
+  return writer_.StartArray();
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::end_map()
+bool JsonValueWriter<Writer>::end_map()
 {
-  writer_.EndArray();
+  return writer_.EndArray();
 }
 
 template <typename Writer>

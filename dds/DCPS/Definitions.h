@@ -99,11 +99,6 @@
 #  define OPENDDS_GCC_HAS_DIAG_PUSHPOP 0
 #endif
 
-#if defined TAO_HAS_IDL_FEATURES && TAO_HAS_IDL_FEATURES
-#  include <tao/idl_features.h>
-#  define OPENDDS_HAS_IDL_MAP TAO_IDL_HAS_MAP
-#endif
-
 #ifndef OPENDDS_CONFIG_AUTO_STATIC_INCLUDES
 #  define OPENDDS_CONFIG_AUTO_STATIC_INCLUDES 0
 #endif

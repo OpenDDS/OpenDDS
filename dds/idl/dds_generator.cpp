@@ -417,8 +417,6 @@ string type_to_default(const std::string& indent, AST_Type* type, const string& 
   } else if (fld_cls & CL_ARRAY) {
     return type_to_default_array(
       indent, type, name, is_anonymous, is_union, use_cxx11, fld_cls);
-  } else if (fld_cls & CL_MAP) {
-    return "{};\n";
   } else if (fld_cls & CL_ENUM) {
     // For now, simply return the first value of the enumeration.
     // Must be changed, if support for @default_literal is desired.

@@ -75,8 +75,6 @@ public:
   bool begin_map(XTypes::TypeKind key_kind, XTypes::TypeKind value_kind);
   bool end_map();
 
-  bool begin_map();
-  bool end_map();
   bool pairs_remaining();
   bool begin_pair();
   bool begin_pair_key();
@@ -365,7 +363,7 @@ bool JsonValueReader<InputStream>::end_element()
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::begin_map()
+bool JsonValueReader<InputStream>::begin_map(XTypes::TypeKind key_kind, XTypes::TypeKind value_kind)
 {
   peek();
   return consume(kStartArray);

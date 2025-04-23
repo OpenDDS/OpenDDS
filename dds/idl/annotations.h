@@ -342,10 +342,8 @@ public:
   TryConstructFailAction array_element_value(AST_Array* node) const;
   TryConstructFailAction union_value(AST_Union* node) const;
 
-#if OPENDDS_HAS_IDL_MAP
   TryConstructFailAction map_key(AST_Map* node) const;
   TryConstructFailAction map_value(AST_Map* node) const;
-#endif
 };
 
 // @value ====================================================================

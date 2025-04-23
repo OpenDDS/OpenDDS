@@ -5,6 +5,7 @@ enable_testing()
 find_package(OpenDDS REQUIRED)
 
 if(NOT OPENDDS_CXX_STD_YEAR LESS 2011)
+  add_subdirectory(optional)
   add_subdirectory(char_literals)
 endif()
 

@@ -6,13 +6,11 @@
 #include <ast_annotation_appl.h>
 #include <ast_annotation_decl.h>
 #include <ast_annotation_member.h>
-#include <ast_sequence.h>
 #include <ast_array.h>
-#if OPENDDS_HAS_IDL_MAP
 #include <ast_map.h>
-#endif
-#include <ast_union.h>
+#include <ast_sequence.h>
 #include <utl_string.h>
+#include <ast_union.h>
 
 void Annotations::register_all()
 {
@@ -462,7 +460,6 @@ std::string ValueAnnotation::name() const
   return "value";
 }
 
-#if OPENDDS_HAS_IDL_MAP
 TryConstructFailAction TryConstructAnnotation::map_key(AST_Map* node) const
 {
   AST_Annotation_Appl* appl = node->key_type_annotations().find(declaration());
@@ -476,7 +473,6 @@ TryConstructFailAction TryConstructAnnotation::map_value(AST_Map* node) const
   if (!appl) { return absent_value; }
   return value_from_appl(appl);
 }
-#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {

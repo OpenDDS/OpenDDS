@@ -13,8 +13,6 @@
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-
-#if OPENDDS_HAS_IDL_MAP
   // Production apps should check the return values.
   // For tests, it just makes the code noisy.
 
@@ -63,8 +61,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   participant->delete_contained_entities();
   domain_participant_factory->delete_participant(participant);
   TheServiceParticipant->shutdown();
-
-#endif
 
   return 0;
 }

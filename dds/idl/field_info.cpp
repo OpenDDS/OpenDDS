@@ -68,11 +68,9 @@ std::string FieldInfo::scoped_type(AST_Type& field_type, const std::string& fiel
     return n + "_seq";
   }
 
-#if OPENDDS_HAS_IDL_MAP
   if (field_type.node_type() == AST_Decl::NT_map) {
     return n + "_map";
   }
-#endif
 
   return n;
 }
@@ -104,9 +102,7 @@ FieldInfo::FieldInfo(AST_Field& field)
   , cls_(classify(act_))
   , arr_(dynamic_cast<AST_Array*>(type_))
   , seq_(dynamic_cast<AST_Sequence*>(type_))
-#if OPENDDS_HAS_IDL_MAP
   , map_(dynamic_cast<AST_Map*>(type_))
-#endif
   , as_base_(container_base_type(type_))
   , as_act_(as_base_ ? resolveActualType(as_base_) : 0)
   , as_cls_(as_act_ ? classify(as_act_) : CL_UNKNOWN)
@@ -125,12 +121,9 @@ FieldInfo::FieldInfo(AST_Field& field)
   } else if (seq_) {
     length_ = "length";
     arg_ = "seq";
-  }
-#if OPENDDS_HAS_IDL_MAP
-  else if (map_) {
+  } else if (map_) {
     arg_ = "map";
   }
-#endif
 
   if (cxx11()) {
     unwrap_ = scoped_type_ + "& " + arg_ + " = wrap;\n  ACE_UNUSED_ARG(" + arg_ + ");\n";

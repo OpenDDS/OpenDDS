@@ -108,7 +108,7 @@ struct GeneratorBase {
         ? AST_PredefinedType::PT_wchar : AST_PredefinedType::PT_char;
       return map_type_string(chartype, false);
     }
-    if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_MAP | CL_ARRAY | CL_ENUM | CL_FIXED)) {
+    if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_ARRAY | CL_ENUM | CL_FIXED)) {
       return scoped(type->name());
     }
     if (cls & CL_MAP) {
@@ -1501,15 +1501,10 @@ struct Cxx11Generator : GeneratorBase {
       } else if (af.seq_) {
         gen_sequence(af.type_name_, elem_type, "  ");
       }
+    } else if (field->field_type()->anonymous() && af.map_) {
+      be_global->lang_header_ <<
+        "  using AnonymousType_" << af.name_ << "_map = " << generator_->map_to_lang(af.map_) << ";\n";
     }
-
-#if OPENDDS_HAS_IDL_MAP
-    if (af.map_) {
-      const std::string key_type = generator_->map_type(af.map_->key_type());
-      const std::string value_type = generator_->map_type(af.map_->value_type());
-      gen_map(af.type_name_, key_type, value_type, "  ");
-    }
-#endif
 
     const std::string lang_field_type = generator_->map_type(field);
     if (be_global->is_optional(field)) {
@@ -1990,11 +1985,6 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
     case AST_Decl::NT_sequence:
       generator_->gen_sequence(name, dynamic_cast<AST_Sequence*>(base));
       break;
-#if OPENDDS_HAS_IDL_MAP
-    case AST_Decl::NT_map:
-      generator_->gen_map(name, dynamic_cast<AST_Map*>(base));
-      break;
-#endif
     case AST_Decl::NT_array:
       generator_->gen_array(name, arr = dynamic_cast<AST_Array*>(base));
       break;

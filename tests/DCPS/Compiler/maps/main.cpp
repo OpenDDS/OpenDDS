@@ -4,8 +4,6 @@
 
 #include <gtest/gtest.h>
 
-#if OPENDDS_HAS_IDL_MAP
-
 const OpenDDS::DCPS::Encoding encoding(OpenDDS::DCPS::Encoding::KIND_UNALIGNED_CDR);
 
 template<typename T>
@@ -230,8 +228,6 @@ TEST(MapsTests, ValueWriterReader)
   // Test everything is the same
   CheckData(testData, expectedData);
 }
-
-#endif
 
 #endif
 

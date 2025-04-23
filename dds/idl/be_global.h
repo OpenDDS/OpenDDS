@@ -227,10 +227,8 @@ public:
 
   bool value(AST_Decl* node, ACE_INT32& value) const;
 
-#if OPENDDS_HAS_IDL_MAP
   TryConstructFailAction map_key_try_construct(AST_Map* node);
   TryConstructFailAction map_value_try_construct(AST_Map* node);
-#endif
 
   OpenDDS::DataRepresentation data_representations(AST_Decl* node) const;
 
