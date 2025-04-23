@@ -12,6 +12,7 @@
 #ifdef __GNUC__
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#  pragma GCC diagnostic ignored "-Wsign-conversion"
 #endif
 
 #include <QtGui/QtGui>

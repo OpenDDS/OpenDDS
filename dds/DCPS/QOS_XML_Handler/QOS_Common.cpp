@@ -69,7 +69,7 @@ QosCommon::get_duration(::DDS::Duration_t& duration, const ACE_TCHAR * sec, cons
              ACE_OS::strcmp(nsec, ACE_TEXT("DURATION_INFINITE_NSEC")) == 0) {
       duration.nanosec =  ::DDS::DURATION_INFINITE_NSEC;
     } else {
-      duration.nanosec = ACE_OS::atoi(nsec);
+      duration.nanosec = static_cast<DDS::UInt32>(ACE_OS::atoi(nsec));
     }
   }
 }

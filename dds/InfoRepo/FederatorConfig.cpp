@@ -147,7 +147,7 @@ void hash_endpoints(::CORBA::Long& hash, const ACE_TCHAR* const endpoints_str)
     const ACE_TCHAR* next = ACE_OS::strstr(curr, delim);
     if (next == 0)
       next = endpoints_str + len;
-    hash_endpoint(hash, curr, (next - curr));
+    hash_endpoint(hash, curr, static_cast<size_t>(next - curr));
     curr = next + 1;
   }
 }
