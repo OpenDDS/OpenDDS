@@ -49,8 +49,10 @@ RtpsUdpCore::RtpsUdpCore(const RtpsUdpInst_rch& inst)
 {}
 
 RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst,
-                                   DDS::DomainId_t domain)
+                                   DDS::DomainId_t domain,
+                                   DomainParticipantImpl* participant)
   : TransportImpl(inst, domain)
+  , participant_(participant)
 #if OPENDDS_CONFIG_SECURITY
   , local_crypto_handle_(DDS::HANDLE_NIL)
 #endif
@@ -59,6 +61,10 @@ RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst,
   , ice_agent_(ICE::Agent::instance())
 #endif
   , core_(inst)
+  , actual_local_address_(NetworkAddress::default_IPV4)
+#ifdef ACE_HAS_IPV6
+  , ipv6_actual_local_address_(NetworkAddress::default_IPV6)
+#endif
 {
   assign(local_prefix_, GUIDPREFIX_UNKNOWN);
   if (!(configure_i(inst) && open())) {
@@ -353,7 +359,7 @@ RtpsUdpTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags 
 {
   RtpsUdpInst_rch cfg = config();
   if (cfg) {
-    cfg->populate_locator(info, flags, domain_);
+    cfg->populate_locator(info, flags, domain_, participant_);
     return true;
   }
   return false;
@@ -646,7 +652,7 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
   if (!open_socket(config, unicast_socket_, PF_INET, actual4)) {
     return false;
   }
-  config->actual_local_address_ = actual4;
+  actual_local_address_ = actual4;
 
 #ifdef ACE_HAS_IPV6
   ACE_INET_Addr actual6;
@@ -657,7 +663,7 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
   if (actual6.is_ipv4_mapped_ipv6() && temp.is_any()) {
     temp = NetworkAddress(actual6.get_port_number(), "::");
   }
-  config->ipv6_actual_local_address_ = temp;
+  ipv6_actual_local_address_ = temp;
 #endif
 
   create_reactor_task(false, "RtpsUdpTransport" + config->name());
@@ -899,13 +905,7 @@ RtpsUdpTransport::IceEndpoint::host_addresses() const
 {
   ICE::AddressListType addresses;
 
-  RtpsUdpInst_rch cfg = transport.config();
-
-  if (!cfg) {
-    return addresses;
-  }
-
-  ACE_INET_Addr addr = cfg->actual_local_address_.to_addr();
+  ACE_INET_Addr addr = transport.actual_local_address_.to_addr();
   if (addr != ACE_INET_Addr()) {
     if (addr.is_any()) {
       ICE::AddressListType addrs;
@@ -922,7 +922,7 @@ RtpsUdpTransport::IceEndpoint::host_addresses() const
   }
 
 #ifdef ACE_HAS_IPV6
-  addr = cfg->ipv6_actual_local_address_.to_addr();
+  addr = transport.ipv6_actual_local_address_.to_addr();
   if (addr != ACE_INET_Addr()) {
     if (addr.is_any()) {
       ICE::AddressListType addrs;

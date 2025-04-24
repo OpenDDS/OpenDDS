@@ -144,7 +144,8 @@ public:
 
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info,
                                   ConnectionInfoFlags flags,
-                                  DDS::DomainId_t domain) const;
+                                  DDS::DomainId_t domain,
+                                  DomainParticipantImpl* participant);
 
 private:
   friend class TcpType;
@@ -155,7 +156,8 @@ private:
   explicit TcpInst(const OPENDDS_STRING& name);
   virtual ~TcpInst();
 
-  TransportImpl_rch new_impl(DDS::DomainId_t domain);
+  TransportImpl_rch new_impl(DDS::DomainId_t domain,
+                             DomainParticipantImpl* participant);
 
   std::string locator_address_;
 };

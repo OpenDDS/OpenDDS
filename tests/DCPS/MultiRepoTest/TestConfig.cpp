@@ -6,6 +6,8 @@
 // #include "ace/Log_Msg.h"
 
 #include "dds/DCPS/StaticIncludes.h"
+#include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
+#include "dds/DCPS/transport/tcp/Tcp.h"
 
 namespace { // anonymous namespace for file scope.
   //

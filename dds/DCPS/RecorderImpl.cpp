@@ -41,6 +41,8 @@
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include <tao/ORB_Core.h>
 
 #include <ace/Reactor.h>
@@ -56,10 +58,10 @@ RecorderImpl::RecorderImpl()
   : qos_(TheServiceParticipant->initial_DataReaderQos())
   , participant_servant_(0)
   , topic_servant_(0)
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   , is_exclusive_ownership_(false)
 #endif
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   , owner_manager_(0)
 #endif
   , subqos_(TheServiceParticipant->initial_SubscriberQos())
@@ -135,7 +137,7 @@ void RecorderImpl::init(
   qos_ = qos;
   passed_qos_ = qos;
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   is_exclusive_ownership_ = qos_.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
 #endif
 
@@ -146,7 +148,7 @@ void RecorderImpl::init(
   // parent, we will exist as long as it does
   participant_servant_ = participant;
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   if (is_exclusive_ownership_) {
     owner_manager_ = participant_servant_->ownership_manager ();
   }

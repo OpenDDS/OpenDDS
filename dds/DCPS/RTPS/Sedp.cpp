@@ -46,6 +46,8 @@
 #  include <dds/DdsSecurityCoreTypeSupportImpl.h>
 #endif
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include <cstring>
 
 namespace {
@@ -949,7 +951,7 @@ DCPS::LocatorSeq
 Sedp::unicast_locators() const
 {
   DCPS::TransportLocator trans_info;
-  transport_inst_->populate_locator(trans_info, DCPS::CONNINFO_UNICAST, get_domain_id());
+  transport_inst_->populate_locator(trans_info, DCPS::CONNINFO_UNICAST, get_domain_id(), 0);
   return transport_locator_to_locator_seq(trans_info);
 }
 
@@ -957,25 +959,21 @@ DCPS::LocatorSeq
 Sedp::multicast_locators() const
 {
   DCPS::TransportLocator trans_info;
-  transport_inst_->populate_locator(trans_info, DCPS::CONNINFO_MULTICAST, get_domain_id());
+  transport_inst_->populate_locator(trans_info, DCPS::CONNINFO_MULTICAST, get_domain_id(), 0);
   return transport_locator_to_locator_seq(trans_info);
 }
 
 NetworkAddress
 Sedp::local_address() const
 {
-  DCPS::RtpsUdpInst_rch rtps_inst =
-    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  return rtps_inst->actual_local_address_;
+  return transport_inst_->actual_local_address(get_domain_id(), 0);
 }
 
 #ifdef ACE_HAS_IPV6
 NetworkAddress
 Sedp::ipv6_local_address() const
 {
-  DCPS::RtpsUdpInst_rch rtps_inst =
-    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  return rtps_inst->ipv6_actual_local_address_;
+  return transport_inst_->ipv6_actual_local_address(get_domain_id(), 0);
 }
 #endif
 
@@ -2279,6 +2277,26 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
       }
       match_endpoints(guid, top_it->second);
     } else {
+
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+      if (iter->second.writer_data_.ddsPublicationData.ownership.kind == DDS::EXCLUSIVE_OWNERSHIP_QOS &&
+          wdata.ddsPublicationData.ownership.kind == DDS::EXCLUSIVE_OWNERSHIP_QOS &&
+          iter->second.writer_data_.ddsPublicationData.ownership_strength.value != wdata.ddsPublicationData.ownership_strength.value) {
+
+        topic_name = iter->second.get_topic_name();
+        TopicDetailsMap::const_iterator top_it = topics_.find(topic_name);
+        using DCPS::RepoIdSet;
+        const RepoIdSet& assoc =
+          (top_it == topics_.end()) ? RepoIdSet() : top_it->second.local_subscriptions();
+        for (RepoIdSet::const_iterator i = assoc.begin(); i != assoc.end(); ++i) {
+          LocalSubscriptionIter lsi = local_subscriptions_.find(*i);
+          if (lsi != local_subscriptions_.end()) {
+            event_dispatcher_->dispatch(DCPS::make_rch<UpdateOwnershipStrength>(lsi->second.subscription_, guid, wdata.ddsPublicationData.ownership_strength.value));
+          }
+        }
+      }
+#endif
+
       if (checkAndAssignQos(iter->second.writer_data_.ddsPublicationData,
                             wdata.ddsPublicationData)) { // update existing
 
@@ -8062,6 +8080,16 @@ void Sedp::ReaderRemoveAssociations::handle_event()
     lock->remove_associations(writer_seq, false);
   }
 }
+
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+void Sedp::UpdateOwnershipStrength::handle_event()
+{
+  DCPS::DataReaderCallbacks_rch lock = drc_.lock();
+  if (lock) {
+    lock->update_ownership_strength(pub_id_, strength_);
+  }
+}
+#endif
 
 } // namespace RTPS
 } // namespace OpenDDS

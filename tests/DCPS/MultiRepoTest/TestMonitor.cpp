@@ -467,10 +467,14 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
           this->config_.readerTopicName(static_cast<int>(index)).c_str()
         );
 
+    DDS::DataReaderQos dr_qos;
+    this->subscriber_[index]->get_default_datareader_qos(dr_qos);
+    dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+
     this->dataReader_[ index]
       = this->subscriber_[ index]->create_datareader(
           description.in(),
-          DATAREADER_QOS_DEFAULT,
+          dr_qos,
           this->listener_[ index].in (),
           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
         );

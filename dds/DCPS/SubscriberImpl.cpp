@@ -987,27 +987,6 @@ SubscriberImpl::get_subscription_ids(SubscriptionIdVec& subs)
   }
 }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-void
-SubscriberImpl::update_ownership_strength (const GUID_t& pub_id,
-                                           const CORBA::Long&   ownership_strength)
-{
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->si_lock_,
-                   );
-
-  for (DataReaderMap::iterator iter = datareader_map_.begin();
-       iter != datareader_map_.end();
-       ++iter) {
-    if (!iter->second->is_bit()) {
-      iter->second->update_ownership_strength(pub_id, ownership_strength);
-    }
-  }
-}
-#endif
-
-
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 void
 SubscriberImpl::coherent_change_received (const GUID_t& publisher_id,

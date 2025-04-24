@@ -14,7 +14,60 @@ use PerlDDS::Run_Test;
 
 PerlDDS::add_lib_path('../FooType');
 
-my $test = new PerlDDS::TestFramework();
+my %configs = (
+  ir_tcp => {
+    discovery => 'info_repo',
+    file => {
+      common => {
+        pool_size => '900000000',
+        DCPSGlobalTransportConfig => 'myconfig'
+      },
+      'domain/42' => {
+        DiscoveryConfig => 'repo'
+      },
+      'repository/repo' => {
+        RepositoryIor => 'file://repo.ior'
+      },
+      'config/myconfig' => {
+        transports => 'the_tcp_transport'
+      },
+      'transport/the_tcp_transport' => {
+        transport_type => 'tcp'
+      }
+    }
+  },
+  rtps => {
+    discovery => 'rtps',
+    file => {
+      common => {
+        pool_size => '900000000',
+        DCPSGlobalTransportConfig => 'myconfig'
+      },
+      'domain/42' => {
+        DiscoveryConfig => 'uni_rtps'
+      },
+      'rtps_discovery/uni_rtps' => {
+        SedpMulticast => '0',
+        ResendPeriod => '2',
+        SedpPassiveConnectDuration => '900000',
+        MaxSpdpSequenceMsgResetChecks => '10000'
+      },
+      'config/myconfig' => {
+        transports => 'the_rtps_transport',
+        passive_connect_duration => '900000'
+      },
+      'transport/the_rtps_transport' => {
+        transport_type => 'rtps_udp',
+        use_multicast => '0',
+        nak_depth => '512',
+        heartbeat_period => '200'
+      }
+    }
+  }
+);
+
+my $test = new PerlDDS::TestFramework(configs => \%configs, config => 'ir_tcp');
+$test->{add_transport_config} = 0;
 
 my $debug_level = 0;
 my $opts = "";
@@ -51,15 +104,7 @@ if ($debug_level) {
   $opts .= " -DCPSDebugLevel $debug_level -DCPSTransportDebugLevel $debug_level -ORBLogFile Thrasher.log";
 }
 
-my $ini_file = "ir_tcp_thrasher.ini";
-if ($test->flag('rtps')) {
-  $ini_file = "rtps_rtps_thrasher.ini";
-}
-$opts .= " -DCPSConfigFile $ini_file";
-if ("ir_tcp_thrasher.ini" eq $ini_file) {
-  $test->setup_discovery();
-}
-
+$test->setup_discovery();
 $test->enable_console_logging();
 $test->process('Thrasher', 'Thrasher', $opts);
 $test->start_process('Thrasher');

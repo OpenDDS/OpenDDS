@@ -252,13 +252,6 @@ ShmemDataLink::transport() const
 }
 
 ShmemAllocator*
-ShmemDataLink::peer_allocator()
-{
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, peer_alloc_mutex_, 0);
-  return peer_alloc_;
-}
-
-ShmemAllocator*
 ShmemDataLink::local_allocator()
 {
   ShmemAllocator* result = 0;

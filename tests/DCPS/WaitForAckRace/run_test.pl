@@ -13,22 +13,84 @@ use strict;
 
 PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
 
-my $test = new PerlDDS::TestFramework();
+my %configs = (
+  ir_tcp => {
+    discovery => 'info_repo',
+    file => {
+      common => {
+        DCPSGlobalTransportConfig => '$file',
+        DCPSDefaultDiscovery => 'DEFAULT_REPO'
+      },
+      'transport/the_tcp_transport' => {
+          transport_type => 'tcp'
+      }
+    },
+  },
+  rtps => {
+    discovery => 'info_repo',
+    file => {
+      common => {
+        DCPSGlobalTransportConfig => '$file',
+        DCPSDefaultDiscovery => 'DEFAULT_REPO'
+      },
+      'transport/the_rtps_transport' => {
+        transport_type => 'rtps_udp',
+        max_message_size => '1300'
+      }
+    }
+  },
+  rtps_disc => {
+    discovery => 'rtps',
+    file => {
+      'common' => {
+        DCPSGlobalTransportConfig => '$file',
+        DCPSPendingTimeout => '3'
+      },
+      'domain/31' => {
+        DiscoveryConfig => 'uni_rtps'
+      },
+      'rtps_discovery/uni_rtps' => {
+        InteropMulticastOverride => '239.255.1.0',
+        SedpMulticast => '1',
+        ResendPeriod => '2'
+      },
+      'transport/the_rtps_transport' => {
+        transport_type => 'rtps_udp',
+        multicast_group_address => '239.255.2.0',
+        max_message_size => '1300'
+      }
+    }
+  },
+  rtps_disc_tcp => {
+    discovery => 'rtps',
+    file => {
+      common => {
+        DCPSGlobalTransportConfig => '$file'
+      },
+      'domain/31' => {
+        DiscoveryConfig => 'fast_rtps'
+      },
+      'rtps_discovery/fast_rtps' => {
+        SedpMulticast => '0',
+        ResendPeriod => '2'
+      },
+      'transport/t1' => {
+        transport_type => 'tcp'
+      }
+    }
+  }
+);
+
+my $test = new PerlDDS::TestFramework(configs => \%configs, config => 'ir_tcp');
+$test->{add_transport_config} = 0;
 
 my $pub_count = 0;
 my $sub_count = 0;
-my $rtps_disc = 0;
 my $large_samples = 0;
 my $sub_delay = 0;
 
 my $ai = 0;
 foreach $a(@ARGV) {
-  if ($a eq "rtps_disc") {
-    $rtps_disc = 1;
-  }
-  if ($a eq "rtps_disc_tcp") {
-    $rtps_disc = 1;
-  }
   if ($a eq "large_samples") {
     $large_samples = 1;
   }
@@ -46,7 +108,7 @@ foreach $a(@ARGV) {
 
 $test->{'dcps_debug_level'} = 0;
 $test->{'dcps_transport_debug_level'} = 0;
-$test->setup_discovery() unless $rtps_disc;
+$test->setup_discovery();
 
 if ($pub_count == 0) {
   $pub_count = 1;

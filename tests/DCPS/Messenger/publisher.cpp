@@ -19,6 +19,9 @@
 #  include <dds/DCPS/security/framework/Properties.h>
 #endif
 #include <dds/DCPS/StaticIncludes.h>
+#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/transport/tcp/Tcp.h>
+#endif
 #if OPENDDS_DO_MANUAL_STATIC_INCLUDES
 #  ifndef OPENDDS_SAFETY_PROFILE
 #    include <dds/DCPS/RTPS/RtpsDiscovery.h>

@@ -2068,15 +2068,13 @@ DomainParticipantImpl::get_topic_ids(TopicIdVec& topics)
   }
 }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
 
 OwnershipManager*
 DomainParticipantImpl::ownership_manager()
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
-  if (bit_subscriber_) {
-    bit_subscriber_->bit_pub_listener_hack(this);
-  } else {
+  if (!bit_subscriber_) {
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING,
                  "(%P|%t) WARNING: DomainParticipantImpl::ownership_manager: bit_subscriber_ is null"));
@@ -2086,24 +2084,7 @@ DomainParticipantImpl::ownership_manager()
   return &owner_man_;
 }
 
-void
-DomainParticipantImpl::update_ownership_strength (const GUID_t& pub_id,
-                                                  const CORBA::Long& ownership_strength)
-{
-  ACE_GUARD(ACE_Recursive_Thread_Mutex,
-            tao_mon,
-            this->subscribers_protector_);
-
-  if (this->get_deleted ())
-    return;
-
-  for (SubscriberSet::iterator it(this->subscribers_.begin());
-      it != this->subscribers_.end(); ++it) {
-    it->svt_->update_ownership_strength(pub_id, ownership_strength);
-  }
-}
-
-#endif // OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#endif
 
 DomainParticipantImpl::RepoIdSequence::RepoIdSequence(const GUID_t& base) :
   base_(base),

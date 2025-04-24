@@ -42,10 +42,6 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name,
   , responsive_mode_(*this, &RtpsUdpInst::responsive_mode, &RtpsUdpInst::responsive_mode)
   , send_delay_(*this, &RtpsUdpInst::send_delay, &RtpsUdpInst::send_delay)
   , opendds_discovery_guid_(GUID_UNKNOWN)
-  , actual_local_address_(NetworkAddress::default_IPV4)
-#ifdef ACE_HAS_IPV6
-  , ipv6_actual_local_address_(NetworkAddress::default_IPV6)
-#endif
 {}
 
 void
@@ -624,9 +620,10 @@ RtpsUdpInst::stun_server_address() const
 }
 
 TransportImpl_rch
-RtpsUdpInst::new_impl(DDS::DomainId_t domain)
+RtpsUdpInst::new_impl(DDS::DomainId_t domain,
+                      DomainParticipantImpl* participant)
 {
-  return make_rch<RtpsUdpTransport>(rchandle_from(this), domain);
+  return make_rch<RtpsUdpTransport>(rchandle_from(this), domain, participant);
 }
 
 OPENDDS_STRING
@@ -658,7 +655,8 @@ RtpsUdpInst::dump_to_str(DDS::DomainId_t domain) const
 size_t
 RtpsUdpInst::populate_locator(TransportLocator& info,
                               ConnectionInfoFlags flags,
-                              DDS::DomainId_t domain) const
+                              DDS::DomainId_t domain,
+                              DomainParticipantImpl* participant)
 {
   using namespace OpenDDS::RTPS;
 
@@ -680,7 +678,10 @@ RtpsUdpInst::populate_locator(TransportLocator& info,
 #endif
 
   if (flags & CONNINFO_UNICAST) {
-    const NetworkAddress addr = (actual_local_address_ == NetworkAddress::default_IPV4) ? local_address() : actual_local_address_;
+    TransportImpl_rch imp = get_impl(domain, participant);
+
+    const NetworkAddress actual = imp ? imp->actual_local_address() : NetworkAddress::default_IPV4;
+    const NetworkAddress addr = (actual == NetworkAddress::default_IPV4) ? local_address() : actual;
     if (addr != NetworkAddress::default_IPV4) {
       if (advertised_address() != NetworkAddress::default_IPV4) {
         grow(locators);
@@ -707,7 +708,8 @@ RtpsUdpInst::populate_locator(TransportLocator& info,
       }
     }
 #ifdef ACE_HAS_IPV6
-    const NetworkAddress addr6 = (ipv6_actual_local_address_ == NetworkAddress::default_IPV6) ? ipv6_local_address() : ipv6_actual_local_address_;
+    const NetworkAddress actual6 = imp ? imp->ipv6_actual_local_address() : NetworkAddress::default_IPV6;
+    const NetworkAddress addr6 = (actual6 == NetworkAddress::default_IPV6) ? ipv6_local_address() : actual6;
     if (addr6 != NetworkAddress::default_IPV6) {
       if (ipv6_advertised_address() != NetworkAddress::default_IPV6) {
         grow(locators);

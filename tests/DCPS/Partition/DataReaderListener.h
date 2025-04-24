@@ -4,6 +4,10 @@
 #ifndef DATA_READER_LISTENER_IMPL
 #define DATA_READER_LISTENER_IMPL
 
+#include "Partition_Table.h"
+
+#include <tests/Utils/DistributedConditionSet.h>
+
 #include <dds/DdsDcpsSubscriptionExtC.h>
 #include <dds/DCPS/LocalObject.h>
 
@@ -18,7 +22,8 @@ namespace Test
     : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
   {
   public:
-    DataReaderListener (long expected_matches);
+    DataReaderListener (DistributedConditionSet_rch dcs,
+                        const Test::PartitionConfig& config);
 
     virtual void on_requested_deadline_missed (
         DDS::DataReader_ptr reader,
@@ -66,9 +71,8 @@ namespace Test
     void display_partitions (DDS::DataReader_ptr reader) const;
 
   private:
-
-    /// The number of expected subscription matches.
-    long const expected_matches_;
+    DistributedConditionSet_rch dcs_;
+    const Test::PartitionConfig& config_;
 
     /// The actual number of subscription matches.
     OpenDDS::DCPS::Atomic<long> subscription_matches_;
