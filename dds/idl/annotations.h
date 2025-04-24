@@ -18,7 +18,6 @@
 #define OPENDDS_IDL_ANNOTATIONS_HEADER
 
 #include "../Versioned_Namespace.h"
-#include "../DCPS/Definitions.h"
 
 #include <ast_expression.h>
 

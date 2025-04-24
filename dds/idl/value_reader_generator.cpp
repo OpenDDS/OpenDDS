@@ -151,7 +151,7 @@ namespace {
       indent << "  if (!value_reader.begin_element()) return false;\n" <<
       indent << "  " << localKeyType << " key;\n";
     generate_read("key", "", "", map->key_type(), "", level + 1, nested(filter_kind));
-    generate_read(expression + "[key]", "", "value", map->value_type(), "", level + 1, nested(filter_kind));
+    generate_read(expression, "[key]", "value", map->value_type(), "i", level + 1, nested(filter_kind));
     be_global->impl_ <<
       indent << "  if (!value_reader.end_element()) return false;\n" <<
       indent << "}\n" <<

@@ -479,16 +479,23 @@ dds_visitor::visit_union_fwd(AST_UnionFwd* node)
 // *** All methods below here are unimplemented (or trivially implemented) ***
 
 int
+dds_visitor::visit_array(AST_Array*)
+{
+  // arrays appear in typedefs or in oter types (struct, union, etc.)
+  return 0;
+}
+
+int
 dds_visitor::visit_sequence(AST_Sequence*)
 {
-  //sequences always appear as typedefs, see visit_typedef ()
+  // sequences appear in typedefs or in oter types (struct, union, etc.)
   return 0;
 }
 
 int
 dds_visitor::visit_map(AST_Map*)
 {
-  //maps always appear as typedefs, see visit_typedef ()
+  // maps appear in typedefs or in oter types (struct, union, etc.)
   return 0;
 }
 
@@ -510,13 +517,6 @@ int
 dds_visitor::visit_attribute(AST_Attribute*)
 {
   // attributes are taken care of by visit_interface ()
-  return 0;
-}
-
-int
-dds_visitor::visit_array(AST_Array*)
-{
-  //arrays always appear as typedefs, see visit_typedef ()
   return 0;
 }
 
