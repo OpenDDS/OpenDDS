@@ -1,4 +1,4 @@
-.. news-prs: 4977
+.. news-prs: 4977, 4983
 
 .. news-start-section: Platform Support and Dependencies
 - New configure script option: ``--[no-]static-runtime``
