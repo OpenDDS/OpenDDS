@@ -2889,7 +2889,7 @@ sub write_cmake_file {
     $name = uc("OPENDDS_$name");
     $name =~ s/-/_/g;
 
-    if(defined($value)) {
+    if (defined($value)) {
       print $fh "set($name ", to_cmake_value($value), ")\n";
     }
   }

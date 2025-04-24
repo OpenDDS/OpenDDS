@@ -63,7 +63,7 @@ function(_opendds_vs_force_static_runtime)
   endif()
 endfunction()
 
-# In OpenDDS built using CMake in Visual Studio, let CMAKE_MSVC_RUNTIME_LIBRARY
+# If OpenDDS is built using CMake in Visual Studio, let CMAKE_MSVC_RUNTIME_LIBRARY
 # decide what runtime is used. Otherwise we need to force it, see above.
 if(MSVC AND OPENDDS_STATIC AND NOT OPENDDS_BUILT_USING_CMAKE)
   if(NOT DEFINED OPENDDS_STATIC_RUNTIME)
