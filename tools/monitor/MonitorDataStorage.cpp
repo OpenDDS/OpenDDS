@@ -717,7 +717,7 @@ Monitor::MonitorDataStorage::displayNvp(
       // This is new data, insert it.
       QList<QVariant> list;
       list << name;
-      switch (data[ index].value._d()) {
+      switch (data[index].value._d()) {
         case OpenDDS::DCPS::INTEGER_TYPE:
           list << QString::number(data[index].value.integer_value());
           break;
@@ -742,7 +742,7 @@ Monitor::MonitorDataStorage::displayNvp(
     } else {
       // This is existing data, update the value.
       TreeNode* node = (*parent)[row];
-      switch (data[ index].value._d()) {
+      switch (data[index].value._d()) {
         case OpenDDS::DCPS::INTEGER_TYPE:
           node->setData(1, QString::number(data[index].value.integer_value()));
           break;

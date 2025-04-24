@@ -134,7 +134,7 @@ MonitorDataStorage::update<OpenDDS::DCPS::ServiceParticipantReport>(
     create = true;
     const DDS::UInt32 transport = data.transports[index];
     TransportKey key(host, data.pid, static_cast<int>(transport));
-    (void)this->getTransportNode(key, create);
+    this->getTransportNode(key, create);
     layoutChanged |= create;
   }
 
@@ -360,7 +360,7 @@ MonitorDataStorage::update<OpenDDS::DCPS::PublisherReport>(
   // TRANSPORT
   create = true;
   if (data.transport_id != 0) {
-    this->manageTransportLink( node, static_cast<int>(data.transport_id), create);
+    this->manageTransportLink(node, static_cast<int>(data.transport_id), create);
   }
   layoutChanged |= create;
 
