@@ -68,11 +68,11 @@ private:
     Element(const ACE_INET_Addr& a_address,
             const OpenDDS::DCPS::Lockable_Message_Block_Ptr& a_message_block,
             const OpenDDS::DCPS::MonotonicTimePoint& a_timestamp,
-            MessageType type)
+            MessageType a_type)
       : address(a_address)
       , message_block(a_message_block)
       , timestamp(a_timestamp)
-      , type(type)
+      , type(a_type)
     {}
   };
   ssize_t send_i(const Element& out,

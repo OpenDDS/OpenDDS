@@ -16,9 +16,10 @@ public:
   {}
 
   void on_publication_matched(DDS::DataWriter_ptr /*writer*/,
-                              const DDS::PublicationMatchedStatus & status) override
+                              const DDS::PublicationMatchedStatus& status) override
   {
-    (relay_statistics_reporter_.*update_)(status.current_count, OpenDDS::DCPS::MonotonicTimePoint::now());
+    const auto count = static_cast<DDS::UInt32>(status.current_count);
+    (relay_statistics_reporter_.*update_)(count, OpenDDS::DCPS::MonotonicTimePoint::now());
   }
 
 private:

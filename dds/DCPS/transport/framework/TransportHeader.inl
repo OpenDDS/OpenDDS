@@ -101,7 +101,7 @@ TransportHeader::init(ACE_Message_Block* buffer)
   if (!(reader >> ACE_InputCDR::to_octet(flags)))
     return false;
 
-  this->byte_order_= flags & (1 << BYTE_ORDER_FLAG);
+  this->byte_order_ = flags & (1 << TH_BYTE_ORDER_FLAG);
   this->first_fragment_ = flags & (1 << FIRST_FRAGMENT_FLAG);
   this->last_fragment_ = flags & (1 << LAST_FRAGMENT_FLAG);
 

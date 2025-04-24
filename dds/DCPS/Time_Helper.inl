@@ -216,31 +216,29 @@ ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t)
     return ACE_Time_Value::max_time;
   }
 
-  CORBA::LongLong sec = t.sec + t.nanosec/1000/ACE_ONE_SECOND_IN_USECS;
-  CORBA::ULong usec = t.nanosec/1000 % ACE_ONE_SECOND_IN_USECS;
+  const DDS::Int64 sec = t.sec +
+    static_cast<DDS::Int64>(t.nanosec) / 1000 / ACE_ONE_SECOND_IN_USECS;
+  const suseconds_t usec = static_cast<suseconds_t>(t.nanosec / 1000 % ACE_ONE_SECOND_IN_USECS);
 
   if (sec > ACE_Time_Value::max_time.sec()) {
     return ACE_Time_Value::max_time;
   }
-  else {
-    return ACE_Time_Value(ACE_Utils::truncate_cast<time_t>(sec), usec);
-  }
+
+  return ACE_Time_Value(ACE_Utils::truncate_cast<time_t>(sec), usec);
 }
 
 ACE_INLINE
 ACE_Time_Value duration_to_absolute_time_value(const DDS::Duration_t& t,
                                                const ACE_Time_Value& now)
 {
-  CORBA::LongLong sec
-    = t.sec + now.sec() + (t.nanosec/1000 + now.usec())/ACE_ONE_SECOND_IN_USECS;
-  CORBA::ULong usec = (t.nanosec/1000 + now.usec()) % ACE_ONE_SECOND_IN_USECS;
+  const DDS::Int64 sec = t.sec + now.sec()
+    + (static_cast<DDS::Int64>(t.nanosec) / 1000 + now.usec()) / ACE_ONE_SECOND_IN_USECS;
+  const suseconds_t usec = static_cast<suseconds_t>((t.nanosec / 1000 + now.usec()) % ACE_ONE_SECOND_IN_USECS);
 
   if (sec > ACE_Time_Value::max_time.sec()) {
     return ACE_Time_Value::max_time;
   }
-  else {
-    return ACE_Time_Value(ACE_Utils::truncate_cast<time_t>(sec), usec);
-  }
+  return ACE_Time_Value(ACE_Utils::truncate_cast<time_t>(sec), usec);
 }
 
 ACE_INLINE
