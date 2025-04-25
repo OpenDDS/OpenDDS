@@ -199,11 +199,11 @@ Config::Config(int argc, ACE_TCHAR** argv)
   }
 
   // Setup the internal storage.
-  this->argv_ = new ACE_TCHAR*[argc + 1](); // argv_[argc] == 0
+  this->argv_ = new ACE_TCHAR*[static_cast<size_t>(argc) + 1](); // argv_[argc] == 0
 
   // Process the federation arguments.  Copy the uninteresting arguments verbatim.
   ArgCopier argCopier(this);
-  std::for_each(&argv[0], &argv[ argc], argCopier);
+  std::for_each(&argv[0], &argv[argc], argCopier);
 
   // Read and process any configuration file.
   this->processFile();
@@ -216,7 +216,6 @@ Config::~Config()
                ACE_TEXT("(%P|%t) INFO: Federator::Config::~FederatorConfig()\n")));
   }
 
-  // We prwn this
   delete [] this->argv_;
 }
 
