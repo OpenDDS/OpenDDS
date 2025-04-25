@@ -2889,7 +2889,9 @@ sub write_cmake_file {
     $name = uc("OPENDDS_$name");
     $name =~ s/-/_/g;
 
-    print $fh "set($name ", to_cmake_value($value), ")\n";
+    if (defined($value)) {
+      print $fh "set($name ", to_cmake_value($value), ")\n";
+    }
   }
 
   sub generate_config_cmake {
@@ -3003,7 +3005,7 @@ sub write_cmake_file {
       'rapidjson' => '',
       'security' => 0,
       'static' => 0,
-      'static-runtime' => '',
+      'static-runtime' => undef,
       'std' => '',
       'xerces3' => '',
     );
