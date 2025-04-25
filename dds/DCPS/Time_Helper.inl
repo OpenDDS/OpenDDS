@@ -233,7 +233,7 @@ ACE_Time_Value duration_to_absolute_time_value(const DDS::Duration_t& t,
 {
   const DDS::Int64 sec = t.sec + now.sec()
     + (static_cast<DDS::Int64>(t.nanosec) / 1000 + now.usec()) / ACE_ONE_SECOND_IN_USECS;
-  const suseconds_t usec = static_cast<suseconds_t>((t.nanosec / 1000 + now.usec()) % ACE_ONE_SECOND_IN_USECS);
+  const suseconds_t usec = (static_cast<suseconds_t>(t.nanosec) / 1000 + now.usec()) % ACE_ONE_SECOND_IN_USECS;
 
   if (sec > ACE_Time_Value::max_time.sec()) {
     return ACE_Time_Value::max_time;

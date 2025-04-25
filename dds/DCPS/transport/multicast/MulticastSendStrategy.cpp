@@ -104,6 +104,7 @@ MulticastSendStrategy::async_send(const iovec iov[], int n, const ACE_INET_Addr&
 #else
   ACE_UNUSED_ARG(iov);
   ACE_UNUSED_ARG(n);
+  ACE_UNUSED_ARG(group_address);
   return -1;
 #endif
 }

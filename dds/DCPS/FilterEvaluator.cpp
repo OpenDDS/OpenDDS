@@ -631,7 +631,7 @@ Value::Value(const std::string& s, bool conversion_preferred)
 
 #ifdef DDS_HAS_WCHAR
 Value::Value(ACE_OutputCDR::from_wchar wc, bool conversion_preferred)
-  : type_(VAL_INT), i_(wc.val_), conversion_preferred_(conversion_preferred)
+  : type_(VAL_INT), i_(static_cast<int>(wc.val_)), conversion_preferred_(conversion_preferred)
 {}
 
 Value::Value(const std::wstring& s, bool conversion_preferred)

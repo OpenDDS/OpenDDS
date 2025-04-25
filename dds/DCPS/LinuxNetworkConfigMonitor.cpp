@@ -218,7 +218,11 @@ void LinuxNetworkConfigMonitor::read_messages()
       return;
     }
 
-    for (const nlmsghdr* header = reinterpret_cast<const nlmsghdr*>(buffer);
+// clang warns about alignment for code in NLMSG_NEXT and related macros
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wcast-align"
+#endif
+    for (nlmsghdr* header = reinterpret_cast<nlmsghdr*>(buffer);
          buffer_length >= 0 && NLMSG_OK(header, static_cast<size_t>(buffer_length));
          header = NLMSG_NEXT(header, buffer_length)) {
       process_message(header);
@@ -226,7 +230,7 @@ void LinuxNetworkConfigMonitor::read_messages()
   }
 }
 
-void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
+void LinuxNetworkConfigMonitor::process_message(nlmsghdr* header)
 {
   switch (header->nlmsg_type) {
   case NLMSG_ERROR:
@@ -239,7 +243,7 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
     break;
   case RTM_NEWADDR:
     {
-      const ifaddrmsg* msg = reinterpret_cast<ifaddrmsg*>(NLMSG_DATA(header));
+      ifaddrmsg* msg = reinterpret_cast<ifaddrmsg*>(NLMSG_DATA(header));
       size_t address_length = 0;
       switch (msg->ifa_family) {
       case AF_INET:
@@ -252,7 +256,7 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
         return;
       }
       unsigned int rta_length = IFA_PAYLOAD(header);
-      for (const rtattr* attr = reinterpret_cast<const rtattr*>(IFA_RTA(msg));
+      for (rtattr* attr = reinterpret_cast<rtattr*>(IFA_RTA(msg));
            RTA_OK(attr, rta_length);
            attr = RTA_NEXT(attr, rta_length)) {
         if (attr->rta_type == IFA_ADDRESS) {
@@ -276,7 +280,7 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
     break;
   case RTM_DELADDR:
     {
-      const ifaddrmsg* msg = reinterpret_cast<ifaddrmsg*>(NLMSG_DATA(header));
+      ifaddrmsg* msg = reinterpret_cast<ifaddrmsg*>(NLMSG_DATA(header));
       size_t address_length = 0;
       switch (msg->ifa_family) {
       case AF_INET:
@@ -289,7 +293,7 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
         return;
       }
       unsigned int rta_length = IFA_PAYLOAD(header);
-      for (const rtattr* attr = reinterpret_cast<const rtattr*>(IFA_RTA(msg));
+      for (rtattr* attr = reinterpret_cast<rtattr*>(IFA_RTA(msg));
            RTA_OK(attr, rta_length);
            attr = RTA_NEXT(attr, rta_length)) {
         if (attr->rta_type == IFA_ADDRESS) {
@@ -313,9 +317,9 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
   case RTM_NEWLINK:
     {
       OPENDDS_STRING name;
-      const ifinfomsg* msg = reinterpret_cast<ifinfomsg*>(NLMSG_DATA(header));
+      ifinfomsg* msg = reinterpret_cast<ifinfomsg*>(NLMSG_DATA(header));
       unsigned int rta_length = IFLA_PAYLOAD(header);
-      for (const rtattr* attr = reinterpret_cast<const rtattr*>(IFLA_RTA(msg));
+      for (rtattr* attr = reinterpret_cast<rtattr*>(IFLA_RTA(msg));
            RTA_OK(attr, rta_length);
            attr = RTA_NEXT(attr, rta_length)) {
         if (attr->rta_type == IFLA_IFNAME) {
@@ -334,7 +338,7 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
     break;
   case RTM_DELLINK:
     {
-      const ifinfomsg* msg = reinterpret_cast<ifinfomsg*>(NLMSG_DATA(header));
+      ifinfomsg* msg = reinterpret_cast<ifinfomsg*>(NLMSG_DATA(header));
       NetworkInterfaceMap::iterator pos = network_interface_map_.find(msg->ifi_index);
       if (pos != network_interface_map_.end()) {
         remove_interface(pos->second.name);

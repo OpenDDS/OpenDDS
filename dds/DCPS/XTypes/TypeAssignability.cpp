@@ -310,6 +310,16 @@ bool TypeAssignability::assignable_annotation(const MinimalTypeObject&,
   return false;
 }
 
+namespace {
+  ACE_CDR::ULong to_uint(const NameHash& nh)
+  {
+    return static_cast<ACE_CDR::ULong>(nh[0]) << 24 |
+      static_cast<ACE_CDR::ULong>(nh[1]) << 16 |
+      static_cast<ACE_CDR::ULong>(nh[2]) << 8 |
+      static_cast<ACE_CDR::ULong>(nh[3]);
+  }
+}
+
 /**
  * @brief The first type must be TK_STRUCTURE.
  *        The second type must not be TK_ALIAS.
@@ -356,13 +366,11 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
   // the same ID, and vice versa
   MatchedSet matched_members;
   for (unsigned i = 0; i < ta.struct_type.member_seq.length(); ++i) {
-    MemberId id_a = ta.struct_type.member_seq[i].common.member_id;
-    const NameHash& h_a = ta.struct_type.member_seq[i].detail.name_hash;
-    ACE_CDR::ULong name_a = (h_a[0] << 24) | (h_a[1] << 16) | (h_a[2] << 8) | (h_a[3]);
+    const MemberId id_a = ta.struct_type.member_seq[i].common.member_id;
+    const ACE_CDR::ULong name_a = to_uint(ta.struct_type.member_seq[i].detail.name_hash);
     for (unsigned j = 0; j < tb.struct_type.member_seq.length(); ++j) {
-      MemberId id_b = tb.struct_type.member_seq[j].common.member_id;
-      const NameHash& h_b = tb.struct_type.member_seq[j].detail.name_hash;
-      ACE_CDR::ULong name_b = (h_b[0] << 24) | (h_b[1] << 16) | (h_b[2] << 8) | (h_b[3]);
+      const MemberId id_b = tb.struct_type.member_seq[j].common.member_id;
+      const ACE_CDR::ULong name_b = to_uint(tb.struct_type.member_seq[j].detail.name_hash);
 
       if (!type_consistency_.ignore_member_names) {
         if ((name_a == name_b && id_a != id_b) || (id_a == id_b && name_a != name_b)) {
@@ -733,16 +741,14 @@ bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
     OPENDDS_MAP(ACE_CDR::ULong, MemberId) name_to_id_a;
     for (unsigned i = 0; i < ta.union_type.member_seq.length(); ++i) {
       MemberId id = ta.union_type.member_seq[i].common.member_id;
-      const NameHash& h = ta.union_type.member_seq[i].detail.name_hash;
-      ACE_CDR::ULong name = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+      const ACE_CDR::ULong name = to_uint(ta.union_type.member_seq[i].detail.name_hash);
       id_to_name_a[id] = name;
       name_to_id_a[name] = id;
     }
 
     for (unsigned i = 0; i < tb.union_type.member_seq.length(); ++i) {
       MemberId id = tb.union_type.member_seq[i].common.member_id;
-      const NameHash& h = tb.union_type.member_seq[i].detail.name_hash;
-      ACE_CDR::ULong name = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+      const ACE_CDR::ULong name = to_uint(tb.union_type.member_seq[i].detail.name_hash);
       if (id_to_name_a.find(id) != id_to_name_a.end() &&
           id_to_name_a[id] != name) {
         return false;
@@ -1090,8 +1096,7 @@ bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
   const size_t size_b = tb.enumerated_type.literal_seq.members.size();
   OPENDDS_MAP(ACE_CDR::ULong, ACE_CDR::Long) ta_name_to_value;
   for (size_t i = 0; i < size_a; ++i) {
-    const NameHash& h = ta.enumerated_type.literal_seq.members[i].detail.name_hash;
-    ACE_CDR::ULong key_a = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+    const ACE_CDR::ULong key_a = to_uint(ta.enumerated_type.literal_seq.members[i].detail.name_hash);
     ta_name_to_value[key_a] = ta.enumerated_type.literal_seq.members[i].common.value;
   }
 
@@ -1102,8 +1107,7 @@ bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
     }
 
     for (size_t i = 0; i < size_b; ++i) {
-      const NameHash& h = tb.enumerated_type.literal_seq.members[i].detail.name_hash;
-      ACE_CDR::ULong key_b = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+      const ACE_CDR::ULong key_b = to_uint(tb.enumerated_type.literal_seq.members[i].detail.name_hash);
 
       // Literals that have the same name must have the same value.
       if (ta_name_to_value.find(key_b) == ta_name_to_value.end() ||
@@ -1114,8 +1118,7 @@ bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
   } else {
     // Any literals that have the same name also have the same value
     for (size_t i = 0; i < size_b; ++i) {
-      const NameHash& h = tb.enumerated_type.literal_seq.members[i].detail.name_hash;
-      ACE_CDR::ULong key_b = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+      const ACE_CDR::ULong key_b = to_uint(tb.enumerated_type.literal_seq.members[i].detail.name_hash);
       if (ta_name_to_value.find(key_b) != ta_name_to_value.end() &&
           ta_name_to_value[key_b] != tb.enumerated_type.literal_seq.members[i].common.value) {
         return false;
@@ -1124,17 +1127,14 @@ bool TypeAssignability::assignable_enum(const MinimalTypeObject& ta,
 
     OPENDDS_MAP(ACE_CDR::Long, ACE_CDR::ULong) ta_value_to_name;
     for (size_t i = 0; i < size_a; ++i) {
-      ACE_CDR::Long value_a = ta.enumerated_type.literal_seq.members[i].common.value;
-      const NameHash& h = ta.enumerated_type.literal_seq.members[i].detail.name_hash;
-      ACE_CDR::ULong name_a = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
-      ta_value_to_name[value_a] = name_a;
+      const ACE_CDR::Long value_a = ta.enumerated_type.literal_seq.members[i].common.value;
+      ta_value_to_name[value_a] = to_uint(ta.enumerated_type.literal_seq.members[i].detail.name_hash);
     }
 
     // Any literals that have the same value also have the same name
     for (size_t i = 0; i < size_b; ++i) {
-      ACE_CDR::Long value_b = tb.enumerated_type.literal_seq.members[i].common.value;
-      const NameHash& h = tb.enumerated_type.literal_seq.members[i].detail.name_hash;
-      ACE_CDR::ULong name_b = (h[0] << 24) | (h[1] << 16) | (h[2] << 8) | (h[3]);
+      const ACE_CDR::Long value_b = tb.enumerated_type.literal_seq.members[i].common.value;
+      const ACE_CDR::ULong name_b = to_uint(tb.enumerated_type.literal_seq.members[i].detail.name_hash);
       if (ta_value_to_name.find(value_b) != ta_value_to_name.end() &&
           ta_value_to_name[value_b] != name_b) {
         return false;
@@ -2024,12 +2024,10 @@ bool TypeAssignability::struct_rule_enum_key(const MinimalTypeObject& tb,
 
   // All literals in tb must appear as literals in toa
   for (size_t j = 0; j < literals_b.members.size(); ++j) {
-    const NameHash& h_b = literals_b.members[j].detail.name_hash;
-    ACE_CDR::ULong key_b = (h_b[0] << 24) | (h_b[1] << 16) | (h_b[2] << 8) | (h_b[3]);
+    const ACE_CDR::ULong key_b = to_uint(literals_b.members[j].detail.name_hash);
     bool found = false;
     for (size_t k = 0; k < literals_a->members.size(); ++k) {
-      const NameHash& h_a = literals_a->members[k].detail.name_hash;
-      ACE_CDR::ULong key_a = (h_a[0] << 24) | (h_a[1] << 16) | (h_a[2] << 8) | (h_a[3]);
+      const ACE_CDR::ULong key_a = to_uint(literals_a->members[k].detail.name_hash);
       if (key_a == key_b) {
         found = true;
         break;
