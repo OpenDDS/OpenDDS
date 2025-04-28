@@ -96,8 +96,9 @@ public:
 
     // addr() call is really not absolutely necessary because of the way
     // ACE_Cached_Mem_Pool_Node's internal structure arranged.
-    void* rtn =  this->free_list_.remove()->addr();
+    void* const rtn = this->free_list_.remove()->addr();
     if (0 == rtn) {
+      heap_allocated_ += sizeof(T);
       return ACE_Allocator::instance()->malloc(sizeof(T));
     }
 
@@ -135,6 +136,7 @@ public:
     unsigned char* tmp = static_cast<unsigned char*>(ptr);
 
     if (tmp < begin_ || tmp >= end_) {
+      heap_allocated_ -= sizeof(T);
       ACE_Allocator::instance()->free(tmp);
     } else if (ptr != 0) {
       this->free_list_.add((ACE_Cached_Mem_Pool_Node<T> *) ptr) ;
@@ -154,6 +156,8 @@ public:
 
   size_t n_chunks() const { return n_chunks_; }
 
+  size_t bytes_heap_allocated() const { return heap_allocated_; }
+
 private:
   /// Remember how we allocate the memory in the first place so
   /// we can clear things up later.
@@ -165,6 +169,7 @@ private:
   ACE_Locked_Free_List<ACE_Cached_Mem_Pool_Node<T>, ACE_LOCK> free_list_;
 
   const size_t n_chunks_;
+  size_t heap_allocated_;
 };
 
 typedef Cached_Allocator_With_Overflow<ACE_Message_Block, ACE_Thread_Mutex> MessageBlockAllocator;

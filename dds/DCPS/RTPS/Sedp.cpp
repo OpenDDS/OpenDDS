@@ -397,7 +397,8 @@ Sedp::Sedp(const GUID_t& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
           OPENDDS_STRING("_SPDPTransportInst_") +
           DCPS::GuidConverter(owner.guid_).uniqueParticipantId() +
           DCPS::to_dds_string(owner.domain_))
-{}
+  , total_deferred_samples_(0)
+  {}
 
 DDS::ReturnCode_t
 Sedp::init(const GUID_t& guid,
@@ -3372,6 +3373,7 @@ void Sedp::Writer::send_sample(DCPS::Message_Block_Ptr payload,
       DeferredSamples::iterator samples_for_reader = deferred_samples_.insert(
         std::make_pair(reader, PerReaderDeferredSamples())).first;
       samples_for_reader->second.insert(std::make_pair(sequence, el));
+      ++sedp_.total_deferred_samples_;
       return;
     }
   }
@@ -3391,6 +3393,7 @@ void Sedp::Writer::send_deferred_samples(const GUID_t& reader)
         i != samples_for_reader->second.end(); ++i) {
       send_sample_i(i->second);
     }
+    sedp_.total_deferred_samples_ -= samples_for_reader->second.size();
     deferred_samples_.erase(samples_for_reader);
   }
 }
@@ -8083,6 +8086,74 @@ void Sedp::ReaderRemoveAssociations::handle_event()
     writer_seq[0] = record_->writer_id();
     lock->remove_associations(writer_seq, false);
   }
+}
+
+namespace {
+  const DDS::UInt32 Stats_Index_Topics = 0,
+    Stats_Index_TopicNames = 1,
+    Stats_Index_TopicsIgnored = 2,
+    Stats_Index_TotalDeferredSamples = 3,
+    Stats_Index_TotalReaderBytesAllocated = 4,
+    Stats_Index_TypeLookupReaderDependencies = 5,
+    Stats_Len = 0;//TODO
+}
+
+DCPS::InternalStatisticSeq Sedp::stats_template()
+{
+  DCPS::InternalStatisticSeq stats(Stats_Len);
+  stats.length(Stats_Len);
+  stats[Stats_Index_Topics].name = "Topics";
+  stats[Stats_Index_TopicNames].name = "TopicNames";
+  stats[Stats_Index_TopicsIgnored].name = "TopicsIgnored";
+  stats[Stats_Index_TotalDeferredSamples].name = "TotalDeferredSamples";
+  stats[Stats_Index_TotalReaderBytesAllocated].name = "TotalReaderBytesAllocated";
+  stats[Stats_Index_TypeLookupReaderDependencies].name = "TypeLookupReaderDependencies";
+  return stats;
+}
+
+void Sedp::fill_stats(DCPS::InternalStatisticSeq& stats, DDS::UInt32 begin) const
+{
+  // lock held in Sedp
+  stats[begin + Stats_Index_Topics].value = topics_.size(); // need nested sizes?
+  stats[begin + Stats_Index_TopicNames].value = topic_names_.size();
+  stats[begin + Stats_Index_TopicsIgnored].value = ignored_topics_.size();
+  stats[begin + Stats_Index_TotalDeferredSamples].value = total_deferred_samples_;
+  stats[begin + Stats_Index_TotalReaderBytesAllocated].value = total_reader_bytes_allocated();
+  stats[begin + Stats_Index_TypeLookupReaderDependencies].value = tlreader_dependencies();
+}
+
+size_t Sedp::total_reader_bytes_allocated() const
+{
+  return reader_bytes_allocated(publications_reader_)
+    + reader_bytes_allocated(subscriptions_reader_)
+    + reader_bytes_allocated(participant_message_reader_)
+    + reader_bytes_allocated(type_lookup_request_reader_)
+    + reader_bytes_allocated(type_lookup_reply_reader_)
+#if OPENDDS_CONFIG_SECURITY
+    + reader_bytes_allocated(publications_secure_reader_)
+    + reader_bytes_allocated(subscriptions_secure_reader_)
+    + reader_bytes_allocated(participant_message_secure_reader_)
+    + reader_bytes_allocated(participant_stateless_message_reader_)
+    + reader_bytes_allocated(participant_volatile_message_secure_reader_)
+    + reader_bytes_allocated(dcps_participant_secure_reader_)
+    + reader_bytes_allocated(type_lookup_request_secure_reader_)
+    + reader_bytes_allocated(type_lookup_reply_secure_reader_)
+#endif
+    ;
+}
+
+size_t Sedp::reader_bytes_allocated(const RcHandle<Reader>& reader)
+{
+  return reader ? reader->bytes_heap_allocated() : 0;
+}
+
+size_t Sedp::tlreader_dependencies() const
+{
+  return (type_lookup_reply_reader_ ? type_lookup_reply_reader_->dependencies_participants() : 0)
+#if OPENDDS_CONFIG_SECURITY
+    + (type_lookup_reply_secure_reader_ ? type_lookup_reply_secure_reader_->dependencies_participants() : 0)
+#endif
+  ;
 }
 
 } // namespace RTPS

@@ -4798,8 +4798,9 @@ namespace {
 
 DCPS::InternalStatisticSeq Spdp::stats_template()
 {
-  DCPS::InternalStatisticSeq stats(Stats_Len);
-  stats.length(Stats_Len);
+  const DCPS::InternalStatisticSeq sedp_template = Sedp::stats_template();
+  DCPS::InternalStatisticSeq stats(Stats_Len + sedp_template.length());
+  stats.length(Stats_Len + sedp_template.length());
   stats[Stats_Index_LeaseExpirations].name = "LeaseExpirations";
   stats[Stats_Index_HandshakeDeadlines].name = "HandshakeDeadlines";
   stats[Stats_Index_HandshakeResends].name = "HandshakeResends";
@@ -4811,6 +4812,9 @@ DCPS::InternalStatisticSeq Spdp::stats_template()
   stats[Stats_Index_TotalWriterAssociated].name = "TotalWriterAssociated";
   stats[Stats_Index_TotalReaderPending].name = "TotalReaderPending";
   stats[Stats_Index_TotalReaderAssociated].name = "TotalReaderAssociated";
+  for (DDS::UInt32 i = 0; i < sedp_template.length(); ++i) {
+    stats[Stats_Len + i].name = sedp_template[i].name;
+  }
   return stats;
 }
 
