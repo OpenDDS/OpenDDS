@@ -592,7 +592,7 @@ ConfigStoreImpl::get(const char* key,
         {
           DDS::UInt32 x = 0;
           if (DCPS::convertToInteger(sample.value(), x)) {
-            retval = TimeDuration(x);
+            retval = TimeDuration(static_cast<time_t>(x));
           } else {
             retval = value;
             if (log_level >= LogLevel::Warning) {

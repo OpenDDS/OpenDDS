@@ -82,7 +82,7 @@ int RelayHandler::open(const ACE_INET_Addr& address)
     return -1;
   }
 
-  const int buffer_size = config_.buffer_size();
+  int buffer_size = config_.buffer_size();
 
   if (socket_.set_option(SOL_SOCKET,
                          SO_SNDBUF,
@@ -136,7 +136,8 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
   }
 
   // Allocate at least one byte so that recv cannot return early.
-  OpenDDS::DCPS::Lockable_Message_Block_Ptr buffer(new ACE_Message_Block(std::max(inlen, 1)), message_block_locking_);
+  const auto n = static_cast<size_t>(std::max(inlen, 1));
+  OpenDDS::DCPS::Lockable_Message_Block_Ptr buffer(new ACE_Message_Block(n), message_block_locking_);
 
   const auto bytes = socket_.recv(buffer->wr_ptr(), buffer->space(), remote);
 
@@ -155,7 +156,7 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
     return 0;
   }
 
-  buffer->length(bytes);
+  buffer->length(static_cast<size_t>(bytes));
   MessageType type = MessageType::Unknown;
   const CORBA::ULong generated_messages = process_message(remote, now, buffer, type);
   stats_reporter_.max_gain(generated_messages, now);
@@ -625,8 +626,8 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
         auto p = proxy.find(guid);
         if (p != proxy.end()) {
           p->second.foreach_addr(port(),
-                                 [=, &sent, &msg](const ACE_INET_Addr& addr) {
-                                   venqueue_message(addr,
+                                 [&](const ACE_INET_Addr& address) {
+                                   venqueue_message(address,
                                                     *p->second.select_stats_reporter(port()), msg, now, type);
                                    ++sent;
           });
@@ -744,7 +745,7 @@ CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr& from,
     const auto p = proxy.find(guid);
     if (p != proxy.end()) {
       p->second.foreach_addr(port(),
-                             [=, &sent, &msg](const ACE_INET_Addr& addr) {
+                             [&](const ACE_INET_Addr& addr) {
                                vertical_handler_->venqueue_message(addr,
                                                                    *p->second.select_stats_reporter(port()), msg, now, type);
                                ++sent;
@@ -908,7 +909,7 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
         const auto pos = proxy.find(guid);
         if (pos != proxy.end()) {
           pos->second.foreach_addr(port(),
-                                   [=, &sent, &msg](const ACE_INET_Addr& addr) {
+                                   [&](const ACE_INET_Addr& addr) {
                                      venqueue_message(addr,
                                                       *pos->second.select_stats_reporter(port()), msg, now, MessageType::Rtps);
                                      ++sent;
@@ -1061,7 +1062,7 @@ bool SedpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
         const auto pos = proxy.find(guid);
         if (pos != proxy.end()) {
           pos->second.foreach_addr(port(),
-                                   [=, &sent, &msg](const ACE_INET_Addr& addr) {
+                                   [&](const ACE_INET_Addr& addr) {
                                      venqueue_message(addr,
                                                       *pos->second.select_stats_reporter(port()), msg, now, MessageType::Rtps);
                                      ++sent;

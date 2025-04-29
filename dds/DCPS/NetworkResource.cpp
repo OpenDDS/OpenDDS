@@ -842,7 +842,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
     }
     ip46 addr;
     std::memset(&addr, 0, sizeof addr);
-    std::memcpy(&addr, curr->ai_addr, curr->ai_addrlen);
+    std::memcpy(&addr, curr->ai_addr, static_cast<size_t>(curr->ai_addrlen));
 #ifdef ACE_HAS_IPV6
     if (curr->ai_family == AF_INET6) {
       addr.in6_.sin6_port = ACE_NTOHS(port_number);

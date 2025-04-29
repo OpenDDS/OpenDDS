@@ -90,7 +90,7 @@ private:
   ACE_HANDLE get_handle() const;
   int handle_input(ACE_HANDLE);
   void read_messages();
-  void process_message(const nlmsghdr* header);
+  void process_message(nlmsghdr* header);
 
   ACE_SOCK_Netlink socket_;
   ACE_Thread_Mutex socket_mutex_;
