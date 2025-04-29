@@ -1569,9 +1569,9 @@ protected:
   LivelinessWriter_rch participant_message_secure_writer_;
   SecurityWriter_rch participant_stateless_message_writer_;
   DiscoveryWriter_rch dcps_participant_secure_writer_;
-  friend class Spdp;
   SecurityWriter_rch participant_volatile_message_secure_writer_;
 #endif
+  friend class Spdp;
   TypeLookupRequestWriter_rch type_lookup_request_writer_;
   TypeLookupReplyWriter_rch type_lookup_reply_writer_;
 #if OPENDDS_CONFIG_SECURITY

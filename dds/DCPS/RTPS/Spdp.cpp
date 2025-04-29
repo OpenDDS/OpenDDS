@@ -4781,7 +4781,11 @@ bool Spdp::has_domain_participant(const GUID_t& remote) const
   return has_discovered_participant(remote);
 }
 
-namespace {
+#ifndef OPENDDS_RTPS_UNITY_BUILD_ID
+#  define OPENDDS_RTPS_UNITY_BUILD_ID SpdpAnonymous
+#endif
+
+namespace { namespace OPENDDS_RTPS_UNITY_BUILD_ID {
   const DDS::UInt32 Stats_Index_LeaseExpirations = 0,
     Stats_Index_HandshakeDeadlines = 1,
     Stats_Index_HandshakeResends = 2,
@@ -4794,10 +4798,11 @@ namespace {
     Stats_Index_TotalReaderPending = 9,
     Stats_Index_TotalReaderAssociated = 10,
     Stats_Len = 11;
-}
+} }
 
 DCPS::InternalStatisticSeq Spdp::stats_template()
 {
+  using namespace OPENDDS_RTPS_UNITY_BUILD_ID;
   const DCPS::InternalStatisticSeq sedp_template = Sedp::stats_template();
   DCPS::InternalStatisticSeq stats(Stats_Len + sedp_template.length());
   stats.length(Stats_Len + sedp_template.length());
@@ -4820,11 +4825,14 @@ DCPS::InternalStatisticSeq Spdp::stats_template()
 
 void Spdp::fill_stats(DCPS::InternalStatisticSeq& stats) const
 {
+  using namespace OPENDDS_RTPS_UNITY_BUILD_ID;
   stats = stats_template_;
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   stats[Stats_Index_LeaseExpirations].value = lease_expirations_.size();
+#if OPENDDS_CONFIG_SECURITY
   stats[Stats_Index_HandshakeDeadlines].value = handshake_deadlines_.size();
   stats[Stats_Index_HandshakeResends].value = handshake_resends_.size();
+#endif
   stats[Stats_Index_DiscoveredParticipants].value = participants_.size();
   stats[Stats_Index_TotalLocationUpdates].value = total_location_updates_;
   stats[Stats_Index_TotalBuiltinPending].value = total_builtin_pending_;

@@ -8088,18 +8088,34 @@ void Sedp::ReaderRemoveAssociations::handle_event()
   }
 }
 
-namespace {
+#ifndef OPENDDS_RTPS_UNITY_BUILD_ID
+#  define OPENDDS_RTPS_UNITY_BUILD_ID SedpAnonymous
+#endif
+
+namespace { namespace OPENDDS_RTPS_UNITY_BUILD_ID {
   const DDS::UInt32 Stats_Index_Topics = 0,
     Stats_Index_TopicNames = 1,
     Stats_Index_TopicsIgnored = 2,
     Stats_Index_TotalDeferredSamples = 3,
     Stats_Index_TotalReaderBytesAllocated = 4,
-    Stats_Index_TypeLookupReaderDependencies = 5,
-    Stats_Len = 0;//TODO
-}
+    Stats_Index_JobQueueSize = 5,
+    Stats_Index_AssociatedParticipants = 6,
+    Stats_Index_IgnoredGuids = 7,
+    Stats_Index_LocalPublications = 8,
+    Stats_Index_LocalSubscriptions = 9,
+    Stats_Index_DiscoveredPublications = 10,
+    Stats_Index_DiscoveredSubscriptions = 11,
+    Stats_Index_TypeLookupReaderDependencies = 12,
+    Stats_Index_TypeLookupSequenceNumbers = 13,
+    Stats_Index_TypeLookupMatchingData = 14,
+    Stats_Index_PendingRemoteReaderCryptoTokens = 15,
+    Stats_Index_PendingRemoteWriterCryptoTokens = 16,
+    Stats_Len = 17;
+} }
 
 DCPS::InternalStatisticSeq Sedp::stats_template()
 {
+  using namespace OPENDDS_RTPS_UNITY_BUILD_ID;
   DCPS::InternalStatisticSeq stats(Stats_Len);
   stats.length(Stats_Len);
   stats[Stats_Index_Topics].name = "Topics";
@@ -8107,19 +8123,40 @@ DCPS::InternalStatisticSeq Sedp::stats_template()
   stats[Stats_Index_TopicsIgnored].name = "TopicsIgnored";
   stats[Stats_Index_TotalDeferredSamples].name = "TotalDeferredSamples";
   stats[Stats_Index_TotalReaderBytesAllocated].name = "TotalReaderBytesAllocated";
+  stats[Stats_Index_JobQueueSize].name = "JobQueueSize";
+  stats[Stats_Index_LocalPublications].name = "LocalPublications";
+  stats[Stats_Index_LocalSubscriptions].name = "LocalSubscriptions";
+  stats[Stats_Index_DiscoveredPublications].name = "DiscoveredPublications";
+  stats[Stats_Index_DiscoveredSubscriptions].name = "DiscoveredSubscriptions";
   stats[Stats_Index_TypeLookupReaderDependencies].name = "TypeLookupReaderDependencies";
+  stats[Stats_Index_TypeLookupSequenceNumbers].name = "TypeLookupSequenceNumbers";
+  stats[Stats_Index_TypeLookupMatchingData].name = "TypeLookupMatchingData";
+  stats[Stats_Index_PendingRemoteReaderCryptoTokens].name = "PendingRemoteReaderCryptoTokens";
+  stats[Stats_Index_PendingRemoteWriterCryptoTokens].name = "PendingRemoteWriterCryptoTokens";
   return stats;
 }
 
 void Sedp::fill_stats(DCPS::InternalStatisticSeq& stats, DDS::UInt32 begin) const
 {
+  using namespace OPENDDS_RTPS_UNITY_BUILD_ID;
   // lock held in Sedp
   stats[begin + Stats_Index_Topics].value = topics_.size(); // need nested sizes?
   stats[begin + Stats_Index_TopicNames].value = topic_names_.size();
   stats[begin + Stats_Index_TopicsIgnored].value = ignored_topics_.size();
   stats[begin + Stats_Index_TotalDeferredSamples].value = total_deferred_samples_;
   stats[begin + Stats_Index_TotalReaderBytesAllocated].value = total_reader_bytes_allocated();
+  stats[begin + Stats_Index_JobQueueSize].value = job_queue_ ? job_queue_->size() : 0;
+  stats[begin + Stats_Index_LocalPublications].value = local_publications_.size();
+  stats[begin + Stats_Index_LocalSubscriptions].value = local_subscriptions_.size();
+  stats[begin + Stats_Index_DiscoveredPublications].value = discovered_publications_.size();
+  stats[begin + Stats_Index_DiscoveredSubscriptions].value = discovered_subscriptions_.size();
   stats[begin + Stats_Index_TypeLookupReaderDependencies].value = tlreader_dependencies();
+  stats[begin + Stats_Index_TypeLookupSequenceNumbers].value = orig_seq_numbers_.size();
+  stats[begin + Stats_Index_TypeLookupMatchingData].value = matching_data_buffer_.size();
+#if OPENDDS_CONFIG_SECURITY
+  stats[begin + Stats_Index_PendingRemoteReaderCryptoTokens].value = pending_remote_reader_crypto_tokens_.size();
+  stats[begin + Stats_Index_PendingRemoteWriterCryptoTokens].value = pending_remote_writer_crypto_tokens_.size();
+#endif
 }
 
 size_t Sedp::total_reader_bytes_allocated() const
