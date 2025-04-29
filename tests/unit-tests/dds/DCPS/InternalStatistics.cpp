@@ -9,10 +9,10 @@ using namespace OpenDDS::DCPS;
 TEST(dds_DCPS_InternalStatistics, key_compare)
 {
   typedef InternalTraits<InternalStatistics>::KeyCompare Comparator;
-  const Comparator cmp;
+  const Comparator cmp = Comparator();
 
   const InternalStatisticSeq empty, nonempty(1, 1, InternalStatisticSeq::allocbuf(1), true);
-  const InternalStatistics is1{"a", empty}, is2{"a", nonempty}, is3{"b", empty};
+  const InternalStatistics is1 = {"a", empty}, is2 = {"a", nonempty}, is3 = {"b", empty};
 
   EXPECT_TRUE(cmp(is1, is3));
   EXPECT_TRUE(cmp(is2, is3));

@@ -156,7 +156,7 @@ public:
 
   size_t n_chunks() const { return n_chunks_; }
 
-  size_t bytes_heap_allocated() const { return heap_allocated_; }
+  size_t bytes_heap_allocated() const { return heap_allocated_.value(); }
 
 private:
   /// Remember how we allocate the memory in the first place so
@@ -169,7 +169,7 @@ private:
   ACE_Locked_Free_List<ACE_Cached_Mem_Pool_Node<T>, ACE_LOCK> free_list_;
 
   const size_t n_chunks_;
-  size_t heap_allocated_;
+  ACE_Atomic_Op<ACE_LOCK, size_t> heap_allocated_;
 };
 
 typedef Cached_Allocator_With_Overflow<ACE_Message_Block, ACE_Thread_Mutex> MessageBlockAllocator;
