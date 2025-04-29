@@ -28,7 +28,7 @@
 namespace {
 
   using OpenDDS::DCPS::Encoding;
-  const Encoding::Kind encoding_kind = Encoding::KIND_UNALIGNED_CDR;
+  const Encoding::Kind dsh_encoding_kind = Encoding::KIND_UNALIGNED_CDR;
 
   bool mb_copy(char& dest, const ACE_Message_Block& mb, size_t offset, const Encoding&)
   {
@@ -140,7 +140,7 @@ bool DataSampleHeader::partial(const ACE_Message_Block& mb)
 
   if (len <= FLAGS_OFFSET) return true;
 
-  Encoding encoding(encoding_kind);
+  Encoding encoding(dsh_encoding_kind);
   unsigned char msg_id;
   if (!mb_peek(msg_id, mb, MESSAGE_ID_OFFSET, encoding)
       || int(msg_id) >= MESSAGE_ID_MAX) {
@@ -181,7 +181,7 @@ bool DataSampleHeader::partial(const ACE_Message_Block& mb)
 void
 DataSampleHeader::init(ACE_Message_Block* buffer)
 {
-  Encoding encoding(encoding_kind);
+  Encoding encoding(dsh_encoding_kind);
   Serializer reader(buffer, encoding);
   serialized_size_ = 0;
 
@@ -281,7 +281,7 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
 bool
 operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
 {
-  Serializer writer(&buffer, encoding_kind, value.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
+  Serializer writer(&buffer, dsh_encoding_kind, value.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
 
   writer << value.message_id_;
   writer << value.submessage_id_;
@@ -332,7 +332,7 @@ operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
 void
 DataSampleHeader::add_cfentries(const GUIDSeq* guids, ACE_Message_Block* mb)
 {
-  Encoding encoding(encoding_kind,
+  Encoding encoding(dsh_encoding_kind,
     ACE_CDR_BYTE_ORDER != test_flag(BYTE_ORDER_FLAG, mb));
   size_t size = 0;
   if (guids) {
@@ -385,7 +385,7 @@ DataSampleHeader::split(const ACE_Message_Block& orig, size_t size,
                         Message_Block_Ptr& head, Message_Block_Ptr& tail)
 {
   Message_Block_Ptr dup (orig.duplicate());
-  const Encoding encoding(encoding_kind);
+  const Encoding encoding(dsh_encoding_kind);
 
   const size_t length = dup->total_length();
   DataSampleHeader hdr(*dup); // deserialize entire header (with cfentries)

@@ -7,7 +7,15 @@
 
 #include "QosFormatter.h"
 
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#  pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
 #include <QtCore/QObject>
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
 
 #include "dds/DdsDcpsInfrastructureC.h"
 

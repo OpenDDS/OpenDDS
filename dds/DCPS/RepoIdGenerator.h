@@ -91,9 +91,9 @@ namespace DCPS {
  */
 class OpenDDS_Dcps_Export RepoIdGenerator {
 public:
-  static const unsigned int KeyBits;
+  static const long KeyBits;
 
-  static const unsigned int KeyMask;
+  static const long KeyMask;
 
   /**
    * @brief construct with at least a FederationId value.

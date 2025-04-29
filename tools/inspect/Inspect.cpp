@@ -341,7 +341,7 @@ int run(int argc, ACE_TCHAR* argv[])
 
       DDS::Duration_t timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
       if (num_seconds > 0) {
-        timeout.sec = num_seconds;
+        timeout.sec = static_cast<DDS::Int32>(num_seconds);
         timeout.nanosec = 0;
       }
       DDS::ConditionSeq conditions;
