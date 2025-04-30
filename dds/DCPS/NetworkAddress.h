@@ -60,8 +60,8 @@ public:
   ACE_INET_Addr to_addr() const;
   void to_addr(ACE_INET_Addr&) const;
 
-  ACE_INT16 get_type() const;
-  void set_type(ACE_INT16 type);
+  ACE_UINT16 get_type() const;
+  void set_type(ACE_UINT16 type);
 
   ACE_UINT16 get_port_number() const;
   void set_port_number(ACE_UINT16 port);

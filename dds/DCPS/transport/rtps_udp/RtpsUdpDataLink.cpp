@@ -344,10 +344,10 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
   }
 
   if (cfg->send_buffer_size() > 0) {
-    const int snd_size = cfg->send_buffer_size();
+    int snd_size = cfg->send_buffer_size();
     if (unicast_socket_.set_option(SOL_SOCKET,
                                 SO_SNDBUF,
-                                (void *) &snd_size,
+                                &snd_size,
                                 sizeof(snd_size)) < 0
         && errno != ENOTSUP) {
       if (DCPS_debug_level > 0) {
@@ -376,10 +376,10 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
   }
 
   if (cfg->rcv_buffer_size() > 0) {
-    const int rcv_size = cfg->rcv_buffer_size();
+    int rcv_size = cfg->rcv_buffer_size();
     if (unicast_socket_.set_option(SOL_SOCKET,
                                 SO_RCVBUF,
-                                (void *) &rcv_size,
+                                &rcv_size,
                                 sizeof(int)) < 0
         && errno != ENOTSUP) {
       if (DCPS_debug_level > 0) {
@@ -2371,7 +2371,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(const WriterInfo_rch& writer,
             break;
           }
         } else {
-          if ((0xffffffff << (32 - (num_bits % 32))) & bitmap[i]) {
+          if ((0xffffffff << (32 - (num_bits % 32))) & static_cast<DDS::UInt32>(bitmap[i])) {
             break;
           }
         }
@@ -2849,7 +2849,7 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVec& meta_submessages
                 if (res.sm_.heartbeat_sm().count.value != map_pair.new_) {
                   update_required_acknack_count(res.src_guid_, res.dst_guid_, map_pair.new_);
                 }
-                res.sm_.heartbeat_sm().smHeader.flags &= ~RTPS::OPENDDS_FLAG_R;
+                res.sm_.heartbeat_sm().smHeader.flags &= static_cast<ACE_CDR::Octet>(~RTPS::OPENDDS_FLAG_R);
               }
             }
             map_pair.is_new_assigned_ = true;
@@ -2960,7 +2960,7 @@ RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(MetaSubmessageVec& meta_subme
       fnSet.numBits = std::min(CORBA::ULong(256), iter->second.value);
       fnSet.bitmap.length((fnSet.numBits + 31) / 32);
       for (CORBA::ULong i = 0; i < fnSet.bitmap.length(); ++i) {
-        fnSet.bitmap[i] = 0xFFFFFFFF;
+        fnSet.bitmap[i] = -1;
       }
     }
   }
@@ -3769,7 +3769,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
       meta_submessage.sm_.heartbeat_sm().smHeader.flags |= RTPS::OPENDDS_FLAG_R;
       gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
       reader->required_acknack_count_ = heartbeat_count_;
-      meta_submessage.sm_.heartbeat_sm().smHeader.flags &= ~RTPS::OPENDDS_FLAG_R;
+      meta_submessage.sm_.heartbeat_sm().smHeader.flags &= static_cast<ACE_CDR::Octet>(~RTPS::OPENDDS_FLAG_R);
     } else {
       gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
     }
@@ -4705,7 +4705,7 @@ bool RtpsUdpDataLink::RemoteInfo::insert_recv_addr(NetworkAddressSet& aset) cons
   if (!last_recv_addr_) {
     return false;
   }
-  const ACE_INT16 last_addr_type = last_recv_addr_.get_type();
+  const ACE_UINT16 last_addr_type = last_recv_addr_.get_type();
   NetworkAddress limit;
   limit.set_type(last_addr_type);
   NetworkAddressSet::const_iterator it = unicast_addrs_.lower_bound(limit);

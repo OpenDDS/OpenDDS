@@ -815,7 +815,7 @@ create_message_instance_guid(const OpenDDS::DCPS::GUID_t& pub, const CORBA::Long
   FACE::LongLong masked_seq;
 
   //Until MESSAGE_INSTANCE_GUID becomes 128 bit GUID, use checksum to represent Prefix
-  FACE::Long prefix_representation = ACE::crc32(reinterpret_cast<const void*>(&pub), sizeof(pub));
+  const FACE::UnsignedLong prefix_representation = ACE::crc32(&pub, sizeof(pub));
   masked_seq = orig_seq >> 32;
 
   if (masked_seq) {

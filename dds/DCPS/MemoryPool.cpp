@@ -73,7 +73,7 @@ void
 AllocHeader::set_size(size_t size)
 {
   if (is_free()) {
-    size *= -1;
+    size *= static_cast<size_t>(-1);
   }
   alloc_size_ = (int)size;
 }
@@ -128,7 +128,7 @@ void
 FreeHeader::set_smaller_free(FreeHeader* next, unsigned char* pool_base)
 {
   if (next) {
-    offset_smaller_free_ = reinterpret_cast<unsigned char*>(next) - pool_base;
+    offset_smaller_free_ = static_cast<size_t>(reinterpret_cast<unsigned char*>(next) - pool_base);
   } else {
     offset_smaller_free_ = (std::numeric_limits<size_t>::max)();
   }
@@ -138,7 +138,7 @@ void
 FreeHeader::set_larger_free(FreeHeader* prev, unsigned char* pool_base)
 {
   if (prev) {
-    offset_larger_free_ = reinterpret_cast<unsigned char*>(prev) - pool_base;
+    offset_larger_free_ = static_cast<size_t>(reinterpret_cast<unsigned char*>(prev) - pool_base);
   } else {
     offset_larger_free_ = (std::numeric_limits<size_t>::max)();
   }
@@ -415,7 +415,7 @@ MemoryPool::join_free_allocs(FreeHeader* freed)
     // Adjust psize of adjacent
     AllocHeader* next = freed->next_adjacent();
     if (includes(next)) {
-      next->set_prev_size(freed->size());
+      next->set_prev_size(static_cast<int>(freed->size()));
     }
   }
   if (joinable_prev(freed)) {
@@ -427,7 +427,7 @@ MemoryPool::join_free_allocs(FreeHeader* freed)
     // Adjust psize of adjacent
     AllocHeader* next = prev_free->next_adjacent();
     if (includes(next)) {
-      next->set_prev_size(prev_free->size());
+      next->set_prev_size(static_cast<int>(prev_free->size()));
     }
   } else {
     insert_free_alloc(freed);

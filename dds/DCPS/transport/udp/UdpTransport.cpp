@@ -157,9 +157,9 @@ UdpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
 
   for (PendConnMap::iterator it = pending_connections_.begin();
        it != pending_connections_.end(); ++it) {
-    for (size_t i = 0; i < it->second.size(); ++i) {
-      if (it->second[i].first == client && it->second[i].second == remote_id) {
-        it->second.erase(it->second.begin() + i);
+    for (Callbacks::iterator cit = it->second.begin(); cit != it->second.end(); ++cit) {
+      if (cit->first == client && cit->second == remote_id) {
+        it->second.erase(cit);
         break;
       }
     }

@@ -27,7 +27,7 @@ class AgentImpl;
 
 struct Task : public DCPS::RcObject {
   explicit Task(AgentImpl* a_agent_impl) : agent_impl_(a_agent_impl) {}
-  virtual ~Task() {};
+  virtual ~Task() {}
   virtual void execute(const DCPS::MonotonicTimePoint& a_now) = 0;
   void enqueue(const DCPS::MonotonicTimePoint& release_time);
 private:
