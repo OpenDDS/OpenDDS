@@ -369,6 +369,7 @@ function(_opendds_set_cxx_std)
   endif()
 
   _opendds_cxx_std_from_year(cxx_std ${cxx_std_year})
+  unset(OPENDDS_CXX_STD PARENT_SCOPE)
   set(OPENDDS_CXX_STD ${cxx_std} CACHE STRING
     "Minimum required C++ standard (same values as CMAKE_CXX_STANDARD)" FORCE)
   message(STATUS "OPENDDS_CXX_STD: ${OPENDDS_CXX_STD} (from ${cxx_std_year_source})")
