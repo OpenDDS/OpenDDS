@@ -12,8 +12,8 @@
 #include "rtps_export.h"
 
 #include <dds/DCPS/AtomicBool.h>
-#include <dds/DCPS/InternalStatistics.h>
 #include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/Statistics.h>
 #include <dds/DCPS/debug.h>
 
 #include <dds/OpenDDSConfigWrapper.h>
@@ -357,7 +357,7 @@ private:
                      DCPS::SubscriberImpl* sub,
                      const DDS::DataReaderQos& qos);
 
-  DCPS::InternalStatisticsDataWriter_rch stats_writer_;
+  DCPS::StatisticsDataWriter_rch stats_writer_;
   typedef DCPS::PmfPeriodicTask<const RtpsDiscovery> PeriodicTask;
   DCPS::RcHandle<PeriodicTask> stats_task_;
 

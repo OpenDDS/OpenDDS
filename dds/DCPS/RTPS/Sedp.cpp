@@ -8113,10 +8113,10 @@ namespace { namespace OPENDDS_RTPS_UNITY_BUILD_ID {
     Stats_Len = 17;
 } }
 
-DCPS::InternalStatisticSeq Sedp::stats_template()
+DCPS::StatisticSeq Sedp::stats_template()
 {
   using namespace OPENDDS_RTPS_UNITY_BUILD_ID;
-  DCPS::InternalStatisticSeq stats(Stats_Len);
+  DCPS::StatisticSeq stats(Stats_Len);
   stats.length(Stats_Len);
   stats[Stats_Index_Topics].name = "Topics";
   stats[Stats_Index_TopicNames].name = "TopicNames";
@@ -8136,7 +8136,7 @@ DCPS::InternalStatisticSeq Sedp::stats_template()
   return stats;
 }
 
-void Sedp::fill_stats(DCPS::InternalStatisticSeq& stats, DDS::UInt32 begin) const
+void Sedp::fill_stats(DCPS::StatisticSeq& stats, DDS::UInt32 begin) const
 {
   using namespace OPENDDS_RTPS_UNITY_BUILD_ID;
   // lock held in Sedp

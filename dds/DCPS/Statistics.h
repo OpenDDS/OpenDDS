@@ -23,12 +23,12 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-// The InternalStatistics struct is defined in dds/OpenddsDcpsExt.idl
+// The Statistics struct is defined in dds/OpenddsDcpsExt.idl
 
 template <>
-struct InternalTraits<InternalStatistics> {
+struct InternalTraits<Statistics> {
   struct KeyCompare {
-    bool operator()(const InternalStatistics& lhs, const InternalStatistics& rhs) const
+    bool operator()(const Statistics& lhs, const Statistics& rhs) const
     {
       using ::operator<; // TAO::String_Manager's operator< is in the global namespace
       return lhs.id < rhs.id;
@@ -36,14 +36,14 @@ struct InternalTraits<InternalStatistics> {
   };
 };
 
-typedef InternalDataWriter<InternalStatistics> InternalStatisticsDataWriter;
-typedef RcHandle<InternalStatisticsDataWriter> InternalStatisticsDataWriter_rch;
+typedef InternalDataWriter<Statistics> StatisticsDataWriter;
+typedef RcHandle<StatisticsDataWriter> StatisticsDataWriter_rch;
 
-typedef InternalDataReader<InternalStatistics> InternalStatisticsDataReader;
-typedef RcHandle<InternalStatisticsDataReader> InternalStatisticsDataReader_rch;
+typedef InternalDataReader<Statistics> StatisticsDataReader;
+typedef RcHandle<StatisticsDataReader> StatisticsDataReader_rch;
 
-typedef InternalTopic<InternalStatistics> InternalStatisticsTopic;
-typedef RcHandle<InternalStatisticsTopic> InternalStatisticsTopic_rch;
+typedef InternalTopic<Statistics> StatisticsTopic;
+typedef RcHandle<StatisticsTopic> StatisticsTopic_rch;
 
 }
 }

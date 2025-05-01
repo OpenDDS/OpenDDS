@@ -4800,11 +4800,11 @@ namespace { namespace OPENDDS_RTPS_UNITY_BUILD_ID {
     Stats_Len = 11;
 } }
 
-DCPS::InternalStatisticSeq Spdp::stats_template()
+DCPS::StatisticSeq Spdp::stats_template()
 {
   using namespace OPENDDS_RTPS_UNITY_BUILD_ID;
-  const DCPS::InternalStatisticSeq sedp_template = Sedp::stats_template();
-  DCPS::InternalStatisticSeq stats(Stats_Len + sedp_template.length());
+  const DCPS::StatisticSeq sedp_template = Sedp::stats_template();
+  DCPS::StatisticSeq stats(Stats_Len + sedp_template.length());
   stats.length(Stats_Len + sedp_template.length());
   stats[Stats_Index_LeaseExpirations].name = "LeaseExpirations";
   stats[Stats_Index_HandshakeDeadlines].name = "HandshakeDeadlines";
@@ -4823,7 +4823,7 @@ DCPS::InternalStatisticSeq Spdp::stats_template()
   return stats;
 }
 
-void Spdp::fill_stats(DCPS::InternalStatisticSeq& stats) const
+void Spdp::fill_stats(DCPS::StatisticSeq& stats) const
 {
   using namespace OPENDDS_RTPS_UNITY_BUILD_ID;
   stats = stats_template_;

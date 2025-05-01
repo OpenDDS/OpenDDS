@@ -157,7 +157,7 @@ Service_Participant::Service_Participant()
   , priority_max_(0)
   , shut_down_(false)
   , network_interface_address_topic_(make_rch<InternalTopic<NetworkInterfaceAddress> >())
-  , internal_statistics_topic_(make_rch<InternalStatisticsTopic>())
+  , statistics_topic_(make_rch<StatisticsTopic>())
   , config_topic_(make_rch<InternalTopic<ConfigPair> >())
   , config_store_(make_rch<ConfigStoreImpl>(config_topic_))
   , config_reader_(make_rch<InternalDataReader<ConfigPair> >(DataReaderQosBuilder().reliability_reliable().durability_transient_local()))
@@ -2335,17 +2335,17 @@ Service_Participant::printer_value_writer_indent(unsigned int value)
 }
 
 TimeDuration
-Service_Participant::internal_statistics_period() const
+Service_Participant::statistics_period() const
 {
-  return config_store_->get(COMMON_INTERNAL_STATISTICS_PERIOD,
-                            COMMON_INTERNAL_STATISTICS_PERIOD_default,
+  return config_store_->get(COMMON_STATISTICS_PERIOD,
+                            COMMON_STATISTICS_PERIOD_default,
                             ConfigStoreImpl::Format_FractionalSeconds);
 }
 
 void
-Service_Participant::internal_statistics_period(const TimeDuration& value)
+Service_Participant::statistics_period(const TimeDuration& value)
 {
-  config_store_->set(COMMON_INTERNAL_STATISTICS_PERIOD,
+  config_store_->set(COMMON_STATISTICS_PERIOD,
                      value,
                      ConfigStoreImpl::Format_FractionalSeconds);
 }

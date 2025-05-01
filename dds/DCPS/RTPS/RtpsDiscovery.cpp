@@ -9,12 +9,12 @@
 
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/DomainParticipantImpl.h>
-#include <dds/DCPS/InternalStatistics.h>
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/Registered_Data_Types.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Statistics.h>
 #include <dds/DCPS/SubscriberImpl.h>
 
 #include <dds/DCPS/transport/framework/TransportConfig.h>
@@ -36,15 +36,15 @@ using DCPS::TimeDuration;
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   : key_(key)
   , config_(DCPS::make_rch<RtpsDiscoveryConfig>(key))
-  , stats_writer_(DCPS::make_rch<DCPS::InternalStatisticsDataWriter>(DCPS::DataWriterQosBuilder().durability_transient_local()))
+  , stats_writer_(DCPS::make_rch<DCPS::StatisticsDataWriter>(DCPS::DataWriterQosBuilder().durability_transient_local()))
   , stats_task_(DCPS::make_rch<PeriodicTask>(TheServiceParticipant->reactor_task(), *this, &RtpsDiscovery::write_stats))
 {
-  TheServiceParticipant->internal_statistics_topic()->connect(stats_writer_);
+  TheServiceParticipant->statistics_topic()->connect(stats_writer_);
 }
 
 RtpsDiscovery::~RtpsDiscovery()
 {
-  TheServiceParticipant->internal_statistics_topic()->disconnect(stats_writer_);
+  TheServiceParticipant->statistics_topic()->disconnect(stats_writer_);
 }
 
 int
@@ -194,7 +194,7 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
     // ads.id may change during Spdp constructor
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, participants_lock_, ads);
     participants_[domain][ads.id] = spdp;
-    const DCPS::TimeDuration period = TheServiceParticipant->internal_statistics_period();
+    const DCPS::TimeDuration period = TheServiceParticipant->statistics_period();
     if (!period.is_zero()) {
       stats_task_->enable(false, period);
     }
@@ -225,7 +225,7 @@ RtpsDiscovery::add_domain_participant_secure(
       domain, ads.id, qos, this, tls, id, perm, part_crypto));
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, participants_lock_, ads);
     participants_[domain][ads.id] = spdp;
-    const DCPS::TimeDuration period = TheServiceParticipant->internal_statistics_period();
+    const DCPS::TimeDuration period = TheServiceParticipant->statistics_period();
     if (!period.is_zero()) {
       stats_task_->enable(false, period);
     }
@@ -803,7 +803,7 @@ void RtpsDiscovery::request_remote_complete_type_objects(
 void RtpsDiscovery::write_stats(const MonotonicTimePoint&) const
 {
   ACE_Guard<ACE_Thread_Mutex> guard(participants_lock_);
-  DCPS::InternalStatistics statistics;
+  DCPS::Statistics statistics;
   for (DomainParticipantMap::const_iterator domain = participants_.begin(); domain != participants_.end(); ++domain) {
     for (ParticipantMap::const_iterator part = domain->second.begin(); part != domain->second.end(); ++part) {
       statistics.id = ("RtpsDiscovery " + DCPS::to_dds_string(domain->first) + ' ' + DCPS::to_string(part->first)).c_str();

@@ -1665,8 +1665,8 @@ protected:
 
   RtpsDiscoveryCore core_;
 
-  static DCPS::InternalStatisticSeq stats_template();
-  void fill_stats(DCPS::InternalStatisticSeq& stats, DDS::UInt32 begin) const;
+  static DCPS::StatisticSeq stats_template();
+  void fill_stats(DCPS::StatisticSeq& stats, DDS::UInt32 begin) const;
   size_t total_deferred_samples_;
   size_t total_reader_bytes_allocated() const;
   static size_t reader_bytes_allocated(const RcHandle<Reader>& reader);

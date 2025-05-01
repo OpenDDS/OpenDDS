@@ -355,7 +355,7 @@ public:
     sedp_->request_remote_complete_type_objects(remote_entity, remote_type_info, cond);
   }
 
-  void fill_stats(DCPS::InternalStatisticSeq& stats) const;
+  void fill_stats(DCPS::StatisticSeq& stats) const;
 
 protected:
   Sedp& endpoint_manager() { return *sedp_; }
@@ -697,8 +697,8 @@ private:
   void set_auth_state(DiscoveredParticipant& dp, AuthState state);
 #endif
 
-  static DCPS::InternalStatisticSeq stats_template();
-  const DCPS::InternalStatisticSeq stats_template_;
+  static DCPS::StatisticSeq stats_template();
+  const DCPS::StatisticSeq stats_template_;
   size_t total_location_updates_, total_builtin_pending_, total_builtin_associated_,
     total_writer_pending_, total_writer_associated_, total_reader_pending_, total_reader_associated_;
 

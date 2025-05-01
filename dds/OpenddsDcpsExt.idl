@@ -129,17 +129,17 @@ module OpenDDS
 
     typedef sequence<TransportStatistics> TransportStatisticsSequence;
 
-    struct InternalStatistic {
+    struct Statistic {
       string name;
       unsigned long long value;
     };
 
-    typedef sequence<InternalStatistic> InternalStatisticSeq;
+    typedef sequence<Statistic> StatisticSeq;
 
     // top-level type for an InternalTopic -- see Service_Participant.h
-    struct InternalStatistics {
+    struct Statistics {
       @key string id;
-      InternalStatisticSeq stats;
+      StatisticSeq stats;
     };
 
   }; // module DDS
