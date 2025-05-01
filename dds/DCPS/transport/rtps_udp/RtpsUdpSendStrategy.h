@@ -83,6 +83,9 @@ public:
   virtual Security::SecurityConfig_rch security_config() const;
 #endif
 
+  static StatisticSeq stats_template();
+  void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
+
 protected:
   virtual ssize_t send_bytes_i(const iovec iov[], int n);
   ssize_t send_bytes_i_helper(const iovec iov[], int n);

@@ -1166,7 +1166,7 @@ void RtpsUdpTransport::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
     deferred_connection_records_.size();
 #endif
   if (link_) {
-    //link_->fill_stats(stats, idx);
+    link_->fill_stats(stats, idx);
   }
 }
 

@@ -4624,13 +4624,13 @@ RtpsUdpDataLink::transport() const
 }
 
 RtpsUdpSendStrategy_rch
-RtpsUdpDataLink::send_strategy()
+RtpsUdpDataLink::send_strategy() const
 {
   return dynamic_rchandle_cast<RtpsUdpSendStrategy>(send_strategy_);
 }
 
 RtpsUdpReceiveStrategy_rch
-RtpsUdpDataLink::receive_strategy()
+RtpsUdpDataLink::receive_strategy() const
 {
   return dynamic_rchandle_cast<RtpsUdpReceiveStrategy>(receive_strategy_);
 }
@@ -4898,6 +4898,43 @@ void RtpsUdpDataLink::RtpsReader::log_remote_counts(const char* funcname)
       "%C pre: %b assoc: %b\n",
       funcname, LogGuid(id_).c_str(),
       preassociation_writers_.size(), remote_writers_.size()));
+  }
+}
+
+StatisticSeq RtpsUdpDataLink::stats_template()
+{
+  static const DDS::UInt32 num_local_stats = 2; //TODO
+  const StatisticSeq base = DataLink::stats_template(),
+    send = RtpsUdpSendStrategy::stats_template(),
+    recv = RtpsUdpReceiveStrategy::stats_template();
+  StatisticSeq stats(base.length() + num_local_stats + send.length() + recv.length());
+  stats.length(stats.maximum());
+  for (DDS::UInt32 i = 0; i < base.length(); ++i) {
+    stats[i].name = base[i].name;
+  }
+  // locals
+  const DDS::UInt32 send_offset = base.length() + num_local_stats;
+  for (DDS::UInt32 i = 0; i < send.length(); ++i) {
+    stats[send_offset + i].name = send[i].name;
+  }
+  const DDS::UInt32 recv_offset = send_offset + send.length();
+  for (DDS::UInt32 i = 0; i < recv.length(); ++i) {
+    stats[recv_offset + i].name = recv[i].name;
+  }
+  return stats;
+}
+
+void RtpsUdpDataLink::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
+{
+  DataLink::fill_stats(stats, idx);
+  // locals
+  const RtpsUdpSendStrategy_rch send = send_strategy();
+  if (send) {
+    send->fill_stats(stats, idx);
+  }
+  const RtpsUdpReceiveStrategy_rch recv = receive_strategy();
+  if (recv) {
+    recv->fill_stats(stats, idx);
   }
 }
 

@@ -463,6 +463,9 @@ protected:
 
   /// Listener for TransportSendControlElements created in send_control
   SendResponseListener send_response_listener_;
+
+  static StatisticSeq stats_template();
+  void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
 };
 
 } // namespace DCPS

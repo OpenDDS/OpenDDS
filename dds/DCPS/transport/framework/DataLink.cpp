@@ -1288,6 +1288,16 @@ DataLink::terminate_send_if_suspended()
   }
 }
 
+StatisticSeq DataLink::stats_template()
+{
+  return {};//TODO
+}
+
+void DataLink::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
+{
+
+}
+
 }
 }
 

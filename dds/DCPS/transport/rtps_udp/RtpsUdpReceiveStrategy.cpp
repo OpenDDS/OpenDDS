@@ -1406,6 +1406,16 @@ RtpsUdpReceiveStrategy::MessageReceiver::fill_header(
   assign(header.publication_id_.guidPrefix, source_guid_prefix_);
 }
 
+StatisticSeq RtpsUdpReceiveStrategy::stats_template()
+{
+  return {}; //TODO
+}
+
+void RtpsUdpReceiveStrategy::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
+{
+
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 
