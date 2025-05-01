@@ -4797,7 +4797,8 @@ namespace { namespace OPENDDS_RTPS_UNITY_BUILD_ID {
     Stats_Index_TotalWriterAssociated = 8,
     Stats_Index_TotalReaderPending = 9,
     Stats_Index_TotalReaderAssociated = 10,
-    Stats_Len = 11;
+    Stats_Index_DirectedGuids = 11,
+    Stats_Len = 12;
 } }
 
 DCPS::StatisticSeq Spdp::stats_template()
@@ -4817,6 +4818,7 @@ DCPS::StatisticSeq Spdp::stats_template()
   stats[Stats_Index_TotalWriterAssociated].name = "TotalWriterAssociated";
   stats[Stats_Index_TotalReaderPending].name = "TotalReaderPending";
   stats[Stats_Index_TotalReaderAssociated].name = "TotalReaderAssociated";
+  stats[Stats_Index_DirectedGuids].name = "DirectedGuids";
   for (DDS::UInt32 i = 0; i < sedp_template.length(); ++i) {
     stats[Stats_Len + i].name = sedp_template[i].name;
   }
@@ -4841,6 +4843,7 @@ void Spdp::fill_stats(DCPS::StatisticSeq& stats) const
   stats[Stats_Index_TotalWriterAssociated].value = total_writer_associated_;
   stats[Stats_Index_TotalReaderPending].value = total_reader_pending_;
   stats[Stats_Index_TotalReaderAssociated].value = total_reader_associated_;
+  stats[Stats_Index_DirectedGuids].value = tport_ ? tport_->directed_guids_.size() : 0;
 }
 
 DCPS::TopicStatus Spdp::assert_topic(GUID_t& topicId, const char* topicName,
