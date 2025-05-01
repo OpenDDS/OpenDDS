@@ -60,7 +60,7 @@ RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst,
   , ice_agent_(ICE::Agent::instance())
 #endif
   , core_(inst)
-  , stats_writer_(make_rch<InternalStatisticsDataWriter>(DataWriterQosBuilder().durability_transient_local()))
+  , stats_writer_(make_rch<StatisticsDataWriter>(DataWriterQosBuilder().durability_transient_local()))
   , stats_task_(make_rch<PeriodicTask>(TheServiceParticipant->reactor_task(), *this, &RtpsUdpTransport::write_stats))
   , stats_template_(stats_template())
 {
@@ -68,8 +68,8 @@ RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst,
   if (!(configure_i(inst) && open())) {
     throw Transport::UnableToCreate();
   }
-  TheServiceParticipant->internal_statistics_topic()->connect(stats_writer_);
-  const TimeDuration period = TheServiceParticipant->internal_statistics_period();
+  TheServiceParticipant->statistics_topic()->connect(stats_writer_);
+  const TimeDuration period = TheServiceParticipant->statistics_period();
   if (!period.is_zero()) {
     stats_task_->enable(false, period);
   }
@@ -77,7 +77,7 @@ RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst,
 
 RtpsUdpTransport::~RtpsUdpTransport()
 {
-  TheServiceParticipant->internal_statistics_topic()->disconnect(stats_writer_);
+  TheServiceParticipant->statistics_topic()->disconnect(stats_writer_);
 }
 
 RtpsUdpInst_rch
@@ -1137,12 +1137,12 @@ RtpsUdpTransport::disable_relay_stun_task()
 
 #endif
 
-InternalStatisticSeq RtpsUdpTransport::stats_template()
+StatisticSeq RtpsUdpTransport::stats_template()
 {
   static const DDS::UInt32 num_local_stats = 2;
-  const InternalStatisticSeq base = TransportImpl::stats_template(),
+  const StatisticSeq base = TransportImpl::stats_template(),
     link;// = RtpsUdpDataLink::stats_template();
-  InternalStatisticSeq stats(base.length() + num_local_stats + link.length());
+  StatisticSeq stats(base.length() + num_local_stats + link.length());
   stats.length(stats.maximum());
   for (DDS::UInt32 i = 0; i < base.length(); ++i) {
     stats[i].name = base[i].name;
@@ -1155,7 +1155,7 @@ InternalStatisticSeq RtpsUdpTransport::stats_template()
   return stats;
 }
 
-void RtpsUdpTransport::fill_stats(InternalStatisticSeq& stats, DDS::UInt32& idx) const
+void RtpsUdpTransport::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
 {
   TransportImpl::fill_stats(stats, idx);
   stats[idx++].value = job_queue_ ? job_queue_->size() : 0;
@@ -1172,7 +1172,7 @@ void RtpsUdpTransport::fill_stats(InternalStatisticSeq& stats, DDS::UInt32& idx)
 
 void RtpsUdpTransport::write_stats(const MonotonicTimePoint&) const
 {
-  DCPS::InternalStatistics statistics = {config()->name().c_str(), stats_template_};
+  DCPS::Statistics statistics = {config()->name().c_str(), stats_template_};
   DDS::UInt32 idx = 0;
   fill_stats(statistics.stats, idx);
   stats_writer_->write(statistics);

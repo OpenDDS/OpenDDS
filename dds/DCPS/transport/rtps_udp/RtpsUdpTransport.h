@@ -12,10 +12,10 @@
 
 #include <dds/DCPS/ConnectionRecords.h>
 #include <dds/DCPS/FibonacciSequence.h>
-#include <dds/DCPS/InternalStatistics.h>
 #include <dds/DCPS/PeriodicTask.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/SporadicTask.h>
+#include <dds/DCPS/Statistics.h>
 
 #include <dds/DCPS/RTPS/ICE/Ice.h>
 #include <dds/DCPS/RTPS/RtpsCoreC.h>
@@ -424,14 +424,14 @@ private:
 
   RtpsUdpCore core_;
 
-  InternalStatisticsDataWriter_rch stats_writer_;
+  StatisticsDataWriter_rch stats_writer_;
   typedef PmfPeriodicTask<const RtpsUdpTransport> PeriodicTask;
   RcHandle<PeriodicTask> stats_task_;
 
-  static InternalStatisticSeq stats_template();
-  const InternalStatisticSeq stats_template_;
+  static StatisticSeq stats_template();
+  const StatisticSeq stats_template_;
 
-  void fill_stats(InternalStatisticSeq& stats, DDS::UInt32& idx) const;
+  void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
   void write_stats(const MonotonicTimePoint&) const;
 };
 
