@@ -3,8 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_INTERNAL_STATISTICS_H
-#define OPENDDS_DCPS_INTERNAL_STATISTICS_H
+#ifndef OPENDDS_DCPS_STATISTICS_H
+#define OPENDDS_DCPS_STATISTICS_H
 
 #include "dcps_export.h"
 
