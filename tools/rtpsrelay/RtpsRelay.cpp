@@ -352,7 +352,7 @@ int run(int argc, ACE_TCHAR* argv[])
   const auto interval = both ? std::min(config.log_relay_statistics(), config.publish_relay_statistics())
     : (config.log_relay_statistics() ? config.log_relay_statistics() : config.publish_relay_statistics());
   if (either) {
-    TheServiceParticipant->internal_statistics_period(interval);
+    TheServiceParticipant->statistics_period(interval);
   }
 
   // Set up the relay participant.

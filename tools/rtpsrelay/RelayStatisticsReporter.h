@@ -9,9 +9,9 @@
 // after RelayTypeSupportImpl.h so that set_default is available
 #include "CommonIoStatsReportHelper.h"
 
-#include <dds/DCPS/InternalStatistics.h>
 #include <dds/DCPS/JsonValueWriter.h>
 #include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/Statistics.h>
 
 namespace RtpsRelay {
 
@@ -411,7 +411,7 @@ private:
                       const OpenDDS::DCPS::MonotonicTimePoint& now,
                       bool force);
 
-  void get_internal_stats(RelayStatistics& out);
+  void get_opendds_stats(RelayStatistics& out);
 
   mutable ACE_Thread_Mutex mutex_;
   const Config& config_;
@@ -427,7 +427,7 @@ private:
   RelayStatisticsDataWriter_var writer_;
   CORBA::String_var topic_name_;
 
-  OpenDDS::DCPS::InternalStatisticsDataReader_rch internal_reader_;
+  OpenDDS::DCPS::StatisticsDataReader_rch internal_reader_;
 };
 
 }
