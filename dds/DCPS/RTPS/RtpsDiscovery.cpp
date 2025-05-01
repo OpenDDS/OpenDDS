@@ -800,7 +800,7 @@ void RtpsDiscovery::request_remote_complete_type_objects(
   spdp->request_remote_complete_type_objects(remote_entity, remote_type_info, cond);
 }
 
-void RtpsDiscovery::write_stats(const MonotonicTimePoint&)
+void RtpsDiscovery::write_stats(const MonotonicTimePoint&) const
 {
   ACE_Guard<ACE_Thread_Mutex> guard(participants_lock_);
   DCPS::InternalStatistics statistics;

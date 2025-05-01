@@ -8190,7 +8190,7 @@ size_t Sedp::tlreader_dependencies() const
 #if OPENDDS_CONFIG_SECURITY
     + (type_lookup_reply_secure_reader_ ? type_lookup_reply_secure_reader_->dependencies_participants() : 0)
 #endif
-  ;
+    ;
 }
 
 } // namespace RTPS
