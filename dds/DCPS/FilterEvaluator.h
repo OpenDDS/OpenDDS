@@ -84,12 +84,12 @@ struct OpenDDS_Dcps_Export Value {
     char c_;
     double f_;
     ACE_CDR::LongDouble ld_;
-    const char* s_;
+    char* s_;
   };
   bool conversion_preferred_;
 };
 
-class OpenDDS_Dcps_Export FilterEvaluator : public virtual RcObject {
+class OpenDDS_Dcps_Export FilterEvaluator : public RcObject {
 public:
 
   struct AstNodeWrapper;

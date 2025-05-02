@@ -317,3 +317,28 @@ What could account for increasing memory usage in subscribing processes?
 If the subscribing process contains Data Readers which have received many instances from the corresponding Data Writers, it will need some resources to track each instance.
 This can be bounded by the :ref:`qos-resource-limits` policy and by the subscribing application taking samples from the Data Reader.
 The :ref:`qos-reader-data-lifecycle` policy may also be helpful.
+
+=================================================================================
+How do I configure OpenDDS for large samples (e.g. uncompressed video) with RTPS?
+=================================================================================
+
+https://github.com/OpenDDS/OpenDDS/discussions/4853
+
+First, configure :cfg:prop:`[transport@rtps_udp]max_message_size` with a value that is less than the maximum transmission unit (MTU) of the network.
+A "large sample" is one that is too large to fit in a single network packet so OpenDDS must be configured with a value that represents the MTU.
+A common MTU on the internet is 1500 bytes while local networks can have much larger MTUs.
+By default, OpenDDS will use 64KB which is the maximum size of a UDP datagram.
+:cfg:prop:`[transport@rtps_udp]max_message_size` must be configured to a value less than the MTU to account for additional overhead like IP, UDP, and various RTPS headers.
+Setting this value will causes OpenDDS to fragment samples into fragments of the configured size for transport.
+
+Second, configure :cfg:prop:`[transport@rtps_udp]send_buffer_size` and :cfg:prop:`[transport@rtps_udp]rcv_buffer_size` if send or receiving, respectively.
+The default for these is typically 64KB.
+They should be resized to accommodate at lease one sample if not more.
+
+Third, make a decision on :ref:`qos-reliability`.
+Reliability will causes readers to request missing samples and fragments of samples.
+If using reliability, one should configure :cfg:prop:`[transport@rtps_udp]heartbeat_period`, :cfg:prop:`[transport@rtps_udp]nak_depth`, and :cfg:prop:`[transport@rtps_udp]nak_response_delay` based on the timing characteristics of the application.
+For example, a video with 33 frames per second means that a heartbeat would need to be sent with a period much smaller than 30ms and there should be minimal nak response delay if any.
+
+Fourth, consider the buffering performed by the operating system.
+For example, in Linux, it may be necessary to increase ``net.core.rmem_max``, ``net.core.rmem_default``, ``net.core.wmem_max``, and ``net.core.wmem_default`` using the :manpage:`sysctl(8)` command to values large enough to accommodate one or more samples.

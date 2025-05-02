@@ -146,6 +146,10 @@ namespace {
                       AST_Type* type, const string& prefix, bool wrap_nested_key_only,
                       Intro& intro, const string& stru = "");
 
+  string initializeUnion(const std::string& indent, AST_Decl* node, const string& name,
+                         AST_Type* type, const string& prefix, bool wrap_nested_key_only,
+                         Intro& intro, const string& stru = "");
+
   const std::string construct_bound_fail =
     "strm.get_construction_status() == Serializer::BoundConstructionFailure";
   const std::string construct_elem_fail =
@@ -1486,10 +1490,10 @@ namespace {
       AST_String* string_node = dynamic_cast<AST_String*>(type);
       align(encoding, size, 4);
       size += 4;
-      const int width = (string_node->width() == 1) ? 1 : 2 /*UTF-16*/;
+      const size_t width = (string_node->width() == 1) ? 1 : 2 /*UTF-16*/;
       size += width * string_node->max_size()->ev()->u.ulval;
       if (type->node_type() == AST_Decl::NT_string) {
-        size += 1; // narrow string includes the null terminator
+        ++size; // narrow string includes the null terminator
       }
       break;
     }
@@ -1691,10 +1695,11 @@ namespace {
     } else if (fld_cls & CL_PRIMITIVE) {
       return "(strm " + shift + ' ' + getWrapper(expr, actual_type, dir) + ')';
     } else if (fld_cls == CL_UNKNOWN) {
-      if (dir == WD_INPUT) { // no need to warn twice
-        std::cerr << "WARNING: field " << name << " can not be serialized.  "
-          "The struct or union it belongs to (" << stru <<
-          ") can not be used in an OpenDDS topic type." << std::endl;
+      if (dir == WD_INPUT) {
+        be_global->error(("Field \"" + name + "\" can not be serialized.  "
+                          "The struct or union it belongs to (" + stru +
+                          ") can not be used in an OpenDDS topic type.").c_str(),
+                         field->file_name().c_str(), field->line());
       }
       return "false";
     } else { // sequence, struct, union, array, enum, string(insertion)
@@ -1721,9 +1726,19 @@ namespace {
     }
   }
 
+  string initializeUnion(const std::string& indent, AST_Decl* field, const string& /*name*/,
+                         AST_Type* type, const string& /*prefix*/, bool /*wrap_nested_key_only*/, Intro& /*intro*/,
+                         const string& /*stru*/)
+  {
+    return
+      field_type_name(dynamic_cast<AST_Field*>(field), type) + " temp;\n" +
+      type_to_default(indent, type, "temp", type->anonymous(), false) +
+      "uni.value." + field->local_name()->get_string() + "(temp);\n";
+  }
+
   std::string generate_field_stream(
     const std::string& indent, AST_Field* field, const std::string& prefix, const std::string& field_name,
-    bool wrap_nested_key_only, Intro& intro)
+    bool wrap_nested_key_only, Intro& intro, const std::string& structName = "")
   {
     FieldInfo af(*field);
 
@@ -1737,7 +1752,7 @@ namespace {
     }
     return streamCommon(
       indent, field, field_name, field->field_type(), prefix,
-      wrap_nested_key_only, intro);
+      wrap_nested_key_only, intro, structName);
   }
 
   bool genBinaryProperty_t(const string& cxx)
@@ -2510,8 +2525,8 @@ namespace {
             string("stru") + value_access + "." + field->local_name()->get_string();
           cases <<
             "      case " << id << ": {\n"
-            "        if (!" << generate_field_stream(
-                                                     indent, field, ">> stru" + value_access, field->local_name()->get_string(), wrap_nested_key_only, intro) << ") {\n";
+            "        if (!" << generate_field_stream(indent, field, ">> stru" + value_access, field->local_name()->get_string(),
+                                                     wrap_nested_key_only, intro, cpp_name) << ") {\n";
           AST_Type* const field_type = resolveActualType(field->field_type());
           const Classification fld_cls = classify(field_type);
 
@@ -2675,8 +2690,8 @@ namespace {
           }
           expr += "(strm >> " + strm_name + ")";
         } else {
-          expr += generate_field_stream(
-                                        indent, field, ">> stru" + value_access, field->local_name()->get_string(), wrap_nested_key_only, intro);
+          expr += generate_field_stream(indent, field, ">> stru" + value_access, field->local_name()->get_string(),
+                                        wrap_nested_key_only, intro, cpp_name);
         }
         if (is_appendable) {
           expr += ") {\n"
@@ -3447,7 +3462,9 @@ namespace {
     return true;
   }
 
-  void gen_union_key_serializers(AST_Union* node, FieldFilter kind)
+  void gen_union_key_serializers(AST_Union* node,
+                                 FieldFilter kind,
+                                 const std::vector<AST_UnionBranch*>& branches)
   {
     const string cxx = scoped(node->name()); // name as a C++ class
     AST_Type* const discriminator = node->disc_type();
@@ -3564,7 +3581,13 @@ namespace {
 
         be_global->impl_
           << "  " << scoped(discriminator->name()) << " disc;\n"
-          << streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT))
+          << streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
+
+        // Activate the branch with a default so the union is in a good state.
+        generateSwitchForUnion(node, "disc", initializeUnion, branches,
+                               discriminator, "", ">> forceStreamExp", cxx.c_str());
+
+        be_global->impl_
           << "  uni.value._d(disc);\n";
       }
 
@@ -3826,9 +3849,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     }
   }
 
-  gen_union_key_serializers(node, FieldFilter_NestedKeyOnly);
+  gen_union_key_serializers(node, FieldFilter_NestedKeyOnly, branches);
   if (be_global->is_topic_type(node)) {
-    gen_union_key_serializers(node, FieldFilter_KeyOnly);
+    gen_union_key_serializers(node, FieldFilter_KeyOnly, branches);
   }
 
   TopicKeys keys(node);

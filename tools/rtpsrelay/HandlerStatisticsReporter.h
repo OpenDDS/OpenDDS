@@ -119,7 +119,7 @@ private:
       return;
     }
 
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name_.in(), OpenDDS::DCPS::to_json(log_handler_statistics_).c_str()));
+    ACE_DEBUG((LM_INFO, "(%P|%t) STAT: %C %C\n", topic_name_.in(), OpenDDS::DCPS::to_json(log_handler_statistics_).c_str()));
 
     log_helper_.reset(log_handler_statistics_, now);
   }
@@ -143,7 +143,7 @@ private:
 
   const Config& config_;
 
-  typedef CommonIoStatsReportHelper<HandlerStatistics> Helper;
+  using Helper = CommonIoStatsReportHelper<HandlerStatistics>;
 
   HandlerStatistics log_handler_statistics_;
   Helper log_helper_;

@@ -4,7 +4,7 @@
 # This file is setup the way it is for testing purposes. For a cleaner example
 # see DevGuideExamples/DCPS/Messenger/CMakeLists.txt
 
-cmake_minimum_required(VERSION 3.8...3.27)
+cmake_minimum_required(VERSION 3.8...4.0)
 project(opendds_generated_global_idl CXX)
 
 find_package(OpenDDS REQUIRED)
@@ -26,4 +26,4 @@ set_target_properties(${messenger}
   PROPERTIES OUTPUT_NAME messenger
 )
 opendds_target_sources(${messenger} PUBLIC "${dst}/Messenger.idl")
-target_link_libraries(${messenger} OpenDDS::Dcps)
+target_link_libraries(${messenger} PUBLIC OpenDDS::Dcps)

@@ -166,6 +166,7 @@ struct DiscoveredParticipant {
   typedef OPENDDS_LIST(ReaderAssociationRecord_rch) ReaderAssociationRecords;
   ReaderAssociationRecords reader_pending_records_;
   ReaderAssociationRecords reader_associated_records_;
+  DCPS::String flexible_types_key_;
 #if OPENDDS_CONFIG_SECURITY
   bool have_spdp_info_;
   ICE::AgentInfo spdp_info_;

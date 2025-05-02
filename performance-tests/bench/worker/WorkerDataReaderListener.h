@@ -4,7 +4,7 @@
 #include "DataReaderListener.h"
 #include "PropertyStatBlock.h"
 
-#include "dds/DCPS/DisjointSequence.h"
+#include <dds/DCPS/DisjointSequence.h>
 
 #include <unordered_map>
 #include <condition_variable>

@@ -143,7 +143,6 @@ UdpTransport::accept_datalink(const RemoteTransport& remote,
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink pending\n"));
     return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
   }
-  return AcceptConnectResult();
 }
 
 void
@@ -158,9 +157,9 @@ UdpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
 
   for (PendConnMap::iterator it = pending_connections_.begin();
        it != pending_connections_.end(); ++it) {
-    for (size_t i = 0; i < it->second.size(); ++i) {
-      if (it->second[i].first == client && it->second[i].second == remote_id) {
-        it->second.erase(it->second.begin() + i);
+    for (Callbacks::iterator cit = it->second.begin(); cit != it->second.end(); ++cit) {
+      if (cit->first == client && cit->second == remote_id) {
+        it->second.erase(cit);
         break;
       }
     }
@@ -325,12 +324,12 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
     //still present in the actual pending_connections_ before calling use_datalink
     Callbacks tmp(pend->second);
     for (size_t i = 0; i < tmp.size(); ++i) {
-      const PendConnMap::iterator pend = pending_connections_.find(key);
-      if (pend != pending_connections_.end()) {
-        const Callbacks::iterator tmp_iter = find(pend->second.begin(),
-                                                  pend->second.end(),
+      const PendConnMap::iterator pos = pending_connections_.find(key);
+      if (pos != pending_connections_.end()) {
+        const Callbacks::iterator tmp_iter = find(pos->second.begin(),
+                                                  pos->second.end(),
                                                   tmp.at(i));
-        if (tmp_iter != pend->second.end()) {
+        if (tmp_iter != pos->second.end()) {
           TransportClient_wrch pend_client = tmp.at(i).first;
           GUID_t remote_repo = tmp.at(i).second;
           guard.release();

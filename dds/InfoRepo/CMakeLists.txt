@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23...3.27)
+cmake_minimum_required(VERSION 3.23...4.0)
 project(opendds_info_repo CXX)
 
 set(lib_dep_libs
@@ -46,9 +46,8 @@ target_sources(OpenDDS_Federator
     UpdateReceiver_T.h
     UpdateProcessor_T.h
 )
-_opendds_library(OpenDDS_Federator MSVC_BIGOBJ)
+_opendds_library(OpenDDS_Federator BIGOBJ)
 target_link_libraries(OpenDDS_Federator PUBLIC OpenDDS::InfoRepoLib)
-target_compile_definitions(OpenDDS_Federator PRIVATE OPENDDS_FEDERATOR_BUILD_DLL)
 opendds_target_sources(OpenDDS_Federator
   PUBLIC
     Federator.idl

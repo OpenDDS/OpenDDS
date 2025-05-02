@@ -842,7 +842,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
     }
     ip46 addr;
     std::memset(&addr, 0, sizeof addr);
-    std::memcpy(&addr, curr->ai_addr, curr->ai_addrlen);
+    std::memcpy(&addr, curr->ai_addr, static_cast<size_t>(curr->ai_addrlen));
 #ifdef ACE_HAS_IPV6
     if (curr->ai_family == AF_INET6) {
       addr.in6_.sin6_port = ACE_NTOHS(port_number);
@@ -888,7 +888,7 @@ int locator_to_address(ACE_INET_Addr& dest,
                          16, 0 /*encode*/) == -1) {
       return -1;
     }
-    dest.set_port_number(locator.port);
+    dest.set_port_number(static_cast<u_short>(locator.port));
     return 0;
 #endif
   case LOCATOR_KIND_UDPv4:
@@ -904,13 +904,11 @@ int locator_to_address(ACE_INET_Addr& dest,
     ) == -1) {
       return -1;
     }
-    dest.set_port_number(locator.port);
+    dest.set_port_number(static_cast<u_short>(locator.port));
     return 0;
   default:
     return -1;  // Unknown kind
   }
-
-  return -1;
 }
 
 OpenDDS_Dcps_Export

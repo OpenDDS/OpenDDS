@@ -222,6 +222,9 @@ public:
 
   bool update_domain_participant_qos(const DDS::DomainParticipantQos& qos);
 
+  bool enable_flexible_types(const GUID_t& remoteParticipantId, const char* typeKey);
+  DCPS::String find_flexible_types_key_i(const GUID_t& remoteEndpointId);
+
   bool has_domain_participant(const GUID_t& ignoreId) const;
 
   DCPS::TopicStatus assert_topic(GUID_t& topicId, const char* topicName,
@@ -259,7 +262,7 @@ public:
     const DDS::DataWriterQos& qos,
     const DCPS::TransportLocatorSeq& transInfo,
     const DDS::PublisherQos& publisherQos,
-    const XTypes::TypeInformation& type_info)
+    const DCPS::TypeInformation& type_info)
   {
     return endpoint_manager().add_publication(topicId, publication, qos, transInfo, publisherQos, type_info);
   }
@@ -298,7 +301,7 @@ public:
     const char* filterClassName,
     const char* filterExpr,
     const DDS::StringSeq& params,
-    const XTypes::TypeInformation& type_info)
+    const DCPS::TypeInformation& type_info)
   {
     return endpoint_manager().add_subscription(topicId,
                                                subscription,
@@ -391,6 +394,7 @@ private:
   const DCPS::TimeDuration lease_duration_;
   const DCPS::TimeDuration lease_extension_;
   const DCPS::TimeDuration max_lease_duration_;
+  const DCPS::TimeDuration minimum_cleanup_separation_;
   const u_short max_spdp_sequence_msg_reset_checks_;
   const bool check_source_ip_;
   const bool undirected_spdp_;
@@ -403,11 +407,15 @@ private:
 #endif
   XTypes::TypeLookupService_rch type_lookup_service_;
 
+  typedef OPENDDS_MAP_CMP(GUID_t, DCPS::String, GUID_tKeyLessThan) GuidToString;
+  GuidToString flexible_types_pre_discovery_;
+
   // Participant:
   const DDS::DomainId_t domain_;
   DCPS::GUID_t guid_;
   const DCPS::MonotonicTime_t participant_discovered_at_;
   bool is_application_participant_;
+  bool harvest_thread_status_;
   DDS::UInt16 ipv4_participant_port_id_;
 #ifdef ACE_HAS_IPV6
   DDS::UInt16 ipv6_participant_port_id_;
@@ -454,27 +462,44 @@ private:
     static const WriteFlags SEND_RELAY = (1 << 1);
     static const WriteFlags SEND_DIRECT = (1 << 2);
 
-    class RegisterHandlers : public DCPS::ReactorInterceptor::Command {
+    class RegisterHandlers : public DCPS::ReactorTask::Command {
     public:
-      RegisterHandlers(const DCPS::RcHandle<SpdpTransport>& tport,
-        const DCPS::ReactorTask_rch& reactor_task)
+      RegisterHandlers(const DCPS::RcHandle<SpdpTransport>& tport)
         : tport_(tport)
-        , reactor_task_(reactor_task)
       {
       }
 
-      void execute()
+      void execute(DCPS::ReactorWrapper& reactor_wrapper)
       {
         DCPS::RcHandle<SpdpTransport> tport = tport_.lock();
         if (!tport) {
           return;
         }
-        tport->register_handlers(reactor_task_);
+        tport->register_handlers(reactor_wrapper);
       }
 
     private:
       DCPS::WeakRcHandle<SpdpTransport> tport_;
-      DCPS::ReactorTask_rch reactor_task_;
+    };
+
+    // This is essentially PmfPeriodicTask<SpdpTransport>, but using that
+    // directly was causing warnings on MSVC x86.  There is only one member
+    // function that's used with a PeriodicTask.
+    struct PeriodicThreadStatus : DCPS::PeriodicTask {
+      PeriodicThreadStatus(DCPS::ReactorTask_rch reactor_task, const SpdpTransport& delegate)
+        : PeriodicTask(reactor_task)
+        , delegate_(delegate)
+      {}
+
+      void execute(const MonotonicTimePoint& now)
+      {
+        const DCPS::RcHandle<SpdpTransport> handle = delegate_.lock();
+        if (handle) {
+          handle->thread_status_task(now);
+        }
+      }
+
+      const DCPS::WeakRcHandle<SpdpTransport> delegate_;
     };
 
     explicit SpdpTransport(DCPS::RcHandle<Spdp> outer);
@@ -486,9 +511,10 @@ private:
 
     void open(const DCPS::ReactorTask_rch& reactor_task,
               const DCPS::JobQueue_rch& job_queue);
-    void register_unicast_socket(
-      ACE_Reactor* reactor, ACE_SOCK_Dgram& socket, const char* what);
-    void register_handlers(const DCPS::ReactorTask_rch& reactor_task);
+    void register_unicast_socket(DCPS::ReactorWrapper& reactor_wrapper,
+                                 ACE_SOCK_Dgram& socket,
+                                 const char* what);
+    void register_handlers(DCPS::ReactorWrapper& reactor_wrapper);
     void enable_periodic_tasks();
 
     void shorten_local_sender_delay_i();
@@ -540,7 +566,6 @@ private:
     DCPS::MulticastManager multicast_manager_;
     DCPS::NetworkAddressSet send_addrs_;
     ACE_Message_Block buff_, wbuff_;
-    typedef DCPS::PmfPeriodicTask<SpdpTransport> SpdpPeriodic;
     typedef DCPS::PmfSporadicTask<SpdpTransport> SpdpSporadic;
     typedef DCPS::PmfMultiTask<SpdpTransport> SpdpMulti;
     void send_local(const DCPS::MonotonicTimePoint& now);
@@ -551,7 +576,7 @@ private:
     void process_lease_expirations(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpSporadic> lease_expiration_task_;
     void thread_status_task(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpPeriodic> thread_status_task_;
+    DCPS::RcHandle<PeriodicThreadStatus> thread_status_task_;
     DCPS::RcHandle<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> > network_interface_address_reader_;
 #if OPENDDS_CONFIG_SECURITY
     void process_handshake_deadlines(const DCPS::MonotonicTimePoint& now);

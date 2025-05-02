@@ -80,8 +80,8 @@ DataWriterImpl::DataWriterImpl()
   , is_bit_(false)
   , min_suspended_transaction_id_(0)
   , max_suspended_transaction_id_(0)
-  , liveliness_send_task_(make_rch<DWISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &DataWriterImpl::liveliness_send_task))
-  , liveliness_lost_task_(make_rch<DWISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &DataWriterImpl::liveliness_lost_task))
+  , liveliness_send_task_(make_rch<DWISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &DataWriterImpl::liveliness_send_task))
+  , liveliness_lost_task_(make_rch<DWISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &DataWriterImpl::liveliness_lost_task))
   , liveliness_send_interval_(TimeDuration::max_value)
   , liveliness_lost_interval_(TimeDuration::max_value)
   , liveliness_lost_(false)
@@ -804,11 +804,10 @@ void DataWriterImpl::remove_all_associations()
     size = static_cast<CORBA::ULong>(readers_.size());
     readers.length(size);
 
-    RepoIdSet::iterator itEnd = readers_.end();
-    int i = 0;
-
-    for (RepoIdSet::iterator it = readers_.begin(); it != itEnd; ++it) {
-      readers[i ++] = *it;
+    const RepoIdSet::iterator itEnd = readers_.end();
+    DDS::UInt32 i = 0;
+    for (RepoIdSet::iterator it = readers_.begin(); it != itEnd; ++it, ++i) {
+      readers[i] = *it;
     }
   }
 
@@ -1274,12 +1273,11 @@ DataWriterImpl::get_matched_subscriptions(
                    DDS::RETCODE_ERROR);
 
   // Copy out the handles for the current set of subscriptions.
-  int index = 0;
   subscription_handles.length(
     static_cast<CORBA::ULong>(this->id_to_handle_map_.size()));
 
-  for (RepoIdToHandleMap::iterator
-       current = this->id_to_handle_map_.begin();
+  DDS::UInt32 index = 0;
+  for (RepoIdToHandleMap::iterator current = this->id_to_handle_map_.begin();
        current != this->id_to_handle_map_.end();
        ++current, ++index) {
     subscription_handles[index] = current->second;
@@ -1364,7 +1362,7 @@ DataWriterImpl::enable()
   CORBA::Long max_instances = 0, max_total_samples = 0;
 
   if (qos_.resource_limits.max_samples != DDS::LENGTH_UNLIMITED) {
-    n_chunks_ = qos_.resource_limits.max_samples;
+    n_chunks_ = static_cast<size_t>(qos_.resource_limits.max_samples);
 
     if (qos_.resource_limits.max_instances == DDS::LENGTH_UNLIMITED ||
         (qos_.resource_limits.max_samples < qos_.resource_limits.max_instances)
@@ -1493,7 +1491,7 @@ DataWriterImpl::enable()
   DDS::PublisherQos pub_qos;
   publisher->get_qos(pub_qos);
 
-  XTypes::TypeInformation type_info;
+  TypeInformation type_info;
   type_support_->to_type_info(type_info);
 
   XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
@@ -1971,6 +1969,11 @@ DataWriterImpl::write(Message_Block_Ptr data,
   return DDS::RETCODE_OK;
 }
 
+void DataWriterImpl::get_flexible_types(const char* key, XTypes::TypeInformation& type_info)
+{
+  type_support_->get_flexible_types(key, type_info);
+}
+
 void
 DataWriterImpl::track_sequence_number(GUIDSeq* filter_out)
 {
@@ -2125,7 +2128,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
                                        Message_Block_Ptr data,
                                        const DDS::Time_t& source_timestamp)
 {
-  header_data.message_id_ = message_id;
+  header_data.message_id_ = static_cast<char>(message_id);
   header_data.byte_order_ =
     this->swap_bytes() ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER;
   header_data.coherent_change_ = false;

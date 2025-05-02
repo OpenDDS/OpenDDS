@@ -254,6 +254,10 @@ The command-line options for the RtpsRelay:
 
   Enable/disable logging in the :ref:`meta discovery HTTP server <internet_enabled_rtps--metadisc-server>`.
 
+.. option:: -LogUtilizationChanges 0|1
+
+  Enable/disable logging of thread utilization changes that exceed a certain threshhold.
+
 .. option:: -LogRelayStatistics <seconds>
 
 .. option:: -LogHandlerStatistics <seconds>
@@ -293,6 +297,12 @@ The command-line options for the RtpsRelay:
   New client participants in the :option:`admission control queue <-AdmissionControlQueueSize>` that are taking longer than this many seconds to perform discovery are removed from the queue.
   Default is 0.
 
+.. option:: -AdmissionMaxParticipantsRange <low>-<high>
+
+  If this option is used, the relay's "admitting" state will be set to false when the number of active participants
+  reaches the <high> value.  After the number of active participants falls below the <low> value, this metric will
+  cease to cause the "admitting" state to be false, although it may remain false due to other controls.
+
 .. option:: -PublishRelayStatus <seconds>
 
   Setting this to a positive integer causes the relay to publish its status at that interval.
@@ -324,6 +334,14 @@ The command-line options for the RtpsRelay:
 
   Amount of time to reject messages from client participants that show suspicious behavior, e.g., those that send messages from the RtpsRelay back to the RtpsRelay.
   The default is 0 (disabled).
+
+.. option:: -HandlerThreads <threads>
+
+  Use a thread pool with this many threads (default 1) to handle input/output/timer events.
+
+.. option:: -SynchronousOutput 0|1
+
+  Send messages immediately, defaults to 0 (disabled).
 
 .. _internet_enabled_rtps--deployment-considerations:
 
@@ -443,7 +461,7 @@ Understand the Weaknesses of (Secure) RTPS Discovery
 ..
     Sect<15.4.2>
 
-Secure RTPS Discovery has a behavior that can be exploited to launch a denial of service attack (see https://www.cisa.gov/news-events/ics-advisories/icsa-21-315-02).
+Secure RTPS Discovery has a behavior that can be exploited to launch a denial of service attack (see CISA advisory icsa-21-315-02).
 Basically, an attacker can send a fake SPDP message to a secure participant which will cause it to begin authentication with a non-existent participant.
 The authentication messages are repeated resulting in amplification.
 An attacker could manipulate a group of secure participants to launch a denial of service attack against a specific host or group of hosts.

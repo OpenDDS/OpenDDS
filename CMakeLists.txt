@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23...3.27)
+cmake_minimum_required(VERSION 3.23...4.0)
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/opendds_version.cmake")
 project(opendds
   DESCRIPTION
@@ -158,6 +158,7 @@ set(OPENDDS_BUILD_EXAMPLES TRUE CACHE BOOL "Build OpenDDS Examples")
 if(OPENDDS_BUILD_EXAMPLES OR OPENDDS_BUILD_TESTS)
   enable_testing()
   add_subdirectory(DevGuideExamples/DCPS/Messenger)
+  add_subdirectory(examples)
 endif()
 if(OPENDDS_BUILD_TESTS)
   add_subdirectory(tests)

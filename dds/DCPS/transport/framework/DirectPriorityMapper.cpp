@@ -32,7 +32,7 @@ OpenDDS::DCPS::DirectPriorityMapper::codepoint() const
   // We know that the DiffServ codepoints range from a low number to a
   // high number, with the high number being a higher priority - which
   // is the ordering that the TRANSPORT_PRIORIY value has.
-  short value = std::min(dscp_max, std::max(dscp_min, this->priority()));
+  const short value = static_cast<short>(std::min(dscp_max, std::max(dscp_min, this->priority())));
 
   if (OpenDDS::DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
@@ -54,14 +54,14 @@ OpenDDS::DCPS::DirectPriorityMapper::thread_priority() const
   static const int direction  = (thread_max < thread_min)? -1: 1;
   static const int range      = direction * (thread_max - thread_min);
 
-  short value = thread_min + direction * this->priority();
+  short value = static_cast<short>(thread_min + direction * this->priority());
 
   if (this->priority() < 0) {
-    value = thread_min;
+    value = static_cast<short>(thread_min);
   }
 
   if (this->priority() > range) {
-    value = thread_max;
+    value = static_cast<short>(thread_max);
   }
 
   if (OpenDDS::DCPS::DCPS_debug_level > 4) {

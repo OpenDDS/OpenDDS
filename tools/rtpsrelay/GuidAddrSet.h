@@ -15,18 +15,18 @@
 namespace RtpsRelay {
 
 struct PortSet {
-  std::map<u_short, OpenDDS::DCPS::MonotonicTimePoint> spdp_ports, sedp_ports, data_ports;
+  using PortToExpirationMap = std::map<u_short, OpenDDS::DCPS::MonotonicTimePoint>;
+  PortToExpirationMap spdp_ports, sedp_ports, data_ports;
   bool empty() const { return spdp_ports.empty() && sedp_ports.empty() && data_ports.empty(); }
+  PortToExpirationMap* select(Port p);
+  const PortToExpirationMap* select(Port p) const;
 };
 
 struct InetAddrHash {
-  std::size_t operator()(const ACE_INET_Addr& addr) const noexcept
-  {
-    return addr.hash();
-  }
+  std::size_t operator()(const ACE_INET_Addr& addr) const noexcept { return addr.hash(); }
 };
 
-typedef std::unordered_map<ACE_INET_Addr, PortSet, InetAddrHash> IpToPorts;
+using IpToPorts = std::unordered_map<ACE_INET_Addr, PortSet, InetAddrHash>;
 
 struct AddrSetStats {
   bool allow_rtps;
@@ -39,75 +39,35 @@ struct AddrSetStats {
   OpenDDS::DCPS::MonotonicTimePoint deactivation;
   RelayStatisticsReporter& relay_stats_reporter_;
   std::string common_name;
+  size_t& total_ips;
+  size_t& total_ports;
 
   AddrSetStats(const OpenDDS::DCPS::GUID_t& guid,
                const OpenDDS::DCPS::MonotonicTimePoint& a_session_start,
-               RelayStatisticsReporter& relay_stats_reporter)
+               RelayStatisticsReporter& relay_stats_reporter,
+               size_t& a_total_ips,
+               size_t& a_total_ports)
     : allow_rtps(false)
     , spdp_stats_reporter(rtps_guid_to_relay_guid(guid), "SPDP")
     , sedp_stats_reporter(rtps_guid_to_relay_guid(guid), "SEDP")
     , data_stats_reporter(rtps_guid_to_relay_guid(guid), "DATA")
     , session_start(a_session_start)
     , relay_stats_reporter_(relay_stats_reporter)
+    , total_ips(a_total_ips)
+    , total_ports(a_total_ports)
   {}
 
   bool upsert_address(const AddrPort& remote_address,
                       const OpenDDS::DCPS::MonotonicTimePoint& now,
                       const OpenDDS::DCPS::MonotonicTimePoint& expiration,
-                      size_t max_ip_addresses)
-  {
-    ACE_INET_Addr addr_only(remote_address.addr);
-    addr_only.set_port_number(0);
-    auto iter = ip_to_ports.find(addr_only);
-    if (iter == ip_to_ports.end()) {
-      if (max_ip_addresses > 0 && ip_to_ports.size() == max_ip_addresses) {
-        return false;
-      }
-      iter = ip_to_ports.insert(std::make_pair(addr_only, PortSet())).first;
-    }
-
-    relay_stats_reporter_.max_ips_per_client(static_cast<uint32_t>(ip_to_ports.size()), now);
-
-    std::map<u_short, OpenDDS::DCPS::MonotonicTimePoint>* port_map = nullptr;
-    switch (remote_address.port) {
-    case SPDP:
-      port_map = &iter->second.spdp_ports;
-      break;
-    case SEDP:
-      port_map = &iter->second.sedp_ports;
-      break;
-    case DATA:
-      port_map = &iter->second.data_ports;
-      break;
-    }
-    if (!port_map) {
-      return false;
-    }
-    const auto pair = port_map->insert(std::make_pair(remote_address.addr.get_port_number(), expiration));
-    if (pair.second) {
-      return true;
-    }
-    pair.first->second = expiration;
-    return false;
-  }
+                      size_t max_ip_addresses);
 
   template <typename Function>
   void foreach_addr(Port port, const Function& func) const
   {
     for (const auto& ip : ip_to_ports) {
       ACE_INET_Addr a = ip.first;
-      const std::map<u_short, OpenDDS::DCPS::MonotonicTimePoint>* port_map = nullptr;
-      switch (port) {
-      case SPDP:
-        port_map = &ip.second.spdp_ports;
-        break;
-      case SEDP:
-        port_map = &ip.second.sedp_ports;
-        break;
-      case DATA:
-        port_map = &ip.second.data_ports;
-        break;
-      }
+      const auto port_map = ip.second.select(port);
       if (port_map) {
         for (const auto& p : *port_map) {
           a.set_port_number(p.first);
@@ -118,48 +78,7 @@ struct AddrSetStats {
   }
 
   bool remove_if_expired(const AddrPort& remote_address, const OpenDDS::DCPS::MonotonicTimePoint& now,
-                         bool& ip_now_unused, OpenDDS::DCPS::MonotonicTimePoint& updated_expiration)
-  {
-    ACE_INET_Addr addr_only(remote_address.addr);
-    addr_only.set_port_number(0);
-    const auto iter = ip_to_ports.find(addr_only);
-    if (iter == ip_to_ports.end()) {
-      return false;
-    }
-
-    std::map<u_short, OpenDDS::DCPS::MonotonicTimePoint>* port_map = nullptr;
-    switch (remote_address.port) {
-    case SPDP:
-      port_map = &iter->second.spdp_ports;
-      break;
-    case SEDP:
-      port_map = &iter->second.sedp_ports;
-      break;
-    case DATA:
-      port_map = &iter->second.data_ports;
-      break;
-    }
-
-    if (!port_map) {
-      return false;
-    }
-
-    const auto port_iter = port_map->find(remote_address.addr.get_port_number());
-    if (port_iter == port_map->end()) {
-      return false;
-    }
-
-    if (port_iter->second <= now) {
-      port_map->erase(port_iter);
-      if (iter->second.empty()) {
-        ip_to_ports.erase(addr_only);
-        ip_now_unused = true;
-      }
-      return true;
-    }
-    updated_expiration = port_iter->second;
-    return false;
-  }
+                         bool& ip_now_unused, OpenDDS::DCPS::MonotonicTimePoint& updated_expiration);
 
   bool has_discovery_addrs() const
   {
@@ -186,7 +105,7 @@ struct AddrSetStats {
       return &data_stats_reporter;
     }
 
-    return 0;
+    return nullptr;
   }
 
   OpenDDS::DCPS::TimeDuration get_session_time(const OpenDDS::DCPS::MonotonicTimePoint& now) const
@@ -217,7 +136,7 @@ struct Remote {
 };
 
 struct RemoteHash {
-  size_t operator() (const Remote& remote) const
+  size_t operator()(const Remote& remote) const
   {
     return remote.addr_.hash() ^
       ((static_cast<size_t>(remote.guid_prefix_prefix_[0]) << 0) |
@@ -234,7 +153,7 @@ class RelayParticipantStatusReporter;
 
 class GuidAddrSet {
 public:
-  typedef std::unordered_map<OpenDDS::DCPS::GUID_t, AddrSetStats, GuidHash> GuidAddrSetMap;
+  using GuidAddrSetMap = std::unordered_map<OpenDDS::DCPS::GUID_t, AddrSetStats, GuidHash>;
 
   GuidAddrSet(const Config& config,
               OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery,
@@ -246,28 +165,10 @@ public:
     , relay_participant_status_reporter_(relay_participant_status_reporter)
     , relay_stats_reporter_(relay_stats_reporter)
     , relay_thread_monitor_(relay_thread_monitor)
-    , spdp_vertical_handler_(0)
-    , sedp_vertical_handler_(0)
-    , data_vertical_handler_(0)
+    , total_ips_(0)
+    , total_ports_(0)
+    , participant_admission_limit_reached_(false)
   {}
-
-  void spdp_vertical_handler(RelayHandler* spdp_vertical_handler)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    spdp_vertical_handler_ = spdp_vertical_handler;
-  }
-
-  void sedp_vertical_handler(RelayHandler* sedp_vertical_handler)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    sedp_vertical_handler_ = sedp_vertical_handler;
-  }
-
-  void data_vertical_handler(RelayHandler* data_vertical_handler)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    data_vertical_handler_ = data_vertical_handler;
-  }
 
   using CreatedAddrSetStats = std::pair<bool, AddrSetStats&>;
 
@@ -361,6 +262,11 @@ public:
       gas_.process_expirations(now);
     }
 
+    void maintain_admission_queue(const OpenDDS::DCPS::MonotonicTimePoint& now)
+    {
+      gas_.maintain_admission_queue(now);
+    }
+
     bool admitting() const
     {
       return gas_.admitting();
@@ -377,17 +283,7 @@ public:
 
 private:
   CreatedAddrSetStats find_or_create(const OpenDDS::DCPS::GUID_t& guid,
-                                     const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    auto it = guid_addr_set_map_.find(guid);
-    const bool create = it == guid_addr_set_map_.end();
-    if (create) {
-      const auto it_bool_pair =
-        guid_addr_set_map_.insert(std::make_pair(guid, AddrSetStats(guid, now, relay_stats_reporter_)));
-      it = it_bool_pair.first;
-    }
-    return CreatedAddrSetStats(create, it->second);
-  }
+                                     const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   ParticipantStatisticsReporter&
   record_activity(const AddrPort& remote_address,
@@ -399,11 +295,13 @@ private:
 
   void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now);
 
+  void maintain_admission_queue(const OpenDDS::DCPS::MonotonicTimePoint& now);
+
   bool admitting() const
   {
     const size_t limit = config_.admission_control_queue_size();
     const bool limit_okay = !limit || admission_control_queue_.size() < limit;
-    return limit_okay && relay_thread_monitor_.threads_okay();
+    return !participant_admission_limit_reached_ && limit_okay && relay_thread_monitor_.threads_okay();
   }
 
   bool ignore_rtps(bool from_application_participant,
@@ -429,8 +327,9 @@ private:
       it->second.get_session_time(now);
   }
 
-  struct AdmissionControlInfo
-  {
+  void check_participants_limit();
+
+  struct AdmissionControlInfo {
     AdmissionControlInfo(const OpenDDS::DCPS::GuidPrefix_t& prefix, const OpenDDS::DCPS::MonotonicTimePoint& admitted)
      : admitted_(admitted)
     {
@@ -439,29 +338,36 @@ private:
     OpenDDS::DCPS::GuidPrefix_t prefix_;
     OpenDDS::DCPS::MonotonicTimePoint admitted_;
   };
-  typedef std::deque<AdmissionControlInfo> AdmissionControlQueue;
 
   const Config& config_;
   OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery_;
   RelayParticipantStatusReporter& relay_participant_status_reporter_;
   RelayStatisticsReporter& relay_stats_reporter_;
   RelayThreadMonitor& relay_thread_monitor_;
-  RelayHandler* spdp_vertical_handler_;
-  RelayHandler* sedp_vertical_handler_;
-  RelayHandler* data_vertical_handler_;
   GuidAddrSetMap guid_addr_set_map_;
-  typedef std::unordered_map<Remote, OpenDDS::DCPS::GUID_t, RemoteHash> RemoteMap;
+  size_t total_ips_;
+  size_t total_ports_;
+
+  using RemoteMap = std::unordered_map<Remote, OpenDDS::DCPS::GUID_t, RemoteHash>;
   RemoteMap remote_map_;
-  typedef std::list<std::pair<OpenDDS::DCPS::MonotonicTimePoint, OpenDDS::DCPS::GUID_t> > DeactivationGuidQueue;
+
+  using DeactivationGuidQueue = std::list<std::pair<OpenDDS::DCPS::MonotonicTimePoint, OpenDDS::DCPS::GUID_t>>;
   DeactivationGuidQueue deactivation_guid_queue_;
-  typedef std::list<std::pair<OpenDDS::DCPS::MonotonicTimePoint, GuidAddr> > ExpirationGuidAddrQueue;
+
+  using ExpirationGuidAddrQueue = std::list<std::pair<OpenDDS::DCPS::MonotonicTimePoint, GuidAddr>>;
   ExpirationGuidAddrQueue expiration_guid_addr_queue_;
+
+  using AdmissionControlQueue = std::deque<AdmissionControlInfo>;
   AdmissionControlQueue admission_control_queue_;
-  typedef std::unordered_map<OpenDDS::DCPS::NetworkAddress, OpenDDS::DCPS::MonotonicTimePoint> RejectedAddressMapType;
+
+  using RejectedAddressMapType = std::unordered_map<OpenDDS::DCPS::NetworkAddress, OpenDDS::DCPS::MonotonicTimePoint>;
   RejectedAddressMapType rejected_address_map_;
-  typedef std::list<RejectedAddressMapType::iterator> RejectedAddressExpirationQueue;
+
+  using RejectedAddressExpirationQueue = std::list<RejectedAddressMapType::iterator>;
   RejectedAddressExpirationQueue rejected_address_expiration_queue_;
+
   mutable ACE_Thread_Mutex mutex_;
+  bool participant_admission_limit_reached_;
 };
 
 }

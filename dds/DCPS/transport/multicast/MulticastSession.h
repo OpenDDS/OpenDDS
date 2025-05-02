@@ -31,8 +31,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Multicast_Export MulticastSession
-  : public virtual RcObject {
+class OpenDDS_Multicast_Export MulticastSession : public RcObject {
 public:
   virtual ~MulticastSession();
 
@@ -81,7 +80,7 @@ protected:
 
   MulticastPeer remote_peer_;
 
-  MulticastSession(RcHandle<ReactorInterceptor> interceptor,
+  MulticastSession(RcHandle<ReactorTask> reactor_task,
                    MulticastDataLink* link,
                    MulticastPeer remote_peer);
 

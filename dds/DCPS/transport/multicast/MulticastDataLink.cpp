@@ -103,7 +103,7 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
         false);
   }
 
-  int rcv_buffer_size = ACE_Utils::truncate_cast<int>(cfg->rcv_buffer_size());
+  int rcv_buffer_size = static_cast<int>(cfg->rcv_buffer_size());
   if (rcv_buffer_size != 0
       && ACE_OS::setsockopt(handle, SOL_SOCKET,
           SO_RCVBUF,
@@ -178,7 +178,7 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
   MulticastSession_rch session;
   MulticastTransport_rch mt = transport();
   if (mt) {
-    session = session_factory_->create(mt->reactor_task()->interceptor(), this, remote_peer);
+    session = session_factory_->create(mt->reactor_task(), this, remote_peer);
     if (session.is_nil()) {
       ACE_ERROR_RETURN((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: ")

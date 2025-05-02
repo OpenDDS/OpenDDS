@@ -70,7 +70,7 @@ to_long(const AST_Expression::AST_ExprValue& ev)
   case AST_Expression::EV_long:
     return ev.u.lval;
   case AST_Expression::EV_ulong:
-    return ev.u.ulval;
+    return static_cast<ACE_CDR::Long>(ev.u.ulval);
   case AST_Expression::EV_wchar:
     return ev.u.wcval;
   case AST_Expression::EV_char:
@@ -78,7 +78,7 @@ to_long(const AST_Expression::AST_ExprValue& ev)
   case AST_Expression::EV_bool:
     return ev.u.bval;
   case AST_Expression::EV_enum:
-    return ev.u.eval;
+    return static_cast<ACE_CDR::Long>(ev.u.eval);
   default:
     // Spec issue DDSXTY14-36 (64-bit integers as case labels in TypeObject)
     be_util::misc_error_and_abort("Illegal conversion to long");
@@ -526,7 +526,7 @@ operator<<(std::ostream& out, const OpenDDS::XTypes::TypeIdentifier& ti)
   return out;
 }
 
-void dump_bytes(const OpenDDS::XTypes::TypeObject& to)
+void dump_bytes(const OpenDDS::XTypes::TypeObject& to, std::ostream& stream = be_global->impl_)
 {
   ACE_Message_Block buffer(OpenDDS::DCPS::serialized_size(OpenDDS::XTypes::get_typeobject_encoding(), to));
   OpenDDS::DCPS::Serializer ser(&buffer, OpenDDS::XTypes::get_typeobject_encoding());
@@ -536,9 +536,45 @@ void dump_bytes(const OpenDDS::XTypes::TypeObject& to)
 
   for (const char* ptr = buffer.rd_ptr(); ptr != buffer.wr_ptr(); ++ptr) {
     if (ptr != buffer.rd_ptr()) {
-      be_global->impl_ << ", ";
+      stream << ", ";
     }
-    be_global->impl_ << int(*reinterpret_cast<const unsigned char*>(ptr));
+    stream << int(*reinterpret_cast<const unsigned char*>(ptr));
+  }
+}
+
+std::string get_type_name(const OpenDDS::XTypes::CompleteTypeObject& cto)
+{
+  switch (cto.kind) {
+  case OpenDDS::XTypes::TK_ALIAS:
+    return cto.alias_type.header.detail.type_name;
+  case OpenDDS::XTypes::TK_ANNOTATION:
+    return cto.annotation_type.header.annotation_name;
+  case OpenDDS::XTypes::TK_STRUCTURE:
+    return cto.struct_type.header.detail.type_name;
+  case OpenDDS::XTypes::TK_UNION:
+    return cto.union_type.header.detail.type_name;
+  case OpenDDS::XTypes::TK_BITSET:
+    return cto.bitset_type.header.detail.type_name;
+  case OpenDDS::XTypes::TK_SEQUENCE:
+    {
+      const OPENDDS_OPTIONAL_NS::optional<OpenDDS::XTypes::CompleteTypeDetail>& detail =
+        cto.sequence_type.header.detail;
+      return detail.has_value() ? detail->type_name : "anonymous sequence";
+    }
+  case OpenDDS::XTypes::TK_ARRAY:
+    return cto.array_type.header.detail.type_name;
+  case OpenDDS::XTypes::TK_MAP:
+    {
+      const OPENDDS_OPTIONAL_NS::optional<OpenDDS::XTypes::CompleteTypeDetail>& detail =
+        cto.map_type.header.detail;
+      return detail.has_value() ? detail->type_name : "anonymous map";
+    }
+  case OpenDDS::XTypes::TK_ENUM:
+    return cto.enumerated_type.header.detail.type_name;
+  case OpenDDS::XTypes::TK_BITMASK:
+    return cto.bitmask_type.header.detail.type_name;
+  default:
+    return "unknown type";
   }
 }
 
@@ -570,24 +606,17 @@ typeobject_generator::use_old_typeobject_encoding()
 }
 
 void
-typeobject_generator::gen_epilogue()
+typeobject_generator::gen_epilogue_type_map(const std::string& label,
+  const OpenDDS::XTypes::TypeMap& type_map,
+  const std::string& file)
 {
-  be_global->add_include("dds/DCPS/Service_Participant.h");
-
-  if (!produce_output_ || !get_type_map_declared_) {
-    return;
-  }
-
-  NamespaceGuard ng;
-
-  be_global->impl_ <<
-    "namespace {\n";
-
+  std::ostream* const stream = be_global->typeobject_stream();
   size_t idx = 0;
-  for (OpenDDS::XTypes::TypeMap::const_iterator pos = minimal_type_map_.begin();
-       pos != minimal_type_map_.end(); ++pos, ++idx) {
+  std::vector<std::string> names;
+  for (OpenDDS::XTypes::TypeMap::const_iterator pos = type_map.begin();
+       pos != type_map.end(); ++pos, ++idx) {
     be_global->impl_ <<
-      "XTypes::TypeObject OPENDDS_IDL_FILE_SPECIFIC(minimal_to, " << idx << ")()\n"
+      "XTypes::TypeObject OPENDDS_IDL_FILE_SPECIFIC(" << label << "_to, " << idx << ")()\n"
       "{\n"
       "  static const unsigned char to_bytes[] = { ";
     dump_bytes(pos->second);
@@ -596,62 +625,77 @@ typeobject_generator::gen_epilogue()
       "  };\n"
       "  XTypes::TypeObject to;\n"
       "  if (!to_type_object(to_bytes, sizeof(to_bytes), to)) {\n"
-      "    throw std::runtime_error(\"Could not deserialize minimal Type Object " << idx << "\");\n"
+      "    throw std::runtime_error(\"Could not deserialize " << label << " Type Object " << idx << "\");\n"
       "  }\n"
       "  return to;\n"
       "}\n\n";
+    if (stream) {
+      const std::map<OpenDDS::XTypes::TypeIdentifier, std::string>::const_iterator iter = type_identifier_index_.find(pos->first);
+      const std::string name = (iter == type_identifier_index_.end())
+        ? (file + OpenDDS::DCPS::to_dds_string(idx))
+        : iter->second;
+      names.push_back(name);
+      *stream << "const unsigned char to_" << label << "_bytes_" << name << "[] = {";
+      dump_bytes(pos->second, *stream);
+      *stream << "};\n";
+    }
+  }
+  if (stream) {
+    *stream << "const Span all_" << label << "_type_objects_" << file << "[] = {";
+    for (size_t i = 0; i < names.size(); ++i) {
+      *stream << "{to_" << label << "_bytes_" << names[i] << ", "
+        "sizeof to_" << label << "_bytes_" << names[i] << "}, ";
+    }
+    *stream << "{0, 0}};\n";
   }
 
   be_global->impl_ <<
-    "XTypes::TypeMap OPENDDS_IDL_FILE_SPECIFIC(get_minimal_type_map_private, 0)()\n"
+    "XTypes::TypeMap OPENDDS_IDL_FILE_SPECIFIC(get_" << label << "_type_map_private, 0)()\n"
     "{\n"
     "  XTypes::TypeMap tm;\n";
 
   idx = 0;
-  for (OpenDDS::XTypes::TypeMap::const_iterator pos = minimal_type_map_.begin();
-       pos != minimal_type_map_.end(); ++pos, ++idx) {
-    be_global->impl_ << "  tm[" << pos->first << "] = OPENDDS_IDL_FILE_SPECIFIC(minimal_to, " << idx << ")();\n";
+  for (OpenDDS::XTypes::TypeMap::const_iterator pos = type_map.begin();
+       pos != type_map.end(); ++pos, ++idx) {
+    const std::string comment = (pos->second.kind == OpenDDS::XTypes::EK_COMPLETE) ?
+      " // " + get_type_name(pos->second.complete) : "";
+    be_global->impl_ <<
+      "  tm[" << pos->first << "] = OPENDDS_IDL_FILE_SPECIFIC(" << label << "_to, " << idx << ")();"
+      << comment << '\n';
   }
 
   be_global->impl_ <<
     "  return tm;\n"
     "}\n\n";
+}
+
+void
+typeobject_generator::gen_epilogue()
+{
+  be_global->add_include("dds/DCPS/Service_Participant.h");
+
+  if (!produce_output_ || !get_type_map_declared_) {
+    return;
+  }
+
+  std::ostream* const stream = be_global->typeobject_stream();
+  std::string file = idl_global->filename()->get_string();
+  file.resize(file.find('.'));
+  if (stream && stream->tellp() == 0) {
+    *stream << "#include <cstddef>\nstruct Span { const unsigned char* bytes_; std::size_t size_; };\n";
+  }
+
+  NamespaceGuard ng;
+
+  be_global->impl_ <<
+    "namespace {\n";
+
+  gen_epilogue_type_map("minimal", minimal_type_map_, file);
 
   if (produce_xtypes_complete_) {
-    idx = 0;
-    for (OpenDDS::XTypes::TypeMap::const_iterator pos = complete_type_map_.begin();
-         pos != complete_type_map_.end(); ++pos, ++idx) {
-      be_global->impl_ <<
-        "XTypes::TypeObject OPENDDS_IDL_FILE_SPECIFIC(complete_to, " << idx << ")()\n"
-        "{\n"
-        "  const unsigned char to_bytes[] = {\n";
-      dump_bytes(pos->second);
-      be_global->add_include("<stdexcept>", BE_GlobalData::STREAM_CPP);
-      be_global->impl_ <<
-        "  };\n"
-        "  XTypes::TypeObject to;\n"
-        "  if (!to_type_object(to_bytes, sizeof(to_bytes), to)) {\n"
-        "    throw std::runtime_error(\"Could not deserialize complete Type Object " << idx << "\");\n"
-        "  }\n"
-        "  return to;\n"
-        "}\n\n";
-    }
-
-    be_global->impl_ <<
-      "XTypes::TypeMap OPENDDS_IDL_FILE_SPECIFIC(get_complete_type_map_private, 0)()\n"
-      "{\n"
-      "  XTypes::TypeMap tm;\n";
-
-    idx = 0;
-    for (OpenDDS::XTypes::TypeMap::const_iterator pos = complete_type_map_.begin();
-         pos != complete_type_map_.end(); ++pos, ++idx) {
-      be_global->impl_ << "  tm[" << pos->first << "] = OPENDDS_IDL_FILE_SPECIFIC(complete_to, " << idx << ")();\n";
-    }
-
-    be_global->impl_ <<
-      "  return tm;\n"
-      "}\n";
+    gen_epilogue_type_map("complete", complete_type_map_, file);
   }
+
   be_global->impl_ << "}\n\n";
 
   const std::string common = "{\n"
@@ -1695,8 +1739,7 @@ typeobject_generator::get_minimal_type_identifier(AST_Type* type)
   }
 
   HashTypeIdentifierMap::const_iterator pos = hash_type_identifier_map_.find(type);
-  OPENDDS_ASSERT(pos != hash_type_identifier_map_.end());
-  return pos->second.minimal;
+  return pos == hash_type_identifier_map_.end() ? OpenDDS::XTypes::TypeIdentifier() : pos->second.minimal;
 }
 
 // Get complete or fully descriptive type identifier
@@ -1723,8 +1766,7 @@ typeobject_generator::get_complete_type_identifier(AST_Type* type)
   }
 
   HashTypeIdentifierMap::const_iterator pos = hash_type_identifier_map_.find(type);
-  OPENDDS_ASSERT(pos != hash_type_identifier_map_.end());
-  return pos->second.complete;
+  return pos == hash_type_identifier_map_.end() ? OpenDDS::XTypes::TypeIdentifier() : pos->second.complete;
 }
 
 bool
@@ -1754,6 +1796,7 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
       "    ti = " << ti << ";\n"
       "  }\n"
       "  return ti;\n";
+      type_identifier_index_[ti] = clazz;
   }
 
   declare_get_type_map();
@@ -1777,6 +1820,7 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
           "    ti = " << ti << ";\n"
           "  }\n"
           "  return ti;\n";
+        type_identifier_index_[ti] = clazz;
       } else {
         be_global->impl_ <<
           "  static XTypes::TypeIdentifier ti;\n"

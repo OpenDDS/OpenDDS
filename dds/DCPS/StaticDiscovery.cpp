@@ -94,7 +94,7 @@ StaticEndpointManager::StaticEndpointManager(const GUID_t& participant_id,
 #ifdef DDS_HAS_MINIMUM_BIT
   ACE_UNUSED_ARG(participant);
 #endif
-  type_lookup_init(TheServiceParticipant->interceptor());
+  type_lookup_init(TheServiceParticipant->reactor_task());
 }
 
 StaticEndpointManager::~StaticEndpointManager()
@@ -347,10 +347,10 @@ StaticEndpointManager::add_publication_i(const GUID_t& writerid,
   }
   const EndpointRegistry::Writer& writer = pos->second;
 
-  for (RepoIdSet::const_iterator pos = writer.best_effort_readers.begin(), limit = writer.best_effort_readers.end();
-       pos != limit;
-       ++pos) {
-    const GUID_t& readerid = *pos;
+  for (RepoIdSet::const_iterator iter = writer.best_effort_readers.begin(), limit = writer.best_effort_readers.end();
+       iter != limit;
+       ++iter) {
+    const GUID_t& readerid = *iter;
     const EndpointRegistry::Reader& reader = registry_.reader_map.find(readerid)->second;
 
     const ReaderAssociation ra =
@@ -361,10 +361,10 @@ StaticEndpointManager::add_publication_i(const GUID_t& writerid,
     }
   }
 
-  for (RepoIdSet::const_iterator pos = writer.reliable_readers.begin(), limit = writer.reliable_readers.end();
-       pos != limit;
-       ++pos) {
-    const GUID_t& readerid = *pos;
+  for (RepoIdSet::const_iterator iter = writer.reliable_readers.begin(), limit = writer.reliable_readers.end();
+       iter != limit;
+       ++iter) {
+    const GUID_t& readerid = *iter;
     const EndpointRegistry::Reader& reader = registry_.reader_map.find(readerid)->second;
     DataWriterCallbacks_rch pl = pub.publication_.lock();
     if (pl) {
@@ -388,10 +388,10 @@ StaticEndpointManager::remove_publication_i(const GUID_t& writerid, LocalPublica
   ReaderIdSeq ids;
   ids.length((CORBA::ULong)writer.reliable_readers.size());
   CORBA::ULong idx = 0;
-  for (RepoIdSet::const_iterator pos = writer.reliable_readers.begin(), limit = writer.reliable_readers.end();
-        pos != limit;
-        ++pos, ++idx) {
-    const GUID_t& readerid = *pos;
+  for (RepoIdSet::const_iterator iter = writer.reliable_readers.begin(), limit = writer.reliable_readers.end();
+       iter != limit;
+       ++iter, ++idx) {
+    const GUID_t& readerid = *iter;
     ids[idx] = readerid;
     DataWriterCallbacks_rch pl = pub.publication_.lock();
     if (pl) {
@@ -417,10 +417,10 @@ StaticEndpointManager::add_subscription_i(const GUID_t& readerid,
   }
   const EndpointRegistry::Reader& reader = pos->second;
 
-  for (RepoIdSet::const_iterator pos = reader.best_effort_writers.begin(), limit = reader.best_effort_writers.end();
-       pos != limit;
-       ++pos) {
-    const GUID_t& writerid = *pos;
+  for (RepoIdSet::const_iterator iter = reader.best_effort_writers.begin(), limit = reader.best_effort_writers.end();
+       iter != limit;
+       ++iter) {
+    const GUID_t& writerid = *iter;
     const EndpointRegistry::Writer& writer = registry_.writer_map.find(writerid)->second;
 
     DDS::OctetSeq type_info;
@@ -433,10 +433,10 @@ StaticEndpointManager::add_subscription_i(const GUID_t& readerid,
     }
   }
 
-  for (RepoIdSet::const_iterator pos = reader.reliable_writers.begin(), limit = reader.reliable_writers.end();
-       pos != limit;
-       ++pos) {
-    const GUID_t& writerid = *pos;
+  for (RepoIdSet::const_iterator iter = reader.reliable_writers.begin(), limit = reader.reliable_writers.end();
+       iter != limit;
+       ++iter) {
+    const GUID_t& writerid = *iter;
     const EndpointRegistry::Writer& writer = registry_.writer_map.find(writerid)->second;
     DataReaderCallbacks_rch sl = sub.subscription_.lock();
     if (sl) {
@@ -460,10 +460,10 @@ DDS::ReturnCode_t StaticEndpointManager::remove_subscription_i(
   WriterIdSeq ids;
   ids.length((CORBA::ULong)reader.reliable_writers.size());
   CORBA::ULong idx = 0;
-  for (RepoIdSet::const_iterator pos = reader.reliable_writers.begin(), limit = reader.reliable_writers.end();
-        pos != limit;
-        ++pos, ++idx) {
-    const GUID_t& writerid = *pos;
+  for (RepoIdSet::const_iterator iter = reader.reliable_writers.begin(), limit = reader.reliable_writers.end();
+       iter != limit;
+       ++iter, ++idx) {
+    const GUID_t& writerid = *iter;
     ids[idx] = writerid;
     DataReaderCallbacks_rch sl = sub.subscription_.lock();
     if (sl) {
@@ -610,11 +610,11 @@ StaticEndpointManager::sub_bit()
 }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-void StaticEndpointManager::type_lookup_init(ReactorInterceptor_rch reactor_interceptor)
+void StaticEndpointManager::type_lookup_init(ReactorTask_rch reactor_task)
 {
   if (!type_lookup_reply_deadline_processor_) {
     type_lookup_reply_deadline_processor_ =
-      DCPS::make_rch<StaticEndpointManagerSporadic>(TheServiceParticipant->time_source(), reactor_interceptor,
+      DCPS::make_rch<StaticEndpointManagerSporadic>(TheServiceParticipant->time_source(), reactor_task,
                                                     rchandle_from(this), &StaticEndpointManager::remove_expired_endpoints);
   }
 }
@@ -1543,7 +1543,8 @@ namespace {
   unsigned char
   fromhex(const OPENDDS_STRING& x, size_t idx)
   {
-    return (hextobyte(x[idx * 2]) << 4) | (hextobyte(x[idx * 2 + 1]));
+    return (hextobyte(static_cast<unsigned char>(x[idx * 2])) << 4)
+      | hextobyte(static_cast<unsigned char>(x[idx * 2 + 1]));
   }
 }
 
@@ -1571,7 +1572,7 @@ EndpointRegistry::build_id(DDS::DomainId_t domain,
   // id.guidPrefix[3] = domain[1]
   // id.guidPrefix[4] = domain[2]
   // id.guidPrefix[5] = domain[3]
-  DDS::DomainId_t netdom = ACE_HTONL(domain);
+  DDS::DomainId_t netdom = static_cast<DDS::DomainId_t>(ACE_HTONL(static_cast<DDS::UInt32>(domain)));
   ACE_OS::memcpy(&id.guidPrefix[2], &netdom, sizeof(DDS::DomainId_t));
   // id.guidPrefix[6] = participant[0]
   // id.guidPrefix[7] = participant[1]
@@ -2032,9 +2033,9 @@ StaticDiscovery::parse_endpoints()
   const ConfigStoreImpl::StringList sections = config_store->get_section_names("ENDPOINT");
 
   // Loop through the [endpoint/*] sections
-  for (ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
-       pos != limit; ++pos) {
-    const String& endpoint_name = *pos;
+  for (ConfigStoreImpl::StringList::const_iterator iter = sections.begin(), limit = sections.end();
+       iter != limit; ++iter) {
+    const String& endpoint_name = *iter;
 
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_NOTICE,
@@ -2555,9 +2556,9 @@ bool StaticDiscovery::add_publication(
   const DDS::DataWriterQos& qos,
   const DCPS::TransportLocatorSeq& transInfo,
   const DDS::PublisherQos& publisherQos,
-  const XTypes::TypeInformation& type_info)
+  const TypeInformation& type_info)
 {
-  return get_part(domainId, participantId)->add_publication(topicId, publication, qos, transInfo, publisherQos, type_info);
+  return get_part(domainId, participantId)->add_publication(topicId, publication, qos, transInfo, publisherQos, type_info.xtypes_type_info_);
 }
 
 bool StaticDiscovery::remove_publication(
@@ -2603,7 +2604,7 @@ bool StaticDiscovery::add_subscription(
   const char* filterClassName,
   const char* filterExpr,
   const DDS::StringSeq& params,
-  const XTypes::TypeInformation& type_info)
+  const TypeInformation& type_info)
 {
   return get_part(domainId, participantId)->add_subscription(topicId,
                                                              subscription,
@@ -2613,7 +2614,7 @@ bool StaticDiscovery::add_subscription(
                                                              filterClassName,
                                                              filterExpr,
                                                              params,
-                                                             type_info);
+                                                             type_info.xtypes_type_info_);
 }
 
 bool StaticDiscovery::remove_subscription(

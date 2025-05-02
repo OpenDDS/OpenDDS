@@ -114,7 +114,7 @@ DisjointSequence::insert(SequenceNumber value, ACE_CDR::ULong num_bits,
       }
     }
 
-    if (x & (1 << (31 - bit))) {
+    if (x & (1u << (31 - bit))) {
       if (!range_start_is_valid) {
         range_start = val + i;
         range_start_is_valid = true;
@@ -142,7 +142,7 @@ DisjointSequence::insert(SequenceNumber value, ACE_CDR::ULong num_bits,
 
   if (range_start_is_valid) {
     // iteration finished before we saw a "0" (inside a range)
-    SequenceNumber range_end = (value + num_bits).previous();
+    SequenceNumber range_end = (value + static_cast<int>(num_bits)).previous();
     if (insert_bitmap_range(iter, SequenceRange(range_start, range_end))) {
       return true;
     }
@@ -238,11 +238,11 @@ DisjointSequence::fill_bitmap_range(ACE_CDR::ULong low, ACE_CDR::ULong high,
                                     ACE_CDR::Long bitmap[], ACE_CDR::ULong length,
                                     ACE_CDR::ULong& num_bits, ACE_CDR::ULong& cumulative_bits_added)
 {
-  bool clamped = false;
-  if ((low / 32) >= length) {
+  if (low / 32 >= length) {
     return false;
   }
-  if ((high / 32) >= length) {
+  bool clamped = false;
+  if (high / 32 >= length) {
     high = length * 32 - 1;
     clamped = true;
   }
@@ -253,7 +253,9 @@ DisjointSequence::fill_bitmap_range(ACE_CDR::ULong low, ACE_CDR::ULong high,
 
   // handle idx_nb zeros
   if (bit_nb) {
-    bitmap[idx_nb] &= ~((0x1u << (32 - bit_nb)) - 1);
+    ACE_CDR::ULong entry = static_cast<ACE_CDR::ULong>(bitmap[idx_nb]);
+    entry &= ~((1u << (32 - bit_nb)) - 1);
+    bitmap[idx_nb] = static_cast<ACE_CDR::Long>(entry);
   } else {
     bitmap[idx_nb] = 0;
   }
@@ -265,25 +267,31 @@ DisjointSequence::fill_bitmap_range(ACE_CDR::ULong low, ACE_CDR::ULong high,
 
   // handle idx_nb ones
   if (bit_low) {
+    const ACE_CDR::ULong value = (1u << (32 - bit_low)) - 1;
     if (idx_low > idx_nb) {
-      bitmap[idx_low] = (0x1u << (32 - bit_low)) - 1;
+      bitmap[idx_low] = static_cast<ACE_CDR::Long>(value);
     } else {
-      bitmap[idx_low] |= (0x1u << (32 - bit_low)) - 1;
+      ACE_CDR::ULong entry = static_cast<ACE_CDR::ULong>(bitmap[idx_low]);
+      entry |= value;
+      bitmap[idx_low] = static_cast<ACE_CDR::Long>(entry);
     }
   } else {
-    bitmap[idx_low] = 0xFFFFFFFF;
+    bitmap[idx_low] = -1;
   }
 
   // handle ones between idx_low and idx_high (if gap exists)
   for (ACE_CDR::ULong i = idx_low + 1; i < idx_high; ++i) {
-    bitmap[i] = 0xFFFFFFFF;
+    bitmap[i] = -1;
   }
 
   // handle idx_high
+  const ACE_CDR::ULong value = ~((1u << (31 - bit_high)) - 1);
   if (idx_high > idx_low) {
-    bitmap[idx_high] = ~((0x1u << (31 - bit_high)) - 1);
+    bitmap[idx_high] = static_cast<ACE_CDR::Long>(value);
   } else if (bit_high < 31) {
-    bitmap[idx_high] &= ~((0x1u << (31 - bit_high)) - 1);
+    ACE_CDR::ULong entry = static_cast<ACE_CDR::ULong>(bitmap[idx_high]);
+    entry &= value;
+    bitmap[idx_high] = static_cast<ACE_CDR::Long>(entry);
   }
 
   num_bits = high + 1;

@@ -68,7 +68,7 @@ namespace {
 dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
   : scope_(scope), error_(false), java_ts_only_(java_ts_only)
 {
-  if (!be_global->no_default_gen()) {
+  if (!be_global->no_default_gen() || be_global->gen_typeobject_override()) {
     gen_target_.add_generator(&to_gen_);
     const bool generate_xtypes = !be_global->suppress_xtypes() && !java_ts_only;
     to_gen_.produce_output(generate_xtypes);
@@ -76,7 +76,8 @@ dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
     if (generate_xtypes && be_global->old_typeobject_encoding()) {
       to_gen_.use_old_typeobject_encoding();
     }
-
+  }
+  if (!be_global->no_default_gen()) {
     if (be_global->value_reader_writer()) {
       gen_target_.add_generator(&value_reader_generator_);
       gen_target_.add_generator(&value_writer_generator_);
@@ -181,8 +182,9 @@ dds_visitor::visit_interface(AST_Interface* node)
 
   BE_Comment_Guard g("INTERFACE", name);
 
-  vector<AST_Interface*> inherits(node->n_inherits());
-  for (int i = 0; i < node->n_inherits(); ++i) {
+  const size_t n_inherits = static_cast<size_t>(node->n_inherits());
+  vector<AST_Interface*> inherits(n_inherits);
+  for (size_t i = 0; i < n_inherits; ++i) {
     inherits[i] = dynamic_cast<AST_Interface*>(node->inherits()[i]);
   }
 
@@ -451,6 +453,10 @@ dds_visitor::visit_union(AST_Union* node)
   if (!java_ts_only_) {
     error_ |= !gen_target_.gen_union(node, node->name(), branches, node->disc_type(),
                                      node->repoID());
+  }
+
+  if (!node->imported() && be_global->java()) {
+    java_ts_generator::generate(node);
   }
 
   return 0;

@@ -88,7 +88,7 @@ TestDriver::parse_args(int& argc, ACE_TCHAR* argv[])
         throw TestException();
       }
 
-      num_packets_ = tmp;
+      num_packets_ = static_cast<unsigned>(tmp);
     }
     // The '-d' option
     else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-d")))) {

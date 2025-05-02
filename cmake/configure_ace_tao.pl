@@ -25,6 +25,7 @@ my @optional_values = qw/
   platform-macros-file
   static
   compiler
+  runtime-library
 /;
 my %is_value_required = map {$_ => 1} @required_values;
 my %values = ();
@@ -136,5 +137,9 @@ copy($mwc_src, $mwc) or die("Failed to copy $mwc_src to $mwc: $!");
 my $cmd = [$Config{perlpath}, "$ENV{ACE_ROOT}/bin/mwc.pl", $mwc, '-type', $values{'mpc-type'}];
 if ($values{static}) {
   push(@{$cmd}, '-static');
+  if ($values{'mpc-type'} =~ /^vs/ && $values{'runtime-library'} eq 'dll') {
+    push(@{$cmd}, '-value_template', 'Debug::runtime_library=MultiThreadedDebugDLL',
+                  '-value_template', 'Release::runtime_library=MultiThreadedDLL');
+  }
 }
 run_command($cmd, chdir => $values{src});

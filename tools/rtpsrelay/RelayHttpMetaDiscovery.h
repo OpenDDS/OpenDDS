@@ -24,8 +24,8 @@ public:
   const std::string& message() const { return message_; }
 
 private:
-  int status_;
-  std::string message_;
+  const int status_;
+  const std::string message_;
 };
 
 class RelayHttpMetaDiscovery;
@@ -33,18 +33,13 @@ class RelayHttpMetaDiscovery;
 // ACE_NULL_SYNCH is appropriate since the reactor is single threaded.
 class HttpConnection : public ACE_Svc_Handler<ACE_SOCK_Stream, ACE_NULL_SYNCH> {
 public:
-  HttpConnection()
-    : relay_http_meta_discovery_(0)
-    , buffer_(BUFFER_SIZE)
-  {}
-
-  int open(void* acceptor); // called by ACE_Acceptor
+  int open(void* acceptor) override; // called by ACE_Acceptor
 
 private:
-  int handle_input(ACE_HANDLE h);
+  int handle_input(ACE_HANDLE h) override;
 
-  const RelayHttpMetaDiscovery* relay_http_meta_discovery_;
-  ACE_Message_Block buffer_;
+  const RelayHttpMetaDiscovery* relay_http_meta_discovery_{nullptr};
+  ACE_Message_Block buffer_{BUFFER_SIZE};
 };
 
 class RelayHttpMetaDiscovery : public ACE_Acceptor<HttpConnection, ACE_SOCK_Acceptor> {
@@ -61,6 +56,8 @@ public:
 
   bool processRequest(ACE_SOCK_Stream& peer,
                       const std::string& request) const;
+
+private:
   bool requestIsComplete(const std::string& request,
                          std::string& target) const;
   bool parseRequestLine(const std::string& requestLine,
@@ -70,7 +67,6 @@ public:
   void respondHealthcheck(std::stringstream& response) const;
   void respondStatus(std::stringstream& response, const HttpStatus& status) const;
 
-private:
   const Config& config_;
   const std::string meta_discovery_content_type_;
   const std::string meta_discovery_content_;

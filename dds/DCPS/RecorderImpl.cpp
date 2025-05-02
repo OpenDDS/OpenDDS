@@ -292,7 +292,7 @@ RecorderImpl::add_association(const WriterAssociation& writer,
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
       const GUID_t& writer_id = writer.writerId;
-      RcHandle<WriterInfo> info ( make_rch<WriterInfo>(rchandle_from<WriterInfoListener>(this), writer_id, writer.writerQos));
+      RcHandle<WriterInfo> info (make_rch<WriterInfo>(rchandle_from<WriterInfoListener>(this), writer_id, writer.writerQos, qos_.liveliness.lease_duration));
       /*std::pair<WriterMapType::iterator, bool> bpair =*/
       writers_.insert(
         // This insertion is idempotent.
@@ -649,24 +649,20 @@ RecorderImpl::remove_all_associations()
   DBG_ENTRY_LVL("RecorderImpl","remove_all_associations",6);
 
   OpenDDS::DCPS::WriterIdSeq writers;
-  int size;
+  DDS::UInt32 size;
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
 
   {
     ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, writers_lock_);
 
-    size = static_cast<int>(writers_.size());
+    size = static_cast<DDS::UInt32>(writers_.size());
     writers.length(size);
 
     WriterMapType::iterator curr_writer = writers_.begin();
     WriterMapType::iterator end_writer = writers_.end();
-
-    int i = 0;
-
-    while (curr_writer != end_writer) {
-      writers[i++] = curr_writer->first;
-      ++curr_writer;
+    for (DDS::UInt32 i = 0; curr_writer != end_writer; ++i, ++curr_writer) {
+      writers[i] = curr_writer->first;
     }
   }
 
@@ -917,7 +913,7 @@ RecorderImpl::enable()
       ACE_DEBUG((LM_DEBUG, "(%P|%t) RecorderImpl::enable: add_subscription\n"));
     }
 
-    XTypes::TypeInformation type_info;
+    TypeInformation type_info;
 
     const bool success =
       disco->add_subscription(domain_id_,

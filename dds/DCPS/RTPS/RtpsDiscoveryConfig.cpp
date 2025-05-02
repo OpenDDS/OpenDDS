@@ -105,6 +105,22 @@ RtpsDiscoveryConfig::max_lease_duration(const DCPS::TimeDuration& period)
                                              DCPS::ConfigStoreImpl::Format_IntegerSeconds);
 }
 
+DCPS::TimeDuration
+RtpsDiscoveryConfig::minimum_cleanup_separation() const
+{
+  return TheServiceParticipant->config_store()->get(config_key("MINIMUM_CLEANUP_SEPARATION").c_str(),
+                                                    TimeDuration::from_msec(1),
+                                                    DCPS::ConfigStoreImpl::Format_IntegerMilliseconds);
+}
+
+void
+RtpsDiscoveryConfig::minimum_cleanup_separation(const DCPS::TimeDuration& period)
+{
+  TheServiceParticipant->config_store()->set(config_key("MINIMUM_CLEANUP_SEPARATION").c_str(),
+                                             period,
+                                             DCPS::ConfigStoreImpl::Format_IntegerMilliseconds);
+}
+
 #if OPENDDS_CONFIG_SECURITY
 DCPS::TimeDuration
 RtpsDiscoveryConfig::security_unsecure_lease_duration() const
@@ -192,8 +208,8 @@ void RtpsDiscoveryConfig::sedp_port_mode(PortMode value)
 DDS::UInt16
 RtpsDiscoveryConfig::pb() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("PB").c_str(),
-                                                           default_port_base);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("PB").c_str(),
+                                                                                    default_port_base));
 }
 
 void
@@ -206,8 +222,8 @@ RtpsDiscoveryConfig::pb(DDS::UInt16 port_base)
 DDS::UInt16
 RtpsDiscoveryConfig::dg() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("DG").c_str(),
-                                                           default_domain_gain);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("DG").c_str(),
+                                                                                    default_domain_gain));
 }
 
 void
@@ -220,8 +236,8 @@ RtpsDiscoveryConfig::dg(DDS::UInt16 domain_gain)
 DDS::UInt16
 RtpsDiscoveryConfig::pg() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("PG").c_str(),
-                                                           default_part_gain);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("PG").c_str(),
+                                                                                    default_part_gain));
 }
 
 void
@@ -241,8 +257,8 @@ RtpsDiscoveryConfig::d0() const
     default_value = static_cast<DDS::UInt16>(std::atoi(from_env));
   }
 #endif
-  return TheServiceParticipant->config_store()->get_uint32(config_key("D0").c_str(),
-                                                           default_value);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("D0").c_str(),
+                                                                                    default_value));
 }
 
 void
@@ -255,8 +271,8 @@ RtpsDiscoveryConfig::d0(DDS::UInt16 spdp_multicast_offset)
 DDS::UInt16
 RtpsDiscoveryConfig::d1() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("D1").c_str(),
-                                                           default_spdp_unicast_offset);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("D1").c_str(),
+                                                                                    default_spdp_unicast_offset));
 }
 
 void
@@ -268,8 +284,8 @@ RtpsDiscoveryConfig::d1(DDS::UInt16 spdp_unicast_offset)
 DDS::UInt16
 RtpsDiscoveryConfig::dx() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("DX").c_str(),
-                                                           default_sedp_multicast_offset);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("DX").c_str(),
+                                                                                    default_sedp_multicast_offset));
 }
 
 void
@@ -282,8 +298,8 @@ RtpsDiscoveryConfig::dx(DDS::UInt16 sedp_multicast_offset)
 DDS::UInt16
 RtpsDiscoveryConfig::dy() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("DY").c_str(),
-                                                           default_sedp_unicast_offset);
+  return static_cast<DDS::UInt16>(TheServiceParticipant->config_store()->get_uint32(config_key("DY").c_str(),
+                                                                                    default_sedp_unicast_offset));
 }
 
 void
@@ -296,20 +312,20 @@ RtpsDiscoveryConfig::dy(DDS::UInt16 sedp_unicast_offset)
 bool RtpsDiscoveryConfig::set_spdp_multicast_port(DCPS::NetworkAddress& addr,
   DDS::DomainId_t domain) const
 {
-  return set_rtps_multicast_port(addr, "SPDP multicast", pb(), d0(), domain, dg());
+  return set_rtps_multicast_port(addr, "SPDP multicast", pb(), d0(), static_cast<DDS::UInt16>(domain), dg());
 }
 
 bool RtpsDiscoveryConfig::set_spdp_unicast_port(DCPS::NetworkAddress& addr, bool& fixed_port,
   DDS::DomainId_t domain, DDS::UInt16 part_id) const
 {
   return set_rtps_unicast_port(addr, fixed_port, "SPDP unicast", spdp_port_mode(),
-    pb(), d1(), domain, dg(), part_id, pg());
+    pb(), d1(), static_cast<DDS::UInt16>(domain), dg(), part_id, pg());
 }
 
 unsigned char
 RtpsDiscoveryConfig::ttl() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("TTL").c_str(), 1);
+  return static_cast<unsigned char>(TheServiceParticipant->config_store()->get_uint32(config_key("TTL").c_str(), 1));
 }
 
 void
@@ -715,8 +731,8 @@ RtpsDiscoveryConfig::auth_resend_period(const DCPS::TimeDuration& x)
 u_short
 RtpsDiscoveryConfig::max_spdp_sequence_msg_reset_checks() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("MAX_SPDP_SEQUENCE_MSG_RESET_CHECKS").c_str(),
-                                                           3);
+  const DDS::UInt32 val = TheServiceParticipant->config_store()->get_uint32(config_key("MAX_SPDP_SEQUENCE_MSG_RESET_CHECKS").c_str(), 3);
+  return static_cast<u_short>(val);
 }
 
 void

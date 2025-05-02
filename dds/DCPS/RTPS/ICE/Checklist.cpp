@@ -70,9 +70,7 @@ ConnectivityCheck::ConnectivityCheck(const CandidatePair& a_candidate_pair,
 
   if (a_candidate_pair.local_is_controlling) {
     request_.append_attribute(STUN::make_ice_controlling(a_ice_tie_breaker));
-  }
-
-  else {
+  } else {
     request_.append_attribute(STUN::make_ice_controlled(a_ice_tie_breaker));
   }
 
@@ -117,7 +115,7 @@ void Checklist::generate_candidate_pairs()
     AgentInfo::CandidatesType::const_iterator remote_pos = remote_agent_info_.candidates.begin();
     AgentInfo::CandidatesType::const_iterator remote_limit = remote_agent_info_.candidates.end();
     for (; remote_pos != remote_limit; ++remote_pos) {
-#if ACE_HAS_IPV6
+#if defined ACE_HAS_IPV6 && ACE_HAS_IPV6
       if ((local_pos->address.is_linklocal() && remote_pos->address.is_linklocal()) ||
           (!local_pos->address.is_linklocal() && !remote_pos->address.is_linklocal())) {
         frozen_.push_back(CandidatePair(*local_pos, *remote_pos, local_is_controlling_));
@@ -139,9 +137,7 @@ void Checklist::generate_candidate_pairs()
     while (test_pos != limit) {
       if (pos->local.base == test_pos->local.base && pos->remote == test_pos->remote) {
         frozen_.erase(test_pos++);
-      }
-
-      else {
+      } else {
         ++test_pos;
       }
     }
@@ -355,8 +351,7 @@ void Checklist::generate_triggered_check(const ACE_INET_Addr& local_address,
 
   // 7.3.1.4
   Candidate local;
-  bool flag = get_local_candidate(local_address, local);
-  if (!flag) {
+  if (!get_local_candidate(local_address, local)) {
     // Network addresses may have changed so that local_address is not valid.
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) Checklist::generate_triggered_check: WARNING local_address %C is no longer a local candidate\n"),
                DCPS::LogAddr(local_address).c_str()));
@@ -398,9 +393,7 @@ void Checklist::succeeded(const ConnectivityCheck& cc)
       nominating_ = valid_list_.end();
       OPENDDS_ASSERT(frozen_.empty());
       OPENDDS_ASSERT(waiting_.empty());
-    }
-
-    else {
+    } else {
       nominated_ = std::find(valid_list_.begin(), valid_list_.end(), cp);
 
       // This is the case where the use_candidate check succeeded before the normal check.
@@ -410,16 +403,16 @@ void Checklist::succeeded(const ConnectivityCheck& cc)
       }
 
       while (!frozen_.empty()) {
-        CandidatePair cp = frozen_.front();
+        const CandidatePair pair = frozen_.front();
         frozen_.pop_front();
-        failed_.push_back(cp);
+        failed_.push_back(pair);
       }
 
       while (!waiting_.empty()) {
-        CandidatePair cp = waiting_.front();
+        const CandidatePair pair = waiting_.front();
         waiting_.pop_front();
-        endpoint_manager_->agent_impl->remove(cp.foundation);
-        failed_.push_back(cp);
+        endpoint_manager_->agent_impl->remove(pair.foundation);
+        failed_.push_back(pair);
       }
 
       triggered_check_queue_.clear();
@@ -430,18 +423,16 @@ void Checklist::succeeded(const ConnectivityCheck& cc)
     last_indication_.set_to_now();
 
     while (!connectivity_checks_.empty()) {
-      ConnectivityCheck cc = connectivity_checks_.front();
+      const ConnectivityCheck check = connectivity_checks_.front();
       connectivity_checks_.pop_front();
 
-      if (!cc.cancelled()) {
-        failed(cc);
+      if (!check.cancelled()) {
+        failed(check);
+      } else {
+        remove_from_in_progress(check.candidate_pair());
       }
 
-      else {
-        remove_from_in_progress(cc.candidate_pair());
-      }
-
-      endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, rchandle_from(this));
+      endpoint_manager_->unset_responsible_checklist(check.request().transaction_id, rchandle_from(this));
     }
 
     OPENDDS_ASSERT(frozen_.empty());
@@ -605,11 +596,11 @@ void Checklist::error_response(const ACE_INET_Addr& /*local_address*/,
       a_message.get_error_reason().c_str()));
 
     if (a_message.get_error_code() == STUN::UNKNOWN_ATTRIBUTE && a_message.has_unknown_attributes()) {
-      std::vector<STUN::AttributeType> unknown_attributes = a_message.get_unknown_attributes();
+      std::vector<STUN::AttributeType> unknown = a_message.get_unknown_attributes();
 
-      for (std::vector<STUN::AttributeType>::const_iterator pos = unknown_attributes.begin(),
-           limit = unknown_attributes.end(); pos != limit; ++pos) {
-        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) Checklist::error_response: WARNING Unknown STUN attribute %d\n"), *pos));
+      for (std::vector<STUN::AttributeType>::const_iterator attrib = unknown.begin(),
+           limit = unknown.end(); attrib != limit; ++attrib) {
+        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) Checklist::error_response: WARNING Unknown STUN attribute %d\n"), *attrib));
       }
     }
 
@@ -619,9 +610,8 @@ void Checklist::error_response(const ACE_INET_Addr& /*local_address*/,
       connectivity_checks_.erase(pos);
       endpoint_manager_->unset_responsible_checklist(cc.request().transaction_id, rchandle_from(this));
     }
-  }
 
-  else {
+  } else {
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) Checklist::error_response: WARNING STUN error response (no code)\n")));
   }
 }

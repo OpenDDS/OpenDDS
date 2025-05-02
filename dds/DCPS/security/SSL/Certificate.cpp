@@ -284,7 +284,7 @@ int Certificate::subject_name_to_str(std::string& dst,
       if (buffer) {
         int len = X509_NAME_print_ex(buffer, name, 0, flags);
         if (len > 0) {
-          std::vector<char> tmp(len +
+          std::vector<char> tmp(static_cast<size_t>(len) +
                                 1);  // BIO_gets will add null hence +1
           len = BIO_gets(buffer, &tmp[0], len + 1);
           if (len > 0) {
@@ -504,7 +504,7 @@ X509* Certificate::x509_from_pem(const std::string& path,
   if (filebuf) {
     if (!password.empty()) {
       result =
-        PEM_read_bio_X509_AUX(filebuf, 0, 0, (void*)password.c_str());
+        PEM_read_bio_X509_AUX(filebuf, 0, 0, const_cast<char*>(password.c_str()));
       if (!result) {
         OPENDDS_SSL_LOG_ERR("PEM_read_bio_X509_AUX failed");
       }
@@ -535,13 +535,13 @@ X509* Certificate::x509_from_pem(const DDS::OctetSeq& bytes,
   BIO* filebuf = BIO_new(BIO_s_mem());
   do {
     if (filebuf) {
-      if (0 >= BIO_write(filebuf, bytes.get_buffer(), bytes.length())) {
+      if (0 >= BIO_write(filebuf, bytes.get_buffer(), static_cast<int>(bytes.length()))) {
         OPENDDS_SSL_LOG_ERR("BIO_write failed");
         break;
       }
       if (!password.empty()) {
         result = PEM_read_bio_X509_AUX(filebuf, 0, 0,
-                                       (void*)password.c_str());
+                                       const_cast<char*>(password.c_str()));
         if (!result) {
           OPENDDS_SSL_LOG_ERR("PEM_read_bio_X509_AUX failed");
           break;
@@ -611,7 +611,7 @@ struct deserialize_impl
       return 1;
     }
 
-    const int len = BIO_write(buffer_, src_.get_buffer(), src_.length());
+    const int len = BIO_write(buffer_, src_.get_buffer(), static_cast<int>(src_.length()));
     if (len <= 0) {
       OPENDDS_SSL_LOG_ERR("failed to write OctetSeq to BIO");
       return 1;

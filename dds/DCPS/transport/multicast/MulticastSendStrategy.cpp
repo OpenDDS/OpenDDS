@@ -57,7 +57,9 @@ MulticastSendStrategy::sync_send(const iovec iov[], int n)
     // putting the send strategy in suspended mode.  If reliability
     // is enabled, the data may be resent later in response to a NAK.
     ssize_t b = 0;
-    for (int i = 0; i < n; ++i) b += iov[i].iov_len;
+    for (int i = 0; i < n; ++i) {
+      b += static_cast<ssize_t>(iov[i].iov_len);
+    }
     return b;
   }
 
@@ -98,10 +100,11 @@ MulticastSendStrategy::async_send(const iovec iov[], int n, const ACE_INET_Addr&
   }
 
   // framework needs to think we sent the entire datagram
-  return total_length;
+  return static_cast<ssize_t>(total_length);
 #else
   ACE_UNUSED_ARG(iov);
   ACE_UNUSED_ARG(n);
+  ACE_UNUSED_ARG(group_address);
   return -1;
 #endif
 }

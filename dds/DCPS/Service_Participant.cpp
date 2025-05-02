@@ -62,6 +62,18 @@
 extern char **environ;
 #endif
 
+#if OPENDDS_GCC
+// Embed GDB Extension
+asm(
+  ".pushsection \".debug_gdb_scripts\", \"MS\",@progbits,1\n"
+  ".byte 4\n" // 4 means this is an embedded Python script
+  ".ascii \"gdb.inlined-script\\n\"\n"
+  ".incbin \"../tools/scripts/gdbext.py\"\n"
+  ".byte 0\n"
+  ".popsection\n"
+);
+#endif
+
 namespace {
 
 void set_log_file_name(const char* fname)
@@ -126,7 +138,7 @@ String toupper(const String& x)
 {
   String retval;
   for (String::const_iterator pos = x.begin(), limit = x.end(); pos != limit; ++pos) {
-    retval.push_back(ACE_OS::ace_toupper(*pos));
+    retval.push_back(static_cast<char>(ACE_OS::ace_toupper(*pos)));
   }
   return retval;
 }
@@ -231,16 +243,10 @@ Service_Participant::reactor()
   return reactor_task_.get_reactor();
 }
 
-ACE_thread_t
-Service_Participant::reactor_owner() const
+ReactorTask_rch
+Service_Participant::reactor_task()
 {
-  return reactor_task_.get_reactor_owner();
-}
-
-ReactorInterceptor_rch
-Service_Participant::interceptor() const
-{
-  return reactor_task_.interceptor();
+  return rchandle_from(&reactor_task_);
 }
 
 JobQueue_rch
@@ -296,7 +302,7 @@ DDS::ReturnCode_t Service_Participant::shutdown()
       domainRepoMap_.clear();
 
       {
-        ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, network_config_monitor_lock_,
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, ncm_guard, network_config_monitor_lock_,
           DDS::RETCODE_OUT_OF_RESOURCES);
         if (network_config_monitor_) {
           network_config_monitor_->close();
@@ -479,7 +485,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
       ACE_DEBUG((LM_DEBUG,
                  "(%P|%t) Service_Participant::get_domain_participant_factory: Creating LinuxNetworkConfigMonitor\n"));
     }
-    network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_.interceptor());
+    network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(rchandle_from(&reactor_task_));
 #elif defined(OPENDDS_NETWORK_CONFIG_MODIFIER)
     if (DCPS_debug_level >= 1) {
       ACE_DEBUG((LM_DEBUG,
@@ -1290,7 +1296,7 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
       }
 
       // Wait to traverse the list and try again.
-      ACE_OS::sleep(backoff);
+      ACE_OS::sleep(static_cast<unsigned int>(backoff));
 
       // Exponentially backoff delay.
       backoff *= this->federation_backoff_multiplier();
@@ -2341,9 +2347,9 @@ Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_
       if (p.key() == COMMON_ORB_LOG_FILE) {
         set_log_file_name(p.value().c_str());
       } else if (p.key() == COMMON_ORB_VERBOSE_LOGGING) {
-        set_log_verbose(ACE_OS::atoi(p.value().c_str()));
+        set_log_verbose(static_cast<unsigned long>(ACE_OS::atoi(p.value().c_str())));
       } else if (p.key() == COMMON_DCPS_DEBUG_LEVEL) {
-        set_DCPS_debug_level(ACE_OS::atoi(p.value().c_str()));
+        set_DCPS_debug_level(static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str())));
       } else if (p.key() == COMMON_DCPSRTI_SERIALIZATION) {
         if (ACE_OS::atoi(p.value().c_str()) == 0 && log_level >= LogLevel::Warning) {
           ACE_ERROR((LM_WARNING,
@@ -2351,12 +2357,12 @@ Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_
                      ACE_TEXT("Argument ignored: DCPSRTISerialization is required to be enabled\n")));
         }
       } else if (p.key() == COMMON_DCPS_TRANSPORT_DEBUG_LEVEL) {
-        OpenDDS::DCPS::Transport_debug_level = ACE_OS::atoi(p.value().c_str());
+        Transport_debug_level = static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str()));
       } else if (p.key() == COMMON_DCPS_THREAD_STATUS_INTERVAL) {
         service_participant_.thread_status_manager_.thread_status_interval(TimeDuration(ACE_OS::atoi(p.value().c_str())));
 #if OPENDDS_CONFIG_SECURITY
       } else if (p.key() == COMMON_DCPS_SECURITY_DEBUG_LEVEL) {
-        security_debug.set_debug_level(ACE_OS::atoi(p.value().c_str()));
+        security_debug.set_debug_level(static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str())));
       } else if (p.key() == COMMON_DCPS_SECURITY_DEBUG) {
         security_debug.parse_flags(p.value().c_str());
       } else if (p.key() == COMMON_DCPS_SECURITY_FAKE_ENCRYPTION) {

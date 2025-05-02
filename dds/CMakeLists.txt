@@ -1,5 +1,5 @@
 # CMakeLists for OpenDDS_Dcps
-cmake_minimum_required(VERSION 3.23...3.27)
+cmake_minimum_required(VERSION 3.23...4.0)
 project(opendds_dcps CXX)
 
 set(dcps_lib_deps
@@ -38,6 +38,7 @@ add_library(OpenDDS_Dcps
   DCPS/EventDispatcher.cpp
   DCPS/FileSystemStorage.cpp
   DCPS/FilterEvaluator.cpp
+  DCPS/FlexibleTypeSupport.cpp
   DCPS/GroupRakeData.cpp
   DCPS/GuardCondition.cpp
   DCPS/GuidBuilder.cpp
@@ -72,7 +73,6 @@ add_library(OpenDDS_Dcps
   DCPS/Qos_Helper.cpp
   DCPS/QueryConditionImpl.cpp
   DCPS/RawDataSample.cpp
-  DCPS/ReactorInterceptor.cpp
   DCPS/ReactorTask.cpp
   DCPS/ReadConditionImpl.cpp
   DCPS/ReceivedDataElementList.cpp
@@ -103,7 +103,6 @@ add_library(OpenDDS_Dcps
   DCPS/ThreadStatusManager.cpp
   DCPS/TimeDuration.cpp
   DCPS/Time_Helper.cpp
-  DCPS/Timers.cpp
   DCPS/TopicDescriptionImpl.cpp
   DCPS/TopicImpl.cpp
   DCPS/Transient_Kludge.cpp
@@ -257,6 +256,7 @@ target_sources(OpenDDS_Dcps
     DCPS/DurabilityQueue.h
     DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h
     DCPS/EncapsulationHeader.h
+    DCPS/EndpointCallbacks.h
     DCPS/EntityImpl.h
     DCPS/EventDispatcher.h
     DCPS/FeatureDisabledQosCheck.h
@@ -264,6 +264,7 @@ target_sources(OpenDDS_Dcps
     DCPS/FileSystemStorage.h
     DCPS/FilterEvaluator.h
     DCPS/FilterExpressionGrammar.h
+    DCPS/FlexibleTypeSupport.h
     DCPS/GroupRakeData.h
     DCPS/GuardCondition.h
     DCPS/GuidBuilder.h
@@ -325,7 +326,6 @@ target_sources(OpenDDS_Dcps
     DCPS/RcEventHandler.h
     DCPS/RcHandle_T.h
     DCPS/RcObject.h
-    DCPS/ReactorInterceptor.h
     DCPS/ReactorTask.h
     DCPS/ReactorTask.inl
     DCPS/ReactorTask_rch.h
@@ -565,7 +565,7 @@ target_sources(OpenDDS_Dcps
     OpenDDSConfigWrapper.idl
 )
 target_compile_definitions(OpenDDS_Dcps PUBLIC ${OPENDDS_DCPS_COMPILE_DEFINITIONS})
-_opendds_library(OpenDDS_Dcps MSVC_BIGOBJ)
+_opendds_library(OpenDDS_Dcps BIGOBJ)
 target_include_directories(OpenDDS_Dcps
   PUBLIC
     "$<BUILD_INTERFACE:${OPENDDS_SOURCE_DIR}>"

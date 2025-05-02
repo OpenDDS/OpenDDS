@@ -296,10 +296,10 @@ MulticastTransport::stop_accepting_or_connecting(const TransportClient_wrch& cli
   for (PendConnMap::iterator it = this->pending_connections_.begin();
        it != this->pending_connections_.end(); ++it) {
     bool erased_from_it = false;
-    for (size_t i = 0; i < it->second.size(); ++i) {
-      if (it->second[i].first == client && it->second[i].second == remote_id) {
+    for (Callbacks::iterator cit = it->second.begin(); cit != it->second.end(); ++cit) {
+      if (cit->first == client && cit->second == remote_id) {
         erased_from_it = true;
-        it->second.erase(it->second.begin() + i);
+        it->second.erase(cit);
         break;
       }
     }
@@ -345,12 +345,12 @@ MulticastTransport::passive_connection(MulticastPeer local_peer, MulticastPeer r
   if (pend != pending_connections_.end()) {
     Callbacks tmp(pend->second);
     for (size_t i = 0; i < tmp.size(); ++i) {
-      const PendConnMap::iterator pend = pending_connections_.find(peers);
-      if (pend != pending_connections_.end()) {
-        const Callbacks::iterator tmp_iter = find(pend->second.begin(),
-                                                  pend->second.end(),
+      const PendConnMap::iterator pos = pending_connections_.find(peers);
+      if (pos != pending_connections_.end()) {
+        const Callbacks::iterator tmp_iter = find(pos->second.begin(),
+                                                  pos->second.end(),
                                                   tmp.at(i));
-        if (tmp_iter != pend->second.end()) {
+        if (tmp_iter != pos->second.end()) {
           TransportClient_wrch pend_client = tmp.at(i).first;
           GUID_t remote_repo = tmp.at(i).second;
           guard.release();

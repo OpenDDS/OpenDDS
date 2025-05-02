@@ -28,7 +28,7 @@ namespace DCPS {
 #pragma pack(push, 1)
 
 struct OpenDDS_Rtps_Udp_Export BundlingCacheKey {
-  BundlingCacheKey(const GUID_t& dst_guid, const GUID_t& src_guid)
+  BundlingCacheKey(const GUID_t& src_guid, const GUID_t& dst_guid)
     : src_guid_(src_guid)
     , dst_guid_(dst_guid)
   {

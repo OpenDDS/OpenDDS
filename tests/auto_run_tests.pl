@@ -152,17 +152,16 @@ sub print_help {
 
         # These two are processed by PerlACE/ConfigList.pm
         "    -Config <cfg>            Include tests with <cfg> configuration\n" .
-        "    -Exclude <cfg>           Exclude tests with <cfg> configuration\n" .
-        "                             This is parsed as a Perl regex and will always\n" .
-        "                             override -Config regardless of the order\n" .
+        "    -Exclude <match>         Excludes tests paths and arguments that match this\n" .
+        "                             regex.\n" .
 
         # This one is processed by PerlACE/Process.pm
         "    -ExeSubDir <dir>         Subdirectory for finding the executables\n" .
 
         "    --sandbox | -s <sandbox> Runs each program using a sandbox program\n" .
         "    --dry-run | -z           Do everything except run the tests\n" .
-        "    --show-configs           Print possible values for -Config and -Excludes\n" .
-        "                             broken down by list file\n" .
+        "    --show-configs           Print possible values for -Config broken down by\n" .
+        "                             list file\n" .
         "    --show-all-configs       Same as --show-configs, but for all list files\n" .
         "    --list-configs           Print combined set of the configs from the list\n" .
         "                             files\n" .
@@ -381,7 +380,7 @@ foreach my $test_lst (@file_list) {
 }
 
 if ($cmake) {
-    my $fake_name = "Run CMake Tests";
+    my $fake_name = "tests/cmake/CMakeLists.txt";
     if (!$list_tests) {
         mark_test_start($fake_name);
     }
@@ -411,9 +410,12 @@ if ($cmake) {
             push(@run_test_cmd, "--build-config", $cmake_build_cfg);
         }
         run_test($fake_name, \@run_test_cmd, verbose => 1);
-        $process_name = "Process CMake Test Results";
+        $process_name = "tests/cmake/ctest-to-auto-run-tests.py";
         $process_func = \&run_test;
         push(@process_cmd, '--art-output', $art_output);
+        if (defined($cmake_build_cfg)) {
+            push(@process_cmd, '--config', $cmake_build_cfg);
+        }
         mark_test_start($process_name);
     }
     $process_func->($process_name, \@process_cmd);

@@ -691,6 +691,14 @@ These are all the variables that are exclusive to building OpenDDS with CMake:
 
   .. versionadded:: 3.28
 
+.. cmake:var:: OPENDDS_STD_OPTIONAL
+
+  If set to ``ON``, OpenDDS uses C++17's ``std::optional`` template in its API.
+  If set to ``OFF``, OpenDDS emulates ``std::optional`` with its own data type.
+  Default is ``ON`` when the compiler supports C++17 or higher.
+
+  .. versionadded:: 3.32
+
 .. _cmake-building-speed:
 
 Speeding up the Build
@@ -769,7 +777,7 @@ Known Limitations
   Currently this only exists for Windows, Linux, macOS, and Android.
   All other platforms will require configuring and building ACE/TAO separately and passing the path using :cmake:var:`OPENDDS_ACE`.
 
-  - See https://www.dre.vanderbilt.edu/~schmidt/DOC_ROOT/ACE/ACE-INSTALL.html for how to manually build ACE/TAO.
+  - See https://www.dre.vanderbilt.edu/~schmidt/ACE-install.html for how to manually build ACE/TAO.
 
 - The following features are planned, but not implemented yet:
 

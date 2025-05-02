@@ -57,7 +57,7 @@ env:
   TRIGGERING_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
   VCPKG_INSTALLED_DIR: ${{ github.workspace }}\vcpkg\installed
   CTEST_OUTPUT_ON_FAILURE: ON
-  VCPKG_GIT_COMMIT: f7423ee180c4b7f40d43402c2feb3859161ef625
+  VCPKG_GIT_COMMIT: d5ec528843d29e3a52d745a64b469f810b2cedbf
 
 jobs:
   u22:
@@ -80,8 +80,8 @@ jobs:
       with:
         repository: DOCGroup/ACE_TAO
         path: OpenDDS/build/ACE_TAO
-    - name: Install xerces
-      run: sudo apt-get -y install libxerces-c-dev
+    - name: Install xerces and Qt5
+      run: sudo apt-get -y install libxerces-c-dev qtbase5-dev
     - uses: lukka/get-cmake@latest
       with:
         cmakeVersion: "3.23"
@@ -98,6 +98,7 @@ jobs:
           -DOPENDDS_SECURITY=TRUE \
           -DOPENDDS_ACE_TAO_SRC=$GITHUB_WORKSPACE/OpenDDS/build/ACE_TAO \
           -DOPENDDS_MPC=$GITHUB_WORKSPACE/MPC \
+          -DOPENDDS_QT=TRUE \
           -DOPENDDS_BUILD_TESTS=TRUE \
           -DOPENDDS_CMAKE_VERBOSE=all
     - uses: ammaraskar/gcc-problem-matcher@0.3.0

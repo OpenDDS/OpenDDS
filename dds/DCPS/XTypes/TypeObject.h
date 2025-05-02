@@ -120,6 +120,7 @@ namespace XTypes {
 
   // ---------- Equivalence Kinds -------------------
   typedef ACE_CDR::Octet EquivalenceKind;
+  const EquivalenceKind EK_NONE      = 0;
   const EquivalenceKind EK_MINIMAL   = 0xF1; // 0x1111 0001
   const EquivalenceKind EK_COMPLETE  = 0xF2; // 0x1111 0010
   const EquivalenceKind EK_BOTH      = 0xF3; // 0x1111 0011
@@ -258,8 +259,10 @@ namespace XTypes {
     EquivalenceHash hash;
 
     TypeObjectHashId()
-      : kind(0)
-    {}
+      : kind(EK_NONE)
+    {
+      std::memset(hash, 0, sizeof(hash));
+    }
 
     TypeObjectHashId(const EquivalenceKind& a_kind,
                      const EquivalenceHashWrapper& a_hash)
@@ -378,7 +381,7 @@ namespace XTypes {
     CollectionElementFlag element_flags;
 
     PlainCollectionHeader()
-      : equiv_kind(0)
+      : equiv_kind(EK_NONE)
       , element_flags(0)
     {}
 
@@ -722,6 +725,13 @@ namespace XTypes {
       return !(*this < other) && !(other < *this);
     }
 
+    bool operator!=(const TypeIdentifier& other) const
+    {
+      return *this < other || other < *this;
+    }
+
+    static const TypeIdentifier None;
+
   private:
     ACE_CDR::Octet kind_;
     void* active_;
@@ -896,12 +906,12 @@ namespace XTypes {
   class OpenDDS_Dcps_Export AnnotationParameterValue {
   public:
 
-    explicit AnnotationParameterValue(ACE_CDR::Octet kind = TK_NONE);
+    explicit AnnotationParameterValue(TypeKind kind = TK_NONE);
     AnnotationParameterValue(const AnnotationParameterValue& other);
     AnnotationParameterValue& operator=(const AnnotationParameterValue& other);
     ~AnnotationParameterValue() { reset(); }
 
-    ACE_CDR::Octet kind() const { return kind_; }
+    TypeKind kind() const { return kind_; }
 
 #define OPENDDS_UNION_ACCESSORS(T, N)                         \
     const T& N() const { return *static_cast<T*>(active_); }  \
@@ -981,7 +991,7 @@ namespace XTypes {
     }
 
   private:
-    ACE_CDR::Octet kind_;
+    TypeKind kind_;
     void* active_;
     union {
       ACE_CDR::LongDouble max_alignment;
@@ -2894,7 +2904,7 @@ namespace XTypes {
   // };
 
   struct CompleteTypeObject {
-    ACE_CDR::Octet kind;
+    TypeKind kind;
     CompleteAliasType alias_type;
     CompleteAnnotationType annotation_type;
     CompleteStructType struct_type;
@@ -3044,7 +3054,7 @@ namespace XTypes {
   // };
 
   struct MinimalTypeObject {
-    ACE_CDR::Octet kind;
+    TypeKind kind;
     MinimalAliasType alias_type;
     MinimalAnnotationType annotation_type;
     MinimalStructType struct_type;
@@ -3160,12 +3170,12 @@ namespace XTypes {
   // };
 
   struct TypeObject {
-    ACE_CDR::Octet kind;
+    EquivalenceKind kind;
     CompleteTypeObject complete;
     MinimalTypeObject minimal;
 
     TypeObject()
-      : kind(0)
+      : kind(EK_NONE)
     {}
 
     explicit TypeObject(const CompleteTypeObject& a_complete)
@@ -3354,11 +3364,19 @@ namespace XTypes {
     }
 
     operator TypeMap&() { return type_map_; }
+
+    static const TypeMap EmptyMap;
   };
 
+  typedef OPENDDS_SET(TypeIdentifier) TypeIdentifierSet;
+
+  OpenDDS_Dcps_Export
+  TypeIdentifier make_scc_id_or_default(const TypeIdentifier& tid);
+
+  OpenDDS_Dcps_Export
   void compute_dependencies(const TypeMap& type_map,
                             const TypeIdentifier& type_identifier,
-                            OPENDDS_SET(TypeIdentifier)& dependencies);
+                            TypeIdentifierSet& dependencies);
 
   OpenDDS_Dcps_Export
   const char* typekind_to_string(TypeKind tk);
@@ -3388,10 +3406,14 @@ template<typename T>
 const XTypes::TypeMap& getMinimalTypeMap();
 
 template<typename T>
-const XTypes::TypeIdentifier& getCompleteTypeIdentifier();
+const XTypes::TypeIdentifier& getCompleteTypeIdentifier() {
+  return XTypes::TypeIdentifier::None;
+}
 
 template<typename T>
-const XTypes::TypeMap& getCompleteTypeMap();
+const XTypes::TypeMap& getCompleteTypeMap() {
+  return XTypes::TypeMapBuilder::EmptyMap;
+}
 
 template<typename T>
 void serialized_size(const Encoding& encoding, size_t& size,

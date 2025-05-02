@@ -128,7 +128,7 @@ DDS::MemberId DynamicDataAdapter::get_member_id_at_index(DDS::UInt32 index)
       } else if (index == 1) {
         bool branch_active;
         DDS::MemberDescriptor_var active_branch;
-        DDS::ReturnCode_t rc = get_selected_union_branch(branch_active, active_branch);
+        rc = get_selected_union_branch(branch_active, active_branch);
         if (rc != DDS::RETCODE_OK) {
           if (DCPS::log_level >= DCPS::LogLevel::Warning) {
             const CORBA::String_var type_name = type_->get_name();
@@ -158,7 +158,7 @@ DDS::MemberId DynamicDataAdapter::get_member_id_at_index(DDS::UInt32 index)
     return get_member_id_at_index_impl(index);
   case TK_ARRAY:
     {
-      DDS::ReturnCode_t rc = check_index("get_member_id_at_index", index, bound_total(type_desc_));
+      rc = check_index("get_member_id_at_index", index, bound_total(type_desc_));
       if (rc != DDS::RETCODE_OK) {
         if (DCPS::log_level >= DCPS::LogLevel::Warning) {
           const CORBA::String_var type_name = type_->get_name();

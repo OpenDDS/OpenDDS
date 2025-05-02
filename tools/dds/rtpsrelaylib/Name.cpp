@@ -72,7 +72,7 @@ void Name::parse(Name& name, const std::string& buffer, size_t& idx)
 
 char Name::parse_character(Name& name, const std::string& buffer, size_t& idx)
 {
-  char c = buffer[idx++];
+  const auto c = buffer[idx++];
   if (c == '\\') {
     if (idx == buffer.size()) {
       name.is_valid_ = false;
@@ -123,8 +123,7 @@ void Name::parse_character_class_tail(Name& name, const std::string& buffer, siz
     return;
   }
 
-  char c = buffer[idx];
-  if (c == ']') {
+  if (buffer[idx] == ']') {
     ++idx;
     return;
   }
@@ -154,7 +153,7 @@ void Name::parse_character_or_range(Name& name, const std::string& buffer, size_
     return;
   }
 
-  char last = parse_character(name, buffer, idx);
+  const auto last = parse_character(name, buffer, idx);
   if (first > last) {
     name.is_valid_ = false;
     return;

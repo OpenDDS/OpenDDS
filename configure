@@ -188,6 +188,7 @@ my @specs =
     'host=s', 'Host (auto detect: linux, win32, macosx)',
     'compiler=s', 'Compiler (auto detect / guess by searching PATH)',
     'std=s', 'C++ standard version (compiler default)',
+    'std-optional!', 'Use std::optional (if supported)',
     'target=s', 'Cross-compile target (none): see --target-help',
     'target-arch=s', 'Architecture for target (none): see --target-help',
     'target-compiler=s', 'Compiler for target (if req\'d): see --target-help',
@@ -205,6 +206,7 @@ my @specs =
     'optimize!', 'Optimization (no)',
     'inline!', 'Inlining (yes)',
     'static!', 'Static libraries (no)',
+    'static-runtime!', 'Link to static platform runtime libraries',
     'ipv6!', 'IPv6 support (no)',
     'sanitize=s@', 'Build with a sanitizer, can pass multiple times' .
       $argIndent . 'or one list separated by commas, combining asan' .
@@ -215,8 +217,8 @@ my @specs =
     'compile-warnings=s', 'Enable additional compiler warnings' .
       $argIndent . '(default compiler warnings)' .
       $argIndent . '  WARNING: enable additional warnings' .
-      $argIndent . '  ERROR: enable additional warnings that are' .
-      $argIndent . '    treated as errors',
+      $argIndent . '  ERROR: enable additional warnings and treat' .
+      $argIndent . '    warnings as errors',
    ],
    ['Required dependencies for OpenDDS:',
     'ace=s', 'ACE (use ACE_ROOT, ACE_wrappers, or download)',
@@ -809,6 +811,13 @@ EOF
     $ENV{'PATH'} = $savepath;
     print "Detected Visual C++ version: $opts{'compiler_version'}\n"
       if $opts{'verbose'};
+
+    if ($opts{'static'} && exists $opts{'static-runtime'} && $opts{'static-runtime'} == 0) {
+      push(@mpcopts, '-value_template', 'Debug::runtime_library=MultiThreadedDebugDLL',
+                     '-value_template', 'Release::runtime_library=MultiThreadedDLL');
+      print "Set Visual C++ runtime library to MultiThreaded(Debug)DLL with static build\n"
+        if $opts{'verbose'};
+    }
   }
   elsif ($opts{'compiler'} =~ /g\+\+|clang/) {
     my $version_string = `$opts{'compiler'} --version`;
@@ -869,9 +878,17 @@ if ($compile_warnings eq 'WARNING' or $compile_warnings eq 'ERROR') {
   }
   my $warning_flags = $sections->{$section}{'warning'};
   my $error_flags = $sections->{$section}{'error'};
-  push(@mpcopts, '-value_template', "compile_flags+=${warning_flags}");
-  if ($compile_warnings eq 'ERROR') {
-    push(@mpcopts, '-value_template', "compile_flags+=${error_flags}");
+  if ($section eq 'MSVC') {
+    $warning_flags =~ s/^\/W//;
+    push(@mpcopts, '-value_template', "warning_level+=${warning_flags}");
+    if ($compile_warnings eq 'ERROR') {
+      push(@mpcopts, '-value_template', 'WarnAsError=1');
+    }
+  } else {
+    push(@mpcopts, '-value_template', "compile_flags+=${warning_flags}");
+    if ($compile_warnings eq 'ERROR') {
+      push(@mpcopts, '-value_template', "compile_flags+=${error_flags}");
+    }
   }
 }
 
@@ -1233,6 +1250,8 @@ sub default_features {
     push(@feat, 'ipv6=1') if $opts{'ipv6'};
     my @normalized = map {/=/ ? $_ : "$_=1"} @features;
     push(@feat, @normalized) if @normalized;
+  } elsif ($opts{'java'}) {
+    push(@feat, 'java=1');
   }
   return @feat;
 }
@@ -1354,6 +1373,11 @@ sub write_platform_macros {
           print $PMG "$macro = $opts{$key}\n";
         }
       }
+      if ($opts{'static-runtime'}) {
+        print $PMG "static_stdlibs = 1\n";
+        print "Added static_stdlibs to platform_macros.GNU due to --static-runtime\n"
+          if $opts{'verbose'};
+      }
       if ($cross_compile) {
         print $PMG "CROSS-COMPILE = 1\n";
         print $PMG 'TAO_IDL = $(HOST_ACE)/bin/tao_idl', "\n";
@@ -1444,6 +1468,9 @@ EOT
 
 sub write_opendds_configh {
   my %buildEnv = %{shift()};
+  my $has_cxx17 = grep /no_cxx17=0/, @features;
+  my $use_optional = $has_cxx17 && !(exists $opts{'std-optional'} && $opts{'std-optional'} == 0);
+
   my $CFGH = backup_and_open("$buildEnv{'DDS_ROOT'}/dds/OpenDDSConfig.h");
   my $CFGIN = new FileHandle;
   open($CFGIN, 'dds/OpenDDSConfig.h.in') or die("Can't open OpenDDSConfig.h.in for reading: $!\nStopped");
@@ -1452,6 +1479,7 @@ sub write_opendds_configh {
     'OPENDDS_CONFIG_AUTO_STATIC_INCLUDES' => 0,
     'OPENDDS_CONFIG_BOOTTIME_TIMERS' => $opts{'boottime'} // 0,
     'OPENDDS_CONFIG_SECURITY' => $opts{'security'} // 0,
+    'OPENDDS_CONFIG_STD_OPTIONAL' => $use_optional,
   );
 
   my $replace_value = sub {
@@ -2861,7 +2889,9 @@ sub write_cmake_file {
     $name = uc("OPENDDS_$name");
     $name =~ s/-/_/g;
 
-    print $fh "set($name ", to_cmake_value($value), ")\n";
+    if (defined($value)) {
+      print $fh "set($name ", to_cmake_value($value), ")\n";
+    }
   }
 
   sub generate_config_cmake {
@@ -2975,6 +3005,7 @@ sub write_cmake_file {
       'rapidjson' => '',
       'security' => 0,
       'static' => 0,
+      'static-runtime' => undef,
       'std' => '',
       'xerces3' => '',
     );

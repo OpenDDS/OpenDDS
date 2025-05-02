@@ -25,7 +25,7 @@ ACE_UINT16 Attribute::length() const
 {
   switch (type) {
   case MAPPED_ADDRESS:
-#if ACE_HAS_IPV6
+#if defined ACE_HAS_IPV6 && ACE_HAS_IPV6
     if (mapped_address.get_type() == AF_INET6) {
       return 20;
     }
@@ -45,7 +45,7 @@ ACE_UINT16 Attribute::length() const
     return static_cast<ACE_UINT16>(2 * unknown_attributes.size());
 
   case XOR_MAPPED_ADDRESS:
-#if ACE_HAS_IPV6
+#if defined ACE_HAS_IPV6 && ACE_HAS_IPV6
     if (mapped_address.get_type() == AF_INET6) {
       return 20;
     }
@@ -283,7 +283,7 @@ bool operator>>(DCPS::Serializer& serializer, AttributeHolder& holder)
       return false;
     }
 
-    ACE_UINT16 code = class_ * 100 + num;
+    const ACE_UINT16 code = static_cast<ACE_UINT16>(class_ * 100 + num);
 
     const ACE_CDR::ULong reason_length = attribute_length - 4;
 
@@ -454,7 +454,7 @@ bool operator>>(DCPS::Serializer& serializer, AttributeHolder& holder)
   }
 
   // All attributes are aligned on 32-bit boundaries.
-  if (!serializer.skip((4 - (attribute_length & 0x3)) % 4)) {
+  if (!serializer.skip(static_cast<size_t>(4 - (attribute_length & 0x3)) % 4)) {
     return false;
   }
 
@@ -463,7 +463,7 @@ bool operator>>(DCPS::Serializer& serializer, AttributeHolder& holder)
 
 bool operator<<(DCPS::Serializer& serializer, ConstAttributeHolder& holder)
 {
-  ACE_UINT16 attribute_type = holder.attribute.type;
+  ACE_UINT16 attribute_type = static_cast<ACE_UINT16>(holder.attribute.type);
   ACE_UINT16 attribute_length = holder.attribute.length();
   serializer << attribute_type;
   serializer << attribute_length;
@@ -497,8 +497,8 @@ bool operator<<(DCPS::Serializer& serializer, ConstAttributeHolder& holder)
   break;
 
   case ERROR_CODE: {
-    ACE_UINT8 class_ = holder.attribute.error.code / 100;
-    ACE_UINT8 num = holder.attribute.error.code % 100;
+    const ACE_UINT8 class_ = static_cast<ACE_UINT8>(holder.attribute.error.code / 100);
+    const ACE_UINT8 num = holder.attribute.error.code % 100;
     serializer << static_cast<ACE_CDR::Char>(0);
     serializer << static_cast<ACE_CDR::Char>(0);
     serializer << static_cast<ACE_CDR::Char>(class_);
@@ -702,14 +702,14 @@ bool Message::has_message_integrity() const
   return false;
 }
 
-bool Message::verify_message_integrity(const std::string& password) const
+bool Message::verify_message_integrity(const std::string& pass) const
 {
   bool verified = false;
 
   for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
     if (pos->type == STUN::MESSAGE_INTEGRITY) {
       unsigned char computed_message_integrity[20];
-      compute_message_integrity(password, computed_message_integrity);
+      compute_message_integrity(pass, computed_message_integrity);
       verified = memcmp(computed_message_integrity, pos->message_integrity, 20) == 0;
       // Use the last.
     }
@@ -718,27 +718,27 @@ bool Message::verify_message_integrity(const std::string& password) const
   return verified;
 }
 
-void Message::compute_message_integrity(const std::string& password, unsigned char message_integrity[20]) const
+void Message::compute_message_integrity(const std::string& pass, unsigned char message_integrity[20]) const
 {
-  ACE_Message_Block* block = this->block->duplicate();
-  block->rd_ptr(block->base());
-  DCPS::Serializer serializer(block, encoding);
+  ACE_Message_Block* amb = this->block->duplicate();
+  amb->rd_ptr(amb->base());
+  DCPS::Serializer serializer(amb, encoding);
 
   // Write the length and resize for hashing.
-  block->wr_ptr(block->base() + 2);
+  amb->wr_ptr(amb->base() + 2);
   ACE_UINT16 message_length = length_for_message_integrity();
   serializer << message_length;
-  block->wr_ptr(block->base() + HEADER_SIZE + length_for_message_integrity() - 24);
+  amb->wr_ptr(amb->base() + HEADER_SIZE + length_for_message_integrity() - 24);
 
   // Compute the SHA1.
-  TheSecurityRegistry->builtin_config()->get_utility()->hmac(message_integrity, block->rd_ptr(), block->length(), password);
+  TheSecurityRegistry->builtin_config()->get_utility()->hmac(message_integrity, amb->rd_ptr(), amb->length(), pass);
 
   // Write the correct length.
-  block->wr_ptr(block->base() + 2);
+  amb->wr_ptr(amb->base() + 2);
   message_length = length();
   serializer << message_length;
 
-  block->release();
+  amb->release();
 }
 
 bool Message::has_error_code() const
@@ -809,17 +809,17 @@ bool Message::has_fingerprint() const
 
 ACE_UINT32 Message::compute_fingerprint() const
 {
-  ACE_Message_Block* block = this->block->duplicate();
-  block->rd_ptr(block->base());
-  DCPS::Serializer serializer(block, encoding);
+  ACE_Message_Block* amb = this->block->duplicate();
+  amb->rd_ptr(amb->base());
+  DCPS::Serializer serializer(amb, encoding);
 
   // Resize for hashing.
-  block->wr_ptr(block->base() + HEADER_SIZE + length() - 8);
+  amb->wr_ptr(amb->base() + HEADER_SIZE + length() - 8);
 
   // Compute the CRC-32
-  ACE_UINT32 crc = ACE::crc32(block->rd_ptr(), block->length());
+  ACE_UINT32 crc = ACE::crc32(amb->rd_ptr(), amb->length());
 
-  block->release();
+  amb->release();
 
   return crc ^ 0x5354554E;
 }
@@ -945,8 +945,8 @@ bool operator>>(DCPS::Serializer& serializer, Message& message)
 
 bool operator<<(DCPS::Serializer& serializer, const Message& message)
 {
-  ACE_UINT16 message_class = message.class_;
-  ACE_UINT16 message_method = message.method;
+  const ACE_UINT16 message_class = static_cast<ACE_UINT16>(message.class_);
+  const ACE_UINT16 message_method = static_cast<ACE_UINT16>(message.method);
   ACE_UINT16 message_type =
     ((message_method & 0xF80) << 2) |
     ((message_class & 0x2) << 7) |

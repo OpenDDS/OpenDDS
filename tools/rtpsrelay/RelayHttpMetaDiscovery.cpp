@@ -17,7 +17,9 @@ const HttpStatus HTTP_OK(200, "OK");
 const HttpStatus HTTP_NOT_FOUND(404, "Not Found");
 const HttpStatus HTTP_SERVICE_UNAVAILABLE(503, "Service Unavailable");
 
-const int HANDLER_ERROR = -1, HANDLER_REMOVE = -1, HANDLER_OK = 0;
+namespace {
+  const int HANDLER_ERROR = -1, HANDLER_REMOVE = -1, HANDLER_OK = 0;
+}
 
 int HttpConnection::open(void* x)
 {
@@ -49,7 +51,7 @@ int HttpConnection::handle_input(ACE_HANDLE)
     return HANDLER_ERROR;
   }
 
-  buffer_.wr_ptr(bytes);
+  buffer_.wr_ptr(static_cast<size_t>(bytes));
   const std::string request(buffer_.rd_ptr(), buffer_.length());
   if (relay_http_meta_discovery_->processRequest(peer(), request)) {
     peer().close_writer();
@@ -77,7 +79,7 @@ bool RelayHttpMetaDiscovery::processRequest(ACE_SOCK_Stream& peer,
     if (config_.log_http()) {
       ACE_INET_Addr remote;
       if (peer.get_remote_addr(remote) == 0) {
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: Request from %C\n%C\n%C\n"), OpenDDS::DCPS::LogAddr(remote).c_str(), request.c_str(), r.c_str()));
+        ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Request from %C\n%C\n%C\n", OpenDDS::DCPS::LogAddr(remote).c_str(), request.c_str(), r.c_str()));
       }
     }
     return true;
@@ -117,9 +119,9 @@ bool RelayHttpMetaDiscovery::requestIsComplete(const std::string& request,
 void RelayHttpMetaDiscovery::respond(std::stringstream& response) const
 {
   response << "HTTP/1.1 200 OK\r\n"
-           << "Content-Type: " << meta_discovery_content_type_ << "\r\n"
-           << "Content-Length: " << meta_discovery_content_.size() << "\r\n"
-           << "\r\n"
+           "Content-Type: " << meta_discovery_content_type_ << "\r\n"
+           "Content-Length: " << meta_discovery_content_.size() << "\r\n"
+           "\r\n"
            << meta_discovery_content_;
 }
 
@@ -133,9 +135,9 @@ void RelayHttpMetaDiscovery::respondStatus(std::stringstream& response,
                                            const HttpStatus& status) const
 {
   response << "HTTP/1.1 " << status.status() << " " << status.message() << "\r\n"
-           << "Content-Type: text/plain\r\n"
-           << "Content-Length: " << status.message().size() << "\r\n"
-           << "\r\n"
+           "Content-Type: text/plain\r\n"
+           "Content-Length: " << status.message().size() << "\r\n"
+           "\r\n"
            << status.message();
 }
 

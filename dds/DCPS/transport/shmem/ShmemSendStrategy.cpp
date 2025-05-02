@@ -124,17 +124,17 @@ ShmemSendStrategy::send_bytes_i(const iovec iov[], int n)
     return -1;
   }
 
-  for (ShmemData* iter = reinterpret_cast<ShmemData*>(mem);
-       iter->status_ != ShmemData::EndOfAlloc; ++iter) {
-    if (iter->status_ == ShmemData::RecvDone) {
-      alloc->free(iter->payload_);
+  for (ShmemData* it = reinterpret_cast<ShmemData*>(mem);
+       it->status_ != ShmemData::EndOfAlloc; ++it) {
+    if (it->status_ == ShmemData::RecvDone) {
+      alloc->free(it->payload_);
       // This will eventually be refcounted so instead of a free(), the previous
       // statement would decrement the refcount and check for 0 before free().
       // See the 'FUTURE' comment above.
-      iter->status_ = ShmemData::Free;
+      it->status_ = ShmemData::Free;
       VDBG_LVL((LM_DEBUG, "(%P|%t) ShmemSendStrategy for link %@ "
                 "releasing control block #%d\n", link_,
-                iter - reinterpret_cast<ShmemData*>(mem)), 5);
+                it - reinterpret_cast<ShmemData*>(mem)), 5);
     }
   }
 
@@ -173,7 +173,7 @@ ShmemSendStrategy::send_bytes_i(const iovec iov[], int n)
 
   ACE_OS::sema_post(&peer_semaphore_);
 
-  return pool_alloc_size + iov[0].iov_len;
+  return static_cast<ssize_t>(pool_alloc_size + iov[0].iov_len);
 }
 
 void

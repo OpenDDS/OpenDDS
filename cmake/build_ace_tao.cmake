@@ -21,6 +21,9 @@ set(_opendds_std "$<TARGET_PROPERTY:${_opendds_std_target},CXX_STANDARD>")
 find_package(Perl REQUIRED)
 if(OPENDDS_STATIC)
   list(APPEND _OPENDDS_CONFIGURE_ACE_TAO_ARGS --static=1)
+  if(NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY OR CMAKE_MSVC_RUNTIME_LIBRARY MATCHES "DLL")
+    list(APPEND _OPENDDS_CONFIGURE_ACE_TAO_ARGS --runtime-library=dll)
+  endif()
 endif()
 list(APPEND _OPENDDS_CONFIGURE_ACE_TAO_ARGS
   --compiler "${CMAKE_CXX_COMPILER}"
@@ -96,7 +99,7 @@ if(_OPENDDS_MPC_TYPE STREQUAL gnuace)
     USES_TERMINAL_BUILD TRUE # Needed for Ninja to show the ACE/TAO build
     INSTALL_COMMAND "${CMAKE_COMMAND}" -E echo "No install step"
   )
-elseif(_OPENDDS_MPC_TYPE MATCHES "^vs")
+elseif(_OPENDDS_MPC_TYPE MATCHES "^vs" OR _OPENDDS_MPC_TYPE MATCHES "^vc")
   set(sln ACE_TAO_for_OpenDDS.sln)
   execute_process(
     COMMAND

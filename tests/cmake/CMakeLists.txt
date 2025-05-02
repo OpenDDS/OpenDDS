@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3...3.27)
+cmake_minimum_required(VERSION 3.3...4.0)
 project(opendds_cmake_tests_root_project)
 enable_testing()
 
@@ -10,7 +10,7 @@ add_subdirectory(
   "../../DevGuideExamples/DCPS/Messenger"
   "${CMAKE_CURRENT_SOURCE_DIR}/../../DevGuideExamples/DCPS/Messenger/build")
 
-if(OPENDDS_QT AND OPENDDS_CXX11)
+if(OPENDDS_QT AND NOT OPENDDS_CXX_STD_YEAR LESS 2011)
   add_subdirectory(
     "../../examples/DCPS/ishapes"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../examples/DCPS/ishapes/build")

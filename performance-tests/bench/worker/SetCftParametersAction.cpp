@@ -1,12 +1,12 @@
 #include "SetCftParametersAction.h"
 
-#include "MemFunHandler.h"
+#include "MemFunEvent.h"
 #include "util.h"
 
 namespace Bench {
 
-SetCftParametersAction::SetCftParametersAction(ACE_Proactor& proactor)
-: proactor_(proactor)
+SetCftParametersAction::SetCftParametersAction(OpenDDS::DCPS::EventDispatcher_rch event_dispatcher)
+: event_dispatcher_(event_dispatcher)
 , started_(false)
 , stopped_(false)
 , set_period_(1, 0)
@@ -95,7 +95,7 @@ bool SetCftParametersAction::init(const ActionConfig& config, ActionReport& repo
     double period = 1.0 / set_frequency_prop->value.double_prop();
     int64_t sec = static_cast<int64_t>(period);
     uint64_t usec = static_cast<uint64_t>((period - static_cast<double>(sec)) * 1000000u);
-    set_period_ = ACE_Time_Value(sec, static_cast<suseconds_t>(usec));
+    set_period_ = OpenDDS::DCPS::TimeDuration(sec, static_cast<suseconds_t>(usec));
   }
 
   // Then check period as double (seconds)
@@ -104,16 +104,16 @@ bool SetCftParametersAction::init(const ActionConfig& config, ActionReport& repo
     double period = set_period_prop->value.double_prop();
     int64_t sec = static_cast<int64_t>(period);
     uint64_t usec = static_cast<uint64_t>((period - static_cast<double>(sec)) * 1000000u);
-    set_period_ = ACE_Time_Value(sec, static_cast<suseconds_t>(usec));
+    set_period_ = OpenDDS::DCPS::TimeDuration(sec, static_cast<suseconds_t>(usec));
   }
 
   // Finally check period as TimeStamp
   set_period_prop = get_property(config.params, "set_period", Builder::PVK_TIME);
   if (set_period_prop) {
-    set_period_ = ACE_Time_Value(set_period_prop->value.time_prop().sec, static_cast<suseconds_t>(set_period_prop->value.time_prop().nsec / 1000u));
+    set_period_ = OpenDDS::DCPS::TimeDuration(set_period_prop->value.time_prop().sec, static_cast<suseconds_t>(set_period_prop->value.time_prop().nsec / 1000u));
   }
 
-  handler_.reset(new MemFunHandler<SetCftParametersAction>(&SetCftParametersAction::do_set_expression_parameters, *this));
+  event_ = OpenDDS::DCPS::make_rch<MemFunEvent<SetCftParametersAction> >(shared_from_this(), &SetCftParametersAction::do_set_expression_parameters);
 
   return true;
 }
@@ -123,7 +123,8 @@ void SetCftParametersAction::test_start()
   std::unique_lock<std::mutex> lock(mutex_);
   if (!started_) {
     started_ = true;
-    proactor_.schedule_timer(*handler_, nullptr, ZERO_TIME, set_period_);
+    last_scheduled_time_ = OpenDDS::DCPS::MonotonicTimePoint::now();
+    event_dispatcher_->dispatch(event_);
   }
 }
 
@@ -132,7 +133,7 @@ void SetCftParametersAction::test_stop()
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
     stopped_ = true;
-    proactor_.cancel_timer(*handler_);
+    event_dispatcher_->cancel(event_);
   }
 }
 
@@ -156,6 +157,8 @@ void SetCftParametersAction::do_set_expression_parameters()
       }
 #endif
     }
+    last_scheduled_time_ += set_period_;
+    event_dispatcher_->schedule(event_, last_scheduled_time_);
   }
 }
 

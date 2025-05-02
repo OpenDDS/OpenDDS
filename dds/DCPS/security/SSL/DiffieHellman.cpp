@@ -180,7 +180,7 @@ int DH_2048_MODP_256_PRIME::pub_key(DDS::OctetSeq& dst)
 #else
     BIGNUM* pubkey = 0;
     if (EVP_PKEY_get_bn_param(k_, OSSL_PKEY_PARAM_PUB_KEY, &pubkey)) {
-      dst.length(BN_num_bytes(pubkey));
+      dst.length(static_cast<DDS::UInt32>(BN_num_bytes(pubkey)));
       if (0 < BN_bn2bin(pubkey, dst.get_buffer())) {
         result = 0;
       } else {
@@ -235,7 +235,7 @@ public:
   {
     if (!keypair) return 1;
 
-    if (0 == (pubkey = BN_bin2bn(pub_key.get_buffer(), pub_key.length(), 0))) {
+    if (0 == (pubkey = BN_bin2bn(pub_key.get_buffer(), static_cast<int>(pub_key.length()), 0))) {
       OPENDDS_SSL_LOG_ERR("BN_bin2bn failed");
       return 1;
     }

@@ -28,21 +28,14 @@ namespace DCPS {
 
 const size_t MAX_NETLINK_MESSAGE_SIZE = 4096;
 
-LinuxNetworkConfigMonitor::LinuxNetworkConfigMonitor(ReactorInterceptor_rch interceptor)
-  : interceptor_(interceptor)
-{
-  reactor(interceptor->reactor());
-}
+LinuxNetworkConfigMonitor::LinuxNetworkConfigMonitor(ReactorTask_rch reactor_task)
+  : reactor_task_(reactor_task)
+{}
 
 bool LinuxNetworkConfigMonitor::open()
 {
-  ReactorInterceptor_rch interceptor = interceptor_.lock();
-  if (!interceptor) {
-    return false;
-  }
-
   RcHandle<OpenHandler> oh = make_rch<OpenHandler>(rchandle_from(this));
-  interceptor->execute_or_enqueue(oh);
+  reactor_task_->execute_or_enqueue(oh);
   return oh->wait();
 }
 
@@ -55,19 +48,19 @@ bool LinuxNetworkConfigMonitor::OpenHandler::wait() const
   return retval_;
 }
 
-void LinuxNetworkConfigMonitor::OpenHandler::execute()
+void LinuxNetworkConfigMonitor::OpenHandler::execute(ReactorWrapper& reactor_wrapper)
 {
   RcHandle<LinuxNetworkConfigMonitor> lncm = lncm_.lock();
   if (!lncm) {
     return;
   }
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  retval_ = lncm->open_i();
+  retval_ = lncm->open_i(reactor_wrapper);
   done_ = true;
   condition_.notify_all();
 }
 
-bool LinuxNetworkConfigMonitor::open_i()
+bool LinuxNetworkConfigMonitor::open_i(ReactorWrapper& reactor_wrapper)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, socket_mutex_, false);
 
@@ -136,7 +129,7 @@ bool LinuxNetworkConfigMonitor::open_i()
 
   read_messages();
 
-  if (reactor()->register_handler(this, READ_MASK) != 0) {
+  if (reactor_wrapper.register_handler(this, READ_MASK) != 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open_i: could not register for input: %m\n")));
   }
 
@@ -145,13 +138,8 @@ bool LinuxNetworkConfigMonitor::open_i()
 
 bool LinuxNetworkConfigMonitor::close()
 {
-  ReactorInterceptor_rch interceptor = interceptor_.lock();
-  if (!interceptor) {
-    return false;
-  }
-
   RcHandle<CloseHandler> ch = make_rch<CloseHandler>(rchandle_from(this));
-  interceptor->execute_or_enqueue(ch);
+  reactor_task_->execute_or_enqueue(ch);
   return ch->wait();
 }
 
@@ -164,22 +152,22 @@ bool LinuxNetworkConfigMonitor::CloseHandler::wait() const
   return retval_;
 }
 
-void LinuxNetworkConfigMonitor::CloseHandler::execute()
+void LinuxNetworkConfigMonitor::CloseHandler::execute(ReactorWrapper& reactor_wrapper)
 {
   RcHandle<LinuxNetworkConfigMonitor> lncm = lncm_.lock();
   if (!lncm) {
     return;
   }
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  retval_ = lncm->close_i();
+  retval_ = lncm->close_i(reactor_wrapper);
   done_ = true;
   condition_.notify_all();
 }
 
-bool LinuxNetworkConfigMonitor::close_i()
+bool LinuxNetworkConfigMonitor::close_i(ReactorWrapper& reactor_wrapper)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, socket_mutex_, false);
-  reactor()->remove_handler(this, READ_MASK);
+  reactor_wrapper.remove_handler(this, READ_MASK);
 
   if (socket_.close() != 0) {
     if (log_level >= LogLevel::Error) {
@@ -230,7 +218,11 @@ void LinuxNetworkConfigMonitor::read_messages()
       return;
     }
 
-    for (const nlmsghdr* header = reinterpret_cast<const nlmsghdr*>(buffer);
+// clang warns about alignment for code in NLMSG_NEXT and related macros
+#ifdef __clang__
+#pragma GCC diagnostic ignored "-Wcast-align"
+#endif
+    for (nlmsghdr* header = reinterpret_cast<nlmsghdr*>(buffer);
          buffer_length >= 0 && NLMSG_OK(header, static_cast<size_t>(buffer_length));
          header = NLMSG_NEXT(header, buffer_length)) {
       process_message(header);
@@ -238,7 +230,7 @@ void LinuxNetworkConfigMonitor::read_messages()
   }
 }
 
-void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
+void LinuxNetworkConfigMonitor::process_message(nlmsghdr* header)
 {
   switch (header->nlmsg_type) {
   case NLMSG_ERROR:
@@ -250,45 +242,9 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
     }
     break;
   case RTM_NEWADDR:
-    {
-      const ifaddrmsg* msg = reinterpret_cast<ifaddrmsg*>(NLMSG_DATA(header));
-      size_t address_length = 0;
-      switch (msg->ifa_family) {
-      case AF_INET:
-        address_length = 4;
-        break;
-      case AF_INET6:
-        address_length = 16;
-        break;
-      default:
-        return;
-      }
-      int rta_length = IFA_PAYLOAD(header);
-      for (const rtattr* attr = reinterpret_cast<const rtattr*>(IFA_RTA(msg));
-           RTA_OK(attr, rta_length);
-           attr = RTA_NEXT(attr, rta_length)) {
-        if (attr->rta_type == IFA_ADDRESS) {
-          if (RTA_PAYLOAD(attr) != address_length) {
-            if (log_level >= LogLevel::Warning) {
-              ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LinuxNetworkConfigMonitor::process_message: incorrect address byte count\n"));
-            }
-            return;
-          }
-          ACE_INET_Addr addr;
-          addr.set_address(reinterpret_cast<const char*>(RTA_DATA(attr)), address_length, 0);
-          NetworkInterfaceMap::const_iterator pos = network_interface_map_.find(msg->ifa_index);
-          if (pos != network_interface_map_.end()) {
-            set(NetworkInterfaceAddress(pos->second.name, pos->second.can_multicast, NetworkAddress(addr)));
-          } else if (log_level >= LogLevel::Warning) {
-            ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LinuxNetworkConfigMonitor::process_message: cannot find interface for address\n"));
-          }
-        }
-      }
-    }
-    break;
   case RTM_DELADDR:
     {
-      const ifaddrmsg* msg = reinterpret_cast<ifaddrmsg*>(NLMSG_DATA(header));
+      ifaddrmsg* msg = reinterpret_cast<ifaddrmsg*>(NLMSG_DATA(header));
       size_t address_length = 0;
       switch (msg->ifa_family) {
       case AF_INET:
@@ -300,8 +256,10 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
       default:
         return;
       }
-      int rta_length = IFA_PAYLOAD(header);
-      for (const rtattr* attr = reinterpret_cast<const rtattr*>(IFA_RTA(msg));
+      unsigned int rta_length = IFA_PAYLOAD(header);
+      const int address_length_int = static_cast<int>(address_length);
+      const bool new_addr = header->nlmsg_type == RTM_NEWADDR;
+      for (rtattr* attr = reinterpret_cast<rtattr*>(IFA_RTA(msg));
            RTA_OK(attr, rta_length);
            attr = RTA_NEXT(attr, rta_length)) {
         if (attr->rta_type == IFA_ADDRESS) {
@@ -312,11 +270,24 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
             return;
           }
 
-          NetworkInterfaceMap::iterator pos = network_interface_map_.find(msg->ifa_index);
-          if (pos != network_interface_map_.end()) {
+          const char* addr_str = reinterpret_cast<const char*>(RTA_DATA(attr));
+          const int ifa_index = static_cast<int>(msg->ifa_index);
+          if (new_addr) {
             ACE_INET_Addr addr;
-            addr.set_address(reinterpret_cast<const char*>(RTA_DATA(attr)), address_length, 0);
-            remove_address(pos->second.name, NetworkAddress(addr));
+            addr.set_address(addr_str, address_length_int, 0);
+            NetworkInterfaceMap::const_iterator pos = network_interface_map_.find(ifa_index);
+            if (pos != network_interface_map_.end()) {
+              set(NetworkInterfaceAddress(pos->second.name, pos->second.can_multicast, NetworkAddress(addr)));
+            } else if (log_level >= LogLevel::Warning) {
+              ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LinuxNetworkConfigMonitor::process_message: cannot find interface for address\n"));
+            }
+          } else {
+            NetworkInterfaceMap::iterator pos = network_interface_map_.find(ifa_index);
+            if (pos != network_interface_map_.end()) {
+              ACE_INET_Addr addr;
+              addr.set_address(addr_str, address_length_int, 0);
+              remove_address(pos->second.name, NetworkAddress(addr));
+            }
           }
         }
       }
@@ -325,9 +296,9 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
   case RTM_NEWLINK:
     {
       OPENDDS_STRING name;
-      const ifinfomsg* msg = reinterpret_cast<ifinfomsg*>(NLMSG_DATA(header));
-      int rta_length = IFLA_PAYLOAD(header);
-      for (const rtattr* attr = reinterpret_cast<const rtattr*>(IFLA_RTA(msg));
+      ifinfomsg* msg = reinterpret_cast<ifinfomsg*>(NLMSG_DATA(header));
+      unsigned int rta_length = IFLA_PAYLOAD(header);
+      for (rtattr* attr = reinterpret_cast<rtattr*>(IFLA_RTA(msg));
            RTA_OK(attr, rta_length);
            attr = RTA_NEXT(attr, rta_length)) {
         if (attr->rta_type == IFLA_IFNAME) {
@@ -346,7 +317,7 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
     break;
   case RTM_DELLINK:
     {
-      const ifinfomsg* msg = reinterpret_cast<ifinfomsg*>(NLMSG_DATA(header));
+      ifinfomsg* msg = reinterpret_cast<ifinfomsg*>(NLMSG_DATA(header));
       NetworkInterfaceMap::iterator pos = network_interface_map_.find(msg->ifi_index);
       if (pos != network_interface_map_.end()) {
         remove_interface(pos->second.name);
