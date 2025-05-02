@@ -118,8 +118,8 @@ jobs:
         OPENDDS_INSTALL_PREFIX="$(realpath prefix)"
         echo "OPENDDS_INSTALL_PREFIX=$OPENDDS_INSTALL_PREFIX" >> $GITHUB_ENV
         cmake --install build --prefix "$OPENDDS_INSTALL_PREFIX"
-        # Ensure we can only used the installed OpenDDS
-        rm -fr build
+        # Ensure we can only use the installed OpenDDS, but keep ACE/TAO.
+        find ./build -mindepth 1 ! -regex '^./build/ACE_TAO\(/.*\)?' -delete
     - name: Configure Tests Using Installed OpenDDS
       run: |
         cd OpenDDS
@@ -191,8 +191,8 @@ jobs:
         OPENDDS_INSTALL_PREFIX="$(realpath prefix)"
         echo "OPENDDS_INSTALL_PREFIX=$OPENDDS_INSTALL_PREFIX" >> $GITHUB_ENV
         cmake --install build --prefix "$OPENDDS_INSTALL_PREFIX"
-        # Ensure we can only used the installed OpenDDS
-        rm -fr build
+        # Ensure we can only use the installed OpenDDS, but keep ACE/TAO.
+        find ./build -mindepth 1 ! -regex '^./build/ACE_TAO\(/.*\)?' -delete
     - name: Configure Tests Using Installed OpenDDS
       run: |
         cd OpenDDS
