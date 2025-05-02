@@ -11628,7 +11628,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE -DCMAKE_CXX_STANDARD=20
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
         cmake --build build
     - name: check build configuration
       shell: cmd
