@@ -799,16 +799,6 @@ size_t RtpsUdpSendStrategy::max_message_size() const
     ;
 }
 
-StatisticSeq RtpsUdpSendStrategy::stats_template()
-{
-  return {}; //TODO
-}
-
-void RtpsUdpSendStrategy::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
-{
-
-}
-
 } // namespace DCPS
 } // namespace OpenDDS
 

@@ -158,7 +158,7 @@ StatisticSeq TransportImpl::stats_template()
 {
   static const DDS::UInt32 num_local_stats = 2;
   StatisticSeq stats(num_local_stats);
-  stats.length(stats.maximum());
+  stats.length(num_local_stats);
   stats[0].name = "TransportImplPendingConnections";
   stats[1].name = "TransportImplReactorTaskCmdQueue";
   return stats;

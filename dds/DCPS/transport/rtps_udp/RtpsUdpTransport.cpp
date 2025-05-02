@@ -1141,7 +1141,7 @@ StatisticSeq RtpsUdpTransport::stats_template()
 {
   static const DDS::UInt32 num_local_stats = 2;
   const StatisticSeq base = TransportImpl::stats_template(),
-    link;// = RtpsUdpDataLink::stats_template();
+    link = RtpsUdpDataLink::stats_template();
   StatisticSeq stats(base.length() + num_local_stats + link.length());
   stats.length(stats.maximum());
   for (DDS::UInt32 i = 0; i < base.length(); ++i) {
@@ -1160,7 +1160,7 @@ void RtpsUdpTransport::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
   TransportImpl::fill_stats(stats, idx);
   stats[idx++].value = job_queue_ ? job_queue_->size() : 0;
   stats[idx++].value =
-#ifdef DDS_HAS_MINIMUM_BIT
+#if !OPENDDS_CONFIG_SECURITY || defined DDS_HAS_MINIMUM_BIT
     0;
 #else
     deferred_connection_records_.size();
