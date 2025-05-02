@@ -932,7 +932,8 @@ Dependencies
 .. cmake:var:: OPENDDS_RAPIDJSON
   :no-contents-entry:
 
-  Path to :ref:`deps-rapidjson`
+  Path to :ref:`deps-rapidjson`.
+  When building OpenDDS with CMake, it will be installed by default unless :cmake:var:`OPENDDS_INSTALL_RAPIDJSON` is set to ``FALSE``.
 
 .. cmake:var:: OPENDDS_XERCES3
   :no-contents-entry:
@@ -940,12 +941,14 @@ Dependencies
   Path to :ref:`deps-xerces`
 
 .. cmake:var:: OPENDDS_HOST_TOOLS
+  :no-contents-entry:
 
   A directory that contains a ``bin`` directory with ``opendds_idl`` to be used for cross-compiling.
 
   .. versionadded:: 3.26
 
 .. cmake:var:: OPENDDS_ACE_TAO_HOST_TOOLS
+  :no-contents-entry:
 
   A directory that contains a ``bin`` directory with ``tao_idl`` and ``ace_gperf`` to be used for cross-compiling.
   This isn't set by default unless :cmake:var:`OPENDDS_HOST_TOOLS` is set, in which case it defaults to that.

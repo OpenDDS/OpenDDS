@@ -14,7 +14,6 @@ endif()
 set(CPACK_PACKAGE_CONTACT info@opendds.org)
 
 set(OPENDDS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE INTERNAL "")
-set(_OPENDDS_CMAKE_DIR "${OPENDDS_SOURCE_DIR}/cmake" CACHE INTERNAL "")
 
 macro(_opendds_add_examples_and_tests)
   if(NOT DEFINED _opendds_build_tests_default)
@@ -63,6 +62,7 @@ set(OPENDDS_BIN_DIR "${OPENDDS_BUILD_DIR}/bin" CACHE INTERNAL "")
 set(OPENDDS_LIB_DIR "${OPENDDS_BUILD_DIR}/lib" CACHE INTERNAL "")
 list(APPEND CMAKE_PREFIX_PATH "${OPENDDS_SOURCE_DIR}")
 list(APPEND CMAKE_FIND_ROOT_PATH "${OPENDDS_SOURCE_DIR}")
+set(_OPENDDS_CMAKE_DIR "${OPENDDS_SOURCE_DIR}/cmake" CACHE INTERNAL "")
 
 # Get and build ACE/TAO if OPENDDS_ACE wasn't defined and initialize the core
 # of the CMake support in init.cmake.
