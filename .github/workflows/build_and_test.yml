@@ -10916,7 +10916,7 @@ jobs:
       run: |
         cd /d C:\OpenDDS
         call setenv.cmd
-        cmake -S . -B build -A Win32 -DCMAKE_PREFIX_PATH=%DDS_ROOT% -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake -S . -B build -A Win32 -DOpenDDS_ROOT=%DDS_ROOT% -DOPENDDS_JUST_BUILD_TESTS=TRUE
         cmake --build build
     - name: check build configuration
       shell: cmd
@@ -11313,7 +11313,7 @@ jobs:
       run: |
         cd /d C:\OpenDDS
         call setenv.cmd
-        cmake -S . -B build -A Win32 -DCMAKE_PREFIX_PATH=%DDS_ROOT% -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake -S . -B build -A Win32 -DOpenDDS_ROOT=%DDS_ROOT% -DOPENDDS_JUST_BUILD_TESTS=TRUE
         cmake --build build
     - name: create autobuild config
       shell: bash
