@@ -10904,7 +10904,7 @@ jobs:
     - name: move OpenDDS to C drive
       shell: bash
       run: |
-        mv OpenDDS /c/
+        cp -r OpenDDS /c/
         cd /c/OpenDDS
         git clean -dfX
         cp $GITHUB_WORKSPACE/OpenDDS/setenv.cmd .
@@ -11296,7 +11296,7 @@ jobs:
     - name: move OpenDDS to C drive
       shell: bash
       run: |
-        mv OpenDDS /c/
+        cp -r OpenDDS /c/
         cd /c/OpenDDS
         git clean -dfX
         cp $GITHUB_WORKSPACE/OpenDDS/setenv.cmd .

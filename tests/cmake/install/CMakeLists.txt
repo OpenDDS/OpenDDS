@@ -7,8 +7,8 @@ include(opendds_testing)
 
 include(ExternalProject)
 
-if(OPENDDS_IS_BEING_BUILT)
-  message(FATAL_ERROR "This test doesn't work when building OpenDDS at the same time yet.")
+if(OPENDDS_BUILT_USING_CMAKE)
+  message(FATAL_ERROR "This test doesn't work with OpenDDS built using CMake.")
 endif()
 
 set(INSTALL_IMPORTED_RUNTIME_ARTIFACTS TRUE)

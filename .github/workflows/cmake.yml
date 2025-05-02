@@ -107,7 +107,7 @@ jobs:
     - name: Build
       run: |
         cd OpenDDS
-        cmake --build build -- -j $(getconf _NPROCESSORS_ONLN)
+        cmake --build build --verbose -j $(getconf _NPROCESSORS_ONLN)
     - name: Run Tests
       run: |
         cd OpenDDS/build
@@ -135,7 +135,7 @@ jobs:
     - name: Build Tests Using Installed OpenDDS
       run: |
         cd OpenDDS
-        cmake --build build-tests -- -j $(getconf _NPROCESSORS_ONLN)
+        cmake --build build-tests --verbose -j $(getconf _NPROCESSORS_ONLN)
     - name: Run Tests Using Installed OpenDDS
       run: |
         cd OpenDDS/build-tests
@@ -179,7 +179,7 @@ jobs:
     - name: Build
       run: |
         cd OpenDDS
-        cmake --build build -- -j $(getconf _NPROCESSORS_ONLN)
+        cmake --build build --verbose -j $(getconf _NPROCESSORS_ONLN)
     - name: Run Tests
       run: |
         cd OpenDDS/build
@@ -206,7 +206,7 @@ jobs:
     - name: Build Tests Using Installed OpenDDS
       run: |
         cd OpenDDS
-        cmake --build build-tests -- -j $(getconf _NPROCESSORS_ONLN)
+        cmake --build build-tests --verbose -j $(getconf _NPROCESSORS_ONLN)
     - name: Run Tests Using Installed OpenDDS
       run: |
         cd OpenDDS/build-tests
@@ -258,7 +258,7 @@ jobs:
     - name: Build
       run: |
         cd OpenDDS
-        cmake --build build
+        cmake --build build --verbose
     - name: Run Tests
       run: |
         cd OpenDDS/build
@@ -295,7 +295,7 @@ jobs:
     - name: Build Host Tools
       run: |
         cd OpenDDS
-        cmake --build build-host
+        cmake --build build-host --verbose
     - name: Configure Target
       run: |
         cd OpenDDS
@@ -310,7 +310,7 @@ jobs:
     - name: Build Target
       run: |
         cd OpenDDS
-        cmake --build build-target
+        cmake --build build-target --verbose
 
   w22:
 
@@ -362,7 +362,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        cmake --build build --config Debug
+        cmake --build build --verbose --config Debug
     - name: Run Tests
       shell: cmd
       run: |
@@ -423,7 +423,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        cmake --build build --config Debug
+        cmake --build build --verbose --config Debug
     - name: Run Tests
       shell: cmd
       run: |
@@ -481,7 +481,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        cmake --build build --config Release
+        cmake --build build --verbose --config Release
     - name: Run Tests
       shell: cmd
       run: |
@@ -538,7 +538,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        cmake --build build --config Release
+        cmake --build build --verbose --config Release
     - name: Run Tests
       shell: cmd
       run: |

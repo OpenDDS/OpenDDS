@@ -16,6 +16,6 @@ endif()
 
 add_subdirectory(include_subdir)
 
-if(NOT OPENDDS_IS_BEING_BUILT)
+if(NOT OPENDDS_BUILT_USING_CMAKE)
   add_subdirectory(install)
 endif()

@@ -35,8 +35,8 @@ if(NOT GTest_FOUND)
   if(NOT DEFINED gtest_force_shared_crt)
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
   endif()
-  # GoogleTest will install by default
   if(NOT DEFINED INSTALL_GTEST)
+    # GoogleTest will install by default otherwise
     set(INSTALL_GTEST FALSE CACHE BOOL "" FORCE)
   endif()
   if(has_fetch_content)
