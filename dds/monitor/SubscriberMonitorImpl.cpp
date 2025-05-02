@@ -15,11 +15,11 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace DCPS {
+namespace Monitor {
 
 
-SubscriberMonitorImpl::SubscriberMonitorImpl(SubscriberImpl* sub,
-              OpenDDS::DCPS::SubscriberReportDataWriter_ptr sub_writer)
+SubscriberMonitorImpl::SubscriberMonitorImpl(DCPS::SubscriberImpl* sub,
+                                             SubscriberReportDataWriter_ptr sub_writer)
   : sub_(sub),
     sub_writer_(SubscriberReportDataWriter::_duplicate(sub_writer))
 {
@@ -35,21 +35,21 @@ SubscriberMonitorImpl::report() {
     SubscriberReport report;
     report.handle = sub_->get_instance_handle();
     DDS::DomainParticipant_var dp = sub_->get_participant();
-    OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<DomainParticipantImpl*>(dp.in());
+    OpenDDS::DCPS::DomainParticipantImpl* dpi = dynamic_cast<DCPS::DomainParticipantImpl*>(dp.in());
     if (!dpi) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) SubscriberMonitorImpl::report():")
         ACE_TEXT(" failed to obtain DomainParticipantImpl.\n")));
       return;
     }
     report.dp_id   = dpi->get_id();
-    TransportImpl_rch ti; //TODO: transport    = sub_->get_transport_impl();
+    DCPS::TransportImpl_rch ti; //TODO: transport    = sub_->get_transport_impl();
     // TODO: remove transport_id and replace with name
     report.transport_id = 0;
-    SubscriberImpl::SubscriptionIdVec readers;
+    DCPS::SubscriberImpl::SubscriptionIdVec readers;
     sub_->get_subscription_ids(readers);
     CORBA::ULong length = 0;
     report.readers.length(static_cast<CORBA::ULong>(readers.size()));
-    for (SubscriberImpl::SubscriptionIdVec::iterator iter = readers.begin();
+    for (DCPS::SubscriberImpl::SubscriptionIdVec::iterator iter = readers.begin();
          iter != readers.end();
          ++iter) {
       report.readers[length++] = *iter;
@@ -59,7 +59,7 @@ SubscriberMonitorImpl::report() {
 }
 
 
-} // namespace DCPS
-} // namespace OpenDDS
+}
+}
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

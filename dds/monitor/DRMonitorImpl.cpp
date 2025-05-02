@@ -14,11 +14,11 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace DCPS {
+namespace Monitor {
 
 
-DRMonitorImpl::DRMonitorImpl(DataReaderImpl* dr,
-              OpenDDS::DCPS::DataReaderReportDataWriter_ptr dr_writer)
+DRMonitorImpl::DRMonitorImpl(DCPS::DataReaderImpl* dr,
+                             DataReaderReportDataWriter_ptr dr_writer)
   : dr_(dr)
   , dr_writer_(DataReaderReportDataWriter::_duplicate(dr_writer))
 {
@@ -37,20 +37,20 @@ DRMonitorImpl::report() {
     report.sub_handle = sub->get_instance_handle();
     report.dr_id = dr_->get_guid();
     report.topic_id = dr_->get_topic_id();
-    DataReaderImpl::InstanceHandleVec instances;
+    DCPS::DataReaderImpl::InstanceHandleVec instances;
     dr_->get_instance_handles(instances);
     CORBA::ULong length = 0;
     report.instances.length(static_cast<CORBA::ULong>(instances.size()));
-    for (DataReaderImpl::InstanceHandleVec::iterator iter = instances.begin();
+    for (DCPS::DataReaderImpl::InstanceHandleVec::iterator iter = instances.begin();
          iter != instances.end();
          ++iter) {
       report.instances[length++] = *iter;
     }
-    DataReaderImpl::WriterStatePairVec writer_states;
+    DCPS::DataReaderImpl::WriterStatePairVec writer_states;
     dr_->get_writer_states(writer_states);
     length = 0;
     report.associations.length(static_cast<CORBA::ULong>(writer_states.size()));
-    for (DataReaderImpl::WriterStatePairVec::iterator iter = writer_states.begin();
+    for (DCPS::DataReaderImpl::WriterStatePairVec::iterator iter = writer_states.begin();
          iter != writer_states.end();
          ++iter) {
       report.associations[length].dw_id = iter->first;
@@ -61,7 +61,7 @@ DRMonitorImpl::report() {
   }
 }
 
-} // namespace DCPS
-} // namespace OpenDDS
+}
+}
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
