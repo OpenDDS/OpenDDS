@@ -14,10 +14,10 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace DCPS {
+namespace Monitor {
 
-DWMonitorImpl::DWMonitorImpl(DataWriterImpl* dw,
-              OpenDDS::DCPS::DataWriterReportDataWriter_ptr dw_writer)
+DWMonitorImpl::DWMonitorImpl(DCPS::DataWriterImpl* dw,
+                             DataWriterReportDataWriter_ptr dw_writer)
   : dw_(dw)
   , dw_writer_(DataWriterReportDataWriter::_duplicate(dw_writer))
 {
@@ -36,18 +36,18 @@ DWMonitorImpl::report() {
     report.pub_handle = pub->get_instance_handle();
     report.dw_id = dw_->get_guid();
     DDS::Topic_var topic = dw_->get_topic();
-    OpenDDS::DCPS::TopicImpl* ti = dynamic_cast<TopicImpl*>(topic.in());
+    OpenDDS::DCPS::TopicImpl* ti = dynamic_cast<DCPS::TopicImpl*>(topic.in());
     if (!ti) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DWMonitorImpl::report():")
         ACE_TEXT(" failed to obtain TopicImpl.\n")));
       return;
     }
     report.topic_id = ti->get_id();
-    DataWriterImpl::InstanceHandleVec instances;
+    DCPS::DataWriterImpl::InstanceHandleVec instances;
     dw_->get_instance_handles(instances);
     CORBA::ULong length = 0;
     report.instances.length(static_cast<CORBA::ULong>(instances.size()));
-    for (DataWriterImpl::InstanceHandleVec::iterator iter = instances.begin();
+    for (DCPS::DataWriterImpl::InstanceHandleVec::iterator iter = instances.begin();
          iter != instances.end();
          ++iter) {
       report.instances[length++] = *iter;
@@ -66,7 +66,7 @@ DWMonitorImpl::report() {
   }
 }
 
-} // namespace DCPS
-} // namespace OpenDDS
+}
+}
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

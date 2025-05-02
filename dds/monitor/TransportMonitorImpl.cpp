@@ -14,13 +14,13 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace DCPS {
+namespace Monitor {
 
 TransportMonitorImpl::TransportReportVec TransportMonitorImpl::queue_;
 ACE_Recursive_Thread_Mutex TransportMonitorImpl::queue_lock_;
 
-TransportMonitorImpl::TransportMonitorImpl(TransportImpl* /*transport*/,
-              OpenDDS::DCPS::TransportReportDataWriter_ptr transport_writer)
+TransportMonitorImpl::TransportMonitorImpl(DCPS::TransportImpl* /*transport*/,
+                                           TransportReportDataWriter_ptr transport_writer)
   : transport_writer_(TransportReportDataWriter::_duplicate(transport_writer))
 {
   char host[256];
@@ -64,7 +64,7 @@ TransportMonitorImpl::report() {
 }
 
 
-} // namespace DCPS
-} // namespace OpenDDS
+}
+}
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
