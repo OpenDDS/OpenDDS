@@ -72,16 +72,13 @@ public:
   bool end_sequence();
   bool begin_element();
   bool end_element();
+
   bool begin_map(XTypes::TypeKind key_kind, XTypes::TypeKind value_kind);
   bool end_map();
-
-  bool pairs_remaining();
-  bool begin_pair();
-  bool begin_pair_key();
-  bool end_pair_key();
-  bool begin_pair_value();
-  bool end_pair_value();
-  bool end_pair();
+  bool begin_key();
+  bool end_key();
+  bool begin_value();
+  bool end_value();
 
   bool read_boolean(ACE_CDR::Boolean& value);
   bool read_byte(ACE_CDR::Octet& value);
@@ -366,25 +363,11 @@ template <typename InputStream>
 bool JsonValueReader<InputStream>::begin_map(XTypes::TypeKind key_kind, XTypes::TypeKind value_kind)
 {
   peek();
-  return consume(kStartArray);
-}
-
-template <typename InputStream>
-bool JsonValueReader<InputStream>::pairs_remaining()
-{
-  peek();
-  return token_type_ != kEndArray;
-}
-
-template <typename InputStream>
-bool JsonValueReader<InputStream>::begin_pair()
-{
-  peek();
   return consume(kStartObject);
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::begin_pair_key()
+bool JsonValueReader<InputStream>::begin_key()
 {
   if (peek() == kKey) {
     return consume(kKey);
@@ -393,13 +376,13 @@ bool JsonValueReader<InputStream>::begin_pair_key()
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::end_pair_key()
+bool JsonValueReader<InputStream>::end_key()
 {
   return true;
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::begin_pair_value()
+bool JsonValueReader<InputStream>::begin_value()
 {
   if (peek() == kKey) {
     return consume(kKey);
@@ -408,23 +391,16 @@ bool JsonValueReader<InputStream>::begin_pair_value()
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::end_pair_value()
+bool JsonValueReader<InputStream>::end_value()
 {
   return true;
-}
-
-template <typename InputStream>
-bool JsonValueReader<InputStream>::end_pair()
-{
-  peek();
-  return consume(kEndObject);
 }
 
 template <typename InputStream>
 bool JsonValueReader<InputStream>::end_map()
 {
   peek();
-  return consume(kEndArray);
+  return consume(kEndObject);
 }
 
 template <typename InputStream>
