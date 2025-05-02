@@ -154,7 +154,7 @@ message(STATUS "Using ACE ${OPENDDS_ACE_VERSION} at ${ACE_ROOT}")
 message(STATUS "Using TAO ${OPENDDS_TAO_VERSION} at ${TAO_ROOT}")
 
 function(_opendds_cxx_std_to_year out_var cxx_std)
-  if(cxx_std STREQUAL 98)
+  if(cxx_std STREQUAL 98 OR cxx_std STREQUAL 03) # 2003 is not used in CMake's CXX_STANDARD property
     set(year 1998)
   else()
     math(EXPR year "2000 + ${cxx_std}")
@@ -369,11 +369,12 @@ function(_opendds_set_cxx_std)
   endif()
 
   _opendds_cxx_std_from_year(cxx_std ${cxx_std_year})
+  unset(OPENDDS_CXX_STD PARENT_SCOPE)
   set(OPENDDS_CXX_STD ${cxx_std} CACHE STRING
     "Minimum required C++ standard (same values as CMAKE_CXX_STANDARD)" FORCE)
   message(STATUS "OPENDDS_CXX_STD: ${OPENDDS_CXX_STD} (from ${cxx_std_year_source})")
   set(OPENDDS_CXX_STD_YEAR ${cxx_std_year} CACHE STRING
-    "Minimum required C++ standard year (do not set mannually)" FORCE)
+    "Minimum required C++ standard year (do not set manually)" FORCE)
 endfunction()
 
 if(NOT DEFINED OPENDDS_CXX_STD_YEAR)

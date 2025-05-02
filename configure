@@ -2979,7 +2979,7 @@ sub write_cmake_file {
     }
 
     if (defined($cxx_std)) {
-      print_cmake_config($fh, 'OPENDDS_CXX_STD', $cxx_std);
+      print_cmake_config($fh, 'CXX_STD', $cxx_std);
     }
 
     # TODO(iguessthislldo): Move to a smarter system that can use existing
