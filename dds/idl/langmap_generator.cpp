@@ -128,12 +128,6 @@ struct GeneratorBase {
       mt = "OPENDDS_OPTIONAL_NS::optional<" + mt + ">";
     }
     return mt;
-    if (af.map_) {
-      return af.type_name_;
-    }
-#endif
-
-    return map_type(af.type_);
   }
 
   virtual std::string map_type_string(AST_PredefinedType::PredefinedType chartype, bool constant)
@@ -1467,13 +1461,6 @@ struct Cxx11Generator : GeneratorBase {
     be_global->add_include("<map>", BE_GlobalData::STREAM_LANG_H);
     return "std::map<" + map_type(map->key_type()) + ", " + map_type(map->value_type()) + '>';
   }
-
-#if OPENDDS_HAS_IDL_MAP
-  void gen_map(UTL_ScopedName* tdname, AST_Map* map)
-  {
-    gen_map(tdname->last_component()->get_string(), map_type(map->key_type()), map_type(map->value_type()));
-  }
-#endif
 
   static void gen_common_strunion_pre(const char* nm)
   {
