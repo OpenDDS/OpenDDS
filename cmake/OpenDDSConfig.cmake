@@ -6,7 +6,7 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-cmake_minimum_required(VERSION 3.3...3.27)
+cmake_minimum_required(VERSION 3.3...4.0)
 
 if(OPENDDS_CMAKE_VERBOSE)
   message(STATUS "find_package(OpenDDS) called from ${PROJECT_NAME}")
@@ -15,6 +15,11 @@ set(_opendds_old_cmake_message_indent "${CMAKE_MESSAGE_INDENT}")
 list(APPEND CMAKE_MESSAGE_INDENT "  ")
 
 include("${CMAKE_CURRENT_LIST_DIR}/init.cmake")
+if(NOT _OPENDDS_INIT_CMAKE_COMPLETE)
+  set(CMAKE_MESSAGE_INDENT "${_opendds_cmake_message_indent}")
+  message(SEND_ERROR "init.cmake called from OpenDDSConfig.cmake didn't complete")
+  return()
+endif()
 include("${CMAKE_CURRENT_LIST_DIR}/ace_group.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/tao_group.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/opendds_group.cmake")

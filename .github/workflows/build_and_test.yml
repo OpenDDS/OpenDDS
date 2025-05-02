@@ -10916,7 +10916,7 @@ jobs:
       run: |
         cd /d C:\OpenDDS
         call setenv.cmd
-        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE -A Win32
+        cmake -S . -B build -A Win32 -DCMAKE_PREFIX_PATH=%DDS_ROOT% -DOPENDDS_JUST_BUILD_TESTS=TRUE
         cmake --build build
     - name: check build configuration
       shell: cmd
@@ -11293,7 +11293,7 @@ jobs:
         cd OpenDDS
         tar xvfJ build_w22_x86_i0_j_FM-1f.tar.xz
         rm -f build_w22_x86_i0_j_FM-1f.tar.xz
-    - name: move OpenDDS to C drive
+    - name: Move OpenDDS to C Drive
       shell: bash
       run: |
         cp -r OpenDDS /c/
@@ -11313,7 +11313,7 @@ jobs:
       run: |
         cd /d C:\OpenDDS
         call setenv.cmd
-        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE -A Win32
+        cmake -S . -B build -A Win32 -DCMAKE_PREFIX_PATH=%DDS_ROOT% -DOPENDDS_JUST_BUILD_TESTS=TRUE
         cmake --build build
     - name: create autobuild config
       shell: bash

@@ -1,7 +1,7 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-cmake_minimum_required(VERSION 3.3.2...3.27)
+cmake_minimum_required(VERSION 3.3.2...4.0)
 
 if(_OPENDDS_ACE_GROUP_CMAKE)
   return()
