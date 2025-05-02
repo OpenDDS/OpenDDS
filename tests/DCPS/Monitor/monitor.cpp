@@ -71,7 +71,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     // Create DomainParticipant
     DDS::DomainParticipant_var participant =
-      dpf->create_participant(OpenDDS::DCPS::MONITOR_DOMAIN_ID,
+      dpf->create_participant(OpenDDS::Monitor::MONITOR_DOMAIN_ID,
                               PARTICIPANT_QOS_DEFAULT,
                               DDS::DomainParticipantListener::_nil(),
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -99,9 +99,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
     DDS::DataReader_var reader;
 
-    // Register for OpenDDS::DCPS::ServiceParticipantReport
-    OpenDDS::DCPS::ServiceParticipantReportTypeSupport_var sp_ts =
-      new OpenDDS::DCPS::ServiceParticipantReportTypeSupportImpl();
+    // Register for OpenDDS::Monitor::ServiceParticipantReport
+    OpenDDS::Monitor::ServiceParticipantReportTypeSupport_var sp_ts =
+      new OpenDDS::Monitor::ServiceParticipantReportTypeSupportImpl();
     if (sp_ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
@@ -112,7 +112,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     reader = create_data_reader(participant.in(),
                                 sub.in(),
                                 sp_type_name.in(),
-                                OpenDDS::DCPS::SERVICE_PARTICIPANT_MONITOR_TOPIC,
+                                OpenDDS::Monitor::SERVICE_PARTICIPANT_MONITOR_TOPIC,
                                 dr_qos,
                                 sp_drl);
     if (CORBA::is_nil(reader.in())) {
@@ -121,9 +121,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
     }
 
-    // Register for OpenDDS::DCPS::DomainParticipantReport
-    OpenDDS::DCPS::DomainParticipantReportTypeSupport_var dp_ts =
-      new OpenDDS::DCPS::DomainParticipantReportTypeSupportImpl();
+    // Register for OpenDDS::Monitor::DomainParticipantReport
+    OpenDDS::Monitor::DomainParticipantReportTypeSupport_var dp_ts =
+      new OpenDDS::Monitor::DomainParticipantReportTypeSupportImpl();
     if (dp_ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
@@ -134,7 +134,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     reader = create_data_reader(participant.in(),
                                 sub.in(),
                                 dp_type_name.in(),
-                                OpenDDS::DCPS::DOMAIN_PARTICIPANT_MONITOR_TOPIC,
+                                OpenDDS::Monitor::DOMAIN_PARTICIPANT_MONITOR_TOPIC,
                                 dr_qos,
                                 dp_drl);
     if (CORBA::is_nil(reader.in())) {
@@ -143,9 +143,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
     }
 
-    // Register for OpenDDS::DCPS::TopicReport
-    OpenDDS::DCPS::TopicReportTypeSupport_var topic_ts =
-      new OpenDDS::DCPS::TopicReportTypeSupportImpl();
+    // Register for OpenDDS::Monitor::TopicReport
+    OpenDDS::Monitor::TopicReportTypeSupport_var topic_ts =
+      new OpenDDS::Monitor::TopicReportTypeSupportImpl();
     if (topic_ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
@@ -156,7 +156,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     reader = create_data_reader(participant.in(),
                                 sub.in(),
                                 topic_type_name.in(),
-                                OpenDDS::DCPS::TOPIC_MONITOR_TOPIC,
+                                OpenDDS::Monitor::TOPIC_MONITOR_TOPIC,
                                 dr_qos,
                                 topic_drl);
     if (CORBA::is_nil(reader.in())) {
@@ -165,9 +165,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
     }
 
-    // Register for OpenDDS::DCPS::PublisherReport
-    OpenDDS::DCPS::PublisherReportTypeSupport_var publisher_ts =
-      new OpenDDS::DCPS::PublisherReportTypeSupportImpl();
+    // Register for OpenDDS::Monitor::PublisherReport
+    OpenDDS::Monitor::PublisherReportTypeSupport_var publisher_ts =
+      new OpenDDS::Monitor::PublisherReportTypeSupportImpl();
     if (publisher_ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
@@ -178,7 +178,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     reader = create_data_reader(participant.in(),
                                 sub.in(),
                                 publisher_type_name.in(),
-                                OpenDDS::DCPS::PUBLISHER_MONITOR_TOPIC,
+                                OpenDDS::Monitor::PUBLISHER_MONITOR_TOPIC,
                                 dr_qos,
                                 publisher_drl);
     if (CORBA::is_nil(reader.in())) {
@@ -187,9 +187,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
     }
 
-    // Register for OpenDDS::DCPS::SubscriberReport
-    OpenDDS::DCPS::SubscriberReportTypeSupport_var subscriber_ts =
-      new OpenDDS::DCPS::SubscriberReportTypeSupportImpl();
+    // Register for OpenDDS::Monitor::SubscriberReport
+    OpenDDS::Monitor::SubscriberReportTypeSupport_var subscriber_ts =
+      new OpenDDS::Monitor::SubscriberReportTypeSupportImpl();
     if (subscriber_ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
@@ -200,7 +200,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     reader = create_data_reader(participant.in(),
                                 sub.in(),
                                 subscriber_type_name.in(),
-                                OpenDDS::DCPS::SUBSCRIBER_MONITOR_TOPIC,
+                                OpenDDS::Monitor::SUBSCRIBER_MONITOR_TOPIC,
                                 dr_qos,
                                 subscriber_drl);
     if (CORBA::is_nil(reader.in())) {
@@ -209,9 +209,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
     }
 
-    // Register for OpenDDS::DCPS::DataWriterReport
-    OpenDDS::DCPS::DataWriterReportTypeSupport_var dw_ts =
-      new OpenDDS::DCPS::DataWriterReportTypeSupportImpl();
+    // Register for OpenDDS::Monitor::DataWriterReport
+    OpenDDS::Monitor::DataWriterReportTypeSupport_var dw_ts =
+      new OpenDDS::Monitor::DataWriterReportTypeSupportImpl();
     if (dw_ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
@@ -222,7 +222,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     reader = create_data_reader(participant.in(),
                                 sub.in(),
                                 dw_type_name.in(),
-                                OpenDDS::DCPS::DATA_WRITER_MONITOR_TOPIC,
+                                OpenDDS::Monitor::DATA_WRITER_MONITOR_TOPIC,
                                 dr_qos,
                                 dw_drl);
     if (CORBA::is_nil(reader.in())) {
@@ -231,9 +231,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
     }
 
-    // Register for OpenDDS::DCPS::DataWriterPeriodicReport
-    OpenDDS::DCPS::DataWriterPeriodicReportTypeSupport_var dwper_ts =
-      new OpenDDS::DCPS::DataWriterPeriodicReportTypeSupportImpl();
+    // Register for OpenDDS::Monitor::DataWriterPeriodicReport
+    OpenDDS::Monitor::DataWriterPeriodicReportTypeSupport_var dwper_ts =
+      new OpenDDS::Monitor::DataWriterPeriodicReportTypeSupportImpl();
     if (dwper_ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
@@ -244,7 +244,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     reader = create_data_reader(participant.in(),
                                 sub.in(),
                                 dwper_type_name.in(),
-                                OpenDDS::DCPS::DATA_WRITER_PERIODIC_MONITOR_TOPIC,
+                                OpenDDS::Monitor::DATA_WRITER_PERIODIC_MONITOR_TOPIC,
                                 dr_qos,
                                 dwper_drl);
     if (CORBA::is_nil(reader.in())) {
@@ -253,9 +253,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
     }
 
-    // Register for OpenDDS::DCPS::DataReaderReport
-    OpenDDS::DCPS::DataReaderReportTypeSupport_var dr_ts =
-      new OpenDDS::DCPS::DataReaderReportTypeSupportImpl();
+    // Register for OpenDDS::Monitor::DataReaderReport
+    OpenDDS::Monitor::DataReaderReportTypeSupport_var dr_ts =
+      new OpenDDS::Monitor::DataReaderReportTypeSupportImpl();
     if (dr_ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
@@ -266,7 +266,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     reader = create_data_reader(participant.in(),
                                 sub.in(),
                                 dr_type_name.in(),
-                                OpenDDS::DCPS::DATA_READER_MONITOR_TOPIC,
+                                OpenDDS::Monitor::DATA_READER_MONITOR_TOPIC,
                                 dr_qos,
                                 dr_drl);
     if (CORBA::is_nil(reader.in())) {
@@ -275,9 +275,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
     }
 
-    // Register for OpenDDS::DCPS::DataReaderPeriodicReport
-    OpenDDS::DCPS::DataReaderPeriodicReportTypeSupport_var drper_ts =
-      new OpenDDS::DCPS::DataReaderPeriodicReportTypeSupportImpl();
+    // Register for OpenDDS::Monitor::DataReaderPeriodicReport
+    OpenDDS::Monitor::DataReaderPeriodicReportTypeSupport_var drper_ts =
+      new OpenDDS::Monitor::DataReaderPeriodicReportTypeSupportImpl();
     if (drper_ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
@@ -288,7 +288,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     reader = create_data_reader(participant.in(),
                                 sub.in(),
                                 drper_type_name.in(),
-                                OpenDDS::DCPS::DATA_READER_PERIODIC_MONITOR_TOPIC,
+                                OpenDDS::Monitor::DATA_READER_PERIODIC_MONITOR_TOPIC,
                                 dr_qos,
                                 drper_drl);
     if (CORBA::is_nil(reader.in())) {
@@ -297,9 +297,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
     }
 
-    // Register for OpenDDS::DCPS::TransportReport
-    OpenDDS::DCPS::TransportReportTypeSupport_var transport_ts =
-      new OpenDDS::DCPS::TransportReportTypeSupportImpl();
+    // Register for OpenDDS::Monitor::TransportReport
+    OpenDDS::Monitor::TransportReportTypeSupport_var transport_ts =
+      new OpenDDS::Monitor::TransportReportTypeSupportImpl();
     if (transport_ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
@@ -310,7 +310,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     reader = create_data_reader(participant.in(),
                                 sub.in(),
                                 transport_type_name.in(),
-                                OpenDDS::DCPS::TRANSPORT_MONITOR_TOPIC,
+                                OpenDDS::Monitor::TRANSPORT_MONITOR_TOPIC,
                                 dr_qos,
                                 transport_drl);
     if (CORBA::is_nil(reader.in())) {
