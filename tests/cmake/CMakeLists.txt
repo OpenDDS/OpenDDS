@@ -7,11 +7,7 @@ find_package(OpenDDS REQUIRED)
 if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8.2")
   if(OPENDDS_OWNERSHIP_PROFILE)
     add_subdirectory(Messenger)
-    # TODO: This test always builds shared libraries and linker complains about
-    # ACE/TAO libs lacking -fPIC when ACE is static.
-    if(NOT OPENDDS_STATIC)
-      add_subdirectory(generated_global)
-    endif()
+    add_subdirectory(generated_global)
   endif()
   add_subdirectory(Nested_IDL)
   add_subdirectory(idl_compiler_tests)

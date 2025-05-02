@@ -10797,12 +10797,10 @@ jobs:
         cd ACE_TAO
         tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
         rm -f ACE_TAO_w22_x86_i0.tar.xz
-    - name: Clone OpenDDS to C Drive
+    - name: move OpenDDS to C drive
       shell: bash
       run: |
-        cd /c/
-        git clone --depth=1 $GITHUB_WORKSPACE/OpenDDS
-        cp $GITHUB_WORKSPACE/OpenDDS/setenv.cmd .
+        mv OpenDDS /c/
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
       with:
@@ -10903,11 +10901,12 @@ jobs:
         cd OpenDDS
         tar xvfJ build_w22_x86_i0_sec.tar.xz
         rm -f build_w22_x86_i0_sec.tar.xz
-    - name: Clone OpenDDS to C Drive
+    - name: move OpenDDS to C drive
       shell: bash
       run: |
-        cd /c/
-        git clone --depth=1 $GITHUB_WORKSPACE/OpenDDS
+        mv OpenDDS /c/
+        cd /c/OpenDDS
+        git clean -dfX
         cp $GITHUB_WORKSPACE/OpenDDS/setenv.cmd .
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
@@ -11056,12 +11055,10 @@ jobs:
         cd OpenDDS
         tar xvfJ build_w22_x86_i0_sec.tar.xz
         rm -f build_w22_x86_i0_sec.tar.xz
-    - name: Clone OpenDDS to C Drive
+    - name: move OpenDDS to C drive
       shell: bash
       run: |
-        cd /c/
-        git clone --depth=1 $GITHUB_WORKSPACE/OpenDDS
-        cp $GITHUB_WORKSPACE/OpenDDS/setenv.cmd .
+        mv OpenDDS /c/
     - name: setup gtest
       shell: cmd
       run: |
@@ -11192,12 +11189,10 @@ jobs:
         cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
         rm -f ACE_TAO_w22_x86_i0.tar.xz
-    - name: Clone OpenDDS to C Drive
+    - name: Move OpenDDS to C Drive
       shell: bash
       run: |
-        cd /c/
-        git clone --depth=1 $GITHUB_WORKSPACE/OpenDDS
-        cp $GITHUB_WORKSPACE/OpenDDS/setenv.cmd .
+        mv OpenDDS /c/
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
@@ -11298,11 +11293,12 @@ jobs:
         cd OpenDDS
         tar xvfJ build_w22_x86_i0_j_FM-1f.tar.xz
         rm -f build_w22_x86_i0_j_FM-1f.tar.xz
-    - name: Clone OpenDDS to C Drive
+    - name: move OpenDDS to C drive
       shell: bash
       run: |
-        cd /c/
-        git clone --depth=1 $GITHUB_WORKSPACE/OpenDDS
+        mv OpenDDS /c/
+        cd /c/OpenDDS
+        git clean -dfX
         cp $GITHUB_WORKSPACE/OpenDDS/setenv.cmd .
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1

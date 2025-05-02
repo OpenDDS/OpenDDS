@@ -125,9 +125,8 @@ jobs:
         cd OpenDDS
         cmake -B build-tests \
           -DCMAKE_UNITY_BUILD=TRUE \
-          -DBUILD_SHARED_LIBS=FALSE \
+          -DBUILD_SHARED_LIBS=TRUE \
           -DCMAKE_BUILD_TYPE=Debug \
-          -DOPENDDS_COMPILE_WARNINGS=WARNING \
           -DOPENDDS_QT=TRUE \
           -DOPENDDS_JUST_BUILD_TESTS=TRUE \
           -DOPENDDS_ACE=$ACE_SOURCE_ROOT \
@@ -198,9 +197,8 @@ jobs:
         cd OpenDDS
         cmake -B build-tests \
           -DCMAKE_UNITY_BUILD=TRUE \
-          -DBUILD_SHARED_LIBS=TRUE \
+          -DBUILD_SHARED_LIBS=FALSE \
           -DCMAKE_BUILD_TYPE=Debug \
-          -DOPENDDS_COMPILE_WARNINGS=WARNING \
           -DOPENDDS_JUST_BUILD_TESTS=TRUE \
           -DOPENDDS_ACE=$ACE_SOURCE_ROOT \
           -DCMAKE_PREFIX_PATH=$OPENDDS_INSTALL_PREFIX \

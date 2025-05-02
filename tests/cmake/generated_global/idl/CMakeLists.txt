@@ -19,9 +19,12 @@ set(dst ${CMAKE_CURRENT_BINARY_DIR})
 configure_file("${src}/Messenger.idl" "${dst}/Messenger.idl" COPYONLY)
 
 # Messenger library
-add_library(${PROJECT_NAME} SHARED)
+add_library(${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME}
   PROPERTIES OUTPUT_NAME messenger
 )
-opendds_target_sources(${PROJECT_NAME} PUBLIC "${dst}/Messenger.idl")
+opendds_target_sources(${PROJECT_NAME}
+  PUBLIC "${dst}/Messenger.idl"
+  ALWAYS_GENERATE_LIB_EXPORT_HEADER TRUE
+)
 target_link_libraries(${PROJECT_NAME} PUBLIC OpenDDS::Dcps)
