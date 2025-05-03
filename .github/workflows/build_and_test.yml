@@ -10904,10 +10904,9 @@ jobs:
     - name: move OpenDDS to C drive
       shell: bash
       run: |
-        cp -r OpenDDS /c/
+        mv OpenDDS /c/
         cd /c/OpenDDS
-        git clean -dfX
-        cp $GITHUB_WORKSPACE/OpenDDS/setenv.cmd .
+        git clean -dfX tests DevGuideExamples examples
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
@@ -10916,7 +10915,7 @@ jobs:
       run: |
         cd /d C:\OpenDDS
         call setenv.cmd
-        cmake -S . -B build -A Win32 -DOpenDDS_ROOT=%DDS_ROOT% -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake -S . -B build -A Win32 -DOPENDDS_JUST_BUILD_TESTS=TRUE
         cmake --build build
     - name: check build configuration
       shell: cmd
@@ -11296,10 +11295,9 @@ jobs:
     - name: Move OpenDDS to C Drive
       shell: bash
       run: |
-        cp -r OpenDDS /c/
+        mv OpenDDS /c/
         cd /c/OpenDDS
-        git clean -dfX
-        cp $GITHUB_WORKSPACE/OpenDDS/setenv.cmd .
+        git clean -dfX tests DevGuideExamples examples
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
@@ -11313,7 +11311,7 @@ jobs:
       run: |
         cd /d C:\OpenDDS
         call setenv.cmd
-        cmake -S . -B build -A Win32 -DOpenDDS_ROOT=%DDS_ROOT% -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake -S . -B build -A Win32 -DOPENDDS_JUST_BUILD_TESTS=TRUE
         cmake --build build
     - name: create autobuild config
       shell: bash
