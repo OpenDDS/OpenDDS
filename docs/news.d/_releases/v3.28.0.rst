@@ -71,7 +71,7 @@ Fixes
 Documentation
 =============
 
-- :ref:`config` (:ghpr:`4464`, :ghpr:`4570`, :ghpr:`4467`, :ghpr:`4588`)
+- :ref:`config` (:ghpr:`4564`, :ghpr:`4570`, :ghpr:`4467`, :ghpr:`4588`)
 
   - Restructured configuration properties so they can be linked to directly.
     Also reviewed each property description to correct or add missing context as needed.
