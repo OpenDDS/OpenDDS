@@ -57,10 +57,6 @@ add_executable(${client} ${client_files})
 set_target_properties(${client} PROPERTIES OUTPUT_NAME MessengerClient)
 target_link_libraries(${client} ${idl})
 
-if(CMAKE_CONFIGURATION_TYPES)
-  opendds_add_test(COMMAND perl run_test.pl $<$<BOOL:$<CONFIG>>:-ExeSubDir> $<CONFIG>)
-else()
-  opendds_add_test(COMMAND perl run_test.pl)
-endif()
+opendds_add_test(ASSUME_RUN_TEST)
 
 _opendds_restore_cache()

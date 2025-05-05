@@ -1,30 +1,13 @@
 cmake_minimum_required(VERSION 3.3...4.0)
-project(opendds_cmake_tests_root_project)
+project(opendds_tests_cmake)
 enable_testing()
 
 find_package(OpenDDS REQUIRED)
 
-configure_file("CTestCustom.cmake" "." COPYONLY)
-
-add_subdirectory(
-  "../../DevGuideExamples/DCPS/Messenger"
-  "${CMAKE_CURRENT_SOURCE_DIR}/../../DevGuideExamples/DCPS/Messenger/build")
-
-if(OPENDDS_QT AND NOT OPENDDS_CXX_STD_YEAR LESS 2011)
-  add_subdirectory(
-    "../../examples/DCPS/ishapes"
-    "${CMAKE_CURRENT_SOURCE_DIR}/../../examples/DCPS/ishapes/build")
-endif()
-
 if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8.2")
   if(OPENDDS_OWNERSHIP_PROFILE)
     add_subdirectory(Messenger)
-    if(NOT OPENDDS_STATIC)
-      add_subdirectory(generated_global)
-    endif()
-  endif()
-  if(NOT OPENDDS_SAFETY_PROFILE AND OPENDDS_CXX11)
-      add_subdirectory(C++11_typecode)
+    add_subdirectory(generated_global)
   endif()
   add_subdirectory(Nested_IDL)
   add_subdirectory(idl_compiler_tests)
@@ -32,4 +15,7 @@ if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8.2")
 endif()
 
 add_subdirectory(include_subdir)
-add_subdirectory(install)
+
+if(NOT OPENDDS_BUILT_USING_CMAKE)
+  add_subdirectory(install)
+endif()

@@ -671,7 +671,7 @@ my %all_checks = (
               $line = "cmake_minimum_required(VERSION $policy_min...$expected_policy_max)";
             }
             else {
-              print("$line has a policy max of $1, but expected $expected_policy_max\n");
+              print("$line has a policy max of $policy_max, but expected $expected_policy_max\n");
             }
           }
           last unless ($fix);
