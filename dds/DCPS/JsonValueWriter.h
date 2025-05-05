@@ -90,6 +90,7 @@ public:
   bool write_char8(ACE_CDR::Char value);
   bool write_char16(ACE_CDR::WChar value);
   bool write_string(const ACE_CDR::Char* value, size_t length);
+  using ValueWriter::write_string;
   bool write_wstring(const ACE_CDR::WChar* value, size_t length);
   bool write_enum(ACE_CDR::Long value, const EnumHelper& helper);
   bool write_bitmask(ACE_CDR::ULongLong value, const BitmaskHelper& helper);

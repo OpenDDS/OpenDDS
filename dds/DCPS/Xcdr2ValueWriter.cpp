@@ -13,7 +13,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-// Called whenever we encounter a struct, union, sequence, or array.
+// Called whenever we encounter a struct, union, sequence, map, or array.
 // When that happens, create a new instance of SerializedSizeState that stores the states of
 // the byte stream and the information of the type encountered, including its kind
 // and extensibility that helps decide when a header, e.g. Dheader or Emheader, is
@@ -34,7 +34,7 @@ bool Xcdr2ValueWriter::begin_ssize_complex(Extensibility extensibility, Collecti
         // Copy the current size from the enclosing type so that the total size
         // can be built up cumulatively by this type.
         state.total_size = size_states_.top().total_size;
-        if (coll_kind == SEQUENCE_KIND) { // Sequence length
+        if (coll_kind == SEQUENCE_KIND || coll_kind == MAP_KIND) { // Sequence/map length
           primitive_serialized_size_ulong(encoding_, state.total_size);
         }
         must_cache_size = false;
@@ -133,7 +133,7 @@ bool Xcdr2ValueWriter::begin_ssize_aggregated_member(bool optional, bool present
 }
 
 bool Xcdr2ValueWriter::begin_serialize_complex(Extensibility extensibility, CollectionKind ck,
-                                               ACE_CDR::ULong seq_length)
+                                               ACE_CDR::ULong seq_map_length)
 {
   if (!ser_) {
     if (log_level >= LogLevel::Notice) {
@@ -176,8 +176,9 @@ bool Xcdr2ValueWriter::begin_serialize_complex(Extensibility extensibility, Coll
     ++pos_;
   }
 
-  if (ck == SEQUENCE_KIND) {
-    if (!(*ser_ << seq_length)) {
+  // maps without a DHeader have a 32-bit length prefix (like sequences)
+  if (ck == SEQUENCE_KIND || (ck == MAP_KIND && extensibility == FINAL)) {
+    if (!(*ser_ << seq_map_length)) {
       return false;
     }
   }
@@ -355,6 +356,38 @@ bool Xcdr2ValueWriter::begin_element(ACE_CDR::ULong /*idx*/)
 }
 
 bool Xcdr2ValueWriter::end_element()
+{
+  return true;
+}
+
+bool Xcdr2ValueWriter::begin_map(XTypes::TypeKind key_kind, XTypes::TypeKind value_kind)
+{
+  const bool primitive = XTypes::is_primitive(key_kind) && XTypes::is_primitive(value_kind);
+  // TODO: On 2nd pass, get map length here and pass as 3rd arg to begin_complex()
+  return begin_complex(primitive ? APPENDABLE : FINAL, MAP_KIND);
+}
+
+bool Xcdr2ValueWriter::end_map()
+{
+  return end_complex();
+}
+
+bool Xcdr2ValueWriter::begin_key()
+{
+  return true;
+}
+
+bool Xcdr2ValueWriter::end_key()
+{
+  return true;
+}
+
+bool Xcdr2ValueWriter::begin_value()
+{
+  return true;
+}
+
+bool Xcdr2ValueWriter::end_value()
 {
   return true;
 }
