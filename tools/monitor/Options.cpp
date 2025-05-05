@@ -22,7 +22,7 @@ namespace { // anonymous namespace for file scope.
   //
   // Default values.
   //
-  enum { DEFAULT_DOMAINID =  OpenDDS::DCPS::MONITOR_DOMAIN_ID};
+  enum { DEFAULT_DOMAINID =  OpenDDS::Monitor::MONITOR_DOMAIN_ID};
 
   // Command line argument definitions.
   const ACE_TCHAR* VERBOSE_ARGUMENT = ACE_TEXT("-v");
