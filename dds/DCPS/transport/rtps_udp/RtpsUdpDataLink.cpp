@@ -4903,7 +4903,7 @@ void RtpsUdpDataLink::RtpsReader::log_remote_counts(const char* funcname)
 
 StatisticSeq RtpsUdpDataLink::stats_template()
 {
-  static const DDS::UInt32 num_local_stats = 2; //TODO
+  static const DDS::UInt32 num_local_stats = 16;
   const StatisticSeq base = DataLink::stats_template(),
     send = RtpsUdpSendStrategy::stats_template(),
     recv = RtpsUdpReceiveStrategy::stats_template();
@@ -4912,8 +4912,24 @@ StatisticSeq RtpsUdpDataLink::stats_template()
   for (DDS::UInt32 i = 0; i < base.length(); ++i) {
     stats[i].name = base[i].name;
   }
-  // locals
-  const DDS::UInt32 send_offset = base.length() + num_local_stats;
+  const DDS::UInt32 local_offset = base.length();
+  stats[local_offset].name = "RtpsUdpDataLinkJobQueue";
+  stats[local_offset + 1].name = "RtpsUdpDataLinkLocators";
+  stats[local_offset + 2].name = "RtpsUdpDataLinkLocatorCache";
+  stats[local_offset + 3].name = "RtpsUdpDataLinkBundlingCache";
+  stats[local_offset + 4].name = "RtpsUdpDataLinkMessageBlocks";
+  stats[local_offset + 5].name = "RtpsUdpDataLinkDataBlocks";
+  stats[local_offset + 6].name = "RtpsUdpDataLinkWriters";
+  stats[local_offset + 7].name = "RtpsUdpDataLinkRemoteReaders";
+  stats[local_offset + 8].name = "RtpsUdpDataLinkSendBuffers";
+  stats[local_offset + 9].name = "RtpsUdpDataLinkPendingReliableReaders";
+  stats[local_offset + 10].name = "RtpsUdpDataLinkReaders";
+  stats[local_offset + 11].name = "RtpsUdpDataLinkRemoteWriters";
+  stats[local_offset + 12].name = "RtpsUdpDataLinkReadersOfWriter";
+  stats[local_offset + 13].name = "RtpsUdpDataLinkWriterToBestEffort";
+  stats[local_offset + 14].name = "RtpsUdpDataLinkSendQueue";
+  stats[local_offset + 15].name = "RtpsUdpDataLinkFlushSendQueue";
+  const DDS::UInt32 send_offset = local_offset + num_local_stats;
   for (DDS::UInt32 i = 0; i < send.length(); ++i) {
     stats[send_offset + i].name = send[i].name;
   }
@@ -4927,7 +4943,22 @@ StatisticSeq RtpsUdpDataLink::stats_template()
 void RtpsUdpDataLink::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
 {
   DataLink::fill_stats(stats, idx);
-  // locals
+  stats[idx++].value = job_queue_ ? job_queue_->size() : 0;
+  stats[idx++].value = locators_.size();
+  stats[idx++].value = locator_cache_.size();
+  stats[idx++].value = bundling_cache_.size();
+  stats[idx++].value = mb_allocator_.bytes_heap_allocated();
+  stats[idx++].value = db_allocator_.bytes_heap_allocated();
+  stats[idx++].value = writers_.size();
+  stats[idx++].value = total_remote_reliable_readers();
+  stats[idx++].value = total_writer_send_buffers();
+  stats[idx++].value = pending_reliable_readers_.size();
+  stats[idx++].value = readers_.size();
+  stats[idx++].value = total_remote_reliable_writers();
+  stats[idx++].value = readers_of_writer_.size();
+  stats[idx++].value = writer_to_seq_best_effort_readers_.size();
+  stats[idx++].value = sq_.size();
+  stats[idx++].value = fsq_vec_size_;
   const RtpsUdpSendStrategy_rch send = send_strategy();
   if (send) {
     send->fill_stats(stats, idx);
@@ -4936,6 +4967,39 @@ void RtpsUdpDataLink::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
   if (recv) {
     recv->fill_stats(stats, idx);
   }
+}
+
+size_t RtpsUdpDataLink::total_remote_reliable_readers() const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(writers_lock_);
+  size_t readers = 0;
+  for (RtpsWriterMap::const_iterator iter = writers_.begin(); iter != writers_.end(); ++iter) {
+    readers += iter->second->reader_count();
+  }
+  return readers;
+}
+
+size_t RtpsUdpDataLink::total_remote_reliable_writers() const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(readers_lock_);
+  size_t writers = 0;
+  for (RtpsReaderMap::const_iterator iter = readers_.begin(); iter != readers_.end(); ++iter) {
+    writers += iter->second->writer_count();
+  }
+  return writers;
+}
+
+size_t RtpsUdpDataLink::total_writer_send_buffers() const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(writers_lock_);
+  size_t buffer_size = 0;
+  for (RtpsWriterMap::const_iterator iter = writers_.begin(); iter != writers_.end(); ++iter) {
+    const RcHandle<SingleSendBuffer> sb = iter->second->get_send_buff();
+    if (sb) {
+      buffer_size += sb->size();
+    }
+  }
+  return buffer_size;
 }
 
 } // namespace DCPS

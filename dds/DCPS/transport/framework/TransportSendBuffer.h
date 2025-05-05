@@ -204,6 +204,10 @@ public:
 
   bool has_frags(const SequenceNumber& seq) const;
 
+  /// Measure of overall memory used by this object
+  /// The number itself is not meaningful but can be used for tracking trends over time
+  size_t size() const;
+
 private:
   void check_capacity_i(BufferVec& removed);
   void release_i(BufferMap::iterator buffer_iter);

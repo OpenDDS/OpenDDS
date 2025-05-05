@@ -436,7 +436,7 @@ protected:
 
   /// The transport send strategy object for this DataLink.
   TransportSendStrategy_rch send_strategy_;
-  LockType strategy_lock_;
+  mutable LockType strategy_lock_;
 
   TransportSendStrategy_rch get_send_strategy();
 

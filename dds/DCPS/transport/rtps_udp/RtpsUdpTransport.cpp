@@ -61,7 +61,7 @@ RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst,
 #endif
   , core_(inst)
   , stats_writer_(make_rch<StatisticsDataWriter>(DataWriterQosBuilder().durability_transient_local()))
-  , stats_task_(make_rch<PeriodicTask>(TheServiceParticipant->reactor_task(), *this, &RtpsUdpTransport::write_stats))
+  , stats_task_(make_rch<PeriodicTask>(reactor_task(), *this, &RtpsUdpTransport::write_stats))
   , stats_template_(stats_template())
 {
   assign(local_prefix_, GUIDPREFIX_UNKNOWN);
