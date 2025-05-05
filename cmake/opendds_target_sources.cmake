@@ -72,6 +72,9 @@ function(_opendds_get_sources_and_options
     handle_files("${arg_${scope}}" ${scope})
   endforeach()
 
+  # Handle unscoped sources
+  handle_files("${arg_UNPARSED_ARGUMENTS}" ${OPENDDS_DEFAULT_SCOPE})
+
   if(NOT DEFINED arg_SUPPRESS_ANYS)
     set(arg_SUPPRESS_ANYS ${OPENDDS_SUPPRESS_ANYS})
   endif()
@@ -123,8 +126,6 @@ function(_opendds_get_sources_and_options
     set(arg_AUTO_LINK ${OPENDDS_AUTO_LINK_DCPS})
   endif()
   set(${auto_link} ${arg_AUTO_LINK} PARENT_SCOPE)
-
-  handle_files("${arg_UNPARSED_ARGUMENTS}" ${OPENDDS_DEFAULT_SCOPE})
 
   set(all_idl_files)
   foreach(scope PUBLIC PRIVATE INTERFACE)

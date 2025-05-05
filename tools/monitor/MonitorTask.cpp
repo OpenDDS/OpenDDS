@@ -30,10 +30,10 @@
 namespace { // Anonymous namespace for file scope.
 
   /// Type Id values for dispatching Builtin Topic samples.
-  /// @note This must not conflict with the OpenDDS::DCPS::ReportType
+  /// @note This must not conflict with the OpenDDS::Monitor::ReportType
   ///       enumeration.
   enum BuiltinReportType {
-    BUILTIN_PARTICIPANT_REPORT_TYPE = OpenDDS::DCPS::TRANSPORT_REPORT_TYPE + 1,
+    BUILTIN_PARTICIPANT_REPORT_TYPE = OpenDDS::Monitor::TRANSPORT_REPORT_TYPE + 1,
     BUILTIN_TOPIC_REPORT_TYPE,
     BUILTIN_PUBLICATION_REPORT_TYPE,
     BUILTIN_SUBSCRIPTION_REPORT_TYPE
@@ -431,64 +431,64 @@ Monitor::MonitorTask::setActiveRepo( RepoKey key)
   // Create each instrumentation subscription and attach them to the waiter.
 
   this->createSubscription<
-          OpenDDS::DCPS::ServiceParticipantReportTypeSupportImpl>(
+          OpenDDS::Monitor::ServiceParticipantReportTypeSupportImpl>(
             subscriber.in(),
-            OpenDDS::DCPS::SERVICE_PARTICIPANT_MONITOR_TOPIC,
-            OpenDDS::DCPS::SERVICE_PARTICIPANT_REPORT_TYPE);
+            OpenDDS::Monitor::SERVICE_PARTICIPANT_MONITOR_TOPIC,
+            OpenDDS::Monitor::SERVICE_PARTICIPANT_REPORT_TYPE);
 
   this->createSubscription<
-          OpenDDS::DCPS::DomainParticipantReportTypeSupportImpl>(
+          OpenDDS::Monitor::DomainParticipantReportTypeSupportImpl>(
             subscriber.in(),
-            OpenDDS::DCPS::DOMAIN_PARTICIPANT_MONITOR_TOPIC,
-            OpenDDS::DCPS::DOMAIN_PARTICIPANT_REPORT_TYPE);
+            OpenDDS::Monitor::DOMAIN_PARTICIPANT_MONITOR_TOPIC,
+            OpenDDS::Monitor::DOMAIN_PARTICIPANT_REPORT_TYPE);
 
   this->createSubscription<
-          OpenDDS::DCPS::TopicReportTypeSupportImpl>(
+          OpenDDS::Monitor::TopicReportTypeSupportImpl>(
             subscriber.in(),
-            OpenDDS::DCPS::TOPIC_MONITOR_TOPIC,
-            OpenDDS::DCPS::TOPIC_REPORT_TYPE);
+            OpenDDS::Monitor::TOPIC_MONITOR_TOPIC,
+            OpenDDS::Monitor::TOPIC_REPORT_TYPE);
 
   this->createSubscription<
-          OpenDDS::DCPS::PublisherReportTypeSupportImpl>(
+          OpenDDS::Monitor::PublisherReportTypeSupportImpl>(
             subscriber.in(),
-            OpenDDS::DCPS::PUBLISHER_MONITOR_TOPIC,
-            OpenDDS::DCPS::PUBLISHER_REPORT_TYPE);
+            OpenDDS::Monitor::PUBLISHER_MONITOR_TOPIC,
+            OpenDDS::Monitor::PUBLISHER_REPORT_TYPE);
 
   this->createSubscription<
-          OpenDDS::DCPS::SubscriberReportTypeSupportImpl>(
+          OpenDDS::Monitor::SubscriberReportTypeSupportImpl>(
             subscriber.in(),
-            OpenDDS::DCPS::SUBSCRIBER_MONITOR_TOPIC,
-            OpenDDS::DCPS::SUBSCRIBER_REPORT_TYPE);
+            OpenDDS::Monitor::SUBSCRIBER_MONITOR_TOPIC,
+            OpenDDS::Monitor::SUBSCRIBER_REPORT_TYPE);
 
   this->createSubscription<
-          OpenDDS::DCPS::DataWriterReportTypeSupportImpl>(
+          OpenDDS::Monitor::DataWriterReportTypeSupportImpl>(
             subscriber.in(),
-            OpenDDS::DCPS::DATA_WRITER_MONITOR_TOPIC,
-            OpenDDS::DCPS::DATA_WRITER_REPORT_TYPE);
+            OpenDDS::Monitor::DATA_WRITER_MONITOR_TOPIC,
+            OpenDDS::Monitor::DATA_WRITER_REPORT_TYPE);
 
   this->createSubscription<
-          OpenDDS::DCPS::DataWriterPeriodicReportTypeSupportImpl>(
+          OpenDDS::Monitor::DataWriterPeriodicReportTypeSupportImpl>(
             subscriber.in(),
-            OpenDDS::DCPS::DATA_WRITER_PERIODIC_MONITOR_TOPIC,
-            OpenDDS::DCPS::DATA_WRITER_PERIODIC_REPORT_TYPE);
+            OpenDDS::Monitor::DATA_WRITER_PERIODIC_MONITOR_TOPIC,
+            OpenDDS::Monitor::DATA_WRITER_PERIODIC_REPORT_TYPE);
 
   this->createSubscription<
-          OpenDDS::DCPS::DataReaderReportTypeSupportImpl>(
+          OpenDDS::Monitor::DataReaderReportTypeSupportImpl>(
             subscriber.in(),
-            OpenDDS::DCPS::DATA_READER_MONITOR_TOPIC,
-            OpenDDS::DCPS::DATA_READER_REPORT_TYPE);
+            OpenDDS::Monitor::DATA_READER_MONITOR_TOPIC,
+            OpenDDS::Monitor::DATA_READER_REPORT_TYPE);
 
   this->createSubscription<
-          OpenDDS::DCPS::DataReaderPeriodicReportTypeSupportImpl>(
+          OpenDDS::Monitor::DataReaderPeriodicReportTypeSupportImpl>(
             subscriber.in(),
-            OpenDDS::DCPS::DATA_READER_PERIODIC_MONITOR_TOPIC,
-            OpenDDS::DCPS::DATA_READER_PERIODIC_REPORT_TYPE);
+            OpenDDS::Monitor::DATA_READER_PERIODIC_MONITOR_TOPIC,
+            OpenDDS::Monitor::DATA_READER_PERIODIC_REPORT_TYPE);
 
   this->createSubscription<
-          OpenDDS::DCPS::TransportReportTypeSupportImpl>(
+          OpenDDS::Monitor::TransportReportTypeSupportImpl>(
             subscriber.in(),
-            OpenDDS::DCPS::TRANSPORT_MONITOR_TOPIC,
-            OpenDDS::DCPS::TRANSPORT_REPORT_TYPE);
+            OpenDDS::Monitor::TRANSPORT_MONITOR_TOPIC,
+            OpenDDS::Monitor::TRANSPORT_REPORT_TYPE);
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
@@ -619,92 +619,92 @@ void
 Monitor::MonitorTask::dispatchReader( DDS::DataReader_ptr reader)
 {
   switch( this->handleTypeMap_[ reader->get_instance_handle()]) {
-    case OpenDDS::DCPS::SERVICE_PARTICIPANT_REPORT_TYPE:
+    case OpenDDS::Monitor::SERVICE_PARTICIPANT_REPORT_TYPE:
       {
         this->dataUpdate<
-          OpenDDS::DCPS::ServiceParticipantReportDataReader,
-          OpenDDS::DCPS::ServiceParticipantReport>(
+          OpenDDS::Monitor::ServiceParticipantReportDataReader,
+          OpenDDS::Monitor::ServiceParticipantReport>(
             reader);
       }
       break;
 
-    case OpenDDS::DCPS::DOMAIN_PARTICIPANT_REPORT_TYPE:
+    case OpenDDS::Monitor::DOMAIN_PARTICIPANT_REPORT_TYPE:
       {
         this->dataUpdate<
-          OpenDDS::DCPS::DomainParticipantReportDataReader,
-          OpenDDS::DCPS::DomainParticipantReport>(
+          OpenDDS::Monitor::DomainParticipantReportDataReader,
+          OpenDDS::Monitor::DomainParticipantReport>(
             reader);
       }
       break;
 
-    case OpenDDS::DCPS::TOPIC_REPORT_TYPE:
+    case OpenDDS::Monitor::TOPIC_REPORT_TYPE:
       {
         this->dataUpdate<
-          OpenDDS::DCPS::TopicReportDataReader,
-          OpenDDS::DCPS::TopicReport>(
+          OpenDDS::Monitor::TopicReportDataReader,
+          OpenDDS::Monitor::TopicReport>(
             reader);
       }
       break;
 
-    case OpenDDS::DCPS::PUBLISHER_REPORT_TYPE:
+    case OpenDDS::Monitor::PUBLISHER_REPORT_TYPE:
       {
         this->dataUpdate<
-          OpenDDS::DCPS::PublisherReportDataReader,
-          OpenDDS::DCPS::PublisherReport>(
+          OpenDDS::Monitor::PublisherReportDataReader,
+          OpenDDS::Monitor::PublisherReport>(
             reader);
       }
       break;
 
-    case OpenDDS::DCPS::SUBSCRIBER_REPORT_TYPE:
+    case OpenDDS::Monitor::SUBSCRIBER_REPORT_TYPE:
       {
         this->dataUpdate<
-          OpenDDS::DCPS::SubscriberReportDataReader,
-          OpenDDS::DCPS::SubscriberReport>(
+          OpenDDS::Monitor::SubscriberReportDataReader,
+          OpenDDS::Monitor::SubscriberReport>(
             reader);
       }
       break;
 
-    case OpenDDS::DCPS::DATA_WRITER_REPORT_TYPE:
+    case OpenDDS::Monitor::DATA_WRITER_REPORT_TYPE:
       {
         this->dataUpdate<
-          OpenDDS::DCPS::DataWriterReportDataReader,
-          OpenDDS::DCPS::DataWriterReport>(
+          OpenDDS::Monitor::DataWriterReportDataReader,
+          OpenDDS::Monitor::DataWriterReport>(
             reader);
       }
       break;
 
-    case OpenDDS::DCPS::DATA_WRITER_PERIODIC_REPORT_TYPE:
+    case OpenDDS::Monitor::DATA_WRITER_PERIODIC_REPORT_TYPE:
       {
         this->dataUpdate<
-          OpenDDS::DCPS::DataWriterPeriodicReportDataReader,
-          OpenDDS::DCPS::DataWriterPeriodicReport>(
+          OpenDDS::Monitor::DataWriterPeriodicReportDataReader,
+          OpenDDS::Monitor::DataWriterPeriodicReport>(
             reader);
       }
       break;
 
-    case OpenDDS::DCPS::DATA_READER_REPORT_TYPE:
+    case OpenDDS::Monitor::DATA_READER_REPORT_TYPE:
       {
         this->dataUpdate<
-          OpenDDS::DCPS::DataReaderReportDataReader,
-          OpenDDS::DCPS::DataReaderReport>(
+          OpenDDS::Monitor::DataReaderReportDataReader,
+          OpenDDS::Monitor::DataReaderReport>(
             reader);
       }
       break;
 
-    case OpenDDS::DCPS::DATA_READER_PERIODIC_REPORT_TYPE:
+    case OpenDDS::Monitor::DATA_READER_PERIODIC_REPORT_TYPE:
       {
         this->dataUpdate<
-          OpenDDS::DCPS::DataReaderPeriodicReportDataReader,
-          OpenDDS::DCPS::DataReaderPeriodicReport>(
+          OpenDDS::Monitor::DataReaderPeriodicReportDataReader,
+          OpenDDS::Monitor::DataReaderPeriodicReport>(
             reader);
       }
       break;
 
-    case OpenDDS::DCPS::TRANSPORT_REPORT_TYPE:
+    case OpenDDS::Monitor::TRANSPORT_REPORT_TYPE:
       {
         this->dataUpdate<
-          OpenDDS::DCPS::TransportReportDataReader,
-          OpenDDS::DCPS::TransportReport>(
+          OpenDDS::Monitor::TransportReportDataReader,
+          OpenDDS::Monitor::TransportReport>(
             reader);
       }
       break;

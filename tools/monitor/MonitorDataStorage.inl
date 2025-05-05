@@ -71,8 +71,8 @@ MonitorDataStorage::update(const DataType&, DDS::DomainParticipant_ptr, bool)
 template<>
 inline
 void
-MonitorDataStorage::update<OpenDDS::DCPS::ServiceParticipantReport>(
-  const OpenDDS::DCPS::ServiceParticipantReport& data,
+MonitorDataStorage::update<OpenDDS::Monitor::ServiceParticipantReport>(
+  const OpenDDS::Monitor::ServiceParticipantReport& data,
   DDS::DomainParticipant_ptr,
   bool remove
 )
@@ -145,8 +145,8 @@ MonitorDataStorage::update<OpenDDS::DCPS::ServiceParticipantReport>(
 template<>
 inline
 void
-MonitorDataStorage::update<OpenDDS::DCPS::DomainParticipantReport>(
-  const OpenDDS::DCPS::DomainParticipantReport& data,
+MonitorDataStorage::update<OpenDDS::Monitor::DomainParticipantReport>(
+  const OpenDDS::Monitor::DomainParticipantReport& data,
   DDS::DomainParticipant_ptr,
   bool remove
 )
@@ -226,8 +226,8 @@ MonitorDataStorage::update<OpenDDS::DCPS::DomainParticipantReport>(
 template<>
 inline
 void
-MonitorDataStorage::update<OpenDDS::DCPS::TopicReport>(
-  const OpenDDS::DCPS::TopicReport& data,
+MonitorDataStorage::update<OpenDDS::Monitor::TopicReport>(
+  const OpenDDS::Monitor::TopicReport& data,
   DDS::DomainParticipant_ptr,
   bool remove
 )
@@ -312,8 +312,8 @@ MonitorDataStorage::update<OpenDDS::DCPS::TopicReport>(
 template<>
 inline
 void
-MonitorDataStorage::update<OpenDDS::DCPS::PublisherReport>(
-  const OpenDDS::DCPS::PublisherReport& data,
+MonitorDataStorage::update<OpenDDS::Monitor::PublisherReport>(
+  const OpenDDS::Monitor::PublisherReport& data,
   DDS::DomainParticipant_ptr,
   bool remove
 )
@@ -388,8 +388,8 @@ MonitorDataStorage::update<OpenDDS::DCPS::PublisherReport>(
 template<>
 inline
 void
-MonitorDataStorage::update<OpenDDS::DCPS::SubscriberReport>(
-  const OpenDDS::DCPS::SubscriberReport& data,
+MonitorDataStorage::update<OpenDDS::Monitor::SubscriberReport>(
+  const OpenDDS::Monitor::SubscriberReport& data,
   DDS::DomainParticipant_ptr,
   bool remove
 )
@@ -464,8 +464,8 @@ MonitorDataStorage::update<OpenDDS::DCPS::SubscriberReport>(
 template<>
 inline
 void
-MonitorDataStorage::update<OpenDDS::DCPS::DataWriterReport>(
-  const OpenDDS::DCPS::DataWriterReport& data,
+MonitorDataStorage::update<OpenDDS::Monitor::DataWriterReport>(
+  const OpenDDS::Monitor::DataWriterReport& data,
   DDS::DomainParticipant_ptr,
   bool remove
 )
@@ -551,8 +551,8 @@ MonitorDataStorage::update<OpenDDS::DCPS::DataWriterReport>(
 template<>
 inline
 void
-MonitorDataStorage::update<OpenDDS::DCPS::DataWriterPeriodicReport>(
-  const OpenDDS::DCPS::DataWriterPeriodicReport& data,
+MonitorDataStorage::update<OpenDDS::Monitor::DataWriterPeriodicReport>(
+  const OpenDDS::Monitor::DataWriterPeriodicReport& data,
   DDS::DomainParticipant_ptr,
   bool remove
 )
@@ -696,8 +696,8 @@ MonitorDataStorage::update<OpenDDS::DCPS::DataWriterPeriodicReport>(
 template<>
 inline
 void
-MonitorDataStorage::update<OpenDDS::DCPS::DataReaderReport>(
-  const OpenDDS::DCPS::DataReaderReport& data,
+MonitorDataStorage::update<OpenDDS::Monitor::DataReaderReport>(
+  const OpenDDS::Monitor::DataReaderReport& data,
   DDS::DomainParticipant_ptr,
   bool remove
 )
@@ -784,8 +784,8 @@ MonitorDataStorage::update<OpenDDS::DCPS::DataReaderReport>(
 template<>
 inline
 void
-MonitorDataStorage::update<OpenDDS::DCPS::DataReaderPeriodicReport>(
-  const OpenDDS::DCPS::DataReaderPeriodicReport& data,
+MonitorDataStorage::update<OpenDDS::Monitor::DataReaderPeriodicReport>(
+  const OpenDDS::Monitor::DataReaderPeriodicReport& data,
   DDS::DomainParticipant_ptr,
   bool remove
 )
@@ -870,8 +870,8 @@ MonitorDataStorage::update<OpenDDS::DCPS::DataReaderPeriodicReport>(
 template<>
 inline
 void
-MonitorDataStorage::update<OpenDDS::DCPS::TransportReport>(
-  const OpenDDS::DCPS::TransportReport& data,
+MonitorDataStorage::update<OpenDDS::Monitor::TransportReport>(
+  const OpenDDS::Monitor::TransportReport& data,
   DDS::DomainParticipant_ptr,
   bool remove
 )

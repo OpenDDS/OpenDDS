@@ -19,27 +19,27 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace DCPS {
+namespace Monitor {
 
 class MonitorFactoryImpl;
 
-class SPMonitorImpl : public Monitor {
+class SPMonitorImpl : public DCPS::Monitor {
 public:
   SPMonitorImpl(MonitorFactoryImpl* monitor_factory,
-                Service_Participant* sp);
+                DCPS::Service_Participant* sp);
   virtual ~SPMonitorImpl();
   virtual void report();
 
 private:
   MonitorFactoryImpl* monitor_factory_;
-  OpenDDS::DCPS::ServiceParticipantReportDataWriter_var sp_writer_;
+  ServiceParticipantReportDataWriter_var sp_writer_;
   std::string hostname_;
   pid_t pid_;
 };
 
 
-} // namespace DCPS
-} // namespace OpenDDS
+}
+}
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

@@ -19,22 +19,22 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace DCPS {
+namespace Monitor {
 
-class TopicMonitorImpl : public Monitor {
+class TopicMonitorImpl : public DCPS::Monitor {
 public:
-  TopicMonitorImpl(TopicImpl* topic,
-                   OpenDDS::DCPS::TopicReportDataWriter_ptr topic_writer);
+  TopicMonitorImpl(DCPS::TopicImpl* topic,
+                   TopicReportDataWriter_ptr topic_writer);
   virtual ~TopicMonitorImpl();
   virtual void report();
 
 private:
-  TopicImpl* topic_;
-  OpenDDS::DCPS::TopicReportDataWriter_var topic_writer_;
+  DCPS::TopicImpl* topic_;
+  TopicReportDataWriter_var topic_writer_;
 };
 
-} // namespace DCPS
-} // namespace OpenDDS
+}
+}
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

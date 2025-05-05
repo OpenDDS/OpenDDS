@@ -64,7 +64,6 @@ opendds_target_sources(OpenDDS_Rtps
   PUBLIC
     RtpsSubmessageKind.idl
   OPENDDS_IDL_OPTIONS ${opendds_idl_options} -Lspcpp
-  SKIP_TAO_IDL
   ${common_idl_options}
 )
 opendds_target_sources(OpenDDS_Rtps

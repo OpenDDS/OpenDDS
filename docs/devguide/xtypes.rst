@@ -413,6 +413,8 @@ XML
 
     The annotation is :ref:`xtypes--anno-opendds-data-representation-xml`.
 
+.. _xtypes--xcdr1:
+
 XCDR1
     This is the pre-XTypes standard CDR extended with XTypes features.
     Support is limited to non-XTypes features, see :ref:`xtypes--xcdr1-support` for details.
@@ -420,6 +422,8 @@ XCDR1
     The ``DataRepresentationId_t`` value is ``DDS::XCDR_DATA_REPRESENTATION``
 
     The annotation is :ref:`xtypes--anno-opendds-data-representation-xcdr1`.
+
+.. _xtypes--xcdr2:
 
 XCDR2
     This is default for writers when using the :ref:`rtps-udp-transport` and should be preferred in most cases.

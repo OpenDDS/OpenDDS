@@ -36,8 +36,10 @@ sub get_bin_executable {
   my $name = shift;
 
   my $bin = catdir($ENV{DDS_ROOT}, "bin");
+  my $from = "DDS_ROOT";
   if (defined($ENV{OPENDDS_BUILD_DIR})) {
     $bin = catdir($ENV{OPENDDS_BUILD_DIR}, "bin");
+    $from = "OPENDDS_BUILD_DIR";
     if (defined($ENV{CMAKE_CONFIG_TYPE})) {
       my $subdir_bin = catdir($bin, $ENV{CMAKE_CONFIG_TYPE});
       if (-d $subdir_bin) {
@@ -47,6 +49,10 @@ sub get_bin_executable {
   }
   elsif (defined($ENV{OPENDDS_INSTALL_PREFIX})) {
     $bin = catdir($ENV{OPENDDS_INSTALL_PREFIX}, "bin");
+    $from = "OPENDDS_INSTALL_PREFIX";
+  }
+  if (!-d $bin) {
+    printf STDERR "ERROR: $bin (from $from) does not exist!\n";
   }
   return get_executable($name, $bin);
 }

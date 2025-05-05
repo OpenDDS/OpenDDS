@@ -13,17 +13,7 @@ set(_opendds_exec_perms
   WORLD_READ WORLD_EXECUTE)
 
 # Load in build settings.
-file(STRINGS "${OPENDDS_SOURCE_DIR}/build.ini" build_ini)
-unset(section)
-foreach(line IN LISTS build_ini)
-  if(line MATCHES "^\\[(.*)\\]$")
-    set(section "${CMAKE_MATCH_1}")
-  elseif(section AND line MATCHES "^([^=#]+)=(.*)$")
-    set(name "${CMAKE_MATCH_1}")
-    set(value "${CMAKE_MATCH_2}")
-    set("${section}-${name}" "${value}")
-  endif()
-endforeach()
+_opendds_read_ini("${OPENDDS_SOURCE_DIR}/build.ini" PREFIX _OPENDDS_BUILD)
 
 function(_opendds_target target)
   # This is the name the target should be exported from CMake-build OpenDDS as
@@ -40,10 +30,11 @@ function(_opendds_target target)
   set_target_properties(${target} PROPERTIES EXPORT_NAME "${name}")
 
   if(OPENDDS_COMPILE_WARNINGS STREQUAL "WARNING" OR OPENDDS_COMPILE_WARNINGS STREQUAL "ERROR")
-    string(REPLACE " " ";" outvar ${${CMAKE_CXX_COMPILER_ID}-warning})
+    set(prefix "_OPENDDS_BUILD_${CMAKE_CXX_COMPILER_ID}_")
+    string(REPLACE " " ";" outvar "${${prefix}warning}")
     target_compile_options(${target} PRIVATE ${outvar})
     if(OPENDDS_COMPILE_WARNINGS STREQUAL "ERROR")
-      string(REPLACE " " ";" outvar ${{CMAKE_CXX_COMPILER_ID}-error})
+      string(REPLACE " " ";" outvar "${${prefix}error}")
       target_compile_options(${target} PRIVATE ${outvar})
     endif()
   endif()

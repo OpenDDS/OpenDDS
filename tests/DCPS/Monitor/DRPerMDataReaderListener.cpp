@@ -31,8 +31,8 @@ DRPerMDataReaderListenerImpl::~DRPerMDataReaderListenerImpl()
 void DRPerMDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
   try {
-    OpenDDS::DCPS::DataReaderPeriodicReportDataReader_var drperm_dr =
-      OpenDDS::DCPS::DataReaderPeriodicReportDataReader::_narrow(reader);
+    OpenDDS::Monitor::DataReaderPeriodicReportDataReader_var drperm_dr =
+      OpenDDS::Monitor::DataReaderPeriodicReportDataReader::_narrow(reader);
 
     if (CORBA::is_nil(drperm_dr.in())) {
       ACE_ERROR((LM_ERROR,
@@ -41,10 +41,10 @@ void DRPerMDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       ACE_OS::exit(-1);
     }
 
-    OpenDDS::DCPS::DataReaderPeriodicReport drperr;
+    OpenDDS::Monitor::DataReaderPeriodicReport drperr;
     DDS::SampleInfo si;
 
-    DDS::ReturnCode_t status = drperm_dr->take_next_sample(drperr, si) ;
+    DDS::ReturnCode_t status = drperm_dr->take_next_sample(drperr, si);
 
     if (status == DDS::RETCODE_OK) {
       cout << "SampleInfo.sample_rank = " << si.sample_rank << endl;

@@ -1662,9 +1662,9 @@ sub system_default_install_dir {
 }
 
 my $build_gtest = 0;
+my $gtest_root = undef;
 if (exists $opts{'gtest'} || $tests) {
   my $gtest_sanity = 'include/gtest/gtest.h';
-  my $gtest_root = undef;
 
   if ($opts{'gtest'}) {
     die "ERROR: '$gtest_sanity' not found in supplied gtest directory '$opts{'gtest'}'"
@@ -2898,6 +2898,7 @@ sub write_cmake_file {
     my $fh = shift();
     my $buildEnv = shift();
 
+    print_cmake_config($fh, 'SOURCE_DIR', Cwd::abs_path($FindBin::RealBin));
     print_cmake_config($fh, 'MPC', Cwd::abs_path($buildEnv->{'MPC_ROOT'}));
     print_cmake_config($fh, 'ACE', Cwd::abs_path($buildEnv->{'ACE_ROOT'}));
     print_cmake_config($fh, 'TAO', Cwd::abs_path($buildEnv->{'TAO_ROOT'}));
@@ -2979,7 +2980,7 @@ sub write_cmake_file {
     }
 
     if (defined($cxx_std)) {
-      print_cmake_config($fh, 'OPENDDS_CXX_STD', $cxx_std);
+      print_cmake_config($fh, 'CXX_STD', $cxx_std);
     }
 
     # TODO(iguessthislldo): Move to a smarter system that can use existing
@@ -2991,7 +2992,6 @@ sub write_cmake_file {
       'content-filtered-topic' => 1,
       'content-subscription' => 1,
       'debug' => 1,
-      'gtest' => '',
       'inline' => 1,
       'java' => '',
       'multi-topic' => 1,
@@ -3011,6 +3011,9 @@ sub write_cmake_file {
     );
     for my $opt (sort(keys(%opts_to_use))) {
       print_cmake_config($fh, $opt, exists($opts{$opt}) ? $opts{$opt} : $opts_to_use{$opt});
+    }
+    if (defined($gtest_root)) {
+      print_cmake_config($fh, 'GTEST', $gtest_root);
     }
     print_cmake_config($fh, 'features', \@features);
     print_cmake_config($fh, 'mpcopts', \@mpcopts);

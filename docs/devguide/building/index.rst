@@ -675,7 +675,6 @@ These are all the variables that are exclusive to building OpenDDS with CMake:
   The default for this is ``TRUE``.
 
 .. cmake:var:: OPENDDS_BOOTTIME_TIMERS
-  :no-contents-entry:
 
   .. versionadded:: 3.28
 
@@ -696,6 +695,13 @@ These are all the variables that are exclusive to building OpenDDS with CMake:
   If set to ``ON``, OpenDDS uses C++17's ``std::optional`` template in its API.
   If set to ``OFF``, OpenDDS emulates ``std::optional`` with its own data type.
   Default is ``ON`` when the compiler supports C++17 or higher.
+
+  .. versionadded:: 3.32
+
+.. cmake:var:: OPENDDS_INSTALL_RAPIDJSON
+
+  Install the headers of :cmake:var:`OPENDDS_RAPIDJSON` with OpenDDS.
+  Default is ``TRUE`` if OpenDDS uses its own RapidJSON, else ``FALSE`` if a ``OPENDDS_RAPIDJSON`` path was passed by the user.
 
   .. versionadded:: 3.32
 

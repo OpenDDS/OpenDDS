@@ -8,7 +8,7 @@
 
 module OpenDDS {
 
-  module DCPS {
+  module Monitor {
 
     const long MONITOR_DOMAIN_ID = -999;
     const long MONITOR_TRANSPORT_ID = 999;
@@ -53,7 +53,7 @@ module OpenDDS {
       @key string host;
       /// Process ID
       @key long pid;
-      GUIDSeq domain_participants;
+      DCPS::GUIDSeq domain_participants;
       CORBA::ULongSeq transports;
       NVPSeq values;
     };
@@ -65,18 +65,18 @@ module OpenDDS {
       /// Process ID
       long pid;
       /// GUID of the Domain Participant
-      @key GUID_t dp_id;
+      @key DCPS::GUID_t dp_id;
       DDS::DomainId_t domain_id;
-      GUIDSeq topics;
+      DCPS::GUIDSeq topics;
       NVPSeq values;
     };
 
     @topic
     struct TopicReport {
       /// GUID of the Domain Participant this Topic belongs to
-      GUID_t dp_id;
+      DCPS::GUID_t dp_id;
       /// GUID for the Topic
-      @key GUID_t topic_id;
+      @key DCPS::GUID_t topic_id;
       string topic_name;
       string type_name;
       NVPSeq values;
@@ -87,9 +87,9 @@ module OpenDDS {
       /// Instance handle of this Publisher. Unique within the DP.
       @key DDS::InstanceHandle_t handle;
       /// GUID of the Domain Participant this Publisher belongs to
-      @key GUID_t dp_id;
+      @key DCPS::GUID_t dp_id;
       unsigned long transport_id;
-      GUIDSeq writers;
+      DCPS::GUIDSeq writers;
       NVPSeq values;
     };
 
@@ -98,27 +98,27 @@ module OpenDDS {
       /// Instance handle of this Subscriber. Unique within the DP.
       @key DDS::InstanceHandle_t handle;
       /// GUID of the Domain Participant this Subscriber belongs to
-      @key GUID_t dp_id;
+      @key DCPS::GUID_t dp_id;
       unsigned long transport_id;
-      GUIDSeq readers;
+      DCPS::GUIDSeq readers;
       NVPSeq values;
     };
 
     struct DataWriterAssociation {
-      GUID_t        dr_id;
+      DCPS::GUID_t dr_id;
     };
     typedef sequence<DataWriterAssociation> DWAssociations;
 
     @topic
     struct DataWriterReport {
       /// GUID of the Domain Participant this Data Writer belongs to
-      GUID_t dp_id;
+      DCPS::GUID_t dp_id;
       /// Instance handle of this Data Writer's Publisher
       DDS::InstanceHandle_t pub_handle;
       /// GUID for the Data Writer
-      @key GUID_t dw_id;
+      @key DCPS::GUID_t dw_id;
       /// GUID for the Topic this Data Writer is using
-      GUID_t topic_id;
+      DCPS::GUID_t topic_id;
       /// Sequence of instances that this Data Writer has registered
       DDS::InstanceHandleSeq instances;
       /// Sequence of Data Reader GUIDs that this Data Writer is associated with
@@ -127,14 +127,14 @@ module OpenDDS {
     };
 
     struct DataWriterAssociationPeriodic {
-      GUID_t        dr_id;
+      DCPS::GUID_t dr_id;
       unsigned long sequence_number;
     };
     typedef sequence<DataWriterAssociationPeriodic> DWAssociationsPeriodic;
 
     @topic
     struct DataWriterPeriodicReport {
-      @key GUID_t dw_id;
+      @key DCPS::GUID_t dw_id;
       unsigned long data_dropped_count;
       unsigned long data_delivered_count;
       unsigned long control_dropped_count;
@@ -144,7 +144,7 @@ module OpenDDS {
     };
 
     struct DataReaderAssociation {
-      GUID_t        dw_id;
+      DCPS::GUID_t dw_id;
       short         state;
     };
     typedef sequence<DataReaderAssociation> DRAssociations;
@@ -152,13 +152,13 @@ module OpenDDS {
     @topic
     struct DataReaderReport {
       /// GUID of the Domain Participant this Data Reader belongs to
-      GUID_t dp_id;
+      DCPS::GUID_t dp_id;
       /// Instance handle of this Data Reader's Subscriber
       DDS::InstanceHandle_t sub_handle;
       /// GUID for the Data Reader
-      @key GUID_t dr_id;
+      @key DCPS::GUID_t dr_id;
       /// GUID for the Topic this Data Reader is using
-      GUID_t topic_id;
+      DCPS::GUID_t topic_id;
       /// Sequence of instances that this Data Reader has received
       DDS::InstanceHandleSeq instances;
       /// Sequence of Data Writer GUIDs that this Data Reader is associated with
@@ -167,7 +167,7 @@ module OpenDDS {
     };
 
     struct DataReaderAssociationPeriodic {
-      GUID_t        dw_id;
+      DCPS::GUID_t dw_id;
       unsigned long samples_available;
       // Stats      latency_stats;
     };
@@ -175,7 +175,7 @@ module OpenDDS {
 
     @topic
     struct DataReaderPeriodicReport {
-      @key GUID_t dr_id;
+      @key DCPS::GUID_t dr_id;
       DRAssociationsPeriodic associations;
       NVPSeq values;
     };

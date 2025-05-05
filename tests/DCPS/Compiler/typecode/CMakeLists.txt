@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8...4.0)
+cmake_minimum_required(VERSION 3.3...4.0)
 project(opendds_cpp11_typecode CXX)
 
 find_package(OpenDDS REQUIRED)
@@ -12,13 +12,12 @@ if(NOT OPENDDS_CXX11)
 endif()
 
 set(target_prefix "${PROJECT_NAME}_")
-set(src "${CMAKE_CURRENT_SOURCE_DIR}/../../DCPS/Compiler/typecode")
 set(dst ${CMAKE_CURRENT_BINARY_DIR})
 
 # IDL Library
 set(idl "${target_prefix}idl")
 add_library(${idl})
-opendds_target_sources(${idl} PUBLIC "${src}/typecode.idl" OPENDDS_IDL_OPTIONS "-Lc++11" SUPPRESS_ANYS OFF)
+opendds_target_sources(${idl} PUBLIC typecode.idl OPENDDS_IDL_OPTIONS -Lc++11 SUPPRESS_ANYS OFF)
 target_link_libraries(${idl} PUBLIC OpenDDS::Dcps)
 set_target_properties(${idl} PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${dst}/Idl"
@@ -27,7 +26,7 @@ set_target_properties(${idl} PROPERTIES
 # main
 set(typecode "${target_prefix}typecode")
 add_executable(${typecode}
-  "${src}/C++11/typecode.cpp"
+  C++11/typecode.cpp
 )
 set_target_properties(${typecode} PROPERTIES
   OUTPUT_NAME "typecode"
