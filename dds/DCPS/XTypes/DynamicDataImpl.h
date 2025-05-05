@@ -516,10 +516,10 @@ private:
       unsigned char char8_[sizeof(ACE_OutputCDR::from_char)];
       unsigned char byte_[sizeof(ACE_OutputCDR::from_octet)];
       unsigned char boolean_[sizeof(ACE_OutputCDR::from_boolean)];
-      const char* str_;
+      char* str_;
 #ifdef DDS_HAS_WCHAR
       unsigned char char16_[sizeof(ACE_OutputCDR::from_wchar)];
-      const CORBA::WChar* wstr_;
+      CORBA::WChar* wstr_;
 #endif
     };
   };

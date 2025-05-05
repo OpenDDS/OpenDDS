@@ -201,7 +201,7 @@ int run(int argc, ACE_TCHAR* argv[])
       config.restart_detection(ACE_OS::atoi(arg));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-AdmissionControlQueueSize"))) {
-      config.admission_control_queue_size(ACE_OS::atoi(arg));
+      config.admission_control_queue_size(static_cast<size_t>(ACE_OS::atoi(arg)));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-AdmissionControlQueueDuration"))) {
       config.admission_control_queue_duration(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
@@ -212,7 +212,7 @@ int run(int argc, ACE_TCHAR* argv[])
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Argument for -AdmissionMaxParticipantsRange option must be positive: %d\n", conv));
         return EXIT_FAILURE;
       }
-      config.admission_max_participants_low_water(conv);
+      config.admission_max_participants_low_water(static_cast<size_t>(conv));
       const auto dash = std::strchr(arg, '-');
       if (!dash) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Argument for -AdmissionMaxParticipantsRange option must contain a '-': %C\n", arg));
@@ -227,19 +227,19 @@ int run(int argc, ACE_TCHAR* argv[])
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: High value for -AdmissionMaxParticipantsRange option must be greater than or equal to low value\n"));
         return EXIT_FAILURE;
       }
-      config.admission_max_participants_high_water(conv);
+      config.admission_max_participants_high_water(static_cast<size_t>(conv));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-RunTime"))) {
       config.run_time(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-HandlerThreads"))) {
-      config.handler_threads(std::atoi(arg));
+      config.handler_threads(static_cast<size_t>(std::atoi(arg)));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-SynchronousOutput"))) {
       config.synchronous_output(ACE_OS::atoi(arg));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-MaxIpsPerClient"))) {
-      config.max_ips_per_client(ACE_OS::atoi(arg));
+      config.max_ips_per_client(static_cast<size_t>(ACE_OS::atoi(arg)));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-RejectedAddressDuration"))) {
       config.rejected_address_duration(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));

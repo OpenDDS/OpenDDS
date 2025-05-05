@@ -79,6 +79,10 @@ if(NOT OPENDDS_CONFIG_CMAKE AND NOT ACE_IS_BEING_BUILT)
 endif()
 get_filename_component(_OPENDDS_ROOT "${_OPENDDS_ROOT}" ABSOLUTE)
 
+if(NOT DEFINED OPENDDS_BUILT_USING_CMAKE AND OPENDDS_IS_BEING_BUILT)
+  set(OPENDDS_BUILT_USING_CMAKE TRUE)
+endif()
+
 if(NOT DEFINED OPENDDS_INSTALL_LIB)
   set(OPENDDS_INSTALL_LIB "lib")
 endif()
@@ -150,7 +154,7 @@ message(STATUS "Using ACE ${OPENDDS_ACE_VERSION} at ${ACE_ROOT}")
 message(STATUS "Using TAO ${OPENDDS_TAO_VERSION} at ${TAO_ROOT}")
 
 function(_opendds_cxx_std_to_year out_var cxx_std)
-  if(cxx_std STREQUAL 98)
+  if(cxx_std STREQUAL 98 OR cxx_std STREQUAL 03) # 2003 is not used in CMake's CXX_STANDARD property
     set(year 1998)
   else()
     math(EXPR year "2000 + ${cxx_std}")
@@ -365,11 +369,12 @@ function(_opendds_set_cxx_std)
   endif()
 
   _opendds_cxx_std_from_year(cxx_std ${cxx_std_year})
+  unset(OPENDDS_CXX_STD PARENT_SCOPE)
   set(OPENDDS_CXX_STD ${cxx_std} CACHE STRING
     "Minimum required C++ standard (same values as CMAKE_CXX_STANDARD)" FORCE)
   message(STATUS "OPENDDS_CXX_STD: ${OPENDDS_CXX_STD} (from ${cxx_std_year_source})")
   set(OPENDDS_CXX_STD_YEAR ${cxx_std_year} CACHE STRING
-    "Minimum required C++ standard year (do not set mannually)" FORCE)
+    "Minimum required C++ standard year (do not set manually)" FORCE)
 endfunction()
 
 if(NOT DEFINED OPENDDS_CXX_STD_YEAR)
@@ -487,6 +492,13 @@ _opendds_feature(SAFETY_PROFILE OFF CONFIG MPC_INVERTED_NAME no_opendds_safety_p
   DOC "Build using Safety Profile (Not for CMake-built OpenDDS)")
 _opendds_feature(COVERAGE OFF MPC_INVERTED_NAME dds_non_coverage)
 _opendds_feature(BOOTTIME_TIMERS OFF CONFIG DOC "Use CLOCK_BOOTTIME for timers")
+if(OPENDDS_CXX_STD_YEAR LESS 2017)
+  set(_opendds_cxx17 OFF)
+else()
+  set(_opendds_cxx17 ON)
+endif()
+_opendds_feature(CXX17 "${_opendds_cxx17}" MPC_INVERTED_NAME no_cxx17 DOC "Build assumes C++17 support")
+_opendds_feature(STD_OPTIONAL "${OPENDDS_CXX17}" CONFIG DOC "Use C++17's std::optional")
 
 # ACE Features
 _opendds_feature(VERSIONED_NAMESPACE OFF MPC DOC "Namespaces include versions")

@@ -2,6 +2,7 @@
 
 .. news-start-section: Platform Support and Dependencies
 .. news-start-section: CMake
+.. news-rank: 9
 - Fixes and improvements for :cmake:func:`opendds_export_header`:
 
   - ``opendds_export_header`` now allows specifying an existing export header and gives control over what names are used.
@@ -10,6 +11,7 @@
 
   - Fixed Visual Studio failing because of inconsistent linkage of exported symbols when linking between a DLL and a static library.
 
+.. news-rank: 0
 - Added :cmake:func:`opendds_bigobj` to set ``/bigobj`` on targets that need it on Windows.
 .. news-end-section
 .. news-end-section

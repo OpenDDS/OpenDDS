@@ -51,7 +51,7 @@ int HttpConnection::handle_input(ACE_HANDLE)
     return HANDLER_ERROR;
   }
 
-  buffer_.wr_ptr(bytes);
+  buffer_.wr_ptr(static_cast<size_t>(bytes));
   const std::string request(buffer_.rd_ptr(), buffer_.length());
   if (relay_http_meta_discovery_->processRequest(peer(), request)) {
     peer().close_writer();

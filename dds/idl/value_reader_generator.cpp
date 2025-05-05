@@ -68,7 +68,7 @@ namespace {
                     const std::string& idx, int level, FieldFilter filter_kind)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    const std::string indent(level * 2, ' ');
+    const std::string indent(size_t(level) * 2, ' ');
     const Classification c = classify(array->base_type());
     const bool primitive = c & CL_PRIMITIVE;
     // When we have a primitive type the last dimension is read using the read_*_array
@@ -111,7 +111,7 @@ namespace {
   {
     // TODO: Take advantage of the size.
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    const std::string indent(level * 2, ' ');
+    const std::string indent(size_t(level) * 2, ' ');
     const std::string elem_tk = type_kind(sequence->base_type());
     be_global->impl_ <<
       indent << "if (!value_reader.begin_sequence(" << elem_tk << ")) return false;\n" <<
@@ -145,7 +145,7 @@ namespace {
 
     const Classification c = classify(actual);
 
-    const std::string indent(level * 2 + (optional ? 2 : 0), ' ');
+    const std::string indent(size_t(level) * 2 + (optional ? 2 : 0), ' ');
     if (optional) {
       be_global->impl_ <<
         indent.substr(0, indent.size() - 2) << "if (value_reader.member_has_value()) {\n";

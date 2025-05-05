@@ -72,37 +72,37 @@ UdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info,
 void
 UdpInst::send_buffer_size(ACE_INT32 sbs)
 {
-  TheServiceParticipant->config_store()->set_uint32(config_key("SEND_BUFFER_SIZE").c_str(), sbs);
+  TheServiceParticipant->config_store()->set_int32(config_key("SEND_BUFFER_SIZE").c_str(), sbs);
 }
 
 ACE_INT32
 UdpInst::send_buffer_size() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("SEND_BUFFER_SIZE").c_str(),
+  return TheServiceParticipant->config_store()->get_int32(config_key("SEND_BUFFER_SIZE").c_str(),
 #if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
-                                                           ACE_DEFAULT_MAX_SOCKET_BUFSIZ
+                                                          ACE_DEFAULT_MAX_SOCKET_BUFSIZ
 #else
-                                                           0
+                                                          0
 #endif
-                                                           );
+                                                          );
 }
 
 void
 UdpInst::rcv_buffer_size(ACE_INT32 sbs)
 {
-  TheServiceParticipant->config_store()->set_uint32(config_key("RCV_BUFFER_SIZE").c_str(), sbs);
+  TheServiceParticipant->config_store()->set_int32(config_key("RCV_BUFFER_SIZE").c_str(), sbs);
 }
 
 ACE_INT32
 UdpInst::rcv_buffer_size() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("RCV_BUFFER_SIZE").c_str(),
+  return TheServiceParticipant->config_store()->get_int32(config_key("RCV_BUFFER_SIZE").c_str(),
 #if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
-                                                           ACE_DEFAULT_MAX_SOCKET_BUFSIZ
+                                                          ACE_DEFAULT_MAX_SOCKET_BUFSIZ
 #else
-                                                           0
+                                                          0
 #endif
-                                                           );
+                                                          );
 }
 
 void

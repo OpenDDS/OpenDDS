@@ -230,7 +230,7 @@ public:
     if (transport_statistics_.count_messages()) {
       ssize_t bytes = 0;
       for (int i = 0; i < num_blocks; ++i) {
-        bytes += iov[i].iov_len;
+        bytes += static_cast<ssize_t>(iov[i].iov_len);
       }
       const DCPS::InternalMessageCountKey key(remote_address, key_kind, remote_address == spdp_rtps_relay_address_);
       transport_statistics_.message_count[key].send_fail(bytes);
@@ -1365,10 +1365,10 @@ protected:
     {
     }
 
-    MatchingPair(const GUID_t& remote, bool remote_is_reader, DCPS::TypeObjReqCond* type_obj_req_cond)
-      : GuidPair(GUID_UNKNOWN, remote)
+    MatchingPair(const GUID_t& a_remote, bool remote_is_reader, DCPS::TypeObjReqCond* a_type_obj_req_cond)
+      : GuidPair(GUID_UNKNOWN, a_remote)
       , local_is_reader(!remote_is_reader)
-      , type_obj_req_cond(type_obj_req_cond)
+      , type_obj_req_cond(a_type_obj_req_cond)
     {
     }
 

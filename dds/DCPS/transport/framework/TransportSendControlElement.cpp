@@ -28,7 +28,7 @@ TransportSendControlElement::TransportSendControlElement(int initial_count,
                                                          TransportSendListener* listener,
                                                          const DataSampleHeader& header,
                                                          Message_Block_Ptr msg_block)
-  : TransportQueueElement(initial_count),
+  : TransportQueueElement(static_cast<unsigned long>(initial_count)),
     publisher_id_(publisher_id),
     listener_(listener),
     header_(header),
@@ -41,7 +41,7 @@ TransportSendControlElement::TransportSendControlElement(int initial_count,
 
 TransportSendControlElement::TransportSendControlElement(int initial_count,
                                                          const DataSampleElement* dcps_elem)
-  : TransportQueueElement(initial_count)
+  : TransportQueueElement(static_cast<unsigned long>(initial_count))
   , publisher_id_(dcps_elem->get_pub_id())
   , listener_(dcps_elem->get_send_listener())
   , header_(dcps_elem->get_header())

@@ -1220,7 +1220,7 @@ Config::loadPublisher(
   valueString.clear();
   heap.get_string_value( sectionKey, TRANSPORTINDEX_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->transport = ACE_OS::atoi( valueString.c_str());
+    profile->transport = static_cast<unsigned int>(ACE_OS::atoi(valueString.c_str()));
     if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadPublisher() - ")
@@ -2050,7 +2050,7 @@ Config::loadSubscriber(
   valueString.clear();
   heap.get_string_value( sectionKey, TRANSPORTINDEX_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->transport = ACE_OS::atoi( valueString.c_str());
+    profile->transport = static_cast<unsigned int>(ACE_OS::atoi(valueString.c_str()));
     if( OpenDDS::DCPS::DCPS_debug_level>1) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Config::loadSubscriber() - ")

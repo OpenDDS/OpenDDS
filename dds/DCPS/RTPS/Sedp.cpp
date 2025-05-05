@@ -4909,7 +4909,7 @@ DDS::ReturnCode_t
 Sedp::write_volatile_message(DDS::Security::ParticipantVolatileMessageSecure& msg,
                              const GUID_t& reader)
 {
-  msg.message_identity.sequence_number = static_cast<unsigned long>(participant_volatile_message_secure_writer_->get_seq().getValue());
+  msg.message_identity.sequence_number = participant_volatile_message_secure_writer_->get_seq().getValue();
   DCPS::SequenceNumber sequence = DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN();
   return participant_volatile_message_secure_writer_->write_volatile_message_secure(msg, reader, sequence);
 }
@@ -7947,7 +7947,7 @@ void Sedp::get_remote_type_objects(const XTypes::TypeIdentifierWithDependencies&
     // its dependencies are obtained in subsequent type lookup requests.
     send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false, orig_req_data.seq_number);
   } else {
-    type_ids.length(tid_with_deps.dependent_typeid_count + 1);
+    type_ids.length(static_cast<DDS::UInt32>(tid_with_deps.dependent_typeid_count + 1));
     type_ids[0] = make_scc_id_or_default(tid_with_deps.typeid_with_size.type_id);
     for (unsigned i = 1; i <= (unsigned)tid_with_deps.dependent_typeid_count; ++i) {
       type_ids[i] = make_scc_id_or_default(tid_with_deps.dependent_typeids[i - 1].type_id);

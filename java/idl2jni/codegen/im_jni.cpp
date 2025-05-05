@@ -672,7 +672,7 @@ bool idl_mapping_jni::gen_typedef(UTL_ScopedName *name, AST_Type *base,
 
   if (!element) return true;//nothing needed if it's not an array or a sequence
 
-  string length = "source.length ()";
+  string length = "static_cast<jsize> (source.length ())";
 
   if (!sequence) {
     ostringstream oss;
@@ -695,8 +695,9 @@ bool idl_mapping_jni::gen_jarray_copies(UTL_ScopedName *name,
   const bool lengthIsConstant = !sequence;
   commonSetup c(name, jniArrayType.c_str(), false, !sequence);
   string preLoop, postLoopCxx, postLoopJava, preNewArray, newArrayExtra,
-  postNewArray, loopCxx, loopJava, actualJniType = jniType,
-                                     resizeCxx = sequence ? "  target.length (len);\n" : "";
+    postNewArray, loopCxx, loopJava,
+    actualJniType = jniType,
+    resizeCxx = sequence ? "  target.length (static_cast<CORBA::ULong> (len));\n" : "";
 
   if (jvmSig.size() == 1) { //primitive type
     preLoop =
@@ -1692,7 +1693,7 @@ bool idl_mapping_jni::gen_native(UTL_ScopedName *name, const char *)
     if (info) elem_cxx += "_var";
 
     return gen_jarray_copies(name, "L" + elem + ";", "Object", "jobject",
-                             "jobjectArray", elem_cxx, true, "source.length ()");
+                             "jobjectArray", elem_cxx, true, "static_cast<jsize> (source.length ())");
   }
   default:
     break;

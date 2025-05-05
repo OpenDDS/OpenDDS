@@ -554,7 +554,7 @@ WriteDataContainer::num_samples(DDS::InstanceHandle_t handle,
     return DDS::RETCODE_ERROR;
 
   } else {
-    size = instance->samples_.size();
+    size = static_cast<size_t>(instance->samples_.size());
     return DDS::RETCODE_OK;
   }
 }
@@ -571,9 +571,8 @@ WriteDataContainer::num_all_samples()
 
   for (PublicationInstanceMapType::iterator iter = instances_.begin();
        iter != instances_.end();
-       ++iter)
-  {
-    size += iter->second->samples_.size();
+       ++iter) {
+    size += static_cast<size_t>(iter->second->samples_.size());
   }
 
   return size;

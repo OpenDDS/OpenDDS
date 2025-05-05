@@ -93,7 +93,7 @@ OpenDDS::Model::Entities::participant(
   }
   this->participantByString_[ name]
     = this->delegate_.createParticipant(
-        profile->domainId,
+        static_cast<unsigned long>(profile->domainId),
         profile->qos,
         OpenDDS::DCPS::DEFAULT_STATUS_MASK,
         transportConfig

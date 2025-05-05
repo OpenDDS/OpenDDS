@@ -527,7 +527,7 @@ ConfigStoreImpl::get(const char* key,
 
   const char* start = t.c_str();
   while (const char* next_comma = std::strchr(start, ',')) {
-    const size_t size = next_comma - start;
+    const size_t size = static_cast<size_t>(next_comma - start);
     retval.push_back(String(start, size));
     start = next_comma + 1;
   }
@@ -592,7 +592,7 @@ ConfigStoreImpl::get(const char* key,
         {
           DDS::UInt32 x = 0;
           if (DCPS::convertToInteger(sample.value(), x)) {
-            retval = TimeDuration(x);
+            retval = TimeDuration(static_cast<time_t>(x));
           } else {
             retval = value;
             if (log_level >= LogLevel::Warning) {

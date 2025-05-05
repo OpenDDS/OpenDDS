@@ -118,7 +118,9 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
     return -1;
   }
 
-  cur_rb->wr_ptr(bytes_remaining);
+  ACE_UINT32 bytes_remaining_unsigned = static_cast<ACE_UINT32>(bytes_remaining);
+
+  cur_rb->wr_ptr(bytes_remaining_unsigned);
 
   if (bytes_remaining == 0) {
     if (gracefully_disconnected_) {
@@ -130,7 +132,7 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
   }
 
   if (!pdu_remaining_) {
-    receive_transport_header_.length_ = static_cast<ACE_UINT32>(bytes_remaining);
+    receive_transport_header_.length_ = bytes_remaining_unsigned;
   }
 
   receive_transport_header_ = *cur_rb;
@@ -142,17 +144,17 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
     return 0;
   }
 
-  bytes_remaining = receive_transport_header_.length_;
+  bytes_remaining_unsigned = static_cast<ACE_UINT32>(receive_transport_header_.length_);
   if (!check_header(receive_transport_header_)) {
     return 0;
   }
 
   {
     const ScopedHeaderProcessing shp(*this);
-    while (bytes_remaining > 0) {
-      data_sample_header_.pdu_remaining(bytes_remaining);
+    while (bytes_remaining_unsigned > 0) {
+      data_sample_header_.pdu_remaining(bytes_remaining_unsigned);
       data_sample_header_ = *cur_rb;
-      bytes_remaining -= data_sample_header_.get_serialized_size();
+      bytes_remaining_unsigned -= static_cast<ACE_UINT32>(data_sample_header_.get_serialized_size());
       if (!check_header(data_sample_header_)) {
         return 0;
       }
@@ -174,7 +176,7 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
         }
       }
       cur_rb->rd_ptr(data_sample_header_.message_length());
-      bytes_remaining -= data_sample_header_.message_length();
+      bytes_remaining_unsigned -= static_cast<ACE_UINT32>(data_sample_header_.message_length());
 
       // For the reassembly algorithm, the 'last_fragment_' header bit only
       // applies to the first DataSampleHeader in the TransportHeader
@@ -260,7 +262,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
 # else
 
   stop = true;
-  size_t bytes = ret;
+  size_t bytes = static_cast<size_t>(ret);
   size_t block_size = std::min(bytes, static_cast<size_t>(iov[0].iov_len));
   ACE_Message_Block* head = new ACE_Message_Block(static_cast<const char*>(iov[0].iov_base), block_size);
   head->length(block_size);
@@ -457,7 +459,7 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
     }
 
     encoded_rtps_ = true;
-    return plainLen;
+    return static_cast<ssize_t>(plainLen);
   }
 #endif
 
@@ -1148,12 +1150,12 @@ RtpsUdpReceiveStrategy::remove_frags_from_bitmap(CORBA::Long bitmap[],
       }
     }
 
-    const CORBA::ULong mask = 1 << (31 - bit);
+    const CORBA::ULong mask = 1u << (31 - bit);
     if (x & mask) {
-      const bool has_frags = reassembly_.has_frags(base + i, pub_id);
+      const bool has_frags = reassembly_.has_frags(base + static_cast<int>(i), pub_id);
       if (has_frags) {
         x &= ~mask;
-        bitmap[i / 32] = x;
+        bitmap[i / 32] = static_cast<ACE_CDR::Long>(x);
         modified = true;
         --cumulative_bits_added;
       }
@@ -1397,7 +1399,7 @@ RtpsUdpReceiveStrategy::MessageReceiver::fill_header(
 {
   using namespace RTPS;
   if (have_timestamp_) {
-    header.source_timestamp_sec_ = timestamp_.seconds;
+    header.source_timestamp_sec_ = static_cast<ACE_INT32>(timestamp_.seconds);
     header.source_timestamp_nanosec_ =
       DCPS::uint32_fractional_seconds_to_nanoseconds(timestamp_.fraction);
   }

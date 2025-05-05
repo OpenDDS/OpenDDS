@@ -226,7 +226,7 @@ if(_opendds_tao_find_libs OR _opendds_tao_find_exes)
   endif()
 endif()
 
-if(_OPENDDS_CMAKE_BUILT_AND_INSTALLED)
+if(OPENDDS_BUILT_USING_CMAKE AND OPENDDS_USE_PREFIX_PATH)
   include("${CMAKE_CURRENT_LIST_DIR}/opendds_targets.cmake")
   set(OpenDDS_FOUND TRUE)
   foreach(_tgt ${_opendds_required_targets})

@@ -95,7 +95,7 @@ ReceiveListenerSet::size() const
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "size", 6);
   GuardType guard(lock_);
-  return map_.size();
+  return static_cast<ssize_t>(map_.size());
 }
 
 ACE_INLINE ReceiveListenerSet::MapType&

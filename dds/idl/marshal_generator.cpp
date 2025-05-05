@@ -1490,10 +1490,10 @@ namespace {
       AST_String* string_node = dynamic_cast<AST_String*>(type);
       align(encoding, size, 4);
       size += 4;
-      const int width = (string_node->width() == 1) ? 1 : 2 /*UTF-16*/;
+      const size_t width = (string_node->width() == 1) ? 1 : 2 /*UTF-16*/;
       size += width * string_node->max_size()->ev()->u.ulval;
       if (type->node_type() == AST_Decl::NT_string) {
-        size += 1; // narrow string includes the null terminator
+        ++size; // narrow string includes the null terminator
       }
       break;
     }

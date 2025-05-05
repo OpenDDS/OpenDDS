@@ -151,7 +151,7 @@ public:
     if (transport_statistics_.count_messages()) {
       ssize_t bytes = 0;
       for (int i = 0; i < num_blocks; ++i) {
-        bytes += iov[i].iov_len;
+        bytes += static_cast<ssize_t>(iov[i].iov_len);
       }
       const InternalMessageCountKey key(remote_address, key_kind, remote_address == rtps_relay_address_);
       transport_statistics_.message_count[key].send_fail(bytes);

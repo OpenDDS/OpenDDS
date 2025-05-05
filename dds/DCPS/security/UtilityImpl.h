@@ -25,7 +25,7 @@ class OpenDDS_Security_Export UtilityImpl
 public:
   virtual ~UtilityImpl();
   virtual void generate_random_bytes(void* ptr, size_t size);
-  virtual void hmac(void* out, void const* in, size_t size, const std::string& password) const;
+  virtual void hmac(void* out, const void* in, size_t size, const std::string& password) const;
 };
 
 } // Security
