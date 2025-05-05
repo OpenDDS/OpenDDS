@@ -28,8 +28,8 @@ SPMDataReaderListenerImpl::~SPMDataReaderListenerImpl()
 void SPMDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
   try {
-    OpenDDS::DCPS::ServiceParticipantReportDataReader_var spm_dr =
-      OpenDDS::DCPS::ServiceParticipantReportDataReader::_narrow(reader);
+    OpenDDS::Monitor::ServiceParticipantReportDataReader_var spm_dr =
+      OpenDDS::Monitor::ServiceParticipantReportDataReader::_narrow(reader);
 
     if (CORBA::is_nil(spm_dr.in())) {
       ACE_ERROR((LM_ERROR,
@@ -38,10 +38,10 @@ void SPMDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       ACE_OS::exit(-1);
     }
 
-    OpenDDS::DCPS::ServiceParticipantReport spr;
+    OpenDDS::Monitor::ServiceParticipantReport spr;
     DDS::SampleInfo si;
 
-    DDS::ReturnCode_t status = spm_dr->take_next_sample(spr, si) ;
+    DDS::ReturnCode_t status = spm_dr->take_next_sample(spr, si);
 
     if (status == DDS::RETCODE_OK) {
       std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;

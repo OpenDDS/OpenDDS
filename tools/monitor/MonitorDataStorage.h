@@ -402,7 +402,7 @@ class MonitorDataStorage {
     /// layout or data has changed as well.
     void displayNvp(
            TreeNode*                    node,
-           const OpenDDS::DCPS::NVPSeq& nvp,
+           const OpenDDS::Monitor::NVPSeq& nvp,
            bool                         layoutChanged,
            bool                         dataChanged
          );

@@ -21,17 +21,17 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace DCPS {
+namespace Monitor {
 
-class TransportMonitorImpl : public Monitor {
+class TransportMonitorImpl : public DCPS::Monitor {
 public:
-  TransportMonitorImpl(TransportImpl* transport,
-                   OpenDDS::DCPS::TransportReportDataWriter_ptr transport_writer);
+  TransportMonitorImpl(DCPS::TransportImpl* transport,
+                       TransportReportDataWriter_ptr transport_writer);
   virtual ~TransportMonitorImpl();
   virtual void report();
 
 private:
-  OpenDDS::DCPS::TransportReportDataWriter_var transport_writer_;
+  TransportReportDataWriter_var transport_writer_;
   std::string hostname_;
   pid_t pid_;
 
@@ -40,8 +40,8 @@ private:
   static TransportReportVec queue_;
 };
 
-} // namespace DCPS
-} // namespace OpenDDS
+}
+}
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

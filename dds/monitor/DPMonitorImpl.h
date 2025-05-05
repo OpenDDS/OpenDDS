@@ -19,24 +19,24 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace DCPS {
+namespace Monitor {
 
-class DPMonitorImpl : public Monitor {
+class DPMonitorImpl : public DCPS::Monitor {
 public:
-  DPMonitorImpl(DomainParticipantImpl* dp,
-                OpenDDS::DCPS::DomainParticipantReportDataWriter_ptr dp_writer);
+  DPMonitorImpl(DCPS::DomainParticipantImpl* dp,
+                DomainParticipantReportDataWriter_ptr dp_writer);
   virtual ~DPMonitorImpl();
   virtual void report();
 
 private:
-  DomainParticipantImpl* dp_;
-  OpenDDS::DCPS::DomainParticipantReportDataWriter_var dp_writer_;
+  DCPS::DomainParticipantImpl* dp_;
+  DomainParticipantReportDataWriter_var dp_writer_;
   std::string hostname_;
   pid_t pid_;
 };
 
-} // namespace DCPS
-} // namespace OpenDDS
+}
+}
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
