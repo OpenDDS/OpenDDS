@@ -31,8 +31,8 @@ TransportMDataReaderListenerImpl::~TransportMDataReaderListenerImpl()
 void TransportMDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
   try {
-    OpenDDS::DCPS::TransportReportDataReader_var transportm_dr =
-      OpenDDS::DCPS::TransportReportDataReader::_narrow(reader);
+    OpenDDS::Monitor::TransportReportDataReader_var transportm_dr =
+      OpenDDS::Monitor::TransportReportDataReader::_narrow(reader);
 
     if (CORBA::is_nil(transportm_dr.in())) {
       ACE_ERROR((LM_ERROR,
@@ -41,10 +41,10 @@ void TransportMDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr rea
       ACE_OS::exit(-1);
     }
 
-    OpenDDS::DCPS::TransportReport transportr;
+    OpenDDS::Monitor::TransportReport transportr;
     DDS::SampleInfo si;
 
-    DDS::ReturnCode_t status = transportm_dr->take_next_sample(transportr, si) ;
+    DDS::ReturnCode_t status = transportm_dr->take_next_sample(transportr, si);
 
     if (status == DDS::RETCODE_OK) {
       cout << "SampleInfo.sample_rank = " << si.sample_rank << endl;

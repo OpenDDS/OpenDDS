@@ -16,11 +16,11 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace DCPS {
+namespace Monitor {
 
 
 SPMonitorImpl::SPMonitorImpl(MonitorFactoryImpl* monitor_factory,
-                             Service_Participant* /*sp*/)
+                             DCPS::Service_Participant* /*sp*/)
     : monitor_factory_(monitor_factory)
 {
   char host[256];
@@ -36,6 +36,7 @@ SPMonitorImpl::~SPMonitorImpl()
 void
 SPMonitorImpl::report()
 {
+  using DCPS::DomainParticipantFactoryImpl;
   if (CORBA::is_nil(this->sp_writer_.in())) {
     this->sp_writer_ = this->monitor_factory_->get_sp_writer();
   }
@@ -47,7 +48,7 @@ SPMonitorImpl::report()
     report.pid  = this->pid_;
     DDS::DomainParticipantFactory_var pf = TheParticipantFactory;
 
-    OpenDDS::DCPS::DomainParticipantFactoryImpl* pi = dynamic_cast<DomainParticipantFactoryImpl*>(pf.in());
+    DomainParticipantFactoryImpl* pi = dynamic_cast<DomainParticipantFactoryImpl*>(pf.in());
     if (!pi) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) SPMonitorImpl::report():")
         ACE_TEXT(" failed to obtain DomainParticipantFactoryImpl.\n")));
@@ -81,7 +82,7 @@ SPMonitorImpl::report()
   }
 }
 
-} // namespace DCPS
-} // namespace OpenDDS
+}
+}
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

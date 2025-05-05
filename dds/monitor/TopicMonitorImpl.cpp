@@ -15,11 +15,11 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace DCPS {
+namespace Monitor {
 
 
-TopicMonitorImpl::TopicMonitorImpl(TopicImpl* topic,
-              OpenDDS::DCPS::TopicReportDataWriter_ptr topic_writer)
+TopicMonitorImpl::TopicMonitorImpl(DCPS::TopicImpl* topic,
+                                   TopicReportDataWriter_ptr topic_writer)
   : topic_(topic),
     topic_writer_(TopicReportDataWriter::_duplicate(topic_writer))
 {
@@ -34,8 +34,8 @@ TopicMonitorImpl::report() {
   if (!CORBA::is_nil(this->topic_writer_.in())) {
     TopicReport report;
     DDS::DomainParticipant_var dp = this->topic_->get_participant();
-    DomainParticipantImpl* dp_impl =
-      dynamic_cast<DomainParticipantImpl*>(dp.in());
+    DCPS::DomainParticipantImpl* dp_impl =
+      dynamic_cast<DCPS::DomainParticipantImpl*>(dp.in());
     if (dp_impl) {
       report.dp_id = dp_impl->get_id();
       report.topic_id = this->topic_->get_id();
@@ -50,7 +50,7 @@ TopicMonitorImpl::report() {
 }
 
 
-} // namespace DCPS
-} // namespace OpenDDS
+}
+}
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

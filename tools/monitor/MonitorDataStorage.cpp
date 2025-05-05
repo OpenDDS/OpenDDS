@@ -703,7 +703,7 @@ Monitor::MonitorDataStorage::deleteProcessNode( TreeNode* node)
 void
 Monitor::MonitorDataStorage::displayNvp(
   TreeNode*                    parent,
-  const OpenDDS::DCPS::NVPSeq& data,
+  const OpenDDS::Monitor::NVPSeq& data,
   bool                         layoutChanged,
   bool                         dataChanged
 )
@@ -718,20 +718,20 @@ Monitor::MonitorDataStorage::displayNvp(
       QList<QVariant> list;
       list << name;
       switch( data[ index].value._d()) {
-        case OpenDDS::DCPS::INTEGER_TYPE:
+        case OpenDDS::Monitor::INTEGER_TYPE:
           list << QString::number( data[ index].value.integer_value());
           break;
 
-        case OpenDDS::DCPS::DOUBLE_TYPE:
+        case OpenDDS::Monitor::DOUBLE_TYPE:
           list << QString::number( data[ index].value.double_value());
           break;
 
-        case OpenDDS::DCPS::STRING_TYPE:
+        case OpenDDS::Monitor::STRING_TYPE:
           list << QString( data[ index].value.string_value());
           break;
 
-        case OpenDDS::DCPS::STATISTICS_TYPE:
-        case OpenDDS::DCPS::STRING_LIST_TYPE:
+        case OpenDDS::Monitor::STATISTICS_TYPE:
+        case OpenDDS::Monitor::STRING_LIST_TYPE:
           list << QString( QObject::tr("<display unimplemented>"));
           break;
       }
@@ -743,20 +743,20 @@ Monitor::MonitorDataStorage::displayNvp(
       // This is existing data, update the value.
       TreeNode* node = (*parent)[ row];
       switch( data[ index].value._d()) {
-        case OpenDDS::DCPS::INTEGER_TYPE:
+        case OpenDDS::Monitor::INTEGER_TYPE:
           node->setData( 1, QString::number( data[ index].value.integer_value()));
           break;
 
-        case OpenDDS::DCPS::DOUBLE_TYPE:
+        case OpenDDS::Monitor::DOUBLE_TYPE:
           node->setData( 1, QString::number( data[ index].value.double_value()));
           break;
 
-        case OpenDDS::DCPS::STRING_TYPE:
+        case OpenDDS::Monitor::STRING_TYPE:
           node->setData( 1, QString( data[ index].value.string_value()));
           break;
 
-        case OpenDDS::DCPS::STATISTICS_TYPE:
-        case OpenDDS::DCPS::STRING_LIST_TYPE:
+        case OpenDDS::Monitor::STATISTICS_TYPE:
+        case OpenDDS::Monitor::STRING_LIST_TYPE:
           break;
       }
       dataChanged = true;
