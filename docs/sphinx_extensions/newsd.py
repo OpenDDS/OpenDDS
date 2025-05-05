@@ -29,13 +29,18 @@ ghfile_re = re.compile(r':ghfile:')
 newsd_path = Path(__file__).parent.parent / 'news.d'
 releases_path = newsd_path / '_releases'
 
-def loc_str(loc):
-    if loc is None:
-        path = 'unknown'
-        lineno = 0
-    else:
-        path, lineno = loc
-    return str(path) + ':' + str(lineno)
+
+class ParseError(RuntimeError):
+    def __init__(self, loc, *args):
+        self.message = ' '.join(args)
+        if loc is None:
+            path = None
+            lineno = None
+        else:
+            path, lineno = loc
+        self.path = path
+        self.lineno = lineno
+        super().__init__(f'Parse error at {path}:{lineno}: {self.message}')
 
 
 class PrintHelper:
@@ -164,9 +169,7 @@ class Section(Node):
             child.last_start_loc = loc
             return child
         if fixed_main_sections:
-            raise KeyError(
-                "Can't define a new main section named {} at {}".format(
-                    repr(name), loc_str(loc)))
+            raise ParseError(loc, f'Can\'t define a new main section named {name!r}')
         child = Section(rank, self, name, last_start_loc=loc)
         self.children.append(child)
         self.sections[name] = child
@@ -290,11 +293,6 @@ Section B
 ''')
 
 
-class ParseError(RuntimeError):
-    def __init__(self, loc, *args):
-        super().__init__('Parse error at {}: {}'.format(loc_str(loc), ' '.join(args)))
-
-
 def parse(root, path):
     lineno = 0
     rank = 0
@@ -382,6 +380,7 @@ def rst_title(title):
 
 def version_ref(version):
     return '.. _' + version.replace('.', '_') + ':\n'
+
 
 def existing_release_notes():
     releases = []
