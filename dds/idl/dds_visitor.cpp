@@ -481,21 +481,21 @@ dds_visitor::visit_union_fwd(AST_UnionFwd* node)
 int
 dds_visitor::visit_array(AST_Array*)
 {
-  // arrays appear in typedefs or in oter types (struct, union, etc.)
+  // arrays appear in typedefs or in other types (struct, union, etc.)
   return 0;
 }
 
 int
 dds_visitor::visit_sequence(AST_Sequence*)
 {
-  // sequences appear in typedefs or in oter types (struct, union, etc.)
+  // sequences appear in typedefs or in other types (struct, union, etc.)
   return 0;
 }
 
 int
 dds_visitor::visit_map(AST_Map*)
 {
-  // maps appear in typedefs or in oter types (struct, union, etc.)
+  // maps appear in typedefs or in other types (struct, union, etc.)
   return 0;
 }
 
