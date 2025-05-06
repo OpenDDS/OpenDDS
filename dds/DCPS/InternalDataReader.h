@@ -28,6 +28,11 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+template <typename T>
+struct InternalTraits {
+  typedef std::less<T> KeyCompare;
+};
+
 class InternalEntity : public virtual RcObject {};
 typedef WeakRcHandle<InternalEntity> InternalEntity_wrch;
 
@@ -581,7 +586,7 @@ private:
     }
   };
 
-  typedef OPENDDS_MAP_T(T, Instance) InstanceMap;
+  typedef OPENDDS_MAP_CMP_T(T, Instance, typename InternalTraits<T>::KeyCompare) InstanceMap;
   InstanceMap instance_map_;
 
   mutable ACE_Thread_Mutex mutex_;

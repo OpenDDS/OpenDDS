@@ -159,6 +159,20 @@ module RtpsRelay {
     unsigned long slots;
   };
 
+  @mutable
+  @autoid(HASH)
+  struct Statistic {
+    string name;
+    unsigned long long value;
+  };
+
+  @mutable
+  @autoid(HASH)
+  struct OpenDDSModuleStatistics {
+    string id;
+    sequence<Statistic> stats;
+  };
+
   const string RELAY_STATISTICS_TOPIC_NAME = "Relay Statistics";
   @topic
   @mutable
@@ -200,6 +214,7 @@ module RtpsRelay {
     unsigned long admission_queue_size;
     ClientPartitionStatistics client_partitions;
     RelayPartitionStatistics relay_partitions;
+    sequence<OpenDDSModuleStatistics> opendds_modules;
   };
 };
 

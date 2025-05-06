@@ -73,4 +73,7 @@ opendds_target_sources(OpenDDS_Rtps
   SKIP_OPENDDS_IDL
   ${common_idl_options}
 )
+set_target_properties(OpenDDS_Rtps PROPERTIES
+  UNITY_BUILD_UNIQUE_ID "OPENDDS_RTPS_UNITY_BUILD_ID"
+)
 opendds_install_interface_files(OpenDDS_Rtps INCLUDE_BASE "${OPENDDS_SOURCE_DIR}")
