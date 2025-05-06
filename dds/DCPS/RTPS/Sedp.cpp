@@ -397,7 +397,8 @@ Sedp::Sedp(const GUID_t& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
           OPENDDS_STRING("_SPDPTransportInst_") +
           DCPS::GuidConverter(owner.guid_).uniqueParticipantId() +
           DCPS::to_dds_string(owner.domain_))
-{}
+  , total_deferred_samples_(0)
+  {}
 
 DDS::ReturnCode_t
 Sedp::init(const GUID_t& guid,
@@ -1092,6 +1093,7 @@ Sedp::associate(DiscoveredParticipant& participant
   static const int rel_dur = AC_REMOTE_RELIABLE | AC_REMOTE_DURABLE;
   const int part_mesg = AC_REMOTE_DURABLE |
     ((beq & BEST_EFFORT_PARTICIPANT_MESSAGE_DATA_READER) ? AC_EMPTY : AC_REMOTE_RELIABLE);
+  const size_t builtin_pending_start = participant.builtin_pending_records_.size();
 
   // See RTPS v2.1 section 8.5.5.1
   if ((local_available & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) &&
@@ -1301,6 +1303,8 @@ Sedp::associate(DiscoveredParticipant& participant
   }
 #endif
 
+  spdp_.total_builtin_pending_ += participant.builtin_pending_records_.size() - builtin_pending_start;
+
   if (spdp_.shutting_down()) { return; }
 
   associated_participants_.insert(participant.make_part_guid());
@@ -1329,6 +1333,8 @@ void Sedp::process_association_records_i(DiscoveredParticipant& participant)
 
       participant.builtin_associated_records_.push_back(record);
       participant.builtin_pending_records_.erase(pos++);
+      ++spdp_.total_builtin_associated_;
+      --spdp_.total_builtin_pending_;
 
     } else {
       if (DCPS::DCPS_debug_level > 6) {
@@ -1349,6 +1355,8 @@ void Sedp::process_association_records_i(DiscoveredParticipant& participant)
 
       participant.writer_associated_records_.push_back(*pos);
       participant.writer_pending_records_.erase(pos++);
+      --spdp_.total_writer_pending_;
+      ++spdp_.total_writer_associated_;
     } else {
       if (DCPS::DCPS_debug_level > 6) {
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::process_association_records_i writer not ready local %C remote %C pending %B done %B\n"),
@@ -1367,6 +1375,8 @@ void Sedp::process_association_records_i(DiscoveredParticipant& participant)
 
       participant.reader_associated_records_.push_back(*pos);
       participant.reader_pending_records_.erase(pos++);
+      --spdp_.total_reader_pending_;
+      ++spdp_.total_reader_associated_;
     } else {
       if (DCPS::DCPS_debug_level > 6) {
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::process_association_records_i reader not ready local %C remote %C pending %B done %B\n"),
@@ -1401,8 +1411,10 @@ void Sedp::disassociate_volatile(DiscoveredParticipant& participant)
     const BuiltinAssociationRecord& record = *pos;
     if (record.local_id() == local_writer && record.remote_id() == remote_reader) {
       participant.builtin_pending_records_.erase(pos++);
+      --spdp_.total_builtin_pending_;
     } else if (record.local_id() == local_reader && record.remote_id() == remote_writer) {
       participant.builtin_pending_records_.erase(pos++);
+      --spdp_.total_builtin_pending_;
     } else {
       ++pos;
     }
@@ -1414,9 +1426,11 @@ void Sedp::disassociate_volatile(DiscoveredParticipant& participant)
     if (record.local_id() == local_writer && record.remote_id() == remote_reader) {
       record.transport_client_->disassociate(record.remote_id());
       participant.builtin_associated_records_.erase(pos++);
+      --spdp_.total_builtin_associated_;
     } else if (record.local_id() == local_reader && record.remote_id() == remote_writer) {
       record.transport_client_->disassociate(record.remote_id());
       participant.builtin_associated_records_.erase(pos++);
+      --spdp_.total_builtin_associated_;
     } else {
       ++pos;
     }
@@ -1442,6 +1456,7 @@ void Sedp::associate_volatile(DiscoveredParticipant& participant)
                                     participant.make_guid(ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER),
                                     AC_REMOTE_RELIABLE | AC_GENERATE_REMOTE_MATCHED_CRYPTO_HANDLE);
     participant.builtin_pending_records_.push_back(record);
+    ++spdp_.total_builtin_pending_;
   }
   if ((local_available & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_WRITER) &&
       (remote_available & BUILTIN_PARTICIPANT_VOLATILE_MESSAGE_SECURE_READER)) {
@@ -1449,6 +1464,7 @@ void Sedp::associate_volatile(DiscoveredParticipant& participant)
                                     participant.make_guid(ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER),
                                     AC_REMOTE_RELIABLE | AC_GENERATE_REMOTE_MATCHED_CRYPTO_HANDLE);
     participant.builtin_pending_records_.push_back(record);
+    ++spdp_.total_builtin_pending_;
   }
 }
 
@@ -1595,6 +1611,7 @@ Sedp::disassociate(DiscoveredParticipant& participant)
     remove_from_bit_i(*it);
   }
 
+  spdp_.total_builtin_pending_ -= participant.builtin_pending_records_.size();
   participant.builtin_pending_records_.clear();
 
   for (DiscoveredParticipant::BuiltinAssociationRecords::const_iterator pos = participant.builtin_associated_records_.begin(), limit = participant.builtin_associated_records_.end(); pos != limit; ++pos) {
@@ -1602,6 +1619,7 @@ Sedp::disassociate(DiscoveredParticipant& participant)
     record.transport_client_->disassociate(record.remote_id());
   }
 
+  spdp_.total_builtin_associated_ -= participant.builtin_associated_records_.size();
   participant.builtin_associated_records_.clear();
 
   //FUTURE: if/when topic propagation is supported, add it here
@@ -3345,6 +3363,7 @@ void Sedp::Writer::send_sample(DCPS::Message_Block_Ptr payload,
       DeferredSamples::iterator samples_for_reader = deferred_samples_.insert(
         std::make_pair(reader, PerReaderDeferredSamples())).first;
       samples_for_reader->second.insert(std::make_pair(sequence, el));
+      ++sedp_.total_deferred_samples_;
       return;
     }
   }
@@ -3364,6 +3383,7 @@ void Sedp::Writer::send_deferred_samples(const GUID_t& reader)
         i != samples_for_reader->second.end(); ++i) {
       send_sample_i(i->second);
     }
+    sedp_.total_deferred_samples_ -= samples_for_reader->second.size();
     deferred_samples_.erase(samples_for_reader);
   }
 }
@@ -6839,6 +6859,7 @@ void Sedp::cleanup_writer_association(DCPS::DataWriterCallbacks_wrch callbacks,
     for (DiscoveredParticipant::WriterAssociationRecords::iterator pos = part_iter->second.writer_pending_records_.begin(), limit = part_iter->second.writer_pending_records_.end(); pos != limit; ++pos) {
       if ((*pos)->writer_id() == writer && (*pos)->reader_id() == reader) {
         part_iter->second.writer_pending_records_.erase(pos);
+        --spdp_.total_writer_pending_;
         break;
       }
     }
@@ -6847,6 +6868,7 @@ void Sedp::cleanup_writer_association(DCPS::DataWriterCallbacks_wrch callbacks,
       if ((*pos)->writer_id() == writer && (*pos)->reader_id() == reader) {
         event_dispatcher_->dispatch(DCPS::make_rch<WriterRemoveAssociations>(*pos));
         part_iter->second.writer_associated_records_.erase(pos);
+        --spdp_.total_writer_associated_;
         break;
       }
     }
@@ -6870,6 +6892,7 @@ void Sedp::cleanup_reader_association(DCPS::DataReaderCallbacks_wrch callbacks,
     for (DiscoveredParticipant::ReaderAssociationRecords::iterator pos = part_iter->second.reader_pending_records_.begin(), limit = part_iter->second.reader_pending_records_.end(); pos != limit; ++pos) {
       if ((*pos)->reader_id() == reader && (*pos)->writer_id() == writer) {
         part_iter->second.reader_pending_records_.erase(pos);
+        --spdp_.total_reader_pending_;
         break;
       }
     }
@@ -6878,6 +6901,7 @@ void Sedp::cleanup_reader_association(DCPS::DataReaderCallbacks_wrch callbacks,
       if ((*pos)->reader_id() == reader && (*pos)->writer_id() == writer) {
         event_dispatcher_->dispatch(DCPS::make_rch<ReaderRemoveAssociations>(*pos));
         part_iter->second.reader_associated_records_.erase(pos);
+        --spdp_.total_reader_associated_;
         break;
       }
     }
@@ -7528,12 +7552,14 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
       Spdp::DiscoveredParticipantIter iter = spdp_.participants_.find(make_id(writer, ENTITYID_PARTICIPANT));
       if (iter != spdp_.participants_.end()) {
         iter->second.reader_pending_records_.push_back(rar);
+        ++spdp_.total_reader_pending_;
         process_association_records_i(iter->second);
       }
     } else if (call_writer) {
       Spdp::DiscoveredParticipantIter iter = spdp_.participants_.find(make_id(reader, ENTITYID_PARTICIPANT));
       if (iter != spdp_.participants_.end()) {
         iter->second.writer_pending_records_.push_back(war);
+        ++spdp_.total_writer_pending_;
         process_association_records_i(iter->second);
       }
     }
@@ -7801,6 +7827,111 @@ void Sedp::ReaderRemoveAssociations::handle_event()
     writer_seq[0] = record_->writer_id();
     lock->remove_associations(writer_seq, false);
   }
+}
+
+#ifndef OPENDDS_RTPS_UNITY_BUILD_ID
+#  define OPENDDS_RTPS_UNITY_BUILD_ID SedpAnonymous
+#endif
+
+namespace { namespace OPENDDS_RTPS_UNITY_BUILD_ID {
+  const DDS::UInt32 Stats_Index_Topics = 0,
+    Stats_Index_TopicNames = 1,
+    Stats_Index_TopicsIgnored = 2,
+    Stats_Index_TotalDeferredSamples = 3,
+    Stats_Index_TotalReaderBytesAllocated = 4,
+    Stats_Index_JobQueueSize = 5,
+    Stats_Index_AssociatedParticipants = 6,
+    Stats_Index_IgnoredGuids = 7,
+    Stats_Index_LocalPublications = 8,
+    Stats_Index_LocalSubscriptions = 9,
+    Stats_Index_DiscoveredPublications = 10,
+    Stats_Index_DiscoveredSubscriptions = 11,
+    Stats_Index_TypeLookupReaderDependencies = 12,
+    Stats_Index_TypeLookupSequenceNumbers = 13,
+    Stats_Index_TypeLookupMatchingData = 14,
+    Stats_Index_PendingRemoteReaderCryptoTokens = 15,
+    Stats_Index_PendingRemoteWriterCryptoTokens = 16,
+    Stats_Len = 17;
+} }
+
+DCPS::StatisticSeq Sedp::stats_template()
+{
+  using namespace OPENDDS_RTPS_UNITY_BUILD_ID;
+  DCPS::StatisticSeq stats(Stats_Len);
+  stats.length(Stats_Len);
+  stats[Stats_Index_Topics].name = "Topics";
+  stats[Stats_Index_TopicNames].name = "TopicNames";
+  stats[Stats_Index_TopicsIgnored].name = "TopicsIgnored";
+  stats[Stats_Index_TotalDeferredSamples].name = "TotalDeferredSamples";
+  stats[Stats_Index_TotalReaderBytesAllocated].name = "TotalReaderBytesAllocated";
+  stats[Stats_Index_JobQueueSize].name = "JobQueueSize";
+  stats[Stats_Index_LocalPublications].name = "LocalPublications";
+  stats[Stats_Index_LocalSubscriptions].name = "LocalSubscriptions";
+  stats[Stats_Index_DiscoveredPublications].name = "DiscoveredPublications";
+  stats[Stats_Index_DiscoveredSubscriptions].name = "DiscoveredSubscriptions";
+  stats[Stats_Index_TypeLookupReaderDependencies].name = "TypeLookupReaderDependencies";
+  stats[Stats_Index_TypeLookupSequenceNumbers].name = "TypeLookupSequenceNumbers";
+  stats[Stats_Index_TypeLookupMatchingData].name = "TypeLookupMatchingData";
+  stats[Stats_Index_PendingRemoteReaderCryptoTokens].name = "PendingRemoteReaderCryptoTokens";
+  stats[Stats_Index_PendingRemoteWriterCryptoTokens].name = "PendingRemoteWriterCryptoTokens";
+  return stats;
+}
+
+void Sedp::fill_stats(DCPS::StatisticSeq& stats, DDS::UInt32 begin) const
+{
+  using namespace OPENDDS_RTPS_UNITY_BUILD_ID;
+  // lock held in Sedp
+  stats[begin + Stats_Index_Topics].value = topics_.size(); // need nested sizes?
+  stats[begin + Stats_Index_TopicNames].value = topic_names_.size();
+  stats[begin + Stats_Index_TopicsIgnored].value = ignored_topics_.size();
+  stats[begin + Stats_Index_TotalDeferredSamples].value = total_deferred_samples_;
+  stats[begin + Stats_Index_TotalReaderBytesAllocated].value = total_reader_bytes_allocated();
+  stats[begin + Stats_Index_JobQueueSize].value = job_queue_ ? job_queue_->size() : 0;
+  stats[begin + Stats_Index_LocalPublications].value = local_publications_.size();
+  stats[begin + Stats_Index_LocalSubscriptions].value = local_subscriptions_.size();
+  stats[begin + Stats_Index_DiscoveredPublications].value = discovered_publications_.size();
+  stats[begin + Stats_Index_DiscoveredSubscriptions].value = discovered_subscriptions_.size();
+  stats[begin + Stats_Index_TypeLookupReaderDependencies].value = tlreader_dependencies();
+  stats[begin + Stats_Index_TypeLookupSequenceNumbers].value = orig_seq_numbers_.size();
+  stats[begin + Stats_Index_TypeLookupMatchingData].value = matching_data_buffer_.size();
+#if OPENDDS_CONFIG_SECURITY
+  stats[begin + Stats_Index_PendingRemoteReaderCryptoTokens].value = pending_remote_reader_crypto_tokens_.size();
+  stats[begin + Stats_Index_PendingRemoteWriterCryptoTokens].value = pending_remote_writer_crypto_tokens_.size();
+#endif
+}
+
+size_t Sedp::total_reader_bytes_allocated() const
+{
+  return reader_bytes_allocated(publications_reader_)
+    + reader_bytes_allocated(subscriptions_reader_)
+    + reader_bytes_allocated(participant_message_reader_)
+    + reader_bytes_allocated(type_lookup_request_reader_)
+    + reader_bytes_allocated(type_lookup_reply_reader_)
+#if OPENDDS_CONFIG_SECURITY
+    + reader_bytes_allocated(publications_secure_reader_)
+    + reader_bytes_allocated(subscriptions_secure_reader_)
+    + reader_bytes_allocated(participant_message_secure_reader_)
+    + reader_bytes_allocated(participant_stateless_message_reader_)
+    + reader_bytes_allocated(participant_volatile_message_secure_reader_)
+    + reader_bytes_allocated(dcps_participant_secure_reader_)
+    + reader_bytes_allocated(type_lookup_request_secure_reader_)
+    + reader_bytes_allocated(type_lookup_reply_secure_reader_)
+#endif
+    ;
+}
+
+size_t Sedp::reader_bytes_allocated(const RcHandle<Reader>& reader)
+{
+  return reader ? reader->bytes_heap_allocated() : 0;
+}
+
+size_t Sedp::tlreader_dependencies() const
+{
+  return (type_lookup_reply_reader_ ? type_lookup_reply_reader_->dependencies_participants() : 0)
+#if OPENDDS_CONFIG_SECURITY
+    + (type_lookup_reply_secure_reader_ ? type_lookup_reply_secure_reader_->dependencies_participants() : 0)
+#endif
+    ;
 }
 
 } // namespace RTPS

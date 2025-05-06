@@ -363,6 +363,7 @@ target_sources(OpenDDS_Dcps
     DCPS/SporadicTask.h
     DCPS/StaticDiscovery.h
     DCPS/StaticIncludes.h
+    DCPS/Statistics.h
     DCPS/Stats_T.h
     DCPS/StatusConditionImpl.h
     DCPS/SubscriberImpl.h

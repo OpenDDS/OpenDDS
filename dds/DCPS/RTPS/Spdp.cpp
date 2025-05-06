@@ -274,6 +274,14 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , ice_agent_(ICE::Agent::instance())
   , n_participants_in_authentication_(0)
 #endif
+  , stats_template_(stats_template())
+  , total_location_updates_(0)
+  , total_builtin_pending_(0)
+  , total_builtin_associated_(0)
+  , total_writer_pending_(0)
+  , total_writer_associated_(0)
+  , total_reader_pending_(0)
+  , total_reader_associated_(0)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
@@ -338,6 +346,14 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , crypto_handle_(crypto_handle)
   , ice_agent_(ICE::Agent::instance())
   , n_participants_in_authentication_(0)
+  , stats_template_(stats_template())
+  , total_location_updates_(0)
+  , total_builtin_pending_(0)
+  , total_builtin_associated_(0)
+  , total_writer_pending_(0)
+  , total_writer_associated_(0)
+  , total_reader_pending_(0)
+  , total_reader_associated_(0)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
@@ -507,6 +523,7 @@ Spdp::enqueue_location_update_i(DiscoveredParticipantIter iter,
 {
   // We have the global lock.
   iter->second.location_updates_.push_back(DiscoveredParticipant::LocationUpdate(mask, from, DCPS::SystemTimePoint::now()));
+  ++total_location_updates_;
 
   if (DCPS::log_bits) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Spdp::enqueue_location_update_i: %@ for %C size=%B reason=%C\n", this, LogGuid(iter->first).c_str(), iter->second.location_updates_.size(), reason));
@@ -527,6 +544,7 @@ void Spdp::process_location_updates_i(const DiscoveredParticipantIter& iter, con
 
   DiscoveredParticipant::LocationUpdateList location_updates;
   std::swap(iter->second.location_updates_, location_updates);
+  total_location_updates_ -= location_updates.size();
 
   if (DCPS::log_bits) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Spdp::process_location_updates_i: %@ %C has %B location update(s) force_publish=%d reason=%C\n", this, LogGuid(iter->first).c_str(), location_updates.size(), force_publish, reason));
@@ -686,7 +704,8 @@ bool is_ip_equal(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
   return cmp_ip4(a, locator);
 }
 
-void print_locator(const CORBA::ULong i, const DCPS::Locator_t& o){
+void print_locator(const CORBA::ULong i, const DCPS::Locator_t& o)
+{
   const unsigned char* a = reinterpret_cast<const unsigned char*>(o.address);
   ACE_INET_Addr addr;
   bool b = locator_to_address(addr, o, false) == 0;
@@ -4735,6 +4754,71 @@ bool Spdp::has_domain_participant(const GUID_t& remote) const
   return has_discovered_participant(remote);
 }
 
+#ifndef OPENDDS_RTPS_UNITY_BUILD_ID
+#  define OPENDDS_RTPS_UNITY_BUILD_ID SpdpAnonymous
+#endif
+
+namespace { namespace OPENDDS_RTPS_UNITY_BUILD_ID {
+  const DDS::UInt32 Stats_Index_LeaseExpirations = 0,
+    Stats_Index_HandshakeDeadlines = 1,
+    Stats_Index_HandshakeResends = 2,
+    Stats_Index_DiscoveredParticipants = 3,
+    Stats_Index_TotalLocationUpdates = 4,
+    Stats_Index_TotalBuiltinPending = 5,
+    Stats_Index_TotalBuiltinAssociated = 6,
+    Stats_Index_TotalWriterPending = 7,
+    Stats_Index_TotalWriterAssociated = 8,
+    Stats_Index_TotalReaderPending = 9,
+    Stats_Index_TotalReaderAssociated = 10,
+    Stats_Index_DirectedGuids = 11,
+    Stats_Len = 12;
+} }
+
+DCPS::StatisticSeq Spdp::stats_template()
+{
+  using namespace OPENDDS_RTPS_UNITY_BUILD_ID;
+  const DCPS::StatisticSeq sedp_template = Sedp::stats_template();
+  DCPS::StatisticSeq stats(Stats_Len + sedp_template.length());
+  stats.length(Stats_Len + sedp_template.length());
+  stats[Stats_Index_LeaseExpirations].name = "LeaseExpirations";
+  stats[Stats_Index_HandshakeDeadlines].name = "HandshakeDeadlines";
+  stats[Stats_Index_HandshakeResends].name = "HandshakeResends";
+  stats[Stats_Index_DiscoveredParticipants].name = "DiscoveredParticipants";
+  stats[Stats_Index_TotalLocationUpdates].name = "TotalLocationUpdates";
+  stats[Stats_Index_TotalBuiltinPending].name = "TotalBuiltinPending";
+  stats[Stats_Index_TotalBuiltinAssociated].name = "TotalBuiltinAssociated";
+  stats[Stats_Index_TotalWriterPending].name = "TotalWriterPending";
+  stats[Stats_Index_TotalWriterAssociated].name = "TotalWriterAssociated";
+  stats[Stats_Index_TotalReaderPending].name = "TotalReaderPending";
+  stats[Stats_Index_TotalReaderAssociated].name = "TotalReaderAssociated";
+  stats[Stats_Index_DirectedGuids].name = "DirectedGuids";
+  for (DDS::UInt32 i = 0; i < sedp_template.length(); ++i) {
+    stats[Stats_Len + i].name = sedp_template[i].name;
+  }
+  return stats;
+}
+
+void Spdp::fill_stats(DCPS::StatisticSeq& stats) const
+{
+  using namespace OPENDDS_RTPS_UNITY_BUILD_ID;
+  stats = stats_template_;
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  stats[Stats_Index_LeaseExpirations].value = lease_expirations_.size();
+#if OPENDDS_CONFIG_SECURITY
+  stats[Stats_Index_HandshakeDeadlines].value = handshake_deadlines_.size();
+  stats[Stats_Index_HandshakeResends].value = handshake_resends_.size();
+#endif
+  stats[Stats_Index_DiscoveredParticipants].value = participants_.size();
+  stats[Stats_Index_TotalLocationUpdates].value = total_location_updates_;
+  stats[Stats_Index_TotalBuiltinPending].value = total_builtin_pending_;
+  stats[Stats_Index_TotalBuiltinAssociated].value = total_builtin_associated_;
+  stats[Stats_Index_TotalWriterPending].value = total_writer_pending_;
+  stats[Stats_Index_TotalWriterAssociated].value = total_writer_associated_;
+  stats[Stats_Index_TotalReaderPending].value = total_reader_pending_;
+  stats[Stats_Index_TotalReaderAssociated].value = total_reader_associated_;
+  stats[Stats_Index_DirectedGuids].value = tport_ ? tport_->directed_guids_.size() : 0;
+}
+
 DCPS::TopicStatus Spdp::assert_topic(GUID_t& topicId, const char* topicName,
   const char* dataTypeName, const DDS::TopicQos& qos,
   bool hasDcpsKey, DCPS::TopicCallbacks* topic_callbacks)
@@ -4838,6 +4922,13 @@ void Spdp::purge_discovered_participant(const DiscoveredParticipantIter& iter)
     --n_participants_in_authentication_;
   }
 #endif
+  total_location_updates_ -= iter->second.location_updates_.size();
+  total_builtin_pending_ -= iter->second.builtin_pending_records_.size();
+  total_builtin_associated_ -= iter->second.builtin_associated_records_.size();
+  total_writer_pending_ -= iter->second.writer_pending_records_.size();
+  total_writer_associated_ -= iter->second.writer_associated_records_.size();
+  total_reader_pending_ -= iter->second.reader_pending_records_.size();
+  total_reader_associated_ -= iter->second.reader_associated_records_.size();
 }
 
 #if OPENDDS_CONFIG_SECURITY

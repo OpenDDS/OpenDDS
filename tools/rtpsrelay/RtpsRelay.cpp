@@ -347,6 +347,14 @@ int run(int argc, ACE_TCHAR* argv[])
   TheServiceParticipant->bit_autopurge_nowriter_samples_delay(one_minute);
   TheServiceParticipant->bit_autopurge_disposed_samples_delay(one_minute);
 
+  const bool either = config.log_relay_statistics() || config.publish_relay_statistics(),
+    both = config.log_relay_statistics() && config.publish_relay_statistics();
+  const auto interval = both ? std::min(config.log_relay_statistics(), config.publish_relay_statistics())
+    : (config.log_relay_statistics() ? config.log_relay_statistics() : config.publish_relay_statistics());
+  if (either) {
+    TheServiceParticipant->statistics_period(interval);
+  }
+
   // Set up the relay participant.
   DDS::DomainParticipantQos participant_qos;
   factory->get_default_participant_qos(participant_qos);

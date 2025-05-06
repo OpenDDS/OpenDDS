@@ -183,7 +183,7 @@ private:
   typedef OPENDDS_SET(InternalDataReader_wrch) ReaderSet;
   ReaderSet readers_;
   ReaderSet all_instance_readers_;
-  typedef OPENDDS_MAP_T(T, ReaderSet) InstanceReaderSet;
+  typedef OPENDDS_MAP_CMP_T(T, ReaderSet, typename InternalTraits<T>::KeyCompare) InstanceReaderSet;
   InstanceReaderSet instance_readers_;
 
   void write_set(const T& sample,
@@ -254,7 +254,7 @@ private:
     SampleList samples_;
   };
 
-  typedef OPENDDS_MAP_T(T, SampleHolder) InstanceMap;
+  typedef OPENDDS_MAP_CMP_T(T, SampleHolder, typename InternalTraits<T>::KeyCompare) InstanceMap;
   InstanceMap instance_map_;
 
   ACE_Thread_Mutex mutex_;

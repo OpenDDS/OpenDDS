@@ -865,6 +865,8 @@ private:
 
     bool assoc(const DCPS::AssociationData& publication);
 
+    size_t bytes_heap_allocated() const { return mb_alloc_.bytes_heap_allocated(); }
+
     // Implementing TransportReceiveListener
 
     void data_received(const DCPS::ReceivedDataSample& sample);
@@ -982,6 +984,8 @@ private:
                                 XTypes::OctetSeq32& cont_point) const;
 
     void cleanup(const DCPS::GUID_t& guid, const XTypes::TypeIdentifier& ti);
+
+    size_t dependencies_participants() const { return dependencies_.size(); }
 
   private:
     virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
@@ -1535,9 +1539,9 @@ protected:
   LivelinessWriter_rch participant_message_secure_writer_;
   SecurityWriter_rch participant_stateless_message_writer_;
   DiscoveryWriter_rch dcps_participant_secure_writer_;
-  friend class Spdp;
   SecurityWriter_rch participant_volatile_message_secure_writer_;
 #endif
+  friend class Spdp;
   TypeLookupRequestWriter_rch type_lookup_request_writer_;
   TypeLookupReplyWriter_rch type_lookup_reply_writer_;
 #if OPENDDS_CONFIG_SECURITY
@@ -1630,6 +1634,13 @@ protected:
   };
 
   RtpsDiscoveryCore core_;
+
+  static DCPS::StatisticSeq stats_template();
+  void fill_stats(DCPS::StatisticSeq& stats, DDS::UInt32 begin) const;
+  size_t total_deferred_samples_;
+  size_t total_reader_bytes_allocated() const;
+  static size_t reader_bytes_allocated(const RcHandle<Reader>& reader);
+  size_t tlreader_dependencies() const;
 };
 
 bool locators_changed(const ParticipantProxy_t& x,
