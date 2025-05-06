@@ -61,7 +61,6 @@ RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst,
 #endif
   , core_(inst)
   , stats_writer_(make_rch<StatisticsDataWriter>(DataWriterQosBuilder().durability_transient_local()))
-  , stats_task_(make_rch<PeriodicTask>(reactor_task(), *this, &RtpsUdpTransport::write_stats))
   , stats_template_(stats_template())
 {
   assign(local_prefix_, GUIDPREFIX_UNKNOWN);
@@ -69,10 +68,6 @@ RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst,
     throw Transport::UnableToCreate();
   }
   TheServiceParticipant->statistics_topic()->connect(stats_writer_);
-  const TimeDuration period = TheServiceParticipant->statistics_period();
-  if (!period.is_zero()) {
-    stats_task_->enable(false, period);
-  }
 }
 
 RtpsUdpTransport::~RtpsUdpTransport()
@@ -702,6 +697,12 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
   ConfigListener::job_queue(job_queue_);
   config_reader_ = make_rch<ConfigReader>(ConfigStoreImpl::datareader_qos(), rchandle_from(this));
   TheServiceParticipant->config_topic()->connect(config_reader_);
+
+  const TimeDuration period = TheServiceParticipant->statistics_period();
+  if (!period.is_zero()) {
+    stats_task_ = make_rch<PeriodicTask>(reactor_task(), *this, &RtpsUdpTransport::write_stats);
+    stats_task_->enable(false, period);
+  }
 
   return true;
 }
