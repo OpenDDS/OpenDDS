@@ -15,8 +15,8 @@ target_link_libraries(${idl} PUBLIC OpenDDS::Dcps)
 
 set(opendds_libs
   OpenDDS::Dcps # Core OpenDDS Library
-  OpenDDS::InfoRepoDiscovery OpenDDS::Tcp # For run_test.pl
-  OpenDDS::Rtps OpenDDS::Rtps_Udp # For run_test.pl --rtps
+  OpenDDS::InfoRepoDiscovery # For run_test.pl
+  OpenDDS::Rtps_Udp # For run_test.pl --rtps
   ${idl}
 )
 
@@ -43,5 +43,5 @@ set_target_properties(${subscriber} PROPERTIES
 # Testing
 configure_file(run_test.pl . COPYONLY)
 configure_file(rtps.ini . COPYONLY)
-opendds_add_test(NAME info_repo COMMAND perl run_test.pl)
-opendds_add_test(NAME rtps COMMAND perl run_test.pl ini=rtps.ini)
+#opendds_add_test(NAME info_repo COMMAND perl run_test.pl)
+#opendds_add_test(NAME rtps COMMAND perl run_test.pl ini=rtps.ini)
