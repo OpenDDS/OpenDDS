@@ -360,7 +360,7 @@ bool JsonValueReader<InputStream>::end_element()
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::begin_map(XTypes::TypeKind key_kind, XTypes::TypeKind value_kind)
+bool JsonValueReader<InputStream>::begin_map(XTypes::TypeKind, XTypes::TypeKind)
 {
   peek();
   return consume(kStartObject);

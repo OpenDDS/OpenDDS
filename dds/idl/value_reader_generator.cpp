@@ -10,6 +10,7 @@
 #include "field_info.h"
 
 #include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
 
 #include <global_extern.h>
 #include <utl_identifier.h>
@@ -137,23 +138,27 @@ namespace {
       indent << "if (!value_reader.end_sequence()) return false;\n";
   }
 
-  void map_helper(const std::string& expression, AST_Map* map, int level, FieldFilter filter_kind)
+  void map_helper(const std::string& expression, const AST_Map* map, int level, FieldFilter filter_kind)
   {
     const std::string indent(level * 2, ' ');
     AST_Type* const actualKey = resolveActualType(map->key_type());
     const Classification clsKey = classify(actualKey);
     const std::string key_tk = type_kind(map->key_type()),
       value_tk = type_kind(map->value_type()),
-      localKeyType = (clsKey & CL_STRING) ? "String" : scoped(map->key_type()->name());
+      localKeyType = (clsKey & CL_STRING) ? "String" : scoped(map->key_type()->name()),
+      keyName = "key" + OpenDDS::DCPS::to_dds_string(level - 3);
     be_global->impl_ <<
       indent << "if (!value_reader.begin_map(" << key_tk << ", " << value_tk << ")) return false;\n" <<
       indent << "while (value_reader.elements_remaining()) {\n" <<
-      indent << "  if (!value_reader.begin_element()) return false;\n" <<
-      indent << "  " << localKeyType << " key;\n";
-    generate_read("key", "", "", map->key_type(), "", level + 1, nested(filter_kind));
-    generate_read(expression, "[key]", "value", map->value_type(), "i", level + 1, nested(filter_kind));
+      indent << "  if (!value_reader.begin_key()) return false;\n" <<
+      indent << "  " << localKeyType << ' ' << keyName << ";\n";
+    generate_read(keyName, "", "", map->key_type(), "", level + 1, nested(filter_kind));
     be_global->impl_ <<
-      indent << "  if (!value_reader.end_element()) return false;\n" <<
+      indent << "  if (!value_reader.end_key()) return false;\n" <<
+      indent << "  if (!value_reader.begin_value()) return false;\n";
+    generate_read(expression, '[' + keyName + ']', "value", map->value_type(), "i", level + 1, nested(filter_kind));
+    be_global->impl_ <<
+      indent << "  if (!value_reader.end_value()) return false;\n" <<
       indent << "}\n" <<
       indent << "if (!value_reader.end_map()) return false;\n";
   }

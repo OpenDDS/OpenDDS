@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-const OpenDDS::DCPS::Encoding encoding(OpenDDS::DCPS::Encoding::KIND_UNALIGNED_CDR);
+const OpenDDS::DCPS::Encoding test_encoding(OpenDDS::DCPS::Encoding::KIND_UNALIGNED_CDR);
 
 template<typename T>
 T TestMarshalling(OpenDDS::DCPS::Serializer strm, T original) {
@@ -54,7 +54,7 @@ bool CheckData(Data test, Data expected) {
 TEST(MapsTests, Marshalling)
 {
   OpenDDS::DCPS::Message_Block_Ptr b(new ACE_Message_Block(100000));
-  OpenDDS::DCPS::Serializer strm(b.get(), encoding);
+  OpenDDS::DCPS::Serializer strm(b.get(), test_encoding);
 
   Data expectedData;
   expectedData.intIntMap()[10] = 10;
@@ -84,44 +84,44 @@ TEST(MapsTests, SerializedSize)
   Data expectedData;
 
   // intIntMap
-  auto size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.intIntMap());
+  auto size = (int32_t) OpenDDS::DCPS::serialized_size(test_encoding, expectedData.intIntMap());
   EXPECT_EQ(size, 4);
   expectedData.intIntMap()[10] = 10;
-  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.intIntMap());
+  size = (int32_t) OpenDDS::DCPS::serialized_size(test_encoding, expectedData.intIntMap());
   EXPECT_EQ(size, 12);
   expectedData.intIntMap()[20] = 10;
-  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.intIntMap());
+  size = (int32_t) OpenDDS::DCPS::serialized_size(test_encoding, expectedData.intIntMap());
   EXPECT_EQ(size, 20);
 
   // stringStringMap
-  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.stringStringMap());
+  size = (int32_t) OpenDDS::DCPS::serialized_size(test_encoding, expectedData.stringStringMap());
   EXPECT_EQ(size, 4);
   expectedData.stringStringMap()["Hello"] = "World!";
-  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.stringStringMap());
+  size = (int32_t) OpenDDS::DCPS::serialized_size(test_encoding, expectedData.stringStringMap());
   EXPECT_EQ(size, 25);
 
   // enumIntMap
-  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.enumIntMap());
+  size = (int32_t) OpenDDS::DCPS::serialized_size(test_encoding, expectedData.enumIntMap());
   EXPECT_EQ(size, 4);
   expectedData.enumIntMap()[TEST_ENUM::TEST1] = 10;
-  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.enumIntMap());
+  size = (int32_t) OpenDDS::DCPS::serialized_size(test_encoding, expectedData.enumIntMap());
   EXPECT_EQ(size, 12);
 
   // intEnumMap
-  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.intEnumMap());
+  size = (int32_t) OpenDDS::DCPS::serialized_size(test_encoding, expectedData.intEnumMap());
   EXPECT_EQ(size, 4);
   expectedData.intEnumMap()[10] = TEST_ENUM::TEST1;
-  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.intEnumMap());
+  size = (int32_t) OpenDDS::DCPS::serialized_size(test_encoding, expectedData.intEnumMap());
   EXPECT_EQ(size, 12);
 
   // stringStructsMap
   TestStruct stru;
   stru.msg("World");
 
-  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.stringStructsMap());
+  size = (int32_t) OpenDDS::DCPS::serialized_size(test_encoding, expectedData.stringStructsMap());
   EXPECT_EQ(size, 4);
   expectedData.stringStructsMap()["Hello"] = stru;
-  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.stringStructsMap());
+  size = (int32_t) OpenDDS::DCPS::serialized_size(test_encoding, expectedData.stringStructsMap());
   EXPECT_EQ(size, 28);
 
   // stringMapMap
@@ -131,10 +131,10 @@ TEST(MapsTests, SerializedSize)
   t.msg("Hello World");
   testMap[10] = t;
 
-  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.stringMapMap());
+  size = (int32_t) OpenDDS::DCPS::serialized_size(test_encoding, expectedData.stringMapMap());
   EXPECT_EQ(size, 4);
   expectedData.stringMapMap()["Hello World"] = testMap;
-  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.stringMapMap());
+  size = (int32_t) OpenDDS::DCPS::serialized_size(test_encoding, expectedData.stringMapMap());
   EXPECT_EQ(size, 48);
 }
 
