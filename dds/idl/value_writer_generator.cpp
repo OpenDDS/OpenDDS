@@ -180,7 +180,7 @@ namespace {
 
   void map_helper(const std::string& expression, const AST_Map* map, int level, FieldFilter filter_kind)
   {
-    const std::string indent(level * 2, ' ');
+    const std::string indent(static_cast<size_t>(level * 2), ' ');
     const std::string key_tk = type_kind(map->key_type()),
       value_tk = type_kind(map->value_type()),
       elt_name = "elt" + OpenDDS::DCPS::to_dds_string(level);

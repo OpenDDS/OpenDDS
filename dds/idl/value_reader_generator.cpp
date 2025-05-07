@@ -140,7 +140,7 @@ namespace {
 
   void map_helper(const std::string& expression, const AST_Map* map, int level, FieldFilter filter_kind)
   {
-    const std::string indent(level * 2, ' ');
+    const std::string indent(static_cast<size_t>(level * 2), ' ');
     AST_Type* const actualKey = resolveActualType(map->key_type());
     const Classification clsKey = classify(actualKey);
     const std::string key_tk = type_kind(map->key_type()),

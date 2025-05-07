@@ -637,6 +637,7 @@ TEST(dds_DCPS_JsonValueReader, from_json)
   StringStream ss(json);
   MyStruct s;
   EXPECT_TRUE(from_json(s, ss));
+  EXPECT_TRUE(s.value);
 }
 
 void check_members(JsonValueReader<>& jvr)
@@ -742,7 +743,7 @@ TEST(dds_DCPS_JsonValueReader, optional_members)
     "\"nested_union2\":{\"$discriminator\":3,\"3\":null}"
     "}";
 
-  const ListMemberHelper::Pair member_pairs[] = {
+  const ListMemberHelper::Pair member_pairs_local[] = {
     {"bool", 0},
     {"byte", 1},
     {"int16", 2},
@@ -759,7 +760,7 @@ TEST(dds_DCPS_JsonValueReader, optional_members)
     {"nested_union2", 13},
     {0, 0}
   };
-  const ListMemberHelper member_helper(member_pairs);
+  const ListMemberHelper member_helper_local(member_pairs_local);
 
   StringStream ss(json);
   JsonValueReader<> jvr(ss);
@@ -777,87 +778,87 @@ TEST(dds_DCPS_JsonValueReader, optional_members)
   EXPECT_TRUE(jvr.begin_struct());
 
   // bool: non-optional
-  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper_local));
   EXPECT_TRUE(jvr.read_boolean(bool_value));
   EXPECT_EQ(bool_value, true);
   EXPECT_TRUE(jvr.end_struct_member());
 
   // byte: has value
-  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper_local));
   EXPECT_TRUE(jvr.member_has_value());
   EXPECT_TRUE(jvr.read_byte(byte_value));
   EXPECT_EQ(byte_value, 10);
   EXPECT_TRUE(jvr.end_struct_member());
 
   // int16: no value
-  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper_local));
   EXPECT_FALSE(jvr.member_has_value());
   EXPECT_TRUE(jvr.end_struct_member());
 
   // uint16: has value
-  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper_local));
   EXPECT_TRUE(jvr.member_has_value());
   EXPECT_TRUE(jvr.read_uint16(uint16_value));
   EXPECT_EQ(uint16_value, 11);
   EXPECT_TRUE(jvr.end_struct_member());
 
   // int32: has value
-  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper_local));
   EXPECT_TRUE(jvr.member_has_value());
   EXPECT_TRUE(jvr.read_int32(int32_value));
   EXPECT_EQ(int32_value, 12);
   EXPECT_TRUE(jvr.end_struct_member());
 
   // nested_struct: no value
-  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper_local));
   EXPECT_FALSE(jvr.member_has_value());
   EXPECT_TRUE(jvr.end_struct_member());
 
   // uint32: has value
-  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper_local));
   EXPECT_TRUE(jvr.member_has_value());
   EXPECT_TRUE(jvr.read_uint32(uint32_value));
   EXPECT_EQ(uint32_value, 13ul);
   EXPECT_TRUE(jvr.end_struct_member());
 
   // array: no value
-  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper_local));
   EXPECT_FALSE(jvr.member_has_value());
   EXPECT_TRUE(jvr.end_struct_member());
 
   // int64: has value
-  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper_local));
   EXPECT_TRUE(jvr.member_has_value());
   EXPECT_TRUE(jvr.read_int64(int64_value));
   EXPECT_EQ(int64_value, 14);
   EXPECT_TRUE(jvr.end_struct_member());
 
   // sequence: no value
-  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper_local));
   EXPECT_FALSE(jvr.member_has_value());
   EXPECT_TRUE(jvr.end_struct_member());
 
   // uint64: has value
-  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper_local));
   EXPECT_TRUE(jvr.member_has_value());
   EXPECT_TRUE(jvr.read_uint64(uint64_value));
   EXPECT_EQ(uint64_value, 15ull);
   EXPECT_TRUE(jvr.end_struct_member());
 
   // nested_union: no value
-  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper_local));
   EXPECT_FALSE(jvr.member_has_value());
   EXPECT_TRUE(jvr.end_struct_member());
 
   // char8: has value
-  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper_local));
   EXPECT_TRUE(jvr.member_has_value());
   EXPECT_TRUE(jvr.read_char8(char8_value));
   EXPECT_EQ(char8_value, 'a');
   EXPECT_TRUE(jvr.end_struct_member());
 
   // nested_union2: has value with an absent branch
-  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
+  EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper_local));
   EXPECT_TRUE(jvr.member_has_value());
   EXPECT_TRUE(jvr.begin_union());
   EXPECT_TRUE(jvr.begin_discriminator());
@@ -871,6 +872,63 @@ TEST(dds_DCPS_JsonValueReader, optional_members)
   EXPECT_TRUE(jvr.end_struct_member());
 
   EXPECT_TRUE(jvr.end_struct());
+}
+
+TEST(dds_DCPS_JsonValueReader, map)
+{
+  const char json[] = "{"
+    "  \"bool\": 1,"
+    "  \"byte\": 255,"
+    "  \"int16\": 32767,"
+    "  \"uint16\": 65535"
+    "}";
+  StringStream ss(json);
+  JsonValueReader<> jvr(ss);
+  EXPECT_TRUE(jvr.begin_map(TK_STRING8, TK_INT32));
+  std::string k;
+  DDS::Int32 v;
+
+  EXPECT_TRUE(jvr.elements_remaining());
+  EXPECT_TRUE(jvr.begin_key());
+  EXPECT_TRUE(jvr.read_string(k));
+  EXPECT_EQ("bool", k);
+  EXPECT_TRUE(jvr.end_key());
+  EXPECT_TRUE(jvr.begin_value());
+  EXPECT_TRUE(jvr.read_int32(v));
+  EXPECT_EQ(1, v);
+  EXPECT_TRUE(jvr.end_value());
+
+  EXPECT_TRUE(jvr.elements_remaining());
+  EXPECT_TRUE(jvr.begin_key());
+  EXPECT_TRUE(jvr.read_string(k));
+  EXPECT_EQ("byte", k);
+  EXPECT_TRUE(jvr.end_key());
+  EXPECT_TRUE(jvr.begin_value());
+  EXPECT_TRUE(jvr.read_int32(v));
+  EXPECT_EQ(255, v);
+  EXPECT_TRUE(jvr.end_value());
+
+  EXPECT_TRUE(jvr.elements_remaining());
+  EXPECT_TRUE(jvr.begin_key());
+  EXPECT_TRUE(jvr.read_string(k));
+  EXPECT_EQ("int16", k);
+  EXPECT_TRUE(jvr.end_key());
+  EXPECT_TRUE(jvr.begin_value());
+  EXPECT_TRUE(jvr.read_int32(v));
+  EXPECT_EQ(32767, v);
+  EXPECT_TRUE(jvr.end_value());
+
+  EXPECT_TRUE(jvr.elements_remaining());
+  EXPECT_TRUE(jvr.begin_key());
+  EXPECT_TRUE(jvr.read_string(k));
+  EXPECT_EQ("uint16", k);
+  EXPECT_TRUE(jvr.end_key());
+  EXPECT_TRUE(jvr.begin_value());
+  EXPECT_TRUE(jvr.read_int32(v));
+  EXPECT_EQ(65535, v);
+  EXPECT_TRUE(jvr.end_value());
+
+  EXPECT_TRUE(jvr.end_map());
 }
 
 #endif

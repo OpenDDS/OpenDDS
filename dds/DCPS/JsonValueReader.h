@@ -47,6 +47,7 @@ public:
     , int64_value_(0)
     , uint64_value_(0)
     , double_value_(0)
+    , mode_(NormalMode)
   {
     reader_.IterativeParseInit();
   }
@@ -210,6 +211,7 @@ private:
   double double_value_;
   std::string string_value_;
   std::string key_value_;
+  enum {NormalMode, MapKeyMode} mode_;
 };
 
 template <typename InputStream>
@@ -369,25 +371,27 @@ bool JsonValueReader<InputStream>::begin_map(XTypes::TypeKind, XTypes::TypeKind)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::begin_key()
 {
-  if (peek() == kKey) {
-    return consume(kKey);
+  const bool ok = peek() == kKey;
+  if (ok) {
+    mode_ = MapKeyMode;
+    // The next read_*() will use key_value_ instead of another *_value_.
+    // Only simple types are supported as keys, so we don't need to keep
+    // a stack of modes to implement nested objects here.
   }
-  return false;
+  return ok;
 }
 
 template <typename InputStream>
 bool JsonValueReader<InputStream>::end_key()
 {
-  return true;
+  mode_ = NormalMode;
+  return consume(kKey);
 }
 
 template <typename InputStream>
 bool JsonValueReader<InputStream>::begin_value()
 {
-  if (peek() == kKey) {
-    return consume(kKey);
-  }
-  return false;
+  return true;
 }
 
 template <typename InputStream>
@@ -399,7 +403,11 @@ bool JsonValueReader<InputStream>::end_value()
 template <typename InputStream>
 bool JsonValueReader<InputStream>::end_map()
 {
-  peek();
+  if (peek() == kKey) { // skip any unknown members at the end
+    if (!skip_to(kEndObject)) {
+      return false;
+    }
+  }
   return consume(kEndObject);
 }
 
@@ -667,6 +675,10 @@ bool JsonValueReader<InputStream>::read_char16(ACE_CDR::WChar& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_string(std::string& value)
 {
+  if (mode_ == MapKeyMode) {
+    value = key_value_;
+    return true; //TODO: more
+  }
   if (peek() == kString) {
     value = string_value_;
     return consume(kString);
