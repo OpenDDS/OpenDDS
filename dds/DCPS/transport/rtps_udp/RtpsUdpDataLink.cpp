@@ -4950,8 +4950,9 @@ void RtpsUdpDataLink::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
   stats[idx++].value = mb_allocator_.bytes_heap_allocated();
   stats[idx++].value = db_allocator_.bytes_heap_allocated();
   stats[idx++].value = writers_.size();
-  stats[idx++].value = total_remote_reliable_readers();
-  stats[idx++].value = total_writer_send_buffers();
+  const std::pair<size_t, size_t> local_writer_stats = local_reliable_writer_stats();
+  stats[idx++].value = local_writer_stats.first;
+  stats[idx++].value = local_writer_stats.second;
   stats[idx++].value = pending_reliable_readers_.size();
   stats[idx++].value = readers_.size();
   stats[idx++].value = total_remote_reliable_writers();
@@ -4969,16 +4970,6 @@ void RtpsUdpDataLink::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
   }
 }
 
-size_t RtpsUdpDataLink::total_remote_reliable_readers() const
-{
-  ACE_Guard<ACE_Thread_Mutex> guard(writers_lock_);
-  size_t readers = 0;
-  for (RtpsWriterMap::const_iterator iter = writers_.begin(); iter != writers_.end(); ++iter) {
-    readers += iter->second->reader_count();
-  }
-  return readers;
-}
-
 size_t RtpsUdpDataLink::total_remote_reliable_writers() const
 {
   ACE_Guard<ACE_Thread_Mutex> guard(readers_lock_);
@@ -4989,18 +4980,24 @@ size_t RtpsUdpDataLink::total_remote_reliable_writers() const
   return writers;
 }
 
-size_t RtpsUdpDataLink::total_writer_send_buffers() const
+std::pair<size_t, size_t> RtpsUdpDataLink::local_reliable_writer_stats() const
 {
   ACE_Guard<ACE_Thread_Mutex> guard(writers_lock_);
+  const RtpsWriterMap writers(writers_);
+  guard.release();
+
+  size_t readers = 0;
   size_t buffer_size = 0;
-  for (RtpsWriterMap::const_iterator iter = writers_.begin(); iter != writers_.end(); ++iter) {
+  for (RtpsWriterMap::const_iterator iter = writers.begin(); iter != writers.end(); ++iter) {
+    readers += iter->second->reader_count();
     const RcHandle<SingleSendBuffer> sb = iter->second->get_send_buff();
     if (sb) {
       buffer_size += sb->size();
     }
   }
-  return buffer_size;
+  return std::make_pair(readers, buffer_size);
 }
+
 
 } // namespace DCPS
 } // namespace OpenDDS

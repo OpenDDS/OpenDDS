@@ -263,9 +263,8 @@ public:
 
   static StatisticSeq stats_template();
   void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
-  size_t total_remote_reliable_readers() const;
-  size_t total_writer_send_buffers() const;
   size_t total_remote_reliable_writers() const;
+  std::pair<size_t, size_t> local_reliable_writer_stats() const;
 
 private:
   void on_data_available(RcHandle<InternalDataReader<NetworkInterfaceAddress> > reader);
