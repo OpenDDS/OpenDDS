@@ -15,6 +15,8 @@
 #include "TransportHeader.h"
 #include "TransportInst_rch.h"
 
+#include <dds/OpenddsDcpsExtC.h>
+
 #include "ace/INET_Addr.h"
 #include "ace/Lock_Adapter_T.h"
 #include "ace/Synch_Traits.h"
@@ -76,6 +78,9 @@ public:
   /// Use the receive strategy's Message Block Allocator to convert
   /// the ReceivedDataSample's payload to an ACE_Message_Block chain
   ACE_Message_Block* to_msgblock(const ReceivedDataSample& sample);
+
+  static StatisticSeq stats_template();
+  void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
 
 protected:
   explicit TransportReceiveStrategy(const TransportInst_rch& config,

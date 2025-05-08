@@ -16,6 +16,7 @@
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/MonitorFactory.h"
+#include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/ServiceEventDispatcher.h"
 #include "tao/debug.h"
@@ -152,6 +153,26 @@ TransportImpl::dump_to_str()
 {
   TransportInst_rch cfg = config_.lock();
   return cfg ? cfg->dump_to_str(domain_) : OPENDDS_STRING();
+}
+
+StatisticSeq TransportImpl::stats_template()
+{
+  static const DDS::UInt32 num_local_stats = 2;
+  StatisticSeq stats(num_local_stats);
+  stats.length(num_local_stats);
+  stats[0].name = "TransportImplPendingConnections";
+  stats[1].name = "TransportImplReactorTaskCmdQueue";
+  return stats;
+}
+
+void TransportImpl::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
+{
+  {
+    GuardType guard(pending_connections_lock_);
+    stats[idx++].value = pending_connections_.size();
+  }
+  const ReactorInterceptor_rch inter = reactor_task_ ? reactor_task_->interceptor() : ReactorInterceptor_rch();
+  stats[idx++].value = inter ? inter->command_queue_size() : 0;
 }
 
 }

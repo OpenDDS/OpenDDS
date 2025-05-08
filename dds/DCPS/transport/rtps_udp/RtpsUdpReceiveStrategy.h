@@ -91,6 +91,9 @@ public:
   virtual void begin_transport_header_processing();
   virtual void end_transport_header_processing();
 
+  static StatisticSeq stats_template();
+  void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
+
 private:
   bool getDirectedWriteReaders(RepoIdSet& directedWriteReaders, const RTPS::DataSubmessage& ds) const;
 

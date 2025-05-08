@@ -55,6 +55,8 @@ public:
   virtual void reactor(ACE_Reactor *reactor);
   virtual ACE_Reactor* reactor() const;
 
+  size_t command_queue_size() const;
+
 protected:
 
   enum ReactorState {

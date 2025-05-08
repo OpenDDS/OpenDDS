@@ -75,6 +75,12 @@ ReactorInterceptor::CommandPtr ReactorInterceptor::execute_or_enqueue(CommandPtr
   return command;
 }
 
+size_t ReactorInterceptor::command_queue_size() const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  return command_queue_.size();
+}
+
 int ReactorInterceptor::handle_exception(ACE_HANDLE /*fd*/)
 {
   ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
