@@ -1,5 +1,7 @@
 #include "RelayStatisticsReporter.h"
 
+#include <fstream>
+
 namespace RtpsRelay {
 
 using OpenDDS::DCPS::DataReaderQosBuilder;
@@ -44,19 +46,40 @@ void RelayStatisticsReporter::get_opendds_stats(RelayStatistics& out)
   }
 }
 
+void RelayStatisticsReporter::get_process_stats(RelayStatistics& out)
+{
+  out.virtual_memory_kb(0);
+  // This is Linux-specific; other systems will read no lines from the file and report 0 as the value.
+  std::ifstream ifs("/proc/self/status");
+  std::string line;
+  while (getline(ifs, line)) {
+    if (line.find("VmSize:") == 0) {
+      out.virtual_memory_kb(static_cast<uint32_t>(stoul(line.substr(7))));
+      break;
+    }
+  }
+}
+
 void RelayStatisticsReporter::log_report(const OpenDDS::DCPS::MonotonicTimePoint& now, bool force)
 {
   if (!log_helper_.prepare_report(log_relay_statistics_, now, force, config_.log_relay_statistics())) {
     return;
   }
 
+  get_process_stats(log_relay_statistics_);
   get_opendds_stats(log_relay_statistics_);
 
   const auto json = OpenDDS::DCPS::to_json(log_relay_statistics_);
   // subtract estimate of characters for %P %t expansions, other fixed strings
-  static constexpr auto space = ACE_MAXLOGMSGLEN - 65;
+  static constexpr auto space = static_cast<size_t>(ACE_MAXLOGMSGLEN - 65), min = size_t{100};
   for (size_t i = 0, len; i < json.size(); i += len) {
-    len = std::min(json.size() - i, static_cast<size_t>(space));
+    if (json.size() - i > space) {
+      for (len = space; len >= min && json[i + len - 1] != ','; --len)
+        ; // find the last comma so a name/value pair is not split across lines
+    } else {
+      len = json.size() - i;
+    }
+
     ACE_DEBUG((LM_INFO, "(%P|%t) STAT: %C %C\n",
       i ? "(cont)" : topic_name_.in(),
       json.substr(i, len).c_str()));
@@ -67,6 +90,8 @@ void RelayStatisticsReporter::log_report(const OpenDDS::DCPS::MonotonicTimePoint
   log_relay_statistics_.expired_address_count(0);
   log_relay_statistics_.admission_deferral_count(0);
   log_relay_statistics_.max_ips_per_client(0);
+  log_relay_statistics_.transitions_to_admitting(0);
+  log_relay_statistics_.transitions_to_nonadmitting(0);
 }
 
 void RelayStatisticsReporter::publish_report(ACE_Guard<ACE_Thread_Mutex>& guard,
@@ -81,12 +106,15 @@ void RelayStatisticsReporter::publish_report(ACE_Guard<ACE_Thread_Mutex>& guard,
   auto stats_copy = publish_relay_statistics_;
 
   get_opendds_stats(stats_copy);
+  get_process_stats(stats_copy);
 
   publish_helper_.reset(publish_relay_statistics_, now);
   publish_relay_statistics_.new_address_count(0);
   publish_relay_statistics_.expired_address_count(0);
   publish_relay_statistics_.admission_deferral_count(0);
   publish_relay_statistics_.max_ips_per_client(0);
+  publish_relay_statistics_.transitions_to_admitting(0);
+  publish_relay_statistics_.transitions_to_nonadmitting(0);
 
   guard.release();
 
