@@ -874,9 +874,9 @@ TEST(dds_DCPS_JsonValueReader, optional_members)
   EXPECT_TRUE(jvr.end_struct());
 }
 
-TEST(dds_DCPS_JsonValueReader, map)
+TEST(dds_DCPS_JsonValueReader, map_string_key)
 {
-  const char json[] = "{"
+  static const char json[] = "{"
     "  \"bool\": 1,"
     "  \"byte\": 255,"
     "  \"int16\": 32767,"
@@ -928,6 +928,65 @@ TEST(dds_DCPS_JsonValueReader, map)
   EXPECT_EQ(65535, v);
   EXPECT_TRUE(jvr.end_value());
 
+  EXPECT_FALSE(jvr.elements_remaining());
+  EXPECT_TRUE(jvr.end_map());
+}
+
+TEST(dds_DCPS_JsonValueReader, map_int_key)
+{
+  static const char json[] = "{"
+    "  \"1\": \"bool\","
+    "  \"255\": \"byte\","
+    "  \"32767\": \"int16\","
+    "  \"65535\": \"uint16\""
+    "}";
+  StringStream ss(json);
+  JsonValueReader<> jvr(ss);
+  EXPECT_TRUE(jvr.begin_map(TK_INT32, TK_STRING8));
+  DDS::Int32 k;
+  std::string v;
+
+  EXPECT_TRUE(jvr.elements_remaining());
+  EXPECT_TRUE(jvr.begin_key());
+  EXPECT_TRUE(jvr.read_int32(k));
+  EXPECT_EQ(1, k);
+  EXPECT_TRUE(jvr.end_key());
+  EXPECT_TRUE(jvr.begin_value());
+  EXPECT_TRUE(jvr.read_string(v));
+  EXPECT_EQ("bool", v);
+  EXPECT_TRUE(jvr.end_value());
+
+  EXPECT_TRUE(jvr.elements_remaining());
+  EXPECT_TRUE(jvr.begin_key());
+  EXPECT_TRUE(jvr.read_int32(k));
+  EXPECT_EQ(255, k);
+  EXPECT_TRUE(jvr.end_key());
+  EXPECT_TRUE(jvr.begin_value());
+  EXPECT_TRUE(jvr.read_string(v));
+  EXPECT_EQ("byte", v);
+  EXPECT_TRUE(jvr.end_value());
+
+  EXPECT_TRUE(jvr.elements_remaining());
+  EXPECT_TRUE(jvr.begin_key());
+  EXPECT_TRUE(jvr.read_int32(k));
+  EXPECT_EQ(32767, k);
+  EXPECT_TRUE(jvr.end_key());
+  EXPECT_TRUE(jvr.begin_value());
+  EXPECT_TRUE(jvr.read_string(v));
+  EXPECT_EQ("int16", v);
+  EXPECT_TRUE(jvr.end_value());
+
+  EXPECT_TRUE(jvr.elements_remaining());
+  EXPECT_TRUE(jvr.begin_key());
+  EXPECT_TRUE(jvr.read_int32(k));
+  EXPECT_EQ(65535, k);
+  EXPECT_TRUE(jvr.end_key());
+  EXPECT_TRUE(jvr.begin_value());
+  EXPECT_TRUE(jvr.read_string(v));
+  EXPECT_EQ("uint16", v);
+  EXPECT_TRUE(jvr.end_value());
+
+  EXPECT_FALSE(jvr.elements_remaining());
   EXPECT_TRUE(jvr.end_map());
 }
 

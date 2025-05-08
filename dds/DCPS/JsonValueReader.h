@@ -200,6 +200,8 @@ private:
     return false;
   }
 
+  static bool to_wstring(std::wstring& wstr, const std::string& str);
+
   TokenType token_type_;
   InputStream& input_stream_;
   rapidjson::Reader reader_;
@@ -339,7 +341,7 @@ template <typename InputStream>
 bool JsonValueReader<InputStream>::elements_remaining()
 {
   peek();
-  return token_type_ != kEndArray;
+  return token_type_ != kEndArray && token_type_ != kEndObject;
 }
 
 template <typename InputStream>
@@ -403,17 +405,16 @@ bool JsonValueReader<InputStream>::end_value()
 template <typename InputStream>
 bool JsonValueReader<InputStream>::end_map()
 {
-  if (peek() == kKey) { // skip any unknown members at the end
-    if (!skip_to(kEndObject)) {
-      return false;
-    }
-  }
   return consume(kEndObject);
 }
 
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_boolean(ACE_CDR::Boolean& value)
 {
+  if (mode_ == MapKeyMode) {
+    value = key_value_ == "true";
+    return true;
+  }
   if (peek() == kBool) {
     value = bool_value_;
     return consume(kBool);
@@ -424,6 +425,9 @@ bool JsonValueReader<InputStream>::read_boolean(ACE_CDR::Boolean& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_byte(ACE_CDR::Octet& value)
 {
+  if (mode_ == MapKeyMode) {
+    return convertToInteger(key_value_, value);
+  }
   if (peek() == kUint) {
     value = static_cast<ACE_CDR::Octet>(uint_value_);
     return consume(kUint);
@@ -435,6 +439,9 @@ bool JsonValueReader<InputStream>::read_byte(ACE_CDR::Octet& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_int8(ACE_CDR::Int8& value)
 {
+  if (mode_ == MapKeyMode) {
+    return convertToInteger(key_value_, value);
+  }
   switch (peek()) {
   case kInt:
     value = static_cast<ACE_CDR::Int8>(int_value_);
@@ -450,6 +457,9 @@ bool JsonValueReader<InputStream>::read_int8(ACE_CDR::Int8& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_uint8(ACE_CDR::UInt8& value)
 {
+  if (mode_ == MapKeyMode) {
+    return convertToInteger(key_value_, value);
+  }
   if (peek() == kUint) {
     value = static_cast<ACE_CDR::UInt8>(uint_value_);
     return consume(kUint);
@@ -461,7 +471,9 @@ bool JsonValueReader<InputStream>::read_uint8(ACE_CDR::UInt8& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_int16(ACE_CDR::Short& value)
 {
-  peek();
+  if (mode_ == MapKeyMode) {
+    return convertToInteger(key_value_, value);
+  }
   switch (peek())  {
   case kInt:
     value = static_cast<ACE_CDR::Short>(int_value_);
@@ -477,6 +489,9 @@ bool JsonValueReader<InputStream>::read_int16(ACE_CDR::Short& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_uint16(ACE_CDR::UShort& value)
 {
+  if (mode_ == MapKeyMode) {
+    return convertToInteger(key_value_, value);
+  }
   if (peek() == kUint) {
     value = static_cast<ACE_CDR::UShort>(uint_value_);
     return consume(kUint);
@@ -487,6 +502,9 @@ bool JsonValueReader<InputStream>::read_uint16(ACE_CDR::UShort& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_int32(ACE_CDR::Long& value)
 {
+  if (mode_ == MapKeyMode) {
+    return convertToInteger(key_value_, value);
+  }
   switch (peek()) {
   case kInt:
     value = int_value_;
@@ -502,6 +520,9 @@ bool JsonValueReader<InputStream>::read_int32(ACE_CDR::Long& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_uint32(ACE_CDR::ULong& value)
 {
+  if (mode_ == MapKeyMode) {
+    return convertToInteger(key_value_, value);
+  }
   if (peek() == kUint) {
     value = uint_value_;
     return consume(kUint);
@@ -512,6 +533,9 @@ bool JsonValueReader<InputStream>::read_uint32(ACE_CDR::ULong& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_int64(ACE_CDR::LongLong& value)
 {
+  if (mode_ == MapKeyMode) {
+    return convertToInteger(key_value_, value);
+  }
   switch (peek()) {
   case kInt64:
     value = int64_value_;
@@ -533,6 +557,9 @@ bool JsonValueReader<InputStream>::read_int64(ACE_CDR::LongLong& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_uint64(ACE_CDR::ULongLong& value)
 {
+  if (mode_ == MapKeyMode) {
+    return convertToInteger(key_value_, value);
+  }
   switch (peek()) {
   case kUint64:
     value = uint64_value_;
@@ -548,6 +575,9 @@ bool JsonValueReader<InputStream>::read_uint64(ACE_CDR::ULongLong& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_float32(ACE_CDR::Float& value)
 {
+  if (mode_ == MapKeyMode) {
+    return convertToFloating(key_value_, value);
+  }
   switch (peek()) {
   case kDouble:
     value = ACE_CDR::Float(double_value_);
@@ -572,6 +602,9 @@ bool JsonValueReader<InputStream>::read_float32(ACE_CDR::Float& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_float64(ACE_CDR::Double& value)
 {
+  if (mode_ == MapKeyMode) {
+    return convertToFloating(key_value_, value);
+  }
   switch (peek()) {
   case kDouble:
     value = double_value_;
@@ -642,6 +675,12 @@ bool JsonValueReader<InputStream>::read_fixed(ACE_CDR::Fixed& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_char8(ACE_CDR::Char& value)
 {
+  if (mode_ == MapKeyMode) {
+    if (key_value_.length() == 1) {
+      value = key_value_[0];
+      return true;
+    }
+  }
   if (peek() == kString) {
     if (string_value_.length() == 1) {
       value = string_value_[0];
@@ -652,20 +691,33 @@ bool JsonValueReader<InputStream>::read_char8(ACE_CDR::Char& value)
 }
 
 template <typename InputStream>
+bool JsonValueReader<InputStream>::to_wstring(std::wstring& wstr, const std::string& str)
+{
+  rapidjson::StringStream source(str.c_str());
+  rapidjson::GenericStringBuffer<rapidjson::UTF16<> > target;
+
+  while (source.Tell() != str.size()) {
+    if (!rapidjson::Transcoder<rapidjson::UTF8<>, rapidjson::UTF16<> >::Transcode(source, target)) {
+      return false;
+    }
+  }
+
+  wstr.assign(target.GetString(), target.GetLength());
+  return true;
+}
+
+template <typename InputStream>
 bool JsonValueReader<InputStream>::read_char16(ACE_CDR::WChar& value)
 {
-  if (peek() == kString) {
-    rapidjson::StringStream source(string_value_.c_str());
-    rapidjson::GenericStringBuffer<rapidjson::UTF16<> > target;
-
-    while (source.Tell() != string_value_.size()) {
-      if (!rapidjson::Transcoder<rapidjson::UTF8<>, rapidjson::UTF16<> >::Transcode(source, target)) {
-        return false;
-      }
+  std::wstring target;
+  if (mode_ == MapKeyMode) {
+    if (to_wstring(target, key_value_) && target.size() == 1) {
+      value = target[0];
+      return true;
     }
-
-    if (target.GetLength() == 1) {
-      value = target.GetString()[0];
+  } else if (peek() == kString) {
+    if (to_wstring(target, string_value_) && target.size() == 1) {
+      value = target[0];
       return consume(kString);
     }
   }
@@ -677,7 +729,7 @@ bool JsonValueReader<InputStream>::read_string(std::string& value)
 {
   if (mode_ == MapKeyMode) {
     value = key_value_;
-    return true; //TODO: more
+    return true;
   }
   if (peek() == kString) {
     value = string_value_;
@@ -689,17 +741,9 @@ bool JsonValueReader<InputStream>::read_string(std::string& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_wstring(std::wstring& value)
 {
-  if (peek() == kString) {
-    rapidjson::StringStream source(string_value_.c_str());
-    rapidjson::GenericStringBuffer<rapidjson::UTF16<> > target;
-
-    while (source.Tell() != string_value_.size()) {
-      if (!rapidjson::Transcoder<rapidjson::UTF8<>, rapidjson::UTF16<> >::Transcode(source, target)) {
-        return false;
-      }
-    }
-
-    value = target.GetString();
+  if (mode_ == MapKeyMode && to_wstring(value, key_value_)) {
+    return true;
+  } else if (peek() == kString && to_wstring(value, string_value_)) {
     return consume(kString);
   }
   return false;
@@ -708,6 +752,12 @@ bool JsonValueReader<InputStream>::read_wstring(std::wstring& value)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_long_enum(ACE_CDR::Long& value, const EnumHelper& helper)
 {
+  if (mode_ == MapKeyMode) {
+    if (helper.get_value(value, key_value_.c_str())) {
+      return true;
+    }
+    return convertToInteger(key_value_, value);
+  }
   switch (peek()) {
   case kString:
     if (helper.get_value(value, string_value_.c_str())) {
