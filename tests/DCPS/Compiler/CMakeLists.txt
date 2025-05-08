@@ -10,6 +10,6 @@ if(NOT OPENDDS_CXX_STD_YEAR LESS 2011)
   if(NOT OPENDDS_SAFETY_PROFILE)
     add_subdirectory(typecode)
   endif()
+  add_subdirectory(maps)
 endif()
 
-add_subdirectory(maps)
