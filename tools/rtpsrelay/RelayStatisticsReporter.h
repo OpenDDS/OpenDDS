@@ -391,6 +391,19 @@ public:
     report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
   }
 
+  void admission_state_changed(bool admitting)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (admitting) {
+      ++log_relay_statistics_.transitions_to_admitting();
+      ++publish_relay_statistics_.transitions_to_admitting();
+    } else {
+      ++log_relay_statistics_.transitions_to_nonadmitting();
+      ++publish_relay_statistics_.transitions_to_nonadmitting();
+    }
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
+  }
+
   void report()
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -412,6 +425,7 @@ private:
                       bool force);
 
   void get_opendds_stats(RelayStatistics& out);
+  static void get_process_stats(RelayStatistics& out);
 
   mutable ACE_Thread_Mutex mutex_;
   const Config& config_;

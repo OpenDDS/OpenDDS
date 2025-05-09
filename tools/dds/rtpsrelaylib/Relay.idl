@@ -212,6 +212,9 @@ module RtpsRelay {
     unsigned long deactivation_queue_size;
     unsigned long expiration_queue_size;
     unsigned long admission_queue_size;
+    unsigned long transitions_to_admitting;
+    unsigned long transitions_to_nonadmitting;
+    unsigned long virtual_memory_kb;
     ClientPartitionStatistics client_partitions;
     RelayPartitionStatistics relay_partitions;
     sequence<OpenDDSModuleStatistics> opendds_modules;
