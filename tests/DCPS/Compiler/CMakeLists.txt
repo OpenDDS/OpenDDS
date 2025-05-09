@@ -12,4 +12,3 @@ if(NOT OPENDDS_CXX_STD_YEAR LESS 2011)
   endif()
   add_subdirectory(maps)
 endif()
-

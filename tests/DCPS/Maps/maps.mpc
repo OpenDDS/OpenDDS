@@ -2,7 +2,6 @@ project(*Publisher) : dcpsexe, opendds_cxx11, dcps_test, dcps_transports_for_tes
 
   exename = publisher
 
-  macros += CPP11_MAPPING=1
   TypeSupport_Files {
     maps.idl
   }
@@ -17,7 +16,6 @@ project(*Subscriber) : dcpsexe, opendds_cxx11, dcps_test, dcps_transports_for_te
   exename = subscriber
   after += *Publisher
 
-  macros += CPP11_MAPPING=1
   TypeSupport_Files {
     maps.idl
   }

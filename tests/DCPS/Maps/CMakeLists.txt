@@ -17,6 +17,7 @@ set(opendds_libs
   OpenDDS::Dcps # Core OpenDDS Library
   OpenDDS::InfoRepoDiscovery # For run_test.pl
   OpenDDS::Rtps_Udp # For run_test.pl --rtps
+  OpenDDS_TestUtils
   ${idl}
 )
 
