@@ -188,7 +188,6 @@ bool JsonValueWriter<Writer>::end_sequence()
 template <typename Writer>
 bool JsonValueWriter<Writer>::begin_map(XTypes::TypeKind, XTypes::TypeKind)
 {
-  //TODO: check key's kind
   return writer_.StartObject();
 }
 

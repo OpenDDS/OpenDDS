@@ -202,30 +202,24 @@ namespace {
   void generate_write(const std::string& expression, const std::string& field_name,
                       AST_Type* type, const std::string& idx, int level, FieldFilter field_filter)
   {
-    AST_Type* const actual = resolveActualType(type);
+    const std::string indent(size_t(level) * 2, ' ');
 
+    AST_Type* const actual = resolveActualType(type);
     const Classification c = classify(actual);
+
     if (c & CL_SEQUENCE) {
       AST_Sequence* const sequence = dynamic_cast<AST_Sequence*>(actual);
       sequence_helper(expression, sequence, idx, level, field_filter);
-      return;
-    }
 
-    if (c & CL_ARRAY) {
+    } else if (c & CL_ARRAY) {
       AST_Array* const array = dynamic_cast<AST_Array*>(actual);
       array_helper(expression, array, 0, idx, level, field_filter);
-      return;
-    }
 
-    if (c & CL_MAP) {
+    } else if (c & CL_MAP) {
       AST_Map* const map = dynamic_cast<AST_Map*>(actual);
       map_helper(expression, map, level, field_filter);
-      return;
-    }
 
-    const std::string indent(size_t(level) * 2, ' ');
-
-    if (c & CL_FIXED) {
+    } else if (c & CL_FIXED) {
       be_global->impl_ <<
         indent << "if (!value_writer.write_fixed(" << expression << ".to_ace_fixed())) {\n" <<
         indent << "  return false;\n" <<
