@@ -20,11 +20,12 @@
 #include "tests/Utils/WaitForSample.h"
 
 #include <dds/DCPS/BuiltInTopicUtils.h>
-#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Qos_Helper.h>
-#include <dds/DCPS/TopicDescriptionImpl.h>
+#include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/SubscriberImpl.h>
+#include <dds/DCPS/TopicDescriptionImpl.h>
 #include <dds/DCPS/transport/framework/EntryExit.h>
 // Add the TransportImpl.h before TransportImpl_rch.h is included to
 // resolve the build problem that the class is not defined when
@@ -227,7 +228,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     init_dcps_objects(0);
     init_dcps_objects(1);
 
-#if defined (OPENDDS_SAFETY_PROFILE) && !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_SAFETY_PROFILE && OPENDDS_CONFIG_BUILT_IN_TOPICS
     if (safety_profile) {
       int num_participants = 0;
 
@@ -261,7 +262,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         }
       }
     }
-#endif // OPENDDS_SAFETY_PROFILE && !DDS_HAS_MINIMUM_BIT
+#endif
 
     int expected = num_datawriters * num_instances_per_writer * num_samples_per_instance;
 

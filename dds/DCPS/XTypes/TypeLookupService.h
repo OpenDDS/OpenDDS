@@ -6,14 +6,15 @@
 #ifndef OPENDDS_DCPS_XTYPES_TYPE_LOOKUP_SERVICE_H
 #define OPENDDS_DCPS_XTYPES_TYPE_LOOKUP_SERVICE_H
 
-#include "TypeObject.h"
+#include "DynamicTypeImpl.h"
 #include "DynamicTypeMemberImpl.h"
 #include "MemberDescriptorImpl.h"
 #include "TypeDescriptorImpl.h"
-#include "DynamicTypeImpl.h"
+#include "TypeObject.h"
 
-#include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/RcObject.h>
 
 #include <ace/Thread_Mutex.h>
 
@@ -46,7 +47,7 @@ public:
   bool complete_to_minimal_type_object(const TypeObject& cto, TypeObject& mto) const;
   ///@}
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   typedef OPENDDS_MAP(TypeIdentifier, DDS::DynamicType_var) DynamicTypeMap;
   typedef OPENDDS_MAP(DCPS::GUID_t, DynamicTypeMap) GuidTypeMap;
   DDS::DynamicType_ptr complete_to_dynamic(const CompleteTypeObject& cto, const DCPS::GUID_t& guid);
@@ -54,7 +55,7 @@ public:
 
   bool has_complete(const TypeIdentifier& ti) const;
   DDS::DynamicType_ptr type_identifier_to_dynamic(const TypeIdentifier& ti, const DCPS::GUID_t& guid);
-#endif // OPENDDS_SAFETY_PROFILE
+#endif
 
   /// For TypeLookup_getTypeDependencies
   bool get_type_dependencies(const TypeIdentifier& type_id,
@@ -111,7 +112,7 @@ private:
   bool complete_to_minimal_bitmask(const CompleteBitmaskType& ct, MinimalBitmaskType& mt) const;
   bool complete_to_minimal_bitset(const CompleteBitsetType& ct, MinimalBitsetType& mt) const;
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   DDS::MemberDescriptor* complete_struct_member_to_member_descriptor(const CompleteStructMember& cm, const DCPS::GUID_t& guid);
   DDS::MemberDescriptor* complete_union_member_to_member_descriptor(const CompleteUnionMember& cm, const DCPS::GUID_t& guid);
   DDS::MemberDescriptor* complete_annotation_member_to_member_descriptor(const CompleteAnnotationParameter& cm, const DCPS::GUID_t& guid);

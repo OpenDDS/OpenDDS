@@ -512,7 +512,7 @@ namespace {
             be_global->language_mapping() != BE_GlobalData::LANGMAP_SP_CXX) {
           const std::string hdr = "dds/CorbaSeq/" + nameOfSeqHeader(elem) + "SeqTypeSupportImpl.h";
           be_global->conditional_include(hdr.c_str(), BE_GlobalData::STREAM_CPP,
-                                         "#ifndef OPENDDS_SAFETY_PROFILE");
+                                         "#if !OPENDDS_CONFIG_SAFETY_PROFILE");
         }
       } else {
         be_global->add_referenced(elem->file_name().c_str());

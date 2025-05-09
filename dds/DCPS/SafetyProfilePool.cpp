@@ -6,11 +6,14 @@
  */
 
 #include "DCPS/DdsDcps_pch.h"  ////Only the _pch include should start with DCPS/
+
 #include "SafetyProfilePool.h"
+
 #include "debug.h"
+
 #include <stdexcept>
 
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
 namespace OpenDDS {  namespace DCPS {
 
 SafetyProfilePool::SafetyProfilePool()

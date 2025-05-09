@@ -9,12 +9,13 @@
 #define DATAREADER_QCLISTENER_IMPL
 
 #include "DataReaderListener.h"
+#include <dds/DCPS/Definitions.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
 
 class DataReaderQCListenerImpl
   : public virtual DataReaderListenerImpl {

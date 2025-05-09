@@ -6,7 +6,9 @@
 #ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_WRITER_IMPL_H
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_WRITER_IMPL_H
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include <dds/DdsDynamicTypeSupportC.h>
 

@@ -7,11 +7,12 @@
 #include "SecurityAttributesMessageTypeSupportImpl.h"
 #include "Args.h"
 
+#include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/WaitSet.h>
-#include <dds/DCPS/BuiltInTopicUtils.h>
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
@@ -142,13 +143,13 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
 
     // Create DataReaderListener
     DDS::DataReader_var part_reader;
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
     DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
     part_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
 #endif
     DataReaderListenerImpl* const listener_servant = new DataReaderListenerImpl(my_args, part_reader.in());
     DDS::DataReaderListener_var listener(listener_servant);
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
     part_reader->set_listener(listener.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     listener->on_data_available(part_reader);
 #endif
@@ -229,7 +230,7 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
 
     // Clean-up!
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
     part_reader->set_listener(0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     part_reader = 0;
     bit_subscriber = 0;

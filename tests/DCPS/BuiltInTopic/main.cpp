@@ -6,15 +6,18 @@
 #include "ace/OS_NS_time.h"
 
 #include "common.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/RepoIdConverter.h"
-#include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/DomainParticipantImpl.h"
-#include "dds/DCPS/TopicImpl.h"
+
 #include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
+#include "dds/DCPS/DataWriterImpl.h"
+#include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/DomainParticipantImpl.h"
+#include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/Qos_Helper.h"
+#include "dds/DCPS/RepoIdConverter.h"
+#include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/TopicImpl.h"
+
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsTopicC.h"
@@ -23,11 +26,9 @@
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 #include "tests/Utils/WaitForSample.h"
 
-#if !defined(DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #include "dds/DCPS/StaticIncludes.h"
 #endif
-
-#include "dds/OpenDDSConfigWrapper.h"
 
 #include "ace/Get_Opt.h"
 #include "ace/High_Res_Timer.h"
@@ -41,7 +42,7 @@ using namespace ::OpenDDS::DCPS;
 
 int ignore_before_association = 0;
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
 void
 parse_args (int argc,
@@ -69,10 +70,10 @@ parse_args (int argc,
     }
   }
 }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 int init (int argc, ACE_TCHAR *argv[])
 {
   try
@@ -167,10 +168,10 @@ int init (int argc, ACE_TCHAR *argv[])
 
   return 0;
 }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 void test_bit_participant ()
 {
   //ACE_DEBUG((LM_INFO,"sizeof(::DDS::ParticipantBuiltinTopicData) = %d\n",
@@ -223,10 +224,10 @@ void test_bit_participant ()
       ACE_ERROR ((LM_ERROR, "ERROR: Exception caught in test_bit_participant ()"));
     }
 }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 void test_bit_topic ()
 {
   try
@@ -284,10 +285,10 @@ void test_bit_topic ()
       ACE_ERROR ((LM_ERROR, "ERROR: Exception caught in test_bit_topic ()"));
     }
 }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 void test_bit_publication ()
 {
   try
@@ -353,10 +354,10 @@ void test_bit_publication ()
       ACE_ERROR ((LM_ERROR, "ERROR: Exception caught in test_bit_publication ()"));
     }
 }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 void test_bit_subscription ()
 {
   try
@@ -421,10 +422,10 @@ void test_bit_subscription ()
       ACE_ERROR ((LM_ERROR, "ERROR: Exception caught in test_bit_subscription ()"));
     }
 }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 void shutdown ()
 {
   if (participant->delete_contained_entities ()
@@ -449,13 +450,13 @@ void shutdown ()
 
   TheServiceParticipant->shutdown ();
 }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
 
 int
 ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   parse_args (argc, argv);
 
   if (ignore_kind != DONT_IGNORE)
@@ -522,5 +523,5 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   ACE_UNUSED_ARG (argv);
   ACE_DEBUG((LM_DEBUG, "BIT support is not enabled.\n"));
   return 0;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 }

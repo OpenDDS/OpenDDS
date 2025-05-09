@@ -26,7 +26,7 @@ namespace {
   class NoSafetyProfileGuard : public PreprocessorIfGuard {
   public:
     NoSafetyProfileGuard()
-      : PreprocessorIfGuard("ndef OPENDDS_SAFETY_PROFILE")
+      : PreprocessorIfGuard(" !OPENDDS_CONFIG_SAFETY_PROFILE")
     {
     }
   };

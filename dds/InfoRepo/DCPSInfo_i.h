@@ -13,6 +13,7 @@
 #include /**/ "dds/DCPS/InfoRepoDiscovery/InfoS.h"
 #include /**/ "dds/DCPS/InfoRepoDiscovery/DataReaderRemoteC.h"
 #include /**/ "dds/DCPS/InfoRepoDiscovery/DataWriterRemoteC.h"
+#include /**/ "dds/DCPS/Definitions.h"
 
 #include /**/ "DCPS_IR_Topic.h"
 #include /**/ "DCPS_IR_Topic_Description.h"
@@ -437,7 +438,7 @@ private:
   long reassociate_timer_id_;
   long dispatch_check_timer_id_;
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   struct BIT_Cleanup_Handler : ACE_Event_Handler
   {
     BIT_Cleanup_Handler(TAO_DDS_DCPSInfo_i* parent, DDS::DomainId_t domain)

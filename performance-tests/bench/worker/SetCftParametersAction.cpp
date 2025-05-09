@@ -25,7 +25,7 @@ bool SetCftParametersAction::init(const ActionConfig& config, ActionReport& repo
   std::unique_lock<std::mutex> lock(mutex_);
   Action::init(config, report, readers, writers, cft_map);
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   auto content_filtered_topic_prop = get_property(config.params, "content_filtered_topic_name", Builder::PVK_STRING);
   if (content_filtered_topic_prop) {
     auto it = cft_map.find(static_cast<std::string>(content_filtered_topic_prop->value.string_prop()));
@@ -151,7 +151,7 @@ void SetCftParametersAction::do_set_expression_parameters()
         params[i] = acceptable_param_values_[i][index];
       }
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
       if (content_filtered_topic_->set_expression_parameters(params) != DDS::RETCODE_OK) {
         std::cout << "Error during SetCftParametersAction::do_set_expression_parameters()'s call to set_expression_parameters()" << std::endl;
       }

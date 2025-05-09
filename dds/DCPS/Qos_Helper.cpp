@@ -69,7 +69,7 @@ bool Qos_Helper::valid(const DDS::TopicQos& qos)
     return false;
   }
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
   if (!valid(qos.durability_service)) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE,
@@ -172,7 +172,7 @@ bool Qos_Helper::valid(const DDS::DataWriterQos& qos)
     return false;
   }
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
   if (!valid(qos.durability_service)) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE,

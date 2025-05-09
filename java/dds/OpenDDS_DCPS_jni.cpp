@@ -20,13 +20,14 @@
 
 #include <idl2jni_runtime.h>
 
-#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/DomainParticipantImpl.h>
 #include <dds/DCPS/EntityImpl.h>
-#include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/GuardCondition.h>
-#include <dds/DCPS/NetworkAddress.h>
 #include <dds/DCPS/LogAddr.h>
+#include <dds/DCPS/NetworkAddress.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportImpl.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
@@ -930,7 +931,7 @@ jlong JNICALL Java_DDS_GuardCondition__1jni_1init(JNIEnv *, jclass)
                                  new DDS::GuardCondition));
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 // Forward declarations of these functions are generated for the forward
 // declaration of DynamicType in DdsDcpsTopic.idl. They shouldn't be used
 // anywhere, but at least on Windows and macOS, declarations need definitions,

@@ -303,7 +303,7 @@ OPENDDS_STRING to_string(const DataSampleHeader& value);
 OpenDDS_Dcps_Export
 bool operator<<(ACE_Message_Block&, const DataSampleHeader& value);
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 /// Message Id enumeration insertion onto an ostream.
 OpenDDS_Dcps_Export
 std::ostream& operator<<(std::ostream& os, MessageId value);
@@ -315,7 +315,7 @@ std::ostream& operator<<(std::ostream& os, SubMessageId value);
 /// Message header insertion onto an ostream.
 OpenDDS_Dcps_Export
 std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value);
-#endif //OPENDDS_SAFETY_PROFILE
+#endif
 
 } // namespace DCPS
 } // namespace OpenDDS

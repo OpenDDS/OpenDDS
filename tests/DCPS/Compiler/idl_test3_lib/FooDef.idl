@@ -1,6 +1,8 @@
 #include "tao/ShortSeq.pidl"
 #include "tao/StringSeq.pidl"
 
+#include <dds/OpenDDSConfigWrapper.idl>
+
 // note the following predefined types often have special cases:
 //    char, octet, boolean, string
 // where as all of the integer and float types are just one case.
@@ -309,7 +311,7 @@ module Xyz {
     float x;
     float y;
     wchar theWChar;
-#if !defined OPENDDS_SAFETY_PROFILE && !defined NO_TEST_WSTRING
+#if !OPENDDS_CONFIG_SAFETY_PROFILE && !defined NO_TEST_WSTRING
     wstring theWString;
 #endif
     long double theLongDouble;

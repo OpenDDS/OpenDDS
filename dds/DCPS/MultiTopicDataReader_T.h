@@ -8,7 +8,9 @@
 #ifndef OPENDDS_DCPS_MULTITOPICDATAREADER_T_H
 #define OPENDDS_DCPS_MULTITOPICDATAREADER_T_H
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#include "Definitions.h"
+
+#if OPENDDS_CONFIG_MULTI_TOPIC
 
 #include "MultiTopicDataReaderBase.h"
 

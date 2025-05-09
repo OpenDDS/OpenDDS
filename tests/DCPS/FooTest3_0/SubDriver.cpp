@@ -1,15 +1,18 @@
 #include "SubDriver.h"
 #include "TestException.h"
-#include "dds/DCPS/AssociationData.h"
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/RepoIdBuilder.h"
-#include "dds/DCPS/RestoreOutputStreamState.h"
 #include "DataReaderListener.h"
 #include "DataReaderQCListener.h"
+
 #include "tests/DCPS/common/TestSupport.h"
 #include "tests/Utils/ExceptionStreams.h"
 #include "tests/Utils/StatusMatching.h"
+
+#include "dds/DCPS/AssociationData.h"
+#include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/RepoIdBuilder.h"
+#include "dds/DCPS/RestoreOutputStreamState.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include <ace/Arg_Shifter.h>
 #include <ace/Argv_Type_Converter.h>
@@ -179,7 +182,7 @@ SubDriver::init(DistributedConditionSet_rch dcs, int& argc, ACE_TCHAR* argv[])
   }
 
   // Create datareader to test copy_from_topic_qos.
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
   DataReaderQCListenerImpl* qc_listener = 0;
   if (qc_usage_)
   {
@@ -201,7 +204,7 @@ SubDriver::init(DistributedConditionSet_rch dcs, int& argc, ACE_TCHAR* argv[])
   TEST_CHECK (! CORBA::is_nil (datareader_.in ()));
   TEST_CHECK (participant_->contains_entity(datareader_->get_instance_handle()));
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
   if (qc_usage_)
   {
     DDS::StringSeq params(1);

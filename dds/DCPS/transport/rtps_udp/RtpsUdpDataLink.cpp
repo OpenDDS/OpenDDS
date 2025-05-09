@@ -3928,7 +3928,7 @@ RtpsUdpDataLink::RtpsWriter::is_leading(const ReaderInfo_rch& reader) const
 void
 RtpsUdpDataLink::RtpsWriter::check_leader_lagger() const
 {
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #ifndef NDEBUG
   static const SequenceNumber negative_one = SequenceNumber::ZERO().previous();
   for (SNRIS::const_iterator pos1 = lagging_readers_.begin(), limit = lagging_readers_.end();

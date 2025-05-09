@@ -779,7 +779,7 @@ DataLink::data_received_i(ReceivedDataSample& sample,
     return;
   }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
   if (sample.header_.content_filter_
       && sample.header_.content_filter_entries_.length()) {
@@ -788,7 +788,7 @@ DataLink::data_received_i(ReceivedDataSample& sample,
     subset.data_received(sample, incl_excl, constrain);
 
   } else {
-#endif /* OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */
+#endif
 
     if (DCPS_debug_level > 9) {
       // Just get the set to do our dirty work by having it iterate over its
@@ -806,10 +806,10 @@ DataLink::data_received_i(ReceivedDataSample& sample,
                  constrain == ReceiveListenerSet::SET_EXCLUDED ? "exclude" : "include", included_ids.c_str()));
     }
     listener_set->data_received(sample, incl_excl, constrain);
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   }
 
-#endif /* OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */
+#endif
 }
 
 // static
@@ -1253,7 +1253,7 @@ DataLink::replay_durable_data(const GUID_t& local_pub_id, const GUID_t& remote_s
   }
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 std::ostream&
 operator<<(std::ostream& str, const DataLink& value)
 {

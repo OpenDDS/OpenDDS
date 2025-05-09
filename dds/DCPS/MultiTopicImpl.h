@@ -8,7 +8,9 @@
 #ifndef OPENDDS_DCPS_MULTITOPICIMPL_H
 #define OPENDDS_DCPS_MULTITOPICIMPL_H
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#include "Definitions.h"
+
+#if OPENDDS_CONFIG_MULTI_TOPIC
 
 #include "TopicDescriptionImpl.h"
 #include "FilterEvaluator.h"
@@ -88,6 +90,6 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_NO_MULTI_TOPIC
+#endif
 
 #endif

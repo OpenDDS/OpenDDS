@@ -37,7 +37,7 @@
 // so that the static link includes the initializers for these libraries.
 #  include "RTPS/RtpsDiscovery.h"
 #  include "transport/rtps_udp/RtpsUdp.h"
-#  ifdef OPENDDS_SAFETY_PROFILE
+#  if OPENDDS_CONFIG_SAFETY_PROFILE
 #    include "StaticDiscovery.h"
 #  endif
 #endif

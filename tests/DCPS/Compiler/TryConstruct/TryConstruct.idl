@@ -7,6 +7,8 @@
 
 #include <TryConstructBaseTypes.idl>
 
+#include <dds/OpenDDSConfigWrapper.idl>
+
 module TryCon {
 
   @mutable
@@ -56,7 +58,7 @@ module TryCon {
     str20 str20_d;
   };
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   @mutable
   struct DiscardStructWString1 {
     wstr64 wstr64_d;
@@ -127,7 +129,7 @@ module TryCon {
     case 0: @try_construct(DISCARD) str64 str_d;
     case 1: @try_construct(USE_DEFAULT) str64 str_ud;
     case 2: @try_construct(TRIM) str64 str_t;
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
     case 3: @try_construct(DISCARD) wstr64 wstr_d;
     case 4: @try_construct(USE_DEFAULT) wstr64 wstr_ud;
     case 5: @try_construct(TRIM) wstr64 wstr_t;
@@ -147,7 +149,7 @@ module TryCon {
   @extensibility(MUTABLE)
   union DiscardUnion switch (@try_construct(DISCARD) short) {
     case 0: @try_construct(DISCARD) str20 str_d;
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
     case 3: @try_construct(DISCARD) wstr20 wstr_d;
 #endif
     case 6: @try_construct(DISCARD) str20Array stra_d;
@@ -160,7 +162,7 @@ module TryCon {
   @extensibility(MUTABLE)
   union TrimUnion switch (short) {
     case 2: @try_construct(TRIM) str20 str_t;
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
     case 5: @try_construct(TRIM) wstr20 wstr_t;
 #endif
     case 8: @try_construct(TRIM) str20ArrayTrim stra_t;
@@ -172,7 +174,7 @@ module TryCon {
   @extensibility(MUTABLE)
   union DefaultUnion switch (@try_construct(USE_DEFAULT) short) {
     case 1: @try_construct(USE_DEFAULT) str20 str_ud;
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
     case 4: @try_construct(USE_DEFAULT) wstr20 wstr_ud;
 #endif
     case 7: @try_construct(USE_DEFAULT) str20Array stra_ud;

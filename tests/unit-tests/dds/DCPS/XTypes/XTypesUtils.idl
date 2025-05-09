@@ -1,4 +1,6 @@
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/OpenDDSConfigWrapper.idl>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 module XTypesUtils {
 

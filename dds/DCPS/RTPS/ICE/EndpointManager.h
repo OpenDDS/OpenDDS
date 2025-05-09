@@ -3,7 +3,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <dds/OpenDDSConfigWrapper.h>
+#include "dds/DCPS/Definitions.h"
 
 #if OPENDDS_CONFIG_SECURITY
 #ifndef OPENDDS_DCPS_RTPS_ICE_ENDPOINTMANAGER_H
@@ -12,8 +12,6 @@
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
-
-#include "dds/DCPS/Definitions.h"
 
 #include "dds/Versioned_Namespace.h"
 

@@ -5,6 +5,7 @@
 
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/WaitSet.h>
@@ -12,8 +13,6 @@
 #include <dds/DCPS/transport/framework/TransportSendStrategy.h>
 
 #include <dds/DCPS/security/framework/Properties.h>
-
-#include <dds/OpenDDSConfigWrapper.h>
 
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
@@ -53,7 +52,7 @@ void get_topic(bool& success, TypeSupport_var& ts, const DomainParticipant_var d
 {
   TypeSupport_var native_ts = new typename OpenDDS::DCPS::DDSTraits<T>::TypeSupportImplType;
   if (dynamic) {
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
     ACE_ERROR((LM_ERROR, "ERROR: Can't create dynamic type support on safety profile\n"));
     success = false;
     return;

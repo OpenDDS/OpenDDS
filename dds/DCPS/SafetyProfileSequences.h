@@ -5,7 +5,10 @@
 
 #ifndef OPENDDS_DCPS_SAFETY_PROFILE_SEQUENCES_H
 #define OPENDDS_DCPS_SAFETY_PROFILE_SEQUENCES_H
-#ifdef OPENDDS_SAFETY_PROFILE
+
+#include "Definitions.h"
+
+#if OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include "SafetyProfileSequence.h"
 #include "SafetyProfileSequenceVar.h"

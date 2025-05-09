@@ -78,7 +78,7 @@ WriterInfo::WriterInfo(const WriterInfoListener_rch& reader,
   , reader_liveliness_lease_duration_is_finite_(!is_infinite(reader_liveliness_lease_duration))
   , handle_(DDS::HANDLE_NIL)
 {
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   reset_coherent_info();
 #endif
 
@@ -182,7 +182,7 @@ WriterInfo::finished_delivering_historic()
   delivering_historic_samples_cv_.notify_all();
 }
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 void
 WriterInfo::add_coherent_samples(const SequenceNumber& seq)
 {
@@ -293,7 +293,7 @@ WriterInfo::removed()
   liveliness_check_task_->cancel();
 }
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 Coherent_State
 WriterInfo::coherent_change_received()
 {
@@ -347,7 +347,7 @@ WriterInfo::set_group_info(const CoherentChangeControl& info)
   group_coherent_samples_ = info.group_coherent_samples_;
 }
 
-#endif  // OPENDDS_NO_OBJECT_MODEL_PROFILE
+#endif
 
 }
 }

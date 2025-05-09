@@ -46,8 +46,6 @@
 #  include <dds/DdsSecurityCoreTypeSupportImpl.h>
 #endif
 
-#include <dds/OpenDDSConfigWrapper.h>
-
 #include <cstring>
 
 namespace {
@@ -57,7 +55,7 @@ const OpenDDS::DCPS::MonotonicTime_t MTZERO = { 0, 0 };
 bool checkAndAssignQos(DDS::PublicationBuiltinTopicData& dest,
                        const DDS::PublicationBuiltinTopicData& src)
 {
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   using OpenDDS::DCPS::operator!=;
 #endif
   bool changed = false;
@@ -110,7 +108,7 @@ bool checkAndAssignQos(DDS::PublicationBuiltinTopicData& dest,
 bool checkAndAssignQos(DDS::SubscriptionBuiltinTopicData& dest,
                        const DDS::SubscriptionBuiltinTopicData& src)
 {
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   using OpenDDS::DCPS::operator!=;
 #endif
   bool changed = false;
@@ -172,7 +170,7 @@ bool checkAndAssignParams(OpenDDS::DCPS::ContentFilterProperty_t& dest,
   return false;
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 bool operator==(const OpenDDS::DCPS::Locator_t& x,
                 const OpenDDS::DCPS::Locator_t& y)
 {
@@ -7509,7 +7507,7 @@ void Sedp::match_continue(UsedEndpoints& ue,
   const DDS::SubscriberQos* subQos = 0;
   DCPS::TransportLocatorSeq* rTls = 0;
   ACE_CDR::ULong rTransportContext = 0;
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   const DCPS::ContentFilterProperty_t* cfProp = 0;
 #endif
   const XTypes::TypeInformation* reader_type_info = 0;
@@ -7539,7 +7537,7 @@ void Sedp::match_continue(UsedEndpoints& ue,
       tempCfp.filterExpression = lsi->second.filterProperties.filterExpression;
       tempCfp.expressionParameters = lsi->second.filterProperties.expressionParameters;
     }
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
     cfProp = &tempCfp;
 #endif
     if (!already_matched) {
@@ -7579,7 +7577,7 @@ void Sedp::match_continue(UsedEndpoints& ue,
       TheServiceParticipant->initial_EntityFactoryQosPolicy();
     subQos = &tempSubQos;
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
     cfProp = &dsi->second.reader_data_.contentFilterProperty;
 #endif
     reader_type_info = &dsi->second.type_info_;
@@ -7735,7 +7733,7 @@ void Sedp::match_continue(UsedEndpoints& ue,
       ra.readerId = reader;
       ra.subQos = *subQos;
       ra.readerQos = *drQos;
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
       ra.filterClassName = cfProp->filterClassName;
       ra.filterExpression = cfProp->filterExpression;
       ra.exprParams = cfProp->expressionParameters;
@@ -7769,7 +7767,7 @@ void Sedp::match_continue(UsedEndpoints& ue,
       event_dispatcher_->dispatch(DCPS::make_rch<ReaderAddAssociation>(rar));
       event_dispatcher_->dispatch(DCPS::make_rch<WriterAddAssociation>(war));
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
       if (use_xtypes_complete_ && reader_type_info->complete.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {
         // Reader is a local recorder using complete types
         DCPS::DataReaderCallbacks_rch lock = rar->callbacks_.lock();
@@ -7784,7 +7782,7 @@ void Sedp::match_continue(UsedEndpoints& ue,
 #endif
 
     } else if (call_reader) {
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
       if (use_xtypes_complete_ && reader_type_info->complete.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {
         // Reader is a local recorder using complete types
         DCPS::DataReaderCallbacks_rch lock = rar->callbacks_.lock();

@@ -13,7 +13,7 @@
 #include "InstanceDataSampleList.h"
 #include "DataWriterImpl.h"
 #include "MessageTracker.h"
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 #  include "DataDurabilityCache.h"
 #endif
 #include "PublicationInstance.h"
@@ -75,7 +75,7 @@ WriteDataContainer::WriteDataContainer(
   DDS::DomainId_t domain_id,
   const char* topic_name,
   const char* type_name,
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
   DataDurabilityCache* durability_cache,
   const DDS::DurabilityServiceQosPolicy& durability_service,
 #endif
@@ -104,7 +104,7 @@ WriteDataContainer::WriteDataContainer(
   , domain_id_(domain_id)
   , topic_name_(topic_name)
   , type_name_(type_name)
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
   , durability_cache_(durability_cache)
   , durability_service_(durability_service)
 #endif
@@ -325,7 +325,7 @@ WriteDataContainer::enqueue(
 DDS::ReturnCode_t
 WriteDataContainer::reenqueue_all(const GUID_t& reader_id,
                                   const DDS::LifespanQosPolicy& lifespan
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
                                   ,
                                   const OPENDDS_STRING& filterClassName,
                                   const FilterEvaluator* eval,
@@ -351,7 +351,7 @@ WriteDataContainer::reenqueue_all(const GUID_t& reader_id,
                    sending_data_,
                    reader_id,
                    lifespan,
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
                    filterClassName, eval, expression_params,
 #endif
                    total_size);
@@ -360,7 +360,7 @@ WriteDataContainer::reenqueue_all(const GUID_t& reader_id,
                    sent_data_,
                    reader_id,
                    lifespan,
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
                    filterClassName, eval, expression_params,
 #endif
                    total_size);
@@ -1370,7 +1370,7 @@ WriteDataContainer::copy_and_prepend(SendStateDataSampleList& list,
                                      const SendStateDataSampleList& appended,
                                      const GUID_t& reader_id,
                                      const DDS::LifespanQosPolicy& lifespan,
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
                                      const OPENDDS_STRING& filterClassName,
                                      const FilterEvaluator* eval,
                                      const DDS::StringSeq& params,
@@ -1383,7 +1383,7 @@ WriteDataContainer::copy_and_prepend(SendStateDataSampleList& list,
     if (resend_data_expired(*cur, lifespan))
       continue;
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
     if (eval && writer_->filter_out(*cur, filterClassName, *eval, params))
       continue;
 #endif
@@ -1419,7 +1419,7 @@ WriteDataContainer::copy_and_prepend(SendStateDataSampleList& list,
   }
 }
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 bool
 WriteDataContainer::persist_data()
 {

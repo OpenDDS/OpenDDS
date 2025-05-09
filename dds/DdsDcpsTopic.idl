@@ -7,13 +7,14 @@
 #define OPENDDS_DDSDCPSTOPIC_IDL
 
 #include <dds/DdsDcpsInfrastructure.idl>
+#include <dds/OpenDDSConfigWrapper.idl>
 
 #pragma ciao lem "dds/DdsDcpsTopicE.idl"
 
 module DDS {
     local interface DomainParticipant;
     local interface Topic;
-#if !defined OPENDDS_SAFETY_PROFILE && !defined __OPENDDS_MPC
+#if !OPENDDS_CONFIG_SAFETY_PROFILE && !defined __OPENDDS_MPC
     // MPC will make invalid rules in a Java build based on this forward
     // declaration.
     local interface DynamicType;
@@ -46,7 +47,7 @@ module DDS {
     };
 
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
     local interface ContentFilteredTopic : TopicDescription {
         string get_filter_expression();
         ReturnCode_t get_expression_parameters(inout StringSeq params);
@@ -56,7 +57,7 @@ module DDS {
     };
 #endif
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
     local interface MultiTopic : TopicDescription {
         string get_subscription_expression();
         ReturnCode_t get_expression_parameters(inout StringSeq params);
@@ -70,7 +71,7 @@ module DDS {
             in DomainParticipant domain,
             in string type_name);
         string get_type_name();
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
         // TODO: valuetype isn't supported in Java
         @OpenDDS::internal::hidden_op_in_java(0)
         DynamicType get_type();

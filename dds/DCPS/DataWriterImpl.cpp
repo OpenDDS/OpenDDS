@@ -10,6 +10,7 @@
 #include "DCPS_Utils.h"
 #include "DataDurabilityCache.h"
 #include "DataSampleElement.h"
+#include "Definitions.h"
 #include "DomainParticipantImpl.h"
 #include "FeatureDisabledQosCheck.h"
 #include "GuidConverter.h"
@@ -25,21 +26,20 @@
 
 #include "XTypes/TypeObject.h"
 
-#include <dds/OpenDDSConfigWrapper.h>
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 #  include "CoherentChangeControl.h"
 #endif
 #include "AssociationData.h"
 #include "transport/framework/EntryExit.h"
 #include "transport/framework/TransportExceptions.h"
 #include "transport/framework/TransportRegistry.h"
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include "BuiltInTopicUtils.h"
 #endif
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
@@ -113,7 +113,7 @@ DataWriterImpl::~DataWriterImpl()
   liveliness_send_task_->cancel();
   liveliness_lost_task_->cancel();
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
   if (participant) {
     XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
@@ -152,9 +152,9 @@ DataWriterImpl::init(
   topic_id_ = topic_servant_->get_id();
   type_name_ = topic_servant_->get_type_name();
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   is_bit_ = topicIsBIT(topic_name_.in(), type_name_.in());
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
   qos_ = qos;
   passed_qos_ = qos;
@@ -337,7 +337,7 @@ DataWriterImpl::ReaderInfo::ReaderInfo(const char* filterClassName,
                                        const DDS::StringSeq& params,
                                        WeakRcHandle<DomainParticipantImpl> participant,
                                        bool durable)
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   : participant_(participant)
   , filter_class_name_(filterClassName)
   , filter_(filter)
@@ -359,18 +359,18 @@ DataWriterImpl::ReaderInfo::ReaderInfo(const char* filterClassName,
   ACE_UNUSED_ARG(params);
   ACE_UNUSED_ARG(participant);
 }
-#endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#endif
 
 DataWriterImpl::ReaderInfo::~ReaderInfo()
 {
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   eval_ = RcHandle<FilterEvaluator>();
   RcHandle<DomainParticipantImpl> participant = participant_.lock();
   if (participant && !filter_.empty()) {
     participant->deref_filter_eval(filter_.c_str());
   }
 
-#endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#endif
 }
 
 void
@@ -379,7 +379,7 @@ DataWriterImpl::association_complete_i(const GUID_t& remote_id)
   DBG_ENTRY_LVL("DataWriterImpl", "association_complete_i", 6);
 
   bool reader_durable = false;
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   OPENDDS_STRING filterClassName;
   RcHandle<FilterEvaluator> eval;
   DDS::StringSeq expression_params;
@@ -409,7 +409,7 @@ DataWriterImpl::association_complete_i(const GUID_t& remote_id)
 
     if (it != reader_info_.end()) {
       reader_durable = it->second.durable_;
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
       filterClassName = it->second.filter_class_name_;
       eval = it->second.eval_;
       expression_params = it->second.expression_params_;
@@ -479,7 +479,7 @@ DataWriterImpl::association_complete_i(const GUID_t& remote_id)
     // Tell the WriteDataContainer to resend all sending/sent
     // samples.
     this->data_container_->reenqueue_all(remote_id, this->qos_.lifespan
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
                                          , filterClassName, eval.in(), expression_params
 #endif
                                         );
@@ -688,7 +688,7 @@ void DataWriterImpl::replay_durable_data_for(const GUID_t& remote_id)
   DBG_ENTRY_LVL("DataWriterImpl", "replay_durable_data_for", 6);
 
   bool reader_durable = false;
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   OPENDDS_STRING filterClassName;
   RcHandle<FilterEvaluator> eval;
   DDS::StringSeq expression_params;
@@ -700,7 +700,7 @@ void DataWriterImpl::replay_durable_data_for(const GUID_t& remote_id)
 
     if (it != reader_info_.end()) {
       reader_durable = it->second.durable_;
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
       filterClassName = it->second.filter_class_name_;
       eval = it->second.eval_;
       expression_params = it->second.expression_params_;
@@ -713,7 +713,7 @@ void DataWriterImpl::replay_durable_data_for(const GUID_t& remote_id)
     // Tell the WriteDataContainer to resend all sending/sent
     // samples.
     this->data_container_->reenqueue_all(remote_id, this->qos_.lifespan
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
                                          , filterClassName, eval.in(), expression_params
 #endif
                                          );
@@ -892,10 +892,7 @@ void
 DataWriterImpl::update_subscription_params(const GUID_t& readerId,
                                            const DDS::StringSeq& params)
 {
-#ifdef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-  ACE_UNUSED_ARG(readerId);
-  ACE_UNUSED_ARG(params);
-#else
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
   ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
   RepoIdToReaderInfoMap::iterator iter = reader_info_.find(readerId);
@@ -910,7 +907,9 @@ DataWriterImpl::update_subscription_params(const GUID_t& readerId,
                ACE_TEXT(" - writer: %C has no info about reader: %C\n"),
                LogGuid(this->publication_id_).c_str(), LogGuid(readerId).c_str()));
   }
-
+#else
+  ACE_UNUSED_ARG(readerId);
+  ACE_UNUSED_ARG(params);
 #endif
 }
 
@@ -1278,7 +1277,7 @@ DataWriterImpl::get_matched_subscriptions(
   return DDS::RETCODE_OK;
 }
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 DDS::ReturnCode_t
 DataWriterImpl::get_matched_subscription_data(
   DDS::SubscriptionBuiltinTopicData & subscription_data,
@@ -1310,7 +1309,7 @@ DataWriterImpl::get_matched_subscription_data(
 
   return ret;
 }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
 DDS::ReturnCode_t
 DataWriterImpl::enable()
@@ -1374,7 +1373,7 @@ DataWriterImpl::enable()
   const CORBA::Long max_durable_per_instance =
     qos_.durability.kind == DDS::VOLATILE_DURABILITY_QOS ? 0 : history_depth;
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
   // Get data durability cache if DataWriter QoS requires durable
   // samples.  Publisher servant retains ownership of the cache.
   DataDurabilityCache* const durability_cache =
@@ -1394,7 +1393,7 @@ DataWriterImpl::enable()
       domain_id_,
       topic_name_,
       get_type_name(),
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
       durability_cache,
       qos_.durability_service,
 #endif
@@ -1538,7 +1537,7 @@ DataWriterImpl::enable()
   const DDS::ReturnCode_t writer_enabled_result =
     publisher->writer_enabled(topic_name_.in(), this);
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 
   // Move cached data from the durability cache to the unsent data
   // queue.
@@ -1964,7 +1963,7 @@ DataWriterImpl::track_sequence_number(GUIDSeq* filter_out)
   const SequenceNumber sn = get_max_sn();
   ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   // Track individual expected sequence numbers in ReaderInfo
   RepoIdSet excluded;
 
@@ -1988,7 +1987,7 @@ DataWriterImpl::track_sequence_number(GUIDSeq* filter_out)
     iter->second.expected_sequence_ = sn;
   }
 
-#endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#endif
 
 }
 
@@ -2219,7 +2218,7 @@ DataWriterImpl::create_sample_data_message(Message_Block_Ptr data,
     return DDS::RETCODE_ERROR;
   }
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   header_data.group_coherent_ =
     publisher->qos_.presentation.access_scope
     == DDS::GROUP_PRESENTATION_QOS;
@@ -2306,7 +2305,7 @@ DataWriterImpl::parent() const
   return this->publisher_servant_.lock();
 }
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
 bool
 DataWriterImpl::filter_out(const DataSampleElement& elt,
                            const OPENDDS_STRING& filterClassName,
@@ -2347,7 +2346,7 @@ DataWriterImpl::check_transport_qos(const TransportInst&)
   return true;
 }
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 
 bool
 DataWriterImpl::coherent_changes_pending()
@@ -2424,7 +2423,7 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
   }
 }
 
-#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
+#endif
 
 void
 DataWriterImpl::data_dropped(const DataSampleElement* element,
@@ -2555,7 +2554,7 @@ DataWriterImpl::prepare_to_delete()
   this->stop_associating();
   this->terminate_send_if_suspended();
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
   // Trigger data to be persisted, i.e. made durable, if so
   // configured. This needs be called before unregister_instances
   // because unregister_instances may cause instance dispose.
@@ -2711,7 +2710,7 @@ DataWriterImpl::lookup_instance_handles(const ReaderIdSeq& ids,
   }
 }
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 bool
 DataWriterImpl::persist_data()
 {
@@ -3198,7 +3197,7 @@ DDS::ReturnCode_t DataWriterImpl::write_w_timestamp(
 
   // list of reader GUID_ts that should not get data
   GUIDSeq_var filter_out;
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   if (publisher_content_filter_) {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, reader_info_guard, reader_info_lock_, DDS::RETCODE_ERROR);
     for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),

@@ -11,6 +11,8 @@
 #include "CoherentChangeControl.h"
 #include "PoolAllocationBase.h"
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -26,7 +28,7 @@ public:
 
   virtual void add(ReceivedDataElement* data_sample);
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   virtual void accept_coherent(const GUID_t& writer,
                                const GUID_t& publisher);
 

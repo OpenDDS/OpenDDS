@@ -11,7 +11,9 @@
 #include "ace/Malloc_Base.h"
 #include /**/ "dds/Versioned_Namespace.h"
 
-#ifdef OPENDDS_SAFETY_PROFILE
+#include "Definitions.h"
+
+#if OPENDDS_CONFIG_SAFETY_PROFILE
 #include "ace/Atomic_Op.h"
 #include "ace/Singleton.h"
 #include "dcps_export.h"
@@ -95,7 +97,7 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#else // ! OPENDDS_SAFETY_PROFILE
+#else
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -107,6 +109,6 @@ typedef ACE_Allocator SafetyProfilePool;
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif
 
 #endif // OPENDDS_DCPS_SAFETY_PROFILE_POOL_H

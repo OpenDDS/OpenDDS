@@ -5,9 +5,9 @@
 
 #include <DCPS/DdsDcps_pch.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
-#  include "DynamicDataFactory.h"
+#include "DynamicDataFactory.h"
 
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include "DynamicDataImpl.h"
 
 #include <ace/Singleton.h>
@@ -70,4 +70,4 @@ CORBA::Boolean Objref_Traits<DDS::DynamicDataFactory>::marshal(
 } // namespace TAO
 TAO_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

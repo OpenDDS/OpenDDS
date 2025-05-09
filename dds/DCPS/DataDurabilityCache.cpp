@@ -7,11 +7,12 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#include "DataDurabilityCache.h"
+
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTypeSupportExtC.h"
-#include "DataDurabilityCache.h"
 #include "SendStateDataSampleList.h"
 #include "DataSampleElement.h"
 #include "WriteDataContainer.h"
@@ -864,4 +865,4 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
   return true;
 }
 
-#endif // OPENDDS_NO_PERSISTENCE_PROFILE
+#endif

@@ -6,7 +6,9 @@
 #ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_IMPL_H
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_IMPL_H
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include "DynamicDataBase.h"
 
 #  include <dds/DCPS/FilterEvaluator.h>
@@ -702,6 +704,6 @@ bool operator<<(Serializer& ser, const KeyOnly<DDS::DynamicData_ptr>& key);
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif
 
 #endif // OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_IMPL_H

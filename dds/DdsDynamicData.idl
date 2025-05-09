@@ -6,7 +6,9 @@
 #ifndef OPENDDS_DDS_DYNAMIC_DATA_IDL
 #define OPENDDS_DDS_DYNAMIC_DATA_IDL
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/OpenDDSConfigWrapper.idl>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  ifndef OPENDDS_HIDE_DYNAMIC_DATA
 #    include <dds/DdsDcpsInfrastructure.idl>
 #    include <dds/DdsDcpsDomain.idl>
@@ -406,6 +408,6 @@ module DDS {
 #  endif // OPENDDS_HIDE_DYNAMIC_DATA
 };
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif
 
 #endif /* OPENDDS_DDS_DYNAMIC_DATA_IDL */

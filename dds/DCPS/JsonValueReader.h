@@ -6,7 +6,9 @@
 #ifndef OPENDDS_DCPS_JSON_VALUE_READER_H
 #define OPENDDS_DCPS_JSON_VALUE_READER_H
 
-#if defined OPENDDS_RAPIDJSON && !defined OPENDDS_SAFETY_PROFILE
+#include "Definitions.h"
+
+#if OPENDDS_CONFIG_RAPIDJSON && !OPENDDS_CONFIG_SAFETY_PROFILE
 #  define OPENDDS_HAS_JSON_VALUE_READER 1
 #else
 #  define OPENDDS_HAS_JSON_VALUE_READER 0
@@ -18,7 +20,6 @@
 #include "ValueReader.h"
 #include "RapidJsonWrapper.h"
 #include "TypeSupportImpl.h"
-#include "Definitions.h"
 
 #include <iosfwd>
 #include <sstream>

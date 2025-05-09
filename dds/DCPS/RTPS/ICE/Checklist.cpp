@@ -5,7 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <dds/OpenDDSConfigWrapper.h>
+#include "dds/DCPS/Definitions.h"
 
 #if OPENDDS_CONFIG_SECURITY
 
@@ -15,7 +15,6 @@
 #include "EndpointManager.h"
 #include "Ice.h"
 
-#include "dds/DCPS/Definitions.h"
 #include <dds/DCPS/LogAddr.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

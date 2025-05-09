@@ -4,7 +4,9 @@
 
 #include <dds/DCPS/Xcdr2ValueWriter.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include <dds/DCPS/XTypes/DynamicVwrite.h>
 #  include <dds/DCPS/XTypes/DynamicDataAdapter.h>
 #endif
@@ -43,7 +45,7 @@ void init(StructType& st)
   st.ull_field = 30;
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 template <typename Xtag>
 DDS::DynamicType_var get_dynamic_type(XTypes::TypeLookupService& tls)
 {

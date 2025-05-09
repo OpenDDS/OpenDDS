@@ -13,11 +13,12 @@
 #include "GuidConverter.h"
 #include "transport/framework/ReceivedDataSample.h"
 #include "SafetyProfileStreams.h"
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include "RestoreOutputStreamState.h"
 #endif
 
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <cstdio>
 
@@ -261,7 +262,7 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   }
   serialized_size(encoding, serialized_size_, publication_id_);
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   if (this->group_coherent_) {
     if (!(reader >> this->publisher_id_)) {
       return;
@@ -315,7 +316,7 @@ operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
 
   writer << value.publication_id_;
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   if (value.group_coherent_) {
     writer << value.publisher_id_;
   }
@@ -558,7 +559,7 @@ OPENDDS_STRING to_string(const DataSampleHeader& value)
     if (value.coherent_change_ == 1) ret += "Coherent, ";
     if (value.historic_sample_ == 1) ret += "Historic, ";
     if (value.lifespan_duration_ == 1) ret += "Lifespan, ";
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
     if (value.group_coherent_ == 1) ret += "Group-Coherent, ";
 #endif
     if (value.content_filter_ == 1) ret += "Content-Filtered, ";
@@ -586,7 +587,7 @@ OPENDDS_STRING to_string(const DataSampleHeader& value)
     }
 
     ret += "Publication: " + LogGuid(value.publication_id_).conv_;
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
     if (value.group_coherent_) {
       ret += ", Publisher: " + LogGuid(value.publisher_id_).conv_;
     }
@@ -606,7 +607,7 @@ OPENDDS_STRING to_string(const DataSampleHeader& value)
   return ret;
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 /// Message Id enumeration insertion onto an ostream.
 std::ostream& operator<<(std::ostream& os, const MessageId value)
 {
@@ -649,7 +650,7 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     if (value.coherent_change_ == 1) str << "Coherent, ";
     if (value.historic_sample_ == 1) str << "Historic, ";
     if (value.lifespan_duration_ == 1) str << "Lifespan, ";
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
     if (value.group_coherent_ == 1) str << "Group-Coherent, ";
 #endif
     if (value.content_filter_ == 1) str << "Content-Filtered, ";
@@ -670,7 +671,7 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     }
 
     str << "Publication: " << GuidConverter(value.publication_id_);
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
     if (value.group_coherent_) {
       str << ", Publisher: " << GuidConverter(value.publisher_id_);
     }
@@ -688,7 +689,7 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
 
   return str;
 }
-#endif //OPENDDS_SAFETY_PROFILE
+#endif
 
 
 bool

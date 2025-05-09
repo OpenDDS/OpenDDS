@@ -21,7 +21,7 @@ namespace {
   class ContentSubscriptionGuard : public PreprocessorIfGuard {
   public:
     ContentSubscriptionGuard()
-      : PreprocessorIfGuard("ndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE")
+      : PreprocessorIfGuard(" OPENDDS_CONFIG_CONTENT_SUBSCRIPTION")
     {
     }
   };
@@ -286,11 +286,11 @@ namespace {
       "template<>\n"
       "struct MetaStructImpl<" << clazz << "> : MetaStruct {\n"
       "  typedef " << clazz << " T;\n\n"
-      "#ifndef OPENDDS_NO_MULTI_TOPIC\n"
+      "#if OPENDDS_CONFIG_MULTI_TOPIC\n"
       "  void* allocate() const { return new T; }\n\n"
       "  void deallocate(void* stru) const { delete static_cast<T*>(stru); }\n\n"
       "  size_t numDcpsKeys() const { return " << key_count << "; }\n\n"
-      "#endif /* OPENDDS_NO_MULTI_TOPIC */\n\n";
+      "#endif /* OPENDDS_CONFIG_MULTI_TOPIC */\n\n";
     if (struct_node && be_global->extensibility(struct_node) == extensibilitykind_mutable) {
       be_global->impl_ <<
         "  ACE_CDR::ULong map_name_to_id(const char* field) const\n"
@@ -347,7 +347,7 @@ namespace {
     be_global->impl_ <<
       "    " << exception <<
       "  }\n\n"
-      "#ifndef OPENDDS_NO_MULTI_TOPIC\n"
+      "#if OPENDDS_CONFIG_MULTI_TOPIC\n"
       "  const char** getFieldNames() const\n"
       "  {\n"
       "    static const char* names[] = {";
@@ -395,7 +395,7 @@ namespace {
     be_global->impl_ <<
       "    " << exception <<
       "  }\n"
-      "#endif /* OPENDDS_NO_MULTI_TOPIC */\n\n"
+      "#endif /* OPENDDS_CONFIG_MULTI_TOPIC */\n\n"
       "};\n\n"
       "template<>\n"
       << decl << "\n"

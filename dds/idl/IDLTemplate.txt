@@ -9,7 +9,7 @@ typedef sequence<<%SCOPED%>> <%TYPE%><%SEQ%>;
  * this interface.
  */
 local interface <%TYPE%>TypeSupport : OpenDDS::DCPS::TypeSupport {
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
     // TODO: valuetype isn't supported in Java.
     @OpenDDS::internal::hidden_op_in_java(0)
     ::DDS::ReturnCode_t create_sample_rc(inout <%SCOPED%> dst, in ::DDS::DynamicData src);

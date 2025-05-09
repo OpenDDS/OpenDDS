@@ -17,7 +17,7 @@
 
 #include <iostream>
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
 
 DataReaderQCListenerImpl::DataReaderQCListenerImpl(DistributedConditionSet_rch dcs,
                                                    long num_writes)

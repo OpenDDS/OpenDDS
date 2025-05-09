@@ -6,29 +6,30 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "ReplayerImpl.h"
-#include "FeatureDisabledQosCheck.h"
-#include "DomainParticipantImpl.h"
-#include "PublisherImpl.h"
-#include "Service_Participant.h"
-#include "GuidConverter.h"
-#include "TopicImpl.h"
-#include "PublicationInstance.h"
-#include "SendStateDataSampleList.h"
-#include "DataSampleElement.h"
-#include "Serializer.h"
-#include "Transient_Kludge.h"
-#include "DataDurabilityCache.h"
-#include "TypeSupportImpl.h"
+
 #include "DCPS_Utils.h"
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#include "DataDurabilityCache.h"
+#include "DataSampleElement.h"
+#include "Definitions.h"
+#include "DomainParticipantImpl.h"
+#include "FeatureDisabledQosCheck.h"
+#include "GuidConverter.h"
+#include "PublicationInstance.h"
+#include "PublisherImpl.h"
+#include "SendStateDataSampleList.h"
+#include "Serializer.h"
+#include "Service_Participant.h"
+#include "TopicImpl.h"
+#include "Transient_Kludge.h"
+#include "TypeSupportImpl.h"
 #include "CoherentChangeControl.h"
-#endif
 #include "AssociationData.h"
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #include "BuiltInTopicUtils.h"
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
 #include "Util.h"
 
@@ -159,9 +160,9 @@ ReplayerImpl::init(
   topic_id_      = topic_servant_->get_id();
   type_name_     = topic_servant_->get_type_name();
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   is_bit_ = topicIsBIT(topic_name_.in(), type_name_.in());
-#endif   // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
   qos_ = qos;
   passed_qos_ = qos;

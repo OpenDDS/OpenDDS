@@ -8,7 +8,9 @@
 #ifndef OPENDDS_DDS_DYNAMIC_DATA_SEQ_IDL
 #define OPENDDS_DDS_DYNAMIC_DATA_SEQ_IDL
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/OpenDDSConfigWrapper.idl>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include <tao/LongSeq.pidl>
 #include <tao/ULongSeq.pidl>
@@ -51,6 +53,6 @@ module DDS {
 
 };
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif
 
 #endif /* OPENDDS_DDS_DYNAMIC_DATA_SEQ_IDL */

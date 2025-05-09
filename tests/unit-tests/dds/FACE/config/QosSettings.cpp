@@ -6,7 +6,7 @@
 #include "dds/DCPS/Definitions.h"
 
 #ifndef DDS_HAS_WCHAR
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
 #include <gtest/gtest.h>
 
@@ -248,7 +248,7 @@ TEST(dds_FACE_config_QosSettings, test_set_datawriter_durability_transient_local
   EXPECT_TRUE(DDS::TRANSIENT_LOCAL_DURABILITY_QOS == qos.durability.kind);
 }
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 TEST(dds_FACE_config_QosSettings, test_set_datawriter_durability_transient) {
   QosSettings settings;
 
@@ -260,7 +260,7 @@ TEST(dds_FACE_config_QosSettings, test_set_datawriter_durability_transient) {
 }
 #endif
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 TEST(dds_FACE_config_QosSettings, test_set_datawriter_durability_persistent) {
   QosSettings settings;
 
@@ -638,7 +638,7 @@ TEST(dds_FACE_config_QosSettings, test_set_datareader_durability_transient_local
   EXPECT_TRUE(DDS::TRANSIENT_LOCAL_DURABILITY_QOS == qos.durability.kind);
 }
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 TEST(dds_FACE_config_QosSettings, test_set_datareader_durability_transient) {
   QosSettings settings;
 
@@ -650,7 +650,7 @@ TEST(dds_FACE_config_QosSettings, test_set_datareader_durability_transient) {
 }
 #endif
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 TEST(dds_FACE_config_QosSettings, test_set_datareader_durability_persistent) {
   QosSettings settings;
 

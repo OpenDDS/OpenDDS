@@ -10,16 +10,19 @@
  */
 #include "DataRepresentationTypeSupportImpl.h"
 
-#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/WaitSet.h>
+
 #include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DCPS/DCPS_Utils.h>
+
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#  ifdef OPENDDS_SAFETY_PROFILE
+#  if OPENDDS_CONFIG_SAFETY_PROFILE
 #    include <dds/DCPS/StaticDiscovery.h>
 #  endif
 #endif

@@ -7,8 +7,9 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
 #include "MultiTopicImpl.h"
+
+#if OPENDDS_CONFIG_MULTI_TOPIC
 #include "Registered_Data_Types.h"
 #include "DomainParticipantImpl.h"
 #include "TopicExpressionGrammar.h"
@@ -100,4 +101,4 @@ MultiTopicImpl::set_expression_parameters(const DDS::StringSeq& p)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_NO_MULTI_TOPIC
+#endif
