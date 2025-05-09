@@ -75,12 +75,12 @@ bool convertToInteger(const String& s, T& value)
 }
 
 /**
- * Convert string s to value of double type T.
+ * Convert string s to value of floating point type T.
  *
  * Returns true for success, false for error
  */
 template <typename T>
-bool convertToDouble(const String& s, T& value)
+bool convertToFloating(const String& s, T& value)
 {
 #ifdef OPENDDS_SAFETY_PROFILE
   char* end;
