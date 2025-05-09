@@ -1,35 +1,30 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
-#include <dds/DdsDcpsInfrastructureC.h>
+
+#include "Args.h"
+
+#include <tests/Utils/DistributedConditionSet.h>
+
+#include <dds/DCPS/Replayer.h>
+#include <dds/DCPS/Recorder.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/WaitSet.h>
-
-#include "dds/DCPS/StaticIncludes.h"
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DCPS/StaticIncludes.h>
 #if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
-#include <dds/DCPS/transport/udp/Udp.h>
-#include <dds/DCPS/transport/multicast/Multicast.h>
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#include <dds/DCPS/transport/shmem/Shmem.h>
+# include <dds/DCPS/transport/udp/Udp.h>
+# include <dds/DCPS/transport/multicast/Multicast.h>
+# include <dds/DCPS/RTPS/RtpsDiscovery.h>
+# include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+# include <dds/DCPS/transport/shmem/Shmem.h>
 #endif
 
-#include <dds/DCPS/transport/framework/TransportRegistry.h>
-#include <dds/DCPS/transport/framework/TransportConfig.h>
-#include <dds/DCPS/transport/framework/TransportInst.h>
-
-#include "Args.h"
-
-#include "dds/DCPS/Replayer.h"
-#include "dds/DCPS/Recorder.h"
-
-#include "ace/Semaphore.h"
-#include "ace/Thread_Semaphore.h"
+#include <ace/Semaphore.h>
+#include <ace/Thread_Semaphore.h>
 
 bool
 make_dr_reliable()
@@ -38,42 +33,40 @@ make_dr_reliable()
   return gc->instances_[0]->name() == "the_rtps_transport";
 }
 
-
-class MessengerReplayerListener : public OpenDDS::DCPS::ReplayerListener
-{
+class MessengerReplayerListener : public OpenDDS::DCPS::ReplayerListener {
 public:
-  MessengerReplayerListener()
-    : sem_(0)
-  {
-  }
+  // MessengerReplayerListener()
+  //   : sem_(0)
+  // {
+  // }
 
   virtual void on_replayer_matched(OpenDDS::DCPS::Replayer*,
                                    const ::DDS::PublicationMatchedStatus & status)
   {
     if (status.current_count > 0 ) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("MessengerReplayerListener -- a reader connect to replayer\n" )));
+                 ACE_TEXT("MessengerReplayerListener -- a reader connect to replayer\n")));
       connected_readers_.insert(status.last_subscription_handle);
-      sem_.release();
-    }
-    else if (status.current_count == 0 && status.total_count > 0) {
+      // sem_.release();
+    } else if (status.current_count == 0 && status.total_count > 0) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("MessengerRecorderListener -- reader disconnect with replayer\n" )));
+                 ACE_TEXT("MessengerRecorderListener -- reader disconnect with replayer\n")));
     }
   }
 
-  int wait(const ACE_Time_Value & tv) {
-    ACE_Time_Value timeout = ACE_OS::gettimeofday() + tv;
-    return sem_.acquire(timeout);
-  }
+  // int wait(const ACE_Time_Value & tv)
+  // {
+  //   ACE_Time_Value timeout = ACE_OS::gettimeofday() + tv;
+  //   return sem_.acquire(timeout);
+  // }
+
   std::set<DDS::InstanceHandle_t> connected_readers_;
-private:
-  ACE_Thread_Semaphore sem_;
+
+// private:
+//   ACE_Thread_Semaphore sem_;
 };
 
-
-class MessengerRecorderListener : public OpenDDS::DCPS::RecorderListener
-{
+class MessengerRecorderListener : public OpenDDS::DCPS::RecorderListener {
 public:
   explicit MessengerRecorderListener(const OpenDDS::DCPS::Replayer_var& replayer)
     : sem_(0)
@@ -105,34 +98,34 @@ public:
   }
 
   virtual void on_recorder_matched(OpenDDS::DCPS::Recorder*,
-                                   const ::DDS::SubscriptionMatchedStatus& status )
+                                   const ::DDS::SubscriptionMatchedStatus& status)
   {
     if (status.current_count == 1) {
-        ACE_DEBUG((LM_DEBUG,
+      ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("MessengerRecorderListener -- a writer connect to recorder\n")));
-    }
-    else if (status.current_count == 0 && status.total_count > 0) {
+    } else if (status.current_count == 0 && status.total_count > 0) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("MessengerRecorderListener -- writer disconnect with recorder\n")));
       sem_.release();
     }
   }
 
-  int wait(const ACE_Time_Value & tv) {
+  int wait(const ACE_Time_Value & tv)
+  {
     ACE_Time_Value timeout = ACE_OS::gettimeofday() + tv;
     return sem_.acquire(timeout);
   }
+
 private:
   ACE_Thread_Semaphore sem_;
   OpenDDS::DCPS::Replayer_var replayer_;
 };
 
-
-int run_test(int argc, ACE_TCHAR *argv[]){
+int run_test(int argc, ACE_TCHAR *argv[])
+{
   try {
     // Initialize DomainParticipantFactory
-    DDS::DomainParticipantFactory_var dpf =
-      TheParticipantFactoryWithArgs(argc, argv);
+    DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
     int error;
     if ((error = parse_args(argc, argv)) != 0) {
@@ -142,123 +135,130 @@ int run_test(int argc, ACE_TCHAR *argv[]){
     OpenDDS::DCPS::Service_Participant* service = TheServiceParticipant;
 
     // Create DomainParticipant
-    DDS::DomainParticipant_var participant =
-      dpf->create_participant(4,
-                              PARTICIPANT_QOS_DEFAULT,
-                              0,
-                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    DDS::DomainParticipant_var participant = dpf->create_participant(4,
+                                                                     PARTICIPANT_QOS_DEFAULT,
+                                                                     0,
+                                                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (!participant) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" create_participant failed!\n")),
-                       -1);
+                        -1);
     }
 
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Start relay\n"));
 
     using namespace OpenDDS::DCPS;
 
-    {
-      // Create Topic (Movie Discussion List)
-      DDS::Topic_var topic =
-        service->create_typeless_topic(participant,
-                                       "Movie Discussion List",
-                                       "Messenger",
-                                       true,
-                                       TOPIC_QOS_DEFAULT,
-                                       0,
-                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    // Create Topic (Movie Discussion List)
+    DDS::Topic_var topic = service->create_typeless_topic(participant,
+                                                          "Movie Discussion List",
+                                                          "Messenger",
+                                                          true,
+                                                          TOPIC_QOS_DEFAULT,
+                                                          0,
+                                                          OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-      if (!topic) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" create_topic failed!\n")),
-                         -1);
-      }
-
-      // setup partition
-      DDS::PublisherQos pub_qos;
-      participant->get_default_publisher_qos(pub_qos);
-
-      DDS::StringSeq my_partition2;
-      my_partition2.length(1);
-      my_partition2[0] = "Two";
-      pub_qos.partition.name = my_partition2;
-
-      RcHandle<MessengerReplayerListener> replayer_listener = make_rch<MessengerReplayerListener>();
-
-      ACE_DEBUG((LM_DEBUG, "Creating replayer\n"));
-
-      // Create Replayer
-      OpenDDS::DCPS::Replayer_var replayer =
-        service->create_replayer(participant,
-                                 topic.in(),
-                                 pub_qos,
-                                 DATAWRITER_QOS_DEFAULT,
-                                 replayer_listener);
-
-      if (!replayer.in()) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" create_replayer failed!\n")),
-                         -1);
-      }
-
-      ACE_Time_Value wait_time(60, 0);
-
-      // wait until there exist a reader connect to the replayer
-      if (replayer_listener->wait(wait_time) == -1) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" replayer timeout!\n")),
-                         -1);
-      }
-      ACE_DEBUG((LM_DEBUG, "replayer listener wait done\n"));
-
-      RcHandle<MessengerRecorderListener> recorder_listener = make_rch<MessengerRecorderListener> (replayer);
-
-      // setup partition
-      DDS::SubscriberQos sub_qos;
-      participant->get_default_subscriber_qos(sub_qos);
-      DDS::StringSeq my_partition1;
-      my_partition1.length(1);
-      my_partition1[0] = "One";
-      sub_qos.partition.name = my_partition1;
-
-      DDS::DataReaderQos dr_qos = service->initial_DataReaderQos();
-
-      if (make_dr_reliable()) {
-        dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-      }
-
-      // Create Recorder
-      OpenDDS::DCPS::Recorder_var recorder =
-        service->create_recorder(participant,
-                                 topic.in(),
-                                 sub_qos,
-                                 dr_qos,
-                                 recorder_listener);
-
-      if (!recorder.in()) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" create_recorder failed!\n")),
-                         -1);
-      }
-      recorder->check_encap(false);
-
-      // wait until the writer disconnnects
-      if (recorder_listener->wait(wait_time) == -1) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("ERROR: %N:%l: main() -")
-                          ACE_TEXT(" recorder timeout!\n")),
-                         -1);
-      }
-
-      service->delete_recorder(recorder);
-      service->delete_replayer(replayer);
+    if (!topic) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" create_topic failed!\n")),
+                        -1);
     }
+
+    // Setup partition
+    DDS::PublisherQos pub_qos;
+    participant->get_default_publisher_qos(pub_qos);
+
+    DDS::StringSeq my_partition2;
+    my_partition2.length(1);
+    my_partition2[0] = "Two";
+    pub_qos.partition.name = my_partition2;
+
+    RcHandle<MessengerReplayerListener> replayer_listener = make_rch<MessengerReplayerListener>();
+
+    ACE_DEBUG((LM_DEBUG, "Creating replayer\n"));
+
+    // Create Replayer
+    OpenDDS::DCPS::Replayer_var replayer = service->create_replayer(participant,
+                                                                    topic.in(),
+                                                                    pub_qos,
+                                                                    DATAWRITER_QOS_DEFAULT,
+                                                                    replayer_listener);
+
+    if (!replayer.in()) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" create_replayer failed!\n")),
+                        -1);
+    }
+
+    // Wait for the replayer to be matched with the subscriber
+    DistributedConditionSet_rch dcs = OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+    dcs->wait_for(ACTOR_REPLAYER, ACTOR_SUBSCRIBER, EVENT_SUBSCRIBER_JOINED);
+
+    // // wait until there exist a reader connect to the replayer
+    // if (replayer_listener->wait(wait_time) == -1) {
+    //   ACE_ERROR_RETURN((LM_ERROR,
+    //                     ACE_TEXT("ERROR: %N:%l: main() -")
+    //                     ACE_TEXT(" replayer timeout!\n")),
+    //                     -1);
+    // }
+    // ACE_DEBUG((LM_DEBUG, "replayer listener wait done\n"));
+
+    RcHandle<MessengerRecorderListener> recorder_listener = make_rch<MessengerRecorderListener> (replayer);
+
+    // Setup partition
+    DDS::SubscriberQos sub_qos;
+    participant->get_default_subscriber_qos(sub_qos);
+    DDS::StringSeq my_partition1;
+    my_partition1.length(1);
+    my_partition1[0] = "One";
+    sub_qos.partition.name = my_partition1;
+
+    DDS::DataReaderQos dr_qos = service->initial_DataReaderQos();
+
+    if (make_dr_reliable()) {
+      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+    }
+
+    // Create Recorder
+    OpenDDS::DCPS::Recorder_var recorder = service->create_recorder(participant,
+                                                                    topic.in(),
+                                                                    sub_qos,
+                                                                    dr_qos,
+                                                                    recorder_listener);
+
+    if (!recorder.in()) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" create_recorder failed!\n")),
+                        -1);
+    }
+    recorder->check_encap(false);
+
+    // TODO(sonndinh): Wait for the recorder to be matched with the publisher
+    // This is usually done with Utils.wait_match() but that needs a data reader.
+
+    // Then post the condition so that the publisher can proceed
+    dcs->post(ACTOR_RECORDER, EVENT_RECORDER_JOINED);
+
+    // TODO(sonndinh): Now wait for the publisher to finish
+    // Again, this is usually done with Utils.wait_match() but that needs a data reader.
+
+    // ACE_Time_Value wait_time(60, 0);
+
+    // // wait until the writer disconnnects
+    // if (recorder_listener->wait(wait_time) == -1) {
+    //   ACE_ERROR_RETURN((LM_ERROR,
+    //                     ACE_TEXT("ERROR: %N:%l: main() -")
+    //                     ACE_TEXT(" recorder timeout!\n")),
+    //                     -1);
+    // }
+
+    service->delete_recorder(recorder);
+    service->delete_replayer(replayer);
 
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Stop relay\n"));
 
