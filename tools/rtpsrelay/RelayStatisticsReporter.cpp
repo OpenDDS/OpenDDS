@@ -70,19 +70,29 @@ void RelayStatisticsReporter::log_report(const OpenDDS::DCPS::MonotonicTimePoint
   get_opendds_stats(log_relay_statistics_);
 
   const auto json = OpenDDS::DCPS::to_json(log_relay_statistics_);
-  // subtract estimate of characters for %P %t expansions, other fixed strings
-  static constexpr auto space = static_cast<size_t>(ACE_MAXLOGMSGLEN - 65), min = size_t{100};
-  for (size_t i = 0, len; i < json.size(); i += len) {
-    if (json.size() - i > space) {
-      for (len = space; len >= min && json[i + len - 1] != ','; --len)
-        ; // find the last comma so a name/value pair is not split across lines
-    } else {
-      len = json.size() - i;
-    }
 
-    ACE_DEBUG((LM_INFO, "(%P|%t) STAT: %C %C\n",
-      i ? "(cont)" : topic_name_.in(),
-      json.substr(i, len).c_str()));
+  // subtract estimate of characters for %P %t expansions, other fixed strings
+  static constexpr auto space = size_t{ACE_MAXLOGMSGLEN - 65};
+
+  for (size_t i = 0, len; i < json.size(); i += len) {
+    std::string substr;
+    if (json.size() - i <= space) {
+      substr = json.substr(i);
+    } else {
+      substr = json.substr(i, space);
+      // find the last comma so a name/value pair is not split across lines
+      // special case, don't split the comma between "name":"x" and "value":y
+      auto idx = substr.rfind(',');
+      while (idx != std::string::npos && json.substr(i + idx, 9) == R"(,"value":)") {
+        idx = substr.rfind(',', idx - 1);
+      }
+      if (idx != std::string::npos) {
+        substr.erase(idx + 1);
+      }
+    }
+    len = substr.size();
+    ACE_DEBUG((LM_INFO, "(%P|%t) STAT: %C%C %C\n", topic_name_.in(),
+      i ? " (cont.)" : len < json.size() ? " (split)" : "", substr.c_str()));
   }
 
   log_helper_.reset(log_relay_statistics_, now);
