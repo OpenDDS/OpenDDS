@@ -1412,6 +1412,9 @@ StatisticSeq RtpsUdpReceiveStrategy::stats_template()
   const StatisticSeq base = TransportReceiveStrategy::stats_template();
   StatisticSeq stats(base.length() + num_local_stats);
   stats.length(stats.maximum());
+  for (DDS::UInt32 i = 0; i < base.length(); ++i) {
+    stats[i].name = base[i].name;
+  }
   const DDS::UInt32 local_offset = base.length();
   stats[local_offset].name = "RtpsUdpRecvReadersWithheld";
   stats[local_offset + 1].name = "RtpsUdpRecvReadersSelected";
