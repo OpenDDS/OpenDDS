@@ -970,6 +970,28 @@ TransportReceiveStrategy<TH, DSH>::to_msgblock(const ReceivedDataSample& sample)
   return sample.data(&mb_allocator_);
 }
 
+template<typename TH, typename DSH>
+StatisticSeq TransportReceiveStrategy<TH, DSH>::stats_template()
+{
+  static const DDS::UInt32 num_local_stats = 4;
+  StatisticSeq stats(num_local_stats);
+  stats.length(num_local_stats);
+  stats[0].name = "TransportRecvMessageBlocks";
+  stats[1].name = "TransportRecvDataBlocks";
+  stats[2].name = "TransportRecvDataBytes";
+  stats[3].name = "TransportRecvBuffers";
+  return stats;
+}
+
+template<typename TH, typename DSH>
+void TransportReceiveStrategy<TH, DSH>::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
+{
+  stats[idx++].value = mb_allocator_.bytes_heap_allocated();
+  stats[idx++].value = db_allocator_.bytes_heap_allocated();
+  stats[idx++].value = data_allocator_.bytes_heap_allocated();
+  stats[idx++].value = receive_buffers_.size();
+}
+
 }
 }
 

@@ -39,6 +39,19 @@ SingleSendBuffer::pre_insert(SequenceNumber sequence)
   pre_seq_.insert(sequence);
 }
 
+ACE_INLINE size_t
+SingleSendBuffer::size() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, 0);
+  return retained_mb_allocator_.bytes_heap_allocated()
+    + retained_db_allocator_.bytes_heap_allocated()
+    + replaced_mb_allocator_.bytes_heap_allocated()
+    + replaced_db_allocator_.bytes_heap_allocated()
+    + buffers_.size()
+    + fragments_.size()
+    + destinations_.size()
+    + pre_seq_.size();
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

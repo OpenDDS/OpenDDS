@@ -11,6 +11,7 @@ include(opendds_testing)
 set(target_prefix "${PROJECT_NAME}_")
 
 _opendds_save_cache(OPENDDS_FILENAME_ONLY_INCLUDES BOOL ON)
+_opendds_save_cache(CMAKE_WARN_DEPRECATED BOOL OFF)
 
 set(ecu_lib "${target_prefix}lib")
 add_library(${ecu_lib})

@@ -367,6 +367,12 @@ void ReactorTask::process_command_queue_i(ACE_Guard<ACE_Thread_Mutex>& guard,
   }
 }
 
+size_t ReactorTask::command_queue_size() const
+{
+  GuardType guard(lock_);
+  return command_queue_.size();
+}
+
 bool ReactorWrapper::open(ACE_Reactor* reactor)
 {
   reactor_ = reactor;

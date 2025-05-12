@@ -12,8 +12,10 @@
 
 #include <dds/DCPS/ConnectionRecords.h>
 #include <dds/DCPS/FibonacciSequence.h>
+#include <dds/DCPS/PeriodicTask.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/SporadicTask.h>
+#include <dds/DCPS/Statistics.h>
 
 #include <dds/DCPS/RTPS/ICE/Ice.h>
 #include <dds/DCPS/RTPS/RtpsCoreC.h>
@@ -254,8 +256,9 @@ private:
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl, public ConfigListener {
 public:
-  RtpsUdpTransport(const RtpsUdpInst_rch& inst,
-                   DDS::DomainId_t domain);
+  RtpsUdpTransport(const RtpsUdpInst_rch& inst, DDS::DomainId_t domain);
+  ~RtpsUdpTransport();
+
   RtpsUdpInst_rch config() const;
 #if OPENDDS_CONFIG_SECURITY
   DCPS::RcHandle<ICE::Agent> get_ice_agent() const;
@@ -420,6 +423,16 @@ private:
   friend class RtpsUdpReceiveStrategy;
 
   RtpsUdpCore core_;
+
+  StatisticsDataWriter_rch stats_writer_;
+  typedef PmfPeriodicTask<const RtpsUdpTransport> PeriodicTask;
+  RcHandle<PeriodicTask> stats_task_;
+
+  static StatisticSeq stats_template();
+  const StatisticSeq stats_template_;
+
+  void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
+  void write_stats(const MonotonicTimePoint&) const;
 };
 
 } // namespace DCPS

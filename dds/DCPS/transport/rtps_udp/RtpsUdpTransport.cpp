@@ -18,6 +18,7 @@
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/Qos_Helper.h>
 
 #include <dds/DCPS/transport/framework/TransportClient.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
@@ -59,11 +60,19 @@ RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst,
   , ice_agent_(ICE::Agent::instance())
 #endif
   , core_(inst)
+  , stats_writer_(make_rch<StatisticsDataWriter>(DataWriterQosBuilder().durability_transient_local()))
+  , stats_template_(stats_template())
 {
   assign(local_prefix_, GUIDPREFIX_UNKNOWN);
   if (!(configure_i(inst) && open())) {
     throw Transport::UnableToCreate();
   }
+  TheServiceParticipant->statistics_topic()->connect(stats_writer_);
+}
+
+RtpsUdpTransport::~RtpsUdpTransport()
+{
+  TheServiceParticipant->statistics_topic()->disconnect(stats_writer_);
 }
 
 RtpsUdpInst_rch
@@ -689,6 +698,12 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
   config_reader_ = make_rch<ConfigReader>(ConfigStoreImpl::datareader_qos(), rchandle_from(this));
   TheServiceParticipant->config_topic()->connect(config_reader_);
 
+  const TimeDuration period = TheServiceParticipant->statistics_period();
+  if (!period.is_zero()) {
+    stats_task_ = make_rch<PeriodicTask>(reactor_task(), *this, &RtpsUdpTransport::write_stats);
+    stats_task_->enable(false, period);
+  }
+
   return true;
 }
 
@@ -1122,6 +1137,47 @@ RtpsUdpTransport::disable_relay_stun_task()
 }
 
 #endif
+
+StatisticSeq RtpsUdpTransport::stats_template()
+{
+  static const DDS::UInt32 num_local_stats = 2;
+  const StatisticSeq base = TransportImpl::stats_template(),
+    link = RtpsUdpDataLink::stats_template();
+  StatisticSeq stats(base.length() + num_local_stats + link.length());
+  stats.length(stats.maximum());
+  for (DDS::UInt32 i = 0; i < base.length(); ++i) {
+    stats[i].name = base[i].name;
+  }
+  stats[base.length()].name = "RtpsUdpTransportJobQueue";
+  stats[base.length() + 1].name = "RtpsUdpTransportDeferredConnectionRecords";
+  for (DDS::UInt32 i = 0; i < link.length(); ++i) {
+    stats[base.length() + num_local_stats + i].name = link[i].name;
+  }
+  return stats;
+}
+
+void RtpsUdpTransport::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
+{
+  TransportImpl::fill_stats(stats, idx);
+  stats[idx++].value = job_queue_ ? job_queue_->size() : 0;
+  stats[idx++].value =
+#if !OPENDDS_CONFIG_SECURITY || defined DDS_HAS_MINIMUM_BIT
+    0;
+#else
+    deferred_connection_records_.size();
+#endif
+  if (link_) {
+    link_->fill_stats(stats, idx);
+  }
+}
+
+void RtpsUdpTransport::write_stats(const MonotonicTimePoint&) const
+{
+  DCPS::Statistics statistics = {config()->name().c_str(), stats_template_};
+  DDS::UInt32 idx = 0;
+  fill_stats(statistics.stats, idx);
+  stats_writer_->write(statistics);
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

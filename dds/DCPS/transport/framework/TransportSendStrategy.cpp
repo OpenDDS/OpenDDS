@@ -2015,6 +2015,35 @@ bool TransportSendStrategy::fragmentation_helper(
   return true;
 }
 
+StatisticSeq TransportSendStrategy::stats_template()
+{
+  static const DDS::UInt32 num_local_stats = 8;
+  StatisticSeq stats(num_local_stats);
+  stats.length(num_local_stats);
+  stats[0].name = "TransportSendQueue";
+  stats[1].name = "TransportSendElems";
+  stats[2].name = "TransportSendNotificationQueue";
+  stats[3].name = "TransportSendHeaderMessageBlocks";
+  stats[4].name = "TransportSendHeaderDataBlocks";
+  stats[5].name = "TransportSendHeaderData";
+  stats[6].name = "TransportSendReplacedMessageBlocks";
+  stats[7].name = "TransportSendReplacedDataBlocks";
+  return stats;
+}
+
+void TransportSendStrategy::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
+{
+  GuardType guard(lock_);
+  stats[idx++].value = queue_.size();
+  stats[idx++].value = elems_.size();
+  stats[idx++].value = delayed_delivered_notification_queue_.size();
+  stats[idx++].value = header_mb_allocator_ ? header_mb_allocator_->bytes_heap_allocated() : 0;
+  stats[idx++].value = header_db_allocator_ ? header_db_allocator_->bytes_heap_allocated() : 0;
+  stats[idx++].value = header_data_allocator_ ? header_data_allocator_->bytes_heap_allocated() : 0;
+  stats[idx++].value = replaced_element_mb_allocator_.bytes_heap_allocated();
+  stats[idx++].value = replaced_element_db_allocator_.bytes_heap_allocated();
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

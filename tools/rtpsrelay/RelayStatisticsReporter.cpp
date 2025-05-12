@@ -34,12 +34,12 @@ void RelayStatisticsReporter::get_opendds_stats(RelayStatistics& out)
 
   out.opendds_modules().resize(samples.size());
   for (size_t idx = 0; idx != samples.size(); ++idx) {
-    Statistics& is = samples[idx];
+    Statistics& statistics = samples[idx];
     OpenDDSModuleStatistics& mod = out.opendds_modules()[idx];
-    mod.id() = is.id;
-    mod.stats().resize(is.stats.length());
-    for (DDS::UInt32 idxStats = 0; idxStats < is.stats.length(); ++idxStats) {
-      mod.stats()[idxStats] = Statistic{is.stats[idxStats].name.in(), is.stats[idxStats].value};
+    mod.id() = statistics.id;
+    mod.stats().resize(statistics.stats.length());
+    for (DDS::UInt32 idxStats = 0; idxStats < statistics.stats.length(); ++idxStats) {
+      mod.stats()[idxStats] = Statistic{statistics.stats[idxStats].name.in(), statistics.stats[idxStats].value};
     }
   }
 }
@@ -52,7 +52,15 @@ void RelayStatisticsReporter::log_report(const OpenDDS::DCPS::MonotonicTimePoint
 
   get_opendds_stats(log_relay_statistics_);
 
-  ACE_DEBUG((LM_INFO, "(%P|%t) STAT: %C %C\n", topic_name_.in(), OpenDDS::DCPS::to_json(log_relay_statistics_).c_str()));
+  const auto json = OpenDDS::DCPS::to_json(log_relay_statistics_);
+  // subtract estimate of characters for %P %t expansions, other fixed strings
+  static constexpr auto space = ACE_MAXLOGMSGLEN - 65;
+  for (size_t i = 0, len; i < json.size(); i += len) {
+    len = std::min(json.size() - i, static_cast<size_t>(space));
+    ACE_DEBUG((LM_INFO, "(%P|%t) STAT: %C %C\n",
+      i ? "(cont)" : topic_name_.in(),
+      json.substr(i, len).c_str()));
+  }
 
   log_helper_.reset(log_relay_statistics_, now);
   log_relay_statistics_.new_address_count(0);
