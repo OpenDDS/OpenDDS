@@ -11,6 +11,7 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use File::Path;
 use strict;
 
 PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
@@ -139,7 +140,7 @@ $test->start_process("publisher");
 $test->start_process("subscriber");
 $test->start_process("relay");
 
-my $result = $test->finish(300);
+my $result = $test->finish(60);
 if ($result != 0) {
     print STDERR "ERROR: test returned $result\n";
     $status = 1;

@@ -21,7 +21,7 @@ const char* ACTOR_REPLAYER = "Replayer";
 const char* ACTOR_SUBSCRIBER = "Subscriber";
 
 const char* EVENT_RECORDER_JOINED = "RecorderJoined";
-const char* EVENT_RECEIVED_ALL_SAMPLES = "ReceivedAllSamples";
+const char* EVENT_RECORDER_RECEIVED_ALL_SAMPLES = "RecorderReceivedAllSamples";
 const char* EVENT_SUBSCRIBER_JOINED = "SubscriberJoined";
 
 const int NUM_SAMPLES = 10;

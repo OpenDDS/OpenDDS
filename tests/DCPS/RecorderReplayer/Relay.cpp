@@ -38,12 +38,10 @@ public:
                                    const ::DDS::PublicationMatchedStatus & status)
   {
     if (status.current_count > 0 ) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("MessengerReplayerListener -- a reader connect to replayer\n")));
+      ACE_DEBUG((LM_DEBUG, "MessengerReplayerListener -- a reader connect to replayer\n"));
       connected_readers_.insert(status.last_subscription_handle);
     } else if (status.current_count == 0 && status.total_count > 0) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("MessengerRecorderListener -- reader disconnect with replayer\n")));
+      ACE_DEBUG((LM_DEBUG, "MessengerReplayerListener -- reader disconnect with replayer\n"));
     }
   }
 
@@ -74,11 +72,10 @@ public:
   virtual void on_sample_data_received(OpenDDS::DCPS::Recorder*,
                                        const OpenDDS::DCPS::RawDataSample& sample)
   {
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("MessengerRecorderListener::on_sample_data_received\n")));
+    ACE_DEBUG((LM_DEBUG, "MessengerRecorderListener::on_sample_data_received\n"));
 
     if (++sample_count_ >= NUM_SAMPLES) {
-      dcs_->post(ACTOR_RECORDER, EVENT_RECEIVED_ALL_SAMPLES);
+      dcs_->post(ACTOR_RECORDER, EVENT_RECORDER_RECEIVED_ALL_SAMPLES);
     }
 
     MessengerReplayerListener* replayer_listener =
@@ -116,7 +113,7 @@ public:
   {
     // In the main thread, wait for the publisher to associate
     ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, match_status_mutex_, -1);
-    while (match_status_ == UNMATCHED) {
+    while (match_status_ != MATCHED) {
       if (match_cond_.wait() != 0) {
         return -1;
       }
@@ -128,11 +125,12 @@ public:
   {
     // In the main thread, wait for the publisher to deassociate
     ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, match_status_mutex_, -1);
-    while (match_status_ == MATCHED) {
+    while (match_status_ != UNMATCHED) {
       if (unmatch_cond_.wait() != 0) {
         return -1;
       }
     }
+    return 0;
   }
 
 private:

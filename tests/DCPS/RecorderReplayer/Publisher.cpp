@@ -143,7 +143,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // Wait until all samples are received by the Recorder
-    dcs->wait_for(ACTOR_PUBLISHER, ACTOR_RECORDER, EVENT_RECEIVED_ALL_SAMPLES);
+    dcs->wait_for(ACTOR_PUBLISHER, ACTOR_RECORDER, EVENT_RECORDER_RECEIVED_ALL_SAMPLES);
 
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Stop publisher\n"));
 
