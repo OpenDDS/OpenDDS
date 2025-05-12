@@ -8124,6 +8124,8 @@ DCPS::StatisticSeq Sedp::stats_template()
   stats[Stats_Index_TotalDeferredSamples].name = "TotalDeferredSamples";
   stats[Stats_Index_TotalReaderBytesAllocated].name = "TotalReaderBytesAllocated";
   stats[Stats_Index_JobQueueSize].name = "JobQueueSize";
+  stats[Stats_Index_AssociatedParticipants].name = "AssociatedParticipants";
+  stats[Stats_Index_IgnoredGuids].name = "IgnoredGuids";
   stats[Stats_Index_LocalPublications].name = "LocalPublications";
   stats[Stats_Index_LocalSubscriptions].name = "LocalSubscriptions";
   stats[Stats_Index_DiscoveredPublications].name = "DiscoveredPublications";
@@ -8146,6 +8148,8 @@ void Sedp::fill_stats(DCPS::StatisticSeq& stats, DDS::UInt32 begin) const
   stats[begin + Stats_Index_TotalDeferredSamples].value = total_deferred_samples_;
   stats[begin + Stats_Index_TotalReaderBytesAllocated].value = total_reader_bytes_allocated();
   stats[begin + Stats_Index_JobQueueSize].value = job_queue_ ? job_queue_->size() : 0;
+  stats[begin + Stats_Index_AssociatedParticipants].value = associated_participants_.size();
+  stats[begin + Stats_Index_IgnoredGuids].value = ignored_guids_.size();
   stats[begin + Stats_Index_LocalPublications].value = local_publications_.size();
   stats[begin + Stats_Index_LocalSubscriptions].value = local_subscriptions_.size();
   stats[begin + Stats_Index_DiscoveredPublications].value = discovered_publications_.size();
