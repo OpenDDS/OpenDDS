@@ -959,12 +959,23 @@ namespace {
   }
 
   void generate_serialized_size_for_map(const std::string& indent, AST_Type* type, const std::string& cxx_elem, bool key, bool nested_key_only) {
+    const std::string accessor = key ? "elt.first" : "elt.second";
     const Classification cls = classify(type);
-
-    const std::string& accessor = key ? "it->first" : "it->second";
-
-    // String, Struct, Array, Sequence, Union
-    if (cls & CL_STRING) {
+    if (cls & CL_PRIMITIVE) {
+      AST_PredefinedType* const p = dynamic_cast<AST_PredefinedType*>(type);
+      if (p->pt() == AST_PredefinedType::PT_longdouble) {
+        // special case use to ACE's NONNATIVE_LONGDOUBLE in CDR_Base.h
+        be_global->impl_ << indent <<
+          "primitive_serialized_size(encoding, size, ACE_CDR::LongDouble());\n";
+      } else {
+        be_global->impl_ << indent <<
+          "primitive_serialized_size(encoding, size, " <<
+            getWrapper(accessor, type, WD_OUTPUT) << ");\n";
+      }
+    } else if (cls & CL_ENUM) {
+      be_global->impl_ << indent <<
+        "primitive_serialized_size_ulong(encoding, size);\n";
+    } else if (cls & CL_STRING) {
       be_global->impl_ << indent <<
         "primitive_serialized_size_ulong(encoding, size);\n";
       const string strlen_suffix = (cls & CL_WIDE)
@@ -976,8 +987,7 @@ namespace {
       elem_wrapper.nested_key_only_ = nested_key_only;
       Intro intro;
       elem_wrapper.done(&intro);
-      const std::string indent = "    ";
-      intro.join(be_global->impl_, indent);
+      intro.join(be_global->impl_, indent + "  ");
       be_global->impl_ <<
         indent << "serialized_size(encoding, size, " << elem_wrapper.ref() << ");\n";
    }
@@ -997,24 +1007,23 @@ namespace {
 
     AST_Type* key = resolveActualType(map->key_type());
     AST_Type* val = resolveActualType(map->value_type());
-    TryConstructFailAction key_try_construct = be_global->map_key_try_construct(map);
-    TryConstructFailAction val_try_construct = be_global->map_value_try_construct(map);
+    const TryConstructFailAction key_try_construct = be_global->map_key_try_construct(map);
+    const TryConstructFailAction val_try_construct = be_global->map_value_try_construct(map);
 
-    Classification key_cls = classify(key);
+    const Classification key_cls = classify(key);
     const bool key_primitive = key_cls & CL_PRIMITIVE;
-
-    Classification val_cls = classify(val);
+    const Classification val_cls = classify(val);
     const bool val_primitive = val_cls & CL_PRIMITIVE;
+    const bool both_primitive = key_primitive && val_primitive;
 
     if (key_cls & CL_INTERFACE || val_cls & CL_INTERFACE) {
       be_global->error("map with either a key or value of objrefs is not marshaled");
       return;
-    } else if (key_cls & CL_UNKNOWN || val_cls & CL_UNKNOWN) {
+    } else if (key_cls == CL_UNKNOWN || val_cls == CL_UNKNOWN) {
       be_global->error("map with either key or value of unknown/unsupported type");
       return;
     }
 
-    // TODO(tyler) Can we assume this will always be true with maps
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     std::string key_cxx_elem;
     std::string val_cxx_elem;
@@ -1028,7 +1037,7 @@ namespace {
       val_cxx_elem = scoped(val->name());
     }
 
-    RefWrapper (base_wrapper).done().generate_tag();
+    RefWrapper(base_wrapper).done().generate_tag();
 
     {
       Intro intro;
@@ -1036,63 +1045,22 @@ namespace {
       wrapper.done(&intro);
       const std::string value_access = wrapper.value_access();
       const std::string get_length = wrapper.map_get_length();
-      const std::string check_empty = wrapper.map_check_empty();
+
       Function serialized_size("serialized_size", "void");
       serialized_size.addArg("encoding", "const Encoding&");
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg("map", wrapper.wrapped_type_name());
       serialized_size.endArgs();
+      intro.join(be_global->impl_, "  ");
 
-      if ((key_cls & CL_INTERFACE) == 0 || (val_cls & CL_INTERFACE) == 0) {
-        marshal_generator::generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", !val_primitive, false);
-        intro.join(be_global->impl_, "  ");
-        be_global->impl_ <<
-          "  primitive_serialized_size_ulong(encoding, size);\n"
-          "  if (" << check_empty << ") {\n"
-          "    return;\n"
+      be_global->impl_ <<
+        "  primitive_serialized_size_ulong(encoding, size);\n" // either DHeader or Map length
+        "  for (const auto& elt : " << value_access << ") {\n";
+      const std::string indent = "    ";
+      generate_serialized_size_for_map(indent, key, key_cxx_elem, true, nested_key_only);
+      generate_serialized_size_for_map(indent, val, val_cxx_elem, false, nested_key_only);
+      be_global->impl_ <<
           "  }\n";
-      }
-
-      // Simple Types
-      bool key_generated = false;
-      if (key_cls & CL_ENUM) {
-        be_global->impl_ <<
-          "  primitive_serialized_size_ulong(encoding, size, " + get_length + ");\n";
-        key_generated = true;
-      } else if (key_cls & CL_PRIMITIVE) {
-        be_global->impl_ << checkAlignment(key) <<
-          "  " + getSizeExprPrimitive(key, get_length) << ";\n";
-        key_generated = true;
-      }
-
-      bool val_generated = false;
-      if (val_cls & CL_ENUM) {
-        be_global->impl_ <<
-          "  primitive_serialized_size_ulong(encoding, size, " + get_length + ");\n";
-        val_generated = true;
-      } else if (val_cls & CL_PRIMITIVE) {
-        be_global->impl_ << checkAlignment(val) <<
-          "  " + getSizeExprPrimitive(val, get_length) << ";\n";
-        val_generated = true;
-      }
-
-      // Complex Types
-      if (!key_generated || !val_generated) {
-        be_global->impl_ <<
-          "  for (auto it = " << value_access << ".begin(); it != " << value_access << ".end(); ++it) {\n";
-        const std::string indent = "    ";
-
-        if (!key_generated) {
-          generate_serialized_size_for_map(indent, key, key_cxx_elem, true, nested_key_only);
-        }
-
-        if (!val_generated) {
-          generate_serialized_size_for_map(indent, val, val_cxx_elem, false, nested_key_only);
-        }
-
-        be_global->impl_ <<
-          "  }\n";
-      }
     }
 
     {
@@ -1101,7 +1069,6 @@ namespace {
       wrapper.done(&intro);
       const std::string value_access = wrapper.value_access();
       const std::string get_length = wrapper.map_get_length();
-      const std::string check_empty = wrapper.map_check_empty();
       Function insertion("operator<<", "bool");
       insertion.addArg("strm", "Serializer&");
       insertion.addArg("map", wrapper.wrapped_type_name());
@@ -1189,7 +1156,6 @@ namespace {
       wrapper.done(&intro);
       const std::string value_access = wrapper.value_access();
       const std::string get_length = wrapper.map_get_length();
-      const std::string check_empty = wrapper.map_check_empty();
       Function extraction("operator>>", "bool");
       extraction.addArg("strm", "Serializer&");
       extraction.addArg("map", wrapper.wrapped_type_name());
@@ -1683,6 +1649,13 @@ namespace {
       } else {
         bounded = false;
       }
+    } else if (fld_cls & CL_MAP) {
+      if (fld_cls & CL_BOUNDED) {
+        AST_Map* const map = dynamic_cast<AST_Map*>(type);
+        bounded &= is_bounded_type(map->key_type(), encoding) && is_bounded_type(map->value_type(), encoding);
+      } else {
+        bounded = false;
+      }
     } else if (fld_cls & CL_ARRAY) {
       AST_Array* array_node = dynamic_cast<AST_Array*>(type);
       if (!is_bounded_type(array_node->base_type(), encoding)) bounded = false;
@@ -2007,9 +1980,7 @@ namespace {
       }
     } else if (fld_cls == CL_UNKNOWN) {
       return ""; // warning will be issued for the serialize functions
-    } else if ((fld_cls & CL_MAP) && type->anonymous()) {
-      return "//TODO: serialized size\n";
-    } else { // sequence, struct, union, array, named maps
+    } else { // sequence, struct, union, array, map
       RefWrapper wrapper(type, field_type_name(dynamic_cast<AST_Field*>(field), type),
         prefix + "." + insert_cxx11_accessor_parens(name, is_union_member) + (is_optional ? ".value()" : ""));
       wrapper.nested_key_only_ = wrap_nested_key_only;
@@ -3302,10 +3273,10 @@ namespace {
 void marshal_generator::generate_dheader_code(const std::string& code, bool dheader_required,
                                               bool is_ser_func, const char* indent)
 {
-  const std::string indents(indent);
-  //DHeader appears on aggregated types that are mutable or appendable in XCDR2
-  //DHeader also appears on ALL sequences and arrays of non-primitives
+  // DHeader appears on aggregated types that are mutable or appendable in XCDR2
+  // DHeader also appears on ALL sequences/arrays/maps of non-primitives in XCDR2
   if (dheader_required) {
+    const std::string indents(indent);
     if (is_ser_func) {
       be_global->impl_ <<
         indents << "size_t total_size = 0;\n";

@@ -1300,6 +1300,9 @@ inline bool needs_nested_key_only(AST_Type* type)
       result = needs_nested_key_only(dynamic_cast<AST_Array*>(type)->base_type());
     } else if (type_class & CL_SEQUENCE) {
       result = needs_nested_key_only(dynamic_cast<AST_Sequence*>(type)->base_type());
+    } else if (type_class & CL_MAP) {
+      AST_Map* const map = dynamic_cast<AST_Map*>(type);
+      result = needs_nested_key_only(map->key_type()) || needs_nested_key_only(map->value_type());
     } else if (type_class & CL_STRUCTURE) {
       AST_Structure* const struct_node = dynamic_cast<AST_Structure*>(type);
       // TODO(iguessthislldo): Possible optimization: If everything in a struct
@@ -1683,11 +1686,6 @@ struct RefWrapper {
   std::string seq_get_buffer() const
   {
     return value_access() + (cpp11_ ? ".data()" : ".get_buffer()");
-  }
-
-  std::string map_check_empty() const
-  {
-    return value_access() + ".empty()";
   }
 
   std::string map_get_length() const
