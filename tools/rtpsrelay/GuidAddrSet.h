@@ -301,7 +301,12 @@ private:
   {
     const size_t limit = config_.admission_control_queue_size();
     const bool limit_okay = !limit || admission_control_queue_.size() < limit;
-    return !participant_admission_limit_reached_ && limit_okay && relay_thread_monitor_.threads_okay();
+    const bool admit = !participant_admission_limit_reached_ && limit_okay && relay_thread_monitor_.threads_okay();
+    if (admit != last_admit_) {
+      last_admit_ = admit;
+      relay_stats_reporter_.admission_state_changed(admit);
+    }
+    return admit;
   }
 
   bool ignore_rtps(bool from_application_participant,
@@ -368,6 +373,7 @@ private:
 
   mutable ACE_Thread_Mutex mutex_;
   bool participant_admission_limit_reached_;
+  mutable bool last_admit_;
 };
 
 }

@@ -10,21 +10,17 @@
 #include "CommonIoStatsReportHelper.h"
 
 #include <dds/DCPS/JsonValueWriter.h>
+#include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/Statistics.h>
 
 namespace RtpsRelay {
 
 class RelayStatisticsReporter {
 public:
   RelayStatisticsReporter(const Config& config,
-                          RelayStatisticsDataWriter_var writer)
-    : config_(config)
-    , writer_(writer)
-  {
-    DDS::Topic_var topic = writer_->get_topic();
-    topic_name_ = topic->get_name();
-    log_relay_statistics_.relay_id(config.relay_id());
-    publish_relay_statistics_.relay_id(config.relay_id());
-  }
+                          RelayStatisticsDataWriter_var writer);
+
+  ~RelayStatisticsReporter();
 
   void input_message(size_t byte_count,
                      const OpenDDS::DCPS::TimeDuration& time,
@@ -395,6 +391,19 @@ public:
     report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
   }
 
+  void admission_state_changed(bool admitting)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (admitting) {
+      ++log_relay_statistics_.transitions_to_admitting();
+      ++publish_relay_statistics_.transitions_to_admitting();
+    } else {
+      ++log_relay_statistics_.transitions_to_nonadmitting();
+      ++publish_relay_statistics_.transitions_to_nonadmitting();
+    }
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
+  }
+
   void report()
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -402,7 +411,6 @@ public:
   }
 
 private:
-
   void report(ACE_Guard<ACE_Thread_Mutex>& guard,
               const OpenDDS::DCPS::MonotonicTimePoint& now,
               bool force = false)
@@ -411,47 +419,13 @@ private:
     publish_report(guard, now, force);
   }
 
-  void log_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
-                  bool force)
-  {
-    if (!log_helper_.prepare_report(log_relay_statistics_, now, force, config_.log_relay_statistics())) {
-      return;
-    }
-
-    ACE_DEBUG((LM_INFO, "(%P|%t) STAT: %C %C\n", topic_name_.in(), OpenDDS::DCPS::to_json(log_relay_statistics_).c_str()));
-
-    log_helper_.reset(log_relay_statistics_, now);
-    log_relay_statistics_.new_address_count(0);
-    log_relay_statistics_.expired_address_count(0);
-    log_relay_statistics_.admission_deferral_count(0);
-    log_relay_statistics_.max_ips_per_client(0);
-  }
-
+  void log_report(const OpenDDS::DCPS::MonotonicTimePoint& now, bool force);
   void publish_report(ACE_Guard<ACE_Thread_Mutex>& guard,
                       const OpenDDS::DCPS::MonotonicTimePoint& now,
-                      bool force)
-  {
-    if (!publish_helper_.prepare_report(publish_relay_statistics_, now, force, config_.publish_relay_statistics())) {
-      return;
-    }
+                      bool force);
 
-    const auto writer_copy = writer_;
-    const auto stats_copy = publish_relay_statistics_;
-
-    publish_helper_.reset(publish_relay_statistics_, now);
-    publish_relay_statistics_.new_address_count(0);
-    publish_relay_statistics_.expired_address_count(0);
-    publish_relay_statistics_.admission_deferral_count(0);
-    publish_relay_statistics_.max_ips_per_client(0);
-
-    guard.release();
-
-    const auto ret = writer_copy->write(stats_copy, DDS::HANDLE_NIL);
-    if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
-        "RelayStatisticsReporter::publish_report failed to write relay statistics\n"));
-    }
-  }
+  void get_opendds_stats(RelayStatistics& out);
+  static void get_process_stats(RelayStatistics& out);
 
   mutable ACE_Thread_Mutex mutex_;
   const Config& config_;
@@ -466,6 +440,8 @@ private:
 
   RelayStatisticsDataWriter_var writer_;
   CORBA::String_var topic_name_;
+
+  OpenDDS::DCPS::StatisticsDataReader_rch internal_reader_;
 };
 
 }

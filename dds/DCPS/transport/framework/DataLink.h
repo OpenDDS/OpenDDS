@@ -436,7 +436,7 @@ protected:
 
   /// The transport send strategy object for this DataLink.
   TransportSendStrategy_rch send_strategy_;
-  LockType strategy_lock_;
+  mutable LockType strategy_lock_;
 
   TransportSendStrategy_rch get_send_strategy();
 
@@ -463,6 +463,9 @@ protected:
 
   /// Listener for TransportSendControlElements created in send_control
   SendResponseListener send_response_listener_;
+
+  static StatisticSeq stats_template();
+  void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
 };
 
 } // namespace DCPS

@@ -270,7 +270,7 @@ bool SignedDocument::verify(const Certificate& ca)
     return false;
   }
 
-  if (!filebuf.write(original_.get_buffer(), original_.length())) {
+  if (!filebuf.write(original_.get_buffer(), static_cast<int>(original_.length()))) {
     return false;
   }
 
@@ -296,7 +296,7 @@ bool SignedDocument::verify(const Certificate& ca)
     return false;
   }
 
-  content_ = std::string(p, size);
+  content_ = std::string(p, static_cast<size_t>(size));
   verified_ = true;
 
   return verified_;

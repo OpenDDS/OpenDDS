@@ -138,6 +138,25 @@ TransportImpl::dump_to_str()
   return cfg ? cfg->dump_to_str(domain_) : OPENDDS_STRING();
 }
 
+StatisticSeq TransportImpl::stats_template()
+{
+  static const DDS::UInt32 num_local_stats = 2;
+  StatisticSeq stats(num_local_stats);
+  stats.length(num_local_stats);
+  stats[0].name = "TransportImplPendingConnections";
+  stats[1].name = "TransportImplReactorTaskCmdQueue";
+  return stats;
+}
+
+void TransportImpl::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
+{
+  {
+    GuardType guard(pending_connections_lock_);
+    stats[idx++].value = pending_connections_.size();
+  }
+  stats[idx++].value = reactor_task_ ? reactor_task_->command_queue_size() : 0;
+}
+
 }
 }
 

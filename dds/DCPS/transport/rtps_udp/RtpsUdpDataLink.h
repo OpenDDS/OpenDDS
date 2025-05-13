@@ -261,6 +261,11 @@ public:
   EventDispatcher_rch event_dispatcher() { return event_dispatcher_; }
   RcHandle<JobQueue> get_job_queue() const { return job_queue_; }
 
+  static StatisticSeq stats_template();
+  void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
+  size_t total_remote_reliable_writers() const;
+  std::pair<size_t, size_t> local_reliable_writer_stats() const;
+
 private:
   void on_data_available(RcHandle<InternalDataReader<NetworkInterfaceAddress> > reader);
 
@@ -287,8 +292,8 @@ private:
   RcHandle<JobQueue> job_queue_;
   EventDispatcher_rch event_dispatcher_;
 
-  RtpsUdpSendStrategy_rch send_strategy();
-  RtpsUdpReceiveStrategy_rch receive_strategy();
+  RtpsUdpSendStrategy_rch send_strategy() const;
+  RtpsUdpReceiveStrategy_rch receive_strategy() const;
 
   GuidPrefix_t local_prefix_;
 

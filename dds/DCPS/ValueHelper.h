@@ -50,7 +50,7 @@ inline
 std::ostream& hex_value(std::ostream& o, unsigned value, size_t bytes)
 {
   OpenDDS::DCPS::RestoreOutputStreamState ross(o);
-  o << std::hex << std::setw(bytes * 2) << std::setfill('0') << value;
+  o << std::hex << std::setw(static_cast<int>(bytes * 2)) << std::setfill('0') << value;
   return o;
 }
 

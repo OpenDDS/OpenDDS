@@ -10,7 +10,6 @@ project(RtpsRelayPublisher): dcps_test, dcps_cm, opendds_optional_security, dcps
 
   Source_Files {
     publisher.cpp
-    Writer.cpp
   }
 }
 

@@ -20,6 +20,7 @@ import zlib
 import subprocess
 import json
 import re
+from contextlib import nullcontext
 
 
 py_source_dir = Path(__file__).resolve().parent
@@ -86,7 +87,7 @@ def get_cmakelists_from_testfile(testfile):
 dump_line_re = re.compile(r'.*?DUMP\[(?P<name>\w+)\]: (?P<value>.*)')
 
 
-def dump_ctest_info(cmake, build_path, defines):
+def dump_ctest_info(cmake, build_path, defines, debug):
     # This uses the scripts cmake sets up for ctest to run to get the CMakeList
     # files for the tests.
 
@@ -94,6 +95,8 @@ def dump_ctest_info(cmake, build_path, defines):
     for name, value in defines.items():
         cmake_cmd.append('-D{}={}'.format(name, value))
     cmake_cmd += ['-P', str(py_source_dir / 'dump_ctest_info.cmake')]
+    if debug:
+        print('Running:', ' '.join(cmake_cmd))
     lines = subprocess.check_output(cmake_cmd, cwd=str(build_path)).decode('utf-8').splitlines()
     tests = {}
     stack = []
@@ -124,6 +127,8 @@ def dump_ctest_info(cmake, build_path, defines):
                     raise ValueError(
                         'Got END_SUBDIRS {}, but {} is what was at the top of the stack!'.format(
                             value, current['test_file']))
+            elif name == 'MISSING_SUBDIRS':
+                print(f'No test file {value}')
             else:
                 raise ValueError('Unexpected info name: {}'.format(name))
         else:
@@ -231,17 +236,6 @@ def generate_test_results(tests, build_path, source_path, art_output, debug=Fals
             print(template.format(**results), file=art_output)
 
 
-# Like a normal file, stdout itself can be used as a context manger, but
-# like a normal file __exit__ will close it.
-class StdoutContextManager:
-
-    def __enter__(self):
-        return sys.stdout
-
-    def __exit__(self, *args):
-        pass
-
-
 if __name__ == "__main__":
     arg_parser = ArgumentParser(description=__doc__)
     arg_parser.add_argument('source_path', metavar='SOURCE_PATH', type=Path)
@@ -259,7 +253,7 @@ if __name__ == "__main__":
     cmake_defines = {}
     if args.config is not None:
         cmake_defines['CTEST_CONFIGURATION_TYPE'] = args.config
-    tests = dump_ctest_info(args.cmake, args.build_path, cmake_defines)
+    tests = dump_ctest_info(args.cmake, args.build_path, cmake_defines, args.debug)
 
     if args.list:
         for name, info in tests.items():
@@ -268,7 +262,7 @@ if __name__ == "__main__":
         if args.art_output is not None:
             art_output_cm = args.art_output.resolve().open('w')
         else:
-            art_output_cm = StdoutContextManager();
+            art_output_cm = nullcontext(sys.stdout)
 
         with art_output_cm as art_output:
             generate_test_results(tests, args.build_path, args.source_path, art_output, args.debug)

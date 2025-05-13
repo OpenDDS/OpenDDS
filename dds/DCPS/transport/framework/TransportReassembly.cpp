@@ -308,6 +308,15 @@ void TransportReassembly::check_expirations(const MonotonicTimePoint& now)
   }
 }
 
+size_t TransportReassembly::total_frags() const
+{
+  size_t total = 0;
+  for (FragInfoMap::const_iterator iter = fragments_.begin(); iter != fragments_.end(); ++iter) {
+    total += iter->second.total_frags_;
+  }
+  return total;
+}
+
 TransportReassembly::FragInfo::FragInfo()
   : have_first_(false)
   , total_frags_(0)

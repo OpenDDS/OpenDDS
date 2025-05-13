@@ -159,6 +159,14 @@
 /IncompatibleQosStatus.java
 /IncompatibleQosStatusHelper.java
 /IncompatibleQosStatusHolder.java
+/Statistic.java
+/StatisticHelper.java
+/StatisticHolder.java
+/StatisticSeqHelper.java
+/StatisticSeqHolder.java
+/Statistics.java
+/StatisticsHelper.java
+/StatisticsHolder.java
 /InternalThreadBuiltinTopicData.java
 /InternalThreadBuiltinTopicDataDataReader.java
 /InternalThreadBuiltinTopicDataDataReaderHelper.java

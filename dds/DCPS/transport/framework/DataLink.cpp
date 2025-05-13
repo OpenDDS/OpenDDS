@@ -1288,6 +1288,42 @@ DataLink::terminate_send_if_suspended()
   }
 }
 
+StatisticSeq DataLink::stats_template()
+{
+  static const DDS::UInt32 num_local_stats = 9;
+  StatisticSeq stats(num_local_stats);
+  stats.length(num_local_stats);
+  stats[0].name = "DataLinkSendListeners";
+  stats[1].name = "DataLinkRecvListeners";
+  stats[2].name = "DataLinkAssociationsByRemote";
+  stats[3].name = "DataLinkAssociationsByLocal";
+  stats[4].name = "DataLinkAssociationsReleasing";
+  stats[5].name = "DataLinkOnStartCallbacks";
+  stats[6].name = "DataLinkPendingOnStarts";
+  stats[7].name = "DataLinkMessageBlocks";
+  stats[8].name = "DataLinkDataBlocks";
+  return stats;
+}
+
+void DataLink::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
+{
+  {
+    GuardType guard(pub_sub_maps_lock_);
+    stats[idx++].value = send_listeners_.size();
+    stats[idx++].value = recv_listeners_.size();
+    stats[idx++].value = assoc_by_remote_.size();
+    stats[idx++].value = assoc_by_local_.size();
+    stats[idx++].value = assoc_releasing_.size();
+  }
+  {
+    GuardType guard(strategy_lock_);
+    stats[idx++].value = on_start_callbacks_.size();
+    stats[idx++].value = pending_on_starts_.size();
+  }
+  stats[idx++].value = mb_allocator_ ? mb_allocator_->bytes_heap_allocated() : 0;
+  stats[idx++].value = db_allocator_ ? db_allocator_->bytes_heap_allocated() : 0;
+}
+
 }
 }
 

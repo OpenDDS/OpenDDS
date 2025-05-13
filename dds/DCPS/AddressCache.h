@@ -232,6 +232,12 @@ public:
     return map_.empty() && id_map_.empty();
   }
 
+  size_t size() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return map_.size() + id_map_.size();
+  }
+
 private:
 
   void insert_ids(const Key& key)

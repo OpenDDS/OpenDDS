@@ -1406,6 +1406,43 @@ RtpsUdpReceiveStrategy::MessageReceiver::fill_header(
   assign(header.publication_id_.guidPrefix, source_guid_prefix_);
 }
 
+StatisticSeq RtpsUdpReceiveStrategy::stats_template()
+{
+  static const DDS::UInt32 num_local_stats = 7;
+  const StatisticSeq base = TransportReceiveStrategy::stats_template();
+  StatisticSeq stats(base.length() + num_local_stats);
+  stats.length(stats.maximum());
+  for (DDS::UInt32 i = 0; i < base.length(); ++i) {
+    stats[i].name = base[i].name;
+  }
+  const DDS::UInt32 local_offset = base.length();
+  stats[local_offset].name = "RtpsUdpRecvReadersWithheld";
+  stats[local_offset + 1].name = "RtpsUdpRecvReadersSelected";
+  stats[local_offset + 2].name = "RtpsUdpRecvSecureSubmessages";
+  stats[local_offset + 3].name = "RtpsUdpRecvReassemblyFrags";
+  stats[local_offset + 4].name = "RtpsUdpRecvReassemblyTotal";
+  stats[local_offset + 5].name = "RtpsUdpRecvReassemblyQueue";
+  stats[local_offset + 6].name = "RtpsUdpRecvReassemblyCompleted";
+  return stats;
+}
+
+void RtpsUdpReceiveStrategy::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
+{
+  TransportReceiveStrategy::fill_stats(stats, idx);
+  stats[idx++].value = readers_withheld_.size();
+  stats[idx++].value = readers_selected_.size();
+  stats[idx++].value =
+#if OPENDDS_CONFIG_SECURITY
+    secure_submessages_.size();
+#else
+    0;
+#endif
+  stats[idx++].value = reassembly_.fragments_size();
+  stats[idx++].value = reassembly_.total_frags();
+  stats[idx++].value = reassembly_.queue_size();
+  stats[idx++].value = reassembly_.completed_size();
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

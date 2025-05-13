@@ -206,6 +206,7 @@ my @specs =
     'optimize!', 'Optimization (no)',
     'inline!', 'Inlining (yes)',
     'static!', 'Static libraries (no)',
+    'static-runtime!', 'Link to static platform runtime libraries',
     'ipv6!', 'IPv6 support (no)',
     'sanitize=s@', 'Build with a sanitizer, can pass multiple times' .
       $argIndent . 'or one list separated by commas, combining asan' .
@@ -216,8 +217,8 @@ my @specs =
     'compile-warnings=s', 'Enable additional compiler warnings' .
       $argIndent . '(default compiler warnings)' .
       $argIndent . '  WARNING: enable additional warnings' .
-      $argIndent . '  ERROR: enable additional warnings that are' .
-      $argIndent . '    treated as errors',
+      $argIndent . '  ERROR: enable additional warnings and treat' .
+      $argIndent . '    warnings as errors',
    ],
    ['Required dependencies for OpenDDS:',
     'ace=s', 'ACE (use ACE_ROOT, ACE_wrappers, or download)',
@@ -808,6 +809,13 @@ EOF
     $ENV{'PATH'} = $savepath;
     print "Detected Visual C++ version: $opts{'compiler_version'}\n"
       if $opts{'verbose'};
+
+    if ($opts{'static'} && exists $opts{'static-runtime'} && $opts{'static-runtime'} == 0) {
+      push(@mpcopts, '-value_template', 'Debug::runtime_library=MultiThreadedDebugDLL',
+                     '-value_template', 'Release::runtime_library=MultiThreadedDLL');
+      print "Set Visual C++ runtime library to MultiThreaded(Debug)DLL with static build\n"
+        if $opts{'verbose'};
+    }
   }
   elsif ($opts{'compiler'} =~ /g\+\+|clang/) {
     my $version_string = `$opts{'compiler'} --version`;
@@ -1363,6 +1371,11 @@ sub write_platform_macros {
           print $PMG "$macro = $opts{$key}\n";
         }
       }
+      if ($opts{'static-runtime'}) {
+        print $PMG "static_stdlibs = 1\n";
+        print "Added static_stdlibs to platform_macros.GNU due to --static-runtime\n"
+          if $opts{'verbose'};
+      }
       if ($cross_compile) {
         print $PMG "CROSS-COMPILE = 1\n";
         print $PMG 'TAO_IDL = $(HOST_ACE)/bin/tao_idl', "\n";
@@ -1653,9 +1666,9 @@ sub system_default_install_dir {
 }
 
 my $build_gtest = 0;
+my $gtest_root = undef;
 if (exists $opts{'gtest'} || $tests) {
   my $gtest_sanity = 'include/gtest/gtest.h';
-  my $gtest_root = undef;
 
   if ($opts{'gtest'}) {
     die "ERROR: '$gtest_sanity' not found in supplied gtest directory '$opts{'gtest'}'"
@@ -2872,13 +2885,16 @@ sub write_cmake_file {
     $name = uc("OPENDDS_$name");
     $name =~ s/-/_/g;
 
-    print $fh "set($name ", to_cmake_value($value), ")\n";
+    if (defined($value)) {
+      print $fh "set($name ", to_cmake_value($value), ")\n";
+    }
   }
 
   sub generate_config_cmake {
     my $fh = shift();
     my $buildEnv = shift();
 
+    print_cmake_config($fh, 'SOURCE_DIR', Cwd::abs_path($FindBin::RealBin));
     print_cmake_config($fh, 'MPC', Cwd::abs_path($buildEnv->{'MPC_ROOT'}));
     print_cmake_config($fh, 'ACE', Cwd::abs_path($buildEnv->{'ACE_ROOT'}));
     print_cmake_config($fh, 'TAO', Cwd::abs_path($buildEnv->{'TAO_ROOT'}));
@@ -2960,7 +2976,7 @@ sub write_cmake_file {
     }
 
     if (defined($cxx_std)) {
-      print_cmake_config($fh, 'OPENDDS_CXX_STD', $cxx_std);
+      print_cmake_config($fh, 'CXX_STD', $cxx_std);
     }
 
     # TODO(iguessthislldo): Move to a smarter system that can use existing
@@ -2972,7 +2988,6 @@ sub write_cmake_file {
       'content-filtered-topic' => 1,
       'content-subscription' => 1,
       'debug' => 1,
-      'gtest' => '',
       'inline' => 1,
       'java' => '',
       'multi-topic' => 1,
@@ -2986,11 +3001,15 @@ sub write_cmake_file {
       'rapidjson' => '',
       'security' => 0,
       'static' => 0,
+      'static-runtime' => undef,
       'std' => '',
       'xerces3' => '',
     );
     for my $opt (sort(keys(%opts_to_use))) {
       print_cmake_config($fh, $opt, exists($opts{$opt}) ? $opts{$opt} : $opts_to_use{$opt});
+    }
+    if (defined($gtest_root)) {
+      print_cmake_config($fh, 'GTEST', $gtest_root);
     }
     print_cmake_config($fh, 'features', \@features);
     print_cmake_config($fh, 'mpcopts', \@mpcopts);

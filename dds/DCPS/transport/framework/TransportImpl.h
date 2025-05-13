@@ -314,6 +314,9 @@ protected:
   /// Id of the last link established.
   AtomicBool is_shut_down_;
   DDS::DomainId_t domain_;
+
+  static StatisticSeq stats_template();
+  void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
 };
 
 } // namespace DCPS

@@ -13,6 +13,7 @@
 
 #include <dds/DCPS/AtomicBool.h>
 #include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/Statistics.h>
 #include <dds/DCPS/debug.h>
 
 #include <dds/OpenDDSConfigWrapper.h>
@@ -355,6 +356,12 @@ private:
   void create_bit_dr(DDS::TopicDescription_ptr topic, const char* type,
                      DCPS::SubscriberImpl* sub,
                      const DDS::DataReaderQos& qos);
+
+  DCPS::StatisticsDataWriter_rch stats_writer_;
+  typedef DCPS::PmfPeriodicTask<const RtpsDiscovery> PeriodicTask;
+  DCPS::RcHandle<PeriodicTask> stats_task_;
+
+  void write_stats(const MonotonicTimePoint&) const;
 
 public:
   class Config : public Discovery::Config {

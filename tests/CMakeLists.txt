@@ -2,50 +2,66 @@ cmake_minimum_required(VERSION 3.3...4.0)
 project(opendds_tests)
 enable_testing()
 
+set(has_fetch_content FALSE)
+if(NOT CMAKE_VERSION VERSION_LESS 3.11)
+  set(has_fetch_content TRUE)
+  include(FetchContent)
+endif()
+
 find_package(OpenDDS REQUIRED)
 
 find_package(GTest QUIET PATHS "${OPENDDS_GTEST}")
 if(NOT GTest_FOUND)
   set(gtestsm "${OPENDDS_SOURCE_DIR}/tests/googletest")
-  if(EXISTS "${gtestsm}/CMakeLists.txt")
-    message("GTest not found, using submodule")
-    set(fetch_args SOURCE_DIR "${gtestsm}")
-  else()
-    message("GTest not found, using clone")
-    set(fetch_args
-      GIT_REPOSITORY "https://github.com/OpenDDS/googletest"
-      GIT_TAG "v1.8.x"
-      GIT_SHALLOW TRUE
-      GIT_PROGRESS TRUE
-      USES_TERMINAL_DOWNLOAD TRUE
-    )
+  set(gtestsm_cmakelists "${gtestsm}/CMakeLists.txt")
+  if(has_fetch_content)
+    if(EXISTS "${gtestsm_cmakelists}")
+      message("GoogleTest not found, using submodule")
+      set(fetch_args SOURCE_DIR "${gtestsm}")
+    else()
+      message("GoogleTest not found, using clone")
+      set(fetch_args
+        GIT_REPOSITORY "https://github.com/OpenDDS/googletest"
+        GIT_TAG "v1.8.x"
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
+        USES_TERMINAL_DOWNLOAD TRUE
+      )
+    endif()
+    FetchContent_Declare(googletest ${fetch_args})
   endif()
-  FetchContent_Declare(googletest ${fetch_args})
   # Prevent overriding the parent project's compiler/linker
   # settings on Windows
-  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-  FetchContent_MakeAvailable(googletest)
+  if(NOT DEFINED gtest_force_shared_crt)
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+  endif()
+  if(NOT DEFINED INSTALL_GTEST)
+    # GoogleTest will install by default otherwise
+    set(INSTALL_GTEST FALSE CACHE BOOL "" FORCE)
+  endif()
+  if(has_fetch_content)
+    FetchContent_MakeAvailable(googletest)
+  elseif(EXISTS "${gtestsm_cmakelists}")
+    add_subdirectory("${gtestsm}")
+  else()
+    message(FATAL_ERROR "GoogleTest not found and can't fetch it")
+  endif()
 endif()
 if(TARGET GTest::gtest)
-  get_target_property(google_test_bin_dir GTest::gtest BINARY_DIR)
-  set(_OPENDDS_GOOGLE_TEST_DIR "${google_test_bin_dir}" CACHE INTERNAL "")
+  set(_opendds_googletest GTest::gtest CACHE INTERNAL "" FORCE)
 elseif(TARGET gtest)
-  get_target_property(google_test_bin_dir gtest BINARY_DIR)
-  set(_OPENDDS_GOOGLE_TEST_DIR "${google_test_bin_dir}" CACHE INTERNAL "")
+  set(_opendds_googletest gtest CACHE INTERNAL "" FORCE)
+else()
+  message(FATAL_ERROR "No GoogleTest target found!")
 endif()
+add_library(OpenDDS_GoogleTest INTERFACE)
+target_link_libraries(OpenDDS_GoogleTest INTERFACE ${_opendds_googletest})
+get_target_property(_opendds_googletest_type ${_opendds_googletest} TYPE)
+if(_opendds_googletest_type STREQUAL "SHARED_LIBRARY")
+  target_compile_definitions(OpenDDS_GoogleTest INTERFACE GTEST_LINKED_AS_SHARED_LIBRARY=1)
+endif()
+get_target_property(_opendds_googletest_bin_dir ${_opendds_googletest} BINARY_DIR)
+set(_OPENDDS_GOOGLETEST_DIR "${_opendds_googletest_bin_dir}" CACHE INTERNAL "")
 
-# TODO: Replace with:
-# add_subdirectory(cmake)
-add_subdirectory(cmake/ace_tao_only)
-if(OPENDDS_OWNERSHIP_PROFILE)
-  add_subdirectory(cmake/Messenger)
-endif()
-add_subdirectory(cmake/idl_compiler_tests)
-add_subdirectory(cmake/include_subdir)
-# TODO: This test always builds shared libraries and linker complains about
-# ACE/TAO libs lacking -fPIC when ACE is static.
-if(OPENDDS_OWNERSHIP_PROFILE AND NOT OPENDDS_STATIC)
-  add_subdirectory(cmake/generated_global)
-endif()
-
+add_subdirectory(cmake)
 add_subdirectory(DCPS)

@@ -120,6 +120,30 @@ private:
   }
 };
 
+template <typename Delegate>
+class PmfPeriodicTask<const Delegate> : public PeriodicTask {
+public:
+  typedef void (Delegate::*CPMF)(const MonotonicTimePoint&) const;
+
+  PmfPeriodicTask(ReactorTask_rch reactor_task, const Delegate& delegate, CPMF function)
+    : PeriodicTask(reactor_task)
+    , delegate_(delegate)
+    , function_(function)
+    {}
+
+private:
+  const WeakRcHandle<Delegate> delegate_;
+  const CPMF function_;
+
+  void execute(const MonotonicTimePoint& now)
+  {
+    RcHandle<Delegate> handle = delegate_.lock();
+    if (handle) {
+      ((*handle).*function_)(now);
+    }
+  }
+};
+
 } // namespace DCPS
 } // namespace OpenDDS
 

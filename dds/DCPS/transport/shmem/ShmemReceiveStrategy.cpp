@@ -133,7 +133,7 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
           "header %@ payload %@ len %B\n", current_data_->transport_header_,
           (char*)current_data_->payload_, remaining));
     std::memcpy(iov[0].iov_base, current_data_->transport_header_, hdr_sz);
-    total += hdr_sz;
+    total += static_cast<ssize_t>(hdr_sz);
     src_iter = current_data_->payload_;
     if (static_cast<size_t>(iov[0].iov_len) > hdr_sz) {
       dst_iter = (char*)iov[0].iov_base + hdr_sz;
@@ -144,7 +144,7 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
   }
 
   for (; i < n && remaining; ++i) {
-    const size_t space = (i == 0) ? iov[i].iov_len - total : iov[i].iov_len,
+    const size_t space = (i == 0) ? iov[i].iov_len - static_cast<size_t>(total) : iov[i].iov_len,
       chunk = std::min(space, remaining);
 
 #ifdef OPENDDS_SHMEM_WINDOWS
@@ -161,7 +161,7 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
       dst_iter = (char*)iov[i + 1].iov_base;
     }
     remaining -= chunk;
-    total += chunk;
+    total += static_cast<ssize_t>(chunk);
     src_iter += chunk;
   }
 

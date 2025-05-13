@@ -59,6 +59,15 @@ public:
                        const TransportReceiveListener_wrch& receive_listener,
                        bool reliable);
 
+  int make_reservation(const GUID_t& remote_publication_id,
+                       const GUID_t& local_subscription_id,
+                       const TransportSendListener_wrch& send_listener,
+                       bool reliable)
+  {
+    // avoid a warning due to overriding one overload of make_reservation() without the other
+    return DataLink::make_reservation(remote_publication_id, local_subscription_id, send_listener, reliable);
+  }
+
   void request_ack_received(ReceivedDataSample& sample);
   void stop_resend_association_msgs(const GUID_t& local, const GUID_t& remote);
 

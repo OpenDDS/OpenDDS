@@ -129,6 +129,8 @@ public:
   CommandPtr execute_or_enqueue(CommandPtr command);
   void wait_until_empty();
 
+  size_t command_queue_size() const;
+
   OPENDDS_POOL_ALLOCATION_FWD
 
 private:

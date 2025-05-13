@@ -177,7 +177,7 @@ ShmemSendStrategy::send_bytes_i(const iovec iov[], int n)
 
   ACE_OS::sema_post(&peer_semaphore_);
 
-  return pool_alloc_size + iov[0].iov_len;
+  return static_cast<ssize_t>(pool_alloc_size + iov[0].iov_len);
 }
 
 void

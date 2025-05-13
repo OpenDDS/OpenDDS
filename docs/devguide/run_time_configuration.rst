@@ -1407,7 +1407,7 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     If :ref:`dds_security` is enabled, the :ref:`Participant's USER_DATA QoS <quality_of_service--user-data>` is omitted from unsecured discovery messages.
 
   .. prop:: UseXTypes=no|minimal|complete
-    :default: :val:`no`
+    :default: :val:`minimal`
 
     Enables discovery extensions from the XTypes specification.
     Participants exchange topic type information in endpoint announcements and extended type information using the Type Lookup Service.

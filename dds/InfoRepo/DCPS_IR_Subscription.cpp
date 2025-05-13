@@ -240,7 +240,7 @@ void DCPS_IR_Subscription::disassociate_participant(OpenDDS::DCPS::GUID_t id,
   size_t numAssociations = associations_.size();
   CORBA::Boolean dontSend = 0;
   CORBA::Boolean send = 1;
-  long count = 0;
+  CORBA::ULong count = 0;
 
   if (0 < numAssociations) {
     OpenDDS::DCPS::WriterIdSeq idSeq(static_cast<CORBA::ULong>(numAssociations));
@@ -315,7 +315,7 @@ void DCPS_IR_Subscription::disassociate_topic(OpenDDS::DCPS::GUID_t id)
   size_t numAssociations = associations_.size();
   CORBA::Boolean dontSend = 0;
   CORBA::Boolean send = 1;
-  long count = 0;
+  CORBA::ULong count = 0;
 
   if (0 < numAssociations) {
     OpenDDS::DCPS::WriterIdSeq idSeq(static_cast<CORBA::ULong>(numAssociations));
@@ -380,7 +380,7 @@ void DCPS_IR_Subscription::disassociate_publication(OpenDDS::DCPS::GUID_t id,
   size_t numAssociations = associations_.size();
   CORBA::Boolean dontSend = 0;
   CORBA::Boolean send = 1;
-  long count = 0;
+  CORBA::ULong count = 0;
 
   if (0 < numAssociations) {
     OpenDDS::DCPS::WriterIdSeq idSeq(static_cast<CORBA::ULong>(numAssociations));

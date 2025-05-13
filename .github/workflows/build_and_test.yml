@@ -177,7 +177,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -188,11 +187,10 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: gitclean
       shell: bash
       run: |
@@ -271,7 +269,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -372,17 +369,16 @@ jobs:
           --features=versioned_namespace=1 \
           --tests \
           --compile-warnings=WARNING
+    - name: check build configuration
+      shell: bash
+      run: |
+        cd OpenDDS
+        tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make OpenDDS
       run: |
         cd OpenDDS
         make -j4
-    - name: check build configuration
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        tools/scripts/show_build_config.pl
     - name: make install OpenDDS
       shell: bash
       run: |
@@ -673,6 +669,11 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u22_esafe_js0.tar.xz
+    - name: check build configuration
+      shell: bash
+      run: |
+        cd OpenDDS
+        tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
@@ -687,12 +688,6 @@ jobs:
         . setenv.sh
         $ACE_ROOT/bin/mwc.pl -type gnuace host_tools.mwc
         make -j4
-    - name: check build configuration
-      shell: bash
-      run: |
-        cd OpenDDS/build/target
-        . setenv.sh
-        tools/scripts/show_build_config.pl
     - name: build OpenDDS
       run: |
         cd OpenDDS/build/target
@@ -771,8 +766,7 @@ jobs:
     - name: check build configuration
       shell: bash
       run: |
-        cd OpenDDS/build/target
-        . setenv.sh
+        cd OpenDDS
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -1022,8 +1016,7 @@ jobs:
     - name: check build configuration
       shell: bash
       run: |
-        cd OpenDDS/build/target
-        . setenv.sh
+        cd OpenDDS
         tools/scripts/show_build_config.pl
     - name: build OpenDDS
       run: |
@@ -1103,8 +1096,7 @@ jobs:
     - name: check build configuration
       shell: bash
       run: |
-        cd OpenDDS/build/target
-        . setenv.sh
+        cd OpenDDS
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -1297,7 +1289,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -1308,11 +1299,10 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -1386,7 +1376,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -1603,7 +1592,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -1614,11 +1602,13 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_STANDARD=11 -DCMAKE_CXX_COMPILER=clang++-18 ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build \
+          -DOPENDDS_JUST_BUILD_TESTS=TRUE \
+          -DCMAKE_CXX_STANDARD=11 \
+          -DCMAKE_CXX_COMPILER=clang++-18
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -1694,7 +1684,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install lldb
       shell: bash
@@ -1910,7 +1899,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -1921,11 +1909,13 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_STANDARD=11 -DCMAKE_CXX_COMPILER=clang++-17 ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build \
+          -DOPENDDS_JUST_BUILD_TESTS=TRUE \
+          -DCMAKE_CXX_STANDARD=11 \
+          -DCMAKE_CXX_COMPILER=clang++-17
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -2001,7 +1991,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install lldb
       shell: bash
@@ -2217,7 +2206,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -2228,11 +2216,13 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_STANDARD=98 -DCMAKE_CXX_COMPILER=g++-13 ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build \
+          -DOPENDDS_JUST_BUILD_TESTS=TRUE \
+          -DCMAKE_CXX_STANDARD=98 \
+          -DCMAKE_CXX_COMPILER=g++-13
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -2304,7 +2294,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -2505,7 +2494,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -2516,11 +2504,12 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_COMPILER=g++-12 ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build \
+          -DOPENDDS_JUST_BUILD_TESTS=TRUE \
+          -DCMAKE_CXX_COMPILER=g++-12
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -2592,7 +2581,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -2781,7 +2769,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -2792,11 +2779,10 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -2868,7 +2854,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -3130,8 +3115,7 @@ jobs:
     - name: check build configuration
       shell: bash
       run: |
-        cd OpenDDS/build/target
-        . setenv.sh
+        cd OpenDDS
         tools/scripts/show_build_config.pl
     - name: build OpenDDS
       run: |
@@ -3277,7 +3261,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -3288,11 +3271,10 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: Build iShapes with CMake
       run: |
         source OpenDDS/setenv.sh
@@ -3373,7 +3355,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -3591,7 +3572,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -3603,9 +3583,12 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        cd OpenDDS/tests/cmake
-        cmake -DCMAKE_CXX_COMPILER=clang++-16 -DCMAKE_CXX_STANDARD=11 -S . -B build
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build \
+          -DOPENDDS_JUST_BUILD_TESTS=TRUE \
+          -DCMAKE_CXX_COMPILER=clang++-16 \
+          -DCMAKE_CXX_STANDARD=11
         ASAN_OPTIONS=detect_leaks=0 cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -3682,7 +3665,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install lldb
       shell: bash
@@ -3898,7 +3880,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -3982,7 +3963,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install lldb
       shell: bash
@@ -4203,7 +4183,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -4214,10 +4193,13 @@ jobs:
         make -j2
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        cd OpenDDS/tests/cmake
-        cmake -DCMAKE_CXX_COMPILER=clang++-16 -DCMAKE_CXX_STANDARD=11 -S . -B build
-        cmake --build build -- -j2
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build \
+          -DOPENDDS_JUST_BUILD_TESTS=TRUE \
+          -DCMAKE_CXX_COMPILER=clang++-16 \
+          -DCMAKE_CXX_STANDARD=11
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -4293,7 +4275,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install lldb
       shell: bash
@@ -4519,7 +4500,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -4530,11 +4510,10 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -4619,7 +4598,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -4767,7 +4745,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: run OpenDDS tests
       shell: bash
@@ -4882,7 +4859,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -4893,11 +4869,10 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -4973,7 +4948,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -5172,7 +5146,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -5183,11 +5156,10 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -5261,7 +5233,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -5383,7 +5354,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -5394,11 +5364,10 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -5472,7 +5441,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -5678,7 +5646,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -5764,7 +5731,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -5781,11 +5747,10 @@ jobs:
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -5925,7 +5890,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -6106,7 +6070,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -6273,7 +6236,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -6431,7 +6393,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -6643,7 +6604,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -6654,11 +6614,10 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -6732,7 +6691,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -6843,7 +6801,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: setup for run-vcpkg
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
@@ -6869,7 +6827,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --no-rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
+        configure --ipv6 --static --no-static-runtime --no-rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -6956,12 +6914,11 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --no-rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --compile-warnings=WARNING
+        configure --ipv6 --static --no-static-runtime --no-rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --compile-warnings=WARNING
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -7056,15 +7013,12 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        mkdir tests\cmake\build
-        cd tests\cmake\build
-        cmake ..
-        cmake --build .
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: create autobuild config
       shell: bash
@@ -7216,7 +7170,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: configure messenger tests
       shell: cmd
@@ -7224,7 +7177,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Messenger
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
@@ -7239,7 +7192,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\C++11
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
     - name: make C++11 messenger test
       shell: cmd
       run: |
@@ -7381,13 +7334,12 @@ jobs:
         mkdir build
         cd build
         mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake -DCMAKE_INSTALL_PREFIX=./install -Dgtest_force_shared_crt=ON ..
         cmake --build . --target install
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: configure compiler tests
       shell: cmd
@@ -7406,7 +7358,7 @@ jobs:
         rm -rf underscore_fields
         rm -rf xcdr
         rm -rf XTypesExtensibility
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
@@ -7550,13 +7502,12 @@ jobs:
         mkdir build
         cd build
         mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake -DCMAKE_INSTALL_PREFIX=./install -Dgtest_force_shared_crt=ON ..
         cmake --build . --target install
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: configure compiler tests
       shell: cmd
@@ -7577,7 +7528,7 @@ jobs:
         rm -rf idl_test_nested_types_lib
         rm -rf isolated_types
         rm -rf is_topic_type
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
@@ -7730,13 +7681,12 @@ jobs:
         mkdir build
         cd build
         mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake -DCMAKE_INSTALL_PREFIX=./install -Dgtest_force_shared_crt=ON ..
         cmake --build . --target install
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: configure unit tests
       shell: cmd
@@ -7744,7 +7694,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\unit-tests
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
@@ -7972,7 +7922,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -8059,6 +8008,11 @@ jobs:
         cd OpenDDS
         tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
         rm -f build_w19_re_p1_stat_FM-08.tar.xz
+    - name: check build configuration
+      shell: cmd
+      run: |
+        cd OpenDDS
+        perl tools\scripts\show_build_config.pl
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
@@ -8067,16 +8021,8 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        mkdir tests\cmake\build
-        cd tests\cmake\build
-        cmake ..
-        cmake --build . --config Release
-    - name: check build configuration
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        perl tools\scripts\show_build_config.pl
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build --config Release
     - name: create autobuild config
       shell: bash
       run: |
@@ -8227,7 +8173,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: configure messenger tests
       shell: cmd
@@ -8398,7 +8343,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: configure compiler tests
       shell: cmd
@@ -8566,7 +8510,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: configure compiler tests
       shell: cmd
@@ -8745,7 +8688,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: configure unit tests
       shell: cmd
@@ -9005,7 +8947,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -9019,10 +8960,8 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        mkdir tests\cmake\build
-        cd tests\cmake\build
-        cmake ..
-        cmake --build . --config Release
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build --config Release
     - name: gitclean
       shell: bash
       run: |
@@ -9134,7 +9073,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: create autobuild config
       shell: bash
@@ -9464,7 +9402,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: setup gtest
       shell: cmd
@@ -9639,7 +9576,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: setup gtest
       shell: cmd
@@ -9977,7 +9913,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -9991,10 +9926,8 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        mkdir tests\cmake\build
-        cd tests\cmake\build
-        cmake ..
-        cmake --build . --config Release
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build --config Release
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -10070,8 +10003,18 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
+    - name: setup gtest
+      shell: cmd
+      run: |
+        cd OpenDDS/tests/googletest
+        git submodule init
+        git submodule update
+        mkdir build
+        cd build
+        mkdir install
+        cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON ..
+        cmake --build . --target install --config Release
     - name: create autobuild config
       shell: bash
       run: |
@@ -10211,7 +10154,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: setup gtest
       shell: cmd
@@ -10391,7 +10333,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: setup gtest
       shell: cmd
@@ -10557,7 +10498,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: setup gtest
       shell: cmd
@@ -10570,13 +10510,6 @@ jobs:
         mkdir install
         cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON ..
         cmake --build . --target install --config Release
-    - name: check GTest Path
-      shell: cmd
-      run: |
-        cd D:\a\OpenDDS\OpenDDS\OpenDDS\tests\googletest\build\install\
-        dir
-        cd lib
-        dir
     - name: configure unit tests
       shell: cmd
       run: |
@@ -10821,7 +10754,6 @@ jobs:
       shell: cmd
       run: |
         cd /d C:\OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -10913,6 +10845,8 @@ jobs:
       shell: bash
       run: |
         mv OpenDDS /c/
+        cd /c/OpenDDS
+        git clean -dfX tests DevGuideExamples examples
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
@@ -10921,15 +10855,12 @@ jobs:
       run: |
         cd /d C:\OpenDDS
         call setenv.cmd
-        mkdir tests\cmake\build
-        cd tests\cmake\build
-        cmake -A Win32 ..
-        cmake --build .
+        cmake -S . -B build -A Win32 -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build
     - name: check build configuration
       shell: cmd
       run: |
         cd /d C:\OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: create autobuild config
       shell: bash
@@ -11084,7 +11015,6 @@ jobs:
       shell: cmd
       run: |
         cd /d C:\OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: create autobuild config
       shell: bash
@@ -11216,7 +11146,6 @@ jobs:
       shell: cmd
       run: |
         cd /d C:\OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: build OpenDDS
       shell: cmd
@@ -11307,6 +11236,8 @@ jobs:
       shell: bash
       run: |
         mv OpenDDS /c/
+        cd /c/OpenDDS
+        git clean -dfX tests DevGuideExamples examples
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
@@ -11314,17 +11245,14 @@ jobs:
       shell: cmd
       run: |
         cd /d C:\OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: Build CMake Tests
       shell: cmd
       run: |
         cd /d C:\OpenDDS
         call setenv.cmd
-        mkdir C:\tests\cmake\build
-        cd /d C:\tests\cmake\build
-        cmake -A Win32 %DDS_ROOT%\tests\cmake
-        cmake --build .
+        cmake -S . -B build -A Win32 -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build
     - name: create autobuild config
       shell: bash
       run: |
@@ -11350,7 +11278,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=c:/OpenDDS --no-dcps --cmake --cmake-build-dir=c:/tests/cmake/build -Config OPENDDS_TESTING_FEATURES"/>
+        <command name="auto_run_tests" options="script_path=tests dir=c:/OpenDDS --no-dcps --cmake --cmake-build-dir=c:/OpenDDS/build -Config OPENDDS_TESTING_FEATURES"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -11544,7 +11472,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -11639,15 +11566,12 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        mkdir tests\cmake\build
-        cd tests\cmake\build
-        cmake .. -DCMAKE_CXX_STANDARD=20
-        cmake --build .
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: create autobuild config
       shell: bash
@@ -11788,7 +11712,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: configure messenger tests
       shell: cmd
@@ -11957,7 +11880,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: setup gtest
       shell: cmd
@@ -12123,7 +12045,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: setup gtest
       shell: cmd
@@ -12346,7 +12267,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -12357,11 +12277,12 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_STANDARD=11 ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build \
+          -DOPENDDS_JUST_BUILD_TESTS=TRUE \
+          -DCMAKE_CXX_STANDARD=11
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -12436,7 +12357,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: run OpenDDS tests
       shell: bash
@@ -12560,7 +12480,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: run OpenDDS tests
       shell: bash
@@ -12669,7 +12588,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -12680,11 +12598,12 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_STANDARD=11 ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build \
+          -DOPENDDS_JUST_BUILD_TESTS=TRUE \
+          -DCMAKE_CXX_STANDARD=11
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -12759,7 +12678,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: run OpenDDS tests
       shell: bash
@@ -12883,7 +12801,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: run OpenDDS tests
       shell: bash
@@ -13070,7 +12987,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -13081,11 +12997,12 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_STANDARD=11 ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build \
+          -DOPENDDS_JUST_BUILD_TESTS=TRUE \
+          -DCMAKE_CXX_STANDARD=11
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -13161,7 +13078,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: run OpenDDS tests
       shell: bash
@@ -13288,7 +13204,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: run OpenDDS tests
       shell: bash
@@ -13409,7 +13324,7 @@ jobs:
       run: |
         cd OpenDDS
         XERCESC_ROOT=$(find /opt/homebrew/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
-        ./configure  --no-inline --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/opt/homebrew/opt/openssl@1.1 --compile-warnings=WARNING
+        ./configure --no-inline --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/opt/homebrew/opt/openssl@1.1 --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -13482,7 +13397,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -13493,11 +13407,12 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_STANDARD=11 ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build \
+          -DOPENDDS_JUST_BUILD_TESTS=TRUE \
+          -DCMAKE_CXX_STANDARD=11
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -13573,7 +13488,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: run OpenDDS tests
       shell: bash
@@ -13700,7 +13614,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: run OpenDDS tests
       shell: bash

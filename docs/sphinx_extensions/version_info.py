@@ -42,13 +42,7 @@ class VersionInfo:
         vparts = {p: self.get(int, p + '_version') for p in ('major', 'minor', 'micro')}
         self.ver = '{major}.{minor}.{micro}'.format(**vparts)
         self.v_ver = 'v' + self.ver
-        if vparts['major'] >= 4:
-            self.tag = self.v_ver
-        else:
-            fmt_str = 'DDS-{major}.{minor}'
-            if vparts['micro'] > 0:
-                fmt_str += '.{micro}'
-            self.tag = fmt_str.format(**vparts)
+        self.tag = self.v_ver
 
         # Read values from acetao.ini
         ini = configparser.ConfigParser(interpolation=None)

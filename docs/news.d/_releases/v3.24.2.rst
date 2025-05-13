@@ -14,7 +14,7 @@ Security
 Fixes
 =====
 
-- Fixed leaked shared memory by the shared memory transport. (:ghpr:`#4171`)
+- Fixed leaked shared memory by the shared memory transport. (:ghpr:`4171`)
 
   - For a 100% fix, a new ACE version including https://github.com/DOCGroup/ACE_TAO/pull/2077 must be used.
 
