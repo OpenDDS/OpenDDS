@@ -990,11 +990,35 @@ namespace {
       intro.join(be_global->impl_, indent + "  ");
       be_global->impl_ <<
         indent << "serialized_size(encoding, size, " << elem_wrapper.ref() << ");\n";
-   }
+    }
   }
 
-  void gen_map_i(
-    UTL_ScopedName* tdname, AST_Map* map, bool nested_key_only, const FieldInfo* anonymous = 0)
+  void generate_streaming_for_map(Classification member_cls, AST_Type* member_type,
+                                  const std::string& accessor, const std::string& cxx_elem,
+                                  bool nested_key_only)
+  {
+    static const size_t streamIndent = 4;
+    if (member_cls & CL_PRIMITIVE) {
+      be_global->impl_ <<
+        streamAndCheck("<< " + accessor, streamIndent);
+    } else {
+      if ((member_cls & (CL_STRING | CL_BOUNDED)) == (CL_STRING | CL_BOUNDED)) {
+        const string args = accessor + ", " + bounded_arg(member_type);
+        be_global->impl_ <<
+          streamAndCheck("<< " + getWrapper(args, member_type, WD_OUTPUT), streamIndent);
+      } else {
+        RefWrapper member_wrapper(member_type, cxx_elem, accessor);
+        member_wrapper.nested_key_only_ = nested_key_only;
+        Intro intro;
+        member_wrapper.done(&intro);
+        intro.join(be_global->impl_, "    ");
+        be_global->impl_ <<
+          streamAndCheck("<< " + member_wrapper.ref(), streamIndent);
+      }
+    }
+  }
+
+  void gen_map_i(UTL_ScopedName* tdname, AST_Map* map, bool nested_key_only, const FieldInfo* anonymous = 0)
   {
     if (anonymous) {
       map = dynamic_cast<AST_Map*>(anonymous->type_);
@@ -1067,82 +1091,37 @@ namespace {
       Intro intro;
       RefWrapper wrapper(base_wrapper);
       wrapper.done(&intro);
-      const std::string value_access = wrapper.value_access();
-      const std::string get_length = wrapper.map_get_length();
       Function insertion("operator<<", "bool");
       insertion.addArg("strm", "Serializer&");
       insertion.addArg("map", wrapper.wrapped_type_name());
       insertion.endArgs();
+      intro.join(be_global->impl_, "  ");
 
-      if ((key_cls & CL_INTERFACE) == 0) {
+      std::string indentForLength = "  ";
+      if (!both_primitive) {
         be_global->impl_ <<
           "  const Encoding& encoding = strm.encoding();\n"
-          "  ACE_UNUSED_ARG(encoding);\n";
-        marshal_generator::generate_dheader_code(
-          "    serialized_size(encoding, total_size, map);\n"
+          "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
+          "    size_t total_size = 0;\n"
+          "    serialized_size(encoding, total_size, " << wrapper.value_access() << ");\n"
           "    if (!strm.write_delimiter(total_size)) {\n"
           "      return false;\n"
-          "    }\n", !val_primitive);
-
-        intro.join(be_global->impl_, "  ");
-
-        be_global->impl_ <<
-          "  const CORBA::ULong length = " << get_length << ";\n";
-
-        be_global->impl_ <<
-          streamAndCheck("<< length") <<
-          "  if (length == 0) {\n"
-          "    return true;\n"
-          "  }\n";
+          "    }\n"
+          "  } else {\n";
+        indentForLength += "  ";
       }
+
+      be_global->impl_ << indentForLength <<
+        "const DDS::UInt32 length = " << wrapper.map_get_length() << ";\n" <<
+        streamAndCheck("<< length", indentForLength.size());
+
+      if (!both_primitive) be_global->impl_ << "  }\n\n";
 
       be_global->impl_ <<
-        "  for (auto it = " << value_access <<  ".begin(); it != " << value_access << ".end(); ++it) {\n";
+        "  for (const auto& elt : " << wrapper.value_access() << ") {\n";
 
-      // TODO(tyler) Can these just be errors, and skip code generation completely? See line 1012
-      if (key_cls & CL_INTERFACE || val_cls & CL_INTERFACE) {
-        be_global->impl_ <<
-          "  return false; // map with either a key or value of objrefs is not marshaled\n";
-      } else if (key_cls & CL_UNKNOWN || val_cls & CL_UNKNOWN) {
-        be_global->impl_ <<
-          "  return false; // map with either key or value of unknown/unsupported type\n";
-      } else {
-        if (key_cls & CL_PRIMITIVE) {
-          be_global->impl_ <<
-            "    strm << it->first;\n";
-        } else { // Enum, String, Struct, Array, Sequence, Union
-          if ((key_cls & (CL_STRING | CL_BOUNDED)) == (CL_STRING | CL_BOUNDED)) {
-            const string args = "it->first, " + bounded_arg(key);
-            be_global->impl_ <<
-              streamAndCheck("<< " + getWrapper(args, key, WD_OUTPUT), 4);
-          } else {
-            RefWrapper key_wrapper(key, key_cxx_elem, "it->first");
-            key_wrapper.nested_key_only_ = nested_key_only;
-            Intro intro;
-            key_wrapper.done(&intro);
-            intro.join(be_global->impl_, "    ");
-            be_global->impl_ << streamAndCheck("<< " + key_wrapper.ref(), 4);
-          }
-        }
-
-        if (val_cls & CL_PRIMITIVE) {
-          be_global->impl_ <<
-            "    strm << it->second;\n";
-        } else { // Enum, String, Struct, Array, Sequence, Union
-          if ((val_cls & (CL_STRING | CL_BOUNDED)) == (CL_STRING | CL_BOUNDED)) {
-            const string args = "it->second, " + bounded_arg(val);
-            be_global->impl_ <<
-              streamAndCheck("<< " + getWrapper(args, key, WD_OUTPUT), 4);
-          } else {
-            RefWrapper val_wrapper(val, val_cxx_elem, "it->second");
-            val_wrapper.nested_key_only_ = nested_key_only;
-            Intro intro;
-            val_wrapper.done(&intro);
-            intro.join(be_global->impl_, "    ");
-            be_global->impl_ << streamAndCheck("<< " + val_wrapper.ref(), 4);
-          }
-        }
-      }
+      generate_streaming_for_map(key_cls, key, "elt.first", key_cxx_elem, nested_key_only);
+      generate_streaming_for_map(val_cls, val, "elt.second", val_cxx_elem, nested_key_only);
 
       be_global->impl_ <<
         "  }\n"
@@ -1154,94 +1133,26 @@ namespace {
       RefWrapper wrapper(base_wrapper);
       wrapper.is_const_ = false;
       wrapper.done(&intro);
-      const std::string value_access = wrapper.value_access();
-      const std::string get_length = wrapper.map_get_length();
       Function extraction("operator>>", "bool");
       extraction.addArg("strm", "Serializer&");
       extraction.addArg("map", wrapper.wrapped_type_name());
       extraction.endArgs();
+      intro.join(be_global->impl_, "  ");
 
-      if ((key_cls & CL_INTERFACE) == 0) {
+      if (!both_primitive) {
         be_global->impl_ <<
-          "  const Encoding& encoding = strm.encoding();\n"
-          "  ACE_UNUSED_ARG(encoding);\n";
-        marshal_generator::generate_dheader_code(
-          "    serialized_size(encoding, total_size, map);\n"
-          "    if (!strm.write_delimiter(total_size)) {\n"
-          "      return false;\n"
-          "    }\n", !key_primitive || !val_primitive);
-
-        if (!key_primitive || !val_primitive) {
-          be_global->impl_ << "  const size_t end_of_map = strm.rpos() + total_size;\n";
-        }
-
-        intro.join(be_global->impl_, "  ");
-
-        be_global->impl_ <<
-          "  CORBA::ULong length = 0;\n";
-
-        be_global->impl_ <<
-          streamAndCheck(">> length") <<
-          "  if (length == 0) {\n"
-          "    return true;\n"
-          "  }\n";
+          "  const bool use_dheader = strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2;\n";
       }
 
       be_global->impl_ <<
-        "  for (CORBA::ULong i = 0; i < length; ++i) {\n";
-
-      // Key
-      if (key_cls & CL_STRING) {
-        be_global->impl_ <<
-          "    std::string key;\n" <<
-          "    if (!(strm >> key)) {\n";
-      } else {
-        be_global->impl_ <<
-          "   " << key_cxx_elem << " key;\n" <<
-          "    if(!(strm >> key)) {\n";
-      }
-
-      if (key_try_construct == tryconstructfailaction_use_default) {
-        be_global->impl_ <<
-          type_to_default("        ", val, "key") <<
-          "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
-      } else {
-        //discard/default
-        be_global->impl_ <<
-          "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
-        skip_to_end_map("      ", "i", "length", named_as, use_cxx11, key_cls, map);
-        be_global->impl_ <<
-          "      return false;\n";
-      }
-
-      be_global->impl_ << "    }\n";
-
-      // Value
-      const std::string stream_to = value_access + "[key]";
-
-      const std::string indent = "    ";
-      intro.join(be_global->impl_, indent);
+        "  DDS::UInt32 total_size = 0;\n" << // in bytes for DHeader, or in elements for Length
+        streamAndCheck(">> total_size") <<
+        "  " << wrapper.value_access() << ".clear();\n"
+        "  DDS::UInt32 read = 0;\n"
+        "  while (read < total_size) {\n";
+      // Read key (trycon), read value (trycon), store in map
       be_global->impl_ <<
-        indent << "if (!(strm >> " << stream_to << ")) {\n";
-
-      if (val_try_construct == tryconstructfailaction_use_default) {
-        be_global->impl_ <<
-          type_to_default("        ", val, value_access) <<
-          "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
-      } else if (val_try_construct == tryconstructfailaction_trim) {
-        // Skip this for now
-        be_global->warning("TryConstruct::Trim not currently supported");
-      } else {
-        //discard/default
-        be_global->impl_ <<
-          "     strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
-        skip_to_end_map("      ", "i", "length", named_as, use_cxx11, val_cls, map);
-        be_global->impl_ <<
-          "     return false;\n";
-      }
-
-      be_global->impl_ <<
-        "  }\n"
+        "    ++read;\n" // or for DHeader we need stream bytes, but round up for alignment
         "  }\n"
         "  return true;\n";
     }
@@ -1652,7 +1563,7 @@ namespace {
     } else if (fld_cls & CL_MAP) {
       if (fld_cls & CL_BOUNDED) {
         AST_Map* const map = dynamic_cast<AST_Map*>(type);
-        bounded &= is_bounded_type(map->key_type(), encoding) && is_bounded_type(map->value_type(), encoding);
+        bounded = is_bounded_type(map->key_type(), encoding) && is_bounded_type(map->value_type(), encoding);
       } else {
         bounded = false;
       }

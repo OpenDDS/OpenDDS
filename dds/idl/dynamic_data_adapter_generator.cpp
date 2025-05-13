@@ -215,6 +215,7 @@ namespace {
     AST_Union* union_node = 0;
     AST_Sequence* seq_node = 0;
     AST_Array* array_node = 0;
+    AST_Map* map_node = 0;
     if (!node) {
       return false;
     }
@@ -230,6 +231,9 @@ namespace {
       break;
     case AST_Decl::NT_array:
       array_node = dynamic_cast<AST_Array*>(node);
+      break;
+    case AST_Decl::NT_map:
+      map_node = dynamic_cast<AST_Map*>(node);
       break;
     default:
       return false;
@@ -303,6 +307,8 @@ namespace {
           "    ACE_UNUSED_ARG(tk);\n"
           "    return missing_dda(method, id);\n";
       }
+    } else if (map_node) { //TODO
+      be_global->impl_ << "    return DDS::RETCODE_UNSUPPORTED;\n";
     } else {
       return false;
     }
@@ -356,6 +362,12 @@ namespace {
     return kind == AST_Decl::NT_interface || kind == AST_Decl::NT_valuetype;
   }
 
+  bool is_collection_of_interface_or_value_type(AST_Map* type)
+  {
+    const AST_Decl::NodeType kind = resolveActualType(type->value_type())->node_type();
+    return kind == AST_Decl::NT_interface || kind == AST_Decl::NT_valuetype;
+  }
+
   bool generate_dynamic_data_adapter(
     AST_Decl* node, const std::string* use_scoped_name = 0, AST_Typedef* typedef_node = 0)
   {
@@ -363,6 +375,7 @@ namespace {
     AST_Union* union_node = 0;
     AST_Sequence* seq_node = 0;
     AST_Array* array_node = 0;
+    AST_Map* map_node = 0;
     if (!node) {
       return false;
     }
@@ -385,6 +398,13 @@ namespace {
         return true;
       }
       break;
+    case AST_Decl::NT_map:
+      map_node = dynamic_cast<AST_Map*>(node);
+      // No check of keys because interface/valuetype can't be keys
+      if (is_collection_of_interface_or_value_type(map_node)) {
+        return true;
+      }
+      break;
     default:
       return true;
     }
@@ -398,12 +418,13 @@ namespace {
 
     if (struct_node || union_node) {
       const Fields fields(union_node ? union_node : struct_node);
-      FieldInfo::EleLenSet anonymous_seq_generated;
+      FieldInfo::EleLenSet anonymous_seq_generated, anonymous_map_generated;
       for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
         AST_Field* const field = *i;
         if (field->field_type()->anonymous()) {
           FieldInfo af(*field);
-          if (af.arr_ || (af.seq_ && af.is_new(anonymous_seq_generated))) {
+          if (af.arr_ || (af.seq_ && af.is_new(anonymous_seq_generated))
+              || (af.map_ && af.is_new(anonymous_map_generated))) {
             if (!generate_dynamic_data_adapter(af.type_, &af.scoped_type_)) {
               be_util::misc_error_and_abort(
                 "Failed to generate adapter for anonymous type of field", field);
@@ -456,7 +477,7 @@ namespace {
           "    return rc;\n"
           "  }\n"
           "\n";
-        if (struct_node || seq_node || array_node) {
+        if (struct_node || seq_node || array_node || map_node) {
           be_global->impl_ <<
             "  DDS::UInt32 get_item_count()\n"
             "  {\n"
@@ -467,6 +488,8 @@ namespace {
             be_global->impl_ << wrapper.seq_get_length();
           } else if (array_node) {
             be_global->impl_ << array_element_count(array_node);
+          } else if (map_node) {
+            be_global->impl_ << wrapper.map_get_length();
           }
           be_global->impl_ << ";\n"
             "  }\n"
@@ -519,7 +542,7 @@ namespace {
         } else {
           be_global->impl_ <<
             "    ACE_UNUSED_ARG(ext);\n";
-          if (distinct_type) { // sequence or array (C++11 mapping)
+          if (distinct_type) { // sequence, map, or array (C++11 mapping)
             RefWrapper distinct_type_wrapper(node_as_type, cpp_name, "");
             distinct_type_wrapper.done();
             be_global->impl_ <<
@@ -646,7 +669,7 @@ bool dynamic_data_adapter_generator::gen_typedef(AST_Typedef* typedef_node, UTL_
   AST_Type* type, const char*)
 {
   const AST_Decl::NodeType nt = type->node_type();
-  if (nt != AST_Decl::NT_sequence && nt != AST_Decl::NT_array) {
+  if (nt != AST_Decl::NT_sequence && nt != AST_Decl::NT_array && nt != AST_Decl::NT_map) {
     return true;
   }
   const std::string cpp_name = scoped(name);

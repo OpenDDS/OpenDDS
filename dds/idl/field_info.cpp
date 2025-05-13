@@ -147,5 +147,5 @@ bool FieldInfo::is_new(EleLenSet& el_set) const
 
 bool FieldInfo::anonymous() const
 {
-  return type_->anonymous() && as_base_ && (cls_ & (CL_ARRAY | CL_SEQUENCE));
+  return type_->anonymous() && (cls_ & (CL_ARRAY | CL_SEQUENCE | CL_MAP));
 }
