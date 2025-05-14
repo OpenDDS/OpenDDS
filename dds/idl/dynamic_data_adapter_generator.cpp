@@ -364,6 +364,7 @@ namespace {
 
   bool is_collection_of_interface_or_value_type(AST_Map* type)
   {
+    // No check of keys because interface/valuetype can't be keys
     const AST_Decl::NodeType kind = resolveActualType(type->value_type())->node_type();
     return kind == AST_Decl::NT_interface || kind == AST_Decl::NT_valuetype;
   }
@@ -400,7 +401,6 @@ namespace {
       break;
     case AST_Decl::NT_map:
       map_node = dynamic_cast<AST_Map*>(node);
-      // No check of keys because interface/valuetype can't be keys
       if (is_collection_of_interface_or_value_type(map_node)) {
         return true;
       }

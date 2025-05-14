@@ -958,8 +958,8 @@ namespace {
       indent << "}\n";
   }
 
-  void generate_serialized_size_for_map(const std::string& indent, AST_Type* type, const std::string& cxx_elem, bool key, bool nested_key_only) {
-    const std::string accessor = key ? "elt.first" : "elt.second";
+  void generate_serialized_size_for_map(AST_Type* type, const std::string& cxx_elem, bool key, bool nested_key_only) {
+    const std::string accessor = key ? "elt.first" : "elt.second", indent = "    ";
     const Classification cls = classify(type);
     if (cls & CL_PRIMITIVE) {
       AST_PredefinedType* const p = dynamic_cast<AST_PredefinedType*>(type);
@@ -1060,42 +1060,40 @@ namespace {
       key_cxx_elem = scoped(key->name());
       val_cxx_elem = scoped(val->name());
     }
+    if ((key_cls & CL_STRING) && use_cxx11) {
+      key_cxx_elem = (key_cls & CL_WIDE) ? "std::wstring" : "std::string";
+    }
+    if ((val_cls & CL_STRING) && use_cxx11) {
+      val_cxx_elem = (val_cls & CL_WIDE) ? "std::wstring" : "std::string";
+    }
 
     RefWrapper(base_wrapper).done().generate_tag();
 
     {
-      Intro intro;
       RefWrapper wrapper(base_wrapper);
-      wrapper.done(&intro);
-      const std::string value_access = wrapper.value_access();
-      const std::string get_length = wrapper.map_get_length();
-
+      wrapper.done();
       Function serialized_size("serialized_size", "void");
       serialized_size.addArg("encoding", "const Encoding&");
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg("map", wrapper.wrapped_type_name());
       serialized_size.endArgs();
-      intro.join(be_global->impl_, "  ");
 
       be_global->impl_ <<
         "  primitive_serialized_size_ulong(encoding, size);\n" // either DHeader or Map length
-        "  for (const auto& elt : " << value_access << ") {\n";
-      const std::string indent = "    ";
-      generate_serialized_size_for_map(indent, key, key_cxx_elem, true, nested_key_only);
-      generate_serialized_size_for_map(indent, val, val_cxx_elem, false, nested_key_only);
+        "  for (const auto& elt : " << wrapper.value_access() << ") {\n";
+      generate_serialized_size_for_map(key, key_cxx_elem, true, nested_key_only);
+      generate_serialized_size_for_map(val, val_cxx_elem, false, nested_key_only);
       be_global->impl_ <<
           "  }\n";
     }
 
     {
-      Intro intro;
       RefWrapper wrapper(base_wrapper);
-      wrapper.done(&intro);
+      wrapper.done();
       Function insertion("operator<<", "bool");
       insertion.addArg("strm", "Serializer&");
       insertion.addArg("map", wrapper.wrapped_type_name());
       insertion.endArgs();
-      intro.join(be_global->impl_, "  ");
 
       std::string indentForLength = "  ";
       if (!both_primitive) {
@@ -1129,30 +1127,47 @@ namespace {
     }
 
     {
-      Intro intro;
       RefWrapper wrapper(base_wrapper);
       wrapper.is_const_ = false;
-      wrapper.done(&intro);
+      wrapper.done();
       Function extraction("operator>>", "bool");
       extraction.addArg("strm", "Serializer&");
       extraction.addArg("map", wrapper.wrapped_type_name());
       extraction.endArgs();
-      intro.join(be_global->impl_, "  ");
+
+      be_global->impl_ <<
+        "  DDS::UInt32 size = 0;\n" << // in bytes for DHeader, or in elements for Length
+        streamAndCheck(">> size");
 
       if (!both_primitive) {
         be_global->impl_ <<
-          "  const bool use_dheader = strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2;\n";
+          "  const bool size_is_bytes = strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2;\n"
+          "  const std::size_t start = size_is_bytes ? strm.rpos() : 0u;\n";
       }
 
+      static const size_t loopIndent = 4;
       be_global->impl_ <<
-        "  DDS::UInt32 total_size = 0;\n" << // in bytes for DHeader, or in elements for Length
-        streamAndCheck(">> total_size") <<
         "  " << wrapper.value_access() << ".clear();\n"
         "  DDS::UInt32 read = 0;\n"
-        "  while (read < total_size) {\n";
-      // Read key (trycon), read value (trycon), store in map
-      be_global->impl_ <<
-        "    ++read;\n" // or for DHeader we need stream bytes, but round up for alignment
+        "  while (read < size) {\n"
+        "    " << key_cxx_elem << " key;\n" <<
+        streamAndCheck(">> key", loopIndent) <<
+        "    " << val_cxx_elem << " val;\n"<<
+        streamAndCheck(">> val", loopIndent) <<
+      //TODO: try-construct
+        "    " << wrapper.value_access() << "[key] = val;\n" <<
+        (both_primitive ?
+        "    ++read;\n"
+        :
+        "    if (size_is_bytes) {\n"
+        "      if (strm.rpos() - start <= read) {\n"
+        "        return false;\n"
+        "      }\n"
+        "      read = static_cast<DDS::UInt32>(strm.rpos() - start);\n"
+        "    } else {\n"
+        "      ++read;\n"
+        "    }\n"
+        ) <<
         "  }\n"
         "  return true;\n";
     }
