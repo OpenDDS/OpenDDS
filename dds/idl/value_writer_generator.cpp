@@ -252,7 +252,6 @@ namespace {
                             Intro&,
                             const std::string&)
   {
-    // TODO: Update the arguments when @optional is available.
     const OpenDDS::XTypes::MemberId id = be_global->get_id(dynamic_cast<AST_UnionBranch*>(branch));
     const bool must_understand = be_global->is_effectively_must_understand(branch);
     be_global->impl_ <<
@@ -260,7 +259,8 @@ namespace {
       (must_understand ? "true" : "false") << ", \"" << canonical_name(branch) << "\", false, true))) {\n"
       "      return false;\n"
       "    }\n";
-    generate_write("value." + field_name + "()", field_name, type, "i", 2);
+    const bool is_optional = be_global->is_optional(branch);
+    generate_write("value." + field_name + "()" + (is_optional ? ".value()" : ""), field_name, type, "i", 2);
     be_global->impl_ <<
       "    if (!value_writer.end_union_member()) {\n"
       "      return false;\n"

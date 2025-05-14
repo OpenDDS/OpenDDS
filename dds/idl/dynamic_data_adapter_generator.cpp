@@ -173,11 +173,13 @@ namespace {
       std::string optional_value;
       if (field != 0 && be_global->is_optional(field)) {
         if (set) {
-          optional_value = value;
-          be_global->impl_ <<
-            "        " << type_name << " temp;\n";
-          rc_dest = "rc = ";
-          value = "temp";
+          if (!union_node) {
+            optional_value = value;
+            be_global->impl_ <<
+              "        " << type_name << " temp;\n";
+            rc_dest = "rc = ";
+            value = "temp";
+          }
         } else {
           be_global->impl_ <<
             "        if (!" << value << ".has_value()) {\n"
