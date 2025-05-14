@@ -121,7 +121,7 @@ For consistency and to avoid build errors, applications that have code that is c
 The following macros are available in the config header:
 
 ``OPENDDS_CONFIG_AUTO_STATIC_INCLUDES``
-    TODO
+    If OpenDDS was :ref:`built using CMake <cmake-building>`, then :ghfile:`dds/DCPS/StaticIncludes.h` can be included and the initialization headers will be included automatically based on the :ref:`static libraries <cmake-libraries>` that were linked.
 
 ``OPENDDS_CONFIG_BOOTTIME_TIMERS``
     Use Linux ``CLOCK_BOOTTIME`` when setting timers.

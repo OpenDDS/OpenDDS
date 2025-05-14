@@ -1624,7 +1624,7 @@ Service_Participant::set_security(bool b)
 bool
 Service_Participant::get_BIT() const
 {
-  return config_store_->get_boolean(COMMON_DCPS_BIT, COMMON_DCPS_BIT_default);
+  return config_store_->get_boolean(COMMON_DCPS_BIT, OPENDDS_CONFIG_BUILT_IN_TOPICS);
 }
 
 void

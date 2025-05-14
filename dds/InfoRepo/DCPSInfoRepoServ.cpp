@@ -42,11 +42,7 @@
 InfoRepo::InfoRepo(int argc, ACE_TCHAR *argv[])
 : ior_file_(ACE_TEXT("repo.ior"))
 , listen_address_given_(0)
-#if OPENDDS_CONFIG_BUILT_IN_TOPICS
-, use_bits_(true)
-#else
-, use_bits_(false)
-#endif
+, use_bits_(OPENDDS_CONFIG_BUILT_IN_TOPICS)
 , resurrect_(true)
 , finalized_(false)
 , servant_finalized_(false)

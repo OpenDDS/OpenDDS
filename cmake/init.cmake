@@ -520,7 +520,7 @@ else()
 endif()
 _opendds_feature(CXX17 "${_opendds_cxx17}" MPC_INVERTED_NAME no_cxx17 DOC "Build assumes C++17 support")
 _opendds_feature(STD_OPTIONAL "${OPENDDS_CXX17}" CONFIG DOC "Use C++17's std::optional")
-_opendds_feature(RAPIDJSON "${OPENDDS_RAPIDJSON}" CONFIG DOC "Enable rapidjson features" TYPE PATH)
+_opendds_feature(RAPIDJSON "${OPENDDS_RAPIDJSON}" CONFIG DOC "Enable RapidJSON features" TYPE PATH)
 
 # ACE Features
 _opendds_feature(VERSIONED_NAMESPACE OFF MPC DOC "Namespaces include versions")
