@@ -698,7 +698,7 @@ namespace OpenDDS
 
             std::string sample_str(format(sample));
 
-            proto_item* item =
+            proto_item* i =
               proto_tree_add_none_format
               (trans_tree, hf_sample, tvb_, offset,
                static_cast<gint>(sample.get_serialized_size()) +
@@ -707,13 +707,11 @@ namespace OpenDDS
                sample_str.c_str()
                );
 
-            proto_tree* sample_tree =
-              proto_item_add_subtree(item, ett_sample_header);
+            proto_tree* sample_tree = proto_item_add_subtree(i, ett_sample_header);
+            this->dissect_sample_header(sample_tree, sample, offset);
 
-            this->dissect_sample_header (sample_tree, sample, offset);
-
-            sample_tree = proto_item_add_subtree (item, ett_sample_header);
-            this->dissect_sample_payload (sample_tree, sample, offset);
+            sample_tree = proto_item_add_subtree(i, ett_sample_header);
+            this->dissect_sample_payload(sample_tree, sample, offset);
           }
       }
       return offset;

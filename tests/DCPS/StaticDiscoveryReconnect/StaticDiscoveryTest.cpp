@@ -359,6 +359,4 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     e._tao_print_exception("Exception caught in main():");
     return -1;
   }
-
-  return 0;
 }

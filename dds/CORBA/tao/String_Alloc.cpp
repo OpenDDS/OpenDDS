@@ -38,7 +38,7 @@ CORBA::string_alloc (CORBA::ULong len)
   // Allocate 1 + strlen to accommodate the null terminating character.
   char *s = 0;
   ACE_ALLOCATOR_NEW (s,
-                     char[size_t (len + 1)],
+                     char[len + 1],
                      0);
 
   s[0]= '\0';
@@ -80,7 +80,7 @@ CORBA::wstring_alloc (CORBA::ULong len)
 {
   CORBA::WChar *s = 0;
   ACE_ALLOCATOR_NEW (s,
-                     CORBA::WChar [(size_t) (len + 1)],
+                     CORBA::WChar [len + 1],
                      0);
 
   return s;

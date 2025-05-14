@@ -582,11 +582,11 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     // Regression Test for https://github.com/OpenDDS/OpenDDS/issues/592
     {
       Resulting resulting_value;
-      ReturnCode_t rc = res_dr->get_key_value(resulting_value, HANDLE_NIL);
-      if (rc != RETCODE_BAD_PARAMETER) {
+      const ReturnCode_t rc_get_key_value = res_dr->get_key_value(resulting_value, HANDLE_NIL);
+      if (rc_get_key_value != RETCODE_BAD_PARAMETER) {
         throw std::runtime_error(
           std::string("Expected get_key_value for HANDLE_NIL to return bad param, but it returned ") +
-          retcode_to_string(rc));
+          retcode_to_string(rc_get_key_value));
       }
     }
 
