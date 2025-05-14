@@ -274,6 +274,7 @@ function(_opendds_target_idl_sources target)
     set_target_properties(${target} PROPERTIES _OPENDDS_IDL_FILE_COUNT ${idl_file_count})
     set(idl_target "_opendds_codegen_${idl_file_count}_for_${target}")
     add_custom_target(${idl_target} DEPENDS ${generated_files})
+    set_target_properties(${idl_target} PROPERTIES FOLDER IDL)
     add_dependencies(${target} ${idl_target})
 
     set_source_files_properties(${idl_files} ${h_files}
