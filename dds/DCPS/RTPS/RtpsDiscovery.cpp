@@ -37,7 +37,6 @@ RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   : key_(key)
   , config_(DCPS::make_rch<RtpsDiscoveryConfig>(key))
   , stats_writer_(DCPS::make_rch<DCPS::StatisticsDataWriter>(DCPS::DataWriterQosBuilder().durability_transient_local()))
-  , stats_task_(DCPS::make_rch<PeriodicTask>(TheServiceParticipant->interceptor(), *this, &RtpsDiscovery::write_stats))
 {
   TheServiceParticipant->statistics_topic()->connect(stats_writer_);
 }
@@ -196,6 +195,7 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
     participants_[domain][ads.id] = spdp;
     const DCPS::TimeDuration period = TheServiceParticipant->statistics_period();
     if (!period.is_zero()) {
+      stats_task_ = DCPS::make_rch<PeriodicTask>(TheServiceParticipant->interceptor(), *this, &RtpsDiscovery::write_stats);
       stats_task_->enable(false, period);
     }
   } catch (const std::exception& e) {
