@@ -1486,7 +1486,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c03_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -1504,7 +1504,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-18 \
-          --std=c++11 \
+          --std=c++17 \
           --no-inline \
           --features=uses_wchar=1 \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
@@ -1580,7 +1580,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-18 \
-          --std=c++11 \
+          --std=c++17 \
           --no-inline \
           --features=uses_wchar=1 \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
@@ -1795,7 +1795,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c03_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -1813,7 +1813,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-17 \
-          --std=c++11 \
+          --std=c++17 \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --tests \
           --security \
@@ -1888,7 +1888,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-17 \
-          --std=c++11 \
+          --std=c++17 \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --tests \
           --security \
@@ -2102,7 +2102,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -2121,7 +2121,7 @@ jobs:
           --compiler=g++-13 \
           --no-debug \
           --features=uses_wchar=1 \
-          --std=c++03 \
+          --std=c++17 \
           --tests \
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
@@ -2196,7 +2196,7 @@ jobs:
           --compiler=g++-13 \
           --no-debug \
           --features=uses_wchar=1 \
-          --std=c++03 \
+          --std=c++17 \
           --tests \
           --rapidjson \
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
@@ -3465,7 +3465,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c12_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -3483,7 +3483,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-16 \
-          --std=c++11 \
+          --std=c++17 \
           --sanitize asan \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --ipv6 \
@@ -3560,7 +3560,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-16 \
-          --std=c++11 \
+          --std=c++17 \
           --sanitize asan \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --ipv6 \
@@ -3776,7 +3776,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c12_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -3794,7 +3794,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-16 \
-          --std=c++11 \
+          --std=c++17 \
           --sanitize tsan \
           --ipv6 \
           --tests \
@@ -3869,7 +3869,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-16 \
-          --std=c++11 \
+          --std=c++17 \
           --sanitize tsan \
           --ipv6 \
           --tests \
@@ -4092,7 +4092,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-16 \
-          --std=c++11 \
+          --std=c++17 \
           --sanitize ubsan \
           --features=no_hidden_visibility=1 \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
@@ -4170,7 +4170,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-16 \
-          --std=c++11 \
+          --std=c++17 \
           --gtest \
           --sanitize ubsan \
           --features=no_hidden_visibility=1 \
@@ -9708,20 +9708,19 @@ jobs:
     - name: set up msvc env
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: ilammy/msvc-dev-cmd@v1
+    - name: Reset VCPKG_ROOT
+      shell: cmd
+      run: |
+        echo VCPKG_ROOT=C:\vcpkg>> %GITHUB_ENV%
     - name: copy CMakePresets for WinFlexBison
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
       run: copy OpenDDS\.github\workflows\WinFlexBison_CMakePresets.json winflexbison\CMakePresets.json
-    - name: create vcpkg.json
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      shell: cmd
-      run: |
-        cd winflexbison
-        vcpkg new --application
     - name: build WinFlexBison
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-cmake@v10
       with:
+        vcpkgDirectory: '${{ env.VCPKG_INSTALLATION_ROOT }}'
         cmakeListsTxtPath: winflexbison/CMakeLists.txt
         configurePreset: config1
         buildPreset: build1
