@@ -1495,7 +1495,6 @@ sub write_opendds_configh {
     'OPENDDS_CONFIG_BOOTTIME_TIMERS' => $opts{'boottime'} // 0,
     'OPENDDS_CONFIG_BUILT_IN_TOPICS' => $opts{'built-in-topics'} // 1,
     'OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC' => $opts{'content-filtered-topic'} // $safety_profile_0,
-    'OPENDDS_CONFIG_CONTENT_SUBSCRIPTION' => $opts{'content-subscription'} // $safety_profile_0,
     'OPENDDS_CONFIG_MULTI_TOPIC' => $opts{'multi-topic'} // $safety_profile_0,
     'OPENDDS_CONFIG_OBJECT_MODEL_PROFILE' => $opts{'object-model-profile'} // $safety_profile_0,
     'OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE' => $exclusive,
@@ -1508,10 +1507,10 @@ sub write_opendds_configh {
     'OPENDDS_CONFIG_STD_OPTIONAL' => $use_optional,
   );
 
-  if ($config{'OPENDDS_CONFIG_CONTENT_SUBSCRIPTION'} == 0) {
-    $config{'OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC'} = 0;
-    $config{'OPENDDS_CONFIG_MULTI_TOPIC'} = 0;
-    $config{'OPENDDS_CONFIG_QUERY_CONDITION'} = 0;
+  if (exists $opts{'content-subscription'}) {
+    $config{'OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC'} = $opts{'content-subscription'};
+    $config{'OPENDDS_CONFIG_MULTI_TOPIC'} = $opts{'content-subscription'};
+    $config{'OPENDDS_CONFIG_QUERY_CONDITION'} = $opts{'content-subscription'};
   }
 
   my $replace_value = sub {

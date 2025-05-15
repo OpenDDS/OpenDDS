@@ -133,9 +133,6 @@ The following macros are available in the config header:
 ``OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC``
     Enable :ref:`content_subscription_profile--content-filtered-topic`.
 
-``OPENDDS_CONFIG_CONTENT_SUBSCRIPTION``
-    Enable :ref:`content_subscription_profile`.
-
 ``OPENDDS_CONFIG_MULTI_TOPIC``
     Enable :ref:`content_subscription_profile--multi-topic`.
 
