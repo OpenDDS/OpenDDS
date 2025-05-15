@@ -1684,7 +1684,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // !!!! note - this test should be the last because it deletes the datareader
         ACE_DEBUG((LM_INFO,"==== TEST 10: show that loans are checked by delete_datareader.\n"));
 
-        const CORBA::Long max_samples = 2;
         // Initialize the ZeroCopySeq and ZeroCopyInfoSeq objects for read
         // operation.
         Test::SimpleSeq     data0 (0, max_samples);
