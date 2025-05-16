@@ -19,7 +19,7 @@ namespace DCPS {
 
 // These operators are used in some inline functions below.  Some
 // compilers require the inline definition to appear before its use.
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 ACE_INLINE
 bool operator==(const DDS::Duration_t& t1, const DDS::Duration_t& t2)
 {
@@ -82,7 +82,7 @@ bool operator!(const DDS::Time_t& t)
          || t.nanosec == DDS::TIME_INVALID_NSEC;
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 ACE_INLINE bool
 operator==(const DDS::Time_t& t1, const DDS::Time_t& t2)
 {
@@ -183,7 +183,7 @@ operator<(const MonotonicTime_t& t1, const MonotonicTime_t& t2)
   return t1.sec < t2.sec || (t1.sec == t2.sec && t1.nanosec < t2.nanosec);
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 ACE_INLINE bool
 operator==(const MonotonicTime_t& t1, const MonotonicTime_t& t2)
 {

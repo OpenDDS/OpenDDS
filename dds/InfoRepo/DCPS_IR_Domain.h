@@ -13,16 +13,17 @@
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsDomainC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
-#include <dds/DCPS/InfoRepoDiscovery/InfoS.h>
 #include <dds/DCPS/AtomicBool.h>
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/InfoRepoDiscovery/InfoS.h>
 #include <dds/DCPS/RepoIdGenerator.h>
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/tcp/TcpTransport.h>
 #include <dds/DCPS/transport/framework/TransportConfig_rch.h>
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
 #include <ace/Unbounded_Set.h>
 
@@ -248,7 +249,7 @@ private:
   DDS::DomainParticipantListener_var               bitParticipantListener_;
   DDS::Publisher_var                               bitPublisher_;
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   OpenDDS::DCPS::TransportConfig_rch               transportConfig_;
 
   DDS::Topic_var                                   bitParticipantTopic_;
@@ -262,7 +263,7 @@ private:
 
   DDS::Topic_var                                   bitPublicationTopic_;
   DDS::PublicationBuiltinTopicDataDataWriter_var   bitPublicationDataWriter_;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
   ///@}
 
   // MSVC 2017 has trouble to compile std::map<key, std::unique_ptr<Foo> > when it is enclosed

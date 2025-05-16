@@ -36,7 +36,7 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t      handle,
   default_datawriter_qos_(TheServiceParticipant->initial_DataWriterQos()),
   listener_mask_(mask),
   listener_(DDS::PublisherListener::_duplicate(a_listener)),
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   change_depth_(0),
 #endif
   domain_id_(participant->get_domain_id()),
@@ -617,7 +617,7 @@ PublisherImpl::resume_publications()
   return DDS::RETCODE_OK;
 }
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 
 DDS::ReturnCode_t
 PublisherImpl::begin_coherent_changes()
@@ -748,7 +748,7 @@ PublisherImpl::end_coherent_changes()
   return DDS::RETCODE_OK;
 }
 
-#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
+#endif
 
 DDS::ReturnCode_t
 PublisherImpl::wait_for_acknowledgments(

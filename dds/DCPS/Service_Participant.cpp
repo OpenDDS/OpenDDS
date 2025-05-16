@@ -47,7 +47,7 @@
 #include <ace/config.h>
 
 #include <cstring>
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
 #  include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
 #else
 #  include <fstream>
@@ -77,7 +77,7 @@ namespace {
 
 void set_log_file_name(const char* fname)
 {
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
   ACE_LOG_MSG->msg_ostream(fopen(fname, "a"), true);
 #else
   std::ofstream* output_stream = new std::ofstream(fname, ios::app);
@@ -146,7 +146,7 @@ String toupper(const String& x)
 
 Service_Participant::Service_Participant()
   :
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   ORB_argv_(false /*substitute_env_args*/),
 #endif
   time_source_()
@@ -307,7 +307,7 @@ DDS::ReturnCode_t Service_Participant::shutdown()
 
       discoveryMap_.clear();
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
       transient_data_cache_.reset();
       persistent_data_cache_.reset();
 #endif
@@ -354,7 +354,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
       // The exceptions are -ORBLogFile and -ORBVerboseLogging, which
       // are processed by the service participant. This allows log control
       // even if an ORB is not being used.
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
       ORB_argv_.add(ACE_TEXT("unused_arg_0"));
 #endif
       /* NOTE ABOUT ADDING NEW OPTIONS HERE ==================================
@@ -379,12 +379,12 @@ Service_Participant::get_domain_participant_factory(int &argc,
         } else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-ORB")) < 0) {
           shifter.ignore_arg();
         } else {
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
           ORB_argv_.add(shifter.get_current());
 #endif
           shifter.consume_arg();
           if (shifter.is_parameter_next()) {
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
             ORB_argv_.add(shifter.get_current(), true /*quote_arg*/);
 #endif
             shifter.consume_arg();
@@ -1624,7 +1624,7 @@ Service_Participant::set_security(bool b)
 bool
 Service_Participant::get_BIT() const
 {
-  return config_store_->get_boolean(COMMON_DCPS_BIT, COMMON_DCPS_BIT_default);
+  return config_store_->get_boolean(COMMON_DCPS_BIT, OPENDDS_CONFIG_BUILT_IN_TOPICS);
 }
 
 void
@@ -2021,7 +2021,7 @@ Service_Participant::configure_pool()
 }
 #endif
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 DataDurabilityCache *
 Service_Participant::get_data_durability_cache(
   DDS::DurabilityQosPolicy const & durability)
@@ -2231,7 +2231,7 @@ Service_Participant::get_type_information(DDS::DomainParticipant_ptr participant
   return XTypes::TypeInformation();
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 DDS::ReturnCode_t Service_Participant::get_dynamic_type(DDS::DynamicType_var& type,
   DDS::DomainParticipant_ptr participant, const DDS::BuiltinTopicKey_t& key) const
 {

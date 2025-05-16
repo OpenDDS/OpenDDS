@@ -195,7 +195,7 @@ set_durability_kind_qos(
     } else if (!std::strcmp(value, "TRANSIENT_LOCAL")) {
       target.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
       matched = true;
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
     } else if (!std::strcmp(value, "TRANSIENT")) {
       target.kind = DDS::TRANSIENT_DURABILITY_QOS;
       matched = true;

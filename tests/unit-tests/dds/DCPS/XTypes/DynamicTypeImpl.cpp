@@ -1,4 +1,6 @@
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 /*
 TODO Untested Types:
@@ -831,4 +833,4 @@ void dds_DCPS_XTypes_DynamicTypeImpl_CompleteToMinimal::MoreSetup()
   tls_->update_type_identifier_map(tid_pairs);
 }
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

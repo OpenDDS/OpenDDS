@@ -70,7 +70,7 @@ public:
 
 typedef RcHandle<WriterInfoListener> WriterInfoListener_rch;
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 enum Coherent_State {
   NOT_COMPLETED_YET,
   COMPLETED,
@@ -154,7 +154,7 @@ public:
   /// update liveliness when remove_association is called.
   void removed();
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   Coherent_State coherent_change_received();
   void reset_coherent_info();
   void set_group_info(const CoherentChangeControl& info);
@@ -237,7 +237,7 @@ private:
   OwnerEvaluateFlags owner_evaluated_;
 
   /// Data to support GROUP access scope.
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   bool group_coherent_;
   GUID_t publisher_id_;
   DisjointSequence coherent_sample_sequence_;

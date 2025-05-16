@@ -14,11 +14,12 @@
 #  pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "RcObject.h"
-#include "PoolAllocator.h"
+#include "Definitions.h"
 #include "InternalDataReaderListener.h"
-#include "Time_Helper.h"
+#include "PoolAllocator.h"
+#include "RcObject.h"
 #include "TimeTypes.h"
+#include "Time_Helper.h"
 
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsInfrastructureC.h>
@@ -65,7 +66,7 @@ inline DDS::SampleInfo make_sample_info(DDS::SampleStateKind sample_state,
   return si;
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 inline bool operator==(const DDS::SampleInfo& x, const DDS::SampleInfo& y)
 {
   return x.sample_state == y.sample_state &&

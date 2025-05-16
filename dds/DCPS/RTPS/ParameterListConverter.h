@@ -10,7 +10,7 @@
 #include "rtps_export.h"
 #include "RtpsCoreC.h"
 
-#include <dds/OpenDDSConfigWrapper.h>
+#include <dds/DCPS/Definitions.h>
 
 #if OPENDDS_CONFIG_SECURITY
 #include "RtpsSecurityC.h"

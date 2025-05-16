@@ -6,17 +6,19 @@
  */
 // ============================================================================
 
-#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
-#include <dds/DCPS/transport/framework/TransportType_rch.h>
-#include <dds/DCPS/transport/framework/TransportRegistry.h>
+#include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/transport/framework/TransportConfig_rch.h>
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
+#include <dds/DCPS/transport/framework/TransportType_rch.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
+
 #include "MessengerTypeSupportImpl.h"
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #endif
 
@@ -118,7 +120,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
         }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
       OpenDDS::RTPS::RtpsDiscovery_rch disc =
         OpenDDS::DCPS::make_rch<OpenDDS::RTPS::RtpsDiscovery>(OpenDDS::DCPS::Discovery::DEFAULT_RTPS);
 

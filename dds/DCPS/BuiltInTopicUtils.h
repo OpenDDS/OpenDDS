@@ -6,11 +6,12 @@
 #ifndef OPENDDS_DCPS_BUILTINTOPICUTILS_H
 #define OPENDDS_DCPS_BUILTINTOPICUTILS_H
 
-#include "dcps_export.h"
-#include "Service_Participant.h"
-#include "DomainParticipantImpl.h"
-#include "debug.h"
 #include "DCPS_Utils.h"
+#include "Definitions.h"
+#include "DomainParticipantImpl.h"
+#include "Service_Participant.h"
+#include "dcps_export.h"
+#include "debug.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -100,7 +101,7 @@ public:
 template<typename TopicType>
 DDS::BuiltinTopicKey_t keyFromSample(TopicType* sample);
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
 template<class BIT_Reader_var, class BIT_DataSeq>
 DDS::ReturnCode_t instance_handle_to_bit_data(
@@ -193,7 +194,7 @@ BuiltinTopicKeyLess::operator()(const DDS::BuiltinTopicKey_t& lhs,
   return std::memcmp(lhs.value, rhs.value, sizeof(lhs.value)) < 0;
 }
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
 template<>
 inline

@@ -5,6 +5,7 @@
 #include "BuiltInTopicUtils.h"
 #include "DataWriterImpl.h"
 #include "DcpsUpcalls.h"
+#include "Definitions.h"
 #include "DomainParticipantImpl.h"
 #include "Marked_Default_Qos.h"
 #include "Qos_Helper.h"
@@ -15,8 +16,6 @@
 #include "transport/framework/TransportRegistry.h"
 
 #include "XTypes/TypeAssignability.h"
-
-#include <dds/OpenDDSConfigWrapper.h>
 
 #include <ctype.h>
 
@@ -85,13 +84,13 @@ StaticEndpointManager::StaticEndpointManager(const GUID_t& participant_id,
   , participant_id_(participant_id)
   , topic_counter_(0)
   , registry_(registry)
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   , participant_(participant)
 #endif
   , max_type_lookup_service_reply_period_(0)
   , type_lookup_service_sequence_number_(0)
 {
-#ifdef DDS_HAS_MINIMUM_BIT
+#if !OPENDDS_CONFIG_BUILT_IN_TOPICS
   ACE_UNUSED_ARG(participant);
 #endif
   type_lookup_init(TheServiceParticipant->reactor_task());
@@ -154,12 +153,12 @@ void StaticEndpointManager::init_bit()
       data.group_data = writer.publisher_qos.group_data;
       data.representation = writer.qos.representation;
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
       OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
       if (bit) { // bit may be null if the DomainParticipant is shutting down
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);
       }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
     }
   }
 
@@ -209,12 +208,12 @@ void StaticEndpointManager::init_bit()
       data.group_data = reader.subscriber_qos.group_data;
       data.representation = reader.qos.representation;
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
       OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
       if (bit) { // bit may be null if the DomainParticipant is shutting down
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);
       }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
     }
   }
 }
@@ -586,7 +585,7 @@ void StaticEndpointManager::cleanup_type_lookup_data(const GuidPrefix_t& /*guid_
   // Do nothing.
 }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl*
 StaticEndpointManager::pub_bit()
 {
@@ -608,7 +607,7 @@ StaticEndpointManager::sub_bit()
   DDS::DataReader_var d = sub->lookup_datareader(BUILT_IN_SUBSCRIPTION_TOPIC);
   return dynamic_cast<OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl*>(d.in());
 }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 
 void StaticEndpointManager::type_lookup_init(ReactorTask_rch reactor_task)
 {
@@ -1373,7 +1372,7 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
     XTypes::serialize_type_info(*reader_type_info, octet_seq_type_info_reader);
     const ReaderAssociation ra = {
       *rTls, TransportLocator(), rTransportContext, reader, *subQos, *drQos,
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
       cfProp->filterClassName, cfProp->filterExpression,
 #else
       "", "",
@@ -1663,7 +1662,7 @@ namespace {
     {
       { DDS::VOLATILE_DURABILITY_QOS, "VOLATILE" },
       { DDS::TRANSIENT_LOCAL_DURABILITY_QOS, "TRANSIENT_LOCAL" }
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
       ,
       { DDS::TRANSIENT_DURABILITY_QOS, "TRANSIENT" },
       { DDS::PERSISTENT_DURABILITY_QOS, "PERSISTENT" }
@@ -2365,7 +2364,7 @@ StaticDiscovery_rch StaticDiscovery::instance_(make_rch<StaticDiscovery>(Discove
 RcHandle<BitSubscriber> StaticDiscovery::init_bit(DomainParticipantImpl* participant)
 {
   DDS::Subscriber_var bit_subscriber;
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (!TheServiceParticipant->get_BIT()) {
     get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber);
     return RcHandle<BitSubscriber>();
@@ -2438,7 +2437,7 @@ RcHandle<BitSubscriber> StaticDiscovery::init_bit(DomainParticipantImpl* partici
     }
     return RcHandle<BitSubscriber>();
   }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 
   get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber);
 
@@ -2717,7 +2716,7 @@ void StaticParticipant::remove_discovered_participant(DiscoveredParticipantIter&
     return;
   }
   if (removed) {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
     ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
     ParticipantLocationBuiltinTopicDataDataReaderImpl* loc_bit = part_loc_bit();
     // bit may be null if the DomainParticipant is shutting down
@@ -2743,7 +2742,7 @@ void StaticParticipant::remove_discovered_participant(DiscoveredParticipantIter&
         return;
       }
     }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
     if (DCPS_debug_level > 3) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) LocalParticipant::remove_discovered_participant")
                  ACE_TEXT(" - erasing %C (%B)\n"), LogGuid(iter->first).c_str(), participants_.size()));

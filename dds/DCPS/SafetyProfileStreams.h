@@ -1,12 +1,13 @@
 #ifndef OPENDDS_DCPS_SAFETYPROFILESTREAMS_H
 #define OPENDDS_DCPS_SAFETYPROFILESTREAMS_H
 
-#include "dcps_export.h"
+#include "Definitions.h"
 #include "PoolAllocator.h"
+#include "dcps_export.h"
 
 #include <ace/CDR_Base.h>
 
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
 #  include <cstdlib> // For strto*
 #else
 #  include <fstream>
@@ -62,7 +63,7 @@ OpenDDS_Dcps_Export String to_hex_dds_string(
 template <typename T>
 bool convertToInteger(const String& s, T& value)
 {
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
   char* end;
   const long conv = std::strtol(s.c_str(), &end, 10);
   if (end == s.c_str()) return false;
@@ -82,7 +83,7 @@ bool convertToInteger(const String& s, T& value)
 template <typename T>
 bool convertToDouble(const String& s, T& value)
 {
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
   char* end;
   const double conv = std::strtod(s.c_str(), &end);
   if (end == s.c_str()) return false;

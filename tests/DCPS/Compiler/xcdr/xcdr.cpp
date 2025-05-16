@@ -13,9 +13,11 @@
 #include <tests/Utils/DataView.h>
 #include <tests/Utils/GtestRc.h>
 
-#include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/Xcdr2ValueWriter.h>
+
 #include <dds/DCPS/XTypes/TypeLookupService.h>
 #include <dds/DCPS/XTypes/DynamicDataImpl.h>
 #include <dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h>
@@ -42,7 +44,7 @@ enum FieldFilter {
 
 bool dynamic = false;
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 TypeLookupService_rch tls;
 
 template<typename TopicType>

@@ -6,10 +6,11 @@
 #ifndef OPENDDS_DCPS_SAMPLE_H
 #define OPENDDS_DCPS_SAMPLE_H
 
+#include "Definitions.h"
+#include "FilterEvaluator.h"
+#include "RcHandle_T.h"
 #include "Serializer.h"
 #include "TypeSupportImpl.h"
-#include "RcHandle_T.h"
-#include "FilterEvaluator.h"
 #include "XTypes/DynamicDataAdapterFwd.h"
 
 #include <dds/DdsDynamicDataC.h>
@@ -79,13 +80,13 @@ public:
     return copy(mutability, extent_);
   }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   virtual DDS::DynamicData_var get_dynamic_data(DDS::DynamicType_ptr type) const = 0;
 #endif
 
   virtual const void* native_data() const = 0;
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   virtual bool eval(FilterEvaluator& evaluator, const DDS::StringSeq& params) const = 0;
 #endif
 
@@ -232,7 +233,7 @@ public:
       make_rch<Sample_T<NativeType> >(new_data, extent));
   }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   DDS::DynamicData_var get_dynamic_data(DDS::DynamicType_ptr type) const
   {
 #  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
@@ -254,7 +255,7 @@ public:
     return data_;
   }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   bool eval(FilterEvaluator& evaluator, const DDS::StringSeq& params) const
   {
     return evaluator.eval(*data_, params);

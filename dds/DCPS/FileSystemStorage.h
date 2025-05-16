@@ -8,7 +8,9 @@
 #ifndef OPENDDS_DCPS_FILESYSTEMSTORAGE_H
 #define OPENDDS_DCPS_FILESYSTEMSTORAGE_H
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include "Definitions.h"
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include "dcps_export.h"
 

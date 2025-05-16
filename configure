@@ -1480,13 +1480,38 @@ sub write_opendds_configh {
     $exclusive = 0;
   }
 
+  my $cxx11 = 0;
+  for my $f (@features) {
+    if ($f eq 'no_cxx11=0') {
+      $cxx11 = 1;
+    }
+  }
+
+  my $safety_profile_0 = $opts{'safety-profile'} ? 0 : 1;
+  my $safety_profile_1 = $opts{'safety-profile'} ? 1 : 0;
+
   my %config = (
     'OPENDDS_CONFIG_AUTO_STATIC_INCLUDES' => 0,
     'OPENDDS_CONFIG_BOOTTIME_TIMERS' => $opts{'boottime'} // 0,
+    'OPENDDS_CONFIG_BUILT_IN_TOPICS' => $opts{'built-in-topics'} // 1,
+    'OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC' => $opts{'content-filtered-topic'} // $safety_profile_0,
+    'OPENDDS_CONFIG_MULTI_TOPIC' => $opts{'multi-topic'} // $safety_profile_0,
+    'OPENDDS_CONFIG_OBJECT_MODEL_PROFILE' => $opts{'object-model-profile'} // $safety_profile_0,
     'OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE' => $exclusive,
+    'OPENDDS_CONFIG_OWNERSHIP_PROFILE' => $opts{'ownership-profile'} // 1,
+    'OPENDDS_CONFIG_PERSISTENCE_PROFILE' => $opts{'persistence-profile'} // $safety_profile_0,
+    'OPENDDS_CONFIG_QUERY_CONDITION' => $opts{'query-condition'} // $safety_profile_0,
+    'OPENDDS_CONFIG_RAPIDJSON' => ($opts{'rapidjson'} // 0) ? 1 : 0,
+    'OPENDDS_CONFIG_SAFETY_PROFILE' => ($buildEnv{'build'} eq 'host') ? 0 : $safety_profile_1,
     'OPENDDS_CONFIG_SECURITY' => $opts{'security'} // 0,
     'OPENDDS_CONFIG_STD_OPTIONAL' => $use_optional,
   );
+
+  if (exists $opts{'content-subscription'}) {
+    $config{'OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC'} = $opts{'content-subscription'};
+    $config{'OPENDDS_CONFIG_MULTI_TOPIC'} = $opts{'content-subscription'};
+    $config{'OPENDDS_CONFIG_QUERY_CONDITION'} = $opts{'content-subscription'};
+  }
 
   my $replace_value = sub {
     my $var = shift;
@@ -1527,7 +1552,6 @@ my %optdep = (
   'rapidjson' => {
     env => 'RAPIDJSON_ROOT',
     sanity => 'include/rapidjson/rapidjson.h',
-    mpc => 'no_rapidjson=0',
   },
   'qt' => {env => 'QTDIR', sanity => '', mpc => 'qt5'},
   'xerces3' => {
@@ -2528,6 +2552,10 @@ EOT
     push(@mwc_common_args, '-static');
   }
 
+  if ($opts{'rapidjson'}) {
+    push(@mwc_common_args, '-features', 'no_rapidjson=0');
+  }
+
   if (!$buildtao) {
     my %existing_features = get_default_features($buildEnv);
     my %requested_features = get_requested_features();
@@ -2651,6 +2679,7 @@ sub configure_build {
     write_default_features($buildEnvRef);
     write_platform_macros($buildEnvRef);
   }
+  # Write the config before generating the workspace so that OpenDDSConfig.h is in place for the Java Support in MPC.
   write_opendds_configh($buildEnvRef);
   generate_workspace($buildEnvRef);
   write_environment($buildEnvRef, $buildEnvRef->{'DDS_ROOT'});

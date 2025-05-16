@@ -5,9 +5,9 @@
 
 #include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
-#ifdef OPENDDS_SAFETY_PROFILE
-
 #include "SafetyProfileSequences.h"
+
+#if OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include "debug.h"
 

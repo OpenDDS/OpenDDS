@@ -66,7 +66,7 @@ namespace {
     return false;
   }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   DCPS::ParticipantLocation compute_location_mask(const DCPS::NetworkAddress& address, bool from_relay)
   {
     if (address.get_type() == AF_INET6) {
@@ -78,7 +78,7 @@ namespace {
 
 #if OPENDDS_CONFIG_SECURITY
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   DCPS::ParticipantLocation compute_ice_location_mask(const DCPS::NetworkAddress& address)
   {
     if (address.get_type() == AF_INET6) {
@@ -514,7 +514,7 @@ namespace {
   }
 }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 void
 Spdp::enqueue_location_update_i(DiscoveredParticipantIter iter,
                                 DCPS::ParticipantLocation mask,
@@ -790,7 +790,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
   const bool from_relay = sedp_->core().from_relay(from);
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   const DCPS::ParticipantLocation location_mask = compute_location_mask(from, from_relay);
 #endif
 
@@ -896,7 +896,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       log_progress("participant discovery", guid_, guid, iter->second.discovered_at_.to_idl_struct());
     }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
     if (!from_sedp) {
       enqueue_location_update_i(iter, location_mask, from, "new participant");
     }
@@ -983,7 +983,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       log_progress("secure participant discovery", guid_, guid, iter->second.discovered_at_.to_idl_struct());
     }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
     if (!from_sedp) {
       enqueue_location_update_i(iter, location_mask, from, "existing participant");
     }
@@ -996,7 +996,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       if (!from_relay && from) {
         iter->second.last_recv_address_ = from;
       }
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
       process_location_updates_i(iter, "non-secure liveliness");
 #endif
       return;
@@ -1016,7 +1016,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       }
       purge_handshake_deadlines(iter);
 #endif
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
       process_location_updates_i(iter, "dispose/unregister");
 #endif
       if (iter != participants_.end()) {
@@ -1033,7 +1033,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       DDS::ParticipantBuiltinTopicData& discoveredBit = partBitData(iter->second.pdata_);
       pdataBit.key = discoveredBit.key;
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
       using DCPS::operator!=;
 #endif
       if (discoveredBit.user_data != pdataBit.user_data ||
@@ -1056,7 +1056,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         iter->second.last_recv_address_ = from;
       }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
       /*
        * If secure user data, force update location bit because we just gave
        * the first data on the participant. Readers might have been ignoring
@@ -1069,7 +1069,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #if OPENDDS_CONFIG_SECURITY
       purge_handshake_deadlines(iter);
 #endif
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
       process_location_updates_i(iter, "reset");
 #endif
       if (iter != participants_.end()) {
@@ -1080,7 +1080,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
   }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (iter != participants_.end()) {
     process_location_updates_i(iter, "catch all");
   }
@@ -1162,7 +1162,7 @@ Spdp::data_received(const DataSubmessage& data,
   if (!security_enabled) {
     process_participant_ice(plist, pdata, guid);
   }
-#elif !defined OPENDDS_SAFETY_PROFILE
+#elif !OPENDDS_CONFIG_SAFETY_PROFILE
   const bool from_relay = sedp_->core().from_relay(from);
   guard.release();
 
@@ -1182,7 +1182,7 @@ Spdp::data_received(const DataSubmessage& data,
 void
 Spdp::match_unauthenticated(const DiscoveredParticipantIter& dp_iter)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (!secure_part_user_data()) { // else the user data is assumed to be blank
     dp_iter->second.bit_ih_ = bit_subscriber_->add_participant(partBitData(dp_iter->second.pdata_), DDS::NEW_VIEW_STATE);
   }
@@ -1190,7 +1190,7 @@ Spdp::match_unauthenticated(const DiscoveredParticipantIter& dp_iter)
   process_location_updates_i(dp_iter, "match_unauthenticated");
 #else
   ACE_UNUSED_ARG(dp_iter);
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 }
 
 #if OPENDDS_CONFIG_SECURITY
@@ -2183,7 +2183,7 @@ Spdp::match_authenticated(const DCPS::GUID_t& guid, DiscoveredParticipantIter& i
   // Auth is now complete.
   sedp_->process_association_records_i(iter->second);
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   process_location_updates_i(iter, "match_authenticated");
 #endif
   return true;
@@ -2439,7 +2439,7 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
   }
 #endif
 
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
   if (outer->ipv4_participant_port_id_ > startingParticipantId && ACE_OS::getpid() == -1) {
     // Since pids are not available, use the fact that we had to increment
     // participantId to modify the GUID's pid bytes.  This avoids GUID conflicts
@@ -2521,12 +2521,12 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
                                  rchandle_from(this), &SpdpTransport::relay_stun_task);
 #endif
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   // internal thread bit reporting
   if (TheServiceParticipant->get_thread_status_manager().update_thread_status() && outer->harvest_thread_status_) {
     thread_status_task_ = DCPS::make_rch<PeriodicThreadStatus>(reactor_task, ref(*this));
   }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 
   // Connect the listeners last so that the tasks are created.
   DCPS::ConfigListener::job_queue(job_queue);
@@ -2622,12 +2622,12 @@ Spdp::SpdpTransport::enable_periodic_tasks()
   relay_stun_task_->schedule(TimeDuration::zero_value);
 #endif
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   const DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   if (thread_status_manager.update_thread_status() && outer->harvest_thread_status_) {
     thread_status_task_->enable(false, thread_status_manager.thread_status_interval());
   }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 }
 
 void
@@ -3457,7 +3457,7 @@ Spdp::SpdpTransport::stun_server_address() const
   return outer ? outer->sedp_->core().spdp_stun_server_address().to_addr() : ACE_INET_Addr();
 }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 void
 Spdp::SpdpTransport::ice_connect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr)
 {
@@ -3488,7 +3488,7 @@ Spdp::SpdpTransport::ice_disconnect(const ICE::GuidSetType& guids, const ACE_INE
 
   outer->sedp_->job_queue()->enqueue(DCPS::make_rch<IceConnect>(outer, guids, DCPS::NetworkAddress(addr), false));
 }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 #endif
 
 void
@@ -3702,7 +3702,7 @@ void Spdp::SpdpTransport::on_data_available(DCPS::ConfigReader_rch)
           core.reset_relay_stun_task_falloff();
           relay_stun_task_->schedule(TimeDuration::zero_value);
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
           const DCPS::ParticipantLocation mask =
             DCPS::LOCATION_LOCAL |
             DCPS::LOCATION_LOCAL6 |
@@ -3747,7 +3747,7 @@ void Spdp::SpdpTransport::on_data_available(DCPS::ConfigReader_rch)
             }
           }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
           const DCPS::ParticipantLocation mask =
             DCPS::LOCATION_RELAY |
             DCPS::LOCATION_RELAY6;
@@ -3794,7 +3794,7 @@ void Spdp::SpdpTransport::on_data_available(DCPS::ConfigReader_rch)
           outer->ice_agent_->remove_endpoint(DCPS::static_rchandle_cast<ICE::Endpoint>(rchandle_from(this)));
           ice_endpoint_added_ = false;
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
           const DCPS::ParticipantLocation mask =
             DCPS::LOCATION_ICE |
             DCPS::LOCATION_ICE6;
@@ -4370,7 +4370,7 @@ void Spdp::SpdpTransport::relay_stun_task(const MonotonicTimePoint& /*now*/)
 
 void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange sc)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
@@ -4409,7 +4409,7 @@ void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::St
 
 void Spdp::SpdpTransport::disable_relay_stun_task()
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
@@ -4484,7 +4484,7 @@ Spdp::SpdpTransport::process_lease_expirations(const DCPS::MonotonicTimePoint& n
 void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& now)
 {
   ACE_UNUSED_ARG(now);
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
@@ -4513,7 +4513,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& now
     outer->bit_subscriber_->add_thread_status(data, DDS::NEW_VIEW_STATE, i->timestamp());
   }
 
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 }
 
 #if OPENDDS_CONFIG_SECURITY
@@ -4631,7 +4631,7 @@ void Spdp::process_participant_ice(const ParameterList& plist,
       ice_agent_->start_ice(spdp_endpoint, guid_, guid, spdp_pos->second);
     } else {
       ice_agent_->stop_ice(spdp_endpoint, guid_, guid);
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
       ACE_GUARD(ACE_Thread_Mutex, g, lock_);
       DiscoveredParticipantIter iter = participants_.find(guid);
       if (iter != participants_.end()) {

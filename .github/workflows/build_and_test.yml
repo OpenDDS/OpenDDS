@@ -99,7 +99,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v4
@@ -1206,7 +1206,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -5909,7 +5909,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/DCPS/Messenger
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
+        perl $DDS_ROOT/bin/opendds_mwc.pl -static
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: bash
@@ -5924,7 +5924,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/DCPS/C++11
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
+        perl $DDS_ROOT/bin/opendds_mwc.pl -static
     - name: make C++11 messenger test
       shell: bash
       run: |
@@ -6089,7 +6089,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/DCPS/Compiler
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
+        perl $DDS_ROOT/bin/opendds_mwc.pl -static
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: bash
@@ -6255,7 +6255,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/unit-tests
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
+        perl $DDS_ROOT/bin/opendds_mwc.pl -static
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make unit tests
       shell: bash
@@ -6412,7 +6412,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/security/attributes
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
+        perl $DDS_ROOT/bin/opendds_mwc.pl -static
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build security tests
       shell: bash

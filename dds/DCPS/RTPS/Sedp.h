@@ -6,7 +6,7 @@
 #ifndef OPENDDS_DCPS_RTPS_SEDP_H
 #define OPENDDS_DCPS_RTPS_SEDP_H
 
-#include <dds/OpenDDSConfigWrapper.h>
+#include <dds/DCPS/Definitions.h>
 
 #include "AssociationRecord.h"
 #include "DiscoveredEntities.h"
@@ -30,7 +30,6 @@
 #include <dds/DCPS/DataReaderCallbacks.h>
 #include <dds/DCPS/DataSampleElement.h>
 #include <dds/DCPS/DataSampleHeader.h>
-#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/FibonacciSequence.h>
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/JobQueue.h>
@@ -1154,7 +1153,7 @@ private:
                                            DCPS::SequenceNumber& publication_sn,
                                            const DCPS::GUID_t& reader = DCPS::GUID_UNKNOWN);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::ReturnCode_t write_publication_data_secure(UsedEndpoints& ue,
                                                   const DCPS::GUID_t& rid,
                                                   LocalPublication& pub,
@@ -1179,7 +1178,7 @@ private:
                                             DCPS::SequenceNumber& subscription_sn,
                                             const DCPS::GUID_t& reader = DCPS::GUID_UNKNOWN);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::ReturnCode_t write_subscription_data_secure(UsedEndpoints& ue,
                                                    const DCPS::GUID_t& rid,
                                                    LocalSubscription& sub,

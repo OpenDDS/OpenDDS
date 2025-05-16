@@ -16,9 +16,10 @@
 
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h>
 //If we need BIT support, pull in TCP so that static builds will have it.
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 
@@ -41,11 +42,7 @@
 InfoRepo::InfoRepo(int argc, ACE_TCHAR *argv[])
 : ior_file_(ACE_TEXT("repo.ior"))
 , listen_address_given_(0)
-#ifdef DDS_HAS_MINIMUM_BIT
-, use_bits_(false)
-#else
-, use_bits_(true)
-#endif
+, use_bits_(OPENDDS_CONFIG_BUILT_IN_TOPICS)
 , resurrect_(true)
 , finalized_(false)
 , servant_finalized_(false)

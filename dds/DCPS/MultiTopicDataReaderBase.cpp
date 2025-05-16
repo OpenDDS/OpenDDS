@@ -6,9 +6,10 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-#ifndef OPENDDS_NO_MULTI_TOPIC
 
 #include "MultiTopicDataReaderBase.h"
+
+#if OPENDDS_CONFIG_MULTI_TOPIC
 
 #include "DomainParticipantImpl.h"
 #include "Marked_Default_Qos.h"
@@ -353,7 +354,7 @@ DDS::ReadCondition_ptr MultiTopicDataReaderBase::create_readcondition(
     instance_states);
 }
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
 DDS::QueryCondition_ptr MultiTopicDataReaderBase::create_querycondition(
   DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
   DDS::InstanceStateMask instance_states, const char* query_expression,
@@ -455,7 +456,7 @@ DDS::ReturnCode_t MultiTopicDataReaderBase::get_matched_publications(
   return resulting_reader_->get_matched_publications(publication_handles);
 }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 DDS::ReturnCode_t MultiTopicDataReaderBase::get_matched_publication_data(
   DDS::PublicationBuiltinTopicData& publication_data,
   DDS::InstanceHandle_t publication_handle)

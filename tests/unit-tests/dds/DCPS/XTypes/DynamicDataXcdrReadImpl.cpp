@@ -1,4 +1,6 @@
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include <DynamicDataXcdrReadImplTypeSupportImpl.h>
 
@@ -3361,4 +3363,4 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Enum_As_String)
   EXPECT_EQ(DDS::RETCODE_OK, data.get_string_value(strVal, MID_my_enum));
   EXPECT_STREQ("E_UINT64", strVal.in());
 }
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

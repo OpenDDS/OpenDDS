@@ -1,7 +1,9 @@
 #ifndef OPENDDS_DCPS_XTYPES_TYPE_DESCRIPTOR_IMPL_H
 #define OPENDDS_DCPS_XTYPES_TYPE_DESCRIPTOR_IMPL_H
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include "TypeObject.h"
 
@@ -45,6 +47,6 @@ bool test_equality(DDS::TypeDescriptor* lhs,
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif
 
 #endif  /* OPENDDS_DCPS_XTYPES_TYPE_DESCRIPTOR_IMPL_H */

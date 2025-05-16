@@ -18,7 +18,7 @@
 #include "CoherentChangeControl.h"
 #include "GuidUtils.h"
 #include "unique_ptr.h"
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 #  include "FilterEvaluator.h"
 #endif
 #include "ConditionVariable.h"

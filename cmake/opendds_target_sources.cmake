@@ -296,11 +296,6 @@ function(opendds_target_sources target)
     list(APPEND tao_options -Sa -St)
   endif()
 
-  foreach(def ${OPENDDS_DCPS_COMPILE_DEFINITIONS})
-    list(APPEND tao_options "-D${def}")
-    list(APPEND opendds_options "-D${def}")
-  endforeach()
-
   if(DEFINED OPENDDS_CONFIG_INCLUDE_DIR)
     list(APPEND tao_options "-I${OPENDDS_CONFIG_INCLUDE_DIR}")
     list(APPEND opendds_options "-I${OPENDDS_CONFIG_INCLUDE_DIR}")

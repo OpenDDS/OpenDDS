@@ -14,7 +14,8 @@
 
 #include "DataReaderListener.h"
 #include "TestException.h"
-#ifndef OPENDDS_SAFETY_PROFILE
+#include "dds/DCPS/Definitions.h"
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #include "dds/DCPS/transport/shmem/Shmem.h"
 #endif
 #include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"

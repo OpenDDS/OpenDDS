@@ -1,8 +1,11 @@
 #include "tests/Utils/WaitForSample.h"
 #include "common.h"
 
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Discovery.h>
+
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
+
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsSubscriptionC.h>
@@ -145,7 +148,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       return 1;
     }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
     // BUILT_IN_TOPIC_TOPIC unsupported in SAFETY PROFILE with RTPS
     ::DDS::DataReader_var topic_rdr =
         bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC);
@@ -416,7 +419,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        1);
     }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
     if (num_topics) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for topic sample\n"));
       Utils::waitForSample(topic_rdr);

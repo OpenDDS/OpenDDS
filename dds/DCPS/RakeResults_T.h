@@ -12,6 +12,7 @@
 #endif
 
 #include "Comparator_T.h"
+#include "Definitions.h"
 #include "PoolAllocator.h"
 #include "RakeData.h"
 #include "TypeSupportImpl.h"
@@ -40,7 +41,7 @@ public:
               DDS::SampleInfoSeq& info_seq,
               CORBA::ULong max_samples,
               DDS::PresentationQosPolicy presentation,
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
               DDS::QueryCondition_ptr cond,
 #endif
               Operation_t oper);
@@ -67,7 +68,7 @@ private:
   SampleSeq& received_data_;
   DDS::SampleInfoSeq& info_seq_;
   CORBA::ULong max_samples_;
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
   DDS::QueryCondition_ptr cond_;
 #endif
   Operation_t oper_;

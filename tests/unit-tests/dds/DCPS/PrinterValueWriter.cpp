@@ -5,9 +5,11 @@
 
 #include <dds/DCPS/PrinterValueWriter.h>
 
+#include <dds/DCPS/Definitions.h>
+
 #include <gtest/gtest.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 using namespace OpenDDS::DCPS;
 

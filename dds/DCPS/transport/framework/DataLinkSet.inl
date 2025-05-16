@@ -13,7 +13,7 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidConverter.h"
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #include "TransportCustomizedElement.h"
 #endif
@@ -25,7 +25,7 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: DataLinkSet::send element %@.\n",
             sample), 5);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   const bool customHeader =
     DataSampleHeader::test_flag(CONTENT_FILTER_FLAG, sample->get_sample());
 #endif
@@ -40,7 +40,7 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
     TransportSendElement* send_element = new TransportSendElement(static_cast<int>(map_copy.size()), sample);
     for (MapType::iterator itr = map_copy.begin(); itr != map_copy.end(); ++itr) {
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
       if (customHeader) {
         typedef std::map<DataLinkIdType, GUIDSeq_var>::iterator FilterIter;
         FilterIter fi = sample->get_filter_per_link().find(itr->first);
@@ -63,12 +63,12 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
         itr->second->send(tce);
 
       } else {
-#endif /* OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */
+#endif
 
         // Tell the DataLink to send it.
         itr->second->send(send_element);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
       }
 #endif
     }

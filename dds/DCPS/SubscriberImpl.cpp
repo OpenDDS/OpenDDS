@@ -5,28 +5,30 @@
 
 #include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
-#include "debug.h"
-#include "SubscriberImpl.h"
-#include "FeatureDisabledQosCheck.h"
-#include "DomainParticipantImpl.h"
-#include "Qos_Helper.h"
-#include "GuidConverter.h"
 #include "BuiltInTopicUtils.h"
-#include "TopicImpl.h"
-#include "DataReaderImpl.h"
-#include "Service_Participant.h"
-#include "TopicDescriptionImpl.h"
-#include "Marked_Default_Qos.h"
-#include "Transient_Kludge.h"
 #include "ContentFilteredTopicImpl.h"
-#include "MultiTopicImpl.h"
-#include "GroupRakeData.h"
-#include "MultiTopicDataReaderBase.h"
-#include "Util.h"
-#include "transport/framework/TransportImpl.h"
-#include "transport/framework/DataLinkSet.h"
 #include "DCPS_Utils.h"
+#include "DataReaderImpl.h"
+#include "Definitions.h"
+#include "DomainParticipantImpl.h"
+#include "FeatureDisabledQosCheck.h"
+#include "GroupRakeData.h"
+#include "GuidConverter.h"
+#include "Marked_Default_Qos.h"
+#include "MultiTopicDataReaderBase.h"
+#include "MultiTopicImpl.h"
 #include "PoolAllocator.h"
+#include "Qos_Helper.h"
+#include "Service_Participant.h"
+#include "SubscriberImpl.h"
+#include "TopicDescriptionImpl.h"
+#include "TopicImpl.h"
+#include "Transient_Kludge.h"
+#include "Util.h"
+#include "debug.h"
+
+#include "transport/framework/DataLinkSet.h"
+#include "transport/framework/TransportImpl.h"
 
 #include <dds/DdsDcpsTypeSupportExtC.h>
 
@@ -131,17 +133,17 @@ SubscriberImpl::create_datareader(
 
   TopicImpl* topic_servant = dynamic_cast<TopicImpl*>(a_topic_desc);
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   ContentFilteredTopicImpl* cft = 0;
 #endif
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
   MultiTopicImpl* mt = 0;
 #else
   bool mt = false;
 #endif
 
   if (!topic_servant) {
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
     cft = dynamic_cast<ContentFilteredTopicImpl*>(a_topic_desc);
     if (cft) {
       DDS::Topic_var related;
@@ -151,7 +153,7 @@ SubscriberImpl::create_datareader(
     else
 #endif
     {
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
       mt = dynamic_cast<MultiTopicImpl*>(a_topic_desc);
 #endif
     }
@@ -160,7 +162,7 @@ SubscriberImpl::create_datareader(
   if (!validate_datareader_qos (qos, default_datareader_qos_, topic_servant, dr_qos, mt))
     return DDS::DataReader::_nil();
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
   if (mt) {
     try {
       DDS::DataReader_var dr =
@@ -224,7 +226,7 @@ SubscriberImpl::create_datareader(
     return DDS::DataReader::_nil();
   }
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   if (cft) {
     dr_servant->enable_filtering(cft);
   }
@@ -312,7 +314,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
     if (it == datareader_map_.end()) {
       DDS::TopicDescription_var td = a_datareader->get_topicdescription();
       CORBA::String_var topic_name = td->get_name();
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
       MultitopicReaderMap::iterator mt_iter = multitopic_reader_map_.find(topic_name.in());
       if (mt_iter != multitopic_reader_map_.end()) {
         DDS::DataReader_ptr ptr = mt_iter->second;
@@ -394,7 +396,7 @@ SubscriberImpl::delete_contained_entities()
 
   OPENDDS_VECTOR(DDS::DataReader*) drs;
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                      guard,
@@ -473,7 +475,7 @@ SubscriberImpl::lookup_datareader(
   DataReaderMap::iterator it = datareader_map_.find(topic_name);
 
   if (it == datareader_map_.end()) {
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
     MultitopicReaderMap::iterator mt_iter = multitopic_reader_map_.find(topic_name);
     if (mt_iter != multitopic_reader_map_.end()) {
       return DDS::DataReader::_duplicate(mt_iter->second);
@@ -511,7 +513,7 @@ SubscriberImpl::get_datareaders(
     localreaders = datareader_set_;
   }
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   // If access_scope is GROUP and ordered_access is true then return readers as
   // list which may contain same readers multiple times. Otherwise return readers
   // as set.
@@ -574,7 +576,7 @@ SubscriberImpl::notify_datareaders()
     }
   }
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
   MultitopicReaderMap localmtr;
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -717,7 +719,7 @@ SubscriberImpl::get_listener()
   return DDS::SubscriberListener::_duplicate(listener_.in());
 }
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 
 DDS::ReturnCode_t
 SubscriberImpl::begin_access()
@@ -808,7 +810,7 @@ SubscriberImpl::end_access()
   return DDS::RETCODE_OK;
 }
 
-#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
+#endif
 
 DDS::DomainParticipant_ptr
 SubscriberImpl::get_participant()
@@ -933,7 +935,7 @@ SubscriberImpl::reader_enabled(const char*     topic_name,
   return DDS::RETCODE_OK;
 }
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
 DDS::ReturnCode_t
 SubscriberImpl::multitopic_reader_enabled(DDS::DataReader_ptr reader)
 {
@@ -987,7 +989,7 @@ SubscriberImpl::get_subscription_ids(SubscriptionIdVec& subs)
   }
 }
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 void
 SubscriberImpl::coherent_change_received (const GUID_t& publisher_id,
                                           DataReaderImpl* reader,
@@ -1058,7 +1060,7 @@ SubscriberImpl::validate_datareader_qos(const DDS::DataReaderQos & qos,
 
   } else if (qos == DATAREADER_QOS_USE_TOPIC_QOS) {
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
     if (mt) {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")

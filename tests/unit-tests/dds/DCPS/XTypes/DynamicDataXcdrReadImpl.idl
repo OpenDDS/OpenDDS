@@ -1,4 +1,6 @@
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/OpenDDSConfigWrapper.idl>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include <tao/LongSeq.pidl>
 #include <tao/ULongSeq.pidl>
@@ -383,4 +385,4 @@ struct Node {
   NodeSeq children;
 };
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

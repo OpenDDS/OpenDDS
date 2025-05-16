@@ -64,20 +64,6 @@ list(APPEND CMAKE_PREFIX_PATH "${OPENDDS_SOURCE_DIR}")
 list(APPEND CMAKE_FIND_ROOT_PATH "${OPENDDS_SOURCE_DIR}")
 set(_OPENDDS_CMAKE_DIR "${OPENDDS_SOURCE_DIR}/cmake" CACHE INTERNAL "")
 
-# Get and build ACE/TAO if OPENDDS_ACE wasn't defined and initialize the core
-# of the CMake support in init.cmake.
-if(NOT DEFINED OPENDDS_ACE OR DEFINED ACE_IS_BEING_BUILT)
-  # This is before init.cmake so init.cmake can get the features from ACE if
-  # ACE was already built.
-  include("${_OPENDDS_CMAKE_DIR}/get_ace_tao.cmake")
-endif()
-include("${_OPENDDS_CMAKE_DIR}/init.cmake")
-if(DEFINED ACE_IS_BEING_BUILT)
-  # This is after init.cmake so ACE/TAO can be configured using the features
-  # from init.cmake.
-  include("${_OPENDDS_CMAKE_DIR}/build_ace_tao.cmake")
-endif()
-
 if(NOT DEFINED OPENDDS_RAPIDJSON)
   set(OPENDDS_RAPIDJSON "${OPENDDS_SOURCE_DIR}/tools/rapidjson")
   if(NOT EXISTS "${OPENDDS_RAPIDJSON}/include")
@@ -94,6 +80,20 @@ if(NOT DEFINED OPENDDS_RAPIDJSON)
 endif()
 if(OPENDDS_RAPIDJSON)
   set(OPENDDS_HAS_RAPIDJSON TRUE)
+endif()
+
+# Get and build ACE/TAO if OPENDDS_ACE wasn't defined and initialize the core
+# of the CMake support in init.cmake.
+if(NOT DEFINED OPENDDS_ACE OR DEFINED ACE_IS_BEING_BUILT)
+  # This is before init.cmake so init.cmake can get the features from ACE if
+  # ACE was already built.
+  include("${_OPENDDS_CMAKE_DIR}/get_ace_tao.cmake")
+endif()
+include("${_OPENDDS_CMAKE_DIR}/init.cmake")
+if(DEFINED ACE_IS_BEING_BUILT)
+  # This is after init.cmake so ACE/TAO can be configured using the features
+  # from init.cmake.
+  include("${_OPENDDS_CMAKE_DIR}/build_ace_tao.cmake")
 endif()
 
 # Generate OpenDDSConfig.h, make it available for all targets (see

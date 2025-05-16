@@ -12,7 +12,7 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 namespace {
 
 using namespace OpenDDS::XTypes;
@@ -45,7 +45,7 @@ TypeLookupService::TypeLookupService()
 
 TypeLookupService::~TypeLookupService()
 {
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   for (GuidTypeMap::const_iterator pos = gt_map_.begin(), limit = gt_map_.end(); pos != limit; ++pos) {
     for (DynamicTypeMap::const_iterator pos2 = pos->second.begin(), limit2 = pos->second.end(); pos2 != limit2; ++pos2) {
       pos2->second->clear();
@@ -620,7 +620,7 @@ bool TypeLookupService::complete_to_minimal_type_object(const TypeObject& cto, T
   }
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 DDS::MemberDescriptor* TypeLookupService::complete_struct_member_to_member_descriptor(
   const CompleteStructMember& cm, const DCPS::GUID_t& guid)
 {
@@ -1115,7 +1115,7 @@ DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic(const TypeIde
 
   return dt_var._retn();
 }
-#endif // OPENDDS_SAFETY_PROFILE
+#endif
 
 void TypeLookupService::add_type_dependencies(const TypeIdentifier& type_id,
   const TypeIdentifierWithSizeSeq& dependencies)
@@ -1178,7 +1178,7 @@ bool TypeLookupService::extensibility(TypeFlag extensibility_mask, const TypeIde
   return false;
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 void TypeLookupService::remove_guid_from_dynamic_map(const DCPS::GUID_t& guid)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);

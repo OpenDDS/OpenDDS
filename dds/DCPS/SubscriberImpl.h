@@ -27,7 +27,7 @@ namespace DCPS {
 
 class DomainParticipantImpl;
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
 class MultiTopicImpl;
 #endif
 
@@ -82,7 +82,7 @@ public:
 
   virtual DDS::SubscriberListener_ptr get_listener();
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 
   virtual DDS::ReturnCode_t begin_access();
 
@@ -117,7 +117,7 @@ public:
   DDS::ReturnCode_t reader_enabled(const char* topic_name,
                                    DataReaderImpl* reader);
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
   DDS::ReturnCode_t multitopic_reader_enabled(DDS::DataReader_ptr reader);
   void remove_from_datareader_set(DataReaderImpl* reader);
 #endif
@@ -129,7 +129,7 @@ public:
   /// of this Subscriber's Data Readers
   void get_subscription_ids(SubscriptionIdVec& subs);
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   void coherent_change_received(const GUID_t& publisher_id,
                                 DataReaderImpl* reader,
                                 Coherent_State& group_state);
@@ -170,7 +170,7 @@ private:
   DataReaderMap                datareader_map_;
   DataReaderSet                datareader_set_;
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
   typedef OPENDDS_MAP(String, DDS::DataReader_var) MultitopicReaderMap;
   MultitopicReaderMap multitopic_reader_map_;
 #endif

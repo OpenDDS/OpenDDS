@@ -7,6 +7,7 @@
 #define OPENDDS_DDSDCPSPUBLICATION_IDL
 
 #include <dds/DdsDcpsInfrastructure.idl>
+#include <dds/OpenDDSConfigWrapper.idl>
 
 #pragma ciao lem "dds/DdsDcpsPublicationE.idl"
 
@@ -102,11 +103,11 @@ module DDS {
     ReturnCode_t get_matched_subscriptions(
       inout InstanceHandleSeq subscription_handles);
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
     ReturnCode_t get_matched_subscription_data(
       inout SubscriptionBuiltinTopicData subscription_data,
       in InstanceHandle_t subscription_handle);
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
   };
 
@@ -141,7 +142,7 @@ module DDS {
 
     ReturnCode_t resume_publications();
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 
     ReturnCode_t begin_coherent_changes();
 

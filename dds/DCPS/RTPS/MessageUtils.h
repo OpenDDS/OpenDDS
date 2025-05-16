@@ -11,6 +11,7 @@
 #include "RtpsCoreTypeSupportImpl.h"
 #include "rtps_export.h"
 
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/Hash.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
@@ -107,7 +108,7 @@ void message_block_to_sequence(const ACE_Message_Block& mb_locator, T& out)
   std::memcpy(out.get_buffer(), mb_locator.rd_ptr(), mb_locator.length());
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 inline bool operator==(const Duration_t& x, const Duration_t& y)
 {

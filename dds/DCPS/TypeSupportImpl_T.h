@@ -6,10 +6,12 @@
 #ifndef OPENDDS_DCPS_TYPESUPPORTIMPL_T_H
 #define OPENDDS_DCPS_TYPESUPPORTIMPL_T_H
 
-#include "debug.h"
 #include "DCPS_Utils.h"
+#include "Definitions.h"
 #include "LocalObject.h"
 #include "TypeSupportImpl.h"
+#include "debug.h"
+
 #include "XTypes/DynamicDataAdapter.h"
 #include "XTypes/DynamicDataFactory.h"
 #include "XTypes/Utils.h"
@@ -74,7 +76,7 @@ public:
     return MarshalTraitsType::key_only_serialized_size_bound(encoding);
   }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   DDS::DynamicType_ptr get_type()
   {
     get_type_from_type_lookup_service();

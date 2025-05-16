@@ -362,7 +362,7 @@ protected:
 
   void purge_discovered_participant(const DiscoveredParticipantIter& iter);
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   void enqueue_location_update_i(DiscoveredParticipantIter iter, DCPS::ParticipantLocation mask, const DCPS::NetworkAddress& from, const char* reason);
   void process_location_updates_i(const DiscoveredParticipantIter& iter, const char* reason, bool force_publish = false);
   void publish_location_update_i(const DiscoveredParticipantIter& iter);
@@ -542,7 +542,7 @@ private:
     ICE::AddressListType host_addresses() const;
     void send(const ACE_INET_Addr& address, const STUN::Message& message);
     ACE_INET_Addr stun_server_address() const;
-  #ifndef DDS_HAS_MINIMUM_BIT
+  #if OPENDDS_CONFIG_BUILT_IN_TOPICS
     void ice_connect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr);
     void ice_disconnect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr);
   #endif
@@ -620,7 +620,7 @@ private:
     STUN::Message message_;
   };
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   class IceConnect : public DCPS::Job {
   public:
     IceConnect(DCPS::RcHandle<Spdp> spdp,
@@ -639,7 +639,7 @@ private:
     DCPS::NetworkAddress addr_;
     bool connect_;
   };
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 #endif
 
   /// Spdp initialized

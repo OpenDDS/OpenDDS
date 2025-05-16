@@ -5,8 +5,9 @@
 
 #include <DCPS/DdsDcps_pch.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
-#  include "DynamicDataImpl.h"
+#include "DynamicDataImpl.h"
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #  include "DynamicTypeMemberImpl.h"
 #  include "Utils.h"
@@ -5801,4 +5802,4 @@ bool operator<<(Serializer& ser, const KeyOnly<DDS::DynamicData_ptr>& key)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

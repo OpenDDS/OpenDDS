@@ -1,3 +1,5 @@
+#include <dds/OpenDDSConfigWrapper.idl>
+
 module Unions {
   struct dummy {
     long foo;
@@ -30,7 +32,7 @@ module Unions {
     case 0: dummy_array darray;
   };
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   union S switch(long) {
     case 0: wstring val;
   };

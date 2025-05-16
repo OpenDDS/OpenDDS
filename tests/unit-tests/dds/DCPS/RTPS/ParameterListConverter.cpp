@@ -25,8 +25,6 @@
 #include "dds/DdsDcpsInfoUtilsTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 
-#include "dds/OpenDDSConfigWrapper.h"
-
 #include "gtest/gtest.h"
 
 #include <cstring>
@@ -1562,7 +1560,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_durability_default)
               writer_data_out.ddsPublicationData.durability.kind);
 }
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_durability_service)
 { // Should encode writer durabiltiy service
   DiscoveredWriterData writer_data = Factory::writer_data(

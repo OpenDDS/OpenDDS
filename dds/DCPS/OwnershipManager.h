@@ -8,11 +8,10 @@
 #ifndef OPENDDS_DCPS_OWNERSHIP_MANAGER_H
 #define OPENDDS_DCPS_OWNERSHIP_MANAGER_H
 
-#include "dds/OpenDDSConfigWrapper.h"
+#include "Definitions.h"
 
 #if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
 
-#include "Definitions.h"
 #include "GuidUtils.h"
 #include "InstanceState.h"
 #include "dds/DdsDcpsInfrastructureC.h"
