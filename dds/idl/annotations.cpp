@@ -6,10 +6,11 @@
 #include <ast_annotation_appl.h>
 #include <ast_annotation_decl.h>
 #include <ast_annotation_member.h>
-#include <ast_sequence.h>
 #include <ast_array.h>
-#include <ast_union.h>
+#include <ast_map.h>
+#include <ast_sequence.h>
 #include <utl_string.h>
+#include <ast_union.h>
 
 void Annotations::register_all()
 {
@@ -457,6 +458,20 @@ std::string ValueAnnotation::definition() const
 std::string ValueAnnotation::name() const
 {
   return "value";
+}
+
+TryConstructFailAction TryConstructAnnotation::map_key(AST_Map* node) const
+{
+  AST_Annotation_Appl* appl = node->key_type_annotations().find(declaration());
+  if (!appl) { return absent_value; }
+  return value_from_appl(appl);
+}
+
+TryConstructFailAction TryConstructAnnotation::map_value(AST_Map* node) const
+{
+  AST_Annotation_Appl* appl = node->value_type_annotations().find(declaration());
+  if (!appl) { return absent_value; }
+  return value_from_appl(appl);
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

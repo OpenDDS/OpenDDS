@@ -64,7 +64,15 @@ std::string FieldInfo::scoped_type(AST_Type& field_type, const std::string& fiel
     return n;
   }
   n = n.substr(0, n.rfind(scope_op) + 2) + at_pfx() + field_name;
-  return (field_type.node_type() == AST_Decl::NT_sequence) ? (n + "_seq") : n;
+
+  switch (field_type.node_type()) {
+  case AST_Decl::NT_sequence:
+    return n + "_seq";
+  case AST_Decl::NT_map:
+    return n + "_map";
+  default:
+    return n;
+  }
 }
 
 std::string FieldInfo::underscore(const std::string& scoped)
@@ -94,6 +102,7 @@ FieldInfo::FieldInfo(AST_Field& field)
   , cls_(classify(act_))
   , arr_(dynamic_cast<AST_Array*>(type_))
   , seq_(dynamic_cast<AST_Sequence*>(type_))
+  , map_(dynamic_cast<AST_Map*>(type_))
   , as_base_(container_base_type(type_))
   , as_act_(as_base_ ? resolveActualType(as_base_) : 0)
   , as_cls_(as_act_ ? classify(as_act_) : CL_UNKNOWN)
@@ -112,6 +121,8 @@ FieldInfo::FieldInfo(AST_Field& field)
   } else if (seq_) {
     length_ = "length";
     arg_ = "seq";
+  } else if (map_) {
+    arg_ = "map";
   }
 
   if (cxx11()) {
@@ -136,5 +147,5 @@ bool FieldInfo::is_new(EleLenSet& el_set) const
 
 bool FieldInfo::anonymous() const
 {
-  return type_->anonymous() && as_base_ && (cls_ & (CL_ARRAY | CL_SEQUENCE));
+  return type_->anonymous() && (cls_ & (CL_ARRAY | CL_SEQUENCE | CL_MAP));
 }

@@ -487,4 +487,24 @@ TEST(dds_DCPS_PrinterValueWriter, write_absent_value)
   EXPECT_STREQ(pvw.str().c_str(), "    Int32Field: 10\n    NullField: null");
 }
 
+TEST(dds_DCPS_PrinterValueWriter, complete_map)
+{
+  PrinterValueWriter pvw;
+  EXPECT_TRUE(pvw.begin_map(OpenDDS::XTypes::TK_UINT32, OpenDDS::XTypes::TK_STRING8));
+  EXPECT_TRUE(pvw.begin_key());
+  EXPECT_TRUE(pvw.write_uint32(5));
+  EXPECT_TRUE(pvw.end_key());
+  EXPECT_TRUE(pvw.begin_value());
+  EXPECT_TRUE(pvw.write_string("five"));
+  EXPECT_TRUE(pvw.end_value());
+  EXPECT_TRUE(pvw.begin_key());
+  EXPECT_TRUE(pvw.write_uint32(6));
+  EXPECT_TRUE(pvw.end_key());
+  EXPECT_TRUE(pvw.begin_value());
+  EXPECT_TRUE(pvw.write_string("six"));
+  EXPECT_TRUE(pvw.end_value());
+  EXPECT_TRUE(pvw.end_map());
+  EXPECT_STREQ(pvw.str().c_str(), "    5 => five\n    6 => six");
+}
+
 #endif

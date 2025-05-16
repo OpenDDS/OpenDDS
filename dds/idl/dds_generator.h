@@ -427,7 +427,7 @@ namespace AstTypeClassification {
   const Classification CL_UNKNOWN = 0, CL_SCALAR = 1, CL_PRIMITIVE = 2,
     CL_STRUCTURE = 4, CL_STRING = 8, CL_ENUM = 16, CL_UNION = 32, CL_ARRAY = 64,
     CL_SEQUENCE = 128, CL_WIDE = 256, CL_BOUNDED = 512, CL_INTERFACE = 1024,
-    CL_FIXED = 2048;
+    CL_FIXED = 2048, CL_MAP = 4096;
 
   inline Classification classify(AST_Type* type)
   {
@@ -466,6 +466,9 @@ namespace AstTypeClassification {
       return CL_INTERFACE;
     case AST_Decl::NT_fixed:
       return CL_FIXED;
+    case AST_Decl::NT_map:
+      return CL_MAP |
+        ((dynamic_cast<AST_Map*>(type)->unbounded()) ? 0 : CL_BOUNDED);
     default:
       return CL_UNKNOWN;
     }
@@ -713,6 +716,9 @@ inline std::string bounded_arg(AST_Type* type)
   } else if (cls & CL_SEQUENCE) {
     AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(type);
     arg << seq->max_size()->ev()->u.ulval;
+  } else if (cls & CL_MAP) {
+    AST_Map* const map = dynamic_cast<AST_Map*>(type);
+    arg << map->max_size()->ev()->u.ulval;
   }
   return arg.str();
 }
@@ -1243,9 +1249,12 @@ ACE_CDR::ULong container_element_limit(AST_Type* type)
 {
   AST_Type* const act = AstTypeClassification::resolveActualType(type);
   AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(act);
+  AST_Map* const map = dynamic_cast<AST_Map*>(act);
   AST_Array* const arr = dynamic_cast<AST_Array*>(act);
   if (seq && !seq->unbounded()) {
     return seq->max_size()->ev()->u.ulval;
+  } else if (map && !map->unbounded()) {
+    return map->max_size()->ev()->u.ulval;
   } else if (arr) {
     return array_element_count(arr);
   }
@@ -1298,6 +1307,9 @@ inline bool needs_nested_key_only(AST_Type* type)
       result = needs_nested_key_only(dynamic_cast<AST_Array*>(type)->base_type());
     } else if (type_class & CL_SEQUENCE) {
       result = needs_nested_key_only(dynamic_cast<AST_Sequence*>(type)->base_type());
+    } else if (type_class & CL_MAP) {
+      AST_Map* const map = dynamic_cast<AST_Map*>(type);
+      result = needs_nested_key_only(map->key_type()) || needs_nested_key_only(map->value_type());
     } else if (type_class & CL_STRUCTURE) {
       AST_Structure* const struct_node = dynamic_cast<AST_Structure*>(type);
       // TODO(iguessthislldo): Possible optimization: If everything in a struct
@@ -1337,7 +1349,7 @@ inline bool needs_distinct_type(AST_Type* type)
   using namespace AstTypeClassification;
   const Classification type_class = classify(resolveActualType(type));
   return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 &&
-    type_class & (CL_SEQUENCE | CL_ARRAY);
+    type_class & (CL_SEQUENCE | CL_ARRAY | CL_MAP);
 }
 
 const char* const shift_out = "<< ";
@@ -1443,6 +1455,8 @@ inline std::string type_kind(AST_Type* type)
     return "XTypes::TK_STRUCTURE";
   case AST_Decl::NT_enum:
     return "XTypes::TK_ENUM";
+  case AST_Decl::NT_map:
+    return "XTypes::TK_MAP";
   default:
     return "XTypes::TK_NONE";
   }
@@ -1601,8 +1615,7 @@ struct RefWrapper {
       wrapped_type_name_ =
         std::string("IDL::DistinctType<") + const_str + wrapped_type_name_ +
         ", " + get_tag_name_i() + ">";
-      value_access_pre_ += "(*";
-      value_access_post_ = ".val_)" + value_access_post_;
+      value_access_post_ = ".get()" + value_access_post_;
       const std::string idt_arg = "(" + ref_ + ")";
       if (is_const_) {
         ref_ = wrapped_type_name_ + idt_arg;
@@ -1615,7 +1628,7 @@ struct RefWrapper {
       by_ref = false;
     }
 
-    wrapped_type_name_ = const_str + wrapped_type_name_ + (by_ref ? "&" : "");
+    wrapped_type_name_ = (by_ref ? const_str : "") + wrapped_type_name_ + (by_ref ? "&" : "");
     done_ = true;
     return *this;
   }
@@ -1658,7 +1671,7 @@ struct RefWrapper {
 
   std::string value_access(const std::string& var_name = "") const
   {
-    return value_access_pre_ + get_var_name(var_name) + value_access_post_;
+    return get_var_name(var_name) + value_access_post_;
   }
 
   std::string seq_check_empty() const
@@ -1681,6 +1694,12 @@ struct RefWrapper {
   std::string seq_get_buffer() const
   {
     return value_access() + (cpp11_ ? ".data()" : ".get_buffer()");
+  }
+
+  std::string map_get_length() const
+  {
+    const std::string value = value_access();
+    return "static_cast<uint32_t>(" + value + ".size())";
   }
 
   std::string flat_collection_access(std::string index) const
@@ -1713,7 +1732,6 @@ private:
   bool done_;
   std::string wrapped_type_name_;
   std::string ref_;
-  std::string value_access_pre_;
   std::string value_access_post_;
   bool needs_dda_tag_;
 

@@ -864,7 +864,14 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
       consider(v, n->base_type(), v.name);
       break;
     }
-
+  case AST_ConcreteType::NT_map:
+    {
+      AST_Map* const n = dynamic_cast<AST_Map*>(type);
+      v.name = anonymous_name + ".m";
+      consider(v, n->key_type(), v.name);
+      consider(v, n->value_type(), v.name);
+      break;
+    }
   case AST_ConcreteType::NT_sequence:
     {
       AST_Sequence* const n = dynamic_cast<AST_Sequence*>(type);
@@ -1422,6 +1429,78 @@ typeobject_generator::generate_array_type_identifier(AST_Type* type, bool force_
 }
 
 void
+typeobject_generator::generate_map_type_identifier(AST_Type* type, bool force_type_object)
+{
+  using namespace OpenDDS::XTypes;
+  AST_Map* const n = dynamic_cast<AST_Map*>(type);
+  const ACE_CDR::ULong bound = n->unbounded() ? INVALID_LBOUND : n->max_size()->ev()->u.ulval;
+
+  const TryConstructFailAction trykey = be_global->try_construct(n->key_type());
+  const TryConstructFailAction tryval = be_global->try_construct(n->value_type());
+
+  CollectionElementFlag cef_key = try_construct_to_member_flag(trykey);
+  if (be_global->is_external(n->key_type())) {
+    cef_key |= IS_EXTERNAL;
+  }
+
+  CollectionElementFlag cef_val = try_construct_to_member_flag(tryval);
+  if (be_global->is_external(n->value_type())) {
+    cef_val |= IS_EXTERNAL;
+  }
+
+  const TypeIdentifier minimal_key_ti = get_minimal_type_identifier(n->key_type());
+  const TypeIdentifier minimal_val_ti = get_minimal_type_identifier(n->value_type());
+
+  const bool fully_descriptive = is_fully_descriptive(minimal_key_ti) && is_fully_descriptive(minimal_val_ti);
+
+  if (fully_descriptive && be_global->is_plain(type) && !force_type_object) {
+
+    // When TypeIdentifiers are fully descriptive, minimal and complete are equivalent.
+
+    if (bound < 256) {
+      const PlainMapSTypeDefn defn(PlainCollectionHeader(EK_BOTH, cef_val),
+                                   static_cast<SBound>(bound),
+                                   minimal_val_ti,
+                                   cef_key,
+                                   minimal_key_ti);
+      const TypeIdentifier ti(TI_PLAIN_MAP_SMALL, defn);
+      const TypeIdentifierPair ti_pair = {ti, ti};
+      hash_type_identifier_map_[type] = ti_pair;
+    } else {
+      const PlainMapLTypeDefn defn(PlainCollectionHeader(EK_BOTH, cef_val),
+                                   bound,
+                                   minimal_val_ti,
+                                   cef_key,
+                                   minimal_key_ti);
+      const TypeIdentifier ti(TI_PLAIN_MAP_LARGE, defn);
+      const TypeIdentifierPair ti_pair = {ti, ti};
+      hash_type_identifier_map_[type] = ti_pair;
+    }
+
+  } else {
+    TypeObject minimal_to;
+    minimal_to.kind = EK_MINIMAL;
+    minimal_to.minimal.kind = TK_MAP;
+    minimal_to.minimal.map_type.header.common.bound = bound;
+    minimal_to.minimal.map_type.key.common.element_flags = cef_key;
+    minimal_to.minimal.map_type.key.common.type = minimal_key_ti;
+    minimal_to.minimal.map_type.element.common.element_flags = cef_val;
+    minimal_to.minimal.map_type.element.common.type = minimal_val_ti;
+
+    TypeObject complete_to;
+    complete_to.kind = EK_COMPLETE;
+    complete_to.complete.kind = TK_MAP;
+    complete_to.complete.map_type.header.common = minimal_to.minimal.map_type.header.common;
+    complete_to.complete.map_type.key.common.element_flags = cef_key;
+    complete_to.complete.map_type.key.common.type = get_complete_type_identifier(n->key_type());
+    complete_to.complete.map_type.element.common.element_flags = cef_val;
+    complete_to.complete.map_type.element.common.type = get_complete_type_identifier(n->value_type());
+
+    update_maps(type, minimal_to, complete_to);
+  }
+}
+
+void
 typeobject_generator::generate_sequence_type_identifier(AST_Type* type, bool force_type_object)
 {
   AST_Sequence* const n = dynamic_cast<AST_Sequence*>(type);
@@ -1640,6 +1719,12 @@ typeobject_generator::generate_type_identifier(AST_Type* type, bool force_type_o
   case AST_ConcreteType::NT_array:
     {
       generate_array_type_identifier(type, force_type_object);
+      break;
+    }
+
+  case AST_ConcreteType::NT_map:
+    {
+      generate_map_type_identifier(type, force_type_object);
       break;
     }
 
