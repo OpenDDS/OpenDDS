@@ -279,11 +279,14 @@ namespace {
     return ser;
   }
 
-  string streamAndCheck(const string& expr, size_t indent = 2)
+  static const char streamAndCheckDefaultFailureHandler[] = "  return false;\n";
+
+  string streamAndCheck(const string& expr, size_t indent = 2,
+                        const std::string& failureHandler = streamAndCheckDefaultFailureHandler)
   {
     string idt(indent, ' ');
     return idt + "if (!(strm " + expr + ")) {\n" +
-      idt + "  return false;\n" +
+      idt + failureHandler +
       idt + "}\n";
   }
 
@@ -826,12 +829,12 @@ namespace {
         const std::string indent = "    ";
         intro2.join(be_global->impl_, indent);
         be_global->impl_ <<
-          indent << " if (!(strm >> " << stream_to << ")) {\n";
+          indent << "if (!(strm >> " << stream_to << ")) {\n";
 
         if (try_construct == tryconstructfailaction_use_default) {
           be_global->impl_ <<
-            type_to_default("        ", elem, elem_access) <<
-            "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+            type_to_default("      ", elem, elem_access) <<
+            "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
         } else if ((try_construct == tryconstructfailaction_trim) && (elem_cls & CL_BOUNDED) &&
                    (elem_cls & (CL_STRING | CL_SEQUENCE))) {
           if (elem_cls & CL_STRING) {
@@ -1001,20 +1004,18 @@ namespace {
     if (member_cls & CL_PRIMITIVE) {
       be_global->impl_ <<
         streamAndCheck("<< " + accessor, streamIndent);
+    } else if ((member_cls & (CL_STRING | CL_BOUNDED)) == (CL_STRING | CL_BOUNDED)) {
+      const string args = accessor + ", " + bounded_arg(member_type);
+      be_global->impl_ <<
+        streamAndCheck("<< " + getWrapper(args, member_type, WD_OUTPUT), streamIndent);
     } else {
-      if ((member_cls & (CL_STRING | CL_BOUNDED)) == (CL_STRING | CL_BOUNDED)) {
-        const string args = accessor + ", " + bounded_arg(member_type);
-        be_global->impl_ <<
-          streamAndCheck("<< " + getWrapper(args, member_type, WD_OUTPUT), streamIndent);
-      } else {
-        RefWrapper member_wrapper(member_type, cxx_elem, accessor);
-        member_wrapper.nested_key_only_ = nested_key_only;
-        Intro intro;
-        member_wrapper.done(&intro);
-        intro.join(be_global->impl_, "    ");
-        be_global->impl_ <<
-          streamAndCheck("<< " + member_wrapper.ref(), streamIndent);
-      }
+      RefWrapper member_wrapper(member_type, cxx_elem, accessor);
+      member_wrapper.nested_key_only_ = nested_key_only;
+      Intro intro;
+      member_wrapper.done(&intro);
+      intro.join(be_global->impl_, "    ");
+      be_global->impl_ <<
+        streamAndCheck("<< " + member_wrapper.ref(), streamIndent);
     }
   }
 
@@ -1023,43 +1024,38 @@ namespace {
     if (anonymous) {
       map = dynamic_cast<AST_Map*>(anonymous->type_);
     }
-    const std::string named_as = anonymous ? anonymous->scoped_type_ : scoped(tdname);
-    RefWrapper base_wrapper(map, named_as, "map");
+    RefWrapper base_wrapper(map, anonymous ? anonymous->scoped_type_ : scoped(tdname), "map");
     base_wrapper.nested_key_only_ = nested_key_only;
 
     NamespaceGuard ng(!anonymous);
 
-    AST_Type* key = resolveActualType(map->key_type());
-    AST_Type* val = resolveActualType(map->value_type());
-    const TryConstructFailAction key_try_construct = be_global->map_key_try_construct(map);
-    const TryConstructFailAction val_try_construct = be_global->map_value_try_construct(map);
-
+    AST_Type* const key = resolveActualType(map->key_type());
     const Classification key_cls = classify(key);
     const bool key_primitive = key_cls & CL_PRIMITIVE;
+
+    AST_Type* const val = resolveActualType(map->value_type());
     const Classification val_cls = classify(val);
     const bool val_primitive = val_cls & CL_PRIMITIVE;
     const bool both_primitive = key_primitive && val_primitive;
 
     if (key_cls & CL_INTERFACE || val_cls & CL_INTERFACE) {
-      be_global->error("map with either a key or value of objrefs is not marshaled");
-      return;
-    } else if (key_cls == CL_UNKNOWN || val_cls == CL_UNKNOWN) {
-      be_global->error("map with either key or value of unknown/unsupported type");
-      return;
+      be_util::misc_error_and_abort("map with either a key or value of objrefs is not marshaled", map);
+    }
+    if (key_cls == CL_UNKNOWN || val_cls == CL_UNKNOWN) {
+      be_util::misc_error_and_abort("map with either key or value of unknown/unsupported type", map);
     }
 
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     std::string key_cxx_elem;
     std::string val_cxx_elem;
     if (anonymous) {
-      AST_Type* const act = AstTypeClassification::resolveActualType(map);
-      AST_Map * const m = dynamic_cast<AST_Map*>(act);
+      AST_Map* const m = dynamic_cast<AST_Map*>(AstTypeClassification::resolveActualType(map));
       key_cxx_elem = scoped(m->key_type()->name());
       val_cxx_elem = scoped(m->value_type()->name());
     } else {
       key_cxx_elem = scoped(key->name());
       val_cxx_elem = scoped(val->name());
     }
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     if ((key_cls & CL_STRING) && use_cxx11) {
       key_cxx_elem = (key_cls & CL_WIDE) ? "std::wstring" : "std::string";
     }
@@ -1101,7 +1097,7 @@ namespace {
           "  const Encoding& encoding = strm.encoding();\n"
           "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
           "    size_t total_size = 0;\n"
-          "    serialized_size(encoding, total_size, " << wrapper.value_access() << ");\n"
+          "    serialized_size(encoding, total_size, map);\n"
           "    if (!strm.write_delimiter(total_size)) {\n"
           "      return false;\n"
           "    }\n"
@@ -1145,17 +1141,65 @@ namespace {
           "  const std::size_t start = size_is_bytes ? strm.rpos() : 0u;\n";
       }
 
+      const bool bounded = !map->unbounded(),
+        may_skip = bounded && !both_primitive;
+      std::string skip;
+      if (bounded) {
+        skip =
+          both_primitive ?
+          "      std::size_t skip = 0;\n"
+          "      for (; read < size; ++read) {\n"
+          "        " + getSizeExprPrimitive(key, "1", "skip", "strm.encoding()") + ";\n"
+          "        " + getSizeExprPrimitive(val, "1", "skip", "strm.encoding()") + ";\n"
+          "      }\n"
+          "      strm.skip(skip);\n"
+          "      strm.set_construction_status(Serializer::BoundConstructionFailure);\n"
+          "      return false;\n"
+          :
+          "      if (size_is_bytes) {\n"
+          "        strm.skip(size - read);\n"
+          "        strm.set_construction_status(Serializer::BoundConstructionFailure);\n"
+          "        return false;\n"
+          "      } else {\n"
+          "        skip = true;\n"
+          "      }\n";
+      }
+
+      if (be_global->map_key_try_construct(map) != tryconstructfailaction_discard) {
+        be_util::misc_error_and_abort("map keys may only use DISCARD as their @try_construct mode", map);
+      }
+
+      std::string valFailureHandler = streamAndCheckDefaultFailureHandler;
+      switch (be_global->map_value_try_construct(map)) {
+      case tryconstructfailaction_use_default:
+        valFailureHandler =
+          type_to_default("      ", val, "val", anonymous, false, false /*TODO: optional?*/) +
+          "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
+        break;
+      case tryconstructfailaction_trim:
+        valFailureHandler =
+          "      if (strm.get_construction_status() == Serializer::BoundConstructionFailure) {\n"
+          "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+          "      } else {\n"
+          "        return false;\n"
+          "      }\n";
+        break;
+      }
+
       static const size_t loopIndent = 4;
       be_global->impl_ <<
-        "  " << wrapper.value_access() << ".clear();\n"
-        "  DDS::UInt32 read = 0;\n"
-        "  while (read < size) {\n"
+        "  " << wrapper.value_access() << ".clear();\n" <<
+        (may_skip ? "  bool skip = false;\n" : "") <<
+        "  for (DDS::UInt32 read = 0; read < size;) {\n"
         "    " << key_cxx_elem << " key;\n" <<
         streamAndCheck(">> key", loopIndent) <<
-        "    " << val_cxx_elem << " val;\n"<<
-        streamAndCheck(">> val", loopIndent) <<
-      //TODO: try-construct
+        "    " << val_cxx_elem << " val;\n" <<
+        streamAndCheck(">> val", loopIndent, valFailureHandler) <<
+        (may_skip ?
+        "    if (!skip) {\n  "
+        : "") <<
         "    " << wrapper.value_access() << "[key] = val;\n" <<
+        (may_skip ? "    }\n" : "") <<
         (both_primitive ?
         "    ++read;\n"
         :
@@ -1168,7 +1212,19 @@ namespace {
         "      ++read;\n"
         "    }\n"
         ) <<
+        (bounded ?
+        "    if (read < size && " + wrapper.map_get_length() + " == "
+          + OpenDDS::DCPS::to_dds_string(container_element_limit(map)) + ") {\n" +
+               skip +
+        "    }\n"
+        : "") <<
+        "  }\n" <<
+        (may_skip ?
+        "  if (skip) {\n"
+        "    strm.set_construction_status(Serializer::BoundConstructionFailure);\n"
+        "    return false;\n"
         "  }\n"
+        : "") <<
         "  return true;\n";
     }
   }
