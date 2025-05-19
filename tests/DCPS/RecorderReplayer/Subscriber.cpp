@@ -25,13 +25,6 @@
 # include <dds/DCPS/transport/shmem/Shmem.h>
 #endif
 
-bool
-make_dr_reliable()
-{
-  OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
-  return gc->instances_[0]->name() == "the_rtps_transport";
-}
-
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -104,9 +97,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     DDS::DataReaderQos dr_qos;
     subscriber->get_default_datareader_qos(dr_qos);
-    if (make_dr_reliable()) {
-      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-    }
+    dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
     DDS::DataReader_var reader = subscriber->create_datareader(topic,
                                                                dr_qos,
