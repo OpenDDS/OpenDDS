@@ -254,9 +254,9 @@ namespace {
       }
       RefWrapper key(map_node->value_type(), elem, "key");
       be_global->impl_ <<
-        "  " << elem << " id_to_key(DDS::MemberId id)\n"
+        "  " << elem << " id_to_key(DDS::MemberId)\n"
         "  {\n"
-        "    return {}; //TODO\n"
+        "    return " << elem << "();\n" // not currently called since check_index() returns an error
         "  }\n\n";
     }
 
