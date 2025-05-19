@@ -8180,7 +8180,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Messenger
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
@@ -8195,7 +8195,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\C++11
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - name: make C++11 messenger test
       shell: cmd
       run: |
@@ -8361,7 +8361,7 @@ jobs:
         rm -rf underscore_fields
         rm -rf xcdr
         rm -rf XTypesExtensibility
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
@@ -8530,7 +8530,7 @@ jobs:
         rm -rf idl_test_nested_types_lib
         rm -rf isolated_types
         rm -rf is_topic_type
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
@@ -8695,7 +8695,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\unit-tests
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
@@ -9720,7 +9720,6 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-cmake@v10
       with:
-        vcpkgDirectory: '${{ env.VCPKG_INSTALLATION_ROOT }}'
         cmakeListsTxtPath: winflexbison/CMakeLists.txt
         configurePreset: config1
         buildPreset: build1
