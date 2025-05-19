@@ -79,6 +79,7 @@ namespace {
     case AST_Decl::NT_struct:
     case AST_Decl::NT_union:
     case AST_Decl::NT_sequence:
+    case AST_Decl::NT_map:
       is_complex = true;
       op_type = set ? "direct_complex" : "complex";
       return true;
@@ -209,7 +210,7 @@ namespace {
       "      }\n";
   }
 
-  bool generate_dynamic_data_adapter_access(AST_Decl* node, RefWrapper& wrapper, bool set)
+  bool generate_dynamic_data_adapter_access(AST_Decl* node, const RefWrapper& wrapper, bool set)
   {
     AST_Structure* struct_node = 0;
     AST_Union* union_node = 0;
@@ -237,6 +238,26 @@ namespace {
       break;
     default:
       return false;
+    }
+
+    if (map_node && !set) {
+      std::string elem;
+      if (map_node->anonymous()) {
+        AST_Map* const m = dynamic_cast<AST_Map*>(AstTypeClassification::resolveActualType(map_node));
+        elem = scoped(m->key_type()->name());
+      } else {
+        elem = scoped(map_node->key_type()->name());
+      }
+      const Classification key_cls = classify(map_node->key_type());
+      if ((key_cls & CL_STRING) && be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+        elem = (key_cls & CL_WIDE) ? "std::wstring" : "std::string";
+      }
+      RefWrapper key(map_node->value_type(), elem, "key");
+      be_global->impl_ <<
+        "  " << elem << " id_to_key(DDS::MemberId id)\n"
+        "  {\n"
+        "    return {}; //TODO\n"
+        "  }\n\n";
     }
 
     be_global->impl_ << "  DDS::ReturnCode_t " << op(set) << "_raw_value(const char* method, ";
@@ -277,8 +298,10 @@ namespace {
         "    default:\n"
         "      return invalid_id(method, id);\n"
         "    }\n";
-    } else if (seq_node || array_node) {
-      AST_Type* const base_type = seq_node ? seq_node->base_type() : array_node->base_type();
+    } else if (seq_node || array_node || map_node) {
+      AST_Type* const base_type =
+        seq_node ? seq_node->base_type() : array_node ? array_node->base_type()
+        : map_node->value_type();
       AST_Type* const named_type = deepest_named_type(base_type);
 
       std::string op_type;
@@ -290,8 +313,8 @@ namespace {
           be_global->impl_ << "const DDS::ReturnCode_t ";
         }
         be_global->impl_ << "rc = check_index(method, id, ";
-        if (seq_node) {
-          be_global->impl_ << wrapper.seq_get_length();
+        if (seq_node || map_node) {
+          be_global->impl_ << wrapper.get_length();
         } else {
           be_global->impl_ << array_element_count(array_node);
         }
@@ -300,15 +323,13 @@ namespace {
           "      return rc;\n"
           "    }\n";
         generate_op(2, set, base_type, scoped(named_type->name()), op_type, is_complex,
-          wrapper.flat_collection_access("id") + extra_access);
+          wrapper.flat_collection_access(map_node ? "id_to_key(id)" : "id") + extra_access);
       } else {
         be_global->impl_ <<
           "    ACE_UNUSED_ARG(" << (set ? "source" : "dest") << ");\n"
           "    ACE_UNUSED_ARG(tk);\n"
           "    return missing_dda(method, id);\n";
       }
-    } else if (map_node) { //TODO
-      be_global->impl_ << "    return DDS::RETCODE_UNSUPPORTED;\n";
     } else {
       return false;
     }
@@ -484,12 +505,10 @@ namespace {
             "    return ";
           if (struct_node) {
             be_global->impl_ << struct_node->nfields();
-          } else if (seq_node) {
-            be_global->impl_ << wrapper.seq_get_length();
+          } else if (seq_node || map_node) {
+            be_global->impl_ << wrapper.get_length();
           } else if (array_node) {
             be_global->impl_ << array_element_count(array_node);
-          } else if (map_node) {
-            be_global->impl_ << wrapper.map_get_length();
           }
           be_global->impl_ << ";\n"
             "  }\n"
@@ -501,7 +520,7 @@ namespace {
           be_global->impl_ <<
             "  DDS::MemberId get_member_id_at_index_impl(DDS::UInt32 index)\n"
             "  {\n"
-            "    const DDS::UInt32 count = " << wrapper.seq_get_length() << ";\n"
+            "    const DDS::UInt32 count = " << wrapper.get_length() << ";\n"
             "    if (!read_only_ && index >= count) {\n"
             "      " << wrapper.seq_resize("index + 1") <<
             "      return index;\n"

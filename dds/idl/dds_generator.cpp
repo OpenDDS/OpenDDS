@@ -484,7 +484,7 @@ std::string field_type_name(AST_Field* field, AST_Type* field_type)
   }
   if (field) {
     FieldInfo af(*field);
-    if (af.as_base_ && af.type_->anonymous()) {
+    if (af.anonymous()) {
       return af.scoped_type_;
     }
   }

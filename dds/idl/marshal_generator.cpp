@@ -533,8 +533,8 @@ namespace {
       RefWrapper wrapper(base_wrapper);
       wrapper.done(&intro);
       const std::string value_access = wrapper.value_access();
-      const std::string get_length = wrapper.seq_get_length();
-      const std::string check_empty = wrapper.seq_check_empty();
+      const std::string get_length = wrapper.get_length();
+      const std::string check_empty = wrapper.check_empty();
       Function serialized_size("serialized_size", "void");
       serialized_size.addArg("encoding", "const Encoding&");
       serialized_size.addArg("size", "size_t&");
@@ -602,8 +602,8 @@ namespace {
       RefWrapper wrapper(base_wrapper);
       wrapper.done(&intro);
       const std::string value_access = wrapper.value_access();
-      const std::string get_length = wrapper.seq_get_length();
-      const std::string check_empty = wrapper.seq_check_empty();
+      const std::string get_length = wrapper.get_length();
+      const std::string check_empty = wrapper.check_empty();
       const std::string get_buffer = wrapper.seq_get_buffer();
       Function insertion("operator<<", "bool");
       insertion.addArg("strm", "Serializer&");
@@ -683,8 +683,8 @@ namespace {
       wrapper.is_const_ = false;
       wrapper.done(&intro);
       const std::string value_access = wrapper.value_access();
-      const std::string get_length = wrapper.seq_get_length();
-      const std::string check_empty = wrapper.seq_check_empty();
+      const std::string get_length = wrapper.get_length();
+      const std::string check_empty = wrapper.check_empty();
       const std::string get_buffer = wrapper.seq_get_buffer();
       Function extraction("operator>>", "bool");
       extraction.addArg("strm", "Serializer&");
@@ -1106,7 +1106,7 @@ namespace {
       }
 
       be_global->impl_ << indentForLength <<
-        "const DDS::UInt32 length = " << wrapper.map_get_length() << ";\n" <<
+        "const DDS::UInt32 length = " << wrapper.get_length() << ";\n" <<
         streamAndCheck("<< length", indentForLength.size());
 
       if (!both_primitive) be_global->impl_ << "  }\n\n";
@@ -1212,7 +1212,7 @@ namespace {
         "    }\n"
         ) <<
         (bounded ?
-        "    if (read < size && " + wrapper.map_get_length() + " == "
+        "    if (read < size && " + wrapper.get_length() + " == "
           + OpenDDS::DCPS::to_dds_string(container_element_limit(map)) + ") {\n" +
                skip +
         "    }\n"

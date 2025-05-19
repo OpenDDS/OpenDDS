@@ -1068,7 +1068,7 @@ std::string insert_cxx11_accessor_parens(
   std::string full_var_name(full_var_name_);
   std::string::size_type n = 0;
   while ((n = full_var_name.find('.', n)) != std::string::npos) {
-    if (full_var_name[n-1] != ']') {
+    if (full_var_name[n - 1] != ']') {
       full_var_name.insert(n, "()");
       n += 3;
     } else {
@@ -1476,6 +1476,11 @@ bool has_discriminator(AST_Union* u, FieldFilter filter_kind)
     || filter_kind == FieldFilter_All;
 }
 
+inline bool uses_stl_container(AST_Type* type, bool cpp11)
+{
+  return cpp11 || (AstTypeClassification::classify(type) & AstTypeClassification::CL_MAP);
+}
+
 // TODO: Add more fine-grained control of "const" string for the wrapper type and wrapped type.
 // Currently, there is a single bool to control both; that is, either both are "const" or
 // none is "const". But sometimes, we want something like "const KeyOnly<SampleType>&", and
@@ -1516,6 +1521,7 @@ struct RefWrapper {
     , typedef_node_(0)
     , done_(false)
     , needs_dda_tag_(false)
+    , stl_container_(uses_stl_container(type, cpp11_))
   {
   }
 
@@ -1536,6 +1542,7 @@ struct RefWrapper {
     , typedef_node_(0)
     , done_(false)
     , needs_dda_tag_(false)
+    , stl_container_(uses_stl_container(type, cpp11_))
   {
   }
 
@@ -1674,15 +1681,15 @@ struct RefWrapper {
     return get_var_name(var_name) + value_access_post_;
   }
 
-  std::string seq_check_empty() const
+  std::string check_empty() const
   {
-    return value_access() + (cpp11_ ? ".empty()" : ".length() == 0");
+    return value_access() + (stl_container_ ? ".empty()" : ".length() == 0");
   }
 
-  std::string seq_get_length() const
+  std::string get_length() const
   {
     const std::string value = value_access();
-    return cpp11_ ? "static_cast<uint32_t>(" + value + ".size())" : value + ".length()";
+    return stl_container_ ? "static_cast<uint32_t>(" + value + ".size())" : value + ".length()";
   }
 
   std::string seq_resize(const std::string& new_size) const
@@ -1694,12 +1701,6 @@ struct RefWrapper {
   std::string seq_get_buffer() const
   {
     return value_access() + (cpp11_ ? ".data()" : ".get_buffer()");
-  }
-
-  std::string map_get_length() const
-  {
-    const std::string value = value_access();
-    return "static_cast<uint32_t>(" + value + ".size())";
   }
 
   std::string flat_collection_access(std::string index) const
@@ -1734,6 +1735,7 @@ private:
   std::string ref_;
   std::string value_access_post_;
   bool needs_dda_tag_;
+  const bool stl_container_;
 
   std::string get_tag_name_i() const
   {
