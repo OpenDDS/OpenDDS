@@ -1173,12 +1173,11 @@ namespace {
       switch (be_global->map_value_try_construct(map)) {
       case tryconstructfailaction_use_default:
         valFailureHandler =
-          type_to_default("      ", val, "val", anonymous, false, false /*TODO: optional?*/) +
+          type_to_default("  ", val, "val", anonymous, false, false /*TODO: optional?*/) +
           "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
         break;
       case tryconstructfailaction_trim:
-        valFailureHandler =
-          "      if (strm.get_construction_status() == Serializer::BoundConstructionFailure) {\n"
+        valFailureHandler = "  if (strm.get_construction_status() == Serializer::BoundConstructionFailure) {\n"
           "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
           "      } else {\n"
           "        return false;\n"

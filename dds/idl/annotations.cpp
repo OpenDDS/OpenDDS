@@ -445,6 +445,20 @@ TryConstructFailAction TryConstructAnnotation::union_value(AST_Union* node) cons
   return value_from_appl(appl);
 }
 
+TryConstructFailAction TryConstructAnnotation::map_key(AST_Map* node) const
+{
+  AST_Annotation_Appl* appl = node->key_type_annotations().find(declaration());
+  if (!appl) { return absent_value; }
+  return value_from_appl(appl);
+}
+
+TryConstructFailAction TryConstructAnnotation::map_value(AST_Map* node) const
+{
+  AST_Annotation_Appl* appl = node->value_type_annotations().find(declaration());
+  if (!appl) { return absent_value; }
+  return value_from_appl(appl);
+}
+
 // @value ====================================================================
 
 std::string ValueAnnotation::definition() const
@@ -458,20 +472,6 @@ std::string ValueAnnotation::definition() const
 std::string ValueAnnotation::name() const
 {
   return "value";
-}
-
-TryConstructFailAction TryConstructAnnotation::map_key(AST_Map* node) const
-{
-  AST_Annotation_Appl* appl = node->key_type_annotations().find(declaration());
-  if (!appl) { return absent_value; }
-  return value_from_appl(appl);
-}
-
-TryConstructFailAction TryConstructAnnotation::map_value(AST_Map* node) const
-{
-  AST_Annotation_Appl* appl = node->value_type_annotations().find(declaration());
-  if (!appl) { return absent_value; }
-  return value_from_appl(appl);
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

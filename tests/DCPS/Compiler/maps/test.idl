@@ -5,8 +5,8 @@ struct TestStruct {
 
 enum TEST_ENUM {TEST1, TEST2, TEST3};
 
-typedef sequence<TestStruct> TestStructSeq;
-typedef map<int32, TestStruct> TestStructMap;
+typedef sequence<TestStruct, 12> TestStructSeq;
+typedef map<int32, TestStruct, 11> TestStructMap;
 typedef map<int32, string, 10> TestIntStringMap;
 
 @topic
@@ -20,8 +20,8 @@ struct Data {
 
   map<string, TestStruct> stringStructsMap;
 
-  map<string, TestStructSeq> stringSequenceMap;
+  map<string, @try_construct(TRIM) TestStructSeq> stringSequenceMap;
 
-  map<string, TestStructMap> stringMapMap;
+  map<string, @try_construct TestStructMap> stringMapMap;
 };
 
