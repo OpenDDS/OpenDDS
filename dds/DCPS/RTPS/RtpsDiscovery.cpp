@@ -227,6 +227,7 @@ RtpsDiscovery::add_domain_participant_secure(
     participants_[domain][ads.id] = spdp;
     const DCPS::TimeDuration period = TheServiceParticipant->statistics_period();
     if (!period.is_zero()) {
+      stats_task_ = DCPS::make_rch<PeriodicTask>(TheServiceParticipant->interceptor(), *this, &RtpsDiscovery::write_stats);
       stats_task_->enable(false, period);
     }
   } catch (const std::exception& e) {
