@@ -149,32 +149,4 @@ void GuidPartitionTable::lookup(StringSet& partitions, const OpenDDS::DCPS::GUID
   }
 }
 
-void GuidPartitionTable::populate_replay(SpdpReplay& spdp_replay,
-                                         const OpenDDS::DCPS::GUID_t& guid,
-                                         const std::vector<std::string>& to_add) const
-{
-  // The partitions are new for this reader/writer.
-  // Check if they are new for the participant.
-
-  const auto prefix = make_unknown_guid(guid);
-
-  for (const auto& part : to_add) {
-    const auto pos1 = partition_to_guid_.find(part);
-    if (pos1 == partition_to_guid_.end()) {
-      if (config_.allow_empty_partition() || !part.empty()) {
-        spdp_replay.partitions().push_back(part);
-      }
-      continue;
-    }
-
-    const auto pos2 = pos1->second.lower_bound(prefix);
-
-    if (pos2 == pos1->second.end() || equal_guid_prefixes(*pos2, prefix)) {
-      if (config_.allow_empty_partition() || !part.empty()) {
-        spdp_replay.partitions().push_back(part);
-      }
-    }
-  }
-}
-
 }
