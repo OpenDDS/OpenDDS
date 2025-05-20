@@ -77,14 +77,6 @@ module RtpsRelay {
     DDS::UserDataQosPolicy user_data;
   };
 
-  const string SPDP_REPLAY_TOPIC_NAME = "SPDP Replay";
-  @topic
-  struct SpdpReplay {
-    StringSequence partitions;
-    string address;
-    GUID_t guid;
-  };
-
   struct RelayHeader {
     StringSequence to_partitions;
     GuidSequence to_guids;

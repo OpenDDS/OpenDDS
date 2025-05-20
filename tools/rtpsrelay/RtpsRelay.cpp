@@ -18,7 +18,6 @@
 #include "RelayStatisticsReporter.h"
 #include "RelayStatusReporter.h"
 #include "RelayThreadMonitor.h"
-#include "SpdpReplayListener.h"
 #include "StatisticsWriterListener.h"
 #include "SubscriptionListener.h"
 
@@ -440,23 +439,6 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  SpdpReplayTypeSupport_var spdp_replay_ts = new SpdpReplayTypeSupportImpl;
-  if (spdp_replay_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to register SpdpReplay type\n"));
-    return EXIT_FAILURE;
-  }
-  CORBA::String_var spdp_replay_type_name = spdp_replay_ts->get_type_name();
-
-  DDS::Topic_var spdp_replay_topic =
-    relay_participant->create_topic(SPDP_REPLAY_TOPIC_NAME.c_str(),
-                                    spdp_replay_type_name,
-                                    TOPIC_QOS_DEFAULT, nullptr,
-                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-  if (!spdp_replay_topic) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Spdp Replay topic\n"));
-  }
-
   HandlerStatisticsTypeSupport_var handler_statistics_ts = new HandlerStatisticsTypeSupportImpl;
   if (handler_statistics_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to register HandlerStatistics type\n"));
@@ -727,37 +709,12 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  DDS::DataWriterQos replay_writer_qos;
-  relay_publisher->get_default_datawriter_qos(replay_writer_qos);
-
-  replay_writer_qos.durability.kind = DDS::VOLATILE_DURABILITY_QOS;
-  replay_writer_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  replay_writer_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
-
-  DDS::DataWriterListener_var spdp_replay_writer_listener =
-    new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::spdp_replay_sub_count);
-  DDS::DataWriter_var spdp_replay_writer_var =
-    relay_publisher->create_datawriter(spdp_replay_topic, replay_writer_qos, spdp_replay_writer_listener,
-                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-  if (!spdp_replay_writer_var) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Spdp Replay data writer\n"));
-    return EXIT_FAILURE;
-  }
-
-  SpdpReplayDataWriter_var spdp_replay_writer = SpdpReplayDataWriter::_narrow(spdp_replay_writer_var);
-
-  if (!spdp_replay_writer) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to narrow Spdp Replay data writer\n"));
-    return EXIT_FAILURE;
-  }
-
   RelayParticipantStatusReporter relay_participant_status_reporter(config, relay_participant_status_writer, relay_statistics_reporter);
   RelayThreadMonitor* relay_thread_monitor = new RelayThreadMonitor(config);
   GuidAddrSet guid_addr_set(config, rtps_discovery, relay_participant_status_reporter, relay_statistics_reporter, *relay_thread_monitor);
   ACE_Reactor reactor_(RelayEventLoop::make_reactor_impl(config), true);
   const auto reactor = &reactor_;
-  GuidPartitionTable guid_partition_table(config, spdp_horizontal_addr, relay_partitions_writer, spdp_replay_writer, relay_statistics_reporter);
+  GuidPartitionTable guid_partition_table(config, spdp_horizontal_addr, relay_partitions_writer, relay_statistics_reporter);
   RelayPartitionTable relay_partition_table(relay_statistics_reporter);
   relay_statistics_reporter.report();
 
@@ -830,27 +787,6 @@ int run(int argc, ACE_TCHAR* argv[])
                                         DDS::DATA_AVAILABLE_STATUS | DDS::SUBSCRIPTION_MATCHED_STATUS);
 
   if (!relay_address_reader_var) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Relay Address data reader\n"));
-    return EXIT_FAILURE;
-  }
-
-  DDS::DataReaderQos replay_reader_qos;
-  relay_subscriber->get_default_datareader_qos(replay_reader_qos);
-
-  replay_reader_qos.durability.kind = DDS::VOLATILE_DURABILITY_QOS;
-  replay_reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  replay_reader_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
-  replay_reader_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay = one_minute;
-  replay_reader_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = one_minute;
-
-  DDS::DataReaderListener_var spdp_replay_listener =
-    new SpdpReplayListener(spdp_vertical_handler, relay_statistics_reporter);
-  DDS::DataReader_var spdp_replay_reader_var =
-    relay_subscriber->create_datareader(spdp_replay_topic, replay_reader_qos,
-                                        spdp_replay_listener,
-                                        DDS::DATA_AVAILABLE_STATUS | DDS::SUBSCRIPTION_MATCHED_STATUS);
-
-  if (!spdp_replay_reader_var) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Relay Address data reader\n"));
     return EXIT_FAILURE;
   }

@@ -25,7 +25,6 @@ add_executable(RtpsRelay
   RelayStatusReporter.cpp
   RelayThreadMonitor.cpp
   RtpsRelay.cpp
-  SpdpReplayListener.cpp
   SubscriptionListener.cpp
 )
 _opendds_executable(RtpsRelay)

@@ -11,7 +11,6 @@ GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_
 {
   Result result;
   std::vector<RelayPartitions> relay_partitions;
-  SpdpReplay spdp_replay;
 
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, NO_CHANGE);
@@ -44,8 +43,6 @@ GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_
 
     remove_from_cache(guid);
 
-    populate_replay(spdp_replay, guid, to_add);
-
     StringSet globally_new;
     x.insert(to_add.begin(), to_add.end());
     for (const auto& part : to_add) {
@@ -77,19 +74,6 @@ GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, write_mutex_, NO_CHANGE);
     write_relay_partitions(relay_partitions);
-
-    if (!spdp_replay.partitions().empty()) {
-      spdp_replay.address(address_);
-      spdp_replay.guid(rtps_guid_to_relay_guid(OpenDDS::DCPS::make_id(guid, OpenDDS::DCPS::ENTITYID_PARTICIPANT)));
-      if (spdp_replay_writer_->write(spdp_replay, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: GuidPartitionTable::insert failed to write SPDP Replay\n"));
-      }
-    }
-  }
-
-  if (!spdp_replay.partitions().empty() && config_.log_activity()) {
-    const auto part_guid = make_id(guid, OpenDDS::DCPS::ENTITYID_PARTICIPANT);
-    ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidPartitionTable::insert %C add partitions %C\n", guid_to_string(part_guid).c_str(), OpenDDS::DCPS::to_json(spdp_replay).c_str()));
   }
 
   return result;
