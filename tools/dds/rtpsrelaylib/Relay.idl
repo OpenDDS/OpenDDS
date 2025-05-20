@@ -189,12 +189,10 @@ module RtpsRelay {
     unsigned long participant_statistics_sub_count;
     unsigned long relay_partitions_sub_count;
     unsigned long relay_participant_status_sub_count;
-    unsigned long spdp_replay_sub_count;
     unsigned long relay_address_sub_count;
     unsigned long relay_status_sub_count;
     unsigned long relay_partitions_pub_count;
     unsigned long relay_address_pub_count;
-    unsigned long spdp_replay_pub_count;
     unsigned long admission_deferral_count;
     unsigned long remote_map_size;
     unsigned long max_ips_per_client;
