@@ -25,13 +25,6 @@
 
 #include <ace/Condition_Thread_Mutex.h>
 
-bool
-make_dr_reliable()
-{
-  OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
-  return gc->instances_[0]->name() == "the_rtps_transport";
-}
-
 class MessengerReplayerListener : public OpenDDS::DCPS::ReplayerListener {
 public:
   virtual void on_replayer_matched(OpenDDS::DCPS::Replayer*,
@@ -238,10 +231,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
     sub_qos.partition.name = my_partition1;
 
     DDS::DataReaderQos dr_qos = service->initial_DataReaderQos();
-
-    if (make_dr_reliable()) {
-      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-    }
+    dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
     // Create Recorder
     OpenDDS::DCPS::Recorder_var recorder = service->create_recorder(participant,
