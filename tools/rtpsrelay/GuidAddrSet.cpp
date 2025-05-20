@@ -279,7 +279,7 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
 
     // Address actually expired.
     if (config_.log_activity()) {
-      const auto ago = now - expiration;
+      const auto ago = now - updated_expiration;
       ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::process_expirations "
                  "%C %C expired %C ago %C into session ips=%B total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
                  guid_to_string(ga.guid).c_str(),
