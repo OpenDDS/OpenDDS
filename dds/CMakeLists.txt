@@ -425,7 +425,6 @@ target_sources(OpenDDS_Dcps
     DCPS/ZeroCopySeq_T.inl
     DCPS/dcps_export.h
     DCPS/debug.h
-    DCPS/optional.h
     DCPS/security/framework/HandleRegistry.h
     DCPS/security/framework/Properties.h
     DCPS/security/framework/SecurityConfig.h

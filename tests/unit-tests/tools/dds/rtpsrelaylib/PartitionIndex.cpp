@@ -1,5 +1,3 @@
-#ifdef OPENDDS_HAS_CXX11
-
 #include <dds/rtpsrelaylib/PartitionIndex.h>
 
 #include <gtest/gtest.h>
@@ -205,5 +203,3 @@ TEST(tools_dds_rtpsrelaylib_PartitionIndex, Identity)
   Identity id;
   EXPECT_EQ(id("x"), "x");
 }
-
-#endif

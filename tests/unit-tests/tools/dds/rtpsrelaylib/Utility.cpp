@@ -1,5 +1,3 @@
-#ifdef OPENDDS_HAS_CXX11
-
 #include <dds/rtpsrelaylib/Utility.h>
 
 #include <gtest/gtest.h>
@@ -224,5 +222,3 @@ TEST(tools_dds_rtpsrelaylib_Utility, GuidHash)
 
   EXPECT_EQ(expected, actual);
 }
-
-#endif
