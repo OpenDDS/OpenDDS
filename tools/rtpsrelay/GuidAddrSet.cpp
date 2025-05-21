@@ -166,8 +166,10 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
 
   if (created) {
     if (config_.log_activity()) {
-      ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::record_activity %C added 0.000 s into session\n",
-                 guid_to_string(src_guid).c_str()));
+      ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::record_activity "
+                 "%C added 0.000 s into session from %C\n",
+                 guid_to_string(src_guid).c_str(),
+                 OpenDDS::DCPS::LogAddr(remote_address.addr).c_str()));
     }
     check_participants_limit();
   }

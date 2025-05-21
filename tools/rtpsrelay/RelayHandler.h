@@ -230,16 +230,11 @@ public:
               const ACE_INET_Addr& application_participant_addr,
               HandlerStatisticsReporter& stats_reporter);
 
-  void replay(const SpdpReplay& spdp_replay);
-
   CORBA::ULong send_to_application_participant(GuidAddrSet::Proxy& proxy,
                                                const OpenDDS::DCPS::GUID_t& guid,
                                                const OpenDDS::DCPS::MonotonicTimePoint& now);
 
 private:
-  using ReplayQueue = std::vector<SpdpReplay>;
-  ReplayQueue replay_queue_;
-  ACE_Thread_Mutex replay_queue_mutex_;
 
   void cache_message(GuidAddrSet::Proxy& proxy,
                      const OpenDDS::DCPS::GUID_t& src_guid,
@@ -256,8 +251,6 @@ private:
                             const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                             const OpenDDS::DCPS::MonotonicTimePoint& now,
                             CORBA::ULong& sent) override;
-
-  int handle_exception(ACE_HANDLE fd) override;
 };
 
 class SedpHandler : public VerticalHandler {
