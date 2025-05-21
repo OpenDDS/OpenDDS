@@ -150,7 +150,7 @@ namespace {
         "        return missing_dda(method, id);\n";
 
     } else {
-      const std::string type_name = field_type_name(field, field_type);
+      const std::string type_name = dds_generator::field_type_name(field, field_type);
       std::string value = "value_.";
       const char* rc_dest = "return";
       if (union_node) {
@@ -302,7 +302,7 @@ namespace {
       AST_Type* const base_type =
         seq_node ? seq_node->base_type() : array_node ? array_node->base_type()
         : map_node->value_type();
-      AST_Type* const named_type = deepest_named_type(base_type);
+      AST_Type* const named_type = dds_generator::deepest_named_type(base_type);
 
       std::string op_type;
       std::string extra_access;

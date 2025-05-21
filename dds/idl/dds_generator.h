@@ -117,6 +117,18 @@ public:
 
   static bool gen_enum_helper(AST_Enum* node, UTL_ScopedName* name,
     const std::vector<AST_EnumVal*>& contents, const char* repoid);
+
+  static std::string call_gen_skip_over(AST_Type* type, const std::string& typeName, const std::string& tag);
+
+  static std::string field_type_name(AST_Field* field, AST_Type* field_type = 0);
+
+  /**
+  * For the some situations, like a tag name, the type name we need is the
+  * deepest named type, not the actual type. This will be the name of the
+  * deepest typedef if it's an array or sequence, otherwise the name of the
+  * type.
+  */
+  static AST_Type* deepest_named_type(AST_Type* type);
 };
 
 inline std::string canonical_name(UTL_ScopedName* sn)
@@ -803,15 +815,6 @@ struct Intro {
   }
 };
 
-std::string field_type_name(AST_Field* field, AST_Type* field_type = 0);
-
-/**
- * For the some situations, like a tag name, the type name we need is the
- * deepest named type, not the actual type. This will be the name of the
- * deepest typedef if it's an array or sequence, otherwise the name of the
- * type.
- */
-AST_Type* deepest_named_type(AST_Type* type);
 
 typedef std::string (*CommonFn)(
   const std::string& indent, AST_Decl* node,
@@ -830,7 +833,7 @@ void generateCaseBody(
   const bool use_cxx11 = lmap == BE_GlobalData::LANGMAP_CXX11;
   const std::string name = branch->local_name()->get_string();
   if (namePrefix == std::string(">> ")) {
-    std::string brType = field_type_name(branch, branch->field_type());
+    std::string brType = dds_generator::field_type_name(branch, branch->field_type());
     std::string forany;
     AST_Type* br = resolveActualType(branch->field_type());
     Classification br_cls = classify(br);
@@ -1257,20 +1260,6 @@ ACE_CDR::ULong container_element_limit(AST_Type* type)
     return map->max_size()->ev()->u.ulval;
   } else if (arr) {
     return array_element_count(arr);
-  }
-  return 0;
-}
-
-inline
-AST_Type* container_base_type(AST_Type* type)
-{
-  AST_Type* const act = AstTypeClassification::resolveActualType(type);
-  AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(act);
-  AST_Array* const arr = dynamic_cast<AST_Array*>(act);
-  if (seq) {
-    return seq->base_type();
-  } else if (arr) {
-    return arr->base_type();
   }
   return 0;
 }

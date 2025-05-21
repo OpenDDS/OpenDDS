@@ -373,7 +373,7 @@ string type_to_default_array(const std::string& indent, AST_Type* type, const st
   replace(temp.begin(), temp.end(), '[', '_');
   replace(temp.begin(), temp.end(), ']', '_');
   if (use_cxx11) {
-    string n = scoped(deepest_named_type(type)->name());
+    string n = scoped(dds_generator::deepest_named_type(type)->name());
     if (is_anonymous) {
       n = n.substr(0, n.rfind("::") + 2) + "AnonymousType_" + type->local_name()->get_string();
       n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq") : n;
@@ -467,7 +467,7 @@ string type_to_default(const std::string& indent, AST_Type* type, const string& 
   return indent + name + pre + def_val + post + ";\n";
 }
 
-std::string field_type_name(AST_Field* field, AST_Type* field_type)
+std::string dds_generator::field_type_name(AST_Field* field, AST_Type* field_type)
 {
   if (!field_type) {
     field_type = field->field_type();
@@ -491,7 +491,7 @@ std::string field_type_name(AST_Field* field, AST_Type* field_type)
   return name;
 }
 
-AST_Type* deepest_named_type(AST_Type* type)
+AST_Type* dds_generator::deepest_named_type(AST_Type* type)
 {
   AST_Type* consider = type;
   AST_Type* named_type = type;
@@ -500,4 +500,22 @@ AST_Type* deepest_named_type(AST_Type* type)
     consider = dynamic_cast<AST_Typedef*>(named_type)->base_type();
   }
   return named_type;
+}
+
+std::string dds_generator::call_gen_skip_over(AST_Type* type, const std::string& typeName, const std::string& tag)
+{
+  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+  std::string pre, post;
+  const Classification cls = classify(type);
+  if (!use_cxx11 && (cls & CL_ARRAY)) {
+    post = "_forany";
+  } else if (use_cxx11 && (cls & (CL_ARRAY | CL_SEQUENCE | CL_MAP))) {
+    pre = "IDL::DistinctType<";
+    post = ", " + tag + ">";
+  }
+  return
+    "    if (!gen_skip_over(strm, static_cast<" + pre + typeName + post
+    + "*>(0))) {\n"
+    "      return false;\n"
+    "    }\n";
 }

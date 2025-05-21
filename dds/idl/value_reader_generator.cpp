@@ -281,7 +281,7 @@ namespace {
                             const std::string&)
   {
     AST_Type* const actual = resolveActualType(type);
-    std::string decl = field_type_name(dynamic_cast<AST_Field*>(branch), type);
+    std::string decl = dds_generator::field_type_name(dynamic_cast<AST_Field*>(branch), type);
 
     const Classification c = classify(actual);
     if (c & CL_STRING) {

@@ -407,33 +407,37 @@ namespace {
   }
 }
 
-void generate_anon_fields(AST_Structure* node)
+void metaclass_generator::generate_anon_fields(AST_Structure* node)
 {
   const Fields fields(node);
-  FieldInfo::EleLenSet anonymous_seq_generated;
+  FieldInfo::EleLenSet anonymous_seq_generated, anonymous_map_generated;
   for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
     AST_Field* const field = *i;
     if (field->field_type()->anonymous()) {
       FieldInfo af(*field);
-      if (af.arr_ || (af.seq_ && af.is_new(anonymous_seq_generated))) {
+      if (af.arr_ || (af.seq_ && af.is_new(anonymous_seq_generated))
+          || (af.map_ && af.is_new(anonymous_map_generated))) {
         Function f("gen_skip_over", "bool");
-        f.addArg("ser", "Serializer&");
+        f.addArg("strm", "Serializer&");
         f.addArg("", af.ptr_);
         f.endArgs();
 
         AST_Type* elem;
-        if (af.seq_ != 0) {
+        if (af.seq_) {
           elem = af.seq_->base_type();
-        } else {
+        } else if (af.arr_) {
           elem = af.arr_->base_type();
+        } else {
+          marshal_generator::gen_map_skip_over(af.map_);
+          continue;
         }
         be_global->impl_ <<
-          "  const Encoding& encoding = ser.encoding();\n"
+          "  const Encoding& encoding = strm.encoding();\n"
           "  ACE_UNUSED_ARG(encoding);\n";
         Classification elem_cls = classify(elem);
         const bool primitive = elem_cls & CL_PRIMITIVE;
         marshal_generator::generate_dheader_code(
-          "    if (!ser.read_delimiter(total_size)) {\n"
+          "    if (!strm.read_delimiter(total_size)) {\n"
           "      return false;\n"
           "    }\n", !primitive, true);
 
@@ -445,7 +449,7 @@ void generate_anon_fields(AST_Structure* node)
         } else { // Sequence
           be_global->impl_ <<
             "  ACE_CDR::ULong length;\n"
-            "  if (!(ser >> length)) return false;\n";
+            "  if (!(strm >> length)) return false;\n";
           len = "length";
         }
         const std::string cxx_elem = scoped(elem->name());
@@ -458,32 +462,22 @@ void generate_anon_fields(AST_Structure* node)
           size_t sz = 0;
           to_cxx_type(af.as_act_, sz);
           be_global->impl_ <<
-            "  return ser.skip(" << af.length_ << ", " << sz << ");\n";
+            "  return strm.skip(" << af.length_ << ", " << sz << ");\n";
         } else {
           be_global->impl_ <<
             "  for (ACE_CDR::ULong i = 0; i < " << len << "; ++i) {\n";
           if (elem_cls & CL_STRING) {
             be_global->impl_ <<
               "    ACE_CDR::ULong strlength;\n"
-              "    if (!(ser >> strlength && ser.skip(strlength))) return false;\n";
-          } else if (elem_cls & (CL_ARRAY | CL_SEQUENCE | CL_STRUCTURE)) {
-            std::string pre, post;
-            const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-            if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
-              post = "_forany";
-            } else if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
-              pre = "IDL::DistinctType<";
-              post = ", " + dds_generator::get_tag_name(dds_generator::scoped_helper(deepest_named_type(elem_orig)->name(), "::")) + ">";
-            }
-            be_global->impl_ <<
-              "    if (!gen_skip_over(ser, static_cast<" << pre << cxx_elem << post
-              << "*>(0))) return false;\n";
+              "    if (!(strm >> strlength && strm.skip(strlength))) return false;\n";
+          } else {
+            const std::string tag = get_tag_name(scoped_helper(deepest_named_type(elem_orig)->name(), "::"));
+            be_global->impl_ << call_gen_skip_over(elem, cxx_elem, tag);
           }
           be_global->impl_ <<
             "  }\n"
             "  return true;\n";
         }
-
       }
     }
   }
@@ -525,7 +519,8 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
 {
   AST_Array* arr = dynamic_cast<AST_Array*>(type);
   AST_Sequence* seq = dynamic_cast<AST_Sequence*>(type);
-  if (!arr && !seq) {
+  AST_Map* map = dynamic_cast<AST_Map*>(type);
+  if (!arr && !seq && !map) {
     return true;
   }
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
@@ -534,7 +529,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   ContentSubscriptionGuard csg;
   NamespaceGuard ng;
   Function f("gen_skip_over", "bool");
-  f.addArg("ser", "Serializer&");
+  f.addArg("strm", "Serializer&");
   if (use_cxx11) {
     f.addArg("", "IDL::DistinctType<" + clazz + ", " + dds_generator::get_tag_name(clazz) +">*");
   } else {
@@ -542,19 +537,22 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   }
   f.endArgs();
 
-  AST_Type* elem;
-  if (seq != 0) {
+  AST_Type* elem = 0;
+  if (seq) {
     elem = seq->base_type();
-  } else {
+  } else if (arr) {
     elem = arr->base_type();
+  } else {
+    marshal_generator::gen_map_skip_over(map);
+    return true;
   }
+
   be_global->impl_ <<
-    "  const Encoding& encoding = ser.encoding();\n"
+    "  const Encoding& encoding = strm.encoding();\n"
     "  ACE_UNUSED_ARG(encoding);\n";
-  Classification elem_cls = classify(elem);
-  const bool primitive = elem_cls & CL_PRIMITIVE;
+  const bool primitive = classify(elem) & CL_PRIMITIVE;
   marshal_generator::generate_dheader_code(
-    "    if (!ser.read_delimiter(total_size)) {\n"
+    "    if (!strm.read_delimiter(total_size)) {\n"
     "      return false;\n"
     "    }\n", !primitive, true);
 
@@ -567,39 +565,33 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   } else { // Sequence
     be_global->impl_ <<
       "  ACE_CDR::ULong length;\n"
-      "  if (!(ser >> length)) return false;\n";
+      "  if (!(strm >> length)) return false;\n";
     len = "length";
   }
 
-  const std::string cxx_elem = scoped(elem->name());
-  AST_Type* elem_orig = elem;
+  AST_Type* const elem_orig = elem;
   elem = resolveActualType(elem);
-  elem_cls = classify(elem);
+  const Classification elem_cls = classify(elem);
 
   if ((elem_cls & (CL_PRIMITIVE | CL_ENUM))) {
     // fixed-length sequence/array element -> skip all elements at once
     size_t sz = 0;
     to_cxx_type(elem, sz);
     be_global->impl_ <<
-      "  return ser.skip(" << len << ", " << sz << ");\n";
+      "  return strm.skip(" << len << ", " << sz << ");\n";
   } else {
     be_global->impl_ <<
       "  for (ACE_CDR::ULong i = 0; i < " << len << "; ++i) {\n";
     if (elem_cls & CL_STRING) {
       be_global->impl_ <<
         "    ACE_CDR::ULong strlength;\n"
-        "    if (!(ser >> strlength && ser.skip(strlength))) return false;\n";
-    } else if (elem_cls & (CL_ARRAY | CL_SEQUENCE | CL_STRUCTURE)) {
-      std::string pre, post;
-      if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
-        post = "_forany";
-      } else if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
-        pre = "IDL::DistinctType<";
-        post = ", " + dds_generator::get_tag_name(scoped_helper(deepest_named_type(elem_orig)->name(), "::")) + ">";
-      }
+        "    if (!(strm >> strlength && strm.skip(strlength))) {\n"
+        "      return false;\n"
+        "    }\n";
+    } else {
       be_global->impl_ <<
-        "    if (!gen_skip_over(ser, static_cast<" << pre << cxx_elem << post
-        << "*>(0))) return false;\n";
+        call_gen_skip_over(elem, scoped(elem_orig->name()),
+                           get_tag_name(scoped_helper(deepest_named_type(elem_orig)->name(), "::")));
     }
     be_global->impl_ <<
       "  }\n"
@@ -609,40 +601,28 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   return true;
 }
 
-static
-std::string gen_union_branch(const std::string&, AST_Decl* branch, const std::string&,
-  AST_Type* br_type, const std::string&, bool, Intro&, const std::string&)
+std::string metaclass_generator::gen_union_branch(const std::string&, AST_Decl* branch, const std::string&,
+                                                  AST_Type* br_type, const std::string&, bool, Intro&, const std::string&)
 {
-  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
   std::stringstream ss;
   const Classification br_cls = classify(br_type);
   ss <<
-    "    if (is_mutable && !ser.read_parameter_id(member_id, field_size, must_understand)) {\n"
+    "    if (is_mutable && !strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
     "      return false;\n"
     "    }\n";
   if (br_cls & CL_STRING) {
     ss <<
       "    ACE_CDR::ULong len;\n"
-      "    if (!(ser >> len && ser.skip(len))) return false;\n";
+      "    if (!(strm >> len && strm.skip(len))) return false;\n";
   } else if (br_cls & CL_SCALAR) {
     size_t sz = 0;
     to_cxx_type(br_type, sz);
     ss <<
-      "    if (!ser.skip(1, " << sz << ")) return false;\n";
+      "    if (!strm.skip(1, " << sz << ")) return false;\n";
   } else {
-    std::string pre, post;
-    if (!use_cxx11 && (br_cls & CL_ARRAY)) {
-      post = "_forany";
-    } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE))) {
-      pre = "IDL::DistinctType<";
-      post = ", " + dds_generator::get_tag_name(dds_generator::scoped_helper(deepest_named_type(br_type)->name(), "::")) + ">";
-    }
-    ss <<
-      "    if (!gen_skip_over(ser, static_cast<" << pre
-      << field_type_name(dynamic_cast<AST_Field*>(branch), br_type) << post <<
-        "*>(0))) return false;\n";
+    ss << call_gen_skip_over(br_type, field_type_name(dynamic_cast<AST_Field*>(branch), br_type),
+                             get_tag_name(scoped_helper(deepest_named_type(br_type)->name(), "::")));
   }
-
   ss <<
     "    return true;\n";
   return ss.str();
@@ -667,7 +647,7 @@ metaclass_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
   {
     Function f("gen_skip_over", "bool");
-    f.addArg("ser", "Serializer&");
+    f.addArg("strm", "Serializer&");
     f.addArg("", clazz + "*");
     f.endArgs();
 
@@ -675,25 +655,25 @@ metaclass_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     const bool not_final = exten != extensibilitykind_final;
     const bool is_mutable  = exten == extensibilitykind_mutable;
     be_global->impl_ <<
-      "  const Encoding& encoding = ser.encoding();\n"
+      "  const Encoding& encoding = strm.encoding();\n"
       "  ACE_UNUSED_ARG(encoding);\n"
       "  const bool is_mutable = " << is_mutable <<";\n"
       "  unsigned member_id;\n"
       "  size_t field_size;\n"
       "  bool must_understand = false;\n";
     marshal_generator::generate_dheader_code(
-      "    if (!ser.read_delimiter(total_size)) {\n"
+      "    if (!strm.read_delimiter(total_size)) {\n"
       "      return false;\n"
       "    }\n", not_final);
     if (is_mutable) {
       be_global->impl_ <<
-        "  if (!ser.read_parameter_id(member_id, field_size, must_understand)) {\n"
+        "  if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
         "    return false;\n"
         "  }\n";
     }
     be_global->impl_ <<
       "  " << scoped(discriminator->name()) << " disc;\n"
-      "  if (!(ser >> " << getWrapper("disc", discriminator, WD_INPUT) << ")) {\n"
+      "  if (!(strm >> " << getWrapper("disc", discriminator, WD_INPUT) << ")) {\n"
       "    return false;\n"
       "  }\n";
     if (generateSwitchForUnion(node, "disc", gen_union_branch, branches, discriminator, "", "", "",

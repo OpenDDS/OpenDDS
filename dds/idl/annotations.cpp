@@ -9,8 +9,8 @@
 #include <ast_array.h>
 #include <ast_map.h>
 #include <ast_sequence.h>
-#include <utl_string.h>
 #include <ast_union.h>
+#include <utl_string.h>
 
 void Annotations::register_all()
 {
