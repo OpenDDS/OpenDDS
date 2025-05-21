@@ -4,6 +4,7 @@ project: dcpsexe, dcps_test, opendds_cxx11 {
   libpaths += ../idl_test1_lib
   after    += cxx11_idl_test1_lib
   includes += ../idl_test1_lib
+  requires += no_opendds_safety_profile
 
   Source_Files {
     main.cpp

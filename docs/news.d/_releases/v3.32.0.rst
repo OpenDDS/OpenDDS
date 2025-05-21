@@ -62,7 +62,7 @@ Platform Support and Dependencies
 
   - See ``OPENDDS_CONFIG_STD_OPTIONAL`` in ``dds/OpenDDSConfig.h``
   - Default is to use ``std::optional`` on compilers that support it
-  - See configure script's ``--no-std-optional`` or CMake's :cmake:var:`OPENDDS_STD_OPTIONAL`
+  - See configure script's ``--no-std-optional`` or CMake's ``OPENDDS_STD_OPTIONAL``
 - New configure script option: ``--[no-]static-runtime`` (:ghpr:`4977`, :ghpr:`4983`)
 
 Fixes
