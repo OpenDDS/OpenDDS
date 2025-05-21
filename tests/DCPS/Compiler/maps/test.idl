@@ -12,13 +12,14 @@ typedef map<int32, string, 10> TestIntStringMap;
 @topic
 struct Data {
   map<int32, int32, 9> intIntMap;
-
   map<string, string> stringStringMap;
+  TestIntStringMap intStringMap;
 
   map<TEST_ENUM, int32, 8> enumIntMap;
   map<int32, TEST_ENUM> intEnumMap;
 
   map<string, TestStruct> stringStructsMap;
+  TestStructMap intStructsMap;
 
   map<string, @try_construct(TRIM) TestStructSeq> stringSequenceMap;
 
