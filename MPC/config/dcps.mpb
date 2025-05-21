@@ -1,3 +1,5 @@
 project: dcps_no_idl, dcps_ts_defaults, dcps_optional_features, dds_suppress_any_support, taoidldefaults, optional_rapidjson {
   idlflags += -I$(DDS_ROOT)
+  avoids += no_cxx11
+  avoids += no_cxx17
 }

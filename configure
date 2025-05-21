@@ -188,7 +188,6 @@ my @specs =
     'host=s', 'Host (auto detect: linux, win32, macosx)',
     'compiler=s', 'Compiler (auto detect / guess by searching PATH)',
     'std=s', 'C++ standard version (compiler default)',
-    'std-optional!', 'Use std::optional (if supported)',
     'target=s', 'Cross-compile target (none): see --target-help',
     'target-arch=s', 'Architecture for target (none): see --target-help',
     'target-compiler=s', 'Compiler for target (if req\'d): see --target-help',
@@ -793,19 +792,13 @@ EOF
     }
     $opts{'compiler_version'} = $vers->{$ver};
 
-    if ($ver >= 19) {
-      push(@features, 'no_cxx11=0');
-      print "Visual C++ has >= C++11 support\n" if $opts{'verbose'};
-    }
+    my $std = "stdcpp17";
     if ($opts{'std'}) {
-      my $std = "stdcpp$cxx_std";
-      push(@mpcopts, '-value_template', "LanguageStandard=$std");
-      print "Setting Visual C++ LanguageStandard to $std\n" if $opts{'verbose'};
-      if ($opts{'std'} eq 'latest' || $cxx_std >= 17) {
-        push(@features, 'no_cxx17=0');
-        print "Visual C++ has >= C++17 support\n" if $opts{'verbose'};
-      }
+      $std = "stdcpp$cxx_std";
     }
+    push(@mpcopts, '-value_template', "LanguageStandard=$std");
+    print "Setting Visual C++ LanguageStandard to $std\n" if $opts{'verbose'};
+
     $ENV{'PATH'} = $savepath;
     print "Detected Visual C++ version: $opts{'compiler_version'}\n"
       if $opts{'verbose'};
@@ -850,20 +843,19 @@ EOF
         print "Detected Clang >= 6, default -std=gnu++14\n" if $opts{'verbose'};
       }
     }
+  }
 
-    if ($opts{'std'}) {
-      my $cpp17 = qr/(17|2a|20|2b|23)/;
-      if ($opts{'std'} =~ /(0x|11|1y|14|1z|$cpp17)$/) {
-        push(@features, 'no_cxx11=0');
-        print "Compiler has >= C++11 support\n" if $opts{'verbose'};
-      }
+  ## Minimum C++ Standard is C++17
 
-      if ($opts{'std'} =~ /$cpp17$/) {
-        push(@features, 'no_cxx17=0');
-        print "Compiler has >= C++17 support\n" if $opts{'verbose'};
-      }
+  if ($opts{'std'}) {
+    my $cpp17 = qr/(17|2a|20|2b|23)/;
+    if ($opts{'std'} !~ /$cpp17$/) {
+      die("C++17 is required to compile OpenDDS");
     }
   }
+
+  push(@features, 'no_cxx11=0');
+  push(@features, 'no_cxx17=0');
 }
 
 my $compile_warnings = $opts{'compile-warnings'} // '';
@@ -1466,8 +1458,6 @@ EOT
 
 sub write_opendds_configh {
   my %buildEnv = %{shift()};
-  my $has_cxx17 = grep /no_cxx17=0/, @features;
-  my $use_optional = $has_cxx17 && !(exists $opts{'std-optional'} && $opts{'std-optional'} == 0);
 
   my $CFGH = backup_and_open("$buildEnv{'DDS_ROOT'}/dds/OpenDDSConfig.h");
   my $CFGIN = new FileHandle;
@@ -1504,7 +1494,6 @@ sub write_opendds_configh {
     'OPENDDS_CONFIG_RAPIDJSON' => ($opts{'rapidjson'} // 0) ? 1 : 0,
     'OPENDDS_CONFIG_SAFETY_PROFILE' => ($buildEnv{'build'} eq 'host') ? 0 : $safety_profile_1,
     'OPENDDS_CONFIG_SECURITY' => $opts{'security'} // 0,
-    'OPENDDS_CONFIG_STD_OPTIONAL' => $use_optional,
   );
 
   if (exists $opts{'content-subscription'}) {
