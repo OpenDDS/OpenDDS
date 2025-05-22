@@ -394,6 +394,7 @@ Functions
       [INCLUDE_BASE <dir>]
       [SKIP_TAO_IDL]
       [SKIP_OPENDDS_IDL]
+      [FOLDER <string>]
     )
 
   A function that acts like `target_sources <https://cmake.org/cmake/help/latest/command/target_sources.html>`__, but it adds IDL files and the resulting generated code to a target.
@@ -509,6 +510,14 @@ Functions
     Skip invoking ``opendds_idl`` on the IDL files.
 
     .. versionadded:: 3.25
+
+  .. cmake:func:arg:: FOLDER <string>
+
+    Set the FOLDER CMake property of generated targets to this value.
+    This is used by some CMake Generators to group these targets in IDEs.
+    The default is set by :cmake:var:`OPENDDS_DEFAULT_GENERATED_FOLDER`.
+
+    .. versionadded:: 3.33
 
   After ``opendds_target_sources`` is run on a target, it will have these target properties set on it:
 
@@ -871,6 +880,13 @@ These variables can be used to override default behavior of the CMake package.
     This variable will be removed in OpenDDS 4.0 and the behavior will be the same as if this variable was set to ``TRUE``.
 
   .. versionadded:: 3.24
+
+.. cmake:var:: OPENDDS_DEFAULT_GENERATED_FOLDER
+
+  Value used for the FOLDER CMake property of generated targets added in :cmake:func:`opendds_target_sources` when no ``FOLDER`` argument is specified.
+  The default value of this variable is ``IDL``.
+
+  .. versionadded:: 3.33
 
 .. _cmake-config-vars:
 
