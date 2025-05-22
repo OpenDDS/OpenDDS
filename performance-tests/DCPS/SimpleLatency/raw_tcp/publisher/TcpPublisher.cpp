@@ -31,7 +31,7 @@ add_stats (
     )
 {
   data = data / (ACE_hrtime_t) 1000;
-  cout << static_cast<double> (ACE_UINT64_DBLCAST_ADAPTER (data))
+  cout << static_cast<double>(ACE_UINT64_DBLCAST_ADAPTER(data))
        << endl;
 
   const ACE_hrtime_t count_hrtime = static_cast<ACE_hrtime_t>(stats.count);

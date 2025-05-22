@@ -345,10 +345,10 @@ CORBA::SystemException::_info (void) const
         default:
           {
             // 7 bits of some other errno.
-            ACE_OS::snprintf (unknown_errno,
+            ACE_OS::snprintf(unknown_errno,
                              255,
                              "low 7 bits of errno: %3u %s",
-                             minor_code, ACE_OS::strerror (static_cast<int> (minor_code)));
+                             minor_code, ACE_OS::strerror(static_cast<int>(minor_code)));
 
             errno_indication = unknown_errno;
           }
