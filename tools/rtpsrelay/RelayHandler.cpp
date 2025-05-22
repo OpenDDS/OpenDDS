@@ -866,7 +866,7 @@ void SpdpHandler::cache_message(GuidAddrSet::Proxy& proxy,
   if (to.empty()) {
     const auto pos = proxy.find(src_guid);
     if (pos != proxy.end()) {
-      if (!pos->second.spdp_message) {
+      if (!pos->second.seen_spdp_message) {
         pos->second.common_name = extract_common_name(*msg, src_guid);
         if (config_.log_activity()) {
           ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SpdpHandler::cache_message %C got first SPDP %C into session dds.cert.sn %C\n",
@@ -874,8 +874,9 @@ void SpdpHandler::cache_message(GuidAddrSet::Proxy& proxy,
                      pos->second.get_session_time(now).sec_str().c_str(),
                      pos->second.common_name.c_str()));
         }
+        pos->second.spdp_message = msg;
+        pos->second.seen_spdp_message = true;
       }
-      pos->second.spdp_message = msg;
     }
   }
 }
@@ -947,7 +948,9 @@ CORBA::ULong SpdpHandler::send_to_application_participant(GuidAddrSet::Proxy& pr
     return 0;
   }
 
-  return send(proxy, guid, StringSet(), GuidSet(), true, pos->second.spdp_message, now);
+  const auto ret = send(proxy, guid, StringSet(), GuidSet(), true, pos->second.spdp_message, now);
+  pos->second.spdp_message = OpenDDS::DCPS::Lockable_Message_Block_Ptr{};
+  return ret;
 }
 
 SedpHandler::SedpHandler(const Config& config,
