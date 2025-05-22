@@ -38,8 +38,8 @@ add_stats (
   stats.average = (count_hrtime * stats.average + data) / (count_hrtime + 1);
   stats.min = (stats.count == 0 || data < stats.min) ? data : stats.min;
   stats.max = (stats.count == 0 || data > stats.max) ? data : stats.max;
-  stats.sum = stats.sum + data;
-  stats.sum2 = stats.sum2 + data * data;
+  stats.sum += data;
+  stats.sum2 += data * data;
   ++stats.count;
 }
 
