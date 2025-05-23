@@ -1,5 +1,3 @@
-#ifdef OPENDDS_HAS_CXX11
-
 #include <dds/rtpsrelaylib/Name.h>
 
 #include <gtest/gtest.h>
@@ -310,5 +308,3 @@ TEST(tools_dds_rtpsrelaylib_Name, Name_stringify)
 {
   EXPECT_EQ(stringify(Name("a[bc][d-e][!fg][!h-i]*?")), "a[bc][de][!fg][!hi]*?");
 }
-
-#endif
