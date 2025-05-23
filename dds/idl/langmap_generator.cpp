@@ -85,6 +85,7 @@ struct GeneratorBase {
   virtual ~GeneratorBase() {}
   virtual void init() = 0;
   virtual void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq) = 0;
+  virtual std::string map_to_lang(AST_Map*) { return "<<unsupported>>"; }
   virtual bool gen_struct(AST_Structure* s, UTL_ScopedName* name, const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE size, const char* x) = 0;
 
   virtual std::string const_keyword(AST_Expression::ExprType)
@@ -110,6 +111,9 @@ struct GeneratorBase {
     if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_ARRAY | CL_ENUM | CL_FIXED)) {
       return scoped(type->name());
     }
+    if (cls & CL_MAP) {
+      return type->anonymous() ? map_to_lang(dynamic_cast<AST_Map*>(type)) : scoped(type->name());
+    }
     if (cls & CL_INTERFACE) {
       return scoped(type->name()) + "_var";
     }
@@ -119,7 +123,7 @@ struct GeneratorBase {
   std::string map_type(AST_Field* field)
   {
     FieldInfo af(*field);
-    std::string mt = (af.type_->anonymous() && af.as_base_) ? af.type_name_ : map_type(af.type_);
+    std::string mt = af.anonymous() ? af.type_name_ : map_type(af.type_);
     if (af.is_optional_) {
       mt = "OPENDDS_OPTIONAL_NS::optional<" + mt + ">";
     }
@@ -352,7 +356,7 @@ struct GeneratorBase {
           "  " << field_type_string << "_slice* " << field_name << " () const {\n"
           "    return this->_u." << field_name << ";\n"
           "  }\n";
-      } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
+      } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_MAP | CL_FIXED)) {
         be_global->lang_header_ <<
           "  void " << field_name << " (const " << field_type_string << "& x) {\n"
           "    _reset();\n"
@@ -422,7 +426,7 @@ struct GeneratorBase {
     } else if (cls & CL_ARRAY) {
       be_global->lang_header_ <<
         "    " << lang_field_type << "_slice* " << branch->local_name()->get_string() << ";\n";
-    } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
+    } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_MAP | CL_FIXED)) {
       be_global->lang_header_ <<
         "    " << lang_field_type << "* " << branch->local_name()->get_string() << ";\n";
     } else {
@@ -447,7 +451,7 @@ struct GeneratorBase {
     } else if (cls & CL_ARRAY) {
       ss <<
         "    this->_u." << name << " = (other._u." << name << ") ? " << lang_field_type << "_dup(other._u." << name << ") : 0 ;\n";
-    } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
+    } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_MAP | CL_FIXED)) {
       ss <<
         "    this->_u." << name << " = (other._u." << name << ") ? new " << lang_field_type << "(*other._u." << name << ") : 0;\n";
     } else {
@@ -502,7 +506,7 @@ struct GeneratorBase {
       // TODO
       ss <<
         "    return false;\n";
-    } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
+    } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_MAP | CL_FIXED)) {
       ss <<
         "    return *this->_u." << name << " == *rhs._u." << name << ";\n";
     } else {
@@ -520,7 +524,7 @@ struct GeneratorBase {
 
     AST_Type* actual_field_type = resolveActualType(field_type);
     const Classification cls = classify(actual_field_type);
-    if (cls & (CL_PRIMITIVE | CL_ENUM | CL_STRING | CL_ARRAY | CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
+    if (cls & (CL_PRIMITIVE | CL_ENUM | CL_STRING | CL_ARRAY | CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_MAP | CL_FIXED)) {
       ss <<
         "    return this->_" << name << " == rhs._" << name << ";\n";
     } else {
@@ -548,7 +552,7 @@ struct GeneratorBase {
       ss <<
         "    " << generator_->map_type(field_type) << "_free(this->_u." << name << ");\n"
         "    this->_u." << name << " = 0;\n";
-    } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
+    } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_MAP | CL_FIXED)) {
       ss <<
         "    delete this->_u." << name << ";\n"
         "    this->_u." << name << " = 0;\n";
@@ -1441,7 +1445,7 @@ struct Cxx11Generator : GeneratorBase {
   void gen_array_typedef(const char*, AST_Type*) {}
   void gen_typedef_varout(const char*, AST_Type*) {}
 
-  static void gen_sequence(const std::string& type, const std::string& elem,  const std::string& ind = "")
+  static void gen_sequence(const std::string& type, const std::string& elem, const std::string& ind = "")
   {
     be_global->add_include("<vector>", BE_GlobalData::STREAM_LANG_H);
     be_global->lang_header_ << ind << "using " << type << " = std::vector<" << elem << ">;\n";
@@ -1450,6 +1454,12 @@ struct Cxx11Generator : GeneratorBase {
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
   {
     gen_sequence(tdname->last_component()->get_string(), map_type(seq->base_type()));
+  }
+
+  std::string map_to_lang(AST_Map* map)
+  {
+    be_global->add_include("<map>", BE_GlobalData::STREAM_LANG_H);
+    return "std::map<" + map_type(map->key_type()) + ", " + map_type(map->value_type()) + '>';
   }
 
   static void gen_common_strunion_pre(const char* nm)
@@ -1471,13 +1481,16 @@ struct Cxx11Generator : GeneratorBase {
   static void gen_struct_members(AST_Field* field)
   {
     FieldInfo af(*field);
-    if (af.type_->anonymous() && af.as_base_) {
+    if (af.anonymous() && af.as_base_) {
       const std::string elem_type = generator_->map_type(af.as_base_);
       if (af.arr_) {
         gen_array(af.arr_, af.type_name_, elem_type, "  ");
       } else if (af.seq_) {
         gen_sequence(af.type_name_, elem_type, "  ");
       }
+    } else if (af.anonymous() && af.map_) {
+      be_global->lang_header_ <<
+        "  using AnonymousType_" << af.name_ << "_map = " << generator_->map_to_lang(af.map_) << ";\n";
     }
 
     const std::string lang_field_type = generator_->map_type(field);
@@ -1610,6 +1623,19 @@ struct Cxx11Generator : GeneratorBase {
 
   static void union_accessors(AST_UnionBranch* branch)
   {
+    FieldInfo af(*branch);
+    if (af.anonymous() && af.as_base_) {
+      const std::string elem_type = generator_->map_type(af.as_base_);
+      if (af.arr_) {
+        gen_array(af.arr_, af.type_name_, elem_type, "  ");
+      } else if (af.seq_) {
+        gen_sequence(af.type_name_, elem_type, "  ");
+      }
+    } else if (af.anonymous() && af.map_) {
+      be_global->lang_header_ <<
+        "  using AnonymousType_" << af.name_ << "_map = " << generator_->map_to_lang(af.map_) << ";\n";
+    }
+
     AST_Type* field_type = branch->field_type();
     AST_Type* actual_field_type = resolveActualType(field_type);
     const std::string lang_field_type = generator_->map_type(field_type);

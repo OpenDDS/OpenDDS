@@ -229,7 +229,12 @@ DDS::ReturnCode_t DynamicDataAdapter::assert_mutable(const char* method) const
 DDS::ReturnCode_t DynamicDataAdapter::check_index(
   const char* method, DDS::UInt32 index, DDS::UInt32 size) const
 {
-  if (index >= size) {
+  if (type_->get_kind() == TK_MAP) {
+    // When this is supported, change dynamic_data_generator.cpp
+    // to generate the id_to_key() member function.
+    return DDS::RETCODE_UNSUPPORTED;
+
+  } else if (index >= size) {
     if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Notice) {
       const CORBA::String_var type_name = type_->get_name();
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataAdapterImpl<%C>::%C: "

@@ -28,6 +28,10 @@ public:
 
 private:
   bool first_struct_;
+
+  static std::string gen_union_branch(const std::string&, AST_Decl* branch, const std::string&,
+                                      AST_Type* br_type, const std::string&, bool, Intro&, const std::string&);
+  static void generate_anon_fields(AST_Structure* node);
 };
 
 #endif

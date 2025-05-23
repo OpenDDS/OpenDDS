@@ -9,6 +9,7 @@
 #include "global_extern.h"
 
 #include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
 
 #include <utl_identifier.h>
 #include <utl_labellist.h>
@@ -141,7 +142,7 @@ namespace {
     if (c & CL_PRIMITIVE) {
       if (use_cxx11) {
         const AST_PredefinedType::PredefinedType pt = dynamic_cast<AST_PredefinedType*>(actual)->pt();
-        use_optimized_write_ = !(pt == AST_PredefinedType::PT_boolean);
+        use_optimized_write_ = pt != AST_PredefinedType::PT_boolean;
       } else {
         use_optimized_write_ = true;
       }
@@ -177,26 +178,48 @@ namespace {
       indent << "}\n";
   }
 
+  void map_helper(const std::string& expression, const AST_Map* map, int level, FieldFilter filter_kind)
+  {
+    const std::string indent(static_cast<size_t>(level * 2), ' ');
+    const std::string key_tk = type_kind(map->key_type()),
+      value_tk = type_kind(map->value_type()),
+      elt_name = "elt" + OpenDDS::DCPS::to_dds_string(level);
+    be_global->impl_ <<
+      indent << "if (!value_writer.begin_map(" << key_tk << ", " << value_tk << ")) return false;\n" <<
+      indent << "for (const auto& " << elt_name << " : " << expression << ") {\n" <<
+      indent << "  if (!value_writer.begin_key()) return false;\n";
+    generate_write(elt_name + ".first", "", map->key_type(), "", level + 1, nested(filter_kind));
+    be_global->impl_ <<
+      indent << "  if (!value_writer.end_key()) return false;\n" <<
+      indent << "  if (!value_writer.begin_value()) return false;\n";
+    generate_write(elt_name + ".second", "", map->value_type(), "idx", level + 1, nested(filter_kind));
+    be_global->impl_ <<
+      indent << "  if (!value_writer.end_value()) return false;\n" <<
+      indent << "}\n" <<
+      indent << "if (!value_writer.end_map()) return false;\n";
+  }
+
   void generate_write(const std::string& expression, const std::string& field_name,
                       AST_Type* type, const std::string& idx, int level, FieldFilter field_filter)
   {
-    AST_Type* const actual = resolveActualType(type);
+    const std::string indent(size_t(level) * 2, ' ');
 
+    AST_Type* const actual = resolveActualType(type);
     const Classification c = classify(actual);
+
     if (c & CL_SEQUENCE) {
       AST_Sequence* const sequence = dynamic_cast<AST_Sequence*>(actual);
       sequence_helper(expression, sequence, idx, level, field_filter);
-      return;
 
     } else if (c & CL_ARRAY) {
       AST_Array* const array = dynamic_cast<AST_Array*>(actual);
       array_helper(expression, array, 0, idx, level, field_filter);
-      return;
-    }
 
-    const std::string indent(size_t(level) * 2, ' ');
+    } else if (c & CL_MAP) {
+      AST_Map* const map = dynamic_cast<AST_Map*>(actual);
+      map_helper(expression, map, level, field_filter);
 
-    if (c & CL_FIXED) {
+    } else if (c & CL_FIXED) {
       be_global->impl_ <<
         indent << "if (!value_writer.write_fixed(" << expression << ".to_ace_fixed())) {\n" <<
         indent << "  return false;\n" <<
@@ -297,7 +320,8 @@ namespace {
 
       be_global->impl_ <<
         "  {\n" <<
-        "    MemberParam param(" << id << ", " << (must_understand ? "true" : "false") << ", \"" << idl_name << "\", " << is_optional << ", " << optional_is_present << ");\n" <<
+        "    MemberParam param(" << id << ", " << (must_understand ? "true" : "false") << ", \"" << idl_name << "\", "
+        << (is_optional ? "true" : "false") << ", " << optional_is_present << ");\n" <<
         "    if (!value_writer.begin_struct_member(param)) {\n"
         "      return false;\n"
         "    }\n" <<

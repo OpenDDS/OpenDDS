@@ -79,6 +79,7 @@ namespace {
     case AST_Decl::NT_struct:
     case AST_Decl::NT_union:
     case AST_Decl::NT_sequence:
+    case AST_Decl::NT_map:
       is_complex = true;
       op_type = set ? "direct_complex" : "complex";
       return true;
@@ -149,7 +150,7 @@ namespace {
         "        return missing_dda(method, id);\n";
 
     } else {
-      const std::string type_name = field_type_name(field, field_type);
+      const std::string type_name = dds_generator::field_type_name(field, field_type);
       std::string value = "value_.";
       const char* rc_dest = "return";
       if (union_node) {
@@ -209,12 +210,13 @@ namespace {
       "      }\n";
   }
 
-  bool generate_dynamic_data_adapter_access(AST_Decl* node, RefWrapper& wrapper, bool set)
+  bool generate_dynamic_data_adapter_access(AST_Decl* node, const RefWrapper& wrapper, bool set)
   {
     AST_Structure* struct_node = 0;
     AST_Union* union_node = 0;
     AST_Sequence* seq_node = 0;
     AST_Array* array_node = 0;
+    AST_Map* map_node = 0;
     if (!node) {
       return false;
     }
@@ -231,8 +233,31 @@ namespace {
     case AST_Decl::NT_array:
       array_node = dynamic_cast<AST_Array*>(node);
       break;
+    case AST_Decl::NT_map:
+      map_node = dynamic_cast<AST_Map*>(node);
+      break;
     default:
       return false;
+    }
+
+    if (map_node && !set) {
+      std::string elem;
+      if (map_node->anonymous()) {
+        AST_Map* const m = dynamic_cast<AST_Map*>(AstTypeClassification::resolveActualType(map_node));
+        elem = scoped(m->key_type()->name());
+      } else {
+        elem = scoped(map_node->key_type()->name());
+      }
+      const Classification key_cls = classify(map_node->key_type());
+      if ((key_cls & CL_STRING) && be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+        elem = (key_cls & CL_WIDE) ? "std::wstring" : "std::string";
+      }
+      RefWrapper key(map_node->value_type(), elem, "key");
+      be_global->impl_ <<
+        "  " << elem << " id_to_key(DDS::MemberId)\n"
+        "  {\n"
+        "    return " << elem << "();\n" // not currently called since check_index() returns an error
+        "  }\n\n";
     }
 
     be_global->impl_ << "  DDS::ReturnCode_t " << op(set) << "_raw_value(const char* method, ";
@@ -273,9 +298,11 @@ namespace {
         "    default:\n"
         "      return invalid_id(method, id);\n"
         "    }\n";
-    } else if (seq_node || array_node) {
-      AST_Type* const base_type = seq_node ? seq_node->base_type() : array_node->base_type();
-      AST_Type* const named_type = deepest_named_type(base_type);
+    } else if (seq_node || array_node || map_node) {
+      AST_Type* const base_type =
+        seq_node ? seq_node->base_type() : array_node ? array_node->base_type()
+        : map_node->value_type();
+      AST_Type* const named_type = dds_generator::deepest_named_type(base_type);
 
       std::string op_type;
       std::string extra_access;
@@ -286,8 +313,8 @@ namespace {
           be_global->impl_ << "const DDS::ReturnCode_t ";
         }
         be_global->impl_ << "rc = check_index(method, id, ";
-        if (seq_node) {
-          be_global->impl_ << wrapper.seq_get_length();
+        if (seq_node || map_node) {
+          be_global->impl_ << wrapper.get_length();
         } else {
           be_global->impl_ << array_element_count(array_node);
         }
@@ -296,7 +323,7 @@ namespace {
           "      return rc;\n"
           "    }\n";
         generate_op(2, set, base_type, scoped(named_type->name()), op_type, is_complex,
-          wrapper.flat_collection_access("id") + extra_access);
+          wrapper.flat_collection_access(map_node ? "id_to_key(id)" : "id") + extra_access);
       } else {
         be_global->impl_ <<
           "    ACE_UNUSED_ARG(" << (set ? "source" : "dest") << ");\n"
@@ -356,6 +383,13 @@ namespace {
     return kind == AST_Decl::NT_interface || kind == AST_Decl::NT_valuetype;
   }
 
+  bool is_collection_of_interface_or_value_type(AST_Map* type)
+  {
+    // No check of keys because interface/valuetype can't be keys
+    const AST_Decl::NodeType kind = resolveActualType(type->value_type())->node_type();
+    return kind == AST_Decl::NT_interface || kind == AST_Decl::NT_valuetype;
+  }
+
   bool generate_dynamic_data_adapter(
     AST_Decl* node, const std::string* use_scoped_name = 0, AST_Typedef* typedef_node = 0)
   {
@@ -363,6 +397,7 @@ namespace {
     AST_Union* union_node = 0;
     AST_Sequence* seq_node = 0;
     AST_Array* array_node = 0;
+    AST_Map* map_node = 0;
     if (!node) {
       return false;
     }
@@ -385,6 +420,12 @@ namespace {
         return true;
       }
       break;
+    case AST_Decl::NT_map:
+      map_node = dynamic_cast<AST_Map*>(node);
+      if (is_collection_of_interface_or_value_type(map_node)) {
+        return true;
+      }
+      break;
     default:
       return true;
     }
@@ -398,12 +439,13 @@ namespace {
 
     if (struct_node || union_node) {
       const Fields fields(union_node ? union_node : struct_node);
-      FieldInfo::EleLenSet anonymous_seq_generated;
+      FieldInfo::EleLenSet anonymous_seq_generated, anonymous_map_generated;
       for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
         AST_Field* const field = *i;
         if (field->field_type()->anonymous()) {
           FieldInfo af(*field);
-          if (af.arr_ || (af.seq_ && af.is_new(anonymous_seq_generated))) {
+          if (af.arr_ || (af.seq_ && af.is_new(anonymous_seq_generated))
+              || (af.map_ && af.is_new(anonymous_map_generated))) {
             if (!generate_dynamic_data_adapter(af.type_, &af.scoped_type_)) {
               be_util::misc_error_and_abort(
                 "Failed to generate adapter for anonymous type of field", field);
@@ -456,15 +498,15 @@ namespace {
           "    return rc;\n"
           "  }\n"
           "\n";
-        if (struct_node || seq_node || array_node) {
+        if (struct_node || seq_node || array_node || map_node) {
           be_global->impl_ <<
             "  DDS::UInt32 get_item_count()\n"
             "  {\n"
             "    return ";
           if (struct_node) {
             be_global->impl_ << struct_node->nfields();
-          } else if (seq_node) {
-            be_global->impl_ << wrapper.seq_get_length();
+          } else if (seq_node || map_node) {
+            be_global->impl_ << wrapper.get_length();
           } else if (array_node) {
             be_global->impl_ << array_element_count(array_node);
           }
@@ -478,7 +520,7 @@ namespace {
           be_global->impl_ <<
             "  DDS::MemberId get_member_id_at_index_impl(DDS::UInt32 index)\n"
             "  {\n"
-            "    const DDS::UInt32 count = " << wrapper.seq_get_length() << ";\n"
+            "    const DDS::UInt32 count = " << wrapper.get_length() << ";\n"
             "    if (!read_only_ && index >= count) {\n"
             "      " << wrapper.seq_resize("index + 1") <<
             "      return index;\n"
@@ -519,7 +561,7 @@ namespace {
         } else {
           be_global->impl_ <<
             "    ACE_UNUSED_ARG(ext);\n";
-          if (distinct_type) { // sequence or array (C++11 mapping)
+          if (distinct_type) { // sequence, map, or array (C++11 mapping)
             RefWrapper distinct_type_wrapper(node_as_type, cpp_name, "");
             distinct_type_wrapper.done();
             be_global->impl_ <<
@@ -646,7 +688,7 @@ bool dynamic_data_adapter_generator::gen_typedef(AST_Typedef* typedef_node, UTL_
   AST_Type* type, const char*)
 {
   const AST_Decl::NodeType nt = type->node_type();
-  if (nt != AST_Decl::NT_sequence && nt != AST_Decl::NT_array) {
+  if (nt != AST_Decl::NT_sequence && nt != AST_Decl::NT_array && nt != AST_Decl::NT_map) {
     return true;
   }
   const std::string cpp_name = scoped(name);

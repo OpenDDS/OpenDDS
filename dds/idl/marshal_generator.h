@@ -31,6 +31,8 @@ public:
 
   static void gen_field_getValueFromSerialized(AST_Structure* node, const std::string& clazz);
 
+  static void gen_map_skip_over(AST_Map* map);
+
 private:
   void gen_union_default(AST_UnionBranch* branch, const std::string& varname);
 };
