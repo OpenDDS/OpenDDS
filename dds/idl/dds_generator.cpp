@@ -376,7 +376,8 @@ string type_to_default_array(const std::string& indent, AST_Type* type, const st
     string n = scoped(dds_generator::deepest_named_type(type)->name());
     if (is_anonymous) {
       n = n.substr(0, n.rfind("::") + 2) + "AnonymousType_" + type->local_name()->get_string();
-      n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq") : n;
+      n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq")
+          : (fld_cls == AST_Decl::NT_map) ? (n + "_map") : n;
     }
     val += indent + "set_default(IDL::DistinctType<" + n + ", " + dds_generator::get_tag_name(n) + ">(" +
       (is_union ? "tmp" : name) + "));\n";
@@ -384,7 +385,8 @@ string type_to_default_array(const std::string& indent, AST_Type* type, const st
     string n = scoped(type->name());
     if (is_anonymous) {
       n = n.substr(0, n.rfind("::") + 2) + "_" + type->local_name()->get_string();
-      n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq") : n;
+      n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq")
+          : (fld_cls == AST_Decl::NT_map) ? (n + "_map") : n;
     }
     val = indent + n + "_forany " + temp + "(const_cast<"
       + n + "_slice*>(" + (is_union ? "tmp": name) + "));\n";

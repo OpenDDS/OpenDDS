@@ -565,7 +565,7 @@ namespace {
       } else if (elem_cls == CL_UNKNOWN) {
         be_global->impl_ <<
           "  // sequence of unknown/unsupported type\n";
-      } else { // String, Struct, Array, Sequence, Union
+      } else { // String, Struct, Array, Sequence, Map, Union
         be_global->impl_ <<
           "  for (CORBA::ULong i = 0; i < " << get_length << "; ++i) {\n";
         if (elem_cls & CL_STRING) {
@@ -656,7 +656,7 @@ namespace {
       } else if (elem_cls == CL_UNKNOWN) {
         be_global->impl_ <<
           "  return false; // sequence of unknown/unsupported type\n";
-      } else { // Enum, String, Struct, Array, Sequence, Union
+      } else { // Enum, String, Struct, Array, Sequence, Map, Union
         be_global->impl_ <<
           "  for (CORBA::ULong i = 0; i < length; ++i) {\n";
         if ((elem_cls & (CL_STRING | CL_BOUNDED)) == (CL_STRING | CL_BOUNDED)) {
@@ -785,7 +785,7 @@ namespace {
         be_global->impl_ <<
           "  return false; // sequence of unknown/unsupported type\n";
         return;
-      } else { // Enum, String, Struct, Array, Sequence, Union
+      } else { // Enum, String, Struct, Array, Sequence, Map, Union
         const std::string elem_access = value_access + "[i]";
         if (!seq->unbounded()) {
           be_global->impl_ <<
@@ -990,8 +990,11 @@ namespace {
     if (key_cls & CL_INTERFACE || val_cls & CL_INTERFACE) {
       be_util::misc_error_and_abort("map with either a key or value of objrefs is not marshaled", map);
     }
-    if (key_cls == CL_UNKNOWN || val_cls == CL_UNKNOWN) {
-      be_util::misc_error_and_abort("map with either key or value of unknown/unsupported type", map);
+    if ((key_cls & CL_SCALAR) == 0) {
+      be_util::misc_error_and_abort("map with key of unknown/unsupported type", map);
+    }
+    if (val_cls == CL_UNKNOWN) {
+      be_util::misc_error_and_abort("map with value of unknown/unsupported type", map);
     }
 
     std::string key_cxx_elem;
@@ -3961,7 +3964,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   string cxx = scoped(name); // name as a C++ class
   const Classification disc_cls = classify(discriminator);
 
-  FieldInfo::EleLenSet anonymous_seq_generated;
+  FieldInfo::EleLenSet anonymous_seq_generated, anonymous_map_generated;
   for (size_t i = 0; i < branches.size(); ++i) {
     if (branches[i]->field_type()->anonymous()) {
       FieldInfo af(*branches[i]);
@@ -3969,6 +3972,8 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         gen_anonymous_array(af);
       } else if (af.seq_ && af.is_new(anonymous_seq_generated)) {
         gen_anonymous_sequence(af);
+      } else if (af.map_ && af.is_new(anonymous_map_generated)) {
+        gen_anonymous_map(af);
       }
     }
   }
@@ -4215,6 +4220,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
 void marshal_generator::gen_union_default(AST_UnionBranch* branch, const std::string& varname)
 {
+  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
   AST_Type* br = resolveActualType(branch->field_type());
   const Classification br_cls = classify(br);
   const std::string tmpname = "tmp";
@@ -4229,7 +4235,8 @@ void marshal_generator::gen_union_default(AST_UnionBranch* branch, const std::st
     be_global->impl_ << "  " << varname << "." << branch->local_name()->get_string() << "(tmp);\n";
   } else {
     be_global->impl_ << type_to_default("  ", branch->field_type(),
-                                        varname + "." + branch->local_name()->get_string(),
+                                        varname + "." + branch->local_name()->get_string()
+                                        + (use_cxx11 ? "()" : ""),
                                         false, true);
   }
 }

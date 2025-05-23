@@ -148,16 +148,16 @@ namespace {
   assign_field(AST_Field* field)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    Classification cls = classify(field->field_type());
+    const Classification cls = classify(field->field_type());
     if (!cls) return; // skip CL_UNKNOWN types
     std::string fieldType = (cls & CL_STRING) ?
       string_type(cls) : scoped(field->field_type()->name());
     FieldInfo af(*field);
-    if (af.as_base_ && af.type_->anonymous()) {
+    if (af.anonymous()) {
       fieldType = af.scoped_type_;
     }
     const std::string idl_name = canonical_name(field);
-    if ((cls & (CL_SCALAR | CL_STRUCTURE | CL_SEQUENCE | CL_UNION))
+    if ((cls & (CL_SCALAR | CL_STRUCTURE | CL_SEQUENCE | CL_MAP | CL_UNION))
         || (use_cxx11 && (cls & CL_ARRAY))) {
       be_global->impl_ <<
         "    if (std::strcmp(field, \"" << idl_name << "\") == 0) {\n"

@@ -860,11 +860,11 @@ void generateCaseBody(
       brType = use_cxx11 ? std::string("std::") + (is_wide ? "w" : "") + "string"
         : nmspace + (is_wide ? "W" : "") + "String_var";
       rhs = use_cxx11 ? "tmp" : "tmp.out()";
-    } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE))) {  //array or seq C++11
+    } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE | CL_MAP))) {  // container C++11
       rhs = "IDL::DistinctType<" + brType + ", "
         + dds_generator::get_tag_name(brType)
         + ">(tmp)";
-    } else if (br_cls & CL_ARRAY) { //array classic
+    } else if (br_cls & CL_ARRAY) { // array classic
       forany = "    " + brType + "_forany fa = tmp;\n";
       rhs = getWrapper("fa", br, WD_INPUT);
     } else { // anything else
@@ -888,7 +888,7 @@ void generateCaseBody(
         "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
         "        return true;\n";
     } else if ((be_global->try_construct(branch) == tryconstructfailaction_trim) && (br_cls & CL_BOUNDED) &&
-                (br_cls & (CL_STRING | CL_SEQUENCE))) {
+                (br_cls & (CL_STRING | CL_SEQUENCE | CL_MAP))) {
       if (is_bound_string) {
         const std::string check_not_empty = "!tmp.empty()";
         const std::string get_length = use_cxx11 ? "tmp.length()" : "ACE_OS::strlen(tmp.c_str())";
@@ -906,9 +906,9 @@ void generateCaseBody(
           "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
           "          return false;\n"
           "        }\n";
-      } else if (br_cls & CL_SEQUENCE) {
+      } else if (br_cls & (CL_SEQUENCE | CL_MAP)) {
         be_global->impl_ <<
-          "        if(strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n"
+          "        if (strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n"
           "          return false;\n"
           "        }\n"
           "        uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp);\n") <<
