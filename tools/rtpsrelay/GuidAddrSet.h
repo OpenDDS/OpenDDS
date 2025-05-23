@@ -30,6 +30,7 @@ using IpToPorts = std::unordered_map<ACE_INET_Addr, PortSet, InetAddrHash>;
 
 struct AddrSetStats {
   bool allow_rtps;
+  bool seen_spdp_message;
   IpToPorts ip_to_ports;
   ParticipantStatisticsReporter spdp_stats_reporter;
   ParticipantStatisticsReporter sedp_stats_reporter;
@@ -37,22 +38,23 @@ struct AddrSetStats {
   OpenDDS::DCPS::Lockable_Message_Block_Ptr spdp_message;
   OpenDDS::DCPS::MonotonicTimePoint session_start;
   OpenDDS::DCPS::MonotonicTimePoint deactivation;
-  RelayStatisticsReporter& relay_stats_reporter_;
+  RelayStatisticsReporter& relay_stats_reporter;
   std::string common_name;
   size_t& total_ips;
   size_t& total_ports;
 
   AddrSetStats(const OpenDDS::DCPS::GUID_t& guid,
                const OpenDDS::DCPS::MonotonicTimePoint& a_session_start,
-               RelayStatisticsReporter& relay_stats_reporter,
+               RelayStatisticsReporter& a_relay_stats_reporter,
                size_t& a_total_ips,
                size_t& a_total_ports)
     : allow_rtps(false)
+    , seen_spdp_message(false)
     , spdp_stats_reporter(rtps_guid_to_relay_guid(guid), "SPDP")
     , sedp_stats_reporter(rtps_guid_to_relay_guid(guid), "SEDP")
     , data_stats_reporter(rtps_guid_to_relay_guid(guid), "DATA")
     , session_start(a_session_start)
-    , relay_stats_reporter_(relay_stats_reporter)
+    , relay_stats_reporter(a_relay_stats_reporter)
     , total_ips(a_total_ips)
     , total_ports(a_total_ports)
   {}

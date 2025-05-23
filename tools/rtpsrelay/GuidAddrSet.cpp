@@ -47,10 +47,10 @@ bool AddrSetStats::upsert_address(const AddrPort& remote_address,
     }
     iter = ip_to_ports.insert(std::make_pair(addr_only, PortSet())).first;
     ++total_ips;
-    relay_stats_reporter_.total_client_ips(total_ips, now);
+    relay_stats_reporter.total_client_ips(total_ips, now);
   }
 
-  relay_stats_reporter_.max_ips_per_client(static_cast<uint32_t>(ip_to_ports.size()), now);
+  relay_stats_reporter.max_ips_per_client(static_cast<uint32_t>(ip_to_ports.size()), now);
 
   const auto port_map = iter->second.select(remote_address.port);
   if (!port_map) {
@@ -60,7 +60,7 @@ bool AddrSetStats::upsert_address(const AddrPort& remote_address,
   const auto pair = port_map->insert(std::make_pair(remote_address.addr.get_port_number(), expiration));
   if (pair.second) {
     ++total_ports;
-    relay_stats_reporter_.total_client_ports(total_ports, now);
+    relay_stats_reporter.total_client_ports(total_ports, now);
     return true;
   }
   pair.first->second = expiration;
@@ -90,12 +90,12 @@ bool AddrSetStats::remove_if_expired(const AddrPort& remote_address, const OpenD
   if (port_iter->second <= now) {
     port_map->erase(port_iter);
     --total_ports;
-    relay_stats_reporter_.total_client_ports(total_ports, now);
+    relay_stats_reporter.total_client_ports(total_ports, now);
     if (iter->second.empty()) {
       ip_to_ports.erase(addr_only);
       ip_now_unused = true;
       --total_ips;
-      relay_stats_reporter_.total_client_ips(total_ips, now);
+      relay_stats_reporter.total_client_ips(total_ips, now);
     }
     return true;
   }
@@ -344,7 +344,7 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
     return false;
   }
 
-  if (!pos->second.has_discovery_addrs() || !pos->second.spdp_message) {
+  if (!pos->second.has_discovery_addrs() || !pos->second.seen_spdp_message) {
     // Don't have the necessary addresses or message to complete discovery.
     return true;
   }
