@@ -47,7 +47,7 @@ Read [the documentation for this release on Read the Docs](https://opendds.readt
 - OpenDDS's use of `std::optional` or an emulation is determined by the configuration file ([PR #4976](https://github.com/OpenDDS/OpenDDS/pull/4976))
   - See `OPENDDS_CONFIG_STD_OPTIONAL` in `dds/OpenDDSConfig.h`
   - Default is to use `std::optional` on compilers that support it
-  - See configure script's `--no-std-optional` or CMake's [`OPENDDS_STD_OPTIONAL`](https://opendds.readthedocs.io/en/v3.32.0/devguide/building/index.html#cmake-var-OPENDDS_STD_OPTIONAL)
+  - See configure script's `--no-std-optional` or CMake's `OPENDDS_STD_OPTIONAL`
 - New configure script option: `--[no-]static-runtime` ([PR #4977](https://github.com/OpenDDS/OpenDDS/pull/4977), [PR #4983](https://github.com/OpenDDS/OpenDDS/pull/4983))
 
 ### Fixes

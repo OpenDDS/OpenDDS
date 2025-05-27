@@ -1,6 +1,7 @@
 project: dcps_test, googletest, opendds_cxx11 {
   dcps_ts_flags += -I..
   idlflags += -I..
+  requires += no_opendds_safety_profile
 
   TypeSupport_Files {
     ../union_defaults.idl

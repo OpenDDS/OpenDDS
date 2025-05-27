@@ -1,4 +1,6 @@
-#ifdef OPENDDS_HAS_CXX11
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include <dds/rtpsrelaylib/Name.h>
 

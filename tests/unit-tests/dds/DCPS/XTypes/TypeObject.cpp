@@ -577,9 +577,9 @@ TEST(dds_DCPS_XTypes_TypeObject, AppliedVerbatimAnnotation_equal)
 TEST(dds_DCPS_XTypes_TypeObject, AppliedBuiltinMemberAnnotations_equal)
 {
   AppliedBuiltinMemberAnnotations uut1;
-  uut1.unit = OPENDDS_OPTIONAL_NS::optional<OpenDDS::DCPS::String>("meters");
+  uut1.unit = std::optional<OpenDDS::DCPS::String>("meters");
   AppliedBuiltinMemberAnnotations uut2;
-  uut2.unit = OPENDDS_OPTIONAL_NS::optional<OpenDDS::DCPS::String>("meters");
+  uut2.unit = std::optional<OpenDDS::DCPS::String>("meters");
   AppliedBuiltinMemberAnnotations uut3;
 
   EXPECT_EQ(uut1, uut2);
@@ -650,9 +650,9 @@ TEST(dds_DCPS_XTypes_TypeObject, AppliedBuiltinTypeAnnotations_equal)
   value.text = "text";
 
   AppliedBuiltinTypeAnnotations uut1;
-  uut1.verbatim = OPENDDS_OPTIONAL_NS::optional<AppliedVerbatimAnnotation>(value);
+  uut1.verbatim = std::optional<AppliedVerbatimAnnotation>(value);
   AppliedBuiltinTypeAnnotations uut2;
-  uut2.verbatim = OPENDDS_OPTIONAL_NS::optional<AppliedVerbatimAnnotation>(value);
+  uut2.verbatim = std::optional<AppliedVerbatimAnnotation>(value);
   AppliedBuiltinTypeAnnotations uut3;
 
   EXPECT_EQ(uut1, uut2);
@@ -1068,12 +1068,12 @@ TEST(dds_DCPS_XTypes_TypeObject, MinimalAliasType_equal)
 TEST(dds_DCPS_XTypes_TypeObject, CompleteElementDetail_equal)
 {
   AppliedBuiltinMemberAnnotations builtin;
-  builtin.unit = OPENDDS_OPTIONAL_NS::optional<OpenDDS::DCPS::String>("meters");
+  builtin.unit = std::optional<OpenDDS::DCPS::String>("meters");
 
   CompleteElementDetail uut1;
-  uut1.ann_builtin = OPENDDS_OPTIONAL_NS::optional<AppliedBuiltinMemberAnnotations>(builtin);
+  uut1.ann_builtin = std::optional<AppliedBuiltinMemberAnnotations>(builtin);
   CompleteElementDetail uut2;
-  uut2.ann_builtin = OPENDDS_OPTIONAL_NS::optional<AppliedBuiltinMemberAnnotations>(builtin);
+  uut2.ann_builtin = std::optional<AppliedBuiltinMemberAnnotations>(builtin);
   CompleteElementDetail uut3;
 
   EXPECT_EQ(uut1, uut2);

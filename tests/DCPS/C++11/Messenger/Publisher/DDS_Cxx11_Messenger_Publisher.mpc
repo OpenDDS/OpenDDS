@@ -1,4 +1,4 @@
-project: dcpsexe, dcps_test, dcps_transports_for_test, opendds_uses_cxx11 {
+project: dcpsexe, dcps_test, dcps_transports_for_test {
   exename   = publisher
   after    += DDS_Cxx11_Messenger_Idl
   libs     += DDS_Cxx11_Messenger_Idl

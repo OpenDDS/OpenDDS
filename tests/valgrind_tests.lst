@@ -12,4 +12,4 @@
 
 tests/unit-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS
 
-performance-tests/bench/unit-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS CXX11 RAPIDJSON
+performance-tests/bench/unit-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS RAPIDJSON
