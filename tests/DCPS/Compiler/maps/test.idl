@@ -22,12 +22,12 @@ case TEST2:
 struct Data {
   map<int32, int32, 9> intIntMap;
   map<string, string> stringStringMap;
-  TestIntStringMap intStringMap;
+  @optional TestIntStringMap intStringMap;
 
   map<TEST_ENUM, int32, 8> enumIntMap;
   map<int32, TEST_ENUM> intEnumMap;
 
-  map<string, TestStruct> stringStructsMap;
+  @optional map<string, TestStruct> stringStructsMap;
   TestStructMap intStructsMap;
 
   TestMapSeq sequenceOfMaps;

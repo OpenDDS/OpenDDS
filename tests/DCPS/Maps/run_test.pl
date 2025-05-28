@@ -13,7 +13,6 @@ use File::Path;
 use strict;
 
 my $test = new PerlDDS::TestFramework();
-$test->setup_discovery();
 
 my $opts .= " -DCPSConfigFile rtps.ini";
 

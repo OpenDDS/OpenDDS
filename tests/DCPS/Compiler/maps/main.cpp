@@ -4,10 +4,11 @@
 
 #include <gtest/gtest.h>
 
-const OpenDDS::DCPS::Encoding test_encoding(OpenDDS::DCPS::Encoding::KIND_UNALIGNED_CDR);
+const OpenDDS::DCPS::Encoding test_encoding(OpenDDS::DCPS::Encoding::KIND_XCDR2);
 
 template<typename T>
-T TestMarshalling(OpenDDS::DCPS::Serializer strm, T original) {
+T TestMarshalling(OpenDDS::DCPS::Serializer strm, T original)
+{
   strm << original;
   T t;
   strm >> t;
@@ -15,7 +16,8 @@ T TestMarshalling(OpenDDS::DCPS::Serializer strm, T original) {
 }
 
 template<typename T>
-bool CheckMaps(T map1, T map2) {
+bool CheckMaps(T map1, T map2)
+{
   if (map1.size() != map2.size()) {
     return false;
   }
@@ -31,20 +33,23 @@ bool CheckMaps(T map1, T map2) {
 }
 
 // equals operator for TestStruct
-bool operator==(const TestStruct& lhs, const TestStruct& rhs) {
+bool operator==(const TestStruct& lhs, const TestStruct& rhs)
+{
   return lhs.id() == rhs.id() && lhs.msg() == rhs.msg();
 }
 
-bool operator!=(const TestStruct& lhs, const TestStruct& rhs) {
+bool operator!=(const TestStruct& lhs, const TestStruct& rhs)
+{
   return !(lhs == rhs);
 }
 
-bool CheckData(Data test, Data expected) {
+bool CheckData(Data test, Data expected)
+{
   if (!CheckMaps(test.intIntMap(), expected.intIntMap())) return false;
   if (!CheckMaps(test.stringStringMap(), expected.stringStringMap())) return false;
   if (!CheckMaps(test.enumIntMap(), expected.enumIntMap())) return false;
   if (!CheckMaps(test.intEnumMap(), expected.intEnumMap())) return false;
-  if (!CheckMaps(test.stringStructsMap(), expected.stringStructsMap())) return false;
+  if (!CheckMaps(*test.stringStructsMap(), *expected.stringStructsMap())) return false;
   if (!CheckMaps(test.stringSequenceMap(), expected.stringSequenceMap())) return false;
   if (!CheckMaps(test.stringMapMap(), expected.stringMapMap())) return false;
 
@@ -64,7 +69,8 @@ TEST(MapsTests, Marshalling)
 
   TestStruct stru;
   stru.msg("World");
-  expectedData.stringStructsMap()["Hello"] = stru;
+  expectedData.stringStructsMap() = std::map<std::string, TestStruct>{};
+  (*expectedData.stringStructsMap())["Hello"] = stru;
 
   std::map<int32_t, TestStruct> testMap;
   TestStruct t;
@@ -98,7 +104,7 @@ TEST(MapsTests, SerializedSize)
   EXPECT_EQ(size, 4);
   expectedData.stringStringMap()["Hello"] = "World!";
   size = (int32_t) OpenDDS::DCPS::serialized_size(test_encoding, expectedData.stringStringMap());
-  EXPECT_EQ(size, 25);
+  EXPECT_EQ(size, 4 + 4 + 8 + 4 + 7);
 
   // enumIntMap
   size = (int32_t) OpenDDS::DCPS::serialized_size(test_encoding, expectedData.enumIntMap());
@@ -118,11 +124,13 @@ TEST(MapsTests, SerializedSize)
   TestStruct stru;
   stru.msg("World");
 
+  expectedData.stringStructsMap() = std::map<std::string, TestStruct>{};
   size = (int32_t) OpenDDS::DCPS::serialized_size(test_encoding, expectedData.stringStructsMap());
-  EXPECT_EQ(size, 4);
-  expectedData.stringStructsMap()["Hello"] = stru;
+  EXPECT_EQ(size, 4 /*optional*/ + 4 /*length*/);
+  (*expectedData.stringStructsMap())["Hello"] = stru;
   size = (int32_t) OpenDDS::DCPS::serialized_size(test_encoding, expectedData.stringStructsMap());
-  EXPECT_EQ(size, 28);
+  EXPECT_EQ(size, 8 /* see above */ + 12 /* key w/ trailing padding */
+                  + 12 /* dheader; id; len of msg */ + 6 /* World<nul> */);
 
   // stringMapMap
   std::map<int32_t, TestStruct> testMap;
@@ -135,7 +143,8 @@ TEST(MapsTests, SerializedSize)
   EXPECT_EQ(size, 4);
   expectedData.stringMapMap()["Hello World"] = testMap;
   size = (int32_t) OpenDDS::DCPS::serialized_size(test_encoding, expectedData.stringMapMap());
-  EXPECT_EQ(size, 48);
+  EXPECT_EQ(size, 4 /* see above */ + 16 /* string key */ + 8 /* inner map len; int key*/
+            + 12 /* dheader; id; len of msg */ + 12 /* msg contents */);
 }
 
 #if OPENDDS_HAS_JSON_VALUE_WRITER
@@ -155,7 +164,8 @@ TEST(MapsTests, ValueWriterReader)
 
   TestStruct stru;
   stru.msg("World");
-  expectedData.stringStructsMap()["Hello"] = stru;
+  expectedData.stringStructsMap() = std::map<std::string, TestStruct>{};
+  (*expectedData.stringStructsMap())["Hello"] = stru;
 
   std::map<int32_t, TestStruct> testMap;
   TestStruct t;
@@ -165,70 +175,16 @@ TEST(MapsTests, ValueWriterReader)
 
   expectedData.stringMapMap()["Hello World"] = testMap;
 
-  vwrite(testWriter, expectedData);
+  EXPECT_TRUE(vwrite(testWriter, expectedData));
 
-  rapidjson::StringStream stream = R"(
-    {
-      "intIntMap":[
-        {
-          "key":10,
-          "value":10
-        }
-      ],
-      "stringStringMap":[
-        {
-          "key":"Hello",
-          "value":"World"
-        }
-      ],
-      "enumIntMap":[
-        {
-          "key":"TEST1",
-          "value":10
-        }
-      ],
-      "intEnumMap":[
-        {
-          "key":10,
-          "value":"TEST1"
-        }
-      ],
-      "stringStructsMap":[
-        {
-          "key":"Hello",
-          "value":
-            {
-              "id":0,
-              "msg":"World"
-            }
-        }
-      ],
-      "stringSequenceMap":[],
-      "stringMapMap":[
-        {
-          "key":"Hello World",
-          "value":[
-            {
-              "key":10,
-              "value":{
-                "id":190,
-                "msg":"Hello World"
-                }
-            }
-          ]
-        }
-      ]
-    })";
-
+  rapidjson::StringStream stream = buffer.GetString();
   OpenDDS::DCPS::JsonValueReader<> testReader(stream);
 
   Data testData;
-  vread(testReader, testData);
+  EXPECT_TRUE(vread(testReader, testData));
 
-  // Test everything is the same
-  CheckData(testData, expectedData);
+  EXPECT_TRUE(CheckData(testData, expectedData));
 }
-
 #endif
 
 int main(int argc, char* argv[])

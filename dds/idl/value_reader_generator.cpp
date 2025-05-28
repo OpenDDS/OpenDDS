@@ -182,7 +182,7 @@ namespace {
     const std::string var_name = create_tmp ? "tmp" : expression + accessor;
     if (create_tmp) {
       std::string tmp_type = scoped(type->name());
-      if (c & (CL_ARRAY | CL_SEQUENCE)) {
+      if (c & (CL_ARRAY | CL_SEQUENCE | CL_MAP)) {
         tmp_type = FieldInfo::scoped_type(*type, field_name);
       }
       be_global->impl_ <<
