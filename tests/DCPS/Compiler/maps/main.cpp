@@ -226,7 +226,7 @@ TEST(MapsTest, Xcdr2ValueWriter)
   Serializer ser(&buffer, test_encoding_le);
   value_writer.set_serializer(&ser);
   EXPECT_TRUE(vwrite(value_writer, value));
-//  EXPECT_PRED_FORMAT2(assert_DataView, control_buffer, buffer);
+  EXPECT_PRED_FORMAT2(assert_DataView, control_buffer, buffer);
 
   static const unsigned char expected_cdr[] = {
     116, 1, 0, 0, // dheader 256 + 116 = 372
@@ -325,7 +325,6 @@ TEST(MapsTest, Xcdr2ValueWriter)
     0, 0, 0, 0, // stringMapMap dheader
   };
   EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, control_buffer);
-//  EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
 }
 
 int main(int argc, char* argv[])
