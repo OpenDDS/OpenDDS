@@ -1,6 +1,9 @@
 #include <dds/DCPS/JsonValueReader.h>
 #include <dds/DCPS/JsonValueWriter.h>
+#include <dds/DCPS/Xcdr2ValueWriter.h>
 #include "testTypeSupportImpl.h"
+
+#include <tests/Utils/DataView.h>
 
 #include <gtest/gtest.h>
 
@@ -186,6 +189,144 @@ TEST(MapsTests, ValueWriterReader)
   EXPECT_TRUE(CheckData(testData, expectedData));
 }
 #endif
+
+TEST(MapsTest, Xcdr2ValueWriter)
+{
+  using namespace OpenDDS::DCPS;
+
+  Data value;
+  value.intIntMap()[10] = 10;
+  value.intIntMap()[20] = 20;
+  value.stringStringMap()["Hello"] = "World";
+  value.stringStringMap()["World"] = "Hello";
+  value.intStringMap() = TestIntStringMap{};
+  value.intStringMap()->insert(std::make_pair(3, "three"));
+  value.intStringMap()->insert(std::make_pair(2, "two"));
+  value.enumIntMap()[TEST_ENUM::TEST1] = 1;
+  value.enumIntMap()[TEST_ENUM::TEST2] = 2;
+  value.enumIntMap()[TEST_ENUM::TEST3] = 3;
+  value.intEnumMap()[1] = TEST_ENUM::TEST1;
+  value.intEnumMap()[2] = TEST_ENUM::TEST2;
+  value.intEnumMap()[3] = TEST_ENUM::TEST3;
+  value.intStructsMap()[4] = TestStruct{4, "four"};
+  value.intStructsMap()[5] = TestStruct{5, "five"};
+  value.anonSequenceOfMaps().push_back(value.intStructsMap());
+  value.anonSequenceOfMaps().push_back(value.intStructsMap());
+
+  const Encoding test_encoding_le(Encoding::KIND_XCDR2, ENDIAN_LITTLE);
+  const size_t control_size = serialized_size(test_encoding_le, value);
+  ACE_Message_Block control_buffer(control_size);
+  Serializer control_ser(&control_buffer, test_encoding_le);
+  EXPECT_TRUE(control_ser << value);
+
+  Xcdr2ValueWriter value_writer(test_encoding_le);
+  EXPECT_TRUE(vwrite(value_writer, value));
+  EXPECT_EQ(control_size, value_writer.get_serialized_size());
+  ACE_Message_Block buffer(value_writer.get_serialized_size());
+  Serializer ser(&buffer, test_encoding_le);
+  value_writer.set_serializer(&ser);
+  EXPECT_TRUE(vwrite(value_writer, value));
+//  EXPECT_PRED_FORMAT2(assert_DataView, control_buffer, buffer);
+
+  static const unsigned char expected_cdr[] = {
+    116, 1, 0, 0, // dheader 256 + 116 = 372
+    2, 0, 0, 0, // intIntMap length
+    10, 0, 0, 0, // intIntMap key0
+    10, 0, 0, 0, // intIntMap val0
+    20, 0, 0, 0, // intIntMap key1
+    20, 0, 0, 0, // intIntMap val1
+    46, 0, 0, 0, // stringStringMap dheader
+    6, 0, 0, 0, // stringStringMap key0
+    'H', 'e', 'l', 'l',
+    'o', 0, 0, 0,
+    6, 0, 0, 0, // stringStringMap val0
+    'W', 'o', 'r', 'l',
+    'd', 0, 0, 0,
+    6, 0, 0, 0, // stringStringMap key1
+    'W', 'o', 'r', 'l',
+    'd', 0, 0, 0,
+    6, 0, 0, 0, // stringStringMap val1
+    'H', 'e', 'l', 'l',
+    'o', 0, 1, 0, // end of val1; optional intStringMap is present
+    26, 0, 0, 0, // intStringMap dheader
+    2, 0, 0, 0, // intStringMap key0 (ordered)
+    4, 0, 0, 0, // intStringMap val0
+    't', 'w', 'o', 0,
+    3, 0, 0, 0, // intStringMap key1
+    6, 0, 0, 0, // intStringMap val1
+    't', 'h', 'r', 'e',
+    'e', 0, 0, 0,
+    24, 0, 0, 0, // enumIntMap dheader
+    0, 0, 0, 0, // enumIntMap key0
+    1, 0, 0, 0, // enumIntMap val0
+    1, 0, 0, 0, // enumIntMap key1
+    2, 0, 0, 0, // enumIntMap val1
+    2, 0, 0, 0, // enumIntMap key2
+    3, 0, 0, 0, // enumIntMap val2
+    24, 0, 0, 0, // intEnumMap dheader
+    1, 0, 0, 0, // intEnumMap key0
+    0, 0, 0, 0, // intEnumMap val0
+    2, 0, 0, 0, // intEnumMap key1
+    1, 0, 0, 0, // intEnumMap val1
+    3, 0, 0, 0, // intEnumMap key2
+    2, 0, 0, 0, // intEnumMap val2
+    0, 0, 0, 0, // optional stringStructsMap not present
+    45, 0, 0, 0, // intStructsMap dheader
+    4, 0, 0, 0, // intStructsMap key0
+    13, 0, 0, 0, // intStructsMap val0 dheader
+    4, 0, 0, 0, // intStructsMap val0 id
+    5, 0, 0, 0, // intStructsMap val0 msg
+    'f', 'o', 'u', 'r',
+    0, 0, 0, 0,
+    5, 0, 0, 0, // intStructsMap key1
+    13, 0, 0, 0, // intStructsMap val1 dheader
+    5, 0, 0, 0, // intStructsMap val1 id
+    5, 0, 0, 0, // intStructsMap val1 msg
+    'f', 'i', 'v', 'e',
+    0, 0, 0, 0,
+    4, 0, 0, 0, // sequenceOfMaps dheader
+    0, 0, 0, 0, // sequenceOfMaps length
+    105, 0, 0, 0, // anonSequenceOfMaps dheader
+    2, 0, 0, 0, // anonSequenceOfMaps length
+    45, 0, 0, 0, // anonSequenceOfMaps[0] dheader
+    4, 0, 0, 0, // anonSequenceOfMaps[0] key0
+    13, 0, 0, 0, // anonSequenceOfMaps[0] val0 dheader
+    4, 0, 0, 0, // anonSequenceOfMaps[0] val0 id
+    5, 0, 0, 0, // anonSequenceOfMaps[0] val0 msg
+    'f', 'o', 'u', 'r',
+    0, 0, 0, 0,
+    5, 0, 0, 0, // anonSequenceOfMaps[0] key1
+    13, 0, 0, 0, // anonSequenceOfMaps[0] val1 dheader
+    5, 0, 0, 0, // anonSequenceOfMaps[0] val1 id
+    5, 0, 0, 0, // anonSequenceOfMaps[0] val1 msg
+    'f', 'i', 'v', 'e',
+    0, 0, 0, 0,
+    45, 0, 0, 0, // anonSequenceOfMaps[1] dheader
+    4, 0, 0, 0, // anonSequenceOfMaps[1] key0
+    13, 0, 0, 0, // anonSequenceOfMaps[1] val0 dheader
+    4, 0, 0, 0, // anonSequenceOfMaps[1] val0 id
+    5, 0, 0, 0, // anonSequenceOfMaps[1] val0 msg
+    'f', 'o', 'u', 'r',
+    0, 0, 0, 0,
+    5, 0, 0, 0, // anonSequenceOfMaps[1] key1
+    13, 0, 0, 0, // anonSequenceOfMaps[1] val1 dheader
+    5, 0, 0, 0, // anonSequenceOfMaps[1] val1 id
+    5, 0, 0, 0, // anonSequenceOfMaps[1] val1 msg
+    'f', 'i', 'v', 'e',
+    0, 0, 0, 0,
+    12, 0, 0, 0, // arrayOfMaps dheader
+    0, 0, 0, 0, // arrayOfMaps[0]
+    0, 0, 0, 0, // arrayOfMaps[1]
+    0, 0, 0, 0, // arrayOfMaps[2]
+    8, 0, 0, 0, // anonArrayOfMaps dheader
+    0, 0, 0, 0, // anonArrayOfMaps[0]
+    0, 0, 0, 0, // anonArrayOfMaps[1]
+    0, 0, 0, 0, // stringSequenceMap dheader
+    0, 0, 0, 0, // stringMapMap dheader
+  };
+  EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, control_buffer);
+//  EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+}
 
 int main(int argc, char* argv[])
 {
