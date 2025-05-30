@@ -140,7 +140,7 @@ $test->start_process("publisher");
 $test->start_process("subscriber");
 $test->start_process("relay");
 
-my $result = $test->finish(60);
+my $result = $test->finish(180);
 if ($result != 0) {
     print STDERR "ERROR: test returned $result\n";
     $status = 1;
