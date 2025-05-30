@@ -4,6 +4,8 @@
 #include "ValueWriter.h"
 #include "PoolAllocator.h"
 
+#include <dds/DdsDcpsCoreC.h>
+
 #include <stack>
 #include <stdexcept>
 
