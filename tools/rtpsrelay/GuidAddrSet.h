@@ -170,6 +170,7 @@ public:
     , total_ips_(0)
     , total_ports_(0)
     , participant_admission_limit_reached_(false)
+    , last_admit_(true)
   {}
 
   using CreatedAddrSetStats = std::pair<bool, AddrSetStats&>;

@@ -61,6 +61,11 @@ public:
     return *this;
   }
 
+#ifdef ACE_HAS_CPP11
+  Message_Block_Shared_Ptr(Message_Block_Shared_Ptr&&) = default;
+  Message_Block_Shared_Ptr& operator=(Message_Block_Shared_Ptr&&) = default;
+#endif
+
   operator bool() const { return msg_.get(); }
 
   ACE_Message_Block& operator*() const { return *msg_; }
@@ -123,7 +128,15 @@ public:
     return *this;
   }
 
-  Lockable_Message_Block_Ptr& operator=(Lockable_Message_Block_Ptr&&) = default;
+  Lockable_Message_Block_Ptr& operator=(Lockable_Message_Block_Ptr&& other)
+  {
+    if (&other != this) {
+      // msgblock_ first so that this->msgblock_ can use this->lock_ in its own operator=
+      msgblock_ = exchange(other.msgblock_, Message_Block_Shared_Ptr{});
+      lock_ = exchange(other.lock_, Lock_Shared_Ptr{});
+    }
+    return *this;
+  }
 
   Lock_Policy lock_policy() const { return lock_ ? Lock_Policy::Use_Lock : Lock_Policy::No_Lock; }
 
@@ -172,6 +185,15 @@ private:
       }
     }
   };
+
+  // In C++14 this is std::exchange
+  template <typename T, typename U = T>
+  T exchange(T& from, U&& to)
+  {
+    const T old = std::move(from);
+    from = std::forward<U>(to);
+    return old;
+  }
 };
 #endif
 
