@@ -18,6 +18,13 @@ case TEST2:
   TestStructMap intStructMap;
 };
 
+struct TreeNode;
+typedef map<string, TreeNode> NodeMap;
+struct TreeNode {
+  string data;
+  NodeMap nodes;
+};
+
 @topic
 struct Data {
   map<int32, int32, 9> intIntMap;

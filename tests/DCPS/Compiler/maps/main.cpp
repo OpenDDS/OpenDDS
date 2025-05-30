@@ -190,6 +190,22 @@ TEST(MapsTests, ValueWriterReader)
 }
 #endif
 
+TEST(MapsTests, RecursiveTypes)
+{
+  using namespace OpenDDS::DCPS;
+  using namespace OpenDDS::XTypes;
+
+  const TypeIdentifier& tiNodeMap = getMinimalTypeIdentifier<NodeMap_xtag>();
+  EXPECT_EQ(TI_STRONGLY_CONNECTED_COMPONENT, tiNodeMap.kind());
+  const TypeIdentifier& tiTreeNode = getMinimalTypeIdentifier<TreeNode_xtag>();
+  EXPECT_EQ(TI_STRONGLY_CONNECTED_COMPONENT, tiTreeNode.kind());
+
+  const TypeObjectHashId& hashNodeMap = tiNodeMap.sc_component_id().sc_component_id;
+  const TypeObjectHashId& hashTreeNode = tiTreeNode.sc_component_id().sc_component_id;
+  EXPECT_FALSE(hashNodeMap < hashTreeNode);
+  EXPECT_FALSE(hashTreeNode < hashNodeMap);
+}
+
 TEST(MapsTest, Xcdr2ValueWriter)
 {
   using namespace OpenDDS::DCPS;
