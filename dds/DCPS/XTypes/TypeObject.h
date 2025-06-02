@@ -663,6 +663,8 @@ namespace XTypes {
     TypeIdentifier(ACE_CDR::Octet kind, const PlainSequenceLElemDefn& ldefn);
     TypeIdentifier(ACE_CDR::Octet kind, const PlainArraySElemDefn& sdefn);
     TypeIdentifier(ACE_CDR::Octet kind, const PlainArrayLElemDefn& ldefn);
+    TypeIdentifier(ACE_CDR::Octet kind, const PlainMapSTypeDefn& sdefn);
+    TypeIdentifier(ACE_CDR::Octet kind, const PlainMapLTypeDefn& ldefn);
     TypeIdentifier(ACE_CDR::Octet kind, const EquivalenceHashWrapper& equivalence_hash);
     TypeIdentifier(ACE_CDR::Octet kind, const StronglyConnectedComponentId& sc_component_id);
 

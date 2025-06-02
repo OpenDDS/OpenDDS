@@ -288,7 +288,7 @@ Unlike when using the classic mapping, ``Foo.idl`` is not processed by ``tao_idl
   * If you chose to use the ``_d()`` method of the generated union types, take note that it can only be used to set a value that selects the same union member as the one that's currently selected.
     OpenDDS treats this as a precondition (it is not checked within the implementation).
 
-* strings (narrow and wide), sequences, and arrays
+* strings (narrow and wide), sequences, maps, and arrays
 
   * Bounded strings and sequences are supported, but bounds checks are not currently enforced.
     Due to this limitation, distinct types are not used for bounded instantiations.
