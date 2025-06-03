@@ -4022,6 +4022,7 @@ Spdp::send_participant_crypto_tokens(const DCPS::GUID_t& id)
     DDS::Security::ParticipantVolatileMessageSecure msg;
     msg.message_identity.source_guid = writer;
     msg.related_message_identity.source_guid = GUID_UNKNOWN;
+    msg.related_message_identity.sequence_number = 0;
     msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_PARTICIPANT_CRYPTO_TOKENS;
     msg.destination_participant_guid = peer;
     msg.destination_endpoint_guid = GUID_UNKNOWN; // unknown = whole participant
@@ -4844,6 +4845,7 @@ void Spdp::fill_stats(DCPS::StatisticSeq& stats) const
   stats[Stats_Index_TotalReaderPending].value = total_reader_pending_;
   stats[Stats_Index_TotalReaderAssociated].value = total_reader_associated_;
   stats[Stats_Index_DirectedGuids].value = tport_ ? tport_->directed_guids_.size() : 0;
+  sedp_->fill_stats(stats, Stats_Len);
 }
 
 DCPS::TopicStatus Spdp::assert_topic(GUID_t& topicId, const char* topicName,
