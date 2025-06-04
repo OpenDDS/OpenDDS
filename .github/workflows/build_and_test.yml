@@ -9798,6 +9798,10 @@ jobs:
     - name: set up msvc env
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: ilammy/msvc-dev-cmd@v1
+    - name: Reset VCPKG_ROOT
+      shell: cmd
+      run: |
+        echo VCPKG_ROOT=C:\vcpkg>> %GITHUB_ENV%
     - name: copy CMakePresets for WinFlexBison
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
