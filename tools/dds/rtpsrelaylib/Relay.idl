@@ -153,16 +153,9 @@ module RtpsRelay {
 
   @mutable
   @autoid(HASH)
-  struct Statistic {
-    string name;
-    unsigned long long value;
-  };
-
-  @mutable
-  @autoid(HASH)
   struct OpenDDSModuleStatistics {
     string id;
-    sequence<Statistic> stats;
+    map<string, unsigned long long> stats;
   };
 
   const string RELAY_STATISTICS_TOPIC_NAME = "Relay Statistics";
