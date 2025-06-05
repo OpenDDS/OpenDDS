@@ -77,6 +77,8 @@ module OpenDDS
       BUILT_IN_TOPIC_KEY string thread_id;
       double utilization;
       MonotonicTime_t monotonic_timestamp;
+      long detail1;
+      long detail2;
     };
 
     const long LOCATOR_KIND_INVALID = -1;
