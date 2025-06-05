@@ -6829,9 +6829,9 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  ACE_TAO_w19_p1_stat_js0:
+  ACE_TAO_w25_p1_stat_js0:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
     steps:
     - name: checkout OpenDDS
@@ -6861,7 +6861,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c00_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: setup for run-vcpkg
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
@@ -6887,7 +6887,9 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --no-static-runtime --no-rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
+        configure --ipv6 --static --no-static-runtime --no-rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE ^
+        --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows ^
+        --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -6914,11 +6916,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_w19_p1_stat_js0:
+  build_w25_p1_stat_js0:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: ACE_TAO_w19_p1_stat_js0
+    needs: ACE_TAO_w25_p1_stat_js0
 
     steps:
     - name: setup for run-vcpkg
@@ -6949,14 +6951,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_p1_stat_js0_artifact
+        name: ACE_TAO_w25_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
-        rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
+        tar xvfJ ACE_TAO_w25_p1_stat_js0.tar.xz
+        rm -f ACE_TAO_w25_p1_stat_js0.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -6974,7 +6976,9 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --no-static-runtime --no-rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --compile-warnings=WARNING
+        configure --ipv6 --static --no-static-runtime --no-rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install ^
+        --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC ^
+        --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --compile-warnings=WARNING
     - name: check build configuration
       shell: cmd
       run: |
@@ -7002,11 +7006,10 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_w19_p1_stat_js0:
+  cmake_w25_p1_stat_js0:
 
-    runs-on: windows-2019
-
-    needs: build_w19_p1_stat_js0
+    runs-on: windows-2025
+    needs: build_w25_p1_stat_js0
 
     permissions:
       contents: read
@@ -7046,25 +7049,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_p1_stat_js0_artifact
+        name: ACE_TAO_w25_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
-        rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
+        tar xvfJ ACE_TAO_w25_p1_stat_js0.tar.xz
+        rm -f ACE_TAO_w25_p1_stat_js0.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_p1_stat_js0_artifact
+        name: build_w25_p1_stat_js0_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_p1_stat_js0.tar.xz
-        rm -f build_w19_p1_stat_js0.tar.xz
+        tar xvfJ build_w25_p1_stat_js0.tar.xz
+        rm -f build_w25_p1_stat_js0.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
@@ -7150,11 +7153,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  messenger_w19_p1_stat_js0:
+  messenger_w25_p1_stat_js0:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_p1_stat_js0
+    needs: build_w25_p1_stat_js0
 
     permissions:
       contents: read
@@ -7194,25 +7197,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_p1_stat_js0_artifact
+        name: ACE_TAO_w25_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
-        rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
+        tar xvfJ ACE_TAO_w25_p1_stat_js0.tar.xz
+        rm -f ACE_TAO_w25_p1_stat_js0.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_p1_stat_js0_artifact
+        name: build_w25_p1_stat_js0_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_p1_stat_js0.tar.xz
-        rm -f build_w19_p1_stat_js0.tar.xz
+        tar xvfJ build_w25_p1_stat_js0.tar.xz
+        rm -f build_w25_p1_stat_js0.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -7329,11 +7332,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  compiler_w19_p1_stat_js0:
+  compiler_w25_p1_stat_js0:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_p1_stat_js0
+    needs: build_w25_p1_stat_js0
 
     permissions:
       contents: read
@@ -7364,25 +7367,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_p1_stat_js0_artifact
+        name: ACE_TAO_w25_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
-        rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
+        tar xvfJ ACE_TAO_w25_p1_stat_js0.tar.xz
+        rm -f ACE_TAO_w25_p1_stat_js0.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_p1_stat_js0_artifact
+        name: build_w25_p1_stat_js0_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_p1_stat_js0.tar.xz
-        rm -f build_w19_p1_stat_js0.tar.xz
+        tar xvfJ build_w25_p1_stat_js0.tar.xz
+        rm -f build_w25_p1_stat_js0.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -7497,11 +7500,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  compiler2_w19_p1_stat_js0:
+  compiler2_w25_p1_stat_js0:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_p1_stat_js0
+    needs: build_w25_p1_stat_js0
 
     permissions:
       contents: read
@@ -7532,25 +7535,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_p1_stat_js0_artifact
+        name: ACE_TAO_w25_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
-        rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
+        tar xvfJ ACE_TAO_w25_p1_stat_js0.tar.xz
+        rm -f ACE_TAO_w25_p1_stat_js0.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_p1_stat_js0_artifact
+        name: build_w25_p1_stat_js0_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_p1_stat_js0.tar.xz
-        rm -f build_w19_p1_stat_js0.tar.xz
+        tar xvfJ build_w25_p1_stat_js0.tar.xz
+        rm -f build_w25_p1_stat_js0.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -7667,11 +7670,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  unit_w19_p1_stat_js0:
+  unit_w25_p1_stat_js0:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_p1_stat_js0
+    needs: build_w25_p1_stat_js0
 
     permissions:
       contents: read
@@ -7711,25 +7714,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_p1_stat_js0_artifact
+        name: ACE_TAO_w25_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
-        rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
+        tar xvfJ ACE_TAO_w25_p1_stat_js0.tar.xz
+        rm -f ACE_TAO_w25_p1_stat_js0.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_p1_stat_js0_artifact
+        name: build_w25_p1_stat_js0_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_p1_stat_js0.tar.xz
-        rm -f build_w19_p1_stat_js0.tar.xz
+        tar xvfJ build_w25_p1_stat_js0.tar.xz
+        rm -f build_w25_p1_stat_js0.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -7832,9 +7835,9 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  ACE_TAO_w19_re_p1_stat_FM-08:
+  ACE_TAO_w25_re_p1_stat_FM-08:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
     steps:
     - name: checkout OpenDDS
@@ -7864,7 +7867,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c00_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: setup for run-vcpkg
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
@@ -7890,7 +7893,11 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
+        configure --ipv6 --static --rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile ^
+        --no-object-model-profile --no-persistence-profile --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE ^
+        --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC ^
+        --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows ^
+        --mpcopts=-hierarchy --compile-warnings=WARNING
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -7917,11 +7924,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_w19_re_p1_stat_FM-08:
+  build_w25_re_p1_stat_FM-08:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: ACE_TAO_w19_re_p1_stat_FM-08
+    needs: ACE_TAO_w25_re_p1_stat_FM-08
 
     steps:
     - name: setup for run-vcpkg
@@ -7952,14 +7959,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
+        name: ACE_TAO_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
-        rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
+        rm -f ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -7977,7 +7984,11 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --compile-warnings=WARNING
+        configure --ipv6 --static --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install ^
+        --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile ^
+        --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO ^
+        --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows ^
+        --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --compile-warnings=WARNING
     - name: check build configuration
       shell: cmd
       run: |
@@ -8005,11 +8016,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_w19_re_p1_stat_FM-08:
+  cmake_w25_re_p1_stat_FM-08:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_p1_stat_FM-08
+    needs: build_w25_re_p1_stat_FM-08
 
     permissions:
       contents: read
@@ -8049,25 +8060,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
+        name: ACE_TAO_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
-        rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
+        rm -f ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_p1_stat_FM-08_artifact
+        name: build_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
-        rm -f build_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ build_w25_re_p1_stat_FM-08.tar.xz
+        rm -f build_w25_re_p1_stat_FM-08.tar.xz
     - name: check build configuration
       shell: cmd
       run: |
@@ -8153,11 +8164,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  messenger_w19_re_p1_stat_FM-08:
+  messenger_w25_re_p1_stat_FM-08:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_p1_stat_FM-08
+    needs: build_w25_re_p1_stat_FM-08
 
     permissions:
       contents: read
@@ -8197,25 +8208,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
+        name: ACE_TAO_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
-        rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
+        rm -f ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_p1_stat_FM-08_artifact
+        name: build_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
-        rm -f build_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ build_w25_re_p1_stat_FM-08.tar.xz
+        rm -f build_w25_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -8240,7 +8251,9 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Messenger
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 ^
+        -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 ^
+        -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
@@ -8255,7 +8268,9 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\C++11
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 ^
+        -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 ^
+        -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
     - name: make C++11 messenger test
       shell: cmd
       run: |
@@ -8332,11 +8347,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  compiler_w19_re_p1_stat_FM-08:
+  compiler_w25_re_p1_stat_FM-08:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_p1_stat_FM-08
+    needs: build_w25_re_p1_stat_FM-08
 
     permissions:
       contents: read
@@ -8367,25 +8382,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
+        name: ACE_TAO_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
-        rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
+        rm -f ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_p1_stat_FM-08_artifact
+        name: build_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
-        rm -f build_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ build_w25_re_p1_stat_FM-08.tar.xz
+        rm -f build_w25_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -8421,7 +8436,9 @@ jobs:
         rm -rf underscore_fields
         rm -rf xcdr
         rm -rf XTypesExtensibility
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 ^
+        -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 ^
+        -features object_model_profile=0 -features persistence_profile=0
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
@@ -8499,11 +8516,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  compiler2_w19_re_p1_stat_FM-08:
+  compiler2_w25_re_p1_stat_FM-08:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_p1_stat_FM-08
+    needs: build_w25_re_p1_stat_FM-08
 
     permissions:
       contents: read
@@ -8534,25 +8551,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
+        name: ACE_TAO_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
-        rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
+        rm -f ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_p1_stat_FM-08_artifact
+        name: build_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
-        rm -f build_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ build_w25_re_p1_stat_FM-08.tar.xz
+        rm -f build_w25_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -8590,7 +8607,9 @@ jobs:
         rm -rf idl_test_nested_types_lib
         rm -rf isolated_types
         rm -rf is_topic_type
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 ^
+        -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 ^
+        -features object_model_profile=0 -features persistence_profile=0
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
@@ -8668,11 +8687,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  unit_w19_re_p1_stat_FM-08:
+  unit_w25_re_p1_stat_FM-08:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_p1_stat_FM-08
+    needs: build_w25_re_p1_stat_FM-08
 
     permissions:
       contents: read
@@ -8712,25 +8731,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
+        name: ACE_TAO_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
-        rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
+        rm -f ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_p1_stat_FM-08_artifact
+        name: build_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
-        rm -f build_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ build_w25_re_p1_stat_FM-08.tar.xz
+        rm -f build_w25_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -8755,7 +8774,9 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\unit-tests
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 ^
+        -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 ^
+        -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
@@ -8833,22 +8854,22 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  ACE_TAO_w19_re_o1p1_sec:
+  ACE_TAO_w25_re_o1p1_sec:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: openssl3_w19
+    needs: openssl3_w25
 
     steps:
     - name: download openssl artifact
       uses: actions/download-artifact@v4
       with:
-        name: openssl3_w19_artifact
+        name: openssl3_w25_artifact
     - name: extract openssl artifact
       shell: bash
       run: |
-        tar xvJf openssl3_w19.tar.xz
-        rm -f openssl3_w19.tar.xz
+        tar xvJf openssl3_w25.tar.xz
+        rm -f openssl3_w25.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -8876,7 +8897,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c00_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: setup for run-vcpkg
       shell: bash
       run: |
@@ -8902,7 +8923,9 @@ jobs:
       run: |
         set SSL_DIR=%CD%/openssl3
         cd OpenDDS
-        call configure -v --optimize --ipv6 --security --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=%SSL_DIR% --mpcopts=-hierarchy --compile-warnings=WARNING
+        call configure -v --optimize --ipv6 --security --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE ^
+        --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC ^
+        --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=%SSL_DIR% --mpcopts=-hierarchy --compile-warnings=WARNING
         echo "SSL_DIR=%SSL_DIR%" >> setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: build ACE & TAO
@@ -8931,22 +8954,22 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_w19_re_o1p1_sec:
+  build_w25_re_o1p1_sec:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: ACE_TAO_w19_re_o1p1_sec
+    needs: ACE_TAO_w25_re_o1p1_sec
 
     steps:
     - name: download openssl artifact
       uses: actions/download-artifact@v4
       with:
-        name: openssl3_w19_artifact
+        name: openssl3_w25_artifact
     - name: extract openssl artifact
       shell: bash
       run: |
-        tar xvJf openssl3_w19.tar.xz
-        rm -f openssl3_w19.tar.xz
+        tar xvJf openssl3_w25.tar.xz
+        rm -f openssl3_w25.tar.xz
     - name: setup for run-vcpkg
       shell: bash
       run: |
@@ -8975,14 +8998,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_o1p1_sec_artifact
+        name: ACE_TAO_w25_re_o1p1_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_o1p1_sec.tar.xz
-        rm -f ACE_TAO_w19_re_o1p1_sec.tar.xz
+        tar xvfJ ACE_TAO_w25_re_o1p1_sec.tar.xz
+        rm -f ACE_TAO_w25_re_o1p1_sec.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -9001,7 +9024,9 @@ jobs:
       run: |
         set SSL_DIR=%CD%/openssl3
         cd OpenDDS
-        configure --optimize --ipv6 --rapidjson --security --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=%SSL_DIR% --compile-warnings=WARNING
+        configure --optimize --ipv6 --rapidjson --security --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install ^
+        --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO ^
+        --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=%SSL_DIR% --compile-warnings=WARNING
         echo "SSL_DIR=%SSL_DIR%" >> setenv.cmd
     - name: check build configuration
       shell: cmd
@@ -9044,11 +9069,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_w19_re_o1p1_sec:
+  cmake_w25_re_o1p1_sec:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_o1p1_sec
+    needs: build_w25_re_o1p1_sec
 
     permissions:
       contents: read
@@ -9058,12 +9083,12 @@ jobs:
     - name: download openssl artifact
       uses: actions/download-artifact@v4
       with:
-        name: openssl3_w19_artifact
+        name: openssl3_w25_artifact
     - name: extract openssl artifact
       shell: bash
       run: |
-        tar xvJf openssl3_w19.tar.xz
-        rm -f openssl3_w19.tar.xz
+        tar xvJf openssl3_w25.tar.xz
+        rm -f openssl3_w25.tar.xz
     - name: setup for run-vcpkg
       shell: bash
       run: |
@@ -9097,25 +9122,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_o1p1_sec_artifact
+        name: ACE_TAO_w25_re_o1p1_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_o1p1_sec.tar.xz
-        rm -f ACE_TAO_w19_re_o1p1_sec.tar.xz
+        tar xvfJ ACE_TAO_w25_re_o1p1_sec.tar.xz
+        rm -f ACE_TAO_w25_re_o1p1_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_o1p1_sec_artifact
+        name: build_w25_re_o1p1_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_o1p1_sec.tar.xz
-        rm -f build_w19_re_o1p1_sec.tar.xz
+        tar xvfJ build_w25_re_o1p1_sec.tar.xz
+        rm -f build_w25_re_o1p1_sec.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -9204,11 +9229,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  messenger_w19_re_o1p1_sec:
+  messenger_w25_re_o1p1_sec:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_o1p1_sec
+    needs: build_w25_re_o1p1_sec
 
     permissions:
       contents: read
@@ -9218,12 +9243,12 @@ jobs:
     - name: download openssl artifact
       uses: actions/download-artifact@v4
       with:
-        name: openssl3_w19_artifact
+        name: openssl3_w25_artifact
     - name: extract openssl artifact
       shell: bash
       run: |
-        tar xvJf openssl3_w19.tar.xz
-        rm -f openssl3_w19.tar.xz
+        tar xvJf openssl3_w25.tar.xz
+        rm -f openssl3_w25.tar.xz
     - name: setup for run-vcpkg
       shell: bash
       run: |
@@ -9257,25 +9282,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_o1p1_sec_artifact
+        name: ACE_TAO_w25_re_o1p1_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_o1p1_sec.tar.xz
-        rm -f ACE_TAO_w19_re_o1p1_sec.tar.xz
+        tar xvfJ ACE_TAO_w25_re_o1p1_sec.tar.xz
+        rm -f ACE_TAO_w25_re_o1p1_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_o1p1_sec_artifact
+        name: build_w25_re_o1p1_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_o1p1_sec.tar.xz
-        rm -f build_w19_re_o1p1_sec.tar.xz
+        tar xvfJ build_w25_re_o1p1_sec.tar.xz
+        rm -f build_w25_re_o1p1_sec.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -9301,7 +9326,8 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Messenger
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 ^
+        -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
@@ -9316,7 +9342,8 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\C++11
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 ^
+        -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
     - name: make C++11 messenger test
       shell: cmd
       run: |
@@ -9393,11 +9420,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  compiler_w19_re_o1p1_sec:
+  compiler_w25_re_o1p1_sec:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_o1p1_sec
+    needs: build_w25_re_o1p1_sec
 
     permissions:
       contents: read
@@ -9437,25 +9464,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_o1p1_sec_artifact
+        name: ACE_TAO_w25_re_o1p1_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_o1p1_sec.tar.xz
-        rm -f ACE_TAO_w19_re_o1p1_sec.tar.xz
+        tar xvfJ ACE_TAO_w25_re_o1p1_sec.tar.xz
+        rm -f ACE_TAO_w25_re_o1p1_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_o1p1_sec_artifact
+        name: build_w25_re_o1p1_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_o1p1_sec.tar.xz
-        rm -f build_w19_re_o1p1_sec.tar.xz
+        tar xvfJ build_w25_re_o1p1_sec.tar.xz
+        rm -f build_w25_re_o1p1_sec.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: check build configuration
@@ -9480,7 +9507,8 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Compiler
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 ^
+        -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
@@ -9558,11 +9586,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  unit_w19_re_o1p1_sec:
+  unit_w25_re_o1p1_sec:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_o1p1_sec
+    needs: build_w25_re_o1p1_sec
 
     permissions:
       contents: read
@@ -9572,12 +9600,12 @@ jobs:
     - name: download openssl artifact
       uses: actions/download-artifact@v4
       with:
-        name: openssl3_w19_artifact
+        name: openssl3_w25_artifact
     - name: extract openssl artifact
       shell: bash
       run: |
-        tar xvJf openssl3_w19.tar.xz
-        rm -f openssl3_w19.tar.xz
+        tar xvJf openssl3_w25.tar.xz
+        rm -f openssl3_w25.tar.xz
     - name: setup for run-vcpkg
       shell: bash
       run: |
@@ -9611,27 +9639,27 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_o1p1_sec_artifact
+        name: ACE_TAO_w25_re_o1p1_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_o1p1_sec.tar.xz
-        rm -f ACE_TAO_w19_re_o1p1_sec.tar.xz
+        tar xvfJ ACE_TAO_w25_re_o1p1_sec.tar.xz
+        rm -f ACE_TAO_w25_re_o1p1_sec.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_o1p1_sec_artifact
+        name: build_w25_re_o1p1_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_o1p1_sec.tar.xz
-        rm -f build_w19_re_o1p1_sec.tar.xz
+        tar xvfJ build_w25_re_o1p1_sec.tar.xz
+        rm -f build_w25_re_o1p1_sec.tar.xz
     - name: check build configuration
       shell: cmd
       run: |
@@ -9654,7 +9682,9 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\unit-tests
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 ^
+        -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0 ^
+        -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
@@ -9732,9 +9762,9 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  wireshark_w19-release:
+  wireshark_w25-release:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
     steps:
     - name: checkout OpenDDS
@@ -9757,7 +9787,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c02_${{ github.job }}_${{ env.WIRESHARK_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c00_${{ github.job }}_${{ env.WIRESHARK_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout WinFlexBison
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v4
@@ -9768,6 +9798,10 @@ jobs:
     - name: set up msvc env
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: ilammy/msvc-dev-cmd@v1
+    - name: Reset VCPKG_ROOT
+      shell: cmd
+      run: |
+        echo VCPKG_ROOT=C:\vcpkg>> %GITHUB_ENV%
     - name: copy CMakePresets for WinFlexBison
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -9809,9 +9843,9 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  ACE_TAO_w19_re_j_ws_FM-1f:
+  ACE_TAO_w25_re_j_ws_FM-1f:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
     steps:
     - name: checkout OpenDDS
@@ -9846,7 +9880,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
+        key: c00_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: setup for run-vcpkg
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
@@ -9872,7 +9906,9 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --optimize --java --no-built-in-topics --rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
+        configure --optimize --java --no-built-in-topics --rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE ^
+        --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows ^
+        --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -9899,22 +9935,22 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_w19_re_j_ws_FM-1f:
+  build_w25_re_j_ws_FM-1f:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: [ACE_TAO_w19_re_j_ws_FM-1f, wireshark_w19-release]
+    needs: [ACE_TAO_w25_re_j_ws_FM-1f, wireshark_w25-release]
 
     steps:
     - name: download Wireshark artifact
       uses: actions/download-artifact@v4
       with:
-        name: wireshark_w19-release_artifact
+        name: wireshark_w25-release_artifact
     - name: extract Wireshark artifact
       shell: bash
       run: |
-        tar xvJf wireshark_w19-release.tar.xz
-        rm -f wireshark_w19-release.tar.xz
+        tar xvJf wireshark_w25-release.tar.xz
+        rm -f wireshark_w25-release.tar.xz
     - name: setup for run-vcpkg
       shell: bash
       run: |
@@ -9943,14 +9979,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_j_ws_FM-1f_artifact
+        name: ACE_TAO_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
-        rm -f ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
+        tar xvfJ ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
+        rm -f ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -9968,7 +10004,12 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --optimize --java --no-built-in-topics --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --wireshark-cmake=${{ github.workspace }}\wireshark --wireshark-build=${{ github.workspace }}\wsbuild --wireshark-lib=run --glib=${{ github.workspace }}\wireshark-win64-libs-3.6\vcpkg-export-20210609-1-win64ws\installed\x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
+        configure --optimize --java --no-built-in-topics --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install ^
+        --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC ^
+        --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --wireshark-cmake=${{ github.workspace }}\wireshark ^
+        --wireshark-build=${{ github.workspace }}\wsbuild --wireshark-lib=run ^
+        --glib=${{ github.workspace }}\wireshark-win64-libs-3.6\vcpkg-export-20210609-1-win64ws\installed\x64-windows ^
+        --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
     - name: check build configuration
       shell: cmd
       run: |
@@ -10003,11 +10044,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_w19_re_j_ws_FM-1f:
+  cmake_w25_re_j_ws_FM-1f:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_j_ws_FM-1f
+    needs: build_w25_re_j_ws_FM-1f
 
     permissions:
       contents: read
@@ -10038,25 +10079,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_j_ws_FM-1f_artifact
+        name: ACE_TAO_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
-        rm -f ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
+        tar xvfJ ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
+        rm -f ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_j_ws_FM-1f_artifact
+        name: build_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_j_ws_FM-1f.tar.xz
-        rm -f build_w19_re_j_ws_FM-1f.tar.xz
+        tar xvfJ build_w25_re_j_ws_FM-1f.tar.xz
+        rm -f build_w25_re_j_ws_FM-1f.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: check build configuration
@@ -10145,11 +10186,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  messenger_w19_re_j_ws_FM-1f:
+  messenger_w25_re_j_ws_FM-1f:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_j_ws_FM-1f
+    needs: build_w25_re_j_ws_FM-1f
 
     permissions:
       contents: read
@@ -10189,25 +10230,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_j_ws_FM-1f_artifact
+        name: ACE_TAO_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
-        rm -f ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
+        tar xvfJ ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
+        rm -f ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_j_ws_FM-1f_artifact
+        name: build_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_j_ws_FM-1f.tar.xz
-        rm -f build_w19_re_j_ws_FM-1f.tar.xz
+        tar xvfJ build_w25_re_j_ws_FM-1f.tar.xz
+        rm -f build_w25_re_j_ws_FM-1f.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: check build configuration
@@ -10232,7 +10273,8 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Messenger
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_cxx11=0 -features java=1 -features xerces3=1 ^
+        -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
@@ -10247,7 +10289,8 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\C++11
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_cxx11=0 -features java=1 -features xerces3=1 ^
+        -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
     - name: make C++11 messenger test
       shell: cmd
       run: |
@@ -10324,11 +10367,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  compiler_w19_re_j_ws_FM-1f:
+  compiler_w25_re_j_ws_FM-1f:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_j_ws_FM-1f
+    needs: build_w25_re_j_ws_FM-1f
 
     permissions:
       contents: read
@@ -10368,25 +10411,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_j_ws_FM-1f_artifact
+        name: ACE_TAO_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
-        rm -f ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
+        tar xvfJ ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
+        rm -f ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_j_ws_FM-1f_artifact
+        name: build_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_j_ws_FM-1f.tar.xz
-        rm -f build_w19_re_j_ws_FM-1f.tar.xz
+        tar xvfJ build_w25_re_j_ws_FM-1f.tar.xz
+        rm -f build_w25_re_j_ws_FM-1f.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: check build configuration
@@ -10411,7 +10454,8 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Compiler
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_cxx11=0 -features java=1 -features xerces3=1 ^
+        -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
@@ -10489,11 +10533,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  unit_w19_re_j_ws_FM-1f:
+  unit_w25_re_j_ws_FM-1f:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_j_ws_FM-1f
+    needs: build_w25_re_j_ws_FM-1f
 
     permissions:
       contents: read
@@ -10533,25 +10577,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_j_ws_FM-1f_artifact
+        name: ACE_TAO_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
-        rm -f ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
+        tar xvfJ ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
+        rm -f ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_j_ws_FM-1f_artifact
+        name: build_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_j_ws_FM-1f.tar.xz
-        rm -f build_w19_re_j_ws_FM-1f.tar.xz
+        tar xvfJ build_w25_re_j_ws_FM-1f.tar.xz
+        rm -f build_w25_re_j_ws_FM-1f.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: check build configuration
@@ -10576,7 +10620,8 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\unit-tests
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_cxx11=0 -features java=1 -features xerces3=1 ^
+        -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
@@ -13822,9 +13867,9 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  openssl3_w19:
+  openssl3_w25:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
     steps:
     - name: checkout openssl 3.0.2
@@ -13843,7 +13888,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_${{ env.OPENSSL_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c00_${{ github.job }}_${{ env.OPENSSL_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: set up msvc env
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: ilammy/msvc-dev-cmd@v1
