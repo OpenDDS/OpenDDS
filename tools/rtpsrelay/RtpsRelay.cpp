@@ -836,17 +836,17 @@ int run(int argc, ACE_TCHAR* argv[])
   ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Application Participant GUID %C\n",
     OpenDDS::DCPS::LogGuid(config.application_participant_guid()).c_str()));
   ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SPDP Horizontal %d listening on %C\n",
-    static_cast<int>(spdp_horizontal_handler.get_handle()), OpenDDS::DCPS::LogAddr(spdp_horizontal_addr).c_str()));
+    handle_to_int(spdp_horizontal_handler.get_handle()), OpenDDS::DCPS::LogAddr(spdp_horizontal_addr).c_str()));
   ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SEDP Horizontal %d listening on %C\n",
-    static_cast<int>(sedp_horizontal_handler.get_handle()), OpenDDS::DCPS::LogAddr(sedp_horizontal_addr).c_str()));
+    handle_to_int(sedp_horizontal_handler.get_handle()), OpenDDS::DCPS::LogAddr(sedp_horizontal_addr).c_str()));
   ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Data Horizontal %d listening on %C\n",
-    static_cast<int>(data_horizontal_handler.get_handle()), OpenDDS::DCPS::LogAddr(data_horizontal_addr).c_str()));
+    handle_to_int(data_horizontal_handler.get_handle()), OpenDDS::DCPS::LogAddr(data_horizontal_addr).c_str()));
   ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SPDP Vertical %d listening on %C\n",
-    static_cast<int>(spdp_vertical_handler.get_handle()), OpenDDS::DCPS::LogAddr(spdp_vertical_addr).c_str()));
+    handle_to_int(spdp_vertical_handler.get_handle()), OpenDDS::DCPS::LogAddr(spdp_vertical_addr).c_str()));
   ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SEDP Vertical %d listening on %C\n",
-    static_cast<int>(sedp_vertical_handler.get_handle()), OpenDDS::DCPS::LogAddr(sedp_vertical_addr).c_str()));
+    handle_to_int(sedp_vertical_handler.get_handle()), OpenDDS::DCPS::LogAddr(sedp_vertical_addr).c_str()));
   ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Data Vertical %d listening on %C\n",
-    static_cast<int>(data_vertical_handler.get_handle()), OpenDDS::DCPS::LogAddr(data_vertical_addr).c_str()));
+    handle_to_int(data_vertical_handler.get_handle()), OpenDDS::DCPS::LogAddr(data_vertical_addr).c_str()));
 
   // Write about the relay.
   DDS::DataWriterListener_var relay_address_writer_listener =

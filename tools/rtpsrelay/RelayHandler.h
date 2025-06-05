@@ -293,6 +293,15 @@ public:
               HandlerStatisticsReporter& stats_reporter);
 };
 
+inline int handle_to_int(ACE_HANDLE handle)
+{
+#ifdef ACE_WIN32
+  return static_cast<int>(reinterpret_cast<intptr_t>(handle));
+#else
+  return handle;
+#endif
+}
+
 }
 
 #endif /* RTPSRELAY_RELAY_HANDLER_H_ */

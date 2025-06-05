@@ -112,7 +112,7 @@ int RelayHandler::open(const ACE_INET_Addr& address)
 
 int RelayHandler::handle_input(ACE_HANDLE handle)
 {
-  OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager(), READ_MASK, handle);
+  OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager(), READ_MASK, handle_to_int(handle));
 
   const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
@@ -169,12 +169,12 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
 int RelayHandler::handle_output(ACE_HANDLE handle)
 {
   auto& statusManager = TheServiceParticipant->get_thread_status_manager();
-  OpenDDS::DCPS::ThreadStatusManager::Event ev(statusManager, WRITE_MASK, handle);
+  OpenDDS::DCPS::ThreadStatusManager::Event ev(statusManager, WRITE_MASK, handle_to_int(handle));
 
   const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, outgoing_mutex_, 0);
-  OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, WRITE_MASK | DONT_CALL, handle);
+  OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, WRITE_MASK | DONT_CALL, handle_to_int(handle));
 
   if (!outgoing_.empty()) {
     const auto& out = outgoing_.front();
@@ -306,11 +306,11 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
                                               MessageType& type)
 {
   auto& statusManager = TheServiceParticipant->get_thread_status_manager();
-  const auto handle = static_cast<int>(get_handle());
+  const auto handle_as_int = handle_to_int(get_handle());
   const auto msg_len = msg->length();
   {
     GuidAddrSet::Proxy proxy(guid_addr_set_);
-    OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, READ_MASK | DONT_CALL, handle);
+    OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, READ_MASK | DONT_CALL, handle_as_int);
     proxy.maintain_admission_queue(now);
     proxy.process_expirations(now);
     if (!proxy.check_address(remote_address)) {
@@ -335,7 +335,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     }
 
     GuidAddrSet::Proxy proxy(guid_addr_set_);
-    OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, READ_MASK | SIGNAL_MASK, handle);
+    OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, READ_MASK | SIGNAL_MASK, handle_as_int);
     record_activity(proxy, addr_port, now, src_guid, type, msg_len);
 
     cache_message(proxy, src_guid, to, msg, now);
@@ -434,7 +434,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
 
     if (has_guid) {
       GuidAddrSet::Proxy proxy(guid_addr_set_);
-      OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, READ_MASK | GROUP_QOS_MASK, handle);
+      OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, READ_MASK | GROUP_QOS_MASK, handle_as_int);
 
       ParticipantStatisticsReporter& from_psr =
         record_activity(proxy, addr_port, now, src_guid, type, msg_len);
@@ -747,7 +747,8 @@ CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr&,
   guid_partition_table_.lookup(guids, relay_header.to_partitions(), to_guids);
   GuidAddrSet::Proxy proxy(vertical_handler_->guid_addr_set());
   OpenDDS::DCPS::ThreadStatusManager::Event evLocked(TheServiceParticipant->get_thread_status_manager(),
-    READ_MASK | DONT_CALL, static_cast<int>(get_handle()));
+    READ_MASK | DONT_CALL, handle_to_int(get_handle()));
+
   CORBA::ULong sent = 0;
   for (const auto& guid : guids) {
     const auto p = proxy.find(guid);
