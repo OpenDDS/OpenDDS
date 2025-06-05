@@ -61,20 +61,13 @@ DDS::ReturnCode_t max_extensibility(DDS::DynamicType_ptr type, DCPS::Extensibili
     return DDS::RETCODE_OK;
   }
 
-  DDS::DynamicTypeMembersById_var members;
+  DDS::DynamicTypeMembersById members;
   rc = base_type->get_all_members(members);
   if (rc != DDS::RETCODE_OK) {
     return rc;
   }
 
-  DynamicTypeMembersByIdImpl* const members_impl =
-    dynamic_cast<DynamicTypeMembersByIdImpl*>(members.in());
-  if (!members_impl) {
-    return DDS::RETCODE_BAD_PARAMETER;
-  }
-
-  for (DynamicTypeMembersByIdImpl::const_iterator it = members_impl->begin();
-       it != members_impl->end(); ++it) {
+  for (DDS::DynamicTypeMembersById::const_iterator it = members.begin(); it != members.end(); ++it) {
     DDS::MemberDescriptor_var md;
     rc = it->second->get_descriptor(md);
     if (rc != DDS::RETCODE_OK) {
@@ -354,16 +347,10 @@ namespace {
     switch (kind) {
     case TK_STRUCTURE:
       {
-        DDS::DynamicTypeMembersById_var members;
+        DDS::DynamicTypeMembersById members;
         DDS::ReturnCode_t rc = type->get_all_members(members);
         if (rc != DDS::RETCODE_OK) {
           return rc;
-        }
-
-        DynamicTypeMembersByIdImpl* const members_i =
-          dynamic_cast<DynamicTypeMembersByIdImpl*>(members.in());
-        if (!members_i) {
-          return DDS::RETCODE_BAD_PARAMETER;
         }
 
         bool include_all = filter == Filter_All;
@@ -371,8 +358,7 @@ namespace {
           // If there are no explicit keys, then they are implied to all be keys.
           // TODO: Except when @key(FALSE)
           include_all = true;
-          for (DynamicTypeMembersByIdImpl::const_iterator it = members_i->begin();
-               it != members_i->end(); ++it) {
+          for (DDS::DynamicTypeMembersById::const_iterator it = members.begin(); it != members.end(); ++it) {
             DDS::MemberDescriptor_var md;
             rc = it->second->get_descriptor(md);
             if (rc != DDS::RETCODE_OK) {
@@ -385,8 +371,7 @@ namespace {
           }
         }
 
-        for (DynamicTypeMembersByIdImpl::const_iterator it = members_i->begin();
-             it != members_i->end(); ++it) {
+        for (DDS::DynamicTypeMembersById::const_iterator it = members.begin(); it != members.end(); ++it) {
           DDS::MemberDescriptor_var md;
           rc = it->second->get_descriptor(md);
           if (rc != DDS::RETCODE_OK) {
@@ -1543,27 +1528,23 @@ DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
 
   case TK_STRUCTURE:
     {
-      DDS::DynamicTypeMembersById_var src_members_var;
-      rc = actual_src_type->get_all_members(src_members_var);
+      DDS::DynamicTypeMembersById src_members;
+      rc = actual_src_type->get_all_members(src_members);
       if (rc != DDS::RETCODE_OK) {
         return rc;
       }
-      DynamicTypeMembersByIdImpl* src_members =
-        dynamic_cast<DynamicTypeMembersByIdImpl*>(src_members_var.in());
 
-      DDS::DynamicTypeMembersById_var dest_members_var;
-      rc = actual_dest_type->get_all_members(dest_members_var);
+      DDS::DynamicTypeMembersById dest_members;
+      rc = actual_dest_type->get_all_members(dest_members);
       if (rc != DDS::RETCODE_OK) {
         return rc;
       }
-      DynamicTypeMembersByIdImpl* dest_members =
-        dynamic_cast<DynamicTypeMembersByIdImpl*>(dest_members_var.in());
 
-      for (DynamicTypeMembersByIdImpl::const_iterator src_it = src_members->begin();
-           src_it != src_members->end(); ++src_it) {
+      for (DDS::DynamicTypeMembersById::const_iterator src_it = src_members.begin();
+           src_it != src_members.end(); ++src_it) {
         const DDS::MemberId id = src_it->first;
-        const DynamicTypeMembersByIdImpl::const_iterator dest_it = dest_members->find(id);
-        if (dest_it == dest_members->end()) {
+        const DDS::DynamicTypeMembersById::const_iterator dest_it = dest_members.find(id);
+        if (dest_it == dest_members.end()) {
           continue;
         }
 
