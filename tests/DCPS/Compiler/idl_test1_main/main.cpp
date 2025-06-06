@@ -15,7 +15,7 @@ using OpenDDS::DCPS::serialized_size;
 using OpenDDS::DCPS::Message_Block_Ptr;
 using OpenDDS::DCPS::SerializedSizeBound;
 
-const Encoding encoding(Encoding::KIND_UNALIGNED_CDR);
+const Encoding encoding_for_test(Encoding::KIND_UNALIGNED_CDR);
 
 // this test tests the opendds_idl generated code for type XyZ::Foo from idl_test1_lib.
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -33,7 +33,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       4 + // union discriminator
       4 + // string length
       4; // string contents
-    const size_t actual_size = serialized_size(encoding, sau);
+    const size_t actual_size = serialized_size(encoding_for_test, sau);
     if (expected_size != actual_size) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("ERROR: StructAUnion expected serialized_size to return %B, ")
@@ -52,7 +52,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       4 + // seq length
       4 + 5 + // seq[0]
       4 + 6; // seq[1]
-    size_t actual_size = serialized_size(encoding, ass);
+    size_t actual_size = serialized_size(encoding_for_test, ass);
     if (expected_size != actual_size) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("ERROR: AStringSeq expected serialized_size to return ")
@@ -69,7 +69,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     const size_t expected_size =
       4 + // seq length
       5 * 2 * seqlen; // ArrayOfShorts * seqlen
-    size_t actual_size = serialized_size(encoding, ash);
+    size_t actual_size = serialized_size(encoding_for_test, ash);
     if (expected_size != actual_size) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("ERROR: ArrayOfShortsSeq expected serialized_size to return ")
@@ -94,7 +94,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       4 + // f1[2].v1
       4 + // f1[2].v2s length
       2 * 0; // f1[2].v2s contents
-    size_t actual_size = serialized_size(encoding, aas);
+    size_t actual_size = serialized_size(encoding_for_test, aas);
     if (expected_size != actual_size) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("ERROR: StructContainingArrayOfAStruct expected ")
@@ -134,7 +134,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           // v2s
             4 + // length
             2 * 0; // contents
-    size_t actual_size = serialized_size(encoding, aas);
+    size_t actual_size = serialized_size(encoding_for_test, aas);
     if (expected_size != actual_size) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("ERROR: StructContainingArrayOfAStructSeq expected ")
@@ -152,14 +152,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     Message_Block_Ptr b(new ACE_Message_Block(100000));
 
-    Serializer serializer(b.get(), encoding);
+    Serializer serializer(b.get(), encoding_for_test);
 
     if (!(serializer << fwddeclstructs)) {
       ACE_ERROR((LM_ERROR, "FwdDeclSameNamespaceStructs serialization failed\n"));
       failed = true;
     }
 
-    Serializer deserializer(b.get(), encoding);
+    Serializer deserializer(b.get(), encoding_for_test);
     N1::FwdDeclSameNamespaceStructs fwddeclstructs2;
     if (!(serializer >> fwddeclstructs2)) {
       ACE_ERROR((LM_ERROR, "FwdDeclSameNamespaceStructs deserialization failed\n"));
@@ -190,13 +190,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     Message_Block_Ptr b(new ACE_Message_Block(100000));
 
-    Serializer serializer(b.get(), encoding);
+    Serializer serializer(b.get(), encoding_for_test);
     if (!(serializer << fwddeclstructs)) {
       ACE_ERROR((LM_ERROR, "FwdDeclSameNamespaceStructs serialization failed\n"));
       failed = true;
     }
 
-    Serializer deserializer(b.get(), encoding);
+    Serializer deserializer(b.get(), encoding_for_test);
     N2::FwdDeclStructSeqWrapper fwddeclstructs2;
     if (!(serializer >> fwddeclstructs2)) {
       ACE_ERROR((LM_ERROR, "FwdDeclSameNamespaceStructs deserialization failed\n"));
@@ -222,7 +222,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   {
     Xyz::StructOfArrayOfArrayOfShorts2 aas;
     const size_t expected_size = 18;
-    const size_t actual_size = serialized_size(encoding, aas);
+    const size_t actual_size = serialized_size(encoding_for_test, aas);
     if (actual_size != expected_size) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("StructOfArrayOfArrayOfShorts2 serialized_size failed ")
@@ -239,14 +239,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     ACE_Message_Block mb(actual_size);
-    Serializer ss(&mb, encoding);
+    Serializer ss(&mb, encoding_for_test);
 
     if (!(ss << aas)) {
       ACE_ERROR((LM_ERROR, "Serializing StructOfArrayOfArrayOfShorts2 failed\n"));
       failed = true;
     }
 
-    Serializer ss2(&mb, encoding);
+    Serializer ss2(&mb, encoding_for_test);
 
     Xyz::StructOfArrayOfArrayOfShorts2 aas2;
     if (!(ss2 >> aas2)) {
@@ -358,8 +358,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   const size_t expected_size = 79;
 
   const SerializedSizeBound actual_bound =
-    OpenDDS::DCPS::MarshalTraits<Xyz::Foo>::serialized_size_bound(encoding);
-  const size_t actual_size = serialized_size(encoding, my_foo);
+    OpenDDS::DCPS::MarshalTraits<Xyz::Foo>::serialized_size_bound(encoding_for_test);
+  const size_t actual_size = serialized_size(encoding_for_test, my_foo);
 
   ACE_DEBUG((LM_DEBUG, "serialized_size_bound => %C\n", actual_bound.to_string().c_str()));
   ACE_DEBUG((LM_DEBUG, "serialized_size => %B\n", actual_size));
@@ -381,8 +381,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   // test serializing
 
   ACE_Message_Block mb(actual_size);
-  Serializer ss(&mb, encoding);
-  Serializer ss2(&mb, encoding);
+  Serializer ss(&mb, encoding_for_test);
+  Serializer ss2(&mb, encoding_for_test);
 
   Xyz::Foo ss_foo;
   try {

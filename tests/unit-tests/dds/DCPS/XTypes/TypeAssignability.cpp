@@ -301,19 +301,19 @@ TEST(dds_DCPS_XTypes_TypeAssignability, PrimitiveTypesTest_NotAssignable)
   EXPECT_FALSE(test.assignable(tia, TypeObject(tob)));
 
   {
-    const TypeIdentifier tia(TK_UINT16);
+    const TypeIdentifier ti(TK_UINT16);
     tob.bitmask_type.header.common.bit_bound = 17;
-    EXPECT_FALSE(test.assignable(tia, TypeObject(tob)));
+    EXPECT_FALSE(test.assignable(ti, TypeObject(tob)));
   }
   {
-    const TypeIdentifier tia(TK_UINT32);
+    const TypeIdentifier ti(TK_UINT32);
     tob.bitmask_type.header.common.bit_bound = 33;
-    EXPECT_FALSE(test.assignable(tia, TypeObject(tob)));
+    EXPECT_FALSE(test.assignable(ti, TypeObject(tob)));
   }
   {
-    const TypeIdentifier tia(TK_UINT64);
+    const TypeIdentifier ti(TK_UINT64);
     tob.bitmask_type.header.common.bit_bound = 31;
-    EXPECT_FALSE(test.assignable(tia, TypeObject(tob)));
+    EXPECT_FALSE(test.assignable(ti, TypeObject(tob)));
   }
 }
 
