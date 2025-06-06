@@ -72,7 +72,7 @@ TEST(dds_DCPS_GuidConverter, validate_IDs_and_Key)
   long entityKey = GuidConverter(guid).entityKey();
 
   EXPECT_EQ(vendorId, 0x00000102);
-  EXPECT_EQ(entityId, 0xd0e0f000);
+  EXPECT_EQ(entityId, static_cast<long>(0xd0e0f000));
   EXPECT_EQ(entityKey, 0x00d0e0f0);
 }
 
