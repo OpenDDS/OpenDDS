@@ -77,6 +77,11 @@ module OpenDDS
       BUILT_IN_TOPIC_KEY string thread_id;
       double utilization;
       MonotonicTime_t monotonic_timestamp;
+
+      // The "detail" members can provide additional information
+      // about the last-reported state of the thread in question.
+      long detail1;
+      long detail2;
     };
 
     const long LOCATOR_KIND_INVALID = -1;
