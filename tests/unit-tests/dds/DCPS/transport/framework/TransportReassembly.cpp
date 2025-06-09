@@ -74,7 +74,7 @@ namespace {
       // How many bits from base
       CORBA::ULong bit_offset = frag_seq - base;
       // What array index is that
-      int index = bit_offset / 32;
+      CORBA::ULong index = bit_offset / 32;
       // Find that elemnet
       CORBA::Long& entry = bitmap[index];
       // Now build a bitmask, offset 0 is HIGH ORDER bit

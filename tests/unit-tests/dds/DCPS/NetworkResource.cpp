@@ -10,19 +10,24 @@ using namespace OpenDDS::DCPS;
 // Test Utils
 
 namespace {
-class ScopedDebugLevels
-{
+
+class ScopedDebugLevels {
 public:
-  explicit ScopedDebugLevels(int level) : previous_transport_debug_level_(OpenDDS::DCPS::Transport_debug_level) {
+  explicit ScopedDebugLevels(unsigned int level)
+  : previous_transport_debug_level_(OpenDDS::DCPS::Transport_debug_level)
+  {
     OpenDDS::DCPS::Transport_debug_level = level;
   }
-  ~ScopedDebugLevels() {
+
+  ~ScopedDebugLevels()
+  {
     OpenDDS::DCPS::Transport_debug_level = previous_transport_debug_level_;
   }
+
 private:
   ScopedDebugLevels();
 
-  int previous_transport_debug_level_;
+  unsigned int previous_transport_debug_level_;
 };
 }
 
