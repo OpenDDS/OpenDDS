@@ -20,7 +20,7 @@ namespace {
   public:
     MOCK_METHOD4(schedule_timer, long(ACE_Event_Handler*, const void*, const ACE_Time_Value&, const ACE_Time_Value&));
     MOCK_METHOD3(cancel_timer, int(long, const void**, int));
-    MOCK_METHOD3(cancel_timer, int(ACE_Event_Handler*, int));
+    MOCK_METHOD2(cancel_timer, int(ACE_Event_Handler*, int));
   };
 
   struct TestEventHandler : RcEventHandler {
