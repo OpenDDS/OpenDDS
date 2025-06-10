@@ -74,7 +74,7 @@ namespace {
       // How many bits from base
       CORBA::ULong bit_offset = frag_seq - base;
       // What array index is that
-      int index = bit_offset / 32;
+      CORBA::ULong index = bit_offset / 32;
       // Find that elemnet
       CORBA::Long& entry = bitmap[index];
       // Now build a bitmask, offset 0 is HIGH ORDER bit
@@ -1129,11 +1129,11 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Permutations)
 #ifdef ACE_HAS_CPP11
         uint32_t end_hash = 0;
 #endif
-        for (size_t i = 0; i < sample_count; ++i) {
-          ASSERT_EQ(data[static_cast<CORBA::ULong>(i * 1024 * fragments_per_sample)], 'a' + i);
-          ASSERT_EQ(data[static_cast<CORBA::ULong>((i + 1) * 1024 * fragments_per_sample - 1)], 'a' + i);
+        for (size_t j = 0; j < sample_count; ++j) {
+          ASSERT_EQ(data[static_cast<CORBA::ULong>(j * 1024 * fragments_per_sample)], 'a' + j);
+          ASSERT_EQ(data[static_cast<CORBA::ULong>((j + 1) * 1024 * fragments_per_sample - 1)], 'a' + j);
 #ifdef ACE_HAS_CPP11
-          end_hash = one_at_a_time_hash(&data[static_cast<CORBA::ULong>(i * 1024 * fragments_per_sample)], 1024 * fragments_per_sample, end_hash);
+          end_hash = one_at_a_time_hash(&data[static_cast<CORBA::ULong>(j * 1024 * fragments_per_sample)], 1024 * fragments_per_sample, end_hash);
 #endif
         }
 #ifdef ACE_HAS_CPP11

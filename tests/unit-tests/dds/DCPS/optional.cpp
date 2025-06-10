@@ -87,11 +87,11 @@ TEST(dds_DCPS_optional, copy_ctor)
   EXPECT_FALSE(y);
   EXPECT_EQ(IntCounter::count, 0);
   {
-    optional<IntCounter> x(IntCounter(5));
-    optional<IntCounter> y(x);
-    EXPECT_TRUE(y.has_value());
-    EXPECT_TRUE(y);
-    EXPECT_EQ(y.value().value, 5);
+    optional<IntCounter> x2(IntCounter(5));
+    optional<IntCounter> y2(x2);
+    EXPECT_TRUE(y2.has_value());
+    EXPECT_TRUE(y2);
+    EXPECT_EQ(y2.value().value, 5);
     EXPECT_EQ(IntCounter::count, 2);
   }
   EXPECT_EQ(IntCounter::count, 0);
@@ -106,11 +106,11 @@ TEST(dds_DCPS_optional, copy_convert_ctor)
   EXPECT_EQ(IntCounter::count, 0);
   EXPECT_EQ(CharCounter::count, 0);
   {
-    optional<CharCounter> x(CharCounter(5));
-    optional<IntCounter> y(x);
-    EXPECT_TRUE(y.has_value());
-    EXPECT_TRUE(y);
-    EXPECT_EQ(y.value().value, 5);
+    optional<CharCounter> x2(CharCounter(5));
+    optional<IntCounter> y2(x2);
+    EXPECT_TRUE(y2.has_value());
+    EXPECT_TRUE(y2);
+    EXPECT_EQ(y2.value().value, 5);
     EXPECT_EQ(IntCounter::count, 1);
     EXPECT_EQ(CharCounter::count, 1);
   }
@@ -149,12 +149,12 @@ TEST(dds_DCPS_optional, copy_convert_assign)
   EXPECT_EQ(IntCounter::count, 0);
   EXPECT_EQ(CharCounter::count, 0);
   {
-    optional<CharCounter> x(CharCounter(5));
-    optional<IntCounter> y;
-    y = x;
-    EXPECT_TRUE(y.has_value());
-    EXPECT_TRUE(y);
-    EXPECT_EQ(y.value().value, 5);
+    optional<CharCounter> x2(CharCounter(5));
+    optional<IntCounter> y2;
+    y2 = x2;
+    EXPECT_TRUE(y2.has_value());
+    EXPECT_TRUE(y2);
+    EXPECT_EQ(y2.value().value, 5);
     EXPECT_EQ(IntCounter::count, 1);
     EXPECT_EQ(CharCounter::count, 1);
   }

@@ -110,8 +110,8 @@ namespace {
     dds_DCPS_XTypes_Utils& t;
     MemberPathVec expected;
 
-    GetKeysCheck(dds_DCPS_XTypes_Utils& t)
-    : t(t)
+    GetKeysCheck(dds_DCPS_XTypes_Utils& testsuite)
+      : t(testsuite)
     {
     }
 
