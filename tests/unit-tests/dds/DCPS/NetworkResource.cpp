@@ -14,7 +14,7 @@ namespace {
 class ScopedDebugLevels {
 public:
   explicit ScopedDebugLevels(unsigned int level)
-  : previous_transport_debug_level_(OpenDDS::DCPS::Transport_debug_level)
+    : previous_transport_debug_level_(OpenDDS::DCPS::Transport_debug_level)
   {
     OpenDDS::DCPS::Transport_debug_level = level;
   }

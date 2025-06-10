@@ -111,7 +111,7 @@ namespace {
     MemberPathVec expected;
 
     GetKeysCheck(dds_DCPS_XTypes_Utils& testsuite)
-    : t(testsuite)
+      : t(testsuite)
     {
     }
 
