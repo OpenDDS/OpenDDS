@@ -1,5 +1,6 @@
 project: opendds_cxx11 {
   dcps_ts_flags += -Cw -as -SI
+  requires += no_opendds_safety_profile
 
   TypeSupport_Files {
     test.idl

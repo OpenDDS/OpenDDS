@@ -383,6 +383,19 @@ function(_opendds_set_cxx_std)
     set(cxx_std_year_source "ACE")
   endif()
 
+  # See if OpenDDS requires a later standard
+  if(cxx_std_year LESS 2017)
+    set(msg "OpenDDS requires at least C++ 2017")
+    if(NOT explicit AND max_cxx_std_year LESS 2017)
+      message(FATAL_ERROR "${msg}, but ${compiler_info} only supports up to "
+        "C++ ${max_cxx_std_year}.")
+    endif()
+    message(STATUS "${compiler_info} would use ${cxx_std_year}, but ${msg}. Raising "
+      "requirement to that.")
+    set(cxx_std_year 2017)
+    set(cxx_std_year_source "OpenDDS")
+  endif()
+
   _opendds_cxx_std_from_year(cxx_std ${cxx_std_year})
   unset(OPENDDS_CXX_STD PARENT_SCOPE)
   set(OPENDDS_CXX_STD ${cxx_std} CACHE STRING
@@ -394,6 +407,10 @@ endfunction()
 
 if(NOT DEFINED OPENDDS_CXX_STD_YEAR)
   _opendds_set_cxx_std()
+endif()
+
+if(OPENDDS_CXX_STD_YEAR LESS 2017)
+  message(FATAL_ERROR "C++ standard year (${OPENDDS_CXX_STD_YEAR}) is less than 2017.")
 endif()
 
 function(_opendds_cxx_std target scope)
@@ -519,7 +536,6 @@ else()
   set(_opendds_cxx17 ON)
 endif()
 _opendds_feature(CXX17 "${_opendds_cxx17}" MPC_INVERTED_NAME no_cxx17 DOC "Build assumes C++17 support")
-_opendds_feature(STD_OPTIONAL "${OPENDDS_CXX17}" CONFIG DOC "Use C++17's std::optional")
 _opendds_feature(RAPIDJSON "${OPENDDS_RAPIDJSON}" CONFIG DOC "Enable RapidJSON features" TYPE PATH)
 
 # ACE Features
