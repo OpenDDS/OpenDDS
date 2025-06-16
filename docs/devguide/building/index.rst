@@ -160,9 +160,6 @@ The following macros are available in the config header:
 ``OPENDDS_CONFIG_SECURITY``
     Enable :ref:`dds_security`.
 
-``OPENDDS_CONFIG_STD_OPTIONAL``
-    Use ``std::optional``.
-
 Java
 ====
 
@@ -748,14 +745,6 @@ These are all the variables that are exclusive to building OpenDDS with CMake:
   If set to ``ERROR``, enables additional compiler warnings which are treated as errors when compiling OpenDDS.
 
   .. versionadded:: 3.28
-
-.. cmake:var:: OPENDDS_STD_OPTIONAL
-
-  If set to ``ON``, OpenDDS uses C++17's ``std::optional`` template in its API.
-  If set to ``OFF``, OpenDDS emulates ``std::optional`` with its own data type.
-  Default is ``ON`` when the compiler supports C++17 or higher.
-
-  .. versionadded:: 3.32
 
 .. cmake:var:: OPENDDS_INSTALL_RAPIDJSON
 
