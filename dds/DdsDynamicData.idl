@@ -29,9 +29,7 @@ module DDS {
   // ---------- TypeKinds (begin) -------------------
   typedef octet TypeKind;
 
-  // FUTURE: Support map.
-  //typedef map<ObjectName, ObjectName> Parameters;
-  local interface Parameters;
+  typedef map<ObjectName, ObjectName> Parameters;
 
   valuetype AnnotationDescriptor {
     public DynamicType type;
@@ -120,12 +118,8 @@ module DDS {
     ObjectName get_name();
   };
 
-  // FUTURE: Support map.
-  // typedef map<ObjectName, DynamicTypeMember> DynamicTypeMembersByName;
-  local interface DynamicTypeMembersByName {};
-  // FUTURE: Support map.
-  // typedef map<MemberId, DynamicTypeMember> DynamicTypeMembersById;
-  local interface DynamicTypeMembersById {};
+  typedef map<ObjectName, DynamicTypeMember> DynamicTypeMembersByName;
+  typedef map<MemberId, DynamicTypeMember> DynamicTypeMembersById;
 
   local interface DynamicType {
     DDS::ReturnCode_t get_descriptor(
