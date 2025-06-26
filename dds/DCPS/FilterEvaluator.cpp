@@ -7,7 +7,7 @@
 
 #include "Definitions.h"
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
 #include "FilterEvaluator.h"
 #include "FilterExpressionGrammar.h"
@@ -281,7 +281,7 @@ namespace {
   class Parameter : public FilterEvaluator::Operand {
   public:
     explicit Parameter(AstNode* fnNode)
-      : param_(std::atoi(toString(fnNode).c_str() + 1 /* skip % */))
+      : param_(static_cast<size_t>(std::atoi(toString(fnNode).c_str() + 1 /* skip % */)))
     {}
 
     bool isParameter() const { return true; }
@@ -631,7 +631,7 @@ Value::Value(const std::string& s, bool conversion_preferred)
 
 #ifdef DDS_HAS_WCHAR
 Value::Value(ACE_OutputCDR::from_wchar wc, bool conversion_preferred)
-  : type_(VAL_INT), i_(wc.val_), conversion_preferred_(conversion_preferred)
+  : type_(VAL_INT), i_(static_cast<int>(wc.val_)), conversion_preferred_(conversion_preferred)
 {}
 
 Value::Value(const std::wstring& s, bool conversion_preferred)
@@ -667,7 +667,7 @@ template<> ACE_UINT64& Value::get() { return m_; }
 template<> char& Value::get() { return c_; }
 template<> double& Value::get() { return f_; }
 template<> ACE_CDR::LongDouble& Value::get() { return ld_; }
-template<> const char*& Value::get() { return s_; }
+template<> char*& Value::get() { return s_; }
 
 template<> const bool& Value::get() const { return b_; }
 template<> const int& Value::get() const { return i_; }
@@ -677,11 +677,11 @@ template<> const ACE_UINT64& Value::get() const { return m_; }
 template<> const char& Value::get() const { return c_; }
 template<> const double& Value::get() const { return f_; }
 template<> const ACE_CDR::LongDouble& Value::get() const { return ld_; }
-template<> const char* const& Value::get() const { return s_; }
+template<> char* const& Value::get() const { return s_; }
 
 Value::~Value()
 {
-  if (type_ == VAL_STRING) ACE_OS::free((void*)s_);
+  if (type_ == VAL_STRING) ACE_OS::free(s_);
 }
 
 namespace {
@@ -721,7 +721,7 @@ namespace {
     explicit Assign(Value& target, bool steal = false)
       : tgt_(target), steal_(steal) {}
 
-    void operator()(const char* s)
+    void operator()(char* s)
     {
       tgt_.s_ = steal_ ? s : ACE_OS::strdup(s);
     }
@@ -757,7 +757,7 @@ Value::swap(Value& v)
   Value t(v);
 
   if (v.type_ == VAL_STRING) {
-    ACE_OS::free((void*)v.s_);
+    ACE_OS::free(v.s_);
   }
 
   Assign visitor1(v, true);
@@ -780,7 +780,7 @@ namespace {
   struct Equals : VisitorBase<bool> {
     explicit Equals(const Value& lhs) : lhs_(lhs) {}
 
-    bool operator()(const char* s) const
+    bool operator()(char* s) const
     {
       return std::strcmp(lhs_.s_, s) == 0;
     }
@@ -796,7 +796,7 @@ namespace {
   struct Less : VisitorBase<bool> {
     explicit Less(const Value& lhs) : lhs_(lhs) {}
 
-    bool operator()(const char* s) const
+    bool operator()(char* s) const
     {
       return std::strcmp(lhs_.s_, s) < 0;
     }
@@ -812,7 +812,7 @@ namespace {
   struct Modulus : VisitorBase<Value> {
     explicit Modulus(const Value& lhs) : lhs_(lhs) {}
 
-    bool operator()(const char*&) const
+    bool operator()(char*&) const
     {
       throw std::runtime_error(std::string(MOD) + " cannot be applied to strings");
     }
@@ -907,8 +907,8 @@ namespace {
   struct StreamExtract : VisitorBase<> {
     explicit StreamExtract(std::istream& is) : is_(is) {}
 
-    void operator()(const char*) {}
-    // not called.  prevents instantiation of the following with T = const char*
+    void operator()(char*) {}
+    // not called.  prevents instantiation of the following with T = char*
 
     void operator()(ACE_CDR::LongDouble& ld)
     {

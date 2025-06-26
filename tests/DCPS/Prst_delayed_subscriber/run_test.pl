@@ -55,27 +55,9 @@ $subDebugOpts .= "-ORBLogFile $debugFile "    if $subDebug and $debugFile;
 $pub_opts = "$pubDebugOpts -DCPSConfigFile pub.ini";
 $sub_opts = "$subDebugOpts -DCPSConfigFile sub.ini";
 
-if ($ARGV[0] eq 'udp') {
-    $opts = "-t udp";
-    $pub_opts = "$opts -DCPSConfigFile pub_udp.ini";
-    $sub_opts = "$opts -DCPSConfigFile sub_udp.ini";
-}
-elsif ($ARGV[0] eq 'multicast') {
-    $opts = "-t multicast";
-    $pub_opts = "$opts -DCPSConfigFile pub_multicast.ini";
-    $sub_opts = "$opts -DCPSConfigFile sub_multicast.ini";
-}
-elsif ($ARGV[0] eq 'default_tcp') {
+if ($ARGV[0] eq 'default_tcp') {
     $pub_opts = "-t default_tcp";
     $sub_opts = "-t default_tcp";
-}
-elsif ($ARGV[0] eq 'default_udp') {
-    $pub_opts = "-t default_udp";
-    $sub_opts = "-t default_udp";
-}
-elsif ($ARGV[0] eq 'default_multicast') {
-    $pub_opts = "-t default_multicast";
-    $sub_opts = "-t default_multicast";
 }
 elsif ($ARGV[0] ne '') {
     print STDERR "ERROR: invalid test case\n";

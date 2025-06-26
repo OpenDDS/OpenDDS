@@ -8,10 +8,10 @@
 #include "DataReaderImpl.h"
 
 #include "DCPS_Utils.h"
+#include "Definitions.h"
 #include "DomainParticipantImpl.h"
 #include "FeatureDisabledQosCheck.h"
 #include "GuidConverter.h"
-#include "MonitorFactory.h"
 #include "Qos_Helper.h"
 #include "QueryConditionImpl.h"
 #include "ReadConditionImpl.h"
@@ -31,12 +31,11 @@
 
 #include "XTypes/TypeObject.h"
 
-#include <dds/OpenDDSConfigWrapper.h>
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include "BuiltInTopicUtils.h"
 #endif
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif
 #include <dds/DdsDcpsCoreC.h>
@@ -47,7 +46,7 @@
 
 #include <cstdio>
 #include <stdexcept>
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 #  include <sstream>
 #endif
 
@@ -66,7 +65,7 @@ DataReaderImpl::DataReaderImpl()
   , topic_servant_(0)
   , type_support_(0)
   , topic_id_(GUID_UNKNOWN)
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   , is_exclusive_ownership_(false)
 #endif
   , coherent_(false)
@@ -81,9 +80,6 @@ DataReaderImpl::DataReaderImpl()
   , deadline_task_(make_rch<DRISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &DataReaderImpl::deadline_task))
   , is_bit_(false)
   , always_get_history_(false)
-  , statistics_enabled_(false)
-  , raw_latency_buffer_size_(0)
-  , raw_latency_buffer_type_(DataCollector<double>::KeepOldest)
   , transport_disabled_(false)
   , mb_alloc_(DEFAULT_TRANSPORT_RECEIVE_BUFFERS)
 {
@@ -120,13 +116,6 @@ DataReaderImpl::DataReaderImpl()
   sample_rejected_status_.total_count_change = 0;
   sample_rejected_status_.last_reason = DDS::NOT_REJECTED;
   sample_rejected_status_.last_instance_handle = DDS::HANDLE_NIL;
-
-  this->budget_exceeded_status_.total_count = 0;
-  this->budget_exceeded_status_.total_count_change = 0;
-  this->budget_exceeded_status_.last_instance_handle = DDS::HANDLE_NIL;
-
-  monitor_.reset(TheServiceParticipant->monitor_factory_->create_data_reader_monitor(this));
-  periodic_monitor_.reset(TheServiceParticipant->monitor_factory_->create_data_reader_periodic_monitor(this));
 }
 
 // This method is called when there are no longer any reference to the
@@ -137,7 +126,7 @@ DataReaderImpl::~DataReaderImpl()
 
   deadline_task_->cancel();
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
   if (participant) {
     XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
@@ -157,7 +146,7 @@ DataReaderImpl::cleanup()
   // deleted
   set_listener(0, NO_STATUS_MASK);
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   OwnershipManagerPtr owner_manager = this->ownership_manager();
   if (owner_manager) {
     owner_manager->unregister_reader(topic_servant_->type_name(), this);
@@ -169,14 +158,14 @@ DataReaderImpl::cleanup()
 
   topic_servant_ = 0;
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   {
     ACE_Guard<ACE_Thread_Mutex> guard_cft(content_filtered_topic_mutex_);
     content_filtered_topic_ = 0;
   }
 #endif
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
   multi_topic_ = 0;
 #endif
 
@@ -197,16 +186,16 @@ void DataReaderImpl::init(
     topic_id_ = topic->get_id();
   }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   CORBA::String_var topic_name = topic_desc->get_name();
   CORBA::String_var topic_type_name = topic_desc->get_type_name();
   is_bit_ = topicIsBIT(topic_name, topic_type_name);
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
   qos_ = qos;
   passed_qos_ = qos;
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   is_exclusive_ownership_ = this->qos_.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
 #endif
 
@@ -281,14 +270,6 @@ DataReaderImpl::add_association(const WriterAssociation& writer,
     //   - only need to check reader qos - we know the writer must be >= reader
     if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
       info->waiting_for_end_historic_samples(true);
-    }
-
-    {
-      ACE_Guard<ACE_Recursive_Thread_Mutex> guard(statistics_lock_);
-      statistics_.insert(
-        StatsMapType::value_type(
-          writer_id,
-          WriterStats(raw_latency_buffer_size_, raw_latency_buffer_type_)));
     }
 
     // If this is a durable reader
@@ -431,10 +412,6 @@ DataReaderImpl::transport_assoc_done(int flags, const GUID_t& remote_id)
       pos->second->start_liveliness_timer();
     }
   }
-
-  if (monitor_) {
-    monitor_->report();
-  }
 }
 
 void
@@ -466,19 +443,6 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
   if (!get_deleted()) {
     // stop pending associations for these writer ids
     this->stop_associating(writers.get_buffer(), writers.length());
-
-    {
-      CORBA::ULong wr_len = writers.length();
-      ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
-
-      for (CORBA::ULong i = 0; i < wr_len; i++) {
-        const GUID_t writer_id = writers[i];
-        {
-          ACE_Guard<ACE_Recursive_Thread_Mutex> guard(statistics_lock_);
-          statistics_.erase(writer_id);
-        }
-      }
-    }
   }
 
   remove_associations_i(writers, notify_lost);
@@ -619,10 +583,6 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   if (notify_lost) {
     this->notify_subscription_lost(handles);
   }
-
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
 }
 
 void
@@ -632,22 +592,18 @@ DataReaderImpl::remove_all_associations()
   stop_associating();
 
   OpenDDS::DCPS::WriterIdSeq writers;
-  int size;
+  DDS::UInt32 size;
 
   {
     ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
-    size = static_cast<int>(writers_.size());
+    size = static_cast<DDS::UInt32>(writers_.size());
     writers.length(size);
 
     WriterMapType::iterator curr_writer = writers_.begin();
     WriterMapType::iterator end_writer = writers_.end();
-
-    int i = 0;
-
-    while (curr_writer != end_writer) {
-      writers[i++] = curr_writer->first;
-      ++curr_writer;
+    for (DDS::UInt32 i = 0; curr_writer != end_writer; ++i, ++curr_writer) {
+      writers[i] = curr_writer->first;
     }
   }
 
@@ -758,7 +714,7 @@ DDS::ReadCondition_ptr DataReaderImpl::create_readcondition(
   return rc._retn();
 }
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
 DDS::QueryCondition_ptr DataReaderImpl::create_querycondition(
     DDS::SampleStateMask sample_states,
     DDS::ViewStateMask view_states,
@@ -922,7 +878,7 @@ DataReaderListener_ptr DataReaderImpl::get_ext_listener()
 
 DDS::TopicDescription_ptr DataReaderImpl::get_topicdescription()
 {
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   {
     ACE_Guard<ACE_Thread_Mutex> guard(content_filtered_topic_mutex_);
     if (content_filtered_topic_) {
@@ -1055,9 +1011,9 @@ DataReaderImpl::get_matched_publications(
       DDS::RETCODE_ERROR);
 
   // Copy out the handles for the current set of publications.
-  int index = 0;
   publication_handles.length(static_cast<CORBA::ULong>(this->publication_id_to_handle_map_.size()));
 
+  DDS::UInt32 index = 0;
   for (RepoIdToHandleMap::iterator
       current = this->publication_id_to_handle_map_.begin();
       current != this->publication_id_to_handle_map_.end();
@@ -1068,7 +1024,7 @@ DataReaderImpl::get_matched_publications(
   return DDS::RETCODE_OK;
 }
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 DDS::ReturnCode_t
 DataReaderImpl::get_matched_publication_data(
     DDS::PublicationBuiltinTopicData & publication_data,
@@ -1100,7 +1056,7 @@ DataReaderImpl::get_matched_publication_data(
 
   return ret;
 }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
 DDS::ReturnCode_t
 DataReaderImpl::enable()
@@ -1157,7 +1113,7 @@ DataReaderImpl::enable()
   }
 
   if (qos_.resource_limits.max_samples != DDS::LENGTH_UNLIMITED) {
-    n_chunks_ = qos_.resource_limits.max_samples;
+    n_chunks_ = static_cast<size_t>(qos_.resource_limits.max_samples);
   }
 
   //else using value from Service_Participant
@@ -1211,7 +1167,7 @@ DataReaderImpl::enable()
     CORBA::String_var filterClassName = "";
     CORBA::String_var filterExpression = "";
     DDS::StringSeq exprParams;
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
     {
       ACE_Guard<ACE_Thread_Mutex> guard(content_filtered_topic_mutex_);
       if (content_filtered_topic_) {
@@ -1280,10 +1236,6 @@ DataReaderImpl::enable()
   if (topic_servant_) {
     const CORBA::String_var name = topic_servant_->get_name();
     return_value = subscriber->reader_enabled(name.in(), this);
-
-    if (this->monitor_) {
-      this->monitor_->report();
-    }
   }
 
   if (return_value == DDS::RETCODE_OK) {
@@ -1335,7 +1287,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
         (header.message_id_ == DISPOSE_INSTANCE) ||
         (header.message_id_ == DISPOSE_UNREGISTER_INSTANCE)) {
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
       if (header.coherent_change_) {
         writer->add_coherent_samples(header.sequence_);
       }
@@ -1391,11 +1343,6 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       subscriber->data_received(this);
     }
 
-    // Only gather statistics about real samples, not registration data, etc.
-    if (header.message_id_ == SAMPLE_DATA) {
-      this->process_latency(sample);
-    }
-
     // This also adds to the sample container and makes any callbacks
     // and condition modifications.
 
@@ -1421,7 +1368,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   }
   break;
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   case END_COHERENT_CHANGES: {
     CoherentChangeControl control;
 
@@ -1474,7 +1421,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     }
   }
   break;
-#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
+#endif
 
   case DATAWRITER_LIVELINESS: {
     if (DCPS_debug_level >= 4) {
@@ -1512,7 +1459,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // not be accessed.
       ReceivedDataSample dup(sample);
       this->lookup_instance(dup, instance);
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
       OwnershipManagerPtr owner_manager = this->ownership_manager();
 
       if (! this->is_exclusive_ownership_
@@ -1522,7 +1469,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
                   sample.header_.publication_id_)))) {
 #endif
         cancel_deadline(instance);
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
       }
 #endif
     }
@@ -1544,13 +1491,13 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       ReceivedDataSample dup(sample);
       this->lookup_instance(dup, instance);
       if (instance) {
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
         if (! this->is_exclusive_ownership_
             || (this->is_exclusive_ownership_
                 && instance->instance_state_->is_last(sample.header_.publication_id_))) {
 #endif
           cancel_deadline(instance);
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
         }
 #endif
       }
@@ -1572,7 +1519,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       // not be accessed.
       ReceivedDataSample dup(sample);
       this->lookup_instance(dup, instance);
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
       OwnershipManagerPtr owner_manager = this->ownership_manager();
       if (! this->is_exclusive_ownership_
           || (owner_manager
@@ -1586,7 +1533,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         if (instance) {
           cancel_deadline(instance);
         }
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
       }
 #endif
     }
@@ -1779,7 +1726,7 @@ CORBA::Long DataReaderImpl::total_samples() const
 void
 DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
 {
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   OwnershipManagerPtr owner_manager = this->ownership_manager();
   if (owner_manager) {
     owner_manager->remove_writers(handle);
@@ -1802,7 +1749,7 @@ DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
     instances_.erase(handle);
   }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   if (this->is_exclusive_ownership_ && instance->instance_state_->is_exclusive()) {
     if (owner_manager) {
       owner_manager->remove_writers(instance->instance_handle_);
@@ -1819,9 +1766,6 @@ DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
 #endif
 
   this->release_instance_i(handle);
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
 }
 
 void
@@ -1830,47 +1774,6 @@ DataReaderImpl::state_updated(DDS::InstanceHandle_t handle)
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
   state_updated_i(handle);
 }
-
-OpenDDS::DCPS::WriterStats::WriterStats(
-    int amount,
-    DataCollector<double>::OnFull type) : stats_(amount, type)
-{
-}
-
-void OpenDDS::DCPS::WriterStats::add_stat(const TimeDuration& delay)
-{
-  double datum = static_cast<double>(delay.value().sec());
-  datum += delay.value().usec() / 1000000.0;
-  this->stats_.add(datum);
-}
-
-OpenDDS::DCPS::LatencyStatistics OpenDDS::DCPS::WriterStats::get_stats() const
-{
-  LatencyStatistics value;
-
-  value.publication = GUID_UNKNOWN;
-  value.n           = this->stats_.n();
-  value.maximum     = this->stats_.maximum();
-  value.minimum     = this->stats_.minimum();
-  value.mean        = static_cast<double>(this->stats_.mean());
-  value.variance    = static_cast<double>(this->stats_.var());
-
-  return value;
-}
-
-void OpenDDS::DCPS::WriterStats::reset_stats()
-{
-  this->stats_.reset();
-}
-
-#ifndef OPENDDS_SAFETY_PROFILE
-std::ostream& OpenDDS::DCPS::WriterStats::raw_data(std::ostream& str) const
-{
-  str << std::dec << this->stats_.size()
-                              << " samples out of " << this->stats_.n() << std::endl;
-  return str << this->stats_;
-}
-#endif //OPENDDS_SAFETY_PROFILE
 
 void
 DataReaderImpl::writer_removed(WriterInfo& info)
@@ -1885,7 +1788,7 @@ DataReaderImpl::writer_removed(WriterInfo& info)
         LogGuid(info_writer_id).c_str()));
   }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   OwnershipManagerPtr owner_manager = this->ownership_manager();
   if (owner_manager) {
     owner_manager->remove_writer(info_writer_id);
@@ -1982,10 +1885,6 @@ DataReaderImpl::writer_became_alive(WriterInfo& info,
 
     liveliness_changed_status_.last_publication_handle = info.handle();
 
-    if (this->monitor_) {
-      this->monitor_->report();
-    }
-
     // Call listener only when there are liveliness status changes.
     if (liveliness_changed) {
       set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
@@ -2008,7 +1907,7 @@ DataReaderImpl::writer_became_dead(WriterInfo& info,
                get_state_str(previous_state)));
   }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   OwnershipManagerPtr owner_manager = this->ownership_manager();
   if (owner_manager) {
     owner_manager->remove_writer(info_writer_id);
@@ -2058,10 +1957,6 @@ DataReaderImpl::writer_became_dead(WriterInfo& info,
     }
 
     liveliness_changed_status_.last_publication_handle = info.handle();
-
-    if (this->monitor_) {
-      this->monitor_->report();
-    }
 
     instances_liveliness_update(info_writer_id, publication_handle);
 
@@ -2121,131 +2016,6 @@ void DataReaderImpl::dispose_unregister(const ReceivedDataSample&,
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::dispose_unregister()\n"));
   }
-}
-
-void DataReaderImpl::process_latency(const ReceivedDataSample& sample)
-{
-  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(statistics_lock_);
-  StatsMapType::iterator location = this->statistics_.find(sample.header_.publication_id_);
-
-  if (location != this->statistics_.end()) {
-    const DDS::Duration_t zero = { DDS::DURATION_ZERO_SEC, DDS::DURATION_ZERO_NSEC };
-
-    // Only when the user has specified a latency budget or statistics
-    // are enabled we need to calculate our latency
-    if ((this->statistics_enabled()) ||
-        (this->qos_.latency_budget.duration > zero)) {
-      const DDS::Time_t timestamp = {
-        sample.header_.source_timestamp_sec_,
-        sample.header_.source_timestamp_nanosec_
-      };
-      const TimeDuration latency = SystemTimePoint::now() - SystemTimePoint(timestamp);
-
-      if (this->statistics_enabled()) {
-        location->second.add_stat(latency);
-      }
-
-      if (DCPS_debug_level > 9) {
-        ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
-            ACE_TEXT("measured latency of %C for current sample.\n"),
-            latency.str().c_str()));
-      }
-
-      if (this->qos_.latency_budget.duration > zero) {
-        // Check latency against the budget.
-        if (latency > TimeDuration(this->qos_.latency_budget.duration)) {
-          this->notify_latency(sample.header_.publication_id_);
-        }
-      }
-    }
-  } else if (DCPS_debug_level > 0) {
-    /// NB: This message is generated contemporaneously with a similar
-    ///     message from writer_activity().  That message is not marked
-    ///     as an error, so we follow that lead and leave this as an
-    ///     informational message, guarded by debug level.  This seems
-    ///     to be due to late samples (samples delivered after an
-    ///     association has been torn down).  We may want to promote this
-    ///     to a warning if other conditions causing this symptom are
-    ///     discovered.
-    ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
-        ACE_TEXT("reader %C is not associated with writer %C (late sample?).\n"),
-        LogGuid(get_guid()).c_str(),
-        LogGuid(sample.header_.publication_id_).c_str()));
-  }
-}
-
-void DataReaderImpl::notify_latency(GUID_t writer)
-{
-  // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
-  // is given to this DataReader then narrow() fails.
-  DataReaderListener_var listener = get_ext_listener();
-
-  if (!CORBA::is_nil(listener.in())) {
-    WriterIdSeq writerIds;
-    writerIds.length(1);
-    writerIds[ 0] = writer;
-
-    DDS::InstanceHandleSeq handles;
-    this->lookup_instance_handles(writerIds, handles);
-
-    if (handles.length() >= 1) {
-      this->budget_exceeded_status_.last_instance_handle = handles[ 0];
-
-    } else {
-      this->budget_exceeded_status_.last_instance_handle = -1;
-    }
-
-    ++this->budget_exceeded_status_.total_count;
-    ++this->budget_exceeded_status_.total_count_change;
-
-    listener->on_budget_exceeded(this, this->budget_exceeded_status_);
-
-    this->budget_exceeded_status_.total_count_change = 0;
-  }
-}
-
-#ifndef OPENDDS_SAFETY_PROFILE
-void
-DataReaderImpl::get_latency_stats(
-    OpenDDS::DCPS::LatencyStatisticsSeq & stats)
-{
-  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(statistics_lock_);
-  stats.length(static_cast<CORBA::ULong>(this->statistics_.size()));
-  int index = 0;
-
-  for (StatsMapType::const_iterator current = this->statistics_.begin();
-      current != this->statistics_.end();
-      ++current, ++index) {
-    stats[ index] = current->second.get_stats();
-    stats[ index].publication = current->first;
-  }
-}
-#endif
-
-void
-DataReaderImpl::reset_latency_stats()
-{
-  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(statistics_lock_);
-  for (StatsMapType::iterator current = this->statistics_.begin();
-      current != this->statistics_.end();
-      ++current) {
-    current->second.reset_stats();
-  }
-}
-
-CORBA::Boolean
-DataReaderImpl::statistics_enabled()
-{
-  return statistics_enabled_;
-}
-
-void
-DataReaderImpl::statistics_enabled(
-    CORBA::Boolean statistics_enabled)
-{
-  statistics_enabled_ = statistics_enabled;
 }
 
 void
@@ -2473,7 +2243,7 @@ bool
 DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instance,
   const GUID_t& pubid)
 {
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   if (this->is_exclusive_ownership_) {
 
     ACE_WRITE_GUARD_RETURN(ACE_RW_Thread_Mutex, write_guard, writers_lock_, true);
@@ -2494,7 +2264,7 @@ DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instan
     }
 
 
-    // Evaulate the owner of the instance if not selected and filter
+    // Evaluate the owner of the instance if not selected and filter
     // current message if it's not from owner writer.
     if ( instance->instance_state_->get_owner() == GUID_UNKNOWN
         || ! iter->second->is_owner_evaluated(instance->instance_handle_)) {
@@ -2687,10 +2457,10 @@ DataReaderImpl::get_writer_states(WriterStatePairVec& writer_states)
   }
 }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
 void
 DataReaderImpl::update_ownership_strength(const GUID_t& pub_id,
-    const CORBA::Long& ownership_strength)
+                                          CORBA::Long ownership_strength)
 {
   ACE_READ_GUARD(ACE_RW_Thread_Mutex,
       read_guard,
@@ -2717,7 +2487,7 @@ DataReaderImpl::update_ownership_strength(const GUID_t& pub_id,
 }
 #endif
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 bool DataReaderImpl::verify_coherent_changes_completion(WriterInfo* writer)
 {
   Coherent_State state = COMPLETED;
@@ -2953,7 +2723,7 @@ void DataReaderImpl::get_ordered_data(GroupRakeData& data,
   }
 }
 
-#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
+#endif
 
 void
 DataReaderImpl::set_subscriber_qos(
@@ -2962,7 +2732,7 @@ DataReaderImpl::set_subscriber_qos(
   this->subqos_ = qos;
 }
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
 void
 DataReaderImpl::enable_filtering(ContentFilteredTopicImpl* cft)
 {
@@ -2981,7 +2751,7 @@ DataReaderImpl::get_cf_topic() const
 }
 #endif
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
 void
 DataReaderImpl::enable_multi_topic(MultiTopicImpl* mt)
 {
@@ -2989,7 +2759,7 @@ DataReaderImpl::enable_multi_topic(MultiTopicImpl* mt)
 }
 #endif
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
 void
 DataReaderImpl::update_subscription_params(const DDS::StringSeq& params) const
@@ -3194,7 +2964,7 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
                                               bool is_new_instance)
 {
   bool accepted = true;
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   bool verify_coherent = false;
 #endif
   WriterInfo_rch writer;
@@ -3207,7 +2977,7 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
     if (where != writers_.end()) {
       if (header.coherent_change_) {
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
         // Received coherent change
         where->second->coherent_change(header.group_coherent_, header.publisher_id_);
         verify_coherent = true;
@@ -3225,7 +2995,7 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
     }
   }
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   if (verify_coherent) {
     accepted = verify_coherent_changes_completion(writer.in());
   }
@@ -3418,7 +3188,7 @@ void DataReaderImpl::process_deadline(SubscriptionInstance_rch instance,
 
         DDS::DataReaderListener_var listener = listener_for(DDS::REQUESTED_DEADLINE_MISSED_STATUS);
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
         if (instance->instance_state_->is_exclusive()) {
           DataReaderImpl::OwnershipManagerPtr owner_manager = ownership_manager();
           if (owner_manager)

@@ -13,7 +13,7 @@ This package bridges the gap between the MPC build system used by OpenDDS and CM
 Requirements
 ************
 
-CMake version 3.3.2 or greater is required to use the CMake package, but some some features require newer versions.
+CMake version 3.3.2 or greater is required to use the CMake package, but some features require newer versions.
 
 *******************************
 Using the OpenDDS CMake Package
@@ -83,8 +83,8 @@ Other Examples
 
 The :ghfile:`CMake tests <tests/cmake>` are written primarily as tests, but can also be used as examples for specific features and approaches.
 
-find_package
-============
+``find_package(OpenDDS)``
+=========================
 
 To use the OpenDDS CMake package, first it has to be loaded using `find_package <https://cmake.org/cmake/help/latest/command/find_package.html>`__.
 For example to mandatorily load OpenDDS:
@@ -109,7 +109,7 @@ Components
 .. versionadded:: 3.25
 
 By default the package will search for all libraries and executables, but only require the bare minimum for ACE/TAO and OpenDDS.
-Arguments can be passed to ``find_package(OpenDDS COMPONENTS <argument>...)`` (or alternatively ``find_package(OpenDDS REQUIRED [COMPONENTS] <argument>...)``) add to what's required.
+Arguments can be passed to ``find_package(OpenDDS COMPONENTS <argument>...)`` (or alternatively ``find_package(OpenDDS REQUIRED [COMPONENTS] <argument>...)``) require additional executables, libraries, and features.
 These can be:
 
 - :ref:`Executables <cmake-executables>` and :ref:`Libraries <cmake-libraries>`
@@ -135,7 +135,7 @@ These can be:
   .. note::
 
     Passing features to ``OPTIONAL_COMPONENTS`` is treated as an error.
-    It doesn't make sense to optionally request them because they are fixed.
+    It doesn't make sense to optionally request them because they are fixed when OpenDDS is built.
 
 - ``NO_DEFAULTS``
 
@@ -152,8 +152,8 @@ These can be:
   This just makes :cmake:tgt:`ACE::ACE` and optionally :cmake:tgt:`TAO::TAO` available.
   Normally :cmake:tgt:`ACE::ACE`, :cmake:tgt:`TAO::TAO`, and :cmake:tgt:`OpenDDS::Dcps` are unconditionally searched for and required.
 
-Adding IDL Sources with opendds_target_sources
-==============================================
+Adding IDL Sources with ``opendds_target_sources``
+==================================================
 
 The CMake config package provides an easy way to add IDL sources to CMake targets using :cmake:func:`opendds_target_sources`.
 Here is how it's used in the :ghfile:`Developer’s Guide Messenger example <DevGuideExamples/DCPS/Messenger/CMakeLists.txt>`:
@@ -185,8 +185,8 @@ See :ref:`cmake-libraries` for all the libraries the CMake package can provide.
 
 .. _cmake-install-imported-runtime-artifacts:
 
-install(IMPORTED_RUNTIME_ARTIFACTS)
-===================================
+``install(IMPORTED_RUNTIME_ARTIFACTS)``
+=======================================
 
 .. versionadded:: 3.20
 
@@ -219,8 +219,8 @@ For example, the `PUBLIC_HEADER <https://cmake.org/cmake/help/latest/prop_tgt/PU
 Then they could be installed using `install(TARGETS ... PUBLIC_HEADER ...) <https://cmake.org/cmake/help/latest/command/install.html#targets>`__.
 Another method is provided by :cmake:func:`opendds_install_interface_files`.
 
-Manually Creating config.cmake
-==============================
+Manually Creating ``config.cmake``
+==================================
 
 The :ghfile:`configure script <configure>` is responsible for generating the ``config.cmake`` file in :ghfile:`cmake`, which has various configuration options.
 These options provide the OpenDDS CMake package with the required context it needs to integrate with the OpenDDS code generators and libraries.
@@ -258,10 +258,6 @@ The CMake package can provide library targets that can be linked using `target_l
 
   :ref:`rtps-udp-transport`
 
-.. cmake:tgt:: OpenDDS::Multicast
-
-  :ref:`multicast-transport`
-
 .. cmake:tgt:: OpenDDS::Shmem
 
   :ref:`shmem-transport`
@@ -269,10 +265,6 @@ The CMake package can provide library targets that can be linked using `target_l
 .. cmake:tgt:: OpenDDS::Tcp
 
   :ref:`tcp-transport`
-
-.. cmake:tgt:: OpenDDS::Udp
-
-  :ref:`udp-transport`
 
 .. cmake:tgt:: OpenDDS::Security
 
@@ -374,6 +366,8 @@ The CMake package can provide executable targets that can be called manually fro
 Functions
 =========
 
+.. |multiple-call-export-note| replace:: If there are multiple calls to :cmake:func:`opendds_target_sources` or :cmake:func:`opendds_export_header` on the same target, only the export header settings of the first call are used.
+
 .. cmake:func:: opendds_target_sources
 
   ::
@@ -385,8 +379,8 @@ Functions
       [OPENDDS_IDL_OPTIONS <option>...]
       [SUPPRESS_ANYS TRUE|FALSE]
       [ALWAYS_GENERATE_LIB_EXPORT_HEADER TRUE|FALSE]
-      [USE_EXPORT <export-header>;<export-macro>]
-      [USE_VERSIONED_NAMESPACE <vns-header>;<vns-prefix>]
+      [USE_EXPORT <export-header> <export-macro>]
+      [USE_VERSIONED_NAMESPACE <vns-header> <vns-prefix>]
       [GENERATE_SERVER_SKELETONS TRUE|FALSE]
       [AUTO_LINK TRUE|FALSE]
       [INCLUDE_BASE <dir>]
@@ -404,6 +398,14 @@ Functions
   .. deprecated:: 3.15
 
     C/C++ files can also be passed along with IDL files, but this has been deprecated.
+
+  .. versionchanged:: 3.32
+
+    Added support for using the same IDL files in different targets with different options.
+
+  .. versionchanged:: 3.32
+
+    Added support for the `codegen <https://cmake.org/cmake/help/latest/policy/CMP0171.html>`__ target (CMake 3.31 or later) to build and run IDL compilers on targets with IDL.
 
   .. cmake:func:arg:: TAO_IDL_OPTIONS <option>...
 
@@ -424,11 +426,18 @@ Functions
 
   .. cmake:func:arg:: ALWAYS_GENERATE_LIB_EXPORT_HEADER TRUE|FALSE
 
-    If ``TRUE``, a header for exporting symbols in a shared library will be always generated as long the target is `some sort of library <https://cmake.org/cmake/help/latest/prop_tgt/TYPE.html>`__.
-    If ``FALSE``, then it will only be done if the target is a shared library.
+    If ``TRUE``, a header for exporting symbols will be always generated as long as the target is `some sort of library <https://cmake.org/cmake/help/latest/prop_tgt/TYPE.html>`__.
+    If ``FALSE``, then it will only be done if the target is a shared library and there are non-``PRIVATE`` IDL files.
     The default is set by :cmake:var:`OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER`.
 
+    See :cmake:func:`opendds_export_header` for more information on export headers.
+    |multiple-call-export-note|
+
     .. versionadded:: 3.20
+
+    .. versionchanged:: 3.32
+
+      Export headers will no longer be automatically generated by default when all IDL files are scoped ``PRIVATE``.
 
   .. cmake:func:arg:: EXPORT_HEADER_DIR <header-dir>
 
@@ -437,23 +446,24 @@ Functions
 
     .. versionadded:: 3.28
 
-  .. cmake:func:arg:: USE_EXPORT <export-header>;<export-macro>
+  .. cmake:func:arg:: USE_EXPORT <export-header> <export-macro>
 
-    Pass a CMake list (``;``-delimited) of an existing export header and export macro to use in the generated code.
-    This is the same format as :cmake:func:`opendds_export_header(USE_EXPORT_VAR)`, but is intended for use with a custom export header.
-    If there are multiple calls to :cmake:func:`opendds_target_sources` on the same target, only the first ``USE_EXPORT`` is used.
+    Pass an existing export header and export macro to use in the generated code.
+    These values are passed to :cmake:func:`opendds_export_header`.
+    If more control is needed, use :cmake:func:`opendds_export_header(EXISTING)` before ``opendds_target_sources`` instead of ``USE_EXPORT``.
+    |multiple-call-export-note|
 
     .. versionadded:: 3.25
 
-  .. cmake:func:arg:: USE_VERSIONED_NAMESPACE <version-ns-header>;<version-ns-prefix>
+  .. cmake:func:arg:: USE_VERSIONED_NAMESPACE <version-ns-header> <version-ns-prefix>
 
-    Pass a CMake list (``;``-delimited) of an existing versioned namespace header and prefix to use in the generated code.
+    Pass an existing versioned namespace header and prefix to use in the generated code.
 
     .. versionadded:: 3.26
 
   .. cmake:func:arg:: GENERATE_SERVER_SKELETONS TRUE|FALSE
 
-    ``tao_idl`` generate code for CORBA servers.
+    Have ``tao_idl`` generate code for CORBA servers.
     The default is ``FALSE``.
     ``tao_idl`` by itself does this by default, but by default ``opendds_target_sources`` passes ``-SS`` to suppress this as it's not normally useful to an OpenDDS application.
 
@@ -601,26 +611,107 @@ Functions
   ::
 
     opendds_export_header(<target>
+      [EXISTING]
       [USE_EXPORT_VAR <use-export-var-name>]
       [DIR <dir-path>]
+      [INCLUDE <path>]
+      [MACRO_PREFIX <macro-prefix-name>]
+      [EXPORT_MACRO <name>]
+      [HEADER_MACRO <name>]
+      [SOURCE_MACRO <name>]
+      [FORCE_EXPORT TRUE|FALSE]
     )
 
-  Generates a header that is compatible with `ACE's generate_export_file.pl <https://github.com/DOCGroup/ACE_TAO/blob/master/ACE/bin/generate_export_file.pl>`__ for exporting symbols in shared libraries.
-  The header will able to be included as ``<target>_export.h`` and the macro that can be used to export symbols will be named ``<target>_Export``.
-  It is the same function :cmake:func:`opendds_target_sources` uses so all the same info about :ref:`generated files <cmake-files-props>` applies.
+  C++ compilers can control what symbols are exposed to the `linker at compile time <https://en.wikipedia.org/wiki/Linker_(computing)>`__ and the `dynamic linker at runtime <https://en.wikipedia.org/wiki/Dynamic_linker>`__.
+  In `GCC and Clang <https://gcc.gnu.org/wiki/Visibility>`__, limiting what symbols are exposed is good to avoid collision and improve performance.
+  On `Windows <https://learn.microsoft.com/en-us/cpp/build/exporting-from-a-dll>`__ it's something that's required to properly create libraries.
+
+  OpenDDS provides the :cmake:func:`opendds_export_header` function to generate and use export headers that provide preprocessor macros to export symbols.
+  This is similar to `CMake's built-in generate_export_header <https://cmake.org/cmake/help/latest/module/GenerateExportHeader.html>`__, but the headers this function uses are made to be compatible with `ACE's generate_export_file.pl <https://github.com/DOCGroup/ACE_TAO/blob/master/ACE/bin/generate_export_file.pl>`__.
+  ``opendds_export_header`` is called automatically from :cmake:func:`opendds_target_sources`.
+  |multiple-call-export-note|
+
+  Generated export headers are treated like other :ref:`generated files <cmake-files-props>`.
+  Existing export headers can be used if :cmake:func:`opendds_export_header(EXISTING)` is passed, but they must be compatible and must be installed separately as they won't be considered files generated by OpenDDS.
+
+  The generated export headers are used by IDL-generated code, but can also be used in your own code.
+  By default, the header can be included as ``<target>_export.h`` and the macro that can be used to export symbols will be named ``<target>_Export``.
+  For example:
+
+  .. code-block:: cpp
+
+    #include <Doohickey_export.h>
+
+    class Doohickey_Export Doohickey {
+    public:
+      int x_;
+      Doohickey(int x): x_(x) {}
+    };
+
+    Doohickey_Export void proccess_doohickey(Doohickey& doohickey);
+
+  .. cmake:func:arg:: EXISTING
+
+    By default a header file will be generated, but the IDL-generated code can also use an existing compatible export header if that is preferred.
+    The header will be included in IDL-generated using :cmake:func:`opendds_export_header(INCLUDE)`.
+
+    .. versionadded:: 3.32
 
   .. cmake:func:arg:: USE_EXPORT_VAR <use-export-var-name>
 
     Set a variable with the given name that contains a list with the location of the generated export header and the macro name to export a symbol.
-    These values could be passed to :cmake:func:`opendds_target_sources(USE_EXPORT)`, but this shouldn't be necessary because these values are saved on the target on the first call of :cmake:func:`opendds_target_sources` or :cmake:func:`opendds_export_header`.
 
   .. cmake:func:arg:: DIR <dir-path>
 
     Where the export header is placed relative to the other generated files.
+    This is added to the start of :cmake:func:`opendds_export_header(INCLUDE)`.
     By default the generated export header is put in the root of the include base.
     See :cmake:func:`opendds_target_sources(EXPORT_HEADER_DIR)` for how to pass this argument from there.
 
     .. versionadded:: 3.28 to replace the broken and undocumented ``INCLUDE_BASE`` argument.
+
+  .. cmake:func:arg:: INCLUDE <path>
+
+    Set the directory and file name for the export header.
+    Use :cmake:func:`opendds_export_header(DIR)` to just set the directory path.
+    By default this is ``<target>_export.h``.
+
+    .. versionadded:: 3.32
+
+  .. cmake:func:arg:: MACRO_PREFIX <macro-prefix-name>
+
+    The default prefix of all the macro names.
+    By default this is ``<target>``.
+
+    .. versionadded:: 3.32
+
+  .. cmake:func:arg:: EXPORT_MACRO <name>
+
+    The name of the macro used to export a symbol.
+    By default this is ``<macro-prefix-name>_Export``.
+
+    .. versionadded:: 3.32
+
+  .. cmake:func:arg:: HEADER_MACRO <name>
+
+    The name of the macro set by the build system to signal that symbols in a header should be exported.
+    By default this is ``<uppercase-macro-prefix-name>_HAS_DLL``.
+
+    .. versionadded:: 3.32
+
+  .. cmake:func:arg:: SOURCE_MACRO <name>
+
+    The name of the macro defined by the build system to signal that symbols in a source will be exported.
+    By default this is ``<uppercase-macro-prefix-name>_BUILD_DLL``.
+
+    .. versionadded:: 3.32
+
+  .. cmake:func:arg:: FORCE_EXPORT TRUE|FALSE
+
+    By default symbols are exported based on if the target library is `shared or static <https://cmake.org/cmake/help/latest/prop_tgt/TYPE.html>`__.
+    If this is passed, this overrides that decision and allows using other types which would cause an error otherwise.
+
+    .. versionadded:: 3.32
 
   .. versionadded:: 3.25
 
@@ -653,6 +744,17 @@ Functions
     Extra custom files that are in :cmake:prop:`OPENDDS_GENERATED_DIRECTORY` to install using the same method.
 
   .. versionadded:: 3.26
+
+.. cmake:func:: opendds_bigobj
+
+  ::
+
+    opendds_bigobj(<target>)
+
+  A function that adds `/bigobj <https://learn.microsoft.com/en-us/cpp/build/reference/bigobj-increase-number-of-sections-in-dot-obj-file>`__ to the compile options of the targets when using Visual Studio.
+  Targets with a large amount of IDL files may require this because of the size of the generated code.
+
+  .. versionadded:: 3.32
 
 Variables
 =========
@@ -825,7 +927,8 @@ Dependencies
 .. cmake:var:: OPENDDS_RAPIDJSON
   :no-contents-entry:
 
-  Path to :ref:`deps-rapidjson`
+  Path to :ref:`deps-rapidjson`.
+  When building OpenDDS with CMake, it will be installed by default unless :cmake:var:`OPENDDS_INSTALL_RAPIDJSON` is set to ``FALSE``.
 
 .. cmake:var:: OPENDDS_XERCES3
   :no-contents-entry:
@@ -833,12 +936,14 @@ Dependencies
   Path to :ref:`deps-xerces`
 
 .. cmake:var:: OPENDDS_HOST_TOOLS
+  :no-contents-entry:
 
   A directory that contains a ``bin`` directory with ``opendds_idl`` to be used for cross-compiling.
 
   .. versionadded:: 3.26
 
 .. cmake:var:: OPENDDS_ACE_TAO_HOST_TOOLS
+  :no-contents-entry:
 
   A directory that contains a ``bin`` directory with ``tao_idl`` and ``ace_gperf`` to be used for cross-compiling.
   This isn't set by default unless :cmake:var:`OPENDDS_HOST_TOOLS` is set, in which case it defaults to that.

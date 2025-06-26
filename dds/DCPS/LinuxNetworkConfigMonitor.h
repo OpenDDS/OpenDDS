@@ -10,7 +10,9 @@
 
 #include "ace/config.h"
 
-#if (defined(ACE_LINUX) || defined(ACE_ANDROID)) && !defined(OPENDDS_SAFETY_PROFILE)
+#include "Definitions.h"
+
+#if (defined(ACE_LINUX) || defined(ACE_ANDROID)) && !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #define OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
 
@@ -90,7 +92,7 @@ private:
   ACE_HANDLE get_handle() const;
   int handle_input(ACE_HANDLE);
   void read_messages();
-  void process_message(const nlmsghdr* header);
+  void process_message(nlmsghdr* header);
 
   ACE_SOCK_Netlink socket_;
   ACE_Thread_Mutex socket_mutex_;

@@ -93,7 +93,8 @@ public:
 
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info,
                                   ConnectionInfoFlags flags,
-                                  DDS::DomainId_t domain) const;
+                                  DDS::DomainId_t domain,
+                                  DomainParticipantImpl* participant);
   const TransportBLOB* get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) const;
 
   RTPS::PortMode port_mode() const;
@@ -183,16 +184,13 @@ private:
   explicit RtpsUdpInst(const OPENDDS_STRING& name,
                        bool is_template);
 
-  TransportImpl_rch new_impl(DDS::DomainId_t domain);
+  TransportImpl_rch new_impl(DDS::DomainId_t domain,
+                             DomainParticipantImpl* participant);
 
   friend class RTPS::Sedp;
   friend class RtpsUdpTransport;
   TransportReceiveListener_rch opendds_discovery_default_listener_;
   GUID_t opendds_discovery_guid_;
-  NetworkAddress actual_local_address_;
-#ifdef ACE_HAS_IPV6
-  NetworkAddress ipv6_actual_local_address_;
-#endif
 };
 
 } // namespace DCPS

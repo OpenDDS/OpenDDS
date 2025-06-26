@@ -15,9 +15,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-const unsigned int RepoIdGenerator::KeyBits = 24;
+const long RepoIdGenerator::KeyBits = 24;
 
-const unsigned int RepoIdGenerator::KeyMask = (1 << KeyBits) - 1;
+const long RepoIdGenerator::KeyMask = (1 << KeyBits) - 1;
 
 RepoIdGenerator::RepoIdGenerator(long federation, long participant, EntityKind kind)
   : kind_(kind)

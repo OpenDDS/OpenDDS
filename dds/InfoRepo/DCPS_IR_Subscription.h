@@ -146,6 +146,11 @@ public:
   // the new association will be added.
   bool reevaluate_association(DCPS_IR_Publication* publication);
 
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+  void update_ownership_strength(DCPS_IR_Publication* publication,
+                                 CORBA::Long strength);
+#endif
+
   OpenDDS::DCPS::TransportLocatorSeq get_transportLocatorSeq() const;
   ACE_CDR::ULong get_transportContext() const { return transportContext_; }
 

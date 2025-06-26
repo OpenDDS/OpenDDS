@@ -7,9 +7,9 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-
 #include "CoherentChangeControl.h"
+
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 
 #include "Serializer.h"
 #include "GuidConverter.h"
@@ -129,4 +129,4 @@ std::ostream& operator<<(std::ostream& str, const CoherentChangeControl& value)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
+#endif

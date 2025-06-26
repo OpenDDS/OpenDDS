@@ -596,7 +596,7 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent)
               "by the num_bytes_left (%d).\n", num_bytes_left));
 
         // Only part of the current block was sent.
-        pkt_chain_->rd_ptr(num_bytes_left);
+        pkt_chain_->rd_ptr(static_cast<size_t>(num_bytes_left));
 
         if (header_complete_) {
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1388,7 +1388,7 @@ TransportSendStrategy::do_remove_sample(const GUID_t&,
     const RemoveResult status = simple_rem_vis.status();
 
     if (status == REMOVE_RELEASED || status == REMOVE_FOUND) {
-      header_.length_ -= simple_rem_vis.removed_bytes();
+      header_.length_ -= static_cast<ACE_UINT32>(simple_rem_vis.removed_bytes());
 
     } else if (status == REMOVE_NOT_FOUND) {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1764,7 +1764,7 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
       substitute.reset(pre_send_packet(packet));
       if (!substitute) {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   pre_send_packet returned NULL, dropping.\n"));
-        return packet->total_length();
+        return static_cast<ssize_t>(packet->total_length());
       }
     }
   }
@@ -1800,7 +1800,7 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
     // of the framework needs to account for the bytes in "packet" being taken
     // care of, as if they were actually sent.
     // Since this is done with datagram sockets, partial sends aren't possible.
-    return packet->total_length();
+    return static_cast<ssize_t>(packet->total_length());
   }
 #endif
 
@@ -2013,6 +2013,35 @@ bool TransportSendStrategy::fragmentation_helper(
     }
   }
   return true;
+}
+
+StatisticSeq TransportSendStrategy::stats_template()
+{
+  static const DDS::UInt32 num_local_stats = 8;
+  StatisticSeq stats(num_local_stats);
+  stats.length(num_local_stats);
+  stats[0].name = "TransportSendQueue";
+  stats[1].name = "TransportSendElems";
+  stats[2].name = "TransportSendNotificationQueue";
+  stats[3].name = "TransportSendHeaderMessageBlocks";
+  stats[4].name = "TransportSendHeaderDataBlocks";
+  stats[5].name = "TransportSendHeaderData";
+  stats[6].name = "TransportSendReplacedMessageBlocks";
+  stats[7].name = "TransportSendReplacedDataBlocks";
+  return stats;
+}
+
+void TransportSendStrategy::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
+{
+  GuardType guard(lock_);
+  stats[idx++].value = queue_.size();
+  stats[idx++].value = elems_.size();
+  stats[idx++].value = delayed_delivered_notification_queue_.size();
+  stats[idx++].value = header_mb_allocator_ ? header_mb_allocator_->bytes_heap_allocated() : 0;
+  stats[idx++].value = header_db_allocator_ ? header_db_allocator_->bytes_heap_allocated() : 0;
+  stats[idx++].value = header_data_allocator_ ? header_data_allocator_->bytes_heap_allocated() : 0;
+  stats[idx++].value = replaced_element_mb_allocator_.bytes_heap_allocated();
+  stats[idx++].value = replaced_element_db_allocator_.bytes_heap_allocated();
 }
 
 } // namespace DCPS

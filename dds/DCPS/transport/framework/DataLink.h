@@ -280,6 +280,9 @@ public:
 
   virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint() const { return WeakRcHandle<ICE::Endpoint>(); }
 
+  virtual SequenceNumber cur_cumulative_ack(const GUID_t& /*writer*/,
+                                            const GUID_t& /*reader*/) const { return SequenceNumber::ZERO(); }
+
   virtual bool is_leading(const GUID_t& /*writer*/,
                           const GUID_t& /*reader*/) const { return false; }
 
@@ -372,7 +375,7 @@ private:
   typedef ACE_SYNCH_MUTEX     LockType;
 
   /// Convenience function for diagnostic information.
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   friend OpenDDS_Dcps_Export
   std::ostream& operator<<(std::ostream& str, const DataLink& value);
 #endif
@@ -433,7 +436,7 @@ protected:
 
   /// The transport send strategy object for this DataLink.
   TransportSendStrategy_rch send_strategy_;
-  LockType strategy_lock_;
+  mutable LockType strategy_lock_;
 
   TransportSendStrategy_rch get_send_strategy();
 
@@ -460,6 +463,9 @@ protected:
 
   /// Listener for TransportSendControlElements created in send_control
   SendResponseListener send_response_listener_;
+
+  static StatisticSeq stats_template();
+  void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
 };
 
 } // namespace DCPS

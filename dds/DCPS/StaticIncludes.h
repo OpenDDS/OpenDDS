@@ -23,16 +23,8 @@
 #    include "transport/rtps_udp/RtpsUdp.h"
 #  endif
 
-#  if defined OPENDDS_UDP_HAS_DLL && !OPENDDS_UDP_HAS_DLL
-#    include "transport/udp/Udp.h"
-#  endif
-
 #  if defined OPENDDS_SHMEM_HAS_DLL && !OPENDDS_SHMEM_HAS_DLL
 #    include "transport/shmem/Shmem.h"
-#  endif
-
-#  if defined OPENDDS_MULTICAST_HAS_DLL && !OPENDDS_MULTICAST_HAS_DLL
-#    include "transport/multicast/Multicast.h"
 #  endif
 
 #  if defined OPENDDS_SECURITY_HAS_DLL && !OPENDDS_SECURITY_HAS_DLL
@@ -43,13 +35,10 @@
 // Only for static builds, include default libraries for both discovery
 // and transport.  This file will be included by the code in the executable
 // so that the static link includes the initializers for these libraries.
-#  ifdef OPENDDS_SAFETY_PROFILE
+#  include "RTPS/RtpsDiscovery.h"
+#  include "transport/rtps_udp/RtpsUdp.h"
+#  if OPENDDS_CONFIG_SAFETY_PROFILE
 #    include "StaticDiscovery.h"
-#    include "RTPS/RtpsDiscovery.h"
-#    include "transport/rtps_udp/RtpsUdp.h"
-#  else
-#    include "InfoRepoDiscovery/InfoRepoDiscovery.h"
-#    include "transport/tcp/Tcp.h"
 #  endif
 #endif
 

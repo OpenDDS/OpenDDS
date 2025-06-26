@@ -10,7 +10,7 @@
 #include "BuiltInTopicUtils.h"
 
 #include "BuiltInTopicDataReaderImpls.h"
-#include "BitPubListenerImpl.h"
+#include "Definitions.h"
 #include "Logging.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -48,7 +48,7 @@ DDS::InstanceHandle_t BitSubscriber::add_participant(const DDS::ParticipantBuilt
 void BitSubscriber::remove_participant(DDS::InstanceHandle_t part_ih,
                                        DDS::InstanceHandle_t loc_ih)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   remove_i(BUILT_IN_PARTICIPANT_TOPIC, part_ih);
   remove_i(BUILT_IN_PARTICIPANT_LOCATION_TOPIC, loc_ih);
 #else
@@ -60,7 +60,7 @@ void BitSubscriber::remove_participant(DDS::InstanceHandle_t part_ih,
 DDS::ReturnCode_t BitSubscriber::get_discovered_participant_data(DDS::ParticipantBuiltinTopicData& participant_data,
                                                                  DDS::InstanceHandle_t participant_handle)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, DDS::RETCODE_NO_DATA);
 
   if (!bit_subscriber_) {
@@ -100,7 +100,7 @@ DDS::ReturnCode_t BitSubscriber::get_discovered_participant_data(DDS::Participan
 DDS::ReturnCode_t BitSubscriber::get_discovered_topic_data(DDS::TopicBuiltinTopicData& topic_data,
                                                            DDS::InstanceHandle_t topic_handle)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, DDS::RETCODE_NO_DATA);
 
   if (!bit_subscriber_) {
@@ -173,7 +173,7 @@ DDS::InstanceHandle_t BitSubscriber::add_connection_record(const ConnectionRecor
 
 void BitSubscriber::remove_connection_record(const ConnectionRecord& cr)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
   if (!bit_subscriber_) {
@@ -201,7 +201,7 @@ DDS::InstanceHandle_t BitSubscriber::add_thread_status(const InternalThreadBuilt
                                                        DDS::ViewStateKind view_state,
                                                        const SystemTimePoint& timestamp)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, DDS::HANDLE_NIL);
 
   if (!bit_subscriber_) {
@@ -224,12 +224,12 @@ DDS::InstanceHandle_t BitSubscriber::add_thread_status(const InternalThreadBuilt
   ACE_UNUSED_ARG(view_state);
   ACE_UNUSED_ARG(timestamp);
   return DDS::HANDLE_NIL;
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 }
 
 void BitSubscriber::remove_thread_status(const InternalThreadBuiltinTopicData& ts)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
   if (!bit_subscriber_) {
@@ -253,45 +253,12 @@ void BitSubscriber::remove_thread_status(const InternalThreadBuiltinTopicData& t
 #endif
 }
 
-void BitSubscriber::bit_pub_listener_hack(DomainParticipantImpl* participant)
-{
-#ifndef DDS_HAS_MINIMUM_BIT
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
-  if (!bit_subscriber_) {
-    return;
-  }
-
-  DDS::DataReader_var dr =
-    bit_subscriber_->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
-  DDS::PublicationBuiltinTopicDataDataReader_var bit_pub_dr =
-    DDS::PublicationBuiltinTopicDataDataReader::_narrow(dr);
-
-  if (bit_pub_dr) {
-    DDS::DataReaderListener_var listener = bit_pub_dr->get_listener();
-    if (!listener) {
-      DDS::DataReaderListener_var bit_pub_listener =
-        new BitPubListenerImpl(participant);
-      bit_pub_dr->set_listener(bit_pub_listener, DDS::DATA_AVAILABLE_STATUS);
-      // Must call on_data_available when attaching a listener late - samples may be waiting
-      DataReaderImpl* reader = dynamic_cast<DataReaderImpl*>(bit_pub_dr.in());
-      if (!reader) {
-        return;
-      }
-      TheServiceParticipant->job_queue()->enqueue(make_rch<DataReaderImpl::OnDataAvailable>(bit_pub_listener, rchandle_from(reader), true, false, false));
-    }
-  }
-#else
-  ACE_UNUSED_ARG(participant);
-#endif
-}
-
 template <typename DataReaderImpl, typename Sample>
 DDS::InstanceHandle_t BitSubscriber::add_i(const char* topic_name,
                                            const Sample& sample,
                                            DDS::ViewStateKind view_state)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, DDS::HANDLE_NIL);
 
   if (!bit_subscriber_) {
@@ -324,18 +291,18 @@ DDS::InstanceHandle_t BitSubscriber::add_i(const char* topic_name,
   return ih;
 #else
   if (log_bits) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: BitSubscriber::add_i: %@ DDS_HAS_MINIMUM_BIT is not defined, returning nil\n", this, topic_name));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: BitSubscriber::add_i: %@ OPENDDS_CONFIG_BUILT_IN_TOPICS is not defined to 1, returning nil\n", this, topic_name));
   }
   ACE_UNUSED_ARG(sample);
   ACE_UNUSED_ARG(view_state);
   return DDS::HANDLE_NIL;
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 }
 
 void BitSubscriber::remove_i(const char* topic_name,
                              DDS::InstanceHandle_t ih)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (ih != DDS::HANDLE_NIL) {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 

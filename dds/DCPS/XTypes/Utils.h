@@ -6,7 +6,9 @@
 #ifndef OPENDDS_DCPS_XTYPES_UTILS_H
 #define OPENDDS_DCPS_XTYPES_UTILS_H
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include <dds/DCPS/Serializer.h>
 #  include <dds/DCPS/Sample.h>
 #  include <dds/DCPS/DCPS_Utils.h>
@@ -281,5 +283,5 @@ TypeIdentifier remove_enumerators(const TypeIdentifier& top_level,
 } // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif
 #endif

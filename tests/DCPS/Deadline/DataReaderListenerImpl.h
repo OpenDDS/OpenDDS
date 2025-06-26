@@ -35,7 +35,6 @@ public:
   virtual void on_subscription_disconnected(DDS::DataReader_ptr reader, const OpenDDS::DCPS::SubscriptionDisconnectedStatus& status);
   virtual void on_subscription_reconnected(DDS::DataReader_ptr reader, const OpenDDS::DCPS::SubscriptionReconnectedStatus& status);
   virtual void on_subscription_lost(DDS::DataReader_ptr reader, const OpenDDS::DCPS::SubscriptionLostStatus& status);
-  virtual void on_budget_exceeded(DDS::DataReader_ptr reader, const OpenDDS::DCPS::BudgetExceededStatus& status);
 
 protected:
   virtual ~DataReaderListenerImpl();

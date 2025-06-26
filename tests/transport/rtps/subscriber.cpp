@@ -13,13 +13,15 @@
 #include <dds/DCPS/RTPS/MessageUtils.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 
-#include <dds/DCPS/RepoIdBuilder.h>
+#include <dds/DCPS/AssociationData.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/EncapsulationHeader.h>
 #include <dds/DCPS/GuidConverter.h>
-#include <dds/DCPS/AssociationData.h>
-#include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/NetworkAddress.h>
 #include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/RepoIdBuilder.h>
+#include <dds/DCPS/Service_Participant.h>
+
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
 #include <ace/OS_main.h>
@@ -247,7 +249,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                                                "rtps_udp");
 
     RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst.in());
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
     if (host == "localhost") {
       host = "127.0.0.1";
     }

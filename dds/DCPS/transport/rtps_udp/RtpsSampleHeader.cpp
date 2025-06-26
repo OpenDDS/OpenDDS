@@ -10,6 +10,7 @@
 #include "RtpsUdpSendStrategy.h"
 
 #include <dds/DCPS/DataSampleElement.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/DisjointSequence.h>
 #include <dds/DCPS/EncapsulationHeader.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -45,7 +46,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace RTPS {
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 inline bool
 operator==(const StatusInfo_t& lhs, const StatusInfo_t& rhs)
 {
@@ -77,9 +78,9 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
   ACE_CDR::Octet flags = 0;
 
   if (mb.length() > 1) {
-    flags = mb.rd_ptr()[1];
+    flags = static_cast<ACE_CDR::Octet>(mb.rd_ptr()[1]);
   } else if (mb.cont() && mb.cont()->length() > 0) {
-    flags = mb.cont()->rd_ptr()[0];
+    flags = static_cast<ACE_CDR::Octet>(mb.cont()->rd_ptr()[0]);
   } else {
     return;
   }
@@ -186,9 +187,9 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
       // (from a newer minor version of the RTPS spec).  Either way, indicate
       // to the TransportReceiveStrategy that there is no data payload here.
       message_length_ = 0;
-      ACE_CDR::UShort marshaled = static_cast<ACE_CDR::UShort>(serialized_size_);
-      if (octetsToNextHeader + SMHDR_SZ > marshaled) {
-        valid_ = ser.skip(octetsToNextHeader + SMHDR_SZ - marshaled);
+      const ACE_CDR::UShort marshaledNoHeader = static_cast<ACE_CDR::UShort>(serialized_size_ - SMHDR_SZ);
+      if (octetsToNextHeader > marshaledNoHeader) {
+        valid_ = ser.skip(static_cast<size_t>(octetsToNextHeader - marshaledNoHeader));
         serialized_size_ = octetsToNextHeader + SMHDR_SZ;
       }
     }
@@ -477,13 +478,13 @@ RtpsSampleHeader::populate_data_control_submessages(
     // We have decided to send a DATA Submessage containing the key and an
     // inlineQoS StatusInfo of zero.
     data.smHeader.flags |= FLAG_K_IN_DATA;
-    const int qos_len = DCPS::grow(data.inlineQos) - 1;
+    const DDS::UInt32 qos_len = DCPS::grow(data.inlineQos) - 1;
     data.inlineQos[qos_len].status_info(STATUS_INFO_REGISTER);
     break;
   }
   case UNREGISTER_INSTANCE: {
     data.smHeader.flags |= FLAG_K_IN_DATA;
-    const int qos_len = data.inlineQos.length();
+    const DDS::UInt32 qos_len = data.inlineQos.length();
     data.inlineQos.length(qos_len+1);
     data.inlineQos[qos_len].status_info(STATUS_INFO_UNREGISTER);
     if (header.publication_id_.entityId.entityKind == BUILT_IN_WRITER) {
@@ -493,7 +494,7 @@ RtpsSampleHeader::populate_data_control_submessages(
   }
   case DISPOSE_INSTANCE: {
     data.smHeader.flags |= FLAG_K_IN_DATA;
-    const int qos_len = DCPS::grow(data.inlineQos) - 1;
+    const DDS::UInt32 qos_len = DCPS::grow(data.inlineQos) - 1;
     data.inlineQos[qos_len].status_info(STATUS_INFO_DISPOSE);
     if (header.publication_id_.entityId.entityKind == BUILT_IN_WRITER) {
       add_key_hash(data.inlineQos, tsce.msg_payload());
@@ -502,7 +503,7 @@ RtpsSampleHeader::populate_data_control_submessages(
   }
   case DISPOSE_UNREGISTER_INSTANCE: {
     data.smHeader.flags |= FLAG_K_IN_DATA;
-    const int qos_len = DCPS::grow(data.inlineQos) - 1;
+    const DDS::UInt32 qos_len = DCPS::grow(data.inlineQos) - 1;
     data.inlineQos[qos_len].status_info(STATUS_INFO_DISPOSE_UNREGISTER);
     if (header.publication_id_.entityId.entityKind == BUILT_IN_WRITER) {
       add_key_hash(data.inlineQos, tsce.msg_payload());
@@ -535,7 +536,7 @@ RtpsSampleHeader::populate_data_control_submessages(
 
 #define PROCESS_INLINE_QOS(QOS_NAME, DEFAULT_QOS, WRITER_QOS) \
   if (WRITER_QOS.QOS_NAME != DEFAULT_QOS.QOS_NAME) {          \
-    const int idx = DCPS::grow(plist) - 1;                    \
+    const DDS::UInt32 idx = DCPS::grow(plist) - 1;            \
     plist[idx].QOS_NAME(WRITER_QOS.QOS_NAME);                 \
   }
 
@@ -548,7 +549,7 @@ RtpsSampleHeader::populate_inline_qos(
 
   // Always include topic name (per the spec)
   {
-    const int idx = DCPS::grow(plist) - 1;
+    const DDS::UInt32 idx = DCPS::grow(plist) - 1;
     plist[idx].string_data(qos_data.topic_name.c_str());
     plist[idx]._d(PID_TOPIC_NAME);
   }
@@ -566,12 +567,12 @@ RtpsSampleHeader::populate_inline_qos(
   PROCESS_INLINE_QOS(deadline, default_dw_qos, qos_data.dw_qos);
   PROCESS_INLINE_QOS(latency_budget, default_dw_qos, qos_data.dw_qos);
   PROCESS_INLINE_QOS(ownership, default_dw_qos, qos_data.dw_qos);
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   PROCESS_INLINE_QOS(ownership_strength, default_dw_qos, qos_data.dw_qos);
 #endif
   PROCESS_INLINE_QOS(liveliness, default_dw_qos, qos_data.dw_qos);
   if (qos_data.dw_qos.reliability != default_dw_qos.reliability) {
-    const int idx = DCPS::grow(plist) - 1;
+    const DDS::UInt32 idx = DCPS::grow(plist) - 1;
 
     ReliabilityQosPolicyRtps reliability;
     reliability.max_blocking_time = qos_data.dw_qos.reliability.max_blocking_time;
@@ -652,7 +653,7 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
   // The submessages from the start of the msg block to this point (data_offset)
   // will be copied to both the head and tail fragments.
   while (true) {
-    flags = rd[data_offset + 1];
+    flags = static_cast<ACE_CDR::Octet>(rd[data_offset + 1]);
     swap_bytes = ACE_CDR_BYTE_ORDER != bool(flags & FLAG_E);
     bool found_data = false;
 
@@ -715,7 +716,7 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
   head->copy(rd, data_offset);
 
   head->wr_ptr()[0] = DATA_FRAG;
-  head->wr_ptr()[1] = new_flags;
+  head->wr_ptr()[1] = static_cast<char>(new_flags);
   head->wr_ptr(2);
 
   std::memset(head->wr_ptr(), 0, 4); // octetsToNextHeader, extraFlags
@@ -749,7 +750,7 @@ RtpsSampleHeader::split(const ACE_Message_Block& orig, size_t size,
   tail->copy(rd, data_offset);
 
   tail->wr_ptr()[0] = DATA_FRAG;
-  tail->wr_ptr()[1] = new_flags & ~FLAG_Q;
+  tail->wr_ptr()[1] = static_cast<char>(new_flags & ~FLAG_Q);
   tail->wr_ptr(2);
 
   std::memset(tail->wr_ptr(), 0, 4); // octetsToNextHeader, extraFlags

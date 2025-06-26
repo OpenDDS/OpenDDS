@@ -1,4 +1,6 @@
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include <dds/DCPS/XTypes/MemberDescriptorImpl.h>
 
@@ -172,4 +174,4 @@ TEST(dds_DCPS_XTypes_MemberDescriptorImpl, MemberDescriptorImpl_copy_from)
 
 // TODO:  Test is_consistent.
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

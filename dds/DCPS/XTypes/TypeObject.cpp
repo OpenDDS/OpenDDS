@@ -51,10 +51,10 @@ MinimalMemberDetail::MinimalMemberDetail(const OPENDDS_STRING& name)
 #undef max
 #endif
 
-AppliedBuiltinMemberAnnotations::AppliedBuiltinMemberAnnotations(const OPENDDS_OPTIONAL_NS::optional<DCPS::String>& a_unit,
-                                                                 const OPENDDS_OPTIONAL_NS::optional<AnnotationParameterValue>& a_min,
-                                                                 const OPENDDS_OPTIONAL_NS::optional<AnnotationParameterValue>& a_max,
-                                                                 const OPENDDS_OPTIONAL_NS::optional<DCPS::String>& a_hash_id)
+AppliedBuiltinMemberAnnotations::AppliedBuiltinMemberAnnotations(const std::optional<DCPS::String>& a_unit,
+                                                                 const std::optional<AnnotationParameterValue>& a_min,
+                                                                 const std::optional<AnnotationParameterValue>& a_max,
+                                                                 const std::optional<DCPS::String>& a_hash_id)
   : unit(a_unit)
   , min(a_min)
   , max(a_max)
@@ -466,49 +466,64 @@ bool has_type_object(const TypeIdentifier& ti)
     ti.kind() != TK_NONE;
 }
 
+TypeIdentifier make_scc_id_or_default(const TypeIdentifier& tid)
+{
+  if (tid.kind() != TI_STRONGLY_CONNECTED_COMPONENT) {
+    return tid;
+  }
+
+  TypeIdentifier scc_id(tid);
+  scc_id.sc_component_id().scc_index = 0;
+  return scc_id;
+}
+
 const TypeMap TypeMapBuilder::EmptyMap;
 
 namespace {
   void compute_dependencies_i(const TypeMap& type_map,
                               const TypeIdentifier& type_identifier,
-                              OPENDDS_SET(TypeIdentifier)& dependencies);
+                              TypeIdentifierSet& dependencies);
+
+  void compute_dependencies_j(const TypeMap& type_map,
+                              const TypeIdentifier& type_identifier,
+                              TypeIdentifierSet& dependencies);
 
   template <typename T>
   void compute_dependencies_i(const TypeMap& type_map,
                               const Sequence<T>& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies);
+                              TypeIdentifierSet& dependencies);
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CommonAliasBody& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.related_type, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const MinimalAliasBody& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.common, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const MinimalAliasType& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.body, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const AppliedAnnotation& ann,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, ann.annotation_typeid, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
-                              const OPENDDS_OPTIONAL_NS::optional<AppliedAnnotationSeq>& ann_seq,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              const std::optional<AppliedAnnotationSeq>& ann_seq,
+                              TypeIdentifierSet& dependencies)
   {
     if (ann_seq) {
       compute_dependencies_i(type_map, ann_seq.value(), dependencies);
@@ -517,21 +532,21 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteTypeDetail& type_detail,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type_detail.ann_custom, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteAliasHeader& header,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, header.detail, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteAliasBody& body,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, body.common, dependencies);
     compute_dependencies_i(type_map, body.ann_custom, dependencies);
@@ -539,7 +554,7 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteAliasType& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.header, dependencies);
     compute_dependencies_i(type_map, type.body, dependencies);
@@ -547,63 +562,63 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CommonAnnotationParameter& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.member_type_id, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const MinimalAnnotationParameter& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.common, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const MinimalAnnotationType& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.member_seq, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteAnnotationParameter& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.common, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteAnnotationType& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.member_seq, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const MinimalStructHeader& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.base_type, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CommonStructMember& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.member_type_id, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const MinimalStructMember& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.common, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const MinimalStructType& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.header, dependencies);
     compute_dependencies_i(type_map, type.member_seq, dependencies);
@@ -611,7 +626,7 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteStructHeader& header,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, header.base_type, dependencies);
     compute_dependencies_i(type_map, header.detail, dependencies);
@@ -619,14 +634,14 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteMemberDetail& detail,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, detail.ann_custom, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteStructMember& member,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, member.common, dependencies);
     compute_dependencies_i(type_map, member.detail, dependencies);
@@ -634,7 +649,7 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteStructType& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.header, dependencies);
     compute_dependencies_i(type_map, type.member_seq, dependencies);
@@ -642,35 +657,35 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CommonDiscriminatorMember& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.type_id, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const MinimalDiscriminatorMember& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.common, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CommonUnionMember& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.type_id, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const MinimalUnionMember& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.common, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const MinimalUnionType& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.discriminator, dependencies);
     compute_dependencies_i(type_map, type.member_seq, dependencies);
@@ -678,14 +693,14 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteUnionHeader& header,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, header.detail, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteDiscriminatorMember& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.common, dependencies);
     compute_dependencies_i(type_map, type.ann_custom, dependencies);
@@ -693,7 +708,7 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteUnionMember& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.common, dependencies);
     compute_dependencies_i(type_map, type.detail, dependencies);
@@ -701,7 +716,7 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteUnionType& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.header, dependencies);
     compute_dependencies_i(type_map, type.discriminator, dependencies);
@@ -710,28 +725,28 @@ namespace {
 
   void compute_dependencies_i(const TypeMap&,
                               const MinimalBitsetType&,
-                              OPENDDS_SET(TypeIdentifier)&)
+                              TypeIdentifierSet&)
   {
     // Doesn't have any dependencies.
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteBitsetHeader& header,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, header.detail, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteBitfield& field,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, field.detail, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteBitsetType& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.header, dependencies);
     compute_dependencies_i(type_map, type.field_seq, dependencies);
@@ -739,28 +754,28 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CommonCollectionElement& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.type, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const MinimalCollectionElement& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.common, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const MinimalSequenceType& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.element, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteCollectionHeader& header,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     if (header.detail) {
       compute_dependencies_i(type_map, header.detail.value(), dependencies);
@@ -769,14 +784,14 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteElementDetail& detail,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, detail.ann_custom, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteCollectionElement& element,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, element.common, dependencies);
     compute_dependencies_i(type_map, element.detail, dependencies);
@@ -784,7 +799,7 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteSequenceType& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.header, dependencies);
     compute_dependencies_i(type_map, type.element, dependencies);
@@ -792,21 +807,21 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const MinimalArrayType& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.element, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteArrayHeader& header,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, header.detail, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteArrayType& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.header, dependencies);
     compute_dependencies_i(type_map, type.element, dependencies);
@@ -814,7 +829,7 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const MinimalMapType& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.key, dependencies);
     compute_dependencies_i(type_map, type.element, dependencies);
@@ -822,7 +837,7 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteMapType& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.header, dependencies);
     compute_dependencies_i(type_map, type.key, dependencies);
@@ -831,28 +846,28 @@ namespace {
 
   void compute_dependencies_i(const TypeMap&,
                               const MinimalEnumeratedType&,
-                              OPENDDS_SET(TypeIdentifier)&)
+                              TypeIdentifierSet&)
   {
     // Doesn't have any dependencies.
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteEnumeratedHeader& header,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, header.detail, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteEnumeratedLiteral& literal,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, literal.detail, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteEnumeratedType& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.header, dependencies);
     compute_dependencies_i(type_map, type.literal_seq, dependencies);
@@ -860,21 +875,21 @@ namespace {
 
   void compute_dependencies_i(const TypeMap&,
                               const MinimalBitmaskType&,
-                              OPENDDS_SET(TypeIdentifier)&)
+                              TypeIdentifierSet&)
   {
     // Doesn't have any dependencies.
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteBitflag& bitflag,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, bitflag.detail, dependencies);
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const CompleteBitmaskType& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.header, dependencies);
     compute_dependencies_i(type_map, type.flag_seq, dependencies);
@@ -883,7 +898,7 @@ namespace {
   template <typename T>
   void compute_dependencies_i(const TypeMap& type_map,
                               const T& type_object, // MinimalTypeObject, CompleteTypeObject
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     switch (type_object.kind) {
     case TK_ALIAS:
@@ -921,7 +936,7 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const TypeObject& type_object,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     switch (type_object.kind) {
     case EK_COMPLETE:
@@ -935,28 +950,28 @@ namespace {
 
   void compute_dependencies_i(const TypeMap&,
                               const StringSTypeDefn&,
-                              OPENDDS_SET(TypeIdentifier)&)
+                              TypeIdentifierSet&)
   {
     // Do nothing.
   }
 
   void compute_dependencies_i(const TypeMap&,
                               const StringLTypeDefn&,
-                              OPENDDS_SET(TypeIdentifier)&)
+                              TypeIdentifierSet&)
   {
     // Do nothing.
   }
 
   void compute_dependencies_i(const TypeMap&,
                               const PlainCollectionHeader&,
-                              OPENDDS_SET(TypeIdentifier)&)
+                              TypeIdentifierSet&)
   {
     // Do nothing.
   }
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const PlainSequenceSElemDefn& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.header, dependencies);
     compute_dependencies_i(type_map, *type.element_identifier, dependencies);
@@ -964,7 +979,7 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const PlainSequenceLElemDefn& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.header, dependencies);
     compute_dependencies_i(type_map, *type.element_identifier, dependencies);
@@ -972,7 +987,7 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const PlainArraySElemDefn& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.header, dependencies);
     compute_dependencies_i(type_map, *type.element_identifier, dependencies);
@@ -980,7 +995,7 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const PlainArrayLElemDefn& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.header, dependencies);
     compute_dependencies_i(type_map, *type.element_identifier, dependencies);
@@ -988,7 +1003,7 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const PlainMapSTypeDefn& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.header, dependencies);
     compute_dependencies_i(type_map, *type.element_identifier, dependencies);
@@ -997,24 +1012,32 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const PlainMapLTypeDefn& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     compute_dependencies_i(type_map, type.header, dependencies);
     compute_dependencies_i(type_map, *type.element_identifier, dependencies);
     compute_dependencies_i(type_map, *type.key_identifier, dependencies);
   }
 
-  void compute_dependencies_i(const TypeMap&,
-                              const StronglyConnectedComponentId&,
-                              OPENDDS_SET(TypeIdentifier)&)
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const StronglyConnectedComponentId& type,
+                              TypeIdentifierSet& dependencies)
   {
-    // Do nothing.
+    // An SCCId (identifies the entire component.)
+    TypeIdentifier scc_id(TI_STRONGLY_CONNECTED_COMPONENT, type);
+    for (ACE_CDR::Long i = 1; i <= scc_id.sc_component_id().scc_length; ++i) {
+      scc_id.sc_component_id().scc_index = i;
+      TypeMap::const_iterator pos = type_map.find(scc_id);
+      if (pos != type_map.end()) {
+        compute_dependencies_i(type_map, pos->second, dependencies);
+      }
+    }
   }
 
   template <typename T>
   void compute_dependencies_i(const TypeMap& type_map,
                               const Sequence<T>& type,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
     for (typename Sequence<T>::const_iterator pos = type.begin(), limit = type.end(); pos != limit; ++pos) {
       compute_dependencies_i(type_map, *pos, dependencies);
@@ -1023,62 +1046,73 @@ namespace {
 
   void compute_dependencies_i(const TypeMap& type_map,
                               const TypeIdentifier& type_identifier,
-                              OPENDDS_SET(TypeIdentifier)& dependencies)
+                              TypeIdentifierSet& dependencies)
   {
-    if (dependencies.count(type_identifier) != 0) {
+    const TypeIdentifier scc_id = make_scc_id_or_default(type_identifier);
+
+    if (dependencies.count(scc_id) != 0) {
       return;
     }
 
-    dependencies.insert(type_identifier);
+    if (scc_id.kind() != TK_NONE) {
+      dependencies.insert(scc_id);
+    }
 
-    compute_dependencies(type_map, type_identifier, dependencies);
+    compute_dependencies_j(type_map, scc_id, dependencies);
+  }
+
+  void compute_dependencies_j(const TypeMap& type_map,
+                              const TypeIdentifier& type_identifier,
+                              TypeIdentifierSet& dependencies)
+  {
+    switch (type_identifier.kind()) {
+    case TI_STRING8_SMALL:
+    case TI_STRING16_SMALL:
+      compute_dependencies_i(type_map, type_identifier.string_sdefn(), dependencies);
+      break;
+    case TI_STRING8_LARGE:
+    case TI_STRING16_LARGE:
+      compute_dependencies_i(type_map, type_identifier.string_ldefn(), dependencies);
+      break;
+    case TI_PLAIN_SEQUENCE_SMALL:
+      compute_dependencies_i(type_map, type_identifier.seq_sdefn(), dependencies);
+      break;
+    case TI_PLAIN_SEQUENCE_LARGE:
+      compute_dependencies_i(type_map, type_identifier.seq_ldefn(), dependencies);
+      break;
+    case TI_PLAIN_ARRAY_SMALL:
+      compute_dependencies_i(type_map, type_identifier.array_sdefn(), dependencies);
+      break;
+    case TI_PLAIN_ARRAY_LARGE:
+      compute_dependencies_i(type_map, type_identifier.array_ldefn(), dependencies);
+      break;
+    case TI_PLAIN_MAP_SMALL:
+      compute_dependencies_i(type_map, type_identifier.map_sdefn(), dependencies);
+      break;
+    case TI_PLAIN_MAP_LARGE:
+      compute_dependencies_i(type_map, type_identifier.map_ldefn(), dependencies);
+      break;
+    case TI_STRONGLY_CONNECTED_COMPONENT:
+      compute_dependencies_i(type_map, type_identifier.sc_component_id(), dependencies);
+      break;
+    case EK_COMPLETE:
+    case EK_MINIMAL:
+      {
+        TypeMap::const_iterator pos = type_map.find(type_identifier);
+        if (pos != type_map.end()) {
+          compute_dependencies_i(type_map, pos->second, dependencies);
+        }
+        break;
+      }
+    }
   }
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const TypeIdentifier& type_identifier,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
+                          TypeIdentifierSet& dependencies)
 {
-  switch (type_identifier.kind()) {
-  case TI_STRING8_SMALL:
-  case TI_STRING16_SMALL:
-    compute_dependencies_i(type_map, type_identifier.string_sdefn(), dependencies);
-    break;
-  case TI_STRING8_LARGE:
-  case TI_STRING16_LARGE:
-    compute_dependencies_i(type_map, type_identifier.string_ldefn(), dependencies);
-    break;
-  case TI_PLAIN_SEQUENCE_SMALL:
-    compute_dependencies_i(type_map, type_identifier.seq_sdefn(), dependencies);
-    break;
-  case TI_PLAIN_SEQUENCE_LARGE:
-    compute_dependencies_i(type_map, type_identifier.seq_ldefn(), dependencies);
-    break;
-  case TI_PLAIN_ARRAY_SMALL:
-    compute_dependencies_i(type_map, type_identifier.array_sdefn(), dependencies);
-    break;
-  case TI_PLAIN_ARRAY_LARGE:
-    compute_dependencies_i(type_map, type_identifier.array_ldefn(), dependencies);
-    break;
-  case TI_PLAIN_MAP_SMALL:
-    compute_dependencies_i(type_map, type_identifier.map_sdefn(), dependencies);
-    break;
-  case TI_PLAIN_MAP_LARGE:
-    compute_dependencies_i(type_map, type_identifier.map_ldefn(), dependencies);
-    break;
-  case TI_STRONGLY_CONNECTED_COMPONENT:
-    compute_dependencies_i(type_map, type_identifier.sc_component_id(), dependencies);
-    break;
-  case EK_COMPLETE:
-  case EK_MINIMAL:
-    {
-      TypeMap::const_iterator pos = type_map.find(type_identifier);
-      if (pos != type_map.end()) {
-        compute_dependencies_i(type_map, pos->second, dependencies);
-      }
-      break;
-    }
-  }
+  compute_dependencies_j(type_map, type_identifier, dependencies);
 }
 
 bool write_empty_xcdr2_nonfinal(DCPS::Serializer& strm)

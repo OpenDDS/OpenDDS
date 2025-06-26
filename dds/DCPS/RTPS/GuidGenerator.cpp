@@ -51,7 +51,8 @@ using DCPS::SystemTimePoint;
 GuidGenerator::GuidGenerator()
   : pid_(ACE_OS::getpid())
 {
-  unsigned seed = static_cast<unsigned>(SystemTimePoint::now().value().usec() + reinterpret_cast<size_t>(this));
+  unsigned seed = static_cast<unsigned>(static_cast<size_t>(SystemTimePoint::now().value().usec())
+    + reinterpret_cast<size_t>(this));
 
   if (pid_ == -1) {
     pid_ = static_cast<pid_t>(ACE_OS::rand_r(&seed));

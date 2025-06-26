@@ -13,9 +13,11 @@
 #include <tests/Utils/DataView.h>
 #include <tests/Utils/GtestRc.h>
 
-#include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/Xcdr2ValueWriter.h>
+
 #include <dds/DCPS/XTypes/TypeLookupService.h>
 #include <dds/DCPS/XTypes/DynamicDataImpl.h>
 #include <dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h>
@@ -42,7 +44,7 @@ enum FieldFilter {
 
 bool dynamic = false;
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 TypeLookupService_rch tls;
 
 template<typename TopicType>
@@ -211,7 +213,7 @@ void amalgam_serializer_test_base(
   const TypeA& value, TypeB& result, FieldFilter field_filter = FieldFilter_All)
 {
 #if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
-  const bool key_only = field_filter == FieldFilter_KeyOnly;
+  const bool test_key_only = field_filter == FieldFilter_KeyOnly;
 #else
   ACE_UNUSED_ARG(field_filter);
 #endif
@@ -227,7 +229,7 @@ void amalgam_serializer_test_base(
       ASSERT_RC_OK(tsi.create_dynamic_sample_rc(dd, value));
 
       DDS::DynamicData_ptr dd_ptr = dd.in();
-      if (key_only) {
+      if (test_key_only) {
         const KeyOnly<DDS::DynamicData_ptr> key_only(dd_ptr);
         EXPECT_EQ(serialized_size(encoding, key_only), expected_cdr.size);
         ASSERT_TRUE(serializer << key_only);
@@ -252,7 +254,7 @@ void amalgam_serializer_test_base(
       add_type<RealTypeB>();
       DDS::DynamicType_var type = get_dynamic_type<RealTypeB>();
       DDS::DynamicData_var ddi = new DynamicDataXcdrReadImpl(serializer, type,
-        key_only ? Sample::KeyOnly: Sample::Full);
+        test_key_only ? Sample::KeyOnly: Sample::Full);
       typename DDSTraits<RealTypeB>::TypeSupportImplType tsi;
       ASSERT_RC_OK(tsi.create_sample_rc(result, ddi));
 #else
@@ -2813,7 +2815,7 @@ TEST(OptionalTests, Present)
 
   Optional::OptionalMembers value{};
   value.short_field(0x7fff);
-  value.str_field(OPENDDS_OPTIONAL_NS::optional<std::string>("Hello World"));
+  value.str_field(std::optional<std::string>("Hello World"));
   Optional::OptionalMembers result;
   amalgam_serializer_test(xcdr2, expected, value, result);
 }

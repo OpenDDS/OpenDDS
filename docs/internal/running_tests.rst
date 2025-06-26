@@ -70,10 +70,6 @@ To manually configure what tests to run:
 
     * Use ``--java`` to include this list.
 
-  * :ghfile:`tools/modeling/tests/modeling_tests.lst`
-
-    * Use ``--modeling`` to include this list.
-
 * In a test list file each of the-space delimited words after the colon determines when the test is ran.
 * Passing ``-Config RTPS`` will run tests that have ``RTPS`` and leave out tests with ``!RTPS``.
 * There are ``-Config`` options that are added automatically if ``--no-auto-config`` wasn't passed:

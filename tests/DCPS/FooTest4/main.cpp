@@ -11,12 +11,16 @@
 
 #include "Reader.h"
 #include "Writer.h"
+
 #include "../common/TestException.h"
-#include "dds/DCPS/Service_Participant.h"
+
+#include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
-#include "dds/DCPS/TopicDescriptionImpl.h"
+#include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/SubscriberImpl.h"
+#include "dds/DCPS/TopicDescriptionImpl.h"
+
 #include "dds/DCPS/transport/framework/TransportInst.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
@@ -184,7 +188,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ::DDS::SubscriberQos default_sub_qos;
       dp->get_default_subscriber_qos (default_sub_qos);
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
       using OpenDDS::DCPS::operator==;
 #endif
       if (! (sub_qos_got == default_sub_qos))

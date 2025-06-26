@@ -7,8 +7,9 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
 #include "QueryConditionImpl.h"
+
+#if OPENDDS_CONFIG_QUERY_CONDITION
 #include "DataReaderImpl.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -106,4 +107,4 @@ TypeSupportImpl* QueryConditionImpl::get_type_support() const
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_NO_QUERY_CONDITION
+#endif

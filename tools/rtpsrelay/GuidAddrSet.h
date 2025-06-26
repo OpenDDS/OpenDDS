@@ -39,16 +39,22 @@ struct AddrSetStats {
   OpenDDS::DCPS::MonotonicTimePoint deactivation;
   RelayStatisticsReporter& relay_stats_reporter_;
   std::string common_name;
+  size_t& total_ips;
+  size_t& total_ports;
 
   AddrSetStats(const OpenDDS::DCPS::GUID_t& guid,
                const OpenDDS::DCPS::MonotonicTimePoint& a_session_start,
-               RelayStatisticsReporter& relay_stats_reporter)
+               RelayStatisticsReporter& relay_stats_reporter,
+               size_t& a_total_ips,
+               size_t& a_total_ports)
     : allow_rtps(false)
     , spdp_stats_reporter(rtps_guid_to_relay_guid(guid), "SPDP")
     , sedp_stats_reporter(rtps_guid_to_relay_guid(guid), "SEDP")
     , data_stats_reporter(rtps_guid_to_relay_guid(guid), "DATA")
     , session_start(a_session_start)
     , relay_stats_reporter_(relay_stats_reporter)
+    , total_ips(a_total_ips)
+    , total_ports(a_total_ports)
   {}
 
   bool upsert_address(const AddrPort& remote_address,
@@ -159,6 +165,8 @@ public:
     , relay_participant_status_reporter_(relay_participant_status_reporter)
     , relay_stats_reporter_(relay_stats_reporter)
     , relay_thread_monitor_(relay_thread_monitor)
+    , total_ips_(0)
+    , total_ports_(0)
     , participant_admission_limit_reached_(false)
   {}
 
@@ -293,7 +301,12 @@ private:
   {
     const size_t limit = config_.admission_control_queue_size();
     const bool limit_okay = !limit || admission_control_queue_.size() < limit;
-    return !participant_admission_limit_reached_ && limit_okay && relay_thread_monitor_.threads_okay();
+    const bool admit = !participant_admission_limit_reached_ && limit_okay && relay_thread_monitor_.threads_okay();
+    if (admit != last_admit_) {
+      last_admit_ = admit;
+      relay_stats_reporter_.admission_state_changed(admit);
+    }
+    return admit;
   }
 
   bool ignore_rtps(bool from_application_participant,
@@ -337,6 +350,8 @@ private:
   RelayStatisticsReporter& relay_stats_reporter_;
   RelayThreadMonitor& relay_thread_monitor_;
   GuidAddrSetMap guid_addr_set_map_;
+  size_t total_ips_;
+  size_t total_ports_;
 
   using RemoteMap = std::unordered_map<Remote, OpenDDS::DCPS::GUID_t, RemoteHash>;
   RemoteMap remote_map_;
@@ -358,6 +373,7 @@ private:
 
   mutable ACE_Thread_Mutex mutex_;
   bool participant_admission_limit_reached_;
+  mutable bool last_admit_;
 };
 
 }

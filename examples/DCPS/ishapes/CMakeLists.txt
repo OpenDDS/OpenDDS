@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3...3.27)
+cmake_minimum_required(VERSION 3.3...4.0)
 include("${CMAKE_CURRENT_LIST_DIR}/../../../cmake/opendds_version.cmake")
 project(ishapes VERSION ${OpenDDS_VERSION} LANGUAGES CXX)
 find_package(OpenDDS REQUIRED)
@@ -51,8 +51,6 @@ target_link_libraries(ishapes
   Qt5::Widgets
   OpenDDS::Dcps
   OpenDDS::Tcp
-  OpenDDS::Udp
-  OpenDDS::Multicast
   OpenDDS::Rtps_Udp
   OpenDDS::InfoRepoDiscovery
 )

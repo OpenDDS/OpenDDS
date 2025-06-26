@@ -7,11 +7,12 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#include "DataDurabilityCache.h"
+
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTypeSupportExtC.h"
-#include "DataDurabilityCache.h"
 #include "SendStateDataSampleList.h"
 #include "DataSampleElement.h"
 #include "WriteDataContainer.h"
@@ -63,16 +64,14 @@ void cleanup_directory(const OPENDDS_VECTOR(OPENDDS_STRING) & path,
 class Cleanup_Handler : public virtual OpenDDS::DCPS::RcEventHandler {
 public:
 
-  typedef
-  OpenDDS::DCPS::DataDurabilityCache::sample_data_type data_type;
-  typedef
-  OpenDDS::DCPS::DataDurabilityCache::sample_list_type list_type;
-  typedef ptrdiff_t list_difference_type;
+  typedef OpenDDS::DCPS::DataDurabilityCache::sample_data_type data_type;
+  typedef OpenDDS::DCPS::DataDurabilityCache::sample_list_type list_type;
+  typedef list_type::size_type list_index_type;
 
-  Cleanup_Handler(list_type & sample_list,
-                  list_difference_type index,
-                  ACE_Allocator * allocator,
-                  const OPENDDS_VECTOR(OPENDDS_STRING) & path,
+  Cleanup_Handler(list_type& sample_list,
+                  list_index_type index,
+                  ACE_Allocator* allocator,
+                  const OPENDDS_VECTOR(OpenDDS::DCPS::String)& path,
                   const OpenDDS::DCPS::String& data_dir)
   : sample_list_(sample_list)
   , index_(index)
@@ -142,7 +141,7 @@ private:
   list_type & sample_list_;
 
   /// Location in list/array of queue to be deallocated.
-  list_difference_type const index_;
+  list_index_type const index_;
 
   /// Allocator to be used when deallocating data queue.
   ACE_Allocator * const allocator_;
@@ -160,7 +159,7 @@ private:
   OpenDDS::DCPS::DataDurabilityCache::timer_id_list_type *
   timer_ids_;
 
-  OPENDDS_VECTOR(OPENDDS_STRING) path_;
+  OPENDDS_VECTOR(OpenDDS::DCPS::String) path_;
 
   OpenDDS::DCPS::String data_dir_;
 };
@@ -396,7 +395,7 @@ void OpenDDS::DCPS::DataDurabilityCache::init()
               ACE_Message_Block * current = &mb;
 
               while (!is.eof()) {
-                is.read(current->wr_ptr(), current->space());
+                is.read(current->wr_ptr(), static_cast<std::streamsize>(current->space()));
 
                 if (is.bad()) break;
 
@@ -646,7 +645,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
           sample.get_sample(data, len, timestamp);
 
           os << timestamp.sec << ' ' << timestamp.nanosec << ' ';
-          os.write(data, len);
+          os.write(data, static_cast<std::streamsize>(len));
 
         } catch (const std::exception& ex) {
           if (DCPS_debug_level > 0) {
@@ -678,9 +677,9 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
                  type_name));
     }
 
-    Cleanup_Handler * const cleanup =
+    Cleanup_Handler* const cleanup =
       new Cleanup_Handler(*sample_list,
-                          slot - &(*sample_list)[0],
+                          static_cast<size_t>(slot - &(*sample_list)[0]),
                           this->allocator_.get(),
                           path,
                           this->data_dir_);
@@ -866,4 +865,4 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
   return true;
 }
 
-#endif // OPENDDS_NO_PERSISTENCE_PROFILE
+#endif

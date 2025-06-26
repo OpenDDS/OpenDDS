@@ -3,6 +3,8 @@
 #ifndef WRITER_H
 #define WRITER_H
 
+#include <tests/Utils/DistributedConditionSet.h>
+
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DCPS/Atomic.h>
 
@@ -12,7 +14,8 @@ class Writer : public ACE_Task_Base
 {
 public:
 
-  Writer (::DDS::DataWriter_ptr writer);
+  Writer (DistributedConditionSet_rch dcs,
+          ::DDS::DataWriter_ptr writer);
 
   void start ();
 
@@ -21,16 +24,9 @@ public:
   /** Lanch a thread to write. **/
   virtual int svc ();
 
-  bool is_finished () const;
-
-  int get_timeout_writes () const;
-
-
 private:
-
+  DistributedConditionSet_rch dcs_;
   ::DDS::DataWriter_var writer_;
-  OpenDDS::DCPS::Atomic<int> finished_instances_;
-  OpenDDS::DCPS::Atomic<int> timeout_writes_;
 };
 
 #endif /* WRITER_H */

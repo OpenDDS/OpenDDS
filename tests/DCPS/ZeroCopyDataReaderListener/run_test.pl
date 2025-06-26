@@ -19,8 +19,7 @@ my $test = new PerlDDS::TestFramework();
 
 if ($test->flag('all')) {
     @original_ARGV = grep { $_ ne 'all' } @original_ARGV;
-    my @tests = ('', qw/udp multicast default_tcp default_udp default_multicast
-                        nobits stack shmem
+    my @tests = ('', qw/default_tcp nobits stack shmem
                         rtps rtps_disc rtps_unicast rtps_disc_tcp/);
     push(@tests, 'ipv6') if new PerlACE::ConfigList->check_config('IPV6');
     my $status = 0;
@@ -39,9 +38,7 @@ my $pending_timeout = '-DCPSPendingTimeout 2';
 my $thread_per_connection = $test->flag('thread_per') ? '-p' : '';
 
 my $default_tport = ($test->flag('default_tcp') ||
-                     $test->flag('stack')) ? '-t tcp' :
-    $test->flag('default_udp') ? '-t udp' :
-    $test->flag('default_multicast') ? '-t multicast' : '';
+                     $test->flag('stack')) ? '-t tcp' : '';
 
 $test->{'transport'} = ($PerlDDS::SafetyProfile ? 'rtps_disc' : 'tcp')
     if $default_tport eq '' && $test->{'transport'} eq '';

@@ -27,7 +27,6 @@
 #include "RcHandle_T.h"
 #include "RcObject.h"
 #include "Service_Participant.h"
-#include "Stats_T.h"
 #include "SubscriptionInstance.h"
 #include "TimeTypes.h"
 #include "TopicImpl.h"
@@ -39,11 +38,11 @@
 #include "transport/framework/TransportClient.h"
 #include "transport/framework/TransportReceiveListener.h"
 
-#include <dds/DdsDcpsTopicC.h>
-#include <dds/DdsDcpsSubscriptionExtC.h>
 #include <dds/DdsDcpsDomainC.h>
-#include <dds/DdsDcpsTopicC.h>
 #include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsSubscriptionExtC.h>
+#include <dds/DdsDcpsTopicC.h>
+#include <dds/DdsDcpsTopicC.h>
 
 #include <ace/String_Base.h>
 #include <ace/Reverse_Lock_T.h>
@@ -67,7 +66,6 @@ class DomainParticipantImpl;
 class SubscriptionInstance;
 class TopicImpl;
 class TopicDescriptionImpl;
-class Monitor;
 class DataReaderImpl;
 class FilterEvaluator;
 
@@ -79,37 +77,7 @@ enum MarshalingType {
   KEY_ONLY_MARSHALING
 };
 
-/// Elements stored for managing statistical data.
-class OpenDDS_Dcps_Export WriterStats {
-public:
-  /// Default constructor.
-  WriterStats(
-    int amount = 0,
-    DataCollector<double>::OnFull type = DataCollector<double>::KeepOldest);
-#ifdef ACE_HAS_CPP11
-  WriterStats(const WriterStats&) = default;
-#endif
-
-  /// Add a datum to the latency statistics.
-  void add_stat(const TimeDuration& delay);
-
-  /// Extract the current latency statistics for this writer.
-  LatencyStatistics get_stats() const;
-
-  /// Reset the latency statistics for this writer.
-  void reset_stats();
-
-#ifndef OPENDDS_SAFETY_PROFILE
-  /// Dump any raw data.
-  std::ostream& raw_data(std::ostream& str) const;
-#endif
-
-private:
-  /// Latency statistics for the DataWriter to this DataReader.
-  Stats<double> stats_;
-};
-
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
 class OpenDDS_Dcps_Export AbstractSamples
 {
@@ -134,7 +102,7 @@ public:
 *
 */
 class OpenDDS_Dcps_Export DataReaderImpl
-  : public virtual LocalObject<DataReaderEx>,
+  : public virtual LocalObject<DDS::DataReader>,
     public virtual DataReaderCallbacks,
     public virtual EntityImpl,
     public virtual TransportClient,
@@ -148,8 +116,6 @@ public:
   typedef OPENDDS_MAP(DDS::InstanceHandle_t, SubscriptionInstance_rch) SubscriptionInstanceMapType;
   typedef OPENDDS_SET(DDS::InstanceHandle_t) InstanceSet;
   typedef OPENDDS_SET(SubscriptionInstance_rch) SubscriptionInstanceSet;
-  /// Type of collection of statistics for writers to this reader.
-  typedef OPENDDS_MAP_CMP(GUID_t, WriterStats, GUID_tKeyLessThan) StatsMapType;
 
   DataReaderImpl();
 
@@ -213,7 +179,7 @@ public:
     DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states);
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
   virtual DDS::QueryCondition_ptr create_querycondition(
     DDS::SampleStateMask sample_states,
     DDS::ViewStateMask view_states,
@@ -267,39 +233,13 @@ public:
   virtual DDS::ReturnCode_t get_matched_publications(
     DDS::InstanceHandleSeq & publication_handles);
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   virtual DDS::ReturnCode_t get_matched_publication_data(
     DDS::PublicationBuiltinTopicData & publication_data,
     DDS::InstanceHandle_t publication_handle);
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-
-  virtual DDS::ReturnCode_t enable();
-
-#ifndef OPENDDS_SAFETY_PROFILE
-  virtual void get_latency_stats(
-    LatencyStatisticsSeq & stats);
 #endif
 
-  virtual void reset_latency_stats();
-
-  virtual CORBA::Boolean statistics_enabled();
-
-  virtual void statistics_enabled(
-    CORBA::Boolean statistics_enabled);
-
-  /// @name Raw Latency Statistics Interfaces
-  /// @{
-
-  /// Expose the statistics container.
-  const StatsMapType& raw_latency_statistics() const;
-
-  /// Configure the size of the raw data collection buffer.
-  unsigned int& raw_latency_buffer_size();
-
-  /// Configure the type of the raw data collection buffer.
-  DataCollector<double>::OnFull& raw_latency_buffer_type();
-
-  /// @}
+  virtual DDS::ReturnCode_t enable();
 
   /// update liveliness info for this writer.
   void writer_activity(const DataSampleHeader& header);
@@ -318,7 +258,7 @@ public:
                        DDS::ViewStateMask view_states,
                        DDS::InstanceStateMask instance_states);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   virtual bool contains_sample_filtered(DDS::SampleStateMask sample_states,
                                         DDS::ViewStateMask view_states,
                                         DDS::InstanceStateMask instance_states,
@@ -336,9 +276,6 @@ public:
   virtual void dispose_unregister(const ReceivedDataSample& sample,
                                   DDS::InstanceHandle_t publication_handle,
                                   SubscriptionInstance_rch& instance);
-
-  void process_latency(const ReceivedDataSample& sample);
-  void notify_latency(GUID_t writer);
 
   size_t get_depth() const
   {
@@ -389,9 +326,9 @@ public:
   typedef OPENDDS_VECTOR(WriterStatePair) WriterStatePairVec;
   void get_writer_states(WriterStatePairVec& writer_states);
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  void update_ownership_strength (const GUID_t& pub_id,
-                                  const CORBA::Long& ownership_strength);
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+  void update_ownership_strength(const GUID_t& pub_id,
+                                 CORBA::Long ownership_strength);
 
   // Access to OwnershipManager is only valid when the domain participant is valid;
   // therefore, we must lock the domain pariticipant when using  OwnershipManager.
@@ -446,9 +383,9 @@ public:
   virtual void lookup_instance(const ReceivedDataSample& sample,
                                SubscriptionInstance_rch& instance) = 0;
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
 
   void enable_filtering(ContentFilteredTopicImpl* cft);
 
@@ -456,7 +393,7 @@ public:
 
 #endif
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
 
   void enable_multi_topic(MultiTopicImpl* mt);
 
@@ -512,7 +449,7 @@ public:
     set_instance_state_i(instance, publication_handle, state, timestamp, guid);
   }
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   void begin_access();
   void end_access();
   void get_ordered_data(GroupRakeData& data,
@@ -705,17 +642,16 @@ protected:
   TypeSupportImpl* type_support_;
   GUID_t topic_id_;
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   bool is_exclusive_ownership_;
-
 #endif
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   mutable ACE_Thread_Mutex content_filtered_topic_mutex_;
   TopicDescriptionPtr<ContentFilteredTopicImpl> content_filtered_topic_;
 #endif
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
   TopicDescriptionPtr<MultiTopicImpl> multi_topic_;
 #endif
 
@@ -750,7 +686,7 @@ private:
   void instances_liveliness_update(const GUID_t& writer,
                                    DDS::InstanceHandle_t publication_handle);
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   bool verify_coherent_changes_completion(WriterInfo* writer);
   bool coherent_change_received(WriterInfo* writer);
 #endif
@@ -816,9 +752,6 @@ private:
   DDS::RequestedIncompatibleQosStatus  requested_incompatible_qos_status_;
   DDS::SubscriptionMatchedStatus       subscription_match_status_;
 
-  // OpenDDS extended status.  This is only available via listener.
-  BudgetExceededStatus                 budget_exceeded_status_;
-
   /**
    * @todo The subscription_lost_status_ and
    *       subscription_reconnecting_status_ are left here for
@@ -863,9 +796,6 @@ private:
 
   bool always_get_history_;
 
-  /// Flag indicating status of statistics gathering.
-  AtomicBool statistics_enabled_;
-
   /// publications writing to this reader.
   typedef OPENDDS_MAP_CMP(GUID_t, WriterInfo_rch,
                    GUID_tKeyLessThan) WriterMapType;
@@ -875,25 +805,9 @@ private:
   /// RW lock for reading/writing publications.
   ACE_RW_Thread_Mutex writers_lock_;
 
-  /// Statistics for this reader, collected for each writer.
-  StatsMapType statistics_;
-  ACE_Recursive_Thread_Mutex statistics_lock_;
-
-  /// Bound (or initial reservation) of raw latency buffer.
-  unsigned int raw_latency_buffer_size_;
-
-  /// Type of raw latency data buffer.
-  DataCollector<double>::OnFull raw_latency_buffer_type_;
-
   typedef VarLess<DDS::ReadCondition> RCCompLess;
   typedef OPENDDS_SET_CMP(DDS::ReadCondition_var,  RCCompLess) ReadConditionSet;
   ReadConditionSet read_conditions_;
-
-  /// Monitor object for this entity
-  unique_ptr<Monitor> monitor_;
-
-  /// Periodic Monitor object for this entity
-  unique_ptr<Monitor>  periodic_monitor_;
 
   bool transport_disabled_;
 

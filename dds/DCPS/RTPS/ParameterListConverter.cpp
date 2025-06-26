@@ -25,7 +25,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace RTPS {
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 using DCPS::operator!=;
 #endif
 
@@ -199,13 +199,13 @@ namespace {
 
   bool not_default(const DDS::OwnershipStrengthQosPolicy& qos)
   {
-#ifdef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-    ACE_UNUSED_ARG(qos);
-    return false;
-#else
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
     DDS::OwnershipStrengthQosPolicy def_qos =
       TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
     return qos != def_qos;
+#else
+    ACE_UNUSED_ARG(qos);
+    return false;
 #endif
   }
 
@@ -998,11 +998,11 @@ bool from_param_list(const ParameterList& param_list,
     TheServiceParticipant->initial_UserDataQosPolicy();
   writer_data.ddsPublicationData.ownership =
     TheServiceParticipant->initial_OwnershipQosPolicy();
-#ifdef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  writer_data.ddsPublicationData.ownership_strength.value = 0;
-#else
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   writer_data.ddsPublicationData.ownership_strength =
     TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
+#else
+  writer_data.ddsPublicationData.ownership_strength.value = 0;
 #endif
   writer_data.ddsPublicationData.destination_order =
     TheServiceParticipant->initial_DestinationOrderQosPolicy();

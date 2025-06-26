@@ -996,7 +996,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
         VDBG_LVL((LM_DEBUG,"(%P|%t) DBG: Found DataLinkSet. Sending element %@.\n"
                   , cur), 5);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
         // Content-Filtering adjustment to the pub_links:
         // - If the sample should be filtered out of all subscriptions on a given
@@ -1180,6 +1180,12 @@ void TransportClient::data_acked(const GUID_t& remote)
     send_listener = get_send_listener();
   }
   send_listener->data_acked(remote);
+}
+
+SequenceNumber TransportClient::cur_cumulative_ack(const GUID_t& reader_id) const
+{
+  OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
+  return links_.cur_cumulative_ack(guid_, reader_id);
 }
 
 bool TransportClient::is_leading(const GUID_t& reader_id) const

@@ -1,5 +1,5 @@
 # CMakeLists for OpenDDS_Dcps
-cmake_minimum_required(VERSION 3.23...3.27)
+cmake_minimum_required(VERSION 3.23...4.0)
 project(opendds_dcps CXX)
 
 set(dcps_lib_deps
@@ -13,7 +13,6 @@ find_package(OpenDDS REQUIRED NO_DEFAULTS TAO::tao_idl OpenDDS::opendds_idl ${dc
 include(opendds_build_helpers)
 
 add_library(OpenDDS_Dcps
-  DCPS/BitPubListenerImpl.cpp
   DCPS/BuiltInTopicUtils.cpp
   DCPS/CoherentChangeControl.cpp
   DCPS/ConditionImpl.cpp
@@ -56,7 +55,6 @@ add_library(OpenDDS_Dcps
   DCPS/MemoryPool.cpp
   DCPS/MessageBlock.cpp
   DCPS/MessageTracker.cpp
-  DCPS/MonitorFactory.cpp
   DCPS/MultiTask.cpp
   DCPS/MultiTopicDataReaderBase.cpp
   DCPS/MultiTopicImpl.cpp
@@ -211,7 +209,6 @@ target_sources(OpenDDS_Dcps
     DCPS/AstNodeWrapper.h
     DCPS/Atomic.h
     DCPS/AtomicBool.h
-    DCPS/BitPubListenerImpl.h
     DCPS/BuiltInTopicDataReaderImpls.h
     DCPS/BuiltInTopicUtils.h
     DCPS/Cached_Allocator_With_Overflow_T.h
@@ -225,9 +222,6 @@ target_sources(OpenDDS_Dcps
     DCPS/ContentFilteredTopicImpl.h
     DCPS/DCPS_Utils.h
     DCPS/DataBlockLockPool.h
-    DCPS/DataCollector_T.cpp
-    DCPS/DataCollector_T.h
-    DCPS/DataCollector_T.inl
     DCPS/DataDurabilityCache.h
     DCPS/DataReaderCallbacks.h
     DCPS/DataReaderImpl.h
@@ -294,7 +288,6 @@ target_sources(OpenDDS_Dcps
     DCPS/MessageBlock.h
     DCPS/MessageTracker.h
     DCPS/Message_Block_Ptr.h
-    DCPS/MonitorFactory.h
     DCPS/MultiTask.h
     DCPS/MultiTopicDataReaderBase.h
     DCPS/MultiTopicDataReader_T.cpp
@@ -363,7 +356,7 @@ target_sources(OpenDDS_Dcps
     DCPS/SporadicTask.h
     DCPS/StaticDiscovery.h
     DCPS/StaticIncludes.h
-    DCPS/Stats_T.h
+    DCPS/Statistics.h
     DCPS/StatusConditionImpl.h
     DCPS/SubscriberImpl.h
     DCPS/SubscriptionInstance.h
@@ -432,7 +425,6 @@ target_sources(OpenDDS_Dcps
     DCPS/ZeroCopySeq_T.inl
     DCPS/dcps_export.h
     DCPS/debug.h
-    DCPS/optional.h
     DCPS/security/framework/HandleRegistry.h
     DCPS/security/framework/Properties.h
     DCPS/security/framework/SecurityConfig.h
@@ -565,7 +557,7 @@ target_sources(OpenDDS_Dcps
     OpenDDSConfigWrapper.idl
 )
 target_compile_definitions(OpenDDS_Dcps PUBLIC ${OPENDDS_DCPS_COMPILE_DEFINITIONS})
-_opendds_library(OpenDDS_Dcps MSVC_BIGOBJ)
+_opendds_library(OpenDDS_Dcps BIGOBJ)
 target_include_directories(OpenDDS_Dcps
   PUBLIC
     "$<BUILD_INTERFACE:${OPENDDS_SOURCE_DIR}>"

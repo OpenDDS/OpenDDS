@@ -72,13 +72,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
     buffer << "Total messages received: " << std::dec << subscriber.total_messages() << std::endl;
     buffer << "Valid messages received: " << std::dec << subscriber.valid_messages() << std::endl;
-    buffer << subscriber << std::endl;
-
-    // Put any raw data out if indicated.
-    if( !options.rawOutputFilename().empty()) {
-      std::ofstream rawOutput( options.rawOutputFilename().c_str());
-      subscriber.rawData( rawOutput);
-    }
 
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) subscriber_main() - ")

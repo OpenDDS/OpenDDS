@@ -4,6 +4,7 @@
 #include "TypeSupportRegistry.h"
 
 #include <dds/DdsDcpsDomainC.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 
 namespace Builder {
@@ -83,7 +84,7 @@ Topic::Topic(const TopicConfig& config, DDS::DomainParticipant_var& participant,
     throw std::runtime_error(ss.str());
   }
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   for (unsigned int i = 0; i != content_filtered_topics_.length(); ++i) {
     DDS::ContentFilteredTopic_var cft =
       participant_->create_contentfilteredtopic(content_filtered_topics_[i].cft_name,

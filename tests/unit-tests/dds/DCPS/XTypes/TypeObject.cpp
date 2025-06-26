@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include <CompleteToMinimalTypeObjectTypeSupportImpl.h>
+
 #include "dds/DCPS/XTypes/TypeObject.h"
 
 #include "gtest/gtest.h"
@@ -100,15 +102,23 @@ TypeObject getTypeObject()
 std::ostream& operator<<(std::ostream& os, const TypeIdentifier& ti)
 {
   std::ostream os_hex(os.rdbuf());
-  os_hex << std::hex << std::showbase;
-  os_hex << "Kind: " << int(ti.kind()) << ' ';
+  os << std::hex << std::showbase;
+  os << "Kind: " << int(ti.kind()) << ' ';
   if (ti.kind() == EK_COMPLETE || ti.kind() == EK_MINIMAL) {
     os_hex << "Equiv Hash: ";
     for (size_t i = 0; i < sizeof ti.equivalence_hash(); ++i) {
       os_hex << int(ti.equivalence_hash()[i]) << ' ';
     }
+  } else if (ti.kind() == TI_STRONGLY_CONNECTED_COMPONENT) {
+    os_hex << "SC Hash Kind: " << int(ti.sc_component_id().sc_component_id.kind);
+    os << " SC Hash: ";
+    for (size_t i = 0; i < sizeof ti.sc_component_id().sc_component_id.hash; ++i) {
+      os_hex << int(ti.sc_component_id().sc_component_id.hash[i]) << ' ';
+    }
+    os << " length: " << ti.sc_component_id().scc_length;
+    os << " index: " << ti.sc_component_id().scc_index;
   }
-  return os << '\n';
+  return os;
 }
 
 TEST(dds_DCPS_XTypes_TypeObject, maintest)
@@ -567,9 +577,9 @@ TEST(dds_DCPS_XTypes_TypeObject, AppliedVerbatimAnnotation_equal)
 TEST(dds_DCPS_XTypes_TypeObject, AppliedBuiltinMemberAnnotations_equal)
 {
   AppliedBuiltinMemberAnnotations uut1;
-  uut1.unit = OPENDDS_OPTIONAL_NS::optional<OpenDDS::DCPS::String>("meters");
+  uut1.unit = std::optional<OpenDDS::DCPS::String>("meters");
   AppliedBuiltinMemberAnnotations uut2;
-  uut2.unit = OPENDDS_OPTIONAL_NS::optional<OpenDDS::DCPS::String>("meters");
+  uut2.unit = std::optional<OpenDDS::DCPS::String>("meters");
   AppliedBuiltinMemberAnnotations uut3;
 
   EXPECT_EQ(uut1, uut2);
@@ -640,9 +650,9 @@ TEST(dds_DCPS_XTypes_TypeObject, AppliedBuiltinTypeAnnotations_equal)
   value.text = "text";
 
   AppliedBuiltinTypeAnnotations uut1;
-  uut1.verbatim = OPENDDS_OPTIONAL_NS::optional<AppliedVerbatimAnnotation>(value);
+  uut1.verbatim = std::optional<AppliedVerbatimAnnotation>(value);
   AppliedBuiltinTypeAnnotations uut2;
-  uut2.verbatim = OPENDDS_OPTIONAL_NS::optional<AppliedVerbatimAnnotation>(value);
+  uut2.verbatim = std::optional<AppliedVerbatimAnnotation>(value);
   AppliedBuiltinTypeAnnotations uut3;
 
   EXPECT_EQ(uut1, uut2);
@@ -1058,12 +1068,12 @@ TEST(dds_DCPS_XTypes_TypeObject, MinimalAliasType_equal)
 TEST(dds_DCPS_XTypes_TypeObject, CompleteElementDetail_equal)
 {
   AppliedBuiltinMemberAnnotations builtin;
-  builtin.unit = OPENDDS_OPTIONAL_NS::optional<OpenDDS::DCPS::String>("meters");
+  builtin.unit = std::optional<OpenDDS::DCPS::String>("meters");
 
   CompleteElementDetail uut1;
-  uut1.ann_builtin = OPENDDS_OPTIONAL_NS::optional<AppliedBuiltinMemberAnnotations>(builtin);
+  uut1.ann_builtin = std::optional<AppliedBuiltinMemberAnnotations>(builtin);
   CompleteElementDetail uut2;
-  uut2.ann_builtin = OPENDDS_OPTIONAL_NS::optional<AppliedBuiltinMemberAnnotations>(builtin);
+  uut2.ann_builtin = std::optional<AppliedBuiltinMemberAnnotations>(builtin);
   CompleteElementDetail uut3;
 
   EXPECT_EQ(uut1, uut2);
@@ -1922,4 +1932,36 @@ TEST(dds_DCPS_XTypes_TypeIdentifierWithSize, TypeIdentifierWithSize_equal)
 
   EXPECT_EQ(uut1, uut2);
   EXPECT_NE(uut2, uut3);
+}
+
+TEST(dds_DCPS_XTypes, make_scc_id_or_default)
+{
+  TypeIdentifier none;
+  EXPECT_EQ(none, make_scc_id_or_default(none));
+
+  TypeIdentifier scc_x(TI_STRONGLY_CONNECTED_COMPONENT, StronglyConnectedComponentId());
+  scc_x.sc_component_id().scc_index = 1;
+  scc_x.sc_component_id().scc_length = 5;
+  TypeIdentifier scc_y(scc_x);
+  scc_y.sc_component_id().scc_index = 0;
+  EXPECT_EQ(scc_y, make_scc_id_or_default(scc_x));
+}
+
+TEST(dds_DCPS_XTypes, compute_dependencies)
+{
+  MyModCompleteToMinimal::CircularStructTypeSupportImpl type_support;
+
+  const TypeIdentifier ti = type_support.getMinimalTypeIdentifier();
+  ASSERT_EQ(ti.kind(), TI_STRONGLY_CONNECTED_COMPONENT);
+  ASSERT_EQ(ti.sc_component_id().scc_index, 1);
+  ASSERT_EQ(ti.sc_component_id().scc_length, 5);
+
+  const TypeMap& tm = type_support.getMinimalTypeMap();
+
+  TypeIdentifierSet dependencies;
+  compute_dependencies(tm, ti, dependencies);
+
+  ASSERT_EQ(dependencies.size(), 1U);
+  const TypeIdentifier& x = *dependencies.begin();
+  ASSERT_EQ(x, make_scc_id_or_default(ti));
 }

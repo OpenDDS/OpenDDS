@@ -36,6 +36,9 @@ GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_
     std::set_difference(x.begin(), x.end(), parts.begin(), parts.end(), std::back_inserter(to_remove));
 
     if (to_add.empty() && to_remove.empty()) {
+      if (result == ADDED) {
+        relay_stats_reporter_.partition_guids(guid_to_partitions_.size(), guid_to_partitions_cache_.size());
+      }
       return NO_CHANGE;
     }
 
@@ -66,6 +69,9 @@ GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_
     }
 
     add_new(relay_partitions, globally_new);
+    relay_stats_reporter_.partition_index_nodes(partition_index_.size());
+    relay_stats_reporter_.partition_index_cache(partition_index_.cache_size());
+    relay_stats_reporter_.partition_guids(guid_to_partitions_.size(), guid_to_partitions_cache_.size());
   }
 
   {
@@ -114,6 +120,9 @@ void GuidPartitionTable::remove(const OpenDDS::DCPS::GUID_t& guid)
       remove_from_cache(guid);
     }
 
+    relay_stats_reporter_.partition_index_nodes(partition_index_.size());
+    relay_stats_reporter_.partition_index_cache(partition_index_.cache_size());
+    relay_stats_reporter_.partition_guids(guid_to_partitions_.size(), guid_to_partitions_cache_.size());
     remove_defunct(relay_partitions, defunct);
   }
 
@@ -136,7 +145,7 @@ void GuidPartitionTable::lookup(StringSet& partitions, const OpenDDS::DCPS::GUID
     return;
   }
 
-  auto& c = guid_to_partitions_cache_[prefix];
+  StringSet c;
 
   for (auto pos = guid_to_partitions_.lower_bound(prefix), limit = guid_to_partitions_.end();
         pos != limit && std::memcmp(pos->first.guidPrefix, prefix.guidPrefix, sizeof(prefix.guidPrefix)) == 0; ++pos) {
@@ -147,6 +156,12 @@ void GuidPartitionTable::lookup(StringSet& partitions, const OpenDDS::DCPS::GUID
   if (!config_.allow_empty_partition()) {
     partitions.erase("");
     c.erase("");
+  }
+
+  // Only create a cache entry if there is something to cache.
+  if (!c.empty()) {
+    guid_to_partitions_cache_[prefix] = c;
+    relay_stats_reporter_.partition_guids(guid_to_partitions_.size(), guid_to_partitions_cache_.size());
   }
 }
 

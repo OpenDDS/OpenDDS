@@ -14,6 +14,7 @@ set(_OPENDDS_INIT_CMAKE TRUE)
 include(CMakeParseArguments)
 
 include("${CMAKE_CURRENT_LIST_DIR}/opendds_version.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/opendds_utils.cmake")
 
 enable_language(C CXX)
 
@@ -41,42 +42,54 @@ function(_opendds_detect_ace)
   endforeach()
 endfunction()
 
-include("${CMAKE_CURRENT_LIST_DIR}/config.cmake" OPTIONAL RESULT_VARIABLE OPENDDS_CONFIG_CMAKE)
-if(OPENDDS_USE_PREFIX_PATH)
-  set(_OPENDDS_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../..")
+set(_opendds_config_cmake "${CMAKE_CURRENT_LIST_DIR}/config.cmake")
+include("${_opendds_config_cmake}" OPTIONAL RESULT_VARIABLE _opendds_found_config_cmake)
+if(_opendds_found_config_cmake)
+  message(STATUS "OpenDDS config.cmake (${_opendds_config_cmake}) found")
 else()
-  set(_OPENDDS_ROOT "${CMAKE_CURRENT_LIST_DIR}/..")
-  if(DEFINED OPENDDS_ACE)
-    if(NOT EXISTS "${OPENDDS_ACE}")
-      message(SEND_ERROR "OPENDDS_ACE (${OPENDDS_ACE}) does not exist")
-      return()
-    endif()
-  else()
-    message(SEND_ERROR "OPENDDS_ACE must be defined")
-    return()
-  endif()
-  get_filename_component(OPENDDS_ACE "${OPENDDS_ACE}" ABSOLUTE)
-
-  if(DEFINED OPENDDS_TAO)
-    if(NOT EXISTS "${OPENDDS_TAO}")
-      message(SEND_ERROR "OPENDDS_TAO (${OPENDDS_TAO}) does not exist")
-      return()
-    endif()
-  elseif(EXISTS "${OPENDDS_ACE}/TAO")
-    set(OPENDDS_TAO "${OPENDDS_ACE}/TAO")
-  elseif(EXISTS "${OPENDDS_ACE}/../TAO")
-    set(OPENDDS_TAO "${OPENDDS_ACE}/../TAO")
-  else()
-    message(SEND_ERROR
-      "OPENDDS_TAO not relative to OPENDDS_ACE (${OPENDDS_ACE}), so OPENDDS_TAO must be defined")
-    return()
-  endif()
-  get_filename_component(OPENDDS_TAO "${OPENDDS_TAO}" ABSOLUTE)
+  message(STATUS "OpenDDS config.cmake (${_opendds_config_cmake}) NOT found")
 endif()
-if(NOT OPENDDS_CONFIG_CMAKE AND NOT ACE_IS_BEING_BUILT)
+
+if(DEFINED OPENDDS_ACE)
+  get_filename_component(OPENDDS_ACE "${OPENDDS_ACE}" ABSOLUTE)
+  if(NOT EXISTS "${OPENDDS_ACE}")
+    message(SEND_ERROR "OPENDDS_ACE (${OPENDDS_ACE}) does not exist")
+    return()
+  endif()
+elseif(OPENDDS_USE_PREFIX_PATH)
+  set(OPENDDS_ACE_USE_PREFIX_PATH TRUE)
+else()
+  message(SEND_ERROR "OPENDDS_ACE must be defined")
+  if(NOT _opendds_found_config_cmake AND NOT OPENDDS_IS_BEING_BUILT)
+    message(SEND_ERROR "Maybe this OpenDDS needs to be built?")
+  endif()
+  return()
+endif()
+
+if(DEFINED OPENDDS_TAO)
+  get_filename_component(OPENDDS_TAO "${OPENDDS_TAO}" ABSOLUTE)
+  if(NOT EXISTS "${OPENDDS_TAO}")
+    message(SEND_ERROR "OPENDDS_TAO (${OPENDDS_TAO}) does not exist")
+    return()
+  endif()
+elseif(EXISTS "${OPENDDS_ACE}/TAO")
+  set(OPENDDS_TAO "${OPENDDS_ACE}/TAO")
+elseif(EXISTS "${OPENDDS_ACE}/../TAO")
+  set(OPENDDS_TAO "${OPENDDS_ACE}/../TAO")
+elseif(OPENDDS_USE_PREFIX_PATH)
+  set(OPENDDS_TAO_USE_PREFIX_PATH TRUE)
+else()
+  message(SEND_ERROR
+    "OPENDDS_TAO not relative to OPENDDS_ACE (${OPENDDS_ACE}), so OPENDDS_TAO must be defined")
+  return()
+endif()
+if(NOT _opendds_found_config_cmake AND NOT ACE_IS_BEING_BUILT)
   _opendds_detect_ace()
 endif()
-get_filename_component(_OPENDDS_ROOT "${_OPENDDS_ROOT}" ABSOLUTE)
+
+if(NOT DEFINED OPENDDS_BUILT_USING_CMAKE AND OPENDDS_IS_BEING_BUILT)
+  set(OPENDDS_BUILT_USING_CMAKE TRUE)
+endif()
 
 if(NOT DEFINED OPENDDS_INSTALL_LIB)
   set(OPENDDS_INSTALL_LIB "lib")
@@ -87,6 +100,13 @@ if(OPENDDS_MPC)
   file(TO_CMAKE_PATH "${OPENDDS_MPC}" OPENDDS_MPC)
 endif()
 file(TO_CMAKE_PATH "${OPENDDS_TAO}" OPENDDS_TAO)
+
+if(OPENDDS_USE_PREFIX_PATH)
+  set(_OPENDDS_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../..")
+else()
+  set(_OPENDDS_ROOT "${CMAKE_CURRENT_LIST_DIR}/..")
+endif()
+get_filename_component(_OPENDDS_ROOT "${_OPENDDS_ROOT}" ABSOLUTE)
 
 if(NOT DEFINED DDS_ROOT)
   if(OPENDDS_USE_PREFIX_PATH)
@@ -105,7 +125,7 @@ if(NOT DEFINED DDS_ROOT)
 endif()
 
 if(NOT DEFINED ACE_ROOT)
-  if(OPENDDS_USE_PREFIX_PATH)
+  if(OPENDDS_ACE_USE_PREFIX_PATH)
     set(ACE_ROOT "${_OPENDDS_ROOT}/share/ace")
     set(ACE_INCLUDE_DIRS "${_OPENDDS_ROOT}/include")
     set(ACE_LIB_DIR "${_OPENDDS_ROOT}/${OPENDDS_INSTALL_LIB}")
@@ -121,7 +141,7 @@ endif()
 _opendds_get_version(OPENDDS_ACE_VERSION ACE "${ACE_ROOT}")
 
 if(NOT DEFINED TAO_ROOT)
-  if(OPENDDS_USE_PREFIX_PATH)
+  if(OPENDDS_TAO_USE_PREFIX_PATH)
     set(TAO_ROOT "${_OPENDDS_ROOT}/share/tao")
     set(TAO_INCLUDE_DIR "${_OPENDDS_ROOT}/include")
 
@@ -149,7 +169,7 @@ message(STATUS "Using ACE ${OPENDDS_ACE_VERSION} at ${ACE_ROOT}")
 message(STATUS "Using TAO ${OPENDDS_TAO_VERSION} at ${TAO_ROOT}")
 
 function(_opendds_cxx_std_to_year out_var cxx_std)
-  if(cxx_std STREQUAL 98)
+  if(cxx_std STREQUAL 98 OR cxx_std STREQUAL 03) # 2003 is not used in CMake's CXX_STANDARD property
     set(year 1998)
   else()
     math(EXPR year "2000 + ${cxx_std}")
@@ -358,21 +378,39 @@ function(_opendds_set_cxx_std)
         "C++ ${max_cxx_std_year}.")
     endif()
     message(STATUS "${compiler_info} would use ${cxx_std_year}, but ${msg}. Raising "
-      "requirment to that.")
+      "requirement to that.")
     set(cxx_std_year ${ace_min_cxx_std_year})
     set(cxx_std_year_source "ACE")
   endif()
 
+  # See if OpenDDS requires a later standard
+  if(cxx_std_year LESS 2017)
+    set(msg "OpenDDS requires at least C++ 2017")
+    if(NOT explicit AND max_cxx_std_year LESS 2017)
+      message(FATAL_ERROR "${msg}, but ${compiler_info} only supports up to "
+        "C++ ${max_cxx_std_year}.")
+    endif()
+    message(STATUS "${compiler_info} would use ${cxx_std_year}, but ${msg}. Raising "
+      "requirement to that.")
+    set(cxx_std_year 2017)
+    set(cxx_std_year_source "OpenDDS")
+  endif()
+
   _opendds_cxx_std_from_year(cxx_std ${cxx_std_year})
+  unset(OPENDDS_CXX_STD PARENT_SCOPE)
   set(OPENDDS_CXX_STD ${cxx_std} CACHE STRING
     "Minimum required C++ standard (same values as CMAKE_CXX_STANDARD)" FORCE)
   message(STATUS "OPENDDS_CXX_STD: ${OPENDDS_CXX_STD} (from ${cxx_std_year_source})")
   set(OPENDDS_CXX_STD_YEAR ${cxx_std_year} CACHE STRING
-    "Minimum required C++ standard year (do not set mannually)" FORCE)
+    "Minimum required C++ standard year (do not set manually)" FORCE)
 endfunction()
 
 if(NOT DEFINED OPENDDS_CXX_STD_YEAR)
   _opendds_set_cxx_std()
+endif()
+
+if(OPENDDS_CXX_STD_YEAR LESS 2017)
+  message(FATAL_ERROR "C++ standard year (${OPENDDS_CXX_STD_YEAR}) is less than 2017.")
 endif()
 
 function(_opendds_cxx_std target scope)
@@ -433,6 +471,9 @@ function(_opendds_feature name default_value)
   # Make sure the value is set
   set("${name}" "${default_value}" CACHE "${arg_TYPE}" "${arg_DOC}")
   set(value "${${name}}")
+  if(OPENDDS_CMAKE_VERBOSE)
+    message(STATUS "  ${name}=${value}")
+  endif()
 
   # Set MPC feature name and value in case we're creating default.features
   if(arg_MPC_NAME)
@@ -446,7 +487,7 @@ function(_opendds_feature name default_value)
 
   # Set values for OpenDDSConfig.h
   if(arg_CONFIG)
-    if(arg_TYPE STREQUAL BOOL)
+    if(arg_TYPE STREQUAL BOOL OR arg_TYPE STREQUAL PATH)
       if(value)
         set(config_value 1)
       else()
@@ -464,6 +505,9 @@ function(_opendds_feature name default_value)
 endfunction()
 
 # OpenDDS Features
+if(OPENDDS_CMAKE_VERBOSE)
+  message(STATUS "All OpenDDS Features:")
+endif()
 _opendds_feature(BUILT_IN_TOPICS ON CONFIG DOC "Enables built-in-topics (BITs)")
 _opendds_feature(OBJECT_MODEL_PROFILE ON CONFIG DOC "Allows using presentation group QoS")
 _opendds_feature(PERSISTENCE_PROFILE ON CONFIG
@@ -472,7 +516,7 @@ _opendds_feature(OWNERSHIP_PROFILE ON CONFIG
   DOC "Allows history depth QoS and implies OPENDDS_OWNERSHIP_KIND_EXCLUSIVE")
 _opendds_feature(OWNERSHIP_KIND_EXCLUSIVE "${OPENDDS_OWNERSHIP_PROFILE}" CONFIG
   DOC "Allows the EXCLUSIVE ownership QoS")
-_opendds_feature(CONTENT_SUBSCRIPTION ON CONFIG
+_opendds_feature(CONTENT_SUBSCRIPTION ON
   DOC "Implies OPENDDS_CONTENT_FILTERED_TOPIC, OPENDDS_MULTI_TOPIC, and OPENDDS_QUERY_CONDITION")
 _opendds_feature(CONTENT_FILTERED_TOPIC "${OPENDDS_CONTENT_SUBSCRIPTION}" CONFIG
   DOC "Allows using ContentFilteredTopic")
@@ -486,6 +530,13 @@ _opendds_feature(SAFETY_PROFILE OFF CONFIG MPC_INVERTED_NAME no_opendds_safety_p
   DOC "Build using Safety Profile (Not for CMake-built OpenDDS)")
 _opendds_feature(COVERAGE OFF MPC_INVERTED_NAME dds_non_coverage)
 _opendds_feature(BOOTTIME_TIMERS OFF CONFIG DOC "Use CLOCK_BOOTTIME for timers")
+if(OPENDDS_CXX_STD_YEAR LESS 2017)
+  set(_opendds_cxx17 OFF)
+else()
+  set(_opendds_cxx17 ON)
+endif()
+_opendds_feature(CXX17 "${_opendds_cxx17}" MPC_INVERTED_NAME no_cxx17 DOC "Build assumes C++17 support")
+_opendds_feature(RAPIDJSON "${OPENDDS_RAPIDJSON}" CONFIG DOC "Enable RapidJSON features" TYPE PATH)
 
 # ACE Features
 _opendds_feature(VERSIONED_NAMESPACE OFF MPC DOC "Namespaces include versions")
@@ -510,7 +561,7 @@ if(OPENDDS_CXX_STD_YEAR LESS 2011)
 else()
   set(_opendds_cxx11_default ON)
 endif()
-_opendds_feature(CXX11 "${_opendds_cxx11_default}" MPC_INVERTED_NAME no_cxx11
+_opendds_feature(CXX11 "${_opendds_cxx11_default}" CONFIG MPC_INVERTED_NAME no_cxx11
   DOC "Build assumes C++11 support")
 
 # TAO Features
@@ -543,57 +594,6 @@ option(OPENDDS_AUTO_LINK_DCPS
 # TODO: Make this default ON in v4.0
 option(OPENDDS_USE_CORRECT_INCLUDE_SCOPE
   "Include using SCOPE specified in opendds_target_sources" OFF)
-
-macro(_opendds_save_cache name type value)
-  list(APPEND _opendds_save_cache_vars ${name})
-  set(_opendds_save_cache_${name}_type ${type})
-  set(_opendds_save_cache_${name}_value "${${name}}")
-  set(${name} "${value}" CACHE ${type} "" FORCE)
-endmacro()
-
-macro(_opendds_restore_cache)
-  foreach(name ${_opendds_save_cache_vars})
-    set(${name} "${_opendds_save_cache_${name}_value}" CACHE
-      "${_opendds_save_cache_${name}_type}" "" FORCE)
-    unset(_opendds_save_cache_${name}_type)
-    unset(_opendds_save_cache_${name}_value)
-  endforeach()
-  unset(_opendds_save_cache_vars)
-endmacro()
-
-function(_opendds_pop_list list_var)
-  set(list "${${list_var}}")
-  list(LENGTH list len)
-  if(len GREATER 0)
-    math(EXPR last "${len} - 1")
-    list(REMOVE_AT list "${last}")
-    set("${list_var}" "${list}" PARENT_SCOPE)
-  endif()
-endfunction()
-
-function(_opendds_path_list path_list_var)
-  if("APPEND" IN_LIST ARGN)
-    set(path_list "${${path_list_var}}")
-    list(REMOVE_ITEM ARGN APPEND)
-  else()
-    set(path_list)
-  endif()
-
-  if(WIN32)
-    set(delimiter ";")
-  else()
-    set(delimiter ":")
-  endif()
-
-  foreach(path ${ARGN})
-    if(path_list AND NOT path_list MATCHES "${delimiter}$")
-      set(path_list "${path_list}${delimiter}")
-    endif()
-    set(path_list "${path_list}${path}")
-  endforeach()
-
-  set("${path_list_var}" "${path_list}" PARENT_SCOPE)
-endfunction()
 
 if(OPENDDS_STATIC)
   set(OPENDDS_LIBRARY_TYPE STATIC)
@@ -684,3 +684,5 @@ if(OPENDDS_XERCES3)
     endif()
   endif()
 endif()
+
+set(_OPENDDS_INIT_CMAKE_COMPLETE TRUE)

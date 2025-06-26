@@ -141,7 +141,7 @@ OpenDDS::DCPS::DataSampleHeader::set_flag(DataSampleHeaderFlag flag,
   }
 
   MaybeGuard g(buffer->locking_strategy());
-  base[FLAGS_OFFSET] |= mask_flag(flag);
+  base[FLAGS_OFFSET] |= static_cast<char>(mask_flag(flag));
 }
 
 ACE_INLINE

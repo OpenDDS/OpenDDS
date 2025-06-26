@@ -2,6 +2,7 @@ project(Compiler*): dcps_test, googletest, msvc_bigobj, opendds_cxx11 {
   exename = *
   dcps_ts_flags += -I..
   idlflags += -I..
+  requires += no_opendds_safety_profile
 
   Source_Files {
     TryConstruct.cpp

@@ -97,11 +97,11 @@ public:
 
   void remove_all_associations();
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   void add_to_dynamic_type_map(const GUID_t& pub_id, const XTypes::TypeIdentifier& ti);
 #endif
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   // implement Recoder
   virtual DDS::ReturnCode_t repoid_to_bit_key(const DCPS::GUID_t&     id,
                                               DDS::BuiltinTopicKey_t& key);
@@ -144,6 +144,11 @@ public:
 
   virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint() { return WeakRcHandle<ICE::Endpoint>(); }
 
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+  virtual void update_ownership_strength(const GUID_t&,
+                                         CORBA::Long) {}
+#endif
+
 protected:
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
 
@@ -155,7 +160,7 @@ private:
   void lookup_instance_handles(const WriterIdSeq&      ids,
                                DDS::InstanceHandleSeq& hdls);
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   DDS::DynamicData_ptr get_dynamic_data(const RawDataSample& sample);
 #endif
   void check_encap(bool b) { check_encap_ = b; }
@@ -170,7 +175,7 @@ private:
   DomainParticipantImpl* participant_servant_;
   TopicDescriptionPtr<TopicImpl> topic_servant_;
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   bool is_exclusive_ownership_;
 
   OwnershipManager* owner_manager_;
@@ -205,7 +210,7 @@ private:
   /// RW lock for reading/writing publications.
   ACE_RW_Thread_Mutex writers_lock_;
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   typedef OPENDDS_MAP(GUID_t, DDS::DynamicType_var) DynamicTypeByPubId;
   DynamicTypeByPubId dt_map_;
 #endif

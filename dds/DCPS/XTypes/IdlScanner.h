@@ -6,11 +6,12 @@
 #ifndef OPENDDS_DCPS_XTYPES_IDL_SCANNER_H
 #define OPENDDS_DCPS_XTYPES_IDL_SCANNER_H
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #  include <dds/DCPS/dcps_export.h>
 
-#  include <dds/DCPS/Definitions.h>
 #  include <dds/DdsDynamicDataC.h>
 
 #  include <string>
@@ -664,11 +665,11 @@ private:
 
     const char c = scanner_.peek();
     if (c >= '0' && c <= '9') {
-      return scanner_.match(c) && scale_integer(16, c - '0');
+      return scanner_.match(c) && scale_integer(16, static_cast<unsigned char>(c - '0'));
     } else if (c >= 'a' && c <= 'f') {
-      return scanner_.match(c) && scale_integer(16, c - 'a' + 10);
+      return scanner_.match(c) && scale_integer(16, static_cast<unsigned char>(c - 'a') + 10);
     } else if (c >= 'A' && c <= 'F') {
-      return scanner_.match(c) && scale_integer(16, c - 'A' + 10);
+      return scanner_.match(c) && scale_integer(16, static_cast<unsigned char>(c - 'A') + 10);
     }
 
     return false;
@@ -682,11 +683,11 @@ private:
 
     const char c = scanner_.peek();
     if (c >= '0' && c <= '9') {
-      return scanner_.match(c) && scale_integer(16, c - '0') && scan_numeric_hex_optional_digits();
+      return scanner_.match(c) && scale_integer(16, static_cast<unsigned char>(c - '0')) && scan_numeric_hex_optional_digits();
     } else if (c >= 'a' && c <= 'f') {
-      return scanner_.match(c) && scale_integer(16, c - 'a' + 10) && scan_numeric_hex_optional_digits();
+      return scanner_.match(c) && scale_integer(16, static_cast<unsigned char>(c - 'a') + 10) && scan_numeric_hex_optional_digits();
     } else if (c >= 'A' && c <= 'F') {
-      return scanner_.match(c) && scale_integer(16, c - 'A' + 10) && scan_numeric_hex_optional_digits();
+      return scanner_.match(c) && scale_integer(16, static_cast<unsigned char>(c - 'A') + 10) && scan_numeric_hex_optional_digits();
     }
 
     return true;
@@ -710,7 +711,7 @@ private:
     const char c = scanner_.peek();
     if (c >= '0' && c <= '9') {
       ++numeric_literal_.digits_after_decimal_;
-      return scanner_.match(c) && scale_integer(10, c - '0');
+      return scanner_.match(c) && scale_integer(10, static_cast<unsigned char>(c - '0'));
     } else {
       return false;
     }
@@ -725,7 +726,7 @@ private:
     const char c = scanner_.peek();
     if (c >= '0' && c <= '9') {
       ++numeric_literal_.digits_after_decimal_;
-      return scanner_.match(c) && scale_integer(10, c - '0') && scan_numeric_fraction_optional_digits();
+      return scanner_.match(c) && scale_integer(10, static_cast<unsigned char>(c - '0')) && scan_numeric_fraction_optional_digits();
     } else {
       return true;
     }
@@ -768,7 +769,7 @@ private:
 
     const char c = scanner_.peek();
     if (c >= '0' && c <= '9') {
-      return scanner_.match(c) && scale_exponent(c - '0');
+      return scanner_.match(c) && scale_exponent(static_cast<unsigned char>(c - '0'));
     } else {
       return false;
     }
@@ -782,7 +783,7 @@ private:
 
     const char c = scanner_.peek();
     if (c >= '0' && c <= '9') {
-      return scanner_.match(c) && scale_exponent(c - '0') && scan_numeric_exponent_optional_digits();
+      return scanner_.match(c) && scale_exponent(static_cast<unsigned char>(c - '0')) && scan_numeric_exponent_optional_digits();
     } else {
       return true;
     }
@@ -824,7 +825,7 @@ private:
 
     const char c = scanner_.peek();
     if (c >= '0' && c <= '9') {
-      return scanner_.match(c) && scale_integer(10, c - '0');
+      return scanner_.match(c) && scale_integer(10, static_cast<unsigned char>(c - '0'));
     } else {
       return false;
     }
@@ -838,7 +839,7 @@ private:
 
     const char c = scanner_.peek();
     if (c >= '0' && c <= '9') {
-      return scanner_.match(c) && scale_integer(10, c - '0') && scan_numeric_integer_optional_digits();
+      return scanner_.match(c) && scale_integer(10, static_cast<unsigned char>(c - '0')) && scan_numeric_integer_optional_digits();
     } else {
       return true;
     }
@@ -908,5 +909,5 @@ private:
 } // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif
 #endif // OPENDDS_DCPS_XTYPES_IDL_SCANNER_H

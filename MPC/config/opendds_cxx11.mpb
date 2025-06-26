@@ -1,6 +1,5 @@
-// This is for projects that use the IDL to C++11 Mapping. Use
-// opendds_uses_cxx11 if the project only requires C++11.
-project: dcps, dcps_ts_defaults, opendds_uses_cxx11 {
+// This is for projects that use the IDL to C++11 Mapping.
+project: dcps, dcps_ts_defaults {
   dcps_ts_flags += -Lc++11
   idlflags += -SS -Sa -St
 

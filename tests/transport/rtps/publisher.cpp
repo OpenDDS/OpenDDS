@@ -12,16 +12,19 @@
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/MessageUtils.h>
-#include <dds/DCPS/RepoIdBuilder.h>
-#include <dds/DCPS/Serializer.h>
+
 #include <dds/DCPS/AssociationData.h>
-#include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/SendStateDataSampleList.h>
 #include <dds/DCPS/DataSampleElement.h>
-#include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/EncapsulationHeader.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
-#include <dds/DCPS/EncapsulationHeader.h>
+#include <dds/DCPS/PublicationInstance.h>
+#include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/RepoIdBuilder.h>
+#include <dds/DCPS/SendStateDataSampleList.h>
+#include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/Service_Participant.h>
 
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
@@ -157,7 +160,7 @@ public:
       qos_data.dw_qos.durability.kind = DDS::PERSISTENT_DURABILITY_QOS;
       qos_data.dw_qos.deadline.period.sec = 10;
       qos_data.dw_qos.latency_budget.duration.sec = 11;
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
       qos_data.dw_qos.ownership.kind = DDS::EXCLUSIVE_OWNERSHIP_QOS;
 #endif
       /* Falls through. */
@@ -165,7 +168,7 @@ public:
       qos_data.pub_qos.presentation.access_scope = DDS::GROUP_PRESENTATION_QOS;
       qos_data.pub_qos.partition.name.length(1);
       qos_data.pub_qos.partition.name[0] = "Hello";
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
       qos_data.dw_qos.ownership_strength.value = 12;
 #endif
       qos_data.dw_qos.liveliness.kind = DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
@@ -208,7 +211,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
 
   // 0. initialization
 
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
   if (host == "localhost") {
     host = "127.0.0.1";
   }

@@ -8,7 +8,7 @@
 #include "DataReaderListenerImpl.h"
 #include "Boilerplate.h"
 #include <dds/DCPS/Service_Participant.h>
-#include <model/Sync.h>
+#include "tests/Utils/StatusMatching.h"
 #include <stdexcept>
 #include <iostream>
 
@@ -42,10 +42,17 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                   topic,
                                                   listener);
 
-    {
-      // Block until reader has associated with a writer
-      // but is no longer associated with any writer
-      OpenDDS::Model::ReaderSync rs(reader);
+    // Block until reader has associated with a writer
+    // but is no longer associated with any writer
+    if (wait_match(reader, 1, Utils::EQ) != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR: %N:%l: main: "
+                 "wait for publisher failed\n"));
+      return -1;
+    }
+    if (wait_match(reader, 0, Utils::EQ) != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR: %N:%l: main: "
+                 "wait for publisher failed\n"));
+      return -1;
     }
 
     // Output the sample count

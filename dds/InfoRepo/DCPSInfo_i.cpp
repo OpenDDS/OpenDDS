@@ -51,7 +51,7 @@ TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
   , shutdown_(shutdown)
   , reassociate_timer_id_(-1)
   , dispatch_check_timer_id_(-1)
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   , in_cleanup_all_built_in_topics_(false)
 #endif
 {
@@ -674,10 +674,10 @@ void TAO_DDS_DCPSInfo_i::remove_publication(
   }
 
   const bool in_cleanup =
-#ifdef DDS_HAS_MINIMUM_BIT
-    false;
-#else
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
     in_cleanup_all_built_in_topics_;
+#else
+    false;
 #endif
 
   if (partPtr->remove_publication(publicationId) != 0) {
@@ -1036,10 +1036,10 @@ void TAO_DDS_DCPSInfo_i::remove_subscription(
   }
 
   where->second->remove_dead_participants(
-#ifdef DDS_HAS_MINIMUM_BIT
-    false
-#else
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
     in_cleanup_all_built_in_topics_
+#else
+    false
 #endif
     );
 
@@ -1550,7 +1550,7 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
   }
 
   if (where->second->participants().empty()
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
     && !(participant->isOwner() && participant->isBitPublisher() && in_cleanup_all_built_in_topics_)
     // If this is false, we're running as part of cleanup_all_built_in_topics
     // and we can't remove the domain because we would invalid the iterator
@@ -1560,7 +1560,7 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
     ) {
     domains_.erase(where);
   }
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   else if (where->second->useBIT() &&
            where->second->participants().size() == 1) {
     // The only participant left is the one we created to publish BITs.
@@ -1582,7 +1582,7 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
 #endif
 }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 int TAO_DDS_DCPSInfo_i::BIT_Cleanup_Handler::handle_exception(ACE_HANDLE)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, parent_->lock_, 0);
@@ -2202,7 +2202,7 @@ TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain)
       where,
       DCPS_IR_Domain_Map::value_type(domain, OpenDDS::DCPS::move(domain_uptr)));
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
     if (TheServiceParticipant->get_BIT() && !domainPtr->useBIT() &&
       domainPtr->init_built_in_topics(federation_.overridden(), reincarnate_)
     ) {
@@ -2235,7 +2235,7 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
 {
   int status = 0;
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   try {
 
 #  if OPENDDS_TCP_HAS_DLL
@@ -2303,7 +2303,7 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
   }
 
   // Initialize builtin topics first so that they always have the same IDs
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (TheServiceParticipant->get_BIT()) {
     for (Update::UImage::ParticipantSeq::const_iterator
          iter = image.participants.begin();
@@ -2444,7 +2444,7 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
     }
   }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (TheServiceParticipant->get_BIT()) {
     for (DCPS_IR_Domain_Map::const_iterator currentDomain = domains_.begin();
          currentDomain != domains_.end();
@@ -2554,7 +2554,7 @@ TAO_DDS_DCPSInfo_i::dump_to_string()
 
 void TAO_DDS_DCPSInfo_i::cleanup_all_built_in_topics()
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   DCPS_IR_Domain_Map copy;
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);

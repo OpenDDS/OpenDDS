@@ -11,6 +11,8 @@
 #include "DataReaderImpl.h"
 #include "QueryConditionImpl.h"
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -44,7 +46,7 @@ void
 GroupRakeData::get_datareaders(DDS::DataReaderSeq & readers)
 {
   ACE_UNUSED_ARG(readers);
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   readers.length(static_cast<CORBA::ULong>(this->sorted_.size()));
   CORBA::ULong i = 0;
   SortedSet::iterator itEnd = this->sorted_.end();

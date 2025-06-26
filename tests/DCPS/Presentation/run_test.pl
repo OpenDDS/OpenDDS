@@ -4,55 +4,41 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 # -*- perl -*-
 
-use Env qw(DDS_ROOT ACE_ROOT);
+use Env (DDS_ROOT);
 use lib "$DDS_ROOT/bin";
+use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use strict;
 
 PerlDDS::add_lib_path('../FooType');
 
-$test_opts = "@ARGV";
+my %configs = (
+    'ir_tcp' => {
+        'discovery' => 'info_repo',
+        'file' => {
+            'common' => {
+                'DCPSGlobalTransportConfig' => 'tcp'
+            },
+            'transport/tcp' => {
+                'transport_type' => 'tcp'
+            },
+            'config/tcp' => {
+                'transports' => 'tcp'
+            },
+        }
+    }
+);
 
-$status = 0;
+my $test_opts = "@ARGV";
 
-$dcpsrepo_ior = "repo.ior";
+my $test = new PerlDDS::TestFramework(configs => \%configs, config => 'ir_tcp');
 
-unlink $dcpsrepo_ior;
+$test->setup_discovery();
 
-$DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                    "-o $dcpsrepo_ior ");
+$test->process('test', 'test');
+$test->start_process('test', "$test_opts");
 
-$Test = PerlDDS::create_process("test", "$test_opts");
+my $result = $test->finish(180);
 
-print $DCPSREPO->CommandLine() . "\n";
-$DCPSREPO->Spawn();
-if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for Info Repo IOR file\n";
-    $DCPSREPO->Kill ();
-    exit 1;
-}
-
-print $Test->CommandLine() . "\n";
-$Test->Spawn();
-
-$TestResult = $Test->WaitKill(300);
-if ($TestResult != 0) {
-  print STDERR "ERROR: test returned $TestResult\n";
-  $status = 1;
-}
-
-$ir = $DCPSREPO->TerminateWaitKill(5);
-if ($ir != 0) {
-  print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-  $status = 1;
-}
-
-unlink $dcpsrepo_ior;
-
-if ($status == 0) {
-  print "test PASSED.\n";
-} else {
-  print STDERR "test FAILED.\n";
-}
-
-exit $status;
+exit $result;

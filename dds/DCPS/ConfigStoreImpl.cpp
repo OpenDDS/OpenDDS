@@ -140,6 +140,23 @@ ConfigStoreImpl::has(const char* key)
   return false;
 }
 
+DDS::Boolean
+ConfigStoreImpl::has_prefix(const char* prefix)
+{
+  DCPS::InternalDataReader<ConfigPair>::SampleSequence samples;
+  DCPS::InternalSampleInfoSequence infos;
+  config_reader_->read(samples, infos, DDS::LENGTH_UNLIMITED,
+                       DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+  for (size_t idx = 0; idx != samples.size(); ++idx) {
+    const DDS::SampleInfo& info = infos[idx];
+    if (info.valid_data && samples[idx].key_has_prefix(prefix)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 void
 ConfigStoreImpl::set_boolean(const char* key,
                              DDS::Boolean value)
@@ -527,7 +544,7 @@ ConfigStoreImpl::get(const char* key,
 
   const char* start = t.c_str();
   while (const char* next_comma = std::strchr(start, ',')) {
-    const size_t size = next_comma - start;
+    const size_t size = static_cast<size_t>(next_comma - start);
     retval.push_back(String(start, size));
     start = next_comma + 1;
   }
@@ -592,7 +609,7 @@ ConfigStoreImpl::get(const char* key,
         {
           DDS::UInt32 x = 0;
           if (DCPS::convertToInteger(sample.value(), x)) {
-            retval = TimeDuration(x);
+            retval = TimeDuration(static_cast<time_t>(x));
           } else {
             retval = value;
             if (log_level >= LogLevel::Warning) {

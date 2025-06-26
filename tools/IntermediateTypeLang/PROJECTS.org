@@ -26,7 +26,6 @@
   - Avro
   - Wireshark (DDS)
   - XMI (DDS Modeling)
-  - DDS Modeling Eclipe Plugin
   - Protobuf
   - Thift
   - TypeCode

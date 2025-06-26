@@ -15,14 +15,14 @@
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/udp/Udp.h>
-#include <dds/DCPS/transport/multicast/Multicast.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
 #include "MessengerTypeSupportImpl.h"
-#include "Writer.h"
+
+#include <tests/Utils/StatusMatching.h>
+#include <tests/Utils/DistributedConditionSet.h>
 
 DDS::Duration_t deadline = {DDS::DURATION_INFINITE_SEC,
                             DDS::DURATION_INFINITE_NSEC};
@@ -101,6 +101,9 @@ parse_args(int argc, ACE_TCHAR *argv[])
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   try {
+    DistributedConditionSet_rch dcs =
+      OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
@@ -187,19 +190,101 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        -1);
     }
 
-    // Start writing threads
-    Writer* writer = new Writer(dw.in(), ownership_dw_id.c_str());
-    writer->start();
-
-    while (!writer->is_finished()) {
-      ACE_Time_Value small_time(0, 250000);
-      ACE_OS::sleep(small_time);
+    // Block until Subscribers are available
+    if (wait_match(dw, 2, Utils::EQ)) {
+      ACE_OS::exit(-1);
     }
 
-    // Wait for acks failing in static build...
-    writer->wait_for_acks();
-    writer->end();
-    delete writer;
+    dcs->wait_for(ownership_dw_id.c_str(), "reader1", "ready");
+    dcs->wait_for(ownership_dw_id.c_str(), "reader2", "ready");
+
+    // Write samples
+    Messenger::MessageDataWriter_var message_dw
+      = Messenger::MessageDataWriter::_narrow(dw.in());
+
+    if (CORBA::is_nil(message_dw.in())) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l: svc()")
+                 ACE_TEXT(" ERROR: _narrow failed!\n")));
+      ACE_OS::exit(-1);
+    }
+
+    Messenger::Message message;
+
+    message.from       = CORBA::string_dup(ownership_dw_id.c_str());
+    message.subject    = CORBA::string_dup("Review");
+    message.text       = CORBA::string_dup("Worst. Movie. Ever.");
+    message.count      = 1;
+    message.strength   = ownership_strength;
+
+    for (int i = 0; i != 20; ++i) {
+      message.subject_id = message.count % 2;  // 0 or 1
+      ACE_DEBUG ((LM_DEBUG, "(%P|%t) %C writes instance %d count %d str %d\n",
+                  ownership_dw_id.c_str(), message.subject_id, message.count, message.strength));
+      DDS::ReturnCode_t rc_error = message_dw->write(message, ::DDS::HANDLE_NIL);
+
+      if (rc_error != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("%N:%l: svc()")
+                   ACE_TEXT(" ERROR: write returned %d!\n"), rc_error));
+      }
+
+      if (message.count == 5) {
+        ::DDS::DataWriterQos qos;
+        rc_error = dw->get_qos(qos);
+        if (rc_error != ::DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("%N:%l: svc()")
+                     ACE_TEXT(" ERROR: get_qos returned %d!\n"), rc_error));
+        }
+        CORBA::Long old = qos.ownership_strength.value;
+        if (reset_ownership_strength != -1 && old != reset_ownership_strength) {
+          dcs->wait_for("publisher", "subscriber", "strength change " + OpenDDS::DCPS::to_dds_string(old));
+          qos.ownership_strength.value = reset_ownership_strength;
+          // Wait for the change in qos to propagate. This helps
+          // simplify result verification on subscriber side.
+          ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) %C : reset ownership strength from %d to %d\n"),
+                      ownership_dw_id.c_str(), old, reset_ownership_strength));
+          rc_error = dw->set_qos (qos);
+          if (rc_error != ::DDS::RETCODE_OK) {
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("%N:%l: svc()")
+                       ACE_TEXT(" ERROR: set_qos returned %d!\n"), rc_error));
+          } else {
+            message.strength   =  reset_ownership_strength;
+            ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) ownership strength in message is now %d\n"),
+                        message.strength));
+            rc_error = dw->get_qos(qos);
+            if (rc_error != ::DDS::RETCODE_OK) {
+              ACE_ERROR((LM_ERROR,
+                         ACE_TEXT("%N:%l: svc()")
+                         ACE_TEXT(" ERROR: get_qos returned %d!\n"), rc_error));
+            } else {
+              ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) ownership strength in qos is now %d\n"),
+                          qos.ownership_strength.value));
+            }
+          }
+          dcs->wait_for("publisher", "subscriber", "strength change " + OpenDDS::DCPS::to_dds_string(reset_ownership_strength));
+        }
+      }
+
+      if ((message.count == 5)
+          && reset_delay > ACE_Time_Value::zero) {
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) %C : reset delay from %d to %d at sample %d\n"),
+                    ownership_dw_id.c_str(), dds_delay.msec(), reset_delay.msec(), message.count));
+        ACE_OS::sleep(reset_delay);
+      } else if (dds_delay > ACE_Time_Value::zero) {
+        ACE_OS::sleep(dds_delay);
+      }
+
+      message.count++;
+    }
+
+    const DDS::Duration_t max_wait = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+    if (dw->wait_for_acknowledgments(max_wait) != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) %C : wait for acknowledgement failed\n",
+                 ownership_dw_id.c_str()));
+    }
 
     // Clean-up!
     participant->delete_contained_entities();

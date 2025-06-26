@@ -168,16 +168,12 @@ Java
 OpenDDS has optional :ref:`Java bindings <java>`.
 It requires the Java Development Kit (JDK).
 
-There is also support for Java Message Server (JMS) v1.1.
-In addition to the JDK, it requires Ant and JBoss 4.2.x.
-See :ghfile:`java/jms/README`.
-
 .. _deps-qt:
 
 Qt
 ==
 
-`Qt5 <https://www.qt.io/>`__ is used for the :ghfile:`tools/monitor` utility program and the :ghfile:`examples/DCPS/ishapes` RTPS demo.
+`Qt5 <https://www.qt.io/>`__ is used for the :ghfile:`examples/DCPS/ishapes` RTPS demo.
 
 See :ghfile:`docs/qt.md` for details on configuring OpenDDS to use Qt.
 

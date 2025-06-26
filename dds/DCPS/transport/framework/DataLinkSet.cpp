@@ -107,11 +107,26 @@ void OpenDDS::DCPS::DataLinkSet::terminate_send_if_suspended()
   }
 }
 
+OpenDDS::DCPS::SequenceNumber OpenDDS::DCPS::DataLinkSet::cur_cumulative_ack(const GUID_t& writer_id,
+                                                                             const GUID_t& reader_id) const
+{
+  SequenceNumber sn = SequenceNumber::ZERO();
+
+  GuardType guard(this->lock_);
+  // Note: Only one DataLink will handle the writer/reader pair.  The other DataLinks will return 0.
+  for (MapType::const_iterator pos = map_.begin(), limit = map_.end(); pos != limit; ++pos) {
+    sn = std::max(sn, pos->second->cur_cumulative_ack(writer_id, reader_id));
+  }
+
+  return sn;
+}
+
 bool OpenDDS::DCPS::DataLinkSet::is_leading(const GUID_t& writer_id,
                                             const GUID_t& reader_id) const
 {
   GuardType guard(this->lock_);
   for (MapType::const_iterator pos = map_.begin(), limit = map_.end(); pos != limit; ++pos) {
+    // Note: Only one DataLink will handle the writer/reader pair.  The other DataLinks will return false.
     if (pos->second->is_leading(writer_id, reader_id)) {
       return true;
     }

@@ -6,7 +6,9 @@
 #ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_BASE_H
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_BASE_H
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include "DynamicTypeImpl.h"
 
 #  include <dds/DCPS/LocalObject.h>
@@ -41,7 +43,7 @@ public:
   DDS::ReturnCode_t get_uint64_value(DDS::UInt64& value, DDS::MemberId id);
   virtual DDS::ReturnCode_t get_uint64_value_impl(DDS::UInt64& value, DDS::MemberId id) = 0;
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   virtual DDS::ReturnCode_t get_simple_value(DCPS::Value& value, DDS::MemberId id);
 #endif
 
@@ -89,6 +91,6 @@ protected:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif
 
 #endif // OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_BASE_H

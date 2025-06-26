@@ -15,7 +15,6 @@
 #include "FeatureDisabledQosCheck.h"
 #include "GuidConverter.h"
 #include "Marked_Default_Qos.h"
-#include "MonitorFactory.h"
 #include "MultiTopicImpl.h"
 #include "PublisherImpl.h"
 #include "Qos_Helper.h"
@@ -42,7 +41,7 @@
 #include "XTypes/Utils.h"
 
 #include <dds/DdsDcpsGuidC.h>
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #endif
 
@@ -129,7 +128,6 @@ DomainParticipantImpl::DomainParticipantImpl(
     &LivelinessTimer::execute))
 {
   (void) this->set_listener(a_listener, mask);
-  monitor_.reset(TheServiceParticipant->monitor_factory_->create_dp_monitor(this));
   type_lookup_service_ = make_rch<XTypes::TypeLookupService>();
 }
 
@@ -482,7 +480,7 @@ DomainParticipantImpl::create_topic_i(
                      this->topics_protector_,
                      DDS::Topic::_nil());
 
-#if !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC || OPENDDS_CONFIG_MULTI_TOPIC
     if (topic_descrs_.count(topic_name)) {
       if (DCPS_debug_level > 3) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
@@ -797,7 +795,7 @@ DomainParticipantImpl::lookup_topicdescription(const char* name)
   TopicMap::mapped_type* entry = 0;
 
   if (Util::find(topics_, name, entry) == -1) {
-#if !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC || OPENDDS_CONFIG_MULTI_TOPIC
     TopicDescriptionMap::iterator iter = topic_descrs_.find(name);
     if (iter != topic_descrs_.end()) {
       return DDS::TopicDescription::_duplicate(iter->second);
@@ -810,7 +808,7 @@ DomainParticipantImpl::lookup_topicdescription(const char* name)
   }
 }
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
 
 DDS::ContentFilteredTopic_ptr
 DomainParticipantImpl::create_contentfilteredtopic(
@@ -917,9 +915,9 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_contentfilteredtopic(
   return DDS::RETCODE_OK;
 }
 
-#endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#endif
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
 
 DDS::MultiTopic_ptr DomainParticipantImpl::create_multitopic(
   const char* name, const char* type_name,
@@ -1010,9 +1008,9 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
   return DDS::RETCODE_OK;
 }
 
-#endif // OPENDDS_NO_MULTI_TOPIC
+#endif
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
 RcHandle<FilterEvaluator>
 DomainParticipantImpl::get_filter_eval(const char* filter)
@@ -1220,7 +1218,7 @@ DDS::ReturnCode_t
 DomainParticipantImpl::ignore_participant(
   DDS::InstanceHandle_t handle)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (!enabled_) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
@@ -1272,14 +1270,14 @@ DomainParticipantImpl::ignore_participant(
 #else
   ACE_UNUSED_ARG(handle);
   return DDS::RETCODE_UNSUPPORTED;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 }
 
 DDS::ReturnCode_t
 DomainParticipantImpl::ignore_topic(
   DDS::InstanceHandle_t handle)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (!enabled_) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
@@ -1322,14 +1320,14 @@ DomainParticipantImpl::ignore_topic(
 #else
   ACE_UNUSED_ARG(handle);
   return DDS::RETCODE_UNSUPPORTED;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 }
 
 DDS::ReturnCode_t
 DomainParticipantImpl::ignore_publication(
   DDS::InstanceHandle_t handle)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (!enabled_) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
@@ -1364,14 +1362,14 @@ DomainParticipantImpl::ignore_publication(
 #else
   ACE_UNUSED_ARG(handle);
   return DDS::RETCODE_UNSUPPORTED;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 }
 
 DDS::ReturnCode_t
 DomainParticipantImpl::ignore_subscription(
   DDS::InstanceHandle_t handle)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (!enabled_) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
@@ -1406,7 +1404,7 @@ DomainParticipantImpl::ignore_subscription(
 #else
   ACE_UNUSED_ARG(handle);
   return DDS::RETCODE_UNSUPPORTED;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 }
 
 DDS::DomainId_t
@@ -1511,7 +1509,7 @@ DomainParticipantImpl::get_current_time(DDS::Time_t& current_time)
   return DDS::RETCODE_OK;
 }
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
 DDS::ReturnCode_t
 DomainParticipantImpl::get_discovered_participants(DDS::InstanceHandleSeq& participant_handles)
@@ -1771,14 +1769,6 @@ DomainParticipantImpl::enable()
   dp_id_ = value.id;
   federated_ = value.federated;
 
-  if (monitor_) {
-    monitor_->report();
-  }
-
-  if (TheServiceParticipant->monitor_) {
-    TheServiceParticipant->monitor_->report();
-  }
-
   const DDS::ReturnCode_t ret = this->set_enabled();
 
   if (DCPS_debug_level > 1) {
@@ -2008,10 +1998,6 @@ DomainParticipantImpl::create_new_topic(
   RefCounted_Topic refCounted_topic(Topic_Pair(topic_servant, obj, false));
   topics_.insert(std::make_pair(topic_name, refCounted_topic));
 
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
-
   // the topics_ map has one reference and we duplicate to give
   // the caller another reference.
   return DDS::Topic::_duplicate(refCounted_topic.pair_.obj_.in());
@@ -2082,15 +2068,13 @@ DomainParticipantImpl::get_topic_ids(TopicIdVec& topics)
   }
 }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
 
 OwnershipManager*
 DomainParticipantImpl::ownership_manager()
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
-  if (bit_subscriber_) {
-    bit_subscriber_->bit_pub_listener_hack(this);
-  } else {
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
+  if (!bit_subscriber_) {
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING,
                  "(%P|%t) WARNING: DomainParticipantImpl::ownership_manager: bit_subscriber_ is null"));
@@ -2100,24 +2084,7 @@ DomainParticipantImpl::ownership_manager()
   return &owner_man_;
 }
 
-void
-DomainParticipantImpl::update_ownership_strength (const GUID_t& pub_id,
-                                                  const CORBA::Long& ownership_strength)
-{
-  ACE_GUARD(ACE_Recursive_Thread_Mutex,
-            tao_mon,
-            this->subscribers_protector_);
-
-  if (this->get_deleted ())
-    return;
-
-  for (SubscriberSet::iterator it(this->subscribers_.begin());
-      it != this->subscribers_.end(); ++it) {
-    it->svt_->update_ownership_strength(pub_id, ownership_strength);
-  }
-}
-
-#endif // OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#endif
 
 DomainParticipantImpl::RepoIdSequence::RepoIdSequence(const GUID_t& base) :
   base_(base),
@@ -2617,7 +2584,7 @@ bool DomainParticipantImpl::set_wait_pending_deadline(const MonotonicTimePoint& 
   return result;
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 DDS::ReturnCode_t DomainParticipantImpl::get_dynamic_type(
   DDS::DynamicType_var& type, const DDS::BuiltinTopicKey_t& key)
 {

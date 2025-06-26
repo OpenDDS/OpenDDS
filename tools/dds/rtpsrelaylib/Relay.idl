@@ -138,6 +138,41 @@ module RtpsRelay {
     Duration_t max_queue_latency;
   };
 
+  @mutable
+  @autoid(HASH)
+  struct ClientPartitionStatistics {
+    unsigned long slots;
+    unsigned long free_slots;
+    unsigned long count;
+    unsigned long partition_index_cache;
+    unsigned long partition_index_nodes;
+    unsigned long guids;
+    unsigned long guids_cache;
+  };
+
+  @mutable
+  @autoid(HASH)
+  struct RelayPartitionStatistics {
+    unsigned long addresses;
+    unsigned long partition_index_cache;
+    unsigned long partition_index_nodes;
+    unsigned long slots;
+  };
+
+  @mutable
+  @autoid(HASH)
+  struct Statistic {
+    string name;
+    unsigned long long value;
+  };
+
+  @mutable
+  @autoid(HASH)
+  struct OpenDDSModuleStatistics {
+    string id;
+    sequence<Statistic> stats;
+  };
+
   const string RELAY_STATISTICS_TOPIC_NAME = "Relay Statistics";
   @topic
   @mutable
@@ -171,7 +206,18 @@ module RtpsRelay {
     unsigned long admission_deferral_count;
     unsigned long remote_map_size;
     unsigned long max_ips_per_client;
+    unsigned long total_client_ips;
+    unsigned long total_client_ports;
     unsigned long rejected_address_map_size;
+    unsigned long deactivation_queue_size;
+    unsigned long expiration_queue_size;
+    unsigned long admission_queue_size;
+    unsigned long transitions_to_admitting;
+    unsigned long transitions_to_nonadmitting;
+    unsigned long virtual_memory_kb;
+    ClientPartitionStatistics client_partitions;
+    RelayPartitionStatistics relay_partitions;
+    sequence<OpenDDSModuleStatistics> opendds_modules;
   };
 };
 

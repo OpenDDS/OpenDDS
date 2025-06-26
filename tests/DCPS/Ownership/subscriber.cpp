@@ -11,6 +11,7 @@
 #include <ace/OS_NS_stdlib.h>
 
 #include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/SubscriberImpl.h>
@@ -18,14 +19,15 @@
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/udp/Udp.h>
-#include <dds/DCPS/transport/multicast/Multicast.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportImpl.h"
+
+#include "tests/Utils/StatusMatching.h"
+#include <tests/Utils/DistributedConditionSet.h>
 
 #include <iostream>
 
@@ -66,11 +68,63 @@ parse_args(int argc, ACE_TCHAR *argv[])
   return 0;
 }
 
+class BitDataReaderListenerImpl
+  : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
+public:
+  BitDataReaderListenerImpl(DistributedConditionSet_rch dcs)
+    : dcs_(dcs)
+  {}
+
+  void on_requested_deadline_missed(DDS::DataReader_ptr,
+                                    const DDS::RequestedDeadlineMissedStatus&)
+  {}
+
+  void on_requested_incompatible_qos(DDS::DataReader_ptr,
+                                     const DDS::RequestedIncompatibleQosStatus&)
+  {}
+
+  void on_liveliness_changed(DDS::DataReader_ptr,
+                             const DDS::LivelinessChangedStatus&)
+  {}
+
+  void on_subscription_matched(DDS::DataReader_ptr,
+                               const DDS::SubscriptionMatchedStatus&)
+  {}
+
+  void on_sample_rejected(DDS::DataReader_ptr,
+                          const DDS::SampleRejectedStatus&)
+  {}
+
+  void on_data_available(DDS::DataReader_ptr reader)
+  {
+    DDS::PublicationBuiltinTopicDataDataReader_var pub_bit =
+      DDS::PublicationBuiltinTopicDataDataReader::_narrow(reader);
+
+    DDS::PublicationBuiltinTopicDataSeq data;
+    DDS::SampleInfoSeq info;
+    pub_bit->read(data, info, DDS::LENGTH_UNLIMITED,
+                  DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+    for (unsigned int idx = 0; idx != data.length(); ++idx) {
+      if (info[idx].valid_data) {
+        dcs_->post("subscriber", "strength change " + OpenDDS::DCPS::to_dds_string(data[idx].ownership_strength.value));
+      }
+    }
+  }
+
+  void on_sample_lost(DDS::DataReader_ptr,
+                      const DDS::SampleLostStatus&)
+  {}
+
+  DistributedConditionSet_rch dcs_;
+};
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   try {
+    DistributedConditionSet_rch dcs =
+      OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
@@ -97,6 +151,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT("%N:%l main()")
                           ACE_TEXT(" ERROR: create_participant() failed!\n")), -1);
       }
+
+      DDS::DataReaderListener_var bit_listener(new BitDataReaderListenerImpl(dcs));
+      DDS::Subscriber_var bit_sub = participant->get_builtin_subscriber();
+      DDS::DataReader_var bit_reader = bit_sub->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
+      bit_reader->set_listener(bit_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      bit_listener->on_data_available(bit_reader);
 
       // Register Type (Messenger::Message)
       Messenger::MessageTypeSupport_var ts =
@@ -148,6 +208,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       dr_qos.deadline.period.nanosec = deadline.nanosec;
       dr_qos.liveliness.lease_duration.sec = liveliness.sec;
       dr_qos.liveliness.lease_duration.nanosec = liveliness.nanosec;
+      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
       DDS::DataReader_var reader1 =
         sub->create_datareader(topic.in(),
@@ -172,6 +233,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT("%N:%l main()")
                           ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
       }
+
+      if (wait_match(reader1, 2, Utils::EQ)) {
+        ACE_OS::exit(-1);
+      }
+      dcs->post("reader1", "ready");
+      if (wait_match(reader2, 2, Utils::EQ)) {
+        ACE_OS::exit(-1);
+      }
+      dcs->post("reader2", "ready");
 
       // Block until Publisher completes
       DDS::StatusCondition_var condition1 = reader1->get_statuscondition();

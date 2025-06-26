@@ -24,9 +24,9 @@
 #include "tao/BiDir_GIOP/BiDirGIOP.h"
 #include "ace/Reactor.h"
 
-#include <dds/OpenDDSConfigWrapper.h>
+#include <dds/DCPS/Definitions.h>
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
@@ -298,7 +298,7 @@ InfoRepoDiscovery::ior() const
 TransportConfig_rch
 InfoRepoDiscovery::bit_config()
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   ACE_Guard<ACE_Thread_Mutex> guard(lock_);
   if (bit_config_.is_nil()) {
     const std::string cfg_name = TransportRegistry::DEFAULT_INST_PREFIX +
@@ -339,10 +339,7 @@ InfoRepoDiscovery::bit_config()
 RcHandle<BitSubscriber>
 InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
 {
-#if defined (DDS_HAS_MINIMUM_BIT)
-  ACE_UNUSED_ARG(participant);
-  return RcHandle<BitSubscriber>();
-#else
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (!TheServiceParticipant->get_BIT()) {
     return RcHandle<BitSubscriber>();
   }
@@ -438,6 +435,9 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
     return RcHandle<BitSubscriber>();
   }
   return make_rch<BitSubscriber>(bit_subscriber);
+#else
+  ACE_UNUSED_ARG(participant);
+  return RcHandle<BitSubscriber>();
 #endif
 }
 

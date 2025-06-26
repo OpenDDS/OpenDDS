@@ -355,12 +355,14 @@ public:
     sedp_->request_remote_complete_type_objects(remote_entity, remote_type_info, cond);
   }
 
+  void fill_stats(DCPS::StatisticSeq& stats) const;
+
 protected:
   Sedp& endpoint_manager() { return *sedp_; }
 
   void purge_discovered_participant(const DiscoveredParticipantIter& iter);
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   void enqueue_location_update_i(DiscoveredParticipantIter iter, DCPS::ParticipantLocation mask, const DCPS::NetworkAddress& from, const char* reason);
   void process_location_updates_i(const DiscoveredParticipantIter& iter, const char* reason, bool force_publish = false);
   void publish_location_update_i(const DiscoveredParticipantIter& iter);
@@ -406,6 +408,9 @@ private:
   const bool secure_participant_user_data_;
 #endif
   XTypes::TypeLookupService_rch type_lookup_service_;
+
+  typedef OPENDDS_MAP_CMP(GUID_t, DCPS::String, GUID_tKeyLessThan) GuidToString;
+  GuidToString flexible_types_pre_discovery_;
 
   // Participant:
   const DDS::DomainId_t domain_;
@@ -479,6 +484,26 @@ private:
       DCPS::WeakRcHandle<SpdpTransport> tport_;
     };
 
+    // This is essentially PmfPeriodicTask<SpdpTransport>, but using that
+    // directly was causing warnings on MSVC x86.  There is only one member
+    // function that's used with a PeriodicTask.
+    struct PeriodicThreadStatus : DCPS::PeriodicTask {
+      PeriodicThreadStatus(DCPS::ReactorTask_rch reactor_task, const SpdpTransport& delegate)
+        : PeriodicTask(reactor_task)
+        , delegate_(delegate)
+      {}
+
+      void execute(const MonotonicTimePoint& now)
+      {
+        const DCPS::RcHandle<SpdpTransport> handle = delegate_.lock();
+        if (handle) {
+          handle->thread_status_task(now);
+        }
+      }
+
+      const DCPS::WeakRcHandle<SpdpTransport> delegate_;
+    };
+
     explicit SpdpTransport(DCPS::RcHandle<Spdp> outer);
     ~SpdpTransport();
 
@@ -517,7 +542,7 @@ private:
     ICE::AddressListType host_addresses() const;
     void send(const ACE_INET_Addr& address, const STUN::Message& message);
     ACE_INET_Addr stun_server_address() const;
-  #ifndef DDS_HAS_MINIMUM_BIT
+  #if OPENDDS_CONFIG_BUILT_IN_TOPICS
     void ice_connect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr);
     void ice_disconnect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr);
   #endif
@@ -543,7 +568,6 @@ private:
     DCPS::MulticastManager multicast_manager_;
     DCPS::NetworkAddressSet send_addrs_;
     ACE_Message_Block buff_, wbuff_;
-    typedef DCPS::PmfPeriodicTask<SpdpTransport> SpdpPeriodic;
     typedef DCPS::PmfSporadicTask<SpdpTransport> SpdpSporadic;
     typedef DCPS::PmfMultiTask<SpdpTransport> SpdpMulti;
     void send_local(const DCPS::MonotonicTimePoint& now);
@@ -554,7 +578,7 @@ private:
     void process_lease_expirations(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpSporadic> lease_expiration_task_;
     void thread_status_task(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpPeriodic> thread_status_task_;
+    DCPS::RcHandle<PeriodicThreadStatus> thread_status_task_;
     DCPS::RcHandle<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> > network_interface_address_reader_;
 #if OPENDDS_CONFIG_SECURITY
     void process_handshake_deadlines(const DCPS::MonotonicTimePoint& now);
@@ -596,7 +620,7 @@ private:
     STUN::Message message_;
   };
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   class IceConnect : public DCPS::Job {
   public:
     IceConnect(DCPS::RcHandle<Spdp> spdp,
@@ -615,7 +639,7 @@ private:
     DCPS::NetworkAddress addr_;
     bool connect_;
   };
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 #endif
 
   /// Spdp initialized
@@ -672,6 +696,11 @@ private:
   size_t n_participants_in_authentication_;
   void set_auth_state(DiscoveredParticipant& dp, AuthState state);
 #endif
+
+  static DCPS::StatisticSeq stats_template();
+  const DCPS::StatisticSeq stats_template_;
+  size_t total_location_updates_, total_builtin_pending_, total_builtin_associated_,
+    total_writer_pending_, total_writer_associated_, total_reader_pending_, total_reader_associated_;
 
   friend class ::DDS_TEST;
 };

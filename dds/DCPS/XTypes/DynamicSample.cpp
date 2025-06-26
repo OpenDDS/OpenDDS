@@ -5,9 +5,9 @@
 
 #include <DCPS/DdsDcps_pch.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
-
 #include "DynamicSample.h"
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include "DynamicDataImpl.h"
 #include "DynamicDataXcdrReadImpl.h"

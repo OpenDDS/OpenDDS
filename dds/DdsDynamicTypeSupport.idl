@@ -6,7 +6,9 @@
 #ifndef OPENDDS_DDS_DYNAMIC_TYPE_SUPPORT_IDL
 #define OPENDDS_DDS_DYNAMIC_TYPE_SUPPORT_IDL
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/OpenDDSConfigWrapper.idl>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include <dds/DdsDynamicData.idl>
 #  include <dds/DdsDcpsPublication.idl>
 #  include <dds/DdsDcpsTopic.idl>
@@ -184,6 +186,6 @@ local interface DynamicDataReader : DataReader {
 
 }; // module DDS
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif
 
 #endif // OPENDDS_DDS_DYNAMIC_TYPE_SUPPORT_IDL

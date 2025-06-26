@@ -512,7 +512,7 @@ namespace {
             be_global->language_mapping() != BE_GlobalData::LANGMAP_SP_CXX) {
           const std::string hdr = "dds/CorbaSeq/" + nameOfSeqHeader(elem) + "SeqTypeSupportImpl.h";
           be_global->conditional_include(hdr.c_str(), BE_GlobalData::STREAM_CPP,
-                                         "#ifndef OPENDDS_SAFETY_PROFILE");
+                                         "#if !OPENDDS_CONFIG_SAFETY_PROFILE");
         }
       } else {
         be_global->add_referenced(elem->file_name().c_str());
@@ -1490,10 +1490,10 @@ namespace {
       AST_String* string_node = dynamic_cast<AST_String*>(type);
       align(encoding, size, 4);
       size += 4;
-      const int width = (string_node->width() == 1) ? 1 : 2 /*UTF-16*/;
+      const size_t width = (string_node->width() == 1) ? 1 : 2 /*UTF-16*/;
       size += width * string_node->max_size()->ev()->u.ulval;
       if (type->node_type() == AST_Decl::NT_string) {
-        size += 1; // narrow string includes the null terminator
+        ++size; // narrow string includes the null terminator
       }
       break;
     }

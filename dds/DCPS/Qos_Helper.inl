@@ -15,7 +15,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 ACE_INLINE
 bool operator==(const DDS::UserDataQosPolicy& qos1,
                 const DDS::UserDataQosPolicy& qos2)
@@ -280,7 +280,7 @@ bool operator==(const DDS::DataWriterQos& qos1,
     && qos1.lifespan == qos2.lifespan
     && qos1.user_data == qos2.user_data
     && qos1.ownership == qos2.ownership
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
     && qos1.ownership_strength == qos2.ownership_strength
 #endif
     && qos1.writer_data_lifecycle == qos2.writer_data_lifecycle
@@ -628,7 +628,7 @@ bool Qos_Helper::consistent(const DDS::TopicQos& qos)
   // Leverage existing validation functions for related QoS
   // policies.
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
   DDS::HistoryQosPolicy const ds_history = {
     qos.durability_service.history_kind,
     qos.durability_service.history_depth
@@ -656,7 +656,7 @@ Qos_Helper::consistent(const DDS::DataWriterQos& qos)
   // Leverage existing validation functions for related QoS
   // policies.
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
   DDS::HistoryQosPolicy const ds_history = {
     qos.durability_service.history_kind,
     qos.durability_service.history_depth
@@ -787,13 +787,13 @@ bool Qos_Helper::valid(const DDS::OwnershipQosPolicy& qos)
 {
   return
     qos.kind == DDS::SHARED_OWNERSHIP_QOS
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
     || qos.kind == DDS::EXCLUSIVE_OWNERSHIP_QOS
 #endif
     ;
 }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
 ACE_INLINE
 bool Qos_Helper::valid(const DDS::OwnershipStrengthQosPolicy& /*qos*/)
 {
@@ -867,7 +867,7 @@ Qos_Helper::valid(const DDS::ResourceLimitsQosPolicy& qos)
         || qos.max_samples_per_instance > 0);
 }
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 ACE_INLINE
 bool
 Qos_Helper::valid(const DDS::DurabilityServiceQosPolicy& qos)
@@ -993,7 +993,7 @@ bool Qos_Helper::changeable(const DDS::DurabilityQosPolicy& qos1,
   return qos1 == qos2;
 }
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 ACE_INLINE
 bool
 Qos_Helper::changeable(const DDS::DurabilityServiceQosPolicy& qos1,
@@ -1040,7 +1040,7 @@ bool Qos_Helper::changeable(const DDS::OwnershipQosPolicy& qos1,
 }
 // ---------------------------------------------------------------
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
 ACE_INLINE
 bool Qos_Helper::changeable(
   const DDS::OwnershipStrengthQosPolicy& /* qos1 */,
@@ -1141,7 +1141,7 @@ bool Qos_Helper::changeable(const DDS::TopicQos& qos1,
   return
     changeable(qos1.topic_data, qos2.topic_data)
     && changeable(qos1.durability, qos2.durability)
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
     && changeable(qos1.durability_service, qos2.durability_service)
 #endif
     && changeable(qos1.deadline, qos2.deadline)
@@ -1163,7 +1163,7 @@ bool Qos_Helper::changeable(const DDS::DataWriterQos& qos1,
 {
   return
     changeable(qos1.durability, qos2.durability)
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
     && changeable(qos1.durability_service, qos2.durability_service)
 #endif
     && changeable(qos1.deadline, qos2.deadline)
@@ -1177,7 +1177,7 @@ bool Qos_Helper::changeable(const DDS::DataWriterQos& qos1,
     && changeable(qos1.lifespan, qos2.lifespan)
     && changeable(qos1.user_data, qos2.user_data)
     && changeable(qos1.ownership, qos2.ownership)
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
     && changeable(qos1.ownership_strength, qos2.ownership_strength)
 #endif
     && changeable(qos1.writer_data_lifecycle, qos2.writer_data_lifecycle)
@@ -1273,7 +1273,7 @@ bool Qos_Helper::copy_from_topic_qos(DDS::DataWriterQos& a_datawriter_qos,
   // Some members in the DataWriterQos are not contained
   // in the TopicQos. The caller needs initialize them.
   a_datawriter_qos.durability = a_topic_qos.durability;
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
   a_datawriter_qos.durability_service = a_topic_qos.durability_service;
 #endif
   a_datawriter_qos.deadline = a_topic_qos.deadline;

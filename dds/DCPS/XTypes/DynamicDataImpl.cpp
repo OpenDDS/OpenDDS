@@ -5,8 +5,9 @@
 
 #include <DCPS/DdsDcps_pch.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
-#  include "DynamicDataImpl.h"
+#include "DynamicDataImpl.h"
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #  include "DynamicTypeMemberImpl.h"
 #  include "Utils.h"
@@ -910,13 +911,13 @@ DynamicDataImpl::SingleValue::~SingleValue()
   case TK_BOOLEAN:
     SINGLE_VALUE_DESTRUCT(from_boolean);
   case TK_STRING8:
-    CORBA::string_free((char*)str_);
+    CORBA::string_free(str_);
     break;
 #ifdef DDS_HAS_WCHAR
   case TK_CHAR16:
     SINGLE_VALUE_DESTRUCT(from_wchar);
   case TK_STRING16:
-    CORBA::wstring_free((CORBA::WChar*)wstr_);
+    CORBA::wstring_free(wstr_);
     break;
 #endif
   }
@@ -5137,7 +5138,7 @@ bool serialized_size(const Encoding& encoding, size_t& size, const KeyOnly<DDS::
 
 // Serialize header for a basic member.
 // The return code @rc must be either NO_DATA or OK.
-bool serialize_dynamic_basic_member_header(Serializer& ser, void* value, DDS::ReturnCode_t rc,
+bool serialize_dynamic_basic_member_header(Serializer& ser, const void* value, DDS::ReturnCode_t rc,
   DDS::MemberId id, DDS::TypeKind tk, DDS::ExtensibilityKind extensibility,
   CORBA::Boolean optional, CORBA::Boolean must_understand)
 {
@@ -5159,12 +5160,12 @@ bool serialize_dynamic_basic_member_header(Serializer& ser, void* value, DDS::Re
         return false;
       }
     } else if (tk == TK_STRING8) {
-      const char* str = (const char*)value;
+      const char* str = static_cast<const char*>(value);
       serialized_size_string_value(encoding, member_size, str);
     }
 #ifdef DDS_HAS_WCHAR
     else if (tk == TK_STRING16) {
-      const CORBA::WChar* wstr = (const CORBA::WChar*)value;
+      const CORBA::WChar* wstr = static_cast<const CORBA::WChar*>(value);
       serialized_size_wstring_value(encoding, member_size, wstr);
     }
 #endif
@@ -5332,7 +5333,7 @@ bool serialize_dynamic_member(Serializer& ser, DDS::DynamicData_ptr data,
     CORBA::String_var val;
     rc = data->get_string_value(val, id);
     if (!XTypes::check_rc_from_get(rc, id, treat_member_as, "serialize_dynamic_member") ||
-        !serialize_dynamic_basic_member_header(ser, (void*)val.in(), rc, id, TK_STRING8,
+        !serialize_dynamic_basic_member_header(ser, val.in(), rc, id, TK_STRING8,
                                                extensibility, optional, must_understand)) {
       return false;
     }
@@ -5346,7 +5347,7 @@ bool serialize_dynamic_member(Serializer& ser, DDS::DynamicData_ptr data,
     CORBA::WString_var val;
     rc = data->get_wstring_value(val, id);
     if (!XTypes::check_rc_from_get(rc, id, treat_member_as, "serialize_dynamic_member") ||
-        !serialize_dynamic_basic_member_header(ser, (void*)val.in(), rc, id, TK_STRING16,
+        !serialize_dynamic_basic_member_header(ser, val.in(), rc, id, TK_STRING16,
                                                extensibility, optional, must_understand)) {
       return false;
     }
@@ -5801,4 +5802,4 @@ bool operator<<(Serializer& ser, const KeyOnly<DDS::DynamicData_ptr>& key)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

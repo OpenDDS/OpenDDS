@@ -70,7 +70,7 @@ to_long(const AST_Expression::AST_ExprValue& ev)
   case AST_Expression::EV_long:
     return ev.u.lval;
   case AST_Expression::EV_ulong:
-    return ev.u.ulval;
+    return static_cast<ACE_CDR::Long>(ev.u.ulval);
   case AST_Expression::EV_wchar:
     return ev.u.wcval;
   case AST_Expression::EV_char:
@@ -78,7 +78,7 @@ to_long(const AST_Expression::AST_ExprValue& ev)
   case AST_Expression::EV_bool:
     return ev.u.bval;
   case AST_Expression::EV_enum:
-    return ev.u.eval;
+    return static_cast<ACE_CDR::Long>(ev.u.eval);
   default:
     // Spec issue DDSXTY14-36 (64-bit integers as case labels in TypeObject)
     be_util::misc_error_and_abort("Illegal conversion to long");
@@ -557,7 +557,7 @@ std::string get_type_name(const OpenDDS::XTypes::CompleteTypeObject& cto)
     return cto.bitset_type.header.detail.type_name;
   case OpenDDS::XTypes::TK_SEQUENCE:
     {
-      const OPENDDS_OPTIONAL_NS::optional<OpenDDS::XTypes::CompleteTypeDetail>& detail =
+      const std::optional<OpenDDS::XTypes::CompleteTypeDetail>& detail =
         cto.sequence_type.header.detail;
       return detail.has_value() ? detail->type_name : "anonymous sequence";
     }
@@ -565,7 +565,7 @@ std::string get_type_name(const OpenDDS::XTypes::CompleteTypeObject& cto)
     return cto.array_type.header.detail.type_name;
   case OpenDDS::XTypes::TK_MAP:
     {
-      const OPENDDS_OPTIONAL_NS::optional<OpenDDS::XTypes::CompleteTypeDetail>& detail =
+      const std::optional<OpenDDS::XTypes::CompleteTypeDetail>& detail =
         cto.map_type.header.detail;
       return detail.has_value() ? detail->type_name : "anonymous map";
     }
@@ -1054,16 +1054,16 @@ typeobject_generator::update_maps(AST_Type* type,
 }
 
 void typeobject_generator::set_builtin_member_annotations(AST_Decl* member,
-  OPENDDS_OPTIONAL_NS::optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>& annotations)
+  std::optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>& annotations)
 {
   // Support only @hashid annotation for member at this time.
   const HashidAnnotation* hashid_ann = dynamic_cast<const HashidAnnotation*>(be_global->builtin_annotations_["::@hashid"]);
   std::string hash_name;
   if (hashid_ann->node_value_exists(member, hash_name)) {
-    OPENDDS_OPTIONAL_NS::optional<std::string> hash_id(hash_name);
+    std::optional<std::string> hash_id(hash_name);
     if (!annotations) {
       OpenDDS::XTypes::AppliedBuiltinMemberAnnotations value;
-      annotations = OPENDDS_OPTIONAL_NS::optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>(value);
+      annotations = std::optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>(value);
     }
     annotations.value().hash_id = hash_id;
   }

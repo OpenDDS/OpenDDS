@@ -8,16 +8,17 @@
 #ifndef OPENDDS_DCPS_WRITE_DATA_CONTAINER_H
 #define OPENDDS_DCPS_WRITE_DATA_CONTAINER_H
 
-#include "DataSampleElement.h"
-#include "SendStateDataSampleList.h"
-#include "WriterDataSampleList.h"
-#include "DisjointSequence.h"
-#include "PoolAllocator.h"
-#include "PoolAllocationBase.h"
-#include "Message_Block_Ptr.h"
-#include "SporadicTask.h"
 #include "ConditionVariable.h"
+#include "DataSampleElement.h"
+#include "Definitions.h"
+#include "DisjointSequence.h"
+#include "Message_Block_Ptr.h"
+#include "PoolAllocationBase.h"
+#include "PoolAllocator.h"
+#include "SendStateDataSampleList.h"
+#include "SporadicTask.h"
 #include "TimeTypes.h"
+#include "WriterDataSampleList.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsCoreC.h>
@@ -40,7 +41,7 @@ namespace DCPS {
 
 class InstanceDataSampleList;
 class DataWriterImpl;
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 class DataDurabilityCache;
 #endif
 class FilterEvaluator;
@@ -119,7 +120,7 @@ typedef OPENDDS_MAP(DDS::InstanceHandle_t, PublicationInstance_rch)
  *           we do not deadlock; and, 2) we incur the cost of
  *           obtaining the lock only once.
  */
-class OpenDDS_Dcps_Export WriteDataContainer : public virtual RcObject {
+class OpenDDS_Dcps_Export WriteDataContainer : public RcObject {
 public:
 
   friend class DataWriterImpl;
@@ -146,7 +147,7 @@ public:
     char const *     topic_name,
     /// Type name.
     char const *     type_name,
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
     /// The data durability cache for unsent data.
     DataDurabilityCache * durability_cache,
     /// DURABILITY_SERVICE QoS specific to the DataWriter.
@@ -182,7 +183,7 @@ public:
    */
   DDS::ReturnCode_t reenqueue_all(const GUID_t& reader_id,
                                   const DDS::LifespanQosPolicy& lifespan
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
                                   ,
                                   const OPENDDS_STRING& filterClassName,
                                   const FilterEvaluator* eval,
@@ -319,7 +320,7 @@ public:
   PublicationInstance_rch get_handle_instance(
     DDS::InstanceHandle_t handle);
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
   /**
    * Copy sent data to data DURABILITY cache.
    */
@@ -372,7 +373,7 @@ private:
                         const SendStateDataSampleList& appended,
                         const GUID_t& reader_id,
                         const DDS::LifespanQosPolicy& lifespan,
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
                         const OPENDDS_STRING& filterClassName,
                         const FilterEvaluator* eval,
                         const DDS::StringSeq& params,
@@ -540,7 +541,7 @@ private:
   /// Type name.
   char const * const type_name_;
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 
   /// Pointer to the data durability cache.
   /**

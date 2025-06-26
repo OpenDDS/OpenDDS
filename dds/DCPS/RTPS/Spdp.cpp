@@ -66,7 +66,7 @@ namespace {
     return false;
   }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   DCPS::ParticipantLocation compute_location_mask(const DCPS::NetworkAddress& address, bool from_relay)
   {
     if (address.get_type() == AF_INET6) {
@@ -78,7 +78,7 @@ namespace {
 
 #if OPENDDS_CONFIG_SECURITY
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   DCPS::ParticipantLocation compute_ice_location_mask(const DCPS::NetworkAddress& address)
   {
     if (address.get_type() == AF_INET6) {
@@ -274,6 +274,14 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , ice_agent_(ICE::Agent::instance())
   , n_participants_in_authentication_(0)
 #endif
+  , stats_template_(stats_template())
+  , total_location_updates_(0)
+  , total_builtin_pending_(0)
+  , total_builtin_associated_(0)
+  , total_writer_pending_(0)
+  , total_writer_associated_(0)
+  , total_reader_pending_(0)
+  , total_reader_associated_(0)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
@@ -338,6 +346,14 @@ Spdp::Spdp(DDS::DomainId_t domain,
   , crypto_handle_(crypto_handle)
   , ice_agent_(ICE::Agent::instance())
   , n_participants_in_authentication_(0)
+  , stats_template_(stats_template())
+  , total_location_updates_(0)
+  , total_builtin_pending_(0)
+  , total_builtin_associated_(0)
+  , total_writer_pending_(0)
+  , total_writer_associated_(0)
+  , total_reader_pending_(0)
+  , total_reader_associated_(0)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
@@ -498,7 +514,7 @@ namespace {
   }
 }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 void
 Spdp::enqueue_location_update_i(DiscoveredParticipantIter iter,
                                 DCPS::ParticipantLocation mask,
@@ -507,6 +523,7 @@ Spdp::enqueue_location_update_i(DiscoveredParticipantIter iter,
 {
   // We have the global lock.
   iter->second.location_updates_.push_back(DiscoveredParticipant::LocationUpdate(mask, from, DCPS::SystemTimePoint::now()));
+  ++total_location_updates_;
 
   if (DCPS::log_bits) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Spdp::enqueue_location_update_i: %@ for %C size=%B reason=%C\n", this, LogGuid(iter->first).c_str(), iter->second.location_updates_.size(), reason));
@@ -527,6 +544,7 @@ void Spdp::process_location_updates_i(const DiscoveredParticipantIter& iter, con
 
   DiscoveredParticipant::LocationUpdateList location_updates;
   std::swap(iter->second.location_updates_, location_updates);
+  total_location_updates_ -= location_updates.size();
 
   if (DCPS::log_bits) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Spdp::process_location_updates_i: %@ %C has %B location update(s) force_publish=%d reason=%C\n", this, LogGuid(iter->first).c_str(), location_updates.size(), force_publish, reason));
@@ -686,7 +704,8 @@ bool is_ip_equal(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
   return cmp_ip4(a, locator);
 }
 
-void print_locator(const CORBA::ULong i, const DCPS::Locator_t& o){
+void print_locator(const CORBA::ULong i, const DCPS::Locator_t& o)
+{
   const unsigned char* a = reinterpret_cast<const unsigned char*>(o.address);
   ACE_INET_Addr addr;
   bool b = locator_to_address(addr, o, false) == 0;
@@ -771,7 +790,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
   const bool from_relay = sedp_->core().from_relay(from);
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   const DCPS::ParticipantLocation location_mask = compute_location_mask(from, from_relay);
 #endif
 
@@ -867,11 +886,17 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       iter->second.last_recv_address_ = from;
     }
 
+    const GuidToString::iterator flex_iter = flexible_types_pre_discovery_.find(guid);
+    if (flex_iter != flexible_types_pre_discovery_.end()) {
+      iter->second.flexible_types_key_ = flex_iter->second;
+      flexible_types_pre_discovery_.erase(flex_iter);
+    }
+
     if (DCPS::transport_debug.log_progress) {
       log_progress("participant discovery", guid_, guid, iter->second.discovered_at_.to_idl_struct());
     }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
     if (!from_sedp) {
       enqueue_location_update_i(iter, location_mask, from, "new participant");
     }
@@ -958,7 +983,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       log_progress("secure participant discovery", guid_, guid, iter->second.discovered_at_.to_idl_struct());
     }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
     if (!from_sedp) {
       enqueue_location_update_i(iter, location_mask, from, "existing participant");
     }
@@ -971,7 +996,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       if (!from_relay && from) {
         iter->second.last_recv_address_ = from;
       }
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
       process_location_updates_i(iter, "non-secure liveliness");
 #endif
       return;
@@ -991,7 +1016,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       }
       purge_handshake_deadlines(iter);
 #endif
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
       process_location_updates_i(iter, "dispose/unregister");
 #endif
       if (iter != participants_.end()) {
@@ -1008,7 +1033,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       DDS::ParticipantBuiltinTopicData& discoveredBit = partBitData(iter->second.pdata_);
       pdataBit.key = discoveredBit.key;
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
       using DCPS::operator!=;
 #endif
       if (discoveredBit.user_data != pdataBit.user_data ||
@@ -1031,7 +1056,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         iter->second.last_recv_address_ = from;
       }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
       /*
        * If secure user data, force update location bit because we just gave
        * the first data on the participant. Readers might have been ignoring
@@ -1044,7 +1069,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #if OPENDDS_CONFIG_SECURITY
       purge_handshake_deadlines(iter);
 #endif
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
       process_location_updates_i(iter, "reset");
 #endif
       if (iter != participants_.end()) {
@@ -1055,7 +1080,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
   }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (iter != participants_.end()) {
     process_location_updates_i(iter, "catch all");
   }
@@ -1137,7 +1162,7 @@ Spdp::data_received(const DataSubmessage& data,
   if (!security_enabled) {
     process_participant_ice(plist, pdata, guid);
   }
-#elif !defined OPENDDS_SAFETY_PROFILE
+#elif !OPENDDS_CONFIG_SAFETY_PROFILE
   const bool from_relay = sedp_->core().from_relay(from);
   guard.release();
 
@@ -1157,7 +1182,7 @@ Spdp::data_received(const DataSubmessage& data,
 void
 Spdp::match_unauthenticated(const DiscoveredParticipantIter& dp_iter)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (!secure_part_user_data()) { // else the user data is assumed to be blank
     dp_iter->second.bit_ih_ = bit_subscriber_->add_participant(partBitData(dp_iter->second.pdata_), DDS::NEW_VIEW_STATE);
   }
@@ -1165,7 +1190,7 @@ Spdp::match_unauthenticated(const DiscoveredParticipantIter& dp_iter)
   process_location_updates_i(dp_iter, "match_unauthenticated");
 #else
   ACE_UNUSED_ARG(dp_iter);
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 }
 
 #if OPENDDS_CONFIG_SECURITY
@@ -2158,7 +2183,7 @@ Spdp::match_authenticated(const DCPS::GUID_t& guid, DiscoveredParticipantIter& i
   // Auth is now complete.
   sedp_->process_association_records_i(iter->second);
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   process_location_updates_i(iter, "match_authenticated");
 #endif
   return true;
@@ -2414,7 +2439,7 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
   }
 #endif
 
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
   if (outer->ipv4_participant_port_id_ > startingParticipantId && ACE_OS::getpid() == -1) {
     // Since pids are not available, use the fact that we had to increment
     // participantId to modify the GUID's pid bytes.  This avoids GUID conflicts
@@ -2496,12 +2521,12 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
                                  rchandle_from(this), &SpdpTransport::relay_stun_task);
 #endif
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   // internal thread bit reporting
   if (TheServiceParticipant->get_thread_status_manager().update_thread_status() && outer->harvest_thread_status_) {
-    thread_status_task_ = DCPS::make_rch<SpdpPeriodic>(reactor_task, ref(*this), &SpdpTransport::thread_status_task);
+    thread_status_task_ = DCPS::make_rch<PeriodicThreadStatus>(reactor_task, ref(*this));
   }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 
   // Connect the listeners last so that the tasks are created.
   DCPS::ConfigListener::job_queue(job_queue);
@@ -2597,12 +2622,12 @@ Spdp::SpdpTransport::enable_periodic_tasks()
   relay_stun_task_->schedule(TimeDuration::zero_value);
 #endif
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   const DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   if (thread_status_manager.update_thread_status() && outer->harvest_thread_status_) {
     thread_status_task_->enable(false, thread_status_manager.thread_status_interval());
   }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 }
 
 void
@@ -2997,7 +3022,7 @@ Spdp::SpdpTransport::send(const DCPS::NetworkAddress& addr)
   const ssize_t res = socket.send(wbuff_.rd_ptr(), wbuff_.length(), addr.to_addr());
   outer->sedp_->core().writer_resend_count(make_id(outer->guid_, ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER), 1);
   if (res < 0) {
-    outer->sedp_->core().send_fail(addr, DCPS::MCK_RTPS, wbuff_.length());
+    outer->sedp_->core().send_fail(addr, DCPS::MCK_RTPS, static_cast<ssize_t>(wbuff_.length()));
     const int err = errno;
     if (err != ENETUNREACH || !network_is_unreachable_) {
       errno = err;
@@ -3011,7 +3036,7 @@ Spdp::SpdpTransport::send(const DCPS::NetworkAddress& addr)
       network_is_unreachable_ = true;
     }
   } else {
-    outer->sedp_->core().send(addr, DCPS::MCK_RTPS, wbuff_.length());
+    outer->sedp_->core().send(addr, DCPS::MCK_RTPS, static_cast<ssize_t>(wbuff_.length()));
     network_is_unreachable_ = false;
   }
 
@@ -3055,19 +3080,19 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 #else
   ACE_INET_Addr local;
 
-  iovec iov[1];
-  iov[0].iov_base = buff_.wr_ptr();
+  iovec iov;
+  iov.iov_base = buff_.wr_ptr();
 #ifdef _MSC_VER
 #pragma warning(push)
   // iov_len is 32-bit on 64-bit VC++, but we don't want a cast here
   // since on other platforms iov_len is 64-bit
 #pragma warning(disable : 4267)
 #endif
-  iov[0].iov_len = buff_.space();
+  iov.iov_len = buff_.space();
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
-  const ssize_t bytes = socket.recv(iov, 1, remote, 0
+  const ssize_t bytes = socket.recv(&iov, 1, remote, 0
 #if defined(ACE_RECVPKTINFO) || defined(ACE_RECVPKTINFO6)
                                     , &local
 #endif
@@ -3080,7 +3105,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   }
 
   if (bytes > 0) {
-    buff_.wr_ptr(bytes);
+    buff_.wr_ptr(static_cast<size_t>(bytes));
   } else if (bytes == 0) {
     return 0;
   } else {
@@ -3406,7 +3431,7 @@ Spdp::SendStun::execute()
   const ACE_SOCK_Dgram& socket = tport->choose_send_socket(address_);
   const ssize_t res = socket.send(tport->wbuff_.rd_ptr(), tport->wbuff_.length(), address_.to_addr());
   if (res < 0) {
-    outer->sedp_->core().send_fail(address_, DCPS::MCK_STUN, tport->wbuff_.length());
+    outer->sedp_->core().send_fail(address_, DCPS::MCK_STUN, static_cast<ssize_t>(tport->wbuff_.length()));
     const int err = errno;
     if (err != ENETUNREACH || !tport->network_is_unreachable_) {
       errno = err;
@@ -3420,7 +3445,7 @@ Spdp::SendStun::execute()
       tport->network_is_unreachable_ = true;
     }
   } else {
-    outer->sedp_->core().send(address_, DCPS::MCK_STUN, tport->wbuff_.length());
+    outer->sedp_->core().send(address_, DCPS::MCK_STUN, static_cast<ssize_t>(tport->wbuff_.length()));
     tport->network_is_unreachable_ = false;
   }
 }
@@ -3432,7 +3457,7 @@ Spdp::SpdpTransport::stun_server_address() const
   return outer ? outer->sedp_->core().spdp_stun_server_address().to_addr() : ACE_INET_Addr();
 }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 void
 Spdp::SpdpTransport::ice_connect(const ICE::GuidSetType& guids, const ACE_INET_Addr& addr)
 {
@@ -3463,7 +3488,7 @@ Spdp::SpdpTransport::ice_disconnect(const ICE::GuidSetType& guids, const ACE_INE
 
   outer->sedp_->job_queue()->enqueue(DCPS::make_rch<IceConnect>(outer, guids, DCPS::NetworkAddress(addr), false));
 }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 #endif
 
 void
@@ -3677,7 +3702,7 @@ void Spdp::SpdpTransport::on_data_available(DCPS::ConfigReader_rch)
           core.reset_relay_stun_task_falloff();
           relay_stun_task_->schedule(TimeDuration::zero_value);
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
           const DCPS::ParticipantLocation mask =
             DCPS::LOCATION_LOCAL |
             DCPS::LOCATION_LOCAL6 |
@@ -3722,7 +3747,7 @@ void Spdp::SpdpTransport::on_data_available(DCPS::ConfigReader_rch)
             }
           }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
           const DCPS::ParticipantLocation mask =
             DCPS::LOCATION_RELAY |
             DCPS::LOCATION_RELAY6;
@@ -3769,7 +3794,7 @@ void Spdp::SpdpTransport::on_data_available(DCPS::ConfigReader_rch)
           outer->ice_agent_->remove_endpoint(DCPS::static_rchandle_cast<ICE::Endpoint>(rchandle_from(this)));
           ice_endpoint_added_ = false;
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
           const DCPS::ParticipantLocation mask =
             DCPS::LOCATION_ICE |
             DCPS::LOCATION_ICE6;
@@ -4345,7 +4370,7 @@ void Spdp::SpdpTransport::relay_stun_task(const MonotonicTimePoint& /*now*/)
 
 void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange sc)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
@@ -4384,7 +4409,7 @@ void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::St
 
 void Spdp::SpdpTransport::disable_relay_stun_task()
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
@@ -4459,7 +4484,7 @@ Spdp::SpdpTransport::process_lease_expirations(const DCPS::MonotonicTimePoint& n
 void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& now)
 {
   ACE_UNUSED_ARG(now);
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
@@ -4488,7 +4513,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& now
     outer->bit_subscriber_->add_thread_status(data, DDS::NEW_VIEW_STATE, i->timestamp());
   }
 
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 }
 
 #if OPENDDS_CONFIG_SECURITY
@@ -4606,7 +4631,7 @@ void Spdp::process_participant_ice(const ParameterList& plist,
       ice_agent_->start_ice(spdp_endpoint, guid_, guid, spdp_pos->second);
     } else {
       ice_agent_->stop_ice(spdp_endpoint, guid_, guid);
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
       ACE_GUARD(ACE_Thread_Mutex, g, lock_);
       DiscoveredParticipantIter iter = participants_.find(guid);
       if (iter != participants_.end()) {
@@ -4733,7 +4758,10 @@ bool Spdp::enable_flexible_types(const GUID_t& remoteParticipantId, const char* 
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
   const DiscoveredParticipantIter iter = participants_.find(remoteParticipantId);
-  if (iter != participants_.end()) {
+  if (iter == participants_.end()) {
+    flexible_types_pre_discovery_[remoteParticipantId] = typeKey;
+    return true;
+  } else if (iter->second.flexible_types_key_ == "") {
     iter->second.flexible_types_key_ = typeKey;
     return endpoint_manager().enable_flexible_types(remoteParticipantId, typeKey);
   }
@@ -4751,6 +4779,71 @@ bool Spdp::has_domain_participant(const GUID_t& remote) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
   return has_discovered_participant(remote);
+}
+
+#ifndef OPENDDS_RTPS_UNITY_BUILD_ID
+#  define OPENDDS_RTPS_UNITY_BUILD_ID SpdpAnonymous
+#endif
+
+namespace { namespace OPENDDS_RTPS_UNITY_BUILD_ID {
+  const DDS::UInt32 Stats_Index_LeaseExpirations = 0,
+    Stats_Index_HandshakeDeadlines = 1,
+    Stats_Index_HandshakeResends = 2,
+    Stats_Index_DiscoveredParticipants = 3,
+    Stats_Index_TotalLocationUpdates = 4,
+    Stats_Index_TotalBuiltinPending = 5,
+    Stats_Index_TotalBuiltinAssociated = 6,
+    Stats_Index_TotalWriterPending = 7,
+    Stats_Index_TotalWriterAssociated = 8,
+    Stats_Index_TotalReaderPending = 9,
+    Stats_Index_TotalReaderAssociated = 10,
+    Stats_Index_DirectedGuids = 11,
+    Stats_Len = 12;
+} }
+
+DCPS::StatisticSeq Spdp::stats_template()
+{
+  using namespace OPENDDS_RTPS_UNITY_BUILD_ID;
+  const DCPS::StatisticSeq sedp_template = Sedp::stats_template();
+  DCPS::StatisticSeq stats(Stats_Len + sedp_template.length());
+  stats.length(Stats_Len + sedp_template.length());
+  stats[Stats_Index_LeaseExpirations].name = "LeaseExpirations";
+  stats[Stats_Index_HandshakeDeadlines].name = "HandshakeDeadlines";
+  stats[Stats_Index_HandshakeResends].name = "HandshakeResends";
+  stats[Stats_Index_DiscoveredParticipants].name = "DiscoveredParticipants";
+  stats[Stats_Index_TotalLocationUpdates].name = "TotalLocationUpdates";
+  stats[Stats_Index_TotalBuiltinPending].name = "TotalBuiltinPending";
+  stats[Stats_Index_TotalBuiltinAssociated].name = "TotalBuiltinAssociated";
+  stats[Stats_Index_TotalWriterPending].name = "TotalWriterPending";
+  stats[Stats_Index_TotalWriterAssociated].name = "TotalWriterAssociated";
+  stats[Stats_Index_TotalReaderPending].name = "TotalReaderPending";
+  stats[Stats_Index_TotalReaderAssociated].name = "TotalReaderAssociated";
+  stats[Stats_Index_DirectedGuids].name = "DirectedGuids";
+  for (DDS::UInt32 i = 0; i < sedp_template.length(); ++i) {
+    stats[Stats_Len + i].name = sedp_template[i].name;
+  }
+  return stats;
+}
+
+void Spdp::fill_stats(DCPS::StatisticSeq& stats) const
+{
+  using namespace OPENDDS_RTPS_UNITY_BUILD_ID;
+  stats = stats_template_;
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  stats[Stats_Index_LeaseExpirations].value = lease_expirations_.size();
+#if OPENDDS_CONFIG_SECURITY
+  stats[Stats_Index_HandshakeDeadlines].value = handshake_deadlines_.size();
+  stats[Stats_Index_HandshakeResends].value = handshake_resends_.size();
+#endif
+  stats[Stats_Index_DiscoveredParticipants].value = participants_.size();
+  stats[Stats_Index_TotalLocationUpdates].value = total_location_updates_;
+  stats[Stats_Index_TotalBuiltinPending].value = total_builtin_pending_;
+  stats[Stats_Index_TotalBuiltinAssociated].value = total_builtin_associated_;
+  stats[Stats_Index_TotalWriterPending].value = total_writer_pending_;
+  stats[Stats_Index_TotalWriterAssociated].value = total_writer_associated_;
+  stats[Stats_Index_TotalReaderPending].value = total_reader_pending_;
+  stats[Stats_Index_TotalReaderAssociated].value = total_reader_associated_;
+  stats[Stats_Index_DirectedGuids].value = tport_ ? tport_->directed_guids_.size() : 0;
 }
 
 DCPS::TopicStatus Spdp::assert_topic(GUID_t& topicId, const char* topicName,
@@ -4856,6 +4949,13 @@ void Spdp::purge_discovered_participant(const DiscoveredParticipantIter& iter)
     --n_participants_in_authentication_;
   }
 #endif
+  total_location_updates_ -= iter->second.location_updates_.size();
+  total_builtin_pending_ -= iter->second.builtin_pending_records_.size();
+  total_builtin_associated_ -= iter->second.builtin_associated_records_.size();
+  total_writer_pending_ -= iter->second.writer_pending_records_.size();
+  total_writer_associated_ -= iter->second.writer_associated_records_.size();
+  total_reader_pending_ -= iter->second.reader_pending_records_.size();
+  total_reader_associated_ -= iter->second.reader_associated_records_.size();
 }
 
 #if OPENDDS_CONFIG_SECURITY

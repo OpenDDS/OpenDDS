@@ -25,7 +25,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export TransportConfig : public virtual RcObject {
+class OpenDDS_Dcps_Export TransportConfig : public RcObject {
 public:
 
   static const unsigned long DEFAULT_PASSIVE_CONNECT_DURATION = 60000;
@@ -61,7 +61,8 @@ public:
   void sorted_insert(const TransportInst_rch& inst);
 
   void populate_locators(OpenDDS::DCPS::TransportLocatorSeq& trans_info,
-                         DDS::DomainId_t domain) const;
+                         DDS::DomainId_t domain,
+                         DomainParticipantImpl* participant) const;
 
   bool uses_template() const;
 

@@ -6,6 +6,6 @@
 #ifndef OPENDDS_CONFIG_WRAPPER_IDL
 #define OPENDDS_CONFIG_WRAPPER_IDL
 
-#include "OpenDDSConfigWrapper.h"
+#include <dds/OpenDDSConfigWrapper.h>
 
 #endif

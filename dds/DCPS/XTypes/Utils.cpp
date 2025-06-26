@@ -5,8 +5,9 @@
 
 #include <DCPS/DdsDcps_pch.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
-#  include "Utils.h"
+#include "Utils.h"
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #  include "DynamicDataImpl.h"
 
@@ -1192,7 +1193,7 @@ DDS::ReturnCode_t set_enum_value(
   if (rc != DDS::RETCODE_OK) {
     return rc;
   }
-  return set_enum_value(type, dest, id, md->id());
+  return set_enum_value(type, dest, id, static_cast<DDS::Int32>(md->id()));
 }
 
 DDS::ReturnCode_t copy_member(
@@ -1789,10 +1790,10 @@ namespace { // helpers for XTypes::remove_enumerators (below)
         return replace_identifier(*id.array_ldefn().element_identifier);
       case TI_PLAIN_MAP_SMALL:
         return replace_identifier(*id.map_sdefn().key_identifier)
-          | replace_identifier(*id.map_sdefn().element_identifier);
+          | int(replace_identifier(*id.map_sdefn().element_identifier));
       case TI_PLAIN_MAP_LARGE:
         return replace_identifier(*id.map_ldefn().key_identifier)
-          | replace_identifier(*id.map_ldefn().element_identifier);
+          | int(replace_identifier(*id.map_ldefn().element_identifier));
       case EK_MINIMAL:
       case EK_COMPLETE: {
         const TypeIdentifier newId = replace_object(id);
@@ -1843,7 +1844,7 @@ namespace { // helpers for XTypes::remove_enumerators (below)
         return replace_identifier(mcto.array_type.element.common.type);
       case TK_MAP:
         return replace_identifier(mcto.map_type.key.common.type)
-          | replace_identifier(mcto.map_type.element.common.type);
+          | int(replace_identifier(mcto.map_type.element.common.type));
       default:
         return false;
       }
@@ -1907,4 +1908,4 @@ TypeIdentifier remove_enumerators(const TypeIdentifier& top_level,
 } // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

@@ -124,11 +124,11 @@ DCPS::TimeDuration rtps_duration_to_time_duration(const Duration_t& rtps_duratio
   if (version < PROTOCOLVERSION_2_4 && vendor == VENDORID_OPENDDS) {
     return OpenDDS::DCPS::TimeDuration(
       rtps_duration.seconds,
-      static_cast<ACE_UINT32>(rtps_duration.fraction / 1000));
+      static_cast<suseconds_t>(rtps_duration.fraction / 1000));
   } else {
     return OpenDDS::DCPS::TimeDuration(
       rtps_duration.seconds,
-      DCPS::uint32_fractional_seconds_to_microseconds(rtps_duration.fraction));
+      static_cast<suseconds_t>(DCPS::uint32_fractional_seconds_to_microseconds(rtps_duration.fraction)));
   }
 }
 
@@ -151,7 +151,7 @@ bool bitmapNonEmpty(const SequenceNumberSet& snSet)
 
   const CORBA::ULong mod = snSet.numBits % 32;
   const CORBA::ULong mask = mod ? (1 + ~(1u << (32 - mod))) : 0xFFFFFFFF;
-  return (bool)(snSet.bitmap[last_index] & mask);
+  return static_cast<CORBA::ULong>(snSet.bitmap[last_index]) & mask;
 }
 
 bool get_rtps_port(DDS::UInt16& port_result, const char* what,

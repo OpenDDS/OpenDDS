@@ -11,8 +11,10 @@
 
 using namespace examples::boilerplate;
 
-ZeroCopyReaderListenerImpl::ZeroCopyReaderListenerImpl() :
-  messages_(), infos_()
+ZeroCopyReaderListenerImpl::ZeroCopyReaderListenerImpl(DistributedConditionSet_rch dcs)
+  : DataReaderListenerImpl(dcs)
+  , messages_()
+  , infos_()
 {
   std::cout << "Using ZeroCopyReaderListenerImpl" << std::endl;
 }

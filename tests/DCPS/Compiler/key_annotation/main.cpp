@@ -9,7 +9,7 @@
 
 using namespace key_annotation;
 
-const OpenDDS::DCPS::Encoding encoding(
+const OpenDDS::DCPS::Encoding test_encoding(
   OpenDDS::DCPS::Encoding::KIND_XCDR1);
 
 template <typename T>
@@ -51,7 +51,7 @@ bool assert_key_only_size(const T& data, size_t expected)
 {
   typedef OpenDDS::DCPS::KeyOnly<const T> KeyOnlyType;
   const KeyOnlyType key_only_data(data);
-  const size_t size = OpenDDS::DCPS::serialized_size(encoding, key_only_data);
+  const size_t size = OpenDDS::DCPS::serialized_size(test_encoding, key_only_data);
   if (size != expected) {
     const char* type_name = get_type_name<T>();
     ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: ")

@@ -205,6 +205,7 @@ my @specs =
     'optimize!', 'Optimization (no)',
     'inline!', 'Inlining (yes)',
     'static!', 'Static libraries (no)',
+    'static-runtime!', 'Link to static platform runtime libraries',
     'ipv6!', 'IPv6 support (no)',
     'sanitize=s@', 'Build with a sanitizer, can pass multiple times' .
       $argIndent . 'or one list separated by commas, combining asan' .
@@ -215,8 +216,8 @@ my @specs =
     'compile-warnings=s', 'Enable additional compiler warnings' .
       $argIndent . '(default compiler warnings)' .
       $argIndent . '  WARNING: enable additional warnings' .
-      $argIndent . '  ERROR: enable additional warnings that are' .
-      $argIndent . '    treated as errors',
+      $argIndent . '  ERROR: enable additional warnings and treat' .
+      $argIndent . '    warnings as errors',
    ],
    ['Required dependencies for OpenDDS:',
     'ace=s', 'ACE (use ACE_ROOT, ACE_wrappers, or download)',
@@ -250,8 +251,6 @@ my @specs =
    ],
    ['Optional dependencies for OpenDDS (disabled by default unless noted otherwise):',
     'java:s', 'Java development kit (use JAVA_HOME)',
-    'jboss:s', 'JBoss application server (use JBOSS_HOME)',
-    'ant:s', 'Ant for JBoss (use ANT_HOME or system pkg)',
     'wireshark:s',
       'Wireshark dev headers or source not built with' .
       $argIndent . 'CMake (use WIRESHARK_SRC or system pkg)' .
@@ -793,22 +792,23 @@ EOF
     }
     $opts{'compiler_version'} = $vers->{$ver};
 
-    if ($ver >= 19) {
-      push(@features, 'no_cxx11=0');
-      print "Visual C++ has >= C++11 support\n" if $opts{'verbose'};
-    }
+    my $std = "stdcpp17";
     if ($opts{'std'}) {
-      my $std = "stdcpp$cxx_std";
-      push(@mpcopts, '-value_template', "LanguageStandard=$std");
-      print "Setting Visual C++ LanguageStandard to $std\n" if $opts{'verbose'};
-      if ($opts{'std'} eq 'latest' || $cxx_std >= 17) {
-        push(@features, 'no_cxx17=0');
-        print "Visual C++ has >= C++17 support\n" if $opts{'verbose'};
-      }
+      $std = "stdcpp$cxx_std";
     }
+    push(@mpcopts, '-value_template', "LanguageStandard=$std");
+    print "Setting Visual C++ LanguageStandard to $std\n" if $opts{'verbose'};
+
     $ENV{'PATH'} = $savepath;
     print "Detected Visual C++ version: $opts{'compiler_version'}\n"
       if $opts{'verbose'};
+
+    if ($opts{'static'} && exists $opts{'static-runtime'} && $opts{'static-runtime'} == 0) {
+      push(@mpcopts, '-value_template', 'Debug::runtime_library=MultiThreadedDebugDLL',
+                     '-value_template', 'Release::runtime_library=MultiThreadedDLL');
+      print "Set Visual C++ runtime library to MultiThreaded(Debug)DLL with static build\n"
+        if $opts{'verbose'};
+    }
   }
   elsif ($opts{'compiler'} =~ /g\+\+|clang/) {
     my $version_string = `$opts{'compiler'} --version`;
@@ -843,20 +843,19 @@ EOF
         print "Detected Clang >= 6, default -std=gnu++14\n" if $opts{'verbose'};
       }
     }
+  }
 
-    if ($opts{'std'}) {
-      my $cpp17 = qr/(17|2a|20|2b|23)/;
-      if ($opts{'std'} =~ /(0x|11|1y|14|1z|$cpp17)$/) {
-        push(@features, 'no_cxx11=0');
-        print "Compiler has >= C++11 support\n" if $opts{'verbose'};
-      }
+  ## Minimum C++ Standard is C++17
 
-      if ($opts{'std'} =~ /$cpp17$/) {
-        push(@features, 'no_cxx17=0');
-        print "Compiler has >= C++17 support\n" if $opts{'verbose'};
-      }
+  if ($opts{'std'}) {
+    my $cpp17 = qr/(17|2a|20|2b|23)/;
+    if ($opts{'std'} !~ /$cpp17$/) {
+      die("C++17 is required to compile OpenDDS");
     }
   }
+
+  push(@features, 'no_cxx11=0');
+  push(@features, 'no_cxx17=0');
 }
 
 my $compile_warnings = $opts{'compile-warnings'} // '';
@@ -1364,6 +1363,11 @@ sub write_platform_macros {
           print $PMG "$macro = $opts{$key}\n";
         }
       }
+      if ($opts{'static-runtime'}) {
+        print $PMG "static_stdlibs = 1\n";
+        print "Added static_stdlibs to platform_macros.GNU due to --static-runtime\n"
+          if $opts{'verbose'};
+      }
       if ($cross_compile) {
         print $PMG "CROSS-COMPILE = 1\n";
         print $PMG 'TAO_IDL = $(HOST_ACE)/bin/tao_idl', "\n";
@@ -1454,15 +1458,49 @@ EOT
 
 sub write_opendds_configh {
   my %buildEnv = %{shift()};
+
   my $CFGH = backup_and_open("$buildEnv{'DDS_ROOT'}/dds/OpenDDSConfig.h");
   my $CFGIN = new FileHandle;
   open($CFGIN, 'dds/OpenDDSConfig.h.in') or die("Can't open OpenDDSConfig.h.in for reading: $!\nStopped");
 
+  my $exclusive = $opts{'ownership-kind-exclusive'} // 1;
+  if ($opts{'safety-profile'}) {
+    $exclusive = 0;
+  } elsif (exists $opts{'ownership-profile'} && !$opts{'ownership-profile'}) {
+    $exclusive = 0;
+  }
+
+  my $cxx11 = 0;
+  for my $f (@features) {
+    if ($f eq 'no_cxx11=0') {
+      $cxx11 = 1;
+    }
+  }
+
+  my $safety_profile_0 = $opts{'safety-profile'} ? 0 : 1;
+  my $safety_profile_1 = $opts{'safety-profile'} ? 1 : 0;
+
   my %config = (
     'OPENDDS_CONFIG_AUTO_STATIC_INCLUDES' => 0,
     'OPENDDS_CONFIG_BOOTTIME_TIMERS' => $opts{'boottime'} // 0,
+    'OPENDDS_CONFIG_BUILT_IN_TOPICS' => $opts{'built-in-topics'} // 1,
+    'OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC' => $opts{'content-filtered-topic'} // $safety_profile_0,
+    'OPENDDS_CONFIG_MULTI_TOPIC' => $opts{'multi-topic'} // $safety_profile_0,
+    'OPENDDS_CONFIG_OBJECT_MODEL_PROFILE' => $opts{'object-model-profile'} // $safety_profile_0,
+    'OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE' => $exclusive,
+    'OPENDDS_CONFIG_OWNERSHIP_PROFILE' => $opts{'ownership-profile'} // 1,
+    'OPENDDS_CONFIG_PERSISTENCE_PROFILE' => $opts{'persistence-profile'} // $safety_profile_0,
+    'OPENDDS_CONFIG_QUERY_CONDITION' => $opts{'query-condition'} // $safety_profile_0,
+    'OPENDDS_CONFIG_RAPIDJSON' => ($opts{'rapidjson'} // 0) ? 1 : 0,
+    'OPENDDS_CONFIG_SAFETY_PROFILE' => ($buildEnv{'build'} eq 'host') ? 0 : $safety_profile_1,
     'OPENDDS_CONFIG_SECURITY' => $opts{'security'} // 0,
   );
+
+  if (exists $opts{'content-subscription'}) {
+    $config{'OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC'} = $opts{'content-subscription'};
+    $config{'OPENDDS_CONFIG_MULTI_TOPIC'} = $opts{'content-subscription'};
+    $config{'OPENDDS_CONFIG_QUERY_CONDITION'} = $opts{'content-subscription'};
+  }
 
   my $replace_value = sub {
     my $var = shift;
@@ -1485,8 +1523,6 @@ sub write_opendds_configh {
 ## Optional OpenDDS dependencies
 my %optdep = (
   'java' => {env => 'JAVA_HOME', sanity => 'include/jni.h', mpc => 'java'},
-  'jboss' => {env => 'JBOSS_HOME', sanity => 'lib/jboss-common.jar'},
-  'ant' => {env => 'ANT_HOME', sanity => 'bin/ant'},
   'wireshark' => {env => 'WIRESHARK_SRC', sanity => 'epan/packet.h', mpc => 'wireshark'},
   'wireshark-cmake' => {
     env => 'WIRESHARK_SRC',
@@ -1505,7 +1541,6 @@ my %optdep = (
   'rapidjson' => {
     env => 'RAPIDJSON_ROOT',
     sanity => 'include/rapidjson/rapidjson.h',
-    mpc => 'no_rapidjson=0',
   },
   'qt' => {env => 'QTDIR', sanity => '', mpc => 'qt5'},
   'xerces3' => {
@@ -1644,9 +1679,9 @@ sub system_default_install_dir {
 }
 
 my $build_gtest = 0;
+my $gtest_root = undef;
 if (exists $opts{'gtest'} || $tests) {
   my $gtest_sanity = 'include/gtest/gtest.h';
-  my $gtest_root = undef;
 
   if ($opts{'gtest'}) {
     die "ERROR: '$gtest_sanity' not found in supplied gtest directory '$opts{'gtest'}'"
@@ -1748,7 +1783,7 @@ if (exists $opts{'rapidjson'}) {
   }
 }
 
-my %use_system_pkg = map {$_, 1} qw/ant glib qt xerces3 openssl/;
+my %use_system_pkg = map {$_, 1} qw/glib qt xerces3 openssl/;
 
 my %use_win_default = (
     'openssl' => system_default_install_dir() . '/OpenSSL',
@@ -1990,14 +2025,6 @@ if ($build_gtest) {
   }
 
   print("Done Building GoogleTest\n");
-}
-
-if (exists $opts{'jboss'} && !exists $opts{'java'}) {
-  die "ERROR: --java is required for --jboss (OpenDDS JMS Provider).\nStopped";
-}
-
-if (exists $opts{'jboss'} && !exists $opts{'ant'}) {
-  die "ERROR: --ant is required for --jboss (OpenDDS JMS Provider).\nStopped";
 }
 
 if (exists $opts{'wireshark-cmake'}) {
@@ -2514,6 +2541,10 @@ EOT
     push(@mwc_common_args, '-static');
   }
 
+  if ($opts{'rapidjson'}) {
+    push(@mwc_common_args, '-features', 'no_rapidjson=0');
+  }
+
   if (!$buildtao) {
     my %existing_features = get_default_features($buildEnv);
     my %requested_features = get_requested_features();
@@ -2637,6 +2668,7 @@ sub configure_build {
     write_default_features($buildEnvRef);
     write_platform_macros($buildEnvRef);
   }
+  # Write the config before generating the workspace so that OpenDDSConfig.h is in place for the Java Support in MPC.
   write_opendds_configh($buildEnvRef);
   generate_workspace($buildEnvRef);
   write_environment($buildEnvRef, $buildEnvRef->{'DDS_ROOT'});
@@ -2871,13 +2903,16 @@ sub write_cmake_file {
     $name = uc("OPENDDS_$name");
     $name =~ s/-/_/g;
 
-    print $fh "set($name ", to_cmake_value($value), ")\n";
+    if (defined($value)) {
+      print $fh "set($name ", to_cmake_value($value), ")\n";
+    }
   }
 
   sub generate_config_cmake {
     my $fh = shift();
     my $buildEnv = shift();
 
+    print_cmake_config($fh, 'SOURCE_DIR', Cwd::abs_path($FindBin::RealBin));
     print_cmake_config($fh, 'MPC', Cwd::abs_path($buildEnv->{'MPC_ROOT'}));
     print_cmake_config($fh, 'ACE', Cwd::abs_path($buildEnv->{'ACE_ROOT'}));
     print_cmake_config($fh, 'TAO', Cwd::abs_path($buildEnv->{'TAO_ROOT'}));
@@ -2959,7 +2994,7 @@ sub write_cmake_file {
     }
 
     if (defined($cxx_std)) {
-      print_cmake_config($fh, 'OPENDDS_CXX_STD', $cxx_std);
+      print_cmake_config($fh, 'CXX_STD', $cxx_std);
     }
 
     # TODO(iguessthislldo): Move to a smarter system that can use existing
@@ -2971,7 +3006,6 @@ sub write_cmake_file {
       'content-filtered-topic' => 1,
       'content-subscription' => 1,
       'debug' => 1,
-      'gtest' => '',
       'inline' => 1,
       'java' => '',
       'multi-topic' => 1,
@@ -2985,11 +3019,15 @@ sub write_cmake_file {
       'rapidjson' => '',
       'security' => 0,
       'static' => 0,
+      'static-runtime' => undef,
       'std' => '',
       'xerces3' => '',
     );
     for my $opt (sort(keys(%opts_to_use))) {
       print_cmake_config($fh, $opt, exists($opts{$opt}) ? $opts{$opt} : $opts_to_use{$opt});
+    }
+    if (defined($gtest_root)) {
+      print_cmake_config($fh, 'GTEST', $gtest_root);
     }
     print_cmake_config($fh, 'features', \@features);
     print_cmake_config($fh, 'mpcopts', \@mpcopts);

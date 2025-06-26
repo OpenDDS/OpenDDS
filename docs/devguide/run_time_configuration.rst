@@ -441,8 +441,6 @@ For example:
     Default value for the host portion of ``local_address`` in transport instances and some other host address values:
 
     - :prop:`[transport@tcp]local_address`
-    - :prop:`[transport@udp]local_address`
-    - :prop:`[transport@multicast]local_address`
     - :prop:`[transport@rtps_udp]local_address`
     - :prop:`[transport@rtps_udp]ipv6_local_address`
     - :prop:`[transport@rtps_udp]multicast_interface`
@@ -530,11 +528,6 @@ For example:
       See :ref:`debug log level <log-debug>`
 
     See :ref:`run_time_configuration--logging` for details.
-
-  .. prop:: DCPSMonitor=<boolean>
-    :default: ``0``
-
-    Use the Monitor library to publish data on monitoring topics (see :ghfile:`dds/monitor/README`).
 
   .. prop:: DCPSPendingTimeout=<sec>
     :default: ``0``
@@ -1106,8 +1099,6 @@ Some important implementation notes regarding RTPS discovery in OpenDDS are as f
 #. Domain IDs should be between 0 and 231 (inclusive) due to the way UDP ports are assigned to domain IDs.
    In each OpenDDS process, up to 120 domain participants are supported in each domain.
 
-#. The :ref:`multicast-transport` does not work with RTPS Discovery due to the way GUIDs are assigned (a warning will be issued if this is attempted).
-
 The OMG RTPS specification details several properties that can be adjusted from their defaults that influence the behavior of RTPS discovery.
 Those properties, along with options specific to OpenDDS's RTPS discovery implementation, are listed below.
 
@@ -1416,7 +1407,7 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     If :ref:`dds_security` is enabled, the :ref:`Participant's USER_DATA QoS <quality_of_service--user-data>` is omitted from unsecured discovery messages.
 
   .. prop:: UseXTypes=no|minimal|complete
-    :default: :val:`no`
+    :default: :val:`minimal`
 
     Enables discovery extensions from the XTypes specification.
     Participants exchange topic type information in endpoint announcements and extended type information using the Type Lookup Service.
@@ -2104,7 +2095,7 @@ If an existing data link is found it is used for all subsequent communication be
 
 If no existing data link is found, the Data Writer attempts to connect using the different Transport Instances in the order they are defined in its Transport Configuration.
 Any Transport Instances not "matched" by the other side are skipped.
-For example, if the writer specifies udp and tcp transport instances and the reader only specifies tcp, the udp transport instance is ignored.
+For example, if the writer specifies shmem and tcp transport instances and the reader only specifies tcp, the shmem transport instance is ignored.
 Matching algorithms may also be affected by :ref:`QoS <qos-changing>`, configuration of the instances, and other specifics of the transport implementation.
 The first pair of Transport Instances that successfully "connect" results in a data link that is used for all subsequent data sample publication.
 
@@ -2160,7 +2151,7 @@ Using Mixed Transports
 ..
     Sect<7.4.2.2>
 
-This example configures an application to primarily use multicast and to "fall back" to tcp when it is unable to use multicast.
+This example configures an application to primarily use RTPS and to "fall back" to tcp when it is unable to use RTPS.
 Here is the configuration file:
 
 .. code-block:: ini
@@ -2169,20 +2160,20 @@ Here is the configuration file:
     DCPSGlobalTransportConfig=myconfig
 
     [config/myconfig]
-    transports=mymulticast,mytcp
+    transports=myrtps,mytcp
 
-    [transport/mymulticast]
-    transport_type=multicast
+    [transport/myrtps]
+    transport_type=rtps_udp
 
     [transport/mytcp]
     transport_type=tcp
 
-The transport configuration named ``myconfig`` now includes two transport instances, ``mymulticast`` and ``mytcp``.
+The transport configuration named ``myconfig`` now includes two transport instances, ``myrtps`` and ``mytcp``.
 Neither of these transport instances specify any parameters besides :prop:`[transport]transport_type`, so they use the default configuration of these transport implementations.
 Users are free to use any of the transport-specific configuration parameters that are listed in the following reference sections.
 
-Assuming that all participating processes use this configuration file, the application attempts to use multicast to initiate communication between data writers and readers.
-If the initial multicast communication fails for any reason (possibly because an intervening router is not passing multicast traffic) tcp is used to initiate the connection.
+Assuming that all participating processes use this configuration file, the application attempts to use RTPS to initiate communication between data writers and readers.
+If the initial RTPS communication fails for any reason then tcp is used to initiate the connection.
 
 .. _run_time_configuration--using-multiple-configurations:
 
@@ -2373,7 +2364,7 @@ See :ref:`plugins` for more information.
 
 .. sec:: transport/<inst_name>
 
-  .. prop:: transport_type=tcp|udp|multicast|shmem|rtps_udp
+  .. prop:: transport_type=tcp|udp|shmem|rtps_udp
     :required:
 
     Type of the transport; the list of available transports can be extended programmatically via the transport framework.
@@ -2382,16 +2373,6 @@ See :ref:`plugins` for more information.
 
       Use the :ref:`tcp-transport`.
       See :ref:`tcp-transport-config` for properties specific to this transport.
-
-    .. val:: udp
-
-      Use the :ref:`udp-transport`.
-      See :ref:`udp-transport-config` for properties specific to this transport.
-
-    .. val:: multicast
-
-      Use the :ref:`multicast-transport`.
-      See :ref:`multicast-transport-config` for properties specific to this transport.
 
     .. val:: shmem
 
@@ -2550,154 +2531,6 @@ The reconnection process is (a successful reconnect ends this sequence):
 * If that fails, then wait :prop:`[transport@tcp]conn_retry_initial_delay` milliseconds and attempt reconnect.
 
 * While we have not tried more than :prop:`[transport@tcp]conn_retry_attempts`, wait (previous wait time * :prop:`[transport@tcp]conn_retry_backoff_multiplier`) milliseconds and attempt to reconnect.
-
-.. _udp-transport-config:
-.. _run_time_configuration--udp-ip-transport-configuration-options:
-
-UDP Transport Configuration Properties
---------------------------------------
-
-..
-    Sect<7.4.5.3>
-
-This section describes the configuration properties for the :ref:`udp-transport`.
-
-.. sec:: transport@udp/<inst_name>
-
-  .. prop:: local_address=<host>:<port>
-    :default: :prop:`[common]DCPSDefaultAddress`
-
-    Hostname and port of the listening socket.
-    The port can be omitted, in which case the value should end in ``:``.
-
-  .. prop:: send_buffer_size=<n>
-    :default: Platform value of ``ACE_DEFAULT_MAX_SOCKET_BUFSIZ``
-
-    Total send buffer size in bytes for UDP payload.
-
-  .. prop:: rcv_buffer_size=<n>
-    :default: Platform value of ``ACE_DEFAULT_MAX_SOCKET_BUFSIZ``
-
-    Total receive buffer size in bytes for UDP payload.
-
-.. _multicast-transport-config:
-.. _run_time_configuration--ip-multicast-transport-configuration-options:
-
-Multicast Transport Configuration Properties
---------------------------------------------
-
-..
-    Sect<7.4.5.4>
-
-This section describes the configuration properties for the :ref:`multicast-transport`.
-
-This transport has the following restrictions:
-
-* *At most*, one DDS domain may be used per multicast group;
-
-* A given participant may only have a single ``multicast`` transport attached per multicast group; if you wish to send and receive samples on the same multicast group in the same process, independent participants must be used.
-
-.. sec:: transport@multicast/<inst_name>
-
-  .. prop:: default_to_ipv6=<boolean>
-    :default: ``0`` (disabled)
-
-    The ``default_to_ipv6`` and :prop:`port_offset` options affect how default multicast group addresses are selected.
-    If ``default_to_ipv6`` is set to ``1`` (enabled), then the default IPv6 address will be used (``[FF01::80]``).
-
-  .. prop:: group_address=<host>:<port>
-    :default: ``224.0.0.128:,[FF01::80]:``
-
-    This property may be used to manually define a multicast group to join to exchange data.
-    Both IPv4 and IPv6 addresses are supported.
-    OpenDDS IPv6 support requires that the underlying ACE/TAO components be built with IPv6 support enabled.
-
-  .. prop:: local_address=<address>
-    :default: :prop:`[common]DCPSDefaultAddress`
-
-    If non-empty, address of a local network interface which is used to join the multicast group.
-    On hosts with multiple network interfaces, it may be necessary to specify that the multicast group should be joined on a specific interface.
-
-  .. prop:: nak_delay_intervals=<n>
-    :default: ``4``
-
-    The number of intervals between naks after the initial nak.
-
-  .. prop:: nak_depth=<n>
-    :default: ``32``
-
-    The number of datagrams to retain in order to service repair requests (reliable only).
-
-  .. prop:: nak_interval=<msec>
-    :default: ``500``
-
-    The minimum number of milliseconds to wait between repair requests (reliable only).
-    This interval is randomized to prevent potential collisions between similarly associated peers.
-    Use this option so that naks will be not be sent repeatedly for unrecoverable packets before :prop:`nak_timeout`.
-
-  .. prop:: nak_max=<n>
-    :default: ``3``
-
-    The maximum number of times a missing sample will be nak'ed.
-    The *maximum* delay between repair requests is bounded to double the minimum value.
-
-  .. prop:: nak_timeout=<msec>
-    :default: ``30000`` (30 sec)
-
-    The maximum number of milliseconds to wait before giving up on a repair response (reliable only).
-
-  .. prop:: port_offset=<n>
-    :default: ``49152``
-
-    Used to set the port number when not specifying a group address.
-    When a group address is specified, the port number within it is used.
-    If no group address is specified, the port offset is used as a port number.
-    This value should not be set less than ``49152``.
-
-  .. prop:: rcv_buffer_size=<n>
-    :default: ``0`` (system default buffer size)
-
-    The size of the socket receive buffer in bytes.
-    A value of zero indicates that the system default value is used.
-
-  .. prop:: reliable=<boolean>
-    :default: ``1`` (enabled)
-
-    Enables reliable communication.
-
-  .. prop:: syn_backoff=<n>
-    :default: ``2.0``
-
-    The exponential base used during handshake retries; smaller values yield shorter delays between attempts.
-
-    Given the values of :prop:`syn_backoff` and :prop:`syn_interval`, it is possible to calculate the delays between handshake attempts (bounded by :prop:`syn_timeout`):
-
-    ::
-
-      delay = syn_interval * syn_backoff ^ number_of_retries
-
-    For example, if the default configuration options are assumed, the delays between handshake attempts would be: 0, 250, 1000, 2000, 4000, and 8000 milliseconds respectively.
-
-  .. prop:: syn_interval=<msec>
-    :default: ``250``
-
-    The minimum number of milliseconds to wait between handshake attempts during association.
-
-  .. prop:: syn_timeout=<msec>
-    :default: ``30000`` (30 sec)
-
-    The maximum number of milliseconds to wait before giving up on a handshake response during association.
-
-  .. prop:: ttl=<n>
-    :default: ``1`` (all data is restricted to the local network)
-
-    The value of the time-to-live (TTL) field of any datagrams sent.
-    This value specifies the number of hops the datagram will traverse before being discarded by the network.
-
-  .. prop:: async_send=<boolean>
-    :default: ``0`` (disabled)
-
-    Send datagrams using asynchronous I/O on platforms that support it efficiently.
 
 .. _rtps-udp-transport-config:
 .. _run_time_configuration--rtps-udp-transport-configuration-options:

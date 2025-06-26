@@ -191,10 +191,3 @@ Test::DataReaderListener::on_subscription_lost (
     ::OpenDDS::DCPS::SubscriptionLostStatus const &)
 {
 }
-
-void
-Test::DataReaderListener::on_budget_exceeded (
-    DDS::DataReader_ptr,
-    const ::OpenDDS::DCPS::BudgetExceededStatus&)
-{
-}

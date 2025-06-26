@@ -1,15 +1,17 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-cmake_minimum_required(VERSION 3.8...3.27)
+cmake_minimum_required(VERSION 3.8...4.0)
 project(opendds_nested_idl CXX)
 enable_testing()
 
 find_package(OpenDDS REQUIRED)
+include(opendds_testing)
 
 set(target_prefix "${PROJECT_NAME}_")
 
 _opendds_save_cache(OPENDDS_FILENAME_ONLY_INCLUDES BOOL ON)
+_opendds_save_cache(CMAKE_WARN_DEPRECATED BOOL OFF)
 
 set(ecu_lib "${target_prefix}lib")
 add_library(${ecu_lib})
@@ -47,9 +49,6 @@ set_target_properties(${ecu_exe}
 target_link_libraries(${ecu_exe} OpenDDS::Dcps ${ecu_lib})
 
 # Testing
-configure_file("run_test.pl" "." COPYONLY)
-add_test(NAME "${target_prefix}test"
-  COMMAND perl run_test.pl $<$<BOOL:$<CONFIG>>:-ExeSubDir> $<CONFIG>
-)
+opendds_add_test()
 
 _opendds_restore_cache()

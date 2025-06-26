@@ -58,7 +58,7 @@ env:
   VCPKG_INSTALLED_DIR: ${{ github.workspace }}\vcpkg\installed
   CTEST_OUTPUT_ON_FAILURE: ON
   VCPKG_GIT_COMMIT: d5ec528843d29e3a52d745a64b469f810b2cedbf
-  SCOREBOARD_UPLOAD_BRANCH: refs/heads/master
+  SCOREBOARD_UPLOAD_BRANCH: refs/heads/v4
 
 jobs:
 
@@ -99,7 +99,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v4
@@ -177,7 +177,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -188,11 +187,10 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: gitclean
       shell: bash
       run: |
@@ -271,7 +269,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -372,17 +369,16 @@ jobs:
           --features=versioned_namespace=1 \
           --tests \
           --compile-warnings=WARNING
+    - name: check build configuration
+      shell: bash
+      run: |
+        cd OpenDDS
+        tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make OpenDDS
       run: |
         cd OpenDDS
         make -j4
-    - name: check build configuration
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        tools/scripts/show_build_config.pl
     - name: make install OpenDDS
       shell: bash
       run: |
@@ -673,6 +669,11 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u22_esafe_js0.tar.xz
+    - name: check build configuration
+      shell: bash
+      run: |
+        cd OpenDDS
+        tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
@@ -687,12 +688,6 @@ jobs:
         . setenv.sh
         $ACE_ROOT/bin/mwc.pl -type gnuace host_tools.mwc
         make -j4
-    - name: check build configuration
-      shell: bash
-      run: |
-        cd OpenDDS/build/target
-        . setenv.sh
-        tools/scripts/show_build_config.pl
     - name: build OpenDDS
       run: |
         cd OpenDDS/build/target
@@ -771,8 +766,7 @@ jobs:
     - name: check build configuration
       shell: bash
       run: |
-        cd OpenDDS/build/target
-        . setenv.sh
+        cd OpenDDS
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -1022,8 +1016,7 @@ jobs:
     - name: check build configuration
       shell: bash
       run: |
-        cd OpenDDS/build/target
-        . setenv.sh
+        cd OpenDDS
         tools/scripts/show_build_config.pl
     - name: build OpenDDS
       run: |
@@ -1103,8 +1096,7 @@ jobs:
     - name: check build configuration
       shell: bash
       run: |
-        cd OpenDDS/build/target
-        . setenv.sh
+        cd OpenDDS
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -1214,7 +1206,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -1297,7 +1289,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -1308,11 +1299,10 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -1386,7 +1376,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -1428,7 +1417,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config XERCES3 -Config WCHAR -Config CXX11 -Config OPENDDS_SECURITY -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config NO_UNIT_TESTS --security --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config XERCES3 -Config WCHAR -Config OPENDDS_SECURITY -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config NO_UNIT_TESTS --security --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -1497,7 +1486,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c03_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -1515,7 +1504,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-18 \
-          --std=c++11 \
+          --std=c++17 \
           --no-inline \
           --features=uses_wchar=1 \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
@@ -1591,7 +1580,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-18 \
-          --std=c++11 \
+          --std=c++17 \
           --no-inline \
           --features=uses_wchar=1 \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
@@ -1603,7 +1592,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -1614,11 +1602,13 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_STANDARD=11 -DCMAKE_CXX_COMPILER=clang++-18 ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build \
+          -DOPENDDS_JUST_BUILD_TESTS=TRUE \
+          -DCMAKE_CXX_STANDARD=11 \
+          -DCMAKE_CXX_COMPILER=clang++-18
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -1694,7 +1684,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install lldb
       shell: bash
@@ -1806,7 +1795,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c03_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -1824,7 +1813,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-17 \
-          --std=c++11 \
+          --std=c++17 \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --tests \
           --security \
@@ -1899,7 +1888,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-17 \
-          --std=c++11 \
+          --std=c++17 \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --tests \
           --security \
@@ -1910,7 +1899,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -1921,11 +1909,13 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_STANDARD=11 -DCMAKE_CXX_COMPILER=clang++-17 ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build \
+          -DOPENDDS_JUST_BUILD_TESTS=TRUE \
+          -DCMAKE_CXX_STANDARD=11 \
+          -DCMAKE_CXX_COMPILER=clang++-17
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -2001,7 +1991,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install lldb
       shell: bash
@@ -2113,7 +2102,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -2132,7 +2121,7 @@ jobs:
           --compiler=g++-13 \
           --no-debug \
           --features=uses_wchar=1 \
-          --std=c++03 \
+          --std=c++17 \
           --tests \
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
@@ -2207,7 +2196,7 @@ jobs:
           --compiler=g++-13 \
           --no-debug \
           --features=uses_wchar=1 \
-          --std=c++03 \
+          --std=c++17 \
           --tests \
           --rapidjson \
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
@@ -2217,7 +2206,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -2228,11 +2216,13 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_STANDARD=98 -DCMAKE_CXX_COMPILER=g++-13 ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build \
+          -DOPENDDS_JUST_BUILD_TESTS=TRUE \
+          -DCMAKE_CXX_STANDARD=98 \
+          -DCMAKE_CXX_COMPILER=g++-13
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -2304,7 +2294,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -2505,7 +2494,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -2516,11 +2504,12 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_COMPILER=g++-12 ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build \
+          -DOPENDDS_JUST_BUILD_TESTS=TRUE \
+          -DCMAKE_CXX_COMPILER=g++-12
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -2592,7 +2581,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -2781,7 +2769,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -2792,11 +2779,10 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -2868,7 +2854,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -2910,7 +2895,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config CXX11 -Config RAPIDJSON"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RAPIDJSON"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -3130,8 +3115,7 @@ jobs:
     - name: check build configuration
       shell: bash
       run: |
-        cd OpenDDS/build/target
-        . setenv.sh
+        cd OpenDDS
         tools/scripts/show_build_config.pl
     - name: build OpenDDS
       run: |
@@ -3277,7 +3261,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -3286,28 +3269,12 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4
-    - name: set up Modeling tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tools/modeling/tests
-        ./setup.pl
-        cd -
-        mwc.pl -type gnuace -workers 4 -features no_opendds_security=0 tools/modeling/tests/modeling_tests.mwc
-    - name: build Modeling tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        make -j4 -C tools/modeling/tests
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: Build iShapes with CMake
       run: |
         source OpenDDS/setenv.sh
@@ -3388,7 +3355,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -3430,7 +3396,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config WIRESHARK --java --modeling --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config XERCES3 -Config RAPIDJSON -Config WIRESHARK --java --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -3499,7 +3465,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c12_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -3517,7 +3483,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-16 \
-          --std=c++11 \
+          --std=c++17 \
           --sanitize asan \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --ipv6 \
@@ -3594,7 +3560,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-16 \
-          --std=c++11 \
+          --std=c++17 \
           --sanitize asan \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --ipv6 \
@@ -3606,7 +3572,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -3618,9 +3583,12 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        cd OpenDDS/tests/cmake
-        cmake -DCMAKE_CXX_COMPILER=clang++-16 -DCMAKE_CXX_STANDARD=11 -S . -B build
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build \
+          -DOPENDDS_JUST_BUILD_TESTS=TRUE \
+          -DCMAKE_CXX_COMPILER=clang++-16 \
+          -DCMAKE_CXX_STANDARD=11
         ASAN_OPTIONS=detect_leaks=0 cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -3697,7 +3665,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install lldb
       shell: bash
@@ -3740,7 +3707,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON --security -Config GH_ACTIONS_ASAN --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON --security -Config GH_ACTIONS_ASAN --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -3809,7 +3776,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c12_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -3827,7 +3794,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-16 \
-          --std=c++11 \
+          --std=c++17 \
           --sanitize tsan \
           --ipv6 \
           --tests \
@@ -3902,7 +3869,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-16 \
-          --std=c++11 \
+          --std=c++17 \
           --sanitize tsan \
           --ipv6 \
           --tests \
@@ -3913,7 +3880,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -3997,7 +3963,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install lldb
       shell: bash
@@ -4040,7 +4005,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON --no-dcps tests/tsan_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON --no-dcps tests/tsan_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -4127,7 +4092,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-16 \
-          --std=c++11 \
+          --std=c++17 \
           --sanitize ubsan \
           --features=no_hidden_visibility=1 \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
@@ -4205,7 +4170,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-16 \
-          --std=c++11 \
+          --std=c++17 \
           --gtest \
           --sanitize ubsan \
           --features=no_hidden_visibility=1 \
@@ -4218,7 +4183,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -4229,10 +4193,13 @@ jobs:
         make -j2
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        cd OpenDDS/tests/cmake
-        cmake -DCMAKE_CXX_COMPILER=clang++-16 -DCMAKE_CXX_STANDARD=11 -S . -B build
-        cmake --build build -- -j2
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build \
+          -DOPENDDS_JUST_BUILD_TESTS=TRUE \
+          -DCMAKE_CXX_COMPILER=clang++-16 \
+          -DCMAKE_CXX_STANDARD=11
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -4308,7 +4275,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install lldb
       shell: bash
@@ -4351,7 +4317,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON --no-dcps tests/ubsan_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON --no-dcps tests/ubsan_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -4534,7 +4500,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -4545,11 +4510,10 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -4634,7 +4598,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -4676,7 +4639,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON --security --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON --security --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -4782,7 +4745,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: run OpenDDS tests
       shell: bash
@@ -4815,7 +4777,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON --no-dcps tests/valgrind_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON --no-dcps tests/valgrind_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -4897,7 +4859,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -4908,26 +4869,10 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
-    - name: set up Modeling tests
-      shell: bash
-      run: |
         cd OpenDDS
-        . setenv.sh
-        cd tools/modeling/tests
-        ./setup.pl
-        cd -
-        mwc.pl -type gnuace -workers 4 -features built_in_topics=0 -features ipv6=1 tools/modeling/tests/modeling_tests.mwc
-    - name: build Modeling tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        make -j4 -C tools/modeling/tests
+        source setenv.sh
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -5003,7 +4948,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -5045,7 +4989,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS --modeling --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -5202,7 +5146,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -5213,11 +5156,10 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -5291,7 +5233,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -5333,7 +5274,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config WCHAR -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_UNIT_TESTS --security --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config WCHAR -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config NO_UNIT_TESTS --security --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -5413,7 +5354,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -5424,26 +5364,10 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
-    - name: set up Modeling tests
-      shell: bash
-      run: |
         cd OpenDDS
-        . setenv.sh
-        cd tools/modeling/tests
-        ./setup.pl
-        cd -
-        mwc.pl -type gnuace -workers 4 -features content_subscription=0 tools/modeling/tests/modeling_tests.mwc
-    - name: build Modeling tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        make -j4 -C tools/modeling/tests
+        source setenv.sh
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -5517,7 +5441,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -5559,7 +5482,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config WCHAR -Config CXX11 -Config RAPIDJSON -Config DDS_NO_CONTENT_SUBSCRIPTION -Config NO_UNIT_TESTS --java --modeling --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config WCHAR -Config RAPIDJSON -Config DDS_NO_CONTENT_SUBSCRIPTION -Config NO_UNIT_TESTS --java --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -5723,7 +5646,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -5809,7 +5731,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -5826,11 +5747,10 @@ jobs:
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -5970,7 +5890,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -5990,7 +5909,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/DCPS/Messenger
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
+        perl $DDS_ROOT/bin/opendds_mwc.pl -static
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: bash
@@ -6005,7 +5924,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/DCPS/C++11
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
+        perl $DDS_ROOT/bin/opendds_mwc.pl -static
     - name: make C++11 messenger test
       shell: bash
       run: |
@@ -6040,7 +5959,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/core_ci_tests.lst -Config STATIC_MESSENGER -Config STATIC -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config NO_UNIT_TESTS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/core_ci_tests.lst -Config STATIC_MESSENGER -Config STATIC -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -6151,7 +6070,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -6171,7 +6089,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/DCPS/Compiler
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
+        perl $DDS_ROOT/bin/opendds_mwc.pl -static
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: bash
@@ -6207,7 +6125,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/core_ci_tests.lst -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config NO_UNIT_TESTS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/core_ci_tests.lst -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -6318,7 +6236,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -6338,7 +6255,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/unit-tests
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
+        perl $DDS_ROOT/bin/opendds_mwc.pl -static
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: make unit tests
       shell: bash
@@ -6374,7 +6291,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/core_ci_tests.lst -Config STATIC_UNIT_TESTS -Config STATIC -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/core_ci_tests.lst -Config STATIC_UNIT_TESTS -Config STATIC -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -6476,7 +6393,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -6496,7 +6412,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/security/attributes
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
+        perl $DDS_ROOT/bin/opendds_mwc.pl -static
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build security tests
       shell: bash
@@ -6688,7 +6604,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -6699,26 +6614,10 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake ..
-        cmake --build . -- -j4
-    - name: set up Modeling tests
-      shell: bash
-      run: |
         cd OpenDDS
-        . setenv.sh
-        cd tools/modeling/tests
-        ./setup.pl
-        cd -
-        mwc.pl -type gnuace -workers 4 -features content_filtered_topic=0 tools/modeling/tests/modeling_tests.mwc
-    - name: build Modeling tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        make -j4 -C tools/modeling/tests
+        source setenv.sh
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -6792,7 +6691,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: install gdb
       shell: bash
@@ -6834,7 +6732,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RAPIDJSON -Config DDS_NO_CONTENT_FILTERED_TOPIC --modeling --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RAPIDJSON -Config DDS_NO_CONTENT_FILTERED_TOPIC --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -6871,9 +6769,9 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  ACE_TAO_w19_p1_stat_js0:
+  ACE_TAO_w25_p1_stat_js0:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
     steps:
     - name: checkout OpenDDS
@@ -6903,7 +6801,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: setup for run-vcpkg
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
@@ -6929,7 +6827,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --no-rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
+        configure --ipv6 --static --no-static-runtime --no-rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -6956,11 +6854,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_w19_p1_stat_js0:
+  build_w25_p1_stat_js0:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: ACE_TAO_w19_p1_stat_js0
+    needs: ACE_TAO_w25_p1_stat_js0
 
     steps:
     - name: setup for run-vcpkg
@@ -6991,14 +6889,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_p1_stat_js0_artifact
+        name: ACE_TAO_w25_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
-        rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
+        tar xvfJ ACE_TAO_w25_p1_stat_js0.tar.xz
+        rm -f ACE_TAO_w25_p1_stat_js0.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -7016,12 +6914,11 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --no-rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --compile-warnings=WARNING
+        configure --ipv6 --static --no-static-runtime --no-rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --compile-warnings=WARNING
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -7045,11 +6942,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_w19_p1_stat_js0:
+  cmake_w25_p1_stat_js0:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_p1_stat_js0
+    needs: build_w25_p1_stat_js0
 
     permissions:
       contents: read
@@ -7089,25 +6986,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_p1_stat_js0_artifact
+        name: ACE_TAO_w25_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
-        rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
+        tar xvfJ ACE_TAO_w25_p1_stat_js0.tar.xz
+        rm -f ACE_TAO_w25_p1_stat_js0.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_p1_stat_js0_artifact
+        name: build_w25_p1_stat_js0_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_p1_stat_js0.tar.xz
-        rm -f build_w19_p1_stat_js0.tar.xz
+        tar xvfJ build_w25_p1_stat_js0.tar.xz
+        rm -f build_w25_p1_stat_js0.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
@@ -7116,15 +7013,12 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        mkdir tests\cmake\build
-        cd tests\cmake\build
-        cmake ..
-        cmake --build .
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: create autobuild config
       shell: bash
@@ -7196,11 +7090,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  messenger_w19_p1_stat_js0:
+  messenger_w25_p1_stat_js0:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_p1_stat_js0
+    needs: build_w25_p1_stat_js0
 
     permissions:
       contents: read
@@ -7240,25 +7134,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_p1_stat_js0_artifact
+        name: ACE_TAO_w25_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
-        rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
+        tar xvfJ ACE_TAO_w25_p1_stat_js0.tar.xz
+        rm -f ACE_TAO_w25_p1_stat_js0.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_p1_stat_js0_artifact
+        name: build_w25_p1_stat_js0_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_p1_stat_js0.tar.xz
-        rm -f build_w19_p1_stat_js0.tar.xz
+        tar xvfJ build_w25_p1_stat_js0.tar.xz
+        rm -f build_w25_p1_stat_js0.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -7276,7 +7170,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: configure messenger tests
       shell: cmd
@@ -7284,7 +7177,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Messenger
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
@@ -7299,7 +7192,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\C++11
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - name: make C++11 messenger test
       shell: cmd
       run: |
@@ -7332,7 +7225,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_MESSENGER -Config IPV6 -Config XERCES3 -Config CXX11 -Config NO_UNIT_TESTS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_MESSENGER -Config IPV6 -Config XERCES3 -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -7376,11 +7269,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  compiler_w19_p1_stat_js0:
+  compiler_w25_p1_stat_js0:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_p1_stat_js0
+    needs: build_w25_p1_stat_js0
 
     permissions:
       contents: read
@@ -7411,25 +7304,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_p1_stat_js0_artifact
+        name: ACE_TAO_w25_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
-        rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
+        tar xvfJ ACE_TAO_w25_p1_stat_js0.tar.xz
+        rm -f ACE_TAO_w25_p1_stat_js0.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_p1_stat_js0_artifact
+        name: build_w25_p1_stat_js0_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_p1_stat_js0.tar.xz
-        rm -f build_w19_p1_stat_js0.tar.xz
+        tar xvfJ build_w25_p1_stat_js0.tar.xz
+        rm -f build_w25_p1_stat_js0.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -7441,13 +7334,12 @@ jobs:
         mkdir build
         cd build
         mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake -DCMAKE_INSTALL_PREFIX=./install -Dgtest_force_shared_crt=ON ..
         cmake --build . --target install
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: configure compiler tests
       shell: cmd
@@ -7466,7 +7358,7 @@ jobs:
         rm -rf underscore_fields
         rm -rf xcdr
         rm -rf XTypesExtensibility
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
@@ -7501,7 +7393,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_COMPILER -Config IPV6 -Config XERCES3 -Config CXX11 -Config NO_UNIT_TESTS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_COMPILER -Config IPV6 -Config XERCES3 -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -7545,11 +7437,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  compiler2_w19_p1_stat_js0:
+  compiler2_w25_p1_stat_js0:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_p1_stat_js0
+    needs: build_w25_p1_stat_js0
 
     permissions:
       contents: read
@@ -7580,25 +7472,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_p1_stat_js0_artifact
+        name: ACE_TAO_w25_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
-        rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
+        tar xvfJ ACE_TAO_w25_p1_stat_js0.tar.xz
+        rm -f ACE_TAO_w25_p1_stat_js0.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_p1_stat_js0_artifact
+        name: build_w25_p1_stat_js0_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_p1_stat_js0.tar.xz
-        rm -f build_w19_p1_stat_js0.tar.xz
+        tar xvfJ build_w25_p1_stat_js0.tar.xz
+        rm -f build_w25_p1_stat_js0.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -7610,13 +7502,12 @@ jobs:
         mkdir build
         cd build
         mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake -DCMAKE_INSTALL_PREFIX=./install -Dgtest_force_shared_crt=ON ..
         cmake --build . --target install
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: configure compiler tests
       shell: cmd
@@ -7637,7 +7528,7 @@ jobs:
         rm -rf idl_test_nested_types_lib
         rm -rf isolated_types
         rm -rf is_topic_type
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
@@ -7672,7 +7563,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_COMPILER2 -Config IPV6 -Config XERCES3 -Config CXX11 -Config NO_UNIT_TESTS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_COMPILER2 -Config IPV6 -Config XERCES3 -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -7716,11 +7607,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  unit_w19_p1_stat_js0:
+  unit_w25_p1_stat_js0:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_p1_stat_js0
+    needs: build_w25_p1_stat_js0
 
     permissions:
       contents: read
@@ -7760,25 +7651,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_p1_stat_js0_artifact
+        name: ACE_TAO_w25_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
-        rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
+        tar xvfJ ACE_TAO_w25_p1_stat_js0.tar.xz
+        rm -f ACE_TAO_w25_p1_stat_js0.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_p1_stat_js0_artifact
+        name: build_w25_p1_stat_js0_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_p1_stat_js0.tar.xz
-        rm -f build_w19_p1_stat_js0.tar.xz
+        tar xvfJ build_w25_p1_stat_js0.tar.xz
+        rm -f build_w25_p1_stat_js0.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -7790,13 +7681,12 @@ jobs:
         mkdir build
         cd build
         mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake -DCMAKE_INSTALL_PREFIX=./install -Dgtest_force_shared_crt=ON ..
         cmake --build . --target install
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: configure unit tests
       shell: cmd
@@ -7804,7 +7694,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\unit-tests
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
@@ -7838,7 +7728,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_UNIT_TESTS -Config IPV6 -Config XERCES3 -Config CXX11"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Debug -Config STATIC_UNIT_TESTS -Config IPV6 -Config XERCES3"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -7882,9 +7772,9 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  ACE_TAO_w19_re_p1_stat_FM-08:
+  ACE_TAO_w25_re_p1_stat_FM-08:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
     steps:
     - name: checkout OpenDDS
@@ -7914,7 +7804,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: setup for run-vcpkg
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
@@ -7967,11 +7857,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_w19_re_p1_stat_FM-08:
+  build_w25_re_p1_stat_FM-08:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: ACE_TAO_w19_re_p1_stat_FM-08
+    needs: ACE_TAO_w25_re_p1_stat_FM-08
 
     steps:
     - name: setup for run-vcpkg
@@ -8002,14 +7892,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
+        name: ACE_TAO_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
-        rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
+        rm -f ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -8032,7 +7922,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -8056,11 +7945,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_w19_re_p1_stat_FM-08:
+  cmake_w25_re_p1_stat_FM-08:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_p1_stat_FM-08
+    needs: build_w25_re_p1_stat_FM-08
 
     permissions:
       contents: read
@@ -8100,25 +7989,30 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
+        name: ACE_TAO_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
-        rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
+        rm -f ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_p1_stat_FM-08_artifact
+        name: build_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
-        rm -f build_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ build_w25_re_p1_stat_FM-08.tar.xz
+        rm -f build_w25_re_p1_stat_FM-08.tar.xz
+    - name: check build configuration
+      shell: cmd
+      run: |
+        cd OpenDDS
+        perl tools\scripts\show_build_config.pl
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
@@ -8127,16 +8021,8 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        mkdir tests\cmake\build
-        cd tests\cmake\build
-        cmake ..
-        cmake --build . --config Release
-    - name: check build configuration
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        perl tools\scripts\show_build_config.pl
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build --config Release
     - name: create autobuild config
       shell: bash
       run: |
@@ -8207,11 +8093,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  messenger_w19_re_p1_stat_FM-08:
+  messenger_w25_re_p1_stat_FM-08:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_p1_stat_FM-08
+    needs: build_w25_re_p1_stat_FM-08
 
     permissions:
       contents: read
@@ -8251,25 +8137,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
+        name: ACE_TAO_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
-        rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
+        rm -f ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_p1_stat_FM-08_artifact
+        name: build_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
-        rm -f build_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ build_w25_re_p1_stat_FM-08.tar.xz
+        rm -f build_w25_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -8287,7 +8173,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: configure messenger tests
       shell: cmd
@@ -8295,7 +8180,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Messenger
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
@@ -8310,7 +8195,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\C++11
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - name: make C++11 messenger test
       shell: cmd
       run: |
@@ -8343,7 +8228,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Release -Config STATIC -Config STATIC_MESSENGER -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config CXX11 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config NO_UNIT_TESTS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Release -Config STATIC -Config STATIC_MESSENGER -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -8387,11 +8272,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  compiler_w19_re_p1_stat_FM-08:
+  compiler_w25_re_p1_stat_FM-08:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_p1_stat_FM-08
+    needs: build_w25_re_p1_stat_FM-08
 
     permissions:
       contents: read
@@ -8422,25 +8307,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
+        name: ACE_TAO_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
-        rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
+        rm -f ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_p1_stat_FM-08_artifact
+        name: build_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
-        rm -f build_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ build_w25_re_p1_stat_FM-08.tar.xz
+        rm -f build_w25_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -8458,7 +8343,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: configure compiler tests
       shell: cmd
@@ -8477,7 +8361,7 @@ jobs:
         rm -rf underscore_fields
         rm -rf xcdr
         rm -rf XTypesExtensibility
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
@@ -8511,7 +8395,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_COMPILER -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config NO_UNIT_TESTS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_COMPILER -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -8555,11 +8439,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  compiler2_w19_re_p1_stat_FM-08:
+  compiler2_w25_re_p1_stat_FM-08:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_p1_stat_FM-08
+    needs: build_w25_re_p1_stat_FM-08
 
     permissions:
       contents: read
@@ -8590,25 +8474,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
+        name: ACE_TAO_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
-        rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
+        rm -f ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_p1_stat_FM-08_artifact
+        name: build_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
-        rm -f build_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ build_w25_re_p1_stat_FM-08.tar.xz
+        rm -f build_w25_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -8626,7 +8510,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: configure compiler tests
       shell: cmd
@@ -8647,7 +8530,7 @@ jobs:
         rm -rf idl_test_nested_types_lib
         rm -rf isolated_types
         rm -rf is_topic_type
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
@@ -8681,7 +8564,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_COMPILER2 -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config NO_UNIT_TESTS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_COMPILER2 -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -8725,11 +8608,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  unit_w19_re_p1_stat_FM-08:
+  unit_w25_re_p1_stat_FM-08:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_p1_stat_FM-08
+    needs: build_w25_re_p1_stat_FM-08
 
     permissions:
       contents: read
@@ -8769,25 +8652,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_p1_stat_FM-08_artifact
+        name: ACE_TAO_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
-        rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
+        rm -f ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_p1_stat_FM-08_artifact
+        name: build_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
-        rm -f build_w19_re_p1_stat_FM-08.tar.xz
+        tar xvfJ build_w25_re_p1_stat_FM-08.tar.xz
+        rm -f build_w25_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -8805,7 +8688,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: configure unit tests
       shell: cmd
@@ -8813,7 +8695,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\unit-tests
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
@@ -8847,7 +8729,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_UNIT_TESTS -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Static_Release -Config STATIC_UNIT_TESTS -Config STATIC -Config NO_BUILT_IN_TOPICS -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config IPV6 -Config OPENDDS_SECURITY -Config RAPIDJSON"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -8891,22 +8773,22 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  ACE_TAO_w19_re_o1p1_sec:
+  ACE_TAO_w25_re_o1p1_sec:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: openssl3_w19
+    needs: openssl3_w25
 
     steps:
     - name: download openssl artifact
       uses: actions/download-artifact@v4
       with:
-        name: openssl3_w19_artifact
+        name: openssl3_w25_artifact
     - name: extract openssl artifact
       shell: bash
       run: |
-        tar xvJf openssl3_w19.tar.xz
-        rm -f openssl3_w19.tar.xz
+        tar xvJf openssl3_w25.tar.xz
+        rm -f openssl3_w25.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v4
       with:
@@ -8989,22 +8871,22 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_w19_re_o1p1_sec:
+  build_w25_re_o1p1_sec:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: ACE_TAO_w19_re_o1p1_sec
+    needs: ACE_TAO_w25_re_o1p1_sec
 
     steps:
     - name: download openssl artifact
       uses: actions/download-artifact@v4
       with:
-        name: openssl3_w19_artifact
+        name: openssl3_w25_artifact
     - name: extract openssl artifact
       shell: bash
       run: |
-        tar xvJf openssl3_w19.tar.xz
-        rm -f openssl3_w19.tar.xz
+        tar xvJf openssl3_w25.tar.xz
+        rm -f openssl3_w25.tar.xz
     - name: setup for run-vcpkg
       shell: bash
       run: |
@@ -9033,14 +8915,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_o1p1_sec_artifact
+        name: ACE_TAO_w25_re_o1p1_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_o1p1_sec.tar.xz
-        rm -f ACE_TAO_w19_re_o1p1_sec.tar.xz
+        tar xvfJ ACE_TAO_w25_re_o1p1_sec.tar.xz
+        rm -f ACE_TAO_w25_re_o1p1_sec.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -9065,7 +8947,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -9079,10 +8960,8 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        mkdir tests\cmake\build
-        cd tests\cmake\build
-        cmake ..
-        cmake --build . --config Release
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build --config Release
     - name: gitclean
       shell: bash
       run: |
@@ -9105,11 +8984,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_w19_re_o1p1_sec:
+  cmake_w25_re_o1p1_sec:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_o1p1_sec
+    needs: build_w25_re_o1p1_sec
 
     permissions:
       contents: read
@@ -9119,12 +8998,12 @@ jobs:
     - name: download openssl artifact
       uses: actions/download-artifact@v4
       with:
-        name: openssl3_w19_artifact
+        name: openssl3_w25_artifact
     - name: extract openssl artifact
       shell: bash
       run: |
-        tar xvJf openssl3_w19.tar.xz
-        rm -f openssl3_w19.tar.xz
+        tar xvJf openssl3_w25.tar.xz
+        rm -f openssl3_w25.tar.xz
     - name: setup for run-vcpkg
       shell: bash
       run: |
@@ -9158,25 +9037,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_o1p1_sec_artifact
+        name: ACE_TAO_w25_re_o1p1_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_o1p1_sec.tar.xz
-        rm -f ACE_TAO_w19_re_o1p1_sec.tar.xz
+        tar xvfJ ACE_TAO_w25_re_o1p1_sec.tar.xz
+        rm -f ACE_TAO_w25_re_o1p1_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_o1p1_sec_artifact
+        name: build_w25_re_o1p1_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_o1p1_sec.tar.xz
-        rm -f build_w19_re_o1p1_sec.tar.xz
+        tar xvfJ build_w25_re_o1p1_sec.tar.xz
+        rm -f build_w25_re_o1p1_sec.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -9194,7 +9073,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: create autobuild config
       shell: bash
@@ -9266,11 +9144,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  messenger_w19_re_o1p1_sec:
+  messenger_w25_re_o1p1_sec:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_o1p1_sec
+    needs: build_w25_re_o1p1_sec
 
     permissions:
       contents: read
@@ -9280,12 +9158,12 @@ jobs:
     - name: download openssl artifact
       uses: actions/download-artifact@v4
       with:
-        name: openssl3_w19_artifact
+        name: openssl3_w25_artifact
     - name: extract openssl artifact
       shell: bash
       run: |
-        tar xvJf openssl3_w19.tar.xz
-        rm -f openssl3_w19.tar.xz
+        tar xvJf openssl3_w25.tar.xz
+        rm -f openssl3_w25.tar.xz
     - name: setup for run-vcpkg
       shell: bash
       run: |
@@ -9319,25 +9197,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_o1p1_sec_artifact
+        name: ACE_TAO_w25_re_o1p1_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_o1p1_sec.tar.xz
-        rm -f ACE_TAO_w19_re_o1p1_sec.tar.xz
+        tar xvfJ ACE_TAO_w25_re_o1p1_sec.tar.xz
+        rm -f ACE_TAO_w25_re_o1p1_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_o1p1_sec_artifact
+        name: build_w25_re_o1p1_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_o1p1_sec.tar.xz
-        rm -f build_w19_re_o1p1_sec.tar.xz
+        tar xvfJ build_w25_re_o1p1_sec.tar.xz
+        rm -f build_w25_re_o1p1_sec.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -9363,7 +9241,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Messenger
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
@@ -9378,7 +9256,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\C++11
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - name: make C++11 messenger test
       shell: cmd
       run: |
@@ -9411,7 +9289,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Release -Config STATIC_MESSENGER -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_UNIT_TESTS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Release -Config STATIC_MESSENGER -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -9455,11 +9333,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  compiler_w19_re_o1p1_sec:
+  compiler_w25_re_o1p1_sec:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_o1p1_sec
+    needs: build_w25_re_o1p1_sec
 
     permissions:
       contents: read
@@ -9499,32 +9377,31 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_o1p1_sec_artifact
+        name: ACE_TAO_w25_re_o1p1_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_o1p1_sec.tar.xz
-        rm -f ACE_TAO_w19_re_o1p1_sec.tar.xz
+        tar xvfJ ACE_TAO_w25_re_o1p1_sec.tar.xz
+        rm -f ACE_TAO_w25_re_o1p1_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_o1p1_sec_artifact
+        name: build_w25_re_o1p1_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_o1p1_sec.tar.xz
-        rm -f build_w19_re_o1p1_sec.tar.xz
+        tar xvfJ build_w25_re_o1p1_sec.tar.xz
+        rm -f build_w25_re_o1p1_sec.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: setup gtest
       shell: cmd
@@ -9543,7 +9420,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Compiler
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
@@ -9577,7 +9454,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Release -Config STATIC_COMPILER -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_UNIT_TESTS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Release -Config STATIC_COMPILER -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -9621,11 +9498,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  unit_w19_re_o1p1_sec:
+  unit_w25_re_o1p1_sec:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_o1p1_sec
+    needs: build_w25_re_o1p1_sec
 
     permissions:
       contents: read
@@ -9635,12 +9512,12 @@ jobs:
     - name: download openssl artifact
       uses: actions/download-artifact@v4
       with:
-        name: openssl3_w19_artifact
+        name: openssl3_w25_artifact
     - name: extract openssl artifact
       shell: bash
       run: |
-        tar xvJf openssl3_w19.tar.xz
-        rm -f openssl3_w19.tar.xz
+        tar xvJf openssl3_w25.tar.xz
+        rm -f openssl3_w25.tar.xz
     - name: setup for run-vcpkg
       shell: bash
       run: |
@@ -9674,32 +9551,31 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_o1p1_sec_artifact
+        name: ACE_TAO_w25_re_o1p1_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_o1p1_sec.tar.xz
-        rm -f ACE_TAO_w19_re_o1p1_sec.tar.xz
+        tar xvfJ ACE_TAO_w25_re_o1p1_sec.tar.xz
+        rm -f ACE_TAO_w25_re_o1p1_sec.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_o1p1_sec_artifact
+        name: build_w25_re_o1p1_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_o1p1_sec.tar.xz
-        rm -f build_w19_re_o1p1_sec.tar.xz
+        tar xvfJ build_w25_re_o1p1_sec.tar.xz
+        rm -f build_w25_re_o1p1_sec.tar.xz
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: setup gtest
       shell: cmd
@@ -9718,7 +9594,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\unit-tests
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
+        perl %DDS_ROOT%\bin\opendds_mwc.pl -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
@@ -9752,7 +9628,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Release -Config STATIC_UNIT_TESTS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Release -Config STATIC_UNIT_TESTS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -9796,9 +9672,9 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  wireshark_w19-release:
+  wireshark_w25-release:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
     steps:
     - name: checkout OpenDDS
@@ -9828,10 +9704,14 @@ jobs:
       with:
         repository: lexxmark/winflexbison
         path: winflexbison
-        ref: v2.5.24
+        ref: 300f48ba3e598e7a6600d724b58541fbcc3c2fa6
     - name: set up msvc env
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: ilammy/msvc-dev-cmd@v1
+    - name: Reset VCPKG_ROOT
+      shell: cmd
+      run: |
+        echo VCPKG_ROOT=C:\vcpkg>> %GITHUB_ENV%
     - name: copy CMakePresets for WinFlexBison
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -9873,9 +9753,9 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  ACE_TAO_w19_re_j_ws_FM-1f:
+  ACE_TAO_w25_re_j_ws_FM-1f:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
     steps:
     - name: checkout OpenDDS
@@ -9963,22 +9843,22 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_w19_re_j_ws_FM-1f:
+  build_w25_re_j_ws_FM-1f:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: [ACE_TAO_w19_re_j_ws_FM-1f, wireshark_w19-release]
+    needs: [ACE_TAO_w25_re_j_ws_FM-1f, wireshark_w25-release]
 
     steps:
     - name: download Wireshark artifact
       uses: actions/download-artifact@v4
       with:
-        name: wireshark_w19-release_artifact
+        name: wireshark_w25-release_artifact
     - name: extract Wireshark artifact
       shell: bash
       run: |
-        tar xvJf wireshark_w19-release.tar.xz
-        rm -f wireshark_w19-release.tar.xz
+        tar xvJf wireshark_w25-release.tar.xz
+        rm -f wireshark_w25-release.tar.xz
     - name: setup for run-vcpkg
       shell: bash
       run: |
@@ -10007,14 +9887,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_j_ws_FM-1f_artifact
+        name: ACE_TAO_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
-        rm -f ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
+        tar xvfJ ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
+        rm -f ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -10037,7 +9917,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -10051,10 +9930,8 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        mkdir tests\cmake\build
-        cd tests\cmake\build
-        cmake ..
-        cmake --build . --config Release
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build --config Release
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -10070,11 +9947,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_w19_re_j_ws_FM-1f:
+  cmake_w25_re_j_ws_FM-1f:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_j_ws_FM-1f
+    needs: build_w25_re_j_ws_FM-1f
 
     permissions:
       contents: read
@@ -10105,33 +9982,43 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_j_ws_FM-1f_artifact
+        name: ACE_TAO_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
-        rm -f ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
+        tar xvfJ ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
+        rm -f ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_j_ws_FM-1f_artifact
+        name: build_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_j_ws_FM-1f.tar.xz
-        rm -f build_w19_re_j_ws_FM-1f.tar.xz
+        tar xvfJ build_w25_re_j_ws_FM-1f.tar.xz
+        rm -f build_w25_re_j_ws_FM-1f.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
+    - name: setup gtest
+      shell: cmd
+      run: |
+        cd OpenDDS/tests/googletest
+        git submodule init
+        git submodule update
+        mkdir build
+        cd build
+        mkdir install
+        cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON ..
+        cmake --build . --target install --config Release
     - name: create autobuild config
       shell: bash
       run: |
@@ -10202,11 +10089,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  messenger_w19_re_j_ws_FM-1f:
+  messenger_w25_re_j_ws_FM-1f:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_j_ws_FM-1f
+    needs: build_w25_re_j_ws_FM-1f
 
     permissions:
       contents: read
@@ -10246,32 +10133,31 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_j_ws_FM-1f_artifact
+        name: ACE_TAO_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
-        rm -f ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
+        tar xvfJ ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
+        rm -f ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_j_ws_FM-1f_artifact
+        name: build_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_j_ws_FM-1f.tar.xz
-        rm -f build_w19_re_j_ws_FM-1f.tar.xz
+        tar xvfJ build_w25_re_j_ws_FM-1f.tar.xz
+        rm -f build_w25_re_j_ws_FM-1f.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: setup gtest
       shell: cmd
@@ -10290,7 +10176,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Messenger
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make messenger tests
       shell: cmd
@@ -10305,7 +10191,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\C++11
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - name: make C++11 messenger test
       shell: cmd
       run: |
@@ -10338,7 +10224,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Release -Config STATIC_MESSENGER -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Release -Config STATIC_MESSENGER -Config XERCES3 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -10382,11 +10268,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  compiler_w19_re_j_ws_FM-1f:
+  compiler_w25_re_j_ws_FM-1f:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_j_ws_FM-1f
+    needs: build_w25_re_j_ws_FM-1f
 
     permissions:
       contents: read
@@ -10426,32 +10312,31 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_j_ws_FM-1f_artifact
+        name: ACE_TAO_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
-        rm -f ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
+        tar xvfJ ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
+        rm -f ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_j_ws_FM-1f_artifact
+        name: build_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_j_ws_FM-1f.tar.xz
-        rm -f build_w19_re_j_ws_FM-1f.tar.xz
+        tar xvfJ build_w25_re_j_ws_FM-1f.tar.xz
+        rm -f build_w25_re_j_ws_FM-1f.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: setup gtest
       shell: cmd
@@ -10470,7 +10355,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Compiler
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
+        perl %DDS_ROOT%\bin\opendds_mwc.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make compiler tests
       shell: cmd
@@ -10504,7 +10389,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Release -Config STATIC_COMPILER -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Release -Config STATIC_COMPILER -Config XERCES3 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -10548,11 +10433,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  unit_w19_re_j_ws_FM-1f:
+  unit_w25_re_j_ws_FM-1f:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
-    needs: build_w19_re_j_ws_FM-1f
+    needs: build_w25_re_j_ws_FM-1f
 
     permissions:
       contents: read
@@ -10592,32 +10477,31 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v4
       with:
-        name: ACE_TAO_w19_re_j_ws_FM-1f_artifact
+        name: ACE_TAO_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
-        rm -f ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
+        tar xvfJ ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
+        rm -f ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v4
       with:
-        name: build_w19_re_j_ws_FM-1f_artifact
+        name: build_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w19_re_j_ws_FM-1f.tar.xz
-        rm -f build_w19_re_j_ws_FM-1f.tar.xz
+        tar xvfJ build_w25_re_j_ws_FM-1f.tar.xz
+        rm -f build_w25_re_j_ws_FM-1f.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: setup gtest
       shell: cmd
@@ -10630,20 +10514,13 @@ jobs:
         mkdir install
         cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON ..
         cmake --build . --target install --config Release
-    - name: check GTest Path
-      shell: cmd
-      run: |
-        cd D:\a\OpenDDS\OpenDDS\OpenDDS\tests\googletest\build\install\
-        dir
-        cd lib
-        dir
     - name: configure unit tests
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
         cd tests\unit-tests
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
+        perl %DDS_ROOT%\bin\opendds_mwc.pl -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: make unit tests
       shell: cmd
@@ -10677,7 +10554,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Release -Config STATIC_UNIT_TESTS -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Release -Config STATIC_UNIT_TESTS -Config XERCES3 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -10881,7 +10758,6 @@ jobs:
       shell: cmd
       run: |
         cd /d C:\OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -10973,6 +10849,8 @@ jobs:
       shell: bash
       run: |
         mv OpenDDS /c/
+        cd /c/OpenDDS
+        git clean -dfX tests DevGuideExamples examples
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
@@ -10981,15 +10859,12 @@ jobs:
       run: |
         cd /d C:\OpenDDS
         call setenv.cmd
-        mkdir tests\cmake\build
-        cd tests\cmake\build
-        cmake -A Win32 ..
-        cmake --build .
+        cmake -S . -B build -A Win32 -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build
     - name: check build configuration
       shell: cmd
       run: |
         cd /d C:\OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: create autobuild config
       shell: bash
@@ -11144,7 +11019,6 @@ jobs:
       shell: cmd
       run: |
         cd /d C:\OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: create autobuild config
       shell: bash
@@ -11276,7 +11150,6 @@ jobs:
       shell: cmd
       run: |
         cd /d C:\OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: build OpenDDS
       shell: cmd
@@ -11367,6 +11240,8 @@ jobs:
       shell: bash
       run: |
         mv OpenDDS /c/
+        cd /c/OpenDDS
+        git clean -dfX tests DevGuideExamples examples
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
@@ -11374,17 +11249,14 @@ jobs:
       shell: cmd
       run: |
         cd /d C:\OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: Build CMake Tests
       shell: cmd
       run: |
         cd /d C:\OpenDDS
         call setenv.cmd
-        mkdir C:\tests\cmake\build
-        cd /d C:\tests\cmake\build
-        cmake -A Win32 %DDS_ROOT%\tests\cmake
-        cmake --build .
+        cmake -S . -B build -A Win32 -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build
     - name: create autobuild config
       shell: bash
       run: |
@@ -11410,7 +11282,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=c:/OpenDDS --no-dcps --cmake --cmake-build-dir=c:/tests/cmake/build -Config OPENDDS_TESTING_FEATURES"/>
+        <command name="auto_run_tests" options="script_path=tests dir=c:/OpenDDS --no-dcps --cmake --cmake-build-dir=c:/OpenDDS/build -Config OPENDDS_TESTING_FEATURES"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -11604,7 +11476,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -11699,15 +11570,12 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        mkdir tests\cmake\build
-        cd tests\cmake\build
-        cmake .. -DCMAKE_CXX_STANDARD=20
-        cmake --build .
+        cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
+        cmake --build build
     - name: check build configuration
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: create autobuild config
       shell: bash
@@ -11848,7 +11716,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: configure messenger tests
       shell: cmd
@@ -11904,7 +11771,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Debug -Config STATIC_MESSENGER -Config IPV6 -Config XERCES3 -Config CXX11 -Config NO_UNIT_TESTS -Config RAPIDJSON"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Debug -Config STATIC_MESSENGER -Config IPV6 -Config XERCES3 -Config NO_UNIT_TESTS -Config RAPIDJSON"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -12017,7 +11884,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: setup gtest
       shell: cmd
@@ -12070,7 +11936,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Debug -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config IPV6 -Config XERCES3 -Config CXX11 -Config NO_UNIT_TESTS -Config RAPIDJSON"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Debug -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config IPV6 -Config XERCES3 -Config NO_UNIT_TESTS -Config RAPIDJSON"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -12183,7 +12049,6 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: setup gtest
       shell: cmd
@@ -12236,7 +12101,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Debug -Config STATIC_UNIT_TESTS -Config IPV6 -Config XERCES3 -Config CXX11 -Config RAPIDJSON"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\core_ci_tests.lst -ExeSubDir Debug -Config STATIC_UNIT_TESTS -Config IPV6 -Config XERCES3 -Config RAPIDJSON"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -12335,7 +12200,7 @@ jobs:
       run: |
         cd OpenDDS
         XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
-        ./configure --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1 --compile-warnings=WARNING
+        ./configure --std=c++17 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1 --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -12401,12 +12266,11 @@ jobs:
       run: |
         cd OpenDDS
         XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
-        ./configure --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1 --compile-warnings=WARNING
+        ./configure --std=c++17 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1 --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -12417,11 +12281,12 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_STANDARD=11 ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build \
+          -DOPENDDS_JUST_BUILD_TESTS=TRUE \
+          -DCMAKE_CXX_STANDARD=11
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -12496,7 +12361,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: run OpenDDS tests
       shell: bash
@@ -12524,7 +12388,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS --no-dcps tests/core_ci_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS --no-dcps tests/core_ci_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -12620,7 +12484,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: run OpenDDS tests
       shell: bash
@@ -12724,12 +12587,11 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --std=c++11 --tests --rapidjson --java --no-built-in-topics --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
+        ./configure --std=c++17 --tests --rapidjson --java --no-built-in-topics --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -12740,26 +12602,12 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_STANDARD=11 ..
-        cmake --build . -- -j4
-    - name: set up Modeling tests
-      shell: bash
-      run: |
         cd OpenDDS
-        . setenv.sh
-        cd tools/modeling/tests
-        ./setup.pl
-        cd -
-        mwc.pl -type gnuace -workers 4 -features built_in_topics=0 tools/modeling/tests/modeling_tests.mwc
-    - name: build Modeling tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        make -j4 -C tools/modeling/tests
+        source setenv.sh
+        cmake -S . -B build \
+          -DOPENDDS_JUST_BUILD_TESTS=TRUE \
+          -DCMAKE_CXX_STANDARD=11
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -12834,7 +12682,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: run OpenDDS tests
       shell: bash
@@ -12862,7 +12709,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS --no-dcps tests/core_ci_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS --no-dcps tests/core_ci_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -12899,7 +12746,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  cmake_modeling_m13_j_FM-1f:
+  cmake_m13_j_FM-1f:
 
     runs-on: macos-13
 
@@ -12958,7 +12805,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: run OpenDDS tests
       shell: bash
@@ -12986,7 +12832,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS --java --cmake --modeling"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS --java --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -13073,7 +12919,7 @@ jobs:
       run: |
         cd OpenDDS
         XERCESC_ROOT=$(find /opt/homebrew/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
-        ./configure --optimize --no-debug --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/opt/homebrew/opt/openssl@1.1 --compile-warnings=WARNING
+        ./configure --optimize --no-debug --std=c++17 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/opt/homebrew/opt/openssl@1.1 --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -13140,12 +12986,11 @@ jobs:
         cd OpenDDS
         clang++ --version
         XERCESC_ROOT=$(find /opt/homebrew/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
-        ./configure --optimize --no-debug --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/opt/homebrew/opt/openssl@1.1 --compile-warnings=WARNING
+        ./configure --optimize --no-debug --std=c++17 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/opt/homebrew/opt/openssl@1.1 --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -13156,11 +13001,12 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_STANDARD=11 ..
-        cmake --build . -- -j4
+        cd OpenDDS
+        source setenv.sh
+        cmake -S . -B build \
+          -DOPENDDS_JUST_BUILD_TESTS=TRUE \
+          -DCMAKE_CXX_STANDARD=11
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -13236,7 +13082,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: run OpenDDS tests
       shell: bash
@@ -13267,7 +13112,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS --no-dcps tests/core_ci_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS --no-dcps tests/core_ci_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -13363,7 +13208,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: run OpenDDS tests
       shell: bash
@@ -13484,7 +13328,7 @@ jobs:
       run: |
         cd OpenDDS
         XERCESC_ROOT=$(find /opt/homebrew/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
-        ./configure  --no-inline --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/opt/homebrew/opt/openssl@1.1 --compile-warnings=WARNING
+        ./configure --no-inline --std=c++17 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/opt/homebrew/opt/openssl@1.1 --compile-warnings=WARNING
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -13552,12 +13396,11 @@ jobs:
         cd OpenDDS
         clang++ --version
         XERCESC_ROOT=$(find /opt/homebrew/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
-        ./configure --no-inline --std=c++11 --tests --rapidjson --java --no-built-in-topics --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --compile-warnings=WARNING
+        ./configure --no-inline --std=c++17 --tests --rapidjson --java --no-built-in-topics --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --compile-warnings=WARNING
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
@@ -13568,26 +13411,12 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        source OpenDDS/setenv.sh
-        mkdir OpenDDS/tests/cmake/build
-        cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_STANDARD=11 ..
-        cmake --build . -- -j4
-    - name: set up Modeling tests
-      shell: bash
-      run: |
         cd OpenDDS
-        . setenv.sh
-        cd tools/modeling/tests
-        ./setup.pl
-        cd -
-        mwc.pl -type gnuace -workers 4 -features built_in_topics=0 tools/modeling/tests/modeling_tests.mwc
-    - name: build Modeling tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        make -j4 -C tools/modeling/tests
+        source setenv.sh
+        cmake -S . -B build \
+          -DOPENDDS_JUST_BUILD_TESTS=TRUE \
+          -DCMAKE_CXX_STANDARD=11
+        cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -13663,7 +13492,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: run OpenDDS tests
       shell: bash
@@ -13694,7 +13522,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS --no-dcps tests/core_ci_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS --no-dcps tests/core_ci_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -13731,7 +13559,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  cmake_modeling_m14_i0_j_FM-1f:
+  cmake_m14_i0_j_FM-1f:
 
     runs-on: macos-14
 
@@ -13790,7 +13618,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        . setenv.sh
         tools/scripts/show_build_config.pl
     - name: run OpenDDS tests
       shell: bash
@@ -13821,7 +13648,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS --modeling --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="move prettify index"/>
         </autobuild>
@@ -13857,20 +13684,6 @@ jobs:
         $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
-
-  build_u14_gcc4:
-
-    runs-on: ubuntu-22.04
-
-    steps:
-    - name: Checkout OpenDDS
-      uses: actions/checkout@v4
-      with:
-        path: OpenDDS
-        submodules: true
-    - uses: ammaraskar/gcc-problem-matcher@0.3.0
-    - name: Build
-      run: cd OpenDDS && docker build -f .github/workflows/build_u14_gcc4.Dockerfile .
 
   openssl3_u24:
 
@@ -13909,9 +13722,9 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  openssl3_w19:
+  openssl3_w25:
 
-    runs-on: windows-2019
+    runs-on: windows-2025
 
     steps:
     - name: checkout openssl 3.0.2

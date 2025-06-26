@@ -27,7 +27,7 @@ class DataSampleElement;
 class DataLinkSet;
 typedef RcHandle<DataLinkSet> DataLinkSet_rch;
 
-class OpenDDS_Dcps_Export DataLinkSet : public virtual RcObject {
+class OpenDDS_Dcps_Export DataLinkSet : public RcObject {
 public:
 
   DataLinkSet();
@@ -86,6 +86,9 @@ public:
   //@}
 
   void terminate_send_if_suspended();
+
+  SequenceNumber cur_cumulative_ack(const GUID_t& writer_id,
+                                    const GUID_t& reader_id) const;
 
   bool is_leading(const GUID_t& writer_id,
                   const GUID_t& reader_id) const;

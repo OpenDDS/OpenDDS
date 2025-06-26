@@ -34,7 +34,7 @@
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDynamicDataC.h>
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif
 
@@ -55,13 +55,12 @@ class PublisherImpl;
 class SubscriberImpl;
 class DataWriterImpl;
 class DomainParticipantFactoryImpl;
-class Monitor;
 class BitSubscriber;
 
 class RecorderImpl;
 class ReplayerImpl;
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 class FilterEvaluator;
 #endif
 
@@ -176,7 +175,7 @@ public:
   virtual DDS::TopicDescription_ptr lookup_topicdescription(
     const char * name);
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
 
   virtual DDS::ContentFilteredTopic_ptr create_contentfilteredtopic(
     const char *           name,
@@ -189,7 +188,7 @@ public:
 
 #endif
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
 
   virtual DDS::MultiTopic_ptr create_multitopic(
     const char *           name,
@@ -201,7 +200,7 @@ public:
 
 #endif
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
   RcHandle<FilterEvaluator> get_filter_eval(const char* filter);
   void deref_filter_eval(const char* filter);
@@ -263,7 +262,7 @@ public:
    */
   virtual DDS::ReturnCode_t get_current_time(DDS::Time_t& current_time);
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
   virtual DDS::ReturnCode_t get_discovered_participants(
     DDS::InstanceHandleSeq & participant_handles);
@@ -355,20 +354,11 @@ public:
    */
   void get_topic_ids(TopicIdVec& topics);
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
 
   /** Accessor for ownership manager.
    */
   OwnershipManager* ownership_manager();
-
-
-  /**
-   * Called upon receiving new BIT publication data to
-   * update the ownership strength of a publication.
-   */
-  void update_ownership_strength(const GUID_t& pub_id,
-                                 const CORBA::Long&   ownership_strength);
-
 #endif
 
   bool federated() const {
@@ -422,7 +412,7 @@ public:
   bool prepare_to_delete_datawriters();
   bool set_wait_pending_deadline(const MonotonicTimePoint& deadline);
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   DDS::ReturnCode_t get_dynamic_type(
     DDS::DynamicType_var& type, const DDS::BuiltinTopicKey_t& key);
 #endif
@@ -504,7 +494,7 @@ private:
   SubscriberSet subscribers_;
   /// Collection of topics.
   TopicMap topics_;
-#if !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC || OPENDDS_CONFIG_MULTI_TOPIC
   /// Collection of TopicDescriptions which are not also Topics
   TopicDescriptionMap topic_descrs_;
 #endif
@@ -544,16 +534,14 @@ private:
   /// Keep track of handles that can be reused (use handle_protector_)
   DisjointSequence::OrderedRanges<DDS::InstanceHandle_t> reusable_handles_;
 
-  unique_ptr<Monitor> monitor_;
-
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   OwnershipManager owner_man_;
 #endif
 
   /// Publisher ID generator.
   RepoIdSequence pub_id_gen_;
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   ACE_Thread_Mutex filter_cache_lock_;
   OPENDDS_MAP(OPENDDS_STRING, RcHandle<FilterEvaluator> ) filter_cache_;
 #endif
@@ -573,7 +561,7 @@ private:
   /// Protect the replayers collection.
   ACE_Recursive_Thread_Mutex replayers_protector_;
 
-  class LivelinessTimer : public virtual RcObject {
+  class LivelinessTimer : public RcObject {
   public:
     LivelinessTimer(DomainParticipantImpl& impl, DDS::LivelinessQosPolicyKind kind);
     virtual ~LivelinessTimer();

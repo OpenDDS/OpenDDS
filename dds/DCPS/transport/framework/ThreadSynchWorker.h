@@ -19,8 +19,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export ThreadSynchWorker
-  : public virtual RcObject {
+class OpenDDS_Dcps_Export ThreadSynchWorker : public RcObject {
 public:
 
   virtual ~ThreadSynchWorker();

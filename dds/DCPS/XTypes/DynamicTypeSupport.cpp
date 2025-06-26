@@ -5,8 +5,9 @@
 
 #include <DCPS/DdsDcps_pch.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
 #include "DynamicTypeSupport.h"
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include "DynamicDataImpl.h"
 #include "DynamicDataReaderImpl.h"
@@ -35,7 +36,7 @@ namespace OpenDDS {
       return sample.value.deserialize(strm);
     }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
     static ComparatorBase::Ptr make_nested_cmp(const std::string& field, ComparatorBase::Ptr inner,
                                                ComparatorBase::Ptr next);
 
@@ -75,7 +76,7 @@ namespace OpenDDS {
       {
         const char* const dot = std::strchr(field, '.');
         if (dot) {
-          const String local(field, dot - field);
+          const String local(field, static_cast<size_t>(dot - field));
           const DDS::MemberId id = dd->get_member_id_by_name(local.c_str());
           DDS::DynamicData_var nested;
           if (dd->get_complex_value(nested, id) != DDS::RETCODE_OK) {
@@ -95,11 +96,11 @@ namespace OpenDDS {
       ComparatorBase::Ptr create_qc_comparator(const char* field, ComparatorBase::Ptr next) const
       {
         const char* const dot = std::strchr(field, '.');
-        return dot ? make_nested_cmp(String(field, dot - field), make_dynamic_cmp(dot + 1), next)
+        return dot ? make_nested_cmp(String(field, static_cast<size_t>(dot - field)), make_dynamic_cmp(dot + 1), next)
           : make_dynamic_cmp(field, next);
       }
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
       void* allocate() const { return 0; }
 
       void deallocate(void*) const {}
@@ -209,7 +210,7 @@ namespace OpenDDS {
   }
 
   namespace DCPS {
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
     template <>
     DDS::ReturnCode_t DataReaderImpl_T<XTypes::DynamicSample>::read_generic(
       GenericBundle&,
@@ -313,7 +314,7 @@ namespace DDS {
     return new DynamicDataReaderImpl();
   }
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
   DataReader_ptr DynamicTypeSupport::create_multitopic_datareader()
   {
     // TODO
@@ -351,7 +352,7 @@ namespace DDS {
     return dti->get_preset_type_info();
   }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   const OpenDDS::DCPS::MetaStruct& DynamicTypeSupport::getMetaStructForType() const
   {
     return getMetaStruct<OpenDDS::XTypes::DynamicSample>();

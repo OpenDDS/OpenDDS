@@ -1,4 +1,6 @@
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include <DynamicDataImplTypeSupportImpl.h>
 
@@ -4348,4 +4350,4 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, String_As_Enum)
   EXPECT_EQ(DDS::RETCODE_OK, data.get_int32_value(eval, MID_my_enum));
   EXPECT_EQ(static_cast<int>(E_UINT64), eval);
 }
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

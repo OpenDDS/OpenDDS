@@ -84,7 +84,7 @@ jint JNICALL Java_i2jrt_TAOObject__1hash(JNIEnv *jni, jobject jThis,
   CORBA::Object_ptr ptr = recoverTaoObject(jni, jThis);
 
   try {
-    return ptr->_hash(i);
+    return static_cast<jint>(ptr->_hash(static_cast<CORBA::ULong>(i)));
 
   } catch (const CORBA::SystemException &se) {
     throw_java_exception(jni, se);

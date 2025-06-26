@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3...3.27)
+cmake_minimum_required(VERSION 3.3...4.0)
 project(opendds_tests_dcps)
 enable_testing()
 
@@ -6,3 +6,9 @@ find_package(OpenDDS REQUIRED)
 
 add_subdirectory(Compiler)
 add_subdirectory(HelloWorld)
+if(OPENDDS_OWNERSHIP_PROFILE)
+  add_subdirectory(Messenger)
+endif()
+if(NOT OPENDDS_CXX_STD_YEAR LESS 2011)
+  add_subdirectory(C++11)
+endif()

@@ -6,7 +6,9 @@
 #ifndef TestUtils_Safety_H
 #define TestUtils_Safety_H
 
-#if defined(OPENDDS_SAFETY_PROFILE) && (defined(__GLIBC__) || defined(ACE_HAS_EXECINFO_H))
+#include <dds/DCPS/Definitions.h>
+
+#if OPENDDS_CONFIG_SAFETY_PROFILE && (defined(__GLIBC__) || defined(ACE_HAS_EXECINFO_H))
 
 #include <cstdlib>
 

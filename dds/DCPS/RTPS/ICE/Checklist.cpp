@@ -5,7 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <dds/OpenDDSConfigWrapper.h>
+#include "dds/DCPS/Definitions.h"
 
 #if OPENDDS_CONFIG_SECURITY
 
@@ -15,7 +15,6 @@
 #include "EndpointManager.h"
 #include "Ice.h"
 
-#include "dds/DCPS/Definitions.h"
 #include <dds/DCPS/LogAddr.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -115,7 +114,7 @@ void Checklist::generate_candidate_pairs()
     AgentInfo::CandidatesType::const_iterator remote_pos = remote_agent_info_.candidates.begin();
     AgentInfo::CandidatesType::const_iterator remote_limit = remote_agent_info_.candidates.end();
     for (; remote_pos != remote_limit; ++remote_pos) {
-#if ACE_HAS_IPV6
+#if defined ACE_HAS_IPV6 && ACE_HAS_IPV6
       if ((local_pos->address.is_linklocal() && remote_pos->address.is_linklocal()) ||
           (!local_pos->address.is_linklocal() && !remote_pos->address.is_linklocal())) {
         frozen_.push_back(CandidatePair(*local_pos, *remote_pos, local_is_controlling_));

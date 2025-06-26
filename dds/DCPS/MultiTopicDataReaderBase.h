@@ -8,12 +8,15 @@
 #ifndef OPENDDS_DCPS_MULTITOPICDATAREADERBASE_H
 #define OPENDDS_DCPS_MULTITOPICDATAREADERBASE_H
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#include "Definitions.h"
+
+#if OPENDDS_CONFIG_MULTI_TOPIC
 
 #include "dds/DdsDcpsSubscriptionExtC.h"
-#include "ZeroCopySeq_T.h"
+
 #include "MultiTopicImpl.h"
 #include "PoolAllocator.h"
+#include "ZeroCopySeq_T.h"
 #include "unique_ptr.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -28,7 +31,7 @@ namespace DCPS {
 class SubscriberImpl;
 
 class OpenDDS_Dcps_Export MultiTopicDataReaderBase
-  : public virtual LocalObject<DataReaderEx> {
+  : public virtual LocalObject<DDS::DataReader> {
 public:
   MultiTopicDataReaderBase() {}
 
@@ -60,7 +63,7 @@ public:
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states);
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
   DDS::QueryCondition_ptr create_querycondition(
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states, const char* query_expression,
@@ -106,30 +109,20 @@ public:
   DDS::ReturnCode_t get_matched_publications(
     DDS::InstanceHandleSeq& publication_handles);
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   DDS::ReturnCode_t get_matched_publication_data(
     DDS::PublicationBuiltinTopicData& publication_data,
     DDS::InstanceHandle_t publication_handle);
 #endif
 
-  // OpenDDS::DCPS::DataReaderEx interface
-
-  void get_latency_stats(LatencyStatisticsSeq& stats);
-
-  void reset_latency_stats();
-
-  CORBA::Boolean statistics_enabled();
-
-  void statistics_enabled(CORBA::Boolean statistics_enabled);
-
 private:
-  virtual void init_typed(DataReaderEx* dr) = 0;
+  virtual void init_typed(DDS::DataReader* dr) = 0;
   virtual const MetaStruct& getResultingMeta() = 0;
   virtual void incoming_sample(void* sample, const DDS::SampleInfo& info,
                                const char* topic, const MetaStruct& meta) = 0;
 
   unique_ptr<OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> > listener_;
-  DataReaderEx_var resulting_reader_;
+  DDS::DataReader_var resulting_reader_;
 
 protected:
 
