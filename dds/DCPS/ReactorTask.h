@@ -17,10 +17,11 @@
 #include "TimeTypes.h"
 #include "dcps_export.h"
 
-#include <ace/Task.h>
-#include <ace/Synch_Traits.h>
-#include <ace/Timer_Heap_T.h>
+#include <ace/Hash_Map_Manager_T.h>
 #include <ace/Event_Handler_Handle_Timeout_Upcall.h>
+#include <ace/Synch_Traits.h>
+#include <ace/Task.h>
+#include <ace/Timer_Heap_T.h>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Proactor;
