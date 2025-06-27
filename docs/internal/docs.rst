@@ -208,13 +208,13 @@ These come in the form of `RST roles <https://docutils.sourceforge.io/docs/ref/r
 
     See :acetaorel:`ace6tao2`
 
-    Also see :acetaorel:`this <ace7tao3>`
+    Also see :acetaorel:`this <ace8tao4>`
 
   Turns into:
 
-    See :acetaorel:`ace6tao2`
+    See :acetaorel:`ace8tao4`
 
-    Also see :acetaorel:`this <ace7tao3>`
+    Also see :acetaorel:`this <ace8tao4>`
 
 .. rst:role:: omgissue
 

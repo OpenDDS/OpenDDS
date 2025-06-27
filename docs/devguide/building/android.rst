@@ -137,7 +137,7 @@ OpenDDS can be configured and built with the Android NDK using the following com
 
 .. code-block:: shell
 
-  ./configure --doc-group3 --target=android --macros=android_abi=$ABI --macros=android_api=$MIN_API --macros=android_ndk=$NDK
+  ./configure --ace-tao=ace8tao4 --target=android --macros=android_abi=$ABI --macros=android_api=$MIN_API --macros=android_ndk=$NDK
   make # Pass -j/--jobs with an appropriate value or this'll take a while...
 
 .. _android-using-a-standalone-toolchain:
@@ -221,8 +221,8 @@ android_abi
 -----------
 
 The architecture to cross-target.
-When using ACE6/TAO2 it is optional as it defaults to ``armeabi-v7a``.
-When using ACE7/ACE3 it is required.
+When using ACE version 6 it is optional as it defaults to ``armeabi-v7a``.
+When using ACE version 7 or later, it is required.
 
 The valid options are:
 

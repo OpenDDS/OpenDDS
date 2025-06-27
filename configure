@@ -224,9 +224,9 @@ my @specs =
     'tao=s', 'TAO (use TAO_ROOT, ACE_ROOT/TAO, or download)',
     'mpc=s', 'MPC (use MPC_ROOT, ACE_ROOT/MPC, or download)',
     'doc-group|doc_group!', 'Use the DOC Group release of TAO 2.5.x (yes)',
-    'doc-group3|doc_group3!', 'Use the DOC Group release of TAO 3.x (no)',
     'ace-tao=s', 'Use the ACE/TAO version from acetao.ini',
     'ace-github-latest!', 'Clone latest ACE/TAO/MPC from GitHub (no)',
+    'doc-master-branch!', 'When using --ace-github-latest, get master branch (no)',
     'force-ace-tao', 'Force configuration of ACE/TAO (no)',
     'no-disable-deprecated', 'Turn off disabling deprecated interfaces when' .
                              $argIndent . 'configuring ACE/TAO (no)',
@@ -983,7 +983,7 @@ if (!$ace_src || !$tao_src) {
 
     my $urlbase = 'https://github.com/DOCGroup';
     my $branch = 'ace6tao2';
-    if ($opts{'doc-group3'}) {
+    if ($opts{'doc-master-branch'}) {
       $branch = 'master';
     }
 
@@ -1004,7 +1004,7 @@ if (!$ace_src || !$tao_src) {
   else {
     # Get ACE/TAO version info
     my ($section_names, $sections) = read_ini_file("$FindBin::RealBin/acetao.ini");
-    my $ace_tao_version = $opts{'doc-group3'} ? $sections->{ace7tao3} : $sections->{ace6tao2};
+    my $ace_tao_version = $sections->{ace6tao2};
     if ($opts{'ace-tao'}) {
       $ace_tao_version = $sections->{$opts{'ace-tao'}};
       die "ERROR: No entry named '$opts{'ace-tao'}' in acetao.ini" unless $ace_tao_version;
