@@ -8,7 +8,7 @@
 namespace RtpsRelay {
 
 PublicationListener::PublicationListener(const Config& config,
-                                         GuidAddrSet& guid_addr_set,
+                                         const GuidAddrSet_rch& guid_addr_set,
                                          OpenDDS::DCPS::DomainParticipantImpl* participant,
                                          GuidPartitionTable& guid_partition_table,
                                          RelayStatisticsReporter& stats_reporter)
@@ -61,7 +61,7 @@ void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
 
           if (r == GuidPartitionTable::ADDED) {
             if (config_.log_discovery()) {
-              GuidAddrSet::Proxy proxy(guid_addr_set_);
+              GuidAddrSet::Proxy proxy(*guid_addr_set_);
               ACE_DEBUG((LM_INFO, "(%P|%t) INFO: PublicationListener::on_data_available "
                          "add local writer %C %C %C into session [%u/%u]\n",
                          guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str(),
@@ -86,7 +86,7 @@ void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
         const auto repoid = participant_->get_repoid(info.instance_handle);
 
         if (config_.log_discovery()) {
-          GuidAddrSet::Proxy proxy(guid_addr_set_);
+          GuidAddrSet::Proxy proxy(*guid_addr_set_);
           ACE_DEBUG((LM_INFO, "(%P|%t) INFO: PublicationListener::on_data_available "
                      "remove local writer %C %C into session [%u/%u]\n",
                      guid_to_string(repoid).c_str(),

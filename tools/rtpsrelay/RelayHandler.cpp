@@ -312,7 +312,6 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     GuidAddrSet::Proxy proxy(guid_addr_set_);
     OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, READ_MASK | DONT_CALL, handle_as_int);
     proxy.maintain_admission_queue(now);
-    proxy.process_expirations(now);
     if (!proxy.check_address(remote_address)) {
       stats_reporter_.ignored_message(msg_len, now, type);
       return 0;

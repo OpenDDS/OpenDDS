@@ -3,7 +3,7 @@
 namespace RtpsRelay {
 
 ParticipantListener::ParticipantListener(OpenDDS::DCPS::DomainParticipantImpl* participant,
-                                         GuidAddrSet& guid_addr_set,
+                                         const GuidAddrSet_rch& guid_addr_set,
                                          RelayParticipantStatusReporter& participant_status_reporter)
   : participant_(participant)
   , guid_addr_set_(guid_addr_set)
@@ -48,7 +48,7 @@ void ParticipantListener::on_data_available(DDS::DataReader_ptr reader)
     case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
     case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
       {
-        GuidAddrSet::Proxy proxy(guid_addr_set_);
+        GuidAddrSet::Proxy proxy(*guid_addr_set_);
         participant_status_reporter_.remove_participant(proxy, participant_->get_repoid(info.instance_handle), idx, infos.length());
       }
       break;

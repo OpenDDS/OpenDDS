@@ -10,7 +10,6 @@
 #include "ParticipantStatisticsReporter.h"
 #include "PublicationListener.h"
 #include "RelayAddressListener.h"
-#include "RelayEventLoop.h"
 #include "RelayHandler.h"
 #include "RelayHttpMetaDiscovery.h"
 #include "RelayPartitionTable.h"
@@ -38,6 +37,8 @@
 #include <ace/Arg_Shifter.h>
 #include <ace/Argv_Type_Converter.h>
 #include <ace/Reactor.h>
+#include <ace/Select_Reactor.h>
+#include <ace/TP_Reactor.h>
 
 #include <cstdlib>
 #include <algorithm>
@@ -710,23 +711,27 @@ int run(int argc, ACE_TCHAR* argv[])
   }
 
   RelayParticipantStatusReporter relay_participant_status_reporter(config, relay_participant_status_writer, relay_statistics_reporter);
+
   RelayThreadMonitor* relay_thread_monitor = new RelayThreadMonitor(config);
-  GuidAddrSet guid_addr_set(config, rtps_discovery, relay_participant_status_reporter, relay_statistics_reporter, *relay_thread_monitor);
-  ACE_Reactor reactor_(RelayEventLoop::make_reactor_impl(config), true);
-  const auto reactor = &reactor_;
+  const auto reactor = new ACE_Reactor(config.handler_threads() == 1 ? new ACE_Select_Reactor : new ACE_TP_Reactor, true); // deleted by ReactorTask
+  const auto reactor_task = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ReactorTask>();
+  reactor_task->init_reactor_task(&TheServiceParticipant->get_thread_status_manager(), "RtpsRelay Main", reactor);
+
+  const auto guid_addr_set = OpenDDS::DCPS::make_rch<GuidAddrSet>(config, reactor_task, rtps_discovery,
+    OpenDDS::DCPS::ref(relay_participant_status_reporter), OpenDDS::DCPS::ref(relay_statistics_reporter), OpenDDS::DCPS::ref(*relay_thread_monitor));
   GuidPartitionTable guid_partition_table(config, spdp_horizontal_addr, relay_partitions_writer, relay_statistics_reporter);
   RelayPartitionTable relay_partition_table(relay_statistics_reporter);
   relay_statistics_reporter.report();
 
   HandlerStatisticsReporter spdp_vertical_reporter(config, VSPDP, handler_statistics_writer, relay_statistics_reporter);
   spdp_vertical_reporter.report();
-  SpdpHandler spdp_vertical_handler(config, VSPDP, spdp_horizontal_addr, reactor, guid_partition_table, relay_partition_table, guid_addr_set, rtps_discovery, crypto, spdp, spdp_vertical_reporter);
+  SpdpHandler spdp_vertical_handler(config, VSPDP, spdp_horizontal_addr, reactor, guid_partition_table, relay_partition_table, *guid_addr_set, rtps_discovery, crypto, spdp, spdp_vertical_reporter);
   HandlerStatisticsReporter sedp_vertical_reporter(config, VSEDP, handler_statistics_writer, relay_statistics_reporter);
   sedp_vertical_reporter.report();
-  SedpHandler sedp_vertical_handler(config, VSEDP, sedp_horizontal_addr, reactor, guid_partition_table, relay_partition_table, guid_addr_set, rtps_discovery, crypto, sedp, sedp_vertical_reporter);
+  SedpHandler sedp_vertical_handler(config, VSEDP, sedp_horizontal_addr, reactor, guid_partition_table, relay_partition_table, *guid_addr_set, rtps_discovery, crypto, sedp, sedp_vertical_reporter);
   HandlerStatisticsReporter data_vertical_reporter(config, VDATA, handler_statistics_writer, relay_statistics_reporter);
   data_vertical_reporter.report();
-  DataHandler data_vertical_handler(config, VDATA, data_horizontal_addr, reactor, guid_partition_table, relay_partition_table, guid_addr_set, rtps_discovery, crypto, data_vertical_reporter);
+  DataHandler data_vertical_handler(config, VDATA, data_horizontal_addr, reactor, guid_partition_table, relay_partition_table, *guid_addr_set, rtps_discovery, crypto, data_vertical_reporter);
 
   HandlerStatisticsReporter spdp_horizontal_reporter(config, HSPDP, handler_statistics_writer, relay_statistics_reporter);
   spdp_horizontal_reporter.report();
@@ -913,18 +918,28 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  RelayStatusReporter relay_status_reporter(config, guid_addr_set, relay_status_writer, reactor);
+  RelayStatusReporter relay_status_reporter(config, *guid_addr_set, relay_status_writer, reactor);
 
-  RelayHttpMetaDiscovery relay_http_meta_discovery(config, meta_discovery_content_type, meta_discovery_content, guid_addr_set);
+  RelayHttpMetaDiscovery relay_http_meta_discovery(config, meta_discovery_content_type, meta_discovery_content, *guid_addr_set);
   if (relay_http_meta_discovery.open(meta_discovery_addr, reactor) != 0) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: could not open RelayHttpMetaDiscovery\n"));
     return EXIT_FAILURE;
   }
   ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Meta Discovery listening on %C\n", OpenDDS::DCPS::LogAddr(meta_discovery_addr).c_str()));
 
-  const auto status = RelayEventLoop::run(config, *reactor, *relay_thread_monitor);
+  const auto run_thread_mon = TheServiceParticipant->get_thread_status_manager().update_thread_status();
+  if (run_thread_mon && relay_thread_monitor->start() != EXIT_SUCCESS) {
+    ACE_ERROR((LM_ERROR, "(%P:%t) ERROR: Failed to start Relay Thread Monitor\n"));
+    return EXIT_FAILURE;
+  }
+
+  const auto status = reactor_task->run_reactor(config.handler_threads(), config.run_time());
   if (status != EXIT_SUCCESS) {
-    return status;
+    ACE_ERROR((LM_ERROR, "(%P:%t) ERROR: Failed to run reactor task: %m\n"));
+  }
+
+  if (run_thread_mon) {
+    relay_thread_monitor->stop();
   }
 
   application_participant->delete_contained_entities();

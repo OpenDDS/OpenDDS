@@ -151,7 +151,6 @@ Service_Participant::Service_Participant()
   ORB_argv_(false /*substitute_env_args*/),
 #endif
   time_source_()
-  , reactor_task_(false)
   , monitor_factory_(0)
   , priority_min_(0)
   , priority_max_(0)
