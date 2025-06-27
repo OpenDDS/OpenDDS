@@ -97,7 +97,7 @@ if(NOT DEFINED OPENDDS_ACE_TAO_SRC)
   _opendds_read_ini("${OPENDDS_SOURCE_DIR}/acetao.ini" PREFIX _OPENDDS_ACE_TAO)
 
   if(NOT DEFINED OPENDDS_ACE_TAO_KIND)
-    set(OPENDDS_ACE_TAO_KIND ace7tao3)
+    set(OPENDDS_ACE_TAO_KIND ace8tao4)
   endif()
   set(prefix "_OPENDDS_ACE_TAO_${OPENDDS_ACE_TAO_KIND}_")
   set(url_var "${prefix}${ext}-url")
