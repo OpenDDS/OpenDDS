@@ -137,9 +137,9 @@ private:
     INVALID
   };
 
+  ACE_Thread_Mutex match_status_mutex_;
   ACE_Condition_Thread_Mutex match_cond_;
   ACE_Condition_Thread_Mutex unmatch_cond_;
-  ACE_Thread_Mutex match_status_mutex_;
   MatchStatus match_status_;
 };
 
