@@ -26,6 +26,13 @@
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Proactor;
 class ACE_Reactor;
+#ifdef ACE_HAS_MAC_OSX
+template <>
+class ACE_Hash<ACE_thread_t> {
+public:
+  unsigned long operator()(const ACE_thread_t&) const;
+};
+#endif
 ACE_END_VERSIONED_NAMESPACE_DECL
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

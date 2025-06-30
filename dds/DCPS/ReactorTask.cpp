@@ -10,19 +10,20 @@
 #include "ReactorTask.inl"
 #endif /* __ACE_INLINE__ */
 
+#include "debug.h"
 #include "RcHandle_T.h"
 #include "Service_Participant.h"
-#include "debug.h"
 
-#include <ace/Select_Reactor.h>
-#include <ace/WFMO_Reactor.h>
+#include <ace/ACE.h>
+#include <ace/OS_NS_Thread.h>
 #include <ace/Proactor.h>
 #include <ace/Proactor_Impl.h>
+#include <ace/Select_Reactor.h>
+#include <ace/WFMO_Reactor.h>
 #include <ace/WIN32_Proactor.h>
-#include <ace/OS_NS_Thread.h>
 
-#include <exception>
 #include <cstring>
+#include <exception>
 
 #if OPENDDS_CONFIG_BOOTTIME_TIMERS
 #  if defined __linux__ && __linux__
@@ -30,6 +31,17 @@
 #  else
 #    error Unsupported platform for OPENDDS_CONFIG_BOOTTIME_TIMERS
 #  endif
+#endif
+
+#ifdef ACE_HAS_MAC_OSX
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+unsigned long ACE_Hash<ACE_thread_t>::operator()(const ACE_thread_t& t) const
+{
+  char bytes[sizeof t];
+  std::memcpy(bytes, &t, sizeof t);
+  return ACE::hash_pjw(bytes, sizeof t);
+}
+ACE_END_VERSIONED_NAMESPACE_DECL
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
