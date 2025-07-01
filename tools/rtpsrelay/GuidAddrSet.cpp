@@ -343,7 +343,7 @@ void GuidAddrSet::process_expiration(const OpenDDS::DCPS::MonotonicTimePoint& no
 
         // Address actually expired.
         if (config_.log_activity()) {
-          const auto ago = now - updated_expiration;
+          const auto ago = now - expiration;
           ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::process_expiration "
                      "%C %C expired %C ago %C into session ips=%B total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
                      guid_to_string(ga.guid).c_str(),
@@ -363,7 +363,7 @@ void GuidAddrSet::process_expiration(const OpenDDS::DCPS::MonotonicTimePoint& no
           remove(ga.guid, pos, now, &relay_participant_status_reporter_);
         }
 
-      } else {
+      } else if (updated_expiration != OpenDDS::DCPS::MonotonicTimePoint::zero_value) {
         expiration_guid_addr_queue_.push_back(std::make_pair(updated_expiration, ga));
       }
     }
