@@ -21,8 +21,8 @@ if(NOT GTest_FOUND)
     else()
       message("GoogleTest not found, using clone")
       set(fetch_args
-        GIT_REPOSITORY "https://github.com/OpenDDS/googletest"
-        GIT_TAG "v1.8.x"
+        GIT_REPOSITORY "https://github.com/google/googletest"
+        GIT_TAG "v1.17.x"
         GIT_SHALLOW TRUE
         GIT_PROGRESS TRUE
         USES_TERMINAL_DOWNLOAD TRUE
