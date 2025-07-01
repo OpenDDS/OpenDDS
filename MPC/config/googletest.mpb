@@ -6,13 +6,8 @@ project {
   includes += $(GTEST_ROOT)/include
   libpaths += $(GTEST_ROOT)/lib
 
-  specific(prop:windows) {
-    // Avoid adding "s" suffix in static builds
-    Release::lit_libs += gtest
-    Debug::lit_libs += gtestd
-  } else {
-    libs += gtest
-  }
+  // Avoid adding "s" suffix in static builds
+  lit_libs += gtest
 
   specific(prop:microsoft) {
     macros += _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING
