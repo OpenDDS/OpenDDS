@@ -7,6 +7,6 @@
 [submodule "tests/googletest"]
 	path = tests/googletest
 	url = https://github.com/google/googletest
-	branch = 1.17.x
+	branch = v1.17.x
 	shallow = true
 	openddsConfigureCommit = 52eb8108c5bdec04579160ae17225d66034bd723
