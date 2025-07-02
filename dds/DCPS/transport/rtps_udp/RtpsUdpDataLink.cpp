@@ -1850,6 +1850,11 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
   const SequenceNumber start = to_opendds_seqnum(gap.gapStart);
   const SequenceNumber base = to_opendds_seqnum(gap.gapList.bitmapBase);
 
+  if (Transport_debug_level > 5) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsReader::process_gap_i: %C -> %C start %q base %q bits %u\n",
+      LogGuid(src).c_str(), LogGuid(id_).c_str(), start.getValue(), base.getValue(), gap.gapList.numBits));
+  }
+
   if (start < base) {
     writer->recvd_.insert(SequenceRange(start, base.previous()));
   } else if (start != base) {
