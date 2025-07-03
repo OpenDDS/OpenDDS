@@ -408,8 +408,9 @@ jobs:
         export ACE_SOURCE_ROOT=$ACE_ROOT
         export TAO_SOURCE_ROOT=$TAO_ROOT
         export PERL5LIB=$(realpath bin):\$ACE_SOURCE_ROOT/bin
+        export GTEST_ROOT=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install
         EOF
-    - name: delete host directories
+    - name: delete directories not used for make install tests
       shell: bash
       run: |
         cd OpenDDS
