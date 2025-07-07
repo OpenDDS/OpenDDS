@@ -6771,9 +6771,7 @@ jobs:
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_w25_p1_stat_js0:
-  ACE_TAO_w25_p1_stat_js0:
 
-    runs-on: windows-2025
     runs-on: windows-2025
 
     steps:
@@ -6949,7 +6947,6 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_w25_p1_stat_js0:
   cmake_w25_p1_stat_js0:
 
     runs-on: windows-2025
@@ -9810,7 +9807,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c00_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: setup for run-vcpkg
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
