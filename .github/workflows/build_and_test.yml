@@ -408,8 +408,9 @@ jobs:
         export ACE_SOURCE_ROOT=$ACE_ROOT
         export TAO_SOURCE_ROOT=$TAO_ROOT
         export PERL5LIB=$(realpath bin):\$ACE_SOURCE_ROOT/bin
+        export GTEST_ROOT=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install
         EOF
-    - name: delete host directories
+    - name: delete directories not used for make install tests
       shell: bash
       run: |
         cd OpenDDS
@@ -6770,7 +6771,9 @@ jobs:
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
   ACE_TAO_w25_p1_stat_js0:
+  ACE_TAO_w25_p1_stat_js0:
 
+    runs-on: windows-2025
     runs-on: windows-2025
 
     steps:
@@ -6827,7 +6830,9 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --no-static-runtime --no-rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
+        configure --ipv6 --static --no-static-runtime --no-rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE ^
+        --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows ^
+        --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -6914,7 +6919,9 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --no-static-runtime --no-rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --compile-warnings=WARNING
+        configure --ipv6 --static --no-static-runtime --no-rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install ^
+        --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC ^
+        --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --compile-warnings=WARNING
     - name: check build configuration
       shell: cmd
       run: |
@@ -6942,6 +6949,7 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
+  cmake_w25_p1_stat_js0:
   cmake_w25_p1_stat_js0:
 
     runs-on: windows-2025
@@ -7830,7 +7838,11 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
+        configure --ipv6 --static --rapidjson --no-built-in-topics --no-content-subscription --no-ownership-profile ^
+        --no-object-model-profile --no-persistence-profile --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE ^
+        --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC ^
+        --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows ^
+        --mpcopts=-hierarchy --compile-warnings=WARNING
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -7917,7 +7929,11 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --compile-warnings=WARNING
+        configure --ipv6 --static --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install ^
+        --no-built-in-topics --no-content-subscription --no-ownership-profile --no-object-model-profile --no-persistence-profile ^
+        --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO ^
+        --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows ^
+        --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --compile-warnings=WARNING
     - name: check build configuration
       shell: cmd
       run: |
@@ -8842,7 +8858,9 @@ jobs:
       run: |
         set SSL_DIR=%CD%/openssl3
         cd OpenDDS
-        call configure -v --optimize --ipv6 --security --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=%SSL_DIR% --mpcopts=-hierarchy --compile-warnings=WARNING
+        call configure -v --optimize --ipv6 --security --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE ^
+        --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC ^
+        --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=%SSL_DIR% --mpcopts=-hierarchy --compile-warnings=WARNING
         echo "SSL_DIR=%SSL_DIR%" >> setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: build ACE & TAO
@@ -8941,7 +8959,9 @@ jobs:
       run: |
         set SSL_DIR=%CD%/openssl3
         cd OpenDDS
-        configure --optimize --ipv6 --rapidjson --security --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=%SSL_DIR% --compile-warnings=WARNING
+        configure --optimize --ipv6 --rapidjson --security --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install ^
+        --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO ^
+        --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=%SSL_DIR% --compile-warnings=WARNING
         echo "SSL_DIR=%SSL_DIR%" >> setenv.cmd
     - name: check build configuration
       shell: cmd
@@ -9790,7 +9810,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
+        key: c00_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: setup for run-vcpkg
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
@@ -9816,7 +9836,9 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --optimize --java --no-built-in-topics --rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
+        configure --optimize --java --no-built-in-topics --rapidjson --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE ^
+        --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows ^
+        --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -9912,7 +9934,12 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --optimize --java --no-built-in-topics --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --wireshark-cmake=${{ github.workspace }}\wireshark --wireshark-build=${{ github.workspace }}\wsbuild --wireshark-lib=run --glib=${{ github.workspace }}\wireshark-win64-libs-3.6\vcpkg-export-20210609-1-win64ws\installed\x64-windows --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
+        configure --optimize --java --no-built-in-topics --rapidjson --gtest=${{ github.workspace }}/OpenDDS/tests/googletest/build/install ^
+        --ace=${{ github.workspace }}/OpenDDS/ACE_TAO/ACE --tao=${{ github.workspace }}/OpenDDS/ACE_TAO/TAO --mpc=${{ github.workspace }}/MPC ^
+        --xerces3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --wireshark-cmake=${{ github.workspace }}\wireshark ^
+        --wireshark-build=${{ github.workspace }}\wsbuild --wireshark-lib=run ^
+        --glib=${{ github.workspace }}\wireshark-win64-libs-3.6\vcpkg-export-20210609-1-win64ws\installed\x64-windows ^
+        --openssl=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows --mpcopts=-hierarchy --compile-warnings=WARNING
     - name: check build configuration
       shell: cmd
       run: |

@@ -112,7 +112,7 @@ int RelayHandler::open(const ACE_INET_Addr& address)
 
 int RelayHandler::handle_input(ACE_HANDLE handle)
 {
-  OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+  OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager(), READ_MASK, handle_to_int(handle));
 
   const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
@@ -166,13 +166,15 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
   return 0;
 }
 
-int RelayHandler::handle_output(ACE_HANDLE)
+int RelayHandler::handle_output(ACE_HANDLE handle)
 {
-  OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+  auto& statusManager = TheServiceParticipant->get_thread_status_manager();
+  OpenDDS::DCPS::ThreadStatusManager::Event ev(statusManager, WRITE_MASK, handle_to_int(handle));
 
   const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, outgoing_mutex_, 0);
+  OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, WRITE_MASK | DONT_CALL, handle_to_int(handle));
 
   if (!outgoing_.empty()) {
     const auto& out = outgoing_.front();
@@ -303,11 +305,13 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
                                               const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                               MessageType& type)
 {
+  auto& statusManager = TheServiceParticipant->get_thread_status_manager();
+  const auto handle_as_int = handle_to_int(get_handle());
   const auto msg_len = msg->length();
   {
     GuidAddrSet::Proxy proxy(guid_addr_set_);
+    OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, READ_MASK | DONT_CALL, handle_as_int);
     proxy.maintain_admission_queue(now);
-    proxy.process_expirations(now);
     if (!proxy.check_address(remote_address)) {
       stats_reporter_.ignored_message(msg_len, now, type);
       return 0;
@@ -330,6 +334,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     }
 
     GuidAddrSet::Proxy proxy(guid_addr_set_);
+    OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, READ_MASK | SIGNAL_MASK, handle_as_int);
     record_activity(proxy, addr_port, now, src_guid, type, msg_len);
 
     cache_message(proxy, src_guid, to, msg, now);
@@ -428,6 +433,8 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
 
     if (has_guid) {
       GuidAddrSet::Proxy proxy(guid_addr_set_);
+      OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, READ_MASK | GROUP_QOS_MASK, handle_as_int);
+
       ParticipantStatisticsReporter& from_psr =
         record_activity(proxy, addr_port, now, src_guid, type, msg_len);
       if (bytes_sent) {
@@ -713,13 +720,11 @@ void HorizontalHandler::enqueue_or_send_message(const ACE_INET_Addr& addr,
   RelayHandler::enqueue_message(addr, header_block, now, MessageType::Rtps);
 }
 
-CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr& from,
+CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr&,
                                                 const OpenDDS::DCPS::MonotonicTimePoint& now,
                                                 const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                                 MessageType& type)
 {
-  ACE_UNUSED_ARG(from);
-
   type = MessageType::Rtps;
 
   OpenDDS::RTPS::MessageParser mp(*msg);
@@ -740,6 +745,9 @@ CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr& from,
 
   guid_partition_table_.lookup(guids, relay_header.to_partitions(), to_guids);
   GuidAddrSet::Proxy proxy(vertical_handler_->guid_addr_set());
+  OpenDDS::DCPS::ThreadStatusManager::Event evLocked(TheServiceParticipant->get_thread_status_manager(),
+    READ_MASK | DONT_CALL, handle_to_int(get_handle()));
+
   CORBA::ULong sent = 0;
   for (const auto& guid : guids) {
     const auto p = proxy.find(guid);
@@ -866,7 +874,7 @@ void SpdpHandler::cache_message(GuidAddrSet::Proxy& proxy,
   if (to.empty()) {
     const auto pos = proxy.find(src_guid);
     if (pos != proxy.end()) {
-      if (!pos->second.spdp_message) {
+      if (!pos->second.seen_spdp_message) {
         pos->second.common_name = extract_common_name(*msg, src_guid);
         if (config_.log_activity()) {
           ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SpdpHandler::cache_message %C got first SPDP %C into session dds.cert.sn %C\n",
@@ -874,8 +882,9 @@ void SpdpHandler::cache_message(GuidAddrSet::Proxy& proxy,
                      pos->second.get_session_time(now).sec_str().c_str(),
                      pos->second.common_name.c_str()));
         }
+        pos->second.spdp_message = msg;
+        pos->second.seen_spdp_message = true;
       }
-      pos->second.spdp_message = msg;
     }
   }
 }
@@ -934,16 +943,6 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
   return true;
 }
 
-void SpdpHandler::replay(const SpdpReplay& spdp_replay)
-{
-  ACE_GUARD(ACE_Thread_Mutex, g, replay_queue_mutex_);
-  const bool notify = replay_queue_.empty();
-  replay_queue_.push_back(spdp_replay);
-  if (notify) {
-    reactor()->notify(this);
-  }
-}
-
 CORBA::ULong SpdpHandler::send_to_application_participant(GuidAddrSet::Proxy& proxy,
                                                           const OpenDDS::DCPS::GUID_t& guid,
                                                           const OpenDDS::DCPS::MonotonicTimePoint& now)
@@ -957,66 +956,9 @@ CORBA::ULong SpdpHandler::send_to_application_participant(GuidAddrSet::Proxy& pr
     return 0;
   }
 
-  return send(proxy, guid, StringSet(), GuidSet(), true, pos->second.spdp_message, now);
-}
-
-
-int SpdpHandler::handle_exception(ACE_HANDLE /*fd*/)
-{
-  OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
-
-  ReplayQueue q;
-
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, replay_queue_mutex_, 0);
-    std::swap(q, replay_queue_);
-  }
-
-  const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
-
-  // Fan-in refers to the idea that the SPDP messages for participants
-  // in a common partition need to go to the guid in the replay
-  // message.  Fan-out refers to the idea that the SPDP message of the
-  // guid in the replay message needs to go out to the other
-  // participants in a common partition.
-
-  for (const auto& r : q) {
-    const ACE_INET_Addr fan_in_replay_address(r.address().c_str());
-    const auto fan_in_to_guid = relay_guid_to_rtps_guid(r.guid());
-    GuidSet fan_in_to_guid_set;
-    fan_in_to_guid_set.insert(fan_in_to_guid);
-
-    GuidSet fan_in_from_guids;
-    guid_partition_table_.lookup(fan_in_from_guids, r.partitions(), GuidSet());
-
-    bool do_fan_out = false;
-    for (const auto& fan_in_from_guid : fan_in_from_guids) {
-      if (fan_in_from_guid == fan_in_to_guid) {
-        do_fan_out = true;
-        continue;
-      }
-
-      GuidAddrSet::Proxy proxy(guid_addr_set_);
-      const auto pos = proxy.find(fan_in_from_guid);
-      if (pos != proxy.end() && pos->second.spdp_message) {
-        // Send the SPDP message horizontally.  We may be sending to ourselves which is okay.
-        horizontal_handler_->enqueue_or_send_message(fan_in_replay_address, StringSet(), fan_in_to_guid_set, pos->second.spdp_message, now);
-      }
-    }
-
-    if (do_fan_out) {
-      GuidAddrSet::Proxy proxy(guid_addr_set_);
-      const auto pos = proxy.find(fan_in_to_guid);
-      if (pos != proxy.end() && pos->second.spdp_message) {
-        // The partitions in the replay message may be a subset of the actual partitions.
-        StringSet to_partitions;
-        guid_partition_table_.lookup(to_partitions, fan_in_to_guid);
-        send(proxy, fan_in_to_guid, to_partitions, GuidSet(), false, pos->second.spdp_message, now);
-      }
-    }
-  }
-
-  return 0;
+  const auto ret = send(proxy, guid, StringSet(), GuidSet(), true, pos->second.spdp_message, now);
+  pos->second.spdp_message = OpenDDS::DCPS::Lockable_Message_Block_Ptr{};
+  return ret;
 }
 
 SedpHandler::SedpHandler(const Config& config,

@@ -117,9 +117,9 @@ Writer::svc()
     ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
     for (int i = 0; i < num_messages; ++i) {
-      message.short_seq[4]      = message.count;
-      message.long_seq[4]       = message.count;
-      message.octet_seq[4]      = message.count;
+      message.short_seq[4] = static_cast<CORBA::Short>(message.count);
+      message.long_seq[4] = message.count;
+      message.octet_seq[4] = static_cast<CORBA::Octet>(message.count);
       message.outside_long_seq[4] = message.count;
       ::DDS::ReturnCode_t ret = message_dw->write(message, handle);
 

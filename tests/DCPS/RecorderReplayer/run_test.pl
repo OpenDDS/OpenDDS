@@ -11,6 +11,7 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use File::Path;
 use strict;
 
 PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
@@ -112,11 +113,14 @@ $test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log $repo_bit_
 $test->process("subscriber", ($stack_based ? 'stack_' : '') . "subscriber", $sub_opts);
 $test->process("publisher",  "publisher", $pub_opts);
 $test->process("relay",      "relay", $relay_opts);
+
+rmtree './DCS';
+
 $test->start_process("publisher");
 $test->start_process("subscriber");
 $test->start_process("relay");
 
-my $result = $test->finish(300);
+my $result = $test->finish(180);
 if ($result != 0) {
     print STDERR "ERROR: test returned $result\n";
     $status = 1;

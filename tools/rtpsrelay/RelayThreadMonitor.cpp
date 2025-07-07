@@ -103,9 +103,9 @@ int RelayThreadMonitor::svc()
 
     for (const auto idx : late_thread_indexes) {
       const SystemTimePoint timestamp(infos[idx].source_timestamp);
-      ACE_ERROR((LM_ERROR,
-                  "(%P|%t) ERROR: RelayThreadMonitor::svc thread %C last update %#T.  Aborting...\n",
-                  datas[idx].thread_id.in(), &timestamp.value()));
+      const auto& thread = datas[idx];
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RelayThreadMonitor::svc thread %C (%d, %d) last update %#T.  Aborting...\n",
+                 thread.thread_id.in(), thread.detail1, thread.detail2, &timestamp.value()));
     }
 
     if (!late_thread_indexes.empty()) {

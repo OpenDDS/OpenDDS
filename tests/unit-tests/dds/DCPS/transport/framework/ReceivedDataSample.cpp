@@ -25,7 +25,7 @@ namespace {
   void fill(char (&buffer)[N], char start = 0)
   {
     for (size_t i = 0; i < N; ++i) {
-      buffer[i] = static_cast<char>(start + i);
+      buffer[i] = start + static_cast<char>(i);
     }
   }
 

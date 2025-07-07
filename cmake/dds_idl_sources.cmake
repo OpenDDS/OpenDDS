@@ -20,6 +20,7 @@ function(_opendds_target_idl_sources target)
     SKIP_OPENDDS_IDL
     AUTO_INCLUDES
     INCLUDE_BASE
+    FOLDER
   )
   set(multi_value_args TAO_IDL_FLAGS DDS_IDL_FLAGS IDL_FILES)
   cmake_parse_arguments(arg "" "${one_value_args}" "${multi_value_args}" ${ARGN})
@@ -274,6 +275,7 @@ function(_opendds_target_idl_sources target)
     set_target_properties(${target} PROPERTIES _OPENDDS_IDL_FILE_COUNT ${idl_file_count})
     set(idl_target "_opendds_codegen_${idl_file_count}_for_${target}")
     add_custom_target(${idl_target} DEPENDS ${generated_files})
+    set_target_properties(${idl_target} PROPERTIES FOLDER ${arg_FOLDER})
     add_dependencies(${target} ${idl_target})
 
     set_source_files_properties(${idl_files} ${h_files}

@@ -120,16 +120,16 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
         ws->detach_condition(condition);
         std::string from_list = std::string(message.from) + "->" + writer_id_;
         message.from = from_list.c_str();
-        DDS::ReturnCode_t error;
+        DDS::ReturnCode_t write_error;
         do {
-          error = message_writer->write(message, DDS::HANDLE_NIL);
+          write_error = message_writer->write(message, DDS::HANDLE_NIL);
 
-          if ((error != DDS::RETCODE_OK) && (error != DDS::RETCODE_TIMEOUT)) {
+          if (write_error != DDS::RETCODE_OK && write_error != DDS::RETCODE_TIMEOUT) {
             ACE_ERROR((LM_ERROR,
                        ACE_TEXT("ERROR: %N:%l: on_data_available() -")
                        ACE_TEXT(" write returned %d!\n"), error));
           }
-        } while (error == DDS::RETCODE_TIMEOUT);
+        } while (write_error == DDS::RETCODE_TIMEOUT);
       }
       if (++received_samples_ == expected_samples_) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReader %C has received expected number of samples\n", id_.c_str()));

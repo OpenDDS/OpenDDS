@@ -7,6 +7,7 @@ RelayStatusReporter::RelayStatusReporter(const Config& config,
                                          RelayStatusDataWriter_var writer,
                                          ACE_Reactor* reactor)
   : ACE_Event_Handler(reactor)
+  , config_(config)
   , guid_addr_set_(guid_addr_set)
   , writer_(writer)
 {
@@ -19,7 +20,10 @@ RelayStatusReporter::RelayStatusReporter(const Config& config,
 
 int RelayStatusReporter::handle_timeout(const ACE_Time_Value&, const void*)
 {
-  OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+  if (config_.log_activity()) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) RelayStatusReporter::handle_timeout\n"));
+  }
+  OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager(), TIMER_MASK);
 
   GuidAddrSet::Proxy proxy(guid_addr_set_);
   relay_status_.admitting(proxy.admitting());

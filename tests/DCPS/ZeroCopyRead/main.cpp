@@ -1401,7 +1401,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       } // t7
 
-      const CORBA::Long max_samples = 2;
+      static const CORBA::Long max_samples = 2;
       // scope must be larger than the sequences that use the allocator.
       BogusExampleAllocator<Test::Simple*,max_samples> the_allocator;
       {
@@ -1410,7 +1410,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         //=====================================================
         ACE_DEBUG((LM_INFO,"==== TEST 8 : show that an allocator can be provided.\n"));
 
-        const CORBA::Long max_samples = 2;
         // Note: the default allocator for a ZCSeq is very fast because
         // it will allocate from a pool on the stack and thus avoid
         // a heap allocation.
@@ -1685,7 +1684,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // !!!! note - this test should be the last because it deletes the datareader
         ACE_DEBUG((LM_INFO,"==== TEST 10: show that loans are checked by delete_datareader.\n"));
 
-        const CORBA::Long max_samples = 2;
         // Initialize the ZeroCopySeq and ZeroCopyInfoSeq objects for read
         // operation.
         Test::SimpleSeq     data0 (0, max_samples);
