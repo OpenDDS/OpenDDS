@@ -216,6 +216,8 @@ public:
 
   VendorId_t get_vendor_id_i(const GUID_t& guid) const;
 
+  OPENDDS_SET(DDS::UInt32) get_ignored_user_tags() const;
+
   void ignore_domain_participant(const GUID_t& ignoreId);
 
   void remove_domain_participant(const GUID_t& removeId);
@@ -595,6 +597,7 @@ private:
 #endif
     bool network_is_unreachable_;
     bool ice_endpoint_added_;
+    OPENDDS_SET(DDS::UInt32) ignored_user_tags_;
 
     DCPS::MonotonicTimePoint last_thread_status_harvest_;
     DCPS::ConfigReader_rch config_reader_;

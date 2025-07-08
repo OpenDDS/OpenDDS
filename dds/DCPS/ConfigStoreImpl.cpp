@@ -539,6 +539,56 @@ ConfigStoreImpl::get(const char* key,
 
 void
 ConfigStoreImpl::set(const char* key,
+                     const UInt32List& value)
+{
+  String s;
+  for (UInt32List::const_iterator pos = value.begin(), limit = value.end(); pos != limit; ++pos) {
+    if (!s.empty()) {
+      s += ',';
+    }
+    s += to_dds_string(*pos);
+  }
+
+  set(key, s);
+}
+
+ConfigStoreImpl::UInt32List
+ConfigStoreImpl::get(const char* key,
+                     const UInt32List& value) const
+{
+  // Join the default.
+  String s;
+  for (UInt32List::const_iterator pos = value.begin(), limit = value.end(); pos != limit; ++pos) {
+    if (!s.empty()) {
+      s += ',';
+    }
+    s += to_dds_string(*pos);
+  }
+
+  const String t = get(key, s);
+
+  UInt32List retval;
+
+  const char* start = t.c_str();
+  while (const char* next_comma = std::strchr(start, ',')) {
+    const size_t size = static_cast<size_t>(next_comma - start);
+    DDS::UInt32 val = 0;
+    if (convertToInteger(String(start, size), val)) {
+      retval.push_back(val);
+    }
+    start = next_comma + 1;
+  }
+  // Append everything after last comma
+  DDS::UInt32 val = 0;
+  if (convertToInteger(start, val)) {
+    retval.push_back(val);
+  }
+
+  return retval;
+}
+
+void
+ConfigStoreImpl::set(const char* key,
                      const TimeDuration& value,
                      TimeFormat format)
 {

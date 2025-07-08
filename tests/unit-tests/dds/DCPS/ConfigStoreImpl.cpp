@@ -239,6 +239,22 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_StringList)
   EXPECT_EQ(store.get("key", default_list), other_list);
 }
 
+TEST(dds_DCPS_ConfigStoreImpl, set_get_IntList)
+{
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  ConfigStoreImpl store(topic);
+  ConfigStoreImpl::UInt32List default_list;
+  default_list.push_back(1);
+  default_list.push_back(2);
+  default_list.push_back(3);
+  EXPECT_EQ(store.get("key", default_list), default_list);
+
+  ConfigStoreImpl::UInt32List other_list;
+  other_list.push_back(4);
+  store.set("key", other_list);
+  EXPECT_EQ(store.get("key", default_list), other_list);
+}
+
 enum MyConfigStoreEnum {
   ALPHA,
   BETA,

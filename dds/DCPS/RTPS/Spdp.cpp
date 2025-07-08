@@ -2369,6 +2369,7 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
   , wbuff_(64 * 1024)
   , network_is_unreachable_(false)
   , ice_endpoint_added_(false)
+  , ignored_user_tags_(outer->get_ignored_user_tags())
 {
   hdr_.prefix[0] = 'R';
   hdr_.prefix[1] = 'T';
@@ -3253,8 +3254,18 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
             }
             return 0;
           }
-          submessageLength = sm.smHeader.submessageLength;
+          if (ignored_user_tags_.count(sm.userTag)) {
+            if (DCPS::DCPS_debug_level > 5) {
+              ACE_DEBUG((LM_DEBUG, "(%P|%t) Spdp::SpdpTransport::handle_input() - "
+                                   "dropped message with ignored userTag %d\n", sm.userTag));
+            }
+            return 0;
+          }
           userTag = sm.userTag;
+          submessageLength = sm.smHeader.submessageLength;
+          if (DCPS::transport_debug.log_messages) {
+            append_submessage(message, sm);
+          }
         } else {
           SubmessageHeader smHeader;
           if (!(ser >> smHeader)) {
@@ -4725,6 +4736,12 @@ VendorId_t Spdp::get_vendor_id_i(const GUID_t& guid) const
     return iter->second.pdata_.participantProxy.vendorId;
   }
   return unknown_vendor;
+}
+
+OPENDDS_SET(DDS::UInt32) Spdp::get_ignored_user_tags() const
+{
+  const RtpsDiscoveryConfig::UserTagList tags = config_->ignored_spdp_user_tags();
+  return OPENDDS_SET(DDS::UInt32)(tags.begin(), tags.end());
 }
 
 void Spdp::ignore_domain_participant(const GUID_t& ignoreId)
