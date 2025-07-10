@@ -861,6 +861,12 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
 #if OPENDDS_CONFIG_SECURITY
     std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, auth_resend_period_)));
+    p.first->second.identity_token_ = pdata.ddsParticipantDataSecure.base.identity_token;
+    p.first->second.permissions_token_ = pdata.ddsParticipantDataSecure.base.permissions_token;
+    p.first->second.property_qos_ = pdata.ddsParticipantDataSecure.base.property;
+    p.first->second.security_info_ = pdata.ddsParticipantDataSecure.base.security_info;
+    p.first->second.extended_builtin_endpoints_ = pdata.ddsParticipantDataSecure.base.extended_builtin_endpoints;
+
     DDS::Security::SecurityException sec_except = {"", 0, 0};
     const DDS::Security::ValidationResult_t validation_result = pre_check_auth(p.first, sec_except);
     if (is_security_enabled() && security_config_ &&
@@ -944,12 +950,6 @@ Spdp::handle_participant_data(DCPS::MessageId id,
           match_unauthenticated(iter);
         }
       } else {
-        iter->second.identity_token_ = pdata.ddsParticipantDataSecure.base.identity_token;
-        iter->second.permissions_token_ = pdata.ddsParticipantDataSecure.base.permissions_token;
-        iter->second.property_qos_ = pdata.ddsParticipantDataSecure.base.property;
-        iter->second.security_info_ = pdata.ddsParticipantDataSecure.base.security_info;
-        iter->second.extended_builtin_endpoints_ = pdata.ddsParticipantDataSecure.base.extended_builtin_endpoints;
-
         // The remote needs to see our SPDP before attempting authentication.
         tport_->write_i(guid, iter->second.last_recv_address_, from_relay ? SpdpTransport::SEND_RELAY : SpdpTransport::SEND_DIRECT);
 
