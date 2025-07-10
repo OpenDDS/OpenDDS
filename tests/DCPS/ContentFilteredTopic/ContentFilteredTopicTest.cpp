@@ -578,12 +578,12 @@ bool run_single_dispose_filter_test(const MessageTypeSupport_var& ts, const Publ
   }
 
   // Compare Numbers to what was Expected
-  if (num_valid != 1) {
+  if (num_valid != 1u) {
     cerr << "ERROR: run_single_dispose_filter_test: "
       "expected one sample with valid data, got " << num_valid << endl;
     return false;
   }
-  if (num_invalid != (expect_dispose ? 1 : 0)) {
+  if (num_invalid != (expect_dispose ? 1u : 0u)) {
     cerr << "ERROR: run_single_dispose_filter_test: expected "
       << (expect_dispose ? "one sample" : "no samples")
       << " with invalid data, got " << num_invalid << endl;

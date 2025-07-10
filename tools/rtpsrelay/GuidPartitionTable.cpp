@@ -11,7 +11,6 @@ GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_
 {
   Result result;
   std::vector<RelayPartitions> relay_partitions;
-  SpdpReplay spdp_replay;
 
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, NO_CHANGE);
@@ -44,8 +43,6 @@ GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_
 
     remove_from_cache(guid);
 
-    populate_replay(spdp_replay, guid, to_add);
-
     StringSet globally_new;
     x.insert(to_add.begin(), to_add.end());
     for (const auto& part : to_add) {
@@ -77,19 +74,6 @@ GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, write_mutex_, NO_CHANGE);
     write_relay_partitions(relay_partitions);
-
-    if (!spdp_replay.partitions().empty()) {
-      spdp_replay.address(address_);
-      spdp_replay.guid(rtps_guid_to_relay_guid(OpenDDS::DCPS::make_id(guid, OpenDDS::DCPS::ENTITYID_PARTICIPANT)));
-      if (spdp_replay_writer_->write(spdp_replay, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: GuidPartitionTable::insert failed to write SPDP Replay\n"));
-      }
-    }
-  }
-
-  if (!spdp_replay.partitions().empty() && config_.log_activity()) {
-    const auto part_guid = make_id(guid, OpenDDS::DCPS::ENTITYID_PARTICIPANT);
-    ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidPartitionTable::insert %C add partitions %C\n", guid_to_string(part_guid).c_str(), OpenDDS::DCPS::to_json(spdp_replay).c_str()));
   }
 
   return result;
@@ -162,34 +146,6 @@ void GuidPartitionTable::lookup(StringSet& partitions, const OpenDDS::DCPS::GUID
   if (!c.empty()) {
     guid_to_partitions_cache_[prefix] = c;
     relay_stats_reporter_.partition_guids(guid_to_partitions_.size(), guid_to_partitions_cache_.size());
-  }
-}
-
-void GuidPartitionTable::populate_replay(SpdpReplay& spdp_replay,
-                                         const OpenDDS::DCPS::GUID_t& guid,
-                                         const std::vector<std::string>& to_add) const
-{
-  // The partitions are new for this reader/writer.
-  // Check if they are new for the participant.
-
-  const auto prefix = make_unknown_guid(guid);
-
-  for (const auto& part : to_add) {
-    const auto pos1 = partition_to_guid_.find(part);
-    if (pos1 == partition_to_guid_.end()) {
-      if (config_.allow_empty_partition() || !part.empty()) {
-        spdp_replay.partitions().push_back(part);
-      }
-      continue;
-    }
-
-    const auto pos2 = pos1->second.lower_bound(prefix);
-
-    if (pos2 == pos1->second.end() || equal_guid_prefixes(*pos2, prefix)) {
-      if (config_.allow_empty_partition() || !part.empty()) {
-        spdp_replay.partitions().push_back(part);
-      }
-    }
   }
 }
 

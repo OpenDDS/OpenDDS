@@ -16,8 +16,8 @@ _opendds_group(OpenDDS DEFAULT_REQUIRED OpenDDS::Dcps OpenDDS::opendds_idl)
 _opendds_group_lib(Dcps
   DEPENDS
     ACE::ACE
-    TAO::TAO
     # TODO: These are omitted with safety profile
+    TAO::TAO
     TAO::Valuetype
     TAO::PortableServer
     TAO::BiDirGIOP
@@ -27,6 +27,7 @@ _opendds_group_lib(Federator DEPENDS OpenDDS::InfoRepoLib)
 _opendds_group_lib(InfoRepoDiscovery
   DEPENDS
     OpenDDS::Dcps
+    OpenDDS::Tcp
     TAO::PortableServer
     TAO::BiDirGIOP
     TAO::PI

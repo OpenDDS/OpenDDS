@@ -36,6 +36,7 @@ class DynamicDataAdapterImpl;
  *   - Part of this is accessing all types as complex value.
  * - Implement equals, clear_value, and clear_nonkey_values
  * - Respect bounds of strings and sequences.
+ * - Implement support for IDL maps
  * - Add a way to check if using get_complex_value on a complex member of a
  *   union that isn't selected. Doing this will cause a segfault. It should
  *   return DDS::PRECONDITION_NOT_MET.

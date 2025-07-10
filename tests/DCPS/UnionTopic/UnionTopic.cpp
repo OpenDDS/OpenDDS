@@ -209,12 +209,12 @@ basic_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
   // Calculate the canonical expected winner
   ElectionResult_t canonical_result = { { "", 0 }, 0 };
   Vote_t max = 0;
-  Canonical::iterator i, finished = canonical.end();
-  for (i = canonical.begin(); i != finished; ++i) {
-    Vote_t votes = i->second;
+  Canonical::iterator iter, finished = canonical.end();
+  for (iter = canonical.begin(); iter != finished; ++iter) {
+    Vote_t votes = iter->second;
     if (votes > max) {
       Candidate_t c;
-      c.name = i->first.c_str();
+      c.name = iter->first.c_str();
       c.votes = max = votes;
       canonical_result.winner = c;
     }
@@ -246,15 +246,15 @@ basic_test(DDS::DomainParticipant_var& participant, DDS::Topic_var& topic)
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("Writing Election Statuses...\n")));
   ElectionNews_t news;
   Candidate_t c;
-  for (i = canonical.begin(); i != finished; ++i) {
-    c.name = i->first.c_str();
-    c.votes = i->second;
+  for (iter = canonical.begin(); iter != finished; ++iter) {
+    c.name = iter->first.c_str();
+    c.votes = iter->second;
     news.status(c);
     rc = writer_i->write(news, DDS::HANDLE_NIL);
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("%N:%l basic_test() ERROR: ")
         ACE_TEXT("Unable to write sample %C: %C\n"),
-        i->first.c_str(), retcode_to_string(rc)), false);
+        iter->first.c_str(), retcode_to_string(rc)), false);
     }
   }
 

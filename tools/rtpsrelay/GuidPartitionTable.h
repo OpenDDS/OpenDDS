@@ -29,13 +29,11 @@ public:
   GuidPartitionTable(const Config& config,
                      const ACE_INET_Addr& address,
                      RelayPartitionsDataWriter_var relay_partitions_writer,
-                     SpdpReplayDataWriter_var spdp_replay_writer,
                      RelayStatisticsReporter& relay_stats_reporter)
     : config_(config)
     , address_(OpenDDS::DCPS::LogAddr(address).c_str())
     , relay_stats_reporter_(relay_stats_reporter)
     , relay_partitions_writer_(relay_partitions_writer)
-    , spdp_replay_writer_(spdp_replay_writer)
   {}
 
   // Insert a reader/writer guid and its partitions.
@@ -69,10 +67,6 @@ private:
     // Invalidate the cache.
     guid_to_partitions_cache_.erase(make_id(guid, OpenDDS::DCPS::ENTITYID_UNKNOWN));
   }
-
-  void populate_replay(SpdpReplay& spdp_replay,
-                       const OpenDDS::DCPS::GUID_t& guid,
-                       const std::vector<std::string>& to_add) const;
 
   void add_new(std::vector<RelayPartitions>& relay_partitions, const StringSet& partitions)
   {
@@ -179,8 +173,6 @@ private:
 
   using PartitionToSlot = std::unordered_map<std::string, size_t>;
   PartitionToSlot partition_to_slot_;
-
-  SpdpReplayDataWriter_var spdp_replay_writer_;
 
   using GuidToPartitions = std::map<OpenDDS::DCPS::GUID_t, StringSet, OpenDDS::DCPS::GUID_tKeyLessThan>;
   GuidToPartitions guid_to_partitions_;

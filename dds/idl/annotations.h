@@ -30,6 +30,7 @@
 
 class AST_Array;
 class AST_Sequence;
+class AST_Map;
 class AST_Decl;
 class AST_Union;
 class AST_Annotation_Decl;
@@ -339,6 +340,9 @@ public:
   TryConstructFailAction sequence_element_value(AST_Sequence* node) const;
   TryConstructFailAction array_element_value(AST_Array* node) const;
   TryConstructFailAction union_value(AST_Union* node) const;
+
+  TryConstructFailAction map_key(AST_Map* node) const;
+  TryConstructFailAction map_value(AST_Map* node) const;
 };
 
 // @value ====================================================================

@@ -594,6 +594,8 @@ option(OPENDDS_AUTO_LINK_DCPS
 # TODO: Make this default ON in v4.0
 option(OPENDDS_USE_CORRECT_INCLUDE_SCOPE
   "Include using SCOPE specified in opendds_target_sources" OFF)
+set(OPENDDS_DEFAULT_GENERATED_FOLDER "IDL" CACHE STRING
+  "Default value used for the FOLDER CMake property of generated targets added in opendds_target_sources")
 
 if(OPENDDS_STATIC)
   set(OPENDDS_LIBRARY_TYPE STATIC)

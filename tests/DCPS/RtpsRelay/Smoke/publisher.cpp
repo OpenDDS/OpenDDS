@@ -128,7 +128,7 @@ void stress_test(const DDS::DataWriter_var& dw,
     Messenger::MessageDataWriter_var message_local_dw = Messenger::MessageDataWriter::_narrow(local_dw.in());
 
     for (std::size_t instance = 0, instance_limit = rand() % 26; instance != instance_limit; ++instance) {
-      message.subject_id = instance;
+      message.subject_id = static_cast<DDS::Int32>(instance);
       message.text = std::string(rand() % (1400 * 6), 'c').c_str();
       message_local_dw->write(message, DDS::HANDLE_NIL);
     }

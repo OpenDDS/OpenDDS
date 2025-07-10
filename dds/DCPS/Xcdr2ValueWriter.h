@@ -4,6 +4,8 @@
 #include "ValueWriter.h"
 #include "PoolAllocator.h"
 
+#include <dds/DdsDcpsCoreC.h>
+
 #include <stack>
 #include <stdexcept>
 
@@ -43,6 +45,13 @@ public:
   bool end_sequence();
   bool begin_element(ACE_CDR::ULong idx);
   bool end_element();
+
+  bool begin_map(XTypes::TypeKind key_kind, XTypes::TypeKind value_kind);
+  bool end_map();
+  bool begin_key();
+  bool end_key();
+  bool begin_value();
+  bool end_value();
 
   bool write_boolean(ACE_CDR::Boolean value);
   bool write_byte(ACE_CDR::Octet value);
@@ -98,7 +107,7 @@ public:
   }
 
 private:
-  enum CollectionKind { SEQUENCE_KIND, ARRAY_KIND, NOT_COLLECTION_KIND };
+  enum CollectionKind { SEQUENCE_KIND, ARRAY_KIND, MAP_KIND, NOT_COLLECTION_KIND };
 
   // Common internal methods for computing serialized sizes.
   bool begin_ssize_complex(Extensibility extensiblity, CollectionKind ck);
@@ -106,13 +115,13 @@ private:
   bool begin_ssize_aggregated_member(bool optional, bool present);
 
   // Common internal methods for serialization.
-  bool begin_serialize_complex(Extensibility extensibility, CollectionKind ck, ACE_CDR::ULong seq_length);
+  bool begin_serialize_complex(Extensibility extensibility, CollectionKind ck, ACE_CDR::ULong seq_map_length);
   bool end_serialize_complex();
   bool begin_serialize_aggregated_member(unsigned id, bool must_understand, bool optional, bool present);
 
-  // Argument seq_length is only used if the type that triggers this call is a sequence.
+  // Argument length is only used if the type that triggers this call is a sequence/map.
   bool begin_complex(Extensibility extensibility, CollectionKind ck = NOT_COLLECTION_KIND,
-                     ACE_CDR::ULong seq_length = 0);
+                     ACE_CDR::ULong length = 0);
   bool end_complex();
   bool begin_aggregated_member(unsigned id, bool must_understand, bool optional, bool present);
 
@@ -172,7 +181,15 @@ private:
     CollectionKind collection_kind;
   };
 
-  std::stack<SerializeState> serialize_states_;
+  OPENDDS_STACK(SerializeState) serialize_states_;
+
+  // For each map, in order they are first encountered, track the current length
+  // during the SERIALIZATION_SIZE_MODE for use during SERIALIZATION_MODE.
+  OPENDDS_DEQUE(DDS::UInt32) map_lengths_;
+
+  // Top of stack is the current index into map_lengths_
+  // Only used for SERIALIZATION_SIZE_MODE
+  OPENDDS_STACK(size_t) map_lengths_index_;
 
   Serializer* ser_;
 };
