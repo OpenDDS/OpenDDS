@@ -1,11 +1,4 @@
 project : googletest {
-
-  specific(prop:windows) {
-    // Avoid adding "s" suffix in static builds
-    Release::lit_libs += gmock
-    Debug::lit_libs += gmockd
-  } else {
-    libs += gmock
-  }
-
+  // Avoid adding "s" suffix in static builds
+  lit_libs += gmock
 }
