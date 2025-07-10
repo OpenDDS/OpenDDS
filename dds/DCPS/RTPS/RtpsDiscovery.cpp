@@ -499,7 +499,7 @@ bool RtpsDiscovery::remove_domain_participant(
   if (domain->second.empty()) {
     participants_.erase(domain);
   }
-  if (participants_.empty()) {
+  if (participants_.empty() && stats_task_) {
     stats_task_->disable();
   }
   g.release();

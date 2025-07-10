@@ -24,7 +24,8 @@ function(_opendds_get_sources_and_options
     auto_link
     include_base
     skip_tao_idl
-    skip_opendds_idl)
+    skip_opendds_idl
+    folder)
   set(no_value_options
     SKIP_TAO_IDL
     SKIP_OPENDDS_IDL
@@ -36,6 +37,7 @@ function(_opendds_get_sources_and_options
     GENERATE_SERVER_SKELETONS
     AUTO_LINK
     INCLUDE_BASE
+    FOLDER
   )
   set(multi_value_options
     PUBLIC PRIVATE INTERFACE
@@ -126,6 +128,11 @@ function(_opendds_get_sources_and_options
     set(arg_AUTO_LINK ${OPENDDS_AUTO_LINK_DCPS})
   endif()
   set(${auto_link} ${arg_AUTO_LINK} PARENT_SCOPE)
+
+  if(NOT DEFINED arg_FOLDER)
+    set(arg_FOLDER ${OPENDDS_DEFAULT_GENERATED_FOLDER})
+  endif()
+  set(${folder} ${arg_FOLDER} PARENT_SCOPE)
 
   set(all_idl_files)
   foreach(scope PUBLIC PRIVATE INTERFACE)
@@ -224,6 +231,7 @@ function(opendds_target_sources target)
     include_base
     skip_tao_idl
     skip_opendds_idl
+    folder
     ${ARGN})
 
   if(NOT opendds_options MATCHES "--(no-)?default-nested")
@@ -331,7 +339,8 @@ function(opendds_target_sources target)
         SCOPE ${scope}
         INCLUDE_BASE "${include_base}"
         AUTO_INCLUDES auto_includes
-        USE_EXPORT ${use_export})
+        USE_EXPORT ${use_export}
+        FOLDER ${folder})
       list(APPEND includes ${auto_includes})
     endif()
 

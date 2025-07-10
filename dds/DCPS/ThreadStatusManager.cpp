@@ -20,7 +20,7 @@ void ThreadStatusManager::Thread::update(const MonotonicTimePoint& m_now,
                                          const SystemTimePoint& s_now,
                                          ThreadStatus next_status,
                                          const TimeDuration& bucket_limit,
-                                         bool nested)
+                                         bool nested, int detail1, int detail2)
 {
   timestamp_ = s_now;
 
@@ -56,6 +56,8 @@ void ThreadStatusManager::Thread::update(const MonotonicTimePoint& m_now,
     last_status_change_ = m_now;
     status_ = next_status;
   }
+  detail1_ = detail1;
+  detail2_ = detail2;
   last_update_ = m_now;
 }
 
@@ -114,7 +116,8 @@ void ThreadStatusManager::add_thread(const String& name)
   map_.insert(std::make_pair(thread_id, Thread(bit_key)));
 }
 
-void ThreadStatusManager::update_i(Thread::ThreadStatus status, bool finished, bool nested)
+void ThreadStatusManager::update_i(Thread::ThreadStatus status, bool finished,
+                                   bool nested, int detail1, int detail2)
 {
   if (!update_thread_status()) {
     return;
@@ -128,7 +131,7 @@ void ThreadStatusManager::update_i(Thread::ThreadStatus status, bool finished, b
 
   const Map::iterator pos = map_.find(thread_id);
   if (pos != map_.end()) {
-    pos->second.update(m_now, s_now, status, bucket_limit_, nested);
+    pos->second.update(m_now, s_now, status, bucket_limit_, nested, detail1, detail2);
     if (finished) {
       finished_.push_back(pos->second);
       map_.erase(pos);

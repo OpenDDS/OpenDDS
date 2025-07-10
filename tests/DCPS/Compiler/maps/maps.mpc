@@ -1,0 +1,12 @@
+project: dcps_test, opendds_cxx11, googletest, msvc_bigobj {
+  requires += no_opendds_safety_profile
+  exename = maps
+  includes += .
+  Source_Files {
+    main.cpp
+  }
+  idlflags += -I.
+  TypeSupport_Files {
+    test.idl
+  }
+}

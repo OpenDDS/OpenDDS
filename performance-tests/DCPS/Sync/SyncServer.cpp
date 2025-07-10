@@ -44,10 +44,10 @@ SyncServer::parse_args (int argc, ACE_TCHAR *argv[])
     switch (c)
       {
       case 'p':
-        pub_count_ = ACE_OS::atoi (get_opts.opt_arg ());
+        pub_count_ = static_cast<size_t>(ACE_OS::atoi(get_opts.opt_arg()));
         break;
       case 's':
-        sub_count_ = ACE_OS::atoi (get_opts.opt_arg ());
+        sub_count_ = static_cast<size_t>(ACE_OS::atoi(get_opts.opt_arg()));
         break;
       case '?':
       default:

@@ -39,6 +39,7 @@ public:
     ArrayType,
     UnionType,
     SequenceType,
+    MapType,
     InvalidType
   };
 

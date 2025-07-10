@@ -39,9 +39,8 @@ void RelayStatisticsReporter::get_opendds_stats(RelayStatistics& out)
     Statistics& statistics = samples[idx];
     OpenDDSModuleStatistics& mod = out.opendds_modules()[idx];
     mod.id() = statistics.id;
-    mod.stats().resize(statistics.stats.length());
     for (DDS::UInt32 idxStats = 0; idxStats < statistics.stats.length(); ++idxStats) {
-      mod.stats()[idxStats] = Statistic{statistics.stats[idxStats].name.in(), statistics.stats[idxStats].value};
+      mod.stats()[statistics.stats[idxStats].name.in()] = statistics.stats[idxStats].value;
     }
   }
 }

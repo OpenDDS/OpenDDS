@@ -10,7 +10,6 @@
 #include "ParticipantStatisticsReporter.h"
 #include "PublicationListener.h"
 #include "RelayAddressListener.h"
-#include "RelayEventLoop.h"
 #include "RelayHandler.h"
 #include "RelayHttpMetaDiscovery.h"
 #include "RelayPartitionTable.h"
@@ -18,7 +17,6 @@
 #include "RelayStatisticsReporter.h"
 #include "RelayStatusReporter.h"
 #include "RelayThreadMonitor.h"
-#include "SpdpReplayListener.h"
 #include "StatisticsWriterListener.h"
 #include "SubscriptionListener.h"
 
@@ -39,6 +37,8 @@
 #include <ace/Arg_Shifter.h>
 #include <ace/Argv_Type_Converter.h>
 #include <ace/Reactor.h>
+#include <ace/Select_Reactor.h>
+#include <ace/TP_Reactor.h>
 
 #include <cstdlib>
 #include <algorithm>
@@ -440,23 +440,6 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  SpdpReplayTypeSupport_var spdp_replay_ts = new SpdpReplayTypeSupportImpl;
-  if (spdp_replay_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to register SpdpReplay type\n"));
-    return EXIT_FAILURE;
-  }
-  CORBA::String_var spdp_replay_type_name = spdp_replay_ts->get_type_name();
-
-  DDS::Topic_var spdp_replay_topic =
-    relay_participant->create_topic(SPDP_REPLAY_TOPIC_NAME.c_str(),
-                                    spdp_replay_type_name,
-                                    TOPIC_QOS_DEFAULT, nullptr,
-                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-  if (!spdp_replay_topic) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Spdp Replay topic\n"));
-  }
-
   HandlerStatisticsTypeSupport_var handler_statistics_ts = new HandlerStatisticsTypeSupportImpl;
   if (handler_statistics_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to register HandlerStatistics type\n"));
@@ -727,49 +710,28 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  DDS::DataWriterQos replay_writer_qos;
-  relay_publisher->get_default_datawriter_qos(replay_writer_qos);
-
-  replay_writer_qos.durability.kind = DDS::VOLATILE_DURABILITY_QOS;
-  replay_writer_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  replay_writer_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
-
-  DDS::DataWriterListener_var spdp_replay_writer_listener =
-    new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::spdp_replay_sub_count);
-  DDS::DataWriter_var spdp_replay_writer_var =
-    relay_publisher->create_datawriter(spdp_replay_topic, replay_writer_qos, spdp_replay_writer_listener,
-                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-  if (!spdp_replay_writer_var) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Spdp Replay data writer\n"));
-    return EXIT_FAILURE;
-  }
-
-  SpdpReplayDataWriter_var spdp_replay_writer = SpdpReplayDataWriter::_narrow(spdp_replay_writer_var);
-
-  if (!spdp_replay_writer) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to narrow Spdp Replay data writer\n"));
-    return EXIT_FAILURE;
-  }
-
   RelayParticipantStatusReporter relay_participant_status_reporter(config, relay_participant_status_writer, relay_statistics_reporter);
+
   RelayThreadMonitor* relay_thread_monitor = new RelayThreadMonitor(config);
-  GuidAddrSet guid_addr_set(config, rtps_discovery, relay_participant_status_reporter, relay_statistics_reporter, *relay_thread_monitor);
-  ACE_Reactor reactor_(RelayEventLoop::make_reactor_impl(config), true);
-  const auto reactor = &reactor_;
-  GuidPartitionTable guid_partition_table(config, spdp_horizontal_addr, relay_partitions_writer, spdp_replay_writer, relay_statistics_reporter);
+  const auto reactor = new ACE_Reactor(config.handler_threads() == 1 ? new ACE_Select_Reactor : new ACE_TP_Reactor, true); // deleted by ReactorTask
+  const auto reactor_task = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ReactorTask>();
+  reactor_task->init_reactor_task(&TheServiceParticipant->get_thread_status_manager(), "RtpsRelay Main", reactor);
+
+  const auto guid_addr_set = OpenDDS::DCPS::make_rch<GuidAddrSet>(config, reactor_task, rtps_discovery,
+    OpenDDS::DCPS::ref(relay_participant_status_reporter), OpenDDS::DCPS::ref(relay_statistics_reporter), OpenDDS::DCPS::ref(*relay_thread_monitor));
+  GuidPartitionTable guid_partition_table(config, spdp_horizontal_addr, relay_partitions_writer, relay_statistics_reporter);
   RelayPartitionTable relay_partition_table(relay_statistics_reporter);
   relay_statistics_reporter.report();
 
   HandlerStatisticsReporter spdp_vertical_reporter(config, VSPDP, handler_statistics_writer, relay_statistics_reporter);
   spdp_vertical_reporter.report();
-  SpdpHandler spdp_vertical_handler(config, VSPDP, spdp_horizontal_addr, reactor, guid_partition_table, relay_partition_table, guid_addr_set, rtps_discovery, crypto, spdp, spdp_vertical_reporter);
+  SpdpHandler spdp_vertical_handler(config, VSPDP, spdp_horizontal_addr, reactor, guid_partition_table, relay_partition_table, *guid_addr_set, rtps_discovery, crypto, spdp, spdp_vertical_reporter);
   HandlerStatisticsReporter sedp_vertical_reporter(config, VSEDP, handler_statistics_writer, relay_statistics_reporter);
   sedp_vertical_reporter.report();
-  SedpHandler sedp_vertical_handler(config, VSEDP, sedp_horizontal_addr, reactor, guid_partition_table, relay_partition_table, guid_addr_set, rtps_discovery, crypto, sedp, sedp_vertical_reporter);
+  SedpHandler sedp_vertical_handler(config, VSEDP, sedp_horizontal_addr, reactor, guid_partition_table, relay_partition_table, *guid_addr_set, rtps_discovery, crypto, sedp, sedp_vertical_reporter);
   HandlerStatisticsReporter data_vertical_reporter(config, VDATA, handler_statistics_writer, relay_statistics_reporter);
   data_vertical_reporter.report();
-  DataHandler data_vertical_handler(config, VDATA, data_horizontal_addr, reactor, guid_partition_table, relay_partition_table, guid_addr_set, rtps_discovery, crypto, data_vertical_reporter);
+  DataHandler data_vertical_handler(config, VDATA, data_horizontal_addr, reactor, guid_partition_table, relay_partition_table, *guid_addr_set, rtps_discovery, crypto, data_vertical_reporter);
 
   HandlerStatisticsReporter spdp_horizontal_reporter(config, HSPDP, handler_statistics_writer, relay_statistics_reporter);
   spdp_horizontal_reporter.report();
@@ -834,27 +796,6 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  DDS::DataReaderQos replay_reader_qos;
-  relay_subscriber->get_default_datareader_qos(replay_reader_qos);
-
-  replay_reader_qos.durability.kind = DDS::VOLATILE_DURABILITY_QOS;
-  replay_reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  replay_reader_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
-  replay_reader_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay = one_minute;
-  replay_reader_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = one_minute;
-
-  DDS::DataReaderListener_var spdp_replay_listener =
-    new SpdpReplayListener(spdp_vertical_handler, relay_statistics_reporter);
-  DDS::DataReader_var spdp_replay_reader_var =
-    relay_subscriber->create_datareader(spdp_replay_topic, replay_reader_qos,
-                                        spdp_replay_listener,
-                                        DDS::DATA_AVAILABLE_STATUS | DDS::SUBSCRIPTION_MATCHED_STATUS);
-
-  if (!spdp_replay_reader_var) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Relay Address data reader\n"));
-    return EXIT_FAILURE;
-  }
-
   DDS::DataReader_var participant_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
   ParticipantListener* participant_listener =
     new ParticipantListener(application_participant_impl, guid_addr_set, relay_participant_status_reporter);
@@ -897,13 +838,20 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Application Participant GUID %C\n", OpenDDS::DCPS::LogGuid(config.application_participant_guid()).c_str()));
-  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SPDP Horizontal listening on %C\n", OpenDDS::DCPS::LogAddr(spdp_horizontal_addr).c_str()));
-  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SEDP Horizontal listening on %C\n", OpenDDS::DCPS::LogAddr(sedp_horizontal_addr).c_str()));
-  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Data Horizontal listening on %C\n", OpenDDS::DCPS::LogAddr(data_horizontal_addr).c_str()));
-  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SPDP Vertical listening on %C\n", OpenDDS::DCPS::LogAddr(spdp_vertical_addr).c_str()));
-  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SEDP Vertical listening on %C\n", OpenDDS::DCPS::LogAddr(sedp_vertical_addr).c_str()));
-  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Data Vertical listening on %C\n", OpenDDS::DCPS::LogAddr(data_vertical_addr).c_str()));
+  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Application Participant GUID %C\n",
+    OpenDDS::DCPS::LogGuid(config.application_participant_guid()).c_str()));
+  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SPDP Horizontal %d listening on %C\n",
+    handle_to_int(spdp_horizontal_handler.get_handle()), OpenDDS::DCPS::LogAddr(spdp_horizontal_addr).c_str()));
+  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SEDP Horizontal %d listening on %C\n",
+    handle_to_int(sedp_horizontal_handler.get_handle()), OpenDDS::DCPS::LogAddr(sedp_horizontal_addr).c_str()));
+  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Data Horizontal %d listening on %C\n",
+    handle_to_int(data_horizontal_handler.get_handle()), OpenDDS::DCPS::LogAddr(data_horizontal_addr).c_str()));
+  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SPDP Vertical %d listening on %C\n",
+    handle_to_int(spdp_vertical_handler.get_handle()), OpenDDS::DCPS::LogAddr(spdp_vertical_addr).c_str()));
+  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SEDP Vertical %d listening on %C\n",
+    handle_to_int(sedp_vertical_handler.get_handle()), OpenDDS::DCPS::LogAddr(sedp_vertical_addr).c_str()));
+  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Data Vertical %d listening on %C\n",
+    handle_to_int(data_vertical_handler.get_handle()), OpenDDS::DCPS::LogAddr(data_vertical_addr).c_str()));
 
   // Write about the relay.
   DDS::DataWriterListener_var relay_address_writer_listener =
@@ -970,18 +918,28 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  RelayStatusReporter relay_status_reporter(config, guid_addr_set, relay_status_writer, reactor);
+  RelayStatusReporter relay_status_reporter(config, *guid_addr_set, relay_status_writer, reactor);
 
-  RelayHttpMetaDiscovery relay_http_meta_discovery(config, meta_discovery_content_type, meta_discovery_content, guid_addr_set);
+  RelayHttpMetaDiscovery relay_http_meta_discovery(config, meta_discovery_content_type, meta_discovery_content, *guid_addr_set);
   if (relay_http_meta_discovery.open(meta_discovery_addr, reactor) != 0) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: could not open RelayHttpMetaDiscovery\n"));
     return EXIT_FAILURE;
   }
   ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Meta Discovery listening on %C\n", OpenDDS::DCPS::LogAddr(meta_discovery_addr).c_str()));
 
-  const auto status = RelayEventLoop::run(config, *reactor, *relay_thread_monitor);
+  const auto run_thread_mon = TheServiceParticipant->get_thread_status_manager().update_thread_status();
+  if (run_thread_mon && relay_thread_monitor->start() != EXIT_SUCCESS) {
+    ACE_ERROR((LM_ERROR, "(%P:%t) ERROR: Failed to start Relay Thread Monitor\n"));
+    return EXIT_FAILURE;
+  }
+
+  const auto status = reactor_task->run_reactor(config.handler_threads(), config.run_time());
   if (status != EXIT_SUCCESS) {
-    return status;
+    ACE_ERROR((LM_ERROR, "(%P:%t) ERROR: Failed to run reactor task: %m\n"));
+  }
+
+  if (run_thread_mon) {
+    relay_thread_monitor->stop();
   }
 
   application_participant->delete_contained_entities();

@@ -2814,7 +2814,7 @@ TEST(OptionalTests, Present)
   };
 
   Optional::OptionalMembers value{};
-  value.short_field(0x7fff);
+  value.short_field(static_cast<int16_t>(0x7fff));
   value.str_field(std::optional<std::string>("Hello World"));
   Optional::OptionalMembers result;
   amalgam_serializer_test(xcdr2, expected, value, result);

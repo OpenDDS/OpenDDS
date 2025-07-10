@@ -960,7 +960,7 @@ template<> const ACE_OutputCDR::from_boolean& DynamicDataImpl::SingleValue::get(
   return *static_cast<ACE_OutputCDR::from_boolean*>(active_);
 }
 
-template<> const char* const& DynamicDataImpl::SingleValue::get() const { return str_; }
+template<> char* const& DynamicDataImpl::SingleValue::get() const { return str_; }
 
 #ifdef DDS_HAS_WCHAR
 template<> const ACE_OutputCDR::from_wchar& DynamicDataImpl::SingleValue::get() const
@@ -968,7 +968,7 @@ template<> const ACE_OutputCDR::from_wchar& DynamicDataImpl::SingleValue::get() 
   return *static_cast<ACE_OutputCDR::from_wchar*>(active_);
 }
 
-template<> const CORBA::WChar* const& DynamicDataImpl::SingleValue::get() const { return wstr_; }
+template<> CORBA::WChar* const& DynamicDataImpl::SingleValue::get() const { return wstr_; }
 #endif
 
 char* DynamicDataImpl::SingleValue::get_string() const { return CORBA::string_dup(str_); }
@@ -3397,7 +3397,7 @@ bool DynamicDataImpl::move_single_to_complex_i(const const_single_iterator& it,
     break;
   }
   case TK_STRING8: {
-    const char* str = it->second.get<const char*>();
+    const char* str = it->second.get<char*>();
     const size_t len = ACE_OS::strlen(str);
     for (CORBA::ULong i = 0; i < len; ++i) {
       data->insert_single(i, ACE_OutputCDR::from_char(str[i]));
@@ -3406,7 +3406,7 @@ bool DynamicDataImpl::move_single_to_complex_i(const const_single_iterator& it,
   }
 #ifdef DDS_HAS_WCHAR
   case TK_STRING16: {
-    const CORBA::WChar* wstr = it->second.get<const CORBA::WChar*>();
+    const CORBA::WChar* wstr = it->second.get<CORBA::WChar*>();
     const size_t len = ACE_OS::strlen(wstr);
     for (CORBA::ULong i = 0; i < len; ++i) {
       data->insert_single(i, ACE_OutputCDR::from_wchar(wstr[i]));

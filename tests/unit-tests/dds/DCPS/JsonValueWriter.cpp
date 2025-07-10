@@ -604,4 +604,25 @@ TEST(dds_DCPS_JsonValueWriter, write_bitmask)
   EXPECT_STREQ(buffer.GetString(), "\"flag1|flag3|flag5\"");
 }
 
+TEST(dds_DCPS_JsonValueWriter, complete_map)
+{
+  Buffer buffer;
+  Writer writer(buffer);
+  JsonValueWriter<Writer> jvw(writer);
+  EXPECT_TRUE(jvw.begin_map(OpenDDS::XTypes::TK_STRING8, OpenDDS::XTypes::TK_UINT64));
+  EXPECT_TRUE(jvw.begin_key());
+  EXPECT_TRUE(jvw.write_string("a"));
+  EXPECT_TRUE(jvw.end_key());
+  EXPECT_TRUE(jvw.begin_value());
+  EXPECT_TRUE(jvw.write_uint64(123u));
+  EXPECT_TRUE(jvw.end_value());
+  EXPECT_TRUE(jvw.begin_key());
+  EXPECT_TRUE(jvw.write_string("b"));
+  EXPECT_TRUE(jvw.end_key());
+  EXPECT_TRUE(jvw.begin_value());
+  EXPECT_TRUE(jvw.write_uint64(456u));
+  EXPECT_TRUE(jvw.end_value());
+  EXPECT_TRUE(jvw.end_map());
+  EXPECT_STREQ(buffer.GetString(), "{\"a\":123,\"b\":456}");
+}
 #endif

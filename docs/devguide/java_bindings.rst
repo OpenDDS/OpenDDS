@@ -46,6 +46,10 @@ C++, Java, and even some additional IDL code is generated.
 In most cases, application developers do not need to be concerned with the details of all the generated files.
 Scripts included with OpenDDS automate this process so that the end result is a native library (``.so`` or ``.dll``) and a Java library (``.jar`` or just a ``classes`` directory) that together contain all of the generated code.
 
+Some IDL features which are generally supported in OpenDDS are not yet supported in the Java bindings:
+
+* maps
+
 Below is a description of the generated files and which tools generate them.
 In this example, ``Foo.idl`` contains a single struct ``Bar`` contained in module ``Baz`` (IDL modules are similar to C++ namespaces and Java packages).
 To the right of each file name is the name of the tool that generates it, followed by some notes on its purpose.
