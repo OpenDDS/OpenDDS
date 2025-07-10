@@ -863,7 +863,8 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, auth_resend_period_)));
     DDS::Security::SecurityException sec_except = {"", 0, 0};
     const DDS::Security::ValidationResult_t validation_result = pre_check_auth(p.first, sec_except);
-    if (is_security_enabled() && !participant_sec_attr_.allow_unauthenticated_participants && validation_result == DDS::Security::VALIDATION_FAILED) {
+    if (is_security_enabled() && security_config_ &&
+        !participant_sec_attr_.allow_unauthenticated_participants && validation_result == DDS::Security::VALIDATION_FAILED) {
       participants_.erase(p.first);
       return; // must authenticate and can't
     }
@@ -1401,6 +1402,9 @@ DDS::Security::ValidationResult_t Spdp::pre_check_auth(const DiscoveredParticipa
 {
   const DCPS::GUID_t& guid = iter->first;
   DiscoveredParticipant& dp = iter->second;
+  if (!security_config_) {
+    return DDS::Security::VALIDATION_FAILED;
+  }
   DDS::Security::Authentication_var auth = security_config_->get_authentication();
 
   return auth->validate_remote_identity(
