@@ -857,17 +857,16 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
     pdata.leaseDuration.seconds = static_cast<ACE_CDR::Long>(effective_lease.value().sec());
 
-    if (tport_->directed_send_task_) {
-      if (tport_->directed_guids_.empty()) {
-        tport_->directed_send_task_->schedule(TimeDuration::zero_value);
-      }
-      tport_->directed_guids_.push_back(guid);
-    }
-
     // add a new participant
 
 #if OPENDDS_CONFIG_SECURITY
     std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, auth_resend_period_)));
+    DDS::Security::SecurityException sec_except = {"", 0, 0};
+    const DDS::Security::ValidationResult_t validation_result = pre_check_auth(p.first, sec_except);
+    if (is_security_enabled() && !participant_sec_attr_.allow_unauthenticated_participants && validation_result == DDS::Security::VALIDATION_FAILED) {
+      participants_.erase(p.first);
+      return; // must authenticate and can't
+    }
     ++n_participants_in_authentication_;
     if (DCPS::security_debug.auth_debug) {
       ACE_DEBUG((LM_DEBUG,
@@ -879,6 +878,14 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #endif
     iter = p.first;
     iter->second.discovered_at_ = now;
+
+    if (tport_->directed_send_task_) {
+      if (tport_->directed_guids_.empty()) {
+        tport_->directed_send_task_->schedule(TimeDuration::zero_value);
+      }
+      tport_->directed_guids_.push_back(guid);
+    }
+
     update_lease_expiration_i(iter, now);
     update_rtps_relay_application_participant_i(iter, p.second);
 
@@ -945,7 +952,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         // The remote needs to see our SPDP before attempting authentication.
         tport_->write_i(guid, iter->second.last_recv_address_, from_relay ? SpdpTransport::SEND_RELAY : SpdpTransport::SEND_DIRECT);
 
-        attempt_authentication(iter, true);
+        attempt_authentication(iter, true, &validation_result, &sec_except);
 
         if (iter->second.auth_state_ == AUTH_STATE_UNAUTHENTICATED) {
           if (!participant_sec_attr_.allow_unauthenticated_participants) {
@@ -1389,8 +1396,22 @@ Spdp::send_handshake_request(const DCPS::GUID_t& guid, DiscoveredParticipant& dp
   }
 }
 
+DDS::Security::ValidationResult_t Spdp::pre_check_auth(const DiscoveredParticipantIter& iter,
+                                                       DDS::Security::SecurityException& se)
+{
+  const DCPS::GUID_t& guid = iter->first;
+  DiscoveredParticipant& dp = iter->second;
+  DDS::Security::Authentication_var auth = security_config_->get_authentication();
+
+  return auth->validate_remote_identity(
+    dp.identity_handle_, dp.local_auth_request_token_, dp.remote_auth_request_token_,
+    identity_handle_, dp.identity_token_, guid, se);
+}
+
 void
-Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_discovery)
+Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_discovery,
+                             const DDS::Security::ValidationResult_t* validation,
+                             const DDS::Security::SecurityException* sec_except)
 {
   const DCPS::GUID_t& guid = iter->first;
   DiscoveredParticipant& dp = iter->second;
@@ -1417,12 +1438,15 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
   handshake_deadlines_.insert(std::make_pair(dp.handshake_deadline_, guid));
   tport_->handshake_deadline_task_->schedule(max_auth_time_);
 
-  DDS::Security::Authentication_var auth = security_config_->get_authentication();
-  DDS::Security::SecurityException se = {"", 0, 0};
-
-  const DDS::Security::ValidationResult_t vr = auth->validate_remote_identity(
-    dp.identity_handle_, dp.local_auth_request_token_, dp.remote_auth_request_token_,
-    identity_handle_, dp.identity_token_, guid, se);
+  DDS::Security::ValidationResult_t vr = validation ? *validation : DDS::Security::VALIDATION_FAILED;
+  static const DDS::Security::SecurityException default_sec_except = {"", 0, 0};
+  DDS::Security::SecurityException se = sec_except ? *sec_except : default_sec_except;
+  if (!validation) {
+    DDS::Security::Authentication_var auth = security_config_->get_authentication();
+    vr = auth->validate_remote_identity(
+      dp.identity_handle_, dp.local_auth_request_token_, dp.remote_auth_request_token_,
+      identity_handle_, dp.identity_token_, guid, se);
+  }
 
   dp.have_auth_req_msg_ = !(dp.local_auth_request_token_ == DDS::Security::Token());
   if (dp.have_auth_req_msg_) {
