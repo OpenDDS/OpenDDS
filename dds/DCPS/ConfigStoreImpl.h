@@ -166,6 +166,12 @@ public:
   StringList get(const char* key,
                  const StringList& value) const;
 
+  typedef OPENDDS_VECTOR(DDS::UInt32) UInt32List;
+  void set(const char* key,
+           const UInt32List& value);
+  UInt32List get(const char* key,
+                 const UInt32List& value) const;
+
   template<typename T, size_t count>
   T get(const char* key,
         T value,

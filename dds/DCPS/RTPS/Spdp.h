@@ -216,6 +216,8 @@ public:
 
   VendorId_t get_vendor_id_i(const GUID_t& guid) const;
 
+  OPENDDS_SET(DDS::UInt32) get_ignored_user_tags() const;
+
   void ignore_domain_participant(const GUID_t& ignoreId);
 
   void remove_domain_participant(const GUID_t& removeId);
@@ -446,7 +448,11 @@ private:
                                            const DDS::Security::ParticipantStatelessMessage& msg);
   DCPS::MonotonicTimePoint schedule_handshake_resend(const DCPS::TimeDuration& time, const DCPS::GUID_t& guid);
   bool match_authenticated(const DCPS::GUID_t& guid, DiscoveredParticipantIter& iter);
-  void attempt_authentication(const DiscoveredParticipantIter& iter, bool from_discovery);
+  DDS::Security::ValidationResult_t pre_check_auth(const DiscoveredParticipantIter& iter,
+                                                   DDS::Security::SecurityException& se);
+  void attempt_authentication(const DiscoveredParticipantIter& iter, bool from_discovery,
+                              const DDS::Security::ValidationResult_t* validation = 0,
+                              const DDS::Security::SecurityException* sec_except = 0);
   void update_agent_info(const DCPS::GUID_t& local_guid, const ICE::AgentInfo& agent_info);
   void remove_agent_info(const DCPS::GUID_t& local_guid);
 #endif
@@ -595,6 +601,7 @@ private:
 #endif
     bool network_is_unreachable_;
     bool ice_endpoint_added_;
+    OPENDDS_SET(DDS::UInt32) ignored_user_tags_;
 
     DCPS::MonotonicTimePoint last_thread_status_harvest_;
     DCPS::ConfigReader_rch config_reader_;
