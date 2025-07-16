@@ -8350,7 +8350,7 @@ jobs:
         mkdir build
         cd build
         mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded ..
         cmake --build . --target install --config Release
     - name: check build configuration
       shell: cmd
@@ -8517,7 +8517,7 @@ jobs:
         mkdir build
         cd build
         mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded ..
         cmake --build . --target install --config Release
     - name: check build configuration
       shell: cmd
@@ -8695,7 +8695,7 @@ jobs:
         mkdir build
         cd build
         mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded ..
         cmake --build . --target install --config Release
     - name: check build configuration
       shell: cmd
