@@ -3160,7 +3160,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     return 0;
   }
 
-  if ((buff_.size() >= 4) && ACE_OS::memcmp(buff_.rd_ptr(), "RTPS", 4) == 0) {
+  if (buff_.length() >= 4 && ACE_OS::memcmp(buff_.rd_ptr(), "RTPS", 4) == 0) {
     RTPS::Message message;
 
     DCPS::Serializer ser(&buff_, encoding_plain_native);
@@ -3339,7 +3339,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
       }
     }
 
-  } else if ((buff_.size() >= 4) && (ACE_OS::memcmp(buff_.rd_ptr(), "RTPX", 4) == 0)) {
+  } else if (buff_.length() >= 4 && ACE_OS::memcmp(buff_.rd_ptr(), "RTPX", 4) == 0) {
     // Handle some RTI protocol multicast to the same address
     return 0; // Ignore
   }
