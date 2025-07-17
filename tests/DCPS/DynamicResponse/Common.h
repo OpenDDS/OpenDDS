@@ -167,49 +167,49 @@ template <typename TopicType>
 struct Topic {
   typedef OpenDDS::DCPS::DDSTraits<TopicType> Traits;
 
-  Test& t;
-  std::string name;
-  DDS::TypeSupport_var ts;
-  DDS::Topic_var topic;
+  Test& test_;
+  std::string name_;
+  DDS::TypeSupport_var ts_;
+  DDS::Topic_var topic_;
   typedef typename Traits::DataWriterType DataWriterType;
-  typename DataWriterType::_var_type writer;
+  typename DataWriterType::_var_type writer_;
   typedef typename Traits::DataReaderType DataReaderType;
-  typename DataReaderType::_var_type reader;
+  typename DataReaderType::_var_type reader_;
   typedef typename Traits::MessageSequenceType SeqType;
 
-  Topic(Test& t): t(t) {}
+  Topic(Test& t): test_(t) {}
 
   bool init()
   {
     using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 
-    ts = new typename Traits::TypeSupportImplType();
-    if (!t.init_topic(ts, topic)) {
+    ts_ = new typename Traits::TypeSupportImplType();
+    if (!test_.init_topic(ts_, topic_)) {
       return false;
     }
 
     CORBA::String_var type_name = ts->get_type_name();
-    name = type_name.in();
+    name_ = type_name.in();
 
     DDS::DataReader_var dr =
-      t.sub->create_datareader(topic, DATAREADER_QOS_DEFAULT, 0 ,DEFAULT_STATUS_MASK);
-    reader = DataReaderType::_narrow(dr);
-    if (!reader) {
-      ACE_ERROR((LM_ERROR, "%C (%P|%t) ERROR: create_datareader failed!\n", t.name));
+      test_.sub->create_datareader(topic, DATAREADER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
+    reader_ = DataReaderType::_narrow(dr);
+    if (!reader_) {
+      ACE_ERROR((LM_ERROR, "%C (%P|%t) ERROR: create_datareader failed!\n", test_.name)));
       return false;
     }
 
-    writer = t.create_writer<DataWriterType>(topic);
+    writer_ = test_.create_writer<DataWriterType>(topic_);
 
-    return writer;
+    return writer_;
   }
 
   bool init_bit(const char* name)
   {
-    DDS::Subscriber_var bit_subscriber = t.dp->get_builtin_subscriber();
+    DDS::Subscriber_var bit_subscriber = test_.dp->get_builtin_subscriber();
     DDS::DataReader_var dr = bit_subscriber->lookup_datareader(name);
-    reader = DataReaderType::_narrow(dr);
-    if (!reader) {
+    reader_ = DataReaderType::_narrow(dr);
+    if (!reader_) {
       ACE_ERROR((LM_ERROR, "%C (%P|%t) failed to get %C datareader\n", name));
       return false;
     }
@@ -218,13 +218,13 @@ struct Topic {
 
   bool write(const TopicType& msg)
   {
-    return writer->write(msg, DDS::HANDLE_NIL) == DDS::RETCODE_OK;
+    return writer_->write(msg, DDS::HANDLE_NIL) == DDS::RETCODE_OK;
   }
 
   bool wait_dr_match(int count) const
   {
     DDS::DataReader_var dr = DDS::DataReader::_duplicate(reader);
-    if (Utils::wait_match(dr, count, Utils::EQ)) {
+    if (Utils::wait_match(dr, static_cast<unsigned int>(count), Utils::EQ)) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): Error waiting for match for dr\n"));
       return false;
     }
@@ -233,7 +233,7 @@ struct Topic {
 
   bool read_multiple(SeqType& seq)
   {
-    DDS::DataReader_var dr = DDS::DataReader::_duplicate(reader);
+    DDS::DataReader_var dr = DDS::DataReader::_duplicate(reader_);
     Utils::waitForSample(dr);
     DDS::SampleInfoSeq info;
     return t.check_rc(reader->read(seq, info, DDS::LENGTH_UNLIMITED,
@@ -242,10 +242,10 @@ struct Topic {
 
   bool read_one(TopicType& msg)
   {
-    DDS::DataReader_var dr = DDS::DataReader::_duplicate(reader);
-    ACE_DEBUG((LM_DEBUG, "%C (%P|%t) waiting for sample on %C\n", t.name, name.c_str()));
+    DDS::DataReader_var dr = DDS::DataReader::_duplicate(reader_);
+    ACE_DEBUG((LM_DEBUG, "%C (%P|%t) waiting for sample on %C\n", test_.name, name_.c_str()));
     Utils::waitForSample(dr);
     DDS::SampleInfo info;
-    return t.check_rc(reader->read_next_sample(msg, info), "read failed");
+    return test_.check_rc(reader->read_next_sample(msg, info), "read failed");
   }
 };

@@ -119,9 +119,8 @@ Writer::svc()
 
       message.count++;
 
-      if (send_interval > 0)
-      {
-        ACE_OS::sleep (send_interval);
+      if (send_interval > 0) {
+        ACE_OS::sleep(static_cast<unsigned int>(send_interval));
       }
     }
 
