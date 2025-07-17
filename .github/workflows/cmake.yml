@@ -355,6 +355,7 @@ jobs:
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
           -DOPENDDS_XERCES3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
           -DOPENDDS_OPENSSL=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
+          -DOPENDDS_SECURITY=TRUE^
           -DOPENDDS_BUILD_TESTS=TRUE^
           -DOPENDDS_CMAKE_VERBOSE=all
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
@@ -416,6 +417,7 @@ jobs:
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
           -DOPENDDS_XERCES3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
           -DOPENDDS_OPENSSL=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
+          -DOPENDDS_SECURITY=TRUE^
           -DOPENDDS_BUILD_TESTS=TRUE^
           -DOPENDDS_CMAKE_VERBOSE=all
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
@@ -474,6 +476,7 @@ jobs:
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
           -DOPENDDS_XERCES3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
           -DOPENDDS_OPENSSL=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
+          -DOPENDDS_SECURITY=TRUE^
           -DOPENDDS_BUILD_TESTS=TRUE^
           -DOPENDDS_CMAKE_VERBOSE=all
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
@@ -531,6 +534,7 @@ jobs:
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
           -DOPENDDS_XERCES3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
           -DOPENDDS_OPENSSL=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
+          -DOPENDDS_SECURITY=TRUE^
           -DOPENDDS_BUILD_TESTS=TRUE^
           -DOPENDDS_CMAKE_VERBOSE=all
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
