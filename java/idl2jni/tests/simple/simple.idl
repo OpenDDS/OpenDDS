@@ -107,6 +107,9 @@ module simple {
     TestUnion2 variableUnion;
   };
 
+#ifdef USE_LOCAL
+  local
+#endif
   interface TestInterf {
     TestArrayTypedef op1(in TestEnum p1, inout unsigned short p2,
                          out TestSeqTypedef p3, out string p4);
@@ -124,10 +127,16 @@ module simple {
   default: double fp;
   };
 
+#ifdef USE_LOCAL
+  local
+#endif
   interface TestInterf2 : TestInterf {
     long op2(in TestArrayTypedef p1, in LongSeqSeq p2);
   };
 
+#ifdef USE_LOCAL
+  local
+#endif
   interface TestInterf3 : TestInterf2 {
     void op3(in TestNestedStruct p1);
   };

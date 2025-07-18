@@ -17,8 +17,8 @@ class Listener
 public:
   Listener();
 
-  unsigned long long sample_count() { return sample_count_; }
-  unsigned long long expected_count() { return expected_count_; }
+  unsigned long long sample_count() { return static_cast<unsigned long long>(sample_count_); }
+  unsigned long long expected_count() { return static_cast<unsigned long long>(expected_count_); }
 
   protected:
   virtual void on_sample(const ::Xyz::Foo& msg);

@@ -1583,7 +1583,7 @@ struct Cxx11Generator : GeneratorBase {
         const Classification cls = classify(field_type);
         if (cls & CL_ARRAY) {
           std::string indent("  ");
-          NestedForLoops nfl("int", "i",
+          NestedForLoops nfl("size_t", "i",
                              dynamic_cast<AST_Array*>(field_type), indent, true);
           be_global->impl_ <<
             indent << "if (_" << field_name << nfl.index_ << " != rhs._"
