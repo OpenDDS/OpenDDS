@@ -354,6 +354,7 @@ jobs:
           -DOPENDDS_COMPILE_WARNINGS=WARNING^
           -DOPENDDS_ACE_TAO_SRC=${{ github.workspace }}\OpenDDS\build\ACE_TAO^
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
+          -DOPENDDS_XERCES3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
           -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_TOOLCHAIN_FILE }}^
           -DOPENDDS_SECURITY=TRUE^
           -DOPENDDS_BUILD_TESTS=TRUE^
@@ -415,6 +416,7 @@ jobs:
           -DOPENDDS_COMPILE_WARNINGS=WARNING^
           -DOPENDDS_ACE_TAO_SRC=${{ github.workspace }}\OpenDDS\build\ACE_TAO^
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
+          -DOPENDDS_XERCES3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
           -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_TOOLCHAIN_FILE }}^
           -DOPENDDS_SECURITY=TRUE^
           -DOPENDDS_BUILD_TESTS=TRUE^
@@ -473,6 +475,7 @@ jobs:
           -DOPENDDS_COMPILE_WARNINGS=WARNING^
           -DOPENDDS_ACE_TAO_SRC=${{ github.workspace }}\OpenDDS\build\ACE_TAO^
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
+          -DOPENDDS_XERCES3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
           -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_TOOLCHAIN_FILE }}^
           -DOPENDDS_SECURITY=TRUE^
           -DOPENDDS_BUILD_TESTS=TRUE^
@@ -530,6 +533,7 @@ jobs:
           -DOPENDDS_COMPILE_WARNINGS=WARNING^
           -DOPENDDS_ACE_TAO_SRC=${{ github.workspace }}\OpenDDS\build\ACE_TAO^
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
+          -DOPENDDS_XERCES3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
           -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_TOOLCHAIN_FILE }}^
           -DOPENDDS_SECURITY=TRUE^
           -DOPENDDS_BUILD_TESTS=TRUE^
