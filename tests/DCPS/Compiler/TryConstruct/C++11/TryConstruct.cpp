@@ -477,7 +477,7 @@ TEST(AnonSequence, Trim)
     }
     sent.AnonUnsignedShortSeqBound().resize(3);
     for (size_t i = 0; i < 3; ++i) {
-      sent.AnonUnsignedShortSeqBound()[i] = i;
+      sent.AnonUnsignedShortSeqBound()[i] = static_cast<uint16_t>(i);
     }
     sent.AnonStringSeqBound().resize(3);
     for (size_t i = 0; i < 3; ++i) {
@@ -490,7 +490,7 @@ TEST(AnonSequence, Trim)
     sent.AnonShortArraySeqBound().resize(3);
     for (size_t i = 0; i < 3; ++i) {
       for (size_t j = 0; j < 2; j++) {
-        sent.AnonShortArraySeqBound()[i][j] = j;
+        sent.AnonShortArraySeqBound()[i][j] = static_cast<uint16_t>(j);
       }
     }
     ShortSeqUnbound ssu;

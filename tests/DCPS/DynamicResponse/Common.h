@@ -30,8 +30,8 @@ struct Test {
   DDS::Subscriber_var sub;
   DDS::Publisher_var pub;
 
-  Test(const char* name)
-    : name(name)
+  Test(const char* n)
+    : name(n)
     , exit_status(0)
     , dcs(OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>())
   {
@@ -188,14 +188,14 @@ struct Topic {
       return false;
     }
 
-    CORBA::String_var type_name = ts->get_type_name();
+    CORBA::String_var type_name = ts_->get_type_name();
     name_ = type_name.in();
 
     DDS::DataReader_var dr =
-      test_.sub->create_datareader(topic, DATAREADER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
+      test_.sub->create_datareader(topic_, DATAREADER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
     reader_ = DataReaderType::_narrow(dr);
     if (!reader_) {
-      ACE_ERROR((LM_ERROR, "%C (%P|%t) ERROR: create_datareader failed!\n", test_.name)));
+      ACE_ERROR((LM_ERROR, "%C (%P|%t) ERROR: create_datareader failed!\n", test_.name));
       return false;
     }
 
@@ -223,7 +223,7 @@ struct Topic {
 
   bool wait_dr_match(int count) const
   {
-    DDS::DataReader_var dr = DDS::DataReader::_duplicate(reader);
+    DDS::DataReader_var dr = DDS::DataReader::_duplicate(reader_);
     if (Utils::wait_match(dr, static_cast<unsigned int>(count), Utils::EQ)) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): Error waiting for match for dr\n"));
       return false;
@@ -236,8 +236,8 @@ struct Topic {
     DDS::DataReader_var dr = DDS::DataReader::_duplicate(reader_);
     Utils::waitForSample(dr);
     DDS::SampleInfoSeq info;
-    return t.check_rc(reader->read(seq, info, DDS::LENGTH_UNLIMITED,
-        DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE), "read failed");
+    return test_.check_rc(reader_->read(seq, info, DDS::LENGTH_UNLIMITED,
+      DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE), "read failed");
   }
 
   bool read_one(TopicType& msg)
@@ -246,6 +246,6 @@ struct Topic {
     ACE_DEBUG((LM_DEBUG, "%C (%P|%t) waiting for sample on %C\n", test_.name, name_.c_str()));
     Utils::waitForSample(dr);
     DDS::SampleInfo info;
-    return test_.check_rc(reader->read_next_sample(msg, info), "read failed");
+    return test_.check_rc(reader_->read_next_sample(msg, info), "read failed");
   }
 };
