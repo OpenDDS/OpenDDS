@@ -123,10 +123,10 @@ my %platforminfo =
                   'no_host' => 1,
                   'usage' => [
                       "Use --macros=ANDROID_ABI=<ARCH> to specify the",
-                      "target architecture.",
-                      "Use --macros=android_sdk=<SDK_PATH> and",
-                      "--macros=android_target_api=<API_NUMBER> to specify",
-                      "where to find android.jar.",
+                      "  target architecture.",
+                      "Also specify --macros=android_ndk=<NDK_PATH> and",
+                      "  --macros=android_api=<API_NUMBER>",
+                      "See docs/devguide/building/android.rst for details"
                     ],
                   'needs_i2jrt_corba' => 1,
                   'java_platform' => 'android',
