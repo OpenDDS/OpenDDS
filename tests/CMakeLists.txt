@@ -30,11 +30,6 @@ if(NOT GTest_FOUND)
     endif()
     FetchContent_Declare(googletest ${fetch_args})
   endif()
-  # Prevent overriding the parent project's compiler/linker
-  # settings on Windows
-  if(NOT DEFINED gtest_force_shared_crt)
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-  endif()
   if(NOT DEFINED INSTALL_GTEST)
     # GoogleTest will install by default otherwise
     set(INSTALL_GTEST FALSE CACHE BOOL "" FORCE)
