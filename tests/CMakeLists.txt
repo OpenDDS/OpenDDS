@@ -55,7 +55,7 @@ get_target_property(_opendds_googletest_type ${_opendds_googletest} TYPE)
 if(_opendds_googletest_type STREQUAL "SHARED_LIBRARY")
   target_compile_definitions(OpenDDS_GoogleTest INTERFACE GTEST_LINKED_AS_SHARED_LIBRARY=1)
 endif()
-get_target_property(_opendds_googletest_bin_dir ${_opendds_googletest} BINARY_DIR)
+get_target_property(_opendds_googletest_bin_dir ${_opendds_googletest} RUNTIME_OUTPUT_DIRECTORY)
 set(_OPENDDS_GOOGLETEST_DIR "${_opendds_googletest_bin_dir}" CACHE INTERNAL "")
 
 add_subdirectory(cmake)
