@@ -21,19 +21,14 @@ if(NOT GTest_FOUND)
     else()
       message("GoogleTest not found, using clone")
       set(fetch_args
-        GIT_REPOSITORY "https://github.com/OpenDDS/googletest"
-        GIT_TAG "v1.8.x"
+        GIT_REPOSITORY "https://github.com/google/googletest"
+        GIT_TAG "v1.17.x"
         GIT_SHALLOW TRUE
         GIT_PROGRESS TRUE
         USES_TERMINAL_DOWNLOAD TRUE
       )
     endif()
     FetchContent_Declare(googletest ${fetch_args})
-  endif()
-  # Prevent overriding the parent project's compiler/linker
-  # settings on Windows
-  if(NOT DEFINED gtest_force_shared_crt)
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
   endif()
   if(NOT DEFINED INSTALL_GTEST)
     # GoogleTest will install by default otherwise
@@ -60,7 +55,7 @@ get_target_property(_opendds_googletest_type ${_opendds_googletest} TYPE)
 if(_opendds_googletest_type STREQUAL "SHARED_LIBRARY")
   target_compile_definitions(OpenDDS_GoogleTest INTERFACE GTEST_LINKED_AS_SHARED_LIBRARY=1)
 endif()
-get_target_property(_opendds_googletest_bin_dir ${_opendds_googletest} BINARY_DIR)
+get_target_property(_opendds_googletest_bin_dir ${_opendds_googletest} RUNTIME_OUTPUT_DIRECTORY)
 set(_OPENDDS_GOOGLETEST_DIR "${_opendds_googletest_bin_dir}" CACHE INTERNAL "")
 
 add_subdirectory(cmake)

@@ -6,7 +6,7 @@
 	openddsConfigureCommit = fd3dc29a5c2852df569e1ea81dbde2c412ac5051
 [submodule "tests/googletest"]
 	path = tests/googletest
-	url = https://github.com/OpenDDS/googletest
-	branch = v1.8.x
+	url = https://github.com/google/googletest
+	branch = v1.17.x
 	shallow = true
-	openddsConfigureCommit = 792e0bb01d6ed3f0f47f6207390ecb63b9f4ce5e
+	openddsConfigureCommit = 52eb8108c5bdec04579160ae17225d66034bd723
