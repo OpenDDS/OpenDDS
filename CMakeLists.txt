@@ -84,6 +84,10 @@ if(NOT DEFINED OPENDDS_RAPIDJSON)
     FetchContent_Declare(rapidjson
       GIT_REPOSITORY https://github.com/Tencent/rapidjson.git
       GIT_TAG fd3dc29a5c2852df569e1ea81dbde2c412ac5051
+      # RapidJSON's CMakeLists can cause multiple problems for us. So we need
+      # to ignore it. This is the official "solution" to doing this:
+      # https://discourse.cmake.org/t/prevent-fetchcontent-makeavailable-to-execute-cmakelists-txt/12704/11
+      SOURCE_SUBDIR invalid_on_purpose_to_ignore_cmakelists
     )
     FetchContent_MakeAvailable(rapidjson)
     set(OPENDDS_RAPIDJSON "${rapidjson_SOURCE_DIR}")

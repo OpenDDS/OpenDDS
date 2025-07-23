@@ -626,10 +626,11 @@ endif()
 function(_opendds_find_xerces_for_ace)
   # ACE needs the root of Xerces. find_package doesn't seems like it can
   # provide it, so need to extract the root from XercesC_INCLUDE_DIR or
-  # XercesC_INCLUDE_DIRS and XercesC_LIBRARY
+  # XercesC_INCLUDE_DIRS and XercesC::XercesC.
+  get_target_property(xerces_path XercesC::XercesC LOCATION)
   foreach(include IN LISTS XercesC_INCLUDE_DIR XercesC_INCLUDE_DIRS)
     if(include AND EXISTS "${include}")
-      file(TO_CMAKE_PATH "${XercesC_LIBRARY}" path)
+      file(TO_CMAKE_PATH "${xerces_path}" path)
       while(TRUE)
         get_filename_component(parent "${path}" DIRECTORY)
         if(parent STREQUAL path)
@@ -643,10 +644,13 @@ function(_opendds_find_xerces_for_ace)
         endif()
       endwhile()
     endif()
+    if(DEFINED _OPENDDS_XERCES3_FOR_ACE)
+      break()
+    endif()
   endforeach()
   if(NOT DEFINED _OPENDDS_XERCES3_FOR_ACE)
     message(FATAL_ERROR "Failed to extract Xerces root from: "
-      "${XercesC_LIBRARY} AND ${XercesC_INCLUDE_DIR} AND ${XercesC_INCLUDE_DIRS}")
+      "${xerces_path} AND ${XercesC_INCLUDE_DIR} AND ${XercesC_INCLUDE_DIRS}")
   endif()
 endfunction()
 
