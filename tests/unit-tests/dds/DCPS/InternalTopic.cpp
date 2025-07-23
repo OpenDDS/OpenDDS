@@ -23,7 +23,8 @@ TEST(dds_DCPS_InternalTopic, connect_writer)
 {
   RcHandle<TopicType> topic = make_rch<TopicType>();
   RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
-  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
+  TimeSource time_source;
+  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder(), time_source);
 
   topic->connect(reader);
   topic->connect(writer);
@@ -35,7 +36,8 @@ TEST(dds_DCPS_InternalTopic, connect_reader)
 {
   RcHandle<TopicType> topic = make_rch<TopicType>();
   RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
-  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
+  TimeSource time_source;
+  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder(), time_source);
 
   topic->connect(writer);
   topic->connect(reader);
@@ -47,7 +49,8 @@ TEST(dds_DCPS_InternalTopic, disconnect_writer)
 {
   RcHandle<TopicType> topic = make_rch<TopicType>();
   RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
-  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
+  TimeSource time_source;
+  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder(), time_source);
 
   topic->connect(reader);
   topic->connect(writer);
@@ -60,7 +63,8 @@ TEST(dds_DCPS_InternalTopic, disconnect_reader)
 {
   RcHandle<TopicType> topic = make_rch<TopicType>();
   RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
-  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
+  TimeSource time_source;
+  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder(), time_source);
 
   topic->connect(writer);
   topic->connect(reader);
@@ -73,9 +77,10 @@ TEST(dds_DCPS_InternalTopic, connect_multiple)
 {
   RcHandle<TopicType> topic = make_rch<TopicType>();
   RcHandle<ReaderType> reader1 = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
-  RcHandle<WriterType> writer1 = make_rch<WriterType>(DataWriterQosBuilder());
+  TimeSource time_source;
+  RcHandle<WriterType> writer1 = make_rch<WriterType>(DataWriterQosBuilder(), time_source);
   RcHandle<ReaderType> reader2 = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable());
-  RcHandle<WriterType> writer2 = make_rch<WriterType>(DataWriterQosBuilder());
+  RcHandle<WriterType> writer2 = make_rch<WriterType>(DataWriterQosBuilder(), time_source);
 
   topic->connect(reader1);
   topic->connect(writer1);

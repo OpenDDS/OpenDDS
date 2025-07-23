@@ -116,7 +116,8 @@ public:
 #endif
   };
 
-  ConfigStoreImpl(ConfigTopic_rch config_topic);
+  ConfigStoreImpl(ConfigTopic_rch config_topic,
+                  const TimeSource& time_source);
   ~ConfigStoreImpl();
 
   DDS::Boolean has(const char* key);

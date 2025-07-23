@@ -60,7 +60,7 @@ RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst,
   , ice_agent_(ICE::Agent::instance())
 #endif
   , core_(inst)
-  , stats_writer_(make_rch<StatisticsDataWriter>(DataWriterQosBuilder().durability_transient_local()))
+  , stats_writer_(make_rch<StatisticsDataWriter>(DataWriterQosBuilder().durability_transient_local(), TheServiceParticipant->time_source()))
   , stats_template_(stats_template())
 {
   assign(local_prefix_, GUIDPREFIX_UNKNOWN);
