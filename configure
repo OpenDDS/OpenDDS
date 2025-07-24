@@ -881,7 +881,7 @@ EOF
       close($clang_out_fd);
     }
     add_mpc_features_for_std();
-    if ($features{'no_cxx17'} == 0) {
+    if (exists $features{'no_cxx17'} && $features{'no_cxx17'} == 0) {
       unless (grep(/ACE_LACKS_AUTO_PTR/, @{$opts{'configh'}})) {
         push(@{$opts{'configh'}}, '#define ACE_LACKS_AUTO_PTR');
       }
