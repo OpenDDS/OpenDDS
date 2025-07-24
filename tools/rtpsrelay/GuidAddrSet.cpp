@@ -114,6 +114,11 @@ GuidAddrSet::~GuidAddrSet()
   if (expiration_task_) {
     expiration_task_->cancel();
   }
+  if (drain_task_) {
+    drain_task_->cancel();
+  }
+
+  TheServiceParticipant->config_topic()->disconnect(config_reader_);
 }
 
 GuidAddrSet::CreatedAddrSetStats GuidAddrSet::find_or_create(const OpenDDS::DCPS::GUID_t& guid,
@@ -136,6 +141,8 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
                              const OpenDDS::DCPS::GUID_t& src_guid,
                              MessageType msg_type,
                              const size_t& msg_len,
+                             bool from_application_participant,
+                             bool* allow_stun_responses,
                              const RelayHandler& handler)
 {
   const auto expiration = now + config_.lifespan();
@@ -220,6 +227,26 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
   ParticipantStatisticsReporter& stats_reporter =
     *addr_set_stats.select_stats_reporter(remote_address.port);
   stats_reporter.input_message(msg_len, msg_type);
+
+  switch (drain_state_) {
+  case DrainState::DS_NORMAL:
+    if (!addr_set_stats.allow_stun_responses) {
+      addr_set_stats.allow_stun_responses = true;
+      --mark_count_;
+    }
+    break;
+  case DrainState::DS_DRAINING:
+    if (!from_application_participant && addr_set_stats.allow_stun_responses && mark_budget_) {
+      addr_set_stats.allow_stun_responses = false;
+      --mark_budget_;
+      ++mark_count_;
+    }
+    break;
+  }
+
+  if (allow_stun_responses) {
+    *allow_stun_responses = addr_set_stats.allow_stun_responses;
+  }
 
   return stats_reporter;
 }
@@ -462,6 +489,10 @@ void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid,
     }
   }
 
+  if (!addr_stats.allow_stun_responses) {
+    --mark_count_;
+  }
+
   guid_addr_set_map_.erase(it);
   relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
   check_participants_limit();
@@ -512,6 +543,91 @@ void GuidAddrSet::check_participants_limit()
   if (low > 0) {
     participant_admission_limit_reached_ = guid_addr_set_map_.size() >=
       (participant_admission_limit_reached_ ? low : config_.admission_max_participants_high_water());
+  }
+}
+
+void GuidAddrSet::admit_state(AdmitState as, const DDS::Time_t& now)
+{
+  if (admit_state_ != as) {
+    admit_state_ = as;
+    admit_state_change_ = now;
+  }
+}
+
+void GuidAddrSet::drain_state(DrainState ds, const DDS::Time_t& now)
+{
+  if (!drain_task_) {
+    drain_task_ = OpenDDS::DCPS::make_rch<GuidAddrSetSporadicTask>(TheServiceParticipant->time_source(),
+                                                                   reactor_task_,
+                                                                   rchandle_from(this),
+                                                                   &GuidAddrSet::process_drain_state);
+  }
+
+  if (drain_state_ != ds) {
+    switch (ds) {
+    case DrainState::DS_NORMAL:
+      mark_budget_ = 0;
+      drain_task_->cancel();
+      break;
+    case DrainState::DS_DRAINING:
+      drain_task_->schedule(drain_interval_);
+      break;
+    }
+
+    drain_state_ = ds;
+    drain_state_change_ = now;
+  }
+}
+
+void GuidAddrSet::process_drain_state(const OpenDDS::DCPS::MonotonicTimePoint&)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  ++mark_budget_;
+  drain_task_->schedule(drain_interval_);
+}
+
+void GuidAddrSet::populate_relay_status(RelayStatus& relay_status)
+{
+  relay_status.admitting(admitting());
+  relay_status.admit_state(admit_state_);
+  relay_status.admit_state_change(admit_state_change_);
+  relay_status.drain_state(drain_state_);
+  relay_status.drain_state_change(drain_state_change_);
+  relay_status.local_active_participants(guid_addr_set_map_.size());
+  relay_status.marked_participants(mark_count_);
+}
+
+void GuidAddrSet::ConfigReaderListener::on_data_available(InternalDataReader_rch reader)
+{
+  using OpenDDS::DCPS::ConfigStoreImpl;
+  OpenDDS::DCPS::ConfigReader::SampleSequence samples;
+  OpenDDS::DCPS::InternalSampleInfoSequence infos;
+  reader->read(samples, infos, DDS::LENGTH_UNLIMITED,
+               DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+
+  GuidAddrSet::Proxy proxy(guid_addr_set_);
+
+  for (size_t idx = 0; idx != samples.size(); ++idx) {
+    const auto& info = infos[idx];
+    if (info.valid_data) {
+      const auto& pair = samples[idx];
+      if (pair.key() == RTPS_RELAY_ADMIT_STATE) {
+        AdmitState admit = AdmitState::AS_NORMAL;
+        if (ConfigStoreImpl::convert_value(pair.value(), admit_state_encoding, admit)) {
+          proxy.admit_state(admit, info.source_timestamp);
+        }
+      } else if (pair.key() == RTPS_RELAY_DRAIN_STATE) {
+        DrainState drain = DrainState::DS_NORMAL;
+        if (ConfigStoreImpl::convert_value(pair.value(), drain_state_encoding, drain)) {
+          proxy.drain_state(drain, info.source_timestamp);
+        }
+      } else if (pair.key() == RTPS_RELAY_DRAIN_INTERVAL) {
+        OpenDDS::DCPS::TimeDuration interval;
+        if (ConfigStoreImpl::convert_value(pair, ConfigStoreImpl::Format_IntegerMilliseconds, interval)) {
+          proxy.drain_interval(interval);
+        }
+      }
+    }
   }
 }
 
