@@ -201,12 +201,11 @@ class Section(Node):
     def print_all(self, file=sys.stdout):
         version_info = VersionInfo()
         if version_info.is_release:
-            today = datetime.now(timezone.utc).date()
             print((
                 'Released {}\n\n' +
                 'Download :ghrelease:`this release on GitHub <{}>`.\n\n' +
                 'Read `the documentation for this release on Read the Docs <https://opendds.readthedocs.io/en/{}>`__.'
-            ).format(today.isoformat(), version_info.tag, version_info.tag.lower()), file=file)
+            ).format(version_info.release_date.isoformat(), version_info.tag, version_info.tag.lower()), file=file)
         else:
             print('This version is currently still in development, so this list might change.', file=file)
 
