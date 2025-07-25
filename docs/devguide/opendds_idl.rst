@@ -244,7 +244,7 @@ Using the IDL-to-C++11 Mapping
 The :ref:`IDL-to-C++11 Mapping <spec-idl-to-cpp11>` is a separate specification from the OMG.
 Like the "classic" IDL-to-C++ Mapping, IDL-to-C++11 describes how IDL constructs (structs, sequences, unions, etc.) should appear in C++.
 Since the IDL-to-C++11 Mapping assumes a C++11 (or higher) compiler and standard library, the code generated is easier to use and looks more natural to C++ developers who are not familiar with the classic mapping.
-For example, IDL strings, arrays, and sequences map to their equivalents in the ``std`` namespace: ``string``, ``array``, and ``vector``.
+For example, IDL strings, arrays, sequences, and maps map to their equivalents in the ``std`` namespace: ``string``, ``array``, ``vector``, and ``map``.
 All of the details of the mapping are spelled out in the specification document (available at https://www.omg.org/spec/CPP11), however the easiest way to get started with the mapping is to generate code from IDL and examine the generated header file.
 
 In the default mode of ``opendds_idl`` (as described in :ref:`getting_started--processing-the-idl`), responsibility for generating the language mapping is delegated to ``tao_idl`` (using the IDL-to-C++ classic mapping).

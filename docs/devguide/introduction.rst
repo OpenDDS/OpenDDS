@@ -274,7 +274,13 @@ OpenDDS supports the following building blocks, with notes/caveats listed below 
 
   * The integer types ``int8``, ``uint8`` and the type aliases ``int16``, ``uin16``, ``int32`` ``uint32``, ``int64``, and ``uint64`` are supported.
 
-  * Maps are supported.  Map key types may be basic types, strings, enums, or aliases of any of these types.
+  * Maps are supported.
+    They map to C++ ``std::map`` in both the classic IDL-to-C++ and IDL-to-C++11 mappings.
+    Known limitations:
+
+    * Map key types must be basic types, strings, enums, or aliases of any of these types.
+    * Support might be incomplete in the classic IDL-to-C++ mapping compared to the IDL-to-C++11 mapping.
+    * Using maps in IDL-to-Java mapping and ``DynamicData`` is currently not supported.
 
   * The rest of the building block is not supported.
 

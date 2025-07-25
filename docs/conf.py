@@ -96,8 +96,8 @@ if is_release:
     github_links_release_tag = opendds_version_info.tag
 ace6tao2_version = opendds_version_info.ace6tao2_version
 ace7tao3_version = opendds_version_info.ace7tao3_version
-if opendds_version_info.release_year:
-    copyright = f'{opendds_version_info.release_year} {copyright}'
+if opendds_version_info.release_date:
+    copyright = f'{opendds_version_info.release_date.year} {copyright}'
 
 # Handle News Generation
 try:
