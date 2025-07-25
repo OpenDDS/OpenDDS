@@ -4,12 +4,9 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 use strict;
 
-use File::Path /rmtree/;
 use lib "$ENV{ACE_ROOT}/bin";
 use lib "$ENV{DDS_ROOT}/bin";
 use PerlDDS::Run_Test;
-
-rmtree('./DCS');
 
 my $test = new PerlDDS::TestFramework();
 $test->{dcps_debug_level} = 4;

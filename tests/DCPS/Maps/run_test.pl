@@ -9,7 +9,6 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
-use File::Path;
 use strict;
 
 my $test = new PerlDDS::TestFramework();
@@ -18,8 +17,6 @@ my $opts .= " -DCPSConfigFile rtps.ini";
 
 $test->process('subscriber', 'subscriber', $opts);
 $test->process('publisher', 'publisher', $opts);
-
-rmtree './DCS';
 
 $test->start_process('publisher');
 $test->start_process('subscriber');

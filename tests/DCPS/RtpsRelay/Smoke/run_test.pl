@@ -12,7 +12,6 @@ use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use PerlDDS::Response_Monitor;
-use File::Path;
 use strict;
 
 PerlDDS::add_lib_path('../../ConsolidatedMessengerIdl');
@@ -45,8 +44,6 @@ if ($test->flag('single')) {
     $sub_ini = $pub_ini;
 }
 elsif ($test->flag('partition_same_relay')) {
-    rmtree 'DCS';
-    END { rmtree 'DCS'; }
     # Use with the 'secure' flag.
     # This puts the subscriber in a partition that doesn't match the publisher.
     # The config files are set up to allow the participants to exchange SPDP

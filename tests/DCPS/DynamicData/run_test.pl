@@ -9,7 +9,6 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
-use File::Path;
 use strict;
 
 my $test = new PerlDDS::TestFramework();
@@ -28,8 +27,6 @@ push(@pub_args, "-adapter") if ($adapt);
 
 $test->process('subscriber', 'subscriber', $dyn eq 'dr' ? '-dynamic' : '');
 $test->process('publisher', 'publisher', join(' ', @pub_args));
-
-rmtree './DCS';
 
 $test->start_process('publisher');
 $test->start_process('subscriber');

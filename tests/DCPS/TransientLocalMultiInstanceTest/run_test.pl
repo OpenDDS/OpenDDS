@@ -47,11 +47,11 @@ $test->process('sub2', 'subscriber', "-OpenDDSAppName sub2 " . $sub_opts);
 
 $test->start_process('sub1');
 
-$test->wait_for('driver', 'sub1', 'ready', 5);
+$test->wait_for('sub1', 'ready', max_wait => 5);
 
 $test->start_process('pub');
 
-$test->wait_for('driver', 'pub', 'write done', 5);
+$test->wait_for('pub', 'write done', max_wait => 5);
 
 $test->start_process('sub2');
 
