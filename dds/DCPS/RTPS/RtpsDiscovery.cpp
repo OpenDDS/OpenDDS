@@ -36,7 +36,7 @@ using DCPS::TimeDuration;
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   : key_(key)
   , config_(DCPS::make_rch<RtpsDiscoveryConfig>(key))
-  , stats_writer_(DCPS::make_rch<DCPS::StatisticsDataWriter>(DCPS::DataWriterQosBuilder().durability_transient_local()))
+  , stats_writer_(DCPS::make_rch<DCPS::StatisticsDataWriter>(DCPS::DataWriterQosBuilder().durability_transient_local(), TheServiceParticipant->time_source()))
   , stats_task_(DCPS::make_rch<PeriodicTask>(TheServiceParticipant->reactor_task(), *this, &RtpsDiscovery::write_stats))
 {
   TheServiceParticipant->statistics_topic()->connect(stats_writer_);

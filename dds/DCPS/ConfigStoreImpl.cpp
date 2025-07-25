@@ -107,9 +107,10 @@ String ConfigPair::canonicalize(const String& key)
   return retval;
 }
 
-ConfigStoreImpl::ConfigStoreImpl(ConfigTopic_rch config_topic)
+ConfigStoreImpl::ConfigStoreImpl(ConfigTopic_rch config_topic,
+                                 const TimeSource& time_source)
   : config_topic_(config_topic)
-  , config_writer_(make_rch<InternalDataWriter<ConfigPair> >(datawriter_qos()))
+  , config_writer_(make_rch<InternalDataWriter<ConfigPair> >(datawriter_qos(), time_source))
   , config_reader_(make_rch<InternalDataReader<ConfigPair> >(datareader_qos()))
 {
   config_topic_->connect(config_writer_);

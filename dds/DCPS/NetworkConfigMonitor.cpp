@@ -43,7 +43,7 @@ bool NetworkInterfaceAddress::exclude_from_multicast(const char* configured_inte
 }
 
 NetworkConfigMonitor::NetworkConfigMonitor()
-  : writer_(make_rch<InternalDataWriter<NetworkInterfaceAddress> >(DataWriterQosBuilder().durability_transient_local()))
+  : writer_(make_rch<InternalDataWriter<NetworkInterfaceAddress> >(DataWriterQosBuilder().durability_transient_local(), TheServiceParticipant->time_source()))
 {}
 
 NetworkConfigMonitor::~NetworkConfigMonitor()
