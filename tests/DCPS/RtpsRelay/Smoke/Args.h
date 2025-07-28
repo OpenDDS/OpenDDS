@@ -27,6 +27,7 @@ struct Args {
   int participant_bit_expected_instances = -1;
   bool stress_test = false;
   bool terminate_on_data = false;
+  bool drain_test = false;
 
   int parse(int argc, ACE_TCHAR* argv[]);
 };
@@ -34,7 +35,7 @@ struct Args {
 inline int
 Args::parse(int argc, ACE_TCHAR* argv[])
 {
-  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("lep:b:s"));
+  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("lep:b:sd"));
 
   int c;
   while ((c = get_opts()) != -1) {
@@ -54,8 +55,11 @@ Args::parse(int argc, ACE_TCHAR* argv[])
     case 's':
       stress_test = true;
       break;
+    case 'd':
+      drain_test = true;
+      break;
     case '?':
-      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("usage: %s [-les] [-p partition] [-b particpant_bit_expected_instances]\n"), argv[0]), EXIT_FAILURE);
+      ACE_ERROR_RETURN((LM_ERROR, "usage: %s [-lesd] [-p partition] [-b particpant_bit_expected_instances]\n", argv[0]), EXIT_FAILURE);
     }
   }
 
