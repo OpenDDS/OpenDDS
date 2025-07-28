@@ -4,7 +4,7 @@
 .. news-rank: 10
 - IDL Maps are now supported by ``opendds_idl``.
 
-  - We would like to thank tmayoff for contributing much of the work needed for this.
+  - We would like to thank `tmayoff <https://github.com/tmayoff>`__ for contributing much of the work needed for this.
   - Usage example:
 
     .. code-block:: omg-idl
