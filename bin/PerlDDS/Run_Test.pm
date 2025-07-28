@@ -21,7 +21,7 @@ BEGIN {
   unshift(@INC, catfile(File::Basename::dirname(Cwd::realpath(__FILE__)), '..', '..', 'tools', 'scripts', 'modules'))
 };
 
-use misc_utils qw/trace parse_func_opts/;
+use misc_utils qw/trace/;
 
 sub is_executable {
   my $path = shift;
