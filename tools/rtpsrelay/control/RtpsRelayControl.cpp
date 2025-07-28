@@ -3,7 +3,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <tools/dds/rtpsrelaylib/RelayTypeSupportImpl.h>
+#include <dds/rtpsrelaylib/RelayTypeSupportImpl.h>
 
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 

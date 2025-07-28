@@ -4,7 +4,7 @@
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DCPS/DataReaderImpl.h>
 #include <dds/DCPS/Definitions.h>
-#include <tools/dds/rtpsrelaylib/RelayC.h>
+#include <dds/rtpsrelaylib/RelayC.h>
 
 namespace RtpsRelay {
 

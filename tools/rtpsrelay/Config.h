@@ -6,7 +6,7 @@
 #include <dds/DCPS/TimeDuration.h>
 #include <dds/DdsDcpsInfrastructureC.h>
 
-#include <tools/dds/rtpsrelaylib/RelayC.h>
+#include <dds/rtpsrelaylib/RelayC.h>
 
 #include <list>
 
