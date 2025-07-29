@@ -190,7 +190,7 @@ void drain_test(DistributedConditionSet_rch dcs, const DDS::DomainParticipant_va
   DDS::TopicDescription_var topic = dr->get_topicdescription();
   ACE_UNUSED_ARG(topic);
   DDS::ReadCondition_var read_cond =
-    dr->create_readcondition(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+    dr->create_readcondition(DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
   OpenDDS::DCPS::ConnectionRecordDataReader_var connection_records = OpenDDS::DCPS::ConnectionRecordDataReader::_narrow(dr);
 
   DDS::WaitSet_var waiter = new DDS::WaitSet;

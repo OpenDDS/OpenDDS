@@ -284,7 +284,7 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
   DDS::ReadCondition_var read_cond{
-    dr->create_readcondition(DDS::NOT_READ_SAMPLE_STATE, DDS::NEW_VIEW_STATE, DDS::ANY_INSTANCE_STATE)};
+    dr->create_readcondition(DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE)};
   waiter->attach_condition(read_cond);
 
   DDS::GuardCondition_var shutdown_guard{new DDS::GuardCondition};
