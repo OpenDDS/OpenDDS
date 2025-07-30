@@ -593,8 +593,8 @@ void GuidAddrSet::populate_relay_status(RelayStatus& relay_status)
   relay_status.admit_state_change(admit_state_change_);
   relay_status.drain_state(drain_state_);
   relay_status.drain_state_change(drain_state_change_);
-  relay_status.local_active_participants(guid_addr_set_map_.size());
-  relay_status.marked_participants(mark_count_);
+  relay_status.local_active_participants(static_cast<uint32_t>(guid_addr_set_map_.size()));
+  relay_status.marked_participants(static_cast<uint32_t>(mark_count_));
 }
 
 void GuidAddrSet::ConfigReaderListener::on_data_available(InternalDataReader_rch reader)
