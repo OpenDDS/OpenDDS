@@ -115,7 +115,7 @@ if ($test->flag('join')) {
 $test->start_process("metachecker");
 
 if ($test->flag('draining')) {
-    $test->wait_for('driver', 'publisher', 'connected', 5);
+    $test->wait_for('publisher', 'connected', max_wait => 5);
     $test->start_process("control1");
     $test->wait_kill("publisher", 30);
     $test->kill_process(5, "control1");

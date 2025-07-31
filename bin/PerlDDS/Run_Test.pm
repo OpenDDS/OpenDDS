@@ -602,7 +602,7 @@ sub finish {
 
   if (defined($wait_to_kill)) {
     $self->stop_processes($wait_to_kill, $first_process_to_stop);
-    if ($self->{report_errors_in_log_file} && $self->{status} == 0) {
+    if ($self->{report_errors_in_log_file} && $self->{status} == success) {
       $self->_info("TestFramework::finish looking for ERRORs in log files."
         . " To prevent this set <TestFramework>->{report_errors_in_log_file}"
         . "=0\n");
