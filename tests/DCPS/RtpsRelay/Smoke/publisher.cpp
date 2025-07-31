@@ -73,7 +73,7 @@ void writer_test(DistributedConditionSet_rch dcs,
   }
 
   if (args.check_lease_recovery) {
-    dcs->wait_for("Publisher", "Subscriber", "count_0");;
+    dcs->wait_for("Publisher", "Subscriber", "count_0");
     if (args.expect_unmatch) {
       dcs->wait_for("Publisher", "Publisher", "on_publication_matched_2_1_1_1");
     } else {
@@ -90,7 +90,7 @@ void writer_test(DistributedConditionSet_rch dcs,
                  ACE_TEXT(" ERROR: write returned %C!\n"), OpenDDS::DCPS::retcode_to_string(error)));
     }
   }
-  dcs->wait_for("Publisher", "Subscriber", "count_1");;
+  dcs->wait_for("Publisher", "Subscriber", "count_1");
 }
 
 void stress_test(const DDS::DataWriter_var& dw,
@@ -181,6 +181,57 @@ void stress_test(const DDS::DataWriter_var& dw,
       }
     }
   }
+}
+
+void drain_test(DistributedConditionSet_rch dcs, const DDS::DomainParticipant_var& participant)
+{
+  DDS::Subscriber_var bits = participant->get_builtin_subscriber();
+  DDS::DataReader_var dr = bits->lookup_datareader(OpenDDS::DCPS::BUILT_IN_CONNECTION_RECORD_TOPIC);
+  DDS::TopicDescription_var topic = dr->get_topicdescription();
+  ACE_UNUSED_ARG(topic);
+  DDS::ReadCondition_var read_cond =
+    dr->create_readcondition(DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+  OpenDDS::DCPS::ConnectionRecordDataReader_var connection_records = OpenDDS::DCPS::ConnectionRecordDataReader::_narrow(dr);
+
+  DDS::WaitSet_var waiter = new DDS::WaitSet;
+  waiter->attach_condition(read_cond);
+  struct WaitSetCleanup {
+    DDS::WaitSet_var& waiter_;
+    WaitSetCleanup(DDS::WaitSet_var& waiter) : waiter_(waiter) {}
+    ~WaitSetCleanup()
+    {
+      DDS::ConditionSeq conditions;
+      waiter_->get_conditions(conditions);
+      waiter_->detach_conditions(conditions);
+    }
+  } cleanup(waiter);
+
+  bool connected = false;
+  constexpr DDS::Duration_t timeout{DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
+  DDS::ConditionSeq active_conditions;
+
+  while (waiter->wait(active_conditions, timeout) == DDS::RETCODE_OK) {
+    while (true) {
+      OpenDDS::DCPS::ConnectionRecord record;
+      DDS::SampleInfo info;
+      if (connection_records->take_next_sample(record, info) != DDS::RETCODE_OK) {
+        break;
+      }
+      if (std::string(record.address).find(":4444") == std::string::npos) {
+        continue; // not interested in this instance
+      }
+#if OPENDDS_HAS_JSON_VALUE_WRITER
+      ACE_DEBUG((LM_DEBUG, "%C\n", OpenDDS::DCPS::to_json(topic, record, info).c_str()));
+#endif
+      if (!connected && info.instance_state == DDS::ALIVE_INSTANCE_STATE) {
+        connected = true;
+        dcs->post("publisher", "connected");
+      } else if (connected && (info.instance_state & DDS::NOT_ALIVE_INSTANCE_STATE)) {
+        return; // exit on transition from connected to disconnected
+      }
+    }
+  }
+  ACE_ERROR((LM_ERROR, "ERROR: failed to wait()\n"));
 }
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -320,6 +371,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       } else if (args.stress_test) {
         stress_test(dw, participant, type_name, pub);
+      } else if (args.drain_test) {
+        drain_test(dcs, participant);
       } else {
         writer_test(dcs, dw);
 
