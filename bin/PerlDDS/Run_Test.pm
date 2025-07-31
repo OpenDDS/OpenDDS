@@ -393,13 +393,38 @@ use File::Path qw(rmtree);
 
 use misc_utils qw/trace parse_func_opts/;
 
+use constant {
+  success => 0,
+  init_error => 1,
+  finish_error => 1,
+  dcs_timeout => 2,
+  process_error => 4,
+  errors_in_log => 8,
+};
+
+sub status_string {
+  my $self = shift();
+
+  if ($self->{status} == success) {
+    return 'success';
+  }
+
+  my @statuses = ();
+  push(@statuses, 'init_error') if ($self->{status} & init_error);
+  push(@statuses, 'finish_error') if ($self->{status} & finish_error);
+  push(@statuses, 'dcs_timeout') if ($self->{status} & dcs_timeout);
+  push(@statuses, 'process_error') if ($self->{status} & process_error);
+  push(@statuses, 'errors_in_log') if ($self->{status} & errors_in_log);
+  return join(' ', @statuses);
+}
+
 sub new {
   my $class = shift;
   my $self = bless {}, $class;
 
   $self->{processes} = {};
   $self->{_flags} = {};
-  $self->{status} = 0;
+  $self->{status} = success;
   $self->{log_files} = [];
   $self->{temp_files} = [];
   $self->{errors_to_ignore} = [];
@@ -507,15 +532,18 @@ sub wait_for {
   $self->_info("$info\n");
 
   my $path = catdir($self->{dcs}, $posting_actor, $condition);
+  my $start = time();
   for (my $i = 0; $i < $opts->{max_wait}; $i = $i + 1) {
     if (-e $path) {
-      $self->_info("$info done after $i secs\n");
-      return;
+      my $elapsed = time() - $start;
+      $self->_info("$info done after $elapsed secs\n");
+      return $elapsed;
     }
     sleep(1);
   }
-  $self->{status} = -1;
-  trace("$info timeout after $opts->{max_wait} secs\n");
+  $self->{status} |= dcs_timeout;
+  my $elapsed = time() - $start;
+  trace("$info timeout after $elapsed secs\n");
 }
 
 sub wait_kill {
@@ -550,12 +578,22 @@ sub DESTROY {
   $self->finish();
 }
 
+sub print_log_files {
+  my $self = shift();
+
+  foreach my $file (@{$self->{log_files}}) {
+    PerlDDS::print_file($file);
+  }
+}
+
 sub finish {
   my $self = shift;
   my $wait_to_kill = shift;
   my $first_process_to_stop = shift;
+
+  my $status_str = $self->status_string();
   $self->_info("TestFramework::finish finished=$self->{finished}, "
-    . "status=$self->{status}\n");
+    . "status=$self->{status} ($status_str)\n");
 
   if ($self->{finished}) {
     return $self->{status};
@@ -570,32 +608,24 @@ sub finish {
         . "=0\n");
       foreach my $file (@{$self->{log_files}}) {
         if (PerlDDS::report_errors_in_file($file, $self->{errors_to_ignore})) {
-          $self->{status} = -1;
+          $self->{status} |= errors_in_log;
         }
       }
     }
   }
-  if ($PerlDDS::SafetyProfile && $self->{console_logging} == 1) {
-    foreach my $file (@{$self->{log_files}}) {
-      PerlDDS::print_file($file);
-    }
-    if ($self->{status} == 0) {
-      print STDERR $self->_log_prefix() . "test PASSED.\n";
-    }
-    else {
-      print STDERR $self->_log_prefix() . "test FAILED.\n";
-    }
+
+  my $sf_logging = $PerlDDS::SafetyProfile && $self->{console_logging};
+  if ($sf_logging) {
+    $self->print_log_files();
+  }
+  if ($self->{status} == success) {
+    print STDERR $self->_log_prefix() . "test PASSED.\n";
   }
   else {
-    if ($self->{status} == 0) {
-      print STDERR $self->_log_prefix() . "test PASSED.\n";
+    if (!$sf_logging) {
+      $self->print_log_files();
     }
-    else {
-      foreach my $file (@{$self->{log_files}}) {
-        PerlDDS::print_file($file);
-      }
-      print STDERR $self->_log_prefix() . "test FAILED.\n";
-    }
+    print STDERR $self->_log_prefix() . "test FAILED ($status_str).\n";
   }
 
   foreach my $file (@{$self->{temp_files}}) {
@@ -651,7 +681,7 @@ sub report_unused_flags {
   my $indication = ($exit_if_unidentified ? "ERROR" : "WARNING");
   print STDERR "$indication: unused command line arguments: $list\n";
   if ($exit_if_unidentified) {
-    $self->{status} = -1;
+    $self->{status} |= init_error;
     exit $self->finish();
   }
 }
@@ -736,7 +766,7 @@ sub process {
   my $params = shift // "";
   if (defined($self->{processes}->{process}->{$name})) {
     print STDERR "ERROR: already created process named \"$name\"\n";
-    $self->{status} = -1;
+    $self->{status} |= process_error;
     return;
   }
 
@@ -750,7 +780,7 @@ sub process {
   my $dirname = File::Basename::dirname($executable);
   if (!defined(PerlDDS::get_executable($basename, $dirname, catdir($dirname, $subdir)))) {
     print STDERR "ERROR: executable \"$executable\" does not exist; subdir: $subdir; basename: $basename ; dirname: $dirname\n";
-    $self->{status} = -1;
+    $self->{status} |= process_error;
     return;
   }
 
@@ -770,7 +800,7 @@ sub java_process {
 
   if (defined($self->{processes}->{process}->{$name})) {
     print STDERR "ERROR: already created process named \"$name\"\n";
-    $self->{status} = -1;
+    $self->{status} |= process_error;
     return;
   }
 
@@ -816,7 +846,7 @@ sub setup_discovery {
       $self->{info_repo}->{state} ne "shutdown") {
     print STDERR "ERROR: cannot start DCPSInfoRepo from a state of " .
       $self->{info_repo}->{state} . "\n";
-    $self->{status} = -1;
+    $self->{status} |= init_error;
   }
 
   $self->{info_repo}->{state} = "started";
@@ -859,7 +889,7 @@ sub setup_discovery {
   $self->_info("TestFramework::setup_discovery waiting for $self->{info_repo}->{file}\n");
   if (PerlACE::waitforfile_timed($self->{info_repo}->{file}, 30) == -1) {
     print STDERR "ERROR: waiting for $executable IOR file\n";
-    $self->{status} = -1;
+    $self->{status} |= init_error;
     exit $self->finish();
   }
 }
@@ -871,7 +901,7 @@ sub start_process {
 
   if (!defined($self->{processes}->{process}->{$name})) {
     print STDERR "ERROR: no process with name=$name\n";
-    $self->{status} = -1;
+    $self->{status} |= process_error;
     return;
   }
 
@@ -899,7 +929,7 @@ sub _remove_process_common {
 
   my $process_info = $self->{processes}->{process}->{$name};
   if (!defined($process_info)) {
-    $self->{status} = -1;
+    $self->{status} |= process_error;
     trace("no process with name=$name");
   }
 
@@ -926,7 +956,7 @@ sub stop_process {
   my $process = $process_info->{process};
   if (defined($process)) {
     if (PerlDDS::wait_kill($process, $timed_wait, $name, $self->{test_verbose}, $opts)) {
-      $self->{status} = -1;
+      $self->{status} |= process_error;
     }
   }
   else {
@@ -947,7 +977,9 @@ sub kill_process {
                                  $timed_wait,
                                  $name,
                                  $self->{test_verbose});
-  $self->{status} |= $kill_status;
+  if ($kill_status) {
+    $self->{status} |= process_error;
+  }
   delete($self->{processes}->{process}->{$name});
   return !$kill_status;
 }
@@ -961,7 +993,7 @@ sub stop_processes {
   if (!defined($timed_wait)) {
     print STDERR "ERROR: TestFramework::stop_processes need to provide time "
       . "to wait as first parameter passed.\n";
-    $self->{status} = -1;
+    $self->{status} |= finish_error;
     return;
   }
 
@@ -1001,7 +1033,7 @@ sub stop_discovery {
     my $state = (!defined($self->{info_repo}->{state}) ? "" : $self->{info_repo}->{state});
     print STDERR "ERROR: TestFramework::stop_discovery cannot stop $name " .
       "since its state=$state\n";
-    $self->{status} = -1;
+    $self->{status} |= finish_error;
     return;
   }
 
@@ -1011,7 +1043,9 @@ sub stop_discovery {
                                    $timed_wait,
                                    $name,
                                    $self->{test_verbose}) : 0;
-  $self->{status} |= $term_status;
+  if ($term_status) {
+    $self->{status} |= finish_error;
+  }
 
   $self->_info("TestFramework::stop_discovery unlink $self->{info_repo}->{file}\n");
   unlink $self->{info_repo}->{file};
@@ -1055,7 +1089,7 @@ sub _temporary_file_path {
 
   if (!defined($self->{processes}->{process}->{$name})) {
     print STDERR "ERROR: no process with name=$name\n";
-    $self->{status} = -1;
+    $self->{status} |= process_error;
     return;
   }
   my $process = $self->{processes}->{process}->{$name}->{process};
