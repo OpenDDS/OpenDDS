@@ -2122,14 +2122,14 @@ Sedp::shutdown()
 
   job_queue_.reset();
   reactor_task_.reset();
-  const String config_prefix = transport_inst_->config_prefix();
 
   DCPS::RtpsUdpInst_rch rtps_inst =
     DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
   rtps_inst->opendds_discovery_default_listener_.reset();
   TheTransportRegistry->remove_config(transport_cfg_);
   TheTransportRegistry->remove_inst(transport_inst_);
-  config_store_->unset_section(config_prefix);
+  config_store_->unset_section(transport_inst_->config_prefix());
+  config_store_->unset_section(transport_cfg_->config_prefix());
 }
 
 void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
