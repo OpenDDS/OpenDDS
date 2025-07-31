@@ -343,6 +343,68 @@ The command-line options for the RtpsRelay:
 
   Send messages immediately, defaults to 0 (disabled).
 
+.. option:: -DrainInterval <seconds>
+
+  Initial value for the client draining rate. Draining will not start until enabled by a command sent from :program:`RtpsRelayControl`.
+
+.. _internet_enabled_rtps--rtps_relay_control:
+
+RtpsRelayControl
+================
+
+.. program:: RtpsRelayControl
+
+The RtpsRelayControl application's source code is located in :ghfile:`tools/rtpsrelay/control`.
+It is an OpenDDS application that interacts with the :ref:`RtpsRelay <rtpsrelay>` using the topics
+``Relay Config Status`` and ``Relay Config Control``.
+
+RtpsRelayControl is a command-line application that passes its argument vector to the OpenDDS
+DomainParticipantFactory.  Therefore options like ``-DCPSConfigFile`` are all supported.
+In most cases, the same config file used for the RtpsRelay can be used for RtpsRelayControl.
+If a different config file is desired, it must configure the Relay Domain with compatible discovery
+and transport options.
+
+The command-line options specific to ``RtpsRelayControl`` are:
+
+.. option:: -Domain <integer>
+
+  Sets the DDS domain used to communicate with the ``RtpsRelay``.
+  The default is 0.
+
+.. option:: -RelayId <string>
+
+  Sets the unique ID for the ``RtpsRelay`` instance that will be controlled.
+  The default is the empty string, in which case no ``-Set`` options may be used but the current
+  configuration of all discovered instances is shown.
+
+.. option:: -Set <string>
+
+  This option may be specified multiple times.
+  The argument is ``NAME=value`` designating a configuration parameter to change in the ``RtpsRelay``.
+  ``RtpsRelayControl`` will send thoes changes to the ``RtpsRelay`` via its ``Relay Config Control`` topic and
+  run until the desired changes are acknowledged by the ``RtpsRelay`` via its ``Relay Config Status`` topic.
+
+.. option:: -ShowAll
+
+  If specified, all configuration parameters sent by the ``RtpsRelay`` on ``Relay Config Status`` are written to
+  standard output in JSON format.
+  The default is to output only configuration parameters that begin with ``RTPS_RELAY``, omitting those
+  parameters that are internal to OpenDDS.
+
+.. option:: -KeepRunning
+
+  If specified, the ``RtpsRelayControl`` process will keep running until terminated by the user.
+  This is also the behavior when there is no specified ``-RelayId``.
+  Then default (when run with ``-RelayId``) is to exit the process when requested settings are complete.
+
+Parameters that may be dynamically configured in the ``RtpsRelay`` include:
+
+* ``RTPS_RELAY_DRAIN_INTERVAL`` set to an integer number of milliseconds to change the ``-DrainInterval``.
+
+* ``RTPS_RELAY_DRAIN_STATE`` set to either ``Normal`` or ``Draining``.  When ``Draining`` the RtpsRelay will, one client at a time, stop responding to STUN requests from that client.  Clients should monitor STUN responses using the :ref:`built_in_topics--openddsconnectionrecord-topic` and find a new relay instance when STUN responses cease.
+
+* ``RTPS_RELAY_ADMIT_STATE`` set to either ``Normal`` or ``NotAdmitting``.  In most cases users will want an instance that is ``Draining`` to also be ``NotAdmitting`` in order to prevent new clients from associating.
+
 .. _internet_enabled_rtps--deployment-considerations:
 
 Deployment Considerations

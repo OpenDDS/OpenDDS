@@ -150,7 +150,9 @@ protected:
                                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
                                                  const OpenDDS::DCPS::GUID_t& src_guid,
                                                  MessageType msg_type,
-                                                 const size_t& msg_len);
+                                                 const size_t& msg_len,
+                                                 bool from_application_participant,
+                                                 bool* allow_stun_responses = 0);
 
   CORBA::ULong send(GuidAddrSet::Proxy& proxy,
                     const OpenDDS::DCPS::GUID_t& src_guid,
