@@ -412,14 +412,13 @@ Sedp::init(const GUID_t& guid,
 {
   type_lookup_service_ = tls;
 
-  const OPENDDS_STRING domainStr = DCPS::to_dds_string(domainId);
-  const OPENDDS_STRING key = DCPS::GuidConverter(guid).uniqueParticipantId();
+  const String uniqueId = DCPS::GuidConverter(guid).uniqueParticipantId() + '_' + DCPS::to_dds_string(domainId);
 
   // configure one transport
   transport_inst_ = TheTransportRegistry->create_inst(
-                       DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
-                       OPENDDS_STRING("_SEDPTransportInst_") + key + domainStr,
-                       "rtps_udp");
+                      DCPS::TransportRegistry::DEFAULT_INST_PREFIX + String("SEDPTransportInst_") + uniqueId,
+                      "rtps_udp");
+  config_store_->add_section("TRANSPORT", transport_inst_->name());
 
   // Be careful to not call any function that causes the transport be
   // to created before the configuration is complete.
@@ -502,10 +501,9 @@ Sedp::init(const GUID_t& guid,
 #endif
 
   // Create a config
-  OPENDDS_STRING config_name = DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
-                            OPENDDS_STRING("_SEDP_TransportCfg_") + key +
-                            domainStr;
-  transport_cfg_ = TheTransportRegistry->create_config(config_name.c_str());
+  const String config_name = DCPS::TransportRegistry::DEFAULT_INST_PREFIX + String("SEDP_TransportCfg_") + uniqueId;
+  transport_cfg_ = TheTransportRegistry->create_config(config_name);
+  config_store_->add_section("CONFIG", transport_cfg_->name());
   transport_cfg_->instances_.push_back(transport_inst_);
   transport_cfg_->passive_connect_duration_ = disco.config()->sedp_passive_connect_duration();
 
