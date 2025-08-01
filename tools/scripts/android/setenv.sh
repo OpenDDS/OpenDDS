@@ -133,17 +133,17 @@ case $ace_tao in
     exit 1
     ;;
 esac
-mpc_dir="MPC"
+mpc_dir="ACE_TAO/MPC"
 ace_dir="ACE_TAO/ACE"
 tao_dir="ACE_TAO/TAO"
-export MPC_ROOT="${MPC_ROOT-"${workspace}/${mpc_dir}"}"
-export ACE_ROOT="${ACE_ROOT-"${workspace}/${ace_dir}"}"
-export TAO_ROOT="${TAO_ROOT-"${workspace}/${tao_dir}"}"
+export MPC_ROOT="${MPC_ROOT-"${DDS_ROOT}/${mpc_dir}"}"
+export ACE_ROOT="${ACE_ROOT-"${DDS_ROOT}/${ace_dir}"}"
+export TAO_ROOT="${TAO_ROOT-"${DDS_ROOT}/${tao_dir}"}"
 export host_tools=${host_tools:-}
 if [ -z "$host_tools" ]
 then
-  ace_target="$ACE_ROOT/build/target"
-  ace_host="$ACE_ROOT/build/host"
+  ace_target="$DDS_ROOT/build/target/ACE_TAO/ACE"
+  ace_host="$DDS_ROOT/build/host/ACE_TAO/ACE"
 else
   export HOST_DDS="$host_tools"
   export HOST_ACE="$host_tools/ACE_TAO/ACE"

@@ -8,10 +8,7 @@ echo get_ace_tao.sh ===========================================================
 
 source setenv.sh
 
-if [ ! -d MPC ]
-then
-  git clone --depth 1 https://github.com/DOCGroup/MPC
-fi
+cd $DDS_ROOT
 
 if [ ! -d ACE_TAO ]
 then
@@ -20,3 +17,9 @@ then
     --branch ${ACE_TAO_BRANCH:-$ace_tao_default_branch}
 fi
 
+cd ACE_TAO
+
+if [ ! -d MPC ]
+then
+  git clone --depth 1 https://github.com/DOCGroup/MPC
+fi

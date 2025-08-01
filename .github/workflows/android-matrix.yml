@@ -71,7 +71,7 @@ jobs:
       run: |
         bash get_openssl.sh
 
-    - name: Get ACE/TAO and OpenDDS
+    - name: Get ACE/TAO
       run: |
         bash get_ace_tao.sh
 
