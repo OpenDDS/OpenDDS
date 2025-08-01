@@ -1,5 +1,59 @@
 # OpenDDS Releases
 
+## Version 3.33.0 of OpenDDS
+
+Released 2025-08-01
+
+Download [this release on GitHub](https://github.com/OpenDDS/OpenDDS/releases/tag/v3.33.0).
+
+Read [the documentation for this release on Read the Docs](https://opendds.readthedocs.io/en/v3.33.0).
+
+### Additions
+
+- IDL Maps are now supported by `opendds_idl`. ([PR #4999](https://github.com/OpenDDS/OpenDDS/pull/4999))
+  - We would like to thank [tmayoff](https://github.com/tmayoff) for contributing much of the work needed for this.
+  - Usage example:
+    ```omg-idl
+    @nested
+    struct Item {
+      string desc_name;
+      uint32 count;
+    };
+
+    @topic
+    struct Inventory {
+      map<string, Item> items;
+    };
+    ```
+  - They map to C++ `std::map` in both the classic IDL-to-C++ and IDL-to-C++11 mappings.
+  - See [IDL Compliance](https://opendds.readthedocs.io/en/v3.33.0/devguide/introduction.html#introduction-idl-compliance) for known limitations.
+- RtpsRelay
+  - Output from [`RtpsRelay -LogRelayStatistics`](https://opendds.readthedocs.io/en/v3.33.0/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-LogRelayStatistics) / [`RtpsRelay -PublishRelayStatistics`](https://opendds.readthedocs.io/en/v3.33.0/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-PublishRelayStatistics) includes extended RtpsRelay statistics ([PR #4972](https://github.com/OpenDDS/OpenDDS/pull/4972), [PR #5006](https://github.com/OpenDDS/OpenDDS/pull/5006))
+  - Output from [`RtpsRelay -LogRelayStatistics`](https://opendds.readthedocs.io/en/v3.33.0/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-LogRelayStatistics) / [`RtpsRelay -PublishRelayStatistics`](https://opendds.readthedocs.io/en/v3.33.0/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-PublishRelayStatistics) includes internal OpenDDS statistics ([PR #5000](https://github.com/OpenDDS/OpenDDS/pull/5000), [PR #5006](https://github.com/OpenDDS/OpenDDS/pull/5006), [PR #4990](https://github.com/OpenDDS/OpenDDS/pull/4990), [PR #5023](https://github.com/OpenDDS/OpenDDS/pull/5023))
+  - RtpsRelay no longer needs to store and replay SPDP messages ([PR #5017](https://github.com/OpenDDS/OpenDDS/pull/5017), [PR #5020](https://github.com/OpenDDS/OpenDDS/pull/5020))
+  - The OpenDDSInternalThread built-in topic has additional detail fields which may be populated by internal threads. ([PR #5026](https://github.com/OpenDDS/OpenDDS/pull/5026))
+    - The RtpsRelay's event handling threads make use of this feature.
+  - RtpsRelay expiration/deactivation is now done by separate timer events instead of during input handling ([PR #5032](https://github.com/OpenDDS/OpenDDS/pull/5032))
+  - [`RtpsRelay -DrainInterval`](https://opendds.readthedocs.io/en/v3.33.0/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-DrainInterval) can drain clients to implement a controlled shutdown ([PR #5063](https://github.com/OpenDDS/OpenDDS/pull/5063))
+- Added [`[rtps_discovery] IgnoredSpdpUserTags`](https://opendds.readthedocs.io/en/v3.33.0/devguide/run_time_configuration.html#cfg-prop-rtps_discovery-IgnoredSpdpUserTags). ([PR #5046](https://github.com/OpenDDS/OpenDDS/pull/5046))
+- When DDS Security is configured to require authentication and an incoming SPDP message has a different Identity CA, authentication is not attempted. ([PR #5046](https://github.com/OpenDDS/OpenDDS/pull/5046))
+
+### Platform Support and Dependencies
+
+- ACE/TAO
+  - Updated ACE 6/TAO 2 from 6.5.21 to [6.5.22](https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_22).
+  - Updated ACE 8/TAO 4 from 8.0.3 to [8.0.4](https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-8_0_4).
+- CMake
+  - [`opendds_target_sources`](https://opendds.readthedocs.io/en/v3.33.0/devguide/building/cmake.html#cmake-func-opendds_target_sources) now has a FOLDER argument which sets the CMake FOLDER property on generated targets. ([PR #5009](https://github.com/OpenDDS/OpenDDS/pull/5009))
+  - Fixed accidental use of RapidJSON's `CMakeLists.txt` file when building OpenDDS with CMake. ([PR #5054](https://github.com/OpenDDS/OpenDDS/pull/5054))
+    This caused issues such as forcing the `CMAKE_CXX_STANDARD` to C++11 and breaking the ACE C++ standard detection code.
+  - Fixed configure issue with Xerces from vcpkg when building OpenDDS with CMake. ([PR #5054](https://github.com/OpenDDS/OpenDDS/pull/5054))
+- The configure script detects the C++ standard supported by the Android NDK compiler ([PR #5057](https://github.com/OpenDDS/OpenDDS/pull/5057), [PR #5052](https://github.com/OpenDDS/OpenDDS/pull/5052))
+
+### Fixes
+
+- Reset heartbeat fallback when the sequence number advances. ([PR #5048](https://github.com/OpenDDS/OpenDDS/pull/5048))
+
 ## Version 3.32.0 of OpenDDS
 
 Released 2025-05-06
