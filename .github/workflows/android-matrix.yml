@@ -92,7 +92,8 @@ jobs:
       run: bash configure.sh
 
     - name: Show Build Config
-      run: perl OpenDDS/tools/scripts/show_build_config.pl
+      working-directory: .
+      run: perl tools/scripts/show_build_config.pl
 
     - name: Build ACE/TAO and OpenDDS
       run: bash build.sh
