@@ -1,4 +1,4 @@
-name: matrix
+name: Android
 
 on:
   push:
@@ -23,6 +23,10 @@ jobs:
 
     name: ${{ matrix.name }}
 
+    defaults:
+      run:
+        working-directory: tools/scripts/android
+
     # TODO: Figure out a way let the matrix cases define the environment variables
     env:
       name: ${{ matrix.name }}
@@ -43,11 +47,6 @@ jobs:
       # For Quickly Reproducing Failing CI Builds
       run: |
         bash print_settings.sh
-
-    - name: Install Python 2
-      if: ${{ matrix.install_python2 }}
-      run: |
-        sudo apt install python2
 
     - name: Get NDK and Toolchain
       run: |
@@ -75,7 +74,6 @@ jobs:
     - name: Get ACE/TAO and OpenDDS
       run: |
         bash get_ace_tao.sh
-        bash get_opendds.sh
 
     - name: Use GCC problem matcher
       uses: ammaraskar/gcc-problem-matcher@0.3.0
@@ -112,7 +110,6 @@ jobs:
             ndk: r28c
             api: 30
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: true
             use_java: true
             use_toolchain: false
@@ -123,7 +120,6 @@ jobs:
             ndk: r28c
             api: 29
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -134,7 +130,6 @@ jobs:
             ndk: r28c
             api: 28
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -145,7 +140,6 @@ jobs:
             ndk: r28c
             api: 27
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -156,7 +150,6 @@ jobs:
             ndk: r28c
             api: 26
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -167,7 +160,6 @@ jobs:
             ndk: r28c
             api: 24
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -178,7 +170,6 @@ jobs:
             ndk: r28c
             api: 23
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -189,7 +180,6 @@ jobs:
             ndk: r28c
             api: 22
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -200,7 +190,6 @@ jobs:
             ndk: r28c
             api: 21
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: true
             use_java: true
             use_toolchain: false
@@ -212,7 +201,6 @@ jobs:
             ndk: r27c
             api: 30
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -223,7 +211,6 @@ jobs:
             ndk: r27c
             api: 21
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -235,7 +222,6 @@ jobs:
             ndk: r23c
             api: 30
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -246,7 +232,6 @@ jobs:
             ndk: r23c
             api: 16
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -258,7 +243,6 @@ jobs:
             ndk: r18b
             api: 16
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: true
             use_toolchain: true
@@ -269,7 +253,6 @@ jobs:
             ndk: r18b
             api: 28
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: true
@@ -282,7 +265,6 @@ jobs:
             ndk: r28c
             api: 30
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -293,7 +275,6 @@ jobs:
             ndk: r28c
             api: 29
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -304,7 +285,6 @@ jobs:
             ndk: r28c
             api: 28
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -315,7 +295,6 @@ jobs:
             ndk: r28c
             api: 27
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -326,7 +305,6 @@ jobs:
             ndk: r28c
             api: 26
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -337,7 +315,6 @@ jobs:
             ndk: r28c
             api: 24
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -348,7 +325,6 @@ jobs:
             ndk: r28c
             api: 23
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -359,7 +335,6 @@ jobs:
             ndk: r28c
             api: 22
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -370,7 +345,6 @@ jobs:
             ndk: r28c
             api: 21
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -382,7 +356,6 @@ jobs:
             ndk: r21e
             api: 29
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -393,7 +366,6 @@ jobs:
             ndk: r21e
             api: 16
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: false
@@ -405,7 +377,6 @@ jobs:
             ndk: r18b
             api: 28
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: true
@@ -416,7 +387,6 @@ jobs:
             ndk: r18b
             api: 16
             os: "ubuntu-22.04"
-            install_python2: false
             use_security: false
             use_java: false
             use_toolchain: true

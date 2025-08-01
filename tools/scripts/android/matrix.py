@@ -15,7 +15,6 @@ import argparse
 default_default_flags = dict(
   # TODO: os='ubuntu-latest',
   os='ubuntu-22.04',
-  install_python2=False,
   use_security=False,
   use_java=False,
   use_toolchain=False,
