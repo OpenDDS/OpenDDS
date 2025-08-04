@@ -1,9 +1,5 @@
 /settings.sh
 
-/MPC
-/ACE_TAO
-/ACE_wrappers
-
 /android-ndk-*
 /*-toolchain
 /commandlinetools-*
