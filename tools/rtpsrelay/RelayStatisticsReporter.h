@@ -408,8 +408,10 @@ private:
                       const OpenDDS::DCPS::MonotonicTimePoint& now,
                       bool force);
 
-  void get_opendds_stats(RelayStatistics& out);
+  void get_opendds_stats(std::vector<OpenDDSModuleStatistics>& out);
   static void get_process_stats(RelayStatistics& out);
+
+  static void log_json(const std::string& label, const std::string& json);
 
   mutable ACE_Thread_Mutex mutex_;
   const Config& config_;
@@ -423,7 +425,7 @@ private:
   Helper publish_helper_;
 
   RelayStatisticsDataWriter_var writer_;
-  CORBA::String_var topic_name_;
+  std::string topic_name_;
 
   OpenDDS::DCPS::StatisticsDataReader_rch internal_reader_;
 };
