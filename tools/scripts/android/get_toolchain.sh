@@ -23,5 +23,9 @@ then
   fi
   $py $OPENDDS_ANDROID_NDK/build/tools/make_standalone_toolchain.py \
     --arch $arch --api $api --install-dir $toolchain_name
+
+  # clone_build_tree.pl didn't work with some of the files in sources
+  rm -rf $OPENDDS_ANDROID_NDK/sources
+
   echo "Done"
 fi
