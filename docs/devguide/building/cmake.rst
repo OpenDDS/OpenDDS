@@ -96,7 +96,7 @@ For example to mandatorily load OpenDDS:
 For this to work, CMake has to be able to find the package.
 If the OpenDDS build environment variables (from ``source setenv.sh`` or ``call setenv.cmd``) are set then CMake should be able to find it using the ``PATH`` environment variable.
 If those environment variables aren't set, OpenDDS was installed to a path CMake doesn't search automatically, or CMake can’t otherwise find the OpenDDS package, then CMake has to be told about it explicitly somehow.
-This can be done a number of ways, which includes adding the OpenDDS source tree or install prefix path to ``CMAKE_PREFIX_PATH`` or setting ``OPENDDS_ROOT`` to that path (if using CMake 3.12 or later).
+This can be done a number of ways, which includes adding the OpenDDS source tree or install prefix path to ``CMAKE_PREFIX_PATH`` or setting ``OpenDDS_ROOT`` to that path (if using CMake 3.12 or later).
 
 Consult the ``find_package`` documentation for your CMake version for all the details on how CMake could find OpenDDS.
 `Here <https://cmake.org/cmake/help/latest/command/find_package.html#config-mode-search-procedure>`__ is the documentation for the latest version of CMake
