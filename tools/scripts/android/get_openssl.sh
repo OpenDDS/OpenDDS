@@ -33,7 +33,7 @@ function get {
   fi
 }
 
-version="3.0.2"
+version="3.0.17"
 basename="openssl-$version"
 tarname="$basename.tar.gz"
 url="https://www.openssl.org/source/$tarname"

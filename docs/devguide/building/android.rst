@@ -350,10 +350,10 @@ This can be accomplished by either disabling the generation of the shared librar
 
   1. Start the MSYS2 MSYS development shell using the start menu shortcut or ``C:\msys64\msys2_shell.cmd -msys``
   2. ``cd /c/your/location/of/OpenSSL-source``
-  3. ``export ANDROID_NDK_HOME=/c/your/location/of/ndk-standalone-toolchain``
-  4. ``PATH+=:$ANDROID_NDK_HOME/bin``
+  3. ``export ANDROID_NDK_ROOT=/c/your/location/of/ndk-standalone-toolchain``
+  4. ``PATH+=:$ANDROID_NDK_ROOT/bin``
   5. ``./Configure --prefix=$SSL_ROOT android-arm no-tests no-shared`` (or replace ``-arm`` with a different platform like ``-arm64``, see OpenSSL's ``NOTES.ANDROID`` file)
-  6. ``make install_sw``
+  6. ``make AR=llvm-ar install_sw``
 
 Xerces
 ------
