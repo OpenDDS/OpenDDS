@@ -71,7 +71,7 @@ The RtpsRelay can be used in lieu of -- or in addition to -- conventional RTPS d
          | "1"                "5" |
          V                        V
   +--------------+         +--------------+
-  |"Pariticpant" |         |"Pariticpant" |
+  |"Participant" |         |"Participant" |
   +--------------+         +--------------+
 
 The preceding diagram illustrates how the RtpsRelay can be used to connect participants that are behind firewalls that may be performing NAT.
