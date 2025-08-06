@@ -129,7 +129,8 @@ TEST(dds_DCPS_ConfigStoreImpl, has)
 TEST(dds_DCPS_ConfigStoreImpl, has_prefix)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
   EXPECT_FALSE(store.has_prefix("ke"));
   store.set_boolean("key", true);
   EXPECT_TRUE(store.has_prefix("k"));

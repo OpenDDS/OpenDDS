@@ -921,8 +921,8 @@ EOF
       die("C++17 is required to compile OpenDDS");
     }
   }
-  push(@features, 'no_cxx11=0');
-  push(@features, 'no_cxx17=0');
+  $features{'no_cxx11'} = 0;
+  $features{'no_cxx17'} = 0;
 }
 
 my $compile_warnings = $opts{'compile-warnings'} // '';
@@ -1528,7 +1528,6 @@ EOT
 sub write_opendds_configh {
   my %buildEnv = %{shift()};
   my $host = $buildEnv{'build'} eq 'host';
-  my $has_cxx17 = exists $features{'no_cxx17'} && $features{'no_cxx17'} == 0;
 
   my $CFGH = backup_and_open("$buildEnv{'DDS_ROOT'}/dds/OpenDDSConfig.h");
   my $CFGIN = new FileHandle;
@@ -1539,13 +1538,6 @@ sub write_opendds_configh {
     $exclusive = 0;
   } elsif (exists $opts{'ownership-profile'} && !$opts{'ownership-profile'}) {
     $exclusive = 0;
-  }
-
-  my $cxx11 = 0;
-  for my $f (@features) {
-    if ($f eq 'no_cxx11=0') {
-      $cxx11 = 1;
-    }
   }
 
   my $safety_profile_0 = $opts{'safety-profile'} ? 0 : 1;
@@ -1563,6 +1555,7 @@ sub write_opendds_configh {
     'OPENDDS_CONFIG_PERSISTENCE_PROFILE' => $opts{'persistence-profile'} // $safety_profile_0,
     'OPENDDS_CONFIG_QUERY_CONDITION' => $opts{'query-condition'} // $safety_profile_0,
     'OPENDDS_CONFIG_RAPIDJSON' => ($opts{'rapidjson'} // 0) ? 1 : 0,
+    'OPENDDS_CONFIG_SECURITY' => $host ? 0 : ($opts{'security'} // 0),
     'OPENDDS_CONFIG_SAFETY_PROFILE' => ($host ? 0 : $safety_profile_1),
   );
 
