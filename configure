@@ -723,8 +723,20 @@ sub add_mpc_features_for_std {
 sub ndk_clang {
   my $ndk_host_type = $is_windows ? 'windows' : 'linux';
   for my $m (@{$opts{'macros'}}) {
-    if ($m =~ /^android_ndk.?\s*=\s*(.*)/) {
+    if ($m =~ /^android_ndk\s*.?=\s*(.*)/) {
       return $1 . '/toolchains/llvm/prebuilt/' . $ndk_host_type . '-x86_64/bin/clang++';
+    }
+  }
+  # If android_ndk was not set, try standalone toolchain (deprecated) compiler names.
+  # The toolchain's /bin directory is expected to be on the PATH.
+  for my $m (@{$opts{'macros'}}) {
+    if ($m =~ /^android_abi\s*.?=\s*(.*)/i) {
+      my $abi = $1;
+      # See $ACE_ROOT/include/makeinclude/platform_android.GNU
+      return 'armv7a-linux-androideabi-clang++' if $abi =~ /^armeabi-v7a/;
+      return 'aarch64-linux-android-clang++' if $abi eq 'arm64-v8a';
+      return 'i686-linux-android-clang++' if $abi eq 'x86';
+      return 'x86_64-linux-android-clang++' if $abi eq 'x86_64';
     }
   }
   return undef;
