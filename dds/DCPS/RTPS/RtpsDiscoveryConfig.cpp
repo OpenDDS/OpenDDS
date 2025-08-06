@@ -1171,6 +1171,20 @@ RtpsDiscoveryConfig::spdp_user_tag(ACE_CDR::ULong tag)
                                                     tag);
 }
 
+RtpsDiscoveryConfig::UserTagList
+RtpsDiscoveryConfig::ignored_spdp_user_tags() const
+{
+  return TheServiceParticipant->config_store()->get(config_key("IGNORED_SPDP_USER_TAGS").c_str(),
+                                                    UserTagList());
+}
+
+void
+RtpsDiscoveryConfig::ignored_spdp_user_tags(const UserTagList& tags)
+{
+  TheServiceParticipant->config_store()->set(config_key("IGNORED_SPDP_USER_TAGS").c_str(),
+                                             tags);
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

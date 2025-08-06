@@ -272,7 +272,7 @@ Publisher::run()
               "ERROR: failed to get publication matched status\n"));
             ACE_OS::exit (1);
           }
-          cummulative_count += matches.current_count_change;
+          cummulative_count += static_cast<unsigned int>(matches.current_count_change);
         }
       }
     }

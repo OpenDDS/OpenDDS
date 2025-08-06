@@ -36,7 +36,7 @@ using DCPS::TimeDuration;
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   : key_(key)
   , config_(DCPS::make_rch<RtpsDiscoveryConfig>(key))
-  , stats_writer_(DCPS::make_rch<DCPS::StatisticsDataWriter>(DCPS::DataWriterQosBuilder().durability_transient_local()))
+  , stats_writer_(DCPS::make_rch<DCPS::StatisticsDataWriter>(DCPS::DataWriterQosBuilder().durability_transient_local(), TheServiceParticipant->time_source()))
   , stats_task_(DCPS::make_rch<PeriodicTask>(TheServiceParticipant->reactor_task(), *this, &RtpsDiscovery::write_stats))
 {
   TheServiceParticipant->statistics_topic()->connect(stats_writer_);
@@ -806,7 +806,8 @@ void RtpsDiscovery::write_stats(const MonotonicTimePoint&) const
   DCPS::Statistics statistics;
   for (DomainParticipantMap::const_iterator domain = participants_.begin(); domain != participants_.end(); ++domain) {
     for (ParticipantMap::const_iterator part = domain->second.begin(); part != domain->second.end(); ++part) {
-      statistics.id = ("RtpsDiscovery " + DCPS::to_dds_string(domain->first) + ' ' + DCPS::to_string(part->first)).c_str();
+      statistics.id = ("RtpsDiscovery_" + DCPS::GuidConverter(part->first).uniqueParticipantId() + '_'
+                       + DCPS::to_dds_string(domain->first)).c_str();
       part->second->fill_stats(statistics.stats);
       stats_writer_->write(statistics);
     }

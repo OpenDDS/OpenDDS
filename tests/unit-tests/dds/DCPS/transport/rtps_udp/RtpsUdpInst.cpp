@@ -11,7 +11,7 @@ namespace {
     RcHandle<RtpsUdpInst> rtps_udp;
 
     RtpsUdpType()
-    : store(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic()))
+    : store(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic(), TheServiceParticipant->time_source()))
     , rtps_udp(make_rch<RtpsUdpInst>("RTPS_UDP_INST_UNIT_TEST", true))
     {
       store->unset_section(rtps_udp->config_prefix());

@@ -254,6 +254,15 @@ AuthenticationBuiltInImpl::~AuthenticationBuiltInImpl()
     return DDS::Security::VALIDATION_FAILED;
   }
 
+  std::string local_identity_ca;
+  if (local_data->credentials && local_data->credentials->get_ca_cert().subject_name_to_str(local_identity_ca) == 0) {
+    const char* const remote_identity_ca = TokenReader(remote_identity_token).get_property_value(dds_ca_sn);
+    if (remote_identity_ca && remote_identity_ca != local_identity_ca) {
+      set_security_error(ex, -1, 0, "Remote identity token's dds.ca.sn doesn't match local");
+      return DDS::Security::VALIDATION_FAILED;
+    }
+  }
+
   // Make sure that a remote_participant_guid has not already been assigned a
   // remote-identity-handle before creating a new one.
   RemoteParticipantMap::iterator begin = local_data->validated_remotes.begin(),

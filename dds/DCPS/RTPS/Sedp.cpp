@@ -302,7 +302,7 @@ RtpsDiscoveryCore::RtpsDiscoveryCore(RcHandle<RtpsDiscoveryConfig> config,
 {}
 
 Sedp::Sedp(const GUID_t& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
-  : config_store_(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic()))
+  : config_store_(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic(), TheServiceParticipant->time_source()))
   , spdp_(owner)
   , lock_(lock)
   , participant_id_(participant_id)
@@ -413,14 +413,13 @@ Sedp::init(const GUID_t& guid,
 {
   type_lookup_service_ = tls;
 
-  const OPENDDS_STRING domainStr = DCPS::to_dds_string(domainId);
-  const OPENDDS_STRING key = DCPS::GuidConverter(guid).uniqueParticipantId();
+  const String uniqueId = DCPS::GuidConverter(guid).uniqueParticipantId() + '_' + DCPS::to_dds_string(domainId);
 
   // configure one transport
   transport_inst_ = TheTransportRegistry->create_inst(
-                       DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
-                       OPENDDS_STRING("_SEDPTransportInst_") + key + domainStr,
-                       "rtps_udp");
+                      DCPS::TransportRegistry::DEFAULT_INST_PREFIX + String("SEDPTransportInst_") + uniqueId,
+                      "rtps_udp");
+  config_store_->add_section("TRANSPORT", transport_inst_->name());
 
   // Be careful to not call any function that causes the transport be
   // to created before the configuration is complete.
@@ -503,10 +502,9 @@ Sedp::init(const GUID_t& guid,
 #endif
 
   // Create a config
-  OPENDDS_STRING config_name = DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
-                            OPENDDS_STRING("_SEDP_TransportCfg_") + key +
-                            domainStr;
-  transport_cfg_ = TheTransportRegistry->create_config(config_name.c_str());
+  const String config_name = DCPS::TransportRegistry::DEFAULT_INST_PREFIX + String("SEDP_TransportCfg_") + uniqueId;
+  transport_cfg_ = TheTransportRegistry->create_config(config_name);
+  config_store_->add_section("CONFIG", transport_cfg_->name());
   transport_cfg_->instances_.push_back(transport_inst_);
   transport_cfg_->passive_connect_duration_ = disco.config()->sedp_passive_connect_duration();
 
@@ -2121,14 +2119,14 @@ Sedp::shutdown()
 
   job_queue_.reset();
   reactor_task_.reset();
-  const String config_prefix = transport_inst_->config_prefix();
 
   DCPS::RtpsUdpInst_rch rtps_inst =
     DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
   rtps_inst->opendds_discovery_default_listener_.reset();
   TheTransportRegistry->remove_config(transport_cfg_);
   TheTransportRegistry->remove_inst(transport_inst_);
-  config_store_->unset_section(config_prefix);
+  config_store_->unset_section(transport_inst_->config_prefix());
+  config_store_->unset_section(transport_cfg_->config_prefix());
 }
 
 void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,

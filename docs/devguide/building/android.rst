@@ -101,15 +101,14 @@ In addition to OpenDDS and the Android NDK you will also need the following soft
   - Follow all the install/update steps from the msys2.org website.
 
 - `Strawberry Perl <https://strawberryperl.com/>`__
-- OpenDDS Host tools build using Visual Studio
+- OpenDDS Host tools (built using Visual Studio)
 
   - In a separate copy of OpenDDS, build OpenDDS as described in :doc:`/devguide/building/index` using Visual Studio, except use the ``--host-tools-only`` configure script option.
     This OpenDDS (and the ACE+TAO it uses) must be the same version as the one used to build for Android.
   - If you want to use Java in the Android build, also pass the ``--java`` configure script option here as described in :ref:`android-java`.
-    You will also need to pass it to the configure script build for
-    Android when that comes.
+    You will also need to pass it to the configure script when configuring the build for Android.
 
-Finally, all paths being passed to GNU Make must not contain spaces because ACE's gnuace make scripts don't handle those paths correctly on Windows.
+Finally, all paths being passed to GNU Make must not contain spaces because ACE's gnuace makefiles don't handle those paths correctly on Windows.
 This means the NDK, toolchain, MSYS2, JDK, OpenDDS source, OpenDDS host tools, etc. must not contain any spaces in their paths.
 
 ****************************
@@ -222,7 +221,7 @@ android_abi
 
 The architecture to cross-target.
 When using ACE version 6 it is optional as it defaults to ``armeabi-v7a``.
-When using ACE version 7 or later, it is required.
+When using ACE8/TAO4 it is required.
 
 The valid options are:
 
@@ -362,9 +361,9 @@ Xerces C++ is also required for OpenDDS Security.
 It does not support Android specifically, but it comes with a CMake build script that can be paired with the Android NDK's CMake toolchain.
 
 Xerces requires a supported "transcoder" library.
-For API levels greater than or equal to 28 one of these, GNU libiconv, is included with Android.
-Before 28 any of the transcoders supported by Xerces would work theoretically but GNU libiconv was the one tested.
-If GNU libiconv is used, build it as an archive library (``--disable-shared``) so that the users of Xerces (ACE and OpenDDS) don't need to be aware of it as an additional runtime dependency.
+For API levels greater than or equal to 28, a transcoder -- GNU libiconv -- is included with Android.
+Before 28 any of the transcoders supported by Xerces would work but GNU libiconv was the one tested.
+If GNU libiconv is used, build it as an archive library (``--disable-shared``) so that the users of Xerces (ACE and OpenDDS) don't need it as an additional runtime dependency.
 
 Download `GNU libiconv <https://ftp.gnu.org/pub/gnu/libiconv>`__ version 1.16 source code and extract the archive.
 
@@ -387,13 +386,13 @@ GNU libiconv
 Xerces
 """"""
 
-A modified version of Xerces C++ hosted on `OpenDDS GitHub organization <https://github.com/OpenDDS/xerces-c/tree/android>`__ has support for an external GNU libiconv.
-Download this version using git (``android`` branch) or the via `ZIP archive <https://github.com/OpenDDS/xerces-c/archive/android.zip>`__.
+A modified version of Xerces C++ hosted on `OpenDDS GitHub organization <https://github.com/OpenDDS/xerces-c/tree/xerces-3.2-android>`__ has support for an external GNU libiconv.
+Download this version using git (``xerces-3.2-android`` branch) or the via `ZIP archive <https://github.com/OpenDDS/xerces-c/archive/xerces-3.2-android.zip>`__.
 
-Start the Microsoft Visual Studio command prompt for C++ development (for example "x64 Native Tools Command Prompt for VS 2019").
+Start the Microsoft Visual Studio command prompt for C++ development (for example "x64 Native Tools Command Prompt for VS 2022").
 
 ``cmake`` and ``ninja`` should be on the PATH.
-They can be installed as on option component in the Visual Studio installer (see "C++ CMake tools for Windows"), or downloaded separately.
+They can be installed as an optional component in the Visual Studio installer (see "C++ CMake tools for Windows"), or downloaded separately.
 
 Set environment variables based on the NDK location and Android configuration selected:
 

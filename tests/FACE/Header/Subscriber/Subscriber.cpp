@@ -85,7 +85,6 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   bool receiveMessageHappened = false;
   int recv_msg_count = 0;
   if (!status) {
-    const FACE::TIMEOUT_TYPE timeout = FACE::INF_TIME_VALUE;
     FACE::TRANSACTION_ID_TYPE txn;
     HeaderTest::Message msg;
     std::cout << "Subscriber: about to Receive_Message()" << std::endl;

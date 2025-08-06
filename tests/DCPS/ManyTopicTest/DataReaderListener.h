@@ -121,7 +121,7 @@ void DataReaderListenerImpl<MessageType>::read(DDS::DataReader_ptr dr)
     TraitsType::DataReaderType::_narrow(dr);
 
   typename TraitsType::MessageSequenceType foo;
-  DDS::SampleInfoSeq si;
+  DDS::SampleInfoSeq si(static_cast<DDS::UInt32>(num_ops_per_thread_));
 
   const DDS::ReturnCode_t status =
     foo_dr->read(foo, si, DDS::LENGTH_UNLIMITED,

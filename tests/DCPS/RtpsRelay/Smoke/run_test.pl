@@ -12,7 +12,6 @@ use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use PerlDDS::Response_Monitor;
-use File::Path;
 use strict;
 
 PerlDDS::add_lib_path('../../ConsolidatedMessengerIdl');
@@ -35,7 +34,7 @@ if ($test->flag('secure')) {
 }
 
 sub uses_one_relay {
-    return $test->flag('partition_same_relay') || $test->flag('single');
+    return $test->flag('partition_same_relay') || $test->flag('single') || $test->flag('draining');
 }
 
 my $pub_ini = " pub_rtps.ini";
@@ -45,8 +44,6 @@ if ($test->flag('single')) {
     $sub_ini = $pub_ini;
 }
 elsif ($test->flag('partition_same_relay')) {
-    rmtree 'DCS';
-    END { rmtree 'DCS'; }
     # Use with the 'secure' flag.
     # This puts the subscriber in a partition that doesn't match the publisher.
     # The config files are set up to allow the participants to exchange SPDP
@@ -58,34 +55,39 @@ elsif ($test->flag('partition_same_relay')) {
 }
 
 sub get_relay_args {
-  my $n = shift;
-  my $port_digit = 3 + $n;
-  return join(' ',
-    "-Id relay${n}",
-    "-UserData relay${n}",
-    "-DCPSDebugLevel 1",
-    "-DCPSSecurityDebugLevel 2",
-    "-LogDiscovery 1",
-    "-LogActivity 1",
-    "-LogThreadStatus 1",
-    "-LogRelayStatistics 3",
-    "-LogParticipantStatistics 1",
-    "-DCPSConfigFile relay${n}.ini",
-    "-ApplicationDomain 42",
-    "-VerticalAddress ${port_digit}444",
-    "-HorizontalAddress 127.0.0.1:11${port_digit}44",
-    "-MetaDiscoveryAddress 127.0.0.1:808${n}",
-    "-ORBVerboseLogging 1",
-    "-SynchronousOutput 1"
-  );
+    my $n = shift;
+    my $port_digit = 3 + $n;
+    return join(' ',
+        "-Id relay${n}",
+        "-UserData relay${n}",
+        "-DCPSDebugLevel 1",
+        "-DCPSSecurityDebugLevel 2",
+        "-LogDiscovery 1",
+        "-LogActivity 1",
+        "-LogThreadStatus 1",
+        "-LogRelayStatistics 3",
+        "-LogParticipantStatistics 1",
+        "-DCPSConfigFile relay${n}.ini",
+        "-ApplicationDomain 42",
+        "-VerticalAddress ${port_digit}444",
+        "-HorizontalAddress 127.0.0.1:11${port_digit}44",
+        "-MetaDiscoveryAddress 127.0.0.1:808${n}",
+        "-ORBVerboseLogging 1",
+        "-SynchronousOutput 1"
+    );
 }
+
+my $pub_extra_args = $test->flag('draining') ? ' -d' : '';
+my $control_args = '-Set RTPS_RELAY_DRAIN_INTERVAL=100 -Set RTPS_RELAY_DRAIN_STATE=Draining ' .
+    '-Set RTPS_RELAY_ADMIT_STATE=NotAdmitting';
 
 $test->process("monitor", "monitor", "-DCPSConfigFile monitor.ini");
 $test->process("relay1", "$ENV{DDS_ROOT}/bin/RtpsRelay", get_relay_args(1) . $relay_security_opts);
 $test->process("relay2", "$ENV{DDS_ROOT}/bin/RtpsRelay", get_relay_args(2) . $relay_security_opts) unless uses_one_relay();
-$test->process("publisher", "publisher", "-ORBDebugLevel 1 -DCPSConfigFile". $pub_ini . $pub_sub_security_opts);
+$test->process("publisher", "publisher", "-ORBDebugLevel 1 -DCPSConfigFile". $pub_ini . $pub_sub_security_opts . $pub_extra_args);
 $test->process("subscriber", "subscriber", "-ORBDebugLevel 1 -DCPSConfigFile" . $sub_ini . $pub_sub_security_opts);
 $test->process("metachecker", "metachecker", "127.0.0.1:8081");
+$test->process("control1", "$ENV{DDS_ROOT}/bin/RtpsRelayControl", "-RelayId relay1 -DCPSConfigFile relay1.ini $control_args");
 
 # start a response monitor checking for
 # > 500 ms of clock drift every second.
@@ -108,13 +110,20 @@ if ($test->flag('join')) {
     sleep 10;
     $test->start_process("publisher");
     sleep 1;
-    $test->start_process("subscriber");
+    $test->start_process("subscriber") unless $test->flag('draining');
 }
 $test->start_process("metachecker");
 
+if ($test->flag('draining')) {
+    $test->wait_for('publisher', 'connected', max_wait => 5);
+    $test->start_process("control1");
+    $test->wait_kill("publisher", 30);
+    $test->kill_process(5, "control1");
+}
+
 $test->stop_process(5, "metachecker");
-$test->stop_process(20, "subscriber");
-$test->stop_process(5, "publisher");
+$test->stop_process(20, "subscriber") unless $test->flag('draining');
+$test->stop_process(5, "publisher") unless $test->flag('draining');
 
 $test->kill_process(5, "relay1");
 $test->kill_process(5, "relay2") unless uses_one_relay();
