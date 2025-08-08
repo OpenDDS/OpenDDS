@@ -179,16 +179,16 @@ To configure and build OpenDDS after this, run:
 
   .. code-block:: batch
 
+    set PATH=C:\msys64\usr\bin;%PATH%;%TOOLCHAIN%\bin
     configure --target=android --macros=android_abi=%ABI% --host-tools=%HOST_DDS%
-    set PATH=%PATH%;%TOOLCHAIN%\bin;C:\msys64\usr\bin
-    make
+    make XERCESLIB=xerces-c-3.2
     REM Pass -j/--jobs with an appropriate value or this'll take a while...
 
   .. note::
 
     - Pass ``--host-tools`` with the location of the OpenDDS host tools that were built using Visual Studio must be passed to ``configure``.
 
-    - You will need MSYS2 utilities in your ``%PATH%``.
+    - You will need MSYS2 utilities in your ``%PATH%``.  Since Windows has its own ``bash.exe``, these utilities must come before the system PATH entries.
 
     - Run these commands in a new Visual Studio command prompt that is different from where you configured the host tools.
 
@@ -349,10 +349,10 @@ This can be accomplished by either disabling the generation of the shared librar
 
   1. Start the MSYS2 MSYS development shell using the start menu shortcut or ``C:\msys64\msys2_shell.cmd -msys``
   2. ``cd /c/your/location/of/OpenSSL-source``
-  3. ``export ANDROID_NDK_HOME=/c/your/location/of/ndk-standalone-toolchain``
-  4. ``PATH+=:$ANDROID_NDK_HOME/bin``
+  3. ``export ANDROID_NDK_ROOT=/c/your/location/of/ndk-standalone-toolchain``
+  4. ``PATH+=:$ANDROID_NDK_ROOT/bin``
   5. ``./Configure --prefix=$SSL_ROOT android-arm no-tests no-shared`` (or replace ``-arm`` with a different platform like ``-arm64``, see OpenSSL's ``NOTES.ANDROID`` file)
-  6. ``make install_sw``
+  6. ``make AR=llvm-ar install_sw``
 
 Xerces
 ------
