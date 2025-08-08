@@ -252,6 +252,10 @@ public:
   ACE_CDR::ULong spdp_user_tag() const;
   void spdp_user_tag(ACE_CDR::ULong tag);
 
+  typedef OPENDDS_VECTOR(ACE_CDR::ULong) UserTagList;
+  UserTagList ignored_spdp_user_tags() const;
+  void ignored_spdp_user_tags(const UserTagList& tags);
+
 private:
   const String config_prefix_;
 };

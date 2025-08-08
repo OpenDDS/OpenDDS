@@ -257,10 +257,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     std::condition_variable cleaning_cv;
     std::thread cleanup_monitor([&](){
       std::unique_lock<std::mutex> lock(cleaning_mutex);
-      int count = 0;
+      int count_cleanup = 0;
       while (cleaning) {
         cleaning_cv.wait_for(lock, chrono::seconds(1));
-        if (++count >= 3) {
+        if (++count_cleanup >= 3) {
           stringstream ss;
           ss << "Subscriber " << ACE_OS::getpid() << " is taking a long time to clean up." << endl;
           cout << ss.str() << flush;

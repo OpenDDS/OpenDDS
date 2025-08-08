@@ -156,7 +156,7 @@ Service_Participant::Service_Participant()
   , network_interface_address_topic_(make_rch<InternalTopic<NetworkInterfaceAddress> >())
   , statistics_topic_(make_rch<StatisticsTopic>())
   , config_topic_(make_rch<InternalTopic<ConfigPair> >())
-  , config_store_(make_rch<ConfigStoreImpl>(config_topic_))
+  , config_store_(make_rch<ConfigStoreImpl>(config_topic_, time_source_))
   , config_reader_(make_rch<InternalDataReader<ConfigPair> >(DataReaderQosBuilder().reliability_reliable().durability_transient_local()))
   , config_reader_listener_(make_rch<ConfigReaderListener>(ref(*this)))
   , pending_timeout_(0,0) // Can't use COMMON_DCPS_PENDING_TIMEOUT_default due to initialization order.

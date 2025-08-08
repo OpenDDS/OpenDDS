@@ -1,0 +1,66 @@
+Released 2025-08-01
+
+Download :ghrelease:`this release on GitHub <v3.33.0>`.
+
+Read `the documentation for this release on Read the Docs <https://opendds.readthedocs.io/en/v3.33.0>`__.
+
+Additions
+=========
+
+- IDL Maps are now supported by ``opendds_idl``. (:ghpr:`4999`)
+
+  - We would like to thank `tmayoff <https://github.com/tmayoff>`__ for contributing much of the work needed for this.
+  - Usage example:
+
+    .. code-block:: omg-idl
+
+      @nested
+      struct Item {
+        string desc_name;
+        uint32 count;
+      };
+
+      @topic
+      struct Inventory {
+        map<string, Item> items;
+      };
+
+  - They map to C++ ``std::map`` in both the classic IDL-to-C++ and IDL-to-C++11 mappings.
+  - See :ref:`introduction--idl-compliance` for known limitations.
+
+- RtpsRelay
+
+  - Output from :option:`RtpsRelay -LogRelayStatistics` / :option:`RtpsRelay -PublishRelayStatistics` includes extended RtpsRelay statistics (:ghpr:`4972`, :ghpr:`5006`)
+  - Output from :option:`RtpsRelay -LogRelayStatistics` / :option:`RtpsRelay -PublishRelayStatistics` includes internal OpenDDS statistics (:ghpr:`5000`, :ghpr:`5006`, :ghpr:`4990`, :ghpr:`5023`)
+  - RtpsRelay no longer needs to store and replay SPDP messages (:ghpr:`5017`, :ghpr:`5020`)
+  - The OpenDDSInternalThread built-in topic has additional detail fields which may be populated by internal threads. (:ghpr:`5026`)
+
+    - The RtpsRelay's event handling threads make use of this feature.
+  - RtpsRelay expiration/deactivation is now done by separate timer events instead of during input handling (:ghpr:`5032`)
+  - :option:`RtpsRelay -DrainInterval` can drain clients to implement a controlled shutdown (:ghpr:`5063`)
+
+- Added :cfg:prop:`[rtps_discovery]IgnoredSpdpUserTags`. (:ghpr:`5046`)
+- When DDS Security is configured to require authentication and an incoming SPDP message has a different Identity CA, authentication is not attempted. (:ghpr:`5046`)
+
+Platform Support and Dependencies
+=================================
+
+- ACE/TAO
+
+  - Updated ACE 6/TAO 2 from 6.5.21 to `6.5.22 <https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_22>`__.
+  - Updated ACE 8/TAO 4 from 8.0.3 to `8.0.4 <https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-8_0_4>`__.
+
+- CMake
+
+  - :cmake:func:`opendds_target_sources` now has a `FOLDER` argument which sets the CMake FOLDER property on generated targets. (:ghpr:`5009`)
+  - Fixed accidental use of RapidJSON's ``CMakeLists.txt`` file when building OpenDDS with CMake. (:ghpr:`5054`)
+    This caused issues such as forcing the ``CMAKE_CXX_STANDARD`` to C++11 and breaking the ACE C++ standard detection code.
+  - Fixed configure issue with Xerces from vcpkg when building OpenDDS with CMake. (:ghpr:`5054`)
+
+- The configure script detects the C++ standard supported by the Android NDK compiler (:ghpr:`5057`, :ghpr:`5052`)
+
+Fixes
+=====
+
+- Reset heartbeat fallback when the sequence number advances. (:ghpr:`5048`)
+

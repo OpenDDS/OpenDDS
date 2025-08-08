@@ -13,7 +13,7 @@ namespace {
     bool fixed;
 
     AddressTest()
-    : store(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic()))
+    : store(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic(), TheServiceParticipant->time_source()))
     , rtps("ADDRESS_TEST")
     , addr()
     , fixed(false)

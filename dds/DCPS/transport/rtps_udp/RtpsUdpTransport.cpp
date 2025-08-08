@@ -66,7 +66,7 @@ RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst,
 #ifdef ACE_HAS_IPV6
   , ipv6_actual_local_address_(NetworkAddress::default_IPV6)
 #endif
-  , stats_writer_(make_rch<StatisticsDataWriter>(DataWriterQosBuilder().durability_transient_local()))
+  , stats_writer_(make_rch<StatisticsDataWriter>(DataWriterQosBuilder().durability_transient_local(), TheServiceParticipant->time_source()))
   , stats_template_(stats_template())
 {
   assign(local_prefix_, GUIDPREFIX_UNKNOWN);

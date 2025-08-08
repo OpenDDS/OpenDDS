@@ -107,9 +107,10 @@ String ConfigPair::canonicalize(const String& key)
   return retval;
 }
 
-ConfigStoreImpl::ConfigStoreImpl(ConfigTopic_rch config_topic)
+ConfigStoreImpl::ConfigStoreImpl(ConfigTopic_rch config_topic,
+                                 const TimeSource& time_source)
   : config_topic_(config_topic)
-  , config_writer_(make_rch<InternalDataWriter<ConfigPair> >(datawriter_qos()))
+  , config_writer_(make_rch<InternalDataWriter<ConfigPair> >(datawriter_qos(), time_source))
   , config_reader_(make_rch<InternalDataReader<ConfigPair> >(datareader_qos()))
 {
   config_topic_->connect(config_writer_);
@@ -556,6 +557,56 @@ ConfigStoreImpl::get(const char* key,
 
 void
 ConfigStoreImpl::set(const char* key,
+                     const UInt32List& value)
+{
+  String s;
+  for (UInt32List::const_iterator pos = value.begin(), limit = value.end(); pos != limit; ++pos) {
+    if (!s.empty()) {
+      s += ',';
+    }
+    s += to_dds_string(*pos);
+  }
+
+  set(key, s);
+}
+
+ConfigStoreImpl::UInt32List
+ConfigStoreImpl::get(const char* key,
+                     const UInt32List& value) const
+{
+  // Join the default.
+  String s;
+  for (UInt32List::const_iterator pos = value.begin(), limit = value.end(); pos != limit; ++pos) {
+    if (!s.empty()) {
+      s += ',';
+    }
+    s += to_dds_string(*pos);
+  }
+
+  const String t = get(key, s);
+
+  UInt32List retval;
+
+  const char* start = t.c_str();
+  while (const char* next_comma = std::strchr(start, ',')) {
+    const size_t size = static_cast<size_t>(next_comma - start);
+    DDS::UInt32 val = 0;
+    if (convertToInteger(String(start, size), val)) {
+      retval.push_back(val);
+    }
+    start = next_comma + 1;
+  }
+  // Append everything after last comma
+  DDS::UInt32 val = 0;
+  if (convertToInteger(start, val)) {
+    retval.push_back(val);
+  }
+
+  return retval;
+}
+
+void
+ConfigStoreImpl::set(const char* key,
                      const TimeDuration& value,
                      TimeFormat format)
 {
@@ -570,6 +621,58 @@ ConfigStoreImpl::set(const char* key,
     set_float64(key, value.to_double());
     break;
   }
+}
+
+bool
+ConfigStoreImpl::convert_value(const ConfigPair& sample, TimeFormat format, TimeDuration& value)
+{
+  switch (format) {
+  case Format_IntegerMilliseconds:
+    {
+      DDS::UInt32 x = 0;
+      if (DCPS::convertToInteger(sample.value(), x)) {
+        value = TimeDuration::from_msec(x);
+        return true;
+      }
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: ConfigStoreImpl::convert_value: "
+                   "failed to parse TimeDuration (integer milliseconds) for %C=%C\n",
+                   sample.key().c_str(), sample.value().c_str()));
+      }
+    }
+    break;
+  case Format_IntegerSeconds:
+    {
+      DDS::UInt32 x = 0;
+      if (DCPS::convertToInteger(sample.value(), x)) {
+        value = TimeDuration(static_cast<time_t>(x));
+        return true;
+      }
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING,
+                   "(%P|%t) WARNING: ConfigStoreImpl::convert_value: "
+                   "failed to parse TimeDuration (integer seconds) for %C=%C\n",
+                   sample.key().c_str(), sample.value().c_str()));
+      }
+    }
+    break;
+  case Format_FractionalSeconds:
+    {
+      double x = 0.0;
+      if (DCPS::convertToFloating(sample.value(), x)) {
+        value = TimeDuration::from_double(x);
+        return true;
+      }
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING,
+                   "(%P|%t) WARNING: ConfigStoreImpl::convert_value: "
+                   "failed to parse TimeDuration (fractional seconds) for %C=%C\n",
+                   sample.key().c_str(), sample.value().c_str()));
+      }
+    }
+    break;
+  }
+  return false;
 }
 
 TimeDuration
@@ -588,56 +691,7 @@ ConfigStoreImpl::get(const char* key,
     const ConfigPair& sample = samples[idx];
     const DDS::SampleInfo& info = infos[idx];
     if (info.valid_data) {
-      switch (format) {
-      case Format_IntegerMilliseconds:
-        {
-          DDS::UInt32 x = 0;
-          if (DCPS::convertToInteger(sample.value(), x)) {
-            retval = TimeDuration::from_msec(x);
-          } else {
-            retval = value;
-            if (log_level >= LogLevel::Warning) {
-              ACE_ERROR((LM_WARNING,
-                         ACE_TEXT("(%P|%t) WARNING: ConfigStoreImpl::get: ")
-                         ACE_TEXT("failed to parse TimeDuration (integer milliseconds) for %C=%C\n"),
-                         sample.key().c_str(), sample.value().c_str()));
-            }
-          }
-        }
-        break;
-      case Format_IntegerSeconds:
-        {
-          DDS::UInt32 x = 0;
-          if (DCPS::convertToInteger(sample.value(), x)) {
-            retval = TimeDuration(static_cast<time_t>(x));
-          } else {
-            retval = value;
-            if (log_level >= LogLevel::Warning) {
-              ACE_ERROR((LM_WARNING,
-                         ACE_TEXT("(%P|%t) WARNING: ConfigStoreImpl::get: ")
-                         ACE_TEXT("failed to parse TimeDuration (integer seconds) for %C=%C\n"),
-                         sample.key().c_str(), sample.value().c_str()));
-            }
-          }
-        }
-        break;
-      case Format_FractionalSeconds:
-        {
-          double x = 0.0;
-          if (DCPS::convertToFloating(sample.value(), x)) {
-            retval = TimeDuration::from_double(x);
-          } else {
-            retval = value;
-            if (log_level >= LogLevel::Warning) {
-              ACE_ERROR((LM_WARNING,
-                         ACE_TEXT("(%P|%t) WARNING: ConfigStoreImpl::get: ")
-                         ACE_TEXT("failed to parse TimeDuration (fractional seconds) for %C=%C\n"),
-                         sample.key().c_str(), sample.value().c_str()));
-            }
-          }
-        }
-        break;
-      }
+      convert_value(sample, format, retval);
     }
   }
 
@@ -990,6 +1044,11 @@ ConfigStoreImpl::get(const char* key,
   }
 
   return retval;
+}
+
+void ConfigStoreImpl::add_section(const String& prefix, const String& name)
+{
+  set(prefix + (prefix.empty() ? "" : "_") + name, '@' + name);
 }
 
 ConfigStoreImpl::StringList

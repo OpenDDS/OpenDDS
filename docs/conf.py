@@ -94,8 +94,8 @@ release = opendds_version_info.version
 is_release = opendds_version_info.is_release
 if is_release:
     github_links_release_tag = opendds_version_info.tag
-if opendds_version_info.release_year:
-    copyright = f'{opendds_version_info.release_year} {copyright}'
+if opendds_version_info.release_date:
+    copyright = f'{opendds_version_info.release_date.year} {copyright}'
 
 # Handle News Generation
 try:

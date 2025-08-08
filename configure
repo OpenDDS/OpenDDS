@@ -123,10 +123,10 @@ my %platforminfo =
                   'no_host' => 1,
                   'usage' => [
                       "Use --macros=ANDROID_ABI=<ARCH> to specify the",
-                      "target architecture.",
-                      "Use --macros=android_sdk=<SDK_PATH> and",
-                      "--macros=android_target_api=<API_NUMBER> to specify",
-                      "where to find android.jar.",
+                      "  target architecture.",
+                      "Also specify --macros=android_ndk=<NDK_PATH> and",
+                      "  --macros=android_api=<API_NUMBER>",
+                      "See docs/devguide/building/android.rst for details"
                     ],
                   'needs_i2jrt_corba' => 1,
                   'java_platform' => 'android',
@@ -450,8 +450,20 @@ if (exists($opts{'std'})) {
 }
 my @mpcopts;
 push(@mpcopts, @{$opts{'mpcopts'}}) if exists($opts{'mpcopts'});
-my @features;
-push(@features, @{$opts{'features'}}) if exists($opts{'features'});
+
+my %features;
+
+sub add_feature_from_string { # input is feature_key=[0|1]
+  my $str = shift;
+  my @parts = split(/=/, $str);
+  $features{$parts[0]} = $parts[1] // 1;
+}
+
+if (exists($opts{'features'})) {
+  for my $f (@{$opts{'features'}}) {
+    add_feature_from_string($f);
+  }
+}
 
 $opts{'host'} = perlOS_to_host() unless $opts{'host'};
 
@@ -690,6 +702,31 @@ if (!exists $platforminfo{$opts{'target'}}->{'needs_i2jrt_corba'}) {
   $platforminfo{$opts{'target'}}->{'needs_i2jrt_corba'} = 0;
 }
 
+sub add_mpc_features_for_std {
+  if ($opts{'std'}) {
+    my $cpp17 = qr/(17|2a|20|2b|23)/;
+    if ($opts{'std'} =~ /(0x|11|1y|14|1z|$cpp17)$/) {
+      $features{'no_cxx11'} = 0;
+      print "Compiler has >= C++11 support\n" if $opts{'verbose'};
+    }
+
+    if ($opts{'std'} =~ /$cpp17$/) {
+      $features{'no_cxx17'} = 0;
+      print "Compiler has >= C++17 support\n" if $opts{'verbose'};
+    }
+  }
+}
+
+sub ndk_clang {
+  my $ndk_host_type = $is_windows ? 'windows' : 'linux';
+  for my $m (@{$opts{'macros'}}) {
+    if ($m =~ /^android_ndk.?\s*=\s*(.*)/) {
+      return $1 . '/toolchains/llvm/prebuilt/' . $ndk_host_type . '-x86_64/bin/clang++';
+    }
+  }
+  return undef;
+}
+
 ## compiler
 
 if ($has_host_compiler) {
@@ -810,6 +847,37 @@ EOF
         if $opts{'verbose'};
     }
   }
+  elsif ($opts{'target'} eq 'android') {
+    if ($opts{'std'}) {
+      push(@{$opts{'macros'}}, 'CCFLAGS += -std=' . $opts{'std'});
+      print "Added platform_macros for -std=$opts{std}\n" if $opts{'verbose'};
+    }
+    else {
+      my $clang = ndk_clang();
+      my $null = File::Spec->devnull();
+      my $clang_command = "$clang -xc++ $null -E -dM 2>$null";
+      print "Running $clang_command\n" if $opts{'verbose'};
+      open(my $clang_out_fd, "-|", $clang_command)
+        or die "ERROR: Could not detect NDK Clang's default -std.\nStopped";
+      while (my $line = <$clang_out_fd>) {
+        chomp($line);
+        if ($line =~ /#define __cplusplus (\d{2})(\d{2})/) {
+          if ($1 == 20) {
+            $opts{'std'} = "c++$2";
+            print "NDK Clang defaults to -std=c++$2 (from $line)\n" if $opts{'verbose'};
+          }
+          last;
+        }
+      }
+      close($clang_out_fd);
+    }
+    add_mpc_features_for_std();
+    if (exists $features{'no_cxx17'} && $features{'no_cxx17'} == 0) {
+      unless (grep(/ACE_LACKS_AUTO_PTR/, @{$opts{'configh'}})) {
+        push(@{$opts{'configh'}}, '#define ACE_LACKS_AUTO_PTR');
+      }
+    }
+  }
   elsif ($opts{'compiler'} =~ /g\+\+|clang/) {
     my $version_string = `$opts{'compiler'} --version`;
     print "Compiler version: $version_string\n" if $opts{'verbose'};
@@ -853,9 +921,8 @@ EOF
       die("C++17 is required to compile OpenDDS");
     }
   }
-
-  push(@features, 'no_cxx11=0');
-  push(@features, 'no_cxx17=0');
+  $features{'no_cxx11'} = 0;
+  $features{'no_cxx17'} = 0;
 }
 
 my $compile_warnings = $opts{'compile-warnings'} // '';
@@ -874,7 +941,8 @@ if ($compile_warnings eq 'WARNING' or $compile_warnings eq 'ERROR') {
     if ($compile_warnings eq 'ERROR') {
       push(@mpcopts, '-value_template', 'WarnAsError=1');
     }
-  } else {
+  }
+  else {
     push(@mpcopts, '-value_template', "compile_flags+=${warning_flags}");
     if ($compile_warnings eq 'ERROR') {
       push(@mpcopts, '-value_template', "compile_flags+=${error_flags}");
@@ -1232,30 +1300,31 @@ sub write_config_h {
 }
 
 my $wrote_df = 0;
+my %wrote_df_features;
 
 sub default_features {
   my %buildEnv = %{shift()};
-  my @feat;
+  my %feat = (%features);
   if ($buildEnv{'build'} eq 'target') {
-    push(@feat, 'ipv6=1') if $opts{'ipv6'};
-    my @normalized = map {/=/ ? $_ : "$_=1"} @features;
-    push(@feat, @normalized) if @normalized;
-  } elsif ($opts{'java'}) {
-    push(@feat, 'java=1');
+    $feat{'ipv6'} = 1 if $opts{'ipv6'};
   }
-  return @feat;
+  elsif ($opts{'java'}) {
+    $feat{'java'} = 1;
+  }
+  return %feat;
 }
 
 sub write_default_features {
   my %buildEnv = %{shift()};
-  my @feat = default_features(\%buildEnv);
+  my %feat = default_features(\%buildEnv);
 
-  if (@feat) {
+  if (%feat) {
     my $DF = backup_and_open("$buildEnv{'ACE_ROOT'}/bin/MakeProjectCreator" .
                              "/config/default.features");
     $wrote_df = 1;
-    for my $f (@feat) {
-      print $DF "$f\n";
+    %wrote_df_features = (%feat);
+    for my $k (sort keys %feat) {
+      print $DF "$k=$feat{$k}\n";
     }
     $DF->close;
     print "Wrote $buildEnv{'ACE_ROOT'}/.../default.features\n"
@@ -1458,6 +1527,7 @@ EOT
 
 sub write_opendds_configh {
   my %buildEnv = %{shift()};
+  my $host = $buildEnv{'build'} eq 'host';
 
   my $CFGH = backup_and_open("$buildEnv{'DDS_ROOT'}/dds/OpenDDSConfig.h");
   my $CFGIN = new FileHandle;
@@ -1470,19 +1540,12 @@ sub write_opendds_configh {
     $exclusive = 0;
   }
 
-  my $cxx11 = 0;
-  for my $f (@features) {
-    if ($f eq 'no_cxx11=0') {
-      $cxx11 = 1;
-    }
-  }
-
   my $safety_profile_0 = $opts{'safety-profile'} ? 0 : 1;
   my $safety_profile_1 = $opts{'safety-profile'} ? 1 : 0;
 
   my %config = (
     'OPENDDS_CONFIG_AUTO_STATIC_INCLUDES' => 0,
-    'OPENDDS_CONFIG_BOOTTIME_TIMERS' => $opts{'boottime'} // 0,
+    'OPENDDS_CONFIG_BOOTTIME_TIMERS' => $host ? 0 : ($opts{'boottime'} // 0),
     'OPENDDS_CONFIG_BUILT_IN_TOPICS' => $opts{'built-in-topics'} // 1,
     'OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC' => $opts{'content-filtered-topic'} // $safety_profile_0,
     'OPENDDS_CONFIG_MULTI_TOPIC' => $opts{'multi-topic'} // $safety_profile_0,
@@ -1492,8 +1555,8 @@ sub write_opendds_configh {
     'OPENDDS_CONFIG_PERSISTENCE_PROFILE' => $opts{'persistence-profile'} // $safety_profile_0,
     'OPENDDS_CONFIG_QUERY_CONDITION' => $opts{'query-condition'} // $safety_profile_0,
     'OPENDDS_CONFIG_RAPIDJSON' => ($opts{'rapidjson'} // 0) ? 1 : 0,
-    'OPENDDS_CONFIG_SAFETY_PROFILE' => ($buildEnv{'build'} eq 'host') ? 0 : $safety_profile_1,
-    'OPENDDS_CONFIG_SECURITY' => $opts{'security'} // 0,
+    'OPENDDS_CONFIG_SECURITY' => $host ? 0 : ($opts{'security'} // 0),
+    'OPENDDS_CONFIG_SAFETY_PROFILE' => ($host ? 0 : $safety_profile_1),
   );
 
   if (exists $opts{'content-subscription'}) {
@@ -1504,8 +1567,7 @@ sub write_opendds_configh {
 
   my $replace_value = sub {
     my $var = shift;
-    return 'UNDEFINED_NEED_TO_UPDATE_CONFIGURE_SCRIPT' unless exists $config{$var};
-    return $config{$var};
+    return exists $config{$var} ? $config{$var} : 'UNDEFINED_NEED_TO_UPDATE_CONFIGURE_SCRIPT';
   };
 
   while (<$CFGIN>) {
@@ -1860,17 +1922,11 @@ for my $key (keys %optdep) {
 
 sub has_feature {
   my $feat = shift;
-  for my $f (@features) {
-    my ($key, $value) = split(/=/, $f);
-    if ($key eq $feat) {
-      return 1;
-    }
-  }
-  return 0;
+  return exists $features{$feat};
 }
 
 if ($opts{'java'}) {
-  push(@features, 'java=1');
+  $features{'java'} = 1;
 
   my $feat = 'java_pre_jpms';
   unless (has_feature($feat)) {
@@ -1880,7 +1936,7 @@ if ($opts{'java'}) {
       if (/javac (\d+)/) {
         print "Found javac major version $1\n" if $opts{'verbose'};
         if ($1 > 1) {
-          push(@features, "$feat=0");
+          $features{$feat} = 0;
           print "Feature $feat=0 due to Java version\n" if $opts{'verbose'};
         }
         last;
@@ -1915,7 +1971,7 @@ for my $key (keys %optdep) {
             print "Found $key at $targetEnv{$e} using alternative $alt\n"
               if $opts{'verbose'};
             $ok = 1;
-            push(@features, $s->{$alt}) if defined $s->{$alt};
+            add_feature_from_string($s->{$alt}) if defined $s->{$alt};
             last;
           }
           print "Didn't find $key at $targetEnv{$e} using alternative $alt\n"
@@ -1929,7 +1985,7 @@ for my $key (keys %optdep) {
         die "ERROR: Can't find $key at $targetEnv{$e} (using $s).\nStopped";
       }
     }
-    push(@features, $m) if $m;
+    add_feature_from_string($m) if $m;
     push(@platformmacros, $m) if $need_platform_macros{$key};
   }
 }
@@ -1962,7 +2018,7 @@ if ($opts{'openssl'} && $opts{'openssl'} ne 'skip_version_check') {
       print "OpenSSL version detected: \"$ver\"\n" if $opts{'verbose'};
       if ($ver =~ /OpenSSL[\W]+1\.1/ || $ver =~ /OpenSSL[\W]+3\./) {
         print "OpenSSL 1.1+ MPC feature enabled\n" if $opts{'verbose'};
-        push(@features, 'openssl11=1');
+        $features{'openssl11'} = 1;
       }
       last;
     }
@@ -2244,9 +2300,9 @@ sub mergeToEnv {
 }
 
 sub disable_feature {
-  my($featureArray, $feature) = @_;
+  my($featureHash, $feature) = @_;
   $feature =~ s/-/_/g;
-  push(@{$featureArray}, "$feature=0");
+  $featureHash->{$feature} = 0;
 }
 
 sub get_default_features {
@@ -2271,10 +2327,8 @@ sub get_default_features {
 
 sub get_requested_features {
   my %requested_features;
-  for my $f (@features) {
-    my ($key, $value) = split(/=/, $f);
-    $value = "1" unless defined $value;
-    $requested_features{$key} = $value;
+  for my $f (keys %features) {
+    $requested_features{$f} = $features{$f} // 1;
   }
   return %requested_features;
 }
@@ -2321,12 +2375,12 @@ sub generate_workspace {
 
   for my $feat (qw/built-in-topics ownership-profile/) {
     if (exists $opts{$feat} && !$opts{$feat}) {
-      disable_feature(\@features, $feat);
+      disable_feature(\%features, $feat);
     }
   }
 
-  if ($opts{'security'}) {
-    disable_feature(\@features, 'no-opendds-security');
+  if ($is_target && $opts{'security'}) {
+    disable_feature(\%features, 'no-opendds-security');
   }
 
   # default of these depends on whether we are doing a safety-profile build
@@ -2336,27 +2390,18 @@ sub generate_workspace {
                    no-opendds-safety-profile/) {
     if (defined $opts{'no-opendds-safety-profile'}) {
       if (!(exists $opts{$feat} && $opts{$feat})) {
-        disable_feature(\@features, $feat);
+        disable_feature(\%features, $feat);
       }
     }
     elsif (exists $opts{$feat} && !$opts{$feat}) {
-      disable_feature(\@features, $feat);
+      disable_feature(\%features, $feat);
     }
   }
 
   if ($is_target && $opts{'target'} eq 'android') {
-    # We can't detect C++11 compatibility in cross compilers at the moment,
-    # but all the NDKs we officially support are C++11+ by default, so enable
-    # C++11 features unless an explicit 'no_cxx11' feature already is set.
-    my $feat = 'no_cxx11';
-    unless (has_feature($feat)) {
-      disable_feature(\@features, $feat);
-      print "Setting $feat=0 for Android\n";
-    }
-
     # Disable including $JAVA_HOME/include on Android. Android NDK includes a
     # jni.h
-    disable_feature(\@features, 'jni_include')
+    disable_feature(\%features, 'jni_include')
   }
 
   my $mpctype = (!$is_windows || ($cross_compile && $is_target))
@@ -2364,17 +2409,15 @@ sub generate_workspace {
 
   if ($mpctype eq 'gnuace') {
     my $UM;
-    if (@features || $cross_compile) {
+    if (%features || $cross_compile) {
       print "Writing $buildEnv->{'DDS_ROOT'}/user_macros.GNU\n"
         if $opts{'verbose'};
       $UM = backup_and_open($buildEnv->{'DDS_ROOT'} . '/user_macros.GNU');
     }
     if ($is_target) {
-      for my $feat (@features) {
-        my $key = $feat;
-        $key =~ s/=.*//;
-        print $UM ($feat =~ /=/ ? $feat : "$feat=1"), "\n"
-          unless $need_platform_macros{$key};
+      for my $feat (sort keys %features) {
+        print $UM "$feat=", ($features{$feat} // 1), "\n"
+          unless $need_platform_macros{$feat};
       }
       if ($cross_compile) {
         print $UM <<'EOT';
@@ -2401,35 +2444,33 @@ EOT
 
   # Append to default.features
   if ($is_target) {
-    push(@features, 'cross_compile') if $cross_compile;
+    $features{'cross_compile'} = 1 if $cross_compile;
 
     if ($platforminfo{$opts{'target'}}->{'needs_i2jrt_corba'} && $opts{'java'}) {
       if ($opts{'verbose'}) {
         print "Target platform needs i2jrt_corba.jar, forcing java_pre_jpms=0 to get it\n";
       }
-      my $found = 0;
-      for my $i (0 .. scalar $#features) {
-        if ($features[$i] =~ /^java_pre_jpms/) {
-          $features[$i] = 'java_pre_jpms=0';
-          my $found = 1;
-        }
-      }
-      if (!$found) {
-        push(@features, "java_pre_jpms=0");
-      }
+      $features{'java_pre_jpms'} = 0;
     }
 
     if ($opts{'java'} && $cross_compile) {
-      push(@features, "jni_check=0");
+      $features{'jni_check'} = 0;
     }
 
-    if ($buildtao && @features) {
+    if ($buildtao && %features) {
       my $df_file = $buildEnv->{'ACE_ROOT'} .
         '/bin/MakeProjectCreator/config/default.features';
       my $DF = $opts{'dry-run'} ? File::Temp->new()
         : new FileHandle(">>$df_file");
-      for my $f (@features) {
-        print $DF ($f =~ /=/ ? $f : "$f=1"), "\n";
+      for my $f (sort keys %features) {
+        if (exists $wrote_df_features{$f}) {
+          if ($wrote_df_features{$f} ne $features{$f}) {
+            die "ERROR: Feature $f already written with value $wrote_df_features{$f} now set to $features{$f}";
+          }
+        }
+        else {
+          print $DF "$f=", ($features{$f} // 1), "\n";
+        }
       }
       $DF->close;
       if ($opts{'verbose'}) {
@@ -2878,12 +2919,24 @@ sub write_cmake_file {
     return '"' . join(';', map {whack_to_slash($_)} @list) . '"';
   }
 
+  sub hash_to_cmake_features {
+    my $hash = shift;
+    my $list;
+    for my $k (sort keys %$hash) {
+      $list .= "$k=" . ($hash->{$k} // 1) . ';';
+    }
+    return '"' . $list . '"';
+  }
+
   sub to_cmake_value {
     my $value = shift();
 
     my $ref_type = ref($value);
     if ($ref_type eq 'ARRAY') {
       return to_cmake_list($value);
+    }
+    elsif ($ref_type eq 'HASH') {
+      return hash_to_cmake_features($value);
     }
     elsif ($ref_type eq '') {
       return to_cmake_scalar($value);
@@ -3027,7 +3080,7 @@ sub write_cmake_file {
     if (defined($gtest_root)) {
       print_cmake_config($fh, 'GTEST', $gtest_root);
     }
-    print_cmake_config($fh, 'features', \@features);
+    print_cmake_config($fh, 'features', \%features);
     print_cmake_config($fh, 'mpcopts', \@mpcopts);
 
     print $fh "\n# Sanitizers\n";

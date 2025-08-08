@@ -56,8 +56,9 @@ concurrency:
 env:
   TRIGGERING_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
   VCPKG_INSTALLED_DIR: ${{ github.workspace }}\vcpkg\installed
-  CTEST_OUTPUT_ON_FAILURE: ON
   VCPKG_GIT_COMMIT: d5ec528843d29e3a52d745a64b469f810b2cedbf
+  VCPKG_TOOLCHAIN_FILE: ${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake
+  CTEST_OUTPUT_ON_FAILURE: ON
 
 jobs:
   u22:
@@ -353,8 +354,8 @@ jobs:
           -DOPENDDS_COMPILE_WARNINGS=WARNING^
           -DOPENDDS_ACE_TAO_SRC=${{ github.workspace }}\OpenDDS\build\ACE_TAO^
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
-          -DOPENDDS_XERCES3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
-          -DOPENDDS_OPENSSL=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
+          -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_TOOLCHAIN_FILE }}^
+          -DOPENDDS_SECURITY=TRUE^
           -DOPENDDS_BUILD_TESTS=TRUE^
           -DOPENDDS_CMAKE_VERBOSE=all
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
@@ -414,8 +415,8 @@ jobs:
           -DOPENDDS_COMPILE_WARNINGS=WARNING^
           -DOPENDDS_ACE_TAO_SRC=${{ github.workspace }}\OpenDDS\build\ACE_TAO^
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
-          -DOPENDDS_XERCES3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
-          -DOPENDDS_OPENSSL=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
+          -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_TOOLCHAIN_FILE }}^
+          -DOPENDDS_SECURITY=TRUE^
           -DOPENDDS_BUILD_TESTS=TRUE^
           -DOPENDDS_CMAKE_VERBOSE=all
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
@@ -472,8 +473,8 @@ jobs:
           -DOPENDDS_COMPILE_WARNINGS=WARNING^
           -DOPENDDS_ACE_TAO_SRC=${{ github.workspace }}\OpenDDS\build\ACE_TAO^
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
-          -DOPENDDS_XERCES3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
-          -DOPENDDS_OPENSSL=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
+          -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_TOOLCHAIN_FILE }}^
+          -DOPENDDS_SECURITY=TRUE^
           -DOPENDDS_BUILD_TESTS=TRUE^
           -DOPENDDS_CMAKE_VERBOSE=all
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
@@ -529,8 +530,8 @@ jobs:
           -DOPENDDS_COMPILE_WARNINGS=WARNING^
           -DOPENDDS_ACE_TAO_SRC=${{ github.workspace }}\OpenDDS\build\ACE_TAO^
           -DOPENDDS_MPC=${{ github.workspace }}\MPC^
-          -DOPENDDS_XERCES3=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
-          -DOPENDDS_OPENSSL=${{ env.VCPKG_INSTALLED_DIR }}/x64-windows^
+          -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_TOOLCHAIN_FILE }}^
+          -DOPENDDS_SECURITY=TRUE^
           -DOPENDDS_BUILD_TESTS=TRUE^
           -DOPENDDS_CMAKE_VERBOSE=all
     - uses: ammaraskar/msvc-problem-matcher@0.3.0
