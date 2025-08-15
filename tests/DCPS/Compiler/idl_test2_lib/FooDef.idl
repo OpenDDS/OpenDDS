@@ -15,3 +15,18 @@ module Xyz {
 struct Bar {
   unsigned long data;
 };
+
+// Verify forward declared types
+struct AA;
+typedef sequence<AA> AASeq;
+
+struct BB
+{
+  AASeq aa_;
+};
+typedef sequence<BB> BBSeq;
+
+struct AA
+{
+  BBSeq bb_;
+};
