@@ -105,6 +105,7 @@ In addition to OpenDDS and the Android NDK you will also need the following soft
 
   - In a separate copy of OpenDDS, build OpenDDS as described in :doc:`/devguide/building/index` using Visual Studio, except use the ``--host-tools-only`` configure script option.
     This OpenDDS (and the ACE+TAO it uses) must be the same version as the one used to build for Android.
+  - The host tools depend on the Visual C++ compiler ``cl.exe`` as their default preprocessor, make sure it's available on the ``PATH`` for the Android build.
   - If you want to use Java in the Android build, also pass the ``--java`` configure script option here as described in :ref:`android-java`.
     You will also need to pass it to the configure script when configuring the build for Android.
 
@@ -155,12 +156,12 @@ To build OpenDDS with with a Android standalone toolchain, a standalone toolchai
 
 .. tab:: Windows
 
-  Android NDK includes Python in ``prebuilt\windows-x86_64\bin`` for 64-bit Windows NDKs.
+  Android NDK includes Python in ``toolchains\llvm\prebuilt\windows-x86_64\python3`` for 64-bit Windows NDKs.
   For the example above, assuming ``%NDK%`` is the location of the NDK and ``%TOOLCHAIN%`` is the desired location of the toolchain, run this command instead:
 
   .. code-block:: batch
 
-    %NDK%\prebuilt\windows-x86_64\bin\python %NDK%\build\tools\make_standalone_toolchain.py --arch %ARCH_ARG% --api %MIN_API% --install-dir %TOOLCHAIN%
+    %NDK%\toolchains\llvm\prebuilt\windows-x86_64\python3\python %NDK%\build\tools\make_standalone_toolchain.py --arch %ARCH_ARG% --api %MIN_API% --install-dir %TOOLCHAIN%
 
 The ``--arch`` argument for ``make_standalone_toolchain.py`` and ``--macros=android_abi=<ARCH>`` argument for the configure script must match according to :ref:`this table <android_abi>`.
 
@@ -187,6 +188,8 @@ To configure and build OpenDDS after this, run:
   .. note::
 
     - Pass ``--host-tools`` with the location of the OpenDDS host tools that were built using Visual Studio must be passed to ``configure``.
+
+    - In addition to the ``PATH`` directories shown above, the Visual C++ compiler ``cl.exe`` must be on the PATH since it will be used as the preprocessor by default.
 
     - You will need MSYS2 utilities in your ``%PATH%``.  Since Windows has its own ``bash.exe``, these utilities must come before the system PATH entries.
 
