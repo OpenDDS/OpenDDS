@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23...3.27)
+cmake_minimum_required(VERSION 3.23...4.0)
 project(opendds_rtps_relay CXX)
 
 set(dep_libs
@@ -16,15 +16,18 @@ add_executable(RtpsRelay
   ParticipantStatisticsReporter.cpp
   PublicationListener.cpp
   RelayAddressListener.cpp
+  RelayConfigControlListener.cpp
   RelayHandler.cpp
   RelayHttpMetaDiscovery.cpp
   RelayParticipantStatusReporter.cpp
   RelayPartitionsListener.cpp
+  RelayStatisticsReporter.cpp
   RelayStatusReporter.cpp
   RelayThreadMonitor.cpp
   RtpsRelay.cpp
-  SpdpReplayListener.cpp
   SubscriptionListener.cpp
 )
 _opendds_executable(RtpsRelay)
 target_link_libraries(RtpsRelay PRIVATE ${dep_libs})
+
+add_subdirectory(control)

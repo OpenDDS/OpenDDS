@@ -5,7 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <dds/OpenDDSConfigWrapper.h>
+#include <dds/DCPS/Definitions.h>
 
 #if OPENDDS_CONFIG_SECURITY
 #ifndef OPENDDS_DCPS_RTPS_ICE_CHECKLIST_H
@@ -21,7 +21,7 @@
 #include "dds/DCPS/TimeTypes.h"
 #include "dds/DCPS/GuidUtils.h"
 
-#if !OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #include "dds/DCPS/GuidUtils.h"
 #include <iostream>
 #endif
@@ -144,7 +144,7 @@ inline bool operator==(const ConnectivityCheck& a_cc, const CandidatePair& a_cp)
   return a_cc.candidate_pair() == a_cp;
 }
 
-#if !OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 inline std::ostream& operator<<(std::ostream& stream, const GuidPair& guidp)
 {
   stream << guidp.local << ':' << guidp.remote;

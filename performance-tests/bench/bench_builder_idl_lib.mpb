@@ -1,4 +1,4 @@
-project: dcps_rtps_udp, opendds_uses_cxx11 {
+project: dcps_rtps_udp {
   after    += Bench_Builder_Idl
   libs     += Bench_Builder_Idl
   expand(BENCH_BUILDER_ROOT) {

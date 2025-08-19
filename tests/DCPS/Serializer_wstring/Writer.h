@@ -23,18 +23,10 @@ public:
   /** Lanch a thread to write. **/
   virtual int svc ();
 
-  bool is_finished () const;
-
-  int get_timeout_writes () const;
-
   void set_message (Messenger::Message& message, int count);
 
-
 private:
-
   ::DDS::DataWriter_var writer_;
-  OpenDDS::DCPS::Atomic<int> finished_instances_;
-  OpenDDS::DCPS::Atomic<int> timeout_writes_;
 };
 
 #endif /* WRITER_H */

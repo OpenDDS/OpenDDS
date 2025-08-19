@@ -18,6 +18,7 @@
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/Qos_Helper.h>
 
 #include <dds/DCPS/transport/framework/TransportClient.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
@@ -49,8 +50,10 @@ RtpsUdpCore::RtpsUdpCore(const RtpsUdpInst_rch& inst)
 {}
 
 RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst,
-                                   DDS::DomainId_t domain)
+                                   DDS::DomainId_t domain,
+                                   DomainParticipantImpl* participant)
   : TransportImpl(inst, domain)
+  , participant_(participant)
 #if OPENDDS_CONFIG_SECURITY
   , local_crypto_handle_(DDS::HANDLE_NIL)
 #endif
@@ -59,11 +62,23 @@ RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst,
   , ice_agent_(ICE::Agent::instance())
 #endif
   , core_(inst)
+  , actual_local_address_(NetworkAddress::default_IPV4)
+#ifdef ACE_HAS_IPV6
+  , ipv6_actual_local_address_(NetworkAddress::default_IPV6)
+#endif
+  , stats_writer_(make_rch<StatisticsDataWriter>(DataWriterQosBuilder().durability_transient_local(), TheServiceParticipant->time_source()))
+  , stats_template_(stats_template())
 {
   assign(local_prefix_, GUIDPREFIX_UNKNOWN);
   if (!(configure_i(inst) && open())) {
     throw Transport::UnableToCreate();
   }
+  TheServiceParticipant->statistics_topic()->connect(stats_writer_);
+}
+
+RtpsUdpTransport::~RtpsUdpTransport()
+{
+  TheServiceParticipant->statistics_topic()->disconnect(stats_writer_);
 }
 
 RtpsUdpInst_rch
@@ -111,7 +126,7 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 #if OPENDDS_CONFIG_SECURITY
   {
     if (core_.use_ice()) {
-      ReactorInterceptor_rch ri = reactor_task()->interceptor();
+      ReactorTask_rch ri = reactor_task();
       ri->execute_or_enqueue(make_rch<RemoveHandler>(unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
       ri->execute_or_enqueue(make_rch<RemoveHandler>(ipv6_unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
@@ -353,7 +368,7 @@ RtpsUdpTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags 
 {
   RtpsUdpInst_rch cfg = config();
   if (cfg) {
-    cfg->populate_locator(info, flags, domain_);
+    cfg->populate_locator(info, flags, domain_, participant_);
     return true;
   }
   return false;
@@ -646,7 +661,7 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
   if (!open_socket(config, unicast_socket_, PF_INET, actual4)) {
     return false;
   }
-  config->actual_local_address_ = actual4;
+  actual_local_address_ = actual4;
 
 #ifdef ACE_HAS_IPV6
   ACE_INET_Addr actual6;
@@ -657,7 +672,7 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
   if (actual6.is_ipv4_mapped_ipv6() && temp.is_any()) {
     temp = NetworkAddress(actual6.get_port_number(), "::");
   }
-  config->ipv6_actual_local_address_ = temp;
+  ipv6_actual_local_address_ = temp;
 #endif
 
   create_reactor_task(false, "RtpsUdpTransport" + config->name());
@@ -670,7 +685,7 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
     start_ice();
   }
 
-  relay_stun_task_= make_rch<Sporadic>(TheServiceParticipant->time_source(), reactor_task()->interceptor(), rchandle_from(this), &RtpsUdpTransport::relay_stun_task);
+  relay_stun_task_= make_rch<Sporadic>(TheServiceParticipant->time_source(), reactor_task(), rchandle_from(this), &RtpsUdpTransport::relay_stun_task);
 #endif
 
   if (config->opendds_discovery_default_listener_) {
@@ -688,6 +703,12 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
   ConfigListener::job_queue(job_queue_);
   config_reader_ = make_rch<ConfigReader>(ConfigStoreImpl::datareader_qos(), rchandle_from(this));
   TheServiceParticipant->config_topic()->connect(config_reader_);
+
+  const TimeDuration period = TheServiceParticipant->statistics_period();
+  if (!period.is_zero()) {
+    stats_task_ = make_rch<PeriodicTask>(reactor_task(), *this, &RtpsUdpTransport::write_stats);
+    stats_task_->enable(false, period);
+  }
 
   return true;
 }
@@ -899,13 +920,7 @@ RtpsUdpTransport::IceEndpoint::host_addresses() const
 {
   ICE::AddressListType addresses;
 
-  RtpsUdpInst_rch cfg = transport.config();
-
-  if (!cfg) {
-    return addresses;
-  }
-
-  ACE_INET_Addr addr = cfg->actual_local_address_.to_addr();
+  ACE_INET_Addr addr = transport.actual_local_address_.to_addr();
   if (addr != ACE_INET_Addr()) {
     if (addr.is_any()) {
       ICE::AddressListType addrs;
@@ -922,7 +937,7 @@ RtpsUdpTransport::IceEndpoint::host_addresses() const
   }
 
 #ifdef ACE_HAS_IPV6
-  addr = cfg->ipv6_actual_local_address_.to_addr();
+  addr = transport.ipv6_actual_local_address_.to_addr();
   if (addr != ACE_INET_Addr()) {
     if (addr.is_any()) {
       ICE::AddressListType addrs;
@@ -999,7 +1014,7 @@ RtpsUdpTransport::start_ice()
   GuardThreadType guard_links(links_lock_);
 
   if (!link_) {
-    ReactorInterceptor_rch ri = reactor_task()->interceptor();
+    ReactorTask_rch ri = reactor_task();
     ri->execute_or_enqueue(make_rch<RegisterHandler>(unicast_socket_.get_handle(), ice_endpoint_.get(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
     ri->execute_or_enqueue(make_rch<RegisterHandler>(ipv6_unicast_socket_.get_handle(), ice_endpoint_.get(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
@@ -1017,7 +1032,7 @@ RtpsUdpTransport::stop_ice()
   GuardThreadType guard_links(links_lock_);
 
   if (!link_) {
-    ReactorInterceptor_rch ri = reactor_task()->interceptor();
+    ReactorTask_rch ri = reactor_task();
     ri->execute_or_enqueue(make_rch<RemoveHandler>(unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
     ri->execute_or_enqueue(make_rch<RemoveHandler>(ipv6_unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
@@ -1046,7 +1061,7 @@ RtpsUdpTransport::relay_stun_task(const DCPS::MonotonicTimePoint& /*now*/)
 void
 RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange sc)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   DCPS::ConnectionRecord connection_record;
   std::memset(connection_record.guid, 0, sizeof(connection_record.guid));
   connection_record.protocol = RTPS_RELAY_STUN_PROTOCOL;
@@ -1095,7 +1110,7 @@ RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChang
 void
 RtpsUdpTransport::disable_relay_stun_task()
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   relay_stun_task_->cancel();
 
   DCPS::ConnectionRecord connection_record;
@@ -1122,6 +1137,47 @@ RtpsUdpTransport::disable_relay_stun_task()
 }
 
 #endif
+
+StatisticSeq RtpsUdpTransport::stats_template()
+{
+  static const DDS::UInt32 num_local_stats = 2;
+  const StatisticSeq base = TransportImpl::stats_template(),
+    link = RtpsUdpDataLink::stats_template();
+  StatisticSeq stats(base.length() + num_local_stats + link.length());
+  stats.length(stats.maximum());
+  for (DDS::UInt32 i = 0; i < base.length(); ++i) {
+    stats[i].name = base[i].name;
+  }
+  stats[base.length()].name = "RtpsUdpTransportJobQueue";
+  stats[base.length() + 1].name = "RtpsUdpTransportDeferredConnectionRecords";
+  for (DDS::UInt32 i = 0; i < link.length(); ++i) {
+    stats[base.length() + num_local_stats + i].name = link[i].name;
+  }
+  return stats;
+}
+
+void RtpsUdpTransport::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
+{
+  TransportImpl::fill_stats(stats, idx);
+  stats[idx++].value = job_queue_ ? job_queue_->size() : 0;
+  stats[idx++].value =
+#if !OPENDDS_CONFIG_SECURITY || !OPENDDS_CONFIG_BUILT_IN_TOPICS
+    0;
+#else
+    deferred_connection_records_.size();
+#endif
+  if (link_) {
+    link_->fill_stats(stats, idx);
+  }
+}
+
+void RtpsUdpTransport::write_stats(const MonotonicTimePoint&) const
+{
+  DCPS::Statistics statistics = {config()->name().c_str(), stats_template_};
+  DDS::UInt32 idx = 0;
+  fill_stats(statistics.stats, idx);
+  stats_writer_->write(statistics);
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

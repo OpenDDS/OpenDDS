@@ -24,9 +24,9 @@
 #include "tao/BiDir_GIOP/BiDirGIOP.h"
 #include "ace/Reactor.h"
 
-#include <dds/OpenDDSConfigWrapper.h>
+#include <dds/DCPS/Definitions.h>
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
@@ -141,7 +141,7 @@ InfoRepoDiscovery::InfoRepoDiscovery(const String& name)
   , config_prefix_(ConfigPair::canonicalize("REPOSITORY_" + name))
   , use_bidir_giop_(TheServiceParticipant->use_bidir_giop())
   , orb_from_user_(false)
-  , config_store_(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic()))
+  , config_store_(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic(), TheServiceParticipant->time_source()))
 {
   init_bidir_giop();
 }
@@ -153,7 +153,7 @@ InfoRepoDiscovery::InfoRepoDiscovery(const String& name,
   , info_(info)
   , use_bidir_giop_(TheServiceParticipant->use_bidir_giop())
   , orb_from_user_(false)
-  , config_store_(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic()))
+  , config_store_(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic(), TheServiceParticipant->time_source()))
 {
   init_bidir_giop();
 }
@@ -298,7 +298,7 @@ InfoRepoDiscovery::ior() const
 TransportConfig_rch
 InfoRepoDiscovery::bit_config()
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   ACE_Guard<ACE_Thread_Mutex> guard(lock_);
   if (bit_config_.is_nil()) {
     const std::string cfg_name = TransportRegistry::DEFAULT_INST_PREFIX +
@@ -339,10 +339,7 @@ InfoRepoDiscovery::bit_config()
 RcHandle<BitSubscriber>
 InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
 {
-#if defined (DDS_HAS_MINIMUM_BIT)
-  ACE_UNUSED_ARG(participant);
-  return RcHandle<BitSubscriber>();
-#else
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (!TheServiceParticipant->get_BIT()) {
     return RcHandle<BitSubscriber>();
   }
@@ -413,7 +410,7 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
     dr = bit_subscriber->create_datareader(bit_pub_topic,
                                            dr_qos,
                                            DDS::DataReaderListener::_nil(),
-                                           OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                           DEFAULT_STATUS_MASK);
 
     DDS::TopicDescription_var bit_sub_topic =
       participant->lookup_topicdescription(BUILT_IN_SUBSCRIPTION_TOPIC);
@@ -421,7 +418,7 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
     dr = bit_subscriber->create_datareader(bit_sub_topic,
                                            dr_qos,
                                            DDS::DataReaderListener::_nil(),
-                                           OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                           DEFAULT_STATUS_MASK);
 
     const DDS::ReturnCode_t ret = bit_subscriber->enable();
     if (ret != DDS::RETCODE_OK) {
@@ -438,6 +435,9 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
     return RcHandle<BitSubscriber>();
   }
   return make_rch<BitSubscriber>(bit_subscriber);
+#else
+  ACE_UNUSED_ARG(participant);
+  return RcHandle<BitSubscriber>();
 #endif
 }
 
@@ -505,7 +505,7 @@ InfoRepoDiscovery::attach_participant(DDS::DomainId_t domainId,
   }
 }
 
-OpenDDS::DCPS::GUID_t
+GUID_t
 InfoRepoDiscovery::generate_participant_guid()
 {
   return GUID_UNKNOWN;
@@ -524,7 +524,7 @@ InfoRepoDiscovery::add_domain_participant(DDS::DomainId_t domainId,
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::add_domain_participant: ");
   }
-  const DCPS::AddDomainStatus ads = {OpenDDS::DCPS::GUID_UNKNOWN, false /*federated*/};
+  const DCPS::AddDomainStatus ads = {GUID_UNKNOWN, false /*federated*/};
   return ads;
 }
 
@@ -534,12 +534,12 @@ InfoRepoDiscovery::add_domain_participant_secure(
   DDS::DomainId_t /*domain*/,
   const DDS::DomainParticipantQos& /*qos*/,
   XTypes::TypeLookupService_rch /*tls*/,
-  const OpenDDS::DCPS::GUID_t& /*guid*/,
+  const GUID_t& /*guid*/,
   DDS::Security::IdentityHandle /*id*/,
   DDS::Security::PermissionsHandle /*perm*/,
   DDS::Security::ParticipantCryptoHandle /*part_crypto*/)
 {
-  const DCPS::AddDomainStatus ads = {OpenDDS::DCPS::GUID_UNKNOWN, false /*federated*/};
+  const DCPS::AddDomainStatus ads = {GUID_UNKNOWN, false /*federated*/};
   return ads;
 }
 #endif
@@ -665,7 +665,7 @@ InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
                                    const DDS::DataWriterQos& qos,
                                    const DCPS::TransportLocatorSeq& transInfo,
                                    const DDS::PublisherQos& publisherQos,
-                                   const XTypes::TypeInformation& type_info)
+                                   const TypeInformation& type_info)
 {
 
 
@@ -679,11 +679,11 @@ InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
     PortableServer::ServantBase_var writer_remote(writer_remote_impl);
 
     //this is the client reference to the DataWriterRemoteImpl
-    OpenDDS::DCPS::DataWriterRemote_var dr_remote_obj =
+    DataWriterRemote_var dr_remote_obj =
       servant_to_remote_reference(writer_remote_impl, orb_, use_bidir_giop_);
     //turn into a octet seq to pass through generated files
     DDS::OctetSeq serializedTypeInfo;
-    XTypes::serialize_type_info(type_info, serializedTypeInfo);
+    XTypes::serialize_type_info(type_info.xtypes_type_info_, serializedTypeInfo);
 
     const GUID_t pubId = get_dcps_info()->reserve_publication_id(domainId, participantId, topicId);
     publication->set_publication_id(pubId);
@@ -777,7 +777,7 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
                                     const char* filterClassName,
                                     const char* filterExpr,
                                     const DDS::StringSeq& params,
-                                    const XTypes::TypeInformation& type_info)
+                                    const TypeInformation& type_info)
 {
   try {
     DCPS::DataReaderRemoteImpl* reader_remote_impl = 0;
@@ -789,11 +789,11 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
     PortableServer::ServantBase_var reader_remote(reader_remote_impl);
 
     //this is the client reference to the DataReaderRemoteImpl
-    OpenDDS::DCPS::DataReaderRemote_var dr_remote_obj =
+    DataReaderRemote_var dr_remote_obj =
       servant_to_remote_reference(reader_remote_impl, orb_, use_bidir_giop_);
     //turn into a octet seq to pass through generated files
     DDS::OctetSeq serializedTypeInfo;
-    XTypes::serialize_type_info(type_info, serializedTypeInfo);
+    XTypes::serialize_type_info(type_info.xtypes_type_info_, serializedTypeInfo);
 
     const GUID_t subId = get_dcps_info()->reserve_subscription_id(domainId, participantId, topicId);
     subscription->set_subscription_id(subId);

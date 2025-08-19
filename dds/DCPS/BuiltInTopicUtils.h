@@ -6,11 +6,12 @@
 #ifndef OPENDDS_DCPS_BUILTINTOPICUTILS_H
 #define OPENDDS_DCPS_BUILTINTOPICUTILS_H
 
-#include "dcps_export.h"
-#include "Service_Participant.h"
-#include "DomainParticipantImpl.h"
-#include "debug.h"
 #include "DCPS_Utils.h"
+#include "Definitions.h"
+#include "DomainParticipantImpl.h"
+#include "Service_Participant.h"
+#include "dcps_export.h"
+#include "debug.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -100,7 +101,7 @@ public:
 template<typename TopicType>
 DDS::BuiltinTopicKey_t keyFromSample(TopicType* sample);
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
 template<class BIT_Reader_var, class BIT_DataSeq>
 DDS::ReturnCode_t instance_handle_to_bit_data(
@@ -130,7 +131,7 @@ DDS::ReturnCode_t instance_handle_to_bit_data(
   }
 
   const MonotonicTimePoint due(MonotonicTimePoint::now() +
-    TimeDuration::from_msec(TheServiceParticipant->bit_lookup_duration_msec()));
+    TimeDuration::from_msec(static_cast<ACE_UINT64>(TheServiceParticipant->bit_lookup_duration_msec())));
 
   // Look for the data from builtin topic datareader until we get results or
   // timeout.
@@ -193,7 +194,7 @@ BuiltinTopicKeyLess::operator()(const DDS::BuiltinTopicKey_t& lhs,
   return std::memcmp(lhs.value, rhs.value, sizeof(lhs.value)) < 0;
 }
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
 template<>
 inline
@@ -292,14 +293,6 @@ public:
                                           DDS::ViewStateKind view_state,
                                           const SystemTimePoint& timestamp);
   void remove_thread_status(const InternalThreadBuiltinTopicData& ts);
-
-  /*
-    The Ownership QoS is implemented by creating a listener for the
-    Publication BIT that reads the ownership strength and makes
-    adjustments.  This is bad (a hack) because it prevents the user
-    from installing a listener for the built-in topics.
-   */
-  void bit_pub_listener_hack(DomainParticipantImpl* participant);
 
 private:
   template <typename DataReaderImpl, typename Sample>

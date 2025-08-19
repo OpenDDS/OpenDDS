@@ -1,8 +1,10 @@
 #include "FooDefTypeSupportImpl.h"
 #include "FooDef2TypeSupportImpl.h"
 #include "FooDef3TypeSupportImpl.h"
-#include <dds/DCPS/JsonValueWriter.h>
+
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/JsonValueReader.h>
+#include <dds/DCPS/JsonValueWriter.h>
 
 #include <tao/CDR.h>
 
@@ -267,7 +269,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     //=====================================================================
     Xyz::StructOfArrayOfOctet val;
 
-    for (CORBA::ULong ii =0; ii < ARRAY_LEN; ii++) {
+    for (CORBA::Octet ii = 0; ii < ARRAY_LEN; ++ii) {
       val.f[ii] = ii;
     }
 
@@ -432,7 +434,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     Xyz::StructOfSeqOfOctet val;
     val.field.length(SEQ_LEN);
 
-    for (CORBA::ULong ii =0; ii < SEQ_LEN; ii++) {
+    for (CORBA::Octet ii = 0; ii < SEQ_LEN; ++ii) {
       val.field[ii] = ii;
     }
 
@@ -697,7 +699,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   Xyz::Foo ss_foo;
 
   const size_t sz = 4529 // see running totals above
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
     - 4 // theWString is gone
 #endif
     , pad = 631;

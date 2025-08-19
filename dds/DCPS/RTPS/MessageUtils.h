@@ -11,6 +11,7 @@
 #include "RtpsCoreTypeSupportImpl.h"
 #include "rtps_export.h"
 
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/Hash.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
@@ -103,11 +104,11 @@ DCPS::LocatorSeq transport_locator_to_locator_seq(const DCPS::TransportLocator& 
 template <typename T>
 void message_block_to_sequence(const ACE_Message_Block& mb_locator, T& out)
 {
-  out.length (CORBA::ULong(mb_locator.length()));
-  std::memcpy (out.get_buffer(), mb_locator.rd_ptr(), mb_locator.length());
+  out.length(CORBA::ULong(mb_locator.length()));
+  std::memcpy(out.get_buffer(), mb_locator.rd_ptr(), mb_locator.length());
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 inline bool operator==(const Duration_t& x, const Duration_t& y)
 {
@@ -116,14 +117,14 @@ inline bool operator==(const Duration_t& x, const Duration_t& y)
 
 inline bool operator==(const VendorId_t& v1, const VendorId_t& v2)
 {
-  return (v1.vendorId[0] == v2.vendorId[0] && v1.vendorId[1] == v2.vendorId[1]);
+  return v1.vendorId[0] == v2.vendorId[0] && v1.vendorId[1] == v2.vendorId[1];
 }
 
 #endif
 
 inline bool operator<(const ProtocolVersion_t& v1, const ProtocolVersion_t& v2)
 {
-  return (v1.major < v2.major || (v1.major == v2.major && v1.minor < v2.minor));
+  return v1.major < v2.major || (v1.major == v2.major && v1.minor < v2.minor);
 }
 
 OpenDDS_Rtps_Export
@@ -172,6 +173,13 @@ inline void append_submessage(RTPS::Message& message, const RTPS::DataFragSubmes
 {
   RTPS::Submessage sm;
   sm.data_frag_sm(submessage);
+  DCPS::push_back(message.submessages, sm);
+}
+
+inline void append_submessage(RTPS::Message& message, const RTPS::UserTagSubmessage& submessage)
+{
+  RTPS::Submessage sm;
+  sm.unknown_sm(submessage.smHeader);
   DCPS::push_back(message.submessages, sm);
 }
 
@@ -231,7 +239,7 @@ handle_to_octets(DDS::Security::NativeCryptoHandle handle)
   DDS::OctetSeq handleOctets(sizeof handle);
   handleOctets.length(handleOctets.maximum());
   unsigned char* rawHandleOctets = handleOctets.get_buffer();
-  unsigned int handleTmp = handle;
+  unsigned int handleTmp = static_cast<unsigned int>(handle);
   for (unsigned int j = sizeof handle; j > 0; --j) {
     rawHandleOctets[j - 1] = handleTmp & 0xff;
     handleTmp >>= 8;

@@ -5,8 +5,9 @@
 
 #include <DCPS/DdsDcps_pch.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
-#  include "IdlScanner.h"
+#include "IdlScanner.h"
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #  include "DynamicTypeImpl.h"
 
@@ -115,7 +116,7 @@ IdlScanner::scan_token(DDS::DynamicType_ptr type)
     break;
   }
   case TK_CHAR16:
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERRROR: IdlScanner::scan_token does not support wide characters\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: IdlScanner::scan_token does not support wide characters\n"));
     break;
   case TK_STRING8: {
     if (scan_string_value(false)) {
@@ -124,7 +125,7 @@ IdlScanner::scan_token(DDS::DynamicType_ptr type)
     break;
   }
   case TK_STRING16:
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERRROR: IdlScanner::scan_token does not support wide strings\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: IdlScanner::scan_token does not support wide strings\n"));
     break;
   case TK_ENUM: {
     const IdlToken token = scan_identifier();
@@ -145,4 +146,4 @@ IdlScanner::scan_token(DDS::DynamicType_ptr type)
 } // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

@@ -5,9 +5,9 @@
 
 #include <DCPS/DdsDcps_pch.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
-#  include "DynamicDataBase.h"
+#include "DynamicDataBase.h"
 
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include "Utils.h"
 #  include "DynamicDataFactory.h"
 
@@ -345,8 +345,9 @@ DDS::ReturnCode_t DynamicDataBase::unsupported_method(const char* method_name, b
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 namespace {
+
   template <typename T>
   DDS::ReturnCode_t get_some_value(DCPS::Value& value, DDS::MemberId id, DDS::DynamicData& dyn,
                                    DDS::ReturnCode_t (DDS::DynamicData::* pmf)(T&, DDS::MemberId))
@@ -630,4 +631,4 @@ DDS::ReturnCode_t DynamicDataBase::get_uint64_value(DDS::UInt64& value, DDS::Mem
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

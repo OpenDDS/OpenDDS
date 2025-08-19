@@ -22,6 +22,8 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include <ace/streams.h>
 #include "tests/Utils/ExceptionStreams.h"
 #include "ace/Get_Opt.h"
@@ -93,7 +95,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       dw_qos.resource_limits.max_samples_per_instance = MAX_SAMPLES_PER_INSTANCES;
       dw_qos.resource_limits.max_samples = MAX_SAMPLES;
       dw_qos.resource_limits.max_instances = MAX_INSTANCES;
-#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+#if OPENDDS_CONFIG_OWNERSHIP_PROFILE
       dw_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
       dw_qos.history.depth = MAX_SAMPLES_PER_INSTANCES;
 #endif

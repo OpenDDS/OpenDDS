@@ -18,6 +18,8 @@
 #include <ace/streams.h>
 #include <ace/OS_NS_unistd.h>
 #include "tests/Utils/ExceptionStreams.h"
+#include "tests/Utils/StatusMatching.h"
+#include "tests/Utils/DistributedConditionSet.h"
 
 #include "dds/DCPS/StaticIncludes.h"
 
@@ -28,6 +30,9 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   try {
+    DistributedConditionSet_rch dcs =
+      OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+
     DDS::DomainParticipantFactory_var dpf;
     DDS::DomainParticipant_var participant;
 
@@ -77,7 +82,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
     // activate the listener
-    DDS::DataReaderListener_var listener (new DataReaderListenerImpl);
+    DDS::DataReaderListener_var listener (new DataReaderListenerImpl(dcs));
     if (CORBA::is_nil (listener.in ())) {
       cerr << "listener is nil." << endl;
       exit(1);
@@ -94,6 +99,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     // Create the Datareaders
     DDS::DataReaderQos dr_qos;
     sub->get_default_datareader_qos (dr_qos);
+    dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+
     DDS::DataReader_var dr
       = sub->create_datareader(topic.in (),
                                dr_qos,
@@ -104,15 +111,10 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       exit(1);
     }
 
+    Utils::wait_match(dr, 1, Utils::EQ);
+    dcs->post("subscriber", "ready");
 
-    while ( ! listener_servant->received_all ()) {
-      ACE_OS::sleep (1);
-    }
-
-    if (! listener_servant->passed ()) {
-      cerr << "test failed - see errors." << endl;
-      return 1;
-    }
+    dcs->wait_for("subscriber", "subscriber", "done");
 
     if (!CORBA::is_nil (participant.in ())) {
       participant->delete_contained_entities();
@@ -120,17 +122,6 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (!CORBA::is_nil (dpf.in ())) {
       dpf->delete_participant(participant.in ());
     }
-
-    ::DDS::InstanceHandleSeq handles;
-    while (1)
-    {
-      ACE_OS::sleep(1);
-      dr->get_matched_publications(handles);
-      if (handles.length() == 0)
-        break;
-    }
-
-    ACE_OS::sleep(2);
 
     TheServiceParticipant->shutdown();
 

@@ -54,22 +54,15 @@
    while (0)
 #endif
 
-// If features content_filtered_topic, multi_topic, and query_condition
-// are all disabled, define a macro to indicate common code these
-// three features depend on should not be built.
-#if defined OPENDDS_NO_QUERY_CONDITION && defined OPENDDS_NO_CONTENT_FILTERED_TOPIC && defined OPENDDS_NO_MULTI_TOPIC
-#  define OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-#endif
-
 #ifndef OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
-#  if !defined OPENDDS_SAFETY_PROFILE && !defined OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#  if !OPENDDS_CONFIG_SAFETY_PROFILE && OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 #    define OPENDDS_HAS_DYNAMIC_DATA_ADAPTER 1
 #  else
 #    define OPENDDS_HAS_DYNAMIC_DATA_ADAPTER 0
 #  endif
 #endif
 
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
 #  define OPENDDS_ASSERT(C) ((void) 0)
 #else
 #  include <cassert>
@@ -87,24 +80,22 @@
 #  define OPENDDS_HAS_EXPLICIT_INTS 0
 #endif
 
+#if defined __GNUC__ && !defined __clang__
+#  define OPENDDS_GCC 1
+#else
+#  define OPENDDS_GCC 0
+#endif
+
 #if defined __GNUC__ && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6) || defined __clang__)
 #  define OPENDDS_GCC_HAS_DIAG_PUSHPOP 1
 #else
 #  define OPENDDS_GCC_HAS_DIAG_PUSHPOP 0
 #endif
 
-#ifndef OPENDDS_CONFIG_AUTO_STATIC_INCLUDES
-#  define OPENDDS_CONFIG_AUTO_STATIC_INCLUDES 0
-#endif
-
 #if !OPENDDS_CONFIG_AUTO_STATIC_INCLUDES && defined(ACE_AS_STATIC_LIBS)
 #  define OPENDDS_DO_MANUAL_STATIC_INCLUDES 1
 #else
 #  define OPENDDS_DO_MANUAL_STATIC_INCLUDES 0
-#endif
-
-#ifndef OPENDDS_CONFIG_BOOTTIME_TIMERS
-#  define OPENDDS_CONFIG_BOOTTIME_TIMERS 0
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

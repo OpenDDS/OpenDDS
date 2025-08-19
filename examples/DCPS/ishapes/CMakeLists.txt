@@ -1,6 +1,7 @@
-cmake_minimum_required(VERSION 3.3...3.27)
-find_package(OpenDDS REQUIRED)
+cmake_minimum_required(VERSION 3.3...4.0)
+include("${CMAKE_CURRENT_LIST_DIR}/../../../cmake/opendds_version.cmake")
 project(ishapes VERSION ${OpenDDS_VERSION} LANGUAGES CXX)
+find_package(OpenDDS REQUIRED)
 
 # Make sure the MPC-generated headers are gone so the CMake build will use the
 # right ones. This is not needed in a real project.
@@ -45,13 +46,11 @@ add_executable(ishapes
   WriterQosDialog.hpp
 )
 target_include_directories(ishapes PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-opendds_target_sources(ishapes ShapeType.idl)
+opendds_target_sources(ishapes ShapeType.idl OPENDDS_IDL_OPTIONS -Gxtypes-complete)
 target_link_libraries(ishapes
   Qt5::Widgets
   OpenDDS::Dcps
   OpenDDS::Tcp
-  OpenDDS::Udp
-  OpenDDS::Multicast
   OpenDDS::Rtps_Udp
   OpenDDS::InfoRepoDiscovery
 )

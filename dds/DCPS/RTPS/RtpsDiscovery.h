@@ -13,6 +13,7 @@
 
 #include <dds/DCPS/AtomicBool.h>
 #include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/Statistics.h>
 #include <dds/DCPS/debug.h>
 
 #include <dds/OpenDDSConfigWrapper.h>
@@ -43,7 +44,7 @@ const char RTPS_DISCOVERY_ENDPOINT_ANNOUNCEMENTS[] = "OpenDDS.RtpsDiscovery.Endp
 const char RTPS_DISCOVERY_TYPE_LOOKUP_SERVICE[] = "OpenDDS.RtpsDiscovery.TypeLookupService";
 const char RTPS_RELAY_APPLICATION_PARTICIPANT[] = "OpenDDS.Rtps.RelayApplicationParticipant";
 const char RTPS_REFLECT_HEARTBEAT_COUNT[] = "OpenDDS.Rtps.ReflectHeartbeatCount";
-
+const char RTPS_HARVEST_THREAD_STATUS[] = "OpenDDS.Rtps.HarvestThreadStatus";
 
 /**
  * @class RtpsDiscovery
@@ -222,6 +223,9 @@ public:
   bool update_domain_participant_qos(DDS::DomainId_t domain, const GUID_t& participant,
     const DDS::DomainParticipantQos& qos);
 
+  bool enable_flexible_types(DDS::DomainId_t domain, const GUID_t& myParticipantId,
+    const GUID_t& remoteParticipantId, const char* typeKey);
+
   bool has_domain_participant(DDS::DomainId_t domain, const GUID_t& local, const GUID_t& remote) const;
 
   DCPS::TopicStatus assert_topic(
@@ -261,7 +265,7 @@ public:
     const DDS::DataWriterQos& qos,
     const DCPS::TransportLocatorSeq& transInfo,
     const DDS::PublisherQos& publisherQos,
-    const XTypes::TypeInformation& type_info);
+    const DCPS::TypeInformation& type_info);
 
   bool remove_publication(DDS::DomainId_t domainId, const GUID_t& participantId,
     const GUID_t& publicationId);
@@ -293,7 +297,7 @@ public:
     const char* filterClassName,
     const char* filterExpr,
     const DDS::StringSeq& params,
-    const XTypes::TypeInformation& type_info);
+    const DCPS::TypeInformation& type_info);
 
   bool remove_subscription(DDS::DomainId_t domainId, const GUID_t& participantId,
     const GUID_t& subscriptionId);
@@ -352,6 +356,12 @@ private:
   void create_bit_dr(DDS::TopicDescription_ptr topic, const char* type,
                      DCPS::SubscriberImpl* sub,
                      const DDS::DataReaderQos& qos);
+
+  DCPS::StatisticsDataWriter_rch stats_writer_;
+  typedef DCPS::PmfPeriodicTask<const RtpsDiscovery> PeriodicTask;
+  DCPS::RcHandle<PeriodicTask> stats_task_;
+
+  void write_stats(const MonotonicTimePoint&) const;
 
 public:
   class Config : public Discovery::Config {

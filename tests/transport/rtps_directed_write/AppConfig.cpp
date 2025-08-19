@@ -1,6 +1,10 @@
 #include "AppConfig.h"
+
+#include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/NetworkAddress.h"
+
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
+
 #include <ace/Get_Opt.h>
 
 AppConfig::AppConfig(int argc, ACE_TCHAR* argv[], bool setLocalAddress) :
@@ -23,7 +27,7 @@ AppConfig::AppConfig(int argc, ACE_TCHAR* argv[], bool setLocalAddress) :
         break;
       }
     }
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
     if (host == ACE_TEXT("localhost")) {
       host = "127.0.0.1";
     }

@@ -7,6 +7,7 @@
 
 #include "NetworkResource.h"
 
+#include "Definitions.h"
 #include "LogAddr.h"
 #include "TimeTypes.h"
 #include "debug.h"
@@ -206,7 +207,7 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
       return fullname;
     }
 
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
     // address resolution may not be available due to safety profile,
     // return an address that should work for running tests
     if (addr) {
@@ -233,7 +234,7 @@ void get_interface_addrs(OPENDDS_VECTOR(ACE_INET_Addr)& addrs)
   size_t endpoint_count = 0;
 
   int result =
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
     -1;
 #else
     ACE::get_ip_interfaces(if_cnt, if_addrs);
@@ -368,7 +369,7 @@ void get_interface_addrs(OPENDDS_VECTOR(ACE_INET_Addr)& addrs)
     }
   }
 #endif
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
   // address resolution may not be available due to safety profile,
   // return an address that should work for running tests
   if (addrs.empty()) {
@@ -842,7 +843,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
     }
     ip46 addr;
     std::memset(&addr, 0, sizeof addr);
-    std::memcpy(&addr, curr->ai_addr, curr->ai_addrlen);
+    std::memcpy(&addr, curr->ai_addr, static_cast<size_t>(curr->ai_addrlen));
 #ifdef ACE_HAS_IPV6
     if (curr->ai_family == AF_INET6) {
       addr.in6_.sin6_port = ACE_NTOHS(port_number);

@@ -1,0 +1,11 @@
+module HelloWorld {
+
+  enum State { Initial, Intermediate, Complete };
+
+  @topic
+  struct Message {
+    @key string deviceId;
+    State st;
+    boolean added;
+  };
+};

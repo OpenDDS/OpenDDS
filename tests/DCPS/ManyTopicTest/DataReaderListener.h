@@ -7,6 +7,7 @@
 #include "dds/DCPS/Definitions.h"
 #include "../common/SampleInfo.h"
 #include "dds/DCPS/TypeSupportImpl.h"
+#include "tests/Utils/DistributedConditionSet.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -20,9 +21,13 @@ public:
   typedef MessageType DSample;
   typedef void (*DSPrinter)(const DSample&, int);
 
-  DataReaderListenerImpl(int num_ops_per_thread, int& num_samples, DSPrinter printer)
-  : num_samples_(num_samples), num_ops_per_thread_(num_ops_per_thread)
-  , print_sample_(printer)
+  DataReaderListenerImpl(DistributedConditionSet_rch dcs,
+                         const OpenDDS::DCPS::String& actor,
+                         DSPrinter printer)
+    : dcs_(dcs)
+    , actor_(actor)
+    , print_sample_(printer)
+    , sample_count_(0)
   {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderListenerImpl::")
                ACE_TEXT("DataReaderListenerImpl\n")));
@@ -99,20 +104,13 @@ public:
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_subscription_lost\n")));
   }
 
-  virtual void on_budget_exceeded(::DDS::DataReader_ptr,
-    const ::OpenDDS::DCPS::BudgetExceededStatus&)
-  {
-    ACE_DEBUG ((LM_DEBUG, "(%P|%t) received on_budget_exceeded\n"));
-  }
-
   void read(::DDS::DataReader_ptr reader);
 
-  int num_samples() const { return num_samples_ ; }
-
 private:
-  int& num_samples_;
-  const int num_ops_per_thread_;
+  DistributedConditionSet_rch dcs_;
+  OpenDDS::DCPS::String actor_;
   DSPrinter print_sample_;
+  size_t sample_count_;
 };
 
 template<typename MessageType>
@@ -122,11 +120,11 @@ void DataReaderListenerImpl<MessageType>::read(DDS::DataReader_ptr dr)
   const typename TraitsType::DataReaderType::_var_type foo_dr =
     TraitsType::DataReaderType::_narrow(dr);
 
-  typename TraitsType::MessageSequenceType foo(num_ops_per_thread_);
-  DDS::SampleInfoSeq si(num_ops_per_thread_);
+  typename TraitsType::MessageSequenceType foo;
+  DDS::SampleInfoSeq si;
 
   const DDS::ReturnCode_t status =
-    foo_dr->read(foo, si, num_ops_per_thread_,
+    foo_dr->read(foo, si, DDS::LENGTH_UNLIMITED,
                  ::DDS::NOT_READ_SAMPLE_STATE,
                  ::DDS::ANY_VIEW_STATE,
                  ::DDS::ANY_INSTANCE_STATE);
@@ -137,8 +135,11 @@ void DataReaderListenerImpl<MessageType>::read(DDS::DataReader_ptr dr)
     {
       if (si[i].valid_data)
       {
-        ++num_samples_;
         print_sample_(foo[i], int(i));
+        ++sample_count_;
+        if (sample_count_ == 10) {
+          dcs_->post(actor_, "done");
+        }
       }
       PrintSampleInfo(si[i]);
     }

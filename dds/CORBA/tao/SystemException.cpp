@@ -162,7 +162,7 @@ CORBA::SystemException::_tao_errno (int errno_value)
 #endif /* ENOSYS != EFAULT */
     default:
       // Mask off bottom 7 bits and return them.
-      return errno_value & 0x7FU;
+      return static_cast<CORBA::ULong>(errno_value & 0x7FU);
     }
 }
 
@@ -345,10 +345,10 @@ CORBA::SystemException::_info (void) const
         default:
           {
             // 7 bits of some other errno.
-            ACE_OS::snprintf (unknown_errno,
+            ACE_OS::snprintf(unknown_errno,
                              255,
                              "low 7 bits of errno: %3u %s",
-                             minor_code, ACE_OS::strerror (minor_code));
+                             minor_code, ACE_OS::strerror(static_cast<int>(minor_code)));
 
             errno_indication = unknown_errno;
           }
@@ -835,10 +835,9 @@ TAO_END_VERSIONED_NAMESPACE_DECL
     TAO_SYSTEM_EXCEPTION (THREAD_CANCELLED)
 
 static const char *repo_id_array[] = {
-#define TAO_SYSTEM_EXCEPTION(name) \
-                  (char *) "IDL:omg.org/CORBA/" #name ":1.0",
-      STANDARD_EXCEPTION_LIST
-#undef  TAO_SYSTEM_EXCEPTION
+#define TAO_SYSTEM_EXCEPTION(name) "IDL:omg.org/CORBA/" #name ":1.0",
+  STANDARD_EXCEPTION_LIST
+#undef TAO_SYSTEM_EXCEPTION
       0
   };
 

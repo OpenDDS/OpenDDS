@@ -36,13 +36,13 @@ bool
 ShmemSendStrategy::start_i()
 {
   bound_name_ = "Write-" + link_->peer_address();
-  ShmemAllocator* alloc = link_->local_allocator();
+  ShmemAllocator* local_allocator = link_->local_allocator();
 
   const size_t n_elems = datalink_control_size_ / sizeof(ShmemData),
     extra = datalink_control_size_ % sizeof(ShmemData);
 
   void* mem = 0;
-  if (alloc == 0 || (mem = alloc->calloc(datalink_control_size_)) == 0) {
+  if (local_allocator == 0 || (mem = local_allocator->calloc(datalink_control_size_)) == 0) {
     VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemSendStrategy for link %@ failed "
               "to allocate %B bytes for control\n", link_, datalink_control_size_), 0);
     return false;
@@ -51,10 +51,14 @@ ShmemSendStrategy::start_i()
   ShmemData* data = reinterpret_cast<ShmemData*>(mem);
   const size_t limit = (extra >= sizeof(int)) ? n_elems : (n_elems - 1);
   data[limit].status_ = ShmemData::EndOfAlloc;
-  alloc->bind(bound_name_.c_str(), mem);
+  local_allocator->bind(bound_name_.c_str(), mem);
 
-  ShmemAllocator* peer = link_->peer_allocator();
-  peer->find("Semaphore", mem);
+  {
+    ShmemDataLink::PeerAllocatorProxy proxy(*link_);
+    ShmemAllocator* peer_allocator = proxy.peer_allocator();
+    peer_allocator->find("Semaphore", mem);
+  }
+
   ShmemSharedSemaphore* sem = reinterpret_cast<ShmemSharedSemaphore*>(mem);
 #if defined OPENDDS_SHMEM_WINDOWS
   HANDLE srcProc = ::OpenProcess(PROCESS_DUP_HANDLE, false /*bInheritHandle*/,
@@ -100,9 +104,9 @@ ShmemSendStrategy::send_bytes_i(const iovec iov[], int n)
     pool_alloc_size += iov[i].iov_len;
   }
 
-  ShmemAllocator* alloc = link_->local_allocator();
+  ShmemAllocator* local_allocator = link_->local_allocator();
   void* from_pool = 0;
-  if (alloc == 0 || (from_pool = alloc->malloc(pool_alloc_size)) == 0) {
+  if (local_allocator == 0 || (from_pool = local_allocator->malloc(pool_alloc_size)) == 0) {
     VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemSendStrategy for link %@ failed "
               "to allocate %B bytes for data\n", link_, pool_alloc_size), 0);
     errno = ENOMEM;
@@ -117,7 +121,7 @@ ShmemSendStrategy::send_bytes_i(const iovec iov[], int n)
   }
 
   void* mem = 0;
-  if (-1 == alloc->find(bound_name_.c_str(), mem) || mem == 0) {
+  if (-1 == local_allocator->find(bound_name_.c_str(), mem) || mem == 0) {
     VDBG_LVL((LM_ERROR, "(%P|%t) ERROR: ShmemSendStrategy for link %@ failed "
               "to find control segment with bound name %C\n", link_, bound_name_.c_str()), 0);
     errno = ENOENT;
@@ -127,7 +131,7 @@ ShmemSendStrategy::send_bytes_i(const iovec iov[], int n)
   for (ShmemData* it = reinterpret_cast<ShmemData*>(mem);
        it->status_ != ShmemData::EndOfAlloc; ++it) {
     if (it->status_ == ShmemData::RecvDone) {
-      alloc->free(it->payload_);
+      local_allocator->free(it->payload_);
       // This will eventually be refcounted so instead of a free(), the previous
       // statement would decrement the refcount and check for 0 before free().
       // See the 'FUTURE' comment above.
@@ -173,7 +177,7 @@ ShmemSendStrategy::send_bytes_i(const iovec iov[], int n)
 
   ACE_OS::sema_post(&peer_semaphore_);
 
-  return pool_alloc_size + iov[0].iov_len;
+  return static_cast<ssize_t>(pool_alloc_size + iov[0].iov_len);
 }
 
 void

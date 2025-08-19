@@ -8,11 +8,11 @@
 #include "RecorderImpl.h"
 
 #include "DCPS_Utils.h"
+#include "Definitions.h"
 #include "DomainParticipantImpl.h"
 #include "EncapsulationHeader.h"
 #include "FeatureDisabledQosCheck.h"
 #include "GuidConverter.h"
-#include "MonitorFactory.h"
 #include "PoolAllocator.h"
 #include "Qos_Helper.h"
 #include "QueryConditionImpl.h"
@@ -27,7 +27,7 @@
 #include "TypeSupportImpl.h"
 #include "Util.h"
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include "BuiltInTopicUtils.h"
 #endif
 
@@ -38,7 +38,7 @@
 
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif
 
@@ -57,10 +57,10 @@ RecorderImpl::RecorderImpl()
   : qos_(TheServiceParticipant->initial_DataReaderQos())
   , participant_servant_(0)
   , topic_servant_(0)
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   , is_exclusive_ownership_(false)
 #endif
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   , owner_manager_(0)
 #endif
   , subqos_(TheServiceParticipant->initial_SubscriberQos())
@@ -136,7 +136,7 @@ void RecorderImpl::init(
   qos_ = qos;
   passed_qos_ = qos;
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   is_exclusive_ownership_ = qos_.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
 #endif
 
@@ -147,7 +147,7 @@ void RecorderImpl::init(
   // parent, we will exist as long as it does
   participant_servant_ = participant;
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   if (is_exclusive_ownership_) {
     owner_manager_ = participant_servant_->ownership_manager ();
   }
@@ -228,7 +228,7 @@ void RecorderImpl::notify_subscription_lost(const WriterIdSeq&)
 {
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 void
 RecorderImpl::add_to_dynamic_type_map(const GUID_t& pub_id, const XTypes::TypeIdentifier& ti)
 {
@@ -292,7 +292,7 @@ RecorderImpl::add_association(const WriterAssociation& writer,
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
       const GUID_t& writer_id = writer.writerId;
-      RcHandle<WriterInfo> info ( make_rch<WriterInfo>(rchandle_from<WriterInfoListener>(this), writer_id, writer.writerQos));
+      RcHandle<WriterInfo> info (make_rch<WriterInfo>(rchandle_from<WriterInfoListener>(this), writer_id, writer.writerQos, qos_.liveliness.lease_duration));
       /*std::pair<WriterMapType::iterator, bool> bpair =*/
       writers_.insert(
         // This insertion is idempotent.
@@ -544,7 +544,7 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
     for (CORBA::ULong i = 0; i < wr_len; i++) {
       GUID_t writer_id = writers[i];
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
       if (dt_map_.erase(writer_id) == 0) {
         if (DCPS_debug_level >= 4) {
           ACE_DEBUG((LM_DEBUG, "(%P|%t) RecorderImpl::remove_associations_i: -"
@@ -649,24 +649,20 @@ RecorderImpl::remove_all_associations()
   DBG_ENTRY_LVL("RecorderImpl","remove_all_associations",6);
 
   OpenDDS::DCPS::WriterIdSeq writers;
-  int size;
+  DDS::UInt32 size;
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
 
   {
     ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, writers_lock_);
 
-    size = static_cast<int>(writers_.size());
+    size = static_cast<DDS::UInt32>(writers_.size());
     writers.length(size);
 
     WriterMapType::iterator curr_writer = writers_.begin();
     WriterMapType::iterator end_writer = writers_.end();
-
-    int i = 0;
-
-    while (curr_writer != end_writer) {
-      writers[i++] = curr_writer->first;
-      ++curr_writer;
+    for (DDS::UInt32 i = 0; curr_writer != end_writer; ++i, ++curr_writer) {
+      writers[i] = curr_writer->first;
     }
   }
 
@@ -917,7 +913,7 @@ RecorderImpl::enable()
       ACE_DEBUG((LM_DEBUG, "(%P|%t) RecorderImpl::enable: add_subscription\n"));
     }
 
-    XTypes::TypeInformation type_info;
+    TypeInformation type_info;
 
     const bool success =
       disco->add_subscription(domain_id_,
@@ -968,7 +964,7 @@ RecorderImpl::unregister_for_writer(const GUID_t& participant,
   TransportClient::unregister_for_writer(participant, readerid, writerid);
 }
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 DDS::ReturnCode_t
 RecorderImpl::repoid_to_bit_key(const GUID_t& id,
                                 DDS::BuiltinTopicKey_t& key)
@@ -994,9 +990,9 @@ RecorderImpl::repoid_to_bit_key(const GUID_t& id,
 
   return ret;
 }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 DDS::DynamicData_ptr RecorderImpl::get_dynamic_data(const RawDataSample& sample)
 {
   const Encoding enc(sample.encoding_kind_, sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);

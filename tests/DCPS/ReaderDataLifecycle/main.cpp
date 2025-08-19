@@ -246,9 +246,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                  ACE_TEXT(" take\n")));
       // Verify that no samples are available
       {
-        FooSeq foo;
+        FooSeq foo2;
         DDS::SampleInfoSeq info;
-        const DDS::ReturnCode_t error = reader_i->take(foo,
+        const DDS::ReturnCode_t error = reader_i->take(foo2,
                                                        info,
                                                        DDS::LENGTH_UNLIMITED,
                                                        DDS::ANY_SAMPLE_STATE,

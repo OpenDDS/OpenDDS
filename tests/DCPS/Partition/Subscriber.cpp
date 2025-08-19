@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <iostream>
 #include "tests/Utils/ExceptionStreams.h"
+#include <tests/Utils/DistributedConditionSet.h>
 
 using std::cerr;
 using std::endl;
@@ -34,6 +35,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   try
     {
+      DistributedConditionSet_rch dcs =
+        OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+
       DDS::DomainParticipantFactory_var dpf;
       DDS::DomainParticipant_var participant;
 
@@ -114,12 +118,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           exit(1);
         }
 
-        DDS::DataReaderListener_var listener (
-          new Test::DataReaderListener ((*i).expected_matches));
+        DDS::DataReaderListener_var listener (new Test::DataReaderListener (dcs, *i));
 
         // Create the Datareaders
         DDS::DataReaderQos dr_qos;
         sub->get_default_datareader_qos (dr_qos);
+        dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
         DDS::DataReader_var dr = sub->create_datareader (topic.in (),
                                                          dr_qos,
                                                          listener.in (),
@@ -132,13 +136,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         readers.push_back (dr);
       }
 
-      ACE_OS::sleep (15);
+      for (Test::PartitionConfig const * i = begin; i != end; ++i)
+      {
+        dcs->wait_for("sub", i->actor, "done");
+      }
 
-//       {
-//         // Force contents of writers vector to be destroyed now.
-//         std::vector<DDS::DataReader_var> tmp;
-//         tmp.swap (readers);
-//       }
+      {
+        // Force contents of writers vector to be destroyed now.
+        std::vector<DDS::DataReader_var> tmp;
+        tmp.swap (readers);
+      }
 
       if (!CORBA::is_nil (participant.in ())) {
         participant->delete_contained_entities();
@@ -146,7 +153,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       if (!CORBA::is_nil (dpf.in ())) {
         dpf->delete_participant(participant.in ());
       }
-      ACE_OS::sleep(2);
 
       TheServiceParticipant->shutdown ();
     }

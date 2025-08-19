@@ -4,6 +4,7 @@
 #include "common.h"
 #include "tests/DCPS/common/TestSupport.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
+#include "dds/DCPS/Definitions.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "ace/OS_NS_unistd.h"
 #include <string>
@@ -40,7 +41,7 @@ int ignore_kind = DONT_IGNORE;
 
 int ignore ()
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   switch (ignore_kind)
   {
   case IGNORE_PARTICIPANT:
@@ -199,7 +200,7 @@ int ignore ()
 #else
 
   return -1;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 }
 
 int write ()

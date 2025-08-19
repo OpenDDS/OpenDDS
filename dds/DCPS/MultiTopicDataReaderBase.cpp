@@ -6,9 +6,10 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-#ifndef OPENDDS_NO_MULTI_TOPIC
 
 #include "MultiTopicDataReaderBase.h"
+
+#if OPENDDS_CONFIG_MULTI_TOPIC
 
 #include "DomainParticipantImpl.h"
 #include "Marked_Default_Qos.h"
@@ -94,7 +95,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
 {
   using namespace std;
   DDS::DataReader_var dr = multitopic->get_type_support()->create_datareader();
-  resulting_reader_ = DataReaderEx::_narrow(dr);
+  resulting_reader_ = DDS::DataReader::_narrow(dr);
   DataReaderImpl* resulting_impl =
     dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
 
@@ -105,8 +106,6 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
   }
 
   resulting_impl->enable_multi_topic(multitopic);
-  resulting_impl->raw_latency_buffer_size() = parent->raw_latency_buffer_size();
-  resulting_impl->raw_latency_buffer_type() = parent->raw_latency_buffer_type();
 
   DDS::DomainParticipant_var participant = parent->get_participant();
   DomainParticipantImpl* dpi = dynamic_cast<DomainParticipantImpl*>(participant.in());
@@ -355,7 +354,7 @@ DDS::ReadCondition_ptr MultiTopicDataReaderBase::create_readcondition(
     instance_states);
 }
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
 DDS::QueryCondition_ptr MultiTopicDataReaderBase::create_querycondition(
   DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
   DDS::InstanceStateMask instance_states, const char* query_expression,
@@ -457,7 +456,7 @@ DDS::ReturnCode_t MultiTopicDataReaderBase::get_matched_publications(
   return resulting_reader_->get_matched_publications(publication_handles);
 }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 DDS::ReturnCode_t MultiTopicDataReaderBase::get_matched_publication_data(
   DDS::PublicationBuiltinTopicData& publication_data,
   DDS::InstanceHandle_t publication_handle)
@@ -466,27 +465,6 @@ DDS::ReturnCode_t MultiTopicDataReaderBase::get_matched_publication_data(
     publication_handle);
 }
 #endif
-
-void MultiTopicDataReaderBase::get_latency_stats(LatencyStatisticsSeq& stats)
-{
-  resulting_reader_->get_latency_stats(stats);
-}
-
-void MultiTopicDataReaderBase::reset_latency_stats()
-{
-  resulting_reader_->reset_latency_stats();
-}
-
-CORBA::Boolean MultiTopicDataReaderBase::statistics_enabled()
-{
-  return resulting_reader_->statistics_enabled();
-}
-
-void MultiTopicDataReaderBase::statistics_enabled(
-  CORBA::Boolean statistics_enabled)
-{
-  resulting_reader_->statistics_enabled(statistics_enabled);
-}
 
 }
 }

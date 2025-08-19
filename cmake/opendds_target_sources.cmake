@@ -6,8 +6,6 @@ if(_OPENDDS_TARGET_SOURCES_CMAKE)
 endif()
 set(_OPENDDS_TARGET_SOURCES_CMAKE TRUE)
 
-include(GNUInstallDirs)
-
 include("${CMAKE_CURRENT_LIST_DIR}/opendds_group.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/dds_idl_sources.cmake")
 
@@ -26,7 +24,8 @@ function(_opendds_get_sources_and_options
     auto_link
     include_base
     skip_tao_idl
-    skip_opendds_idl)
+    skip_opendds_idl
+    folder)
   set(no_value_options
     SKIP_TAO_IDL
     SKIP_OPENDDS_IDL
@@ -38,6 +37,7 @@ function(_opendds_get_sources_and_options
     GENERATE_SERVER_SKELETONS
     AUTO_LINK
     INCLUDE_BASE
+    FOLDER
   )
   set(multi_value_options
     PUBLIC PRIVATE INTERFACE
@@ -74,6 +74,9 @@ function(_opendds_get_sources_and_options
     handle_files("${arg_${scope}}" ${scope})
   endforeach()
 
+  # Handle unscoped sources
+  handle_files("${arg_UNPARSED_ARGUMENTS}" ${OPENDDS_DEFAULT_SCOPE})
+
   if(NOT DEFINED arg_SUPPRESS_ANYS)
     set(arg_SUPPRESS_ANYS ${OPENDDS_SUPPRESS_ANYS})
   endif()
@@ -86,7 +89,7 @@ function(_opendds_get_sources_and_options
         "The opendds_target_sources USE_EXPORT option takes a header path and macro name, "
         "but was passed ${use_export_len} values")
     endif()
-    set(use_export "${arg_USE_EXPORT}" PARENT_SCOPE)
+    set(${use_export} "${arg_USE_EXPORT}" PARENT_SCOPE)
   else()
     if(NOT DEFINED arg_ALWAYS_GENERATE_LIB_EXPORT_HEADER)
       set(arg_ALWAYS_GENERATE_LIB_EXPORT_HEADER ${OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER})
@@ -95,9 +98,9 @@ function(_opendds_get_sources_and_options
   endif()
 
   if(DEFINED arg_EXPORT_HEADER_DIR)
-    set(export_header_dir "${arg_EXPORT_HEADER_DIR}" PARENT_SCOPE)
+    set(${export_header_dir} "${arg_EXPORT_HEADER_DIR}" PARENT_SCOPE)
   else()
-    set(export_header_dir "" PARENT_SCOPE)
+    set(${export_header_dir} "" PARENT_SCOPE)
   endif()
 
   if(arg_USE_VERSIONED_NAMESPACE)
@@ -107,7 +110,7 @@ function(_opendds_get_sources_and_options
         "The opendds_target_sources USE_VERSIONED_NAMESPACE option takes a header path and "
         "macro prefix, but was passed ${use_versioned_namespace_len} values")
     endif()
-    set(use_versioned_namespace "${arg_USE_VERSIONED_NAMESPACE}" PARENT_SCOPE)
+    set(${use_versioned_namespace} "${arg_USE_VERSIONED_NAMESPACE}" PARENT_SCOPE)
   endif()
 
   set(${skip_tao_idl} ${arg_SKIP_TAO_IDL} PARENT_SCOPE)
@@ -126,7 +129,10 @@ function(_opendds_get_sources_and_options
   endif()
   set(${auto_link} ${arg_AUTO_LINK} PARENT_SCOPE)
 
-  handle_files("${arg_UNPARSED_ARGUMENTS}" ${OPENDDS_DEFAULT_SCOPE})
+  if(NOT DEFINED arg_FOLDER)
+    set(arg_FOLDER ${OPENDDS_DEFAULT_GENERATED_FOLDER})
+  endif()
+  set(${folder} ${arg_FOLDER} PARENT_SCOPE)
 
   set(all_idl_files)
   foreach(scope PUBLIC PRIVATE INTERFACE)
@@ -198,54 +204,6 @@ function(_opendds_get_sources_and_options
   set(${opendds_options} ${arg_OPENDDS_IDL_OPTIONS} ${extra_opendds_idl_options} PARENT_SCOPE)
 endfunction()
 
-function(opendds_export_header target)
-  set(no_value_options)
-  set(single_value_options
-    DIR
-    INCLUDE_BASE
-    USE_EXPORT_VAR
-  )
-  set(multi_value_options)
-  cmake_parse_arguments(arg
-    "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
-
-  # Get existing export header and macro for target.
-  get_target_property(use_export ${target} OPENDDS_USE_EXPORT)
-  if(use_export)
-    if(DEFINED arg_USE_EXPORT_VAR)
-      set(${arg_USE_EXPORT_VAR} "${use_export}" PARENT_SCOPE)
-    endif()
-    return()
-  endif()
-
-  # These values are used in configure_file for the export header.
-  string(TOUPPER ${target} uppercase_target)
-  set(export_macro "${target}_Export")
-
-  # Geneate the export header
-  _opendds_get_generated_output_dir(${target} gendir MKDIR)
-  set(export_header "${target}_export.h")
-  if(arg_DIR)
-    set(export_header "${arg_DIR}/${export_header}")
-  endif()
-  _opendds_get_generated_output(${target} "${gendir}/${export_header}"
-    INCLUDE_BASE "${gendir}" MKDIR FILE_PATH_VAR export_header_path)
-  if(NOT EXISTS "${export_header_path}")
-    configure_file("${_OPENDDS_CMAKE_DIR}/export.h.in" "${export_header_path}")
-  endif()
-
-  # Make sure the export header can be used properly and installed.
-  _opendds_add_idl_or_header_files(${target} PUBLIC TRUE "${export_header_path}")
-  target_compile_definitions(${target} PRIVATE "${uppercase_target}_BUILD_DLL")
-  set(use_export "${export_header};${export_macro}")
-  set_target_properties(${target}
-    PROPERTIES
-      OPENDDS_USE_EXPORT "${use_export}")
-  if(DEFINED arg_USE_EXPORT_VAR)
-    set(${arg_USE_EXPORT_VAR} "${use_export}" PARENT_SCOPE)
-  endif()
-endfunction()
-
 function(opendds_target_sources target)
   set(debug FALSE)
   if(opendds_target_sources IN_LIST OPENDDS_CMAKE_VERBOSE)
@@ -273,6 +231,7 @@ function(opendds_target_sources target)
     include_base
     skip_tao_idl
     skip_opendds_idl
+    folder
     ${ARGN})
 
   if(NOT opendds_options MATCHES "--(no-)?default-nested")
@@ -284,29 +243,28 @@ function(opendds_target_sources target)
   endif()
 
   _opendds_get_generated_output_dir(${target} generated_directory MKDIR)
+  _opendds_real_path("${generated_directory}" generated_directory)
   set_target_properties(${target} PROPERTIES OPENDDS_GENERATED_DIRECTORY "${generated_directory}")
   set(includes "${generated_directory}")
 
+  if(idl_sources_PUBLIC OR idl_sources_INTERFACE)
+    # Need to include and link internally even if it's just interface files.
+    set(max_scope PUBLIC)
+  elseif(idl_sources_PRIVATE)
+    set(max_scope PRIVATE)
+  endif()
+
   get_target_property(target_type ${target} TYPE)
-  if(target_type STREQUAL "SHARED_LIBRARY"
-      OR (always_generate_lib_export_header AND target_type MATCHES "LIBRARY"))
-    if(NOT use_export)
-      opendds_export_header(${target} USE_EXPORT_VAR use_export DIR "${export_header_dir}")
-    endif()
-    list(GET use_export 0 export_header)
-    list(GET use_export 1 export_macro)
-    if(NOT "${tao_options}" MATCHES "-Wb,export_include")
-      list(APPEND tao_options "-Wb,export_include=${export_header}")
-    endif()
-    if(NOT "${tao_options}" MATCHES "-Wb,export_macro")
-      list(APPEND tao_options "-Wb,export_macro=${export_macro}")
-    endif()
-    if(NOT "${opendds_options}" MATCHES "-Wb,export_include")
-      list(APPEND opendds_options "-Wb,export_include=${export_header}")
-    endif()
-    if(NOT "${opendds_options}" MATCHES "-Wb,export_macro")
-      list(APPEND opendds_options "-Wb,export_macro=${export_macro}")
-    endif()
+  if(use_export)
+    # Assuming the custom export header is compatible with ones generated by generate_export_file.pl
+    list(GET use_export 0 existing_header)
+    list(GET use_export 1 existing_macro)
+    string(FIND ${existing_macro} "_Export" index)
+    string(SUBSTRING ${existing_macro} 0 ${index} macro_prefix)
+    opendds_export_header(${target} EXISTING INCLUDE ${existing_header} MACRO_PREFIX ${macro_prefix})
+  elseif((target_type STREQUAL "SHARED_LIBRARY" AND max_scope STREQUAL "PUBLIC")
+      OR (target_type MATCHES "LIBRARY" AND always_generate_lib_export_header))
+    opendds_export_header(${target} USE_EXPORT_VAR use_export DIR "${export_header_dir}")
   endif()
 
   if(use_versioned_namespace)
@@ -346,11 +304,6 @@ function(opendds_target_sources target)
     list(APPEND tao_options -Sa -St)
   endif()
 
-  foreach(def ${OPENDDS_DCPS_COMPILE_DEFINITIONS})
-    list(APPEND tao_options "-D${def}")
-    list(APPEND opendds_options "-D${def}")
-  endforeach()
-
   if(DEFINED OPENDDS_CONFIG_INCLUDE_DIR)
     list(APPEND tao_options "-I${OPENDDS_CONFIG_INCLUDE_DIR}")
     list(APPEND opendds_options "-I${OPENDDS_CONFIG_INCLUDE_DIR}")
@@ -358,15 +311,36 @@ function(opendds_target_sources target)
 
   foreach(scope PUBLIC PRIVATE INTERFACE)
     if(idl_sources_${scope})
+      set(this_scope_tao_options ${tao_options})
+      set(this_scope_opendds_options ${opendds_options})
+      if(use_export AND NOT scope STREQUAL "PRIVATE")
+        list(GET use_export 0 export_header)
+        list(GET use_export 1 export_macro)
+        if(NOT "${tao_options}" MATCHES "-Wb,export_include")
+          list(APPEND this_scope_tao_options "-Wb,export_include=${export_header}")
+        endif()
+        if(NOT "${tao_options}" MATCHES "-Wb,export_macro")
+          list(APPEND this_scope_tao_options "-Wb,export_macro=${export_macro}")
+        endif()
+        if(NOT "${opendds_options}" MATCHES "-Wb,export_include")
+          list(APPEND this_scope_opendds_options "-Wb,export_include=${export_header}")
+        endif()
+        if(NOT "${opendds_options}" MATCHES "-Wb,export_macro")
+          list(APPEND this_scope_opendds_options "-Wb,export_macro=${export_macro}")
+        endif()
+      endif()
+
       _opendds_target_idl_sources(${target}
-        TAO_IDL_FLAGS ${tao_options}
-        DDS_IDL_FLAGS ${opendds_options}
+        TAO_IDL_FLAGS ${this_scope_tao_options}
+        DDS_IDL_FLAGS ${this_scope_opendds_options}
         SKIP_TAO_IDL ${skip_tao_idl}
         SKIP_OPENDDS_IDL ${skip_opendds_idl}
         IDL_FILES ${idl_sources_${scope}}
         SCOPE ${scope}
         INCLUDE_BASE "${include_base}"
-        AUTO_INCLUDES auto_includes)
+        AUTO_INCLUDES auto_includes
+        USE_EXPORT ${use_export}
+        FOLDER ${folder})
       list(APPEND includes ${auto_includes})
     endif()
 
@@ -374,13 +348,6 @@ function(opendds_target_sources target)
     # regular c/cpp/h files specified by the user are added.
     target_sources(${target} ${scope} ${non_idl_sources_${scope}})
   endforeach()
-
-  if(idl_sources_PUBLIC OR idl_sources_INTERFACE)
-    # Need to include and link internally even if it's just interface files.
-    set(max_scope PUBLIC)
-  elseif(idl_sources_PRIVATE)
-    set(max_scope PRIVATE)
-  endif()
 
   if(auto_link)
     if(NOT skip_opendds_idl)
@@ -417,40 +384,5 @@ function(opendds_target_sources target)
   endif()
   foreach(include ${includes})
     target_include_directories(${target} ${inc_scope} "$<BUILD_INTERFACE:${include}>")
-  endforeach()
-endfunction()
-
-function(opendds_install_interface_files target)
-  set(no_value_options NO_PASSED NO_GENERATED)
-  set(single_value_options DEST INCLUDE_BASE)
-  set(multi_value_options EXTRA_GENERATED_FILES)
-  cmake_parse_arguments(arg
-    "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
-
-  if(NOT DEFINED arg_INCLUDE_BASE)
-    set(arg_INCLUDE_BASE "${CMAKE_CURRENT_SOURCE_DIR}")
-  endif()
-  if(NOT DEFINED arg_DEST)
-    set(arg_DEST "${CMAKE_INSTALL_INCLUDEDIR}")
-  endif()
-
-  if(NOT arg_NO_PASSED)
-    get_target_property(passed ${target} OPENDDS_ALL_PASSED_INTERFACE_FILES)
-    foreach(file ${passed})
-      file(RELATIVE_PATH dest ${arg_INCLUDE_BASE} ${file})
-      get_filename_component(dest ${dest} DIRECTORY)
-      install(FILES ${file} DESTINATION "${arg_DEST}/${dest}")
-    endforeach()
-  endif()
-
-  get_target_property(generated ${target} OPENDDS_ALL_GENERATED_INTERFACE_FILES)
-  if(arg_NO_GENERATED)
-    unset(generated)
-  endif()
-  get_target_property(gendir ${target} OPENDDS_GENERATED_DIRECTORY)
-  foreach(file ${generated} ${arg_EXTRA_GENERATED_FILES})
-    file(RELATIVE_PATH dest ${gendir} ${file})
-    get_filename_component(dest ${dest} DIRECTORY)
-    install(FILES ${file} DESTINATION "${arg_DEST}/${dest}")
   endforeach()
 endfunction()

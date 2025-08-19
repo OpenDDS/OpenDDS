@@ -8,8 +8,7 @@
 
 #include "DynamicDataAdapterFwd.h"
 
-#ifndef OPENDDS_SAFETY_PROFILE
-#  include <dds/DCPS/Definitions.h>
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
 #    include "DynamicDataBase.h"
 #    include "Utils.h"
@@ -37,6 +36,7 @@ class DynamicDataAdapterImpl;
  *   - Part of this is accessing all types as complex value.
  * - Implement equals, clear_value, and clear_nonkey_values
  * - Respect bounds of strings and sequences.
+ * - Implement support for IDL maps
  * - Add a way to check if using get_complex_value on a complex member of a
  *   union that isn't selected. Doing this will cause a segfault. It should
  *   return DDS::PRECONDITION_NOT_MET.
@@ -697,6 +697,6 @@ protected:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif
 
 #endif // OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_ADAPTER_H

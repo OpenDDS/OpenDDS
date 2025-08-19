@@ -62,7 +62,7 @@ struct FragKey {
 
 typedef std::pair<FragmentNumber, FragmentNumber> FragmentRange;
 
-class OpenDDS_Dcps_Export TransportReassembly : public virtual RcObject {
+class OpenDDS_Dcps_Export TransportReassembly : public RcObject {
 public:
   explicit TransportReassembly(const TimeDuration& timeout = TimeDuration(300));
 
@@ -104,6 +104,11 @@ public:
   CORBA::ULong get_gaps(const SequenceNumber& msg_seq, const GUID_t& pub_id,
                         CORBA::Long bitmap[], CORBA::ULong length,
                         CORBA::ULong& numBits) const;
+
+  size_t fragments_size() const { return fragments_.size(); }
+  size_t queue_size() const { return expiration_queue_.size(); }
+  size_t completed_size() const { return completed_.size(); }
+  size_t total_frags() const;
 
 private:
 

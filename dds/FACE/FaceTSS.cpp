@@ -2,22 +2,25 @@
 #include "FACE/TS.hpp"
 #include "config/Parser.h"
 
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/DomainParticipantImpl.h"
-#include "dds/DCPS/Registered_Data_Types.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
-#include "dds/DCPS/SafetyProfilePool.h"
+#include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/DCPS/GuidConverter.h"
+#include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
+#include "dds/DCPS/Registered_Data_Types.h"
+#include "dds/DCPS/SafetyProfilePool.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
+#include "dds/DCPS/Service_Participant.h"
+
 #include "dds/DdsDcpsCoreC.h"
+
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 
 #include <cstring>
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 using OpenDDS::DCPS::operator==;
 #endif
 
@@ -815,7 +818,7 @@ create_message_instance_guid(const OpenDDS::DCPS::GUID_t& pub, const CORBA::Long
   FACE::LongLong masked_seq;
 
   //Until MESSAGE_INSTANCE_GUID becomes 128 bit GUID, use checksum to represent Prefix
-  FACE::Long prefix_representation = ACE::crc32(reinterpret_cast<const void*>(&pub), sizeof(pub));
+  const FACE::UnsignedLong prefix_representation = ACE::crc32(&pub, sizeof(pub));
   masked_seq = orig_seq >> 32;
 
   if (masked_seq) {

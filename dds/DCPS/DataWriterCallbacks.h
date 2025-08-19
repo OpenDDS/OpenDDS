@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,22 +6,24 @@
 #ifndef OPENDDS_DCPS_DATAWRITERCALLBACKS_H
 #define OPENDDS_DCPS_DATAWRITERCALLBACKS_H
 
-#include "Definitions.h"
-#include "DiscoveryListener.h"
-#include "RcObject.h"
+#include "EndpointCallbacks.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace OpenDDS {
-
-namespace ICE {
-  class Endpoint;
+namespace DDS {
+  class StringSeq;
 }
 
+namespace OpenDDS {
 namespace DCPS {
+
+class DiscoveryListener;
+class ReaderIdSeq;
+struct ReaderAssociation;
 
 /**
 * @class DataWriterCallbacks
@@ -32,12 +32,8 @@ namespace DCPS {
 *
 */
 class OpenDDS_Dcps_Export DataWriterCallbacks
-  : public virtual RcObject {
+  : public EndpointCallbacks {
 public:
-
-  DataWriterCallbacks() {}
-
-  virtual ~DataWriterCallbacks() {}
 
   virtual void set_publication_id(const GUID_t& guid) = 0;
 
@@ -45,9 +41,7 @@ public:
                                bool active) = 0;
 
   virtual void remove_associations(const ReaderIdSeq& readers,
-                                   CORBA::Boolean callback) = 0;
-
-  virtual void update_incompatible_qos(const IncompatibleQosStatus& status) = 0;
+                                   bool callback) = 0;
 
   virtual void update_subscription_params(const GUID_t& readerId,
                                           const DDS::StringSeq& exprParams) = 0;
@@ -61,11 +55,6 @@ public:
   virtual void unregister_for_reader(const GUID_t& /*participant*/,
                                      const GUID_t& /*writerid*/,
                                      const GUID_t& /*readerid*/) { }
-
-  virtual void update_locators(const GUID_t& /*remote*/,
-                               const TransportLocatorSeq& /*locators*/) { }
-
-  virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint() = 0;
 };
 
 typedef RcHandle<DataWriterCallbacks> DataWriterCallbacks_rch;

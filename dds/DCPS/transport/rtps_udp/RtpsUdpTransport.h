@@ -11,9 +11,12 @@
 #include "RtpsUdpDataLink.h"
 
 #include <dds/DCPS/ConnectionRecords.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/FibonacciSequence.h>
+#include <dds/DCPS/PeriodicTask.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/SporadicTask.h>
+#include <dds/DCPS/Statistics.h>
 
 #include <dds/DCPS/RTPS/ICE/Ice.h>
 #include <dds/DCPS/RTPS/RtpsCoreC.h>
@@ -22,8 +25,6 @@
 #include <dds/DCPS/transport/framework/TransportImpl.h>
 #include <dds/DCPS/transport/framework/TransportStatistics.h>
 #include <dds/DCPS/transport/framework/MessageDropper.h>
-
-#include <dds/OpenDDSConfigWrapper.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -151,7 +152,7 @@ public:
     if (transport_statistics_.count_messages()) {
       ssize_t bytes = 0;
       for (int i = 0; i < num_blocks; ++i) {
-        bytes += iov[i].iov_len;
+        bytes += static_cast<ssize_t>(iov[i].iov_len);
       }
       const InternalMessageCountKey key(remote_address, key_kind, remote_address == rtps_relay_address_);
       transport_statistics_.message_count[key].send_fail(bytes);
@@ -255,7 +256,9 @@ private:
 class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl, public ConfigListener {
 public:
   RtpsUdpTransport(const RtpsUdpInst_rch& inst,
-                   DDS::DomainId_t domain);
+                   DDS::DomainId_t domain,
+                   DomainParticipantImpl* participant);
+  ~RtpsUdpTransport();
   RtpsUdpInst_rch config() const;
 #if OPENDDS_CONFIG_SECURITY
   DCPS::RcHandle<ICE::Agent> get_ice_agent() const;
@@ -322,6 +325,17 @@ private:
                                      const GUID_t& /*readerid*/,
                                      const GUID_t& /*writerid*/);
 
+  virtual NetworkAddress actual_local_address() const
+  {
+    return actual_local_address_;
+  }
+#ifdef ACE_HAS_IPV6
+  virtual NetworkAddress ipv6_actual_local_address() const
+  {
+    return ipv6_actual_local_address_;
+  }
+#endif
+
   virtual bool connection_info_i(TransportLocator& info, ConnectionInfoFlags flags) const;
 
   void get_connection_addrs(const TransportBLOB& data,
@@ -375,11 +389,13 @@ private:
 
   JobQueue_rch job_queue_;
 
+  DomainParticipantImpl* participant_;
+
 #if OPENDDS_CONFIG_SECURITY
 
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   ConnectionRecords deferred_connection_records_;
 #endif
 
@@ -420,6 +436,20 @@ private:
   friend class RtpsUdpReceiveStrategy;
 
   RtpsUdpCore core_;
+  NetworkAddress actual_local_address_;
+#ifdef ACE_HAS_IPV6
+  NetworkAddress ipv6_actual_local_address_;
+#endif
+
+  StatisticsDataWriter_rch stats_writer_;
+  typedef PmfPeriodicTask<const RtpsUdpTransport> PeriodicTask;
+  RcHandle<PeriodicTask> stats_task_;
+
+  static StatisticSeq stats_template();
+  const StatisticSeq stats_template_;
+
+  void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
+  void write_stats(const MonotonicTimePoint&) const;
 };
 
 } // namespace DCPS

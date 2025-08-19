@@ -8,11 +8,13 @@
 #ifndef OPENDDS_DCPS_QOS_HELPER_H
 #define OPENDDS_DCPS_QOS_HELPER_H
 
+#include "Definitions.h"
+#include "Time_Helper.h"
+
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsTopicC.h"
-#include "Time_Helper.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -96,7 +98,7 @@ public:
 
   static bool valid(const DDS::DurabilityQosPolicy& qos);
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
   static bool valid(const DDS::DurabilityServiceQosPolicy& qos);
 #endif
 
@@ -108,7 +110,7 @@ public:
 
   static bool valid(const DDS::OwnershipQosPolicy& qos);
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   static bool valid(const DDS::OwnershipStrengthQosPolicy& qos);
 #endif
 
@@ -168,7 +170,7 @@ public:
   static bool changeable(const DDS::DurabilityQosPolicy& qos1,
                          const DDS::DurabilityQosPolicy& qos2);
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
   static bool changeable(const DDS::DurabilityServiceQosPolicy& qos1,
                          const DDS::DurabilityServiceQosPolicy& qos2);
 #endif
@@ -185,7 +187,7 @@ public:
   static bool changeable(const DDS::OwnershipQosPolicy& qos1,
                          const DDS::OwnershipQosPolicy& qos2);
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   static bool changeable(const DDS::OwnershipStrengthQosPolicy& qos1,
                          const DDS::OwnershipStrengthQosPolicy& qos2);
 #endif
@@ -250,9 +252,14 @@ public:
 
   static bool copy_from_topic_qos(DDS::DataWriterQos& a_datareader_qos,
                                   const DDS::TopicQos& a_topic_qos);
+
+  static void append(DDS::PropertySeq& props,
+                     const char* name,
+                     const std::string& value,
+                     bool propagate = false);
 };
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator==(const DDS::UserDataQosPolicy& qos1,
                 const DDS::UserDataQosPolicy& qos2);

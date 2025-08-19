@@ -20,13 +20,15 @@
 #include "dds/DCPS/RTPS/MessageUtils.h"
 #include "dds/DCPS/RTPS/GuidGenerator.h"
 
-#include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/AssociationData.h"
-#include "dds/DCPS/DisjointSequence.h"
-#include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/DataSampleElement.h"
-#include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/EncapsulationHeader.h"
+#include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/PublicationInstance.h"
+#include "dds/DCPS/SendStateDataSampleList.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
@@ -172,7 +174,7 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
     dsle_.get_header().sequence_ = seq;
     Message_Block_Ptr sample(
       new ACE_Message_Block(DataSampleHeader::get_max_serialized_size()));
-    dsle_.set_sample(move(sample));
+    dsle_.set_sample(OpenDDS::DCPS::move(sample));
     *dsle_.get_sample() << dsle_.get_header();
     dsle_.get_sample()->cont(payload_.duplicate());
     ACE_DEBUG((LM_INFO, "sending with seq#: %q\n", seq.getValue()));
@@ -724,7 +726,7 @@ bool run_test()
     exit(1);
   }
   part1_sock.get_local_addr(part1_addr);
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
   part1_addr.set(part1_addr.get_port_number(), "127.0.0.1");
 #else
   part1_addr.set(part1_addr.get_port_number(), "localhost");

@@ -18,7 +18,7 @@ void RelayPartitionsListener::on_data_available(DDS::DataReader_ptr reader)
 {
   RelayPartitionsDataReader_var dr = RelayPartitionsDataReader::_narrow(reader);
   if (!dr) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayPartitionsListener::on_data_available failed to narrow RtpsRelay::RelayPartitionsDataReader\n")));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RelayPartitionsListener::on_data_available failed to narrow RtpsRelay::RelayPartitionsDataReader\n"));
     return;
   }
 
@@ -31,11 +31,12 @@ void RelayPartitionsListener::on_data_available(DDS::DataReader_ptr reader)
                                    DDS::ANY_VIEW_STATE,
                                    DDS::ANY_INSTANCE_STATE);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayPartitionsListener::on_data_available failed to take %C\n"), OpenDDS::DCPS::retcode_to_string(ret)));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RelayPartitionsListener::on_data_available failed to take %C\n", OpenDDS::DCPS::retcode_to_string(ret)));
     return;
   }
 
   for (CORBA::ULong idx = 0; idx != infos.length(); ++idx) {
+    OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
     const auto& data = datas[idx];
     const auto& info = infos[idx];
 

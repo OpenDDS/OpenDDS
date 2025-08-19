@@ -75,18 +75,24 @@ private:
   void generate_enum_type_identifier(AST_Type* type);
   void generate_array_type_identifier(AST_Type* type, bool force_type_object);
   void generate_sequence_type_identifier(AST_Type* type, bool force_type_object);
+  void generate_map_type_identifier(AST_Type* type, bool force_type_object);
   void generate_alias_type_identifier(AST_Type* type);
   void generate_primitive_type_identifier(AST_Type* type);
+
   void update_maps(AST_Type* type,
                    const OpenDDS::XTypes::TypeObject& minimal_to,
                    const OpenDDS::XTypes::TypeObject& complete_to);
   void set_builtin_member_annotations(AST_Decl* member,
-    OPENDDS_OPTIONAL_NS::optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>& annotations);
+    std::optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>& annotations);
 
   OpenDDS::XTypes::TypeIdentifier get_minimal_type_identifier(AST_Type* type);
   OpenDDS::XTypes::TypeIdentifier get_complete_type_identifier(AST_Type* type);
   bool generate(AST_Type* node, UTL_ScopedName* name);
   void declare_get_type_map();
+
+  void gen_epilogue_type_map(const std::string& label,
+    const OpenDDS::XTypes::TypeMap& type_map,
+    const std::string& file);
 
   // Both fields must be constructed when an object is created.
   struct TypeObjectPair {
@@ -124,6 +130,8 @@ private:
   typedef std::map<std::string, ACE_CDR::Long> EnumValues;
   typedef std::map<AST_Enum*, EnumValues> EnumValueMap;
   EnumValueMap enum_values_;
+
+  std::map<OpenDDS::XTypes::TypeIdentifier, std::string> type_identifier_index_;
 };
 
 #endif

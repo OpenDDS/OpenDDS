@@ -1,5 +1,7 @@
 project: dcpsexe, dcps_test, opendds_cxx11 {
   dcps_ts_flags += -SI -Gxtypes-complete
+  requires      += no_opendds_safety_profile
+
   TypeSupport_Files {
     value_annotation.idl
   }

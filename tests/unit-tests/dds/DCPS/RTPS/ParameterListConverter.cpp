@@ -186,7 +186,7 @@ namespace {
           TheServiceParticipant->initial_UserDataQosPolicy();
       writer_data.ddsPublicationData.ownership =
           TheServiceParticipant->initial_OwnershipQosPolicy();
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
       writer_data.ddsPublicationData.ownership_strength =
           TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
 #endif
@@ -314,7 +314,7 @@ namespace {
 
       }
       result.ddsPublicationData.ownership.kind = ownership;
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
       result.ddsPublicationData.ownership_strength.value = ownership_strength;
 #else
       ACE_UNUSED_ARG(ownership_strength);
@@ -1439,10 +1439,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_data)
 { // Should encode writer data
   DiscoveredWriterData writer_data = Factory::default_writer_data();
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
 }
@@ -1452,10 +1449,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_topic_name)
   DiscoveredWriterData writer_data =
     Factory::writer_data("TOPIC NAME TEST");
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_TOPIC_NAME));
@@ -1468,14 +1462,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_topic_name)
   DiscoveredWriterData writer_data =
     Factory::writer_data("TOPIC NAME TEST");
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(!strcmp(writer_data.ddsPublicationData.topic_name,
                       writer_data_out.ddsPublicationData.topic_name));
 }
@@ -1486,9 +1477,6 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_topic_name_default)
   writer_data_out.ddsPublicationData.topic_name = "TEST TOPIC";
   ParameterList empty_param_list;
   OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
   EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(!strcmp(writer_data_out.ddsPublicationData.topic_name, ""));
 }
@@ -1498,10 +1486,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_type_name)
   DiscoveredWriterData writer_data = Factory::writer_data("", "Messages");
 
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_TYPE_NAME));
@@ -1513,14 +1498,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_type_name)
 { // Should decode writer type name
   DiscoveredWriterData writer_data = Factory::writer_data("", "Messages");
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(!strcmp(writer_data.ddsPublicationData.type_name,
                       writer_data_out.ddsPublicationData.type_name));
 }
@@ -1531,9 +1513,6 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_topic_type_default)
   writer_data_out.ddsPublicationData.type_name = "TEST TYPE";
   ParameterList empty_param_list;
   OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
   EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(!strcmp(writer_data_out.ddsPublicationData.type_name, ""));
 }
@@ -1545,10 +1524,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_durability_qos)
                                                           TRANSIENT_LOCAL_DURABILITY_QOS);
 
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info , map));
   EXPECT_TRUE(is_present(param_list, PID_DURABILITY));
@@ -1562,14 +1538,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_durability_qos)
                                                           0, 0,
                                                           TRANSIENT_LOCAL_DURABILITY_QOS);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(writer_data.ddsPublicationData.durability.kind ==
               writer_data_out.ddsPublicationData.durability.kind);
 }
@@ -1580,9 +1553,6 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_durability_default)
                                                               0, 0, TRANSIENT_LOCAL_DURABILITY_QOS);
   ParameterList empty_param_list;
   OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
   EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   DurabilityQosPolicy defaultQos =
     TheServiceParticipant->initial_DurabilityQosPolicy();
@@ -1590,7 +1560,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_durability_default)
               writer_data_out.ddsPublicationData.durability.kind);
 }
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_durability_service)
 { // Should encode writer durabiltiy service
   DiscoveredWriterData writer_data = Factory::writer_data(
@@ -1601,10 +1571,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_durability_service)
                                                           389, 102, 20);
 
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_DURABILITY_SERVICE));
@@ -1628,14 +1595,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_durability_service)
                                                           KEEP_LAST_HISTORY_QOS, 172,
                                                           389, 102, 20);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
   DurabilityServiceQosPolicy& ds_in =
     writer_data.ddsPublicationData.durability_service;
   DurabilityServiceQosPolicy& ds_out =
@@ -1688,10 +1652,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_deadline)
                                                           127, 35000);
 
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_DEADLINE));
@@ -1707,14 +1668,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_deadline)
                                                           KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1,
                                                           127, 35000);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(writer_data.ddsPublicationData.deadline.period.sec ==
               writer_data_out.ddsPublicationData.deadline.period.sec);
   EXPECT_TRUE(writer_data.ddsPublicationData.deadline.period.nanosec ==
@@ -1748,10 +1706,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_latency_budget)
                                                           KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0,
                                                           5, 25000);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_LATENCY_BUDGET));
@@ -1767,14 +1722,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_latency_budget)
                                                           KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0,
                                                           5, 25000);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(writer_data.ddsPublicationData.latency_budget.duration.sec ==
               writer_data_out.ddsPublicationData.latency_budget.duration.sec);
 }
@@ -1806,10 +1758,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_liveliness)
                                                           KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                           MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, 17, 15000);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_LIVELINESS));
@@ -1826,14 +1775,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_liveliness)
                                                           KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                           MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, 17, 15000);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(writer_data.ddsPublicationData.liveliness.kind ==
               writer_data_out.ddsPublicationData.liveliness.kind);
   EXPECT_TRUE(writer_data.ddsPublicationData.liveliness.lease_duration.sec ==
@@ -1874,10 +1820,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_reliability)
                                                           AUTOMATIC_LIVELINESS_QOS, 0, 0,
                                                           RELIABLE_RELIABILITY_QOS, 8, 100);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_RELIABILITY));
@@ -1895,14 +1838,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_reliability)
                                                           AUTOMATIC_LIVELINESS_QOS, 0, 0,
                                                           RELIABLE_RELIABILITY_QOS, 8, 100);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(writer_data.ddsPublicationData.reliability.kind ==
               writer_data_out.ddsPublicationData.reliability.kind);
   EXPECT_TRUE(writer_data.ddsPublicationData.reliability.max_blocking_time.sec ==
@@ -1921,9 +1861,6 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_reliability_default)
 
   ParameterList empty_param_list;
   OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
   EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   ReliabilityQosPolicy defaultQos =
     TheServiceParticipant->initial_DataWriterQos().reliability;
@@ -1944,10 +1881,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_lifespan)
                                                           BEST_EFFORT_RELIABILITY_QOS, 0, 0,
                                                           12, 90000);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_LIFESPAN));
@@ -1965,14 +1899,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_lifespan)
                                                           BEST_EFFORT_RELIABILITY_QOS, 0, 0,
                                                           12, 90000);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(writer_data.ddsPublicationData.lifespan.duration.sec ==
               writer_data_out.ddsPublicationData.lifespan.duration.sec);
   EXPECT_TRUE(writer_data.ddsPublicationData.lifespan.duration.nanosec ==
@@ -1987,9 +1918,6 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_lifespan_default)
 
   ParameterList empty_param_list;
   OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
   EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   LifespanQosPolicy defaultQos =
     TheServiceParticipant->initial_LifespanQosPolicy();
@@ -2010,10 +1938,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_user_data)
                                                           BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                           ud, ud_len);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_USER_DATA));
@@ -2035,14 +1960,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_user_data)
                                                           BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                           ud, ud_len);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(writer_data.ddsPublicationData.user_data.value ==
               writer_data_out.ddsPublicationData.user_data.value);
 }
@@ -2060,9 +1982,6 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_user_data_default)
 
   ParameterList empty_param_list;
   OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
   EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   UserDataQosPolicy defaultQos =
     TheServiceParticipant->initial_UserDataQosPolicy();
@@ -2079,10 +1998,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_ownership)
                                                           BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                           EXCLUSIVE_OWNERSHIP_QOS);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_OWNERSHIP));
@@ -2099,14 +2015,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_ownership)
                                                           BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                           EXCLUSIVE_OWNERSHIP_QOS);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(writer_data.ddsPublicationData.ownership.kind ==
               writer_data_out.ddsPublicationData.ownership.kind);
 }
@@ -2118,9 +2031,6 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_ownership_default)
 
   ParameterList empty_param_list;
   OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
   EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   OwnershipQosPolicy defaultQos =
     TheServiceParticipant->initial_OwnershipQosPolicy();
@@ -2138,20 +2048,17 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_ownership_strength)
                                                           SHARED_OWNERSHIP_QOS,
                                                           29);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   EXPECT_TRUE(is_present(param_list, PID_OWNERSHIP_STRENGTH));
   Parameter param = get(param_list, PID_OWNERSHIP_STRENGTH);
   EXPECT_TRUE(param.ownership_strength().value == 29);
 #endif
 }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
 TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_ownership_strength)
 { // Should decode writer ownership strength
   DiscoveredWriterData writer_data = Factory::writer_data(
@@ -2162,14 +2069,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_ownership_strength)
                                                           SHARED_OWNERSHIP_QOS,
                                                           29);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(writer_data.ddsPublicationData.ownership_strength.value ==
               writer_data_out.ddsPublicationData.ownership_strength.value);
 }
@@ -2181,9 +2085,6 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_ownership_strength_default
 
   ParameterList empty_param_list;
   OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
   EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   OwnershipStrengthQosPolicy defaultQos =
     TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
@@ -2202,10 +2103,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_destination_order)
                                                           SHARED_OWNERSHIP_QOS, 0,
                                                           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_DESTINATION_ORDER));
@@ -2224,14 +2122,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_destination_order)
                                                           SHARED_OWNERSHIP_QOS, 0,
                                                           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(writer_data.ddsPublicationData.destination_order.kind ==
               writer_data_out.ddsPublicationData.destination_order.kind);
 }
@@ -2244,9 +2139,6 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_destination_order_default)
 
   ParameterList empty_param_list;
   OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
   EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   DestinationOrderQosPolicy defaultQos =
     TheServiceParticipant->initial_DestinationOrderQosPolicy();
@@ -2265,10 +2157,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_presentation)
                                                           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
                                                           GROUP_PRESENTATION_QOS, true, true);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_PRESENTATION));
@@ -2290,14 +2179,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_presentation)
                                                           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
                                                           GROUP_PRESENTATION_QOS, true, true);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(writer_data.ddsPublicationData.presentation.access_scope ==
               writer_data_out.ddsPublicationData.presentation.access_scope);
   EXPECT_TRUE(writer_data.ddsPublicationData.presentation.coherent_access ==
@@ -2316,9 +2202,6 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_presentation_default)
 
   ParameterList empty_param_list;
   OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
   EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   PresentationQosPolicy defaultQos =
     TheServiceParticipant->initial_PresentationQosPolicy();
@@ -2343,10 +2226,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_partition)
                                                           INSTANCE_PRESENTATION_QOS, false, false,
                                                           part);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_PARTITION));
@@ -2368,14 +2248,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_partition)
                                                           INSTANCE_PRESENTATION_QOS, false, false,
                                                           part);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(writer_data_out.ddsPublicationData.partition.name.length() == 1);
   EXPECT_TRUE(!strcmp(writer_data.ddsPublicationData.partition.name[0],
                       writer_data_out.ddsPublicationData.partition.name[0]));
@@ -2396,9 +2273,6 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_partition_default)
 
   ParameterList empty_param_list;
   OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
   EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(!writer_data_out.ddsPublicationData.partition.name.length());
 }
@@ -2416,10 +2290,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_topic_data)
                                                           INSTANCE_PRESENTATION_QOS, false, false, 0,
                                                           topic_data, 7);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_TOPIC_DATA));
@@ -2444,14 +2315,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_topic_data)
                                                           INSTANCE_PRESENTATION_QOS, false, false, 0,
                                                           topic_data, 7);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(writer_data.ddsPublicationData.topic_data.value ==
               writer_data_out.ddsPublicationData.topic_data.value);
 }
@@ -2471,9 +2339,6 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_topic_data_default)
 
   ParameterList empty_param_list;
   OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
   EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(!writer_data_out.ddsPublicationData.topic_data.value.length());
 }
@@ -2491,10 +2356,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_group_data)
                                                           INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0,
                                                           group_data, 7);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_GROUP_DATA));
@@ -2519,14 +2381,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_group_data)
                                                           INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0,
                                                           group_data, 7);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(writer_data.ddsPublicationData.group_data.value ==
               writer_data_out.ddsPublicationData.group_data.value);
 }
@@ -2546,9 +2405,6 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_group_data_default)
 
   ParameterList empty_param_list;
   OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
   EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
   EXPECT_TRUE(!writer_data_out.ddsPublicationData.group_data.value.length());
 }
@@ -2564,10 +2420,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_guid)
                                                           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
                                                           INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_ENDPOINT_GUID));
@@ -2577,14 +2430,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_guid)
 { // Should decode writer guid
   DiscoveredWriterData writer_data = Factory::default_writer_data();
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(!memcmp(&writer_data.writerProxy.remoteWriterGuid,
                       &writer_data_out.writerProxy.remoteWriterGuid,
                       sizeof(GUID_t)));
@@ -2610,10 +2460,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_unicast_locators)
                                                           locators, 2
                                                           );
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_UNICAST_LOCATOR));
@@ -2640,14 +2487,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_unicast_allocators)
                                                           INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0,
                                                           locators, 2);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(writer_data_out.writerProxy.allLocators.length() == 1);
   EXPECT_TRUE(!strcmp(writer_data_out.writerProxy.allLocators[0].transport_type, "rtps_udp"));
 }
@@ -2671,10 +2515,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_multicast_locators)
                                                           INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0,
                                                           0, 0, locators, 2);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_MULTICAST_LOCATOR));
@@ -2701,14 +2542,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_multicast_locators)
                                                           INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0,
                                                           0, 0, locators, 2);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(writer_data_out.writerProxy.allLocators.length() == 1);
   EXPECT_TRUE(!strcmp(writer_data_out.writerProxy.allLocators[0].transport_type, "rtps_udp"));
 }
@@ -2717,10 +2555,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_data)
 { // Should encode reader data
   DiscoveredReaderData reader_data = Factory::default_reader_data();
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
 }
@@ -2730,10 +2565,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_topic_name)
   DiscoveredReaderData reader_data =
     Factory::reader_data("TOPIC NAME TEST");
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_TOPIC_NAME));
@@ -2746,14 +2578,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_topic_name)
   DiscoveredReaderData reader_data =
     Factory::reader_data("TOPIC NAME TEST");
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(!strcmp(reader_data.ddsSubscriptionData.topic_name,
                       reader_data_out.ddsSubscriptionData.topic_name));
 }
@@ -2763,10 +2592,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_type_name)
   DiscoveredReaderData reader_data = Factory::reader_data("", "Messages");
 
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_TYPE_NAME));
@@ -2778,14 +2604,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_type_name)
 { // Should decode reader type name
   DiscoveredReaderData reader_data = Factory::reader_data("", "Messages");
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(!strcmp(reader_data.ddsSubscriptionData.type_name,
                       reader_data_out.ddsSubscriptionData.type_name));
 }
@@ -2797,10 +2620,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_durability)
                                                           TRANSIENT_LOCAL_DURABILITY_QOS);
 
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_DURABILITY));
@@ -2814,14 +2634,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_durability)
                                                           0, 0,
                                                           TRANSIENT_LOCAL_DURABILITY_QOS);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.durability.kind ==
               reader_data_out.ddsSubscriptionData.durability.kind);
 }
@@ -2833,10 +2650,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_deadline)
                                                           127, 35000);
 
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_DEADLINE));
@@ -2851,14 +2665,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_deadline)
                                                           0, 0, VOLATILE_DURABILITY_QOS,
                                                           127, 35000);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.deadline.period.sec ==
               reader_data_out.ddsSubscriptionData.deadline.period.sec);
   EXPECT_TRUE(reader_data.ddsSubscriptionData.deadline.period.nanosec ==
@@ -2871,10 +2682,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_latency_budget)
                                                           0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                           5, 25000);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_LATENCY_BUDGET));
@@ -2889,14 +2697,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_latency_budget)
                                                           0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                           5, 25000);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.latency_budget.duration.sec ==
               reader_data_out.ddsSubscriptionData.latency_budget.duration.sec);
 }
@@ -2907,10 +2712,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_liveliness)
                                                           0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                           MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, 17, 15000);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_LIVELINESS));
@@ -2926,14 +2728,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_liveliness)
                                                           0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                           MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, 17, 15000);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.liveliness.kind ==
               reader_data_out.ddsSubscriptionData.liveliness.kind);
   EXPECT_TRUE(reader_data.ddsSubscriptionData.liveliness.lease_duration.sec ==
@@ -2949,10 +2748,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_reliability)
                                                           AUTOMATIC_LIVELINESS_QOS, 0, 0,
                                                           RELIABLE_RELIABILITY_QOS, 8, 100);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_RELIABILITY));
@@ -2969,14 +2765,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_reliability)
                                                           AUTOMATIC_LIVELINESS_QOS, 0, 0,
                                                           RELIABLE_RELIABILITY_QOS, 8, 100);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.reliability.kind ==
               reader_data_out.ddsSubscriptionData.reliability.kind);
   EXPECT_TRUE(reader_data.ddsSubscriptionData.reliability.max_blocking_time.sec ==
@@ -2995,10 +2788,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_user_data)
                                                           BEST_EFFORT_RELIABILITY_QOS, 0, 0,
                                                           ud, ud_len);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_USER_DATA));
@@ -3019,14 +2809,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_user_data)
                                                           BEST_EFFORT_RELIABILITY_QOS, 0, 0,
                                                           ud, ud_len);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.user_data.value ==
               reader_data_out.ddsSubscriptionData.user_data.value);
 }
@@ -3039,10 +2826,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_ownership)
                                                           BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                           EXCLUSIVE_OWNERSHIP_QOS);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_OWNERSHIP));
@@ -3058,14 +2842,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_ownership)
                                                           BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                           EXCLUSIVE_OWNERSHIP_QOS);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.ownership.kind ==
               reader_data_out.ddsSubscriptionData.ownership.kind);
 }
@@ -3079,10 +2860,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_destination_order)
                                                           SHARED_OWNERSHIP_QOS,
                                                           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_DESTINATION_ORDER));
@@ -3100,14 +2878,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_destination_order)
                                                           SHARED_OWNERSHIP_QOS,
                                                           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.destination_order.kind ==
               reader_data_out.ddsSubscriptionData.destination_order.kind);
 }
@@ -3122,10 +2897,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_presentation)
                                                           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
                                                           GROUP_PRESENTATION_QOS, true, true);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_PRESENTATION));
@@ -3146,14 +2918,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_presentation)
                                                           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
                                                           GROUP_PRESENTATION_QOS, true, true);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.presentation.access_scope ==
               reader_data_out.ddsSubscriptionData.presentation.access_scope);
   EXPECT_TRUE(reader_data.ddsSubscriptionData.presentation.coherent_access ==
@@ -3174,10 +2943,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_partition)
                                                           INSTANCE_PRESENTATION_QOS, false, false,
                                                           part);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_PARTITION));
@@ -3198,14 +2964,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_partition)
                                                           INSTANCE_PRESENTATION_QOS, false, false,
                                                           part);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(reader_data_out.ddsSubscriptionData.partition.name.length() == 1);
   EXPECT_TRUE(!strcmp(reader_data.ddsSubscriptionData.partition.name[0],
                       reader_data_out.ddsSubscriptionData.partition.name[0]));
@@ -3223,10 +2986,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_topic_data)
                                                           INSTANCE_PRESENTATION_QOS, false, false, 0,
                                                           topic_data, 7);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_TOPIC_DATA));
@@ -3250,14 +3010,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_topic_data)
                                                           INSTANCE_PRESENTATION_QOS, false, false, 0,
                                                           topic_data, 7);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.topic_data.value ==
               reader_data_out.ddsSubscriptionData.topic_data.value);
 }
@@ -3274,10 +3031,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_group_data)
                                                           INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0,
                                                           group_data, 7);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_GROUP_DATA));
@@ -3301,14 +3055,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_group_data)
                                                           INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0,
                                                           group_data, 7);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.group_data.value ==
               reader_data_out.ddsSubscriptionData.group_data.value);
 }
@@ -3323,10 +3074,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_guid)
                                                           BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
                                                           INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_ENDPOINT_GUID));
@@ -3336,14 +3084,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_guid)
 { // Should decode reader guid
   DiscoveredReaderData reader_data = Factory::default_reader_data();
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(!memcmp(&reader_data.readerProxy.remoteReaderGuid,
                       &reader_data_out.readerProxy.remoteReaderGuid,
                       sizeof(GUID_t)));
@@ -3368,10 +3113,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_unicast_locators)
                                                           locators, 2
                                                           );
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_UNICAST_LOCATOR));
@@ -3397,14 +3139,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_unicast_locators)
                                                           INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0,
                                                           locators, 2);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(reader_data_out.readerProxy.allLocators.length() == 1);
 }
 
@@ -3426,10 +3165,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_multicast_locators)
                                                           INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0,
                                                           0, 0, locators, 2);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_MULTICAST_LOCATOR));
@@ -3459,14 +3195,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_multicast_locators)
                                                           INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0,
                                                           0, 0, locators, 2);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(reader_data_out.readerProxy.allLocators.length() == 1);
   EXPECT_TRUE(!strcmp(reader_data_out.readerProxy.allLocators[0].transport_type, "rtps_udp"));
 }
@@ -3488,10 +3221,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_content_filter_property
                                                           0, 0, 0, 0,
                                                           cf_topic_name, rel_topic_name, 0, filter_expr, params, 2);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   EXPECT_TRUE(is_present(param_list, PID_CONTENT_FILTER_PROPERTY));
@@ -3519,14 +3249,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_content_filter_property
                                                           0, 0, 0, 0,
                                                           cf_topic_name, rel_topic_name, filter_name, filter_expr, params, 2);
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
   EXPECT_TRUE(
               !strcmp(reader_data.contentFilterProperty.contentFilteredTopicName,
                       reader_data_out.contentFilterProperty.contentFilteredTopicName));
@@ -3571,10 +3298,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_decode_reader_associated_guid_
   reader_data.readerProxy.associatedWriters[1] = writer1;
 
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info));
   Parameter guid0 = get(param_list, PID_OPENDDS_ASSOCIATED_WRITER, 0);
   Parameter guid1 = get(param_list, PID_OPENDDS_ASSOCIATED_WRITER, 1);
@@ -3586,7 +3310,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_decode_reader_associated_guid_
                       sizeof(OpenDDS::DCPS::GuidPrefix_t)));
 
   DiscoveredReaderData reader_data_out;
-  from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info);
+  from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_);
   EXPECT_TRUE(reader_data_out.readerProxy.associatedWriters.length() == 2);
   EXPECT_TRUE(!memcmp(reader_data_out.readerProxy.associatedWriters[0].guidPrefix,
                       writer0.guidPrefix,
@@ -3633,9 +3357,6 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_reader_defaults)
                                                               cf_topic_name, rel_topic_name, filter_name, filter_expr, params, 2);
   ParameterList empty_param_list;
   OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
   EXPECT_TRUE(from_param_list(empty_param_list, VENDORID_OPENDDS, reader_data_out, true, type_info));
   EXPECT_TRUE(!strcmp(reader_data_out.ddsSubscriptionData.topic_name, ""));
   EXPECT_TRUE(!strcmp(reader_data_out.ddsSubscriptionData.type_name, ""));
@@ -3704,10 +3425,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, dont_encode_writer_default_data)
   DiscoveredWriterData writer_data = Factory::default_writer_data();
 
   ParameterList param_list;
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
   EXPECT_TRUE(!is_present(param_list, PID_DURABILITY));
@@ -3720,7 +3438,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, dont_encode_writer_default_data)
   EXPECT_TRUE(!is_present(param_list, PID_LIFESPAN));
   EXPECT_TRUE(!is_present(param_list, PID_USER_DATA));
   EXPECT_TRUE(!is_present(param_list, PID_OWNERSHIP));
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   EXPECT_TRUE(!is_present(param_list, PID_OWNERSHIP_STRENGTH));
 #endif
   EXPECT_TRUE(!is_present(param_list, PID_DESTINATION_ORDER));
@@ -3735,10 +3453,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, dont_encode_reader_default_data)
   DiscoveredReaderData reader_data = Factory::default_reader_data();
   ParameterList param_list;
   EXPECT_TRUE(param_list.length() == 0);
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
   EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
   EXPECT_TRUE(!is_present(param_list, PID_DURABILITY));

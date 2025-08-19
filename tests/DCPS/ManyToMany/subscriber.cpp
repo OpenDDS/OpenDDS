@@ -10,8 +10,11 @@
 #include <ace/OS_NS_string.h>
 
 #include <dds/DdsDcpsInfrastructureC.h>
+
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/StaticIncludes.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/WaitSet.h>
 
@@ -19,10 +22,7 @@
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
 #include "dds/DCPS/transport/framework/TransportInst_rch.h"
 
-#include "dds/DCPS/StaticIncludes.h"
-#if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
-#include <dds/DCPS/transport/udp/Udp.h>
-#include <dds/DCPS/transport/multicast/Multicast.h>
+#if defined ACE_AS_STATIC_LIBS && !OPENDDS_CONFIG_SAFETY_PROFILE
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/shmem/Shmem.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>

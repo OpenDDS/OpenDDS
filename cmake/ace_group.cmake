@@ -1,7 +1,7 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-cmake_minimum_required(VERSION 3.3.2...3.27)
+cmake_minimum_required(VERSION 3.3.2...4.0)
 
 if(_OPENDDS_ACE_GROUP_CMAKE)
   return()
@@ -32,7 +32,7 @@ _opendds_group_exe(ace_gperf
   EXTRA_BIN_DIRS "${TAO_BIN_DIR}"
 )
 
-function(_opendds_vs_force_static)
+function(_opendds_vs_force_static_runtime)
   # Make sure the MSVC runtime library, which is similar to libc of other
   # systems, is the same kind everywhere. Normally we shouldn't make global
   # changes, but if we don't do this, MSVC won't link the programs if the
@@ -63,11 +63,17 @@ function(_opendds_vs_force_static)
   endif()
 endfunction()
 
-if(MSVC AND OPENDDS_STATIC)
-  _opendds_vs_force_static()
+# If OpenDDS is built using CMake in Visual Studio, let CMAKE_MSVC_RUNTIME_LIBRARY
+# decide what runtime is used. Otherwise we need to force it, see above.
+if(MSVC AND OPENDDS_STATIC AND NOT OPENDDS_BUILT_USING_CMAKE)
+  if(NOT DEFINED OPENDDS_STATIC_RUNTIME)
+    set(OPENDDS_STATIC_RUNTIME TRUE)
+  endif()
+  if(OPENDDS_STATIC_RUNTIME)
+    _opendds_vs_force_static_runtime()
+  endif()
 endif()
 
-enable_language(C)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 

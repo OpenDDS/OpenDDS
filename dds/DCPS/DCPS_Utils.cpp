@@ -409,7 +409,7 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
   return compatible;
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 using OpenDDS::DCPS::operator==;
 #endif
 bool should_check_association_upon_change(const DDS::DataReaderQos & qos1,

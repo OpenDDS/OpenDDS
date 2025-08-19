@@ -8,8 +8,6 @@
 #ifndef OPENDDS_DCPS_DATAREADERIMPL_H
 #define OPENDDS_DCPS_DATAREADERIMPL_H
 
-#include "dcps_export.h"
-
 #include "AssociationData.h"
 #include "AtomicBool.h"
 #include "Cached_Allocator_With_Overflow_T.h"
@@ -28,24 +26,23 @@
 #include "RcEventHandler.h"
 #include "RcHandle_T.h"
 #include "RcObject.h"
-#include "ReactorInterceptor.h"
 #include "Service_Participant.h"
-#include "Stats_T.h"
 #include "SubscriptionInstance.h"
 #include "TimeTypes.h"
 #include "TopicImpl.h"
 #include "WriterInfo.h"
 #include "ZeroCopyInfoSeq_T.h"
+#include "dcps_export.h"
 
 #include "transport/framework/ReceivedDataSample.h"
 #include "transport/framework/TransportClient.h"
 #include "transport/framework/TransportReceiveListener.h"
 
-#include <dds/DdsDcpsTopicC.h>
-#include <dds/DdsDcpsSubscriptionExtC.h>
 #include <dds/DdsDcpsDomainC.h>
-#include <dds/DdsDcpsTopicC.h>
 #include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsSubscriptionExtC.h>
+#include <dds/DdsDcpsTopicC.h>
+#include <dds/DdsDcpsTopicC.h>
 
 #include <ace/String_Base.h>
 #include <ace/Reverse_Lock_T.h>
@@ -69,7 +66,6 @@ class DomainParticipantImpl;
 class SubscriptionInstance;
 class TopicImpl;
 class TopicDescriptionImpl;
-class Monitor;
 class DataReaderImpl;
 class FilterEvaluator;
 
@@ -81,37 +77,7 @@ enum MarshalingType {
   KEY_ONLY_MARSHALING
 };
 
-/// Elements stored for managing statistical data.
-class OpenDDS_Dcps_Export WriterStats {
-public:
-  /// Default constructor.
-  WriterStats(
-    int amount = 0,
-    DataCollector<double>::OnFull type = DataCollector<double>::KeepOldest);
-#ifdef ACE_HAS_CPP11
-  WriterStats(const WriterStats&) = default;
-#endif
-
-  /// Add a datum to the latency statistics.
-  void add_stat(const TimeDuration& delay);
-
-  /// Extract the current latency statistics for this writer.
-  LatencyStatistics get_stats() const;
-
-  /// Reset the latency statistics for this writer.
-  void reset_stats();
-
-#ifndef OPENDDS_SAFETY_PROFILE
-  /// Dump any raw data.
-  std::ostream& raw_data(std::ostream& str) const;
-#endif
-
-private:
-  /// Latency statistics for the DataWriter to this DataReader.
-  Stats<double> stats_;
-};
-
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
 class OpenDDS_Dcps_Export AbstractSamples
 {
@@ -122,60 +88,6 @@ public:
 };
 
 #endif
-
-// Class to cleanup in case EndHistoricSamples is missed
-class EndHistoricSamplesMissedSweeper : public ReactorInterceptor {
-public:
-  EndHistoricSamplesMissedSweeper(ACE_Reactor* reactor,
-                                  ACE_thread_t owner,
-                                  DataReaderImpl* reader);
-
-  void schedule_timer(WriterInfo_rch& info);
-  void cancel_timer(WriterInfo_rch& info);
-
-  // Arg will be PublicationId
-  int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
-
-  virtual bool reactor_is_shut_down() const
-  {
-    return TheServiceParticipant->is_shut_down();
-  }
-
-private:
-  WeakRcHandle<DataReaderImpl> reader_;
-  OPENDDS_SET(WriterInfo_rch) info_set_;
-
-  class CommandBase : public Command {
-  public:
-    CommandBase(EndHistoricSamplesMissedSweeper* sweeper,
-                WriterInfo_rch& info)
-      : sweeper_(sweeper)
-      , info_(info)
-    { }
-
-  protected:
-    EndHistoricSamplesMissedSweeper* sweeper_;
-    WriterInfo_rch info_;
-  };
-
-  class ScheduleCommand : public CommandBase {
-  public:
-    ScheduleCommand(EndHistoricSamplesMissedSweeper* sweeper,
-                    WriterInfo_rch& info)
-      : CommandBase(sweeper, info)
-    { }
-    virtual void execute();
-  };
-
-  class CancelCommand : public CommandBase {
-  public:
-    CancelCommand(EndHistoricSamplesMissedSweeper* sweeper,
-                  WriterInfo_rch& info)
-      : CommandBase(sweeper, info)
-    { }
-    virtual void execute();
-  };
-};
 
 /**
 * @class DataReaderImpl
@@ -190,7 +102,7 @@ private:
 *
 */
 class OpenDDS_Dcps_Export DataReaderImpl
-  : public virtual LocalObject<DataReaderEx>,
+  : public virtual LocalObject<DDS::DataReader>,
     public virtual DataReaderCallbacks,
     public virtual EntityImpl,
     public virtual TransportClient,
@@ -204,8 +116,6 @@ public:
   typedef OPENDDS_MAP(DDS::InstanceHandle_t, SubscriptionInstance_rch) SubscriptionInstanceMapType;
   typedef OPENDDS_SET(DDS::InstanceHandle_t) InstanceSet;
   typedef OPENDDS_SET(SubscriptionInstance_rch) SubscriptionInstanceSet;
-  /// Type of collection of statistics for writers to this reader.
-  typedef OPENDDS_MAP_CMP(GUID_t, WriterStats, GUID_tKeyLessThan) StatsMapType;
 
   DataReaderImpl();
 
@@ -241,12 +151,14 @@ public:
   /// The writer state is inout parameter, it has to be set ALIVE before
   /// handle_timeout is called since some subroutine use the state.
   void writer_became_alive(WriterInfo& info,
-                           const MonotonicTimePoint& when);
+                           const MonotonicTimePoint& when,
+                           WriterState previous_state);
 
   /// tell instances when a DataWriter transitions to DEAD
   /// The writer state is inout parameter, the state is set to DEAD
   /// when it returns.
-  void writer_became_dead(WriterInfo& info);
+  void writer_became_dead(WriterInfo& info,
+                          WriterState previous_state);
 
   /// tell instance when a DataWriter is removed.
   /// The liveliness status need update.
@@ -267,7 +179,7 @@ public:
     DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states);
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
   virtual DDS::QueryCondition_ptr create_querycondition(
     DDS::SampleStateMask sample_states,
     DDS::ViewStateMask view_states,
@@ -321,39 +233,13 @@ public:
   virtual DDS::ReturnCode_t get_matched_publications(
     DDS::InstanceHandleSeq & publication_handles);
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   virtual DDS::ReturnCode_t get_matched_publication_data(
     DDS::PublicationBuiltinTopicData & publication_data,
     DDS::InstanceHandle_t publication_handle);
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-
-  virtual DDS::ReturnCode_t enable();
-
-#ifndef OPENDDS_SAFETY_PROFILE
-  virtual void get_latency_stats(
-    LatencyStatisticsSeq & stats);
 #endif
 
-  virtual void reset_latency_stats();
-
-  virtual CORBA::Boolean statistics_enabled();
-
-  virtual void statistics_enabled(
-    CORBA::Boolean statistics_enabled);
-
-  /// @name Raw Latency Statistics Interfaces
-  /// @{
-
-  /// Expose the statistics container.
-  const StatsMapType& raw_latency_statistics() const;
-
-  /// Configure the size of the raw data collection buffer.
-  unsigned int& raw_latency_buffer_size();
-
-  /// Configure the type of the raw data collection buffer.
-  DataCollector<double>::OnFull& raw_latency_buffer_type();
-
-  /// @}
+  virtual DDS::ReturnCode_t enable();
 
   /// update liveliness info for this writer.
   void writer_activity(const DataSampleHeader& header);
@@ -372,7 +258,7 @@ public:
                        DDS::ViewStateMask view_states,
                        DDS::InstanceStateMask instance_states);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   virtual bool contains_sample_filtered(DDS::SampleStateMask sample_states,
                                         DDS::ViewStateMask view_states,
                                         DDS::InstanceStateMask instance_states,
@@ -390,9 +276,6 @@ public:
   virtual void dispose_unregister(const ReceivedDataSample& sample,
                                   DDS::InstanceHandle_t publication_handle,
                                   SubscriptionInstance_rch& instance);
-
-  void process_latency(const ReceivedDataSample& sample);
-  void notify_latency(GUID_t writer);
 
   size_t get_depth() const
   {
@@ -439,13 +322,13 @@ public:
   typedef OPENDDS_VECTOR(DDS::InstanceHandle_t) InstanceHandleVec;
   void get_instance_handles(InstanceHandleVec& instance_handles);
 
-  typedef std::pair<GUID_t, WriterInfo::WriterState> WriterStatePair;
+  typedef std::pair<GUID_t, WriterState> WriterStatePair;
   typedef OPENDDS_VECTOR(WriterStatePair) WriterStatePairVec;
   void get_writer_states(WriterStatePairVec& writer_states);
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  void update_ownership_strength (const GUID_t& pub_id,
-                                  const CORBA::Long& ownership_strength);
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+  void update_ownership_strength(const GUID_t& pub_id,
+                                 CORBA::Long ownership_strength);
 
   // Access to OwnershipManager is only valid when the domain participant is valid;
   // therefore, we must lock the domain pariticipant when using  OwnershipManager.
@@ -500,9 +383,9 @@ public:
   virtual void lookup_instance(const ReceivedDataSample& sample,
                                SubscriptionInstance_rch& instance) = 0;
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
 
   void enable_filtering(ContentFilteredTopicImpl* cft);
 
@@ -510,7 +393,7 @@ public:
 
 #endif
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
 
   void enable_multi_topic(MultiTopicImpl* mt);
 
@@ -566,7 +449,7 @@ public:
     set_instance_state_i(instance, publication_handle, state, timestamp, guid);
   }
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   void begin_access();
   void end_access();
   void get_ordered_data(GroupRakeData& data,
@@ -759,17 +642,16 @@ protected:
   TypeSupportImpl* type_support_;
   GUID_t topic_id_;
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   bool is_exclusive_ownership_;
-
 #endif
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   mutable ACE_Thread_Mutex content_filtered_topic_mutex_;
   TopicDescriptionPtr<ContentFilteredTopicImpl> content_filtered_topic_;
 #endif
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
   TopicDescriptionPtr<MultiTopicImpl> multi_topic_;
 #endif
 
@@ -786,6 +668,9 @@ protected:
 private:
   virtual void install_type_support(TypeSupportImpl*) {}
 
+  void get_flexible_types(const char* key,
+                          XTypes::TypeInformation& type_info);
+
   virtual void set_instance_state_i(DDS::InstanceHandle_t instance,
                                     DDS::InstanceHandle_t publication_handle,
                                     DDS::InstanceStateKind state,
@@ -801,7 +686,7 @@ private:
   void instances_liveliness_update(const GUID_t& writer,
                                    DDS::InstanceHandle_t publication_handle);
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   bool verify_coherent_changes_completion(WriterInfo* writer);
   bool coherent_change_received(WriterInfo* writer);
 #endif
@@ -828,6 +713,7 @@ private:
 
   /// when done handling historic samples, resume
   void resume_sample_processing(const GUID_t& pub_id);
+  void resume_sample_processing(WriterInfo& info);
 
   /// collect samples received before END_HISTORIC_SAMPLES
   /// returns false if normal processing of this sample should be skipped
@@ -837,7 +723,6 @@ private:
   void deliver_historic(OPENDDS_MAP(SequenceNumber, ReceivedDataSample)& samples);
 
   friend class InstanceState;
-  friend class EndHistoricSamplesMissedSweeper;
 
   friend class ::DDS_TEST; //allows tests to get at private data
 
@@ -851,7 +736,6 @@ private:
   // transport reactor thread and that thread doesn't have the owenership of the
   // the subscriber_servant_ object.
   WeakRcHandle<SubscriberImpl>              subscriber_servant_;
-  RcHandle<EndHistoricSamplesMissedSweeper> end_historic_sweeper_;
 
   CORBA::Long                  depth_;
   size_t                       n_chunks_;
@@ -868,9 +752,6 @@ private:
   DDS::RequestedIncompatibleQosStatus  requested_incompatible_qos_status_;
   DDS::SubscriptionMatchedStatus       subscription_match_status_;
 
-  // OpenDDS extended status.  This is only available via listener.
-  BudgetExceededStatus                 budget_exceeded_status_;
-
   /**
    * @todo The subscription_lost_status_ and
    *       subscription_reconnecting_status_ are left here for
@@ -886,73 +767,6 @@ private:
   /// The orb's reactor to be used to register the liveliness
   /// timer.
   ACE_Reactor_Timer_Interface* reactor_;
-
-  class LivelinessTimer : public ReactorInterceptor {
-  public:
-    LivelinessTimer(ACE_Reactor* reactor,
-                    ACE_thread_t owner,
-                    DataReaderImpl* data_reader)
-      : ReactorInterceptor(reactor, owner)
-      , data_reader_(*data_reader)
-      , liveliness_timer_id_(-1)
-    { }
-
-    void check_liveliness();
-
-    void cancel_timer()
-    {
-      execute_or_enqueue(make_rch<CancelCommand>(this));
-    }
-
-    virtual bool reactor_is_shut_down() const
-    {
-      return TheServiceParticipant->is_shut_down();
-    }
-
-  private:
-    WeakRcHandle<DataReaderImpl> data_reader_;
-
-    /// liveliness timer id; -1 if no timer is set
-    long liveliness_timer_id_;
-    void check_liveliness_i(bool cancel, const MonotonicTimePoint& now);
-
-    int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
-
-    class CommandBase : public Command {
-    public:
-      CommandBase(LivelinessTimer* timer)
-        : timer_(timer)
-      { }
-
-    protected:
-      LivelinessTimer* timer_;
-    };
-
-    class CheckLivelinessCommand : public CommandBase {
-    public:
-      CheckLivelinessCommand(LivelinessTimer* timer)
-        : CommandBase(timer)
-      { }
-      virtual void execute()
-      {
-        timer_->check_liveliness_i(true, MonotonicTimePoint::now());
-      }
-    };
-
-    class CancelCommand : public CommandBase {
-    public:
-      CancelCommand(LivelinessTimer* timer)
-        : CommandBase(timer)
-      { }
-      virtual void execute()
-      {
-        if (timer_->liveliness_timer_id_ != -1) {
-          timer_->reactor()->cancel_timer(timer_);
-        }
-      }
-    };
-  };
-  RcHandle<LivelinessTimer> liveliness_timer_;
 
   CORBA::Long last_deadline_missed_total_count_;
   /// Watchdog responsible for reporting missed offered
@@ -982,9 +796,6 @@ private:
 
   bool always_get_history_;
 
-  /// Flag indicating status of statistics gathering.
-  AtomicBool statistics_enabled_;
-
   /// publications writing to this reader.
   typedef OPENDDS_MAP_CMP(GUID_t, WriterInfo_rch,
                    GUID_tKeyLessThan) WriterMapType;
@@ -994,25 +805,9 @@ private:
   /// RW lock for reading/writing publications.
   ACE_RW_Thread_Mutex writers_lock_;
 
-  /// Statistics for this reader, collected for each writer.
-  StatsMapType statistics_;
-  ACE_Recursive_Thread_Mutex statistics_lock_;
-
-  /// Bound (or initial reservation) of raw latency buffer.
-  unsigned int raw_latency_buffer_size_;
-
-  /// Type of raw latency data buffer.
-  DataCollector<double>::OnFull raw_latency_buffer_type_;
-
   typedef VarLess<DDS::ReadCondition> RCCompLess;
   typedef OPENDDS_SET_CMP(DDS::ReadCondition_var,  RCCompLess) ReadConditionSet;
   ReadConditionSet read_conditions_;
-
-  /// Monitor object for this entity
-  unique_ptr<Monitor> monitor_;
-
-  /// Periodic Monitor object for this entity
-  unique_ptr<Monitor>  periodic_monitor_;
 
   bool transport_disabled_;
 

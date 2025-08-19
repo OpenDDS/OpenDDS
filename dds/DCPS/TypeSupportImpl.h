@@ -8,9 +8,11 @@
 
 #include "dcps_export.h"
 #include "Definitions.h"
+#include "Discovery.h"
 #include "LocalObject.h"
 #include "Serializer.h"
 #include "SafetyProfileStreams.h"
+
 #include "XTypes/TypeObject.h"
 #include "XTypes/TypeLookupService.h"
 
@@ -71,7 +73,7 @@ class OpenDDS_Dcps_Export TypeSupportImpl
 public:
   TypeSupportImpl() {}
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   explicit TypeSupportImpl(DDS::DynamicType_ptr type)
   : type_(DDS::DynamicType::_duplicate(type))
   {
@@ -80,7 +82,7 @@ public:
 
   virtual ~TypeSupportImpl();
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   virtual const MetaStruct& getMetaStructForType() const = 0;
 #endif
 
@@ -96,7 +98,7 @@ public:
   /// that the caller must take ownership of.
   virtual char* get_type_name();
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   // IDL local interface uses non-const memebers
   DDS::DynamicType_ptr get_type()
   {
@@ -126,34 +128,37 @@ public:
   virtual const XTypes::TypeIdentifier& getCompleteTypeIdentifier() const = 0;
   virtual const XTypes::TypeMap& getCompleteTypeMap() const = 0;
 
-  void to_type_info(XTypes::TypeInformation& type_info) const;
+  virtual void to_type_info(TypeInformation& type_info) const;
   virtual const XTypes::TypeInformation* preset_type_info() const
   {
     return 0;
   }
 
-  void add_types(const XTypes::TypeLookupService_rch& tls) const;
+  virtual void get_flexible_types(const char* /*key*/,
+                                  XTypes::TypeInformation& /*type_info*/) {}
+
+  virtual void add_types(const XTypes::TypeLookupService_rch& tls) const;
 
   RepresentationFormat* make_format(DDS::DataRepresentationId_t representation);
 
 protected:
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   void get_type_from_type_lookup_service();
 
   DDS::DynamicType_var type_;
 #endif
 
-private:
   static const ACE_CDR::Long TYPE_INFO_DEPENDENT_COUNT_NOT_PROVIDED;
 
   void to_type_info_i(XTypes::TypeIdentifierWithDependencies& ti_with_deps,
                       const XTypes::TypeIdentifier& ti,
                       const XTypes::TypeMap& type_map) const;
 
+private:
   void populate_dependencies_i(const XTypes::TypeLookupService_rch& tls,
                                XTypes::EquivalenceKind ek) const;
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   XTypes::TypeLookupService_rch type_lookup_service_;
 #endif
 

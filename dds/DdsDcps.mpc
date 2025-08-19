@@ -51,6 +51,8 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     OpenDDSConfig.h
     OpenDDSConfigWrapper.h
     OpenDDSConfigWrapperC.h
+    OpenDDSConfigWrapperJC.h
+    OpenDDSConfigWrapperS.h
     Version.h
     Versioned_Namespace.h
     DCPS
@@ -120,6 +122,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
 "	echo '' >> $(cmake_config_install_dest)"
 "	echo '# From make install' >> $(cmake_config_install_dest)"
 "	echo 'set(OPENDDS_USE_PREFIX_PATH ON)' >> $(cmake_config_install_dest)"
+"	echo 'set(OPENDDS_RAPIDJSON_USE_PREFIX_PATH ON)' >> $(cmake_config_install_dest)"
 "	echo 'set(OPENDDS_INSTALL_LIB \"$(INSTALL_LIB)\")' >> $(cmake_config_install_dest)"
   }
 

@@ -119,10 +119,3 @@ DataReaderListenerImpl::on_subscription_lost (
 {
   //cerr << "DataReaderListenerImpl::on_subscription_lost" << endl;
 }
-
-void DataReaderListenerImpl::on_budget_exceeded (
-  DDS::DataReader_ptr,
-  const ::OpenDDS::DCPS::BudgetExceededStatus&)
-{
-  //cerr << "DataReaderListenerImpl::on_budget_exceeded" << endl;
-}

@@ -13,7 +13,6 @@
 #include "GuidConverter.h"
 #include "LinuxNetworkConfigMonitor.h"
 #include "Logging.h"
-#include "MonitorFactory.h"
 #include "Qos_Helper.h"
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
@@ -48,7 +47,7 @@
 #include <ace/config.h>
 
 #include <cstring>
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
 #  include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
 #else
 #  include <fstream>
@@ -62,11 +61,23 @@
 extern char **environ;
 #endif
 
+#if OPENDDS_GCC
+// Embed GDB Extension
+asm(
+  ".pushsection \".debug_gdb_scripts\", \"MS\",@progbits,1\n"
+  ".byte 4\n" // 4 means this is an embedded Python script
+  ".ascii \"gdb.inlined-script\\n\"\n"
+  ".incbin \"../tools/scripts/gdbext.py\"\n"
+  ".byte 0\n"
+  ".popsection\n"
+);
+#endif
+
 namespace {
 
 void set_log_file_name(const char* fname)
 {
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
   ACE_LOG_MSG->msg_ostream(fopen(fname, "a"), true);
 #else
   std::ofstream* output_stream = new std::ofstream(fname, ios::app);
@@ -135,29 +146,24 @@ String toupper(const String& x)
 
 Service_Participant::Service_Participant()
   :
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   ORB_argv_(false /*substitute_env_args*/),
 #endif
   time_source_()
-  , reactor_task_(false)
-  , monitor_factory_(0)
   , priority_min_(0)
   , priority_max_(0)
   , shut_down_(false)
   , network_interface_address_topic_(make_rch<InternalTopic<NetworkInterfaceAddress> >())
+  , statistics_topic_(make_rch<StatisticsTopic>())
   , config_topic_(make_rch<InternalTopic<ConfigPair> >())
-  , config_store_(make_rch<ConfigStoreImpl>(config_topic_))
+  , config_store_(make_rch<ConfigStoreImpl>(config_topic_, time_source_))
   , config_reader_(make_rch<InternalDataReader<ConfigPair> >(DataReaderQosBuilder().reliability_reliable().durability_transient_local()))
   , config_reader_listener_(make_rch<ConfigReaderListener>(ref(*this)))
   , pending_timeout_(0,0) // Can't use COMMON_DCPS_PENDING_TIMEOUT_default due to initialization order.
 #ifdef DDS_DEFAULT_DISCOVERY_METHOD
   , default_discovery_(DDS_DEFAULT_DISCOVERY_METHOD)
 #else
-# ifdef OPENDDS_SAFETY_PROFILE
   , default_discovery_(Discovery::DEFAULT_RTPS)
-# else
-  , default_discovery_(Discovery::DEFAULT_REPO)
-# endif
 #endif
 {
   config_topic_->connect(config_reader_);
@@ -231,16 +237,10 @@ Service_Participant::reactor()
   return reactor_task_.get_reactor();
 }
 
-ACE_thread_t
-Service_Participant::reactor_owner() const
+ReactorTask_rch
+Service_Participant::reactor_task()
 {
-  return reactor_task_.get_reactor_owner();
-}
-
-ReactorInterceptor_rch
-Service_Participant::interceptor() const
-{
-  return reactor_task_.interceptor();
+  return rchandle_from(&reactor_task_);
 }
 
 JobQueue_rch
@@ -257,11 +257,6 @@ DDS::ReturnCode_t Service_Participant::shutdown()
 
   if (shut_down_) {
     return DDS::RETCODE_ALREADY_DELETED;
-  }
-
-  if (monitor_factory_) {
-    monitor_factory_->deinitialize();
-    monitor_factory_ = 0;
   }
 
   {
@@ -311,7 +306,7 @@ DDS::ReturnCode_t Service_Participant::shutdown()
 
       discoveryMap_.clear();
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
       transient_data_cache_.reset();
       persistent_data_cache_.reset();
 #endif
@@ -358,7 +353,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
       // The exceptions are -ORBLogFile and -ORBVerboseLogging, which
       // are processed by the service participant. This allows log control
       // even if an ORB is not being used.
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
       ORB_argv_.add(ACE_TEXT("unused_arg_0"));
 #endif
       /* NOTE ABOUT ADDING NEW OPTIONS HERE ==================================
@@ -383,12 +378,12 @@ Service_Participant::get_domain_participant_factory(int &argc,
         } else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-ORB")) < 0) {
           shifter.ignore_arg();
         } else {
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
           ORB_argv_.add(shifter.get_current());
 #endif
           shifter.consume_arg();
           if (shifter.is_parameter_next()) {
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
             ORB_argv_.add(shifter.get_current(), true /*quote_arg*/);
 #endif
             shifter.consume_arg();
@@ -442,36 +437,6 @@ Service_Participant::get_domain_participant_factory(int &argc,
       reactor_task_.open_reactor_task(&thread_status_manager_, "Service_Participant");
 
       job_queue_ = make_rch<JobQueue>(reactor_task_.get_reactor());
-
-      const bool monitor_enabled = config_store_->get_boolean(COMMON_DCPS_MONITOR,
-                                                              COMMON_DCPS_MONITOR_default);
-
-      if (monitor_enabled) {
-#if !defined(ACE_AS_STATIC_LIBS)
-        ACE_TString directive = ACE_TEXT("dynamic OpenDDS_Monitor Service_Object * OpenDDS_monitor:_make_MonitorFactoryImpl()");
-        ACE_Service_Config::process_directive(directive.c_str());
-#endif
-        this->monitor_factory_ =
-          ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor");
-
-        if (this->monitor_factory_ == 0) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("ERROR: Service_Participant::get_domain_participant_factory, ")
-                     ACE_TEXT("Unable to enable monitor factory.\n")));
-        }
-      }
-
-      if (this->monitor_factory_ == 0) {
-        // Use the stubbed factory
-        MonitorFactory::service_initialize();
-        this->monitor_factory_ =
-          ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor_Default");
-      }
-      if (monitor_enabled) {
-        this->monitor_factory_->initialize();
-      }
-
-      this->monitor_.reset(this->monitor_factory_->create_sp_monitor(this));
     }
 
 #if defined OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
@@ -479,7 +444,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
       ACE_DEBUG((LM_DEBUG,
                  "(%P|%t) Service_Participant::get_domain_participant_factory: Creating LinuxNetworkConfigMonitor\n"));
     }
-    network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_.interceptor());
+    network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(rchandle_from(&reactor_task_));
 #elif defined(OPENDDS_NETWORK_CONFIG_MODIFIER)
     if (DCPS_debug_level >= 1) {
       ACE_DEBUG((LM_DEBUG,
@@ -1290,7 +1255,7 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
       }
 
       // Wait to traverse the list and try again.
-      ACE_OS::sleep(backoff);
+      ACE_OS::sleep(static_cast<unsigned int>(backoff));
 
       // Exponentially backoff delay.
       backoff *= this->federation_backoff_multiplier();
@@ -1658,7 +1623,7 @@ Service_Participant::set_security(bool b)
 bool
 Service_Participant::get_BIT() const
 {
-  return config_store_->get_boolean(COMMON_DCPS_BIT, COMMON_DCPS_BIT_default);
+  return config_store_->get_boolean(COMMON_DCPS_BIT, OPENDDS_CONFIG_BUILT_IN_TOPICS);
 }
 
 void
@@ -1929,7 +1894,7 @@ int
 Service_Participant::load_discovery_configuration(const String& discovery_type,
                                                   bool force)
 {
-  if (!force && !config_store_->has(discovery_type.c_str())) {
+  if (!force && !config_store_->has_prefix(discovery_type.c_str())) {
     return 0;
   }
 
@@ -2055,7 +2020,7 @@ Service_Participant::configure_pool()
 }
 #endif
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 DataDurabilityCache *
 Service_Participant::get_data_durability_cache(
   DDS::DurabilityQosPolicy const & durability)
@@ -2265,7 +2230,7 @@ Service_Participant::get_type_information(DDS::DomainParticipant_ptr participant
   return XTypes::TypeInformation();
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 DDS::ReturnCode_t Service_Participant::get_dynamic_type(DDS::DynamicType_var& type,
   DDS::DomainParticipant_ptr participant, const DDS::BuiltinTopicKey_t& key) const
 {
@@ -2327,6 +2292,22 @@ Service_Participant::printer_value_writer_indent(unsigned int value)
   config_store_->set_uint32(COMMON_PRINTER_VALUE_WRITER_INDENT, value);
 }
 
+TimeDuration
+Service_Participant::statistics_period() const
+{
+  return config_store_->get(COMMON_STATISTICS_PERIOD,
+                            COMMON_STATISTICS_PERIOD_default,
+                            ConfigStoreImpl::Format_FractionalSeconds);
+}
+
+void
+Service_Participant::statistics_period(const TimeDuration& value)
+{
+  config_store_->set(COMMON_STATISTICS_PERIOD,
+                     value,
+                     ConfigStoreImpl::Format_FractionalSeconds);
+}
+
 void
 Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_rch reader)
 {
@@ -2341,9 +2322,9 @@ Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_
       if (p.key() == COMMON_ORB_LOG_FILE) {
         set_log_file_name(p.value().c_str());
       } else if (p.key() == COMMON_ORB_VERBOSE_LOGGING) {
-        set_log_verbose(ACE_OS::atoi(p.value().c_str()));
+        set_log_verbose(static_cast<unsigned long>(ACE_OS::atoi(p.value().c_str())));
       } else if (p.key() == COMMON_DCPS_DEBUG_LEVEL) {
-        set_DCPS_debug_level(ACE_OS::atoi(p.value().c_str()));
+        set_DCPS_debug_level(static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str())));
       } else if (p.key() == COMMON_DCPSRTI_SERIALIZATION) {
         if (ACE_OS::atoi(p.value().c_str()) == 0 && log_level >= LogLevel::Warning) {
           ACE_ERROR((LM_WARNING,
@@ -2351,12 +2332,12 @@ Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_
                      ACE_TEXT("Argument ignored: DCPSRTISerialization is required to be enabled\n")));
         }
       } else if (p.key() == COMMON_DCPS_TRANSPORT_DEBUG_LEVEL) {
-        OpenDDS::DCPS::Transport_debug_level = ACE_OS::atoi(p.value().c_str());
+        Transport_debug_level = static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str()));
       } else if (p.key() == COMMON_DCPS_THREAD_STATUS_INTERVAL) {
         service_participant_.thread_status_manager_.thread_status_interval(TimeDuration(ACE_OS::atoi(p.value().c_str())));
 #if OPENDDS_CONFIG_SECURITY
       } else if (p.key() == COMMON_DCPS_SECURITY_DEBUG_LEVEL) {
-        security_debug.set_debug_level(ACE_OS::atoi(p.value().c_str()));
+        security_debug.set_debug_level(static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str())));
       } else if (p.key() == COMMON_DCPS_SECURITY_DEBUG) {
         security_debug.parse_flags(p.value().c_str());
       } else if (p.key() == COMMON_DCPS_SECURITY_FAKE_ENCRYPTION) {

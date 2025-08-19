@@ -120,7 +120,7 @@ struct OpenDDS_Dcps_Export LogGuid {
   OPENDDS_STRING conv_;
 };
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 OpenDDS_Dcps_Export std::ostream&
 operator<<(std::ostream& os, const OpenDDS::DCPS::GuidConverter& rhs);
 
@@ -128,7 +128,7 @@ operator<<(std::ostream& os, const OpenDDS::DCPS::GuidConverter& rhs);
 OpenDDS_Dcps_Export std::wostream&
 operator<<(std::wostream& os, const OpenDDS::DCPS::GuidConverter& rhs);
 #endif //DDS_HAS_WCHAR
-#endif //OPENDDS_SAFETY_PROFILE
+#endif
 
 } // namespace DCPS
 } // namespace OpenDDS

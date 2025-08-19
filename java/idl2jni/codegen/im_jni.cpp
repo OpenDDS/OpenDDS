@@ -672,7 +672,7 @@ bool idl_mapping_jni::gen_typedef(UTL_ScopedName *name, AST_Type *base,
 
   if (!element) return true;//nothing needed if it's not an array or a sequence
 
-  string length = "source.length ()";
+  string length = "static_cast<jsize> (source.length ())";
 
   if (!sequence) {
     ostringstream oss;
@@ -695,8 +695,9 @@ bool idl_mapping_jni::gen_jarray_copies(UTL_ScopedName *name,
   const bool lengthIsConstant = !sequence;
   commonSetup c(name, jniArrayType.c_str(), false, !sequence);
   string preLoop, postLoopCxx, postLoopJava, preNewArray, newArrayExtra,
-  postNewArray, loopCxx, loopJava, actualJniType = jniType,
-                                     resizeCxx = sequence ? "  target.length (len);\n" : "";
+    postNewArray, loopCxx, loopJava,
+    actualJniType = jniType,
+    resizeCxx = sequence ? "  target.length (static_cast<CORBA::ULong> (len));\n" : "";
 
   if (jvmSig.size() == 1) { //primitive type
     preLoop =
@@ -947,23 +948,26 @@ string arg_conversion(const char *name, AST_Type *type,
                       AST_Argument::Direction direction, string &argconv_in, string &argconv_out,
                       string &tao_argconv_in, string &tao_argconv_out)
 {
-  string tao = idl_mapping_jni::taoType(type);
-  string tao_var = append_var(tao);
-  string jni = idl_mapping_jni::type(type);
-  string jvmSig = idl_mapping_jni::jvmSignature(type);
-  string holderSig = idl_mapping::scoped_helper(type->name(), "/") + "Holder";
-  string non_var = idl_mapping::scoped_helper(type->name(), "::");
+  const string tao = idl_mapping_jni::taoType(type),
+    tao_var = append_var(tao),
+    jni = idl_mapping_jni::type(type),
+    jvmSig = idl_mapping_jni::jvmSignature(type),
+    holderSig = idl_mapping::scoped_helper(type->name(), "/") + "Holder",
+    non_var = idl_mapping::scoped_helper(type->name(), "::"),
+    forany = append_forany(tao);
   string suffix;
 
-  bool always_var(tao == tao_var);
+  const bool always_var(tao == tao_var), array = isArray(type);
 
   if (direction == AST_Argument::dir_IN) {
-    if (isArray(type)) {
+    if (array) {
       argconv_in +=
         "      " + tao + " _c_" + name + ";\n"
-        "      " + append_forany(tao) + " _c_" + name + "_fa(_c_" + name + ");\n"
+        "      " + forany + " _c_" + name + "_fa(_c_" + name + ");\n"
         "      copyToCxx (_jni, _c_" + name + "_fa, " + name + ");\n";
       tao_argconv_in +=
+        "  " + forany + ' ' + name + "_fa(const_cast<typename " +
+        forany + "::_slice_type *>(" + name + "));\n"
         "  " + jni + " _j_" + name + " = 0;\n";
     } else {
       argconv_in +=
@@ -983,7 +987,7 @@ string arg_conversion(const char *name, AST_Type *type,
     } else {
       tao_argconv_in +=
         "  copyToJava (_jni, _j_" + string(name) + ", " + name
-        + ", true);\n";
+        + (array ? "_fa" : "") + ", true);\n";
     }
   } else if (direction == AST_Argument::dir_INOUT) {
     argconv_in +=
@@ -1078,7 +1082,7 @@ string arg_conversion(const char *name, AST_Type *type,
 
       if (isArray(type)) {
         tao_argconv_out +=
-          "  " + append_forany(tao) + " _c_" + name + "_fa(_o_" + name + ");\n"
+          "  " + forany + " _c_" + name + "_fa(_o_" + name + ");\n"
           "  copyToCxx (_jni, " + string(name) + ", _c_" + name + "_fa);\n";
       } else if (var) {
         string init = isSSU(type) ? (" = new " + tao) : "";
@@ -1352,8 +1356,9 @@ void write_native_operation(UTL_ScopedName *name, const char *javaStub,
       extra_retn = "._retn ()";
     }
 
-    if (ret.size() > 5 && ret.substr(ret.size() - 5) == "Array")
+    if (ret.size() > 5 && ret.substr(ret.size() - 5) == "Array") {
       array_cast = "static_cast<" + ret + "> (";
+    }
 
     retval += " _c_ret = ";
     tao_retval += " _j_ret = ";
@@ -1692,7 +1697,7 @@ bool idl_mapping_jni::gen_native(UTL_ScopedName *name, const char *)
     if (info) elem_cxx += "_var";
 
     return gen_jarray_copies(name, "L" + elem + ";", "Object", "jobject",
-                             "jobjectArray", elem_cxx, true, "source.length ()");
+                             "jobjectArray", elem_cxx, true, "static_cast<jsize> (source.length ())");
   }
   default:
     break;

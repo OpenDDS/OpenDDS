@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.3...3.27)
-project(opendds_generated_global_test)
+cmake_minimum_required(VERSION 3.8...4.0)
+project(opendds_tests_cmake_generated_global CXX)
 
 add_subdirectory(idl)
 add_subdirectory(cpp)

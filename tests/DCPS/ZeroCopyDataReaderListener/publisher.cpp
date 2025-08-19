@@ -10,14 +10,13 @@
 #include <ace/OS_NS_stdlib.h>
 #include <ace/OS_NS_unistd.h>
 
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/StaticIncludes.h>
 
-#include "dds/DCPS/StaticIncludes.h"
-#if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
-#include <dds/DCPS/transport/udp/Udp.h>
-#include <dds/DCPS/transport/multicast/Multicast.h>
+#if defined ACE_AS_STATIC_LIBS && !OPENDDS_CONFIG_SAFETY_PROFILE
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #include <dds/DCPS/transport/shmem/Shmem.h>
@@ -26,7 +25,7 @@
 #include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
 #include "Args.h"
-#include "model/Sync.h"
+#include "tests/Utils/StatusMatching.h"
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -121,7 +120,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     delete writer;
 
     // Wait for acks
-    OpenDDS::Model::WriterSync::wait_ack(dw);
+    const DDS::Duration_t max_wait = { 30, 0 };
+    if (dw->wait_for_acknowledgments(max_wait) != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "%N:%l: main: wait for acknowledgement failed\n"));
+      return -1;
+    }
 
     // Clean-up!
     participant->delete_contained_entities();

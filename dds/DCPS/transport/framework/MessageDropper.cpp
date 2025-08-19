@@ -52,7 +52,7 @@ MessageDropper::should_drop(const iovec iov[],
 {
   length = 0;
   for (int i = 0; i < n; ++i) {
-    length += iov[i].iov_len;
+    length += static_cast<ssize_t>(iov[i].iov_len);
   }
   return should_drop(length);
 }

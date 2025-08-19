@@ -1,0 +1,26 @@
+project(*Publisher) : dcpsexe, opendds_cxx11, dcps_test, dcps_transports_for_test {
+  requires += no_opendds_safety_profile
+  exename = publisher
+
+  TypeSupport_Files {
+    maps.idl
+  }
+
+  Source_Files {
+    publisher.cpp
+  }
+}
+
+project(*Subscriber) : dcpsexe, opendds_cxx11, dcps_test, dcps_transports_for_test {
+  requires += no_opendds_safety_profile
+  exename = subscriber
+  after += *Publisher
+
+  TypeSupport_Files {
+    maps.idl
+  }
+
+  Source_Files {
+    subscriber.cpp
+  }
+}

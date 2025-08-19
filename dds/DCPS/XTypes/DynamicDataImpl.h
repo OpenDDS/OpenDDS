@@ -6,7 +6,9 @@
 #ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_IMPL_H
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_IMPL_H
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include "DynamicDataBase.h"
 
 #  include <dds/DCPS/FilterEvaluator.h>
@@ -494,7 +496,7 @@ private:
 
     // Return a duplication of the stored string/wstring.
     // Used for the get_* interfaces of DynamicData.
-    // Caller is responsible for release the returned string.
+    // Caller is responsible for releasing the returned string.
     char* get_string() const;
     CORBA::WChar* get_wstring() const;
 
@@ -516,10 +518,10 @@ private:
       unsigned char char8_[sizeof(ACE_OutputCDR::from_char)];
       unsigned char byte_[sizeof(ACE_OutputCDR::from_octet)];
       unsigned char boolean_[sizeof(ACE_OutputCDR::from_boolean)];
-      const char* str_;
+      char* str_;
 #ifdef DDS_HAS_WCHAR
       unsigned char char16_[sizeof(ACE_OutputCDR::from_wchar)];
-      const CORBA::WChar* wstr_;
+      CORBA::WChar* wstr_;
 #endif
     };
   };
@@ -702,6 +704,6 @@ bool operator<<(Serializer& ser, const KeyOnly<DDS::DynamicData_ptr>& key);
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif
 
 #endif // OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_IMPL_H

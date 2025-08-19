@@ -75,7 +75,7 @@ void TypeSupportImpl::to_type_info_i(XTypes::TypeIdentifierWithDependencies& ti_
 
   if (pos == type_map.end()) {
     log_ti_not_found("to_type_info_i", name(), ti);
-    ti_with_deps.typeid_with_size.type_id = XTypes::TypeIdentifier();
+    ti_with_deps.typeid_with_size.type_id = XTypes::TypeIdentifier::None;
     ti_with_deps.typeid_with_size.typeobject_serialized_size = 0;
   } else if (TheServiceParticipant->type_object_encoding() == Service_Participant::Encoding_WriteOldFormat) {
     Encoding encoding = XTypes::get_typeobject_encoding();
@@ -94,22 +94,25 @@ void TypeSupportImpl::to_type_info_i(XTypes::TypeIdentifierWithDependencies& ti_
   ti_with_deps.dependent_typeid_count = TYPE_INFO_DEPENDENT_COUNT_NOT_PROVIDED;
 }
 
-void TypeSupportImpl::to_type_info(XTypes::TypeInformation& type_info) const
+void TypeSupportImpl::to_type_info(TypeInformation& type_info) const
 {
+  XTypes::TypeInformation& xtypeinfo = type_info.xtypes_type_info_;
+  type_info.flags_ = TypeInformation::Flags_None;
+
   const XTypes::TypeInformation* const preset = preset_type_info();
   if (preset) {
-    type_info = *preset;
+    xtypeinfo = *preset;
     return;
   }
 
-  to_type_info_i(type_info.minimal, getMinimalTypeIdentifier(), getMinimalTypeMap());
+  to_type_info_i(xtypeinfo.minimal, getMinimalTypeIdentifier(), getMinimalTypeMap());
 
   // Properly populate the complete member if complete TypeObjects are generated.
   const XTypes::TypeIdentifier& complete_ti = getCompleteTypeIdentifier();
   if (complete_ti.kind() != XTypes::TK_NONE) {
-    to_type_info_i(type_info.complete, complete_ti, getCompleteTypeMap());
+    to_type_info_i(xtypeinfo.complete, complete_ti, getCompleteTypeMap());
   } else {
-    type_info.complete = XTypes::TypeIdentifierWithDependencies();
+    xtypeinfo.complete = XTypes::TypeIdentifierWithDependencies();
   }
 }
 
@@ -175,6 +178,23 @@ void TypeSupportImpl::populate_dependencies_i(const XTypes::TypeLookupService_rc
       const size_t tobj_size = serialized_size(XTypes::get_typeobject_encoding(), iter->second);
       XTypes::TypeIdentifierWithSize ti_with_size(*it, static_cast<ACE_CDR::ULong>(tobj_size));
       deps_with_size.append(ti_with_size);
+    } else if (it->kind() == XTypes::TI_STRONGLY_CONNECTED_COMPONENT) {
+      XTypes::TypeIdentifier scc_id(*it);
+      XTypes::TypeObjectSeq seq;
+      seq.length(static_cast<DDS::UInt32>(scc_id.sc_component_id().scc_length));
+      for (ACE_CDR::Long i = 1; i <= scc_id.sc_component_id().scc_length; ++i) {
+        scc_id.sc_component_id().scc_index = i;
+        XTypes::TypeMap::const_iterator pos = type_map.find(scc_id);
+        if (pos != type_map.end()) {
+          seq[static_cast<DDS::UInt32>(i - 1)] = pos->second;
+        } else {
+          log_ti_not_found("populate_dependencies_i", name(), scc_id);
+        }
+      }
+      scc_id.sc_component_id().scc_index = 0;
+      const size_t tobj_size = serialized_size(XTypes::get_typeobject_encoding(), seq);
+      XTypes::TypeIdentifierWithSize ti_with_size(scc_id, static_cast<ACE_CDR::ULong>(tobj_size));
+      deps_with_size.append(ti_with_size);
     } else if (XTypes::has_type_object(*it)) {
       log_ti_not_found("populate_dependencies_i", name(), *it);
     }
@@ -183,7 +203,7 @@ void TypeSupportImpl::populate_dependencies_i(const XTypes::TypeLookupService_rc
 }
 
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 void TypeSupportImpl::get_type_from_type_lookup_service()
 {
   if (!type_) {

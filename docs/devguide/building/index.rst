@@ -104,6 +104,62 @@ If configure runs successfully it will end with a message about the next steps f
 
     setenv
 
+.. _building--configuration-header:
+
+The Configuration Header
+========================
+
+The :ghfile:`configure` script and CMake generate a header ``$DDS_ROOT/OpenDDSConfig.h`` (see :envvar:`DDS_ROOT`).
+The header defines macros that determine the features and capabilities that are built into OpenDDS.
+Users using a custom build environment must ensure that ``$DDS_ROOT/OpenDDSConfig.h`` exists.
+A template can be found in :ghfile:`dds/OpenDDSConfig.h.in`.
+
+The configuration header is not used directly.
+Instead, :ghfile:`dds/OpenDDSConfigWrapper.h` includes it, provides defaults and backwards compatibility, and performs some sanity checks.
+For consistency and to avoid build errors, applications that have code that is conditioned on OpenDDS features should include :ghfile:`dds/OpenDDSConfigWrapper.h`.
+
+The following macros are available in the config header:
+
+``OPENDDS_CONFIG_AUTO_STATIC_INCLUDES``
+    If OpenDDS was :ref:`built using CMake <cmake-building>`, then :ghfile:`dds/DCPS/StaticIncludes.h` can be included and the initialization headers will be included automatically based on the :ref:`static libraries <cmake-libraries>` that were linked.
+
+``OPENDDS_CONFIG_BOOTTIME_TIMERS``
+    Use Linux ``CLOCK_BOOTTIME`` when setting timers.
+    This makes the timers more accurate when systems do a hardware sleep.
+
+``OPENDDS_CONFIG_BUILT_IN_TOPICS``
+    Enable full support for the :ref:`built_in_topics`.
+
+``OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC``
+    Enable :ref:`content_subscription_profile--content-filtered-topic`.
+
+``OPENDDS_CONFIG_MULTI_TOPIC``
+    Enable :ref:`content_subscription_profile--multi-topic`.
+
+``OPENDDS_CONFIG_OBJECT_MODEL_PROFILE``
+    Enable :ref:`building--object-model-profile`.
+
+``OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE``
+    Enable exclusive ownership as part of :ref:`building--ownership-profile`.
+
+``OPENDDS_CONFIG_OWNERSHIP_PROFILE``
+    Enable :ref:`building--ownership-profile`.
+
+``OPENDDS_CONFIG_PERSISTENCE_PROFILE``
+    Enable :ref:`building--persistence-profile`.
+
+``OPENDDS_CONFIG_QUERY_CONDITION``
+    Enable :ref:`content_subscription_profile--query-condition`.
+
+``OPENDDS_CONFIG_RAPIDJSON``
+    Enable JSON features.
+
+``OPENDDS_CONFIG_SAFETY_PROFILE``
+    Enable :ref:`safety_profile`.
+
+``OPENDDS_CONFIG_SECURITY``
+    Enable :ref:`dds_security`.
+
 Java
 ====
 
@@ -604,7 +660,7 @@ These are all the variables that are exclusive to building OpenDDS with CMake:
 
 .. cmake:var:: OPENDDS_ACE_TAO_KIND
 
-  The default is ``ace7tao3`` for :ref:`ACE 7/TAO 3 <ace7tao3>`.
+  The default is ``ace8tao4`` for :ref:`ACE 8/TAO 4 <ace8tao4>`.
   See :ref:`here <deps-ace-tao>` for other versions of ACE/TAO.
 
   .. versionadded:: 3.27
@@ -675,7 +731,6 @@ These are all the variables that are exclusive to building OpenDDS with CMake:
   The default for this is ``TRUE``.
 
 .. cmake:var:: OPENDDS_BOOTTIME_TIMERS
-  :no-contents-entry:
 
   .. versionadded:: 3.28
 
@@ -690,6 +745,13 @@ These are all the variables that are exclusive to building OpenDDS with CMake:
   If set to ``ERROR``, enables additional compiler warnings which are treated as errors when compiling OpenDDS.
 
   .. versionadded:: 3.28
+
+.. cmake:var:: OPENDDS_INSTALL_RAPIDJSON
+
+  Install the headers of :cmake:var:`OPENDDS_RAPIDJSON` with OpenDDS.
+  Default is ``TRUE`` if OpenDDS uses its own RapidJSON, else ``FALSE`` if a ``OPENDDS_RAPIDJSON`` path was passed by the user.
+
+  .. versionadded:: 3.32
 
 .. _cmake-building-speed:
 
@@ -769,7 +831,7 @@ Known Limitations
   Currently this only exists for Windows, Linux, macOS, and Android.
   All other platforms will require configuring and building ACE/TAO separately and passing the path using :cmake:var:`OPENDDS_ACE`.
 
-  - See https://www.dre.vanderbilt.edu/~schmidt/DOC_ROOT/ACE/ACE-INSTALL.html for how to manually build ACE/TAO.
+  - See https://www.dre.vanderbilt.edu/~schmidt/ACE-install.html for how to manually build ACE/TAO.
 
 - The following features are planned, but not implemented yet:
 

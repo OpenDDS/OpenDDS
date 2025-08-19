@@ -9,6 +9,7 @@
 #ifndef OPENDDS_DCPS_RECORDER_H
 #define OPENDDS_DCPS_RECORDER_H
 
+#include "Definitions.h"
 #include "LocalObject.h"
 #include "PoolAllocator.h"
 #include "RawDataSample.h"
@@ -68,11 +69,11 @@ public:
 
   static Recorder_ptr _duplicate(Recorder_ptr obj);
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   /**
    *  Find the bit key for a given repo id.
    */
-  virtual DDS::ReturnCode_t repoid_to_bit_key(const DCPS::GUID_t&     id,
+  virtual DDS::ReturnCode_t repoid_to_bit_key(const DCPS::GUID_t& id,
                                               DDS::BuiltinTopicKey_t& key) = 0;
 #endif
 
@@ -80,22 +81,22 @@ public:
    * Set the Quality of Service settings for the Recorder.
    *
    */
-  virtual DDS::ReturnCode_t set_qos (const DDS::SubscriberQos & subscriber_qos,
-                                     const DDS::DataReaderQos & datareader_qos)=0;
+  virtual DDS::ReturnCode_t set_qos(const DDS::SubscriberQos& subscriber_qos,
+                                    const DDS::DataReaderQos& datareader_qos) = 0;
 
   /**
    * Get the Quality of Service settings for the Recorder.
    *
    */
-  virtual DDS::ReturnCode_t get_qos (DDS::SubscriberQos & subscriber_qos,
-                                     DDS::DataReaderQos & datareader_qos)=0;
+  virtual DDS::ReturnCode_t get_qos(DDS::SubscriberQos& subscriber_qos,
+                                    DDS::DataReaderQos& datareader_qos) = 0;
 
   /**
    * Change the listener for this Recorder.
    *
    */
-  virtual DDS::ReturnCode_t set_listener (const RecorderListener_rch & a_listener,
-                                          DDS::StatusMask              mask = DEFAULT_STATUS_MASK )=0;
+  virtual DDS::ReturnCode_t set_listener(const RecorderListener_rch& a_listener,
+                                         DDS::StatusMask mask = DEFAULT_STATUS_MASK) = 0;
 
   /**
    * Get the listener for this Recorder.
@@ -103,7 +104,7 @@ public:
    */
   virtual RecorderListener_rch get_listener() = 0;
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   virtual DDS::DynamicData_ptr get_dynamic_data(const RawDataSample& sample) = 0;
 #endif
 

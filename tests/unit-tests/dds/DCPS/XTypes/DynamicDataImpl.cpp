@@ -1,4 +1,6 @@
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include <DynamicDataImplTypeSupportImpl.h>
 
@@ -353,10 +355,10 @@ void verify_modified_single_value_struct(XTypes::DynamicDataImpl& ddi)
   EXPECT_EQ(DDS::RETCODE_OK, ddi.get_uint32_value(uint32_val, 2));
   EXPECT_EQ(321ul, uint32_val);
 
-  EXPECT_EQ(DDS::RETCODE_OK, ddi.set_int8_value(3, CORBA::Int8(128)));
+  EXPECT_EQ(DDS::RETCODE_OK, ddi.set_int8_value(3, CORBA::Int8(127)));
   CORBA::Int8 int8_val;
   EXPECT_EQ(DDS::RETCODE_OK, ddi.get_int8_value(int8_val, 3));
-  EXPECT_EQ(CORBA::Int8(128), int8_val);
+  EXPECT_EQ(CORBA::Int8(127), int8_val);
 
   EXPECT_EQ(DDS::RETCODE_OK, ddi.set_uint8_value(4, CORBA::UInt8(100)));
   CORBA::UInt8 uint8_val;
@@ -405,10 +407,10 @@ void verify_modified_single_value_struct(XTypes::DynamicDataImpl& ddi)
   EXPECT_EQ(L'D', wchar_val);
 #endif
 
-  EXPECT_EQ(DDS::RETCODE_OK, ddi.set_byte_value(14, CORBA::Octet(0x6789)));
+  EXPECT_EQ(DDS::RETCODE_OK, ddi.set_byte_value(14, CORBA::Octet(0x67)));
   CORBA::Octet byte_val;
   EXPECT_EQ(DDS::RETCODE_OK, ddi.get_byte_value(byte_val, 14));
-  EXPECT_EQ(CORBA::Octet(0x6789), byte_val);
+  EXPECT_EQ(CORBA::Octet(0x67), byte_val);
 
   EXPECT_EQ(DDS::RETCODE_OK, ddi.set_boolean_value(15, false));
   CORBA::Boolean bool_val = false;
@@ -4348,4 +4350,4 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, String_As_Enum)
   EXPECT_EQ(DDS::RETCODE_OK, data.get_int32_value(eval, MID_my_enum));
   EXPECT_EQ(static_cast<int>(E_UINT64), eval);
 }
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

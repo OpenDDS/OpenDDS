@@ -18,7 +18,7 @@ Operating System
 
 * u20/u22 - Ubuntu 20.04/22.04
 * w19/w22 - Windows Server 2019/Windows Server 2022
-* m11/m12 - macOS 11/12
+* m13/m14 - macOS 13/14
 
 .. seealso::
 
@@ -146,20 +146,11 @@ MacOS, Windows 22, Static, and Release builds instead use :ghfile:`tests/core_ci
 The Thread Sanatizer build uses :ghfile:`tests/tsan_tests.lst`.
 This separation of .lst files is due to how excluding all but a few tests in the ``dcps_tests.lst`` would require adding a new config option to every test we didn't want to run.
 There is a separate security test list, :ghfile:`tests/security/security_tests.lst`, which governs the security tests which are run when ``--security`` is passed to ``auto_run_tests.pl``.
-The last list file used by ``build_and_test.yml`` is :ghfile:`tools/modeling/tests/modeling_tests.lst`, which is included by passing ``--modeling`` to ``auto_run_tests.pl``.
 
 To disable a test in GitHub Actions, ``!GH_ACTIONS`` must be added next to the test in the .lst file.
 There are similar test blockers which only block for specific GitHub Actions configurations from running marked tests:
 
-* ``!GH_ACTIONS_OPENDDS_SAFETY_PROFILE`` blocks Safety Profile builds
-
-* ``!GH_ACTIONS_M10`` blocks the MacOS10 runners
-
-This option currently does nothing because GitHub sees MacOS runners as unresponsive when they attempt to run some of the more intensive tests in dcps_tests.lst.
-
 * ``!GH_ACTIONS_ASAN`` blocks the Address Sanitizer builds
-
-* ``!GH_ACTIONS_W22`` blocks the Windows Server 2022 runner
 
 These blocks are necessary because certain tests cannot properly run on GitHub Actions due to how the runners are configured.
 ``-Config GH_ACTIONS`` is assumed by ``auto_run_tests.pl`` when running on GitHub Actions, but the other test configurations must be passed using ``-Config``.
@@ -183,77 +174,6 @@ In simplified terms, these rules include:
   This should reduce any warnings from Google Test or ACE/TAO.
 * A problem matcher should be declared before steps that start with "build" or contain "make".
   These steps should also contain ``cmake --build``, ``make``, or ``msbuild`` in their ``run`` string.
-
-Blocked Tests
-=============
-
-Certain tests are blocked from GitHub actions because their failures are either unfixable, or are not represented on the scoreboard.
-If this is the case, we have to assume that the failure is due to some sort of limitation caused by the GitHub Actions runners.
-
-Only Failing on CI
-------------------
-
-* tests/DCPS/SharedTransport/run_test.pl multicast
-
-  * Multicast times out waiting for remote peer. Fails on ``test_u20_p1_j8_FM-1f`` and ``test_u20_p1_sec``.
-
-* tests/DCPS/Thrasher/run_test.pl high/aggressive/medium XXXX XXXX
-
-  * The more intense thrasher tests cause consistent failures due to the increased load from ASAN.
-    GitHub Actions fails these tests very consistently compared to the scoreboard which is more intermittent.
-    Fails on ``test_u20_p1_asan_sec``.
-
-Failing Both CI and scoreboard
-------------------------------
-
-These tests fail on the CI as well as the scoreboard, but will remain blocked on the CI until fixed.
-Each test has a list of the builds it was failing on before being blocked.
-
-* tests/DCPS/BuiltInTopicTest/run_test.pl
-
-  * ``test_u18_esafe_js0``
-
-* tests/DCPS/CompatibilityTest/run_test.pl rtps_disc
-
-  * ``test_m10_o1d0_sec``
-
-* tests/DCPS/Federation/run_test.pl
-
-  * ``test_u18_w1_sec``
-
-  * ``test_u18_j_cft0_FM-37``
-
-  * ``test_u18_w1_j_FM-2f``
-
-  * ``test_u20_ace7_j_qt_ws_sec``
-
-  * ``test_u20_p1_asan_sec``
-
-  * ``test_u20_p1_asan_sec``
-
-* tests/DCPS/MultiDPTest/run_test.pl
-
-  * ``test_u18_bsafe_js0_FM-1f``
-
-  * ``test_u18_esafe_js0``
-
-* tests/DCPS/NotifyTest/run_test.pl
-
-  *  ``test_u18_esafe_js0``
-
-* tests/DCPS/Reconnect/run_test.pl restart_pub
-
-  * ``test_w22_x86_i0_sec``
-
-* tests/DCPS/Reconnect/run_test.pl restart_sub
-
-  * ``test_w22_x86_i0_sec``
-
-* tests/DCPS/TimeBasedFilter/run_test.pl -reliable
-
-  * ``test_u18_bsafe_js0_FM-1f``
-
-  * ``test_u18_esafe_js0``
 
 Test Results
 ============

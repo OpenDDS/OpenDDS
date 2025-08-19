@@ -10,6 +10,7 @@
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/OpenDDSConfigWrapper.h>
 
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/SubscriberImpl.h>
@@ -19,10 +20,11 @@
 #  include <dds/DCPS/security/framework/Properties.h>
 #endif
 #include <dds/DCPS/StaticIncludes.h>
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
+#include <dds/DCPS/transport/tcp/Tcp.h>
+#endif
 #if OPENDDS_DO_MANUAL_STATIC_INCLUDES
-#  ifndef OPENDDS_SAFETY_PROFILE
-#    include <dds/DCPS/transport/udp/Udp.h>
-#    include <dds/DCPS/transport/multicast/Multicast.h>
+#  if !OPENDDS_CONFIG_SAFETY_PROFILE
 #    include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #    include <dds/DCPS/transport/shmem/Shmem.h>
 #    if OPENDDS_CONFIG_SECURITY

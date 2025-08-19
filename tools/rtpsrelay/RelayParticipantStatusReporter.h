@@ -21,10 +21,14 @@ public:
   {}
 
   void add_participant(const OpenDDS::DCPS::GUID_t& repoid,
-                       const DDS::ParticipantBuiltinTopicData& data);
+                       const DDS::ParticipantBuiltinTopicData& data,
+                       CORBA::ULong idx,
+                       CORBA::ULong total);
 
   void remove_participant(GuidAddrSet::Proxy& proxy,
-                          const OpenDDS::DCPS::GUID_t& repoid);
+                          const OpenDDS::DCPS::GUID_t& repoid,
+                          CORBA::ULong idx,
+                          CORBA::ULong total);
 
   void set_alive(const OpenDDS::DCPS::GUID_t& repoid,
                  bool alive);

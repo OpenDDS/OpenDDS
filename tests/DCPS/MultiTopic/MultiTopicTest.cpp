@@ -2,15 +2,16 @@
 #include <ace/OS_NS_string.h>
 
 #include <dds/DCPS/BuiltInTopicUtils.h>
-#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/StaticIncludes.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/WaitSet.h>
-#include <dds/DCPS/StaticIncludes.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
-#include <dds/DCPS/SafetyProfileStreams.h>
-#include <dds/DCPS/DCPS_Utils.h>
 
 #include <MultiTopicTestTypeSupportImpl.h>
 
@@ -368,10 +369,7 @@ struct Writer {
 
 bool check_bits(const Publisher_var& pub)
 {
-#ifdef DDS_HAS_MINIMUM_BIT
-  ACE_UNUSED_ARG(pub);
-  return true;
-#else
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   DomainParticipant_var pub_dp = pub->get_participant();
   Subscriber_var bit_sub = pub_dp->get_builtin_subscriber();
   DataReader_var bit_dr = bit_sub->lookup_datareader(BUILT_IN_SUBSCRIPTION_TOPIC);
@@ -393,6 +391,9 @@ bool check_bits(const Publisher_var& pub)
   }
   std::cerr << "ERROR: Built-In DataReader Location topic not found\n";
   return false;
+#else
+  ACE_UNUSED_ARG(pub);
+  return true;
 #endif
 }
 
@@ -582,11 +583,11 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     // Regression Test for https://github.com/OpenDDS/OpenDDS/issues/592
     {
       Resulting resulting_value;
-      ReturnCode_t rc = res_dr->get_key_value(resulting_value, HANDLE_NIL);
-      if (rc != RETCODE_BAD_PARAMETER) {
+      const ReturnCode_t rc_get_key_value = res_dr->get_key_value(resulting_value, HANDLE_NIL);
+      if (rc_get_key_value != RETCODE_BAD_PARAMETER) {
         throw std::runtime_error(
           std::string("Expected get_key_value for HANDLE_NIL to return bad param, but it returned ") +
-          retcode_to_string(rc));
+          retcode_to_string(rc_get_key_value));
       }
     }
 

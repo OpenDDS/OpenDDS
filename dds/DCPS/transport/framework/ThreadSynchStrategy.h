@@ -21,9 +21,7 @@ class ThreadSynch;
 class ThreadSynchResource;
 
 //MJM: Some class documentation here would be extremely helpful.
-class OpenDDS_Dcps_Export ThreadSynchStrategy
-  : public virtual RcObject
-{
+class OpenDDS_Dcps_Export ThreadSynchStrategy : public RcObject {
 public:
 
   virtual ~ThreadSynchStrategy();

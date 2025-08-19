@@ -1,8 +1,11 @@
 #include "tests/Utils/WaitForSample.h"
 #include "common.h"
 
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Discovery.h>
+
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
+
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsSubscriptionC.h>
@@ -145,7 +148,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       return 1;
     }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
     // BUILT_IN_TOPIC_TOPIC unsupported in SAFETY PROFILE with RTPS
     ::DDS::DataReader_var topic_rdr =
         bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC);
@@ -416,8 +419,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        1);
     }
 
-#ifndef OPENDDS_SAFETY_PROFILE
-    {
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
+    if (num_topics) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for topic sample\n"));
       Utils::waitForSample(topic_rdr);
       ::DDS::InstanceHandleSeq handles;
@@ -463,64 +466,64 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: discover topics test PASSED.\n"));
-    }
 
-    ::DDS::SampleInfoSeq topicinfos(10);
-    ::DDS::TopicBuiltinTopicDataSeq topicdata(10);
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for topic sample\n"));
-    Utils::waitForSample(topic_rdr);
-    ret = topic_reader->read(topicdata,
-                             topicinfos,
-                             10,
-                             ::DDS::ANY_SAMPLE_STATE,
-                             ::DDS::ANY_VIEW_STATE,
-                             ::DDS::ANY_INSTANCE_STATE);
+      ::DDS::SampleInfoSeq topicinfos(10);
+      ::DDS::TopicBuiltinTopicDataSeq topicdata(10);
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for topic sample\n"));
+      Utils::waitForSample(topic_rdr);
+      ret = topic_reader->read(topicdata,
+                               topicinfos,
+                               10,
+                               ::DDS::ANY_SAMPLE_STATE,
+                               ::DDS::ANY_VIEW_STATE,
+                               ::DDS::ANY_INSTANCE_STATE);
 
-    if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA) {
-      ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) monitor:  failed to read BIT topic data.\n"),
-                       1);
-    }
+      if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA) {
+        ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) monitor:  failed to read BIT topic data.\n"),
+                         1);
+      }
 
-    len = topicdata.length();
-    if (len != num_topics) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) monitor: ERROR: read %d BIT topic data, expected %d topics.\n",
-                        len, num_topics), 1);
-    }
-
-    CORBA::ULong num_topics_with_data = 0;
-    for (CORBA::ULong i = 0; i < len; ++i) {
-      if (ACE_OS::strcmp(topicdata[i].name.in(), topic_name) != 0) {
+      len = topicdata.length();
+      if (len != num_topics) {
         ACE_ERROR_RETURN((LM_ERROR,
-          "(%P|%t) monitor: ERROR: got topic name \"%C\", expected topic name \"%C\"\n",
-          topicdata[i].name.in(), topic_name), 1);
-      }
-      if (ACE_OS::strcmp(topicdata[i].type_name.in(), topic_type_name) != 0) {
-        ACE_ERROR_RETURN((LM_ERROR,
-          "(%P|%t) monitor:  got topic type name \"%C\", expected topic type name \"%C\"\n",
-          topicdata[i].type_name.in(), topic_type_name), 1);
+                          "(%P|%t) monitor: ERROR: read %d BIT topic data, expected %d topics.\n",
+                          len, num_topics), 1);
       }
 
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Topic: key = %d, %x, %x, name = %C, "
-        "type_name=%C\n",
-        topicdata[i].key.value[0], topicdata[i].key.value[1], topicdata[i].key.value[2],
-        topicdata[i].name.in(), topicdata[i].type_name.in()));
+      CORBA::ULong num_topics_with_data = 0;
+      for (CORBA::ULong i = 0; i < len; ++i) {
+        if (ACE_OS::strcmp(topicdata[i].name.in(), topic_name) != 0) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            "(%P|%t) monitor: ERROR: got topic name \"%C\", expected topic name \"%C\"\n",
+                            topicdata[i].name.in(), topic_name), 1);
+        }
+        if (ACE_OS::strcmp(topicdata[i].type_name.in(), topic_type_name) != 0) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            "(%P|%t) monitor:  got topic type name \"%C\", expected topic type name \"%C\"\n",
+                            topicdata[i].type_name.in(), topic_type_name), 1);
+        }
 
-      CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen(CUR_TOPIC_DATA));
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Topic: key = %d, %x, %x, name = %C, "
+                   "type_name=%C\n",
+                   topicdata[i].key.value[0], topicdata[i].key.value[1], topicdata[i].key.value[2],
+                   topicdata[i].name.in(), topicdata[i].type_name.in()));
 
-      if (topicdata[i].topic_data.value.length() == topic_data_len &&
-          ACE_OS::strncmp(reinterpret_cast<char*>(topicdata[i].topic_data.value.get_buffer()),
-                          CUR_TOPIC_DATA,
-                          topic_data_len) == 0) {
-        ++num_topics_with_data;
+        CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen(CUR_TOPIC_DATA));
+
+        if (topicdata[i].topic_data.value.length() == topic_data_len &&
+            ACE_OS::strncmp(reinterpret_cast<char*>(topicdata[i].topic_data.value.get_buffer()),
+                            CUR_TOPIC_DATA,
+                            topic_data_len) == 0) {
+          ++num_topics_with_data;
+        }
       }
-    }
 
-    if (num_topics_with_data == num_topics) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Topic changeable qos test PASSED.\n"));
-    } else {
-      ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) monitor:  Topic changeable qos test FAILED.\n"),
-                       1);
+      if (num_topics_with_data == num_topics) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Topic changeable qos test PASSED.\n"));
+      } else {
+        ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) monitor:  Topic changeable qos test FAILED.\n"),
+                         1);
+      }
     }
 #endif
 

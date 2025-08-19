@@ -1,4 +1,6 @@
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/OpenDDSConfigWrapper.idl>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 module XTypesUtils {
 
@@ -97,6 +99,31 @@ struct LessThanStruct {
 @topic
 struct MultidimArrayStruct {
   long arr[2][3];
+};
+
+@nested
+struct UsesEnumS {
+  Enu_t enu;
+};
+
+union UsesEnumU switch (Enu_t) {
+case X:
+  Enu_t xcase;
+};
+
+typedef Enu_t UsesEnumA[2];
+typedef sequence<Enu_t> EnuSeq;
+
+@topic
+struct TestEnums {
+  Enu_t enu;
+  UsesEnumS ues;
+  UsesEnumU ueu;
+  UsesEnumA uea;
+  Enu_t arr[2];
+  EnuSeq ueq;
+  sequence<Enu_t> seq;
+  sequence<EnuSeq> seq2;
 };
 
 };

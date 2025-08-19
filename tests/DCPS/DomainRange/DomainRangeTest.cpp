@@ -61,7 +61,7 @@ public:
     }
 
     // Block until Subscriber is available
-    Utils::wait_match(writer_, total_readers_);
+    Utils::wait_match(writer_, static_cast<unsigned int>(total_readers_));
 
     // Write samples
     Messenger::Message message;

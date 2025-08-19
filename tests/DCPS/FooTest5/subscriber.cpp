@@ -14,11 +14,8 @@
 
 #include "DataReaderListener.h"
 #include "TestException.h"
-// Include the Udp.h to make sure Initializer is created before the Service
-// Configurator open service configure file.
-#ifndef OPENDDS_SAFETY_PROFILE
-#include "dds/DCPS/transport/udp/Udp.h"
-#include "dds/DCPS/transport/multicast/Multicast.h"
+#include "dds/DCPS/Definitions.h"
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #include "dds/DCPS/transport/shmem/Shmem.h"
 #endif
 #include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
@@ -56,8 +53,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -r num_datareaders          defaults to 1
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth            defaults to 1
-    //  -u using_udp                defaults to 0 - using TCP
-    //  -c using_multicast          defaults to 0 - using TCP
     //  -p using rtps transport flag     defaults to 0 - using TCP
     //  -s using shared memory flag      defaults to 0 - using TCP
     //  -m num_instances_per_writer defaults to 1
@@ -87,24 +82,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     {
       history_depth = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-u"))) != 0)
-    {
-      using_udp = ACE_OS::atoi (currentArg);
-      if (using_udp == 1)
-      {
-        ACE_DEBUG((LM_DEBUG, "Subscriber Using UDP transport.\n"));
-      }
-      arg_shifter.consume_arg();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-c"))) != 0)
-    {
-      using_multicast = ACE_OS::atoi (currentArg);
-      if (using_multicast == 1)
-      {
-        ACE_DEBUG((LM_DEBUG, "Subscriber Using MULTICAST transport.\n"));
-      }
-      arg_shifter.consume_arg();
     }
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-p"))) != 0)
     {
@@ -180,12 +157,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     }
   }
 
-  if ((using_udp != 0 || mixed_trans != 0) && using_multicast != 0)
-  {
-    using_multicast = 0;
-    ACE_DEBUG((LM_DEBUG, "Subscriber NOT using MULTICAST transport.\n"));
-  }
-
   // Indicates successful parsing of the command line
   return 0;
 }
@@ -193,8 +164,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
 
 ::DDS::Subscriber_ptr
 create_subscriber (::DDS::DomainParticipant_ptr participant,
-                   int                          attach_to_udp,
-                   int                          attach_to_multicast,
                    int                          attach_to_rtps,
                    int                          attach_to_shmem)
 {
@@ -215,17 +184,7 @@ create_subscriber (::DDS::DomainParticipant_ptr participant,
         }
 
       // Attach the subscriber to the transport.
-      if (attach_to_udp)
-        {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to udp\n")));
-          TheTransportRegistry->bind_config("udp", sub.in());
-        }
-      else if (attach_to_multicast)
-        {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to multicast\n")));
-          TheTransportRegistry->bind_config("multicast", sub.in());
-        }
-      else if (attach_to_rtps)
+      if (attach_to_rtps)
         {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) attach to RTPS\n")));
           TheTransportRegistry->bind_config("rtps", sub);
@@ -323,7 +282,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
             = new ::Xyz::FooTypeSupportImpl();
           OpenDDS::DCPS::LocalObject_var safe_servant = fts_servant;
 
-          if (::DDS::RETCODE_OK != fts_servant->register_type(participant.in (), MY_TYPE_FOR_UDP))
+          if (::DDS::RETCODE_OK != fts_servant->register_type(participant.in (), MY_TYPE_FOR_RTPS))
             {
               ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t) register_type failed.\n")));
               throw TestException ();
@@ -360,8 +319,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (mixed_trans)
         {
-          topic1 = participant->create_topic (MY_TOPIC_FOR_UDP,
-                                              MY_TYPE_FOR_UDP,
+          topic1 = participant->create_topic (MY_TOPIC_FOR_RTPS,
+                                              MY_TYPE_FOR_RTPS,
                                               topic_qos,
                                               ::DDS::TopicListener::_nil(),
                                               ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -373,7 +332,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
             }
 
           description1
-            = participant->lookup_topicdescription(MY_TOPIC_FOR_UDP);
+            = participant->lookup_topicdescription(MY_TOPIC_FOR_RTPS);
           if (CORBA::is_nil (description1.in ()))
             {
               ACE_ERROR ((LM_ERROR,
@@ -382,14 +341,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
             }
         }
 
-      int attach_to_udp = using_udp;
-      int attach_to_multicast = using_multicast;
-
       // Create the subscriber and attach to the corresponding
       // transport.
       DDS::Subscriber_var sub =
-        create_subscriber(participant, attach_to_udp, attach_to_multicast,
-                          using_rtps_transport, using_shmem);
+        create_subscriber(participant, using_rtps_transport, using_shmem);
       if (CORBA::is_nil (sub.in ()))
         {
           ACE_ERROR ((LM_ERROR,
@@ -402,8 +357,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         {
           // Create the subscriber with a different transport from previous
           // subscriber.
-          sub1 = create_subscriber(participant, !attach_to_udp,
-                                   attach_to_multicast, false /*rtps*/, false);
+          sub1 = create_subscriber(participant, !using_rtps_transport, false);
           if (CORBA::is_nil (sub1.in ()))
             {
               ACE_ERROR ((LM_ERROR,
@@ -419,10 +373,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // Make it KEEP_ALL history so we can verify the received
       // data without dropping.
       dr_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
-      dr_qos.reliability.kind =
-        (using_udp || mixed_trans)
-        ? ::DDS::BEST_EFFORT_RELIABILITY_QOS
-        : ::DDS::RELIABLE_RELIABILITY_QOS;
+      dr_qos.reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
       dr_qos.resource_limits.max_samples_per_instance =
         max_samples_per_instance ;
       // The history depth is only used for KEEP_LAST.
@@ -443,14 +394,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // subscriber.
       for (int i = 0; i < num_datareaders; i ++)
         {
-          int attach_to_udp = using_udp;
+          int attach_to_rtps = using_rtps_transport;
           ::DDS::Subscriber_var the_sub = sub;
           ::DDS::TopicDescription_var the_description = description;
           // The first datawriter would be using a different transport
           // from others for the diff trans test case.
           if (mixed_trans && i == 0)
             {
-              attach_to_udp = ! attach_to_udp;
+              attach_to_rtps = ! attach_to_rtps;
               the_sub = sub1;
               the_description = description1;
             }

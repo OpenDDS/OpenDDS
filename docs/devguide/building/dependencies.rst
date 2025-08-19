@@ -55,31 +55,23 @@ These are the versions of ACE/TAO that are officially supported by OpenDDS in th
 
 DOC Group :acetaorel:`ace6tao2`
   The configure script will download this version by default.
-  :ref:`CMake <cmake-building>` will download this version if :cmake:var:`OPENDDS_ACE_TAO_KIND` is set to ``ace6tao``.
+  :ref:`CMake <cmake-building>` will download this version if :cmake:var:`OPENDDS_ACE_TAO_KIND` is set to ``ace6tao2``.
 
   Pass ``--ace-github-latest`` to the configure script to clone the ``ace6tao2`` branch of ACE/TAO as is.
   This also clones the ``master`` branch of MPC as is.
-  :ref:`CMake <cmake-building>` will do the same if :cmake:var:`OPENDDS_ACE_TAO_KIND` is set to ``ace6tao`` and :cmake:var:`OPENDDS_ACE_TAO_GIT` is set to ``TRUE``.
-
-.. _ace7tao3:
-
-DOC Group :acetaorel:`ace7tao3`
-  Pass ``--doc-group3`` to the configure script to download this version.
-  :ref:`CMake <cmake-building>` will download this version by default.
-
-  This version requires a C++14-capable compiler.
-
-  Pass ``--ace-github-latest`` to the configure script to clone the ``master`` branch of ACE/TAO as is.
-  This also clones the ``master`` branch of MPC as is.
-  :ref:`CMake <cmake-building>` will do the same if :cmake:var:`OPENDDS_ACE_TAO_GIT` is set to ``TRUE``.
+  :ref:`CMake <cmake-building>` will do the same if :cmake:var:`OPENDDS_ACE_TAO_KIND` is set to ``ace6tao2`` and :cmake:var:`OPENDDS_ACE_TAO_GIT` is set to ``TRUE``.
 
 .. _ace8tao4:
 
 DOC Group :acetaorel:`ace8tao4`
   Pass ``--ace-tao=ace8tao4`` to the configure script to download this version.
-  :ref:`CMake <cmake-building>` will download this version if :cmake:var:`OPENDDS_ACE_TAO_KIND` is set to ``ace8tao4``.
+  :ref:`CMake <cmake-building>` will download this version by defaut.
 
   This version requires a C++17-capable compiler.
+
+  Pass ``--ace-github-latest --doc-master-branch`` to the configure script to clone the ``master`` branch of ACE/TAO as is.
+  This also clones the ``master`` branch of MPC as is.
+  :ref:`CMake <cmake-building>` will do the same if :cmake:var:`OPENDDS_ACE_TAO_GIT` is set to ``TRUE``.
 
 .. _deps-ace:
 
@@ -124,7 +116,7 @@ TAO is a C++ CORBA Implementation built on ACE.
 
   - This is the only library which depends on ``TAO_PortableServer``.
 
-The TAO Developer's Guide book can be requested for free from https://objectcomputing.com/platforms/tao/tao-developers-guide.
+The TAO Developer's Guide book can be requested for free from https://objectcomputing.com/how-we-serve/accelerators/tao/tao-developers-guide.
 The CORBA Programmers Guide can be downloaded for free from https://www.remedy.nl/opensource/corbapg.html.
 
 .. _deps-optional:
@@ -168,16 +160,12 @@ Java
 OpenDDS has optional :ref:`Java bindings <java>`.
 It requires the Java Development Kit (JDK).
 
-There is also support for Java Message Server (JMS) v1.1.
-In addition to the JDK, it requires Ant and JBoss 4.2.x.
-See :ghfile:`java/jms/README`.
-
 .. _deps-qt:
 
 Qt
 ==
 
-`Qt5 <https://www.qt.io/>`__ is used for the :ghfile:`tools/monitor` utility program and the :ghfile:`examples/DCPS/ishapes` RTPS demo.
+`Qt5 <https://www.qt.io/>`__ is used for the :ghfile:`examples/DCPS/ishapes` RTPS demo.
 
 See :ghfile:`docs/qt.md` for details on configuring OpenDDS to use Qt.
 

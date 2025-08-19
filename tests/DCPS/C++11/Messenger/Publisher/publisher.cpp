@@ -11,6 +11,8 @@
 #include <dds/DCPS/StaticIncludes.h>
 #include <dds/DCPS/WaitSet.h>
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include <ace/Log_Msg.h>
 
 #include <iostream>
@@ -76,7 +78,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     DDS::DataWriterQos qos;
     pub->get_default_datawriter_qos(qos);
-#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+#if OPENDDS_CONFIG_OWNERSHIP_PROFILE
     qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 #endif
 

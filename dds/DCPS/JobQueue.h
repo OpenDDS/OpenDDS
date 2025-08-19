@@ -69,12 +69,18 @@ public:
     }
   }
 
+  size_t size() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, 0);
+    return job_queue_.size();
+  }
+
 private:
-  ACE_Thread_Mutex mutex_;
+  mutable ACE_Thread_Mutex mutex_;
   typedef OPENDDS_VECTOR(JobPtr) Queue;
   Queue job_queue_;
 
-  int handle_exception(ACE_HANDLE /*fd*/);
+  int handle_exception(ACE_HANDLE fd);
 };
 
 typedef RcHandle<JobQueue> JobQueue_rch;

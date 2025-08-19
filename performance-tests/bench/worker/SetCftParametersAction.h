@@ -1,19 +1,22 @@
 #pragma once
 
-#include "dds/DdsDcpsTopicC.h"
-
 #include "Action.h"
-#include "ace/Proactor.h"
+
 #include "BenchTypeSupportImpl.h"
+
+#include <dds/DdsDcpsTopicC.h>
+
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/EventDispatcher.h>
 
 #include <random>
 #include <vector>
 
 namespace Bench {
 
-class SetCftParametersAction : public Action {
+class SetCftParametersAction : public virtual Action, public std::enable_shared_from_this<SetCftParametersAction> {
 public:
-  explicit SetCftParametersAction(ACE_Proactor& proactor);
+  explicit SetCftParametersAction(OpenDDS::DCPS::EventDispatcher_rch event_dispatcher);
 
   bool init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers,
     Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map) override;
@@ -25,17 +28,18 @@ public:
 
 protected:
   std::mutex mutex_;
-  ACE_Proactor& proactor_;
+  OpenDDS::DCPS::EventDispatcher_rch event_dispatcher_;
   bool started_, stopped_;
-  ACE_Time_Value set_period_;
+  OpenDDS::DCPS::TimeDuration set_period_;
   size_t max_count_;
   size_t param_count_;
   bool random_order_;
   DDS::InstanceHandle_t instance_;
-  std::shared_ptr<ACE_Handler> handler_;
+  OpenDDS::DCPS::MonotonicTimePoint last_scheduled_time_;
+  OpenDDS::DCPS::EventBase_rch event_;
   std::mt19937_64 mt_;
   size_t set_call_count_;
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   DDS::ContentFilteredTopic_var content_filtered_topic_;
 #endif
   Builder::StringSeqSeq acceptable_param_values_;

@@ -22,18 +22,18 @@ PerlDDS::add_lib_path('../FooType5');
 my $samples = 10;
 my $sample_interval = 0;
 my $sys1_addr = "localhost:16701";
-my $sys1_pub_domain = 511;
-my $sys1_sub_domain = 111;
+my $sys1_pub_domain = 5;
+my $sys1_sub_domain = 1;
 my $sys1_pub_topic  = "Sys1";
 my $sys1_sub_topic  = "Sys1";
 my $sys2_addr = "localhost:16703";
-my $sys2_pub_domain = 811;
-my $sys2_sub_domain = 711;
+my $sys2_pub_domain = 8;
+my $sys2_sub_domain = 7;
 my $sys2_pub_topic  = "Sys2";
 my $sys2_sub_topic  = "Sys2";
 my $sys3_addr = "localhost:16705";
-my $sys3_pub_domain = 911;
-my $sys3_sub_domain = 911;
+my $sys3_pub_domain = 9;
+my $sys3_sub_domain = 9;
 my $sys3_pub_topic  = "Left";
 my $sys3_sub_topic  = "Right";
 my $monitor_addr = "localhost:29803";
@@ -138,14 +138,14 @@ my $sys3_parameters = "$opt $system3_config "
 # The monitor has 3 Writers and 3 Readers, which are to be connected with
 # the subsystems defined above.  The topology goes like this:
 #
-#   monitor writer [0]    --->   system1 reader
-#   monitor reader [0]   <---    system1 writer
+#   monitor writer [0]    --->   system1 reader domain 1
+#   monitor reader [0]   <---    system1 writer domain 5
 #
-#   monitor writer [1]    --->   system2 reader
-#   monitor reader [1]   <---    system2 writer
+#   monitor writer [1]    --->   system2 reader domain 7
+#   monitor reader [1]   <---    system2 writer domain 8
 #
-#   monitor writer [2]    --->   system3 reader
-#   monitor reader [2]   <---    system3 writer
+#   monitor writer [2]    --->   system3 reader domain 9
+#   monitor reader [2]   <---    system3 writer domain 9
 #
 
 $monitor_parameters = "$opt -Samples $samples -SampleInterval $sample_interval $monitor_config "

@@ -7,10 +7,13 @@
 import sys
 import os
 import re
+import logging
 from pathlib import Path
 
 from docutils.transforms import Transform
 from docutils import nodes
+
+from sphinx.util.logging import NAMESPACE as sphinx_root_logger
 
 docs_path = Path(__file__).parent
 opendds_root_path = docs_path.parent
@@ -18,10 +21,17 @@ ext = (docs_path / 'sphinx_extensions').resolve()
 sys.path.append(str(ext))
 github_links_root_path = str(opendds_root_path)
 
+import newsd
 from mpc_lexer import MpcLexer
-from newsd import print_all_news, parse_newsd
 from version_info import VersionInfo
 from links import add_omg_spec
+from opendds_logging import GhaAnnotationHandler, create_gha_annotation, replace_files
+
+
+# Make Sphinx output GitHub Actions annotations
+logging.getLogger(sphinx_root_logger).addHandler(
+    GhaAnnotationHandler(replace_files=replace_files))
+
 
 # Custom Values ---------------------------------------------------------------
 
@@ -42,12 +52,15 @@ class GlobalSubstitutions(Transform):
                     pass
 
 
+autotab = 'autotab.js'
+
+
 def setup(app):
     app.add_config_value('global_substitutions', vars(opendds_version_info), True)
     app.add_config_value('is_release', False, True)
     app.add_lexer('mpc', MpcLexer)
     app.add_transform(GlobalSubstitutions)
-    app.add_js_file("autotab.js")
+    app.add_js_file(autotab)
 
     add_omg_spec(app, 'DDS', '1.4')
     add_omg_spec(app, 'DDSI-RTPS', '2.3', our_name='rtps', display_name='RTPS')
@@ -68,8 +81,8 @@ pygments_style = 'manni'
 nitpicky = True
 
 project = 'OpenDDS'
-copyright = '2024 OpenDDS Foundation'
 author = 'OpenDDS Foundation'
+copyright = author
 github_links_repo = 'OpenDDS/OpenDDS'
 github_main_branch = 'master'
 github_repo = 'https://github.com/' + github_links_repo
@@ -81,17 +94,25 @@ release = opendds_version_info.version
 is_release = opendds_version_info.is_release
 if is_release:
     github_links_release_tag = opendds_version_info.tag
-ace6tao2_version = opendds_version_info.ace6tao2_version
-ace7tao3_version = opendds_version_info.ace7tao3_version
+if opendds_version_info.release_date:
+    copyright = f'{opendds_version_info.release_date.year} {copyright}'
 
-# Generate news for all releases
-with (docs_path / 'news.rst').open('w') as f:
-    print_all_news(file=f)
+# Handle News Generation
+try:
+    # Generate news for all releases
+    with (docs_path / 'news.rst').open('w') as f:
+        newsd.print_all_news(file=f)
 
-# Generate news used for NEWS.md and Markdown release notes for GitHub
-with (docs_path / 'this-release.rst').open('w') as f:
-    print(':orphan:\n', file=f)
-    parse_newsd().print_all(file=f)
+    # Generate news used for NEWS.md and Markdown release notes for GitHub
+    with (docs_path / 'this-release.rst').open('w') as f:
+        print(':orphan:\n', file=f)
+        newsd.parse_newsd().print_all(file=f)
+except newsd.ParseError as e:
+    anno = create_gha_annotation(
+        'error', e.message, title='news', file=e.path, line=e.lineno, replace_files=replace_files)
+    if anno:
+        print(anno)
+    raise
 
 
 # -- General configuration ---------------------------------------------------
@@ -140,17 +161,10 @@ numfig = False
 
 highlight_language = 'none'
 
+linkcheck_retries = 3
 linkcheck_ignore = [
     # Linkcheck doesn't work with GitHub anchors
     r'^https?://github\.com/.*#.+$',
-    # Returns 403 for some reason
-    r'^https?://docs\.github\.com/.*$',
-    r'^https://www.dds-foundation.org/.*$',
-    r'^https://www.corba.org/.*$',
-    # UTF-8 decode errors (trying to parse PDF as HTML?), shouldn't check these anyways
-    r'^https?://www\.omg\.org/spec/.*/PDF.*$',
-    # OMG Member link, will always redirect to a login page
-    r'https://issues.omg.org/browse/.*$'
 ]
 
 intersphinx_mapping = {
@@ -177,7 +191,12 @@ markdown_uri_doc_suffix = '.html'
 
 # -- Options for HTML output -------------------------------------------------
 
-html_static_path = ['.']
+logo = 'logo_with_name.svg'
+
+html_static_path = [
+    logo,
+    autotab,
+]
 
 html_css_files = [
     'custom.css',
@@ -190,8 +209,8 @@ html_theme = 'furo'
 html_title = project + ' ' + release
 
 html_theme_options = {
-    'light_logo': 'logo_with_name.svg',
-    'dark_logo': 'logo_with_name.svg',
+    'light_logo': logo,
+    'dark_logo': logo,
     'sidebar_hide_name': True, # Logo has the name in it
     # furo doesn't support a view source link for some reason, force edit
     # button to do that.

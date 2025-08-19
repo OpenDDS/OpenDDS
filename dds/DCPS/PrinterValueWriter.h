@@ -6,12 +6,13 @@
 #ifndef OPENDDS_DCPS_PRINTER_VALUE_WRITER_H
 #define OPENDDS_DCPS_PRINTER_VALUE_WRITER_H
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include "Definitions.h"
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include "ValueWriter.h"
 #include "ValueHelper.h"
 #include "dcps_export.h"
-#include "Definitions.h"
 
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #include <dds/DdsDcpsTopicC.h>
@@ -57,6 +58,13 @@ public:
   bool begin_element(ACE_CDR::ULong idx);
   bool end_element();
 
+  bool begin_map(XTypes::TypeKind key_kind, XTypes::TypeKind value_kind);
+  bool end_map();
+  bool begin_key();
+  bool end_key();
+  bool begin_value();
+  bool end_value();
+
   bool write_boolean(ACE_CDR::Boolean value);
   bool write_byte(ACE_CDR::Octet value);
 #if OPENDDS_HAS_EXPLICIT_INTS
@@ -76,6 +84,7 @@ public:
   bool write_char8(ACE_CDR::Char value);
   bool write_char16(ACE_CDR::WChar value);
   bool write_string(const ACE_CDR::Char* value, size_t length);
+  using ValueWriter::write_string;
   bool write_wstring(const ACE_CDR::WChar* value, size_t length);
   bool write_enum(ACE_CDR::Long value, const EnumHelper& helper);
   bool write_bitmask(ACE_CDR::ULongLong value, const BitmaskHelper& helper);
@@ -195,6 +204,41 @@ bool PrinterValueWriter::begin_element(ACE_CDR::ULong idx)
 }
 
 bool PrinterValueWriter::end_element()
+{
+  return true;
+}
+
+bool PrinterValueWriter::begin_map(XTypes::TypeKind, XTypes::TypeKind)
+{
+  current_indent_ += indent_;
+  return true;
+}
+
+bool PrinterValueWriter::end_map()
+{
+  current_indent_ -= indent_;
+  return true;
+}
+
+bool PrinterValueWriter::begin_key()
+{
+  stream_ << newline() << std::string(current_indent_, ' ');
+  at_newline_ = false;
+  return true;
+}
+
+bool PrinterValueWriter::end_key()
+{
+  stream_ << " => ";
+  return true;
+}
+
+bool PrinterValueWriter::begin_value()
+{
+  return true;
+}
+
+bool PrinterValueWriter::end_value()
 {
   return true;
 }

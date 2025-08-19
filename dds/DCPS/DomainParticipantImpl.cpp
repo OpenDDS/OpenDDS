@@ -15,7 +15,6 @@
 #include "FeatureDisabledQosCheck.h"
 #include "GuidConverter.h"
 #include "Marked_Default_Qos.h"
-#include "MonitorFactory.h"
 #include "MultiTopicImpl.h"
 #include "PublisherImpl.h"
 #include "Qos_Helper.h"
@@ -42,7 +41,7 @@
 #include "XTypes/Utils.h"
 
 #include <dds/DdsDcpsGuidC.h>
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #endif
 
@@ -113,25 +112,22 @@ DomainParticipantImpl::DomainParticipantImpl(
   , dp_id_(GUID_UNKNOWN)
   , federated_(false)
   , handle_waiters_(handle_protector_)
-  , shutdown_condition_(shutdown_mutex_)
-  , shutdown_complete_(false)
   , participant_handles_(handle_generator)
   , pub_id_gen_(dp_id_)
   , automatic_liveliness_timer_(make_rch<AutomaticLivelinessTimer>(ref(*this)))
   , automatic_liveliness_task_(make_rch<AutomaticLivelinessTask>(
     TheServiceParticipant->time_source(),
-    TheServiceParticipant->interceptor(),
+    TheServiceParticipant->reactor_task(),
     automatic_liveliness_timer_,
     &LivelinessTimer::execute))
   , participant_liveliness_timer_(make_rch<ParticipantLivelinessTimer>(ref(*this)))
   , participant_liveliness_task_(make_rch<ParticipantLivelinessTask>(
     TheServiceParticipant->time_source(),
-    TheServiceParticipant->interceptor(),
+    TheServiceParticipant->reactor_task(),
     participant_liveliness_timer_,
     &LivelinessTimer::execute))
 {
   (void) this->set_listener(a_listener, mask);
-  monitor_.reset(TheServiceParticipant->monitor_factory_->create_dp_monitor(this));
   type_lookup_service_ = make_rch<XTypes::TypeLookupService>();
 }
 
@@ -484,7 +480,7 @@ DomainParticipantImpl::create_topic_i(
                      this->topics_protector_,
                      DDS::Topic::_nil());
 
-#if !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC || OPENDDS_CONFIG_MULTI_TOPIC
     if (topic_descrs_.count(topic_name)) {
       if (DCPS_debug_level > 3) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
@@ -799,7 +795,7 @@ DomainParticipantImpl::lookup_topicdescription(const char* name)
   TopicMap::mapped_type* entry = 0;
 
   if (Util::find(topics_, name, entry) == -1) {
-#if !defined(OPENDDS_NO_CONTENT_FILTERED_TOPIC) || !defined(OPENDDS_NO_MULTI_TOPIC)
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC || OPENDDS_CONFIG_MULTI_TOPIC
     TopicDescriptionMap::iterator iter = topic_descrs_.find(name);
     if (iter != topic_descrs_.end()) {
       return DDS::TopicDescription::_duplicate(iter->second);
@@ -812,7 +808,7 @@ DomainParticipantImpl::lookup_topicdescription(const char* name)
   }
 }
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
 
 DDS::ContentFilteredTopic_ptr
 DomainParticipantImpl::create_contentfilteredtopic(
@@ -919,9 +915,9 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_contentfilteredtopic(
   return DDS::RETCODE_OK;
 }
 
-#endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#endif
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
 
 DDS::MultiTopic_ptr DomainParticipantImpl::create_multitopic(
   const char* name, const char* type_name,
@@ -1012,9 +1008,9 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
   return DDS::RETCODE_OK;
 }
 
-#endif // OPENDDS_NO_MULTI_TOPIC
+#endif
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
 RcHandle<FilterEvaluator>
 DomainParticipantImpl::get_filter_eval(const char* filter)
@@ -1076,20 +1072,11 @@ DomainParticipantImpl::delete_contained_entities()
   if (disc)
     disc->fini_bit(this);
 
-  if (ACE_OS::thr_equal(TheServiceParticipant->reactor_owner(),
-                        ACE_Thread::self())) {
-    handle_exception(0);
-
-  } else {
-    TheServiceParticipant->reactor()->notify(this);
-
-    shutdown_mutex_.acquire();
-    ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-    while (!shutdown_complete_) {
-      shutdown_condition_.wait(thread_status_manager);
-    }
-    shutdown_complete_ = false;
-    shutdown_mutex_.release();
+  RcHandle<ShutdownHandler> handler = make_rch<ShutdownHandler>(rchandle_from(this));
+  TheServiceParticipant->reactor_task()->execute_or_enqueue(handler);
+  if (!TheServiceParticipant->reactor_task()->on_thread()) {
+    // If on the reactor thread, waiting would cause a deadlock.
+    handler->wait();
   }
 
   bit_subscriber_.reset();
@@ -1098,7 +1085,7 @@ DomainParticipantImpl::delete_contained_entities()
 
   // the participant can now start creating new contained entities
   set_deleted(false);
-  return shutdown_result_;
+  return handler->shutdown_result();
 }
 
 CORBA::Boolean
@@ -1231,7 +1218,7 @@ DDS::ReturnCode_t
 DomainParticipantImpl::ignore_participant(
   DDS::InstanceHandle_t handle)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (!enabled_) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
@@ -1283,14 +1270,14 @@ DomainParticipantImpl::ignore_participant(
 #else
   ACE_UNUSED_ARG(handle);
   return DDS::RETCODE_UNSUPPORTED;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 }
 
 DDS::ReturnCode_t
 DomainParticipantImpl::ignore_topic(
   DDS::InstanceHandle_t handle)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (!enabled_) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
@@ -1333,14 +1320,14 @@ DomainParticipantImpl::ignore_topic(
 #else
   ACE_UNUSED_ARG(handle);
   return DDS::RETCODE_UNSUPPORTED;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 }
 
 DDS::ReturnCode_t
 DomainParticipantImpl::ignore_publication(
   DDS::InstanceHandle_t handle)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (!enabled_) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
@@ -1375,14 +1362,14 @@ DomainParticipantImpl::ignore_publication(
 #else
   ACE_UNUSED_ARG(handle);
   return DDS::RETCODE_UNSUPPORTED;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 }
 
 DDS::ReturnCode_t
 DomainParticipantImpl::ignore_subscription(
   DDS::InstanceHandle_t handle)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (!enabled_) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
@@ -1417,7 +1404,7 @@ DomainParticipantImpl::ignore_subscription(
 #else
   ACE_UNUSED_ARG(handle);
   return DDS::RETCODE_UNSUPPORTED;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 }
 
 DDS::DomainId_t
@@ -1522,7 +1509,7 @@ DomainParticipantImpl::get_current_time(DDS::Time_t& current_time)
   return DDS::RETCODE_OK;
 }
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
 DDS::ReturnCode_t
 DomainParticipantImpl::get_discovered_participants(DDS::InstanceHandleSeq& participant_handles)
@@ -1782,14 +1769,6 @@ DomainParticipantImpl::enable()
   dp_id_ = value.id;
   federated_ = value.federated;
 
-  if (monitor_) {
-    monitor_->report();
-  }
-
-  if (TheServiceParticipant->monitor_) {
-    TheServiceParticipant->monitor_->report();
-  }
-
   const DDS::ReturnCode_t ret = this->set_enabled();
 
   if (DCPS_debug_level > 1) {
@@ -2019,10 +1998,6 @@ DomainParticipantImpl::create_new_topic(
   RefCounted_Topic refCounted_topic(Topic_Pair(topic_servant, obj, false));
   topics_.insert(std::make_pair(topic_name, refCounted_topic));
 
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
-
   // the topics_ map has one reference and we duplicate to give
   // the caller another reference.
   return DDS::Topic::_duplicate(refCounted_topic.pair_.obj_.in());
@@ -2093,15 +2068,13 @@ DomainParticipantImpl::get_topic_ids(TopicIdVec& topics)
   }
 }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
 
 OwnershipManager*
 DomainParticipantImpl::ownership_manager()
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
-  if (bit_subscriber_) {
-    bit_subscriber_->bit_pub_listener_hack(this);
-  } else {
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
+  if (!bit_subscriber_) {
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING,
                  "(%P|%t) WARNING: DomainParticipantImpl::ownership_manager: bit_subscriber_ is null"));
@@ -2111,24 +2084,7 @@ DomainParticipantImpl::ownership_manager()
   return &owner_man_;
 }
 
-void
-DomainParticipantImpl::update_ownership_strength (const GUID_t& pub_id,
-                                                  const CORBA::Long& ownership_strength)
-{
-  ACE_GUARD(ACE_Recursive_Thread_Mutex,
-            tao_mon,
-            this->subscribers_protector_);
-
-  if (this->get_deleted ())
-    return;
-
-  for (SubscriberSet::iterator it(this->subscribers_.begin());
-      it != this->subscribers_.end(); ++it) {
-    it->svt_->update_ownership_strength(pub_id, ownership_strength);
-  }
-}
-
-#endif // OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#endif
 
 DomainParticipantImpl::RepoIdSequence::RepoIdSequence(const GUID_t& base) :
   base_(base),
@@ -2456,135 +2412,136 @@ DomainParticipantImpl::signal_liveliness (DDS::LivelinessQosPolicyKind kind)
   TheServiceParticipant->get_discovery(domain_id_)->signal_liveliness (domain_id_, get_id(), kind);
 }
 
-int
-DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
+void
+DomainParticipantImpl::ShutdownHandler::execute(ReactorWrapper&)
 {
   ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
 
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
 
-  automatic_liveliness_timer_->cancel();
-  participant_liveliness_timer_->cancel();
+  RcHandle<DomainParticipantImpl> dpi = dpi_.lock();
+  if (dpi) {
 
-  // delete publishers
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     tao_mon,
-                     this->publishers_protector_,
-                     DDS::RETCODE_ERROR);
+    dpi->automatic_liveliness_timer_->cancel();
+    dpi->participant_liveliness_timer_->cancel();
 
-    PublisherSet::iterator pubIter = publishers_.begin();
-    DDS::Publisher_ptr pubPtr;
-    size_t pubsize = publishers_.size();
+    // delete publishers
+    {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex,
+                tao_mon,
+                dpi->publishers_protector_);
 
-    while (pubsize > 0) {
-      pubPtr = (*pubIter).obj_.in();
-      ++pubIter;
+      PublisherSet::iterator pubIter = dpi->publishers_.begin();
+      DDS::Publisher_ptr pubPtr;
+      size_t pubsize = dpi->publishers_.size();
 
-      DDS::ReturnCode_t result = pubPtr->delete_contained_entities();
-      if (result != DDS::RETCODE_OK) {
-        ret = result;
+      while (pubsize > 0) {
+        pubPtr = (*pubIter).obj_.in();
+        ++pubIter;
+
+        DDS::ReturnCode_t result = pubPtr->delete_contained_entities();
+        if (result != DDS::RETCODE_OK) {
+          ret = result;
+        }
+
+        result = dpi->delete_publisher(pubPtr);
+
+        if (result != DDS::RETCODE_OK) {
+          ret = result;
+        }
+
+        --pubsize;
       }
-
-      result = delete_publisher(pubPtr);
-
-      if (result != DDS::RETCODE_OK) {
-        ret = result;
-      }
-
-      --pubsize;
-    }
-
-  }
-
-  // delete subscribers
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     tao_mon,
-                     this->subscribers_protector_,
-                     DDS::RETCODE_ERROR);
-
-    SubscriberSet::iterator subIter = subscribers_.begin();
-    DDS::Subscriber_ptr subPtr;
-    size_t subsize = subscribers_.size();
-
-    while (subsize > 0) {
-      subPtr = (*subIter).obj_.in();
-      ++subIter;
-
-      DDS::ReturnCode_t result = subPtr->delete_contained_entities();
-
-      if (result != DDS::RETCODE_OK) {
-        ret = result;
-      }
-
-      result = delete_subscriber(subPtr);
-
-      if (result != DDS::RETCODE_OK) {
-        ret = result;
-      }
-
-      --subsize;
-    }
-  }
-
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     tao_mon,
-                     this->recorders_protector_,
-                     DDS::RETCODE_ERROR);
-
-    RecorderSet::iterator it = recorders_.begin();
-    for (; it != recorders_.end(); ++it ){
-      RecorderImpl* impl = dynamic_cast<RecorderImpl* >(it->in());
-      DDS::ReturnCode_t result = DDS::RETCODE_ERROR;
-      if (impl) result = impl->cleanup();
-      if (result != DDS::RETCODE_OK) ret = result;
-    }
-    recorders_.clear();
-  }
-
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     tao_mon,
-                     this->replayers_protector_,
-                     DDS::RETCODE_ERROR);
-
-    ReplayerSet::iterator it = replayers_.begin();
-    for (; it != replayers_.end(); ++it ){
-      ReplayerImpl* impl = static_cast<ReplayerImpl* >(it->in());
-      DDS::ReturnCode_t result = DDS::RETCODE_ERROR;
-      if (impl) result = impl->cleanup();
-      if (result != DDS::RETCODE_OK) ret = result;
 
     }
 
-    replayers_.clear();
-  }
+    // delete subscribers
+    {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex,
+                tao_mon,
+                dpi->subscribers_protector_);
 
-  // delete topics
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     tao_mon,
-                     this->topics_protector_,
-                     DDS::RETCODE_ERROR);
+      SubscriberSet::iterator subIter = dpi->subscribers_.begin();
+      DDS::Subscriber_ptr subPtr;
+      size_t subsize = dpi->subscribers_.size();
 
-    TopicMap::iterator topicIter = topics_.begin();
-    DDS::Topic_ptr topicPtr;
-    size_t topicsize = topics_.size();
+      while (subsize > 0) {
+        subPtr = (*subIter).obj_.in();
+        ++subIter;
 
-    while (topicsize > 0) {
-      topicPtr = topicIter->second.pair_.obj_.in();
-      ++topicIter;
+        DDS::ReturnCode_t result = subPtr->delete_contained_entities();
 
-      // Delete the topic the reference count.
-      const DDS::ReturnCode_t result = this->delete_topic_i(topicPtr, true);
+        if (result != DDS::RETCODE_OK) {
+          ret = result;
+        }
 
-      if (result != DDS::RETCODE_OK) {
-        ret = result;
+        result = dpi->delete_subscriber(subPtr);
+
+        if (result != DDS::RETCODE_OK) {
+          ret = result;
+        }
+
+        --subsize;
       }
-      --topicsize;
     }
+
+    {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex,
+                tao_mon,
+                dpi->recorders_protector_);
+
+      RecorderSet::iterator it = dpi->recorders_.begin();
+      for (; it != dpi->recorders_.end(); ++it ){
+        RecorderImpl* impl = dynamic_cast<RecorderImpl* >(it->in());
+        DDS::ReturnCode_t result = DDS::RETCODE_ERROR;
+        if (impl) result = impl->cleanup();
+        if (result != DDS::RETCODE_OK) ret = result;
+      }
+      dpi->recorders_.clear();
+    }
+
+    {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex,
+                tao_mon,
+                dpi->replayers_protector_);
+
+      ReplayerSet::iterator it = dpi->replayers_.begin();
+      for (; it != dpi->replayers_.end(); ++it ){
+        ReplayerImpl* impl = static_cast<ReplayerImpl* >(it->in());
+        DDS::ReturnCode_t result = DDS::RETCODE_ERROR;
+        if (impl) result = impl->cleanup();
+        if (result != DDS::RETCODE_OK) ret = result;
+
+      }
+
+      dpi->replayers_.clear();
+    }
+
+    // delete topics
+    {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex,
+                tao_mon,
+                dpi->topics_protector_);
+
+      TopicMap::iterator topicIter = dpi->topics_.begin();
+      DDS::Topic_ptr topicPtr;
+      size_t topicsize = dpi->topics_.size();
+
+      while (topicsize > 0) {
+        topicPtr = topicIter->second.pair_.obj_.in();
+        ++topicIter;
+
+        // Delete the topic the reference count.
+        const DDS::ReturnCode_t result = dpi->delete_topic_i(topicPtr, true);
+
+        if (result != DDS::RETCODE_OK) {
+          ret = result;
+        }
+        --topicsize;
+      }
+    }
+  } else {
+    ret = DDS::RETCODE_ALREADY_DELETED;
   }
 
   shutdown_mutex_.acquire();
@@ -2592,8 +2549,17 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
   shutdown_complete_ = true;
   shutdown_condition_.notify_all();
   shutdown_mutex_.release();
+}
 
-  return 0;
+void
+DomainParticipantImpl::ShutdownHandler::wait()
+{
+  shutdown_mutex_.acquire();
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
+  while (!shutdown_complete_) {
+    shutdown_condition_.wait(thread_status_manager);
+  }
+  shutdown_mutex_.release();
 }
 
 bool DomainParticipantImpl::prepare_to_delete_datawriters()
@@ -2618,7 +2584,7 @@ bool DomainParticipantImpl::set_wait_pending_deadline(const MonotonicTimePoint& 
   return result;
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 DDS::ReturnCode_t DomainParticipantImpl::get_dynamic_type(
   DDS::DynamicType_var& type, const DDS::BuiltinTopicKey_t& key)
 {

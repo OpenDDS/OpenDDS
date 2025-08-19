@@ -5,7 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -68,4 +68,4 @@ CoherentChangeControl::reset()
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
+#endif

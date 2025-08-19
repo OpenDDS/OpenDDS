@@ -1,0 +1,1486 @@
+Fri Oct 11 16:06:40 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit ae98def15f2644358a7a1bc17294791f2b0c5e67
+
+          Merge pull request #4816 from iguessthislldo/igtd/doc-fixes
+
+          Documentation Fixes from 4784
+
+Fri Oct 11 16:04:33 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit edc03fc28445455c7207bffffc15fa56cc561054
+
+          Merge pull request #4818 from OpenDDS/jwillemsen-patch-1
+
+          Update relay-admission-rate-limit.rst
+
+Fri Oct 11 09:48:44 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit f98717119d4a64f944cb1fee6d63eb0e9926e1bc
+
+        * docs/news.d/relay-admission-rate-limit.rst:
+
+          Update relay-admission-rate-limit.rst
+
+          Fixed typo
+
+Thu Oct 10 18:55:26 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 0b34f339e952cc8cef0fa8c245b90fdf66ad70bc
+
+        * docs/news.d/doc-fixes.rst:
+
+          Set PR in News
+
+Thu Oct 10 18:33:23 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit d8fbabb33202d22f87fafc6110c1db082585ffe5
+
+        * docs/devguide/quality_of_service.rst:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/news.d/doc-fixes.rst:
+        * docs/news.d/gdb.rst:
+
+          Documentation Fixes from 4784
+
+          Also added news for GDB extension.
+
+Mon Oct 07 17:32:21 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 44f8dc8635c12e41ea845af87167fd2c88078688
+
+          Merge pull request #4812 from simpsont-oci/bench_event_dispatcher
+
+          [Bench] Replace worker Proactor use with EventDispatcher
+
+Mon Oct 07 17:31:57 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 25d1056d41fa6a44da127a4b86b342c4d6c86c8d
+
+          Merge pull request #4815 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-6.9.0
+
+          Bump docker/build-push-action from 6.8.0 to 6.9.0
+
+Mon Oct 07 07:30:00 UTC 2024  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 479d377bdf0cc4e5d2dfae4a1ca4016f04d82ed6
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 6.8.0 to 6.9.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 6.8.0 to 6.9.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/32945a339266b759abcbdc89316275140b0fc960...4f58ea79222b3b9dc2c8bbdd6debcef730109a75)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Fri Oct 04 09:17:11 UTC 2024  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 0071c2fc9b78e0f271806cded75fbb9317a6d5f0
+
+        * performance-tests/bench/builder/BuilderProcess.cpp:
+        * performance-tests/bench/builder/ConfigSectionManager.cpp:
+        * performance-tests/bench/builder/DataReader.cpp:
+        * performance-tests/bench/builder/DataReader.h:
+        * performance-tests/bench/builder/DataWriter.cpp:
+        * performance-tests/bench/builder/DataWriter.h:
+        * performance-tests/bench/builder/ListenerFactory.h:
+        * performance-tests/bench/builder/Participant.cpp:
+        * performance-tests/bench/builder/Participant.h:
+        * performance-tests/bench/builder/Publisher.cpp:
+        * performance-tests/bench/builder/Subscriber.cpp:
+        * performance-tests/bench/builder/Topic.cpp:
+        * performance-tests/bench/builder/Topic.h:
+        * performance-tests/bench/builder/TypeSupportRegistry.h:
+        * performance-tests/bench/worker/ForwardAction.cpp:
+        * performance-tests/bench/worker/ForwardAction.h:
+        * performance-tests/bench/worker/MemFunEvent.h:
+        * performance-tests/bench/worker/ReadAction.cpp:
+        * performance-tests/bench/worker/ReadAction.h:
+        * performance-tests/bench/worker/SetCftParametersAction.cpp:
+        * performance-tests/bench/worker/SetCftParametersAction.h:
+        * performance-tests/bench/worker/Utils.cpp:
+        * performance-tests/bench/worker/WorkerDataReaderListener.h:
+        * performance-tests/bench/worker/WriteAction.cpp:
+        * performance-tests/bench/worker/WriteAction.h:
+
+          Resolving peer review comments: misc formatting cleanup, direct
+          use of TimeDuration
+
+Wed Oct 02 06:49:36 UTC 2024  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 968edb3ba1154528592307847ed623e2ceca96cb
+
+        * performance-tests/bench/worker/ReadAction.cpp:
+
+          logging cleanup, consolidate locking changed into scoped helper
+          class
+
+Tue Oct 01 20:49:30 UTC 2024  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 67b25d81cddbac9949fe2a913f3b266f7256fdcb
+
+        * performance-tests/bench/worker/ReadAction.cpp:
+        * performance-tests/bench/worker/ReadAction.h:
+
+          attempt locking granularity improvement for ReadAction
+
+Tue Oct 01 20:48:52 UTC 2024  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 6acf1e154105a0644187c58927c4032dc6df40a4
+
+        * performance-tests/bench/run_test.pl:
+        * performance-tests/bench/worker/run_test.pl:
+
+          update/fix script lib path to be more flexible to working dir
+
+Tue Oct 01 16:30:45 UTC 2024  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 676383418ab7e823ddf95ebf3fa1406147c70074
+
+        * performance-tests/bench/worker/ReadAction.cpp:
+
+          adding debug logging for waitset reading issues
+
+Tue Oct 01 09:55:11 UTC 2024  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 94322eadc5f822f57c0295b318f5036d8a1941ef
+
+        * performance-tests/bench/worker/ForwardAction.cpp:
+        * performance-tests/bench/worker/ForwardAction.h:
+        * performance-tests/bench/worker/MemFunEvent.h:
+        * performance-tests/bench/worker/MemFunHandler.h:
+        * performance-tests/bench/worker/ReadAction.cpp:
+        * performance-tests/bench/worker/ReadAction.h:
+        * performance-tests/bench/worker/SetCftParametersAction.cpp:
+        * performance-tests/bench/worker/SetCftParametersAction.h:
+        * performance-tests/bench/worker/WriteAction.cpp:
+        * performance-tests/bench/worker/WriteAction.h:
+        * performance-tests/bench/worker/configs/simple_action_config.json:
+        * performance-tests/bench/worker/configs/simple_read_action_config.json:
+        * performance-tests/bench/worker/main.cpp:
+
+          [Bench] Replace worker Proactor use with EventDispatcher
+
+Tue Oct 01 18:32:50 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 3e33278905d10e7887db5f3a8d2ea414b7600bec
+
+          Merge pull request #4810 from jrw972/reallocating-log
+
+          "reallocating primary receive buffer" shows up too often
+
+Mon Sep 30 20:28:39 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit a504e14100efa040162bec7ad54ebc038d8d5ff3
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * docs/news.d/reallocating-buffer.rst:
+        * docs/news.d/tag-type-separator.rst:
+
+          "reallocating primary receive buffer" shows up too often
+
+          Problem
+          -------
+
+          The "reallocating primary receive buffer" log message shows up
+          under
+          the Info log level. There are a number of reasons why the receive
+          buffer needs to be reallocated and none of them warrant concern
+          from
+          users.
+
+          Solution
+          --------
+
+          Move to transport logging.
+
+Mon Sep 30 19:14:39 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 290031d0c67b1bb446c8de87cdfe0790965565ff
+
+          Merge pull request #4808 from mitza-oci/relay-handler-thread-pool
+
+          Use a configurable thread pool for the RtpsRelay event handlers
+
+Mon Sep 30 17:35:51 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 182c3be6c5e60f3fea7f52005ecdc0b9bf4ffef7
+
+          Merge pull request #4806 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-6.8.0
+
+          Bump docker/build-push-action from 6.7.0 to 6.8.0
+
+Mon Sep 30 17:34:30 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit e13251059222a66a464c16f6edf14937824fdb49
+
+          Merge pull request #4807 from mitza-oci/send-buffer-mutex
+
+          SingleSendBuffer::pre_clear() needs the lock
+
+Mon Sep 30 17:32:47 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 69ae5b34e8abeec3c028d929bb23514745cb08bc
+
+          Merge pull request #4809 from mitza-oci/relay-cleanup
+
+          Continued RtpsRelay cleanup
+
+Mon Sep 30 14:58:41 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 35e4ef3def41fe1e9bcd39480c982503c60dd2fa
+
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/news.d/relay-handler-threadpool.rst:
+        * docs/news.d/relay-max-participants.rst:
+        * docs/news.d/release-reservatons.rst  docs/news.d/release-reservations.rst:
+
+          Updated documentation
+
+Mon Sep 30 14:44:26 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7c7b4fcf47e6b57ac9d58647e32714e7c8f42471
+
+        * tools/rtpsrelay/RelayEventLoop.cpp:
+
+          Corrected formatting of log messages
+
+          Co-authored-by: Justin Wilson <wilsonj@unityfoundation.io>
+
+Mon Sep 30 14:20:05 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 393bc4887bb9b8a9d4c9ad97bf3f111cccf8b982
+
+        * tools/rtpsrelay/GuidAddrSet.h:
+
+          Continued RtpsRelayCleanup
+
+          This was supposed to go in PR #4802
+
+Mon Sep 30 07:37:54 UTC 2024  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 0a065fdb2d0b7f62046e416c8609b984c4e69b2a
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 6.7.0 to 6.8.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 6.7.0 to 6.8.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/5cd11c3a4ced054e52742c5fd54dca954e0edd85...32945a339266b759abcbdc89316275140b0fc960)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Fri Sep 27 19:56:07 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 432a1aae56efdc616614a792660376ad7da51715
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          SingleSendBuffer::pre_clear() needs the lock
+
+          From ASan
+          https://github.com/mitza-oci/OpenDDS/actions/runs/11071598667/job/30767764680
+
+Thu Sep 26 20:08:17 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit d8d033838bac53a47794666bfa57e8fa0f54f5bc
+
+        * tools/rtpsrelay/CMakeLists.txt:
+        * tools/rtpsrelay/Config.h:
+        * tools/rtpsrelay/RelayEventLoop.cpp:
+        * tools/rtpsrelay/RelayEventLoop.h:
+        * tools/rtpsrelay/RtpsRelay.cpp:
+
+          Use a configurable thread pool for the RtpsRelay event handlers
+
+Mon Sep 23 17:38:50 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 86bfaba74e5e9569e2e371b2e45572b05fac89e7
+
+          Merge pull request #4795 from iguessthislldo/igtd/cmake-subdir
+
+          Fix Issues from Using OpenDDS in `add_subdirectory` in CMake
+
+Mon Sep 23 17:35:18 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit d79179d81f5c516b13fdceeb212e71d1c86bd0ec
+
+          Merge pull request #4800 from banburybill/bad_tag_gen
+
+          Fix incorrect separator when generating tag type
+
+Mon Sep 23 17:33:54 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 16842a5e8251fe82e10b5dc4d35b64f1b63b161c
+
+          Merge pull request #4802 from mitza-oci/relay-cleanup
+
+          RtpsRelay cleanup
+
+Mon Sep 23 14:47:34 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit ee7d4e49103a206218918bf75e6c688982bfd978
+
+        * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
+
+          Update for FACE
+
+          This library is used by the FACE compiler tests which don't
+          support
+          anonymous types.
+
+Fri Sep 20 16:02:17 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 4229521c401c1b6429c40626f22efe96399769f4
+
+        * tools/rtpsrelay/GuidPartitionTable.cpp:
+
+          Update tools/rtpsrelay/GuidPartitionTable.cpp
+
+          Co-authored-by: Son Dinh <technology789@gmail.com>
+
+Fri Sep 20 16:01:10 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 8b30379ae351d6999bbd87291e7a4e585e521eaa
+
+        * cmake/tao_idl_sources.cmake:
+
+          Fix Logic in _opendds_get_generated_output
+
+Fri Sep 20 14:03:29 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7f5782a979bb8bd4470a0d63b4e71c730cf30799
+
+        * tools/rtpsrelay/GuidAddrSet.cpp:
+        * tools/rtpsrelay/GuidAddrSet.h:
+        * tools/rtpsrelay/GuidPartitionTable.cpp:
+        * tools/rtpsrelay/README.rst:
+
+          Updates from peer review
+
+Thu Sep 19 20:50:15 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 41ffd393c663dd740562727c74fd70dd5151e688
+
+        * tools/dds/rtpsrelaylib/Utility.h:
+        * tools/rtpsrelay/GuidPartitionTable.h:
+
+          updates
+
+Thu Sep 19 20:08:33 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit c5ec8854c6fedcf638c10fdf60fd1ce38a5a698a
+
+        * tools/dds/rtpsrelaylib/Name.cpp:
+        * tools/dds/rtpsrelaylib/Name.h:
+        * tools/dds/rtpsrelaylib/PartitionIndex.h:
+        * tools/dds/rtpsrelaylib/Utility.h:
+        * tools/rtpsrelay/GuidAddrSet.cpp:
+        * tools/rtpsrelay/GuidAddrSet.h:
+        * tools/rtpsrelay/GuidPartitionTable.cpp:
+        * tools/rtpsrelay/GuidPartitionTable.h:
+        * tools/rtpsrelay/HandlerStatisticsReporter.h:
+        * tools/rtpsrelay/README.rst:
+        * tools/rtpsrelay/ReaderListenerBase.h:
+        * tools/rtpsrelay/RelayHandler.h:
+        * tools/rtpsrelay/RelayHttpMetaDiscovery.cpp:
+        * tools/rtpsrelay/RelayHttpMetaDiscovery.h:
+        * tools/rtpsrelay/RelayPartitionTable.h:
+        * tools/rtpsrelay/RelayStatisticsReporter.h:
+        * tools/rtpsrelay/RelayStatusReporter.cpp:
+        * tools/rtpsrelay/RelayStatusReporter.h:
+
+          RtpsRelay cleanup and simplification
+
+          Make use of C++11 features
+
+Thu Sep 19 18:34:47 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 55bf7ec4b96f18ee5069e2c243e95665f94854d6
+
+        * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
+
+          Update tests/DCPS/Compiler/idl_test1_lib/FooDef.idl
+
+          Co-authored-by: Son Dinh <technology789@gmail.com>
+
+Thu Sep 19 18:34:38 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit d0342784d8c432fba86f9f454a883662271da552
+
+        * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
+
+          Update tests/DCPS/Compiler/idl_test1_lib/FooDef.idl
+
+          Co-authored-by: Son Dinh <technology789@gmail.com>
+
+Thu Sep 19 18:32:46 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 007a2749e049e8bd836f2e8d61b1ff37f2262514
+
+          Merge pull request #4801 from
+          iguessthislldo/igtd/cmake-tests-windows
+
+          Fix `ctest-to-auto-run-tests.py` Output on Windows
+
+Thu Sep 19 18:19:31 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 6af9f917a07068457ca57e54b74a59e4ed34b905
+
+        * tools/rtpsrelay/RelayHandler.cpp:
+        * tools/rtpsrelay/RelayHandler.h:
+        * tools/rtpsrelay/RtpsRelay.cpp:
+
+          simplifications and clarifications
+
+Thu Sep 19 18:18:56 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit d2fdb00601852a01fb4b46a8396e293aec605a19
+
+        * tools/rtpsrelay/GuidAddrSet.cpp:
+        * tools/rtpsrelay/GuidPartitionTable.cpp:
+        * tools/rtpsrelay/GuidPartitionTable.h:
+        * tools/rtpsrelay/HandlerStatisticsReporter.h:
+        * tools/rtpsrelay/ParticipantListener.cpp:
+        * tools/rtpsrelay/ParticipantStatisticsReporter.h:
+        * tools/rtpsrelay/PublicationListener.cpp:
+        * tools/rtpsrelay/RelayAddressListener.cpp:
+        * tools/rtpsrelay/RelayHandler.cpp:
+        * tools/rtpsrelay/RelayHttpMetaDiscovery.cpp:
+        * tools/rtpsrelay/RelayPartitionsListener.cpp:
+        * tools/rtpsrelay/RelayStatisticsReporter.h:
+        * tools/rtpsrelay/RelayStatusReporter.cpp:
+        * tools/rtpsrelay/RtpsRelay.cpp:
+        * tools/rtpsrelay/SpdpReplayListener.cpp:
+        * tools/rtpsrelay/SubscriptionListener.cpp:
+
+          removed ACE_TEXT
+
+Thu Sep 19 18:08:17 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 471e0439d1eecf27faf905b223dc4df2463e6fa4
+
+        * tools/rtpsrelay/GuidAddrSet.h:
+        * tools/rtpsrelay/RtpsRelay.cpp:
+
+          Removed unused connection from GuidAddrSet to vertical handlers
+
+Thu Sep 19 15:03:35 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 4b0e06104811eb4f2fecb91375c111ecdb729bda
+
+        * tests/cmake/ctest-to-auto-run-tests.py:
+
+          Fix Typo
+
+Thu Sep 19 10:26:57 UTC 2024  Jim Hague  <jim.hague@ultra-pcs.com>
+        commit 94611668c5f657b8213c5babb16335a6f04b6879
+
+        * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
+
+          Add regression check for PR #4800 to idl_test1
+
+Wed Sep 18 10:12:46 UTC 2024  Jim Hague  <jim.hague@ultra-pcs.com>
+        commit 29eed5307efd35275b2af84b821c068d50b6a6f8
+
+        * dds/idl/metaclass_generator.cpp:
+
+          Fix incorrect separator when generating tag type
+
+          Module and type names with '_', e.g. 'Test_Module::A_Type' were
+          generating incorrect tags that did not align with the use of '::'
+          elsewhere, with result compile failures.
+
+Thu Sep 19 00:01:22 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit ab1ac363cb8a9c7f52133aa2ef5d181cc436fe93
+
+        * tests/auto_run_tests.pl:
+        * tests/cmake/ctest-to-auto-run-tests.py:
+
+          Fix ctest-to-auto-run-tests.py Output on Windows
+
+          There's a check in the CTest scripts on Windows for the build
+          configuration. If the configuration isn't valid, the script would
+          return
+          invalid results and lead to the fake auto_run_tests name being
+          truncated. These changes pass the build configuration from
+          auto_run_tests.pl and add extra checks to prevent this from
+          happening
+          again.
+
+Wed Sep 18 18:33:08 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit a085078b03a933beee9a36dffac1267d362bdfd6
+
+          Merge pull request #4799 from iguessthislldo/igtd/omg-links
+
+          Fix OMG Spec Links Page
+
+Tue Sep 17 22:32:20 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit e7162d2a4cb4860ef3f2bd10049d5328184e92fb
+
+        * docs/build.py:
+        * docs/sphinx_extensions/links.py:
+
+          Fix OMG Spec Links Page
+
+          [This
+          page](https://opendds.readthedocs.io/en/master/internal/omg_spec_links.html)
+          was causing a lot of output in the link checker, so I made it
+          conditional in https://github.com/OpenDDS/OpenDDS/pull/4669.
+          Unfortunately it looks like I also broke the page so it never
+          lists all
+          the possible spec section links.
+
+          Also added `--nitpicky', `--keep-going', and `--show-traceback'
+          to the
+          `sphinx-build` command of `build.py strict` to make output more
+          useful.
+
+Tue Sep 17 18:24:04 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 7572bafc0983142221f3714bfe86e79fdd0acfd9
+
+        * docs/news.d/cmake-subdir.rst:
+
+          Add News
+
+Mon Sep 16 17:32:40 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit e613d2995c459582351a747e7e236180ef8c68ef
+
+          Merge pull request #4798 from
+          sonndinh/add-type-names-typeobject-gen
+
+          Add comments for type names when generating complete
+          `TypeObject`s
+
+Fri Sep 13 15:07:47 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 8ecb35c333cc339a13ad3e745b4ced743f383c75
+
+        * dds/idl/typeobject_generator.cpp:
+
+          Add comments for type names when generating complete type objects
+
+Tue Sep 10 18:23:30 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 51c03c165cebd0d439df6af70ed9242d3af156a3
+
+        * cmake/tao_idl_sources.cmake:
+        * tests/cmake/generated_global/idl/CMakeLists.txt:
+        * tests/cmake/idl_compiler_tests/CMakeLists.txt:
+        * tests/cmake/idl_compiler_tests/file.ext:
+        * tests/cmake/include_subdir/CMakeLists.txt:
+
+          Fix Issues from Using OpenDDS in add_subdirectory
+
+Mon Sep 09 17:33:53 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit fc3720b109fe6e24ce7c7a99ecba14230813dbba
+
+          Merge pull request #4793 from
+          OpenDDS/dependabot/github_actions/peter-evans/create-pull-request-7
+
+          Bump peter-evans/create-pull-request from 6 to 7
+
+Mon Sep 09 07:35:05 UTC 2024  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 52874027c6b4aba445f780608ab34ba2a79bb9a7
+
+        * .github/workflows/update-ace-tao.yml:
+
+          Bump peter-evans/create-pull-request from 6 to 7
+
+          Bumps
+          [peter-evans/create-pull-request](https://github.com/peter-evans/create-pull-request)
+          from 6 to 7.
+          - [Release
+          notes](https://github.com/peter-evans/create-pull-request/releases)
+          -
+          [Commits](https://github.com/peter-evans/create-pull-request/compare/v6...v7)
+
+          ---
+          updated-dependencies:
+          - dependency-name: peter-evans/create-pull-request
+          dependency-type: direct:production
+          update-type: version-update:semver-major
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Fri Sep 06 16:04:47 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 07ee200864c1b58616cf5e3ab3dc865fb71d84ca
+
+          Merge pull request #4791 from iguessthislldo/igtd/gdb
+
+          Embed GDB Extension in OpenDDS
+
+Fri Sep 06 00:18:52 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 1522bd5aa311abcca0a2f3cc40c6837eba702b95
+
+        * docs/internal/dev_guidelines.rst:
+
+          Fix Typos, Note inspect and monitor
+
+Thu Sep 05 22:48:08 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit a95c2809bbe550380ca5a62cb03d50169d60c321
+
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * docs/design/security.md:
+        * docs/internal/dev_guidelines.rst:
+        * tools/scripts/gdbext.py:
+
+          Document GDB Ext, Try to Fix Embedded GDB Ext
+
+Thu Sep 05 18:28:56 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 9493d894ccaa319ff7ed8e8f8a89e58266f06de3
+
+        * dds/DCPS/Service_Participant.cpp:
+        * tools/scripts/gdbext.py:
+
+          Embed GDB Extension in OpenDDS
+
+          Also fix workaround an issue GDB when dereferences some pointers.
+
+Fri Aug 30 16:01:29 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit c344aebdf4507e3bbeba6d228f312347669303fb
+
+          Merge pull request #4787 from jwillemsen/jwi-fixhiddenwarnings
+
+          Fixed hidden warnings in xsc, add del operations for all
+          sequences
+
+Fri Aug 30 10:23:01 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 7de47ae36605f52239efb6da18be25c022f646ec
+
+        * dds/DCPS/QOS_XML_Handler/dds_qos.cpp:
+
+          Lint
+
+          * dds/DCPS/QOS_XML_Handler/dds_qos.cpp:
+
+Fri Aug 30 10:18:28 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 7404f10a91f46d150cb382da1ec6c9dfffa612a9
+
+        * dds/DCPS/QOS_XML_Handler/dds_qos.hpp:
+
+          Removed redundant whitespace
+
+          * dds/DCPS/QOS_XML_Handler/dds_qos.hpp:
+
+Fri Aug 30 09:39:40 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 9c915a6617024cf738a777946bcd65823de9e33c
+
+        * dds/DCPS/QOS_XML_Handler/dds_qos.cpp:
+        * dds/DCPS/QOS_XML_Handler/dds_qos.hpp:
+
+          Shorten type typedefs
+
+          * dds/DCPS/QOS_XML_Handler/dds_qos.cpp:
+          * dds/DCPS/QOS_XML_Handler/dds_qos.hpp:
+
+Fri Aug 30 09:16:00 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 97b905405315f54d6474de689dc4646b343909e6
+
+        * dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc:
+
+          Specify include guard on generation
+
+          * dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc:
+
+Fri Aug 30 08:27:15 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 209c43b32dcc6483c89ba0abeee047fbcc8936d6
+
+        * dds/DCPS/QOS_XML_Handler/dds_qos.cpp:
+
+          Zapped whitespaces
+
+          * dds/DCPS/QOS_XML_Handler/dds_qos.cpp:
+
+Fri Aug 30 08:22:51 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 2a5cc1788d6249f2f67c4c618ac39eb094edc46d
+
+          Merge branch 'jwi-fixhiddenwarnings' of
+          https://github.com/jwillemsen/OpenDDS into jwi-fixhiddenwarnings
+
+Fri Aug 30 08:22:41 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 4bcd69d5f7254522f48554220ef14b9da106ddc0
+
+        * dds/DCPS/QOS_XML_Handler/dds_qos.cpp:
+        * dds/DCPS/QOS_XML_Handler/dds_qos.hpp:
+
+          Add del operations for all sequences, with this added to xsc no
+          handcrafting more deep in the generated code
+
+          * dds/DCPS/QOS_XML_Handler/dds_qos.cpp:
+          * dds/DCPS/QOS_XML_Handler/dds_qos.hpp:
+
+Fri Aug 30 08:06:24 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit b8b92c1cf03735f5cf119f74733c1378abaa7a50
+
+          Merge branch 'master' into jwi-fixhiddenwarnings
+
+Fri Aug 30 07:44:02 UTC 2024  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit 6c2c01e78cdbdc12b49b9d32584c2f3208b81a99
+
+        * dds/DCPS/QOS_XML_Handler/dds_qos.cpp:
+
+          Fixed hidden warnings
+
+          * dds/DCPS/QOS_XML_Handler/dds_qos.cpp:
+
+Thu Aug 29 18:35:42 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 83695f1005d984166ee26b97e6c257d3d47e9344
+
+          Merge pull request #4783 from
+          mitza-oci/relay-admission-rate-limit
+
+          RtpsRelay: updated handling of admission control queue
+
+Thu Aug 29 18:34:09 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit bdb98f4f469aa8c0f347c07d4ff622a34a78bcf6
+
+          Merge pull request #4785 from iguessthislldo/igtd/preassoc-issue
+
+          Fix Swapped Arguments in RTPS/UDP
+
+Thu Aug 29 18:33:52 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit dfe307ea875924ad352f9e9eca4f8508f207d0bb
+
+          Merge pull request #4786 from iguessthislldo/igtd/rtd-strict
+
+          Turn Off "Fail on Warning" for RTD
+
+Thu Aug 29 17:01:30 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 216ef32e7eb2936b15dec49d9a3ecb0357da01c1
+
+        * docs/.readthedocs.yaml:
+
+          Turn Off "Fail on Warning" for RTD
+
+Thu Aug 29 14:48:42 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit d671452415304574a5d86d3049f802f60ce8e8b4
+
+        * docs/news.d/relay-admission-rate-limit.rst:
+
+          Added NEWS
+
+Wed Aug 28 23:06:49 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 58f970a1404dcff8cfa23105f7d6e8e60707ed44
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * docs/news.d/release-reservatons.rst:
+
+          Fix Swapped Arguments in RTPS/UDP
+
+          This fixes a mistake made in
+          https://github.com/OpenDDS/OpenDDS/pull/4731
+
+Wed Aug 28 19:40:53 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit d19ace3c9260528ae073170d99678dba443fe4ab
+
+        * tools/rtpsrelay/GuidAddrSet.cpp:
+        * tools/rtpsrelay/GuidAddrSet.h:
+        * tools/rtpsrelay/RelayHandler.cpp:
+
+          RtpsRelay: updated handling of admission control queue
+
+          For accurate rate limiting the relay needs to maintain this queue
+          upon
+          receipt of any valid message, not just those from new clients.
+
+Thu Aug 22 19:09:15 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 00d1d5cff0fae21e1787df6a2e9ccddfb2ee732c
+
+          Merge pull request #4771 from jrw972/java-union-topics
+
+          Union topics are not supported in Java
+
+Thu Aug 22 18:31:34 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 8a33db8e9978478d7fd45a42ccf4f9e2dfd916f5
+
+          Merge pull request #4768 from sonndinh/reduce-warnings-p4
+
+          Address warnings (cont.)
+
+Thu Aug 15 20:11:13 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 65ff26fd79d978d0fd7477468d1dc158488f29b0
+
+        * dds/idl/dds_generator.cpp:
+        * dds/idl/dds_generator.h:
+        * dds/idl/dds_visitor.cpp:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/ts_generator.cpp:
+        * java/tests/complex_idl/ComplexIDLTest.java:
+        * java/tests/complex_idl/Complex_Idl.idl:
+
+          Union topics are not supported in Java
+
+          Problem
+          -------
+
+          Union topics do not compile with Java.
+
+          Solution
+          --------
+
+          Add support and a extend a test for union topics in Java.
+
+Wed Aug 21 14:33:20 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit ef24624ce4c81183aefbeaa09694c14458919fc0
+
+        * dds/DCPS/RTPS/RtpsDiscoveryConfig.cpp:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+
+          Loss of data warnings
+
+Tue Aug 20 23:34:18 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 34b0ea4505284d3ae2f20f57ba89656f5cbb386f
+
+          Merge pull request #4778 from mitza-oci/rtm-errors
+
+          Updated RelayThreadMonitor error reporting
+
+Tue Aug 20 20:57:12 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit e3cee05b9cca35a8ed25deb40b7c641be44ab618
+
+          Merge pull request #4777 from iguessthislldo/igtd/preassoc-issue
+
+          Restrict Vector Reserve Count in `RtpsUdpDataLink`
+
+Tue Aug 20 20:00:33 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit d3b36d4ae3ff953936f320a2d23bf4e62b5f990a
+
+        * docs/news.d/relay-thread-monitor.rst:
+
+          NEWS
+
+Tue Aug 20 19:52:32 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 0a3fee2ac2352833bd95b8c3b946e02bf1ebd034
+
+        * tools/rtpsrelay/RelayThreadMonitor.cpp:
+
+          Updated RelayThreadMonitor error reporting
+
+          All threads that have missed the deadline are reported before the
+          process dies.
+          These log messages include the timestamp of the most recent
+          update for each
+          thread that has missed the deadline.
+
+Tue Aug 20 18:18:33 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 48715adb43f2398031d93fa7713e87b30f95f48a
+
+        * dds/DCPS/XTypes/IdlScanner.h:
+
+          Simplify IdlToken
+
+Tue Aug 20 16:33:55 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit c1c7845ae76966f3c3c16fb1359c93d1021aa849
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Restrict Vector Reserve Count in `RtpsUdpDataLink`
+
+          If the number of remotes and `meta_submessages` is large, then
+          this will
+          waste a lot of space.
+
+Tue Aug 20 13:49:02 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 56093090c9032aee832cfc3e3d1ffc41533f96a7
+
+          Merge pull request #4774 from
+          mitza-oci/relay-admission-active-participants
+
+          Added -AdmissionMaxParticipantsRange to RtpsRelay options
+
+Tue Aug 20 13:43:39 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit a54853ea2862061fada31a1de45e5555c23813da
+
+        * docs/news.d/relay-max-participants.rst:
+
+          added news
+
+Mon Aug 19 21:15:48 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 83ab8c139083aa47eb7d55ec664b27742c254a45
+
+        * docs/devguide/internet_enabled_rtps.rst:
+        * tools/rtpsrelay/Config.h:
+        * tools/rtpsrelay/GuidAddrSet.cpp:
+        * tools/rtpsrelay/GuidAddrSet.h:
+        * tools/rtpsrelay/RtpsRelay.cpp:
+
+          Added -AdmissionMaxParticipantsRange to RtpsRelay options
+
+          provides another mechanism for detecting load on each RtpsRelay
+          instance
+
+Mon Aug 19 18:32:35 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit ee428edf63a430b639eb9d1ee6a1fb8014f69604
+
+          Merge pull request #4772 from iguessthislldo/igtd/addr-cache-leak
+
+          Fixed Leak in `AddressCache` for RTPS/UDP Transport
+
+Mon Aug 19 18:31:37 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 0c0985657da0b70127a9b34bfc93d0857825642e
+
+          Merge pull request #4773 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-6.7.0
+
+          Bump docker/build-push-action from 6.6.1 to 6.7.0
+
+Mon Aug 19 15:58:15 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 7ac597c38acfe5322d2a40718e93cb92b320ae56
+
+        * java/idl2jni/codegen/im_java.cpp:
+
+          Incorrect type
+
+Mon Aug 19 15:45:02 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit d7d0a330dcb14247fc07d40135797c054e1f7116
+
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+
+          Typo
+
+Mon Aug 19 15:44:50 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 3189189008fcc5329be686de9d4c6efac80b3760
+
+          Merge branch 'master' of github.com:OpenDDS/OpenDDS into
+          reduce-warnings-p4
+
+Mon Aug 19 15:24:37 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 07c83a526deb0a1e87df28666271647daa9836d5
+
+        * dds/DCPS/Serializer.cpp:
+        * dds/DCPS/ValueHelper.h:
+        * dds/DCPS/XTypes/IdlScanner.h:
+        * dds/DCPS/debug.cpp:
+        * dds/idl/be_util.h:
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+        * java/idl2jni/codegen/im_java.cpp:
+        * java/idl2jni/codegen/im_jni.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/common/TestData.h:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TcpPublisher.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.cpp:
+        * performance-tests/DCPS/Sync/SyncClient_i.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/common/TestData.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TcpSubscriber.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TestDriver.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TestStats.h:
+        * tests/DCPS/TcpReconnect/stub.cpp:
+
+          More warnings
+
+Mon Aug 19 07:28:05 UTC 2024  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 4b471dcb48b2436fe26cb3bd5be1c2e8c00f786f
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 6.6.1 to 6.7.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 6.6.1 to 6.7.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/16ebe778df0e7752d2cfcbd924afdbbd89c1a755...5cd11c3a4ced054e52742c5fd54dca954e0edd85)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Fri Aug 16 22:45:09 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 8b2d38e302fd35f05f30613b7fa20a19c0bfdbdf
+
+        * dds/DCPS/AddressCache.h:
+        * docs/news.d/addr-cache-leak.rst:
+        * tests/unit-tests/dds/DCPS/AddressCache.cpp:
+
+          News, Unit Testing, Tweaks for Unit Testing
+
+Fri Aug 16 16:42:38 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit cda3247fe2ba08c426b4be7a6c89b591f9db31b2
+
+        * dds/DCPS/XTypes/IdlScanner.h:
+        * dds/FACE/config/TopicSettings.cpp:
+
+          Fix build errors
+
+Fri Aug 16 03:23:20 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 4e532244bec5516ac6ba31c5abe6ba4ad88a939c
+
+        * dds/DCPS/AddressCache.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * docs/devguide/quality_of_service.rst:
+
+          Fixed Leak in AddressCache for RTPS/UDP Transport
+
+          AddressCache has a `map_` that maps keys (local-remote GUID pairs
+          in
+          RTPS/UDP) to cache entries and a `id_map_` that maps GUIDs to a
+          vector
+          of related keys. When a key is inserted into the cache the GUIDs
+          get get
+          entries in the `id_map_` that can be used to search `map_`.
+
+          `id_map_` has two problems:
+          - The vector of keys are not checked if they are being
+          duplicated. These
+          changes make it a set.
+          - `remove_id` removes the `id_map_` keys for the GUID argument
+          (the
+          remote GUID in RTPS/UDP), but not any keys that contain that GUID
+          for
+          other vectors in `id_maps_` (the remote in RTPS/UDP). These
+          changes
+          try to clean up all the revelant GUIDs.
+
+          Also:
+          - A change to release reservation I meant to add in the other
+          leak PR.
+          If the release reservation is for a specfic local-remote pair, it
+          doesn't seem right to remove all messages for the remote from the
+          send
+          queue.
+          - Small fixes to QoS doc that I had in this local repo for some
+          reason.
+
+Thu Aug 15 18:31:53 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit efca266de8402aaa83b759e253128223a8f015b8
+
+          Merge pull request #4769 from
+          simpsont-oci/bundlingcachekey_constructor_arg_reorder
+
+          Reorder constructor arguments to BundlingCacheKey
+
+Thu Aug 15 07:24:23 UTC 2024  Timothy Simpson  <simpsont@objectcomputing.com>
+        commit 9f29839d3fdbc88c330891155bd40fc3350d1178
+
+        * dds/DCPS/transport/rtps_udp/BundlingCacheKey.h:
+
+          Reorder constructor arguments to BundlingCacheKey to reflect
+          actual usage and member order
+
+Wed Aug 14 21:29:15 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 63c99a3feb8bf0f7895fe9fc310b30ecd6045870
+
+        * dds/DCPS/XTypes/IdlScanner.h:
+        * dds/FACE/config/TopicSettings.cpp:
+        * dds/FACE/config/TopicSettings.h:
+
+          Can't define struct type in anonymous union
+
+Wed Aug 14 20:02:38 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 2371b32a072beafd960d2749359e7eff787b3671
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/XTypes/IdlScanner.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/monitor/DRMonitorImpl.cpp:
+
+          Fix warnings
+
+Tue Aug 13 16:31:57 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit b875eddd2907855a8703ed1dc3dfba82853ca50d
+
+          Merge pull request #4766 from mitza-oci/gha-no-ace7
+
+          GitHub Actions: ACE 7 is no longer used
+
+Mon Aug 12 17:29:51 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit eba377a0024b4b41e8bff3c889ae8ce13898ea77
+
+        * .github/workflows/build_and_test.yml:
+        * docs/internal/github_actions.rst:
+
+          GitHub Actions: ACE 7 is no longer used
+
+          Updated build names to match
+
+Mon Aug 12 13:52:24 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7ca7a4d0dca8bb7836a229b731add3da682d5ca8
+
+          Merge pull request #4764 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-6.6.1
+
+          Bump docker/build-push-action from 6.5.0 to 6.6.1
+
+Mon Aug 12 13:52:14 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit b7b5c896f487e736a32fa826a44641dfa5a4bb16
+
+          Merge pull request #4763 from iguessthislldo/igtd/cross-java
+
+          Fixed Cross-compiled Builds Using Java
+
+Mon Aug 12 13:51:56 UTC 2024  Adam Mitz  <mitza@objectcomputing.com>
+        commit 22c83732c21e4eba03a4f3a0fda0434c7e6f1924
+
+          Merge pull request #4762 from sonndinh/reduce-warnings-p3
+
+          Address Warnings (cont.)
+
+Mon Aug 12 07:51:43 UTC 2024  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 0010a7986b69938b0568245f8a3eb233ed675e90
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 6.5.0 to 6.6.1
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 6.5.0 to 6.6.1.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/5176d81f87c23d6fc96624dfdbcd9f3830bbe445...16ebe778df0e7752d2cfcbd924afdbbd89c1a755)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Mon Aug 12 03:40:11 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 7796cd6aac9d6d67a623217cdcf546c7c67bcb92
+
+        * configure:
+        * docs/news.d/cross-java.rst:
+
+          Fixed Cross-compiled Builds Using Java
+
+          I took these lines out from the configure script for some reason
+          in
+          https://github.com/OpenDDS/OpenDDS/pull/4611. Without them the
+          host
+          build doesn't include idl2jni.
+
+Thu Aug 08 17:05:57 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit a91b36b8bb5e5be8cd4c394000e502f519a95d9d
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * dds/DCPS/XTypes/DynamicVwrite.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/FederatorConfig.cpp:
+        * dds/InfoRepo/UpdateManager.cpp:
+
+          More fix
+
+Wed Aug 07 18:15:38 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit f938fa6d318e5bd21756fc46650965090d9cbde1
+
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+        * dds/DCPS/NetworkResource.cpp:
+        * dds/DCPS/OwnershipManager.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/StaticDiscovery.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/XTypes/DynamicDataAdapter.cpp:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * dds/DCPS/XTypes/TypeAssignability.cpp:
+        * dds/DCPS/XTypes/TypeLookupService.cpp:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/transport/framework/DirectPriorityMapper.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * dds/FACE/config/Parser.cpp:
+
+          More warnings fix
+
+Tue Aug 06 16:41:29 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit a0f6cb719d3b7fbe48543444db92481991cbf664
+
+        * dds/DCPS/ReplayerImpl.cpp:
+
+          Uninitialized GUID_t var
+
+Tue Aug 06 16:32:35 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 3d80f9ee33e837cc093ecfca4452726119f3aac3
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/NetworkResource.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * java/idl2jni/codegen/im_java.cpp:
+
+          More warnings fix
+
+Fri Aug 02 18:35:54 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 28ae5f590d4b4a988ecb8b83a330d4c1af3c9c7c
+
+          Merge pull request #4756 from OpenDDS/opendds3-ci-prep
+
+          OpenDDS version not accounted for in scoreboard
+
+Fri Aug 02 18:34:55 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 437b90834e2944bc6e456ad6f22087153ce99d4b
+
+          Merge pull request #4758 from OpenDDS/workflows/update-ace-tao
+
+          Update ACE/TAO to 8.0.1
+
+Fri Aug 02 18:34:37 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 995bee7981d1490882cb09f3de4d7ea848a597c4
+
+          Merge pull request #4760 from
+          iguessthislldo/igtd/release-script-output
+
+          Minor Improvements to Release Script Output
+
+Fri Aug 02 16:44:39 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 0756ca84976b1d18369542029fa16c4be2e8da59
+
+        * tools/scripts/gitrelease.pl:
+
+          Minor Improvements to Release Script Output
+
+          Fixes https://github.com/OpenDDS/OpenDDS/issues/4759 and some
+          other
+          issues I noticed in `--help`.
+
+Fri Aug 02 08:28:52 UTC 2024  jwillemsen  <jwillemsen@users.noreply.github.com>
+        commit 7a4c1e879a90572a3ff300a896d540020aabf064
+
+        * acetao.ini:
+        * docs/news.d/automated-update-ace8tao4.rst:
+
+          Update ACE/TAO to 8.0.1
+
+          Updated:
+          - ACE 8/TAO 4 from 8.0.0 to
+          [8.0.1](https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-8_0_1).
+
+Wed Jul 31 20:58:04 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 60cfa54418a46a664fdaf2d5c2a103b6bdd7d4b2
+
+        * .github/workflows/build_and_test.yml:
+
+          OpenDDS version not accounted for in scoreboard
+
+          Problem
+          -------
+
+          As we approach OpenDDS 4, we will most likely have CI jobs with
+          the
+          same name running against version 3 and 4. Currently, the OpenDDS
+          version is not used when naming the result.  For clarity moving
+          forward, the result should include the version.
+
+          Solution
+          --------
+
+          Extract the OpenDDS version from `dds/Version.h` and use it in
+          the
+          upload path.
+
+Thu Aug 01 19:00:23 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 0299e08b3d09444ceecd6434ab33762d6f50078b
+
+          Merge pull request #4755 from sonndinh/reduce-warnings-p2
+
+          Address warnings (cont.)
+
+Thu Aug 01 18:35:15 UTC 2024  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit f1820e770999339468ecb9bb6b3d1bc4234d75e8
+
+          Merge pull request #4754 from jrw972/release-doc
+
+          Release process lacks detail on micro releases and using
+          containers
+
+Wed Jul 31 15:38:43 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 483a8ae1113465806f88f02c072ccd6bc502e53c
+
+        * docs/internal/release.rst:
+
+          Release process lacks detail on micro releases and using
+          containers
+
+          Problem
+          -------
+
+          - The release process cannot be performed on MacOS.
+
+          - There were some assumptions about micro releases that were not
+          stated.
+
+          Solution
+          --------
+
+          - Add guidance for using a container to perform the release.
+
+          - Add detail about preparing the release branch for a micro
+          release.
+
+Wed Jul 31 17:47:07 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit fb025505470e5fd91c81fc25d9892f41844ef65c
+
+        * dds/DCPS/Serializer.inl:
+
+          Convert pointer to size_t
+
+Wed Jul 31 17:01:35 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit 5739777f1ff6b458f8d683e674110941605a9281
+
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/Serializer.inl:
+        * dds/idl/marshal_generator.cpp:
+
+          Address warnings (cont.)
+
+Wed Jul 31 14:47:40 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 5accc7a9e5ece1748fc6a577fa685e55a284e1e4
+
+        * NEWS.md:
+        * docs/news.d/_releases/v3.29.1.rst:
+        * docs/news.d/java-fixed-size-structs.rst:
+
+          OpenDDS Release 3.29.1
+
+Tue Jul 30 20:34:57 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 006cc9f7e0445ede5a49cca10194ebb006730c7d
+
+          Merge pull request #4752 from jrw972/idl2jni-fixed-size-structs
+
+          Fixed-size structs don't compile with Java
+
+Tue Jul 30 18:33:27 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit ce13e9535c489784af32fa0cb96c0048b2a4b166
+
+          Merge pull request #4747 from sonndinh/reduce-warnings
+
+          Address warnings
+
+Mon Jul 29 21:46:23 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 045f7316d715f0a33e84decbc0b259dc97215b5b
+
+        * docs/news.d/java-fixed-size-structs.rst:
+        * java/idl2jni/codegen/be_global.cpp:
+        * java/idl2jni/codegen/be_global.h:
+        * java/idl2jni/codegen/im_jni.cpp:
+        * java/tests/complex_idl/Complex_Idl.idl:
+
+          Fix size structs don't compile with Java
+
+          Problem
+          -------
+
+          A topic type that has fixed size results in compilation errors in
+          the
+          generated code.
+
+          Solution
+          --------
+
+          Extend `idl2jni` to stub out return values for fixed-size
+          structs.
+
+Mon Jul 29 18:30:51 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 8810e9e6a2595d31281abbbb62e89fafd13cdfeb
+
+          Merge pull request #4748 from
+          OpenDDS/dependabot/github_actions/docker/login-action-3.3.0
+
+          Bump docker/login-action from 3.2.0 to 3.3.0
+
+Mon Jul 29 18:30:39 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit e7da0a8dd8849ca6872a88b32507e427540377c1
+
+          Merge pull request #4749 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-6.5.0
+
+          Bump docker/build-push-action from 6.4.1 to 6.5.0
+
+Mon Jul 29 07:11:59 UTC 2024  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 2f07cd7d22f958acfb863ba14cd129beb845ce32
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 6.4.1 to 6.5.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 6.4.1 to 6.5.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/1ca370b3a9802c92e886402e0dd88098a2533b12...5176d81f87c23d6fc96624dfdbcd9f3830bbe445)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Mon Jul 29 07:11:56 UTC 2024  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 4a0bfa9e43dc77c2a97ec9fddc49f6f48c85364b
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/login-action from 3.2.0 to 3.3.0
+
+          Bumps
+          [docker/login-action](https://github.com/docker/login-action)
+          from 3.2.0 to 3.3.0.
+          - [Release
+          notes](https://github.com/docker/login-action/releases)
+          -
+          [Commits](https://github.com/docker/login-action/compare/0d4c9c5ea7693da7b068278f7b52bda2a190a446...9780b0c442fbb1117ed29e0efdff1e18412f7567)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/login-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Fri Jul 26 19:29:44 UTC 2024  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 5c9f96028d23d82ba45421dad69b20b8251cf790
+
+        * PROBLEM-REPORT-FORM:
+        * VERSION.txt:
+        * dds/Version.h:
+
+          OpenDDS Post Release 3.29.0
+
+Thu Jul 25 21:53:08 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+        commit dace3679bb24815d65d4a49b7e9a01b354785347
+
+        * dds/idl/typeobject_generator.cpp:
+
+          Missed parentheses
+
+Thu Jul 25 21:37:10 UTC 2024  Son Dinh  <dinhs@objectcomputing.com>
+
+        * dds/DCPS/ConfigStoreImpl.cpp:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/NetworkResource.h:
+        * dds/idl/metaclass_generator.cpp:
+        * dds/idl/typeobject_generator.cpp:
+        * java/idl2jni/codegen/be_produce.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TestDriver.cpp:
+
+          Make less warnings
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

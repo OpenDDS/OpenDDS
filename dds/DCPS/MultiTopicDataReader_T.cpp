@@ -8,7 +8,7 @@
 #ifndef OPENDDS_DCPS_MULTITOPICDATAREADER_T_CPP
 #define OPENDDS_DCPS_MULTITOPICDATAREADER_T_CPP
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
 
 #include <stdexcept>
 #include <sstream>
@@ -21,7 +21,7 @@ namespace DCPS {
 
 template<typename Sample, typename TypedDataReader>
 void
-MultiTopicDataReader_T<Sample, TypedDataReader>::init_typed(DataReaderEx* dr)
+MultiTopicDataReader_T<Sample, TypedDataReader>::init_typed(DDS::DataReader* dr)
 {
   typed_reader_ = TypedDataReader::Interface::_narrow(dr);
 }

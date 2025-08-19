@@ -17,11 +17,8 @@ const CORBA::WChar* wstrseq = (const CORBA::WChar*)(L"I'm wstring seq");
 const CORBA::Char* str = "I'm string";
 const CORBA::WChar* wstr = (const CORBA::WChar*)(L"I'm wstring");
 
-const int num_expected_messages = 10;
-
-DataReaderListenerImpl::DataReaderListenerImpl()
-  : num_reads_(0),
-    passed_count_ (0)
+DataReaderListenerImpl::DataReaderListenerImpl(DistributedConditionSet_rch dcs)
+  : dcs_(dcs)
 {
 }
 
@@ -31,8 +28,6 @@ DataReaderListenerImpl::~DataReaderListenerImpl ()
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
-  ++num_reads_;
-
   try {
     MessageDataReader_var message_dr = MessageDataReader::_narrow(reader);
     if (CORBA::is_nil (message_dr.in ())) {
@@ -42,30 +37,23 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
     Messenger::Message message;
     DDS::SampleInfo si ;
-    DDS::ReturnCode_t status = message_dr->take_next_sample(message, si) ;
-
-
-    if (status == DDS::RETCODE_OK) {
-      if (si.valid_data)
-      {
+    for (DDS::ReturnCode_t status = message_dr->take_next_sample(message, si);
+         status == DDS::RETCODE_OK;
+         status = message_dr->take_next_sample(message, si)) {
+      if (si.valid_data) {
         cout << "Message: subject_id = " << message.subject_id   << endl
-            << "         count      = " << message.count        << endl;
+             << "         count      = " << message.count        << endl;
         cout << "SampleInfo.sample_rank = " << si.sample_rank << endl;
-        if (verify_message (message))
-          ++passed_count_;
+        verify_message (message);
       }
       else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
-      {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) instance is disposed\n")));
-      }
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) instance is disposed\n")));
+        }
       else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE)
-      {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) instance is unregistered\n")));
-      }
-    } else if (status == DDS::RETCODE_NO_DATA) {
-      cerr << "ERROR: reader received DDS::RETCODE_NO_DATA!" << endl;
-    } else {
-      cerr << "ERROR: read Message: Error: " <<  status << endl;
+        {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) instance is unregistered\n")));
+        }
     }
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in read:" << endl << e << endl;
@@ -87,6 +75,7 @@ bool DataReaderListenerImpl::verify_message (Messenger::Message& message)
                       message.bounded_wchar_seq.get_buffer ()),
                       false);
         }
+        dcs_->post("subscriber", "done");
       }
       break;
     case 8:
@@ -280,22 +269,4 @@ void DataReaderListenerImpl::on_subscription_lost (
   const ::OpenDDS::DCPS::SubscriptionLostStatus &)
 {
   cerr << "DataReaderListenerImpl::on_subscription_lost" << endl;
-}
-
-void DataReaderListenerImpl::on_budget_exceeded (
-  DDS::DataReader_ptr,
-  const ::OpenDDS::DCPS::BudgetExceededStatus&)
-{
-  cerr << "DataReaderListenerImpl::on_budget_exceeded" << endl;
-}
-
-bool DataReaderListenerImpl::received_all ()
-{
-  return this->num_reads_ == num_expected_messages;
-}
-
-
-bool DataReaderListenerImpl::passed ()
-{
-  return this->num_reads_ == this->passed_count_;
 }

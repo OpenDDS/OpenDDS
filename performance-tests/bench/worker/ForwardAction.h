@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ace/Proactor.h"
+#include <dds/DCPS/EventDispatcher.h>
 
 #include "Action.h"
 #include "DataHandler.h"
@@ -15,7 +15,7 @@ namespace Bench {
 
 class ForwardAction : public virtual Action, public virtual DataHandler, public std::enable_shared_from_this<ForwardAction> {
 public:
-  explicit ForwardAction(ACE_Proactor& proactor);
+  explicit ForwardAction(OpenDDS::DCPS::EventDispatcher_rch event_dispatcher);
 
   bool init(const ActionConfig& config, ActionReport& report, Builder::ReaderMap& readers,
     Builder::WriterMap& writers, const Builder::ContentFilteredTopicMap& cft_map) override;
@@ -38,7 +38,7 @@ protected:
   };
 
   std::mutex mutex_;
-  ACE_Proactor& proactor_;
+  OpenDDS::DCPS::EventDispatcher_rch event_dispatcher_;
   bool started_, stopped_;
   bool write_task_active_;
   std::vector<std::shared_ptr<Registration> > registrations_;
@@ -52,7 +52,7 @@ protected:
   size_t queue_first_, queue_last_;
   std::condition_variable queue_not_full_;
   DDS::InstanceHandle_t instance_;
-  std::shared_ptr<ACE_Handler> handler_;
+  OpenDDS::DCPS::EventBase_rch event_;
 };
 
 }

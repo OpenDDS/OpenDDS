@@ -15,6 +15,8 @@
 #include "debug.h"
 #include "DCPS_Utils.h"
 
+#include "dds/OpenDDSConfigWrapper.h"
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -67,7 +69,7 @@ bool Qos_Helper::valid(const DDS::TopicQos& qos)
     return false;
   }
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
   if (!valid(qos.durability_service)) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE,
@@ -170,7 +172,7 @@ bool Qos_Helper::valid(const DDS::DataWriterQos& qos)
     return false;
   }
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
   if (!valid(qos.durability_service)) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE,
@@ -260,7 +262,7 @@ bool Qos_Helper::valid(const DDS::DataWriterQos& qos)
     return false;
   }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   if (!valid(qos.ownership_strength)) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE,

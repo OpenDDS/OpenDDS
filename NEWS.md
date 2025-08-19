@@ -1,5 +1,193 @@
 # OpenDDS Releases
 
+## Version 3.33.0 of OpenDDS
+
+Released 2025-08-01
+
+Download [this release on GitHub](https://github.com/OpenDDS/OpenDDS/releases/tag/v3.33.0).
+
+Read [the documentation for this release on Read the Docs](https://opendds.readthedocs.io/en/v3.33.0).
+
+### Additions
+
+- IDL Maps are now supported by `opendds_idl`. ([PR #4999](https://github.com/OpenDDS/OpenDDS/pull/4999))
+  - We would like to thank [tmayoff](https://github.com/tmayoff) for contributing much of the work needed for this.
+  - Usage example:
+    ```omg-idl
+    @nested
+    struct Item {
+      string desc_name;
+      uint32 count;
+    };
+
+    @topic
+    struct Inventory {
+      map<string, Item> items;
+    };
+    ```
+  - They map to C++ `std::map` in both the classic IDL-to-C++ and IDL-to-C++11 mappings.
+  - See [IDL Compliance](https://opendds.readthedocs.io/en/v3.33.0/devguide/introduction.html#introduction-idl-compliance) for known limitations.
+- RtpsRelay
+  - Output from [`RtpsRelay -LogRelayStatistics`](https://opendds.readthedocs.io/en/v3.33.0/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-LogRelayStatistics) / [`RtpsRelay -PublishRelayStatistics`](https://opendds.readthedocs.io/en/v3.33.0/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-PublishRelayStatistics) includes extended RtpsRelay statistics ([PR #4972](https://github.com/OpenDDS/OpenDDS/pull/4972), [PR #5006](https://github.com/OpenDDS/OpenDDS/pull/5006))
+  - Output from [`RtpsRelay -LogRelayStatistics`](https://opendds.readthedocs.io/en/v3.33.0/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-LogRelayStatistics) / [`RtpsRelay -PublishRelayStatistics`](https://opendds.readthedocs.io/en/v3.33.0/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-PublishRelayStatistics) includes internal OpenDDS statistics ([PR #5000](https://github.com/OpenDDS/OpenDDS/pull/5000), [PR #5006](https://github.com/OpenDDS/OpenDDS/pull/5006), [PR #4990](https://github.com/OpenDDS/OpenDDS/pull/4990), [PR #5023](https://github.com/OpenDDS/OpenDDS/pull/5023))
+  - RtpsRelay no longer needs to store and replay SPDP messages ([PR #5017](https://github.com/OpenDDS/OpenDDS/pull/5017), [PR #5020](https://github.com/OpenDDS/OpenDDS/pull/5020))
+  - The OpenDDSInternalThread built-in topic has additional detail fields which may be populated by internal threads. ([PR #5026](https://github.com/OpenDDS/OpenDDS/pull/5026))
+    - The RtpsRelay's event handling threads make use of this feature.
+  - RtpsRelay expiration/deactivation is now done by separate timer events instead of during input handling ([PR #5032](https://github.com/OpenDDS/OpenDDS/pull/5032))
+  - [`RtpsRelay -DrainInterval`](https://opendds.readthedocs.io/en/v3.33.0/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-DrainInterval) can drain clients to implement a controlled shutdown ([PR #5063](https://github.com/OpenDDS/OpenDDS/pull/5063))
+- Added [`[rtps_discovery] IgnoredSpdpUserTags`](https://opendds.readthedocs.io/en/v3.33.0/devguide/run_time_configuration.html#cfg-prop-rtps_discovery-IgnoredSpdpUserTags). ([PR #5046](https://github.com/OpenDDS/OpenDDS/pull/5046))
+- When DDS Security is configured to require authentication and an incoming SPDP message has a different Identity CA, authentication is not attempted. ([PR #5046](https://github.com/OpenDDS/OpenDDS/pull/5046))
+
+### Platform Support and Dependencies
+
+- ACE/TAO
+  - Updated ACE 6/TAO 2 from 6.5.21 to [6.5.22](https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_22).
+  - Updated ACE 8/TAO 4 from 8.0.3 to [8.0.4](https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-8_0_4).
+- CMake
+  - [`opendds_target_sources`](https://opendds.readthedocs.io/en/v3.33.0/devguide/building/cmake.html#cmake-func-opendds_target_sources) now has a FOLDER argument which sets the CMake FOLDER property on generated targets. ([PR #5009](https://github.com/OpenDDS/OpenDDS/pull/5009))
+  - Fixed accidental use of RapidJSON's `CMakeLists.txt` file when building OpenDDS with CMake. ([PR #5054](https://github.com/OpenDDS/OpenDDS/pull/5054))
+    This caused issues such as forcing the `CMAKE_CXX_STANDARD` to C++11 and breaking the ACE C++ standard detection code.
+  - Fixed configure issue with Xerces from vcpkg when building OpenDDS with CMake. ([PR #5054](https://github.com/OpenDDS/OpenDDS/pull/5054))
+- The configure script detects the C++ standard supported by the Android NDK compiler ([PR #5057](https://github.com/OpenDDS/OpenDDS/pull/5057), [PR #5052](https://github.com/OpenDDS/OpenDDS/pull/5052))
+
+### Fixes
+
+- Reset heartbeat fallback when the sequence number advances. ([PR #5048](https://github.com/OpenDDS/OpenDDS/pull/5048))
+
+## Version 3.32.0 of OpenDDS
+
+Released 2025-05-06
+
+Download [this release on GitHub](https://github.com/OpenDDS/OpenDDS/releases/tag/v3.32.0).
+
+Read [the documentation for this release on Read the Docs](https://opendds.readthedocs.io/en/v3.32.0).
+
+### Additions
+
+- Added [`RtpsRelay -LogUtilizationChanges`](https://opendds.readthedocs.io/en/v3.32.0/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-LogUtilizationChanges) to RtpsRelay options ([PR #4890](https://github.com/OpenDDS/OpenDDS/pull/4890))
+- Added [`opendds_idl --append-typeobjects`](https://opendds.readthedocs.io/en/v3.32.0/devguide/opendds_idl.html#cmdoption-opendds_idl-append-typeobjects) to opendds_idl options.  It can be used to write XTypes Type Objects to a separate output file in addition to normal code generation. ([PR #4898](https://github.com/OpenDDS/OpenDDS/pull/4898))
+- Added [`RtpsRelay -SynchronousOutput`](https://opendds.readthedocs.io/en/v3.32.0/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-SynchronousOutput) option to RtpsRelay. ([PR #4928](https://github.com/OpenDDS/OpenDDS/pull/4928))
+- The TypeLookupService now has support for strongly connected components (recursive types). ([PR #4940](https://github.com/OpenDDS/OpenDDS/pull/4940))
+
+### Platform Support and Dependencies
+
+- ACE/TAO
+  - Updated ACE 8/TAO 4 from 8.0.2 to [8.0.3](https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-8_0_3).
+- CMake
+  - [`opendds_target_sources`](https://opendds.readthedocs.io/en/v3.32.0/devguide/building/cmake.html#cmake-func-opendds_target_sources)
+    - Added support for using the same IDL files in different targets with different options. ([PR #4962](https://github.com/OpenDDS/OpenDDS/pull/4962))
+    - It will not automatically generate an export header when all IDL files are scoped `PRIVATE` unless [`opendds_target_sources(ALWAYS_GENERATE_LIB_EXPORT_HEADER)`](https://opendds.readthedocs.io/en/v3.32.0/devguide/building/cmake.html#cmake-func-arg-opendds_target_sources-ALWAYS_GENERATE_LIB_EXPORT_HEADER) is set to `TRUE`. ([PR #4962](https://github.com/OpenDDS/OpenDDS/pull/4962))
+    - It will not export symbols in code generated from `PRIVATE` IDL files. ([PR #4962](https://github.com/OpenDDS/OpenDDS/pull/4962))
+    - Added support for the [codegen](https://cmake.org/cmake/help/latest/policy/CMP0171.html) target (CMake 3.31 or later) to build and run IDL compilers on targets with IDL. ([PR #4962](https://github.com/OpenDDS/OpenDDS/pull/4962))
+    - [`opendds_target_sources(USE_EXPORT)`](https://opendds.readthedocs.io/en/v3.32.0/devguide/building/cmake.html#cmake-func-arg-opendds_target_sources-USE_EXPORT) will now pass on its arguments to [`opendds_export_header(EXISTING)`](https://opendds.readthedocs.io/en/v3.32.0/devguide/building/cmake.html#cmake-func-arg-opendds_export_header-EXISTING). ([PR #4964](https://github.com/OpenDDS/OpenDDS/pull/4964))
+  - Fixes and improvements for [`opendds_export_header`](https://opendds.readthedocs.io/en/v3.32.0/devguide/building/cmake.html#cmake-func-opendds_export_header): ([PR #4954](https://github.com/OpenDDS/OpenDDS/pull/4954))
+    - `opendds_export_header` now allows specifying an existing export header and gives control over what names are used.
+    - `opendds_export_header` and [`opendds_target_sources`](https://opendds.readthedocs.io/en/v3.32.0/devguide/building/cmake.html#cmake-func-opendds_target_sources) now set symbol visibility to hidden using [CXX_VISIBILITY_PRESET](https://cmake.org/cmake/help/latest/prop_tgt/LANG_VISIBILITY_PRESET.html) and [VISIBILITY_INLINES_HIDDEN](https://cmake.org/cmake/help/latest/prop_tgt/VISIBILITY_INLINES_HIDDEN.html) on platforms where this applies.
+    - Fixed Visual Studio failing because of inconsistent linkage of exported symbols when linking between a DLL and a static library.
+  - Fixed [issue with building iShapes demo with CMake](https://github.com/OpenDDS/OpenDDS/issues/4849). ([PR #4884](https://github.com/OpenDDS/OpenDDS/pull/4884))
+  - Improved C++ standard detection in CMake. ([PR #4884](https://github.com/OpenDDS/OpenDDS/pull/4884))
+  - Added [`opendds_bigobj`](https://opendds.readthedocs.io/en/v3.32.0/devguide/building/cmake.html#cmake-func-opendds_bigobj) to set `/bigobj` on targets that need it on Windows. ([PR #4954](https://github.com/OpenDDS/OpenDDS/pull/4954))
+  - When using CMake 4, fixed relative path issues when working within a symlinked directory, including a warning about [CMP0177](https://cmake.org/cmake/help/latest/policy/CMP0177.html). ([PR #4959](https://github.com/OpenDDS/OpenDDS/pull/4959))
+  - Fixed [issue with CMake being unable to find RapidJSON](https://github.com/OpenDDS/OpenDDS/issues/4905) after installing OpenDDS. ([PR #4973](https://github.com/OpenDDS/OpenDDS/pull/4973))
+  - Fixed reconfigured cross-compiled builds trying to use `TRUE` as the path to host tools. ([PR #4986](https://github.com/OpenDDS/OpenDDS/pull/4986))
+  - Building OpenDDS with CMake
+    - The [Shapes Demo](https://opendds.readthedocs.io/en/v3.32.0/devguide/shapes.html#shapes-demo) will now be built when [Building OpenDDS Using CMake](https://opendds.readthedocs.io/en/v3.32.0/devguide/building/index.html#cmake-building) and [`OPENDDS_QT`](https://opendds.readthedocs.io/en/v3.32.0/devguide/building/cmake.html#cmake-var-OPENDDS_QT) is set to `TRUE`. ([PR #4884](https://github.com/OpenDDS/OpenDDS/pull/4884))
+    - Improved support for using Xerces 3.3.0 when building OpenDDS using CMake. ([PR #4926](https://github.com/OpenDDS/OpenDDS/pull/4926))
+    - GoogleTest will no longer be installed if it was built as part of the OpenDDS tests. ([PR #4973](https://github.com/OpenDDS/OpenDDS/pull/4973))
+    - Added [`OPENDDS_INSTALL_RAPIDJSON`](https://opendds.readthedocs.io/en/v3.32.0/devguide/building/index.html#cmake-var-OPENDDS_INSTALL_RAPIDJSON) to disable installing RapidJSON automatically. ([PR #4973](https://github.com/OpenDDS/OpenDDS/pull/4973))
+    - [`OPENDDS_ACE`](https://opendds.readthedocs.io/en/v3.32.0/devguide/building/cmake.html#cmake-var-OPENDDS_ACE) and [`OPENDDS_TAO`](https://opendds.readthedocs.io/en/v3.32.0/devguide/building/cmake.html#cmake-var-OPENDDS_TAO) can now be overrode after OpenDDS is installed. ([PR #4973](https://github.com/OpenDDS/OpenDDS/pull/4973))
+    - Fixed [`OPENDDS_COMPILE_WARNINGS=ERROR`](https://opendds.readthedocs.io/en/v3.32.0/devguide/building/index.html#cmake-var-OPENDDS_COMPILE_WARNINGS), which didn't work before. ([PR #4986](https://github.com/OpenDDS/OpenDDS/pull/4986))
+- Updated GoogleTest to be compatible with CMake 4. ([PR #4959](https://github.com/OpenDDS/OpenDDS/pull/4959))
+- OpenDDS's use of `std::optional` or an emulation is determined by the configuration file ([PR #4976](https://github.com/OpenDDS/OpenDDS/pull/4976))
+  - See `OPENDDS_CONFIG_STD_OPTIONAL` in `dds/OpenDDSConfig.h`
+  - Default is to use `std::optional` on compilers that support it
+  - See configure script's `--no-std-optional` or CMake's [`OPENDDS_STD_OPTIONAL`](https://opendds.readthedocs.io/en/v3.32.0/devguide/building/index.html#cmake-var-OPENDDS_STD_OPTIONAL)
+- New configure script option: `--[no-]static-runtime` ([PR #4977](https://github.com/OpenDDS/OpenDDS/pull/4977), [PR #4983](https://github.com/OpenDDS/OpenDDS/pull/4983))
+
+### Fixes
+
+- Added `RTPS_HARVEST_THREAD_STATUS` property to select the participant that harvests thread status. ([PR #4887](https://github.com/OpenDDS/OpenDDS/pull/4887))
+  - This addresses erroneous results from multiple participants harvesting thread status.
+  - See [OpenDDSInternalThread Topic](https://opendds.readthedocs.io/en/v3.32.0/devguide/built_in_topics.html#built-in-topics-openddsinternalthread-topic) for usage.
+- Signal the thread monitor in RtpsRelay listeners to avoid thread monitor timeouts. ([PR #4900](https://github.com/OpenDDS/OpenDDS/pull/4900))
+- Introduced a time separation when processed expired discovered participants with RtpsDiscovery. ([PR #4908](https://github.com/OpenDDS/OpenDDS/pull/4908))
+  - See [`[rtps_discovery] MinimumCleanupSeparation`](https://opendds.readthedocs.io/en/v3.32.0/devguide/run_time_configuration.html#cfg-prop-rtps_discovery-MinimumCleanupSeparation).
+
+### Documentation
+
+- Fixed minor typo in documentation of [DOC Group ACE 6.5.21/TAO 2.5.21](https://opendds.readthedocs.io/en/v3.32.0/devguide/building/dependencies.html#ace6tao2) option of [`OPENDDS_ACE_TAO_KIND`](https://opendds.readthedocs.io/en/v3.32.0/devguide/building/index.html#cmake-var-OPENDDS_ACE_TAO_KIND). ([PR #4884](https://github.com/OpenDDS/OpenDDS/pull/4884))
+
+## Version 3.31.0 of OpenDDS
+
+Released 2025-01-29
+
+Download [this release on GitHub](https://github.com/OpenDDS/OpenDDS/releases/tag/v3.31.0).
+
+Read [the documentation for this release on Read the Docs](https://opendds.readthedocs.io/en/v3.31.0).
+
+### Additions
+
+- Improve `--boottime` timers to not use a file descriptor per timer. ([PR #4835](https://github.com/OpenDDS/OpenDDS/pull/4835), [PR #4871](https://github.com/OpenDDS/OpenDDS/pull/4871))
+
+### Platform Support and Dependencies
+
+- ACE/TAO
+  - Updated ACE 8/TAO 4 from 8.0.1 to [8.0.2](https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-8_0_2).
+- CMake
+  - Fixed an issue [where OpenDDS won’t build ACE/TAO with Visual Studio 2015](https://github.com/OpenDDS/OpenDDS/issues/4842). ([PR #4843](https://github.com/OpenDDS/OpenDDS/pull/4843))
+
+### Fixes
+
+- Updated ThreadStatusManager for iterative event handling ([PR #4830](https://github.com/OpenDDS/OpenDDS/pull/4830))
+- Fix periodic timers with `--boottime` so that the initial delay is honored. ([PR #4835](https://github.com/OpenDDS/OpenDDS/pull/4835), [PR #4871](https://github.com/OpenDDS/OpenDDS/pull/4871))
+
+### Notes
+
+- Releases will now use a [new git tagging and branching strategy](https://github.com/OpenDDS/OpenDDS/issues/4761).
+  - Previously releases were tagged as either `DDS-X.Y` or `DDS-X.Y.Z`.
+    Release tags from now on will also be tagged as `vX.Y.Z`.
+    Any future OpenDDS 3 releases will be tagged both ways, while OpenDDS 4 releases will only be tagged in the new way.
+  - New branches can now be used for following specific release series.
+    For example v3 will always be updated to the latest 3 release and `v3.31` will be used for any future 3.31 releases.
+
+## Version 3.30.0 of OpenDDS
+
+Released 2024-10-11
+
+Download [this release on GitHub](https://github.com/OpenDDS/OpenDDS/releases/tag/DDS-3.30).
+
+Read [the documentation for this release on Read the Docs](https://opendds.readthedocs.io/en/dds-3.30).
+
+### Additions
+
+- Added [`RtpsRelay -AdmissionMaxParticipantsRange`](https://opendds.readthedocs.io/en/dds-3.30/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-AdmissionMaxParticipantsRange) to RtpsRelay options ([PR #4774](https://github.com/OpenDDS/OpenDDS/pull/4774))
+  - This option provides another mechanism for detecting load on each RtpsRelay instance
+- Improved RelayThreadMonitor error reporting ([PR #4778](https://github.com/OpenDDS/OpenDDS/pull/4778))
+  - All threads that have missed the deadline are reported before the process dies. These log messages include the timestamp of the most recent update for each thread that has missed the deadline.
+- Embedded a [GDB extension](https://github.com/OpenDDS/OpenDDS/blob/DDS-3.30/tools/scripts/gdbext.py) in `libOpenDDS_Dcps` to help make debugging OpenDDS in GDB a bit easier. ([PR #4791](https://github.com/OpenDDS/OpenDDS/pull/4791), [PR #4727](https://github.com/OpenDDS/OpenDDS/pull/4727))
+- Use a configurable thread pool for the RtpsRelay event handlers ([PR #4808](https://github.com/OpenDDS/OpenDDS/pull/4808))
+  - See [`RtpsRelay -HandlerThreads`](https://opendds.readthedocs.io/en/dds-3.30/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-HandlerThreads)
+
+### Platform Support and Dependencies
+
+- ACE/TAO
+  - Updated ACE 8/TAO 4 from 8.0.0 to [8.0.1](https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-8_0_1).
+- CMake
+  - Fixed issues using OpenDDS as a subproject with `add_subdirectory`. ([PR #4795](https://github.com/OpenDDS/OpenDDS/pull/4795))
+
+### Fixes
+
+- Fixed cross-compiled builds using Java ([PR #4763](https://github.com/OpenDDS/OpenDDS/pull/4763))
+- Fixed a memory leak in the address caches used by the RTPS/UDP transport. ([PR #4772](https://github.com/OpenDDS/OpenDDS/pull/4772))
+- Corrected implementation of [`RtpsRelay -AdmissionControlQueueSize`](https://opendds.readthedocs.io/en/dds-3.30/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-AdmissionControlQueueSize) and [`RtpsRelay -AdmissionControlQueueDuration`](https://opendds.readthedocs.io/en/dds-3.30/devguide/internet_enabled_rtps.html#cmdoption-RtpsRelay-AdmissionControlQueueDuration) ([PR #4783](https://github.com/OpenDDS/OpenDDS/pull/4783))
+- Fix cleanup of pending associations in the RTPS/UDP transport. ([PR #4785](https://github.com/OpenDDS/OpenDDS/pull/4785))
+- Change the tag type separator in `opendds_idl` to allow underscores in identifiers. ([PR #4800](https://github.com/OpenDDS/OpenDDS/pull/4800))
+- Change “reallocating primary receive buffer” to transport debug logging level 3 ([PR #4810](https://github.com/OpenDDS/OpenDDS/pull/4810))
+
+### Documentation
+
+- Documented the [`bit_autopurge_nowriter_samples_delay`](https://opendds.readthedocs.io/en/dds-3.30/devguide/run_time_configuration.html#cfg-prop-common-bit_autopurge_nowriter_samples_delay) and [`bit_autopurge_disposed_samples_delay`](https://opendds.readthedocs.io/en/dds-3.30/devguide/run_time_configuration.html#cfg-prop-common-bit_autopurge_disposed_samples_delay) configuration properties. ([PR #4816](https://github.com/OpenDDS/OpenDDS/pull/4816))
+
 ## Version 3.29.1 of OpenDDS
 
 Released 2024-07-31
@@ -171,7 +359,7 @@ Read [the documentation for this release on Read the Docs](https://opendds.readt
 
 ### Documentation
 
-- [Run-time Configuration](https://opendds.readthedocs.io/en/dds-3.28/devguide/run_time_configuration.html#config) ([PR #4464](https://github.com/OpenDDS/OpenDDS/pull/4464), [PR #4570](https://github.com/OpenDDS/OpenDDS/pull/4570), [PR #4467](https://github.com/OpenDDS/OpenDDS/pull/4467), [PR #4588](https://github.com/OpenDDS/OpenDDS/pull/4588))
+- [Run-time Configuration](https://opendds.readthedocs.io/en/dds-3.28/devguide/run_time_configuration.html#config) ([PR #4564](https://github.com/OpenDDS/OpenDDS/pull/4564), [PR #4570](https://github.com/OpenDDS/OpenDDS/pull/4570), [PR #4467](https://github.com/OpenDDS/OpenDDS/pull/4467), [PR #4588](https://github.com/OpenDDS/OpenDDS/pull/4588))
   - Restructured configuration properties so they can be linked to directly.
     Also reviewed each property description to correct or add missing context as needed.
 - [Introduction to OpenDDS](https://opendds.readthedocs.io/en/dds-3.28/devguide/introduction.html#introduction) ([PR #4467](https://github.com/OpenDDS/OpenDDS/pull/4467))
@@ -256,25 +444,25 @@ Read [the documentation for this release on Read the Docs](https://opendds.readt
 
 ### Additions
 
-* OpenDDS can now be built using CMake for most common scenarios. ([PR #4203](https://github.com/OpenDDS/OpenDDS/pull/4203), [PR #4214](https://github.com/OpenDDS/OpenDDS/pull/4214))
+* OpenDDS can now be built using CMake for most common scenarios. ([PR #4203](https://github.com/OpenDDS/OpenDDS/pull/4203), [PR #4314](https://github.com/OpenDDS/OpenDDS/pull/4314))
     * This is still considered somewhat experimental as it doesn't support [everything that an MPC-built OpenDDS currently can](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/index.html#cmake-known-limitations).
     * See [Building OpenDDS Using CMake](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/index.html#cmake-building) for details.
 
 * Convert transport configurations (`rtps_udp`, `multicast`, `shmem`, `tcp`, `udp`) uses key-value store. ([PR #4162](https://github.com/OpenDDS/OpenDDS/pull/4162), [PR #4270](https://github.com/OpenDDS/OpenDDS/pull/4270), [PR #4272](https://github.com/OpenDDS/OpenDDS/pull/4272), [PR #4241](https://github.com/OpenDDS/OpenDDS/pull/4241), [PR #4242](https://github.com/OpenDDS/OpenDDS/pull/4242), [PR #4243](https://github.com/OpenDDS/OpenDDS/pull/4243), [PR #4249](https://github.com/OpenDDS/OpenDDS/pull/4249), [PR #4255](https://github.com/OpenDDS/OpenDDS/pull/4255))
 * CMake Config Package
-    * Added [`opendds_install_interface_files`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#func-opendds_install_interface_files) to help install IDL files and the files generated from them. ([PR #4203](https://github.com/OpenDDS/OpenDDS/pull/4203), [PR #4214](https://github.com/OpenDDS/OpenDDS/pull/4214))
-    * Added [`OPENDDS_HOST_TOOLS`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#var-OPENDDS_HOST_TOOLS) and [`OPENDDS_ACE_TAO_HOST_TOOLS`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#var-OPENDDS_ACE_TAO_HOST_TOOLS) to allow cross compiling applications with both MPC and CMake-built OpenDDS. ([PR #4203](https://github.com/OpenDDS/OpenDDS/pull/4203), [PR #4214](https://github.com/OpenDDS/OpenDDS/pull/4214))
+    * Added [`opendds_install_interface_files`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#func-opendds_install_interface_files) to help install IDL files and the files generated from them. ([PR #4203](https://github.com/OpenDDS/OpenDDS/pull/4203), [PR #4314](https://github.com/OpenDDS/OpenDDS/pull/4314))
+    * Added [`OPENDDS_HOST_TOOLS`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#var-OPENDDS_HOST_TOOLS) and [`OPENDDS_ACE_TAO_HOST_TOOLS`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#var-OPENDDS_ACE_TAO_HOST_TOOLS) to allow cross compiling applications with both MPC and CMake-built OpenDDS. ([PR #4203](https://github.com/OpenDDS/OpenDDS/pull/4203), [PR #4314](https://github.com/OpenDDS/OpenDDS/pull/4314))
     * [`opendds_target_sources`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#func-opendds_target_sources):
 
-        * Added [`opendds_target_sources(INCLUDE_BASE)`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#func-arg-opendds_target_sources-INCLUDE_BASE) to preserve the directory structure of the IDL files for compiling the resulting generated files and installing everything using [`opendds_install_interface_files`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#func-opendds_install_interface_files). ([PR #4203](https://github.com/OpenDDS/OpenDDS/pull/4203), [PR #4214](https://github.com/OpenDDS/OpenDDS/pull/4214))
-        * Added [`opendds_target_sources(USE_VERSIONED_NAMESPACE)`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#func-arg-opendds_target_sources-USE_VERSIONED_NAMESPACE) as a shortcut to the `-Wb,versioning_\*` IDL compiler options. ([PR #4203](https://github.com/OpenDDS/OpenDDS/pull/4203), [PR #4214](https://github.com/OpenDDS/OpenDDS/pull/4214))
+        * Added [`opendds_target_sources(INCLUDE_BASE)`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#func-arg-opendds_target_sources-INCLUDE_BASE) to preserve the directory structure of the IDL files for compiling the resulting generated files and installing everything using [`opendds_install_interface_files`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#func-opendds_install_interface_files). ([PR #4203](https://github.com/OpenDDS/OpenDDS/pull/4203), [PR #4314](https://github.com/OpenDDS/OpenDDS/pull/4314))
+        * Added [`opendds_target_sources(USE_VERSIONED_NAMESPACE)`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#func-arg-opendds_target_sources-USE_VERSIONED_NAMESPACE) as a shortcut to the `-Wb,versioning_\*` IDL compiler options. ([PR #4203](https://github.com/OpenDDS/OpenDDS/pull/4203), [PR #4314](https://github.com/OpenDDS/OpenDDS/pull/4314))
 
 * Support sending DynamicDataAdapter sample via DynamicDataWriter ([PR #4226](https://github.com/OpenDDS/OpenDDS/pull/4226))
 * Added export macro to ConditionImpl ([PR #4295](https://github.com/OpenDDS/OpenDDS/pull/4295))
 
 ### Deprecations
 
-* Deprecated [`OPENDDS_FILENAME_ONLY_INCLUDES`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#var-OPENDDS_FILENAME_ONLY_INCLUDES) in favor of [`opendds_target_sources(INCLUDE_BASE)`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#func-arg-opendds_target_sources-INCLUDE_BASE). ([PR #4203](https://github.com/OpenDDS/OpenDDS/pull/4203), [PR #4214](https://github.com/OpenDDS/OpenDDS/pull/4214))
+* Deprecated [`OPENDDS_FILENAME_ONLY_INCLUDES`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#var-OPENDDS_FILENAME_ONLY_INCLUDES) in favor of [`opendds_target_sources(INCLUDE_BASE)`](https://opendds.readthedocs.io/en/dds-3.26/devguide/building/cmake.html#func-arg-opendds_target_sources-INCLUDE_BASE). ([PR #4203](https://github.com/OpenDDS/OpenDDS/pull/4203), [PR #4314](https://github.com/OpenDDS/OpenDDS/pull/4314))
 
 ### Fixes
 

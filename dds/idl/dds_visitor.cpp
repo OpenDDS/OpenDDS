@@ -34,6 +34,7 @@
 #include <ast_predefined_type.h>
 #include <ast_root.h>
 #include <ast_sequence.h>
+#include <ast_map.h>
 #include <ast_structure.h>
 #include <ast_union.h>
 #include <ast_valuetype.h>
@@ -68,7 +69,7 @@ namespace {
 dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
   : scope_(scope), error_(false), java_ts_only_(java_ts_only)
 {
-  if (!be_global->no_default_gen()) {
+  if (!be_global->no_default_gen() || be_global->gen_typeobject_override()) {
     gen_target_.add_generator(&to_gen_);
     const bool generate_xtypes = !be_global->suppress_xtypes() && !java_ts_only;
     to_gen_.produce_output(generate_xtypes);
@@ -76,7 +77,8 @@ dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
     if (generate_xtypes && be_global->old_typeobject_encoding()) {
       to_gen_.use_old_typeobject_encoding();
     }
-
+  }
+  if (!be_global->no_default_gen()) {
     if (be_global->value_reader_writer()) {
       gen_target_.add_generator(&value_reader_generator_);
       gen_target_.add_generator(&value_writer_generator_);
@@ -181,8 +183,9 @@ dds_visitor::visit_interface(AST_Interface* node)
 
   BE_Comment_Guard g("INTERFACE", name);
 
-  vector<AST_Interface*> inherits(node->n_inherits());
-  for (int i = 0; i < node->n_inherits(); ++i) {
+  const size_t n_inherits = static_cast<size_t>(node->n_inherits());
+  vector<AST_Interface*> inherits(n_inherits);
+  for (size_t i = 0; i < n_inherits; ++i) {
     inherits[i] = dynamic_cast<AST_Interface*>(node->inherits()[i]);
   }
 
@@ -476,9 +479,23 @@ dds_visitor::visit_union_fwd(AST_UnionFwd* node)
 // *** All methods below here are unimplemented (or trivially implemented) ***
 
 int
+dds_visitor::visit_array(AST_Array*)
+{
+  // arrays appear in typedefs or in other types (struct, union, etc.)
+  return 0;
+}
+
+int
 dds_visitor::visit_sequence(AST_Sequence*)
 {
-  //sequences always appear as typedefs, see visit_typedef ()
+  // sequences appear in typedefs or in other types (struct, union, etc.)
+  return 0;
+}
+
+int
+dds_visitor::visit_map(AST_Map*)
+{
+  // maps appear in typedefs or in other types (struct, union, etc.)
   return 0;
 }
 
@@ -500,13 +517,6 @@ int
 dds_visitor::visit_attribute(AST_Attribute*)
 {
   // attributes are taken care of by visit_interface ()
-  return 0;
-}
-
-int
-dds_visitor::visit_array(AST_Array*)
-{
-  //arrays always appear as typedefs, see visit_typedef ()
   return 0;
 }
 

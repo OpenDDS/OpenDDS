@@ -80,11 +80,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Create DataReader
     DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
 
+    DDS::DataReaderQos reader_qos;
+    subscriber->get_default_datareader_qos(reader_qos);
+    reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+
     DDS::DataReader_var reader =
       subscriber->create_datareader(topic.in(),
-                             DATAREADER_QOS_DEFAULT,
-                             listener.in(),
-                             OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                    reader_qos,
+                                    listener.in(),
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(reader.in())) {
       ACE_ERROR_RETURN((LM_ERROR,

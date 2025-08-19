@@ -288,9 +288,26 @@ OpenDDSInternalThread Topic
 ..
     Sect<6.8.3>
 
-The built-in topic ``OpenDDSInternalThread`` is published when OpenDDS is configured with :cfg:prop:`DCPSThreadStatusInterval`.
+The built-in topic ``OpenDDSInternalThread`` is published when OpenDDS is configured with :cfg:prop:`DCPSThreadStatusInterval` and status harvesting is enabled for a participant.
 When enabled, the DataReader for this built-in topic will report the status of threads created and managed by OpenDDS within the current process.
 The timestamp associated with samples can be used to determine the health (responsiveness) of the thread.
+Status harvesting should only be enabled for one participant.
+The following snippet shows how to enable status harvesting for a participant:
+
+.. code-block:: cpp
+
+        #include <dds/DCPS/RTPS/RtpsDiscovery.h>
+        #include <dds/DCPS/Qos_Helper.h>
+
+        DDS::DomainParticipantFactory_var factory = ...;
+        ...
+        DDS::DomainParticipantQos participant_qos;
+        factory->get_default_participant_qos(participant_qos);
+        DDS::PropertySeq& properties = participant_qos.property.value;
+        OpenDDS::DCPS::Qos_Helper::append(properties, OpenDDS::RTPS::RTPS_HARVEST_THREAD_STATUS, "true");
+        ...
+        DDS::DomainParticipant_var participant =
+          factory->create_participant(..., participant_qos, ..., ...);
 
 The topic type InternalThreadBuiltinTopicData is defined in :ghfile:`dds/OpenddsDcpsExt.idl` in the ``OpenDDS::DCPS`` module:
 
@@ -299,3 +316,5 @@ The topic type InternalThreadBuiltinTopicData is defined in :ghfile:`dds/Opendds
 * ``utilization`` -- Estimated utilization of this thread (0.0-1.0).
 
 * ``monotonic_timestamp`` -- Time of most recent update (monotonic clock).  The SampleInfo's ``source_timestamp`` has the timestamp on the system clock.
+
+* ``detail1``, ``detail2`` -- Additional information reported by the thread in question during its latest update

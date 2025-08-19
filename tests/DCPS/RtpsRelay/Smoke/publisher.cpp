@@ -4,13 +4,14 @@
  */
 
 #include "Args.h"
+#include "DataWriterListenerImpl.h"
 #include "MessengerTypeSupportImpl.h"
 #include "ParticipantBit.h"
-#include "Writer.h"
 
 #include <dds/DCPS/JsonValueWriter.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
+#include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/Service_Participant.h>
 
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
@@ -35,8 +36,6 @@
 #include <ace/OS_NS_stdlib.h>
 #include <ace/OS_NS_unistd.h>
 
-#include <iostream>
-
 #if OPENDDS_CONFIG_SECURITY
 const char auth_ca_file[] = "file:../../../security/certs/identity/identity_ca_cert.pem";
 const char perm_ca_file[] = "file:../../../security/certs/permissions/permissions_ca_cert.pem";
@@ -44,14 +43,6 @@ const char id_cert_file[] = "file:../../../security/certs/identity/test_particip
 const char id_key_file[] = "file:../../../security/certs/identity/test_participant_02_private_key.pem";
 const char governance_file[] = "file:./governance_signed.p7s";
 const char permissions_file[] = "file:./permissions_publisher_signed.p7s";
-
-void append(DDS::PropertySeq& props, const char* name, const char* value, bool propagate = false)
-{
-  const DDS::Property_t prop = {name, value, propagate};
-  const unsigned int len = props.length();
-  props.length(len + 1);
-  props[len] = prop;
-}
 #endif
 
 Args args;
@@ -59,30 +50,188 @@ Args args;
 const char USER_DATA[] = "The Publisher";
 const char OTHER_USER_DATA[] = "The Subscriber";
 
-void writer_test(const DDS::DataWriter_var& dw)
+void writer_test(DistributedConditionSet_rch dcs,
+                 const DDS::DataWriter_var& dw)
 {
-  // Start writing threads
-  std::cout << "Creating Writer" << std::endl;
-  Writer* writer = args.check_lease_recovery ? new Writer(dw, 30, true) : new Writer(dw, 10, false);
-  std::cout << "Starting Writer" << std::endl;
-  writer->start();
+  // Write samples
+  Messenger::MessageDataWriter_var message_dw = Messenger::MessageDataWriter::_narrow(dw.in());
 
-  while (!writer->is_finished()) {
-    ACE_Time_Value small_time(0, 250000);
-    ACE_OS::sleep(small_time);
+  Messenger::Message message;
+  message.subject_id = 99;
+  message.from         = "Comic Book Guy";
+  message.subject      = "Review";
+  message.text         = "Worst. Movie. Ever.";
+  message.count        = 0;
+
+  {
+    const DDS::ReturnCode_t error = message_dw->write(message, DDS::HANDLE_NIL);
+    if (error != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l: svc()")
+                 ACE_TEXT(" ERROR: write returned %C!\n"), OpenDDS::DCPS::retcode_to_string(error)));
+    }
   }
 
-  std::cout << "Writer finished " << std::endl;
-  writer->end();
+  if (args.check_lease_recovery) {
+    dcs->wait_for("Publisher", "Subscriber", "count_0");
+    if (args.expect_unmatch) {
+      dcs->wait_for("Publisher", "Publisher", "on_publication_matched_2_1_1_1");
+    } else {
+      dcs->wait_for("Publisher", "Subscriber", "on_subscription_matched_2_1_1_1");
+    }
+  }
 
-  std::cout << "Writer wait for ACKS" << std::endl;
+  message.count        = 1;
+  {
+    const DDS::ReturnCode_t error = message_dw->write(message, DDS::HANDLE_NIL);
+    if (error != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l: svc()")
+                 ACE_TEXT(" ERROR: write returned %C!\n"), OpenDDS::DCPS::retcode_to_string(error)));
+    }
+  }
+  dcs->wait_for("Publisher", "Subscriber", "count_1");
+}
 
-  DDS::Duration_t timeout =
-    { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-  dw->wait_for_acknowledgments(timeout);
+void stress_test(const DDS::DataWriter_var& dw,
+                 const DDS::DomainParticipant_var& participant,
+                 const CORBA::String_var& type_name,
+                 const DDS::Publisher_var& publisher)
+{
+  // Create additional topics, writers, and populate with data.
+  DDS::DataWriterQos qos;
+  dw->get_qos(qos);
 
-  std::cerr << "deleting DW" << std::endl;
-  delete writer;
+  Messenger::Message message;
+  message.subject_id = 99;
+  message.from         = "Comic Book Guy";
+  message.subject      = "Review";
+  message.text         = "Worst. Movie. Ever.";
+  message.count        = 0;
+
+  for (std::size_t idx = 0; idx != 24; ++idx) {
+    std::string topic_name = "Movie Discussion List ";
+    topic_name += OpenDDS::DCPS::to_dds_string(idx);
+
+    DDS::Topic_var topic =
+      participant->create_topic(topic_name.c_str(),
+                                type_name.in(),
+                                TOPIC_QOS_DEFAULT,
+                                DDS::TopicListener::_nil(),
+                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    DDS::DataWriter_var local_dw =
+      publisher->create_datawriter(topic.in(),
+                                   qos,
+                                   0,
+                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    Messenger::MessageDataWriter_var message_local_dw = Messenger::MessageDataWriter::_narrow(local_dw.in());
+
+    for (std::size_t instance = 0, instance_limit = rand() % 26; instance != instance_limit; ++instance) {
+      message.subject_id = static_cast<DDS::Int32>(instance);
+      message.text = std::string(rand() % (1400 * 6), 'c').c_str();
+      message_local_dw->write(message, DDS::HANDLE_NIL);
+    }
+  }
+
+  // Write samples
+  Messenger::MessageDataWriter_var message_dw = Messenger::MessageDataWriter::_narrow(dw.in());
+
+  message.subject_id = 99;
+  message.from         = "Comic Book Guy";
+  message.subject      = "Review";
+  message.text         = "Worst. Movie. Ever.";
+  message.count        = 0;
+
+  DDS::WaitSet_var waiter = new DDS::WaitSet;
+
+  ShutdownHandler shutdown_handler;
+  waiter->attach_condition(shutdown_handler.guard_);
+
+  DDS::ConditionSeq active;
+  const DDS::Duration_t timeout = {1, 0};
+
+  bool running = true;
+  DDS::ReturnCode_t ret;
+  while (running) {
+    ret = waiter->wait(active, timeout);
+
+    if (ret == DDS::RETCODE_TIMEOUT) {
+      ret = message_dw->write(message, DDS::HANDLE_NIL);
+      if (ret != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("%N:%l: svc()")
+                   ACE_TEXT(" ERROR: write returned %C!\n"), OpenDDS::DCPS::retcode_to_string(ret)));
+      }
+      ++message.count;
+      continue;
+    }
+
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l: svc()")
+                 ACE_TEXT(" ERROR: wait returned %C!\n"), OpenDDS::DCPS::retcode_to_string(ret)));
+      running = false;
+      break;
+    }
+
+    for (unsigned i = 0; running && active.length() > i; ++i) {
+      if (active[i] == shutdown_handler.guard_) {
+        running = false;
+      }
+    }
+  }
+}
+
+void drain_test(DistributedConditionSet_rch dcs, const DDS::DomainParticipant_var& participant)
+{
+  DDS::Subscriber_var bits = participant->get_builtin_subscriber();
+  DDS::DataReader_var dr = bits->lookup_datareader(OpenDDS::DCPS::BUILT_IN_CONNECTION_RECORD_TOPIC);
+  DDS::TopicDescription_var topic = dr->get_topicdescription();
+  ACE_UNUSED_ARG(topic);
+  DDS::ReadCondition_var read_cond =
+    dr->create_readcondition(DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+  OpenDDS::DCPS::ConnectionRecordDataReader_var connection_records = OpenDDS::DCPS::ConnectionRecordDataReader::_narrow(dr);
+
+  DDS::WaitSet_var waiter = new DDS::WaitSet;
+  waiter->attach_condition(read_cond);
+  struct WaitSetCleanup {
+    DDS::WaitSet_var& waiter_;
+    WaitSetCleanup(DDS::WaitSet_var& waiter) : waiter_(waiter) {}
+    ~WaitSetCleanup()
+    {
+      DDS::ConditionSeq conditions;
+      waiter_->get_conditions(conditions);
+      waiter_->detach_conditions(conditions);
+    }
+  } cleanup(waiter);
+
+  bool connected = false;
+  constexpr DDS::Duration_t timeout{DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
+  DDS::ConditionSeq active_conditions;
+
+  while (waiter->wait(active_conditions, timeout) == DDS::RETCODE_OK) {
+    while (true) {
+      OpenDDS::DCPS::ConnectionRecord record;
+      DDS::SampleInfo info;
+      if (connection_records->take_next_sample(record, info) != DDS::RETCODE_OK) {
+        break;
+      }
+      if (std::string(record.address).find(":4444") == std::string::npos) {
+        continue; // not interested in this instance
+      }
+#if OPENDDS_HAS_JSON_VALUE_WRITER
+      ACE_DEBUG((LM_DEBUG, "%C\n", OpenDDS::DCPS::to_json(topic, record, info).c_str()));
+#endif
+      if (!connected && info.instance_state == DDS::ALIVE_INSTANCE_STATE) {
+        connected = true;
+        dcs->post("publisher", "connected");
+      } else if (connected && (info.instance_state & DDS::NOT_ALIVE_INSTANCE_STATE)) {
+        return; // exit on transition from connected to disconnected
+      }
+    }
+  }
+  ACE_ERROR((LM_ERROR, "ERROR: failed to wait()\n"));
 }
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -93,8 +242,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   int status = EXIT_SUCCESS;
   try {
 
-    std::cout << "Starting publisher" << std::endl;
     {
+      DistributedConditionSet_rch dcs = OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+
       // Initialize DomainParticipantFactory
       dpf = TheParticipantFactoryWithArgs(argc, argv);
 
@@ -103,7 +253,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::TransportInst> transport_inst = TheTransportRegistry->get_inst("pub_rtps");
-      transport_inst->count_messages(true);
+      if (transport_inst) {
+        transport_inst->count_messages(true);
+      }
 
       DDS::DomainParticipantQos part_qos;
       dpf->get_default_participant_qos(part_qos);
@@ -113,12 +265,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 #if OPENDDS_CONFIG_SECURITY
       if (TheServiceParticipant->get_security()) {
         DDS::PropertySeq& props = part_qos.property.value;
-        append(props, DDS::Security::Properties::AuthIdentityCA, auth_ca_file);
-        append(props, DDS::Security::Properties::AuthIdentityCertificate, id_cert_file);
-        append(props, DDS::Security::Properties::AuthPrivateKey, id_key_file);
-        append(props, DDS::Security::Properties::AccessPermissionsCA, perm_ca_file);
-        append(props, DDS::Security::Properties::AccessGovernance, governance_file);
-        append(props, DDS::Security::Properties::AccessPermissions, permissions_file);
+        OpenDDS::DCPS::Qos_Helper::append(props, DDS::Security::Properties::AuthIdentityCA, TheServiceParticipant->config_store()->get("AuthIdentityCA", auth_ca_file));
+        OpenDDS::DCPS::Qos_Helper::append(props, DDS::Security::Properties::AuthIdentityCertificate, TheServiceParticipant->config_store()->get("AuthIdentityCertificate", id_cert_file));
+        OpenDDS::DCPS::Qos_Helper::append(props, DDS::Security::Properties::AuthPrivateKey, TheServiceParticipant->config_store()->get("AuthPrivateKey", id_key_file));
+        OpenDDS::DCPS::Qos_Helper::append(props, DDS::Security::Properties::AccessPermissionsCA, TheServiceParticipant->config_store()->get("AccessPermissionsCA", perm_ca_file));
+        OpenDDS::DCPS::Qos_Helper::append(props, DDS::Security::Properties::AccessGovernance, TheServiceParticipant->config_store()->get("AccessGovernance", governance_file));
+        OpenDDS::DCPS::Qos_Helper::append(props, DDS::Security::Properties::AccessPermissions, TheServiceParticipant->config_store()->get("AccessPermissions", permissions_file));
       }
 #endif
 
@@ -189,17 +341,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                          1);
       }
 
+      DataWriterListenerImpl* const listener_servant = new DataWriterListenerImpl(dcs);
+      DDS::DataWriterListener_var listener(listener_servant);
+
       DDS::DataWriterQos qos;
       pub->get_default_datawriter_qos(qos);
-      std::cout << "Reliable DataWriter" << std::endl;
-      qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+      qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
+      qos.history.depth = 1;
       qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+      qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
       // Create DataWriter
       DDS::DataWriter_var dw =
         pub->create_datawriter(topic.in(),
                                qos,
-                               DDS::DataWriterListener::_nil(),
+                               listener.in(),
                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       if (CORBA::is_nil(dw.in())) {
@@ -210,30 +366,32 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       if (args.participant_bit_expected_instances > 0) {
-        status = test_participant_discovery(participant, args.participant_bit_expected_instances,
+        status = test_participant_discovery(dcs, participant, args.participant_bit_expected_instances,
                                             USER_DATA, OTHER_USER_DATA, disc->config()->resend_period());
+
+      } else if (args.stress_test) {
+        stress_test(dw, participant, type_name, pub);
+      } else if (args.drain_test) {
+        drain_test(dcs, participant);
       } else {
-        writer_test(dw);
+        writer_test(dcs, dw);
 
 #if OPENDDS_HAS_JSON_VALUE_WRITER
-        std::cout << "Publisher Guid: " << OpenDDS::DCPS::LogGuid(guid).c_str() << std::endl;
+        ACE_DEBUG((LM_DEBUG, "Publisher Guid: %C\n", OpenDDS::DCPS::LogGuid(guid).c_str()));
         OpenDDS::DCPS::TransportStatisticsSequence stats;
         disc->append_transport_statistics(42, guid, stats);
         transport_inst->append_transport_statistics(stats, 42, dp_impl);
 
         for (unsigned int i = 0; i != stats.length(); ++i) {
-          std::cout << "Publisher Transport Statistics: " << OpenDDS::DCPS::to_json(stats[i]) << std::endl;
+          ACE_DEBUG((LM_DEBUG, "Publisher Transport Statistics: %C\n", OpenDDS::DCPS::to_json(stats[i]).c_str()));
         }
 #endif
       }
     }
 
     // Clean-up!
-    std::cerr << "deleting contained entities" << std::endl;
     participant->delete_contained_entities();
-    std::cerr << "deleting participant" << std::endl;
     dpf->delete_participant(participant.in());
-    std::cerr << "shutdown" << std::endl;
     TheServiceParticipant->shutdown();
 
   } catch (const CORBA::Exception& e) {

@@ -3,6 +3,8 @@
 #ifndef DATAREADER_LISTENER_IMPL
 #define DATAREADER_LISTENER_IMPL
 
+#include <tests/Utils/DistributedConditionSet.h>
+
 #include <dds/DdsDcpsSubscriptionExtC.h>
 #include <dds/DCPS/LocalObject.h>
 
@@ -14,7 +16,8 @@ class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
 public:
-  DataReaderListenerImpl ();
+  DataReaderListenerImpl (DistributedConditionSet_rch dcs,
+                          int expected);
 
   virtual ~DataReaderListenerImpl (void);
 
@@ -63,6 +66,8 @@ public:
 
 
 private:
+  DistributedConditionSet_rch dcs_;
+  const int expected_;
 
   DDS::DataReader_var reader_;
   long                  num_reads_;

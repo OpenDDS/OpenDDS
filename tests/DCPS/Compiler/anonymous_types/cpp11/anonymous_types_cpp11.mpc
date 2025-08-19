@@ -1,5 +1,6 @@
 project: dcps_test, opendds_cxx11, msvc_bigobj {
   idlflags += -I..
+  requires += no_opendds_safety_profile
 
   TypeSupport_Files {
     ../test.idl

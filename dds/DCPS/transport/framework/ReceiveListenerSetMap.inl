@@ -62,7 +62,7 @@ ACE_INLINE ssize_t
 OpenDDS::DCPS::ReceiveListenerSetMap::size() const
 {
   DBG_ENTRY_LVL("ReceiveListenerSetMap","size",6);
-  return map_.size();
+  return static_cast<ssize_t>(map_.size());
 }
 
 ACE_INLINE OpenDDS::DCPS::ReceiveListenerSetMap::MapType&

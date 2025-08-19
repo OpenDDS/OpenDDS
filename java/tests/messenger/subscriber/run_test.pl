@@ -29,10 +29,6 @@ my $use_repo = ($config !~ /^rtps_disc/);
 
 my $reliable = '-r';
 
-if ($config eq 'udp') {
-  $reliable = '';
-}
-
 my $opts = "-DCPSBit 0 -DCPSConfigFile ../$config.ini";
 my $pub_opts = $opts;
 my $sub_opts = "$opts $reliable";

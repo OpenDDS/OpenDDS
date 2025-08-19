@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8...3.27)
+cmake_minimum_required(VERSION 3.8...4.0)
 project(opendds_idl_compiler_tests CXX)
 
 find_package(OpenDDS REQUIRED)
@@ -16,9 +16,8 @@ macro(subtest name)
     "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
 
   set(target "${PROJECT_NAME}_${name}")
-  # TODO: Add target when generation is per-target
-  set(target_gen "${opendds_gen}")
-  # Directory has to exist for get_filename_component(REAPATH) to consistently
+  set(target_gen "${opendds_gen}/${target}")
+  # Directory has to exist for get_filename_component(REALPATH) to consistently
   # resolve it.
   file(MAKE_DIRECTORY "${target_gen}")
   get_filename_component(target_gen "${target_gen}" REALPATH)
@@ -97,6 +96,12 @@ function(assert_generated_output file)
   if(arg_O_OPT)
     list(APPEND args O_OPT "${arg_O_OPT}")
   endif()
+  if(arg_EXPECT_FAIL)
+    list(APPEND args EXPECT_FAIL)
+    set(expect_failed TRUE)
+  else()
+    set(expect_failed FALSE)
+  endif()
   _opendds_get_generated_output(${target} "${file}"
     DIR_PATH_VAR dir_path
     FILE_PATH_VAR file_path
@@ -104,11 +109,6 @@ function(assert_generated_output file)
     FAIL_VAR failed
     ${args})
 
-  if(arg_EXPECT_FAIL)
-    set(expect_failed TRUE)
-  else()
-    set(expect_failed FALSE)
-  endif()
   get_filename_component(filename "${file}" NAME)
   set(expect_dir_path "${arg_EXPECT}")
   set(expect_file_path "${expect_dir_path}/${filename}")
@@ -137,6 +137,27 @@ function(assert_generated_output file)
       return()
     endif()
   endforeach()
+endfunction()
+
+function(assert_file_exists path expected)
+  if(expected STREQUAL IF_SHARED)
+    if(BUILD_SHARED_LIBS)
+      set(expected TRUE)
+    else()
+      set(expected FALSE)
+    endif()
+  endif()
+  if(expected)
+    if(NOT EXISTS "${path}")
+      message(SEND_ERROR "${path} expected to exist!")
+    endif()
+  elseif(EXISTS "${path}")
+    message(SEND_ERROR "${path} expected to NOT exist!")
+  endif()
+endfunction()
+
+function(assert_export_header target gen expected)
+  assert_file_exists("${gen}/${target}_export.h" ${expected})
 endfunction()
 
 subtest(generated_output DUMMY)
@@ -182,27 +203,28 @@ assert_generated_output("file.ext" INCLUDE_BASE "${target_gen}" EXPECT_FAIL)
 subtest(no_scope)
 opendds_target_sources(${target} "${idl_file}")
 assert_includes(${target} PRIVATE "${target_gen}")
+assert_export_header(${target} "${target_gen}" FALSE)
 
 subtest(public)
 opendds_target_sources(${target} PUBLIC "${idl_file}")
 assert_includes(${target} INTERFACE "${target_gen}" PRIVATE "${target_gen}")
+assert_export_header(${target} "${target_gen}" IF_SHARED)
 
 subtest(interface)
 opendds_target_sources(${target} INTERFACE "${idl_file}")
 assert_includes(${target} INTERFACE "${target_gen}" PRIVATE "${target_gen}")
+assert_export_header(${target} "${target_gen}" IF_SHARED)
 
 subtest(private)
 opendds_target_sources(${target} PRIVATE "${idl_file}")
 assert_includes(${target} PRIVATE "${target_gen}")
+assert_export_header(${target} "${target_gen}" FALSE)
 
 subtest(export_header)
 opendds_target_sources(${target} PUBLIC "${idl_file}"
   ALWAYS_GENERATE_LIB_EXPORT_HEADER TRUE)
 assert_includes(${target} INTERFACE "${target_gen}" PRIVATE "${target_gen}")
-set(export_header "${target_gen}/${target}_export.h")
-if(NOT EXISTS "${export_header}")
-  message(SEND_ERROR "${export_header} is missing")
-endif()
+assert_export_header(${target} "${target_gen}" TRUE)
 
 subtest(idl_and_export_header_in_subdir)
 opendds_target_sources(${target} PUBLIC "dir/test2.idl"
@@ -212,10 +234,7 @@ opendds_target_sources(${target} PUBLIC "dir/test2.idl"
 assert_includes(${target}
   INTERFACE "${target_gen}" "${target_gen}/dir"
   PRIVATE "${target_gen}" "${target_gen}/dir")
-set(export_header "${target_gen}/dir/${target}_export.h")
-if(NOT EXISTS "${export_header}")
-  message(SEND_ERROR "${export_header} is missing")
-endif()
+assert_export_header(${target} "${target_gen}/dir" TRUE)
 
 subtest(o_opt)
 opendds_target_sources(${target} "${idl_file}"

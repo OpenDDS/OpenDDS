@@ -12,7 +12,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 ACE_INLINE
 OpenDDS::DCPS::TransportSendElement::TransportSendElement(int initial_count,
                                                           const DataSampleElement* sample)
-  : TransportQueueElement(initial_count),
+  : TransportQueueElement(static_cast<unsigned long>(initial_count)),
     element_(sample)
 {
   DBG_ENTRY_LVL("TransportSendElement", "TransportSendElement", 6);

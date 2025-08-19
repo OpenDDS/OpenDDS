@@ -13,7 +13,7 @@
 class TakeNextReaderListenerImpl : public DataReaderListenerImpl
 {
 public:
-  TakeNextReaderListenerImpl();
+  TakeNextReaderListenerImpl(DistributedConditionSet_rch dcs);
 
   virtual void take_samples(Reliability::MessageDataReader_var reader_i);
 };

@@ -13,11 +13,12 @@
 #include "GuidConverter.h"
 #include "transport/framework/ReceivedDataSample.h"
 #include "SafetyProfileStreams.h"
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include "RestoreOutputStreamState.h"
 #endif
 
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <cstdio>
 
@@ -28,7 +29,7 @@
 namespace {
 
   using OpenDDS::DCPS::Encoding;
-  const Encoding::Kind encoding_kind = Encoding::KIND_UNALIGNED_CDR;
+  const Encoding::Kind dsh_encoding_kind = Encoding::KIND_UNALIGNED_CDR;
 
   bool mb_copy(char& dest, const ACE_Message_Block& mb, size_t offset, const Encoding&)
   {
@@ -140,7 +141,7 @@ bool DataSampleHeader::partial(const ACE_Message_Block& mb)
 
   if (len <= FLAGS_OFFSET) return true;
 
-  Encoding encoding(encoding_kind);
+  Encoding encoding(dsh_encoding_kind);
   unsigned char msg_id;
   if (!mb_peek(msg_id, mb, MESSAGE_ID_OFFSET, encoding)
       || int(msg_id) >= MESSAGE_ID_MAX) {
@@ -160,13 +161,15 @@ bool DataSampleHeader::partial(const ACE_Message_Block& mb)
     return true;
   }
 
-  size_t expected = get_max_serialized_size();
-  if (!(flags & LIFESPAN_MASK)) expected -= LIFESPAN_LENGTH;
-  if (!(flags & COHERENT_MASK)) expected -= COHERENT_LENGTH;
+  const unsigned int flags_ext = static_cast<unsigned int>(flags);
 
-  if (flags & CONTENT_FILT_MASK) {
+  size_t expected = get_max_serialized_size();
+  if (!(flags_ext & LIFESPAN_MASK)) expected -= LIFESPAN_LENGTH;
+  if (!(flags_ext & COHERENT_MASK)) expected -= COHERENT_LENGTH;
+
+  if (flags_ext & CONTENT_FILT_MASK) {
     CORBA::ULong seqLen;
-    encoding.endianness(static_cast<Endianness>(flags & BYTE_ORDER_MASK));
+    encoding.endianness(static_cast<Endianness>(flags_ext & BYTE_ORDER_MASK));
     if (!mb_peek(seqLen, mb, expected, encoding)) {
       return true;
     }
@@ -179,7 +182,7 @@ bool DataSampleHeader::partial(const ACE_Message_Block& mb)
 void
 DataSampleHeader::init(ACE_Message_Block* buffer)
 {
-  Encoding encoding(encoding_kind);
+  Encoding encoding(dsh_encoding_kind);
   Serializer reader(buffer, encoding);
   serialized_size_ = 0;
 
@@ -259,7 +262,7 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   }
   serialized_size(encoding, serialized_size_, publication_id_);
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   if (this->group_coherent_) {
     if (!(reader >> this->publisher_id_)) {
       return;
@@ -279,7 +282,7 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
 bool
 operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
 {
-  Serializer writer(&buffer, encoding_kind, value.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
+  Serializer writer(&buffer, dsh_encoding_kind, value.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
 
   writer << value.message_id_;
   writer << value.submessage_id_;
@@ -313,7 +316,7 @@ operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
 
   writer << value.publication_id_;
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   if (value.group_coherent_) {
     writer << value.publisher_id_;
   }
@@ -330,7 +333,7 @@ operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
 void
 DataSampleHeader::add_cfentries(const GUIDSeq* guids, ACE_Message_Block* mb)
 {
-  Encoding encoding(encoding_kind,
+  Encoding encoding(dsh_encoding_kind,
     ACE_CDR_BYTE_ORDER != test_flag(BYTE_ORDER_FLAG, mb));
   size_t size = 0;
   if (guids) {
@@ -383,7 +386,7 @@ DataSampleHeader::split(const ACE_Message_Block& orig, size_t size,
                         Message_Block_Ptr& head, Message_Block_Ptr& tail)
 {
   Message_Block_Ptr dup (orig.duplicate());
-  const Encoding encoding(encoding_kind);
+  const Encoding encoding(dsh_encoding_kind);
 
   const size_t length = dup->total_length();
   DataSampleHeader hdr(*dup); // deserialize entire header (with cfentries)
@@ -556,7 +559,7 @@ OPENDDS_STRING to_string(const DataSampleHeader& value)
     if (value.coherent_change_ == 1) ret += "Coherent, ";
     if (value.historic_sample_ == 1) ret += "Historic, ";
     if (value.lifespan_duration_ == 1) ret += "Lifespan, ";
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
     if (value.group_coherent_ == 1) ret += "Group-Coherent, ";
 #endif
     if (value.content_filter_ == 1) ret += "Content-Filtered, ";
@@ -584,7 +587,7 @@ OPENDDS_STRING to_string(const DataSampleHeader& value)
     }
 
     ret += "Publication: " + LogGuid(value.publication_id_).conv_;
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
     if (value.group_coherent_) {
       ret += ", Publisher: " + LogGuid(value.publisher_id_).conv_;
     }
@@ -604,7 +607,7 @@ OPENDDS_STRING to_string(const DataSampleHeader& value)
   return ret;
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 /// Message Id enumeration insertion onto an ostream.
 std::ostream& operator<<(std::ostream& os, const MessageId value)
 {
@@ -647,7 +650,7 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     if (value.coherent_change_ == 1) str << "Coherent, ";
     if (value.historic_sample_ == 1) str << "Historic, ";
     if (value.lifespan_duration_ == 1) str << "Lifespan, ";
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
     if (value.group_coherent_ == 1) str << "Group-Coherent, ";
 #endif
     if (value.content_filter_ == 1) str << "Content-Filtered, ";
@@ -668,7 +671,7 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     }
 
     str << "Publication: " << GuidConverter(value.publication_id_);
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
     if (value.group_coherent_) {
       str << ", Publisher: " << GuidConverter(value.publisher_id_);
     }
@@ -686,7 +689,7 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
 
   return str;
 }
-#endif //OPENDDS_SAFETY_PROFILE
+#endif
 
 
 bool

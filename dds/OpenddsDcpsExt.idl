@@ -11,8 +11,9 @@
 #include <dds/DdsDcpsCore.idl>
 #include <dds/DdsDcpsInfoUtils.idl>
 #include <dds/DdsDcpsGuid.idl>
+#include <dds/OpenDDSConfigWrapper.idl>
 
-#if defined __OPENDDS_IDL && !defined DDS_HAS_MINIMUM_BIT
+#if defined __OPENDDS_IDL && OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  define BUILT_IN_TOPIC_TYPE @topic
 #  define BUILT_IN_TOPIC_KEY @key
 #else
@@ -77,6 +78,11 @@ module OpenDDS
       BUILT_IN_TOPIC_KEY string thread_id;
       double utilization;
       MonotonicTime_t monotonic_timestamp;
+
+      // The "detail" members can provide additional information
+      // about the last-reported state of the thread in question.
+      long detail1;
+      long detail2;
     };
 
     const long LOCATOR_KIND_INVALID = -1;
@@ -128,6 +134,20 @@ module OpenDDS
     };
 
     typedef sequence<TransportStatistics> TransportStatisticsSequence;
+
+    struct Statistic {
+      string name;
+      unsigned long long value;
+    };
+
+    typedef sequence<Statistic> StatisticSeq;
+
+    // top-level type for an InternalTopic -- see Service_Participant.h
+    struct Statistics {
+      @key string id;
+      StatisticSeq stats;
+    };
+
   }; // module DDS
 }; // module OpenDDS
 

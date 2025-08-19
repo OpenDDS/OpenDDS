@@ -47,8 +47,8 @@ template<> struct hash<TestKey>
 {
   std::size_t operator()(const TestKey& val) const noexcept
   {
-    uint32_t hash = OpenDDS::DCPS::one_at_a_time_hash(reinterpret_cast<const uint8_t*>(&val.from_), 2 * sizeof (OpenDDS::DCPS::GUID_t));
-    return static_cast<size_t>(hash);
+    const uint32_t hashcode = OpenDDS::DCPS::one_at_a_time_hash(reinterpret_cast<const uint8_t*>(&val.from_), 2 * sizeof (OpenDDS::DCPS::GUID_t));
+    return static_cast<size_t>(hashcode);
   }
 };
 

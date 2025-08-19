@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23...3.27)
+cmake_minimum_required(VERSION 3.23...4.0)
 project(opendds_rtps CXX)
 
 find_package(OpenDDS REQUIRED NO_DEFAULTS OpenDDS::Dcps OpenDDS::opendds_idl)
@@ -64,7 +64,6 @@ opendds_target_sources(OpenDDS_Rtps
   PUBLIC
     RtpsSubmessageKind.idl
   OPENDDS_IDL_OPTIONS ${opendds_idl_options} -Lspcpp
-  SKIP_TAO_IDL
   ${common_idl_options}
 )
 opendds_target_sources(OpenDDS_Rtps
@@ -73,5 +72,8 @@ opendds_target_sources(OpenDDS_Rtps
   TAO_IDL_OPTIONS ${tao_idl_options}
   SKIP_OPENDDS_IDL
   ${common_idl_options}
+)
+set_target_properties(OpenDDS_Rtps PROPERTIES
+  UNITY_BUILD_UNIQUE_ID "OPENDDS_RTPS_UNITY_BUILD_ID"
 )
 opendds_install_interface_files(OpenDDS_Rtps INCLUDE_BASE "${OPENDDS_SOURCE_DIR}")

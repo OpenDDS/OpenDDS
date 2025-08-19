@@ -40,7 +40,6 @@ class TransportClient;
 class TransportReceiveListener;
 class DataLink;
 class TransportInst;
-class Monitor;
 struct AssociationData;
 typedef RcHandle<TransportClient> TransportClient_rch;
 typedef WeakRcHandle<TransportClient> TransportClient_wrch;
@@ -85,6 +84,18 @@ public:
   /// TransportLocator object.
   virtual bool connection_info_i(TransportLocator& local_info, ConnectionInfoFlags flags) const = 0;
 
+  virtual NetworkAddress actual_local_address() const
+  {
+    return NetworkAddress::default_IPV4;
+  }
+
+#ifdef ACE_HAS_IPV6
+  virtual NetworkAddress ipv6_actual_local_address() const
+  {
+    return NetworkAddress::default_IPV6;
+  }
+#endif
+
   virtual void register_for_reader(const GUID_t& /*participant*/,
                                    const GUID_t& /*writerid*/,
                                    const GUID_t& /*readerid*/,
@@ -118,7 +129,6 @@ public:
   ACE_Reactor_Timer_Interface* timer() const;
 
   ACE_Reactor* reactor() const;
-  ACE_thread_t reactor_owner() const;
   bool is_shut_down() const;
 
   /// Create the reactor task using sync send or optionally async send
@@ -128,8 +138,6 @@ public:
   /// Diagnostic aid.
   void dump();
   OPENDDS_STRING dump_to_str();
-
-  void report();
 
   struct ConnectionAttribs {
     GUID_t local_id_;
@@ -302,13 +310,13 @@ private:
   /// smart ptr to the associated DL cleanup task
   EventDispatcher_rch event_dispatcher_;
 
-  /// Monitor object for this entity
-  unique_ptr<Monitor> monitor_;
-
 protected:
   /// Id of the last link established.
   AtomicBool is_shut_down_;
   DDS::DomainId_t domain_;
+
+  static StatisticSeq stats_template();
+  void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
 };
 
 } // namespace DCPS

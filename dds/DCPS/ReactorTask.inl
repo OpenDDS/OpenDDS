@@ -26,14 +26,6 @@ const ACE_Reactor* ReactorTask::get_reactor() const
 }
 
 ACE_INLINE
-ACE_thread_t ReactorTask::get_reactor_owner() const
-{
-  ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
-  wait_for_startup_i();
-  return reactor_owner_;
-}
-
-ACE_INLINE
 ACE_Proactor* ReactorTask::get_proactor()
 {
   ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
@@ -45,35 +37,6 @@ const ACE_Proactor* ReactorTask::get_proactor() const
 {
   ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
   return proactor_;
-}
-
-ACE_INLINE
-void ReactorTask::wait_for_startup() const
-{
-  ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
-  wait_for_startup_i();
-}
-
-ACE_INLINE
-bool ReactorTask::is_shut_down() const
-{
-  ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
-  return state_ == STATE_SHUT_DOWN;
-}
-
-ACE_INLINE
-ReactorInterceptor_rch ReactorTask::interceptor() const
-{
-  ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
-  wait_for_startup_i();
-  return interceptor_;
-}
-
-ACE_INLINE
-ReactorTask::State ReactorTask::state() const
-{
-  ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
-  return state_;
 }
 
 } // namespace DCPS

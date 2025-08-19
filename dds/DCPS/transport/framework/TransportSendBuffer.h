@@ -70,7 +70,7 @@ private:
 /// domain of SequenceNumbers -- for a given SingleSendBuffer object, the
 /// sequence numbers passed to insert() must be generated from the same place.
 class OpenDDS_Dcps_Export SingleSendBuffer
-  : public TransportSendBuffer, public virtual RcObject {
+  : public TransportSendBuffer, public RcObject {
 public:
 
   static const size_t UNLIMITED;
@@ -198,10 +198,15 @@ public:
 
   void pre_clear()
   {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     pre_seq_.clear();
   }
 
   bool has_frags(const SequenceNumber& seq) const;
+
+  /// Measure of overall memory used by this object
+  /// The number itself is not meaningful but can be used for tracking trends over time
+  size_t size() const;
 
 private:
   void check_capacity_i(BufferVec& removed);

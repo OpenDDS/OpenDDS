@@ -6,7 +6,6 @@
 #include "dds/DCPS/InfoRepoDiscovery/InfoC.h"
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/MonitorFactory.h"
 
 #include "dds/DCPS/RTPS/RtpsDiscovery.h"
 #include "dds/DCPS/XTypes/TypeObject.h"
@@ -211,10 +210,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   tii.length(1);
   tii[0].transport_type = "fake transport for test";
 
-  OpenDDS::XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  OpenDDS::DCPS::TypeInformation type_info;
 
   ::DDS::PublisherQos_var pQos = new ::DDS::PublisherQos;
   *pQos = TheServiceParticipant->initial_PublisherQos();
@@ -332,10 +328,6 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   ::DDS::SubscriberQos_var subQos = new ::DDS::SubscriberQos;
   *subQos = TheServiceParticipant->initial_SubscriberQos();
 
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
-
   disc->add_subscription(domain,
                          subPartId,
                          subTopicId,
@@ -386,10 +378,6 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
 
   pQos = new ::DDS::PublisherQos;
   *pQos = TheServiceParticipant->initial_PublisherQos();
-
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.dependent_typeid_count = 0;
 
   disc->add_publication(domain,
                         pubPartId,

@@ -3,6 +3,7 @@ project: dcps_test_idl_only_lib, opendds_cxx11 {
                     -I../../idl_test_nested_types_lib
   dcps_ts_flags += -Wb,export_macro=NestedTypesTest_Export -Wb,export_include=NestedTypesTest_export.h -Gequality
   dynamicflags  += NESTEDTYPESTEST_BUILD_DLL
+  requires      += no_opendds_safety_profile
 
   TypeSupport_Files {
     ../../idl_test_nested_types_lib/NestedTypesTest.idl

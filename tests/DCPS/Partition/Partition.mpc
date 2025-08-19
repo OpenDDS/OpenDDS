@@ -7,6 +7,10 @@ project(DDS*idl): dcps_test_idl_only_lib {
   TypeSupport_Files {
     Test.idl
   }
+
+  Source_Files {
+    Partition_Table.cpp
+  }
 }
 
 project(DDS*Publisher): dcpsexe, dcps_test, dcps_transports_for_test {

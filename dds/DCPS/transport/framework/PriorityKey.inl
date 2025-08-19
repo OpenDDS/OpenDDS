@@ -49,7 +49,7 @@ ACE_INLINE
 unsigned long
 PriorityKey::hash() const
 {
-  return (this->priority_ << 16) + this->address_.hash() + this->is_loopback_
+  return static_cast<unsigned long>(this->priority_ << 16) + this->address_.hash() + this->is_loopback_
     + this->is_active_;
 }
 

@@ -469,7 +469,7 @@ TEST(VreadVwriteTest, KeyOnly_UnionWithKey)
   ASSERT_EQ(sample._d(), sample_out._d());
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 DDS::DynamicType_var get_dynamic_type(OpenDDS::XTypes::TypeLookupService& tls)
 {
@@ -737,6 +737,6 @@ TEST(VreadVwriteTest, DynamicAdapterSerializeTest)
 
 #endif // OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif
 
 #endif // OPENDDS_HAS_JSON_VALUE_WRITER

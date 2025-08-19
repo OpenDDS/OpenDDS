@@ -16,8 +16,6 @@ namespace Test
   class Subscriber;
 }
 
-std::ostream& operator<<(std::ostream& str, const Test::Subscriber& value);
-
 namespace Test
 {
 
@@ -49,12 +47,6 @@ class Subscriber {
     /// Priority of  writers.
     const std::map< long, long>& priorities() const;
 
-    /// Format and dump raw data to a stream.
-    std::ostream& rawData( std::ostream& str) const;
-
-    /// Stream out statistics values.
-    friend std::ostream& ::operator<<(std::ostream& str, const Subscriber& value);
-
   private:
     /// Test options.
     const Options& options_;
@@ -69,7 +61,7 @@ class Subscriber {
     DDS::Subscriber_var subscriber_;
 
     /// Reader.
-    OpenDDS::DCPS::DataReaderEx_var reader_;
+  DDS::DataReader_var reader_;
 
     /// Reader listener.
     DataReaderListener* listener_;

@@ -50,6 +50,9 @@ public:
   DCPS::TimeDuration max_lease_duration() const;
   void max_lease_duration(const DCPS::TimeDuration& period);
 
+  DCPS::TimeDuration minimum_cleanup_separation() const;
+  void minimum_cleanup_separation(const DCPS::TimeDuration& period);
+
 #if OPENDDS_CONFIG_SECURITY
   DCPS::TimeDuration security_unsecure_lease_duration() const;
   void security_unsecure_lease_duration(const DCPS::TimeDuration& period);
@@ -248,6 +251,10 @@ public:
 
   ACE_CDR::ULong spdp_user_tag() const;
   void spdp_user_tag(ACE_CDR::ULong tag);
+
+  typedef OPENDDS_VECTOR(ACE_CDR::ULong) UserTagList;
+  UserTagList ignored_spdp_user_tags() const;
+  void ignored_spdp_user_tags(const UserTagList& tags);
 
 private:
   const String config_prefix_;

@@ -2,6 +2,8 @@
 
 #include <gtest/gtest.h>
 
+#include <dds/DCPS/Definitions.h>
+
 TEST(UnionDefault, no_default)
 {
   Unions::Z z;
@@ -44,7 +46,7 @@ TEST(UnionDefault, dummy_array)
   EXPECT_TRUE(t._d() == 0);
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 TEST(UnionDefault, wstring)
 {
   Unions::S s;

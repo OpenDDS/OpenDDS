@@ -4,6 +4,7 @@
 #include "dds/DdsDcpsC.h"
 #include "tests/DCPS/FooType3/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType3/FooDefTypeSupportImpl.h"
+#include <tests/Utils/DistributedConditionSet.h>
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataWriterImpl_T.h"
@@ -43,14 +44,15 @@ class PubDriver : public ACE_Task_Base
     void unregister_test ();
     void unregister_nil_test ();
     void resume_test ();
-    void listener_test ();
+    void listener_test (DistributedConditionSet_rch dcs);
     void allocator_test ();
     void liveliness_test ();
     void parse_args(int& argc, ACE_TCHAR* argv[]);
-    void initialize(int& argc, ACE_TCHAR* argv[]);
-    void run();
+    void initialize(DistributedConditionSet_rch dcs, int& argc, ACE_TCHAR* argv[]);
+    void run(DistributedConditionSet_rch dcs);
     void end();
-    void run_test (int test_to_run);
+    void run_test (DistributedConditionSet_rch dcs,
+                   int test_to_run);
 
     void shutdown ();
 
@@ -67,8 +69,6 @@ class PubDriver : public ACE_Task_Base
     int               test_to_run_;
 
     int               shutdown_;
-
-    ACE_TString       sub_ready_filename_;
 };
 
 #endif

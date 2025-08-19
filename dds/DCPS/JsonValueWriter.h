@@ -6,7 +6,9 @@
 #ifndef OPENDDS_DCPS_JSON_VALUE_WRITER_H
 #define OPENDDS_DCPS_JSON_VALUE_WRITER_H
 
-#if defined OPENDDS_RAPIDJSON && !defined OPENDDS_SAFETY_PROFILE
+#include "Definitions.h"
+
+#if OPENDDS_CONFIG_RAPIDJSON && !OPENDDS_CONFIG_SAFETY_PROFILE
 #  define OPENDDS_HAS_JSON_VALUE_WRITER 1
 #else
 #  define OPENDDS_HAS_JSON_VALUE_WRITER 0
@@ -18,7 +20,6 @@
 #include "ValueHelper.h"
 #include "RapidJsonWrapper.h"
 #include "dcps_export.h"
-#include "Definitions.h"
 
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #include <dds/DdsDcpsTopicC.h>
@@ -42,6 +43,7 @@ class JsonValueWriter : public ValueWriter {
 public:
   explicit JsonValueWriter(Writer& writer)
     : writer_(writer)
+    , mode_(NormalMode)
   {}
 
   bool begin_struct(Extensibility extensibility = FINAL);
@@ -63,6 +65,13 @@ public:
   bool begin_element(ACE_CDR::ULong idx);
   bool end_element();
 
+  bool begin_map(XTypes::TypeKind key_kind, XTypes::TypeKind value_kind);
+  bool end_map();
+  bool begin_key();
+  bool end_key();
+  bool begin_value();
+  bool end_value();
+
   bool write_boolean(ACE_CDR::Boolean value);
   bool write_byte(ACE_CDR::Octet value);
 #if OPENDDS_HAS_EXPLICIT_INTS
@@ -82,6 +91,7 @@ public:
   bool write_char8(ACE_CDR::Char value);
   bool write_char16(ACE_CDR::WChar value);
   bool write_string(const ACE_CDR::Char* value, size_t length);
+  using ValueWriter::write_string;
   bool write_wstring(const ACE_CDR::WChar* value, size_t length);
   bool write_enum(ACE_CDR::Long value, const EnumHelper& helper);
   bool write_bitmask(ACE_CDR::ULongLong value, const BitmaskHelper& helper);
@@ -89,6 +99,7 @@ public:
 
 private:
   Writer& writer_;
+  enum {NormalMode, MapKeyMode} mode_;
 };
 
 template <typename Writer>
@@ -176,6 +187,47 @@ bool JsonValueWriter<Writer>::end_sequence()
 }
 
 template <typename Writer>
+bool JsonValueWriter<Writer>::begin_map(XTypes::TypeKind, XTypes::TypeKind)
+{
+  return writer_.StartObject();
+}
+
+template <typename Writer>
+bool JsonValueWriter<Writer>::end_map()
+{
+  return writer_.EndObject();
+}
+
+template <typename Writer>
+bool JsonValueWriter<Writer>::begin_key()
+{
+  mode_ = MapKeyMode;
+  // The next write_*() will become a JSON Key instead of a value.
+  // Only simple types are supported as keys, so we don't need to keep
+  // a stack of modes to implement nested objects here.
+  return true;
+}
+
+template <typename Writer>
+bool JsonValueWriter<Writer>::end_key()
+{
+  mode_ = NormalMode;
+  return true;
+}
+
+template <typename Writer>
+bool JsonValueWriter<Writer>::begin_value()
+{
+  return true;
+}
+
+template <typename Writer>
+bool JsonValueWriter<Writer>::end_value()
+{
+  return true;
+}
+
+template <typename Writer>
 bool JsonValueWriter<Writer>::begin_element(ACE_CDR::ULong /*idx*/)
 {
   return true;
@@ -190,12 +242,18 @@ bool JsonValueWriter<Writer>::end_element()
 template <typename Writer>
 bool JsonValueWriter<Writer>::write_boolean(ACE_CDR::Boolean value)
 {
+  if (mode_ == MapKeyMode) {
+    return writer_.Key(value ? "true" : "false", value ? 4 : 5);
+  }
   return writer_.Bool(value);
 }
 
 template <typename Writer>
 bool JsonValueWriter<Writer>::write_byte(ACE_CDR::Octet value)
 {
+  if (mode_ == MapKeyMode) {
+    return writer_.Key(to_dds_string(value).c_str());
+  }
   return writer_.Uint(value);
 }
 
@@ -203,12 +261,18 @@ bool JsonValueWriter<Writer>::write_byte(ACE_CDR::Octet value)
 template <typename Writer>
 bool JsonValueWriter<Writer>::write_int8(ACE_CDR::Int8 value)
 {
+  if (mode_ == MapKeyMode) {
+    return writer_.Key(to_dds_string(value).c_str());
+  }
   return writer_.Int(value);
 }
 
 template <typename Writer>
 bool JsonValueWriter<Writer>::write_uint8(ACE_CDR::UInt8 value)
 {
+  if (mode_ == MapKeyMode) {
+    return writer_.Key(to_dds_string(value).c_str());
+  }
   return writer_.Uint(value);
 }
 #endif
@@ -216,36 +280,54 @@ bool JsonValueWriter<Writer>::write_uint8(ACE_CDR::UInt8 value)
 template <typename Writer>
 bool JsonValueWriter<Writer>::write_int16(ACE_CDR::Short value)
 {
+  if (mode_ == MapKeyMode) {
+    return writer_.Key(to_dds_string(value).c_str());
+  }
   return writer_.Int(value);
 }
 
 template <typename Writer>
 bool JsonValueWriter<Writer>::write_uint16(ACE_CDR::UShort value)
 {
+  if (mode_ == MapKeyMode) {
+    return writer_.Key(to_dds_string(value).c_str());
+  }
   return writer_.Uint(value);
 }
 
 template <typename Writer>
 bool JsonValueWriter<Writer>::write_int32(ACE_CDR::Long value)
 {
+  if (mode_ == MapKeyMode) {
+    return writer_.Key(to_dds_string(value).c_str());
+  }
   return writer_.Int(value);
 }
 
 template <typename Writer>
 bool JsonValueWriter<Writer>::write_uint32(ACE_CDR::ULong value)
 {
+  if (mode_ == MapKeyMode) {
+    return writer_.Key(to_dds_string(value).c_str());
+  }
   return writer_.Uint(value);
 }
 
 template <typename Writer>
 bool JsonValueWriter<Writer>::write_int64(ACE_CDR::LongLong value)
 {
+  if (mode_ == MapKeyMode) {
+    return writer_.Key(to_dds_string(value).c_str());
+  }
   return writer_.Int64(value);
 }
 
 template <typename Writer>
 bool JsonValueWriter<Writer>::write_uint64(ACE_CDR::ULongLong value)
 {
+  if (mode_ == MapKeyMode) {
+    return writer_.Key(to_dds_string(value).c_str());
+  }
   return writer_.Uint64(value);
 }
 
@@ -265,7 +347,7 @@ template <typename Writer>
 bool JsonValueWriter<Writer>::write_float128(ACE_CDR::LongDouble value)
 {
   // TODO
-  return writer_.Double(value);
+  return writer_.Double(static_cast<double>(value));
 }
 
 template <typename Writer>
@@ -281,14 +363,14 @@ bool JsonValueWriter<Writer>::write_fixed(const ACE_CDR::Fixed& value)
 template <typename Writer>
 bool JsonValueWriter<Writer>::write_char8(ACE_CDR::Char value)
 {
-  ACE_CDR::Char s[2] = { value, 0 };
-  return writer_.String(s, 1);
+  const ACE_CDR::Char s[2] = { value, 0 };
+  return mode_ == MapKeyMode ?  writer_.Key(s, 1) : writer_.String(s, 1);
 }
 
 template <typename Writer>
 bool JsonValueWriter<Writer>::write_char16(ACE_CDR::WChar value)
 {
-  ACE_CDR::WChar s[2] = { value, 0 };
+  const ACE_CDR::WChar s[2] = { value, 0 };
 
   rapidjson::GenericStringStream<rapidjson::UTF16<> > source(s);
   rapidjson::GenericStringBuffer<rapidjson::UTF8<> > target;
@@ -297,13 +379,17 @@ bool JsonValueWriter<Writer>::write_char16(ACE_CDR::WChar value)
     return false;
   }
 
-  return writer_.String(target.GetString(), static_cast<rapidjson::SizeType>(target.GetLength()));
+  return mode_ == MapKeyMode
+    ? writer_.Key(target.GetString(), static_cast<rapidjson::SizeType>(target.GetLength()))
+    : writer_.String(target.GetString(), static_cast<rapidjson::SizeType>(target.GetLength()));
 }
 
 template <typename Writer>
 bool JsonValueWriter<Writer>::write_string(const ACE_CDR::Char* value, size_t length)
 {
-  return writer_.String(value, static_cast<rapidjson::SizeType>(length));
+  return mode_ == MapKeyMode
+    ? writer_.Key(value, static_cast<rapidjson::SizeType>(length))
+    : writer_.String(value, static_cast<rapidjson::SizeType>(length));
 }
 
 template <typename Writer>
@@ -318,7 +404,9 @@ bool JsonValueWriter<Writer>::write_wstring(const ACE_CDR::WChar* value, size_t 
     }
   }
 
-  return writer_.String(target.GetString(), static_cast<rapidjson::SizeType>(target.GetLength()));
+  return mode_ == MapKeyMode
+    ? writer_.Key(target.GetString(), static_cast<rapidjson::SizeType>(target.GetLength()))
+    : writer_.String(target.GetString(), static_cast<rapidjson::SizeType>(target.GetLength()));
 }
 
 template <typename Writer>
@@ -326,7 +414,7 @@ bool JsonValueWriter<Writer>::write_enum(ACE_CDR::Long value, const EnumHelper& 
 {
   const char* name = 0;
   if (helper.get_name(name, value)) {
-    return writer_.String(name);
+    return write_string(name, std::strlen(name));
   }
   return false;
 }
@@ -334,7 +422,8 @@ bool JsonValueWriter<Writer>::write_enum(ACE_CDR::Long value, const EnumHelper& 
 template <typename Writer>
 bool JsonValueWriter<Writer>::write_bitmask(ACE_CDR::ULongLong value, const BitmaskHelper& helper)
 {
-  return writer_.String(bitmask_to_string(value, helper).c_str());
+  const String s = bitmask_to_string(value, helper);
+  return write_string(s.c_str(), s.length());
 }
 
 template <typename Writer>
