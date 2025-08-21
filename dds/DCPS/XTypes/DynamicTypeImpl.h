@@ -25,9 +25,16 @@ public:
   char* get_name();
   TypeKind get_kind();
   DDS::ReturnCode_t get_member_by_name(DDS::DynamicTypeMember_ptr& member, const char* name);
-  DDS::ReturnCode_t get_all_members_by_name(DDS::DynamicTypeMembersByName& member);
+
+#if OPENDDS_CONFIG_IDL_MAP
+  DDS::ReturnCode_t get_all_members_by_name(DDS::DynamicTypeMembersByName& members);
+  DDS::ReturnCode_t get_all_members(DDS::DynamicTypeMembersById& members);
+#else
+  DDS::ReturnCode_t get_all_members_by_name(DDS::DynamicTypeMembersByName*& members);
+  DDS::ReturnCode_t get_all_members(DDS::DynamicTypeMembersById*& members);
+#endif
+
   DDS::ReturnCode_t get_member(DDS::DynamicTypeMember_ptr& member, MemberId id);
-  DDS::ReturnCode_t get_all_members(DDS::DynamicTypeMembersById& member);
   ACE_CDR::ULong get_member_count();
   DDS::ReturnCode_t get_member_by_index(DDS::DynamicTypeMember_ptr& member, ACE_CDR::ULong index);
   CORBA::ULong get_annotation_count();
@@ -89,9 +96,17 @@ public:
     return preset_type_info_set_ ? &preset_type_info_ : 0;
   }
 
+#if OPENDDS_CONFIG_IDL_MAP
+  typedef DDS::DynamicTypeMembersByName DynamicTypeMembersByName;
+  typedef DDS::DynamicTypeMembersById DynamicTypeMembersById;
+#else
+  typedef OPENDDS_MAP(DCPS::String, DDS::DynamicTypeMember_var) DynamicTypeMembersByName;
+  typedef OPENDDS_MAP(DDS::MemberId, DDS::DynamicTypeMember_var) DynamicTypeMembersById;
+#endif
+
 private:
-  DDS::DynamicTypeMembersByName members_by_name_;
-  DDS::DynamicTypeMembersById members_by_id_;
+  DynamicTypeMembersByName members_by_name_;
+  DynamicTypeMembersById members_by_id_;
 
   typedef OPENDDS_VECTOR(DDS::DynamicTypeMember_var) DynamicTypeMembersByIndex;
   DynamicTypeMembersByIndex members_by_index_;
@@ -103,12 +118,13 @@ private:
   TypeMap complete_tm_;
   bool preset_type_info_set_;
   TypeInformation preset_type_info_;
+
+  friend bool test_equality(DDS::DynamicType_ptr lhs, DDS::DynamicType_ptr rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
+  static bool test_equality_i(DynamicTypeMembersByName* lhs, DynamicTypeMembersByName* rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
+  static bool test_equality_i(DynamicTypeMembersById* lhs, DynamicTypeMembersById* rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
 };
 
 OpenDDS_Dcps_Export DDS::DynamicType_var get_base_type(DDS::DynamicType_ptr type);
-bool test_equality(DDS::DynamicType_ptr lhs, DDS::DynamicType_ptr rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
-bool test_equality(DDS::DynamicTypeMembersByName* lhs, DDS::DynamicTypeMembersByName* rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
-bool test_equality(DDS::DynamicTypeMembersById* lhs, DDS::DynamicTypeMembersById* rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
 
 } // namespace XTypes
 } // namespace OpenDDS

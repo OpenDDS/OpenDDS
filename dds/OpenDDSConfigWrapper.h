@@ -13,6 +13,14 @@
 // regarding what can be customized.
 #include <dds/OpenDDSConfig.h>
 
+#include <tao/Version.h>
+
+#ifndef OPENDDS_CONFIG_IDL_MAP
+// This version of OpenDDS can be built with TAO version 3.x
+// which doesn't have working code generation for IDL maps.
+#  define OPENDDS_CONFIG_IDL_MAP TAO_MAJOR_VERSION != 3
+#endif
+
 #if defined OPENDDS_SECURITY && defined OPENDDS_CONFIG_SECURITY
 #  if !OPENDDS_CONFIG_SECURITY
 #    error OPENDDS_SECURITY is defined but OPENDDS_CONFIG_SECURITY=0

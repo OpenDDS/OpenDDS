@@ -441,6 +441,7 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
       erase_member(id);
       DDS::DynamicData_var opt_val;
       if (backing_store_ && backing_store_->get_complex_value(opt_val, id) == DDS::RETCODE_OK) {
+#if OPENDDS_CONFIG_IDL_MAP
         // The backing store is read-only, so to remove the optional member we need to
         // invalidate the backing store. Save all the members that are in the backing store
         // but not in the container.
@@ -473,6 +474,9 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
           }
         }
         set_backing_store(0);
+#else
+        return DDS::RETCODE_UNSUPPORTED;
+#endif
       }
       break;
     }
@@ -791,6 +795,7 @@ bool DynamicDataImpl::is_default_member_selected(CORBA::Long disc_val, DDS::Memb
     return false;
   }
 
+#if OPENDDS_CONFIG_IDL_MAP
   DDS::DynamicTypeMembersById members;
   if (type_->get_all_members(members) != DDS::RETCODE_OK) {
     return false;
@@ -811,6 +816,11 @@ bool DynamicDataImpl::is_default_member_selected(CORBA::Long disc_val, DDS::Memb
     }
   }
   return true;
+#else
+  ACE_UNUSED_ARG(disc_val);
+  ACE_UNUSED_ARG(default_id);
+  return false;
+#endif
 }
 
 DynamicDataImpl::SingleValue::SingleValue()

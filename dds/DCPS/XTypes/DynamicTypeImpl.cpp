@@ -52,7 +52,7 @@ TypeKind DynamicTypeImpl::get_kind()
 
 DDS::ReturnCode_t DynamicTypeImpl::get_member_by_name(DDS::DynamicTypeMember_ptr& member, const char* name)
 {
-  const DDS::DynamicTypeMembersByName::const_iterator pos = members_by_name_.find(name);
+  const DynamicTypeMembersByName::const_iterator pos = members_by_name_.find(name);
   if (pos != members_by_name_.end()) {
     DDS::DynamicTypeMember_var member_v(member);
     member = DDS::DynamicTypeMember::_duplicate(pos->second);
@@ -61,15 +61,22 @@ DDS::ReturnCode_t DynamicTypeImpl::get_member_by_name(DDS::DynamicTypeMember_ptr
   return DDS::RETCODE_ERROR;
 }
 
-DDS::ReturnCode_t DynamicTypeImpl::get_all_members_by_name(DDS::DynamicTypeMembersByName& member)
+#if OPENDDS_CONFIG_IDL_MAP
+DDS::ReturnCode_t DynamicTypeImpl::get_all_members_by_name(DDS::DynamicTypeMembersByName& members)
 {
-  member = members_by_name_;
+  members = members_by_name_;
   return DDS::RETCODE_OK;
 }
+#else
+DDS::ReturnCode_t DynamicTypeImpl::get_all_members_by_name(DDS::DynamicTypeMembersByName*&)
+{
+  return DDS::RETCODE_UNSUPPORTED;
+}
+#endif
 
 DDS::ReturnCode_t DynamicTypeImpl::get_member(DDS::DynamicTypeMember_ptr& member, MemberId id)
 {
-  const DDS::DynamicTypeMembersById::const_iterator pos = members_by_id_.find(id);
+  const DynamicTypeMembersById::const_iterator pos = members_by_id_.find(id);
   if (pos == members_by_id_.end()) {
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
       CORBA::String_var name = descriptor_->name();
@@ -84,11 +91,18 @@ DDS::ReturnCode_t DynamicTypeImpl::get_member(DDS::DynamicTypeMember_ptr& member
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t DynamicTypeImpl::get_all_members(DDS::DynamicTypeMembersById& member)
+#if OPENDDS_CONFIG_IDL_MAP
+DDS::ReturnCode_t DynamicTypeImpl::get_all_members(DDS::DynamicTypeMembersById& members)
 {
-  member = members_by_id_;
+  members = members_by_id_;
   return DDS::RETCODE_OK;
 }
+#else
+DDS::ReturnCode_t DynamicTypeImpl::get_all_members(DDS::DynamicTypeMembersById*&)
+{
+  return DDS::RETCODE_UNSUPPORTED;
+}
+#endif
 
 ACE_CDR::ULong DynamicTypeImpl::get_member_count()
 {
@@ -197,7 +211,10 @@ bool test_equality(DDS::DynamicType_ptr lhs, DDS::DynamicType_ptr rhs, DynamicTy
     return true;
   }
 
-  if (lhs == 0 || rhs == 0) {
+  DynamicTypeImpl* lhs_i = dynamic_cast<DynamicTypeImpl*>(lhs);
+  DynamicTypeImpl* rhs_i = dynamic_cast<DynamicTypeImpl*>(rhs);
+
+  if (!lhs_i || !rhs_i) {
     return false;
   }
 
@@ -208,36 +225,27 @@ bool test_equality(DDS::DynamicType_ptr lhs, DDS::DynamicType_ptr rhs, DynamicTy
 
     DDS::TypeDescriptor_var lhs_descriptor;
     DDS::TypeDescriptor_var rhs_descriptor;
-    DDS::DynamicTypeMembersByName lhs_members_by_name;
-    DDS::DynamicTypeMembersByName rhs_members_by_name;
-    DDS::DynamicTypeMembersById lhs_members_by_id;
-    DDS::DynamicTypeMembersById rhs_members_by_id;
-
     if (lhs->get_descriptor(lhs_descriptor) != DDS::RETCODE_OK ||
-        rhs->get_descriptor(rhs_descriptor) != DDS::RETCODE_OK ||
-        lhs->get_all_members_by_name(lhs_members_by_name) != DDS::RETCODE_OK ||
-        rhs->get_all_members_by_name(rhs_members_by_name) != DDS::RETCODE_OK ||
-        lhs->get_all_members(lhs_members_by_id) != DDS::RETCODE_OK ||
-        rhs->get_all_members(rhs_members_by_id) != DDS::RETCODE_OK) {
+        rhs->get_descriptor(rhs_descriptor) != DDS::RETCODE_OK) {
       return false;
     }
 
     return
       test_equality(lhs_descriptor, rhs_descriptor, dt_ptr_pair) &&
-      test_equality(&lhs_members_by_name, &rhs_members_by_name, dt_ptr_pair) &&
-      test_equality(&lhs_members_by_id, &rhs_members_by_id, dt_ptr_pair);
+      DynamicTypeImpl::test_equality_i(&lhs_i->members_by_name_, &rhs_i->members_by_name_, dt_ptr_pair) &&
+      DynamicTypeImpl::test_equality_i(&lhs_i->members_by_id_, &rhs_i->members_by_id_, dt_ptr_pair);
   }
 
   return true;
 }
 
-bool test_equality(DDS::DynamicTypeMembersByName* lhs, DDS::DynamicTypeMembersByName* rhs, DynamicTypePtrPairSeen& dt_ptr_pair)
+bool DynamicTypeImpl::test_equality_i(DynamicTypeMembersByName* lhs, DynamicTypeMembersByName* rhs, DynamicTypePtrPairSeen& dt_ptr_pair)
 {
   if (lhs == rhs) {
     return true;
   }
 
-  if (lhs == 0 || rhs == 0) {
+  if (!lhs || !rhs) {
     return false;
   }
 
@@ -245,8 +253,8 @@ bool test_equality(DDS::DynamicTypeMembersByName* lhs, DDS::DynamicTypeMembersBy
     return false;
   }
 
-  for (DDS::DynamicTypeMembersByName::const_iterator lhs_it = lhs->begin(); lhs_it != lhs->end(); ++lhs_it) {
-    const DDS::DynamicTypeMembersByName::const_iterator rhs_it = rhs->find(lhs_it->first);
+  for (DynamicTypeMembersByName::const_iterator lhs_it = lhs->begin(); lhs_it != lhs->end(); ++lhs_it) {
+    const DynamicTypeMembersByName::const_iterator rhs_it = rhs->find(lhs_it->first);
     if (rhs_it == rhs->end()) {
       return false;
     }
@@ -256,20 +264,20 @@ bool test_equality(DDS::DynamicTypeMembersByName* lhs, DDS::DynamicTypeMembersBy
         rhs_it->second->get_descriptor(rhs_md) != DDS::RETCODE_OK) {
       return false;
     }
-    if (!test_equality(lhs_md, rhs_md, dt_ptr_pair)) {
+    if (!XTypes::test_equality(lhs_md, rhs_md, dt_ptr_pair)) {
       return false;
     }
   }
   return true;
 }
 
-bool test_equality(DDS::DynamicTypeMembersById* lhs, DDS::DynamicTypeMembersById* rhs, DynamicTypePtrPairSeen& dt_ptr_pair)
+bool DynamicTypeImpl::test_equality_i(DynamicTypeMembersById* lhs, DynamicTypeMembersById* rhs, DynamicTypePtrPairSeen& dt_ptr_pair)
 {
   if (lhs == rhs) {
     return true;
   }
 
-  if (lhs == 0 || rhs == 0) {
+  if (!lhs || !rhs) {
     return false;
   }
 
@@ -277,8 +285,8 @@ bool test_equality(DDS::DynamicTypeMembersById* lhs, DDS::DynamicTypeMembersById
     return false;
   }
 
-  for (DDS::DynamicTypeMembersById::const_iterator lhs_it = lhs->begin(); lhs_it != lhs->end(); ++lhs_it) {
-    const DDS::DynamicTypeMembersById::const_iterator rhs_it = rhs->find(lhs_it->first);
+  for (DynamicTypeMembersById::const_iterator lhs_it = lhs->begin(); lhs_it != lhs->end(); ++lhs_it) {
+    const DynamicTypeMembersById::const_iterator rhs_it = rhs->find(lhs_it->first);
     if (rhs_it == rhs->end()) {
       return false;
     }
@@ -288,7 +296,7 @@ bool test_equality(DDS::DynamicTypeMembersById* lhs, DDS::DynamicTypeMembersById
         rhs_it->second->get_descriptor(rhs_md) != DDS::RETCODE_OK) {
       return false;
     }
-    if (!test_equality(lhs_md, rhs_md, dt_ptr_pair)) {
+    if (!XTypes::test_equality(lhs_md, rhs_md, dt_ptr_pair)) {
       return false;
     }
   }

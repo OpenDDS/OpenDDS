@@ -50,6 +50,7 @@ DDS::ReturnCode_t extensibility(DDS::DynamicType_ptr type, DCPS::Extensibility& 
 
 DDS::ReturnCode_t max_extensibility(DDS::DynamicType_ptr type, DCPS::Extensibility& ext)
 {
+#if OPENDDS_CONFIG_IDL_MAP
   DDS::ReturnCode_t rc = extensibility(type, ext);
   if (rc != DDS::RETCODE_OK) {
     return rc;
@@ -87,6 +88,11 @@ DDS::ReturnCode_t max_extensibility(DDS::DynamicType_ptr type, DCPS::Extensibili
   }
 
   return DDS::RETCODE_OK;
+#else
+  ACE_UNUSED_ARG(type);
+  ACE_UNUSED_ARG(ext);
+  return DDS::RETCODE_UNSUPPORTED;
+#endif
 }
 
 DCPS::Extensibility dds_to_opendds_ext(DDS::ExtensibilityKind ext)
@@ -347,6 +353,7 @@ namespace {
     switch (kind) {
     case TK_STRUCTURE:
       {
+#if OPENDDS_CONFIG_IDL_MAP
         DDS::DynamicTypeMembersById members;
         DDS::ReturnCode_t rc = type->get_all_members(members);
         if (rc != DDS::RETCODE_OK) {
@@ -386,6 +393,9 @@ namespace {
             }
           }
         }
+#else
+        return DDS::RETCODE_UNSUPPORTED;
+#endif
       }
       break;
 
@@ -1528,6 +1538,7 @@ DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
 
   case TK_STRUCTURE:
     {
+#if OPENDDS_CONFIG_IDL_MAP
       DDS::DynamicTypeMembersById src_members;
       rc = actual_src_type->get_all_members(src_members);
       if (rc != DDS::RETCODE_OK) {
@@ -1553,6 +1564,9 @@ DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
           rc = this_rc;
         }
       }
+#else
+      return DDS::RETCODE_UNSUPPORTED;
+#endif
     }
     break;
 

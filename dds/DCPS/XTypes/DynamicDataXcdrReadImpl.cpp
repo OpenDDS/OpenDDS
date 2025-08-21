@@ -597,6 +597,7 @@ bool DynamicDataXcdrReadImpl::get_union_item_count()
     return false;
   }
 
+#if OPENDDS_CONFIG_IDL_MAP
   DDS::DynamicTypeMembersById members;
   rc = type_->get_all_members(members);
   if (rc != DDS::RETCODE_OK) {
@@ -628,9 +629,11 @@ bool DynamicDataXcdrReadImpl::get_union_item_count()
       }
     }
   }
-
   item_count_ = 1;
   return true;
+#else
+  return false;
+#endif
 }
 
 DDS::UInt32 DynamicDataXcdrReadImpl::get_item_count()
@@ -897,6 +900,7 @@ DDS::MemberDescriptor* DynamicDataXcdrReadImpl::get_union_selected_member()
     return 0;
   }
 
+#if OPENDDS_CONFIG_IDL_MAP
   DDS::DynamicTypeMembersById members;
   if (type_->get_all_members(members) != DDS::RETCODE_OK) {
     return 0;
@@ -925,7 +929,7 @@ DDS::MemberDescriptor* DynamicDataXcdrReadImpl::get_union_selected_member()
   if (has_default) {
     return default_member._retn();
   }
-
+#endif
   // The union has no selected member.
   return 0;
 }
@@ -2778,6 +2782,7 @@ bool DynamicDataXcdrReadImpl::skip_all()
         return false;
       }
 
+#if OPENDDS_CONFIG_IDL_MAP
       DDS::DynamicTypeMembersById members;
       if (type_->get_all_members(members) != DDS::RETCODE_OK) {
         return false;
@@ -2815,6 +2820,9 @@ bool DynamicDataXcdrReadImpl::skip_all()
                    ACE_TEXT(" selected member and a discriminator with value %d\n"), label));
       }
       return true;
+#else
+      return false;
+#endif
     }
   }
 }
