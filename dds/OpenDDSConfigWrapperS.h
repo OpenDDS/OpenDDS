@@ -3,4 +3,4 @@
  * See: http://www.opendds.org/license.html
  */
 
- #include "OpenDDSConfigWrapper.h"
+#include "OpenDDSConfigWrapper.h"

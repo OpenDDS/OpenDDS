@@ -51,6 +51,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     OpenDDSConfig.h
     OpenDDSConfigWrapper.h
     OpenDDSConfigWrapperC.h
+    OpenDDSConfigWrapperS.h
     Version.h
     Versioned_Namespace.h
     DCPS
@@ -60,7 +61,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     DCPS/XTypes
 
     // Although these files only contain comments since
-    // service-side suppression is done,
+    // server-side suppression is done,
     // they are included here so that "make install" will
     // work.
     DdsDcpsS.h
