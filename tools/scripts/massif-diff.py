@@ -226,6 +226,9 @@ class Node:
         self.process(Node.diff, allocs, dedup, nodes_by_path)
 
         if self.is_section():
+            # heap_tree must be set based on if there are child nodes or not or
+            # else the parser in the visualizer will fail.
+            self.props['heap_tree'] = 'detailed' if self.nodes else 'empty'
             self.value = self.sum_values()
 
         if self.value == 0 and last is not None and last.value == 0:
