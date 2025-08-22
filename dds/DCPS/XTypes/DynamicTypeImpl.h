@@ -124,6 +124,8 @@ private:
   static bool test_equality_i(DynamicTypeMembersById* lhs, DynamicTypeMembersById* rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
 };
 
+bool test_equality(DDS::DynamicType_ptr lhs, DDS::DynamicType_ptr rhs, DynamicTypePtrPairSeen& dt_ptr_pair);
+
 OpenDDS_Dcps_Export DDS::DynamicType_var get_base_type(DDS::DynamicType_ptr type);
 
 } // namespace XTypes
