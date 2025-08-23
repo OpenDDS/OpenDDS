@@ -60,3 +60,4 @@ set(_OPENDDS_GOOGLETEST_DIR "${_opendds_googletest_bin_dir}" CACHE INTERNAL "")
 
 add_subdirectory(cmake)
 add_subdirectory(DCPS)
+add_subdirectory(inspect)
