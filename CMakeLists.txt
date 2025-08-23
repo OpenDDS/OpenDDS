@@ -147,7 +147,9 @@ if(OPENDDS_SECURITY)
     add_subdirectory(tools/rtpsrelay)
   endif()
 endif()
-add_subdirectory(tools/inspect)
+if(OPENDDS_BUILT_IN_TOPICS)
+  add_subdirectory(tools/inspect)
+endif()
 
 # Installation
 set(cmake_dest "${CMAKE_INSTALL_DATAROOTDIR}/cmake/OpenDDS")

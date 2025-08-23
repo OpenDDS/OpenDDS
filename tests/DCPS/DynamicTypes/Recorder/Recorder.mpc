@@ -1,5 +1,6 @@
 project(XTypes_Dynamic_Recorder): dcps_test, dcps_rtps_udp, msvc_bigobj {
   requires += no_opendds_safety_profile
+  requires += built_in_topics
   dcps_ts_flags += -Gxtypes-complete
   exename = xtypes_dynamic_recorder
 

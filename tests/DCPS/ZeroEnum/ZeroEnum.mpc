@@ -14,6 +14,7 @@ project(*Publisher) : dcpsexe, dcps_test, dcps_transports_for_test {
 
 project(*Subscriber) : dcpsexe, dcps_test, dcps_transports_for_test {
   requires += no_opendds_safety_profile
+  requires += built_in_topics
   after += *Publisher
 
   TypeSupport_Files {
