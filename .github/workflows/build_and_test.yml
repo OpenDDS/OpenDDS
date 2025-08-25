@@ -88,6 +88,8 @@ jobs:
       run: |
         wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
         sudo apt-add-repository "deb http://apt.llvm.org/$(lsb_release -cs)/ $llvm-toolchain-noble-20 main"
+    - name: install clang-20
+      run: sudo apt-get -y install clang-20
     - name: get compiler version
       shell: bash
       run: |
@@ -189,6 +191,8 @@ jobs:
       run: |
         wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
         sudo apt-add-repository "deb http://apt.llvm.org/$(lsb_release -cs)/ $llvm-toolchain-noble-20 main"
+    - name: install clang-20
+      run: sudo apt-get -y install clang-20
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -300,6 +304,8 @@ jobs:
       run: |
         wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
         sudo apt-add-repository "deb http://apt.llvm.org/$(lsb_release -cs)/ $llvm-toolchain-noble-20 main"
+    - name: install clang-20
+      run: sudo apt-get -y install clang-20
     - name: check build configuration
       shell: bash
       run: |
