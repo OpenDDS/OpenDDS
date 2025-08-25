@@ -166,7 +166,7 @@ Workflow Checks
 
 The :ghfile:`.github/workflows/lint.yml` workflow runs :ghfile:`.github/workflows/lint_build_and_test.pl`, which checks that the :ghfile:`.github/workflows/build_and_test.yml` workflow has `gcc-problem-matcher <https://github.com/ammaraskar/gcc-problem-matcher>`_ and `msvc-problem-matcher <https://github.com/ammaraskar/msvc-problem-matcher>`_ in the correct places.
 
-Running this script requires the `YAML CPAN module <https://metacpan.org/pod/YAML>`_.
+Running this script requires the YAML CPAN module.
 As a safety measure, it has some picky rules about how steps are named and ordered.
 In simplified terms, these rules include:
 

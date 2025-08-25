@@ -13,17 +13,17 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - name: checkout OpenDDS
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         path: OpenDDS
         submodules: true
     - name: checkout dds-rtps
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         repository: omg-dds/dds-rtps
         path: dds-rtps
     - name: checkout ACE_TAO
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         repository: DOCGroup/ACE_TAO
         ref: Latest_Micro
@@ -40,7 +40,7 @@ jobs:
         export COMPILER_VERSION=$(g++ --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: checkout MPC
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
       with:
         repository: DOCGroup/MPC
         path: OpenDDS/ACE_TAO/ACE/MPC

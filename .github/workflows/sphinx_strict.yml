@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: checkout OpenDDS
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Run Strict Checks
       run: |
@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: checkout OpenDDS
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Run Link Checks
       run: |
