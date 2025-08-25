@@ -76,7 +76,7 @@ jobs:
       uses: actions/checkout@v5
       with:
         repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
+        ref: Latest_Micro
         path: OpenDDS/ACE_TAO
     - name: get ACE_TAO commit
       shell: bash
@@ -152,7 +152,7 @@ jobs:
       uses: actions/checkout@v5
       with:
         repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
+        ref: Latest_Micro
         path: ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v5
@@ -238,7 +238,7 @@ jobs:
       uses: actions/checkout@v5
       with:
         repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
+        ref: Latest_Micro
         path: ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v5
