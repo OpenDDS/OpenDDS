@@ -884,13 +884,7 @@ Dynamic Language Binding
 
 For an overview of the Dynamic Language Binding, see :ref:`xtypes--dynamic-language-binding`.
 This section describes the features of the Dynamic Language Binding that OpenDDS supports.
-
-There are two main usage patterns supported:
-
-* Applications can receive DynamicData from a :ref:`Recorder object <alternate_interfaces_to_data--recorder-and-replayer>`.
-
-* Applications can use XTypes :ref:`DynamicDataWriter and/or DynamicDataReader <xtypes--dynamicdatawriters-and-dynamicdatareaders>`.
-
+Applications can use XTypes :ref:`DynamicDataWriter and/or DynamicDataReader <xtypes--dynamicdatawriters-and-dynamicdatareaders>`.
 To use DynamicDataWriter and/or DynamicDataReader for a given topic, the data type definition for that topic must be available to the local DomainParticipant.
 There are a few ways this can be achieved, see :ref:`xtypes--obtaining-dynamictype-and-registering-typesupport` for details.
 
@@ -983,11 +977,9 @@ The samples for ``MyStruct`` are written by a normal, statically-typed DataWrite
 The writer application needs to have the IDL-generated code including the "complete" form of TypeObjects.
 Use :option:`opendds_idl -Gxtypes-complete` to enable CompleteTypeObjects since the default is to generate MinimalTypeObjects.
 
-One way to obtain a DynamicData object representing a data sample received by the participant is using the :ref:`Recorder and RecorderListener classes <alternate_interfaces_to_data--recorder-and-replayer>`.
-Recorder's ``get_dynamic_data`` can be used to construct a DynamicData object for each received sample from the writer.
+DynamicData objects are obtained from a :ref:`DynamicDataReader <xtypes--creating-and-using-a-dynamicdatareader>`.
 Internally, the CompleteTypeObjects received from discovering that writer are converted to DynamicTypes and they are then used to construct the DynamicData objects.
 Once a DynamicData object for a ``MyStruct`` sample is constructed, its members can be read as described in the following sections.
-Another way to obtain a DynamicData object is from a :ref:`DynamicDataReader <xtypes--creating-and-using-a-dynamicdatareader>`.
 
 .. _xtypes--reading-basic-types:
 

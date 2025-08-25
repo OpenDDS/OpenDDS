@@ -15,8 +15,6 @@
 #include "InstanceHandle.h"
 #include "OwnershipManager.h"
 #include "PoolAllocator.h"
-#include "Recorder.h"
-#include "Replayer.h"
 #include "SporadicTask.h"
 #include "TimeTypes.h"
 #include "TopicImpl.h"
@@ -365,30 +363,6 @@ public:
     return this->federated_;
   }
 
-
-  Recorder_ptr create_recorder(DDS::Topic_ptr               a_topic,
-                               const DDS::SubscriberQos &   subscriber_qos,
-                               const DDS::DataReaderQos &   datareader_qos,
-                               const RecorderListener_rch & a_listener,
-                               DDS::StatusMask              mask);
-
-  Replayer_ptr create_replayer(DDS::Topic_ptr               a_topic,
-                               const DDS::PublisherQos &    publisher_qos,
-                               const DDS::DataWriterQos &   datawriter_qos,
-                               const ReplayerListener_rch & a_listener,
-                               DDS::StatusMask              mask);
-
-  DDS::Topic_ptr create_typeless_topic(
-    const char *           topic_name,
-    const char *           type_name,
-    bool                   type_has_keys,
-    const DDS::TopicQos &  qos,
-    DDS::TopicListener_ptr a_listener,
-    DDS::StatusMask        mask);
-
-  void delete_recorder(Recorder_ptr recorder);
-  void delete_replayer(Replayer_ptr replayer);
-
   void add_adjust_liveliness_timers(DataWriterImpl* writer);
   void remove_adjust_liveliness_timers();
 
@@ -427,7 +401,6 @@ private:
   ///{@
   /// constants for the topic_mask argument to create_topic_i
   static const int TOPIC_TYPE_HAS_KEYS = 1;
-  static const int TOPIC_TYPELESS = 2;
   ///@}
 
   DDS::Topic_ptr create_topic_i(
@@ -545,12 +518,6 @@ private:
   ACE_Thread_Mutex filter_cache_lock_;
   OPENDDS_MAP(OPENDDS_STRING, RcHandle<FilterEvaluator> ) filter_cache_;
 #endif
-
-  typedef OPENDDS_SET_CMP(Recorder_var, VarLess<Recorder> ) RecorderSet;
-  typedef OPENDDS_SET_CMP(Replayer_var, VarLess<Replayer> ) ReplayerSet;
-
-  RecorderSet recorders_;
-  ReplayerSet replayers_;
 
 #if OPENDDS_CONFIG_SECURITY
   Security::SecurityConfig_rch security_config_;
