@@ -90,10 +90,16 @@ namespace DDS {
     typedef DynamicTypeSupport_ptr _ptr_type;
     typedef DynamicTypeSupport_var _var_type;
 
-    explicit DynamicTypeSupport(DynamicType_ptr type)
+    explicit DynamicTypeSupport(DynamicType_ptr type,
+                                const DataRepresentationIdSeq& allowable_representations = DataRepresentationIdSeq())
       : TypeSupportImpl(type)
       , name_(type->get_name())
+      , allowable_representations_(allowable_representations)
     {
+      if (allowable_representations_.length() == 0) {
+        allowable_representations_.length(1);
+        allowable_representations_[0] = XCDR2_DATA_REPRESENTATION;
+      }
     }
 
     virtual ~DynamicTypeSupport() {}
@@ -163,6 +169,7 @@ namespace DDS {
 
   protected:
     CORBA::String_var name_;
+    DataRepresentationIdSeq allowable_representations_;
   };
 }
 

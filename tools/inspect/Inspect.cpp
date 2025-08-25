@@ -3,13 +3,16 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include <dds/DCPS/Atomic.h>
 #include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/GuardCondition.h>
+#include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DCPS/Recorder.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h>
+#include <dds/DCPS/XTypes/DynamicTypeSupport.h>
+#include <dds/DCPS/XTypes/Utils.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/RTPS/RtpsDiscoveryConfig.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
@@ -115,6 +118,7 @@ std::string topic_name;
 std::string type_name;
 DDS::DomainId_t domainid = 0;
 unsigned num_samples = 0;
+Atomic<unsigned> current_sample_count;
 unsigned num_seconds = 0;
 bool help = false;
 bool writer_count = false;
@@ -213,47 +217,144 @@ int parse_args(int argc, ACE_TCHAR* argv[])
   return 0;
 }
 
-class RecorderListenerImpl : public RecorderListener {
-public:
-  explicit RecorderListenerImpl(DDS::GuardCondition_var gc)
-    : sample_count_(0)
-    , gc_(gc)
+bool check_rc(DDS::ReturnCode_t rc, const std::string& what)
+{
+  if (rc != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: %C: %C\n", what.c_str(), retcode_to_string(rc)));
+    return false;
+  }
+  return true;
+}
+
+struct Topic : public virtual LocalObject<DDS::DataReaderListener> {
+  std::string name;
+  std::string type_name;
+  std::string path;
+  DDS::DynamicType_var type;
+  DDS::TypeSupport_var ts;
+  DDS::Topic_var topic;
+  DDS::DataReader_var reader;
+  DDS::GuardCondition_var gc;
+
+  Topic(const std::string& name, const std::string& type_name, DDS::GuardCondition_var gc)
+  : name(name)
+  , type_name(type_name)
+  , gc(gc)
   {
   }
 
-  virtual void on_sample_data_received(Recorder* rec,
-                                       const RawDataSample& sample)
+  bool matches_topic_queries()
   {
-    DDS::DynamicData_var dd = rec->get_dynamic_data(sample);
-    String my_type;
-    String indent;
-    if (!OpenDDS::XTypes::print_dynamic_data(dd, my_type, indent)) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RecorderListenerImpl::on_sample_data_received: "
-        "Failed to read dynamic data\n"));
-    }
-    std::cout << my_type;
-    ++sample_count_;
-    if (num_samples > 0 && sample_count_ >= num_samples) {
-      gc_->set_trigger_value(true);
+    return name == topic_name && this->type_name == type_name;
+  }
+
+  void print_dynamic_data(DDS::DynamicData_ptr dd)
+  {
+    std::string repr;
+    std::string indent;
+    if (OpenDDS::XTypes::print_dynamic_data(dd, repr, indent)) {
+      std::cout << repr;
+      std::cout.flush();
+    } else {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Failed to print dynamic data\n"));
     }
   }
 
-  virtual void on_recorder_matched(Recorder*,
-                                   const ::DDS::SubscriptionMatchedStatus& status)
+  virtual void print() = 0;
+
+  void on_requested_deadline_missed(DDS::DataReader_ptr, const DDS::RequestedDeadlineMissedStatus&)
+  {
+  }
+
+  void on_requested_incompatible_qos(
+    DDS::DataReader_ptr, const DDS::RequestedIncompatibleQosStatus&)
+  {
+  }
+
+  void on_sample_rejected(DDS::DataReader_ptr, const DDS::SampleRejectedStatus&)
+  {
+  }
+
+  void on_liveliness_changed(DDS::DataReader_ptr, const DDS::LivelinessChangedStatus&)
+  {
+  }
+
+  void on_data_available(DDS::DataReader_ptr reader)
+  {
+    ACE_DEBUG((LM_DEBUG, "Sample %C - %C\n", name.c_str(), type_name.c_str()));
+    print();
+    ++current_sample_count;
+    if (num_samples > 0 && current_sample_count >= num_samples) {
+      gc->set_trigger_value(true);
+    }
+  }
+
+  void on_subscription_matched(DDS::DataReader_ptr, const DDS::SubscriptionMatchedStatus& status)
   {
     if (writer_count) {
       std::cout << "Listening to " << status.current_count << " writer(s)\n";
     }
   }
 
-  unsigned sample_count() const
+  void on_sample_lost(DDS::DataReader_ptr, const DDS::SampleLostStatus&)
   {
-    return sample_count_;
+  }
+};
+
+struct DynamicTopic : public Topic {
+  DDS::DynamicDataReader_var ddreader;
+
+  DynamicTopic(const std::string& name, const std::string& type_name, DDS::GuardCondition_var gc)
+  : Topic(name, type_name, gc)
+  {
   }
 
-private:
-  unsigned sample_count_;
-  DDS::GuardCondition_var gc_;
+  bool init(DDS::DomainParticipant_var& dp, DDS::Subscriber_var& sub,
+    DDS::PublicationBuiltinTopicData& pb)
+  {
+    if (!check_rc(TheServiceParticipant->get_dynamic_type(type, dp, pb.key), "get_dynamic_type")) {
+      return false;
+    }
+
+    ts = new DDS::DynamicTypeSupport(type);
+    if (!check_rc(ts->register_type(dp, ""), "register_type")) {
+      return false;
+    }
+
+    CORBA::String_var type_name = ts->get_type_name();
+    topic = dp->create_topic(name.c_str(), type_name, TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
+    if (!topic) {
+      ACE_ERROR((LM_ERROR, "ERROR: create_topic \"%C\" with type \"%C\" failed!\n",
+        name.c_str(), type_name.in()));
+      return false;
+    }
+
+    DDS::DataReaderQos dr_qos;
+    sub->get_default_datareader_qos(dr_qos);
+    dr_qos.representation.value.length(2);
+    dr_qos.representation.value[0] = DDS::XCDR2_DATA_REPRESENTATION;
+    dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+
+    reader = sub->create_datareader(topic, dr_qos, this, DEFAULT_STATUS_MASK);
+    ddreader = DDS::DynamicDataReader::_narrow(reader);
+    if (!ddreader) {
+      ACE_ERROR((LM_ERROR, "ERROR: create_datareader failed!\n"));
+      return false;
+    }
+
+    return true;
+  }
+
+  void print()
+  {
+    DDS::DynamicDataSeq seq;
+    DDS::SampleInfoSeq info;
+    ddreader->read(seq, info, DDS::LENGTH_UNLIMITED,
+      DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+    for (unsigned i = 0; i < seq.length(); ++i) {
+      print_dynamic_data(seq[i]);
+    }
+  }
 };
 
 int run(int argc, ACE_TCHAR* argv[])
@@ -274,9 +375,8 @@ int run(int argc, ACE_TCHAR* argv[])
       return ret_val;
     }
 
-    OpenDDS::RTPS::RtpsDiscovery_rch disc =
-      make_rch<OpenDDS::RTPS::RtpsDiscovery>("rtps_disc");
-    disc->use_xtypes(OpenDDS::RTPS::RtpsDiscoveryConfig::XTYPES_COMPLETE);
+    RtpsDiscovery_rch disc = make_rch<RtpsDiscovery>("rtps_disc");
+    disc->use_xtypes(RtpsDiscoveryConfig::XTYPES_COMPLETE);
     Service_Participant* const service = TheServiceParticipant;
     service->add_discovery(static_rchandle_cast<Discovery>(disc));
     service->set_repo_domain(domainid, disc->key());
@@ -287,76 +387,82 @@ int run(int argc, ACE_TCHAR* argv[])
                               PARTICIPANT_QOS_DEFAULT,
                               0,
                               DEFAULT_STATUS_MASK);
-
     if (!participant) {
-      if (log_level >= LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_participant failed!\n"));
-      }
+      ACE_ERROR((LM_ERROR, "ERROR: create_participant failed!\n"));
       return 1;
     }
 
-    DDS::GuardCondition_var gc = new DDS::GuardCondition;
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    DDS::ReturnCode_t ret = ws->attach_condition(gc);
-    {
-      DDS::Topic_var topic =
-        service->create_typeless_topic(participant,
-                                       topic_name.c_str(),
-                                       type_name.c_str(),
-                                       true,
-                                       TOPIC_QOS_DEFAULT,
-                                       0,
-                                       DEFAULT_STATUS_MASK);
-
-      if (!topic) {
-        if (log_level >= LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_topic failed!\n"));
-        }
-        return 1;
-      }
-
-      RcHandle<RecorderListenerImpl> recorder_listener = make_rch<RecorderListenerImpl>(gc);
-
-      DDS::SubscriberQos sub_qos;
-      participant->get_default_subscriber_qos(sub_qos);
-
-      DDS::DataReaderQos dr_qos = service->initial_DataReaderQos();
-      dr_qos.representation.value.length(2);
-      dr_qos.representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
-      dr_qos.representation.value[1] = DDS::XCDR2_DATA_REPRESENTATION;
-      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-
-      // Create Recorder
-      Recorder_var recorder =
-        service->create_recorder(participant,
-                                 topic.in(),
-                                 sub_qos,
-                                 dr_qos,
-                                 recorder_listener);
-      if (!recorder.in()) {
-        if (log_level >= LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_recorder failed!\n"));
-        }
-        return 1;
-      }
-
-      DDS::Duration_t timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-      if (num_seconds > 0) {
-        timeout.sec = static_cast<DDS::Int32>(num_seconds);
-        timeout.nanosec = 0;
-      }
-      DDS::ConditionSeq conditions;
-      ret = ws->wait(conditions, timeout);
-      if (ret != DDS::RETCODE_OK && ret != DDS::RETCODE_TIMEOUT) {
-        if (log_level >= LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): wait failed!\n"));
-        }
-        return 1;
-      }
-
-      ws->detach_condition(gc);
-      service->delete_recorder(recorder);
+    DDS::Subscriber_var sub = participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
+    if (!sub) {
+      ACE_ERROR((LM_ERROR, "ERROR: create_subscriber failed!\n"));
+      return false;
     }
+
+    DDS::GuardCondition_var gc = new DDS::GuardCondition;
+
+    DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
+    DDS::DataReader_var pub_reader = bit_subscriber->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
+    DDS::PublicationBuiltinTopicDataDataReader_var pub_reader_i =
+      DDS::PublicationBuiltinTopicDataDataReader::_narrow(pub_reader);
+    if (!pub_reader_i) {
+      ACE_ERROR((LM_ERROR, "ERROR: failed to get BIT Publication DataReader\n"));
+      return 1;
+    }
+
+    DDS::ReadCondition_var dr_rc = pub_reader->create_readcondition(
+      DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+    DDS::WaitSet_var ws = new DDS::WaitSet;
+    if (!check_rc(ws->attach_condition(gc), "attach guard condition")) {
+      return 1;
+    }
+    if (!check_rc(ws->attach_condition(dr_rc), "attach read condition")) {
+      return 1;
+    }
+
+    const DDS::Duration_t infinite = {DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
+    const bool use_timeout = num_seconds > 0;
+    const SystemTimePoint end = SystemTimePoint::now() + TimeDuration(num_seconds);
+    while (true) {
+      DDS::ConditionSeq active;
+      const DDS::Duration_t timeout = use_timeout ? (end - SystemTimePoint::now()).to_dds_duration() : infinite;
+      if (!check_rc(ws->wait(active, timeout), "wait on publication BIT")) {
+        break;
+      }
+      if (gc->get_trigger_value() || (use_timeout && SystemTimePoint::now() >= end)) {
+        ACE_DEBUG((LM_DEBUG, "Reached stop condition\n"));
+        break;
+      }
+
+      DDS::PublicationBuiltinTopicDataSeq pub_bit_seq;
+      DDS::SampleInfoSeq info;
+      pub_reader_i->read(pub_bit_seq, info, DDS::LENGTH_UNLIMITED,
+        DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+      DynamicTopic* topic = 0;
+      for (unsigned i = 0; i < pub_bit_seq.length(); ++i) {
+        DDS::PublicationBuiltinTopicData& pb = pub_bit_seq[i];
+        const std::string name = pb.topic_name.in();
+        const std::string type_name = pb.type_name.in();
+        if (topic) {
+          continue;
+        }
+        ACE_DEBUG((LM_DEBUG, "Learned about topic \"%C\" type \"%C\"\n",
+          name.c_str(), type_name.c_str()));
+        topic = new DynamicTopic(name, type_name, gc);
+        if (topic->matches_topic_queries()) {
+          if (topic->init(participant, sub, pb)) {
+            continue;
+          }
+        } else {
+          ACE_DEBUG((LM_DEBUG, "Ignoring\n"));
+        }
+        delete topic;
+        topic = 0;
+      }
+    }
+
+    ws->detach_condition(gc);
+    ws->detach_condition(dr_rc);
+    pub_reader->delete_readcondition(dr_rc);
     participant->delete_contained_entities();
     dpf->delete_participant(participant);
     TheServiceParticipant->shutdown();

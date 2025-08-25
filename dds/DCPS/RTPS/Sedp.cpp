@@ -24,7 +24,6 @@
 #include <dds/DCPS/NetworkResource.h>
 #include <dds/DCPS/PublicationInstance.h>
 #include <dds/DCPS/Qos_Helper.h>
-#include <dds/DCPS/RecorderImpl.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
 #include <dds/DCPS/SendStateDataSampleList.h>
 #include <dds/DCPS/Serializer.h>
@@ -7789,34 +7788,7 @@ void Sedp::match_continue(UsedEndpoints& ue,
       event_dispatcher_->dispatch(DCPS::make_rch<ReaderAddAssociation>(rar));
       event_dispatcher_->dispatch(DCPS::make_rch<WriterAddAssociation>(war));
 
-#if !OPENDDS_CONFIG_SAFETY_PROFILE
-      if (use_xtypes_complete_ && reader_type_info->complete.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {
-        // Reader is a local recorder using complete types
-        DCPS::DataReaderCallbacks_rch lock = rar->callbacks_.lock();
-        OpenDDS::DCPS::RecorderImpl* ri = dynamic_cast<OpenDDS::DCPS::RecorderImpl*>(lock.in());
-        if (ri) {
-          XTypes::TypeInformation type_info;
-          if (XTypes::deserialize_type_info(type_info, rar->writer_association_.serializedTypeInfo)) {
-            ri->add_to_dynamic_type_map(rar->writer_id(), type_info.complete.typeid_with_size.type_id);
-          }
-        }
-      }
-#endif
-
     } else if (call_reader) {
-#if !OPENDDS_CONFIG_SAFETY_PROFILE
-      if (use_xtypes_complete_ && reader_type_info->complete.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {
-        // Reader is a local recorder using complete types
-        DCPS::DataReaderCallbacks_rch lock = rar->callbacks_.lock();
-        OpenDDS::DCPS::RecorderImpl* ri = dynamic_cast<OpenDDS::DCPS::RecorderImpl*>(lock.in());
-        if (ri) {
-          XTypes::TypeInformation type_info;
-          if (XTypes::deserialize_type_info(type_info, rar->writer_association_.serializedTypeInfo)) {
-            ri->add_to_dynamic_type_map(rar->writer_id(), type_info.complete.typeid_with_size.type_id);
-          }
-        }
-      }
-#endif
       if (!writer_local && readerUsedFlexibleTypes) {
         write_subscription_data(ue, reader, lsi->second, rar->subscription_sn_, writer);
       }

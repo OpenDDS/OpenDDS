@@ -18,9 +18,7 @@
 #include "MultiTopicImpl.h"
 #include "PublisherImpl.h"
 #include "Qos_Helper.h"
-#include "RecorderImpl.h"
 #include "Registered_Data_Types.h"
-#include "ReplayerImpl.h"
 #include "Service_Participant.h"
 #include "Service_Participant.h"
 #include "SubscriberImpl.h"
@@ -407,26 +405,6 @@ DomainParticipantImpl::create_topic(
                         mask,
                         0);
 }
-
-DDS::Topic_ptr
-DomainParticipantImpl::create_typeless_topic(
-  const char * topic_name,
-  const char * type_name,
-  bool type_has_keys,
-  const DDS::TopicQos & qos,
-  DDS::TopicListener_ptr a_listener,
-  DDS::StatusMask mask)
-{
-  int topic_mask = (type_has_keys ? TOPIC_TYPE_HAS_KEYS : 0 ) | TOPIC_TYPELESS;
-
-  return create_topic_i(topic_name,
-                        type_name,
-                        qos,
-                        a_listener,
-                        mask,
-                        topic_mask);
-}
-
 
 DDS::Topic_ptr
 DomainParticipantImpl::create_topic_i(
@@ -2149,121 +2127,6 @@ DomainParticipantImpl::validate_subscriber_qos(DDS::SubscriberQos & subscriber_q
   return true;
 }
 
-Recorder_ptr
-DomainParticipantImpl::create_recorder(DDS::Topic_ptr a_topic,
-                                       const DDS::SubscriberQos& subscriber_qos,
-                                       const DDS::DataReaderQos& datareader_qos,
-                                       const RecorderListener_rch& a_listener,
-                                       DDS::StatusMask mask)
-{
-  if (CORBA::is_nil(a_topic)) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DomainParticipantImpl::create_recorder, ")
-                 ACE_TEXT("topic desc is nil.\n")));
-    }
-    return 0;
-  }
-
-  DDS::SubscriberQos sub_qos = subscriber_qos;
-  DDS::DataReaderQos dr_qos;
-
-  if (! this->validate_subscriber_qos(sub_qos) ||
-      ! SubscriberImpl::validate_datareader_qos(datareader_qos,
-                                                TheServiceParticipant->initial_DataReaderQos(),
-                                                a_topic,
-                                                dr_qos, false) ) {
-    return 0;
-  }
-
-  RecorderImpl* recorder(new RecorderImpl);
-  Recorder_var result(recorder);
-
-  recorder->init(dynamic_cast<TopicDescriptionImpl*>(a_topic),
-    dr_qos, a_listener,
-    mask, this, sub_qos);
-
-  if (enabled_ && qos_.entity_factory.autoenable_created_entities) {
-    recorder->enable();
-  }
-
-  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(recorders_protector_);
-  recorders_.insert(result);
-
-  return result._retn();
-}
-
-Replayer_ptr
-DomainParticipantImpl::create_replayer(DDS::Topic_ptr a_topic,
-                                       const DDS::PublisherQos& publisher_qos,
-                                       const DDS::DataWriterQos& datawriter_qos,
-                                       const ReplayerListener_rch& a_listener,
-                                       DDS::StatusMask mask)
-{
-  if (CORBA::is_nil(a_topic)) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DomainParticipantImpl::create_replayer, ")
-                 ACE_TEXT("topic desc is nil.\n")));
-    }
-    return 0;
-  }
-
-  DDS::PublisherQos pub_qos = publisher_qos;
-  DDS::DataWriterQos dw_qos;
-
-  if (! this->validate_publisher_qos(pub_qos) ||
-      ! PublisherImpl::validate_datawriter_qos(datawriter_qos,
-                                               TheServiceParticipant->initial_DataWriterQos(),
-                                               a_topic,
-                                               dw_qos)) {
-    return 0;
-  }
-
-  TopicImpl* topic_servant = dynamic_cast<TopicImpl*>(a_topic);
-
-  ReplayerImpl* replayer(new ReplayerImpl);
-  Replayer_var result(replayer);
-
-  replayer->init(a_topic, topic_servant, dw_qos, a_listener, mask, this, pub_qos);
-
-  if (enabled_ && qos_.entity_factory.autoenable_created_entities) {
-    const DDS::ReturnCode_t ret = replayer->enable();
-
-    if (ret != DDS::RETCODE_OK) {
-      if (DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: ")
-                   ACE_TEXT("DomainParticipantImpl::create_replayer, ")
-                   ACE_TEXT("enable failed.\n")));
-      }
-      return 0;
-    }
-  }
-
-  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(replayers_protector_);
-  replayers_.insert(result);
-  return result._retn();
-}
-
-void
-DomainParticipantImpl::delete_recorder(Recorder_ptr recorder)
-{
-  const Recorder_var recvar(Recorder::_duplicate(recorder));
-  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(recorders_protector_);
-  recorders_.erase(recvar);
-}
-
-void
-DomainParticipantImpl::delete_replayer(Replayer_ptr replayer)
-{
-  const Replayer_var repvar(Replayer::_duplicate(replayer));
-  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(replayers_protector_);
-  replayers_.erase(repvar);
-}
-
 void
 DomainParticipantImpl::add_adjust_liveliness_timers(DataWriterImpl* writer)
 {
@@ -2483,38 +2346,6 @@ DomainParticipantImpl::ShutdownHandler::execute(ReactorWrapper&)
 
         --subsize;
       }
-    }
-
-    {
-      ACE_GUARD(ACE_Recursive_Thread_Mutex,
-                tao_mon,
-                dpi->recorders_protector_);
-
-      RecorderSet::iterator it = dpi->recorders_.begin();
-      for (; it != dpi->recorders_.end(); ++it ){
-        RecorderImpl* impl = dynamic_cast<RecorderImpl* >(it->in());
-        DDS::ReturnCode_t result = DDS::RETCODE_ERROR;
-        if (impl) result = impl->cleanup();
-        if (result != DDS::RETCODE_OK) ret = result;
-      }
-      dpi->recorders_.clear();
-    }
-
-    {
-      ACE_GUARD(ACE_Recursive_Thread_Mutex,
-                tao_mon,
-                dpi->replayers_protector_);
-
-      ReplayerSet::iterator it = dpi->replayers_.begin();
-      for (; it != dpi->replayers_.end(); ++it ){
-        ReplayerImpl* impl = static_cast<ReplayerImpl* >(it->in());
-        DDS::ReturnCode_t result = DDS::RETCODE_ERROR;
-        if (impl) result = impl->cleanup();
-        if (result != DDS::RETCODE_OK) ret = result;
-
-      }
-
-      dpi->replayers_.clear();
     }
 
     // delete topics
