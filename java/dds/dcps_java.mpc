@@ -130,10 +130,6 @@ project: idl2jni, javah, dcpslib, optional_jni_check, dcps_java_optional, dcps_m
     classes/OpenDDS/DCPS/transport/TransportConfig.class << classes/OpenDDS/DCPS/transport/TransportInst.class
   }
 
-  Header_Files {
-    OpenDDSConfigWrapperJC.h
-  }
-
   verbatim(gnuace, postinstall) {
 "	cp $(DDS_ROOT)/lib/OpenDDS_DCPS.jar $(DESTDIR)$(INSTALL_PREFIX)/$(INSTALL_LIB)"
 "	perl -pi -e 's!\\$$[(]DDS_ROOT[)]/lib!$(INSTALL_PREFIX)/$(INSTALL_LIB)!g' $(DESTDIR)$(INSTALL_PREFIX)/share/dds/MPC/config/idl2jni.mpb"

@@ -1,4 +1,4 @@
 ignore paths .git .gitmodules
 ignore paths tests/googletest tools/rapidjson
 ignore paths ACE_wrappers ACE_TAO
-ignore paths java/dds/OpenDDSConfigWrapperJC.h dds/OpenDDSConfigWrapperC.h dds/OpenDDSConfigWrapperS.h
+ignore paths dds/OpenDDSConfigWrapperJC.h dds/OpenDDSConfigWrapperC.h dds/OpenDDSConfigWrapperS.h
