@@ -181,7 +181,7 @@ void Publisher::configure_transport()
     // The 2 is a safety factor to allow for control messages.
     rtps_inst->nak_depth(2 * samples_per_thread_);
     rtps_inst->heartbeat_period(OpenDDS::DCPS::TimeDuration::from_msec(200));
-    config->passive_connect_duration_ = OpenDDS::DCPS::TimeDuration::from_msec(600000);
+    config->passive_connect_duration(OpenDDS::DCPS::TimeDuration::from_msec(600000));
     config->instances_.push_back(inst);
     TheTransportRegistry->bind_config(config_name, dp_);
   }

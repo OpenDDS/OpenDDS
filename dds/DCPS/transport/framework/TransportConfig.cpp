@@ -19,10 +19,7 @@ const unsigned long TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION;
 #endif
 
 TransportConfig::TransportConfig(const OPENDDS_STRING& name)
-  : swap_bytes_(*this, &TransportConfig::swap_bytes, &TransportConfig::swap_bytes)
-  , passive_connect_duration_(*this, &TransportConfig::passive_connect_duration, &TransportConfig::passive_connect_duration)
-  , transports_(*this, &TransportConfig::transports, &TransportConfig::transports)
-  , name_(name)
+  : name_(name)
   , config_prefix_(ConfigPair::canonicalize("CONFIG_" + name_))
 {}
 

@@ -28,19 +28,6 @@ namespace DCPS {
 RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name,
                          bool is_template)
   : TransportInst("rtps_udp", name, is_template)
-  , send_buffer_size_(*this, &RtpsUdpInst::send_buffer_size, &RtpsUdpInst::send_buffer_size)
-  , rcv_buffer_size_(*this, &RtpsUdpInst::rcv_buffer_size, &RtpsUdpInst::rcv_buffer_size)
-  , use_multicast_(*this, &RtpsUdpInst::use_multicast, &RtpsUdpInst::use_multicast)
-  , ttl_(*this, &RtpsUdpInst::ttl, &RtpsUdpInst::ttl)
-  , multicast_interface_(*this, &RtpsUdpInst::multicast_interface, &RtpsUdpInst::multicast_interface)
-  , anticipated_fragments_(*this, &RtpsUdpInst::anticipated_fragments, &RtpsUdpInst::anticipated_fragments)
-  , max_message_size_(*this, &RtpsUdpInst::max_message_size, &RtpsUdpInst::max_message_size)
-  , nak_depth_(*this, &RtpsUdpInst::nak_depth, &RtpsUdpInst::nak_depth)
-  , nak_response_delay_(*this, &RtpsUdpInst::nak_response_delay, &RtpsUdpInst::nak_response_delay)
-  , heartbeat_period_(*this, &RtpsUdpInst::heartbeat_period, &RtpsUdpInst::heartbeat_period)
-  , receive_address_duration_(*this, &RtpsUdpInst::receive_address_duration, &RtpsUdpInst::receive_address_duration)
-  , responsive_mode_(*this, &RtpsUdpInst::responsive_mode, &RtpsUdpInst::responsive_mode)
-  , send_delay_(*this, &RtpsUdpInst::send_delay, &RtpsUdpInst::send_delay)
   , opendds_discovery_guid_(GUID_UNKNOWN)
 {}
 

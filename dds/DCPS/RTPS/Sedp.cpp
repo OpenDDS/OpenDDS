@@ -506,7 +506,7 @@ Sedp::init(const GUID_t& guid,
   transport_cfg_ = TheTransportRegistry->create_config(config_name);
   config_store_->add_section("CONFIG", transport_cfg_->name());
   transport_cfg_->instances_.push_back(transport_inst_);
-  transport_cfg_->passive_connect_duration_ = disco.config()->sedp_passive_connect_duration();
+  transport_cfg_->passive_connect_duration(disco.config()->sedp_passive_connect_duration());
 
   // Use a static cast to avoid dependency on the RtpsUdp library
   DCPS::RtpsUdpInst_rch rtps_inst =
