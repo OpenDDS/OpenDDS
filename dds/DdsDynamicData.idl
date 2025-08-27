@@ -13,6 +13,8 @@
 #    include <dds/DdsDynamicDataSeq.idl>
 #  endif
 
+#include <dds/OpenDDSConfigWrapper.idl>
+
 module DDS {
   local interface DynamicType;
 #  ifndef OPENDDS_HIDE_DYNAMIC_DATA
@@ -29,9 +31,11 @@ module DDS {
   // ---------- TypeKinds (begin) -------------------
   typedef octet TypeKind;
 
-  // FUTURE: Support map.
-  //typedef map<ObjectName, ObjectName> Parameters;
-  local interface Parameters;
+#if OPENDDS_CONFIG_IDL_MAP
+  typedef map<ObjectName, ObjectName> Parameters;
+#else
+  local interface Parameters {};
+#endif
 
   valuetype AnnotationDescriptor {
     public DynamicType type;
@@ -120,12 +124,13 @@ module DDS {
     ObjectName get_name();
   };
 
-  // FUTURE: Support map.
-  // typedef map<ObjectName, DynamicTypeMember> DynamicTypeMembersByName;
+#if OPENDDS_CONFIG_IDL_MAP
+  typedef map<ObjectName, DynamicTypeMember> DynamicTypeMembersByName;
+  typedef map<MemberId, DynamicTypeMember> DynamicTypeMembersById;
+#else
   local interface DynamicTypeMembersByName {};
-  // FUTURE: Support map.
-  // typedef map<MemberId, DynamicTypeMember> DynamicTypeMembersById;
   local interface DynamicTypeMembersById {};
+#endif
 
   local interface DynamicType {
     DDS::ReturnCode_t get_descriptor(
