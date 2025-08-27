@@ -1764,7 +1764,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  ACE_TAO_u24_clang17_sec_js0:
+  ACE_TAO_u24_clang20_sec_js0:
 
     runs-on: ubuntu-24.04
 
@@ -1786,10 +1786,16 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
+    - name: add LLVM apt repo llvm-toolchain-noble-20
+      run: |
+        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        sudo apt-add-repository "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-20 main"
+    - name: install clang-20
+      run: sudo apt-get -y install clang-20
     - name: get compiler version
       shell: bash
       run: |
-        export COMPILER_VERSION=$(clang++-17 --version 2>&1 | head -n 1)
+        export COMPILER_VERSION=$(clang++-20 --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
@@ -1813,7 +1819,7 @@ jobs:
         ./configure \
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
-          --compiler=clang++-17 \
+          --compiler=clang++-20 \
           --std=c++11 \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --tests \
@@ -1845,11 +1851,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_u24_clang17_sec_js0:
+  build_u24_clang20_sec_js0:
 
     runs-on: ubuntu-24.04
 
-    needs: ACE_TAO_u24_clang17_sec_js0
+    needs: ACE_TAO_u24_clang20_sec_js0
 
     steps:
     - name: Update apt indexes
@@ -1870,26 +1876,32 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v5
       with:
-        name: ACE_TAO_u24_clang17_sec_js0_artifact
+        name: ACE_TAO_u24_clang20_sec_js0_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_clang17_sec_js0.tar.xz
+        tar xvfJ ACE_TAO_u24_clang20_sec_js0.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v5
       with:
         path: OpenDDS
         submodules: true
+    - name: add LLVM apt repo llvm-toolchain-noble-20
+      run: |
+        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        sudo apt-add-repository "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-20 main"
+    - name: install clang-20
+      run: sudo apt-get -y install clang-20
     - name: configure OpenDDS
       run: |
         cd OpenDDS
         ./configure \
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
-          --compiler=clang++-17 \
-          --std=c++11 \
+          --compiler=clang++-20 \
+          --std=c++23 \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --tests \
           --security \
@@ -1914,8 +1926,8 @@ jobs:
         source setenv.sh
         cmake -S . -B build \
           -DOPENDDS_JUST_BUILD_TESTS=TRUE \
-          -DCMAKE_CXX_STANDARD=11 \
-          -DCMAKE_CXX_COMPILER=clang++-17
+          -DCMAKE_CXX_STANDARD=23 \
+          -DCMAKE_CXX_COMPILER=clang++-20
         cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -1932,11 +1944,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_u24_clang17_sec_js0:
+  cmake_u24_clang20_sec_js0:
 
     runs-on: ubuntu-24.04
 
-    needs: build_u24_clang17_sec_js0
+    needs: build_u24_clang20_sec_js0
 
     permissions:
       contents: read
@@ -1966,13 +1978,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v5
       with:
-        name: ACE_TAO_u24_clang17_sec_js0_artifact
+        name: ACE_TAO_u24_clang20_sec_js0_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_clang17_sec_js0.tar.xz
+        tar xvfJ ACE_TAO_u24_clang20_sec_js0.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v5
       with:
@@ -1981,13 +1993,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v5
       with:
-        name: build_u24_clang17_sec_js0_artifact
+        name: build_u24_clang20_sec_js0_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u24_clang17_sec_js0.tar.xz
+        tar xvfJ build_u24_clang20_sec_js0.tar.xz
     - name: check build configuration
       shell: bash
       run: |
