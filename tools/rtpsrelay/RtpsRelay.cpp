@@ -978,14 +978,24 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
+  DDS::SubscriberQos subscriber_partitioned_qos;
+  relay_participant->get_default_subscriber_qos(subscriber_partitioned_qos);
+  subscriber_partitioned_qos.partition.name = publisher_qos.partition.name;
+  DDS::Subscriber_var partition_subscriber = relay_participant->create_subscriber(subscriber_partitioned_qos, nullptr,
+                                                                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  if (!partition_subscriber) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Relay partition subscriber\n"));
+    return EXIT_FAILURE;
+  }
+
   DDS::DataReaderQos relay_config_control_qos;
-  relay_subscriber->get_default_datareader_qos(relay_config_control_qos);
+  partition_subscriber->get_default_datareader_qos(relay_config_control_qos);
   relay_config_control_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
   DDS::DataReaderListener_var relay_config_control_listener(new RelayConfigControlListener);
   DDS::DataReader_var relay_config_control_reader =
-    relay_subscriber->create_datareader(cft_config_ctrl, relay_config_control_qos,
-                                        relay_config_control_listener, DDS::DATA_AVAILABLE_STATUS);
+    partition_subscriber->create_datareader(cft_config_ctrl, relay_config_control_qos,
+                                            relay_config_control_listener, DDS::DATA_AVAILABLE_STATUS);
   if (!relay_config_control_reader) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create %C data reader\n", RELAY_CONFIG_CONTROL_TOPIC_NAME.c_str()));
     return EXIT_FAILURE;
