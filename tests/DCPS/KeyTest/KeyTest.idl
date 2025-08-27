@@ -10,8 +10,7 @@
 // Struct with no keys
 module Messenger1 {
 
-#pragma DCPS_DATA_TYPE "Messenger1::Message"
-
+  @topic
   struct Message {
     string from;
     string subject;
@@ -24,12 +23,11 @@ module Messenger1 {
 // Struct with one key
 module Messenger2 {
 
-#pragma DCPS_DATA_TYPE "Messenger2::Message"
-#pragma DCPS_DATA_KEY "Messenger2::Message subject_id"
-
+  @topic
   struct Message {
     string from;
     string subject;
+    @key
     long subject_id;
     string text;
     long   count;
@@ -39,15 +37,14 @@ module Messenger2 {
 // Struct with two keys
 module Messenger3 {
 
-#pragma DCPS_DATA_TYPE "Messenger3::Message"
-#pragma DCPS_DATA_KEY "Messenger3::Message subject_id"
-#pragma DCPS_DATA_KEY "Messenger3::Message count"
-
+  @topic
   struct Message {
     string from;
     string subject;
+    @key
     long subject_id;
     string text;
+    @key
     long   count;
   };
 };
@@ -59,69 +56,47 @@ module Messenger4 {
     FIRST, SECOND, THIRD
   };
 
-#pragma DCPS_DATA_TYPE "Messenger4::Message"
-#pragma DCPS_DATA_KEY "Messenger4::Message short_field"
-#pragma DCPS_DATA_KEY "Messenger4::Message unsigned_short_field"
-#pragma DCPS_DATA_KEY "Messenger4::Message long_field"
-#pragma DCPS_DATA_KEY "Messenger4::Message unsigned_long_field"
-#pragma DCPS_DATA_KEY "Messenger4::Message long_long_field"
-#pragma DCPS_DATA_KEY "Messenger4::Message unsigned_long_long_field"
-#pragma DCPS_DATA_KEY "Messenger4::Message char_field"
-#pragma DCPS_DATA_KEY "Messenger4::Message wchar_field"
-#pragma DCPS_DATA_KEY "Messenger4::Message float_field"
-#pragma DCPS_DATA_KEY "Messenger4::Message double_field"
-#pragma DCPS_DATA_KEY "Messenger4::Message long_double_field"
-#pragma DCPS_DATA_KEY "Messenger4::Message boolean_field"
-#pragma DCPS_DATA_KEY "Messenger4::Message octet_field"
-#pragma DCPS_DATA_KEY "Messenger4::Message enum_field"
-#pragma DCPS_DATA_KEY "Messenger4::Message string_field"
-
-#if !OPENDDS_CONFIG_SAFETY_PROFILE
-#pragma DCPS_DATA_KEY "Messenger4::Message wstring_field"
-#endif
-
+  @topic
   struct Message {
+    @key
     short short_field;
+    @key
     unsigned short unsigned_short_field;
+    @key
     long long_field;
+    @key
     unsigned long unsigned_long_field;
+    @key
     long long long_long_field;
+    @key
     unsigned long long unsigned_long_long_field;
+    @key
     char char_field;
+    @key
     wchar wchar_field;
+    @key
     float float_field;
+    @key
     double double_field;
+    @key
     long double long_double_field;
+    @key
     boolean boolean_field;
+    @key
     octet octet_field;
+    @key
     EnumType enum_field;
+    @key
     string string_field;
 #if !OPENDDS_CONFIG_SAFETY_PROFILE
+    @key
     wstring wstring_field;
 #endif
   };
 
-#pragma DCPS_DATA_TYPE "Messenger4::NestedMessage"
-#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.short_field"
-#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.unsigned_short_field"
-#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.long_field"
-#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.unsigned_long_field"
-#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.long_long_field"
-#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.unsigned_long_long_field"
-#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.char_field"
-#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.wchar_field"
-#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.float_field"
-#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.double_field"
-#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.long_double_field"
-#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.boolean_field"
-#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.octet_field"
-#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.enum_field"
-#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.string_field"
-#if !OPENDDS_CONFIG_SAFETY_PROFILE
-#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.wstring_field"
-#endif
-
+  @topic
   struct NestedMessage {
+    @key
     Message mess;
   };
 
@@ -135,18 +110,17 @@ module Messenger5 {
   struct HeaderType {
     string from;
 #if !OPENDDS_CONFIG_SAFETY_PROFILE
+    @key
     wstring wsubject;
 #endif
     long subject_id;
   };
 
-#pragma DCPS_DATA_TYPE "Messenger5::Message"
-
-#if !OPENDDS_CONFIG_SAFETY_PROFILE
-#pragma DCPS_DATA_KEY "Messenger5::Message header.wsubject"
-#endif
-
+  @topic
   struct Message {
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
+    @key
+#endif
     HeaderType header;
     string text;
     long   count;
@@ -162,6 +136,7 @@ module Messenger6 {
   struct HeaderType {
     string from;
     string subject;
+    @key
     long subject_id;
   };
 
@@ -171,10 +146,9 @@ module Messenger6 {
     long   count;
   };
 
-#pragma DCPS_DATA_TYPE "Messenger6::Message"
-#pragma DCPS_DATA_KEY "Messenger6::Message payload.header.subject_id"
-
+  @topic
   struct Message {
+    @key
     PayloadType payload;
     ResponseArray responses;
   };

@@ -1,21 +1,20 @@
 
 module Messenger {
 
-#pragma DCPS_DATA_TYPE "Messenger::Message1"
-#pragma DCPS_DATA_KEY "Messenger::Message1 subject_id"
-#pragma DCPS_DATA_TYPE "Messenger::Message2"
-#pragma DCPS_DATA_KEY "Messenger::Message2 subject_id"
-
+  @topic
   struct Message1 {
     string from;
     string subject;
+    @key
     string subject_id;
     string text;
     long   count;
   };
+  @topic
   struct Message2 {
     short from;
     double subject;
+    @key
     string subject_id;
     string text;
     long   count;

@@ -1,4 +1,3 @@
 // Properties common to all OpenDDS Tests
 project: dcps, test_root {
-  dcps_ts_flags += --no-dcps-data-type-warnings
 }

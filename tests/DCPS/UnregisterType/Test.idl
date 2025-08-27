@@ -1,9 +1,8 @@
 module Ex {
 
-#pragma DCPS_DATA_TYPE "Ex::Test"
-#pragma DCPS_DATA_KEY "Ex::Test key"
-
+  @topic
   struct Test {
+    @key
     long key;  // the instance key
     char  c;
     float x;

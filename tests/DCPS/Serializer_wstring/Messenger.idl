@@ -8,10 +8,9 @@ module Messenger {
   typedef sequence<char, 15> BoundedCharSeq;
   typedef sequence<wchar, 15> BoundedWCharSeq;
 
-#pragma DCPS_DATA_TYPE "Messenger::Message"
-#pragma DCPS_DATA_KEY "Messenger::Message subject_id"
-
+  @topic
   struct Message {
+    @key
     long subject_id;
     long   count;
     char   ch;

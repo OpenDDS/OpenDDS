@@ -3,8 +3,7 @@
 
 module DDSPerfTest {
 
-#pragma DCPS_DATA_TYPE "DDSPerfTest::PubMessage"
-
+  @topic
   struct PubMessage {
     long seqnum;
 
@@ -60,8 +59,7 @@ module DDSPerfTest {
     long seq_49;
   };
 
-#pragma DCPS_DATA_TYPE "DDSPerfTest::AckMessage"
-
+  @topic
   struct AckMessage {
     long seqnum;
   };

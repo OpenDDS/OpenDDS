@@ -4,11 +4,6 @@ working together.
 3) To make idl compiler gerenated code have the FooKeyLessThan defined,
    the FooDef.idl needs have following statements.
 
----in FooDef.idl
- #pragma DCPS_DATA_TYPE "Xyz::Foo"
- #pragma DCPS_DATA_KEY "Xyz::Foo key"
-
-
 ---in idl compiler generated FooDefTypeSupportImpl.h
 struct FooType_Export FooKeyLessThan
 {

@@ -1,12 +1,11 @@
 module Messenger {
 
-#pragma DCPS_DATA_TYPE "Messenger::Message"
-#pragma DCPS_DATA_KEY "Messenger::Message count"
-
   typedef string<255> BoundedString;
 
+  @topic
   struct Message {
     BoundedString text;
+    @key
     long count;
   };
 

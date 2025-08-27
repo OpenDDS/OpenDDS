@@ -12,10 +12,10 @@ module Satellite
     long long z;
   };
 
-#pragma DCPS_DATA_TYPE "Satellite::Telemetry"
-#pragma DCPS_DATA_KEY "Satellite::Telemetry satellite"
+  @topic
   struct Telemetry
   {
+    @key
     string satellite;
 
     long message_number;
@@ -34,13 +34,12 @@ module Satellite
   const AlertCode DEAD = "Dead";
   const AlertCode SYSTEM_SHUTDOWN = "System Shutdown";
 
-#pragma DCPS_DATA_TYPE "Satellite::Alert"
-#pragma DCPS_DATA_KEY "Satellite::Alert satellite"
-#pragma DCPS_DATA_KEY "Satellite::Alert item"
+  @topic
   struct Alert
   {
+    @key
     string satellite;
-
+    @key
     ItemCode  item;
     AlertCode code;
     string    message;

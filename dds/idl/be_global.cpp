@@ -60,7 +60,6 @@ BE_GlobalData::BE_GlobalData()
   , sequence_suffix_("Seq")
   , language_mapping_(LANGMAP_NONE)
   , root_default_nested_(true)
-  , warn_about_dcps_data_type_(true)
   , default_extensibility_(extensibilitykind_appendable)
   , default_enum_extensibility_zero_(false)
   , root_default_autoid_(autoidkind_sequential)
@@ -350,9 +349,6 @@ BE_GlobalData::parse_args(long& i, char** av)
   static const char NO_DEFAULT_NESTED_FLAG[] = "--no-default-nested";
   static const size_t NO_DEFAULT_NESTED_FLAG_SIZE = sizeof(NO_DEFAULT_NESTED_FLAG) - 1;
 
-  static const char NO_DCPS_DATA_TYPE_WARNINGS_FLAG[] = "--no-dcps-data-type-warnings";
-  static const size_t NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE = sizeof(NO_DCPS_DATA_TYPE_WARNINGS_FLAG) - 1;
-
   static const char FILENAME_ONLY_INCLUDES_FLAG[] = "--filename-only-includes";
   static const size_t FILENAME_ONLY_INCLUDES_FLAG_SIZE = sizeof(FILENAME_ONLY_INCLUDES_FLAG) - 1;
 
@@ -438,8 +434,6 @@ BE_GlobalData::parse_args(long& i, char** av)
       root_default_nested_ = true;
     } else if (!ACE_OS::strncasecmp(av[i], NO_DEFAULT_NESTED_FLAG, NO_DEFAULT_NESTED_FLAG_SIZE)) {
       root_default_nested_ = false;
-    } else if (!ACE_OS::strncasecmp(av[i], NO_DCPS_DATA_TYPE_WARNINGS_FLAG, NO_DCPS_DATA_TYPE_WARNINGS_FLAG_SIZE)) {
-      warn_about_dcps_data_type_ = false;
     } else if (!ACE_OS::strncasecmp(av[i], FILENAME_ONLY_INCLUDES_FLAG, FILENAME_ONLY_INCLUDES_FLAG_SIZE)) {
       filename_only_includes_ = true;
     } else if (!strcmp(av[i], "--default-extensibility")) {
@@ -784,15 +778,6 @@ void BE_GlobalData::error(const char* msg, const char* filename, unsigned lineno
   }
   idl_global->set_err_count(idl_global->err_count() + 1);
   idl_global->err()->last_error = UTL_Error::EIDL_MISC;
-}
-
-bool BE_GlobalData::warn_about_dcps_data_type()
-{
-  if (!warn_about_dcps_data_type_) {
-    return false;
-  }
-  warn_about_dcps_data_type_ = false;
-  return idl_global->print_warnings();
 }
 
 ExtensibilityKind BE_GlobalData::extensibility(AST_Decl* node, ExtensibilityKind default_extensibility, bool& has_annotation) const

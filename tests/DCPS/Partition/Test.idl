@@ -1,10 +1,9 @@
 
 module Test {
 
-#pragma DCPS_DATA_TYPE "Test::Data"
-#pragma DCPS_DATA_KEY "Test::Data key"
-
+  @topic
   struct Data {
+    @key
     long key;
     string the_data;
   };

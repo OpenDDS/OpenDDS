@@ -1,9 +1,6 @@
 
 module Messenger {
 
-#pragma DCPS_DATA_TYPE "Messenger::Message"
-#pragma DCPS_DATA_KEY "Messenger::Message subject_id"
-
   enum MyEnum {b, s, d, other1, other2};
 
   union MyUnion switch (MyEnum) {
@@ -17,9 +14,11 @@ module Messenger {
   typedef MyEnum AnEnum;
   typedef sequence<AnEnum> EnumSeq;
 
+  @topic
   struct Message {
     string from;
     string subject;
+    @key
     string subject_id;
     string text;
     long   count;
