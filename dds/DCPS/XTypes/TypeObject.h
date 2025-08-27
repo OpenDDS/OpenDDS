@@ -406,17 +406,11 @@ namespace XTypes {
     SBound bound;
     External<TypeIdentifier> element_identifier;
 
-    PlainSequenceSElemDefn()
-      : bound(INVALID_SBOUND)
-    {}
+    PlainSequenceSElemDefn();
 
     PlainSequenceSElemDefn(const PlainCollectionHeader& a_header,
                            const SBound& a_bound,
-                           const TypeIdentifier& a_element_identifier)
-      : header(a_header)
-      , bound(a_bound)
-      , element_identifier(a_element_identifier)
-    {}
+                           const TypeIdentifier& a_element_identifier);
 
     bool operator<(const PlainSequenceSElemDefn& other) const;
   };
@@ -426,17 +420,11 @@ namespace XTypes {
     LBound bound;
     External<TypeIdentifier> element_identifier;
 
-    PlainSequenceLElemDefn()
-      : bound(INVALID_LBOUND)
-    {}
+    PlainSequenceLElemDefn();
 
     PlainSequenceLElemDefn(const PlainCollectionHeader& a_header,
                            const LBound& a_bound,
-                           const TypeIdentifier& a_element_identifier)
-      : header(a_header)
-      , bound(a_bound)
-      , element_identifier(a_element_identifier)
-    {}
+                           const TypeIdentifier& a_element_identifier);
 
     bool operator<(const PlainSequenceLElemDefn& other) const;
   };
@@ -446,15 +434,11 @@ namespace XTypes {
     SBoundSeq array_bound_seq;
     External<TypeIdentifier> element_identifier;
 
-    PlainArraySElemDefn() {}
+    PlainArraySElemDefn();
 
     PlainArraySElemDefn(const PlainCollectionHeader& a_header,
                         const SBoundSeq& a_array_bound_seq,
-                        const TypeIdentifier& a_element_identifier)
-      : header(a_header)
-      , array_bound_seq(a_array_bound_seq)
-      , element_identifier(a_element_identifier)
-    {}
+                        const TypeIdentifier& a_element_identifier);
 
     bool operator<(const PlainArraySElemDefn& other) const;
   };
@@ -464,15 +448,11 @@ namespace XTypes {
     LBoundSeq array_bound_seq;
     External<TypeIdentifier> element_identifier;
 
-    PlainArrayLElemDefn() {}
+    PlainArrayLElemDefn();
 
     PlainArrayLElemDefn(const PlainCollectionHeader& a_header,
                         const LBoundSeq& a_array_bound_seq,
-                        const TypeIdentifier& a_element_identifier)
-      : header(a_header)
-      , array_bound_seq(a_array_bound_seq)
-      , element_identifier(a_element_identifier)
-    {}
+                        const TypeIdentifier& a_element_identifier);
 
     bool operator<(const PlainArrayLElemDefn& other) const;
   };
@@ -484,22 +464,13 @@ namespace XTypes {
     CollectionElementFlag key_flags;
     External<TypeIdentifier> key_identifier;
 
-    PlainMapSTypeDefn()
-      : bound(INVALID_SBOUND)
-      , key_flags(0)
-    {}
+    PlainMapSTypeDefn();
 
     PlainMapSTypeDefn(const PlainCollectionHeader& a_header,
                       const SBound& a_bound,
                       const TypeIdentifier& a_element_identifier,
                       const CollectionElementFlag& a_key_flags,
-                      const TypeIdentifier& a_key_identifier)
-      : header(a_header)
-      , bound(a_bound)
-      , element_identifier(a_element_identifier)
-      , key_flags(a_key_flags)
-      , key_identifier(a_key_identifier)
-    {}
+                      const TypeIdentifier& a_key_identifier);
 
     bool operator<(const PlainMapSTypeDefn& other) const;
   };
@@ -511,22 +482,13 @@ namespace XTypes {
     CollectionElementFlag key_flags;
     External<TypeIdentifier> key_identifier;
 
-    PlainMapLTypeDefn()
-      : bound(INVALID_LBOUND)
-      , key_flags(0)
-    {}
+    PlainMapLTypeDefn();
 
     PlainMapLTypeDefn(const PlainCollectionHeader& a_header,
                       const LBound& a_bound,
                       const TypeIdentifier& a_element_identifier,
                       const CollectionElementFlag& a_key_flags,
-                      const TypeIdentifier& a_key_identifier)
-      : header(a_header)
-      , bound(a_bound)
-      , element_identifier(a_element_identifier)
-      , key_flags(a_key_flags)
-      , key_identifier(a_key_identifier)
-    {}
+                      const TypeIdentifier& a_key_identifier);
 
     bool operator<(const PlainMapLTypeDefn& other) const;
   };
