@@ -87,7 +87,7 @@ jobs:
     - name: Add LLVM apt repo llvm-toolchain-noble-20
       run: |
         wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-        sudo apt-add-repository "deb http://apt.llvm.org/$(lsb_release -cs)/ $llvm-toolchain-noble-20 main"
+        sudo apt-add-repository "deb http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-noble-20 main"
     - name: install clang-20
       run: sudo apt-get -y install clang-20
     - name: get compiler version
@@ -190,7 +190,7 @@ jobs:
     - name: Add LLVM apt repo llvm-toolchain-noble-20
       run: |
         wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-        sudo apt-add-repository "deb http://apt.llvm.org/$(lsb_release -cs)/ $llvm-toolchain-noble-20 main"
+        sudo apt-add-repository "deb http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-noble-20 main"
     - name: install clang-20
       run: sudo apt-get -y install clang-20
     - name: configure OpenDDS
@@ -303,7 +303,7 @@ jobs:
     - name: Add LLVM apt repo llvm-toolchain-noble-20
       run: |
         wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-        sudo apt-add-repository "deb http://apt.llvm.org/$(lsb_release -cs)/ $llvm-toolchain-noble-20 main"
+        sudo apt-add-repository "deb http://apt.llvm.org/$(lsb_release -cs)/ llvm-toolchain-noble-20 main"
     - name: install clang-20
       run: sudo apt-get -y install clang-20
     - name: check build configuration
