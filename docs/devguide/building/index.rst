@@ -604,7 +604,7 @@ These are all the variables that are exclusive to building OpenDDS with CMake:
 
 .. cmake:var:: OPENDDS_ACE_TAO_KIND
 
-  The default is ``ace7tao3`` for :ref:`ACE 7/TAO 3 <ace7tao3>`.
+  The default is ``ace8tao4`` for :ref:`ACE 8/TAO 4 <ace8tao4>`.
   See :ref:`here <deps-ace-tao>` for other versions of ACE/TAO.
 
   .. versionadded:: 3.27
