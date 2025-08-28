@@ -401,7 +401,7 @@ namespace XTypes {
     }
   };
 
-  struct PlainSequenceSElemDefn {
+  struct OpenDDS_Dcps_Export PlainSequenceSElemDefn {
     PlainCollectionHeader header;
     SBound bound;
     External<TypeIdentifier> element_identifier;
@@ -415,7 +415,7 @@ namespace XTypes {
     bool operator<(const PlainSequenceSElemDefn& other) const;
   };
 
-  struct PlainSequenceLElemDefn {
+  struct OpenDDS_Dcps_Export PlainSequenceLElemDefn {
     PlainCollectionHeader header;
     LBound bound;
     External<TypeIdentifier> element_identifier;
@@ -429,7 +429,7 @@ namespace XTypes {
     bool operator<(const PlainSequenceLElemDefn& other) const;
   };
 
-  struct PlainArraySElemDefn {
+  struct OpenDDS_Dcps_Export PlainArraySElemDefn {
     PlainCollectionHeader header;
     SBoundSeq array_bound_seq;
     External<TypeIdentifier> element_identifier;
@@ -443,7 +443,7 @@ namespace XTypes {
     bool operator<(const PlainArraySElemDefn& other) const;
   };
 
-  struct PlainArrayLElemDefn {
+  struct OpenDDS_Dcps_Export PlainArrayLElemDefn {
     PlainCollectionHeader header;
     LBoundSeq array_bound_seq;
     External<TypeIdentifier> element_identifier;
@@ -457,7 +457,7 @@ namespace XTypes {
     bool operator<(const PlainArrayLElemDefn& other) const;
   };
 
-  struct PlainMapSTypeDefn {
+  struct OpenDDS_Dcps_Export PlainMapSTypeDefn {
     PlainCollectionHeader header;
     SBound bound;
     External<TypeIdentifier> element_identifier;
@@ -475,7 +475,7 @@ namespace XTypes {
     bool operator<(const PlainMapSTypeDefn& other) const;
   };
 
-  struct PlainMapLTypeDefn {
+  struct OpenDDS_Dcps_Export PlainMapLTypeDefn {
     PlainCollectionHeader header;
     LBound bound;
     External<TypeIdentifier> element_identifier;
