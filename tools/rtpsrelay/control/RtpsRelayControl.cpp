@@ -65,7 +65,8 @@ struct ShutdownHandler : ACE_Event_Handler {
 
 int write_if_ready(const RelayConfig& config,
                    RelayConfigDataWriter_var& relay_config_data_writer,
-                   const DDS::WaitSet_var& waiter)
+                   const DDS::WaitSet_var& waiter,
+                   bool& write_pending)
 {
   DDS::PublicationMatchedStatus matches{};
   if (relay_config_data_writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
@@ -94,9 +95,7 @@ int write_if_ready(const RelayConfig& config,
         waiter->detach_condition(status_cond);
       }
     }
-    DDS::Publisher_var pub{relay_config_data_writer->get_publisher()};
-    pub->delete_datawriter(relay_config_data_writer);
-    relay_config_data_writer = nullptr;
+    write_pending = false;
   }
   return EXIT_SUCCESS;
 }
@@ -217,6 +216,7 @@ int run(int argc, ACE_TCHAR* argv[])
 
   DDS::WaitSet_var waiter = new DDS::WaitSet;
 
+  bool write_pending{false};
   RelayConfigDataWriter_var relay_config_data_writer;
   if (!config.config().empty()) {
     if (config.relay_id().empty()) {
@@ -252,6 +252,7 @@ int run(int argc, ACE_TCHAR* argv[])
     DDS::StatusCondition_var cond = relay_config_data_writer->get_statuscondition();
     cond->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
     waiter->attach_condition(cond);
+    write_pending = true;
   }
 
   DDS::Subscriber_var subscriber{participant->create_subscriber(subscriber_qos, nullptr, 0)};
@@ -292,8 +293,8 @@ int run(int argc, ACE_TCHAR* argv[])
   waiter->attach_condition(shutdown_guard);
 
   for (auto done{false}; !done;) {
-    if (relay_config_data_writer) {
-      if (write_if_ready(config, relay_config_data_writer, waiter) != EXIT_SUCCESS) {
+    if (relay_config_data_writer && write_pending) {
+      if (write_if_ready(config, relay_config_data_writer, waiter, write_pending) != EXIT_SUCCESS) {
         return EXIT_FAILURE;
       }
     }
