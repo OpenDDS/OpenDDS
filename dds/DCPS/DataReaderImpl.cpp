@@ -2637,12 +2637,6 @@ void DataReaderImpl::post_read_or_take()
   }
 }
 
-ACE_Reactor_Timer_Interface*
-DataReaderImpl::get_reactor()
-{
-  return this->reactor_;
-}
-
 OpenDDS::DCPS::GUID_t
 DataReaderImpl::get_topic_id()
 {
