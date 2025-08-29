@@ -1524,12 +1524,19 @@ struct Cxx11Generator : GeneratorBase {
       if (af.cls_ & CL_ARRAY) {
         initializer = "{}";
       }
-      be_global->add_include("<utility>", BE_GlobalData::STREAM_LANG_H);
+      be_global->add_include("<utility>", BE_GlobalData::STREAM_CPP);
       be_global->lang_header_ <<
-        "  void " << af.name_ << "(const " << lang_field_type << "& val) " << assign <<
-        "  void " << af.name_ << '(' << lang_field_type << "&& val) " << move <<
+        "  void " << af.name_ << "(const " << lang_field_type << "& val);\n"
+        "  void " << af.name_ << '(' << lang_field_type << "&& val);\n"
         "  const " << lang_field_type << "& " << af.name_ << "() const " << ret <<
         "  " << lang_field_type << "& " << af.name_ << "() " << ret;
+      AST_Decl* const scope = dynamic_cast<AST_Decl*>(field->defined_in());
+      const char* const clazz = scope ? scope->local_name()->get_string() : "";
+      be_global->impl_ <<
+        "void " << clazz << "::" << af.name_ << "(const " << lang_field_type << "& val)\n"
+        << assign << "\n"
+        "void " << clazz << "::" << af.name_ << '(' << lang_field_type << "&& val)\n"
+        << move << "\n";
     }
     be_global->lang_header_ <<
       "  " << lang_field_type << " _" << af.name_ << initializer << ";\n\n";
@@ -1658,15 +1665,15 @@ struct Cxx11Generator : GeneratorBase {
       dval = strm.str();
     }
 
-    std::string disc_param, disc_name = dval;
+    std::string disc_param, disc_param_no_default, disc_name = dval;
     if (label->label_kind() == AST_UnionLabel::UL_default ||
         branch->label_list_length() > 1) {
       disc_name = "disc";
-      disc_param = ", " + disc_type + " disc = " + dval;
+      disc_param_no_default = ", " + disc_type + " disc";
+      disc_param = disc_param_no_default + " = " + dval;
     }
 
-    const std::string assign_pre = "{ _activate(" + disc_name + "); _"
-      + std::string(nm) + " = ",
+    const std::string assign_pre = "{ _activate(" + disc_name + "); _" + std::string(nm) + " = ",
       assign = assign_pre + "val; }\n",
       move = assign_pre + "std::move(val); }\n",
       ret = "{ return _" + std::string(nm) + "; }\n";
@@ -1677,14 +1684,19 @@ struct Cxx11Generator : GeneratorBase {
         "  " << lang_field_type << ' ' << nm << "() const " << ret <<
         "  " << lang_field_type << "& " << nm << "() " << ret << "\n";
     } else {
-      be_global->add_include("<utility>", BE_GlobalData::STREAM_LANG_H);
+      be_global->add_include("<utility>", BE_GlobalData::STREAM_CPP);
       be_global->lang_header_ <<
-        "  void " << nm << "(const " << lang_field_type << "& val" << disc_param
-        << ") " << assign <<
-        "  void " << nm << '(' << lang_field_type << "&& val" << disc_param
-        << ") " << move <<
+        "  void " << nm << "(const " << lang_field_type << "& val" << disc_param << ");\n"
+        "  void " << nm << '(' << lang_field_type << "&& val" << disc_param << ");\n"
         "  const " << lang_field_type << "& " << nm << "() const " << ret <<
         "  " << lang_field_type << "& " << nm << "() " << ret << "\n";
+      AST_Decl* const scope = dynamic_cast<AST_Decl*>(branch->defined_in());
+      const char* const clazz = scope ? scope->local_name()->get_string() : "";
+      be_global->impl_ <<
+        "void " << clazz << "::" << nm << "(const " << lang_field_type << "& val" << disc_param_no_default << ")\n"
+        << assign << "\n"
+        "void " << clazz << "::" << nm << '(' << lang_field_type << "&& val" << disc_param_no_default << ")\n"
+        << move << "\n";
     }
   }
 
