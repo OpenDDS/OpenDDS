@@ -744,6 +744,16 @@ sub ndk_clang {
 
 ## compiler
 
+sub get_compiler_type {
+  my $comp = shift;
+  return 'MSVC' if $comp =~ /cl(\.exe)?$/i;
+  return 'Clang' if $comp =~ /clang/;
+  return 'GNU' if $comp =~ /g\+\+/;
+  return undef;
+}
+
+my $compiler_type = undef;
+
 if ($has_host_compiler) {
   if ($opts{'compiler'}) {
     my $standard = 0;
@@ -769,9 +779,11 @@ if ($has_host_compiler) {
                                   "Command Prompt.\n" : '') . "Stopped";
     }
   }
-  print "compiler is: $opts{'compiler'}\n" if $opts{'verbose'};
 
-  if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
+  $compiler_type = get_compiler_type($opts{'compiler'});
+  print "compiler is: $opts{'compiler'}; type $compiler_type\n" if $opts{'verbose'};
+
+  if ($compiler_type eq 'MSVC') {
     my $savepath = $ENV{'PATH'};
     my $clpath = which($opts{'compiler'});
     if ($clpath) {
@@ -899,7 +911,7 @@ EOF
       }
     }
   }
-  elsif ($opts{'compiler'} =~ /g\+\+|clang/) {
+  elsif ($compiler_type eq 'Clang' || $compiler_type eq 'GNU') {
     my $version_string = `$opts{'compiler'} --version`;
     print "Compiler version: $version_string\n" if $opts{'verbose'};
     $opts{'is apple clang'} = $version_string =~ /^Apple/;
@@ -918,7 +930,7 @@ EOF
         print "Detected GCC >= 6, default -std=gnu++14\n" if $opts{'verbose'};
       }
     }
-    elsif ($opts{'compiler'} =~ /clang/ && $version_string !~ /^Apple / &&
+    elsif ($compiler_type eq 'Clang' && $version_string !~ /^Apple / &&
            $version_string =~ /(\d+)\.(\d+)\.(\d+)/) {
       # Apple's version of Clang doesn't default to c++11 or higher, users
       # can pass --std= to change the C++ standard version used.
@@ -940,10 +952,9 @@ EOF
 my $compile_warnings = $opts{'compile-warnings'} // '';
 if ($compile_warnings eq 'WARNING' or $compile_warnings eq 'ERROR') {
   my ($section_names, $sections) = read_ini_file("$FindBin::RealBin/build.ini");
-  my %compiler_map = ( 'g++' => 'GNU', 'clang' => 'Clang', 'cl' => 'MSVC', 'cl.exe' => 'MSVC');
-  my $section = $compiler_map{$opts{'compiler'}};
-  if ($opts{'is apple clang'}) {
-    $section = 'AppleClang';
+  my $section = $opts{'is apple clang'} ? 'AppleClang' : $compiler_type;
+  unless (exists $sections->{$section}) {
+    die "Can't determine compiler type to enable warnings.\n Stopped";
   }
   my $warning_flags = $sections->{$section}{'warning'};
   my $error_flags = $sections->{$section}{'error'};
