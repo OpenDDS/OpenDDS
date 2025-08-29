@@ -258,9 +258,7 @@ namespace DDS {
 
   void DynamicTypeSupport::representations_allowed_by_type(DataRepresentationIdSeq& seq)
   {
-    // TODO: Need to be able to read annotations?
-    seq.length(1);
-    seq[0] = XCDR2_DATA_REPRESENTATION;
+    seq = allowable_representations_;
   }
 
   size_t DynamicTypeSupport::key_count() const

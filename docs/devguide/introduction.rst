@@ -391,7 +391,7 @@ Data types, interfaces, and constants in the ``DDS`` IDL module (C++ namespace, 
 * Type-specific DataReaders (including those for Built-in Topics) have additional operations ``read_instance_w_condition()`` and ``take_instance_w_condition()``.
 
 Additional extended behavior is provided by various classes and interfaces in the ``OpenDDS`` module/namespace/package.
-Those include features like Recorder and Replayer (:ref:`altdata`) and also:
+For example:
 
 * ``OpenDDS::DCPS::TypeSupport`` adds the ``unregister_type()`` operation not found in the DDS spec.
 

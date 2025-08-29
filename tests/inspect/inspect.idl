@@ -1,0 +1,20 @@
+struct InnerStruct {
+  int16 value;
+};
+
+@topic
+struct StructTopic {
+  uint32 u32;
+  string str;
+  int16 array[4];
+  sequence<int16> seq;
+  InnerStruct inner;
+};
+
+@topic
+union UnionTopic switch (char) {
+case 'u':
+  uint32 u32;
+case 's':
+  string str;
+};
