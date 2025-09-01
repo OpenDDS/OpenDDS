@@ -1185,7 +1185,7 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     The offset parameter for the :ref:`computed SEDP unicast port <config-ports-used-by-sedp-unicast>`.
 
   .. prop:: SpdpPortMode=system|probe
-    :default: :val:`system`
+    :default: :val:`probe`
 
     When :prop:`SpdpLocalAddress` and :prop:`Ipv6SpdpLocalAddress` don't explicitly set the ports, they are assigned according to one of these methods:
 
@@ -1196,15 +1196,6 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     .. val:: probe
 
       :ref:`Computed SPDP unicast port <config-ports-used-by-spdp-unicast>`
-
-  .. prop:: SpdpRequestRandomPort=<boolean>
-    :default: ``0``
-
-    ``0`` is the same as :val:`SpdpPortMode=probe` and ``1`` is the same as :val:`SpdpPortMode=system`.
-
-    .. deprecated:: 3.29.0
-
-      Use :prop:`SpdpPortMode` instead.
 
   .. prop:: SedpPortMode=system|probe
     :default: :val:`system`
