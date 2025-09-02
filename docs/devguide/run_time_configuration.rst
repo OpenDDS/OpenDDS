@@ -802,14 +802,6 @@ For more explanation of a similar configuration for RTPS discovery see :ref:`run
 
     An integer value representing a domain being associated with a repository.
 
-  .. prop:: DomainRepoKey=<k>
-
-    Key value of the mapped repository
-
-    .. deprecated:: 3.1.0
-
-      Provided for backward compatibility.
-
   .. prop:: DiscoveryConfig=<name>
     :default: :prop:`[common]DCPSDefaultDiscovery`
 

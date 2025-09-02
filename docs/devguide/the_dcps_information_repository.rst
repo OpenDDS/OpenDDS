@@ -325,7 +325,7 @@ The Message Publisher configuration ``pub.ini`` for this example is as follows:
 
     [domain/information]
     DomainId=42
-    DomainRepoKey=1
+    DiscoveryConfig=primary
 
     [repository/primary]
     RepositoryKey=1
@@ -353,7 +353,7 @@ The subscriber process is configured with the ``sub.ini`` file as follows:
 
     [domain/information]
     DomainId=42
-    DomainRepoKey=1
+    DiscoveryConfig=primary
 
     [repository/primary]
     RepositoryKey=1

@@ -86,7 +86,7 @@ a particular repository.
 
 Domain subsections require 2, and only 2, key/value pairs to be specified
 within each subsection. The keys to specify values for are `DomainId` and
-`DomainRepoKey`. The `DomainRepoKey` values may be specified either in the
+`DiscoveryConfig`. The `DiscoveryConfig` values may be specified either in the
 configuration file or later through the API, but must have been specified
 before a `DomainParticipant` for the domain is created. The special value
 `DEFAULT_REPO` can be used to associate a domain with the default repository
@@ -119,11 +119,11 @@ DCPSInfoRepo = file://repo1.ior
 
 [domain/Subscriber]
 DomainId = 411
-DomainRepoKey = DEFAULT_REPO
+DiscoveryConfig = DEFAULT_REPO
 
 [domain/Publisher]
 DomainId = 511
-DomainRepoKey = DEFAULT_REPO
+DiscoveryConfig = DEFAULT_REPO
 ```
 
 This example defines a single repository (not the default) and associates two
@@ -138,11 +138,11 @@ RepositoryIor = file://repo2.ior
 
 [domain/Subscriber]
 DomainId      = 711
-DomainRepoKey = 311
+DiscoveryConfig = local
 
 [domain/Publisher]
 DomainId      = 811
-DomainRepoKey = 311
+DiscoveryConfig = local
 ```
 
 ### Multiple Repos, Multiple Domains
@@ -165,25 +165,25 @@ RepositoryIor = file://repo3.ior
 
 [domain/Band]
 DomainId      = 311
-DomainRepoKey = 0
+DiscoveryConfig = Top
 
 [domain/Information]
 DomainId      = 411
-DomainRepoKey = 0
+DiscoveryConfig = Top
 
 [domain/Vmx]
 DomainId      = 611
-DomainRepoKey = 1
+DiscoveryConfig = Middle
 
 [domain/QuickieMart]
 DomainId      = 711
-DomainRepoKey = 1
+DiscoveryConfig = Middle
 
 [domain/Warnings]
 DomainId      = 811
-DomainRepoKey = 1
+DiscoveryConfig = Middle
 
 [domain/Emergencies]
 DomainId      = 911
-DomainRepoKey = 2
+DiscoveryConfig = Bottom
 ```
