@@ -1,7 +1,5 @@
 module Messenger {
 
-#pragma DCPS_DATA_TYPE "Messenger::Message"
-
   typedef string<255> BoundedString;
 
 #ifdef __OPENDDS_IDL_HAS_FIXED
@@ -10,6 +8,7 @@ module Messenger {
   typedef double Decimal;
 #endif
 
+  @topic
   struct Message {
     BoundedString text;
     long count;

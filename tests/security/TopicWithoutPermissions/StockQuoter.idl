@@ -1,10 +1,9 @@
 module StockQuoter
 {
-#pragma DCPS_DATA_TYPE "StockQuoter::Quote"
-#pragma DCPS_DATA_KEY "StockQuoter::Quote ticker"
 
-
+@topic
 struct Quote {
+        @key
         string ticker;
         string exchange;
         string full_name;

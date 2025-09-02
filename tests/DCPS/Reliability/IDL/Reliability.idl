@@ -1,7 +1,7 @@
 
 module Reliability
 {
-#pragma DCPS_DATA_TYPE "Reliability::Message"
+  @topic
   struct Message
   {
     string id;

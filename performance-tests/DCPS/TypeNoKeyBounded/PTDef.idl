@@ -4,12 +4,9 @@
 module Xyz {
 
 // No key in struct.
-#pragma DCPS_DATA_TYPE "Xyz::Pt128"
-#pragma DCPS_DATA_TYPE "Xyz::Pt512"
-#pragma DCPS_DATA_TYPE "Xyz::Pt2048"
-#pragma DCPS_DATA_TYPE "Xyz::Pt8192"
 
   typedef sequence<float, 128> Flt128Seq;
+  @topic
   struct Pt128 {
     long data_source;
     long sequence_num;
@@ -17,6 +14,7 @@ module Xyz {
   };
 
   typedef sequence<float, 512> Flt512Seq;
+  @topic
   struct Pt512 {
     long data_source;
     long sequence_num;
@@ -24,6 +22,7 @@ module Xyz {
   };
 
   typedef sequence<float, 2048> Flt2048Seq;
+  @topic
   struct Pt2048 {
     long data_source;
     long sequence_num;
@@ -31,6 +30,7 @@ module Xyz {
   };
 
   typedef sequence<float, 8192> Flt8192Seq;
+  @topic
   struct Pt8192 {
     long data_source;
     long sequence_num;

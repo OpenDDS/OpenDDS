@@ -1,9 +1,8 @@
 module HeaderTest {
 
-#pragma DCPS_DATA_TYPE "HeaderTest::Message"
-
   typedef string<255> BoundedString;
 
+  @topic
   struct Message {
     BoundedString text;
     long count;

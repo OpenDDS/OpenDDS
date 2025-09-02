@@ -66,11 +66,9 @@ subsection name. Similarly a domain subsection would be specified as
 `[domain/<NAME>]`. There may be any number of repository or domain sections
 within a single configuration file.
 
-Repository subsections require at least 2 key/value pairs to be specified
-within each subsection. The required keys to specify values for are
-`RepositoryIor` and `RepositoryKey`. The `RepositoryKey` values must be unique
-for each repository within the entire configuration file. They also must not be
-reused for a different repository through the use of the API.
+Repository subsections require one key/value pair to be specified
+within each subsection. The required key to specify a value for is
+`RepositoryIor`.
 
 Optional key/value pairs that may be specified in a repository subsection are
 the `DCPSBitTransportIPAddress` and `DCPSBitTransportPort` keys. These are
@@ -79,14 +77,9 @@ address and port to be bound by the transport used for the instant repository.
 When these key values are used in the common subsection, they specify the
 values to be bound to the transport used for the default repository.
 
-While `RepositoryKey` values must be unique within a given process, there are
-no constraints on the value between processes. That is there is no requirement
-that key values be consistent or the same in different processes for specifying
-a particular repository.
-
 Domain subsections require 2, and only 2, key/value pairs to be specified
 within each subsection. The keys to specify values for are `DomainId` and
-`DomainRepoKey`. The `DomainRepoKey` values may be specified either in the
+`DiscoveryConfig`. The `DiscoveryConfig` values may be specified either in the
 configuration file or later through the API, but must have been specified
 before a `DomainParticipant` for the domain is created. The special value
 `DEFAULT_REPO` can be used to associate a domain with the default repository
@@ -119,11 +112,11 @@ DCPSInfoRepo = file://repo1.ior
 
 [domain/Subscriber]
 DomainId = 411
-DomainRepoKey = DEFAULT_REPO
+DiscoveryConfig = DEFAULT_REPO
 
 [domain/Publisher]
 DomainId = 511
-DomainRepoKey = DEFAULT_REPO
+DiscoveryConfig = DEFAULT_REPO
 ```
 
 This example defines a single repository (not the default) and associates two
@@ -133,16 +126,15 @@ default will be the default IOR of `file://repo.ior`.
 
 ```
 [repository/local]
-RepositoryKey = 311
 RepositoryIor = file://repo2.ior
 
 [domain/Subscriber]
 DomainId      = 711
-DomainRepoKey = 311
+DiscoveryConfig = local
 
 [domain/Publisher]
 DomainId      = 811
-DomainRepoKey = 311
+DiscoveryConfig = local
 ```
 
 ### Multiple Repos, Multiple Domains
@@ -152,38 +144,35 @@ with them. Note how the repository key values are used to do this.
 
 ```
 [repository/Top]
-RepositoryKey = 0
 RepositoryIor = file://repo1.ior
 
 [repository/Middle]
-RepositoryKey = 1
 RepositoryIor = file://repo2.ior
 
 [repository/Bottom]
-RepositoryKey = 2
 RepositoryIor = file://repo3.ior
 
 [domain/Band]
 DomainId      = 311
-DomainRepoKey = 0
+DiscoveryConfig = Top
 
 [domain/Information]
 DomainId      = 411
-DomainRepoKey = 0
+DiscoveryConfig = Top
 
 [domain/Vmx]
 DomainId      = 611
-DomainRepoKey = 1
+DiscoveryConfig = Middle
 
 [domain/QuickieMart]
 DomainId      = 711
-DomainRepoKey = 1
+DiscoveryConfig = Middle
 
 [domain/Warnings]
 DomainId      = 811
-DomainRepoKey = 1
+DiscoveryConfig = Middle
 
 [domain/Emergencies]
 DomainId      = 911
-DomainRepoKey = 2
+DiscoveryConfig = Bottom
 ```

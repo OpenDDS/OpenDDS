@@ -325,21 +325,18 @@ The Message Publisher configuration ``pub.ini`` for this example is as follows:
 
     [domain/information]
     DomainId=42
-    DomainRepoKey=1
+    DiscoveryConfig=primary
 
     [repository/primary]
-    RepositoryKey=1
     RepositoryIor=corbaloc::localhost:2112/InfoRepo
 
     [repository/secondary]
-    RepositoryKey=2
     RepositoryIor=file://repo.ior
 
 Note that the ``DCPSInfo`` attribute/value pair has been omitted from the ``[common]`` section.
 The user domain is 42, so that domain is configured to use the primary repository for service metadata and events.
 
 The ``[repository/primary]`` and ``[repository/secondary]`` sections define the primary and secondary repositories to use within the federation (of two repositories) for this application.
-The ``RepositoryKey`` attribute is an internal key value used to uniquely identify the repository (and allow the domain to be associated with it, as in the preceding ``[domain/information]`` section).
 The ``RepositoryIor`` attributes contain string values of resolvable object references to reach the specified repository.
 The primary repository is referenced at port 2112 of the ``localhost`` and is expected to be available via the TAO ``IORTable`` with an object name of ``/InfoRepo``.
 The secondary repository is expected to provide an IOR value via a file named ``repo.ior`` in the local directory.
@@ -353,14 +350,12 @@ The subscriber process is configured with the ``sub.ini`` file as follows:
 
     [domain/information]
     DomainId=42
-    DomainRepoKey=1
+    DiscoveryConfig=primary
 
     [repository/primary]
-    RepositoryKey=1
     RepositoryIor=file://repo.ior
 
     [repository/secondary]
-    RepositoryKey=2
     RepositoryIor=corbaloc::localhost:2112/InfoRepo
 
 Note that this is the same as the ``pub.ini`` file except the subscriber has specified that the repository located at port 2112 of the ``localhost`` is the secondary and the repository located by the ``repo.ior`` file is the primary.

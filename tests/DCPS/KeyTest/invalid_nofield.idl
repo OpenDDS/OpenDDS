@@ -8,10 +8,9 @@
 // Struct with one key
 module XYZ {
 
-#pragma DCPS_DATA_TYPE "XYZ::Message"
-#pragma DCPS_DATA_KEY "XYZ::Message subject_idx"
-
+  @topic
   struct Message {
+    @key
     long subject_id;
   };
 };

@@ -2,9 +2,9 @@
 module Xyz {
 
 // No key in Foo struct.
-#pragma DCPS_DATA_TYPE "Xyz::Foo"
 
   // Example user defined "Foo" structure
+  @topic
   struct Foo {
     long  a_long_value;
     long  handle_value;

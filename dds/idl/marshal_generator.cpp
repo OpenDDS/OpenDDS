@@ -3336,7 +3336,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   TopicKeys keys;
   if (is_topic_type) {
     keys = TopicKeys(node);
-    info = 0; // Annotations Override DCPS_DATA_TYPE
+    info = 0;
 
     if (!generate_struct_serialization_functions(node, FieldFilter_KeyOnly)) {
       return false;

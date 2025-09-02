@@ -9,10 +9,9 @@
 
 module SecurityAttributes {
 
-#pragma DCPS_DATA_TYPE "SecurityAttributes::Message"
-#pragma DCPS_DATA_KEY "SecurityAttributes::Message subject_id"
-
+  @topic
   struct Message {
+    @key
     long subject_id;
     long count;
     string subject;

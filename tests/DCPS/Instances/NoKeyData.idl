@@ -1,9 +1,8 @@
 
 module Xyz {
 
-#pragma DCPS_DATA_TYPE "Xyz::NoKeyData"
-
   // Example user defined "NoKeyData" structure without a key field
+  @topic
   struct NoKeyData {
     long  a_long_value;
     long  handle_value;

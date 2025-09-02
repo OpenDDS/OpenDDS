@@ -18,13 +18,11 @@ module Messenger2 {
 
     typedef sequence <long> LongSeq;
 
-
-#pragma DCPS_DATA_TYPE "Messenger2::Message2"
-#pragma DCPS_DATA_KEY "Messenger2::Message2 subject_id"
-
+  @topic
   struct Message2 {
     string from;
     string subject;
+    @key
     long subject_id;
     string text;
     long   count;

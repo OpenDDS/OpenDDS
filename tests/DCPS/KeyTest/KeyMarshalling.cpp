@@ -258,74 +258,6 @@ void run_test(const Encoding& encoding)
 #endif
   }
 
-  {
-    Messenger7::Message message;
-    message.header.from = "from";
-    message.header.subject = "subject";
-    message.header.subject_id = 1234;
-    message.text = "text";
-    message.count = 4321;
-    message.responses[0] = 1;   // key
-    message.responses[1] = 2;
-    message.responses[2] = 3;
-
-    // Use Key-Only marshalling (only the key fields should be equal)
-    KeyOnly<const Messenger7::Message> ko_message(message);
-    const size_t size = serialized_size(encoding, ko_message);
-    ACE_Message_Block mb(size);
-    Serializer out_serializer(&mb, encoding);
-    TEST_CHECK(out_serializer << ko_message);
-    Serializer in_serializer(&mb, encoding);
-    Messenger7::Message dm_message;
-    dm_message.header.subject_id = 0;
-    dm_message.count = 0;
-    dm_message.responses[0] = 0;
-    dm_message.responses[1] = 0;
-    dm_message.responses[2] = 0;
-    TEST_CHECK(in_serializer >> KeyOnly<Messenger7::Message>(dm_message));
-    TEST_CHECK(strcmp(message.header.from, dm_message.header.from) != 0);
-    TEST_CHECK(strcmp(message.header.subject, dm_message.header.subject) != 0);
-    TEST_CHECK(message.header.subject_id != dm_message.header.subject_id);
-    TEST_CHECK(strcmp(message.text, dm_message.text) != 0);
-    TEST_CHECK(message.count != dm_message.count);
-    TEST_CHECK(message.responses[0] == dm_message.responses[0]);
-    TEST_CHECK(message.responses[1] != dm_message.responses[1]);
-    TEST_CHECK(message.responses[2] != dm_message.responses[2]);
-  }
-
-  {
-    Messenger9::Message message;
-    message.headers[0].from = "from";
-    message.headers[0].subject = "subject";
-    message.headers[0].subject_id = 1234;
-    message.headers[1].from = "from-1";
-    message.headers[1].subject = "subject-1";
-    message.headers[1].subject_id = 12345;    //key
-    message.text = "text";
-    message.count = 4321;
-
-    // Use Key-Only marshalling (only the key fields should be equal)
-    KeyOnly<const Messenger9::Message> ko_message(message);
-    const size_t size = serialized_size(encoding, ko_message);
-    ACE_Message_Block mb(size);
-    Serializer out_serializer(&mb, encoding);
-    TEST_CHECK(out_serializer << ko_message);
-    Serializer in_serializer(&mb, encoding);
-    Messenger9::Message dm_message;
-    dm_message.headers[0].subject_id = 0;
-    dm_message.headers[1].subject_id = 0;
-    dm_message.count = 0;
-    TEST_CHECK(in_serializer >> KeyOnly<Messenger9::Message>(dm_message));
-    TEST_CHECK(strcmp(message.headers[0].from, dm_message.headers[0].from) != 0);
-    TEST_CHECK(strcmp(message.headers[0].subject, dm_message.headers[0].subject) != 0);
-    TEST_CHECK(message.headers[0].subject_id != dm_message.headers[0].subject_id);
-    TEST_CHECK(strcmp(message.headers[1].from, dm_message.headers[1].from) != 0);
-    TEST_CHECK(strcmp(message.headers[1].subject, dm_message.headers[1].subject) != 0);
-    TEST_CHECK(message.headers[1].subject_id == dm_message.headers[1].subject_id);
-    TEST_CHECK(strcmp(message.text, dm_message.text) != 0);
-    TEST_CHECK(message.count != dm_message.count);
-  }
-
   // The following tests exercise the KeyHash related functionality using
   // a variety of different key types
   {
@@ -368,27 +300,6 @@ void run_test(const Encoding& encoding)
     std::cout << "Messenger6::Message" << std::endl;
     Messenger6::Message message;  // long Key, length = 4, bounded = true
     message.payload.header.subject_id = 0x01020304;
-    key_hash_test(message, 4);
-  }
-
-  {
-    std::cout << "Messenger7::Message" << std::endl;
-    Messenger7::Message message;  // Long Key, length = 4, bounded = true
-    message.responses[0] = 0x01020304;
-    key_hash_test(message, 4);
-  }
-
-  {
-    std::cout << "Messenger8::Message" << std::endl;
-    Messenger8::Message message;  // Long Key, length = 4, bounded = true
-    message.header.responses[0] = 0x01020304;
-    key_hash_test(message, 4);
-  }
-
-  {
-    std::cout << "Messenger9::Message" << std::endl;
-    Messenger9::Message message;  // Long Key, length = 4, bounded = true
-    message.headers[1].subject_id = 0x01020304;
     key_hash_test(message, 4);
   }
 

@@ -1,11 +1,10 @@
 
 module Xyz {
 
-#pragma DCPS_DATA_TYPE "Xyz::Foo"
-#pragma DCPS_DATA_KEY "Xyz::Foo key"
-
   // Example user defined "Foo" structure
+  @topic
   struct Foo {
+    @key
     long key;  // the instance key
     char  c;
     float x;

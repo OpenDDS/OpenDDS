@@ -802,14 +802,6 @@ For more explanation of a similar configuration for RTPS discovery see :ref:`run
 
     An integer value representing a domain being associated with a repository.
 
-  .. prop:: DomainRepoKey=<k>
-
-    Key value of the mapped repository
-
-    .. deprecated:: 3.1.0
-
-      Provided for backward compatibility.
-
   .. prop:: DiscoveryConfig=<name>
     :default: :prop:`[common]DCPSDefaultDiscovery`
 
@@ -1012,14 +1004,6 @@ Here are the valid properties for a ``[repository]`` section:
 
     Repository IOR or host:port
 
-  .. prop:: RepositoryKey=<key>
-
-    Unique key value for the repository
-
-    .. deprecated:: 3.1.0
-
-      Provided for backward compatibility.
-
 .. _rtps-disc-config:
 .. _run_time_configuration--configuring-for-ddsi-rtps-discovery:
 
@@ -1185,7 +1169,7 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     The offset parameter for the :ref:`computed SEDP unicast port <config-ports-used-by-sedp-unicast>`.
 
   .. prop:: SpdpPortMode=system|probe
-    :default: :val:`system`
+    :default: :val:`probe`
 
     When :prop:`SpdpLocalAddress` and :prop:`Ipv6SpdpLocalAddress` don't explicitly set the ports, they are assigned according to one of these methods:
 
@@ -1196,15 +1180,6 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     .. val:: probe
 
       :ref:`Computed SPDP unicast port <config-ports-used-by-spdp-unicast>`
-
-  .. prop:: SpdpRequestRandomPort=<boolean>
-    :default: ``0``
-
-    ``0`` is the same as :val:`SpdpPortMode=probe` and ``1`` is the same as :val:`SpdpPortMode=system`.
-
-    .. deprecated:: 3.29.0
-
-      Use :prop:`SpdpPortMode` instead.
 
   .. prop:: SedpPortMode=system|probe
     :default: :val:`system`
@@ -1434,11 +1409,6 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     :default: ``5000`` milliseconds (5 seconds).
 
     If :prop:`UseXTypes` is enabled, then this sets the timeout for waiting for replies to remote Type Lookup Service requests.
-
-  .. prop:: SedpResponsiveMode=<boolean>
-    :default: ``0`` (disabled)
-
-    Causes the built-in :ref:`SEDP <sedp>` endpoints to send additional messages which may reduce latency.
 
   .. prop:: SedpPassiveConnectDuration=<msec>
     :default: ``60000`` milliseconds (1 minute)
@@ -2706,11 +2676,6 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
     Protocol tuning parameter that specifies in milliseconds how often an RTPS Writer announces the availability of data.
 
     See :omgspec:`rtps:8.4.7.1 RTPS Writer` for more information.
-
-  .. prop:: ResponsiveMode=<boolean>
-    :default: ``0`` (disabled)
-
-    Causes reliable writers and readers to send additional messages which may reduce latency.
 
   .. prop:: max_message_size=<n>
     :default: ``65466`` (maximum worst-case UDP payload size)

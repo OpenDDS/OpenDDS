@@ -803,14 +803,6 @@ sub preprocess {
                 $mparams->{$name} = \@params;
               }
             }
-            elsif ($pline =~ /^pragma\s+(.*)/) {
-              my $arg = $1;
-              if ($arg =~ /^DCPS_DATA_TYPE\s+"(.*)"$/) {
-                my($tst, $tsp) = $self->generate_ts_string($1);
-                $ts_str .= $tst;
-                $ts_pragma .= $tsp;
-              }
-            }
           }
         }
         elsif ($line =~ s/^import\s+([^;]+)\s*;//) {

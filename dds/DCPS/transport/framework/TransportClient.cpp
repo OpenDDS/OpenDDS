@@ -126,10 +126,10 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
                                                DomainParticipantImpl* dpi)
 {
   config_ = tc;
-  swap_bytes_ = tc->swap_bytes_;
+  swap_bytes_ = tc->swap_bytes();
   reliable_ = reliable;
   durable_ = durable;
-  passive_connect_duration_ = tc->passive_connect_duration_;
+  passive_connect_duration_ = tc->passive_connect_duration();
   if (passive_connect_duration_ == 0) {
     passive_connect_duration_ = TimeDuration::from_msec(TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION);
     if (DCPS_debug_level) {

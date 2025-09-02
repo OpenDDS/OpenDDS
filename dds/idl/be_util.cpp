@@ -117,7 +117,6 @@ be_util::usage()
     "                                         #include lines\n"
     " --[no-]default-nested                   topic types must be declared\n"
     "                                         (true by default)\n"
-    " --no-dcps-data-type-warnings            don't warn about #pragma DCPS_DATA_TYPE\n"
     " --default-extensibility final|appendable|mutable\n"
     "                                         set the default XTypes extensibility\n"
     "                                         kind (appendable if not set)\n"

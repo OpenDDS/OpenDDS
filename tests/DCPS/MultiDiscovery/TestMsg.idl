@@ -1,6 +1,5 @@
 
-#pragma DCPS_DATA_TYPE "TestMsg"
-
+@topic
 struct TestMsg {
   string from;
   long value;

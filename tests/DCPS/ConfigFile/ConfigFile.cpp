@@ -89,8 +89,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(config->instances_.size() == 2);
     TEST_CHECK(config->instances_[0] == inst);
     TEST_CHECK(config->instances_[1] == inst2);
-    TEST_CHECK(config->swap_bytes_ == true);
-    TEST_CHECK(config->passive_connect_duration_ == TimeDuration::from_msec(20000));
+    TEST_CHECK(config->swap_bytes() == true);
+    TEST_CHECK(config->passive_connect_duration() == TimeDuration::from_msec(20000));
 
     TransportConfig_rch default_config =
 #if OPENDDS_CONFIG_BUILT_IN_TOPICS
@@ -108,8 +108,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(default_config->instances_[0] == inst2);  // anothertcp
     TEST_CHECK(default_config->instances_[1] == inst);   // mytcp
     TEST_CHECK(default_config->instances_[8]->name() == std::string("tcp7"));
-    TEST_CHECK(default_config->swap_bytes_ == false);
-    TEST_CHECK(default_config->passive_connect_duration_ == TimeDuration::from_msec(60000));
+    TEST_CHECK(default_config->swap_bytes() == false);
+    TEST_CHECK(default_config->passive_connect_duration() == TimeDuration::from_msec(60000));
 
     TransportConfig_rch global_config =
       TransportRegistry::instance()->global_config();

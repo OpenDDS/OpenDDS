@@ -42,11 +42,9 @@ public:
   /// The address string provided to DCPSInfoRepo for connectors.
   /// This string is either from configuration file or defaults
   /// to the local address.
-  ConfigValueRef<TcpInst, String> pub_address_str_;
   void pub_address_str(const String& pas);
   String pub_address_str() const;
 
-  ConfigValue<TcpInst, bool> enable_nagle_algorithm_;
   void enable_nagle_algorithm(bool ena);
   bool enable_nagle_algorithm() const;
 
@@ -54,7 +52,6 @@ public:
   /// The first connection retry will be when the loss of connection
   /// is detected.  The second try will be after this delay.
   /// The default is 500 miliseconds.
-  ConfigValue<TcpInst, int> conn_retry_initial_delay_;
   void conn_retry_initial_delay(int crid);
   int conn_retry_initial_delay() const;
 
@@ -66,14 +63,12 @@ public:
   /// fails; the fourth attempt will be 1.125 seconds after the third retry connect
   /// fails.
   /// The default value is 2.0.
-  ConfigValue<TcpInst, double> conn_retry_backoff_multiplier_;
   void conn_retry_backoff_multiplier(double crbm);
   double conn_retry_backoff_multiplier() const;
 
   /// Number of attempts to reconnect before giving up and calling
   /// on_publication_lost() and on_subscription_lost() callbacks.
   /// The default is 3.
-  ConfigValue<TcpInst, int> conn_retry_attempts_;
   void conn_retry_attempts(int cra);
   int conn_retry_attempts() const;
 
@@ -82,7 +77,6 @@ public:
   /// than this period then the connection will be closed and on_*_lost()
   /// callbacks will be called. If the value is zero, the default, then
   /// this check will not be made.
-  ConfigValue<TcpInst, int> max_output_pause_period_;
   void max_output_pause_period(int mopp);
   int max_output_pause_period() const;
 
@@ -92,7 +86,6 @@ public:
   /// on_publication_lost() and on_subscription_lost() callbacks
   /// will be called.
   /// The default is 2 seconds (2000 millseconds).
-  ConfigValue<TcpInst, int> passive_reconnect_duration_;
   void passive_reconnect_duration(int prd);
   int passive_reconnect_duration() const;
 
@@ -101,7 +94,6 @@ public:
   /// If not connected within this period then this link is removed
   /// from pending and any other links are attempted.
   /// The default is 5 seconds (5000 millseconds).
-  ConfigValue<TcpInst, int> active_conn_timeout_period_;
   void active_conn_timeout_period(int actp);
   int active_conn_timeout_period() const;
 

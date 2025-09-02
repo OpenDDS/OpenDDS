@@ -6,9 +6,9 @@
 
 // Implied IDL for type "Foo"
 // Example user defined structure
-#pragma DCPS_DATA_TYPE "Foo"
-#pragma DCPS_DATA_KEY "Foo key"
+@topic
 struct Foo {
+  @key
   long key;  // the instance key
   float x;
   float y;

@@ -40,18 +40,15 @@ public:
   typedef OPENDDS_VECTOR(TransportInst_rch) InstancesType;
   InstancesType instances_;
 
-  ConfigValue<TransportConfig, bool> swap_bytes_;
   void swap_bytes(bool flag);
   bool swap_bytes() const;
 
   /// The time period in milliseconds for the acceptor side
   /// of a connection to wait for the connection.
   /// The default is 60 seconds
-  ConfigValueRef<TransportConfig, TimeDuration> passive_connect_duration_;
   void passive_connect_duration(const TimeDuration& pcd);
   TimeDuration passive_connect_duration() const;
 
-  ConfigValueRef<TransportConfig, ConfigStoreImpl::StringList> transports_;
   void transports(const ConfigStoreImpl::StringList& t);
   ConfigStoreImpl::StringList transports() const;
 

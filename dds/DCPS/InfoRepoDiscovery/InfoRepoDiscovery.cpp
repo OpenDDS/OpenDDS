@@ -450,7 +450,7 @@ InfoRepoDiscovery::fini_bit(DCPS::DomainParticipantImpl* /* participant */)
 Discovery::RepoKey
 InfoRepoDiscovery::key() const
 {
-  return TheServiceParticipant->config_store()->get(config_key("RepositoryKey").c_str(), name_);
+  return name_;
 }
 
 bool

@@ -237,9 +237,6 @@ public:
   CORBA::ULong participant_flags() const;
   void participant_flags(CORBA::ULong participant_flags);
 
-  bool sedp_responsive_mode() const;
-  void sedp_responsive_mode(bool sedp_responsive_mode);
-
   size_t sedp_receive_preallocated_message_blocks() const;
   void sedp_receive_preallocated_message_blocks(size_t n);
 

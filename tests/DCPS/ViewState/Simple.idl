@@ -1,10 +1,9 @@
 #include <tao/LongSeq.pidl>
 module Test {
 
-#pragma DCPS_DATA_TYPE "Test::Simple"
-#pragma DCPS_DATA_KEY "Test::Simple key"
-
+  @topic
   struct Simple {
+    @key
     long   key;
     long   count;
     string text;

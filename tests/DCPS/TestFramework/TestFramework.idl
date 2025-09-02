@@ -5,10 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#pragma DCPS_DATA_TYPE "TestMessage"
-#pragma DCPS_DATA_KEY "TestMessage key"
-
+@topic
 struct TestMessage {
+  @key
   long key;
   string message;
 };

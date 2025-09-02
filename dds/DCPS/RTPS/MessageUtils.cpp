@@ -162,14 +162,18 @@ bool get_rtps_port(DDS::UInt16& port_result, const char* what,
   const DDS::UInt32 port = static_cast<DDS::UInt32>(port_base) +
     domain * domain_gain + part * part_gain + offset;
   port_result = static_cast<DDS::UInt16>(port);
+
   if (port > 65535) {
-    if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: rtps_port: "
-        "%C port %u is going to be truncated to %u. This behavior is deprecated, please reduce "
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: get_rtps_port: "
+        "%C port %u is out of range. Consider changing the "
         "domain ID or other RTPS port parameters.\n",
         what, port, port_result));
     }
+    port_result = 0;
+    return false;
   }
+
   return true;
 }
 

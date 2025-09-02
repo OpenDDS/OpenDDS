@@ -171,11 +171,7 @@ RtpsDiscoveryConfig::lease_extension(const DCPS::TimeDuration& period)
 
 PortMode RtpsDiscoveryConfig::spdp_port_mode() const
 {
-  // TODO: Deprecated, remove in OpenDDS 4
-  const bool request_random_port = TheServiceParticipant->config_store()->get_boolean(
-    config_key("SPDP_REQUEST_RANDOM_PORT").c_str(), false);
-  return get_port_mode(config_key("SPDP_PORT_MODE"),
-    request_random_port ? PortMode_System : PortMode_Probe);
+  return get_port_mode(config_key("SPDP_PORT_MODE"), PortMode_Probe);
 }
 
 void RtpsDiscoveryConfig::spdp_port_mode(PortMode value)
@@ -1099,20 +1095,6 @@ RtpsDiscoveryConfig::participant_flags(CORBA::ULong participant_flags)
 {
   TheServiceParticipant->config_store()->set_uint32(config_key("PARTICIPANT_FLAGS").c_str(),
                                                     participant_flags);
-}
-
-bool
-RtpsDiscoveryConfig::sedp_responsive_mode() const
-{
-  return TheServiceParticipant->config_store()->get_boolean(config_key("SEDP_RESPONSIVE_MODE").c_str(),
-                                                            false);
-}
-
-void
-RtpsDiscoveryConfig::sedp_responsive_mode(bool srm)
-{
-  TheServiceParticipant->config_store()->set_boolean(config_key("SEDP_RESPONSIVE_MODE").c_str(),
-                                                     srm);
 }
 
 size_t

@@ -164,11 +164,6 @@ opendds_idl Command Line Options
 
   * ``ignore`` -- ignore all unknown annotations.
 
-.. option:: --no-dcps-data-type-warnings
-
-  Don't warn about ``#pragma DCPS_DATA_TYPE``.
-  See :ref:`getting_started--identifying-topic-types` for more information.
-
 .. option:: --default-nested
 .. option:: --no-default-nested
 

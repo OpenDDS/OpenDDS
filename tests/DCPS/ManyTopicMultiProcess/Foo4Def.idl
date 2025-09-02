@@ -3,13 +3,12 @@
 
 module T4 {
 
-#pragma DCPS_DATA_TYPE "T4::Foo4"
-#pragma DCPS_DATA_KEY "T4::Foo4 key"
-
   typedef sequence<float> FloatSeq;
 
   // Example user defined "Foo" structure
+  @topic
   struct Foo4 {
+    @key
     long key;  // the instance key
     FloatSeq values;
   };

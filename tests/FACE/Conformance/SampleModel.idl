@@ -10,7 +10,7 @@ module FACE {
       Altitude alt;
     };
 
-#pragma DCPS_DATA_TYPE "FACE::DM::EGI_Data"
+    @topic
     struct EGI_Data
     {
       Position pos;
@@ -22,14 +22,14 @@ module FACE {
       octet empty;
     };
 
-#pragma DCPS_DATA_TYPE "FACE::DM::IMU_Data"
+    @topic
     struct IMU_Data
     {
       AttitudeBodyFrame att;
     };
 
 
-#pragma DCPS_DATA_TYPE "FACE::DM::Nav_Data"
+    @topic
     struct Nav_Data
     {
       Position pos;

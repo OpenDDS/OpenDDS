@@ -1,11 +1,10 @@
 
 module profilingTest {
 
-#pragma DCPS_DATA_TYPE "profilingTest::testMsg"
-#pragma DCPS_DATA_KEY  "profilingTest::testMsg msgID"
-
   typedef sequence<octet> OctetSeq;
+  @topic
   struct testMsg {
+    @key
     unsigned long         msgID;
     unsigned long         count;
     OctetSeq       contents;

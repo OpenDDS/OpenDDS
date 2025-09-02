@@ -1746,12 +1746,7 @@ Service_Participant::DomainConfig::discovery_config(RcHandle<ConfigStoreImpl> co
 {
   const String r = config_store->get(COMMON_DCPS_DEFAULT_DISCOVERY,
                                      COMMON_DCPS_DEFAULT_DISCOVERY_default);
-  String s = config_store->get(config_key("DOMAIN_REPO_KEY").c_str(), r);
-  if (s == "-1") {
-    s = r;
-  }
-
-  return config_store->get(config_key("DISCOVERY_CONFIG").c_str(), s);
+  return config_store->get(config_key("DISCOVERY_CONFIG").c_str(), r);
 }
 
 String

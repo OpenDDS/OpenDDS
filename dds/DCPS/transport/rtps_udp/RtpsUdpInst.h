@@ -33,55 +33,39 @@ public:
   static const suseconds_t DEFAULT_NAK_RESPONSE_DELAY_USEC = 200000; // default from RTPS
   static const time_t DEFAULT_HEARTBEAT_PERIOD_SEC = 1; // no default in RTPS spec
 
-  ConfigValue<RtpsUdpInst, ACE_INT32> send_buffer_size_;
   void send_buffer_size(ACE_INT32 sbs);
   ACE_INT32 send_buffer_size() const;
 
-  ConfigValue<RtpsUdpInst, ACE_INT32> rcv_buffer_size_;
   void rcv_buffer_size(ACE_INT32 rbs);
   ACE_INT32 rcv_buffer_size() const;
 
-  ConfigValue<RtpsUdpInst, bool> use_multicast_;
   void use_multicast(bool um);
   bool use_multicast() const;
 
-  ConfigValue<RtpsUdpInst, unsigned char> ttl_;
   void ttl(unsigned char t);
   unsigned char ttl() const;
 
-  ConfigValueRef<RtpsUdpInst, String> multicast_interface_;
   void multicast_interface(const String& mi);
   String multicast_interface() const;
 
-  ConfigValue<RtpsUdpInst, size_t> anticipated_fragments_;
   void anticipated_fragments(size_t af);
   size_t anticipated_fragments() const;
 
-  ConfigValue<RtpsUdpInst, size_t> max_message_size_;
   void max_message_size(size_t mms);
   size_t max_message_size() const;
 
-  ConfigValue<RtpsUdpInst, size_t> nak_depth_;
   void nak_depth(size_t mms);
   size_t nak_depth() const;
 
-  ConfigValueRef<RtpsUdpInst, TimeDuration> nak_response_delay_;
   void nak_response_delay(const TimeDuration& nrd);
   TimeDuration nak_response_delay() const;
 
-  ConfigValueRef<RtpsUdpInst, TimeDuration> heartbeat_period_;
   void heartbeat_period(const TimeDuration& nrd);
   TimeDuration heartbeat_period() const;
 
-  ConfigValueRef<RtpsUdpInst, TimeDuration> receive_address_duration_;
   void receive_address_duration(const TimeDuration& rad);
   TimeDuration receive_address_duration() const;
 
-  ConfigValue<RtpsUdpInst, bool> responsive_mode_;
-  void responsive_mode(bool rm);
-  bool responsive_mode() const;
-
-  ConfigValueRef<RtpsUdpInst, TimeDuration> send_delay_;
   void send_delay(const TimeDuration& sd);
   TimeDuration send_delay() const;
 

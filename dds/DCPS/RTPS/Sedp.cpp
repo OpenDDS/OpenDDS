@@ -430,8 +430,6 @@ Sedp::init(const GUID_t& guid,
                      disco.config()->sedp_heartbeat_period(), ConfigStoreImpl::Format_IntegerMilliseconds);
   config_store_->set(transport_inst_->config_key("NAK_RESPONSE_DELAY").c_str(),
                      disco.config()->sedp_nak_response_delay(), ConfigStoreImpl::Format_IntegerMilliseconds);
-  config_store_->set_boolean(transport_inst_->config_key("RESPONSIVE_MODE").c_str(),
-                             disco.config()->sedp_responsive_mode());
   config_store_->set(transport_inst_->config_key("SEND_DELAY").c_str(),
                      disco.config()->sedp_send_delay(), ConfigStoreImpl::Format_IntegerMilliseconds);
   config_store_->set_int32(transport_inst_->config_key("SEND_BUFFER_SIZE").c_str(),
@@ -506,7 +504,7 @@ Sedp::init(const GUID_t& guid,
   transport_cfg_ = TheTransportRegistry->create_config(config_name);
   config_store_->add_section("CONFIG", transport_cfg_->name());
   transport_cfg_->instances_.push_back(transport_inst_);
-  transport_cfg_->passive_connect_duration_ = disco.config()->sedp_passive_connect_duration();
+  transport_cfg_->passive_connect_duration(disco.config()->sedp_passive_connect_duration());
 
   // Use a static cast to avoid dependency on the RtpsUdp library
   DCPS::RtpsUdpInst_rch rtps_inst =
