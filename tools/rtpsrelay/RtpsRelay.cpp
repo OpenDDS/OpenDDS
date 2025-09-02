@@ -117,13 +117,19 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
+  Config config;
+  const OpenDDS::DCPS::RcHandle<Config> config_rch{&config, OpenDDS::DCPS::inc_count{}};
+  const auto config_reader =
+    OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(),
+                                                         config_rch);
+  TheServiceParticipant->config_topic()->connect(config_reader);
+
   DDS::DomainId_t relay_domain = 0;
   ACE_INET_Addr nic_horizontal, nic_vertical, meta_discovery_addr;
   std::string meta_discovery_content_type = "application/json";
   std::string meta_discovery_content = "{}";
   std::string meta_discovery_content_path;
   std::string user_data;
-  Config config;
 
   std::string identity_ca_file;
   std::string permissions_ca_file;
@@ -161,118 +167,8 @@ int run(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-RelayDomain"))) {
       relay_domain = ACE_OS::atoi(arg);
       args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-ApplicationDomain"))) {
-      config.application_domain(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-Lifespan"))) {
-      config.lifespan(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-InactivePeriod"))) {
-      config.inactive_period(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-BufferSize"))) {
-      config.buffer_size(ACE_OS::atoi(arg));
-      args.consume_arg();
     } else if ((arg = args.get_the_parameter("-UserData"))) {
       user_data = arg;
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-AllowEmptyPartition"))) {
-      config.allow_empty_partition(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogWarnings"))) {
-      config.log_warnings(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogDiscovery"))) {
-      config.log_discovery(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogActivity"))) {
-      config.log_activity(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogHttp"))) {
-      config.log_http(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogThreadStatus"))) {
-      config.log_thread_status(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-ThreadStatusSafetyFactor"))) {
-      config.thread_status_safety_factor(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-UtilizationLimit"))) {
-      config.utilization_limit(ACE_OS::atof(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogUtilizationChanges"))) {
-      config.log_utilization_changes(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogRelayStatistics"))) {
-      config.log_relay_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogHandlerStatistics"))) {
-      config.log_handler_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogParticipantStatistics"))) {
-      config.log_participant_statistics(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-PublishRelayStatistics"))) {
-      config.publish_relay_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-PublishHandlerStatistics"))) {
-      config.publish_handler_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-PublishParticipantStatistics"))) {
-      config.publish_participant_statistics(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-PublishRelayStatusLiveliness"))) {
-      config.publish_relay_status_liveliness(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-PublishRelayStatus"))) {
-      config.publish_relay_status(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-RestartDetection"))) {
-      config.restart_detection(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-AdmissionControlQueueSize"))) {
-      config.admission_control_queue_size(static_cast<size_t>(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-AdmissionControlQueueDuration"))) {
-      config.admission_control_queue_duration(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-AdmissionMaxParticipantsRange"))) {
-      auto conv = std::atoi(arg);
-      if (conv <= 0) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Argument for -AdmissionMaxParticipantsRange option must be positive: %d\n", conv));
-        return EXIT_FAILURE;
-      }
-      config.admission_max_participants_low_water(static_cast<size_t>(conv));
-      const auto dash = std::strchr(arg, '-');
-      if (!dash) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Argument for -AdmissionMaxParticipantsRange option must contain a '-': %C\n", arg));
-        return EXIT_FAILURE;
-      }
-      conv = std::atoi(dash + 1);
-      if (conv <= 0) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Argument for -AdmissionMaxParticipantsRange option must be positive: %d\n", conv));
-        return EXIT_FAILURE;
-      }
-      if (static_cast<size_t>(conv) < config.admission_max_participants_low_water()) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: High value for -AdmissionMaxParticipantsRange option must be greater than or equal to low value\n"));
-        return EXIT_FAILURE;
-      }
-      config.admission_max_participants_high_water(static_cast<size_t>(conv));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-RunTime"))) {
-      config.run_time(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-HandlerThreads"))) {
-      config.handler_threads(static_cast<size_t>(std::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-SynchronousOutput"))) {
-      config.synchronous_output(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-MaxIpsPerClient"))) {
-      config.max_ips_per_client(static_cast<size_t>(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-RejectedAddressDuration"))) {
-      config.rejected_address_duration(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-IdentityCA"))) {
       identity_ca_file = file + arg;
@@ -298,17 +194,14 @@ int run(int argc, ACE_TCHAR* argv[])
       permissions_file = file + arg;
       secure = true;
       args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-Id"))) {
-      config.relay_id(arg);
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-DrainInterval"))) {
-      config.drain_interval(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
+    } else if (config.from_arg(args)) {
+      // no-op
     } else {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Invalid option: %C\n", args.get_current()));
       return EXIT_FAILURE;
     }
   }
+  config.set_defaults();
 
   if (!meta_discovery_content_path.empty()) {
     std::ifstream in(meta_discovery_content_path);
@@ -1053,6 +946,7 @@ int run(int argc, ACE_TCHAR* argv[])
   }
 
   TheServiceParticipant->config_topic()->disconnect(internal_config_reader);
+  TheServiceParticipant->config_topic()->disconnect(config_reader);
 
   application_participant->delete_contained_entities();
   factory->delete_participant(application_participant);
