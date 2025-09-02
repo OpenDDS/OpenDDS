@@ -1,4 +1,4 @@
-name: Android
+name: Android Matrix
 
 on:
   push:
@@ -8,7 +8,6 @@ on:
   schedule:
     - cron: "0 3 * * 5"
   workflow_dispatch:
-  pull_request:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
