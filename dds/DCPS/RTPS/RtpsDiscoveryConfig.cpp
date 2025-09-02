@@ -1097,20 +1097,6 @@ RtpsDiscoveryConfig::participant_flags(CORBA::ULong participant_flags)
                                                     participant_flags);
 }
 
-bool
-RtpsDiscoveryConfig::sedp_responsive_mode() const
-{
-  return TheServiceParticipant->config_store()->get_boolean(config_key("SEDP_RESPONSIVE_MODE").c_str(),
-                                                            false);
-}
-
-void
-RtpsDiscoveryConfig::sedp_responsive_mode(bool srm)
-{
-  TheServiceParticipant->config_store()->set_boolean(config_key("SEDP_RESPONSIVE_MODE").c_str(),
-                                                     srm);
-}
-
 size_t
 RtpsDiscoveryConfig::sedp_receive_preallocated_message_blocks() const
 {

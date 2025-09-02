@@ -430,8 +430,6 @@ Sedp::init(const GUID_t& guid,
                      disco.config()->sedp_heartbeat_period(), ConfigStoreImpl::Format_IntegerMilliseconds);
   config_store_->set(transport_inst_->config_key("NAK_RESPONSE_DELAY").c_str(),
                      disco.config()->sedp_nak_response_delay(), ConfigStoreImpl::Format_IntegerMilliseconds);
-  config_store_->set_boolean(transport_inst_->config_key("RESPONSIVE_MODE").c_str(),
-                             disco.config()->sedp_responsive_mode());
   config_store_->set(transport_inst_->config_key("SEND_DELAY").c_str(),
                      disco.config()->sedp_send_delay(), ConfigStoreImpl::Format_IntegerMilliseconds);
   config_store_->set_int32(transport_inst_->config_key("SEND_BUFFER_SIZE").c_str(),

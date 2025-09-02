@@ -66,9 +66,6 @@ public:
   void receive_address_duration(const TimeDuration& rad);
   TimeDuration receive_address_duration() const;
 
-  void responsive_mode(bool rm);
-  bool responsive_mode() const;
-
   void send_delay(const TimeDuration& sd);
   TimeDuration send_delay() const;
 

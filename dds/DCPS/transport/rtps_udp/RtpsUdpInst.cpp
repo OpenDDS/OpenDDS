@@ -190,18 +190,6 @@ RtpsUdpInst::receive_address_duration() const
 }
 
 void
-RtpsUdpInst::responsive_mode(bool rm)
-{
-  TheServiceParticipant->config_store()->set_boolean(config_key("RESPONSIVE_MODE").c_str(), rm);
-}
-
-bool
-RtpsUdpInst::responsive_mode() const
-{
-  return TheServiceParticipant->config_store()->get_boolean(config_key("RESPONSIVE_MODE").c_str(), false);
-}
-
-void
 RtpsUdpInst::send_delay(const TimeDuration& sd)
 {
   TheServiceParticipant->config_store()->set(config_key("SEND_DELAY").c_str(),
@@ -627,7 +615,6 @@ RtpsUdpInst::dump_to_str(DDS::DomainId_t domain) const
   ret += formatNameForDump("nak_depth") + to_dds_string(unsigned(nak_depth())) + '\n';
   ret += formatNameForDump("nak_response_delay") + nak_response_delay().str() + '\n';
   ret += formatNameForDump("heartbeat_period") + heartbeat_period().str() + '\n';
-  ret += formatNameForDump("responsive_mode") + (responsive_mode() ? "true" : "false") + '\n';
   ret += formatNameForDump("multicast_group_address") + LogAddr(multicast_group_address(domain)).str() + '\n';
   ret += formatNameForDump("local_address") + LogAddr(local_address()).str() + '\n';
   ret += formatNameForDump("advertised_address") + LogAddr(advertised_address()).str() + '\n';

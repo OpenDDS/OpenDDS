@@ -1410,11 +1410,6 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
 
     If :prop:`UseXTypes` is enabled, then this sets the timeout for waiting for replies to remote Type Lookup Service requests.
 
-  .. prop:: SedpResponsiveMode=<boolean>
-    :default: ``0`` (disabled)
-
-    Causes the built-in :ref:`SEDP <sedp>` endpoints to send additional messages which may reduce latency.
-
   .. prop:: SedpPassiveConnectDuration=<msec>
     :default: ``60000`` milliseconds (1 minute)
 
@@ -2681,11 +2676,6 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
     Protocol tuning parameter that specifies in milliseconds how often an RTPS Writer announces the availability of data.
 
     See :omgspec:`rtps:8.4.7.1 RTPS Writer` for more information.
-
-  .. prop:: ResponsiveMode=<boolean>
-    :default: ``0`` (disabled)
-
-    Causes reliable writers and readers to send additional messages which may reduce latency.
 
   .. prop:: max_message_size=<n>
     :default: ``65466`` (maximum worst-case UDP payload size)
