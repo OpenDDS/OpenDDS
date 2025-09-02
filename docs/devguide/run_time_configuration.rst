@@ -1004,14 +1004,6 @@ Here are the valid properties for a ``[repository]`` section:
 
     Repository IOR or host:port
 
-  .. prop:: RepositoryKey=<key>
-
-    Unique key value for the repository
-
-    .. deprecated:: 3.1.0
-
-      Provided for backward compatibility.
-
 .. _rtps-disc-config:
 .. _run_time_configuration--configuring-for-ddsi-rtps-discovery:
 

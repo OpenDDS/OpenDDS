@@ -66,11 +66,9 @@ subsection name. Similarly a domain subsection would be specified as
 `[domain/<NAME>]`. There may be any number of repository or domain sections
 within a single configuration file.
 
-Repository subsections require at least 2 key/value pairs to be specified
-within each subsection. The required keys to specify values for are
-`RepositoryIor` and `RepositoryKey`. The `RepositoryKey` values must be unique
-for each repository within the entire configuration file. They also must not be
-reused for a different repository through the use of the API.
+Repository subsections require one key/value pair to be specified
+within each subsection. The required key to specify a value for is
+`RepositoryIor`. 
 
 Optional key/value pairs that may be specified in a repository subsection are
 the `DCPSBitTransportIPAddress` and `DCPSBitTransportPort` keys. These are
@@ -78,11 +76,6 @@ identical to the existing keys for the common subsection but specify the
 address and port to be bound by the transport used for the instant repository.
 When these key values are used in the common subsection, they specify the
 values to be bound to the transport used for the default repository.
-
-While `RepositoryKey` values must be unique within a given process, there are
-no constraints on the value between processes. That is there is no requirement
-that key values be consistent or the same in different processes for specifying
-a particular repository.
 
 Domain subsections require 2, and only 2, key/value pairs to be specified
 within each subsection. The keys to specify values for are `DomainId` and
@@ -133,7 +126,6 @@ default will be the default IOR of `file://repo.ior`.
 
 ```
 [repository/local]
-RepositoryKey = 311
 RepositoryIor = file://repo2.ior
 
 [domain/Subscriber]
@@ -152,15 +144,12 @@ with them. Note how the repository key values are used to do this.
 
 ```
 [repository/Top]
-RepositoryKey = 0
 RepositoryIor = file://repo1.ior
 
 [repository/Middle]
-RepositoryKey = 1
 RepositoryIor = file://repo2.ior
 
 [repository/Bottom]
-RepositoryKey = 2
 RepositoryIor = file://repo3.ior
 
 [domain/Band]
