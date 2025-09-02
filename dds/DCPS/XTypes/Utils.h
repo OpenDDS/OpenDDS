@@ -254,7 +254,7 @@ inline bool check_rc_from_get(DDS::ReturnCode_t rc, DDS::MemberId id, DDS::TypeK
 {
   if (rc != DDS::RETCODE_OK && rc != DDS::RETCODE_NO_DATA) {
     if (DCPS::log_level >= log_thres) {
-      ACE_ERROR((DCPS::LogLevel::to_priority(log_thres), "(%P|t) %C: %C: Failed to get %C member ID %u: %C\n",
+      ACE_ERROR((DCPS::LogLevel::to_priority(log_thres), "(%P|%t) %C: %C: Failed to get %C member ID %u: %C\n",
                  DCPS::LogLevel::to_string(log_thres), fn_name,
                  XTypes::typekind_to_string(tk), id, DCPS::retcode_to_string(rc)));
     }

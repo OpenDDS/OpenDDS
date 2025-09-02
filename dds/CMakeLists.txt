@@ -75,11 +75,7 @@ add_library(OpenDDS_Dcps
   DCPS/ReadConditionImpl.cpp
   DCPS/ReceivedDataElementList.cpp
   DCPS/ReceivedDataStrategy.cpp
-  DCPS/Recorder.cpp
-  DCPS/RecorderImpl.cpp
   DCPS/Registered_Data_Types.cpp
-  DCPS/Replayer.cpp
-  DCPS/ReplayerImpl.cpp
   DCPS/RepoIdBuilder.cpp
   DCPS/RepoIdConverter.cpp
   DCPS/RepoIdGenerator.cpp
@@ -326,11 +322,7 @@ target_sources(OpenDDS_Dcps
     DCPS/ReceivedDataElementList.h
     DCPS/ReceivedDataElementList.inl
     DCPS/ReceivedDataStrategy.h
-    DCPS/Recorder.h
-    DCPS/RecorderImpl.h
     DCPS/Registered_Data_Types.h
-    DCPS/Replayer.h
-    DCPS/ReplayerImpl.h
     DCPS/RepoIdBuilder.h
     DCPS/RepoIdBuilder.inl
     DCPS/RepoIdConverter.h

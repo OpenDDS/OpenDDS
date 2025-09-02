@@ -4,7 +4,7 @@ project(opendds_inspect CXX)
 set(dep_libs
   OpenDDS::Rtps_Udp
 )
-find_package(OpenDDS REQUIRED NO_DEFAULTS ${dep_libs} safety_profile=FALSE)
+find_package(OpenDDS REQUIRED ${dep_libs} built_in_topics safety_profile=FALSE)
 include(opendds_build_helpers)
 
 add_executable(inspect Inspect.cpp)
