@@ -68,7 +68,7 @@ within a single configuration file.
 
 Repository subsections require one key/value pair to be specified
 within each subsection. The required key to specify a value for is
-`RepositoryIor`. 
+`RepositoryIor`.
 
 Optional key/value pairs that may be specified in a repository subsection are
 the `DCPSBitTransportIPAddress` and `DCPSBitTransportPort` keys. These are

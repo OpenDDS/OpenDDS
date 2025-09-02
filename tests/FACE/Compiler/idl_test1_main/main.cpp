@@ -88,9 +88,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   bool failed = false;
   bool dump_buffer = false;
 
-  const unsigned int vers = convert_version(DDS_MAJOR_VERSION,
-                                            DDS_MINOR_VERSION,
-                                            DDS_MICRO_VERSION);
+  const unsigned int vers = convert_version(OPENDDS_MAJOR_VERSION,
+                                            OPENDDS_MINOR_VERSION,
+                                            OPENDDS_MICRO_VERSION);
   if (vers != dds_version) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("Expected dds_version 0x%06x, actual 0x%06x\n"),
