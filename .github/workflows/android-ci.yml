@@ -1,0 +1,106 @@
+name: Android CI
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  matrix:
+    runs-on: ${{ matrix.os }}
+
+    name: ${{ matrix.name }}
+
+    defaults:
+      run:
+        working-directory: tools/scripts/android
+
+    env:
+      name: ${{ matrix.name }}
+      arch: ${{ matrix.arch }}
+      ndk: ${{ matrix.ndk }}
+      api: ${{ matrix.api }}
+      use_toolchain: ${{ matrix.use_toolchain }}
+      ace_tao: ${{ matrix.ace_tao }}
+      use_security: ${{ matrix.use_security }}
+      use_java: ${{ matrix.use_java }}
+      target_api: ${{ matrix.target_api }}
+
+    steps:
+    - name: Check out this repo
+      uses: actions/checkout@v4
+
+    - name: Print the Equivalent settings.sh
+      # For Quickly Reproducing Failing CI Builds
+      run: |
+        bash print_settings.sh
+
+    - name: Get NDK and Toolchain
+      run: |
+        bash get_ndk.sh
+        bash get_toolchain.sh
+        # This is an extra check for files in the NDK we need to know about.
+        # This is not part of run.sh
+        bash assert_ndk_files.sh
+
+    - name: Get SDK
+      if: ${{ matrix.use_java }}
+      run: |
+        bash get_sdk.sh
+
+    - name: Get Xerces
+      if: ${{ matrix.use_security }}
+      run: |
+        bash get_xerces.sh
+
+    - name: Get OpenSSL
+      if: ${{ matrix.use_security }}
+      run: |
+        bash get_openssl.sh
+
+    - name: Get ACE/TAO
+      run: |
+        bash get_ace_tao.sh
+
+    - name: Use GCC problem matcher
+      uses: ammaraskar/gcc-problem-matcher@0.3.0
+
+    - name: Configure and Build Xerces
+      if: ${{ matrix.use_security }}
+      run: |
+        bash build_xerces.sh
+
+    - name: Configure and Build OpenSSL
+      if: ${{ matrix.use_security }}
+      run: |
+        bash build_openssl.sh
+
+    - name: Configure ACE/TAO and OpenDDS
+      run: bash configure.sh
+
+    - name: Show Build Config
+      working-directory: .
+      run: perl tools/scripts/show_build_config.pl
+
+    - name: Build ACE/TAO and OpenDDS
+      run: bash build.sh
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: r28c-arm64-30-security-java-doc-group-master
+            arch: arm64
+            ndk: r28c
+            api: 30
+            os: "ubuntu-22.04"
+            use_security: true
+            use_java: true
+            use_toolchain: false
+            target_api: 30
+            ace_tao: "doc_group_master"
