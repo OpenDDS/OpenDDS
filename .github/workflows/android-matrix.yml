@@ -1,6 +1,9 @@
 name: Android Matrix
 
 on:
+  pull_request:
+    types:
+      - closed
   schedule:
     - cron: "0 3 * * 5"
   workflow_dispatch:
@@ -14,6 +17,8 @@ permissions:
 
 jobs:
   matrix:
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.merged == true }}
+
     runs-on: ${{ matrix.os }}
 
     name: ${{ matrix.name }}
