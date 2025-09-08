@@ -333,7 +333,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -831,7 +831,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -1161,7 +1161,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -1441,7 +1441,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -1750,7 +1750,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -2069,7 +2069,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -2371,7 +2371,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -2658,7 +2658,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -2931,7 +2931,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -3447,7 +3447,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -3758,7 +3758,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -4056,7 +4056,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -4368,7 +4368,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -4690,7 +4690,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -4828,7 +4828,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -5055,7 +5055,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -5340,7 +5340,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -5563,7 +5563,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -5860,7 +5860,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -6040,7 +6040,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -6206,7 +6206,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -6372,7 +6372,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -6528,7 +6528,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -6828,7 +6828,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -7152,7 +7152,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -7331,7 +7331,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -7499,7 +7499,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -7669,7 +7669,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -7834,7 +7834,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -8163,7 +8163,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -8346,7 +8346,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -8515,7 +8515,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -8686,7 +8686,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -8853,7 +8853,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -9228,7 +9228,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -9419,7 +9419,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -9585,7 +9585,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -9761,7 +9761,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -10185,7 +10185,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -10366,7 +10366,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -10532,7 +10532,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -10698,7 +10698,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -11034,7 +11034,7 @@ jobs:
         cd /c/OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: C:\OpenDDS\${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -11188,7 +11188,7 @@ jobs:
         cd /c/OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: C:\OpenDDS\${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -11426,7 +11426,7 @@ jobs:
         cd /c/OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: c:/OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -11747,7 +11747,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -11915,7 +11915,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -12080,7 +12080,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -12245,7 +12245,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -12525,7 +12525,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -12648,7 +12648,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -12861,7 +12861,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -12984,7 +12984,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -13264,7 +13264,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -13390,7 +13390,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -13689,7 +13689,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -13815,7 +13815,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
