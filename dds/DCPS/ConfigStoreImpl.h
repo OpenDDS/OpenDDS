@@ -345,7 +345,8 @@ public:
   static DDS::DataWriterQos datawriter_qos();
   static DDS::DataReaderQos datareader_qos();
 
-  static bool debug_logging, log_changes;
+  static bool debug_logging;
+  static bool log_changes;
 
 private:
   ConfigTopic_rch config_topic_;
