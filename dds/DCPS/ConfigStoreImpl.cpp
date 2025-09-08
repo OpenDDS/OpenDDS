@@ -431,12 +431,17 @@ ConfigStoreImpl::set_string(const char* key,
                             const char* value)
 {
   const ConfigPair cp(key, value);
-  if (log_level >= LogLevel::Info || debug_logging) {
+  const bool log_info = log_level >= LogLevel::Info || debug_logging;
+  if (log_info) {
     ACE_DEBUG((LM_INFO, "(%P|%t) INFO: ConfigStoreImpl::set_string: %C=%C\n",
                cp.key().c_str(),
                cp.value().c_str()));
   }
-  config_writer_->write(cp);
+  if (config_writer_->write(cp) && !log_info && log_changes) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) ConfigStoreImpl::set_string: %C=%C\n",
+               cp.key().c_str(),
+               cp.value().c_str()));
+  }
 }
 
 char*
@@ -527,14 +532,7 @@ void
 ConfigStoreImpl::set(const char* key,
                      const String& value)
 {
-  ConfigPair cp(key, value);
-
-  if (log_level >= LogLevel::Info || debug_logging) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) INFO: ConfigStoreImpl::set: %C=%C\n",
-               cp.key().c_str(),
-               cp.value().c_str()));
-  }
-  config_writer_->write(cp);
+  set_string(key, value.c_str());
 }
 
 String
@@ -1231,6 +1229,7 @@ take_has_prefix(ConfigReader_rch reader,
 }
 
 bool ConfigStoreImpl::debug_logging = CONFIG_DEBUG_LOGGING_default;
+bool ConfigStoreImpl::log_changes = CONFIG_LOG_CHANGES_default;
 
 void
 process_section(ConfigStoreImpl& config_store,

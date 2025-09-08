@@ -123,6 +123,7 @@ int run(int argc, ACE_TCHAR* argv[])
     OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(),
                                                          config_rch);
   TheServiceParticipant->config_topic()->connect(config_reader);
+  OpenDDS::DCPS::ConfigStoreImpl::log_changes = true;
 
   DDS::DomainId_t relay_domain = 0;
   ACE_INET_Addr nic_horizontal, nic_vertical, meta_discovery_addr;

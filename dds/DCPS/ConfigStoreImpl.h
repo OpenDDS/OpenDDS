@@ -27,6 +27,9 @@ namespace DCPS {
 const char CONFIG_DEBUG_LOGGING[] = "CONFIG_DEBUG_LOGGING";
 const bool CONFIG_DEBUG_LOGGING_default = false;
 
+const char CONFIG_LOG_CHANGES[] = "CONFIG_LOG_CHANGES";
+const bool CONFIG_LOG_CHANGES_default = false;
+
 OpenDDS_Dcps_Export
 OPENDDS_VECTOR(String) split(const String& str,
                              const String& delims,
@@ -342,7 +345,7 @@ public:
   static DDS::DataWriterQos datawriter_qos();
   static DDS::DataReaderQos datareader_qos();
 
-  static bool debug_logging;
+  static bool debug_logging, log_changes;
 
 private:
   ConfigTopic_rch config_topic_;
