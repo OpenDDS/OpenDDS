@@ -476,12 +476,12 @@ public:
                                                OpenDDS::DCPS::ConfigStoreImpl::Format_IntegerMilliseconds);
   }
 
+  static bool to_time_duration(const std::string& value, OpenDDS::DCPS::TimeDuration& out);
+
 private:
   void on_data_available(InternalDataReader_rch reader) override;
 
   bool parse_admission_participants_range(const char* arg);
-
-  static bool to_time_duration(const std::string& value, OpenDDS::DCPS::TimeDuration& out);
 
   template <typename T, bool ConvertFromString(const std::string&, T&)>
   class CachedValue {

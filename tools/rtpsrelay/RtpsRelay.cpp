@@ -274,14 +274,6 @@ int run(int argc, ACE_TCHAR* argv[])
   TheServiceParticipant->bit_autopurge_nowriter_samples_delay(one_minute);
   TheServiceParticipant->bit_autopurge_disposed_samples_delay(one_minute);
 
-  const bool either = config.log_relay_statistics() || config.publish_relay_statistics(),
-    both = config.log_relay_statistics() && config.publish_relay_statistics();
-  const auto interval = both ? std::min(config.log_relay_statistics(), config.publish_relay_statistics())
-    : (config.log_relay_statistics() ? config.log_relay_statistics() : config.publish_relay_statistics());
-  if (either) {
-    TheServiceParticipant->statistics_period(interval);
-  }
-
   // Set up the relay participant.
   DDS::DomainParticipantQos participant_qos;
   factory->get_default_participant_qos(participant_qos);
@@ -481,6 +473,11 @@ int run(int argc, ACE_TCHAR* argv[])
   }
 
   RelayStatisticsReporter relay_statistics_reporter(config, relay_statistics_writer);
+  const OpenDDS::DCPS::RcHandle<RelayStatisticsReporter> reporter_rch{&relay_statistics_reporter, OpenDDS::DCPS::inc_count{}};
+  const auto reporter_config_reader =
+    OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(),
+                                                         reporter_rch);
+  TheServiceParticipant->config_topic()->connect(reporter_config_reader);
 
   DDS::DataWriterListener_var relay_statistics_writer_listener =
     new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::relay_statistics_sub_count);
@@ -948,6 +945,7 @@ int run(int argc, ACE_TCHAR* argv[])
 
   TheServiceParticipant->config_topic()->disconnect(internal_config_reader);
   TheServiceParticipant->config_topic()->disconnect(config_reader);
+  TheServiceParticipant->config_topic()->disconnect(reporter_config_reader);
 
   application_participant->delete_contained_entities();
   factory->delete_participant(application_participant);

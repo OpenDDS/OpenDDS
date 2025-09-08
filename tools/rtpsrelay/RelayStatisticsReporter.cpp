@@ -19,7 +19,8 @@ namespace {
 }
 
 RelayStatisticsReporter::RelayStatisticsReporter(const Config& config, RelayStatisticsDataWriter_var writer)
-  : config_(config)
+  : InternalDataReaderListener{TheServiceParticipant->job_queue()}
+  , config_(config)
   , writer_(writer)
   , topic_name_(get_topic_name(DDS::DataWriter::_duplicate(writer)))
   , internal_reader_(make_rch<StatisticsDataReader>(DataReaderQosBuilder().reliability_reliable()))
@@ -27,14 +28,50 @@ RelayStatisticsReporter::RelayStatisticsReporter(const Config& config, RelayStat
   log_relay_statistics_.relay_id(config.relay_id());
   publish_relay_statistics_.relay_id(config.relay_id());
 
-  if (config.log_relay_statistics() || config.publish_relay_statistics()) {
-    TheServiceParticipant->statistics_topic()->connect(internal_reader_);
-  }
+  configure_stats_period(config.log_relay_statistics(), config.publish_relay_statistics());
 }
 
 RelayStatisticsReporter::~RelayStatisticsReporter()
 {
   TheServiceParticipant->statistics_topic()->disconnect(internal_reader_);
+}
+
+void RelayStatisticsReporter::configure_stats_period(const OpenDDS::DCPS::TimeDuration& log,
+                                                     const OpenDDS::DCPS::TimeDuration& publish) const
+{
+  const bool either = log || publish, both = log && publish;
+  if (either) {
+    TheServiceParticipant->statistics_period(both ? std::min(log, publish) : (log ? log : publish));
+    TheServiceParticipant->statistics_topic()->connect(internal_reader_);
+  } else {
+    TheServiceParticipant->statistics_period(OpenDDS::DCPS::TimeDuration{});
+    TheServiceParticipant->statistics_topic()->disconnect(internal_reader_);
+  }
+}
+
+void RelayStatisticsReporter::on_data_available(InternalDataReader_rch reader)
+{
+  OpenDDS::DCPS::ConfigReader::SampleSequence samples;
+  OpenDDS::DCPS::InternalSampleInfoSequence infos;
+  reader->read(samples, infos, DDS::LENGTH_UNLIMITED,
+               DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+  for (size_t idx = 0; idx != samples.size(); ++idx) {
+    const auto& info = infos[idx];
+    const auto& pair = samples[idx];
+    if (info.valid_data) {
+      if (pair.key() == RTPS_RELAY_LOG_RELAY_STATISTICS) {
+        OpenDDS::DCPS::TimeDuration td;
+        if (Config::to_time_duration(pair.value(), td)) {
+          configure_stats_period(td, config_.publish_relay_statistics());
+        }
+      } else if (pair.key() == RTPS_RELAY_PUBLISH_RELAY_STATISTICS) {
+        OpenDDS::DCPS::TimeDuration td;
+        if (Config::to_time_duration(pair.value(), td)) {
+          configure_stats_period(config_.log_relay_statistics(), td);
+        }
+      }
+    }
+  }
 }
 
 void RelayStatisticsReporter::get_opendds_stats(std::vector<OpenDDSModuleStatistics>& out)
