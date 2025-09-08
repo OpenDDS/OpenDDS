@@ -1,10 +1,6 @@
 name: Android Matrix
 
 on:
-  push:
-    branches:
-      - '**'
-      - '!no-gha/**'
   schedule:
     - cron: "0 3 * * 5"
   workflow_dispatch:
