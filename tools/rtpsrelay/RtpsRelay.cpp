@@ -111,6 +111,11 @@ namespace {
 
 int run(int argc, ACE_TCHAR* argv[])
 {
+  using OpenDDS::DCPS::RcHandle;
+  using OpenDDS::DCPS::inc_count;
+  using OpenDDS::DCPS::make_rch;
+  using OpenDDS::DCPS::ref;
+
   DDS::DomainParticipantFactory_var factory = TheParticipantFactoryWithArgs(argc, argv);
   if (!factory) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Failed to initialize participant factory\n"));
@@ -118,10 +123,8 @@ int run(int argc, ACE_TCHAR* argv[])
   }
 
   Config config;
-  const OpenDDS::DCPS::RcHandle<Config> config_rch{&config, OpenDDS::DCPS::inc_count{}};
-  const auto config_reader =
-    OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(),
-                                                         config_rch);
+  const RcHandle<Config> config_rch{&config, inc_count{}};
+  const auto config_reader = make_rch<OpenDDS::DCPS::ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(), config_rch);
   TheServiceParticipant->config_topic()->connect(config_reader);
   OpenDDS::DCPS::ConfigStoreImpl::log_changes = true;
 
@@ -473,11 +476,9 @@ int run(int argc, ACE_TCHAR* argv[])
   }
 
   RelayStatisticsReporter relay_statistics_reporter(config, relay_statistics_writer);
-  const OpenDDS::DCPS::RcHandle<RelayStatisticsReporter> reporter_rch{&relay_statistics_reporter, OpenDDS::DCPS::inc_count{}};
-  const auto reporter_config_reader =
-    OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(),
-                                                         reporter_rch);
-  TheServiceParticipant->config_topic()->connect(reporter_config_reader);
+  const RcHandle<RelayStatisticsReporter> reporter_rch{&relay_statistics_reporter, inc_count{}};
+  const auto stats_reporter_config_reader = make_rch<OpenDDS::DCPS::ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(), reporter_rch);
+  TheServiceParticipant->config_topic()->connect(stats_reporter_config_reader);
 
   DDS::DataWriterListener_var relay_statistics_writer_listener =
     new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::relay_statistics_sub_count);
@@ -638,11 +639,11 @@ int run(int argc, ACE_TCHAR* argv[])
 
   RelayThreadMonitor* relay_thread_monitor = new RelayThreadMonitor(config);
   const auto reactor = new ACE_Reactor(config.handler_threads() == 1 ? new ACE_Select_Reactor : new ACE_TP_Reactor, true); // deleted by ReactorTask
-  const auto reactor_task = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ReactorTask>();
+  const auto reactor_task = make_rch<OpenDDS::DCPS::ReactorTask>();
   reactor_task->init_reactor_task(&TheServiceParticipant->get_thread_status_manager(), "RtpsRelay Main", reactor);
 
-  const auto guid_addr_set = OpenDDS::DCPS::make_rch<GuidAddrSet>(config, reactor_task, rtps_discovery,
-                                                                  OpenDDS::DCPS::ref(relay_participant_status_reporter), OpenDDS::DCPS::ref(relay_statistics_reporter), OpenDDS::DCPS::ref(*relay_thread_monitor));
+  const auto guid_addr_set = make_rch<GuidAddrSet>(config, reactor_task, rtps_discovery,
+                                                   ref(relay_participant_status_reporter), ref(relay_statistics_reporter), ref(*relay_thread_monitor));
   GuidPartitionTable guid_partition_table(config, spdp_horizontal_addr, relay_partitions_writer, relay_statistics_reporter);
   RelayPartitionTable relay_partition_table(relay_statistics_reporter);
   relay_statistics_reporter.report();
@@ -816,32 +817,6 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  DDS::DataWriterQos relay_status_writer_qos;
-  relay_publisher->get_default_datawriter_qos(relay_status_writer_qos);
-
-  relay_status_writer_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
-  relay_status_writer_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  relay_status_writer_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
-  relay_status_writer_qos.history.depth = 1;
-  if (config.publish_relay_status_liveliness() != OpenDDS::DCPS::TimeDuration::zero_value) {
-    relay_status_writer_qos.liveliness.lease_duration = config.publish_relay_status_liveliness().to_dds_duration();
-    relay_status_writer_qos.liveliness.kind = DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
-  }
-
-  DDS::DataWriterListener_var relay_status_writer_listener =
-    new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::relay_status_sub_count);
-  DDS::DataWriter_var relay_status_writer_var = relay_publisher->create_datawriter(relay_status_topic, relay_status_writer_qos, relay_status_writer_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  if (!relay_status_writer_var) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Relay Status data writer\n"));
-    return EXIT_FAILURE;
-  }
-
-  RelayStatusDataWriter_var relay_status_writer = RelayStatusDataWriter::_narrow(relay_status_writer_var);
-  if (!relay_status_writer) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to narrow Relay Status data writer\n"));
-    return EXIT_FAILURE;
-  }
-
   RelayConfigTypeSupport_var relay_config_ts = new RelayConfigTypeSupportImpl;
   if (relay_config_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to register RelayConfig type\n"));
@@ -912,13 +887,19 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
   const auto internal_config_listener =
-    OpenDDS::DCPS::make_rch<InternalConfigListener>(relay_config_status_data_writer, config.relay_id());
+    make_rch<InternalConfigListener>(relay_config_status_data_writer, config.relay_id());
   const auto internal_config_reader =
-    OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(),
+    make_rch<OpenDDS::DCPS::ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(),
                                                          internal_config_listener);
   TheServiceParticipant->config_topic()->connect(internal_config_reader);
 
-  RelayStatusReporter relay_status_reporter(config, *guid_addr_set, relay_status_writer, reactor);
+  RelayStatusReporter relay_status_reporter(config, *guid_addr_set, relay_publisher, reactor, relay_statistics_reporter);
+  if (config.publish_relay_status() && !relay_status_reporter.setup_writer()) {
+    return EXIT_FAILURE;
+  }
+  const RcHandle<RelayStatusReporter> status_reporter_rch{&relay_status_reporter, inc_count{}};
+  const auto status_reporter_config_reader = make_rch<OpenDDS::DCPS::ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(), status_reporter_rch);
+  TheServiceParticipant->config_topic()->connect(status_reporter_config_reader);
 
   RelayHttpMetaDiscovery relay_http_meta_discovery(config, meta_discovery_content_type, meta_discovery_content, *guid_addr_set);
   if (relay_http_meta_discovery.open(meta_discovery_addr, reactor) != 0) {
@@ -945,7 +926,8 @@ int run(int argc, ACE_TCHAR* argv[])
 
   TheServiceParticipant->config_topic()->disconnect(internal_config_reader);
   TheServiceParticipant->config_topic()->disconnect(config_reader);
-  TheServiceParticipant->config_topic()->disconnect(reporter_config_reader);
+  TheServiceParticipant->config_topic()->disconnect(stats_reporter_config_reader);
+  TheServiceParticipant->config_topic()->disconnect(status_reporter_config_reader);
 
   application_participant->delete_contained_entities();
   factory->delete_participant(application_participant);
