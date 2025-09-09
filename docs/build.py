@@ -150,8 +150,12 @@ class DocEnv:
         # Process link check results ourselves so we can print failures in one
         # place, ignore failures based on reason, and inspect things like
         # redirects with custom logic.
+        # This is regex of URL to a list of regex of messages to ignore.
         ignore_info = {
-            r'.*': [r'.*403 Client Error.*'],  # This is very common
+            r'.*': [
+                r'.*403 Client Error.*',  # This is very common
+                r'.*Read timed out.*',
+            ],
         }
         linkcheck_json = self.build_path / 'linkcheck/output.json'
         failed = False
