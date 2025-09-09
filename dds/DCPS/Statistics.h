@@ -25,6 +25,7 @@ namespace DCPS {
 
 // The Statistics struct is defined in dds/OpenddsDcpsExt.idl
 
+#ifndef OPENDDS_SAFETY_PROFILE
 inline bool operator==(const Statistic& lhs, const Statistic& rhs)
 {
   return lhs.name == rhs.name && lhs.value == rhs.value;
@@ -42,6 +43,7 @@ inline bool operator==(const Statistics& lhs, const Statistics& rhs)
   }
   return true;
 }
+#endif
 
 template <>
 struct InternalTraits<Statistics> {

@@ -143,79 +143,80 @@ bool Config::parse_admission_participants_range(const char* arg)
 
 void Config::set_defaults()
 {
-  cached_lifespan_.default_if_empty([&](const auto& default_val) {
+  using OpenDDS::DCPS::TimeDuration;
+  cached_lifespan_.default_if_empty([&](const TimeDuration& default_val) {
     lifespan(default_val);
   });
-  cached_inactive_period_.default_if_empty([&](const auto& default_val) {
+  cached_inactive_period_.default_if_empty([&](const TimeDuration& default_val) {
     inactive_period(default_val);
   });
-  cached_log_warnings_.default_if_empty([&](const auto& default_val) {
+  cached_log_warnings_.default_if_empty([&](bool default_val) {
     log_warnings(default_val);
   });
-  cached_log_discovery_.default_if_empty([&](const auto& default_val) {
+  cached_log_discovery_.default_if_empty([&](bool default_val) {
     log_discovery(default_val);
   });
-  cached_log_activity_.default_if_empty([&](const auto& default_val) {
+  cached_log_activity_.default_if_empty([&](bool default_val) {
     log_activity(default_val);
   });
-  cached_log_http_.default_if_empty([&](const auto& default_val) {
+  cached_log_http_.default_if_empty([&](bool default_val) {
     log_http(default_val);
   });
-  cached_log_thread_status_.default_if_empty([&](const auto& default_val) {
+  cached_log_thread_status_.default_if_empty([&](bool default_val) {
     log_thread_status(default_val);
   });
-  cached_thread_status_safety_factor_.default_if_empty([&](const auto& default_val) {
+  cached_thread_status_safety_factor_.default_if_empty([&](int default_val) {
     thread_status_safety_factor(default_val);
   });
-  cached_utilization_limit_.default_if_empty([&](const auto& default_val) {
+  cached_utilization_limit_.default_if_empty([&](double default_val) {
     utilization_limit(default_val);
   });
-  cached_log_utilization_changes_.default_if_empty([&](const auto& default_val) {
+  cached_log_utilization_changes_.default_if_empty([&](bool default_val) {
     log_utilization_changes(default_val);
   });
-  cached_log_relay_statistics_.default_if_empty([&](const auto& default_val) {
+  cached_log_relay_statistics_.default_if_empty([&](const TimeDuration& default_val) {
     log_relay_statistics(default_val);
   });
-  cached_log_handler_statistics_.default_if_empty([&](const auto& default_val) {
+  cached_log_handler_statistics_.default_if_empty([&](const TimeDuration& default_val) {
     log_handler_statistics(default_val);
   });
-  cached_log_participant_statistics_.default_if_empty([&](const auto& default_val) {
+  cached_log_participant_statistics_.default_if_empty([&](bool default_val) {
     log_participant_statistics(default_val);
   });
-  cached_publish_relay_statistics_.default_if_empty([&](const auto& default_val) {
+  cached_publish_relay_statistics_.default_if_empty([&](const TimeDuration& default_val) {
     publish_relay_statistics(default_val);
   });
-  cached_publish_handler_statistics_.default_if_empty([&](const auto& default_val) {
+  cached_publish_handler_statistics_.default_if_empty([&](const TimeDuration& default_val) {
     publish_handler_statistics(default_val);
   });
-  cached_publish_participant_statistics_.default_if_empty([&](const auto& default_val) {
+  cached_publish_participant_statistics_.default_if_empty([&](bool default_val) {
     publish_participant_statistics(default_val);
   });
-  cached_publish_relay_status_.default_if_empty([&](const auto& default_val) {
+  cached_publish_relay_status_.default_if_empty([&](const TimeDuration& default_val) {
     publish_relay_status(default_val);
   });
-  cached_publish_relay_status_liveliness_.default_if_empty([&](const auto& default_val) {
+  cached_publish_relay_status_liveliness_.default_if_empty([&](const TimeDuration& default_val) {
     publish_relay_status_liveliness(default_val);
   });
-  cached_restart_detection_.default_if_empty([&](const auto& default_val) {
+  cached_restart_detection_.default_if_empty([&](bool default_val) {
     restart_detection(default_val);
   });
-  cached_admission_control_queue_size_.default_if_empty([&](const auto& default_val) {
+  cached_admission_control_queue_size_.default_if_empty([&](size_t default_val) {
     admission_control_queue_size(default_val);
   });
-  cached_admission_control_queue_duration_.default_if_empty([&](const auto& default_val) {
+  cached_admission_control_queue_duration_.default_if_empty([&](const TimeDuration& default_val) {
     admission_control_queue_duration(default_val);
   });
-  cached_max_ips_per_client_.default_if_empty([&](const auto& default_val) {
+  cached_max_ips_per_client_.default_if_empty([&](size_t default_val) {
     max_ips_per_client(default_val);
   });
-  cached_rejected_address_duration_.default_if_empty([&](const auto& default_val) {
+  cached_rejected_address_duration_.default_if_empty([&](const TimeDuration& default_val) {
     rejected_address_duration(default_val);
   });
-  cached_admission_max_participants_high_water_.default_if_empty([&](const auto& default_val) {
+  cached_admission_max_participants_high_water_.default_if_empty([&](size_t default_val) {
     admission_max_participants_high_water(default_val);
   });
-  cached_admission_max_participants_low_water_.default_if_empty([&](const auto& default_val) {
+  cached_admission_max_participants_low_water_.default_if_empty([&](size_t default_val) {
     admission_max_participants_low_water(default_val);
   });
 }

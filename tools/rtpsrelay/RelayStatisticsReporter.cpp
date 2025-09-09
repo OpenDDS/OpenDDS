@@ -39,9 +39,8 @@ RelayStatisticsReporter::~RelayStatisticsReporter()
 void RelayStatisticsReporter::configure_stats_period(const OpenDDS::DCPS::TimeDuration& log,
                                                      const OpenDDS::DCPS::TimeDuration& publish) const
 {
-  const bool either = log || publish, both = log && publish;
-  if (either) {
-    TheServiceParticipant->statistics_period(both ? std::min(log, publish) : (log ? log : publish));
+  if (log || publish) {
+    TheServiceParticipant->statistics_period(log && publish ? std::min(log, publish) : (log ? log : publish));
     TheServiceParticipant->statistics_topic()->connect(internal_reader_);
   } else {
     TheServiceParticipant->statistics_period(OpenDDS::DCPS::TimeDuration{});
