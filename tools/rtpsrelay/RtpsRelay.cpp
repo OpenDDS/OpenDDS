@@ -640,6 +640,7 @@ int run(int argc, ACE_TCHAR* argv[])
   RelayThreadMonitor* relay_thread_monitor = new RelayThreadMonitor(config);
   const auto reactor = new ACE_Reactor(config.handler_threads() == 1 ? new ACE_Select_Reactor : new ACE_TP_Reactor, true); // deleted by ReactorTask
   const auto reactor_task = make_rch<OpenDDS::DCPS::ReactorTask>();
+  reactor_task->job_queue(TheServiceParticipant->job_queue());
   reactor_task->init_reactor_task(&TheServiceParticipant->get_thread_status_manager(), "RtpsRelay Main", reactor);
 
   const auto guid_addr_set = make_rch<GuidAddrSet>(config, reactor_task, rtps_discovery,

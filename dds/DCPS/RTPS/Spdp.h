@@ -514,8 +514,9 @@ private:
     ~SpdpTransport();
 
     const ACE_SOCK_Dgram& choose_recv_socket(ACE_HANDLE h) const;
-
     virtual int handle_input(ACE_HANDLE h);
+
+    void init_thread_status_task();
 
     void open(const DCPS::ReactorTask_rch& reactor_task,
               const DCPS::JobQueue_rch& job_queue);
