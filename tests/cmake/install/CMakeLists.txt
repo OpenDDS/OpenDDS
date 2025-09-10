@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3...4.0)
+cmake_minimum_required(VERSION 3.28...4.0)
 project(opendds_install_test)
 enable_testing()
 
@@ -11,10 +11,7 @@ if(OPENDDS_BUILT_USING_CMAKE)
   message(FATAL_ERROR "This test doesn't work with OpenDDS built using CMake.")
 endif()
 
-set(INSTALL_IMPORTED_RUNTIME_ARTIFACTS TRUE)
-if(${CMAKE_VERSION} VERSION_LESS "3.21.0" OR OPENDDS_STATIC)
-  set(INSTALL_IMPORTED_RUNTIME_ARTIFACTS FALSE)
-endif()
+set(INSTALL_IMPORTED_RUNTIME_ARTIFACTS "${OPENDDS_STATIC}")
 
 set(dest_install_prefix "${CMAKE_CURRENT_BINARY_DIR}/the-install-prefix")
 set(common_cmake_args

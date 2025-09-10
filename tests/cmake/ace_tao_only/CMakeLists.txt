@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8...4.0)
+cmake_minimum_required(VERSION 3.28...4.0)
 project(opendds_ace_tao_only CXX)
 enable_testing()
 

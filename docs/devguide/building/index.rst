@@ -594,7 +594,7 @@ Building OpenDDS Using CMake
 
 .. versionadded:: 3.26
 
-OpenDDS can be built with CMake 3.23 or later.
+OpenDDS can be built with CMake 3.28 or later.
 
 Configuring and Building
 ========================
@@ -766,7 +766,6 @@ Fresh build directories default to ``CMAKE_UNITY_BUILD=FALSE``.
 
 The `Ninja <https://ninja-build.org/>`__ CMake generator can also be used to speed up builds as Ninja was built from scratch for parallel building and build systems like CMake.
 If Ninja is available, pass ``-G Ninja`` to have CMake use it.
-Building ACE/TAO with Ninja requires CMake 3.24 or later.
 If building ACE/TAO, the CMake build will still use either Visual Studio or GNU Make internally to build ACE/TAO because MPC doesn't support Ninja.
 
 Cross Compiling

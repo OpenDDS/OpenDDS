@@ -9,10 +9,6 @@ if(_OPENDDS_INIT_CMAKE)
 endif()
 set(_OPENDDS_INIT_CMAKE TRUE)
 
-# This is required for CMake <=3.4 for cmake_parse_arguments. Remove this when
-# we no longer need to support those versions.
-include(CMakeParseArguments)
-
 include("${CMAKE_CURRENT_LIST_DIR}/opendds_version.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/opendds_utils.cmake")
 
@@ -264,16 +260,14 @@ function(_opendds_set_cxx_std)
 
   # Get the max C++ standard supported by the compiler and/or CMake
   set(max_cxx_std_year ${default_cxx_std_year})
-  if(NOT CMAKE_VERSION VERSION_LESS "3.8.0")
-    foreach(feature IN LISTS CMAKE_CXX_COMPILE_FEATURES)
-      if(feature MATCHES "^cxx_std_(.*)$")
-        _opendds_cxx_std_to_year(supported_year "${CMAKE_MATCH_1}")
-        if(supported_year GREATER max_cxx_std_year)
-          set(max_cxx_std_year "${supported_year}")
-        endif()
+  foreach(feature IN LISTS CMAKE_CXX_COMPILE_FEATURES)
+    if(feature MATCHES "^cxx_std_(.*)$")
+      _opendds_cxx_std_to_year(supported_year "${CMAKE_MATCH_1}")
+      if(supported_year GREATER max_cxx_std_year)
+        set(max_cxx_std_year "${supported_year}")
       endif()
-    endforeach()
-  endif()
+    endif()
+  endforeach()
   if(OPENDDS_CMAKE_VERBOSE)
     message(STATUS "max_cxx_std_year: ${max_cxx_std_year}")
   endif()
@@ -414,7 +408,7 @@ if(OPENDDS_CXX_STD_YEAR LESS 2017)
 endif()
 
 function(_opendds_cxx_std target scope)
-  if(OPENDDS_CXX_STD AND NOT (scope STREQUAL INTERFACE AND CMAKE_VERSION VERSION_LESS "3.11.0"))
+  if(OPENDDS_CXX_STD)
     target_compile_features(${target} ${scope} "cxx_std_${OPENDDS_CXX_STD}")
   endif()
 endfunction()

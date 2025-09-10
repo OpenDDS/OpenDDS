@@ -4,16 +4,12 @@
 # This file is setup the way it is for testing purposes. For a cleaner example
 # see DevGuideExamples/DCPS/Messenger/CMakeLists.txt
 
-cmake_minimum_required(VERSION 3.8...4.0)
+cmake_minimum_required(VERSION 3.28...4.0)
 project(opendds_tests_cmake_messenger_1 CXX)
 enable_testing()
 
 find_package(OpenDDS REQUIRED ownership_profile)
 include(opendds_testing)
-
-if(NOT OPENDDS_OWNERSHIP_PROFILE)
-  message(FATAL_ERROR "This test requires OpenDDS to be built with Ownership Profile enabled")
-endif()
 
 set(target_prefix "${PROJECT_NAME}_")
 set(publisher "${target_prefix}publisher")

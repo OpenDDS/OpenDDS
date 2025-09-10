@@ -4,12 +4,10 @@
 include(${CMAKE_CURRENT_LIST_DIR}/tao_idl_sources.cmake)
 
 function(_opendds_export_target_property target property_name)
-  if(NOT ${CMAKE_VERSION} VERSION_LESS "3.12.0")
-    get_property(target_export_properties TARGET ${target} PROPERTY "EXPORT_PROPERTIES")
-    if(NOT property_name IN_LIST target_export_properties)
-      list(APPEND target_export_properties ${property_name})
-      set_property(TARGET ${target} PROPERTY "EXPORT_PROPERTIES" "${target_export_properties}")
-    endif()
+  get_property(target_export_properties TARGET ${target} PROPERTY "EXPORT_PROPERTIES")
+  if(NOT property_name IN_LIST target_export_properties)
+    list(APPEND target_export_properties ${property_name})
+    set_property(TARGET ${target} PROPERTY "EXPORT_PROPERTIES" "${target_export_properties}")
   endif()
 endfunction()
 

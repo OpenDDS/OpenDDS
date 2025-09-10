@@ -1,16 +1,12 @@
-cmake_minimum_required(VERSION 3.3...4.0)
+cmake_minimum_required(VERSION 3.28...4.0)
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/opendds_version.cmake")
-if(CMAKE_VERSION VERSION_LESS 3.9)
-  project(opendds VERSION "${OPENDDS_VERSION}" LANGUAGES CXX)
-else()
-  project(opendds
-    DESCRIPTION
-      "OpenDDS is an open-source C++ framework for exchanging data in distributed systems."
-    VERSION "${OPENDDS_VERSION}"
-    HOMEPAGE_URL "https://opendds.org/"
-    LANGUAGES CXX
-  )
-endif()
+project(opendds
+  DESCRIPTION
+    "OpenDDS is an open-source C++ framework for exchanging data in distributed systems."
+  VERSION "${OPENDDS_VERSION}"
+  HOMEPAGE_URL "https://opendds.org/"
+  LANGUAGES CXX
+)
 set(CPACK_PACKAGE_CONTACT info@opendds.org)
 
 set(OPENDDS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE INTERNAL "")
@@ -37,8 +33,6 @@ if(OPENDDS_JUST_BUILD_TESTS)
   find_package(OpenDDS REQUIRED)
   _opendds_add_examples_and_tests()
   return()
-elseif(CMAKE_VERSION VERSION_LESS 3.23)
-  message(FATAL_ERROR "Building OpenDDS with CMake requires CMake 3.23 or later")
 endif()
 
 include(CMakePackageConfigHelpers)

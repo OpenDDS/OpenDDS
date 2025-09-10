@@ -13,6 +13,10 @@ use Cwd qw/abs_path/;
 use Getopt::Long qw/GetOptions/;
 use Term::ANSIColor qw//;
 
+use FindBin;
+use lib "$FindBin::RealBin/modules";
+use version_utils;
+
 use constant line_length_limit => 100;
 use constant eof_newline_limit => 2;
 
@@ -641,7 +645,7 @@ my %all_checks = (
 
   cmake_minimum_required => {
     message => [
-      'CMakeLists.txt is missing cmake_minimum_required with correct policy max version',
+      'CMakeLists.txt is missing cmake_minimum_required with correct versions',
     ],
     can_fix => 1,
     path_matches_all_of => ['cmakelists'],
@@ -650,7 +654,8 @@ my %all_checks = (
       my $full_filename = shift;
       my $line_numbers = shift;
 
-      my $expected_policy_max = '4.0';
+      my $policy_min_min = '3.28';
+      my $policy_max_min = '4.0';
       my $ver_re = qr/\d+\.\d+(?:\.\d+)?/;
       my $missing = 1;
       my $fixed = 0;
@@ -662,14 +667,23 @@ my %all_checks = (
         if ($line =~ /^cmake_minimum_required\(VERSION ($ver_re)\.\.\.($ver_re)\)$/) {
           my $policy_min = $1;
           my $policy_max = $2;
-          $missing = $policy_max ne $expected_policy_max;
+          my $min_is_wrong = version_lesser($policy_min, $policy_min_min);
+          my $max_is_wrong = version_lesser($policy_max, $policy_max_min);
+          $missing = $min_is_wrong || $max_is_wrong;
           if ($missing) {
             if ($fix) {
               $fixed = 1;
-              $line = "cmake_minimum_required(VERSION $policy_min...$expected_policy_max)";
+              my $use_min = $min_is_wrong ? $policy_min_min : $policy_min;
+              my $use_max = $max_is_wrong ? $policy_max_min : $policy_max;
+              $line = "cmake_minimum_required(VERSION $policy_min_min...$policy_max_min)";
             }
             else {
-              print("$line has a policy max of $policy_max, but expected $expected_policy_max\n");
+              if ($min_is_wrong) {
+                print("$line has a policy min of $policy_min, should be at least $policy_min_min\n");
+              }
+              if ($max_is_wrong) {
+                print("$line has a policy max of $policy_max, should be at least $policy_max_min\n");
+              }
             }
           }
           last unless ($fix);

@@ -136,8 +136,7 @@ See :doc:`cmake` for how to build OpenDDS applications with CMake and without th
 CMake is required to build :ref:`deps-gtest` for OpenDDS tests if a prebuilt GoogleTest is not found or provided.
 See :ghfile:`tests/gtest_setup.txt` for details.
 
-CMake should be version 3.3 or later for :doc:`cmake`.
-It should be version 3.23 or later for :ref:`cmake-building`.
+CMake should be version 3.38 or later for :doc:`cmake` and :ref:`cmake-building`.
 
 .. _deps-gtest:
 

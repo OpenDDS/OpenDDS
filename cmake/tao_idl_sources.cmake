@@ -196,13 +196,8 @@ function(_opendds_tao_idl target)
 
     set(tao_idl "$<TARGET_FILE:TAO::tao_idl>")
     if(CMAKE_GENERATOR STREQUAL "Ninja" AND TAO_IS_BEING_BUILT)
-      if(CMAKE_VERSION VERSION_LESS 3.24)
-        message(FATAL_ERROR "Using Ninja to build ACE/TAO requires CMake 3.24 or later. "
-         "Please build ACE/TAO separately, use a newer CMake, or a different CMake generator.")
-      else()
-        set(tao_idl "$<PATH:ABSOLUTE_PATH,${tao_idl},\${cmake_ninja_workdir}>")
-        set(gperf_location "$<PATH:ABSOLUTE_PATH,${gperf_location},\${cmake_ninja_workdir}>")
-      endif()
+      set(tao_idl "$<PATH:ABSOLUTE_PATH,${tao_idl},\${cmake_ninja_workdir}>")
+      set(gperf_location "$<PATH:ABSOLUTE_PATH,${gperf_location},\${cmake_ninja_workdir}>")
     endif()
     set(tao_idl_args
       -g ${gperf_location} ${feature_flags} -Sg

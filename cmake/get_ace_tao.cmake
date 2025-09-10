@@ -2,10 +2,6 @@ include(FetchContent)
 
 include("${CMAKE_CURRENT_LIST_DIR}/opendds_utils.cmake")
 
-if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.24)
-  cmake_policy(SET CMP0135 NEW)
-endif()
-
 function(_opendds_set_vs_mpc_type)
   set(vs_vers
     "Visual Studio 14 2015" vc14
