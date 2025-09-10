@@ -3,10 +3,28 @@ name: Android Matrix
 on:
   push:
     branches:
+      - 'master'
+      - '**android**'
+    paths:
       - '**'
-      - '!no-gha/**'
-  schedule:
-    - cron: "0 3 * * 5"
+      - '!AUTHORS'
+      - '!PROBLEM-REPORT-FORM'
+      - '!LICENSE'
+      - '!Dockerfile**'
+      - '!.dockerignore'
+      - '!.mailmap'
+      - '!.github/workflows/lint.yml'
+      - '!.github/workflows/sphinx_strict.yml'
+      - '!etc/**'
+      - '!docs/**'
+      - '!hooks/**'
+      - '!tools/scripts/gitrelease.pl'
+      - '!tools/scripts/lint.pl'
+      - '!**.md'
+      - '!**.rst'
+      - '!**/.gitignore'
+      - '!**/.lint_config'
+      - '!**/README*'
   workflow_dispatch:
 
 concurrency:

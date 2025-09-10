@@ -2,6 +2,9 @@ name: "MPC Builds"
 
 on:
   push:
+    branches-ignore:
+      - 'dependabot/**'
+      - 'workflows/**'
     paths:
       - '**'
       # Don't run this workflow if the only files that changed are the
