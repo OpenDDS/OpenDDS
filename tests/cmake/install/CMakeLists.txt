@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3...4.0)
+cmake_minimum_required(VERSION 3.28...4.0)
 project(opendds_install_test)
 enable_testing()
 
@@ -12,7 +12,7 @@ if(OPENDDS_BUILT_USING_CMAKE)
 endif()
 
 set(INSTALL_IMPORTED_RUNTIME_ARTIFACTS TRUE)
-if(${CMAKE_VERSION} VERSION_LESS "3.21.0" OR OPENDDS_STATIC)
+if(OPENDDS_STATIC)
   set(INSTALL_IMPORTED_RUNTIME_ARTIFACTS FALSE)
 endif()
 

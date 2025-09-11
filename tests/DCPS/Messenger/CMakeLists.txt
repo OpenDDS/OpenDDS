@@ -1,7 +1,7 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-cmake_minimum_required(VERSION 3.3...4.0)
+cmake_minimum_required(VERSION 3.28...4.0)
 project(opendds_tests_dcps_messenger CXX)
 enable_testing()
 

@@ -1,12 +1,8 @@
-cmake_minimum_required(VERSION 3.3...4.0)
+cmake_minimum_required(VERSION 3.28...4.0)
 project(opendds_tests)
 enable_testing()
 
-set(has_fetch_content FALSE)
-if(NOT CMAKE_VERSION VERSION_LESS 3.11)
-  set(has_fetch_content TRUE)
-  include(FetchContent)
-endif()
+include(FetchContent)
 
 find_package(OpenDDS REQUIRED)
 
@@ -14,33 +10,25 @@ find_package(GTest QUIET PATHS "${OPENDDS_GTEST}")
 if(NOT GTest_FOUND)
   set(gtestsm "${OPENDDS_SOURCE_DIR}/tests/googletest")
   set(gtestsm_cmakelists "${gtestsm}/CMakeLists.txt")
-  if(has_fetch_content)
-    if(EXISTS "${gtestsm_cmakelists}")
-      message("GoogleTest not found, using submodule")
-      set(fetch_args SOURCE_DIR "${gtestsm}")
-    else()
-      message("GoogleTest not found, using clone")
-      set(fetch_args
-        GIT_REPOSITORY "https://github.com/google/googletest"
-        GIT_TAG "v1.17.x"
-        GIT_SHALLOW TRUE
-        GIT_PROGRESS TRUE
-        USES_TERMINAL_DOWNLOAD TRUE
-      )
-    endif()
-    FetchContent_Declare(googletest ${fetch_args})
+  if(EXISTS "${gtestsm_cmakelists}")
+    message("GoogleTest not found, using submodule")
+    set(fetch_args SOURCE_DIR "${gtestsm}")
+  else()
+    message("GoogleTest not found, using clone")
+    set(fetch_args
+      GIT_REPOSITORY "https://github.com/google/googletest"
+      GIT_TAG "v1.17.x"
+      GIT_SHALLOW TRUE
+      GIT_PROGRESS TRUE
+      USES_TERMINAL_DOWNLOAD TRUE
+    )
   endif()
+  FetchContent_Declare(googletest ${fetch_args})
   if(NOT DEFINED INSTALL_GTEST)
     # GoogleTest will install by default otherwise
     set(INSTALL_GTEST FALSE CACHE BOOL "" FORCE)
   endif()
-  if(has_fetch_content)
-    FetchContent_MakeAvailable(googletest)
-  elseif(EXISTS "${gtestsm_cmakelists}")
-    add_subdirectory("${gtestsm}")
-  else()
-    message(FATAL_ERROR "GoogleTest not found and can't fetch it")
-  endif()
+  FetchContent_MakeAvailable(googletest)
 endif()
 if(TARGET GTest::gtest)
   set(_opendds_googletest GTest::gtest CACHE INTERNAL "" FORCE)

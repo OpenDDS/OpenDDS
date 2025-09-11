@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3...4.0)
+cmake_minimum_required(VERSION 3.28...4.0)
 project(opendds_install_test_library CXX)
 
 include(GNUInstallDirs)
@@ -6,11 +6,8 @@ include(CMakePackageConfigHelpers)
 
 find_package(OpenDDS REQUIRED)
 
-if(NOT DEFINED INSTALL_IMPORTED_RUNTIME_ARTIFACTS)
+if(NOT DEFINED INSTALL_IMPORTED_RUNTIME_ARTIFACTS AND NOT OPENDDS_STATIC)
   set(INSTALL_IMPORTED_RUNTIME_ARTIFACTS TRUE)
-  if(${CMAKE_VERSION} VERSION_LESS "3.21.0" OR OPENDDS_STATIC)
-    set(INSTALL_IMPORTED_RUNTIME_ARTIFACTS FALSE)
-  endif()
 endif()
 
 add_library(${PROJECT_NAME} ${OPENDDS_LIBRARY_TYPE} "install_library.cpp")

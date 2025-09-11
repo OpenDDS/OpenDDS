@@ -13,7 +13,7 @@ This package bridges the gap between the MPC build system used by OpenDDS and CM
 Requirements
 ************
 
-CMake version 3.3.2 or greater is required to use the CMake package, but some features require newer versions.
+CMake version 3.28 or greater is required to use the CMake package, but some features may require newer versions.
 
 *******************************
 Using the OpenDDS CMake Package
@@ -124,7 +124,7 @@ These can be:
 
   Feature names should be the same as the variable, but without the leading ``OPENDDS_`` and all lowercase.
   Feature names by themselves will be required to be enabled.
-  If using `CMake 3.9 or higher <https://cmake.org/cmake/help/latest/variable/CMAKE_MATCH_n.html>`__ and the name is followed by ``=``, then the `CMake boolean value <https://cmake.org/cmake/help/latest/command/if.html#basic-expressions>`__ following that determines if the feature must be enabled or disabled.
+  If the name is followed by ``=``, then the `CMake boolean value <https://cmake.org/cmake/help/latest/command/if.html#basic-expressions>`__ following that determines if the feature must be enabled or disabled.
 
   Example:
 
@@ -190,7 +190,7 @@ See :ref:`cmake-libraries` for all the libraries the CMake package can provide.
 
 .. versionadded:: 3.20
 
-If using CMake 3.21 or later, it’s possible to install :ref:`executables <cmake-executables>` and :ref:`shared libraries <cmake-libraries>` from OpenDDS, ACE, and TAO in CMake along side the application using `install(IMPORTED_RUNTIME_ARTIFACTS) <https://cmake.org/cmake/help/latest/command/install.html#imported-runtime-artifacts>`__.
+It’s possible to install :ref:`executables <cmake-executables>` and :ref:`shared libraries <cmake-libraries>` from OpenDDS, ACE, and TAO in CMake along side the application using `install(IMPORTED_RUNTIME_ARTIFACTS) <https://cmake.org/cmake/help/latest/command/install.html#imported-runtime-artifacts>`__.
 This will just install shared libraries and executables, not static libraries, headers, or anything else required for building applications.
 
 If OpenDDS and ACE/TAO is built with ``clang``, the shared libraries might be missing an ``SONAME`` entry.
@@ -517,6 +517,7 @@ Functions
     :no-contents-entry:
 
     This holds the IDL language mappings used in the target based on what is passed to :cmake:func:`opendds_target_sources(OPENDDS_IDL_OPTIONS)`.
+    This property will be exported with the target.
 
     It will be a list that can contain one or more of the following:
 
@@ -535,8 +536,6 @@ Functions
     - ``"Java"``
 
       - Currently unsupported.
-
-    If the CMake version is at least 3.12, then this property will be exported with the target.
 
     .. versionadded:: 3.15
 
