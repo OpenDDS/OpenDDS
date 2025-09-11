@@ -11,6 +11,7 @@ race_top:^ACE_Locked_Free_List<ACE_Cached_Mem_Pool_Node<*>, ACE_Thread_Mutex>::s
 race_top:^ACE_Proactor::proactor_end_event_loop
 race_top:^ACE_Proactor_Timer_Handler::destroy
 race_top:^ACE_Refcounted_Auto_Ptr_Rep<ACE_Handler::Proxy, ACE_Thread_Mutex>::attach
+race_top:^ACE_Select_Reactor_T<*>::deactivated
 race_top:^ACE_Thread_Manager::wait_task
 race_top:^ACE_TSS<*>::ts_get
 race_top:^ACE_Timer_Heap_T<*>::is_empty
