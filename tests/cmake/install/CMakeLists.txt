@@ -11,7 +11,10 @@ if(OPENDDS_BUILT_USING_CMAKE)
   message(FATAL_ERROR "This test doesn't work with OpenDDS built using CMake.")
 endif()
 
-set(INSTALL_IMPORTED_RUNTIME_ARTIFACTS "${OPENDDS_STATIC}")
+set(INSTALL_IMPORTED_RUNTIME_ARTIFACTS TRUE)
+if(OPENDDS_STATIC)
+  set(INSTALL_IMPORTED_RUNTIME_ARTIFACTS FALSE)
+endif()
 
 set(dest_install_prefix "${CMAKE_CURRENT_BINARY_DIR}/the-install-prefix")
 set(common_cmake_args
