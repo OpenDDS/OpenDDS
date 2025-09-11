@@ -427,6 +427,9 @@ private:
   StatisticsDataWriter_rch stats_writer_;
   typedef PmfPeriodicTask<const RtpsUdpTransport> PeriodicTask;
   RcHandle<PeriodicTask> stats_task_;
+  TimeDuration stats_task_period_;
+
+  void setup_stats_task(const TimeDuration& period);
 
   static StatisticSeq stats_template();
   const StatisticSeq stats_template_;
