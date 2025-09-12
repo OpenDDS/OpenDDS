@@ -277,7 +277,7 @@ void GuidAddrSet::process_rejected_address_expiration(const OpenDDS::DCPS::Monot
       ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::process_rejected_address_expiration "
                  "Rejected address %C expired %C ago, removing from rejected address map.\n",
                  OpenDDS::DCPS::LogAddr(reject->first).c_str(),
-                 ago.str().c_str()));
+                 ago.sec_str().c_str()));
     }
     rejected_address_map_.erase(reject);
     rejected_address_expiration_queue_.pop_front();
@@ -375,7 +375,7 @@ void GuidAddrSet::process_expiration(const OpenDDS::DCPS::MonotonicTimePoint& no
                      "%C %C expired %C ago %C into session ips=%B total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
                      guid_to_string(ga.guid).c_str(),
                      OpenDDS::DCPS::LogAddr(ga.address.addr).c_str(),
-                     ago.str().c_str(),
+                     ago.sec_str().c_str(),
                      get_session_time(ga.guid, now).sec_str().c_str(),
                      addr_stats.ip_to_ports.size(),
                      guid_addr_set_map_.size(),

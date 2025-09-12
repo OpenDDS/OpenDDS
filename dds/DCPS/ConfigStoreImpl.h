@@ -27,6 +27,9 @@ namespace DCPS {
 const char CONFIG_DEBUG_LOGGING[] = "CONFIG_DEBUG_LOGGING";
 const bool CONFIG_DEBUG_LOGGING_default = false;
 
+const char CONFIG_LOG_CHANGES[] = "CONFIG_LOG_CHANGES";
+const bool CONFIG_LOG_CHANGES_default = false;
+
 OpenDDS_Dcps_Export
 OPENDDS_VECTOR(String) split(const String& str,
                              const String& delims,
@@ -133,17 +136,27 @@ public:
   void set_int32(const char* key,
                  DDS::Int32 value);
   DDS::Int32 get_int32(const char* key,
-                        DDS::Int32 value);
+                       DDS::Int32 value);
 
   void set_uint32(const char* key,
                   DDS::UInt32 value);
   DDS::UInt32 get_uint32(const char* key,
-                          DDS::UInt32 value);
+                         DDS::UInt32 value);
+
+  void set_int64(const char* key,
+                 DDS::Int64 value);
+  DDS::Int64 get_int64(const char* key,
+                       DDS::Int64 value);
+
+  void set_uint64(const char* key,
+                  DDS::UInt64 value);
+  DDS::UInt64 get_uint64(const char* key,
+                         DDS::UInt64 value);
 
   void set_float64(const char* key,
                    DDS::Float64 value);
   DDS::Float64 get_float64(const char* key,
-                            DDS::Float64 value);
+                           DDS::Float64 value);
 
   void set_string(const char* key,
                   const char* value);
@@ -182,6 +195,8 @@ public:
            const UInt32List& value);
   UInt32List get(const char* key,
                  const UInt32List& value) const;
+
+  static bool convert_value(const String& value_as_string, bool& value);
 
   template<typename T, size_t Count>
   static bool convert_value(const String& value_as_string,
@@ -331,6 +346,7 @@ public:
   static DDS::DataReaderQos datareader_qos();
 
   static bool debug_logging;
+  static bool log_changes;
 
 private:
   ConfigTopic_rch config_topic_;

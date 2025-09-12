@@ -334,6 +334,12 @@ module OpenDDS
       void set_uint32(in string key, in uint32 value);
       uint32 get_uint32(in string key, in uint32 default_value);
 
+      void set_int64(in string key, in int64 value);
+      int64 get_int64(in string key, in int64 default_value);
+
+      void set_uint64(in string key, in uint64 value);
+      uint64 get_uint64(in string key, in uint64 default_value);
+
       void set_float64(in string key, in double value);
       double get_float64(in string key, in double default_value);
 

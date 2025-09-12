@@ -446,8 +446,8 @@ Service_Participant::get_domain_participant_factory(int &argc,
       dp_factory_servant_ = make_rch<DomainParticipantFactoryImpl>();
 
       reactor_task_.open_reactor_task(&thread_status_manager_, "Service_Participant");
-
       job_queue_ = make_rch<JobQueue>(reactor_task_.get_reactor());
+      reactor_task_.job_queue(job_queue_);
 
       const bool monitor_enabled = config_store_->get_boolean(COMMON_DCPS_MONITOR,
                                                               COMMON_DCPS_MONITOR_default);

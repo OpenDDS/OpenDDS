@@ -167,6 +167,32 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_uint32)
   EXPECT_EQ(store.get_uint32("key", 0), DDS::DURATION_INFINITE_NSEC);
 }
 
+TEST(dds_DCPS_ConfigStoreImpl, set_get_int64)
+{
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
+  static const DDS::Int64 val = -6000000000;
+  EXPECT_EQ(store.get_int64("key", val), val);
+  store.set_int64("key", val - 1);
+  EXPECT_EQ(store.get_int64("key", val), val - 1);
+  store.set_string("key", "not an int64");
+  EXPECT_EQ(store.get_int64("key", val), val);
+}
+
+TEST(dds_DCPS_ConfigStoreImpl, set_get_uint64)
+{
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
+  static const DDS::UInt64 val = 6000000000;
+  EXPECT_EQ(store.get_uint64("key", val), val);
+  store.set_uint64("key", val + 1);
+  EXPECT_EQ(store.get_uint64("key", val), val + 1);
+  store.set_string("key", "not a uint64");
+  EXPECT_EQ(store.get_uint64("key", val), val);
+}
+
 TEST(dds_DCPS_ConfigStoreImpl, set_get_float64)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();

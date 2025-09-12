@@ -40,6 +40,7 @@ public:
 
   void job_queue(JobQueue_rch job_queue)
   {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     job_queue_ = job_queue;
   }
 

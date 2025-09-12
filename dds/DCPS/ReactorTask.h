@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_REACTORTASK_H
 
 #include "ConditionVariable.h"
+#include "ConfigStoreImpl.h"
 #include "Definitions.h"
 #include "RcEventHandler.h"
 #include "RcObject.h"
@@ -100,6 +101,7 @@ private:
 class OpenDDS_Dcps_Export ReactorTask
   : public virtual ACE_Task_Base
   , public virtual RcObject
+  , public ConfigListener
 {
 public:
   explicit ReactorTask(bool useAsyncSend = false);
@@ -171,6 +173,8 @@ private:
   void wait_for_startup_i() const;
   int run_reactor_i();
 
+  void on_data_available(InternalDataReader_rch reader);
+
   typedef ACE_SYNCH_MUTEX LockType;
   typedef ACE_Guard<LockType> GuardType;
   typedef ConditionVariable<LockType> ConditionVariableType;
@@ -221,6 +225,9 @@ private:
   // thread status reporting
   String name_;
   ThreadStatusManager* thread_status_manager_;
+  ReactorWrapper::TimerId thread_status_timer_;
+  RcHandle<RcEventHandler> tsm_updater_handler_;
+  TimeDuration thread_status_period_;
 };
 
 class OpenDDS_Dcps_Export RegisterHandler : public ReactorTask::Command {

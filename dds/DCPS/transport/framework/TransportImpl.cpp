@@ -101,11 +101,12 @@ TransportImpl::add_pending_connection(const TransportClient_rch& client, DataLin
 void
 TransportImpl::create_reactor_task(bool useAsyncSend, const OPENDDS_STRING& name)
 {
-  if (is_shut_down_ || this->reactor_task_.in()) {
+  if (is_shut_down_ || reactor_task_) {
     return;
   }
 
-  this->reactor_task_= make_rch<ReactorTask>(useAsyncSend);
+  reactor_task_ = make_rch<ReactorTask>(useAsyncSend);
+  reactor_task_->job_queue(TheServiceParticipant->job_queue());
 
   if (reactor_task_->open_reactor_task(&TheServiceParticipant->get_thread_status_manager(), name)) {
     throw Transport::MiscProblem(); // error already logged by TRT::open()

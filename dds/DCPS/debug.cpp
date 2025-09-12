@@ -124,7 +124,7 @@ ACE_Log_Priority LogLevel::to_priority(Value val)
 
 OpenDDS_Dcps_Export void set_DCPS_debug_level(unsigned int lvl)
 {
-  if (log_level.get() < LogLevel::Debug) {
+  if (lvl > 0 && log_level.get() < LogLevel::Debug) {
     log_level.set(LogLevel::Debug);
   }
   if (log_level >= LogLevel::Info) {

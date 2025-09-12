@@ -2550,12 +2550,9 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
                                  rchandle_from(this), &SpdpTransport::relay_stun_task);
 #endif
 
-#ifndef DDS_HAS_MINIMUM_BIT
-  // internal thread bit reporting
   if (TheServiceParticipant->get_thread_status_manager().update_thread_status() && outer->harvest_thread_status_) {
-    thread_status_task_ = DCPS::make_rch<PeriodicThreadStatus>(reactor_task, ref(*this));
+    init_thread_status_task();
   }
-#endif /* DDS_HAS_MINIMUM_BIT */
 
   // Connect the listeners last so that the tasks are created.
   DCPS::ConfigListener::job_queue(job_queue);
@@ -2565,6 +2562,22 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
   DCPS::InternalDataReaderListener<DCPS::NetworkInterfaceAddress>::job_queue(job_queue);
   network_interface_address_reader_ = DCPS::make_rch<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> >(DCPS::DataReaderQosBuilder().reliability_reliable().durability_transient_local(), rchandle_from(this));
   TheServiceParticipant->network_interface_address_topic()->connect(network_interface_address_reader_);
+}
+
+
+void Spdp::SpdpTransport::init_thread_status_task()
+{
+#ifndef DDS_HAS_MINIMUM_BIT
+  const DCPS::RcHandle<Spdp> outer = outer_.lock();
+  if (!outer) return;
+
+  if (!thread_status_task_ && outer->harvest_thread_status_) {
+    const DCPS::RcHandle<Sedp> sedp = outer->sedp_;
+    if (!sedp) return;
+    const DCPS::ReactorTask_rch reactor_task = sedp->reactor_task();
+    thread_status_task_ = DCPS::make_rch<PeriodicThreadStatus>(reactor_task, ref(*this));
+  }
+#endif /* DDS_HAS_MINIMUM_BIT */
 }
 
 Spdp::SpdpTransport::~SpdpTransport()
@@ -3725,8 +3738,17 @@ void Spdp::SpdpTransport::on_data_available(DCPS::ConfigReader_rch)
                        DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
   for (size_t idx = 0; idx != samples.size(); ++idx) {
     const DCPS::ConfigPair& sample = samples[idx];
-
-    if (sample.key_has_prefix(config_prefix)) {
+    if (sample.key() == DCPS::COMMON_DCPS_THREAD_STATUS_INTERVAL) {
+      const TimeDuration val(std::atoi(sample.value().c_str()));
+      init_thread_status_task();
+      if (thread_status_task_) {
+        if (val) {
+          thread_status_task_->enable(true, val);
+        } else {
+          thread_status_task_->disable();
+        }
+      }
+    } else if (sample.key_has_prefix(config_prefix)) {
       has_prefix = true;
 #if OPENDDS_CONFIG_SECURITY
       if (config->config_key("RTPS_RELAY_ONLY") == sample.key()) {
