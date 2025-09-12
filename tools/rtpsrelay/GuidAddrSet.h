@@ -1,7 +1,6 @@
 #ifndef RTPSRELAY_GUID_ADDR_SET_H_
 #define RTPSRELAY_GUID_ADDR_SET_H_
 
-#include "ParticipantStatisticsReporter.h"
 #include "RelayStatisticsReporter.h"
 #include "RelayThreadMonitor.h"
 

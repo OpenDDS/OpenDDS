@@ -5,7 +5,6 @@
 #include "GuidAddrSet.h"
 #include "GuidPartitionTable.h"
 #include "HandlerStatisticsReporter.h"
-#include "ParticipantStatisticsReporter.h"
 #include "RelayPartitionTable.h"
 #include "RelayStatisticsReporter.h"
 

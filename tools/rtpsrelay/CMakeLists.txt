@@ -13,7 +13,6 @@ add_executable(RtpsRelay
   GuidAddrSet.cpp
   GuidPartitionTable.cpp
   ParticipantListener.cpp
-  ParticipantStatisticsReporter.cpp
   PublicationListener.cpp
   RelayAddressListener.cpp
   RelayConfigControlListener.cpp
