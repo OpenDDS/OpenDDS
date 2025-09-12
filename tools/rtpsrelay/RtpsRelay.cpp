@@ -7,7 +7,6 @@
 
 #include "GuidPartitionTable.h"
 #include "ParticipantListener.h"
-#include "ParticipantStatisticsReporter.h"
 #include "PublicationListener.h"
 #include "RelayAddressListener.h"
 #include "RelayConfigControlListener.h"
@@ -209,17 +208,11 @@ int run(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-LogHandlerStatistics"))) {
       config.log_handler_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogParticipantStatistics"))) {
-      config.log_participant_statistics(ACE_OS::atoi(arg));
-      args.consume_arg();
     } else if ((arg = args.get_the_parameter("-PublishRelayStatistics"))) {
       config.publish_relay_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-PublishHandlerStatistics"))) {
       config.publish_handler_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-PublishParticipantStatistics"))) {
-      config.publish_participant_statistics(ACE_OS::atoi(arg));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-PublishRelayStatusLiveliness"))) {
       config.publish_relay_status_liveliness(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
@@ -509,24 +502,6 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  ParticipantStatisticsTypeSupport_var participant_statistics_ts = new ParticipantStatisticsTypeSupportImpl;
-  if (participant_statistics_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to register ParticipantStatistics type\n"));
-    return EXIT_FAILURE;
-  }
-  CORBA::String_var participant_statistics_type_name = participant_statistics_ts->get_type_name();
-
-  DDS::Topic_var participant_statistics_topic =
-    relay_participant->create_topic(PARTICIPANT_STATISTICS_TOPIC_NAME.c_str(),
-                                    participant_statistics_type_name,
-                                    TOPIC_QOS_DEFAULT, nullptr,
-                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-  if (!participant_statistics_topic) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Participant Statistics topic\n"));
-    return EXIT_FAILURE;
-  }
-
   // Setup relay publisher and subscriber.
   DDS::PublisherQos publisher_qos;
   relay_participant->get_default_publisher_qos(publisher_qos);
@@ -605,27 +580,6 @@ int run(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to narrow Handler Statistics data writer\n"));
     return EXIT_FAILURE;
   }
-
-  DDS::DataWriterQos participant_statistics_writer_qos = writer_qos;
-  participant_statistics_writer_qos.writer_data_lifecycle.autodispose_unregistered_instances = false;
-  DDS::DataWriterListener_var participant_statistics_writer_listener =
-    new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::participant_statistics_sub_count);
-  DDS::DataWriter_var participant_statistics_writer_var = relay_publisher->create_datawriter(participant_statistics_topic, participant_statistics_writer_qos, participant_statistics_writer_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  if (!participant_statistics_writer_var) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Participant Statistics data writer\n"));
-    return EXIT_FAILURE;
-  }
-
-  ParticipantStatisticsDataWriter_var participant_statistics_writer = ParticipantStatisticsDataWriter::_narrow(participant_statistics_writer_var);
-  if (!participant_statistics_writer) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to narrow Participant Statistics data writer\n"));
-    return EXIT_FAILURE;
-  }
-
-  ParticipantStatisticsReporter::config = &config;
-  ParticipantStatisticsReporter::writer = participant_statistics_writer;
-  DDS::Topic_var participant_stats_topic = participant_statistics_writer->get_topic();
-  ParticipantStatisticsReporter::topic_name = participant_stats_topic->get_name();
 
   // Configure ports and addresses.
   auto port_horizontal = nic_horizontal.get_port_number();

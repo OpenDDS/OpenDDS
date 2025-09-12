@@ -46,8 +46,6 @@ public:
     , thread_status_safety_factor_(3)
     , utilization_limit_(.95)
     , log_utilization_changes_(false)
-    , log_participant_statistics_(false)
-    , publish_participant_statistics_(false)
     , restart_detection_(false)
     , admission_control_queue_size_(0)
     , max_ips_per_client_(0)
@@ -229,16 +227,6 @@ public:
     return log_handler_statistics_;
   }
 
-  void log_participant_statistics(bool value)
-  {
-    log_participant_statistics_ = value;
-  }
-
-  bool log_participant_statistics() const
-  {
-    return log_participant_statistics_;
-  }
-
   void publish_relay_statistics(OpenDDS::DCPS::TimeDuration value)
   {
     publish_relay_statistics_ = value;
@@ -257,16 +245,6 @@ public:
   OpenDDS::DCPS::TimeDuration publish_handler_statistics() const
   {
     return publish_handler_statistics_;
-  }
-
-  void publish_participant_statistics(bool value)
-  {
-    publish_participant_statistics_ = value;
-  }
-
-  bool publish_participant_statistics() const
-  {
-    return publish_participant_statistics_;
   }
 
   void publish_relay_status(OpenDDS::DCPS::TimeDuration value)
@@ -414,10 +392,8 @@ private:
   bool log_utilization_changes_;
   OpenDDS::DCPS::TimeDuration log_relay_statistics_;
   OpenDDS::DCPS::TimeDuration log_handler_statistics_;
-  bool log_participant_statistics_;
   OpenDDS::DCPS::TimeDuration publish_relay_statistics_;
   OpenDDS::DCPS::TimeDuration publish_handler_statistics_;
-  bool publish_participant_statistics_;
   OpenDDS::DCPS::TimeDuration publish_relay_status_;
   OpenDDS::DCPS::TimeDuration publish_relay_status_liveliness_;
   bool restart_detection_;
