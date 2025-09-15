@@ -66,7 +66,6 @@ sub get_relay_args {
         "-LogActivity 1",
         "-LogThreadStatus 1",
         "-LogRelayStatistics 3",
-        "-LogParticipantStatistics 1",
         "-DCPSConfigFile relay${n}.ini",
         "-ApplicationDomain 42",
         "-VerticalAddress ${port_digit}444",
