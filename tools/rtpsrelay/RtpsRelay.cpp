@@ -764,8 +764,8 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Application Participant GUID %C\n",
-    OpenDDS::DCPS::LogGuid(config.application_participant_guid()).c_str()));
+  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Application Participant GUID %C Id %C\n",
+    OpenDDS::DCPS::LogGuid(config.application_participant_guid()).c_str(), config.relay_id().c_str()));
   ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SPDP Horizontal %d listening on %C\n",
     handle_to_int(spdp_horizontal_handler.get_handle()), OpenDDS::DCPS::LogAddr(spdp_horizontal_addr).c_str()));
   ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SEDP Horizontal %d listening on %C\n",
