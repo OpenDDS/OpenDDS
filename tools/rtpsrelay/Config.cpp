@@ -55,17 +55,11 @@ bool Config::from_arg(ACE_Arg_Shifter_T<char>& args)
   } else if ((arg = args.get_the_parameter("-LogHandlerStatistics"))) {
     log_handler_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
     args.consume_arg();
-  } else if ((arg = args.get_the_parameter("-LogParticipantStatistics"))) {
-    log_participant_statistics(ACE_OS::atoi(arg));
-    args.consume_arg();
   } else if ((arg = args.get_the_parameter("-PublishRelayStatistics"))) {
     publish_relay_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
     args.consume_arg();
   } else if ((arg = args.get_the_parameter("-PublishHandlerStatistics"))) {
     publish_handler_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-    args.consume_arg();
-  } else if ((arg = args.get_the_parameter("-PublishParticipantStatistics"))) {
-    publish_participant_statistics(ACE_OS::atoi(arg));
     args.consume_arg();
   } else if ((arg = args.get_the_parameter("-PublishRelayStatusLiveliness"))) {
     publish_relay_status_liveliness(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
@@ -180,17 +174,11 @@ void Config::set_defaults()
   cached_log_handler_statistics_.default_if_empty([&](const TimeDuration& default_val) {
     log_handler_statistics(default_val);
   });
-  cached_log_participant_statistics_.default_if_empty([&](bool default_val) {
-    log_participant_statistics(default_val);
-  });
   cached_publish_relay_statistics_.default_if_empty([&](const TimeDuration& default_val) {
     publish_relay_statistics(default_val);
   });
   cached_publish_handler_statistics_.default_if_empty([&](const TimeDuration& default_val) {
     publish_handler_statistics(default_val);
-  });
-  cached_publish_participant_statistics_.default_if_empty([&](bool default_val) {
-    publish_participant_statistics(default_val);
   });
   cached_publish_relay_status_.default_if_empty([&](const TimeDuration& default_val) {
     publish_relay_status(default_val);
