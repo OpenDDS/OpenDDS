@@ -529,6 +529,8 @@ Service_Participant::get_domain_participant_factory(int &argc,
     }
   }
 
+  config_reader_listener_->job_queue(job_queue_);
+  config_reader_->set_listener(config_reader_listener_);
   return DDS::DomainParticipantFactory::_duplicate(dp_factory_servant_.in());
 }
 
