@@ -262,15 +262,11 @@ The command-line options for the RtpsRelay:
 
 .. option:: -LogHandlerStatistics <seconds>
 
-.. option:: -LogParticipantStatistics <seconds>
-
   Write statistics for the various event types to the log at the given interval, defaults to 0 (disabled).
 
 .. option:: -PublishRelayStatistics <seconds>
 
 .. option:: -PublishHandlerStatistics <seconds>
-
-.. option:: -PublishParticipantStatistics <seconds>
 
   Configure the relay to publish usage statistics on DDS topics at the given interval, defaults to 0 (disabled).
 
