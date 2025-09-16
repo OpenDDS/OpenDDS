@@ -368,7 +368,7 @@ For API levels greater than or equal to 28, a transcoder -- GNU libiconv -- is i
 Before 28 any of the transcoders supported by Xerces would work but GNU libiconv was the one tested.
 If GNU libiconv is used, build it as an archive library (``--disable-shared``) so that the users of Xerces (ACE and OpenDDS) don't need it as an additional runtime dependency.
 
-Download `GNU libiconv <https://ftp.gnu.org/pub/gnu/libiconv>`__ version 1.16 source code and extract the archive.
+Download `GNU libiconv <https://ftp.gnu.org/pub/gnu/libiconv/>`__ version 1.16 source code and extract the archive.
 
 Cross-compiling on Windows
 ^^^^^^^^^^^^^^^^^^^^^^^^^^

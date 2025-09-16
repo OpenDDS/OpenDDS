@@ -309,16 +309,6 @@ public:
     return cached_log_handler_statistics_.get();
   }
 
-  void log_participant_statistics(bool value)
-  {
-    TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_PARTICIPANT_STATISTICS, value);
-  }
-
-  bool log_participant_statistics() const
-  {
-    return cached_log_participant_statistics_.get();
-  }
-
   void publish_relay_statistics(const OpenDDS::DCPS::TimeDuration& value)
   {
     TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_PUBLISH_RELAY_STATISTICS, value.to_dds_duration());
@@ -337,16 +327,6 @@ public:
   OpenDDS::DCPS::TimeDuration publish_handler_statistics() const
   {
     return cached_publish_handler_statistics_.get();
-  }
-
-  void publish_participant_statistics(bool value)
-  {
-    TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_PUBLISH_PARTICIPANT_STATISTICS, value);
-  }
-
-  bool publish_participant_statistics() const
-  {
-    return cached_publish_participant_statistics_.get();
   }
 
   void publish_relay_status(const OpenDDS::DCPS::TimeDuration& value)
