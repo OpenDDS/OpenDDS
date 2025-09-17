@@ -70,17 +70,11 @@ const DDS::Duration_t RTPS_RELAY_LOG_RELAY_STATISTICS_default = {0, 0};
 const char RTPS_RELAY_LOG_HANDLER_STATISTICS[] = "RTPS_RELAY_LOG_HANDLER_STATISTICS";
 const DDS::Duration_t RTPS_RELAY_LOG_HANDLER_STATISTICS_default = {0, 0};
 
-const char RTPS_RELAY_LOG_PARTICIPANT_STATISTICS[] = "RTPS_RELAY_LOG_PARTICIPANT_STATISTICS";
-const bool RTPS_RELAY_LOG_PARTICIPANT_STATISTICS_default = false;
-
 const char RTPS_RELAY_PUBLISH_RELAY_STATISTICS[] = "RTPS_RELAY_PUBLISH_RELAY_STATISTICS";
 const DDS::Duration_t RTPS_RELAY_PUBLISH_RELAY_STATISTICS_default = {0, 0};
 
 const char RTPS_RELAY_PUBLISH_HANDLER_STATISTICS[] = "RTPS_RELAY_PUBLISH_HANDLER_STATISTICS";
 const DDS::Duration_t RTPS_RELAY_PUBLISH_HANDLER_STATISTICS_default = {0, 0};
-
-const char RTPS_RELAY_PUBLISH_PARTICIPANT_STATISTICS[] = "RTPS_RELAY_PUBLISH_PARTICIPANT_STATISTICS";
-const bool RTPS_RELAY_PUBLISH_PARTICIPANT_STATISTICS_default = false;
 
 const char RTPS_RELAY_PUBLISH_RELAY_STATUS[] = "RTPS_RELAY_PUBLISH_RELAY_STATUS";
 const DDS::Duration_t RTPS_RELAY_PUBLISH_RELAY_STATUS_default = {0, 0};
@@ -512,10 +506,8 @@ private:
   CachedValue<bool, OpenDDS::DCPS::ConfigStoreImpl::convert_value> cached_log_utilization_changes_{RTPS_RELAY_LOG_UTILIZATION_CHANGES_default};
   CachedValue<OpenDDS::DCPS::TimeDuration, to_time_duration> cached_log_relay_statistics_{OpenDDS::DCPS::TimeDuration{RTPS_RELAY_LOG_RELAY_STATISTICS_default}};
   CachedValue<OpenDDS::DCPS::TimeDuration, to_time_duration> cached_log_handler_statistics_{OpenDDS::DCPS::TimeDuration{RTPS_RELAY_LOG_HANDLER_STATISTICS_default}};
-  CachedValue<bool, OpenDDS::DCPS::ConfigStoreImpl::convert_value> cached_log_participant_statistics_{RTPS_RELAY_LOG_PARTICIPANT_STATISTICS_default};
   CachedValue<OpenDDS::DCPS::TimeDuration, to_time_duration> cached_publish_relay_statistics_{OpenDDS::DCPS::TimeDuration{RTPS_RELAY_PUBLISH_RELAY_STATISTICS_default}};
   CachedValue<OpenDDS::DCPS::TimeDuration, to_time_duration> cached_publish_handler_statistics_{OpenDDS::DCPS::TimeDuration{RTPS_RELAY_PUBLISH_HANDLER_STATISTICS_default}};
-  CachedValue<bool, OpenDDS::DCPS::ConfigStoreImpl::convert_value> cached_publish_participant_statistics_{RTPS_RELAY_PUBLISH_PARTICIPANT_STATISTICS_default};
   CachedValue<OpenDDS::DCPS::TimeDuration, to_time_duration> cached_publish_relay_status_{OpenDDS::DCPS::TimeDuration{RTPS_RELAY_PUBLISH_RELAY_STATUS_default}};
   CachedValue<OpenDDS::DCPS::TimeDuration, to_time_duration> cached_publish_relay_status_liveliness_{OpenDDS::DCPS::TimeDuration{RTPS_RELAY_PUBLISH_RELAY_STATUS_LIVELINESS_default}};
   CachedValue<bool, OpenDDS::DCPS::ConfigStoreImpl::convert_value> cached_restart_detection_{RTPS_RELAY_RESTART_DETECTION_default};

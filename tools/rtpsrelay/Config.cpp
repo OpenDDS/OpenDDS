@@ -243,14 +243,10 @@ void Config::on_data_available(InternalDataReader_rch reader)
         cached_log_relay_statistics_.set(pair.value());
       } else if (pair.key() == RTPS_RELAY_LOG_HANDLER_STATISTICS) {
         cached_log_handler_statistics_.set(pair.value());
-      } else if (pair.key() == RTPS_RELAY_LOG_PARTICIPANT_STATISTICS) {
-        cached_log_participant_statistics_.set(pair.value());
       } else if (pair.key() == RTPS_RELAY_PUBLISH_RELAY_STATISTICS) {
         cached_publish_relay_statistics_.set(pair.value());
       } else if (pair.key() == RTPS_RELAY_PUBLISH_HANDLER_STATISTICS) {
         cached_publish_handler_statistics_.set(pair.value());
-      } else if (pair.key() == RTPS_RELAY_PUBLISH_PARTICIPANT_STATISTICS) {
-        cached_publish_participant_statistics_.set(pair.value());
       } else if (pair.key() == RTPS_RELAY_PUBLISH_RELAY_STATUS) {
         cached_publish_relay_status_.set(pair.value());
       } else if (pair.key() == RTPS_RELAY_PUBLISH_RELAY_STATUS_LIVELINESS) {
