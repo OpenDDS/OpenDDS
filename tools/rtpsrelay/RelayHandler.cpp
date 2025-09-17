@@ -397,7 +397,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     }
 
     OpenDDS::STUN::Message response;
-    bool response_needed = true;
+    bool response_needed = false;
 
     switch (message.method) {
     case OpenDDS::STUN::BINDING:
