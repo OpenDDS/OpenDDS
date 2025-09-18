@@ -25,6 +25,26 @@ namespace DCPS {
 
 // The Statistics struct is defined in dds/OpenddsDcpsExt.idl
 
+#ifndef OPENDDS_SAFETY_PROFILE
+inline bool operator==(const Statistic& lhs, const Statistic& rhs)
+{
+  return lhs.name == rhs.name && lhs.value == rhs.value;
+}
+
+inline bool operator==(const Statistics& lhs, const Statistics& rhs)
+{
+  if (lhs.id != rhs.id || lhs.stats.length() != rhs.stats.length()) {
+    return false;
+  }
+  for (DDS::UInt32 i = 0; i < lhs.stats.length(); ++i) {
+    if (!(lhs.stats[i] == rhs.stats[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+#endif
+
 template <>
 struct InternalTraits<Statistics> {
   struct KeyCompare {

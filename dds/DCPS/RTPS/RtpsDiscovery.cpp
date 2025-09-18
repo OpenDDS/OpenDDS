@@ -34,7 +34,8 @@ namespace RTPS {
 using DCPS::TimeDuration;
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
-  : key_(key)
+  : InternalDataReaderListener(TheServiceParticipant->job_queue())
+  , key_(key)
   , config_(DCPS::make_rch<RtpsDiscoveryConfig>(key))
   , stats_writer_(DCPS::make_rch<DCPS::StatisticsDataWriter>(DCPS::DataWriterQosBuilder().durability_transient_local(), TheServiceParticipant->time_source()))
   , stats_task_(DCPS::make_rch<PeriodicTask>(TheServiceParticipant->reactor_task(), *this, &RtpsDiscovery::write_stats))
@@ -45,6 +46,7 @@ RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
 RtpsDiscovery::~RtpsDiscovery()
 {
   TheServiceParticipant->statistics_topic()->disconnect(stats_writer_);
+  TheServiceParticipant->config_topic()->disconnect(config_reader_);
 }
 
 int
@@ -194,10 +196,8 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
     // ads.id may change during Spdp constructor
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, participants_lock_, ads);
     participants_[domain][ads.id] = spdp;
-    const DCPS::TimeDuration period = TheServiceParticipant->statistics_period();
-    if (!period.is_zero()) {
-      stats_task_->enable(false, period);
-    }
+    setup_stats_task(TheServiceParticipant->statistics_period());
+
   } catch (const std::exception& e) {
     ads.id = GUID_UNKNOWN;
     ACE_ERROR((LM_ERROR, "(%P|%t) RtpsDiscovery::add_domain_participant() - "
@@ -225,10 +225,8 @@ RtpsDiscovery::add_domain_participant_secure(
       domain, ads.id, qos, this, tls, id, perm, part_crypto));
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, participants_lock_, ads);
     participants_[domain][ads.id] = spdp;
-    const DCPS::TimeDuration period = TheServiceParticipant->statistics_period();
-    if (!period.is_zero()) {
-      stats_task_->enable(false, period);
-    }
+    setup_stats_task(TheServiceParticipant->statistics_period());
+
   } catch (const std::exception& e) {
     ads.id = GUID_UNKNOWN;
     ACE_ERROR((LM_WARNING, "(%P|%t) RtpsDiscovery::add_domain_participant_secure() - "
@@ -238,6 +236,25 @@ RtpsDiscovery::add_domain_participant_secure(
   return ads;
 }
 #endif
+
+void RtpsDiscovery::setup_stats_task(const DCPS::TimeDuration& period)
+{
+  if (period == stats_task_period_) {
+    return;
+  }
+  stats_task_period_ = period;
+
+  if (period.is_zero()) {
+    stats_task_->disable();
+  } else {
+    stats_task_->enable(true, period);
+  }
+
+  if (!config_reader_) {
+    config_reader_ = DCPS::make_rch<DCPS::ConfigReader>(DCPS::ConfigStoreImpl::datareader_qos(), rchandle_from(this));
+    TheServiceParticipant->config_topic()->connect(config_reader_);
+  }
+}
 
 void
 RtpsDiscovery::signal_liveliness(const DDS::DomainId_t domain_id,
@@ -810,6 +827,24 @@ void RtpsDiscovery::write_stats(const MonotonicTimePoint&) const
                        + DCPS::to_dds_string(domain->first)).c_str();
       part->second->fill_stats(statistics.stats);
       stats_writer_->write(statistics);
+    }
+  }
+}
+
+void RtpsDiscovery::on_data_available(DCPS::ConfigReader_rch reader)
+{
+  DCPS::ConfigReader::SampleSequence samples;
+  DCPS::InternalSampleInfoSequence infos;
+  reader->read(samples, infos, DDS::LENGTH_UNLIMITED,
+               DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+  for (size_t idx = 0; idx != samples.size(); ++idx) {
+    const DCPS::ConfigPair& sample = samples[idx];
+
+    if (sample.key() == DCPS::COMMON_STATISTICS_PERIOD) {
+      DCPS::TimeDuration period;
+      if (DCPS::ConfigStoreImpl::convert_value(sample, DCPS::ConfigStoreImpl::Format_FractionalSeconds, period)) {
+        setup_stats_task(period);
+      }
     }
   }
 }
