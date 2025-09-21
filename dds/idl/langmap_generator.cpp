@@ -1621,8 +1621,7 @@ struct Cxx11Generator : GeneratorBase {
 
   static void union_field(AST_UnionBranch* branch)
   {
-    AST_Type* field_type = branch->field_type();
-    const std::string lang_field_type = generator_->map_type(field_type);
+    const std::string lang_field_type = generator_->map_type(branch);
     be_global->lang_header_ <<
       "    " << lang_field_type << " _" << branch->local_name()->get_string()
       << ";\n";
@@ -1645,7 +1644,7 @@ struct Cxx11Generator : GeneratorBase {
 
     AST_Type* field_type = branch->field_type();
     AST_Type* actual_field_type = resolveActualType(field_type);
-    const std::string lang_field_type = generator_->map_type(field_type);
+    const std::string lang_field_type = generator_->map_type(branch);
     const Classification cls = classify(actual_field_type);
     const char* nm = branch->local_name()->get_string();
 
