@@ -573,9 +573,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   }
 
   for (CORBA::ULong i = 0; i < updated_writers.length(); ++i) {
-    {
-      this->disassociate(updated_writers[i]);
-    }
+    disassociate(updated_writers[i]);
   }
 
   // Mirror the add_associations SUBSCRIPTION_MATCHED_STATUS processing.
@@ -583,9 +581,9 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
     ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publication_handle_lock_);
 
     // Derive the change in the number of publications writing to this reader.
-    int matchedPublications = static_cast<int>(this->publication_id_to_handle_map_.size());
-    this->subscription_match_status_.current_count_change
-    = matchedPublications - this->subscription_match_status_.current_count;
+    const int matchedPublications = static_cast<int>(publication_id_to_handle_map_.size());
+    subscription_match_status_.current_count_change =
+      matchedPublications - subscription_match_status_.current_count;
 
     // Only process status if the number of publications has changed.
     if (this->subscription_match_status_.current_count_change != 0) {
@@ -594,15 +592,12 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
       /// Section 7.1.4.1: total_count will not decrement.
 
       /// @TODO: Reconcile this with the verbiage in section 7.1.4.1
-      this->subscription_match_status_.last_publication_handle
-      = handles[ wr_len - 1];
+      subscription_match_status_.last_publication_handle = handles[wr_len - 1];
 
       set_status_changed_flag(DDS::SUBSCRIPTION_MATCHED_STATUS, true);
 
-      DDS::DataReaderListener_var listener
-      = listener_for(DDS::SUBSCRIPTION_MATCHED_STATUS);
-
-      if (!CORBA::is_nil(listener.in())) {
+      DDS::DataReaderListener_var listener = listener_for(DDS::SUBSCRIPTION_MATCHED_STATUS);
+      if (listener) {
         listener->on_subscription_matched(this, this->subscription_match_status_);
 
         // Client will look at it so next time it looks the change should be 0
@@ -622,6 +617,13 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
 
   if (this->monitor_) {
     this->monitor_->report();
+  }
+
+  {
+    const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+    for (unsigned int i = 0; i < handles.length(); ++i) {
+      participant->return_handle(handles[i]);
+    }
   }
 }
 
