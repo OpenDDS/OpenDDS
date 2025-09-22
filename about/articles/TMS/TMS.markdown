@@ -48,28 +48,28 @@ Figure 3: Device roles in a TMS system [^1]
 
 Below, we give a brief description of each component. First, the roles for control devices:
 
-**Microgrid Dashboard** (MD): receives operating information from the Microgrid Controller and displays it to the operator.
+- **Microgrid Dashboard** (MD): receives operating information from the Microgrid Controller and displays it to the operator.
 It can also allow the operator to manually control the microgrid. Instructions from the MD will be sent to the Microgrid Controller.
 
-**Microgrid Controller** (MC): incorporates the instructions from MD and operating information from power devices to build awareness of the current operating situation.
+- **Microgrid Controller** (MC): incorporates the instructions from MD and operating information from power devices to build awareness of the current operating situation.
 It then instructs the individual power devices accordingly.
 
-**Monitor** (MON): records and displays the data exchanged between devices in the microgrid.
+- **Monitor** (MON): records and displays the data exchanged between devices in the microgrid.
 
 Next, roles from the power devices:
 
-**Source** (SRC): device that generates power, such as those containing a generator or solar panel.
+- **Source** (SRC): device that generates power, such as those containing a generator or solar panel.
 It has a single power port to connect to other devices for distributing or consuming power.
 
-**Storage** (STOR): a device that stores energy and has a power port to provide energy to other devices.
+- **Storage** (STOR): a device that stores energy and has a power port to provide energy to other devices.
 
-**Load** (LOAD): a device that consumes power. It also has a single power port for receiving power.
+- **Load** (LOAD): a device that consumes power. It also has a single power port for receiving power.
 
-**Distribution** (DIST): a power distributing device that has two or more power ports.
+- **Distribution** (DIST): a power distributing device that has two or more power ports.
 
-**Conversion** (CONV): contains multiple power ports with power converters, which allow converting both voltage and frequency.
+- **Conversion** (CONV): contains multiple power ports with power converters, which allow converting both voltage and frequency.
 
-Besides the components for handling power-related functionalities, each of these power devices has a Device Controller component that communicates with other devices and the Microgrid Controller using the DDS topics defined in the TMS specification.
+Besides the components for handling power-related functionalities, each of these power devices has a Device Controller component that communicates with other devices and the microgrid controller using the DDS topics defined in the TMS specification.
 
 For simplicity, we assume that each device only implements a single logical component for the rest of this article.
 For example, a physical device can only perform power distribution or conversion, but not both.
@@ -101,12 +101,12 @@ However, it will likely be added to the standard in a future revision to leverag
 OpenDDS, an open-source implementation of DDS, supports all of the DDS specifications mentioned in this section.
 In particular, it implements DDS-XTypes for extensible and dynamic topic types and its necessary IDL extensions, DDS-RTPS for interoperability with other DDS implementations, and DDS Security.
 In the next section, we demonstrate an application that simulates a TMS-compliant microgrid using OpenDDS.
-In the subsequent section, we provide more details on and references to OpenDDS resources.
+In a subsequent section, we provide more details on and references to OpenDDS resources.
 
 ## TMS Demo Using OpenDDS
 
-We developed a set of applications that simulate devices common to TMS-compliant microgrids including a Microgrid Controller, a Source, a Load, and a Distribution device.
-The simulation is driven by a command-line interface (CLI) program that sets up the topology of the power devices and acts partially as a Microgrid Dashboard from which an operator can issue commands to the devices in the microgrid.
+We developed a set of applications that simulate devices common to TMS-compliant microgrids including a microgrid controller, a source, a load, and a distribution device.
+The simulation is driven by a command-line interface (CLI) program that sets up the topology of the power devices and acts partially as a microgrid dashboard from which an operator can issue commands to the devices in the microgrid.
 
 The following diagram shows the components of the simulated microgrid.
 
@@ -139,7 +139,7 @@ This topic contains the device’s identity, role, TMS topics that it supports, 
 ![DeviceInfo data flow](images/TMS_DeviceInfo.jpg "DeviceInfo topic")
 Figure 5: Devices announce their information
 
-Below is a screenshot of the opendds-monitor tool for displaying the contents of the TMS `DeviceInfo` sample sent from a controller, named TestMC.
+Below is a screenshot of the opendds-monitor tool for displaying the contents of the TMS `DeviceInfo` sample sent from a controller, named "TestMC".
 On the left-hand side, the monitor lists the topics for which it detects publishers and subscribers.
 When a topic is selected from the left-hand side list, a tab is created for that topic on the right-hand side.
 This tab displays a history table containing a list of samples for the topic associated with this tab, and the details of a sample selected from the history table.
@@ -157,7 +157,7 @@ Figure 7: Devices maintain their liveliness using TMS `Heartbeat`
 
 ### Operator Input
 
-This data flow allows an operator of the microgrid to enter their input to influence the operation of the microgrid through the Microgrid Dashboard (MD).
+This data flow allows an operator of the microgrid to enter their input to influence the operation of the microgrid through the microgrid dashboard.
 This is done via the TMS `OperatorIntentRequest` topic.
 In this demo, we use this data flow to start and stop a power device.
 For example, we can stop a source device and observe that the power stops flowing from this device to other devices, such as load or distribution devices.
@@ -183,7 +183,7 @@ It can also be the result of an `OperatorIntentRequest` request issued earlier b
 The TMS topic used in this flow is `EnergyStartStopRequest`, as shown in the diagram below.
 
 ![EnergyStartStopRequest data flow](images/TMS_EnergyStartStopRequest.jpg "EnergyStartStopRequest topic")
-Figure 10: MC requests a change to the energy level of SRC or STOR
+Figure 10: MC requests a change to the energy level of a SRC or STOR
 
 An example of the contents of the `EnergyStartStopRequest` topic is shown in a screenshot of the opendds-monitor below.
 The member `requestId` contains nested fields for specifying the identities of the sending and receiving devices.
@@ -212,21 +212,21 @@ The TMS spec describes the microgrid controller selection algorithm and a corres
 The provided algorithm and its state diagram, however, are simplified and lack details on how some specific actions should be performed.
 We, therefore, break down the state diagram further into a more detailed diagram with additional states that better describe our implementation.
 Our implementation of the microgrid controller selection algorithm has additional steps that are not described in the TMS spec.
-Interested readers are referred to the Appendix section for more details on our implementation.
+Interested readers are referred to the [Appendix](#appendix) section for more details on our implementation.
 
 #### Data Flow
 
 The microgrid controller selection algorithm is mainly driven by the heartbeats of the MCs and the three timers: New MC, Lost Active MC, and No MC timers.
-In addition to the TMS Heartbeat topic, when a power device experiences a change in its active MC, it publishes to the TMS ActiveMicrogridControllerState topic to notify the control devices of its current active MC.
+In addition to the TMS `Heartbeat` topic, when a power device experiences a change in its active MC, it publishes to the TMS `ActiveMicrogridControllerState` topic to notify the control devices of its current active MC.
 
 ![ActiveMicrogridControllerState data flow](images/TMS_ActiveMicrogridControllerState.jpg "ActiveMicrogridControllerState topic")
 Figure 12: Power device notifies a change to active MC
 
-The figure below shows a sample of the ActiveMicrogridControllerState topic, sent from the SRC, named “TestSource”, to notify its current active MC, named “TestMC”.
-The masterId member is optional (annotated with @optional in IDL) and can be empty to indicate that the power device doesn’t have an active MC.
+The figure below shows a sample of the `ActiveMicrogridControllerState` topic, sent from the SRC, named “TestSource”, to notify its current active MC, named “TestMC”.
+The `masterId` member is optional (annotated with `@optional` in IDL) and can be empty to indicate that the power device doesn’t have an active MC.
 
 ![ActiveMicrogridControllerState sample](images/monitor_ActiveMicrogridControllerState.jpg "ActiveMicrogridControllerState in opendds-monitor")
-Figure 13: An ActiveMicrogridControllerState sample captured by opendds-monitor
+Figure 13: An `ActiveMicrogridControllerState` sample captured by opendds-monitor
 
 ## Simulation Data Flows
 
@@ -236,11 +236,11 @@ In the following sections, we briefly describe these data flows and topics.
 
 ### Power Devices List
 
-The controllers learn about the power devices in the microgrid through the TMS Handshaking function, including the DeviceInfo and the periodic Heartbeat messages.
+The controllers learn about the power devices in the microgrid through the TMS Handshaking function, including the `DeviceInfo` and the periodic `Heartbeat` messages.
 However, the power devices initially are isolated processes as there are no connections between them to simulate the power topology of devices in an actual microgrid.
 
-With this data flow, the CLI can send a request to the controllers by publishing to the PowerDevicesRequest topic.
-It then receives back the list of power devices in the simulated TMS domain using the PowerDevicesReply topic.
+With this data flow, the CLI can send a request to the controllers by publishing to the `PowerDevicesRequest` topic.
+It then receives back the list of power devices in the simulated TMS domain using the `PowerDevicesReply` topic.
 The power devices list can then be displayed to the user so that they can connect the devices as they desire.
 
 ![PowerDevicesRequest data flow](images/TMS_PowerDevicesRequest.jpg "PowerDevicesRequest topic")
@@ -248,90 +248,96 @@ Figure 14: CLI requests the list of power devices in the TMS domain
 
 The IDL for these two topics are shown below.
 
-  @topic
-  @final
-  struct PowerDevicesRequest {
-    @key tms::Identity mc_id;
-  };
+```
+@topic
+@final
+struct PowerDevicesRequest {
+  @key tms::Identity mc_id;
+};
 
-  @nested
-  @appendable
-  struct PowerDeviceInfo {
-    tms::DeviceInfo device_info;
-    tms::EnergyStartStopLevel essl;
-    @optional tms::Identity master_id;
-  };
-  typedef sequence<PowerDeviceInfo> PowerDeviceInfoSeq;
+@nested
+@appendable
+struct PowerDeviceInfo {
+  tms::DeviceInfo device_info;
+  tms::EnergyStartStopLevel essl;
+  @optional tms::Identity master_id;
+};
+typedef sequence<PowerDeviceInfo> PowerDeviceInfoSeq;
 
-  @topic
-  @final
-  struct PowerDevicesReply {
-    @key tms::Identity mc_id;
-    PowerDeviceInfoSeq devices;
-  };
+@topic
+@final
+struct PowerDevicesReply {
+  @key tms::Identity mc_id;
+  PowerDeviceInfoSeq devices;
+};
+```
 
-The PowerDevicesRequest topic contains the identity of the target MC, allowing the MCs to ignore requests for other MCs.
-The PowerDevicesReply contains a list of power devices that are reachable from the corresponding MC.
-The information for each power device includes its DeviceInfo, current energy level, and its current active MC.
+The `PowerDevicesRequest` topic contains the identity of the target MC, allowing the MCs to ignore requests for other MCs.
+The `PowerDevicesReply` contains a list of power devices that are reachable from the corresponding MC.
+The information for each power device includes its `DeviceInfo`, current energy level, and its current active MC.
 
 ### Power Topology
 
 Once the CLI has information about the power devices, the user can specify the topology of the simulated microgrid by connecting the power devices.
 The CLI verifies that the construction entered by the user conforms to the characteristics of the devices, for example, a SRC has a single power port and therefore cannot be connected to two devices.
-The power topology information is sent to the MCs via the PowerTopology topic, and then propagated to each individual power device via the PowerConnection topic.
+The power topology information is sent to the MCs via the `PowerTopology` topic, and then propagated to each individual power device via the `PowerConnection` topic.
 
 ![Construct power topology](images/Construct_topology.jpg "CLI construct power devices connection")
 Figure 15: User connects the power devices using the CLI
 
 The IDL definitions of these two topic types are shown below.
 
-  @nested
-  @appendable
-  struct ConnectedDevice {
-    tms::Identity id;
-    tms::DeviceRole role;
-  };
-  typedef sequence<ConnectedDevice> ConnectedDeviceSeq;
+```
+@nested
+@appendable
+struct ConnectedDevice {
+  tms::Identity id;
+  tms::DeviceRole role;
+};
+typedef sequence<ConnectedDevice> ConnectedDeviceSeq;
 
-  @topic
-  @final
-  struct PowerConnection {
-    @key tms::Identity pd_id;
-    ConnectedDeviceSeq connected_devices;
-  };
-  typedef sequence<PowerConnection> PowerConnectionSeq;
+@topic
+@final
+struct PowerConnection {
+  @key tms::Identity pd_id;
+  ConnectedDeviceSeq connected_devices;
+};
+typedef sequence<PowerConnection> PowerConnectionSeq;
 
-  @topic
-  @final
-  struct PowerTopology {
-    @key tms::Identity mc_id;
-    PowerConnectionSeq connections;
-  };
+@topic
+@final
+struct PowerTopology {
+  @key tms::Identity mc_id;
+  PowerConnectionSeq connections;
+};
+```
 
-The PowerConnection topic contains the identity of the device to which the connections apply.
+The `PowerConnection` topic contains the identity of the device to which the connections apply.
 It also contains a list of other devices to which it is connected, each with its identity and role.
-The PowerTopology is simply a list of the PowerConnections for each device.
+The `PowerTopology` is simply a list of the `PowerConnections` for each device.
 
 ### Electric Current
 
-We use a DDS topic, named ElectricCurrent, to simulate the power flow between the devices.
+We use a DDS topic, named `ElectricCurrent`, to simulate the power flow between the devices.
 It can be published by source and distribution devices, and subscribed to by the load and distribution devices.
 
 ![Simulated electric current](images/Simulated_current.jpg "Simulated electric current")
 Figure 16: Simulated electric current
 
-The IDL of the ElectricCurrent topic is shown below.
+The IDL of the `ElectricCurrent` topic is shown below.
 
-  @topic
-  @final
-  struct ElectricCurrent {
-    IdentitySeq power_path;
-    float amperage;
-  };
+```
+@topic
+@final
+struct ElectricCurrent {
+  IdentitySeq power_path;
+  float amperage;
+};
+```
 
 It contains the path of an electric current which starts with a SRC.
 This allows the receiving device to verify that current is flowing through it and not another device.
-Currently, the ElectricCurrent supports only an amperage metric, but it can be enhanced to support other metrics.
+Currently, the `ElectricCurrent` supports only an amperage metric, but it can be enhanced to support other metrics.
 For simplicity of the demo, each DIST device splits the current evenly across its output power ports.
 
 ## Demo in Action
@@ -345,26 +351,26 @@ Figure 17: Demo configuration
 ### Inspect Active Microgrid Controller
 
 We start all devices at the same time.
-The CLI can display the list of MCs, including both the available and unavailable ones, using the list-mc command.
+The CLI can display the list of MCs, including both the available and unavailable ones, using the `list-mc` command.
 
 ![Connected MCs](images/CLI_list-mc.jpg "Connected microgrid controllers")
 Figure 18: List all reachable microgrid controllers
 
-The list of power devices connected to each MC can be displayed by the list-pd command.
+The list of power devices connected to each MC can be displayed by the `list-pd` command.
 The information for each device includes its identity, device role, energy level, and its currently selected controller.
-If this command is issued before a device has completed selecting its active MC, the active MC for the device is noted as “Undetermined”, as shown in the following figure.
+If this command is issued before a device has completed selecting its active MC, the active MC for the device is noted as *Undetermined*, as shown in the following figure.
 
 ![Undetermined MC](images/CLI_list-pd_undetermined.jpg "Undetermined controller")
 Figure 19: Power devices haven’t determined their active MCs
 
-Each device selects its active MC using the microgrid controller selection algorithm described earlier.
+Each device selects its active MC using the microgrid controller selection algorithm described in the [Appendix](#appendix).
 After it has finished selecting an MC, the selected MC is displayed in the console of the device.
 The figure below shows the console of the source device. The other power devices have similar output.
 
 ![Device finishes selecting MC](images/SRC_selectMC.jpg "Finish selecting controller")
 Figure 20: Power device completes selecting active MC
 
-In this setup, we have two MCs with identities “TestMC_1” and “TestMC_2” and equal priorityRanking.
+In this setup, we have two MCs with identities “TestMC_1” and “TestMC_2” and equal `priorityRanking`.
 The microgrid controller selection algorithm thus selects the “TestMC_1” controller since it has the first identity alphabetically.
 The active MCs selected by the power devices can also be seen from the CLI as below.
 
@@ -375,16 +381,16 @@ As shown in the figure, all power devices converge on selecting the same MC, “
 
 ### Connect Power Devices
 
-To construct the microgrid power topology, we use the connect-pd command from the CLI.
+To construct the microgrid power topology, we use the `connect-pd` command from the CLI.
 The figure below shows the user input to connect the power devices following the topology configuration of this demo.
 
 ![Connect power devices](images/CLI_connect-pd.jpg "Construct simulated topology")
 Figure 22: Connect power devices from the CLI
 
 This step goes through the list of devices, and for each device, the user can input whether they want to connect it to each of the other devices.
-The CLI sends a PowerTopology topic sample to one of the MCs which will then propagate the connection information to each power device.
+The CLI sends a `PowerTopology` topic sample to one of the MCs which will then propagate the connection information to each power device.
 
-Once the power topology has been set up, the source starts publishing to the ElectricCurrent topic to simulate the power flow.
+Once the power topology has been set up, the source starts publishing to the `ElectricCurrent` topic to simulate the power flow.
 
 ![Source device sends power](images/SRC_sendpower.jpg "Source sending power")
 Figure 23: Source device sends power
@@ -402,11 +408,11 @@ The output from the load device “TestLoad_2” is similar.
 Figure 25: Load device receives power from the distribution device
 
 From the CLI, the user can stop and start a power device.
-For example, to stop the source device “TestSource”, the user can use command stop TestSource.
+For example, to stop the source device “TestSource”, the user can use command `stop TestSource`.
 Stopping a power device requests the device to operate at the lowest energy level, which essentially means turning it off.
-For the source device, it will stop publishing to the ElectricCurrent topic which simulates the behavior of a real device.
+For the source device, it will stop publishing to the `ElectricCurrent` topic which simulates the behavior of a real device.
 Consequently, the distribution and load devices will no longer receive power.
-To start the source device again, we use the command start TestSource from the CLI.
+To start the source device again, we use the command `start TestSource` from the CLI.
 
 ### Microgrid Controller Failover
 
@@ -421,7 +427,7 @@ A similar process happens on the distribution device,
 ![DIST selects new MC](images/DIST_term_MC1.jpg "Distribution selects new controller")
 Figure 27: Distribution device selects a new active MC
 
-and the two load devices. (We include the console of “TestLoad_1” here. The output of “TestLoad_2” is similar.)
+and the two load devices. (We include the console output of “TestLoad_1” here. The output of “TestLoad_2” is similar.)
 
 ![LOAD selects new MC](images/LOAD1_term_MC1.jpg "Load selects new controller")
 Figure 28: Load device selects a new active MC
@@ -429,11 +435,11 @@ Figure 28: Load device selects a new active MC
 In the figure below of the CLI console, we can see that the controller “TestMC_1” is unavailable, and all power devices converge on the new active MC, “TestMC_2”.
 
 ![CLI after terminating MC1](images/CLI_term_MC1.jpg "CLI output after terminating controller 1")
-Figure 29: Output of list-mc and list-pd commands after TestMC_1 terminates
+Figure 29: Output of the `list-mc` and `list-pd` commands after "TestMC_1" terminates
 
 If we start the controller “TestMC_1” again, the CLI will indicate that it becomes available as shown in the following figure.
-However, the power devices will keep the controller “TestMC_2” as their active MC until the microgrid controller selection process is triggered, for example, when “TestMC_2” crashes and stops sending its heartbeats.
-Refer to the Appendix for more details on the microgrid controller selection algorithm.
+However, the power devices will keep the controller “TestMC_2” as their active MC until the microgrid controller selection process is triggered again, for example, when “TestMC_2” crashes and stops sending its heartbeats.
+Refer to the [Appendix](#appendix) for more details on the microgrid controller selection algorithm.
 
 ![Restart MC1](images/CLI_start_MC1_again.jpg "Restart controller 1")
 Figure 30: Controller “TestMC_1” is brought back up
@@ -444,13 +450,13 @@ In this demo, we used OpenDDS and its tools to simulate a microgrid system that 
 We have demonstrated a few scenarios of a TMS system.
 The demo highlights the following features of OpenDDS:
 
-IDL compiler: We used opendds_idl, the IDL compiler provided by OpenDDS, to process the IDL file containing the topics and types defined in the TMS spec.
-opendds_idl implements OMG Interface Definition Language, version 4.2, and supports the necessary features required by the TMS spec, such as its data types, the @optional, @extensibility, and @try_construct annotations.
+**IDL compiler**: We used `opendds_idl`, the IDL compiler provided by OpenDDS, to process the IDL file containing the topics and types defined in the TMS spec.
+`opendds_idl` implements OMG Interface Definition Language, version 4.2, and supports the necessary features required by the TMS spec, such as its data types, the `@optional`, `@extensibility`, and `@try_construct` annotations.
 
-DDS QoS [^2] implementation: Each topic defined in the TMS spec is associated with a QoS profile.
+**DDS QoS**[^2]: Each topic defined in the TMS spec is associated with a QoS profile.
 Our demo has shown that OpenDDS provides all the QoS policies required by TMS.
 
-RTPS and XTypes: OpenDDS implements the interoperability wire protocol RTPS, version 2.4 [^3], ensuring applications developed using OpenDDS will interoperate with applications developed using other DDS implementations.
+**RTPS and XTypes**: OpenDDS implements the interoperability wire protocol RTPS, version 2.4 [^3], ensuring applications developed using OpenDDS will interoperate with applications developed using other DDS implementations.
 In addition, OpenDDS implements XTypes, version 1.3 [^4], which enables extensible types, dynamic language binding, and data representations such as XCDR2.
 
 In addition to the above features and DDS standards, OpenDDS also implements the DDS Security standard, version 1.1 [^5].
@@ -458,20 +464,6 @@ Although the current TMS specification doesn’t require DDS security, it is lik
 OpenDDS is ready to provide these security features to existing and future TMS systems.
 
 More information on OpenDDS can be found in the project’s documentation [^9] and website [^10].
-
-## References
-
-[^1]: Tactical Microgrid Communications and Control: <https://quicksearch.dla.mil/qsDocDetails.aspx?ident_number=285095>
-[^2]: OMG Data Distribution Service: <https://www.omg.org/spec/DDS/1.4/About-DDS>
-[^3]: OMG DDS Interoperability Wire Protocol: <https://www.omg.org/spec/DDSI-RTPS/2.5/About-DDSI-RTPS>
-[^4]: OMG Extensible and Dynamic Topic Types for DDS: <https://www.omg.org/spec/DDS-XTypes/1.3/About-DDS-XTypes>
-[^5]: OMG DDS Security: <https://www.omg.org/spec/DDS-SECURITY/1.1/About-DDS-SECURITY>
-[^6]: OpenDDS GitHub Repository: <https://github.com/OpenDDS/OpenDDS>
-[^7]: opendds-monitor GitHub Repository: <https://github.com/OpenDDS/opendds-monitor>
-[^8]: The Demo Repository: <https://github.com/OpenDDS/DeveloperResources/tree/main/tactical-microgrid-standard>
-[^9]: OpenDDS Documentation: <https://opendds.readthedocs.io/en/latest-release>
-[^10]: OpenDDS Project: <https://opendds.org>
-[^11]: Tactical Microgrid Standard Industry Day Slides, Public Release 2025
 
 ## Appendix
 
@@ -485,10 +477,10 @@ Figure 31: Microgrid controller selection state diagram
 
 The selection algorithm tracks the availability of all MCs that are reachable from the power device.
 The availability of an MC is determined by whether the power device misses heartbeats from that MC.
-Each MC must publish TMS Heartbeat samples periodically, with a period of 1 second.
+Each MC must publish TMS `Heartbeat` samples periodically, with a period of 1 second.
 If a power device does not receive a heartbeat from an MC after 3 seconds since the last heartbeat, the MC is unavailable to the power device.
 
-The bottom of the diagram with the states in orange describes the transitions between the Available and Unavailable states of each MC.
+The bottom of the diagram with the states in orange describes the transitions between the *Available* and *Unavailable* states of each MC.
 The transitions are driven by a timer with duration of 3 seconds, accounting for the deadline of each heartbeat.
 When a heartbeat is received for an MC, the power device schedules a Missed Heartbeat timer.
 When the timer expires, the MC becomes unavailable.
@@ -496,31 +488,43 @@ In practice, we don’t have to create a timer for each MC.
 Instead, we just track the time point of the last heartbeat received for each of them.
 When the power device selects a new active MC, the MCs for which the last heartbeats were more than 3 seconds ago are ignored.
 
-The states in blue at the top of the diagram are corresponding to the status of the current active MC selected by the power device.
+The states in blue at the top of the diagram correspond to the status of the current active MC selected by the power device.
 At the beginning, there is no MC selected.
 When the power device receives a heartbeat from any MC, it starts a New MC timer with a duration of 3 seconds (transition T1).
 When this timer expires, the device selects an active MC from the list of available MCs (transition T2).
-When there are multiple candidates for an active MC, the power device selects the MC with highest priorityRanking in the nested member MicrogridControllerInfo of the DeviceInfo sample published by the MCs.
-If multiple MCs have the equal priorityRanking value, the MC with first identity alphabetically is selected.
+When there are multiple candidates for an active MC, the power device selects the MC with highest `priorityRanking` in the nested member `MicrogridControllerInfo` of the `DeviceInfo` sample published by the MCs.
+If multiple MCs have the equal `priorityRanking` value, the MC with first identity alphabetically is selected.
 Due to this, the MC that triggered the New MC timer is not necessarily the selected MC.
 
 Transition T3 is similar to what we described for each individual MC.
 That is, each time a heartbeat is received from the active MC, the Missed Heartbeat timer is rescheduled.
 Unlike the unselected MCs, for the active MC, we have to use actual timers to drive its state transitions.
-If the Missed Heartbeat timer expires, the power device transitions to the Active MC Unavailable state, and schedules a Lost Active MC timer with a duration of 6 seconds (transition T4).
+If the Missed Heartbeat timer expires, the power device transitions to the *Active MC Unavailable* state, and schedules a Lost Active MC timer with a duration of 6 seconds (transition T4).
 
-If a heartbeat is received from the active MC while the Lost Active MC timer hasn’t expired yet, the power device moves back to the Active MC Available state (transition T5).
+If a heartbeat is received from the active MC while the Lost Active MC timer hasn’t expired yet, the power device moves back to the *Active MC Available* state (transition T5).
 Receipt of heartbeats from non-active MCs does not affect this timer.
-If, however, the Lost Active MC timer expires, the power device will move to the No Active MC state (transition T6) and have two options.
+If, however, the Lost Active MC timer expires, the power device will move to the *No Active MC* state (transition T6) and have two options.
 
 First, if there are available MCs, the power device will select a new active MC, using the same procedure described for transition T2.
-In that case, the power device transitions to the Active MC Available state, with a new active MC chosen.
+In that case, the power device transitions to the *Active MC Available* state, with a new active MC chosen.
 Assuming there is no network partition, it is expected that after transitions T2 and T7, all power devices in the microgrid will select the same active MC.
 
 The second case occurs when there is no available MC for the power device to select.
-This happens when all MCs have missed their heartbeats, and the global, coordinating state No Available MCs is set (transition T8).
+This happens when all MCs have missed their heartbeats, and the global, coordinating state *No Available MCs* is set (transition T8).
 In this case, a No MC timer with a duration of 10 seconds is scheduled.
 This timer is concurrent with the Lost Active MC timer: it is scheduled at the same time as the Lost Active MC timer if the active MC is the last MC that missed heartbeat, or after the Lost Active MC timer is scheduled if the last available MC becomes unavailable while the Lost Active MC timer is pending.
 
-If a heartbeat is received from any MC while the No MC timer is pending, the No MC timer is cancelled, and the power device moves to the No MC state and starts a New MC timer to trigger the next selection of a new active MC.
-However, if the No MC timer expires without any heartbeats received, the power device doesn’t have any active MC and has to process the CONFIG_ON_COMMS_LOSS configuration.
+If a heartbeat is received from any MC while the No MC timer is pending, the No MC timer is cancelled, and the power device moves to the *No MC* state and starts a New MC timer to trigger the next selection of a new active MC.
+However, if the No MC timer expires without any heartbeats received, the power device doesn’t have any active MC and has to process the `CONFIG_ON_COMMS_LOSS` configuration.
+
+[^1]: Tactical Microgrid Communications and Control: <https://quicksearch.dla.mil/qsDocDetails.aspx?ident_number=285095>
+[^2]: OMG Data Distribution Service: <https://www.omg.org/spec/DDS/1.4/About-DDS>
+[^3]: OMG DDS Interoperability Wire Protocol: <https://www.omg.org/spec/DDSI-RTPS/2.5/About-DDSI-RTPS>
+[^4]: OMG Extensible and Dynamic Topic Types for DDS: <https://www.omg.org/spec/DDS-XTypes/1.3/About-DDS-XTypes>
+[^5]: OMG DDS Security: <https://www.omg.org/spec/DDS-SECURITY/1.1/About-DDS-SECURITY>
+[^6]: OpenDDS GitHub Repository: <https://github.com/OpenDDS/OpenDDS>
+[^7]: opendds-monitor GitHub Repository: <https://github.com/OpenDDS/opendds-monitor>
+[^8]: The Demo Repository: <https://github.com/OpenDDS/DeveloperResources/tree/main/tactical-microgrid-standard>
+[^9]: OpenDDS Documentation: <https://opendds.readthedocs.io/en/latest-release>
+[^10]: OpenDDS Project: <https://opendds.org>
+[^11]: Tactical Microgrid Standard Industry Day Slides, Public Release 2025
