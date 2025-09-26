@@ -783,7 +783,7 @@ Known Limitations
   Currently this only exists for Windows, Linux, macOS, and Android.
   All other platforms will require configuring and building ACE/TAO separately and passing the path using :cmake:var:`OPENDDS_ACE`.
 
-  - See https://www.dre.vanderbilt.edu/~schmidt/ACE-install.html for how to manually build ACE/TAO.
+  - See https://github.com/DOCGroup/ACE_TAO/blob/master/ACE/ACE-INSTALL.html and https://github.com/DOCGroup/ACE_TAO/blob/master/TAO/TAO-INSTALL.html for how to manually build ACE/TAO.
 
 - The following features are planned, but not implemented yet:
 
