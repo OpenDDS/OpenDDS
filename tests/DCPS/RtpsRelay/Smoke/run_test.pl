@@ -34,7 +34,7 @@ if ($test->flag('secure')) {
 }
 
 sub uses_one_relay {
-    return $test->flag('partition_same_relay') || $test->flag('single') || $test->flag('draining');
+    return $test->flag('partition_same_relay') || $test->flag('single') || $test->flag('draining') || $test->flag('verify_config');
 }
 
 my $pub_ini = " pub_rtps.ini";
@@ -78,7 +78,7 @@ sub get_relay_args {
 
 my $pub_extra_args = $test->flag('draining') ? ' -d' : '';
 my $control_args = '-Set RTPS_RELAY_DRAIN_INTERVAL=100 -Set RTPS_RELAY_DRAIN_STATE=Draining ' .
-    '-Set RTPS_RELAY_ADMIT_STATE=NotAdmitting';
+    '-Set RTPS_RELAY_ADMIT_STATE=NotAdmitting' . ' -Set RTPS_RELAY_PUBLISH_RELAY_STATUS=15' unless $test->flag('verify_config');
 
 $test->process("monitor", "monitor", "-DCPSConfigFile monitor.ini");
 $test->process("relay1", "$ENV{DDS_ROOT}/bin/RtpsRelay", get_relay_args(1) . $relay_security_opts);
@@ -103,6 +103,11 @@ if ($test->flag('join')) {
     $test->start_process("relay1");
     sleep 10;
     $test->start_process("publisher");
+} else if ($test->flag('verify_config')) {
+    $test->start_process("relay1");
+    sleep 10;
+    $test->start_process('control1');
+    $test->wait_kill('control1', 30);
 } else {
     $test->start_process("relay1");
     $test->start_process("relay2") unless uses_one_relay();
@@ -121,8 +126,8 @@ if ($test->flag('draining')) {
 }
 
 $test->stop_process(5, "metachecker");
-$test->stop_process(20, "subscriber") unless $test->flag('draining');
-$test->stop_process(5, "publisher") unless $test->flag('draining');
+$test->stop_process(20, "subscriber") unless $test->flag('draining') || $test->flag('verify_config');
+$test->stop_process(5, "publisher") unless $test->flag('draining') || $test->flag('verify_config');
 
 $test->kill_process(5, "relay1");
 $test->kill_process(5, "relay2") unless uses_one_relay();
