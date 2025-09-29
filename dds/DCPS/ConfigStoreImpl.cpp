@@ -162,12 +162,8 @@ ConfigStoreImpl::get_boolean(const char* key,
     const ConfigPair& sample = samples[idx];
     const DDS::SampleInfo& info = infos[idx];
     if (info.valid_data) {
-      DDS::Boolean x = 0;
-      if (sample.value() == "true") {
-        retval = true;
-      } else if (sample.value() == "false") {
-        retval = false;
-      } else if (DCPS::convertToInteger(sample.value(), x)) {
+      bool x = false;
+      if (convert_value(sample.value(), x)) {
         retval = x;
       } else {
         retval = value;
@@ -290,6 +286,100 @@ ConfigStoreImpl::get_uint32(const char* key,
 }
 
 void
+ConfigStoreImpl::set_int64(const char* key,
+                           DDS::Int64 value)
+{
+  set(key, to_dds_string(value));
+}
+
+DDS::Int64
+ConfigStoreImpl::get_int64(const char* key,
+                           DDS::Int64 value)
+{
+  const ConfigPair cp(key, "");
+  DDS::Int64 retval = value;
+  DCPS::InternalDataReader<ConfigPair>::SampleSequence samples;
+  DCPS::InternalSampleInfoSequence infos;
+  config_reader_->read_instance(samples, infos, DDS::LENGTH_UNLIMITED, cp,
+                                DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+  for (size_t idx = 0; idx != samples.size(); ++idx) {
+    const ConfigPair& sample = samples[idx];
+    const DDS::SampleInfo& info = infos[idx];
+    if (info.valid_data) {
+      DDS::Int64 x = 0;
+      if (DCPS::convertToInteger(sample.value(), x)) {
+        retval = x;
+      } else {
+        retval = value;
+        if (log_level >= LogLevel::Warning) {
+          ACE_ERROR((LM_WARNING,
+                     "(%P|%t) WARNING: ConfigStoreImpl::get_int64: "
+                     "failed to parse int64 for %C=%C\n",
+                     sample.key().c_str(), sample.value().c_str()));
+        }
+      }
+    }
+  }
+
+  if (debug_logging) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get_int64: %C=%q\n",
+               CONFIG_DEBUG_LOGGING,
+               cp.key().c_str(),
+               retval));
+
+  }
+
+  return retval;
+}
+
+void
+ConfigStoreImpl::set_uint64(const char* key,
+                            DDS::UInt64 value)
+{
+  set(key, to_dds_string(value));
+}
+
+DDS::UInt64
+ConfigStoreImpl::get_uint64(const char* key,
+                            DDS::UInt64 value)
+{
+  const ConfigPair cp(key, "");
+  DDS::UInt64 retval = value;
+  DCPS::InternalDataReader<ConfigPair>::SampleSequence samples;
+  DCPS::InternalSampleInfoSequence infos;
+  config_reader_->read_instance(samples, infos, DDS::LENGTH_UNLIMITED, cp,
+                                DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+  for (size_t idx = 0; idx != samples.size(); ++idx) {
+    const ConfigPair& sample = samples[idx];
+    const DDS::SampleInfo& info = infos[idx];
+    if (info.valid_data) {
+      DDS::UInt64 x = 0;
+      if (DCPS::convertToInteger(sample.value(), x)) {
+        retval = x;
+      } else {
+        retval = value;
+        if (log_level >= LogLevel::Warning) {
+          ACE_ERROR((LM_WARNING,
+                     "(%P|%t) WARNING: ConfigStoreImpl::get_uint64: "
+                     "failed to parse uint64 for %C=%C\n",
+                     sample.key().c_str(), sample.value().c_str()));
+        }
+      }
+    }
+  }
+
+  if (debug_logging) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get_int64: %C=%Q\n",
+               CONFIG_DEBUG_LOGGING,
+               cp.key().c_str(),
+               retval));
+
+  }
+
+  return retval;
+}
+
+void
 ConfigStoreImpl::set_float64(const char* key,
                              DDS::Float64 value)
 {
@@ -341,12 +431,17 @@ ConfigStoreImpl::set_string(const char* key,
                             const char* value)
 {
   const ConfigPair cp(key, value);
-  if (log_level >= LogLevel::Info || debug_logging) {
+  const bool log_info = log_level >= LogLevel::Info || debug_logging;
+  if (log_info) {
     ACE_DEBUG((LM_INFO, "(%P|%t) INFO: ConfigStoreImpl::set_string: %C=%C\n",
                cp.key().c_str(),
                cp.value().c_str()));
   }
-  config_writer_->write(cp);
+  if (config_writer_->write(cp) && !log_info && log_changes) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) ConfigStoreImpl::set_string: %C=%C\n",
+               cp.key().c_str(),
+               cp.value().c_str()));
+  }
 }
 
 char*
@@ -437,14 +532,7 @@ void
 ConfigStoreImpl::set(const char* key,
                      const String& value)
 {
-  ConfigPair cp(key, value);
-
-  if (log_level >= LogLevel::Info || debug_logging) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) INFO: ConfigStoreImpl::set: %C=%C\n",
-               cp.key().c_str(),
-               cp.value().c_str()));
-  }
-  config_writer_->write(cp);
+  set_string(key, value.c_str());
 }
 
 String
@@ -586,6 +674,20 @@ ConfigStoreImpl::get(const char* key,
   }
 
   return retval;
+}
+
+bool ConfigStoreImpl::convert_value(const String& value_as_string, bool& value)
+{
+  if (value_as_string == "true") {
+    value = true;
+  } else if (value_as_string == "false") {
+    value = false;
+  } else if (DCPS::convertToInteger(value_as_string, value)) {
+    // no-op
+  } else {
+    return false;
+  }
+  return true;
 }
 
 void
@@ -1127,6 +1229,7 @@ take_has_prefix(ConfigReader_rch reader,
 }
 
 bool ConfigStoreImpl::debug_logging = CONFIG_DEBUG_LOGGING_default;
+bool ConfigStoreImpl::log_changes = CONFIG_LOG_CHANGES_default;
 
 void
 process_section(ConfigStoreImpl& config_store,
