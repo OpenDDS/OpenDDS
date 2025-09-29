@@ -262,7 +262,7 @@ The command-line options for the RtpsRelay:
 
 .. option:: -LogHttp 0|1
 
-  :ref:`Config store key <config-store-keys>`: ``RTPS_RELAY_INACTRTPS_RELAY_LOG_HTTPIVE_PERIOD``
+  :ref:`Config store key <config-store-keys>`: ``RTPS_RELAY_LOG_HTTP``
 
   Enable/disable logging in the :ref:`meta discovery HTTP server <internet_enabled_rtps--metadisc-server>`.
 
