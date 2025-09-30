@@ -5,13 +5,14 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # Create generic permissions with no domains specified or other restrictions
 # based on what identities have been generated with the identity CA
 # (participant_01, etc.).
+#
+# Sign with sec-doc-manager.py after generating again.
 
 use File::Basename;
 use strict;
 
 my $output_path = dirname(__FILE__);
 my $identity_ca_path = "$output_path/../certs/identity";
-my $permissions_ca_path = "$output_path/../certs/permissions";
 
 my $template_before_subject = << "EOF";
 <?xml version="1.0" encoding="utf-8"?>
@@ -73,11 +74,6 @@ sub get_permissions_file_unsigned_name {
   return get_permissions_file_base_name($num) . '.xml';
 };
 
-sub get_permissions_file_signed_name {
-  my $num = shift;
-  return get_permissions_file_base_name($num) . '_signed.p7s';
-};
-
 sub convert_subject_to_rfc4514_format {
   my $dn = shift;
   my @rdns = split(/\//, $dn);
@@ -108,15 +104,4 @@ while (my($participant, $subject) = each %subjects) {
     or die("Couldn't open $unsigned_path: $!");
   print $unsigned_file get_permissions_file_contents($subject);
   close($unsigned_file);
-
-  my $signed_path = "$output_path/" . get_permissions_file_signed_name($participant);
-  print("Signing $unsigned_path to make $signed_path\n");
-  my $exit_status = system("openssl smime -sign " .
-    "-in $unsigned_path -text -out $signed_path " .
-    "-signer $permissions_ca_path/permissions_ca_cert.pem " .
-    "-inkey $permissions_ca_path/permissions_ca_private_key.pem");
-  if ($exit_status) {
-    print("OpenSSL Failed!\n");
-    exit($exit_status);
-  }
 }
