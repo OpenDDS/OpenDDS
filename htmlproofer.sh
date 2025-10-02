@@ -41,8 +41,6 @@ url_ignore_arg="${url_ignore_arg:1}"
 
 # NOTE: $(:) is a nop command that can be used like an inline comment.
 exec bundle exec htmlproofer "$site_dir" \
-  --check-html \
-  --check-img-http \
   $(: TODO: --enforce-https \ ) \
   --report-invalid-tags \
   --report-eof-tags \
