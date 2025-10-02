@@ -9,15 +9,15 @@ on:
 
 jobs:
   jekyll:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v5
 
       - name: Setup ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.6
+          ruby-version: 3.4
 
       - name: Jekyll
         uses: limjh16/jekyll-action-ts@v2
