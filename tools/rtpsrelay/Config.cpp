@@ -211,6 +211,8 @@ void Config::set_defaults()
 
 void Config::on_data_available(InternalDataReader_rch reader)
 {
+  std::unordered_set<std::string> change_set;
+
   OpenDDS::DCPS::ConfigReader::SampleSequence samples;
   OpenDDS::DCPS::InternalSampleInfoSequence infos;
   reader->read(samples, infos, DDS::LENGTH_UNLIMITED,
@@ -265,7 +267,18 @@ void Config::on_data_available(InternalDataReader_rch reader)
         cached_admission_max_participants_high_water_.set(pair.value());
       } else if (pair.key() == RTPS_RELAY_MAX_PARTICIPANTS_LOW_WATER) {
         cached_admission_max_participants_low_water_.set(pair.value());
+      } else {
+        continue;
       }
+      change_set.insert(pair.key());
+    }
+  }
+
+  // TODO(sonndinh): Notify (via callbacks) the objects that have registered to receive changes
+  // to the corresponding configuration options.
+  for (const auto& param : change_set) {
+    for (auto observer : observers_[param]) {
+      observer.on_config_changed();
     }
   }
 }
@@ -278,6 +291,14 @@ bool Config::to_time_duration(const std::string& value, OpenDDS::DCPS::TimeDurat
     return true;
   }
   return false;
+}
+
+void Config::observe_changes(ConfigObserver& observer, const std::vector<std::string>& config_params)
+{
+  // TODO(sonndinh): mutex for observers_?
+  for (const auto& param : config_params) {
+    observers_[param].push_back(observer);
+  }
 }
 
 }

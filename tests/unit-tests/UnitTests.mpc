@@ -45,6 +45,8 @@ project(UnitTests): opendds_unit_test, googlemock, msvc_bigobj, dcpsexe, dcps_tr
     dds/FACE/config
     FACE
     tools/dds/rtpsrelaylib
+    tools/rtpsrelay
+    ../../tools/rtpsrelay/Config.cpp
 
     // override default of Template_Files for *_T.cpp
     dds/DCPS/RcHandle_T.cpp

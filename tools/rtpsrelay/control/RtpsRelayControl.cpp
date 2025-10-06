@@ -150,6 +150,7 @@ int run(int argc, ACE_TCHAR* argv[])
 
   DDS::DomainId_t domain{0};
   RelayConfig config;
+  bool verify_config{false};
 
   ACE_Argv_Type_Converter atc{argc, argv};
   ACE_Arg_Shifter_T<char> args{atc.get_argc(), atc.get_ASCII_argv()};
@@ -175,9 +176,30 @@ int run(int argc, ACE_TCHAR* argv[])
       show_all = true;
     } else if (args.cur_arg_strncasecmp("-KeepRunning") == 0) {
       keep_running = true;
+    } else if (args.cur_arg_strncasecmp("-VerifyConfig") == 0) {
+      verify_config = true;
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Invalid argument: %C\n", args.get_current()));
       return EXIT_FAILURE;
+    }
+  }
+
+  if (verify_config) {
+    if (config.relay_id().empty()) {
+      ACE_ERROR((LM_ERROR, "ERROR: -VerifyConfig requires -RelayId\n"));
+      return EXIT_FAILURE;
+    }
+    if (config.config().empty()) {
+      ACE_ERROR((LM_ERROR, "ERROR: -VerifyConfig requires at least one -Set\n"));
+      return EXIT_FAILURE;
+    }
+    if (!show_all) {
+      ACE_ERROR((LM_WARNING, "WARNING: -VerifyConfig assumes -ShowAll for config verification\n"));
+      show_all = true;
+    }
+    if (keep_running) {
+      ACE_ERROR((LM_WARNING, "WARNING: -VerifyConfig ignores -KeepRunning\n"));
+      keep_running = false;
     }
   }
 
