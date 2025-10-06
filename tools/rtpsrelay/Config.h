@@ -16,6 +16,8 @@
 
 #include <ace/Arg_Shifter.h>
 
+#include <unordered_map>
+
 namespace RtpsRelay {
 
 const char RTPS_RELAY_ADMIT_STATE[] = "RTPS_RELAY_ADMIT_STATE";
@@ -452,10 +454,14 @@ public:
 
   static bool to_time_duration(const std::string& value, OpenDDS::DCPS::TimeDuration& out);
 
+  void observe_changes(ConfigObserver& observer, const std::vector<std::string>& config_params);
+
 private:
   void on_data_available(InternalDataReader_rch reader) override;
 
   bool parse_admission_participants_range(const char* arg);
+
+  std::unordered_map<std::string, std::vector<ConfigObserver&>> observers_;
 
   template <typename T, bool ConvertFromString(const std::string&, T&)>
   class CachedValue {
