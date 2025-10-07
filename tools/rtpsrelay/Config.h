@@ -146,7 +146,6 @@ public:
   void lifespan(const OpenDDS::DCPS::TimeDuration& value)
   {
     lifespan(value.to_dds_duration());
-    cached_lifespan_.set(value);
   }
 
   OpenDDS::DCPS::TimeDuration lifespan() const
@@ -157,7 +156,6 @@ public:
   void inactive_period(const OpenDDS::DCPS::TimeDuration& value)
   {
     inactive_period(value.to_dds_duration());
-    cached_inactive_period_.set(value);
   }
 
   OpenDDS::DCPS::TimeDuration inactive_period() const
@@ -473,11 +471,13 @@ private:
   void lifespan(const DDS::Duration_t& value)
   {
     TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_LIFESPAN, value);
+    cached_lifespan_.set(OpenDDS::DCPS::TimeDuration{value});
   }
 
   void inactive_period(const DDS::Duration_t& value)
   {
     TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_INACTIVE_PERIOD, value);
+    cached_inactive_period_.set(OpenDDS::DCPS::TimeDuration{value});
   }
 
   template <typename T, bool ConvertFromString(const std::string&, T&)>
