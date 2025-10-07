@@ -146,11 +146,7 @@ public:
   void lifespan(const OpenDDS::DCPS::TimeDuration& value)
   {
     lifespan(value.to_dds_duration());
-  }
-
-  void lifespan(const DDS::Duration_t& value)
-  {
-    TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_LIFESPAN, value);
+    cached_lifespan_.set(value);
   }
 
   OpenDDS::DCPS::TimeDuration lifespan() const
@@ -161,11 +157,7 @@ public:
   void inactive_period(const OpenDDS::DCPS::TimeDuration& value)
   {
     inactive_period(value.to_dds_duration());
-  }
-
-  void inactive_period(const DDS::Duration_t& value)
-  {
-    TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_INACTIVE_PERIOD, value);
+    cached_inactive_period_.set(value);
   }
 
   OpenDDS::DCPS::TimeDuration inactive_period() const
@@ -206,6 +198,7 @@ public:
   void log_warnings(bool flag)
   {
     TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_WARNINGS, flag);
+    cached_log_warnings_.set(flag);
   }
 
   bool log_warnings() const
@@ -216,6 +209,7 @@ public:
   void log_discovery(bool flag)
   {
     TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_DISCOVERY, flag);
+    cached_log_discovery_.set(flag);
   }
 
   bool log_discovery() const
@@ -226,6 +220,7 @@ public:
   void log_activity(bool flag)
   {
     TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_ACTIVITY, flag);
+    cached_log_activity_.set(flag);
   }
 
   bool log_activity() const
@@ -236,6 +231,7 @@ public:
   void log_http(bool flag)
   {
     TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_HTTP, flag);
+    cached_log_http_.set(flag);
   }
 
   bool log_http() const
@@ -246,6 +242,7 @@ public:
   void log_thread_status(bool flag)
   {
     TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_THREAD_STATUS, flag);
+    cached_log_thread_status_.set(flag);
   }
 
   bool log_thread_status() const
@@ -256,6 +253,7 @@ public:
   void thread_status_safety_factor(int value)
   {
     TheServiceParticipant->config_store()->set_int32(RTPS_RELAY_THREAD_STATUS_SAFETY_FACTOR, value);
+    cached_thread_status_safety_factor_.set(value);
   }
 
   int thread_status_safety_factor() const
@@ -266,6 +264,7 @@ public:
   void utilization_limit(double value)
   {
     TheServiceParticipant->config_store()->set_float64(RTPS_RELAY_UTILIZATION_LIMIT, value);
+    cached_utilization_limit_.set(value);
   }
 
   double utilization_limit() const
@@ -276,6 +275,7 @@ public:
   void log_utilization_changes(bool value)
   {
     TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_UTILIZATION_CHANGES, value);
+    cached_log_utilization_changes_.set(value);
   }
 
   bool log_utilization_changes() const
@@ -286,6 +286,7 @@ public:
   void log_relay_statistics(const OpenDDS::DCPS::TimeDuration& value)
   {
     TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_LOG_RELAY_STATISTICS, value.to_dds_duration());
+    cached_log_relay_statistics_.set(value);
   }
 
   OpenDDS::DCPS::TimeDuration log_relay_statistics() const
@@ -296,6 +297,7 @@ public:
   void log_handler_statistics(const OpenDDS::DCPS::TimeDuration& value)
   {
     TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_LOG_HANDLER_STATISTICS, value.to_dds_duration());
+    cached_log_handler_statistics_.set(value);
   }
 
   OpenDDS::DCPS::TimeDuration log_handler_statistics() const
@@ -306,6 +308,7 @@ public:
   void publish_relay_statistics(const OpenDDS::DCPS::TimeDuration& value)
   {
     TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_PUBLISH_RELAY_STATISTICS, value.to_dds_duration());
+    cached_publish_relay_statistics_.set(value);
   }
 
   OpenDDS::DCPS::TimeDuration publish_relay_statistics() const
@@ -316,6 +319,7 @@ public:
   void publish_handler_statistics(const OpenDDS::DCPS::TimeDuration& value)
   {
     TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_PUBLISH_HANDLER_STATISTICS, value.to_dds_duration());
+    cached_publish_handler_statistics_.set(value);
   }
 
   OpenDDS::DCPS::TimeDuration publish_handler_statistics() const
@@ -326,6 +330,7 @@ public:
   void publish_relay_status(const OpenDDS::DCPS::TimeDuration& value)
   {
     TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_PUBLISH_RELAY_STATUS, value.to_dds_duration());
+    cached_publish_relay_status_.set(value);
   }
 
   OpenDDS::DCPS::TimeDuration publish_relay_status() const
@@ -336,6 +341,7 @@ public:
   void publish_relay_status_liveliness(const OpenDDS::DCPS::TimeDuration& value)
   {
     TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_PUBLISH_RELAY_STATUS_LIVELINESS, value.to_dds_duration());
+    cached_publish_relay_status_liveliness_.set(value);
   }
 
   OpenDDS::DCPS::TimeDuration publish_relay_status_liveliness() const
@@ -346,6 +352,7 @@ public:
   void restart_detection(bool flag)
   {
     TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_RESTART_DETECTION, flag);
+    cached_restart_detection_.set(flag);
   }
 
   bool restart_detection() const
@@ -356,6 +363,7 @@ public:
   void admission_control_queue_size(size_t value)
   {
     TheServiceParticipant->config_store()->set_uint64(RTPS_RELAY_ADMISSION_CONTROL_QUEUE_SIZE, value);
+    cached_admission_control_queue_size_.set(value);
   }
 
   size_t admission_control_queue_size() const
@@ -366,6 +374,7 @@ public:
   void admission_control_queue_duration(const OpenDDS::DCPS::TimeDuration& value)
   {
     TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_ADMISSION_CONTROL_QUEUE_DURATION, value.to_dds_duration());
+    cached_admission_control_queue_duration_.set(value);
   }
 
   OpenDDS::DCPS::TimeDuration admission_control_queue_duration() const
@@ -386,6 +395,7 @@ public:
   void max_ips_per_client(size_t value)
   {
     TheServiceParticipant->config_store()->set_uint64(RTPS_RELAY_MAX_IPS_PER_CLIENT, value);
+    cached_max_ips_per_client_.set(value);
   }
 
   size_t max_ips_per_client() const
@@ -396,6 +406,7 @@ public:
   void rejected_address_duration(const OpenDDS::DCPS::TimeDuration& value)
   {
     TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_REJECTED_ADDRESS_DURATION, value.to_dds_duration());
+    cached_rejected_address_duration_.set(value);
   }
 
   OpenDDS::DCPS::TimeDuration rejected_address_duration() const
@@ -406,6 +417,7 @@ public:
   void admission_max_participants_high_water(size_t value)
   {
     TheServiceParticipant->config_store()->set_uint64(RTPS_RELAY_MAX_PARTICIPANTS_HIGH_WATER, value);
+    cached_admission_max_participants_high_water_.set(value);
   }
 
   size_t admission_max_participants_high_water() const
@@ -416,6 +428,7 @@ public:
   void admission_max_participants_low_water(size_t value)
   {
     TheServiceParticipant->config_store()->set_uint64(RTPS_RELAY_MAX_PARTICIPANTS_LOW_WATER, value);
+    cached_admission_max_participants_low_water_.set(value);
   }
 
   size_t admission_max_participants_low_water() const
@@ -457,6 +470,16 @@ private:
 
   bool parse_admission_participants_range(const char* arg);
 
+  void lifespan(const DDS::Duration_t& value)
+  {
+    TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_LIFESPAN, value);
+  }
+
+  void inactive_period(const DDS::Duration_t& value)
+  {
+    TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_INACTIVE_PERIOD, value);
+  }
+
   template <typename T, bool ConvertFromString(const std::string&, T&)>
   class CachedValue {
   public:
@@ -471,6 +494,12 @@ private:
       if (ConvertFromString(value_as_string, val)) {
         value_ = val;
       }
+    }
+
+    void set(const T& value)
+    {
+      ACE_Guard<ACE_Thread_Mutex> g{lock_};
+      value_ = value;
     }
 
     template <typename Fn>
