@@ -503,11 +503,12 @@ private:
     }
 
     template <typename Fn>
-    void default_if_empty(Fn&& func) const
+    void default_if_empty(Fn&& func)
     {
       ACE_Guard<ACE_Thread_Mutex> g{lock_};
       if (!value_) {
         func(default_value_);
+        value_ = default_value_;
       }
     }
 
