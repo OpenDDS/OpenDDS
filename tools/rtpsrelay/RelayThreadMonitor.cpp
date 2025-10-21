@@ -102,8 +102,8 @@ int RelayThreadMonitor::svc()
     for (const auto idx : late_thread_indexes) {
       const SystemTimePoint timestamp(infos[idx].source_timestamp);
       const auto& thread = datas[idx];
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RelayThreadMonitor::svc thread %C (%d, %d) last update %#T.  Aborting...\n",
-                 thread.thread_id.in(), thread.detail1, thread.detail2, &timestamp.value()));
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RelayThreadMonitor::svc thread %C (%C, %d) last update %#T.  Aborting...\n",
+                 thread.thread_id.in(), decompose_thread_detail1(thread.detail1), thread.detail2, &timestamp.value()));
     }
 
     if (!late_thread_indexes.empty()) {
@@ -143,6 +143,42 @@ void RelayThreadMonitor::on_data_available(DDS::DataReader_ptr /*reader*/)
       utilization_.erase(datas[idx].thread_id.in());
     }
   }
+}
+
+std::string RelayThreadMonitor::decompose_thread_detail1(int detail) const
+{
+  std::string result;
+  if (detail & ACE_Event_Handler::READ_MASK) {
+    result += "READ_MASK";
+  }
+  if (detail & ACE_Event_Handler::WRITE_MASK) {
+    result += " | WRITE_MASK";
+  }
+  if (detail & ACE_Event_Handler::EXCEPT_MASK) {
+    result += " | EXCEPT_MASK";
+  }
+  if (detail & ACE_Event_Handler::ACCEPT_MASK) {
+    result += " | ACCEPT_MASK";
+  }
+  if (detail & ACE_Event_Handler::CONNECT_MASK) {
+    result += " | CONNECT_MASK";
+  }
+  if (detail & ACE_Event_Handler::TIMER_MASK) {
+    result += " | TIMER_MASK";
+  }
+  if (detail & ACE_Event_Handler::QOS_MASK) {
+    result += " | QOS_MASK";
+  }
+  if (detail & ACE_Event_Handler::GROUP_QOS_MASK) {
+    result += " | GROUP_QOS_MASK";
+  }
+  if (detail & ACE_Event_Handler::SIGNAL_MASK) {
+    result += " | SIGNAL_MASK";
+  }
+  if (detail & ACE_Event_Handler::DONT_CALL) {
+    result += " | DONT_CALL";
+  }
+  return result;
 }
 
 }
