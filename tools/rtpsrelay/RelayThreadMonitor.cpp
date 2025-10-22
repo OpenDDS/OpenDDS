@@ -148,35 +148,37 @@ void RelayThreadMonitor::on_data_available(DDS::DataReader_ptr /*reader*/)
 std::string RelayThreadMonitor::decompose_thread_detail1(int detail) const
 {
   std::string result;
+  bool first = true;
   if (detail & ACE_Event_Handler::READ_MASK) {
     result += "READ_MASK";
+    first = false;
   }
   if (detail & ACE_Event_Handler::WRITE_MASK) {
-    result += " | WRITE_MASK";
+    result += first ? "WRITE_MASK" : " | WRITE_MASK";
   }
   if (detail & ACE_Event_Handler::EXCEPT_MASK) {
-    result += " | EXCEPT_MASK";
+    result += first ? "EXCEPT_MASK" : " | EXCEPT_MASK";
   }
   if (detail & ACE_Event_Handler::ACCEPT_MASK) {
-    result += " | ACCEPT_MASK";
+    result += first ? "ACCEPT_MASK" : " | ACCEPT_MASK";
   }
   if (detail & ACE_Event_Handler::CONNECT_MASK) {
-    result += " | CONNECT_MASK";
+    result += first ? "CONNECT_MASK" : " | CONNECT_MASK";
   }
   if (detail & ACE_Event_Handler::TIMER_MASK) {
-    result += " | TIMER_MASK";
+    result += first ? "TIMER_MASK" : " | TIMER_MASK";
   }
   if (detail & ACE_Event_Handler::QOS_MASK) {
-    result += " | QOS_MASK";
+    result += first ? "QOS_MASK" : " | QOS_MASK";
   }
   if (detail & ACE_Event_Handler::GROUP_QOS_MASK) {
-    result += " | GROUP_QOS_MASK";
+    result += first ? "GROUP_QOS_MASK" : " | GROUP_QOS_MASK";
   }
   if (detail & ACE_Event_Handler::SIGNAL_MASK) {
-    result += " | SIGNAL_MASK";
+    result += first ? "SIGNAL_MASK" : " | SIGNAL_MASK";
   }
   if (detail & ACE_Event_Handler::DONT_CALL) {
-    result += " | DONT_CALL";
+    result += first ? "DONT_CALL" : " | DONT_CALL";
   }
   return result;
 }
