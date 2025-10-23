@@ -44,6 +44,7 @@ public:
 private:
   int svc() override;
   void on_data_available(DDS::DataReader_ptr /*reader*/) override;
+  std::string decompose_thread_detail1(int detail) const;
 
   const Config& config_;
   bool running_;
