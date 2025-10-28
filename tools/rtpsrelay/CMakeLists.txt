@@ -26,6 +26,7 @@ add_executable(RtpsRelay
   RelayThreadMonitor.cpp
   RtpsRelay.cpp
   SubscriptionListener.cpp
+  RelayDeniedPartitionsListener.cpp
 )
 _opendds_executable(RtpsRelay)
 target_link_libraries(RtpsRelay PRIVATE ${dep_libs})

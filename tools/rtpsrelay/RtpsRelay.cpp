@@ -19,6 +19,7 @@
 #include "RelayThreadMonitor.h"
 #include "StatisticsWriterListener.h"
 #include "SubscriptionListener.h"
+#include "RelayDeniedPartitionsListener.h"
 
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/DomainParticipantImpl.h>
@@ -397,6 +398,24 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
+  RelayDeniedPartitionsTypeSupport_var relay_denied_partitions_ts = new RelayDeniedPartitionsTypeSupportImpl;
+  if (relay_denied_partitions_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to register RelayDeniedPartitions type\n"));
+    return EXIT_FAILURE;
+  }
+  CORBA::String_var relay_denied_partitions_type_name = relay_denied_partitions_ts->get_type_name();
+
+  DDS::Topic_var relay_denied_partitions_topic =
+    relay_participant->create_topic(RELAY_DENIED_PARTITIONS_TOPIC_NAME.c_str(),
+                                    relay_denied_partitions_type_name,
+                                    TOPIC_QOS_DEFAULT, nullptr,
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  
+  if (!relay_denied_partitions_topic) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Relay Denied Partitions topic\n"));
+    return EXIT_FAILURE;
+  }
+
   // Setup relay publisher and subscriber.
   DDS::PublisherQos publisher_qos;
   relay_participant->get_default_publisher_qos(publisher_qos);
@@ -442,6 +461,13 @@ int run(int argc, ACE_TCHAR* argv[])
   reader_qos.history.depth = 1;
   reader_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay = one_minute;
   reader_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = one_minute;
+
+  DDS::DataReaderQos denied_partitions_reader_qos;
+  relay_subscriber->get_default_datareader_qos(denied_partitions_reader_qos);
+
+  denied_partitions_reader_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+  denied_partitions_reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  denied_partitions_reader_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 
   // Setup statistics publishing.
   DDS::DataWriter_var relay_statistics_writer_var = relay_publisher->create_datawriter(relay_statistics_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -715,6 +741,16 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
   // Don't need to invoke listener for existing samples because no remote participants could be discovered yet.
+
+  DDS::DataReaderListener_var denied_partitions_listener = new RelayDeniedPartitionsListener();
+  DDS::DataReader_var relay_denied_partitions_reader_var =
+    relay_subscriber->create_datareader(relay_denied_partitions_topic, denied_partitions_reader_qos,
+                                        denied_partitions_listener, DDS::DATA_AVAILABLE_STATUS);
+
+  if (!relay_denied_partitions_reader_var) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Relay Denied Partitions data reader\n"));
+    return EXIT_FAILURE;
+  }
 
   if (spdp_horizontal_handler.open(spdp_horizontal_addr) == -1 ||
       sedp_horizontal_handler.open(sedp_horizontal_addr) == -1 ||
