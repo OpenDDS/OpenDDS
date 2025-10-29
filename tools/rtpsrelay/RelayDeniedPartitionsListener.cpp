@@ -7,6 +7,9 @@
 
 namespace RtpsRelay {
 
+RelayDeniedPartitionsListener::RelayDeniedPartitionsListener(GuidPartitionTable& guid_partition_table)
+  : guid_partition_table_(guid_partition_table) {}
+
 void RelayDeniedPartitionsListener::on_data_available(DDS::DataReader_ptr reader)
 {
   RelayDeniedPartitionsDataReader_var denied_partitions_reader = RelayDeniedPartitionsDataReader::_narrow(reader);
@@ -16,13 +19,19 @@ void RelayDeniedPartitionsListener::on_data_available(DDS::DataReader_ptr reader
     return;
   }
 
-  RelayDeniedPartitions denied_partitions;
+  RelayDeniedPartitions sample;
   DDS::SampleInfo info;
-  while (denied_partitions_reader->take_next_sample(denied_partitions, info) == DDS::RETCODE_OK) {
+  
+  GuidPartitionTable::DeniedPartitions requested_denied_partitions;
+  while (denied_partitions_reader->take_next_sample(sample, info) == DDS::RETCODE_OK) {
     if (info.valid_data) {
-      // TODO(sonndinh): Drain the denied partitions and set time out.
+      // TODO: Handle ACTION_REMOVE
+      if (sample.add_or_remove() == Action::ACTION_ADD) {
+        requested_denied_partitions.insert(sample.partitions().begin(), sample.partitions().end());
+      }
     }
   }
+  guid_partition_table_.deny_partitions(requested_denied_partitions);
 }
 
 }

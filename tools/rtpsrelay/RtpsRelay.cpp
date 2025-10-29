@@ -410,7 +410,7 @@ int run(int argc, ACE_TCHAR* argv[])
                                     relay_denied_partitions_type_name,
                                     TOPIC_QOS_DEFAULT, nullptr,
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  
+
   if (!relay_denied_partitions_topic) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Relay Denied Partitions topic\n"));
     return EXIT_FAILURE;
@@ -465,7 +465,6 @@ int run(int argc, ACE_TCHAR* argv[])
   DDS::DataReaderQos denied_partitions_reader_qos;
   relay_subscriber->get_default_datareader_qos(denied_partitions_reader_qos);
 
-  denied_partitions_reader_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   denied_partitions_reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
   denied_partitions_reader_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 
@@ -632,7 +631,7 @@ int run(int argc, ACE_TCHAR* argv[])
 
   const auto guid_addr_set = make_rch<GuidAddrSet>(config, reactor_task, rtps_discovery,
                                                    ref(relay_participant_status_reporter), ref(relay_statistics_reporter), ref(*relay_thread_monitor));
-  GuidPartitionTable guid_partition_table(config, spdp_horizontal_addr, relay_partitions_writer, relay_statistics_reporter);
+  GuidPartitionTable guid_partition_table(config, spdp_horizontal_addr, *guid_addr_set, relay_partitions_writer, relay_statistics_reporter);
   RelayPartitionTable relay_partition_table(relay_statistics_reporter);
   relay_statistics_reporter.report();
 
@@ -742,7 +741,7 @@ int run(int argc, ACE_TCHAR* argv[])
   }
   // Don't need to invoke listener for existing samples because no remote participants could be discovered yet.
 
-  DDS::DataReaderListener_var denied_partitions_listener = new RelayDeniedPartitionsListener();
+  DDS::DataReaderListener_var denied_partitions_listener = new RelayDeniedPartitionsListener(guid_partition_table);
   DDS::DataReader_var relay_denied_partitions_reader_var =
     relay_subscriber->create_datareader(relay_denied_partitions_topic, denied_partitions_reader_qos,
                                         denied_partitions_listener, DDS::DATA_AVAILABLE_STATUS);

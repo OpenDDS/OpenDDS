@@ -3,6 +3,7 @@
 
 #include "Config.h"
 #include "RelayStatisticsReporter.h"
+#include "GuidAddrSet.h"
 
 #include <dds/rtpsrelaylib/PartitionIndex.h>
 #include <dds/rtpsrelaylib/RelayTypeSupportImpl.h>
@@ -28,10 +29,12 @@ public:
 
   GuidPartitionTable(const Config& config,
                      const ACE_INET_Addr& address,
+                     GuidAddrSet& guid_addr_set,
                      RelayPartitionsDataWriter_var relay_partitions_writer,
                      RelayStatisticsReporter& relay_stats_reporter)
     : config_(config)
     , address_(OpenDDS::DCPS::LogAddr(address).c_str())
+    , guid_addr_set_(guid_addr_set)
     , relay_stats_reporter_(relay_stats_reporter)
     , relay_partitions_writer_(relay_partitions_writer)
   {}
@@ -48,7 +51,7 @@ public:
   /// Add to 'guids' the GUIDs of participants that should receive messages based on 'partitions'.
   /// If 'allowed' is empty, it has no effect. Otherwise all entires added to 'guids' must be in 'allowed'.
   template <typename T>
-  void lookup(GuidSet& guids, const T& partitions, const GuidSet& allowed) const
+  void lookup(GuidSet& guids, const T& partitions, const GuidSet& allowed = GuidSet{}) const
   {
     const auto limits = allowed.empty() ? nullptr : &allowed;
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
@@ -59,6 +62,29 @@ public:
       }
     }
     relay_stats_reporter_.partition_index_cache(partition_index_.cache_size());
+  }
+
+  using DeniedPartitions = std::unordered_set<std::string>;
+  
+  void deny_partitions(const DeniedPartitions& partitions)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, denied_partitions_mutex_);
+
+    // The partitions in the current list are already denied.
+    DeniedPartitions partitions_to_drain;
+    for (const auto& partition : partitions) {
+      const auto res = denied_partitions_.insert(partition);
+      if (res.second) {
+        partitions_to_drain.insert(partition);
+      }
+    }
+
+    // Drain the GUIDs associated with the newly denied partitions.
+    GuidSet guids_to_drain;
+    lookup(guids_to_drain, partitions_to_drain);
+    for (const auto& guid : guids_to_drain) {
+      guid_addr_set_.drain(guid);
+    }
   }
 
 private:
@@ -162,6 +188,7 @@ private:
 
   const Config& config_;
   const std::string address_;
+  GuidAddrSet& guid_addr_set_;
   RelayStatisticsReporter& relay_stats_reporter_;
   RelayPartitionsDataWriter_var relay_partitions_writer_;
 
@@ -185,8 +212,11 @@ private:
   PartitionToGuid partition_to_guid_;
   PartitionIndex<GuidSet, GuidToParticipantGuid> partition_index_;
 
+  DeniedPartitions denied_partitions_;
+
   mutable ACE_Thread_Mutex mutex_;
   mutable ACE_Thread_Mutex write_mutex_;
+  mutable ACE_Thread_Mutex denied_partitions_mutex_;
 };
 
 }

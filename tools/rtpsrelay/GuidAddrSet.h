@@ -170,6 +170,8 @@ public:
 
   ~GuidAddrSet();
 
+  void drain(const OpenDDS::DCPS::GUID_t& guid);
+
   using CreatedAddrSetStats = std::pair<bool, AddrSetStats&>;
 
   class Proxy {

@@ -121,6 +121,11 @@ GuidAddrSet::~GuidAddrSet()
   TheServiceParticipant->config_topic()->disconnect(config_reader_);
 }
 
+void GuidAddrSet::drain(const OpenDDS::DCPS::GUID_t& guid)
+{
+  // TODO(sonndinh)
+}
+
 GuidAddrSet::CreatedAddrSetStats GuidAddrSet::find_or_create(const OpenDDS::DCPS::GUID_t& guid,
                                                              const OpenDDS::DCPS::MonotonicTimePoint& now)
 {

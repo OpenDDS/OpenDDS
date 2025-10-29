@@ -474,7 +474,7 @@ public:
   {
     return cached_denied_partitions_timeout_.get();
   }
-  
+
   static bool to_time_duration(const std::string& value, OpenDDS::DCPS::TimeDuration& out);
 
 private:
