@@ -19,7 +19,7 @@ namespace RtpsRelay {
 // FUTURE: Make this configurable, adaptive, etc.
 const size_t MAX_SLOT_SIZE = 64;
 
-class GuidPartitionTable {
+class GuidPartitionTable : public OpenDDS::DCPS::RcObject {
 public:
   enum Result {
     ADDED,
@@ -28,16 +28,20 @@ public:
   };
 
   GuidPartitionTable(const Config& config,
+                     const OpenDDS::DCPS::ReactorTask_rch& reactor_task,
                      const ACE_INET_Addr& address,
                      GuidAddrSet& guid_addr_set,
                      RelayPartitionsDataWriter_var relay_partitions_writer,
                      RelayStatisticsReporter& relay_stats_reporter)
     : config_(config)
+    , reactor_task_(reactor_task)
     , address_(OpenDDS::DCPS::LogAddr(address).c_str())
     , guid_addr_set_(guid_addr_set)
     , relay_stats_reporter_(relay_stats_reporter)
     , relay_partitions_writer_(relay_partitions_writer)
   {}
+
+  ~GuidPartitionTable();
 
   // Insert a reader/writer guid and its partitions.
   Result insert(const OpenDDS::DCPS::GUID_t& guid,
@@ -64,28 +68,13 @@ public:
     relay_stats_reporter_.partition_index_cache(partition_index_.cache_size());
   }
 
-  using DeniedPartitions = std::unordered_set<std::string>;
-  
-  void deny_partitions(const DeniedPartitions& partitions)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, denied_partitions_mutex_);
+  using DeniedPartitions = std::unordered_map<std::string, OpenDDS::DCPS::MonotonicTimePoint>;
 
-    // The partitions in the current list are already denied.
-    DeniedPartitions partitions_to_drain;
-    for (const auto& partition : partitions) {
-      const auto res = denied_partitions_.insert(partition);
-      if (res.second) {
-        partitions_to_drain.insert(partition);
-      }
-    }
+  void deny_partitions(const DeniedPartitions& partitions);
 
-    // Drain the GUIDs associated with the newly denied partitions.
-    GuidSet guids_to_drain;
-    lookup(guids_to_drain, partitions_to_drain);
-    for (const auto& guid : guids_to_drain) {
-      guid_addr_set_.drain(guid);
-    }
-  }
+  void cleanup_denied_partitions(const OpenDDS::DCPS::MonotonicTimePoint& now);
+
+  bool is_denied(const StringSet& partitions) const;
 
 private:
   void remove_from_cache(const OpenDDS::DCPS::GUID_t& guid)
@@ -187,6 +176,7 @@ private:
   }
 
   const Config& config_;
+  OpenDDS::DCPS::ReactorTask_rch reactor_task_;
   const std::string address_;
   GuidAddrSet& guid_addr_set_;
   RelayStatisticsReporter& relay_stats_reporter_;
@@ -213,6 +203,11 @@ private:
   PartitionIndex<GuidSet, GuidToParticipantGuid> partition_index_;
 
   DeniedPartitions denied_partitions_;
+
+  using DeniedPartitionsCleanupSporadicTask = OpenDDS::DCPS::PmfSporadicTask<GuidPartitionTable>;
+  using DeniedPartitionsCleanupSporadicTask_rch = OpenDDS::DCPS::RcHandle<DeniedPartitionsCleanupSporadicTask>;
+  DeniedPartitionsCleanupSporadicTask_rch denied_partitions_cleanup_task_;
+  bool pending_denied_partitions_cleanup_ = false;
 
   mutable ACE_Thread_Mutex mutex_;
   mutable ACE_Thread_Mutex write_mutex_;

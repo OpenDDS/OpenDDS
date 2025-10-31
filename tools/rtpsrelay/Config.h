@@ -104,7 +104,7 @@ const char RTPS_RELAY_MAX_PARTICIPANTS_LOW_WATER[] = "RTPS_RELAY_MAX_PARTICIPANT
 const DDS::UInt64 RTPS_RELAY_MAX_PARTICIPANTS_LOW_WATER_default = 0;
 
 const char RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT[] = "RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT";
-const DDS::Duration_t RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT_default = {120, 0};
+const DDS::Duration_t RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT_default = {900, 0}; // 15 minutes
 
 /// Configuration values for the RtpsRelay
 ///
@@ -470,7 +470,7 @@ public:
     cached_denied_partitions_timeout_.set(value);
   }
 
-  OpenDDS::DCPS::TimeDuration denied_partitions_timout() const
+  OpenDDS::DCPS::TimeDuration denied_partitions_timeout() const
   {
     return cached_denied_partitions_timeout_.get();
   }

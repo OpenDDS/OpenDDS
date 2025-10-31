@@ -631,7 +631,7 @@ int run(int argc, ACE_TCHAR* argv[])
 
   const auto guid_addr_set = make_rch<GuidAddrSet>(config, reactor_task, rtps_discovery,
                                                    ref(relay_participant_status_reporter), ref(relay_statistics_reporter), ref(*relay_thread_monitor));
-  GuidPartitionTable guid_partition_table(config, spdp_horizontal_addr, *guid_addr_set, relay_partitions_writer, relay_statistics_reporter);
+  GuidPartitionTable guid_partition_table(config, reactor_task, spdp_horizontal_addr, *guid_addr_set, relay_partitions_writer, relay_statistics_reporter);
   RelayPartitionTable relay_partition_table(relay_statistics_reporter);
   relay_statistics_reporter.report();
 

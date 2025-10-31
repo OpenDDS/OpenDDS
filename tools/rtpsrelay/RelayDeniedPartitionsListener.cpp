@@ -21,13 +21,17 @@ void RelayDeniedPartitionsListener::on_data_available(DDS::DataReader_ptr reader
 
   RelayDeniedPartitions sample;
   DDS::SampleInfo info;
-  
+
+  const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
+
+  // TODO: Handle ACTION_REMOVE
   GuidPartitionTable::DeniedPartitions requested_denied_partitions;
   while (denied_partitions_reader->take_next_sample(sample, info) == DDS::RETCODE_OK) {
     if (info.valid_data) {
-      // TODO: Handle ACTION_REMOVE
       if (sample.add_or_remove() == Action::ACTION_ADD) {
-        requested_denied_partitions.insert(sample.partitions().begin(), sample.partitions().end());
+        for (const auto& partition : sample.partitions()) {
+          requested_denied_partitions.emplace(partition, now);
+        }
       }
     }
   }
