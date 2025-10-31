@@ -24,7 +24,6 @@ void RelayDeniedPartitionsListener::on_data_available(DDS::DataReader_ptr reader
 
   const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
-  // TODO: Handle ACTION_REMOVE
   GuidPartitionTable::DeniedPartitions requested_denied_partitions;
   while (denied_partitions_reader->take_next_sample(sample, info) == DDS::RETCODE_OK) {
     if (info.valid_data) {

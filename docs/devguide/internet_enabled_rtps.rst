@@ -383,6 +383,13 @@ The command-line options for the RtpsRelay:
 
   Initial value for the client draining rate. Draining will not start until enabled by a command sent from :program:`RtpsRelayControl`.
 
+.. option:: -DeniedPartitionsTimeout <seconds>
+
+  :ref:`Config store key <config-sotre-keys>`: ``RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT``
+
+  Expected amount of time a denied partition will remain in the denied partitions list before being cleaned up.
+  The default is 900 seconds.
+
 .. _internet_enabled_rtps--rtps_relay_control:
 
 RtpsRelayControl
