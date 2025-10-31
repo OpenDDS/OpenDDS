@@ -220,7 +220,7 @@ module RtpsRelay {
 
   enum Action {
     ACTION_ADD,
-    ACTION_REMOVE
+    ACTION_REMOVE // Not implemented yet
   };
 
   const string RELAY_DENIED_PARTITIONS_TOPIC_NAME = "Relay Denied Partitions";

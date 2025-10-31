@@ -385,7 +385,7 @@ The command-line options for the RtpsRelay:
 
 .. option:: -DeniedPartitionsTimeout <seconds>
 
-  :ref:`Config store key <config-sotre-keys>`: ``RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT``
+  :ref:`Config store key <config-store-keys>`: ``RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT``
 
   Expected amount of time a denied partition will remain in the denied partitions list before being cleaned up.
   The default is 900 seconds.
