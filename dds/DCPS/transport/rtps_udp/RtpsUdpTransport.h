@@ -428,6 +428,7 @@ private:
   typedef PmfPeriodicTask<const RtpsUdpTransport> PeriodicTask;
   RcHandle<PeriodicTask> stats_task_;
   TimeDuration stats_task_period_;
+  ACE_Thread_Mutex stats_mutex_;
 
   void setup_stats_task(const TimeDuration& period);
 
