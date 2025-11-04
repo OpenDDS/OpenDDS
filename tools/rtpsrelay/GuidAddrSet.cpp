@@ -586,7 +586,7 @@ void GuidAddrSet::populate_relay_status(RelayStatus& relay_status)
 void GuidAddrSet::deny(const OpenDDS::DCPS::GUID_t& guid)
 {
   const auto it = guid_addr_set_map_.find(guid);
-  if (it != guid_addr_set_map_.end()) {
+  if (it != guid_addr_set_map_.end() && it->second.allow_stun_responses) {
     it->second.allow_stun_responses = false;
     it->second.in_denied_partition = true;
     ++mark_count_;
