@@ -345,7 +345,7 @@ private:
 
   const RepoKey key_;
 
-  // This mutex protects everything else
+  // This mutex protects everything else, except stats data members
   mutable ACE_Thread_Mutex lock_;
 
   RtpsDiscoveryConfig_rch config_;
@@ -363,6 +363,8 @@ private:
   typedef DCPS::PmfPeriodicTask<const RtpsDiscovery> PeriodicTask;
   DCPS::RcHandle<PeriodicTask> stats_task_;
   DCPS::TimeDuration stats_task_period_;
+  // Seperate mutex to reduce contention on lock_
+  mutable ACE_Thread_Mutex stats_lock_;
 
   void setup_stats_task(const DCPS::TimeDuration& period);
   void write_stats(const MonotonicTimePoint&) const;

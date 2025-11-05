@@ -239,20 +239,26 @@ RtpsDiscovery::add_domain_participant_secure(
 
 void RtpsDiscovery::setup_stats_task(const DCPS::TimeDuration& period)
 {
-  if (period == stats_task_period_) {
-    return;
-  }
-  stats_task_period_ = period;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(stats_lock_);
+    if (period == stats_task_period_) {
+      return;
+    }
+    stats_task_period_ = period;
 
-  if (period.is_zero()) {
-    stats_task_->disable();
-  } else {
-    stats_task_->enable(true, period);
+    if (period.is_zero()) {
+      stats_task_->disable();
+    } else {
+      stats_task_->enable(true, period);
+    }
   }
 
-  if (!config_reader_) {
-    config_reader_ = DCPS::make_rch<DCPS::ConfigReader>(DCPS::ConfigStoreImpl::datareader_qos(), rchandle_from(this));
-    TheServiceParticipant->config_topic()->connect(config_reader_);
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(lock_);
+    if (!config_reader_) {
+      config_reader_ = DCPS::make_rch<DCPS::ConfigReader>(DCPS::ConfigStoreImpl::datareader_qos(), rchandle_from(this));
+      TheServiceParticipant->config_topic()->connect(config_reader_);
+    }
   }
 }
 

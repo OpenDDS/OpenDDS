@@ -704,6 +704,7 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
 
 void RtpsUdpTransport::setup_stats_task(const TimeDuration& period)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(stats_mutex_);
   if (period == stats_task_period_) {
     return;
   }
