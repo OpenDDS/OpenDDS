@@ -30,6 +30,7 @@ using IpToPorts = std::unordered_map<ACE_INET_Addr, PortSet, InetAddrHash>;
 struct AddrSetStats {
   bool allow_rtps = false;
   bool allow_stun_responses = true;
+  bool in_denied_partition = false;
   bool seen_spdp_message = false;
   IpToPorts ip_to_ports;
   OpenDDS::DCPS::Lockable_Message_Block_Ptr spdp_message;
@@ -279,6 +280,11 @@ public:
       gas_.populate_relay_status(relay_status);
     }
 
+    void deny(const OpenDDS::DCPS::GUID_t& guid)
+    {
+      gas_.deny(guid);
+    }
+
   private:
     GuidAddrSet& gas_;
 
@@ -358,6 +364,8 @@ private:
   void process_drain_state(const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   void populate_relay_status(RelayStatus& relay_status);
+
+  void deny(const OpenDDS::DCPS::GUID_t& guid);
 
   struct AdmissionControlInfo {
     AdmissionControlInfo(const OpenDDS::DCPS::GuidPrefix_t& prefix, const OpenDDS::DCPS::MonotonicTimePoint& admitted)

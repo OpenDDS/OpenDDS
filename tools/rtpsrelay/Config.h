@@ -103,6 +103,9 @@ const DDS::UInt64 RTPS_RELAY_MAX_PARTICIPANTS_HIGH_WATER_default = 0;
 const char RTPS_RELAY_MAX_PARTICIPANTS_LOW_WATER[] = "RTPS_RELAY_MAX_PARTICIPANTS_LOW_WATER";
 const DDS::UInt64 RTPS_RELAY_MAX_PARTICIPANTS_LOW_WATER_default = 0;
 
+const char RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT[] = "RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT";
+const DDS::Duration_t RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT_default = {900, 0}; // 15 minutes
+
 /// Configuration values for the RtpsRelay
 ///
 /// Each value uses one of these implementation strategies:
@@ -461,6 +464,17 @@ public:
                                                OpenDDS::DCPS::ConfigStoreImpl::Format_IntegerMilliseconds);
   }
 
+  void denied_partitions_timeout(const OpenDDS::DCPS::TimeDuration& value)
+  {
+    TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT, value.to_dds_duration());
+    cached_denied_partitions_timeout_.set(value);
+  }
+
+  OpenDDS::DCPS::TimeDuration denied_partitions_timeout() const
+  {
+    return cached_denied_partitions_timeout_.get();
+  }
+
   static bool to_time_duration(const std::string& value, OpenDDS::DCPS::TimeDuration& out);
 
 private:
@@ -547,6 +561,7 @@ private:
   CachedValue<OpenDDS::DCPS::TimeDuration, to_time_duration> cached_rejected_address_duration_{OpenDDS::DCPS::TimeDuration{RTPS_RELAY_REJECTED_ADDRESS_DURATION_default}};
   CachedValue<size_t, OpenDDS::DCPS::convertToInteger> cached_admission_max_participants_high_water_{RTPS_RELAY_MAX_PARTICIPANTS_HIGH_WATER_default};
   CachedValue<size_t, OpenDDS::DCPS::convertToInteger> cached_admission_max_participants_low_water_{RTPS_RELAY_MAX_PARTICIPANTS_LOW_WATER_default};
+  CachedValue<OpenDDS::DCPS::TimeDuration, to_time_duration> cached_denied_partitions_timeout_{OpenDDS::DCPS::TimeDuration{RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT_default}};
 
   // start of variables without ConfigStore support
   std::string relay_id_;
