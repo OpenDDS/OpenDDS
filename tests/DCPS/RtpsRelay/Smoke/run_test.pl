@@ -79,6 +79,8 @@ sub get_relay_args {
 my $pub_extra_args = $test->flag('draining') ? ' -d' : '';
 my $control_args = '-Set RTPS_RELAY_DRAIN_INTERVAL=100 -Set RTPS_RELAY_DRAIN_STATE=Draining ' .
     '-Set RTPS_RELAY_ADMIT_STATE=NotAdmitting';
+# TODO(sonndinh): use specific partition names. Append to the control's args.
+my $denied_partitions_args = '-Deny <partition> [-Deny <partition> ...] -Set RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT=120';
 
 $test->process("monitor", "monitor", "-DCPSConfigFile monitor.ini");
 $test->process("relay1", "$ENV{DDS_ROOT}/bin/RtpsRelay", get_relay_args(1) . $relay_security_opts);
