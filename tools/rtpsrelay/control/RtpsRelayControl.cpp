@@ -25,6 +25,7 @@
 
 #include <cstdlib>
 #include <string>
+#include <unordered_set>
 
 using namespace RtpsRelay;
 
@@ -66,7 +67,7 @@ struct ShutdownHandler : ACE_Event_Handler {
 int write_if_ready(const RelayConfig& config,
                    RelayConfigDataWriter_var& relay_config_data_writer,
                    const DDS::WaitSet_var& waiter,
-                   bool& write_config_pending)
+                   bool& write_pending)
 {
   DDS::PublicationMatchedStatus matches{};
   if (relay_config_data_writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
@@ -95,7 +96,7 @@ int write_if_ready(const RelayConfig& config,
         waiter->detach_condition(status_cond);
       }
     }
-    write_config_pending = false;
+    write_pending = false;
   }
   return EXIT_SUCCESS;
 }
@@ -228,7 +229,7 @@ int run(int argc, ACE_TCHAR* argv[])
 
   DDS::WaitSet_var waiter = new DDS::WaitSet;
 
-  bool write_config_pending{false};
+  bool write_pending{false};
   RelayConfigDataWriter_var relay_config_data_writer;
   if (!config.config().empty()) {
     if (config.relay_id().empty()) {
@@ -258,7 +259,7 @@ int run(int argc, ACE_TCHAR* argv[])
     DDS::StatusCondition_var cond = relay_config_data_writer->get_statuscondition();
     cond->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
     waiter->attach_condition(cond);
-    write_config_pending = true;
+    write_pending = true;
   }
 
   RelayDeniedPartitionsDataWriter_var relay_denied_partitions_data_writer;
@@ -299,7 +300,7 @@ int run(int argc, ACE_TCHAR* argv[])
     denied_partitions_waiter->attach_condition(status_cond);
 
     RelayDeniedPartitions rdp{};
-    rdp.partitions().insert(rpd.partitions().begin(), denied_partitions.begin(), denied_partitions.end());
+    rdp.partitions().insert(rdp.partitions().begin(), denied_partitions.begin(), denied_partitions.end());
     rdp.add_or_remove() = Action::ACTION_ADD;
 
     while (true) {
@@ -317,7 +318,7 @@ int run(int argc, ACE_TCHAR* argv[])
       }
 
       if (pms.current_count) {
-        if (relay_denied_partitions_data_writer->write(denied_partitions_sample, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
+        if (relay_denied_partitions_data_writer->write(rdp, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
           ACE_ERROR((LM_ERROR, "ERROR: write denied partitions failed\n"));
           return EXIT_FAILURE;
         }
@@ -370,8 +371,8 @@ int run(int argc, ACE_TCHAR* argv[])
   waiter->attach_condition(shutdown_guard);
 
   for (auto done{false}; !done;) {
-    if (relay_config_data_writer && write_config_pending) {
-      if (write_if_ready(config, relay_config_data_writer, waiter, write_config_pending) != EXIT_SUCCESS) {
+    if (relay_config_data_writer && write_pending) {
+      if (write_if_ready(config, relay_config_data_writer, waiter, write_pending) != EXIT_SUCCESS) {
         return EXIT_FAILURE;
       }
     }

@@ -234,6 +234,10 @@ void drain_test(DistributedConditionSet_rch dcs, const DDS::DomainParticipant_va
   ACE_ERROR((LM_ERROR, "ERROR: failed to wait()\n"));
 }
 
+void deny_partition_test()
+{
+}
+
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   DDS::DomainParticipantFactory_var dpf;
@@ -373,6 +377,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         stress_test(dw, participant, type_name, pub);
       } else if (args.drain_test) {
         drain_test(dcs, participant);
+      } else if (args.reject_partition_test) {
+        // TODO:
+        deny_partition_test();
       } else {
         writer_test(dcs, dw);
 
