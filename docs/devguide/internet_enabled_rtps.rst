@@ -438,7 +438,7 @@ The command-line options specific to ``RtpsRelayControl`` are:
 
   If specified, the ``RtpsRelayControl`` process will keep running until terminated by the user.
   This is also the behavior when there is no specified ``-RelayId``.
-  Then default (when run with ``-RelayId``) is to exit the process when requested settings are complete.
+  The default (when run with ``-RelayId``) is to exit the process when requested settings are complete.
 
 Parameters that may be dynamically configured in the ``RtpsRelay`` include:
 
