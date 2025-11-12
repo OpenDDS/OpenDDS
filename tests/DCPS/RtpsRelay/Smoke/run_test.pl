@@ -79,7 +79,7 @@ sub get_relay_args {
 my $pub_extra_args = $test->flag('draining') ? ' -d' : ($test->flag('deny_partitions') ? ' -r' : '');
 my $drain_args = '-Set RTPS_RELAY_DRAIN_INTERVAL=100 -Set RTPS_RELAY_DRAIN_STATE=Draining ' .
     '-Set RTPS_RELAY_ADMIT_STATE=NotAdmitting';
-my $deny_partitions_args = '-Deny publisher -Set RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT=10';
+my $deny_partitions_args = '-Deny OCI -Set RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT=10';
 my $control_args = $test->flag('draining') ? $drain_args : ($test->flag('deny_partitions') ? $deny_partitions_args : '');
 
 $test->process("monitor", "monitor", "-DCPSConfigFile monitor.ini");
@@ -123,8 +123,8 @@ if ($test->flag('draining') || $test->flag('deny_partitions')) {
 }
 
 $test->stop_process(5, "metachecker");
-$test->stop_process(20, "subscriber") unless $test->flag('draining');
-$test->stop_process(5, "publisher") unless $test->flag('draining');
+$test->stop_process(20, "subscriber") unless ($test->flag('draining') || $test->flag('deny_partitions'));
+$test->stop_process(5, "publisher") unless ($test->flag('draining') || $test->flag('deny_partitions'));
 
 $test->kill_process(5, "relay1");
 $test->kill_process(5, "relay2") unless uses_one_relay();
