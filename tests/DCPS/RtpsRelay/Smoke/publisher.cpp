@@ -371,7 +371,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       } else if (args.stress_test) {
         stress_test(dw, participant, type_name, pub);
-      } else if (args.drain_test || args.reject_partition_test) {
+      } else if (args.drain_test || args.deny_partitions_test) {
         drain_test(dcs, participant);
       } else {
         writer_test(dcs, dw);

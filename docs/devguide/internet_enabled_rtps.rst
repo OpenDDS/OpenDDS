@@ -427,6 +427,13 @@ The command-line options specific to ``RtpsRelayControl`` are:
   ``RtpsRelayControl`` will send thoes changes to the ``RtpsRelay`` via its ``Relay Config Control`` topic and
   run until the desired changes are acknowledged by the ``RtpsRelay`` via its ``Relay Config Status`` topic.
 
+.. option:: -Deny <string>
+
+  This option may be specified multiple times.
+  The argument is a client partition name with which the associated client participants will be denied access to the ``RtpsRelay``.
+  When ``-RelayId`` is not specified, the denied partitions will be applied to all discovered ``RtpsRelay`` instances.
+  Otherwise, the denied partitions are sent to the specified ``RtpsRelay`` instance.
+
 .. option:: -ShowAll
 
   If specified, all configuration parameters sent by the ``RtpsRelay`` on ``Relay Config Status`` are written to

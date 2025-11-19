@@ -28,7 +28,7 @@ struct Args {
   bool stress_test = false;
   bool terminate_on_data = false;
   bool drain_test = false;
-  bool reject_partition_test = false;
+  bool deny_partitions_test = false;
 
   int parse(int argc, ACE_TCHAR* argv[]);
 };
@@ -60,7 +60,7 @@ Args::parse(int argc, ACE_TCHAR* argv[])
       drain_test = true;
       break;
     case 'r':
-      reject_partition_test = true;
+      deny_partitions_test = true;
       break;
     case '?':
       ACE_ERROR_RETURN((LM_ERROR, "usage: %s [-lesdr] [-p partition] [-b particpant_bit_expected_instances]\n", argv[0]), EXIT_FAILURE);
