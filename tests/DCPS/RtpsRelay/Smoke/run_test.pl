@@ -34,7 +34,7 @@ if ($test->flag('secure')) {
 }
 
 sub uses_one_relay {
-    return $test->flag('partition_same_relay') || $test->flag('single') || $test->flag('draining');
+    return $test->flag('partition_same_relay') || $test->flag('single') || $test->flag('draining') || $test->flag('deny_partitions');
 }
 
 my $pub_ini = " pub_rtps.ini";
@@ -76,9 +76,11 @@ sub get_relay_args {
     );
 }
 
-my $pub_extra_args = $test->flag('draining') ? ' -d' : '';
-my $control_args = '-Set RTPS_RELAY_DRAIN_INTERVAL=100 -Set RTPS_RELAY_DRAIN_STATE=Draining ' .
+my $pub_extra_args = $test->flag('draining') ? ' -d' : ($test->flag('deny_partitions') ? ' -r' : '');
+my $drain_args = '-Set RTPS_RELAY_DRAIN_INTERVAL=100 -Set RTPS_RELAY_DRAIN_STATE=Draining ' .
     '-Set RTPS_RELAY_ADMIT_STATE=NotAdmitting';
+my $deny_partitions_args = '-Deny OCI -Set RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT=10';
+my $control_args = $test->flag('draining') ? $drain_args : ($test->flag('deny_partitions') ? $deny_partitions_args : '');
 
 $test->process("monitor", "monitor", "-DCPSConfigFile monitor.ini");
 $test->process("relay1", "$ENV{DDS_ROOT}/bin/RtpsRelay", get_relay_args(1) . $relay_security_opts);
@@ -109,11 +111,11 @@ if ($test->flag('join')) {
     sleep 10;
     $test->start_process("publisher");
     sleep 1;
-    $test->start_process("subscriber") unless $test->flag('draining');
+    $test->start_process("subscriber") unless ($test->flag('draining') || $test->flag('deny_partitions'));
 }
 $test->start_process("metachecker");
 
-if ($test->flag('draining')) {
+if ($test->flag('draining') || $test->flag('deny_partitions')) {
     $test->wait_for('publisher', 'connected', max_wait => 5);
     $test->start_process("control1");
     $test->wait_kill("publisher", 30);
@@ -121,8 +123,8 @@ if ($test->flag('draining')) {
 }
 
 $test->stop_process(5, "metachecker");
-$test->stop_process(20, "subscriber") unless $test->flag('draining');
-$test->stop_process(5, "publisher") unless $test->flag('draining');
+$test->stop_process(20, "subscriber") unless ($test->flag('draining') || $test->flag('deny_partitions'));
+$test->stop_process(5, "publisher") unless ($test->flag('draining') || $test->flag('deny_partitions'));
 
 $test->kill_process(5, "relay1");
 $test->kill_process(5, "relay2") unless uses_one_relay();
