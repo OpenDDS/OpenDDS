@@ -21,17 +21,10 @@ $test->setup_discovery();
 
 my $pub_count = 0;
 my $sub_count = 0;
-my $rtps_disc = 0;
 my $large_samples = 0;
 
 my $ai = 0;
 foreach $a(@ARGV) {
-  if ($a eq "rtps_disc") {
-    $rtps_disc = 1;
-  }
-  if ($a eq "rtps_disc_tcp") {
-    $rtps_disc = 1;
-  }
   if ($a eq "large_samples") {
     $large_samples = 1;
   }

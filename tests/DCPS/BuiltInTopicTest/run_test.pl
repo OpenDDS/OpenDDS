@@ -60,8 +60,7 @@ $test->{add_transport_config} = 0;
 $test->report_unused_flags(1);
 $test->setup_discovery();
 
-my ($rtps_mon) = ($test->{discovery} eq 'rtps') ?
-    ('-t 0') : ('');
+my ($rtps_mon) = '-t 0';
 
 $test->process("subscriber", "subscriber");
 $test->process("publisher", "publisher");

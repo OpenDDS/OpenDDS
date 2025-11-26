@@ -13,7 +13,6 @@ use PerlDDS::Run_Test;
 use strict;
 
 my $status = 0;
-my $rtps = 0;
 my $help = 0;
 
 my $dbg_opts = " -ORBDebugLevel 1";
@@ -21,7 +20,6 @@ my $common_opts = "$dbg_opts";
 
 my $help_message = "usage: run_test.pl [-h|--help] [--rtps]\n";
 my $invalid_args = not GetOptions(
-  "rtps" => \$rtps,
   "help|h" => \$help,
 );
 
@@ -40,9 +38,7 @@ if ($help) {
   exit 0;
 }
 
-if ($rtps) {
-  $common_opts .= " -DCPSConfigFile rtps.ini";
-}
+$common_opts .= " -DCPSConfigFile rtps.ini";
 
 my $test = new PerlDDS::TestFramework();
 
@@ -52,8 +48,6 @@ $test->{add_transport_config} = 0;
 
 my $pub_opts = "$common_opts";
 my $sub_opts = "$common_opts";
-
-$test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log") unless $rtps;
 
 $test->process("publisher", "publisher", $pub_opts);
 $test->process("subscriber", "subscriber", $sub_opts);
