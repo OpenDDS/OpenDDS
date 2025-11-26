@@ -19,23 +19,12 @@ PerlDDS::add_lib_path('../common');
 
 # single reader with single instances test
 
-my $rtps_disc = 0;
-
-if ($ARGV[0] eq 'rtps') {
-  $rtps_disc = 1;
-}
-
 my $sub_parameters = "-t all";
 my $pub_parameters = "-t all";
 
 my $test = new PerlDDS::TestFramework();
-if ($rtps_disc) {
-  $sub_parameters .= ' -DCPSConfigFile rtps_disc.ini';
-  $pub_parameters .= ' -DCPSConfigFile rtps_disc.ini';
-}
-else {
-  $test->setup_discovery();
-}
+$sub_parameters .= ' -DCPSConfigFile rtps_disc.ini';
+$pub_parameters .= ' -DCPSConfigFile rtps_disc.ini';
 
 $test->process("subscriber1", "subscriber", $sub_parameters . " -a reader1");
 $test->process("subscriber2", "subscriber", $sub_parameters . " -a reader2");
