@@ -18,6 +18,8 @@
 
 #include <ace/streams.h>
 #include "tests/Utils/ExceptionStreams.h"
+#include <tests/Utils/DistributedConditionSet.h>
+#include <tests/Utils/StatusMatching.h>
 #include "ace/Get_Opt.h"
 #include "ace/OS_NS_unistd.h"
 
@@ -42,13 +44,7 @@ parse_args (int argc, ACE_TCHAR *argv[])
       num_expected_dispose = 1;
       break;
     case 'u':
-      //If writer calls unregister_instance, do not expect
-      //the unregister message because the reader defaults to
-      //auto dispose upon unregister, it will send dispose which
-      //cause the instance release and state not change so
-      //unregister instance message is ignored.
-      num_expected_unregister = 0;
-      ++ num_expected_dispose;
+      num_expected_unregister = 1;
       break;
     case '?':
     default:
@@ -70,6 +66,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   try
     {
+      DistributedConditionSet_rch dcs =
+        OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+
       DDS::DomainParticipantFactory_var dpf;
       DDS::DomainParticipant_var participant;
 
@@ -116,8 +115,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
+      cerr << " expected " <<  num_expected_data << "/" << num_expected_dispose << "/" << num_expected_unregister <<endl;
+
       // activate the listener
-      DDS::DataReaderListener_var listener = new DataReaderListenerImpl;
+      DDS::DataReaderListener_var listener = new DataReaderListenerImpl(dcs, num_expected_data);;
       DataReaderListenerImpl &listener_servant =
         *dynamic_cast<DataReaderListenerImpl*>(listener.in());
 
@@ -127,8 +128,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       // Create the Datareaders
+      DDS::DataReaderQos dr_qos;
+      sub->get_default_datareader_qos(dr_qos);
+      dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+
       DDS::DataReader_var dr = sub->create_datareader(topic.in (),
-                                                      DATAREADER_QOS_DEFAULT,
+                                                      dr_qos,
                                                       listener.in (),
                                                       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (dr.in ())) {
@@ -136,14 +141,16 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
+      Utils::wait_match(dr, 1);
+      dcs->post("sub", "ready");
 
-      int expected = num_expected_data + num_expected_dispose + num_expected_unregister;
-      cerr << " expected " <<  num_expected_data << "/" << num_expected_dispose << "/" << num_expected_unregister <<endl;
-
-      while ( listener_servant.num_reads() < expected ) {
-        cerr << " recv " << listener_servant.num_reads() << endl;
-        ACE_OS::sleep (1);
+      if (num_expected_dispose) {
+        dcs->wait_for("sub", "sub", "dispose");
       }
+      if (num_expected_unregister) {
+        dcs->wait_for("sub", "sub", "unregister");
+      }
+      dcs->wait_for("sub", "sub", "data");
 
       listener_servant.stop ();
 
@@ -153,9 +160,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (!CORBA::is_nil (dpf.in ())) {
         dpf->delete_participant(participant.in ());
       }
-      ACE_OS::sleep(2);
 
       TheServiceParticipant->shutdown ();
+
+      dcs->post("sub", "done");
 
       if (listener_servant.num_received_dispose () != num_expected_dispose)
       {

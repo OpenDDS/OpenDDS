@@ -7,7 +7,7 @@ Read `the documentation for this release on Read the Docs <https://opendds.readt
 Additions
 =========
 
-- OpenDDS can now be built using CMake for most common scenarios. (:ghpr:`4203`, :ghpr:`4214`)
+- OpenDDS can now be built using CMake for most common scenarios. (:ghpr:`4203`, :ghpr:`4314`)
 
   - This is still considered somewhat experimental as it doesn't support :ref:`everything that an MPC-built OpenDDS currently can <cmake-known-limitations>`.
   - See :ref:`cmake-building` for details.
@@ -16,13 +16,13 @@ Additions
 
 - CMake Config Package
 
-  - Added :cmake:func:`opendds_install_interface_files` to help install IDL files and the files generated from them. (:ghpr:`4203`, :ghpr:`4214`)
-  - Added :cmake:var:`OPENDDS_HOST_TOOLS` and :cmake:var:`OPENDDS_ACE_TAO_HOST_TOOLS` to allow cross compiling applications with both MPC and CMake-built OpenDDS. (:ghpr:`4203`, :ghpr:`4214`)
+  - Added :cmake:func:`opendds_install_interface_files` to help install IDL files and the files generated from them. (:ghpr:`4203`, :ghpr:`4314`)
+  - Added :cmake:var:`OPENDDS_HOST_TOOLS` and :cmake:var:`OPENDDS_ACE_TAO_HOST_TOOLS` to allow cross compiling applications with both MPC and CMake-built OpenDDS. (:ghpr:`4203`, :ghpr:`4314`)
 
   - :cmake:func:`opendds_target_sources`:
 
-    - Added :cmake:func:`opendds_target_sources(INCLUDE_BASE)` to preserve the directory structure of the IDL files for compiling the resulting generated files and installing everything using :cmake:func:`opendds_install_interface_files`. (:ghpr:`4203`, :ghpr:`4214`)
-    - Added :cmake:func:`opendds_target_sources(USE_VERSIONED_NAMESPACE)` as a shortcut to the ``-Wb,versioning_*`` IDL compiler options. (:ghpr:`4203`, :ghpr:`4214`)
+    - Added :cmake:func:`opendds_target_sources(INCLUDE_BASE)` to preserve the directory structure of the IDL files for compiling the resulting generated files and installing everything using :cmake:func:`opendds_install_interface_files`. (:ghpr:`4203`, :ghpr:`4314`)
+    - Added :cmake:func:`opendds_target_sources(USE_VERSIONED_NAMESPACE)` as a shortcut to the ``-Wb,versioning_*`` IDL compiler options. (:ghpr:`4203`, :ghpr:`4314`)
 
 - Support sending DynamicDataAdapter sample via DynamicDataWriter (:ghpr:`4226`)
 - Added export macro to ConditionImpl (:ghpr:`4295`)
@@ -30,7 +30,7 @@ Additions
 Deprecations
 ============
 
-- Deprecated :cmake:var:`OPENDDS_FILENAME_ONLY_INCLUDES` in favor of :cmake:func:`opendds_target_sources(INCLUDE_BASE)`. (:ghpr:`4203`, :ghpr:`4214`)
+- Deprecated :cmake:var:`OPENDDS_FILENAME_ONLY_INCLUDES` in favor of :cmake:func:`opendds_target_sources(INCLUDE_BASE)`. (:ghpr:`4203`, :ghpr:`4314`)
 
 Fixes
 =====
@@ -55,7 +55,7 @@ Fixes
 Documentation
 =============
 
-- Remove -Grapidjson flag [opendds_idl] (:ghpr:`4231`)
+- Removed documentation for ``-Grapidjson`` option of ``opendds_idl`` that was removed in 3.20.0 (:ghpr:`4231`)
 - Remove reference to mailing lists (:ghpr:`4234`)
 - Restructured parts of :ref:`dds_security` page and expanded documentation of some XML security document elements. (:ghpr:`4281`)
 - OS-specific instructions will now be automatically selected based on the browser's user agent. (:ghpr:`4281`)

@@ -8,7 +8,9 @@
 #ifndef OPENDDS_DCPS_CONTENTFILTEREDTOPICIMPL_H
 #define OPENDDS_DCPS_CONTENTFILTEREDTOPICIMPL_H
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#include "Definitions.h"
+
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
 
 #include "TopicDescriptionImpl.h"
 #include "FilterEvaluator.h"
@@ -86,6 +88,6 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#endif
 
 #endif

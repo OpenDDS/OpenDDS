@@ -14,9 +14,10 @@
 #include "TransportReceiveListener.h"
 
 #include <dds/DCPS/DataWriterImpl.h>
-#include <dds/DCPS/SendStateDataSampleList.h>
-#include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/SendStateDataSampleList.h>
+
 #include <dds/DCPS/RTPS/ICE/Ice.h>
 
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -32,8 +33,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 TransportClient::TransportClient()
-  : pending_assoc_timer_(make_rch<PendingAssocTimer> (TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner()))
-  , expected_transaction_id_(1)
+  : expected_transaction_id_(1)
   , max_transaction_id_seen_(0)
   , max_transaction_tail_(0)
   , swap_bytes_(false)
@@ -80,7 +80,7 @@ TransportClient::clean_prev_pending()
 }
 
 void
-TransportClient::enable_transport(bool reliable, bool durable)
+TransportClient::enable_transport(bool reliable, bool durable, DomainParticipantImpl* dpi)
 {
   // Search for a TransportConfig to use:
   TransportConfig_rch tc;
@@ -117,20 +117,21 @@ TransportClient::enable_transport(bool reliable, bool durable)
     throw Transport::NotConfigured();
   }
 
-  enable_transport_using_config(reliable, durable, tc);
+  enable_transport_using_config(reliable, durable, tc, dpi);
 }
 
 void
 TransportClient::enable_transport_using_config(bool reliable, bool durable,
-                                               const TransportConfig_rch& tc)
+                                               const TransportConfig_rch& tc,
+                                               DomainParticipantImpl* dpi)
 {
   config_ = tc;
   swap_bytes_ = tc->swap_bytes_;
   reliable_ = reliable;
   durable_ = durable;
-  unsigned long duration = tc->passive_connect_duration_;
-  if (duration == 0) {
-    duration = TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION;
+  passive_connect_duration_ = tc->passive_connect_duration_;
+  if (passive_connect_duration_ == 0) {
+    passive_connect_duration_ = TimeDuration::from_msec(TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION);
     if (DCPS_debug_level) {
       ACE_DEBUG((LM_WARNING,
         ACE_TEXT("(%P|%t) TransportClient::enable_transport_using_config ")
@@ -138,9 +139,8 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
         ACE_TEXT("default value\n")));
     }
   }
-  passive_connect_duration_ = TimeDuration::from_msec(duration);
 
-  populate_connection_info();
+  populate_connection_info(dpi);
 
   const size_t n = tc->instances_.size();
 
@@ -148,12 +148,12 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
     TransportInst_rch inst = tc->instances_[i];
 
     if (check_transport_qos(*inst)) {
-      TransportImpl_rch impl = inst->get_or_create_impl();
+      TransportImpl_rch impl = inst->get_or_create_impl(domain_id(), dpi);
 
       if (impl) {
         impls_.push_back(impl);
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
         impl->local_crypto_handle(get_crypto_handle());
 #endif
 
@@ -171,7 +171,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
 }
 
 void
-TransportClient::populate_connection_info()
+TransportClient::populate_connection_info(DomainParticipantImpl* dpi)
 {
   conn_info_.length(0);
 
@@ -179,7 +179,7 @@ TransportClient::populate_connection_info()
   for (size_t i = 0; i < n; ++i) {
     TransportInst_rch inst = config_->instances_[i];
     if (check_transport_qos(*inst)) {
-      TransportImpl_rch impl = inst->get_or_create_impl();
+      TransportImpl_rch impl = inst->get_or_create_impl(domain_id(), dpi);
       if (impl) {
         const CORBA::ULong idx = DCPS::grow(conn_info_) - 1;
         impl->connection_info(conn_info_[idx], CONNINFO_ALL);
@@ -324,7 +324,7 @@ TransportClient::associate(const AssociationData& data, bool active)
             if (res.link_.is_nil()) {
               // In this case, it may be waiting for the TCP connection to be
               // established.  Just wait without trying other transports.
-              pending_assoc_timer_->schedule_timer(rchandle_from(this), iter->second);
+              iter->second->schedule(passive_connect_duration_);
             } else {
               use_datalink_i(data.remote_id_, res.link_, guard);
               return true;
@@ -334,30 +334,29 @@ TransportClient::associate(const AssociationData& data, bool active)
       }
     }
 
-    pending_assoc_timer_->schedule_timer(rchandle_from(this), iter->second);
+    iter->second->schedule(passive_connect_duration_);
   }
 
   return true;
 }
 
 void
-TransportClient::PendingAssoc::reset_client() {
+TransportClient::PendingAssoc::reset_client()
+{
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   client_.reset();
 }
 
 bool
-TransportClient::PendingAssoc::safe_to_remove() {
+TransportClient::PendingAssoc::safe_to_remove()
+{
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   return !client_ && !scheduled_;
 }
 
-int
-TransportClient::PendingAssoc::handle_timeout(const ACE_Time_Value&,
-                                              const void* arg)
+void
+TransportClient::PendingAssoc::timeout(const MonotonicTimePoint&)
 {
-  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
-
   RcHandle<TransportClient> client;
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -365,10 +364,9 @@ TransportClient::PendingAssoc::handle_timeout(const ACE_Time_Value&,
     scheduled_ = false;
   }
 
-  if (client && client.get() == static_cast<TransportClient*>(const_cast<void*>(arg))) {
+  if (client) {
     client->use_datalink(data_.remote_id_, DataLink_rch());
   }
-  return 0;
 }
 
 bool
@@ -590,7 +588,7 @@ TransportClient::use_datalink_i(const GUID_t& remote_id_ref,
 
   pend_guard.release();
   pend->reset_client();
-  pending_assoc_timer_->cancel_timer(pend);
+  pend->cancel();
   prev_pending_.insert(std::make_pair(iter->first, iter->second));
   pending_.erase(iter);
 
@@ -623,7 +621,7 @@ TransportClient::stop_associating()
   for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
     {
       // The transport impl may have resource for a pending connection.
-      ACE_Guard<ACE_Thread_Mutex> guard(it->second->mutex_);
+      ACE_Guard<ACE_Thread_Mutex> inner_guard(it->second->mutex_);
       for (size_t i = 0; i < it->second->impls_.size(); ++i) {
         TransportImpl_rch impl = it->second->impls_[i].lock();
         if (impl) {
@@ -632,7 +630,7 @@ TransportClient::stop_associating()
       }
     }
     it->second->reset_client();
-    pending_assoc_timer_->cancel_timer(it->second);
+    it->second->cancel();
     prev_pending_.insert(std::make_pair(it->first, it->second));
   }
   pending_.clear();
@@ -651,16 +649,16 @@ TransportClient::stop_associating(const GUID_t* repos, CORBA::ULong length)
       if (iter != pending_.end()) {
         {
           // The transport impl may have resource for a pending connection.
-          ACE_Guard<ACE_Thread_Mutex> guard(iter->second->mutex_);
-          for (size_t i = 0; i < iter->second->impls_.size(); ++i) {
-            TransportImpl_rch impl = iter->second->impls_[i].lock();
+          ACE_Guard<ACE_Thread_Mutex> inner_guard(iter->second->mutex_);
+          for (size_t j = 0; j < iter->second->impls_.size(); ++j) {
+            TransportImpl_rch impl = iter->second->impls_[j].lock();
             if (impl) {
               impl->stop_accepting_or_connecting(*this, iter->second->data_.remote_id_, true, true);
             }
           }
         }
         iter->second->reset_client();
-        pending_assoc_timer_->cancel_timer(iter->second);
+        iter->second->cancel();
         prev_pending_.insert(std::make_pair(iter->first, iter->second));
         pending_.erase(iter);
       }
@@ -692,7 +690,7 @@ TransportClient::disassociate(const GUID_t& peerId)
   if (iter != pending_.end()) {
     {
       // The transport impl may have resource for a pending connection.
-      ACE_Guard<ACE_Thread_Mutex> guard(iter->second->mutex_);
+      ACE_Guard<ACE_Thread_Mutex> inner_guard(iter->second->mutex_);
       for (size_t i = 0; i < iter->second->impls_.size(); ++i) {
         TransportImpl_rch impl = iter->second->impls_[i].lock();
         if (impl) {
@@ -701,7 +699,7 @@ TransportClient::disassociate(const GUID_t& peerId)
       }
     }
     iter->second->reset_client();
-    pending_assoc_timer_->cancel_timer(iter->second);
+    iter->second->cancel();
     prev_pending_.insert(std::make_pair(iter->first, iter->second));
     pending_.erase(iter);
     return;
@@ -736,7 +734,7 @@ TransportClient::disassociate(const GUID_t& peerId)
   }
 
   OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
-  link->release_reservations(peerId, guid_, released);
+  link->release_reservations(peerId, guid_, &released);
 
   if (!released.empty()) {
 
@@ -902,7 +900,7 @@ TransportClient::send_response(const GUID_t& peer,
 
   DataLinkSet singular;
   singular.insert_link(found->second);
-  singular.send_response(peer, header, move(payload));
+  singular.send_response(peer, header, OPENDDS_MOVE_NS::move(payload));
   return true;
 }
 
@@ -927,7 +925,7 @@ TransportClient::send_w_control(SendStateDataSampleList send_list,
   if (send_list.head()) {
     send_i(send_list, 0);
   }
-  return send_control_to(header, move(msg), destination);
+  return send_control_to(header, OPENDDS_MOVE_NS::move(msg), destination);
 }
 
 void
@@ -998,7 +996,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
         VDBG_LVL((LM_DEBUG,"(%P|%t) DBG: Found DataLinkSet. Sending element %@.\n"
                   , cur), 5);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
         // Content-Filtering adjustment to the pub_links:
         // - If the sample should be filtered out of all subscriptions on a given
@@ -1105,7 +1103,7 @@ TransportClient::send_control(const DataSampleHeader& header,
                               Message_Block_Ptr msg)
 {
   OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
-  return links_.send_control(guid_, get_send_listener(), header, move(msg));
+  return links_.send_control(guid_, get_send_listener(), header, OPENDDS_MOVE_NS::move(msg));
 }
 
 SendControlStatus
@@ -1126,7 +1124,7 @@ TransportClient::send_control_to(const DataSampleHeader& header,
 
     singular.insert_link(found->second);
   }
-  return singular.send_control(guid_, get_send_listener(), header, move(msg));
+  return singular.send_control(guid_, get_send_listener(), header, OPENDDS_MOVE_NS::move(msg));
 }
 
 bool
@@ -1182,6 +1180,12 @@ void TransportClient::data_acked(const GUID_t& remote)
     send_listener = get_send_listener();
   }
   send_listener->data_acked(remote);
+}
+
+SequenceNumber TransportClient::cur_cumulative_ack(const GUID_t& reader_id) const
+{
+  OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
+  return links_.cur_cumulative_ack(guid_, reader_id);
 }
 
 bool TransportClient::is_leading(const GUID_t& reader_id) const

@@ -53,6 +53,12 @@ public:
   /// Mark all queued submessage with the given source (src_guid_) as ignored.
   void ignore_local(const GUID_t& id);
 
+  size_t size() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return queue_.size();
+  }
+
 private:
 
   mutable ACE_Thread_Mutex mutex_;

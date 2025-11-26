@@ -240,7 +240,7 @@ void DCPS_IR_Subscription::disassociate_participant(OpenDDS::DCPS::GUID_t id,
   size_t numAssociations = associations_.size();
   CORBA::Boolean dontSend = 0;
   CORBA::Boolean send = 1;
-  long count = 0;
+  CORBA::ULong count = 0;
 
   if (0 < numAssociations) {
     OpenDDS::DCPS::WriterIdSeq idSeq(static_cast<CORBA::ULong>(numAssociations));
@@ -315,7 +315,7 @@ void DCPS_IR_Subscription::disassociate_topic(OpenDDS::DCPS::GUID_t id)
   size_t numAssociations = associations_.size();
   CORBA::Boolean dontSend = 0;
   CORBA::Boolean send = 1;
-  long count = 0;
+  CORBA::ULong count = 0;
 
   if (0 < numAssociations) {
     OpenDDS::DCPS::WriterIdSeq idSeq(static_cast<CORBA::ULong>(numAssociations));
@@ -380,7 +380,7 @@ void DCPS_IR_Subscription::disassociate_publication(OpenDDS::DCPS::GUID_t id,
   size_t numAssociations = associations_.size();
   CORBA::Boolean dontSend = 0;
   CORBA::Boolean send = 1;
-  long count = 0;
+  CORBA::ULong count = 0;
 
   if (0 < numAssociations) {
     OpenDDS::DCPS::WriterIdSeq idSeq(static_cast<CORBA::ULong>(numAssociations));
@@ -664,6 +664,29 @@ DCPS_IR_Subscription::reevaluate_association(DCPS_IR_Publication* publication)
 
   return false;
 }
+
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+void
+DCPS_IR_Subscription::update_ownership_strength(DCPS_IR_Publication* publication,
+                                                CORBA::Long strength)
+{
+  const int status = this->associations_.find(publication);
+
+  if (status == 0) {
+    if (participant_->is_alive() && this->participant_->isOwner()) {
+      try {
+        reader_->update_ownership_strength(publication->get_id(), strength);
+      } catch (const CORBA::Exception& ex) {
+        if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+          ex._tao_print_exception("(%P|%t) ERROR: Exception caught in DCPS_IR_Subscription::update_ownership_strength:");
+        }
+
+        participant_->mark_dead();
+      }
+    }
+  }
+}
+#endif
 
 OpenDDS::DCPS::GUID_t DCPS_IR_Subscription::get_id()
 {

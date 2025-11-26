@@ -20,10 +20,6 @@
 #include "dds/DCPS/WaitSet.h"
 
 #include "dds/DCPS/StaticIncludes.h"
-#if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
-#include "dds/DCPS/transport/udp/Udp.h"
-#include "dds/DCPS/transport/multicast/Multicast.h"
-#endif
 #include "dds/DCPS/transport/framework/TransportClient.h"
 
 ACE_Thread_Mutex shutdown_lock;

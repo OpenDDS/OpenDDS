@@ -2,6 +2,8 @@
 #include "FooTypeTypeSupportC.h"
 #include <dds/DCPS/Service_Participant.h>
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 DataReaderListenerImpl::DataReaderListenerImpl(size_t publisher_count, size_t samples_per_publisher, const char* progress_fmt)
   : mutex_()
 #ifdef ACE_HAS_CPP11
@@ -12,7 +14,7 @@ DataReaderListenerImpl::DataReaderListenerImpl(size_t publisher_count, size_t sa
   , publisher_count_(publisher_count)
   , samples_per_publisher_(samples_per_publisher)
   , maximum_possible_samples_(publisher_count_ * samples_per_publisher_)
-#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+#if OPENDDS_CONFIG_OWNERSHIP_PROFILE
   , expected_total_samples_(maximum_possible_samples_)
   , expected_samples_per_publisher_(samples_per_publisher_)
 #else
@@ -50,7 +52,7 @@ int DataReaderListenerImpl::check_received() const
   for (size_t p = 0; p < publisher_count_; ++p) {
     ReceivedSamplesMap::const_iterator i = received_samples_map_.find(p);
     if (i != received_samples_map_.end()) {
-#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+#if OPENDDS_CONFIG_OWNERSHIP_PROFILE
       for (size_t s = 0; s < expected_samples_per_publisher_; ++s) {
         if (i->second.count(s) == 0) {
           ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: missing pub%B sample%B\n"), p, s));
@@ -69,7 +71,7 @@ int DataReaderListenerImpl::check_received() const
       ++ret;
     }
   }
-#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+#if OPENDDS_CONFIG_OWNERSHIP_PROFILE
   if (received_total_samples_ != expected_total_samples_) {
 #else
   if (received_total_samples_ < expected_total_samples_) {
@@ -107,7 +109,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
 bool DataReaderListenerImpl::received_all() const
 {
-#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+#if OPENDDS_CONFIG_OWNERSHIP_PROFILE
   return received_total_samples_ >= expected_total_samples_;
 #else
   ReceivedSamplesMap::const_iterator i = received_samples_map_.begin();

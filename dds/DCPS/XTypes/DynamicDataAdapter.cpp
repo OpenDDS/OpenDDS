@@ -128,7 +128,7 @@ DDS::MemberId DynamicDataAdapter::get_member_id_at_index(DDS::UInt32 index)
       } else if (index == 1) {
         bool branch_active;
         DDS::MemberDescriptor_var active_branch;
-        DDS::ReturnCode_t rc = get_selected_union_branch(branch_active, active_branch);
+        rc = get_selected_union_branch(branch_active, active_branch);
         if (rc != DDS::RETCODE_OK) {
           if (DCPS::log_level >= DCPS::LogLevel::Warning) {
             const CORBA::String_var type_name = type_->get_name();
@@ -158,7 +158,7 @@ DDS::MemberId DynamicDataAdapter::get_member_id_at_index(DDS::UInt32 index)
     return get_member_id_at_index_impl(index);
   case TK_ARRAY:
     {
-      DDS::ReturnCode_t rc = check_index("get_member_id_at_index", index, bound_total(type_desc_));
+      rc = check_index("get_member_id_at_index", index, bound_total(type_desc_));
       if (rc != DDS::RETCODE_OK) {
         if (DCPS::log_level >= DCPS::LogLevel::Warning) {
           const CORBA::String_var type_name = type_->get_name();
@@ -179,11 +179,6 @@ DDS::MemberId DynamicDataAdapter::get_member_id_at_index(DDS::UInt32 index)
     }
     return MEMBER_ID_INVALID;
   }
-}
-
-DDS::ReturnCode_t DynamicDataAdapter::clear_all_values()
-{
-  return unsupported_method("DynamicDataAdapater::clear_all_values");
 }
 
 DDS::ReturnCode_t DynamicDataAdapter::clear_nonkey_values()
@@ -234,7 +229,12 @@ DDS::ReturnCode_t DynamicDataAdapter::assert_mutable(const char* method) const
 DDS::ReturnCode_t DynamicDataAdapter::check_index(
   const char* method, DDS::UInt32 index, DDS::UInt32 size) const
 {
-  if (index >= size) {
+  if (type_->get_kind() == TK_MAP) {
+    // When this is supported, change dynamic_data_generator.cpp
+    // to generate the id_to_key() member function.
+    return DDS::RETCODE_UNSUPPORTED;
+
+  } else if (index >= size) {
     if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Notice) {
       const CORBA::String_var type_name = type_->get_name();
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataAdapterImpl<%C>::%C: "
@@ -295,17 +295,6 @@ DDS::ReturnCode_t DynamicDataAdapter::get_cpp11_s8_raw_value(
   char*& dest_value = *static_cast<char**>(dest);
   CORBA::string_free(dest_value);
   dest_value = CORBA::string_dup(source.c_str());
-  return rc;
-}
-
-DDS::ReturnCode_t DynamicDataAdapter::set_cpp11_s8_raw_value(
-  const char* method, std::string& dest, DDS::MemberId id,
-  const void* source, DDS::TypeKind tk)
-{
-  const DDS::ReturnCode_t rc = check_member(method, tk, id);
-  if (rc == DDS::RETCODE_OK) {
-    dest = static_cast<const char*>(source);
-  }
   return rc;
 }
 

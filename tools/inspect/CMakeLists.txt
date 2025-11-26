@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23...3.27)
+cmake_minimum_required(VERSION 3.23...4.0)
 project(opendds_inspect CXX)
 
 set(dep_libs
@@ -9,4 +9,4 @@ include(opendds_build_helpers)
 
 add_executable(inspect Inspect.cpp)
 _opendds_executable(inspect)
-target_link_libraries(inspect ${dep_libs})
+target_link_libraries(inspect PRIVATE ${dep_libs})

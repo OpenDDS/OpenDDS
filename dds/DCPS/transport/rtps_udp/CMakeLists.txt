@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23...3.27)
+cmake_minimum_required(VERSION 3.23...4.0)
 project(opendds_rtps_udp CXX)
 
 set(deps OpenDDS::Dcps OpenDDS::Rtps)
@@ -47,5 +47,5 @@ target_sources(OpenDDS_Rtps_Udp
     Rtps_Udp_Export.h
     TransactionalRtpsSendQueue.h
 )
-_opendds_library(OpenDDS_Rtps_Udp MSVC_BIGOBJ)
+_opendds_library(OpenDDS_Rtps_Udp BIGOBJ)
 target_link_libraries(OpenDDS_Rtps_Udp PUBLIC ${deps})

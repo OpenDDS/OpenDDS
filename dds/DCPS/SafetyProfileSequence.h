@@ -524,10 +524,10 @@ namespace SafetyProfile {
   // Members of the Sequence template itself:
 
   template <typename T, typename Bounds, typename Elts>
-  inline Sequence<T, Bounds, Elts>::Sequence(size_type maximum,
+  inline Sequence<T, Bounds, Elts>::Sequence(size_type max,
                                              size_type length,
                                              T* data, seq_flag_type release)
-    : AllocPolicy<T, Sequence, Bounds>(maximum)
+    : AllocPolicy<T, Sequence, Bounds>(max)
     , length_(length)
     , release_(release)
     , buffer_(data)
@@ -573,11 +573,11 @@ namespace SafetyProfile {
   }
 
   template <typename T, typename Bounds, typename Elts>
-  inline void Sequence<T, Bounds, Elts>::replace_i(size_type maximum,
+  inline void Sequence<T, Bounds, Elts>::replace_i(size_type max,
                                                    size_type length, T* data,
                                                    seq_flag_type release)
   {
-    Sequence tmp(maximum, length, data, release);
+    Sequence tmp(max, length, data, release);
     swap(tmp);
   }
 

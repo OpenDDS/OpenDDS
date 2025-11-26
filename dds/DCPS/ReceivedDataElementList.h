@@ -36,7 +36,8 @@ public:
     : pub_(header.publication_id_),
       registered_data_(received_data),
       sample_state_(DDS::NOT_READ_SAMPLE_STATE),
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+      destination_timestamp_(SystemTimePoint::now().to_idl_struct()),
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
       coherent_change_(header.coherent_change_),
       group_coherent_(header.group_coherent_),
       publisher_id_(header.publisher_id_),
@@ -51,8 +52,6 @@ public:
       ref_count_(1),
       mx_(mx)
   {
-    destination_timestamp_ = SystemTimePoint::now().to_dds_time();
-
     source_timestamp_.sec = header.source_timestamp_sec_;
     source_timestamp_.nanosec = header.source_timestamp_nanosec_;
 
@@ -102,7 +101,7 @@ public:
   /// Reception time stamp for this data sample
   DDS::Time_t destination_timestamp_;
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   /// Sample belongs to an active coherent change set
   bool coherent_change_;
 
@@ -217,7 +216,7 @@ public:
   ReceivedDataElement* get_next_match(CORBA::ULong sample_states, ReceivedDataElement* prev);
 
   void mark_read(ReceivedDataElement* item);
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   void accept_coherent_change(ReceivedDataElement* item);
 #endif
 

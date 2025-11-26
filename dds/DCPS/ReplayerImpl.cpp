@@ -6,30 +6,30 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "ReplayerImpl.h"
-#include "FeatureDisabledQosCheck.h"
-#include "DomainParticipantImpl.h"
-#include "PublisherImpl.h"
-#include "Service_Participant.h"
-#include "GuidConverter.h"
-#include "TopicImpl.h"
-#include "PublicationInstance.h"
-#include "SendStateDataSampleList.h"
-#include "DataSampleElement.h"
-#include "Serializer.h"
-#include "Transient_Kludge.h"
-#include "DataDurabilityCache.h"
-#include "MonitorFactory.h"
-#include "TypeSupportImpl.h"
+
 #include "DCPS_Utils.h"
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#include "DataDurabilityCache.h"
+#include "DataSampleElement.h"
+#include "Definitions.h"
+#include "DomainParticipantImpl.h"
+#include "FeatureDisabledQosCheck.h"
+#include "GuidConverter.h"
+#include "PublicationInstance.h"
+#include "PublisherImpl.h"
+#include "SendStateDataSampleList.h"
+#include "Serializer.h"
+#include "Service_Participant.h"
+#include "TopicImpl.h"
+#include "Transient_Kludge.h"
+#include "TypeSupportImpl.h"
 #include "CoherentChangeControl.h"
-#endif
 #include "AssociationData.h"
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #include "BuiltInTopicUtils.h"
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
 #include "Util.h"
 
@@ -102,7 +102,7 @@ ReplayerImpl::cleanup()
 {
 
   //     // Unregister all registered instances prior to deletion.
-  //     // this->unregister_instances(SystemTimePoint::now().to_dds_time());
+  //     // this->unregister_instances(SystemTimePoint::now().to_idl_struct());
   //
   //     // CORBA::String_var topic_name = this->get_Atopic_name();
   {
@@ -160,9 +160,9 @@ ReplayerImpl::init(
   topic_id_      = topic_servant_->get_id();
   type_name_     = topic_servant_->get_type_name();
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   is_bit_ = topicIsBIT(topic_name_.in(), type_name_.in());
-#endif   // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
   qos_ = qos;
   passed_qos_ = qos;
@@ -313,7 +313,7 @@ ReplayerImpl::enable()
   const bool reliable = qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS;
 
   if (qos_.resource_limits.max_samples != DDS::LENGTH_UNLIMITED) {
-    n_chunks_ = qos_.resource_limits.max_samples;
+    n_chunks_ = static_cast<size_t>(qos_.resource_limits.max_samples);
   }
   // +1 because we might allocate one before releasing another
   // TBD - see if this +1 can be removed.
@@ -348,7 +348,7 @@ ReplayerImpl::enable()
 
   try {
     this->enable_transport(reliable,
-                           this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
+                           this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS, participant_servant_);
 
   } catch (const Transport::Exception&) {
     ACE_ERROR((LM_ERROR,
@@ -368,11 +368,7 @@ ReplayerImpl::enable()
     return DDS::RETCODE_ERROR;
   }
 
-  XTypes::TypeInformation type_info;
-  type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.minimal.dependent_typeid_count = 0;
-  type_info.complete.typeid_with_size.typeobject_serialized_size = 0;
-  type_info.complete.dependent_typeid_count = 0;
+  TypeInformation type_info;
 
   const bool success =
     disco->add_publication(this->domain_id_,
@@ -430,7 +426,7 @@ ReplayerImpl::add_association(const ReaderAssociation& reader,
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
     reader_info_.insert(std::make_pair(reader.readerId,
-                                       ReaderInfo(TheServiceParticipant->publisher_content_filter() ? reader.filterExpression : "",
+                                       ReaderInfo(TheServiceParticipant->publisher_content_filter() ? reader.filterExpression.in() : "",
                                                   reader.exprParams, participant_servant_,
                                                   reader.readerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS)));
   }
@@ -699,10 +695,9 @@ void ReplayerImpl::remove_all_associations()
     readers.length(size);
 
     RepoIdSet::iterator itEnd = readers_.end();
-    int i = 0;
-
-    for (RepoIdSet::iterator it = readers_.begin(); it != itEnd; ++it) {
-      readers[i++] = *it;
+    DDS::UInt32 i = 0;
+    for (RepoIdSet::iterator it = readers_.begin(); it != itEnd; ++it, ++i) {
+      readers[i] = *it;
     }
   }
 
@@ -871,7 +866,7 @@ ReplayerImpl::write (const RawDataSample*   samples,
 {
   DBG_ENTRY_LVL("ReplayerImpl","write",6);
 
-  OpenDDS::DCPS::GUID_t repo_id;
+  OpenDDS::DCPS::GUID_t repo_id = GUID_UNKNOWN;
   if (reader_ih_ptr) {
     repo_id = this->participant_servant_->get_repoid(*reader_ih_ptr);
     if (repo_id == GUID_UNKNOWN) {
@@ -902,12 +897,12 @@ ReplayerImpl::write (const RawDataSample*   samples,
     list.enqueue_tail(element);
     Message_Block_Ptr temp;
     Message_Block_Ptr sample(samples[i].sample_->duplicate());
-    DDS::ReturnCode_t ret = create_sample_data_message(move(sample),
+    DDS::ReturnCode_t ret = create_sample_data_message(OPENDDS_MOVE_NS::move(sample),
                                                        element->get_header(),
                                                        temp,
                                                        samples[i].source_timestamp_,
                                                        false);
-    element->set_sample(move(temp));
+    element->set_sample(OPENDDS_MOVE_NS::move(temp));
     if (reader_ih_ptr) {
       element->set_num_subs(1);
       element->set_sub_id(0, repo_id);

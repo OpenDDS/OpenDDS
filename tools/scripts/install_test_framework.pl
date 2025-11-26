@@ -26,15 +26,21 @@ BEGIN {
 }
 use lib "$FindBin::RealBin/../../bin";
 use PerlDDS::Process;
+use lib "$FindBin::RealBin/modules";
+use command_utils;
+use misc_utils qw/parse_func_opts/;
 
 die("ERROR: please pass the install prefix") unless (scalar(@ARGV) == 1);
 my $dest_base = "$ARGV[0]/bin";
 
 sub copy_pms_from_same_dir_as {
-  my $src_example = shift;
+  my $src_example = shift();
+  my $opts = parse_func_opts({
+      dest_dir_name => undef,
+  }, @_);
 
   my $src_dir = dirname($INC{$src_example});
-  my $dest_dir = "$dest_base/" . basename($src_dir);
+  my $dest_dir = "$dest_base/" . ($opts->{dest_dir_name} // basename($src_dir));
   print("Copy $src_dir to\n  $dest_dir\n");
 
   my $copied_at_least_one_file = 0;
@@ -56,3 +62,4 @@ sub copy_pms_from_same_dir_as {
 
 copy_pms_from_same_dir_as('PerlACE/Process.pm');
 copy_pms_from_same_dir_as('PerlDDS/Process.pm');
+copy_pms_from_same_dir_as('command_utils.pm', dest_dir_name => '.');

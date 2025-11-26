@@ -6,7 +6,9 @@
 #ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_SUPPORT_H
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_SUPPORT_H
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include <dds/DdsDynamicTypeSupportC.h>
 #include <dds/DdsDcpsTypeSupportExtC.h>
@@ -122,7 +124,7 @@ namespace DDS {
 
     DataWriter_ptr create_datawriter();
     DataReader_ptr create_datareader();
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
     DataReader_ptr create_multitopic_datareader();
 #endif
 
@@ -138,7 +140,7 @@ namespace DDS {
       return DynamicType::_duplicate(type_);
     }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
     const OpenDDS::DCPS::MetaStruct& getMetaStructForType() const;
 #endif
 
@@ -178,6 +180,6 @@ namespace TAO {
 }
 TAO_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif
 
 #endif // OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_SUPPORT_H

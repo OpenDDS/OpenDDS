@@ -12,10 +12,14 @@
 
 #include "dds/DCPS/RTPS/MessageUtils.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
-#include "dds/DCPS/GuidUtils.h"
+
+#include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/LogAddr.h>
-#include "dds/DCPS/Util.h"
+#include <dds/DCPS/Util.h>
+
 #include "dds/DCPS/transport/framework/TransportDebug.h"
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include "ace/Reactor.h"
 
@@ -40,7 +44,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link,
   , reassembly_(link->config()->fragment_reassembly_timeout())
   , receiver_(local_prefix)
   , thread_status_manager_(thread_status_manager)
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   , secure_sample_()
   , encoded_rtps_(false)
   , encoded_submsg_(false)
@@ -68,7 +72,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link,
       ));
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
 #endif
 }
@@ -114,7 +118,9 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
     return -1;
   }
 
-  cur_rb->wr_ptr(bytes_remaining);
+  ACE_UINT32 bytes_remaining_unsigned = static_cast<ACE_UINT32>(bytes_remaining);
+
+  cur_rb->wr_ptr(bytes_remaining_unsigned);
 
   if (bytes_remaining == 0) {
     if (gracefully_disconnected_) {
@@ -126,7 +132,7 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
   }
 
   if (!pdu_remaining_) {
-    receive_transport_header_.length_ = static_cast<ACE_UINT32>(bytes_remaining);
+    receive_transport_header_.length_ = bytes_remaining_unsigned;
   }
 
   receive_transport_header_ = *cur_rb;
@@ -138,17 +144,17 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
     return 0;
   }
 
-  bytes_remaining = receive_transport_header_.length_;
+  bytes_remaining_unsigned = static_cast<ACE_UINT32>(receive_transport_header_.length_);
   if (!check_header(receive_transport_header_)) {
     return 0;
   }
 
   {
     const ScopedHeaderProcessing shp(*this);
-    while (bytes_remaining > 0) {
-      data_sample_header_.pdu_remaining(bytes_remaining);
+    while (bytes_remaining_unsigned > 0) {
+      data_sample_header_.pdu_remaining(bytes_remaining_unsigned);
       data_sample_header_ = *cur_rb;
-      bytes_remaining -= data_sample_header_.get_serialized_size();
+      bytes_remaining_unsigned -= static_cast<ACE_UINT32>(data_sample_header_.get_serialized_size());
       if (!check_header(data_sample_header_)) {
         return 0;
       }
@@ -170,7 +176,7 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
         }
       }
       cur_rb->rd_ptr(data_sample_header_.message_length());
-      bytes_remaining -= data_sample_header_.message_length();
+      bytes_remaining_unsigned -= static_cast<ACE_UINT32>(data_sample_header_.message_length());
 
       // For the reassembly algorithm, the 'last_fragment_' header bit only
       // applies to the first DataSampleHeader in the TransportHeader
@@ -181,9 +187,7 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
   // If newly selected buffer index still has a reference count, we'll need to allocate a new one for the read
   if (receive_buffers_[INDEX]->data_block()->reference_count() > 1) {
 
-    if (log_level >= LogLevel::Info) {
-      ACE_DEBUG((LM_INFO, "(%P|%t) INFO: RtpsUdpReceiveStrategy::handle_input: reallocating primary receive buffer based on reference count\n"));
-    }
+    VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: RtpsUdpReceiveStrategy::handle_input: reallocating primary receive buffer based on reference count\n"), 5);
 
     ACE_DES_FREE(
       receive_buffers_[INDEX],
@@ -217,7 +221,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
                                              int n,
                                              const ACE_SOCK_Dgram& socket,
                                              ACE_INET_Addr& remote_address,
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
                                              DCPS::RcHandle<ICE::Agent> ice_agent,
                                              DCPS::WeakRcHandle<ICE::Endpoint> endpoint,
 #endif
@@ -247,7 +251,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
     return ret;
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   // Assume STUN
 # ifndef ACE_RECVPKTINFO
   ACE_ERROR((LM_ERROR, "ERROR: RtpsUdpReceiveStrategy::receive_bytes_helper potential STUN message "
@@ -258,7 +262,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
 # else
 
   stop = true;
-  size_t bytes = ret;
+  size_t bytes = static_cast<size_t>(ret);
   size_t block_size = std::min(bytes, static_cast<size_t>(iov[0].iov_len));
   ACE_Message_Block* head = new ACE_Message_Block(static_cast<const char*>(iov[0].iov_base), block_size);
   head->length(block_size);
@@ -282,7 +286,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
 
     if (tport.relay_srsm().is_response(message)) {
       tport.process_relay_sra(tport.relay_srsm().receive(message));
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     } else if (endpoint) {
       ice_agent->receive(endpoint, local_address, remote_address, message);
 #endif
@@ -297,7 +301,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
   return ret;
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 namespace {
   ssize_t recv_err(const char* msg, const ACE_INET_Addr& remote, const DCPS::GUID_t& peer, bool& stop)
   {
@@ -352,14 +356,14 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
   const ssize_t ret = (scatter < 0) ? scatter : (iter - buffer);
 #else
   const ssize_t ret = receive_bytes_helper(iov, n, socket, remote_address,
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
                                            link_->get_ice_agent(), link_->get_ice_endpoint(),
 #endif
                                            *link_->transport(), stop);
 #endif
   remote_address_ = remote_address;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (stop) {
     return ret;
   }
@@ -455,7 +459,7 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
     }
 
     encoded_rtps_ = true;
-    return plainLen;
+    return static_cast<ssize_t>(plainLen);
   }
 #endif
 
@@ -464,7 +468,7 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
 
 bool RtpsUdpReceiveStrategy::check_encoded(const EntityId_t& sender)
 {
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   using namespace DDS::Security;
   const GUID_t sendGuid = make_id(receiver_.source_guid_prefix_, sender);
   const GuidConverter conv(sendGuid);
@@ -520,7 +524,7 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
     DCPS::push_back(message_.submessages, rsh.submessage_);
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   const SubmessageKind kind = rsh.submessage_._d();
 
   if (secure_prefix_.smHeader.submessageId == SEC_PREFIX && kind != SEC_POSTFIX) {
@@ -566,7 +570,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
       break;
     }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     if (!decode_payload(sample, data)) {
       if (transport_debug.log_dropped_messages) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpReceiveStrategy::deliver_sample_i - decode error\n"));
@@ -725,7 +729,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
      has successfully reassembled the fragments and we now have a DATA submsg
    */
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   case SEC_PREFIX:
     secure_prefix_ = submessage.security_sm();
     break;
@@ -740,7 +744,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
   }
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 void
 RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage,
                                             const NetworkAddress& remote_addr)
@@ -984,7 +988,7 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
 int
 RtpsUdpReceiveStrategy::start_i()
 {
-  ReactorInterceptor_rch ri = link_->get_reactor_interceptor();
+  ReactorTask_rch ri = link_->get_reactor_task();
   ri->execute_or_enqueue(make_rch<RegisterHandler>(link_->unicast_socket().get_handle(), this, static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
   ri->execute_or_enqueue(make_rch<RegisterHandler>(link_->ipv6_unicast_socket().get_handle(), this, static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
@@ -996,7 +1000,7 @@ RtpsUdpReceiveStrategy::start_i()
 void
 RtpsUdpReceiveStrategy::stop_i()
 {
-  ReactorInterceptor_rch ri = link_->get_reactor_interceptor();
+  ReactorTask_rch ri = link_->get_reactor_task();
   ri->execute_or_enqueue(make_rch<RemoveHandler>(link_->unicast_socket().get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
 #ifdef ACE_HAS_IPV6
   ri->execute_or_enqueue(make_rch<RemoveHandler>(link_->ipv6_unicast_socket().get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
@@ -1020,7 +1024,7 @@ RtpsUdpReceiveStrategy::check_header(const RtpsTransportHeader& header)
     message_.hdr = header.header_;
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
 #endif
 
@@ -1031,7 +1035,7 @@ bool
 RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
 {
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (secure_prefix_.smHeader.submessageId) {
     return header.valid();
   }
@@ -1146,12 +1150,12 @@ RtpsUdpReceiveStrategy::remove_frags_from_bitmap(CORBA::Long bitmap[],
       }
     }
 
-    const CORBA::ULong mask = 1 << (31 - bit);
+    const CORBA::ULong mask = 1u << (31 - bit);
     if (x & mask) {
-      const bool has_frags = reassembly_.has_frags(base + i, pub_id);
+      const bool has_frags = reassembly_.has_frags(base + static_cast<int>(i), pub_id);
       if (has_frags) {
         x &= ~mask;
-        bitmap[i / 32] = x;
+        bitmap[i / 32] = static_cast<ACE_CDR::Long>(x);
         modified = true;
         --cumulative_bits_added;
       }
@@ -1395,11 +1399,48 @@ RtpsUdpReceiveStrategy::MessageReceiver::fill_header(
 {
   using namespace RTPS;
   if (have_timestamp_) {
-    header.source_timestamp_sec_ = timestamp_.seconds;
+    header.source_timestamp_sec_ = static_cast<ACE_INT32>(timestamp_.seconds);
     header.source_timestamp_nanosec_ =
       DCPS::uint32_fractional_seconds_to_nanoseconds(timestamp_.fraction);
   }
   assign(header.publication_id_.guidPrefix, source_guid_prefix_);
+}
+
+StatisticSeq RtpsUdpReceiveStrategy::stats_template()
+{
+  static const DDS::UInt32 num_local_stats = 7;
+  const StatisticSeq base = TransportReceiveStrategy::stats_template();
+  StatisticSeq stats(base.length() + num_local_stats);
+  stats.length(stats.maximum());
+  for (DDS::UInt32 i = 0; i < base.length(); ++i) {
+    stats[i].name = base[i].name;
+  }
+  const DDS::UInt32 local_offset = base.length();
+  stats[local_offset].name = "RtpsUdpRecvReadersWithheld";
+  stats[local_offset + 1].name = "RtpsUdpRecvReadersSelected";
+  stats[local_offset + 2].name = "RtpsUdpRecvSecureSubmessages";
+  stats[local_offset + 3].name = "RtpsUdpRecvReassemblyFrags";
+  stats[local_offset + 4].name = "RtpsUdpRecvReassemblyTotal";
+  stats[local_offset + 5].name = "RtpsUdpRecvReassemblyQueue";
+  stats[local_offset + 6].name = "RtpsUdpRecvReassemblyCompleted";
+  return stats;
+}
+
+void RtpsUdpReceiveStrategy::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
+{
+  TransportReceiveStrategy::fill_stats(stats, idx);
+  stats[idx++].value = readers_withheld_.size();
+  stats[idx++].value = readers_selected_.size();
+  stats[idx++].value =
+#if OPENDDS_CONFIG_SECURITY
+    secure_submessages_.size();
+#else
+    0;
+#endif
+  stats[idx++].value = reassembly_.fragments_size();
+  stats[idx++].value = reassembly_.total_frags();
+  stats[idx++].value = reassembly_.queue_size();
+  stats[idx++].value = reassembly_.completed_size();
 }
 
 } // namespace DCPS

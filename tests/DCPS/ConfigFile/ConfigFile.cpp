@@ -5,27 +5,23 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "ace/OS_main.h"
-#include <dds/DCPS/Service_Participant.h>
-#include "ace/Configuration_Import_Export.h"
-#include "tao/corba.h"
+#include "../common/TestSupport.h"
 
+#include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
+#include "dds/DCPS/RTPS/RtpsDiscovery.h"
+#include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/StaticIncludes.h"
+#include "dds/DCPS/debug.h"
+#include "dds/DCPS/transport/framework/TransportDebug.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/tcp/TcpInst_rch.h"
-#include "dds/DCPS/debug.h"
-#include "dds/DCPS/transport/framework/TransportDebug.h"
 
-#include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
-#include "dds/DCPS/RTPS/RtpsDiscovery.h"
+#include "tao/corba.h"
 
-#include "dds/DCPS/StaticIncludes.h"
-#ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/transport/udp/Udp.h"
-#include "dds/DCPS/transport/multicast/Multicast.h"
-#endif
-
-#include "../common/TestSupport.h"
+#include "ace/OS_main.h"
+#include "ace/Configuration_Import_Export.h"
 
 #include <iostream>
 
@@ -40,6 +36,10 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       TheParticipantFactoryWithArgs(argc, argv);
     TEST_CHECK(dpf.in() != 0);
 
+    // From commandline
+    TEST_CHECK(TheServiceParticipant->config_store()->get("MY_CONFIG_KEY1", "") == "value1");
+    // From environment variable
+    TEST_CHECK(TheServiceParticipant->config_store()->get("MY_CONFIG_KEY2", "") == "value2");
     TEST_CHECK(OpenDDS::DCPS::DCPS_debug_level == 1);
     TEST_CHECK(TheServiceParticipant->n_chunks() == 10);
     TEST_CHECK(TheServiceParticipant->association_chunk_multiplier() == 5);
@@ -90,13 +90,13 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(config->instances_[0] == inst);
     TEST_CHECK(config->instances_[1] == inst2);
     TEST_CHECK(config->swap_bytes_ == true);
-    TEST_CHECK(config->passive_connect_duration_ == 20000);
+    TEST_CHECK(config->passive_connect_duration_ == TimeDuration::from_msec(20000));
 
     TransportConfig_rch default_config =
-#ifdef DDS_HAS_MINIMUM_BIT
-      TransportRegistry::instance()->get_config("test1_nobits.ini");
-#else
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
       TransportRegistry::instance()->get_config("test1.ini");
+#else
+      TransportRegistry::instance()->get_config("test1_nobits.ini");
 #endif
     TEST_CHECK(default_config);
     //std::cout << "size=" << default_config->instances_.size() << std::endl;
@@ -104,12 +104,12 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     //  std::cout << "  " << default_config->instances_[i]->name() << std::endl;
     //}
     // Should be in alpha-sorted order
-    TEST_CHECK(default_config->instances_.size() == 11);
+    TEST_CHECK(default_config->instances_.size() == 9);
     TEST_CHECK(default_config->instances_[0] == inst2);  // anothertcp
-    TEST_CHECK(default_config->instances_[2] == inst);   // mytcp
-    TEST_CHECK(default_config->instances_[9]->name() == std::string("tcp7"));
+    TEST_CHECK(default_config->instances_[1] == inst);   // mytcp
+    TEST_CHECK(default_config->instances_[8]->name() == std::string("tcp7"));
     TEST_CHECK(default_config->swap_bytes_ == false);
-    TEST_CHECK(default_config->passive_connect_duration_ == 60000);
+    TEST_CHECK(default_config->passive_connect_duration_ == TimeDuration::from_msec(60000));
 
     TransportConfig_rch global_config =
       TransportRegistry::instance()->global_config();
@@ -155,7 +155,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       TEST_CHECK(ird->bit_transport_port() == 4321);
     }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
     {
       DDS::DomainId_t domain = 21;
       OpenDDS::DCPS::Discovery::RepoKey key = "DEFAULT_RTPS";

@@ -6,7 +6,9 @@
 #ifndef OPENDDS_DCPS_JSON_VALUE_WRITER_H
 #define OPENDDS_DCPS_JSON_VALUE_WRITER_H
 
-#if defined OPENDDS_RAPIDJSON && !defined OPENDDS_SAFETY_PROFILE
+#include "Definitions.h"
+
+#if OPENDDS_CONFIG_RAPIDJSON && !OPENDDS_CONFIG_SAFETY_PROFILE
 #  define OPENDDS_HAS_JSON_VALUE_WRITER 1
 #else
 #  define OPENDDS_HAS_JSON_VALUE_WRITER 0
@@ -15,9 +17,9 @@
 #if OPENDDS_HAS_JSON_VALUE_WRITER
 
 #include "ValueWriter.h"
+#include "ValueHelper.h"
 #include "RapidJsonWrapper.h"
 #include "dcps_export.h"
-#include "Definitions.h"
 
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #include <dds/DdsDcpsTopicC.h>
@@ -41,282 +43,393 @@ class JsonValueWriter : public ValueWriter {
 public:
   explicit JsonValueWriter(Writer& writer)
     : writer_(writer)
+    , mode_(NormalMode)
   {}
 
-  void begin_struct();
-  void end_struct();
-  void begin_struct_member(const DDS::MemberDescriptor& /*descriptor*/);
-  void end_struct_member();
+  bool begin_struct(Extensibility extensibility = FINAL);
+  bool end_struct();
+  bool begin_struct_member(MemberParam params);
+  bool end_struct_member();
 
-  void begin_union();
-  void end_union();
-  void begin_discriminator();
-  void end_discriminator();
-  void begin_union_member(const char* name);
-  void end_union_member();
+  bool begin_union(Extensibility extensibility = FINAL);
+  bool end_union();
+  bool begin_discriminator(MemberParam params);
+  bool end_discriminator();
+  bool begin_union_member(MemberParam params);
+  bool end_union_member();
 
-  void begin_array();
-  void end_array();
-  void begin_sequence();
-  void end_sequence();
-  void begin_element(size_t idx);
-  void end_element();
+  bool begin_array(XTypes::TypeKind elem_kind = XTypes::TK_NONE);
+  bool end_array();
+  bool begin_sequence(XTypes::TypeKind elem_kind = XTypes::TK_NONE, ACE_CDR::ULong length = 0);
+  bool end_sequence();
+  bool begin_element(ACE_CDR::ULong idx);
+  bool end_element();
 
-  void write_boolean(ACE_CDR::Boolean value);
-  void write_byte(ACE_CDR::Octet value);
+  bool begin_map(XTypes::TypeKind key_kind, XTypes::TypeKind value_kind);
+  bool end_map();
+  bool begin_key();
+  bool end_key();
+  bool begin_value();
+  bool end_value();
+
+  bool write_boolean(ACE_CDR::Boolean value);
+  bool write_byte(ACE_CDR::Octet value);
 #if OPENDDS_HAS_EXPLICIT_INTS
-  void write_int8(ACE_CDR::Int8 value);
-  void write_uint8(ACE_CDR::UInt8 value);
+  bool write_int8(ACE_CDR::Int8 value);
+  bool write_uint8(ACE_CDR::UInt8 value);
 #endif
-  void write_int16(ACE_CDR::Short value);
-  void write_uint16(ACE_CDR::UShort value);
-  void write_int32(ACE_CDR::Long value);
-  void write_uint32(ACE_CDR::ULong value);
-  void write_int64(ACE_CDR::LongLong value);
-  void write_uint64(ACE_CDR::ULongLong value);
-  void write_float32(ACE_CDR::Float value);
-  void write_float64(ACE_CDR::Double value);
-  void write_float128(ACE_CDR::LongDouble value);
-  void write_fixed(const OpenDDS::FaceTypes::Fixed& value);
-  void write_char8(ACE_CDR::Char value);
-  void write_char16(ACE_CDR::WChar value);
-  void write_string(const ACE_CDR::Char* value, size_t length);
-  void write_wstring(const ACE_CDR::WChar* value, size_t length);
-  void write_enum(const char* /*name*/, ACE_CDR::Long value);
-  void write_absent_value();
+  bool write_int16(ACE_CDR::Short value);
+  bool write_uint16(ACE_CDR::UShort value);
+  bool write_int32(ACE_CDR::Long value);
+  bool write_uint32(ACE_CDR::ULong value);
+  bool write_int64(ACE_CDR::LongLong value);
+  bool write_uint64(ACE_CDR::ULongLong value);
+  bool write_float32(ACE_CDR::Float value);
+  bool write_float64(ACE_CDR::Double value);
+  bool write_float128(ACE_CDR::LongDouble value);
+  bool write_fixed(const ACE_CDR::Fixed& value);
+  bool write_char8(ACE_CDR::Char value);
+  bool write_char16(ACE_CDR::WChar value);
+  bool write_string(const ACE_CDR::Char* value, size_t length);
+  using ValueWriter::write_string;
+  bool write_wstring(const ACE_CDR::WChar* value, size_t length);
+  bool write_enum(ACE_CDR::Long value, const EnumHelper& helper);
+  bool write_bitmask(ACE_CDR::ULongLong value, const BitmaskHelper& helper);
+  bool write_absent_value();
 
 private:
   Writer& writer_;
+  enum {NormalMode, MapKeyMode} mode_;
 };
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_struct()
+bool JsonValueWriter<Writer>::begin_struct(Extensibility)
 {
-  writer_.StartObject();
+  return writer_.StartObject();
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::end_struct()
+bool JsonValueWriter<Writer>::end_struct()
 {
-  writer_.EndObject();
+  return writer_.EndObject();
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_struct_member(const DDS::MemberDescriptor& descriptor)
+bool JsonValueWriter<Writer>::begin_struct_member(MemberParam params)
 {
-  writer_.Key(descriptor.name());
+  return writer_.Key(params.name);
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::end_struct_member()
-{}
-
-template <typename Writer>
-void JsonValueWriter<Writer>::begin_union()
+bool JsonValueWriter<Writer>::end_struct_member()
 {
-  writer_.StartObject();
+  return true;
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::end_union()
+bool JsonValueWriter<Writer>::begin_union(Extensibility)
 {
-  writer_.EndObject();
+  return writer_.StartObject();
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_discriminator()
+bool JsonValueWriter<Writer>::end_union()
 {
-  writer_.Key("$discriminator");
+  return writer_.EndObject();
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::end_discriminator()
-{}
-
-template <typename Writer>
-void JsonValueWriter<Writer>::begin_union_member(const char* name)
+bool JsonValueWriter<Writer>::begin_discriminator(MemberParam)
 {
-  writer_.Key(name);
+  return writer_.Key("$discriminator");
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::end_union_member()
-{}
-
-template <typename Writer>
-void JsonValueWriter<Writer>::begin_array()
+bool JsonValueWriter<Writer>::end_discriminator()
 {
-  writer_.StartArray();
+  return true;
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::end_array()
+bool JsonValueWriter<Writer>::begin_union_member(MemberParam params)
 {
-  writer_.EndArray();
+  return writer_.Key(params.name);
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_sequence()
+bool JsonValueWriter<Writer>::end_union_member()
 {
-  writer_.StartArray();
+  return true;
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::end_sequence()
+bool JsonValueWriter<Writer>::begin_array(XTypes::TypeKind /*elem_tk*/)
 {
-  writer_.EndArray();
+  return writer_.StartArray();
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_element(size_t /*idx*/)
-{}
-
-template <typename Writer>
-void JsonValueWriter<Writer>::end_element()
-{}
-
-template <typename Writer>
-void JsonValueWriter<Writer>::write_boolean(ACE_CDR::Boolean value)
+bool JsonValueWriter<Writer>::end_array()
 {
-  writer_.Bool(value);
+  return writer_.EndArray();
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_byte(ACE_CDR::Octet value)
+bool JsonValueWriter<Writer>::begin_sequence(XTypes::TypeKind /*elem_tk*/, ACE_CDR::ULong /*length*/)
 {
-  writer_.Uint(value);
+  return writer_.StartArray();
+}
+
+template <typename Writer>
+bool JsonValueWriter<Writer>::end_sequence()
+{
+  return writer_.EndArray();
+}
+
+template <typename Writer>
+bool JsonValueWriter<Writer>::begin_map(XTypes::TypeKind, XTypes::TypeKind)
+{
+  return writer_.StartObject();
+}
+
+template <typename Writer>
+bool JsonValueWriter<Writer>::end_map()
+{
+  return writer_.EndObject();
+}
+
+template <typename Writer>
+bool JsonValueWriter<Writer>::begin_key()
+{
+  mode_ = MapKeyMode;
+  // The next write_*() will become a JSON Key instead of a value.
+  // Only simple types are supported as keys, so we don't need to keep
+  // a stack of modes to implement nested objects here.
+  return true;
+}
+
+template <typename Writer>
+bool JsonValueWriter<Writer>::end_key()
+{
+  mode_ = NormalMode;
+  return true;
+}
+
+template <typename Writer>
+bool JsonValueWriter<Writer>::begin_value()
+{
+  return true;
+}
+
+template <typename Writer>
+bool JsonValueWriter<Writer>::end_value()
+{
+  return true;
+}
+
+template <typename Writer>
+bool JsonValueWriter<Writer>::begin_element(ACE_CDR::ULong /*idx*/)
+{
+  return true;
+}
+
+template <typename Writer>
+bool JsonValueWriter<Writer>::end_element()
+{
+  return true;
+}
+
+template <typename Writer>
+bool JsonValueWriter<Writer>::write_boolean(ACE_CDR::Boolean value)
+{
+  if (mode_ == MapKeyMode) {
+    return writer_.Key(value ? "true" : "false", value ? 4 : 5);
+  }
+  return writer_.Bool(value);
+}
+
+template <typename Writer>
+bool JsonValueWriter<Writer>::write_byte(ACE_CDR::Octet value)
+{
+  if (mode_ == MapKeyMode) {
+    return writer_.Key(to_dds_string(value).c_str());
+  }
+  return writer_.Uint(value);
 }
 
 #if OPENDDS_HAS_EXPLICIT_INTS
 template <typename Writer>
-void JsonValueWriter<Writer>::write_int8(ACE_CDR::Int8 value)
+bool JsonValueWriter<Writer>::write_int8(ACE_CDR::Int8 value)
 {
-  writer_.Int(value);
+  if (mode_ == MapKeyMode) {
+    return writer_.Key(to_dds_string(value).c_str());
+  }
+  return writer_.Int(value);
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_uint8(ACE_CDR::UInt8 value)
+bool JsonValueWriter<Writer>::write_uint8(ACE_CDR::UInt8 value)
 {
-  writer_.Uint(value);
+  if (mode_ == MapKeyMode) {
+    return writer_.Key(to_dds_string(value).c_str());
+  }
+  return writer_.Uint(value);
 }
 #endif
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_int16(ACE_CDR::Short value)
+bool JsonValueWriter<Writer>::write_int16(ACE_CDR::Short value)
 {
-  writer_.Int(value);
+  if (mode_ == MapKeyMode) {
+    return writer_.Key(to_dds_string(value).c_str());
+  }
+  return writer_.Int(value);
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_uint16(ACE_CDR::UShort value)
+bool JsonValueWriter<Writer>::write_uint16(ACE_CDR::UShort value)
 {
-  writer_.Uint(value);
+  if (mode_ == MapKeyMode) {
+    return writer_.Key(to_dds_string(value).c_str());
+  }
+  return writer_.Uint(value);
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_int32(ACE_CDR::Long value)
+bool JsonValueWriter<Writer>::write_int32(ACE_CDR::Long value)
 {
-  writer_.Int(value);
+  if (mode_ == MapKeyMode) {
+    return writer_.Key(to_dds_string(value).c_str());
+  }
+  return writer_.Int(value);
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_uint32(ACE_CDR::ULong value)
+bool JsonValueWriter<Writer>::write_uint32(ACE_CDR::ULong value)
 {
-  writer_.Uint(value);
+  if (mode_ == MapKeyMode) {
+    return writer_.Key(to_dds_string(value).c_str());
+  }
+  return writer_.Uint(value);
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_int64(ACE_CDR::LongLong value)
+bool JsonValueWriter<Writer>::write_int64(ACE_CDR::LongLong value)
 {
-  writer_.Int64(value);
+  if (mode_ == MapKeyMode) {
+    return writer_.Key(to_dds_string(value).c_str());
+  }
+  return writer_.Int64(value);
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_uint64(ACE_CDR::ULongLong value)
+bool JsonValueWriter<Writer>::write_uint64(ACE_CDR::ULongLong value)
 {
-  writer_.Uint64(value);
+  if (mode_ == MapKeyMode) {
+    return writer_.Key(to_dds_string(value).c_str());
+  }
+  return writer_.Uint64(value);
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_float32(ACE_CDR::Float value)
+bool JsonValueWriter<Writer>::write_float32(ACE_CDR::Float value)
 {
-  writer_.Double(value);
+  return writer_.Double(value);
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_float64(ACE_CDR::Double value)
+bool JsonValueWriter<Writer>::write_float64(ACE_CDR::Double value)
 {
-  writer_.Double(value);
+  return writer_.Double(value);
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_float128(ACE_CDR::LongDouble value)
+bool JsonValueWriter<Writer>::write_float128(ACE_CDR::LongDouble value)
 {
   // TODO
-  writer_.Double(value);
+  return writer_.Double(static_cast<double>(value));
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_fixed(const OpenDDS::FaceTypes::Fixed& /*value*/)
+bool JsonValueWriter<Writer>::write_fixed(const ACE_CDR::Fixed& value)
 {
-  // TODO
-  writer_.String("fixed");
+  char buffer[ACE_CDR::Fixed::MAX_STRING_SIZE];
+  if (value.to_string(buffer, sizeof buffer)) {
+    return writer_.String(buffer);
+  }
+  return false;
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_char8(ACE_CDR::Char value)
+bool JsonValueWriter<Writer>::write_char8(ACE_CDR::Char value)
 {
-  ACE_CDR::Char s[2] = { value, 0 };
-  writer_.String(s, 1);
+  const ACE_CDR::Char s[2] = { value, 0 };
+  return mode_ == MapKeyMode ?  writer_.Key(s, 1) : writer_.String(s, 1);
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_char16(ACE_CDR::WChar value)
+bool JsonValueWriter<Writer>::write_char16(ACE_CDR::WChar value)
 {
-  ACE_CDR::WChar s[2] = { value, 0 };
+  const ACE_CDR::WChar s[2] = { value, 0 };
 
   rapidjson::GenericStringStream<rapidjson::UTF16<> > source(s);
   rapidjson::GenericStringBuffer<rapidjson::UTF8<> > target;
 
   if (!rapidjson::Transcoder<rapidjson::UTF16<>, rapidjson::UTF8<> >::Transcode(source, target)) {
-    return;
+    return false;
   }
 
-  writer_.String(target.GetString(), static_cast<rapidjson::SizeType>(target.GetLength()));
+  return mode_ == MapKeyMode
+    ? writer_.Key(target.GetString(), static_cast<rapidjson::SizeType>(target.GetLength()))
+    : writer_.String(target.GetString(), static_cast<rapidjson::SizeType>(target.GetLength()));
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_string(const ACE_CDR::Char* value, size_t length)
+bool JsonValueWriter<Writer>::write_string(const ACE_CDR::Char* value, size_t length)
 {
-  writer_.String(value, static_cast<rapidjson::SizeType>(length));
+  return mode_ == MapKeyMode
+    ? writer_.Key(value, static_cast<rapidjson::SizeType>(length))
+    : writer_.String(value, static_cast<rapidjson::SizeType>(length));
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_wstring(const ACE_CDR::WChar* value, size_t length)
+bool JsonValueWriter<Writer>::write_wstring(const ACE_CDR::WChar* value, size_t length)
 {
   rapidjson::GenericStringStream<rapidjson::UTF16<> > source(value);
   rapidjson::GenericStringBuffer<rapidjson::UTF8<> > target;
 
   while (source.Tell() != length) {
     if (!rapidjson::Transcoder<rapidjson::UTF16<>, rapidjson::UTF8<> >::Transcode(source, target)) {
-      return;
+      return false;
     }
   }
 
-  writer_.String(target.GetString(), static_cast<rapidjson::SizeType>(target.GetLength()));
+  return mode_ == MapKeyMode
+    ? writer_.Key(target.GetString(), static_cast<rapidjson::SizeType>(target.GetLength()))
+    : writer_.String(target.GetString(), static_cast<rapidjson::SizeType>(target.GetLength()));
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_enum(const char* name,
-                                         ACE_CDR::Long /*value*/)
+bool JsonValueWriter<Writer>::write_enum(ACE_CDR::Long value, const EnumHelper& helper)
 {
-  writer_.String(name);
+  const char* name = 0;
+  if (helper.get_name(name, value)) {
+    return write_string(name, std::strlen(name));
+  }
+  return false;
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_absent_value()
+bool JsonValueWriter<Writer>::write_bitmask(ACE_CDR::ULongLong value, const BitmaskHelper& helper)
 {
-  writer_.Null();
+  const String s = bitmask_to_string(value, helper);
+  return write_string(s.c_str(), s.length());
+}
+
+template <typename Writer>
+bool JsonValueWriter<Writer>::write_absent_value()
+{
+  return writer_.Null();
 }
 
 template<typename T>
@@ -345,22 +458,22 @@ std::string to_json(const DDS::TopicDescription_ptr topic,
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
   JsonValueWriter<rapidjson::Writer<rapidjson::StringBuffer> > jvw(writer);
   jvw.begin_struct();
-  jvw.begin_struct_member(XTypes::MemberDescriptorImpl("topic", false));
+  jvw.begin_struct_member("topic");
   jvw.begin_struct();
-  jvw.begin_struct_member(XTypes::MemberDescriptorImpl("name", false));
+  jvw.begin_struct_member("name");
   CORBA::String_var topic_name = topic->get_name();
   static_cast<ValueWriter&>(jvw).write_string(topic_name);
   jvw.end_struct_member();
-  jvw.begin_struct_member(XTypes::MemberDescriptorImpl("type_name", false));
+  jvw.begin_struct_member("type_name");
   CORBA::String_var type_name = topic->get_type_name();
   static_cast<ValueWriter&>(jvw).write_string(type_name);
   jvw.end_struct_member();
   jvw.end_struct();
   jvw.end_struct_member();
-  jvw.begin_struct_member(XTypes::MemberDescriptorImpl("sample", false));
+  jvw.begin_struct_member("sample");
   vwrite(jvw, sample);
   jvw.end_struct_member();
-  jvw.begin_struct_member(XTypes::MemberDescriptorImpl("sample_info", false));
+  jvw.begin_struct_member("sample_info");
   vwrite(jvw, sample_info);
   jvw.end_struct_member();
   jvw.end_struct();

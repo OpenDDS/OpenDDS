@@ -20,11 +20,12 @@
 #include "tests/Utils/WaitForSample.h"
 
 #include <dds/DCPS/BuiltInTopicUtils.h>
-#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Qos_Helper.h>
-#include <dds/DCPS/TopicDescriptionImpl.h>
+#include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/SubscriberImpl.h>
+#include <dds/DCPS/TopicDescriptionImpl.h>
 #include <dds/DCPS/transport/framework/EntryExit.h>
 // Add the TransportImpl.h before TransportImpl_rch.h is included to
 // resolve the build problem that the class is not defined when
@@ -33,6 +34,8 @@
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/framework/TransportInst.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 
 #include <ace/Arg_Shifter.h>
@@ -107,24 +110,16 @@ void init_dcps_objects(int i)
     OpenDDS::RTPS::RtpsDiscovery_rch rd = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(disc);
     if (!rd.is_nil()) {
       char config_name[64], inst_name[64];
-      ACE_TCHAR nak_depth[8];
       ACE_OS::snprintf(config_name, 64, "cfg_%d", i);
       ACE_OS::snprintf(inst_name, 64, "rtps_%d", i);
-      // The 2 is a safety factor to allow for control messages.
-      ACE_OS::snprintf(nak_depth, 8, ACE_TEXT("%lu"),
-        static_cast<unsigned long>(2 * num_instances_per_writer * num_samples_per_instance));
 
       OpenDDS::DCPS::TransportConfig_rch config = TheTransportRegistry->create_config(config_name);
       OpenDDS::DCPS::TransportInst_rch inst = TheTransportRegistry->create_inst(inst_name, "rtps_udp");
-      ACE_Configuration_Heap ach;
-      ACE_Configuration_Section_Key sect_key;
-      ach.open();
-      ach.open_section(ach.root_section(), ACE_TEXT("not_root"), 1, sect_key);
-      ach.set_string_value(sect_key, ACE_TEXT("use_multicast"), ACE_TEXT("0"));
-      ach.set_string_value(sect_key, ACE_TEXT("nak_depth"), nak_depth);
-      ach.set_string_value(sect_key, ACE_TEXT("heartbeat_period"), ACE_TEXT("200"));
-      ach.set_string_value(sect_key, ACE_TEXT("heartbeat_response_delay"), ACE_TEXT("100"));
-      inst->load(ach, sect_key);
+      OpenDDS::DCPS::RtpsUdpInst_rch rtps_inst = OpenDDS::DCPS::static_rchandle_cast<OpenDDS::DCPS::RtpsUdpInst>(inst);
+      rtps_inst->use_multicast(false);
+      // The 2 is a safety factor to allow for control messages.
+      rtps_inst->nak_depth(2 * num_instances_per_writer * num_samples_per_instance);
+      rtps_inst->heartbeat_period(OpenDDS::DCPS::TimeDuration::from_msec(200));
       config->instances_.push_back(inst);
       TheTransportRegistry->bind_config(config_name, participant[i]);
 
@@ -233,7 +228,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     init_dcps_objects(0);
     init_dcps_objects(1);
 
-#if defined (OPENDDS_SAFETY_PROFILE) && !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_SAFETY_PROFILE && OPENDDS_CONFIG_BUILT_IN_TOPICS
     if (safety_profile) {
       int num_participants = 0;
 
@@ -267,7 +262,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         }
       }
     }
-#endif // OPENDDS_SAFETY_PROFILE && !DDS_HAS_MINIMUM_BIT
+#endif
 
     int expected = num_datawriters * num_instances_per_writer * num_samples_per_instance;
 

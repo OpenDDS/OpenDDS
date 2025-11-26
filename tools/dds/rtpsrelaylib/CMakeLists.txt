@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23...3.27)
+cmake_minimum_required(VERSION 3.23...4.0)
 project(opendds_rtps_relay_lib CXX)
 
 set(deps
@@ -18,7 +18,7 @@ target_sources(OpenDDS_RtpsRelayLib
     Utility.h
     export.h
 )
-_opendds_library(OpenDDS_RtpsRelayLib)
+_opendds_library(OpenDDS_RtpsRelayLib BIGOBJ)
 target_link_libraries(OpenDDS_RtpsRelayLib PUBLIC ${deps})
 
 opendds_target_sources(OpenDDS_RtpsRelayLib

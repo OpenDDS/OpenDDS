@@ -22,6 +22,8 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include <ace/streams.h>
 #include "tests/Utils/ExceptionStreams.h"
 #include <ace/Time_Value.h>
@@ -117,7 +119,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       dr_qos.resource_limits.max_samples = MAX_SAMPLES;
       dr_qos.resource_limits.max_instances = MAX_INSTANCES;
       dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+#if OPENDDS_CONFIG_OWNERSHIP_PROFILE
       dr_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
       dr_qos.history.depth = MAX_SAMPLES_PER_INSTANCES;
 #endif
@@ -204,7 +206,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // expect 6 rejected for max_instances (register_instance + 5 messages)
       // expect 1 rejected for max_samples_per_instance
 
-#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+#if OPENDDS_CONFIG_OWNERSHIP_PROFILE
       if (rej_max_samples != 2) {
         cerr << "ERROR: Failed to reject expected for max_samples" << endl;
         return_result = 1;
@@ -214,7 +216,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         cerr << "ERROR: Failed to reject expected for max_instances" << endl;
         return_result = 1;
       }
-#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+#if OPENDDS_CONFIG_OWNERSHIP_PROFILE
       if (rej_max_samp_instance != 1) {
         cerr << "ERROR: Failed to reject expected for max_samples_per_instance" << endl;
         return_result = 1;

@@ -12,10 +12,6 @@
 #include "dds/DCPS/PublisherImpl.h"
 
 #include "dds/DCPS/StaticIncludes.h"
-#if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
-#include "dds/DCPS/transport/udp/Udp.h"
-#include "dds/DCPS/transport/multicast/Multicast.h"
-#endif
 
 #include <sstream>
 
@@ -148,12 +144,7 @@ Publisher::Publisher( const Options& options)
   writerQos.reliability.max_blocking_time.nanosec = 0;
   switch( this->options_.transportType()) {
     case Options::TCP:
-    case Options::MC:
       writerQos.reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
-      break;
-
-    case Options::UDP:
-      writerQos.reliability.kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
       break;
 
     case Options::TRANSPORT_NONE:
@@ -281,7 +272,7 @@ Publisher::run()
               "ERROR: failed to get publication matched status\n"));
             ACE_OS::exit (1);
           }
-          cummulative_count += matches.current_count_change;
+          cummulative_count += static_cast<unsigned int>(matches.current_count_change);
         }
       }
     }
@@ -349,13 +340,8 @@ Publisher::run()
   // Make sure that the data has arriven.
   ::DDS::Duration_t shutdownDelay = {15, 0}; // Wait up to a total of 15
                                              // seconds to finish the test.
-  if (this->options_.transportType() != Options::UDP) {
-    writer0->wait_for_acknowledgments(shutdownDelay);
-    writer1->wait_for_acknowledgments(shutdownDelay);
-  } else {
-    // Wait for acks won't work with UDP...
-    ACE_OS::sleep(15);
-  }
+  writer0->wait_for_acknowledgments(shutdownDelay);
+  writer1->wait_for_acknowledgments(shutdownDelay);
 }
 
 } // End of namespace Test

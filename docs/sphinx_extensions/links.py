@@ -1,9 +1,8 @@
 import subprocess
-from pathlib import Path
 import re
-from urllib.request import urlopen
-from urllib.error import URLError
 import shutil
+from pathlib import Path
+from urllib.request import urlopen
 
 from docutils import nodes
 from docutils.parsers.rst import directives
@@ -27,6 +26,13 @@ def get_config(inliner):
     return inliner.document.settings.env.app.config
 
 
+def ignore_url_in_linkcheck(config, url, full=True):
+    regex = '^' + re.escape(url)
+    if not full:
+        regex += '.*'
+    config.linkcheck_ignore.append(regex + '$')
+
+
 def get_commitish(config):
     if config.github_links_commitish is None:
         if config.github_links_release_tag is not None:
@@ -41,8 +47,8 @@ def get_commitish(config):
     return config.github_links_commitish
 
 
-def rst_error(rawtext, text, lineno, inliner, message, *fmtargs, **fmtkwargs):
-    error = inliner.reporter.error(message.format(*fmtargs, **fmtkwargs), line=lineno)
+def rst_error(rawtext, text, lineno, inliner, message):
+    error = inliner.reporter.error(message, line=lineno)
     return [inliner.problematic(text, rawtext, error)], [error]
 
 
@@ -97,8 +103,7 @@ def ghfile_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     # Seperate path and possible URL fragment
     m = ghfile_arg_re.match(target)
     if not m:
-        return rst_error(rawtext, text, lineno, inliner,
-            '{} is an invalid target', repr(target))
+        return rst_error(rawtext, text, lineno, inliner, f'{target!r} is an invalid target')
     path = m.group(1)
     fragment = m.group(2) if m.group(2) is not None else ''
 
@@ -106,12 +111,13 @@ def ghfile_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     local_path = Path(config.github_links_root_path) / path
     if not local_path.exists():
         return rst_error(rawtext, text, lineno, inliner,
-            '"{}" doesn\'t exist. Checked for existence of "{}"',
-                path, str(local_path)),
+            f'"{path}" doesn\'t exist. Checked for existence of "{local_path!s}"')
 
     # Create the main link
     kind = 'tree' if local_path.is_dir() else 'blob'
     url = '/'.join([gh_url_base, config.github_links_repo, kind, get_commitish(config), path]) + fragment
+    # We know the file exists locally, we don't really have to check the link.
+    ignore_url_in_linkcheck(config, url)
     rv = []
     main_link = link_node(rawtext, lineno, inliner,
         title if explicit_title else '', explicit_title, url, options)
@@ -129,28 +135,26 @@ def ghfile_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     return rv
 
 
+def github_numbered_link(role, title, slug, rawtext, text, lineno, inliner, options):
+    config = get_config(inliner)
+    explicit_title, title, target = process_title_target(text, f'{title} #{text}')
+    if not target.isdigit():
+        return rst_error(rawtext, text, lineno, inliner,
+            f'{role} target {target!r} is not a valid number')
+    return link_node(rawtext, lineno, inliner, title, explicit_title,
+        '/'.join((gh_url_base, config.github_links_repo, slug, target)), options)
+
+
 # Turns :ghissue:`213` into the equivalent of:
 #   `Issue #213 <https://github.com/OpenDDS/OpenDDS/issues/213>`_
 def ghissue_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
-    config = get_config(inliner)
-    explicit_title, title, target = process_title_target(
-        text, 'Issue #{}'.format(text))
-    return link_node(rawtext, lineno, inliner,
-        title, explicit_title,
-        '{}/{}/issues/{}'.format(gh_url_base, config.github_links_repo, target),
-        options)
+    return github_numbered_link(name, 'Issue', 'issues', rawtext, text, lineno, inliner, options)
 
 
 # Turns :ghpr:`1` into the equivalent of:
 #   `PR #1 <https://github.com/OpenDDS/OpenDDS/pull/1>`_
 def ghpr_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
-    config = get_config(inliner)
-    explicit_title, title, target = process_title_target(
-        text, 'PR #{}'.format(text))
-    return link_node(rawtext, lineno, inliner,
-        title, explicit_title,
-        '{}/{}/pull/{}'.format(gh_url_base, config.github_links_repo, target),
-        options)
+    return github_numbered_link(name, 'PR', 'pull', rawtext, text, lineno, inliner, options)
 
 
 # If this is a release, turns :ghrelease:`Release Text` into "Release Text"
@@ -185,6 +189,7 @@ def acetaorel_role(name, rawtext, text, lineno, inliner, options={}, content=[])
 
 
 def omgissue_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
+    config = get_config(inliner)
     explicit_title, title, target = process_title_target(
         text, 'OMG Issue {}'.format(text))
     rv = []
@@ -193,33 +198,41 @@ def omgissue_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
         '{}/issues/{}'.format(omg_url_base, target),
         options))
     append(rv, text_node(rawtext, lineno, ' ', options))
+    member_link = f'{omg_url_base}/browse/{target}'
+    # OMG Member link will always redirect to a login page
+    ignore_url_in_linkcheck(config, member_link)
     append(rv, link_node(rawtext, lineno, inliner,
         '(Member Link)', False,
-        '{}/browse/{}'.format(omg_url_base, target),
+        member_link,
         options))
     return rv
 
 
 def add_omg_spec(app, slug, version, our_name=None, display_name=None):
-    '''To be used in conf.py to declare sepcs based on links like https://www.omg.org/spec/DDS/1.4.
+    '''To be used in conf.py to declare specs based on links like https://www.omg.org/spec/DDS/1.4.
     slug is the OMG name in their URL.
     version must also match the URL.
     our_name is the name to use with :omgspec:.
     display_name is the name of the spec to be used in output.
     '''
 
+    config = app.config
     our_name = slug.lower() if our_name is None else our_name
-    omg_specs = app.config.omg_specs
+    omg_specs = config.omg_specs
     if our_name in omg_specs:
         raise KeyError('Already a spec named ' + our_name)
     display_name = slug.replace('-', ' ') if display_name is None else display_name
 
     # Get the PDF if we don't have it
-    dir_path = docs_path / Path('_build') / 'omg-specs'
+    dir_path = docs_path / '.omg-specs'
     dir_path.mkdir(parents=True, exist_ok=True)
     pdf_path = dir_path / '{}-{}.pdf'.format(slug, version)
     url = 'https://www.omg.org/spec/{}/{}'.format(slug, version)
     pdf_url = url + '/PDF'
+    # Trying to check the PDF links results in UTF-8 decode errors (trying to
+    # parse PDF as HTML?). We shouldn't check these anyways because we're
+    # parsing the PDF upfront and checking things in the role.
+    ignore_url_in_linkcheck(config, pdf_url, full=False)
     if not pdf_path.is_file():
         logger.info('Downloading spec %s from %s', our_name, pdf_url)
         try:
@@ -258,7 +271,10 @@ def add_omg_spec(app, slug, version, our_name=None, display_name=None):
             if kind == fitz.LINK_GOTO:
                 loc = 'page={}&view=FitH,{}'.format(page, dest['to'].y)
             elif kind == fitz.LINK_NAMED:
-                loc = dest['name']
+                if 'name' in dest:
+                    loc = dest['name']
+                else:
+                    loc = dest['nameddest']
             else:
                 continue
 
@@ -299,13 +315,13 @@ def omgspec_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
         section_key = args[1]
     else:
         return rst_error(rawtext, text, lineno, inliner,
-            'omgspec target must be of the form SPEC[:SECTION], not {}', repr(target))
+            f'omgspec target must be of the form SPEC[:SECTION], not {target!r}')
 
     spec = config.omg_specs.get(spec_name)
     if spec is None:
+        valid_specs = ', '.join(config.omg_specs.keys())
         return rst_error(rawtext, text, lineno, inliner,
-            '{} is not a valid omgspec spec name, must be one of: {}',
-            repr(spec_name), ', '.join(config.omg_specs.keys()))
+            f'{spec_name!r} is not a valid omgspec spec name, must be one of: {valid_specs}')
 
     section = None
     if section_key is None or spec['sections'] is None:
@@ -325,7 +341,7 @@ def omgspec_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
                     break
         if section is None:
             return rst_error(rawtext, text, lineno, inliner,
-                '{} is not a valid section in the {} spec', repr(section_key), spec_name)
+                f'{section_key!r} is not a valid section in the {spec_name} spec')
         url = section_link(spec, section)
 
     if not explicit_title:
@@ -362,6 +378,7 @@ class OmgSpecsDirective(SphinxDirective):
             node += section_list
 
     def run(self):
+        debug_links = 'debug-links' in self.options and self.env.app.config.gen_all_omg_spec_links
         specs_node = nodes.bullet_list()
         for spec_name, spec in self.env.app.config.omg_specs.items():
             spec_node = nodes.list_item()
@@ -372,7 +389,7 @@ class OmgSpecsDirective(SphinxDirective):
             p += nodes.literal('', spec_name)
             p += nodes.inline('', ')')
             spec_node += p
-            if 'debug-links' in self.options:
+            if debug_links:
                 self.spec_sections(spec, spec_node, spec['sections'])
             specs_node += spec_node
         return [specs_node]
@@ -392,6 +409,7 @@ def setup(app):
     app.add_role('acetaorel', acetaorel_role)
 
     app.add_config_value('omg_specs', {}, 'env', types=[dict])
+    app.add_config_value('gen_all_omg_spec_links', True, 'env', types=[bool])
     app.add_role('omgissue', omgissue_role)
     app.add_role('omgspec', omgspec_role)
     app.add_directive("omgspecs", OmgSpecsDirective)

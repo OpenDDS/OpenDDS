@@ -1,7 +1,9 @@
-#include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/DCPS_Utils.h>
-#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Registered_Data_Types.h>
+#include <dds/DCPS/Service_Participant.h>
+
 #include <dds/DCPS/XTypes/DynamicTypeSupport.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportConfig.h>
@@ -20,12 +22,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
   ACE_DLL ts_plugin;
-  if (ts_plugin.open(ACE_TEXT("TypeSupportPlugin"))) {
+  if (ts_plugin.open(ACE_TEXT("ConsolidatedMessengerIdl"))) {
     ACE_ERROR((LM_ERROR, "ERROR: Failed to open the type support library\n"));
     return 1;
   }
 
-  const char* type_name = "TopicType";
+  const char* const type_name = "Messenger::Message";
   ACE_DEBUG((LM_DEBUG, "Getting TypeSupport for %C\n", type_name));
   DDS::TypeSupport_var ts = Registered_Data_Types->lookup(0, type_name);
   if (!ts) {
@@ -39,7 +41,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ts_name.in(), type_name));
   }
 
-#  ifndef OPENDDS_SAFETY_PROFILE
+#  if !OPENDDS_CONFIG_SAFETY_PROFILE
   // Set default to RTPS, create DynamicDataWriter from dlopened TypeSupport
   TheServiceParticipant->set_default_discovery(OpenDDS::DCPS::Discovery::DEFAULT_RTPS);
   OpenDDS::DCPS::TransportConfig_rch transport_config =
@@ -88,7 +90,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   dp->delete_contained_entities();
   dpf->delete_participant(dp);
   TheServiceParticipant->shutdown();
-#  endif // OPENDDS_SAFETY_PROFILE
+#  endif
 #endif // ACE_AS_STATIC_LIBS
 
   return 0;

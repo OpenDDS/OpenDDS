@@ -35,9 +35,7 @@ namespace { // anonymous namespace for file scope.
                 transportInfo;
 
   } transportTypeArgMappings[] = {
-    { ACE_TEXT("tcp"), std::make_pair( Test::Options::TCP, 1U) }, // [transport_impl_1]
-    { ACE_TEXT("udp"), std::make_pair( Test::Options::UDP, 2U) }, // [transport_impl_2]
-    { ACE_TEXT("mc"),  std::make_pair( Test::Options::MC,  3U) }  // [transport_impl_3]
+    { ACE_TEXT("tcp"), std::make_pair( Test::Options::TCP, 1U) } // [transport_impl_1]
   };
 
 } // end of anonymous namespace.
@@ -117,8 +115,6 @@ operator<<( std::ostream& str, Test::Options::TransportType value)
 {
   switch( value) {
     case Test::Options::TCP: return str << "TCP";
-    case Test::Options::UDP: return str << "UDP";
-    case Test::Options::MC:  return str << "MC";
 
     default:
     case Test::Options::TRANSPORT_NONE: return str << "NONE";

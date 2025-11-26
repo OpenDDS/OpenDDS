@@ -46,7 +46,8 @@ This script requires :ref:`deps-perl`.
 
   `Strawberry Perl <https://strawberryperl.com>`__ is recommended for Windows.
 
-  To start the script, open a `Visual Studio Developer Command Prompt <https://learn.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell>`__ that has C++ tools available, then change to the root of the OpenDDS source directory and run:
+  To start the script, open a `Visual Studio Native Tools Command Prompt <https://learn.microsoft.com/en-us/cpp/build/how-to-enable-a-64-bit-visual-cpp-toolset-on-the-command-line>`__
+  or `Developer Command Prompt <https://learn.microsoft.com/en-us/visualstudio/ide/reference/command-prompt-powershell>`__ that has C++ tools available, then change to the root of the OpenDDS source directory and run:
 
   .. code-block:: batch
 
@@ -83,6 +84,8 @@ If configure runs successfully it will end with a message about the next steps f
 .. tab:: Windows
 
   The configure script will say how to open the solution file for OpenDDS in Visual Studio using ``devenv``.
+  Before building, check that the "Configuration" and "Platform" are correct.
+  In Visual Studio, select "Build" and then "Build Solution".
 
   It can also be built directly from the command prompt by using MSBuild.
   For example, if the configure script was ran without any arguments, to do a Debug x64 build:
@@ -100,6 +103,62 @@ If configure runs successfully it will end with a message about the next steps f
   .. code-block::
 
     setenv
+
+.. _building--configuration-header:
+
+The Configuration Header
+========================
+
+The :ghfile:`configure` script and CMake generate a header ``$DDS_ROOT/OpenDDSConfig.h`` (see :envvar:`DDS_ROOT`).
+The header defines macros that determine the features and capabilities that are built into OpenDDS.
+Users using a custom build environment must ensure that ``$DDS_ROOT/OpenDDSConfig.h`` exists.
+A template can be found in :ghfile:`dds/OpenDDSConfig.h.in`.
+
+The configuration header is not used directly.
+Instead, :ghfile:`dds/OpenDDSConfigWrapper.h` includes it, provides defaults and backwards compatibility, and performs some sanity checks.
+For consistency and to avoid build errors, applications that have code that is conditioned on OpenDDS features should include :ghfile:`dds/OpenDDSConfigWrapper.h`.
+
+The following macros are available in the config header:
+
+``OPENDDS_CONFIG_AUTO_STATIC_INCLUDES``
+    If OpenDDS was :ref:`built using CMake <cmake-building>`, then :ghfile:`dds/DCPS/StaticIncludes.h` can be included and the initialization headers will be included automatically based on the :ref:`static libraries <cmake-libraries>` that were linked.
+
+``OPENDDS_CONFIG_BOOTTIME_TIMERS``
+    Use Linux ``CLOCK_BOOTTIME`` when setting timers.
+    This makes the timers more accurate when systems do a hardware sleep.
+
+``OPENDDS_CONFIG_BUILT_IN_TOPICS``
+    Enable full support for the :ref:`built_in_topics`.
+
+``OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC``
+    Enable :ref:`content_subscription_profile--content-filtered-topic`.
+
+``OPENDDS_CONFIG_MULTI_TOPIC``
+    Enable :ref:`content_subscription_profile--multi-topic`.
+
+``OPENDDS_CONFIG_OBJECT_MODEL_PROFILE``
+    Enable :ref:`building--object-model-profile`.
+
+``OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE``
+    Enable exclusive ownership as part of :ref:`building--ownership-profile`.
+
+``OPENDDS_CONFIG_OWNERSHIP_PROFILE``
+    Enable :ref:`building--ownership-profile`.
+
+``OPENDDS_CONFIG_PERSISTENCE_PROFILE``
+    Enable :ref:`building--persistence-profile`.
+
+``OPENDDS_CONFIG_QUERY_CONDITION``
+    Enable :ref:`content_subscription_profile--query-condition`.
+
+``OPENDDS_CONFIG_RAPIDJSON``
+    Enable JSON features.
+
+``OPENDDS_CONFIG_SAFETY_PROFILE``
+    Enable :ref:`safety_profile`.
+
+``OPENDDS_CONFIG_SECURITY``
+    Enable :ref:`dds_security`.
 
 Java
 ====
@@ -245,8 +304,7 @@ It requires :ref:`deps-xerces` and :ref:`deps-openssl`.
 
        .. code-block:: batch
 
-           configure --security --openssl=%NEW_SSL_ROOT% \
-             --xerces3=%NEW_XERCES_ROOT%
+           configure --security --openssl=%NEW_SSL_ROOT% --xerces3=%NEW_XERCES_ROOT%
 
     #. Compile with msbuild (or by opening the solution file in Visual Studio and building from there).
 
@@ -297,7 +355,7 @@ To explicitly enable the feature, use ``feature=1`` above.
 
 .. _building--disabling-the-building-of-built-in-topic-support:
 
-Disabling the Building of Built-In Topic Support
+Disabling the Building of Built-in Topic Support
 ------------------------------------------------
 
 ..
@@ -306,7 +364,7 @@ Disabling the Building of Built-In Topic Support
 Feature Name: ``built_in_topics``
 
 You can reduce the footprint of the core DDS library by up to 30% by disabling Built-in Topic Support.
-See :ref:`bit` for a description of Built-In Topics.
+See :ref:`bit` for a description of built-in topics.
 
 .. _building--disabling-the-building-of-compliance-profile-features:
 
@@ -366,7 +424,7 @@ Persistence Profile
 
 Feature Name: ``persistence_profile``
 
-This profile adds the QoS policy ``DURABILITY_SERVICE`` and the settings ``TRANSIENT`` and ``PERSISTENT`` of the ``DURABILITY`` QoS policy ``kind``.
+This profile adds the :ref:`qos-durability-service` policy and the settings ``TRANSIENT`` and ``PERSISTENT`` of the :ref:`qos-durability` policy ``kind``.
 
 .. _building--ownership-profile:
 
@@ -380,14 +438,14 @@ Feature Name: ``ownership_profile``
 
 This profile adds:
 
-* the setting ``EXCLUSIVE`` of the ``OWNERSHIP`` ``kind``
+* the setting ``EXCLUSIVE`` of :ref:`qos-ownership`
 
-* support for the ``OWNERSHIP_STRENGTH`` policy
+* support for the :ref:`qos-ownership-strength` policy
 
-* setting a ``depth > 1`` for the ``HISTORY`` QoS policy.
+* setting a ``depth > 1`` for the :ref:`qos-history` policy
 
-*Some users may wish to exclude support for the Exclusive OWNERSHIP policy and its associated OWNERSHIP_STRENGTH without impacting use of HISTORY.*
-*In order to support this configuration, OpenDDS also has the MPC feature ownership_kind_exclusive (configure script option --no-ownership-kind-exclusive).*
+Some users may wish to exclude support for the exclusive :ref:`qos-ownership` policy and its associated :ref:`qos-ownership-strength` without impacting use of :ref:`qos-history`.
+In order to support this configuration, OpenDDS also has the MPC feature ``ownership_kind_exclusive`` (configure script option ``--no-ownership-kind-exclusive``).
 
 .. _building--object-model-profile:
 
@@ -399,9 +457,9 @@ Object Model Profile
 
 Feature Name: ``object_model_profile``
 
-This profile includes support for the ``PRESENTATION`` access_scope setting of ``GROUP``.
+This profile includes support for the :ref:`qos-presentation` ``access_scope`` setting of ``GROUP``.
 
-.. note:: Currently, the ``PRESENTATION`` access_scope of ``TOPIC`` is also excluded when ``object_model_profile`` is disabled.
+.. note:: Currently, the :ref:`qos-presentation` ``access_scope`` of ``TOPIC`` is also excluded when ``object_model_profile`` is disabled.
 
 .. _cross_compiling:
 
@@ -602,8 +660,8 @@ These are all the variables that are exclusive to building OpenDDS with CMake:
 
 .. cmake:var:: OPENDDS_ACE_TAO_KIND
 
-  The default is ``ace7tao3`` for :ref:`ACE 7/TAO 3 <ace7tao3>`.
-  Use ``ace6tao2`` to get :ref:`ACE 6/TAO 2 <ace6tao2>`.
+  The default is ``ace8tao4`` for :ref:`ACE 8/TAO 4 <ace8tao4>`.
+  See :ref:`here <deps-ace-tao>` for other versions of ACE/TAO.
 
   .. versionadded:: 3.27
 
@@ -672,7 +730,32 @@ These are all the variables that are exclusive to building OpenDDS with CMake:
   See :ref:`cmake-running-tests` for how to run them.
   The default for this is ``TRUE``.
 
-Speeding up the build
+.. cmake:var:: OPENDDS_BOOTTIME_TIMERS
+
+  .. versionadded:: 3.28
+
+  OpenDDS uses CLOCK_BOOTTIME when scheduling timers.
+  On some platforms the default is to use CLOCK_MONOTONIC which does not increment when the system is suspended.
+  Enable this option to use CLOCK_BOOTTIME as the timer base clock instead of CLOCK_MONOTONIC.
+  Default is ``OFF``.
+
+.. cmake:var:: OPENDDS_COMPILE_WARNINGS
+
+  If set to ``WARNING``, enables additional compiler warnings when compiling OpenDDS.
+  If set to ``ERROR``, enables additional compiler warnings which are treated as errors when compiling OpenDDS.
+
+  .. versionadded:: 3.28
+
+.. cmake:var:: OPENDDS_INSTALL_RAPIDJSON
+
+  Install the headers of :cmake:var:`OPENDDS_RAPIDJSON` with OpenDDS.
+  Default is ``TRUE`` if OpenDDS uses its own RapidJSON, else ``FALSE`` if a ``OPENDDS_RAPIDJSON`` path was passed by the user.
+
+  .. versionadded:: 3.32
+
+.. _cmake-building-speed:
+
+Speeding up the Build
 ---------------------
 
 A major speed up supported by all the CMake generators are `unity builds <https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html>`__.
@@ -694,7 +777,7 @@ A few things to note:
 
 - Native-built host tools, like :term:`opendds_idl`, have to be configured and built separately and provided to the target build using :cmake:var:`OPENDDS_HOST_TOOLS`.
 - The host tools will build its own ACE/TAO for the host system, but this can be overridden using :cmake:var:`OPENDDS_ACE` on the host build and :cmake:var:`OPENDDS_ACE_TAO_HOST_TOOLS` on the target build.
-- If the target platform isn't automatically supported, then ACE/TAO will have to be :ref:`built serperatly <cmake-ace-tao-manual>`.
+- If the target platform isn't automatically supported, then ACE/TAO will have to be :ref:`built separately <cmake-ace-tao-manual>`.
 
 Android
 ^^^^^^^
@@ -748,7 +831,7 @@ Known Limitations
   Currently this only exists for Windows, Linux, macOS, and Android.
   All other platforms will require configuring and building ACE/TAO separately and passing the path using :cmake:var:`OPENDDS_ACE`.
 
-  - See https://www.dre.vanderbilt.edu/~schmidt/DOC_ROOT/ACE/ACE-INSTALL.html for how to manually build ACE/TAO.
+  - See https://www.dre.vanderbilt.edu/~schmidt/ACE-install.html for how to manually build ACE/TAO.
 
 - The following features are planned, but not implemented yet:
 

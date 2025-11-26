@@ -30,6 +30,7 @@
 
 class AST_Array;
 class AST_Sequence;
+class AST_Map;
 class AST_Decl;
 class AST_Union;
 class AST_Annotation_Decl;
@@ -88,6 +89,9 @@ bool get_bool_annotation_member_value(AST_Annotation_Appl* appl,
 ACE_UINT32 get_u32_annotation_member_value(AST_Annotation_Appl* appl,
                                            const char* member_name);
 
+ACE_INT32 get_i32_annotation_member_value(AST_Annotation_Appl* appl,
+                                          const char* member_name);
+
 std::string get_str_annotation_member_value(AST_Annotation_Appl* appl,
                                             const char* member_name);
 
@@ -138,6 +142,9 @@ bool AnnotationWithValue<bool>::value_from_appl(AST_Annotation_Appl* appl) const
 
 template<>
 unsigned AnnotationWithValue<ACE_UINT32>::value_from_appl(AST_Annotation_Appl* appl) const;
+
+template<>
+int AnnotationWithValue<ACE_INT32>::value_from_appl(AST_Annotation_Appl* appl) const;
 
 template<>
 std::string AnnotationWithValue<std::string>::value_from_appl(AST_Annotation_Appl* appl) const;
@@ -333,6 +340,18 @@ public:
   TryConstructFailAction sequence_element_value(AST_Sequence* node) const;
   TryConstructFailAction array_element_value(AST_Array* node) const;
   TryConstructFailAction union_value(AST_Union* node) const;
+
+  TryConstructFailAction map_key(AST_Map* node) const;
+  TryConstructFailAction map_value(AST_Map* node) const;
+};
+
+// @value ====================================================================
+
+struct ValueAnnotation : AnnotationWithValue<ACE_INT32> {
+  // @value(long) is supported for enumerators
+  // more general @value support as described in IDL4.2 is not yet supported
+  std::string definition() const;
+  std::string name() const;
 };
 
 // OpenDDS Specific Annotations

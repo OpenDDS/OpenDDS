@@ -24,6 +24,8 @@ my @optional_values = qw/
   workspace-file
   platform-macros-file
   static
+  compiler
+  runtime-library
 /;
 my %is_value_required = map {$_ => 1} @required_values;
 my %values = ();
@@ -33,6 +35,8 @@ for my $key (@required_values, @optional_values) {
   push(@opts, "$key=s");
 }
 push(@opts, "macro-line=s@");
+my %env;
+push(@opts, "env=s%" => %env);
 if (!GetOptions(\%values, @opts)) {
   exit(1);
 }
@@ -100,6 +104,12 @@ if ($gnuace) {
   my $platform_macros_path = "$values{ace}/include/makeinclude/platform_macros.GNU";
   open(my $platform_macros_file, '>', $platform_macros_path)
     or die("Failed to open $platform_macros_path: $!");
+  if ($values{compiler}) {
+    for my $var ('CC', 'CXX', 'LD') {
+      print $platform_macros_file ("$var = $values{compiler}\n");
+    }
+  }
+  print $platform_macros_file ("CCFLAGS += \$(opendds_cmake_std)\n");
   if ($values{'macro-line'}) {
     for my $line (@{$values{'macro-line'}}) {
       print $platform_macros_file ("$line\n");
@@ -113,6 +123,13 @@ if ($gnuace) {
 $ENV{MPC_ROOT} = File::Spec->rel2abs($values{mpc});
 $ENV{ACE_ROOT} = File::Spec->rel2abs($values{ace});
 $ENV{TAO_ROOT} = File::Spec->rel2abs($values{tao});
+if ($values{'env'}) {
+  for my $name (keys(%{$values{'env'}})) {
+    my $value = $values{env}->{$name};
+    print("env: $name=$value\n");
+    $ENV{$name} = $value;
+  }
+}
 my $mwc_name = 'ACE_TAO_for_OpenDDS.mwc';
 my $mwc_src = $values{'workspace-file'} // "$FindBin::RealBin/../$mwc_name";
 my $mwc = "$values{src}/$mwc_name";
@@ -120,5 +137,9 @@ copy($mwc_src, $mwc) or die("Failed to copy $mwc_src to $mwc: $!");
 my $cmd = [$Config{perlpath}, "$ENV{ACE_ROOT}/bin/mwc.pl", $mwc, '-type', $values{'mpc-type'}];
 if ($values{static}) {
   push(@{$cmd}, '-static');
+  if ($values{'mpc-type'} =~ /^vs/ && $values{'runtime-library'} eq 'dll') {
+    push(@{$cmd}, '-value_template', 'Debug::runtime_library=MultiThreadedDebugDLL',
+                  '-value_template', 'Release::runtime_library=MultiThreadedDLL');
+  }
 }
 run_command($cmd, chdir => $values{src});

@@ -8,7 +8,9 @@
 #ifndef OPENDDS_DCPS_FILESYSTEMSTORAGE_H
 #define OPENDDS_DCPS_FILESYSTEMSTORAGE_H
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include "Definitions.h"
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include "dcps_export.h"
 
@@ -95,7 +97,7 @@ using OpenDDS::DCPS::RcHandle;
 
 class File;
 
-class OpenDDS_Dcps_Export Directory : public virtual RcObject {
+class OpenDDS_Dcps_Export Directory : public RcObject {
 public:
   typedef RcHandle<Directory> Ptr;
 
@@ -221,7 +223,7 @@ private:
   // phys. prefix (before '.') -> next available counter #
 };
 
-class OpenDDS_Dcps_Export File : public virtual RcObject {
+class OpenDDS_Dcps_Export File : public RcObject {
 public:
   typedef RcHandle<File> Ptr;
 

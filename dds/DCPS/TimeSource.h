@@ -23,10 +23,15 @@ class TimeSource {
 public:
   virtual ~TimeSource() {}
 
-  virtual MonotonicTimePoint monotonic_time_point_now() const {
+  virtual MonotonicTimePoint monotonic_time_point_now() const
+  {
     return MonotonicTimePoint::now();
   }
 
+  virtual DDS::Time_t dds_time_t_now() const
+  {
+    return SystemTimePoint::now().to_idl_struct();
+  }
 };
 
 } // namespace DCPS

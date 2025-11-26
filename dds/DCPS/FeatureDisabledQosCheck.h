@@ -10,7 +10,11 @@
 
 #include "Qos_Helper.h"
 
-#ifdef  OPENDDS_NO_OWNERSHIP_PROFILE
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_OWNERSHIP_PROFILE
+#define OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, error_rtn_value)
+#else
 #define OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, error_rtn_value) \
   if (qos.history.kind == ::DDS::KEEP_ALL_HISTORY_QOS || qos.history.depth > 1) { \
     ACE_ERROR((LM_ERROR, \
@@ -19,11 +23,12 @@
               ACE_TEXT("therefore history must be KEEP_LAST, depth 1.\n"))); \
     return error_rtn_value; \
   }
-#else
-#define OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, error_rtn_value)
 #endif
 
-#ifdef  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
+#  define OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, error_rtn_value)
+#  define OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos, error_rtn_value)
+#else
 #define OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, error_rtn_value) \
   if (qos.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS) { \
     ACE_ERROR((LM_ERROR, \
@@ -40,12 +45,11 @@
               ACE_TEXT("therefore ownership strength must be the default.\n"))); \
     return error_rtn_value; \
   }
-#else
-#define OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, error_rtn_value)
-#define OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos, error_rtn_value)
 #endif
 
-#ifdef  OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
+#define OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(qos, error_rtn_value)
+#else
 #define OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(qos, error_rtn_value) \
   if (qos.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS) { \
     ACE_ERROR((LM_ERROR, \
@@ -62,11 +66,14 @@
               ACE_TEXT("this means presentation access scope cannot be TOPIC.\n"))); \
     return error_rtn_value; \
   }
-#else
-#define OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(qos, error_rtn_value)
 #endif
 
-#ifdef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
+
+#define OPENDDS_NO_DURABILITY_SERVICE_COMPATIBILITY_CHECK(qos, error_rtn_value)
+#define OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, error_rtn_value)
+
+#else
 
 #define OPENDDS_NO_DURABILITY_SERVICE_COMPATIBILITY_CHECK(qos, error_rtn_value) \
   if (qos.durability_service != TheServiceParticipant->initial_DurabilityServiceQosPolicy()) { \
@@ -87,11 +94,6 @@
               ACE_TEXT("be TRANSIENT_DURABILITY_QOS or PERSISTENT_DURABILITY_QOS.\n"))); \
     return error_rtn_value; \
   }
-
-#else
-
-#define OPENDDS_NO_DURABILITY_SERVICE_COMPATIBILITY_CHECK(qos, error_rtn_value)
-#define OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, error_rtn_value)
 
 #endif
 

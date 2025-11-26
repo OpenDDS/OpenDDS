@@ -7,9 +7,9 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#ifndef OPENDDS_SAFETY_PROFILE
-
 #include "FileSystemStorage.h"
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include "DirentWrapper.h"
 
@@ -801,7 +801,7 @@ void Directory::scan_dir(const ACE_TString& relative, DDS_Dirent& dir,
       phys += ent->d_name;
 
       if (ACE_OS::strncmp(ent->d_name, ACE_TEXT("_overflow."), 10) == 0) {
-        unsigned int n = ACE_OS::atoi(ent->d_name + 10);
+        unsigned int n = static_cast<unsigned int>(ACE_OS::atoi(ent->d_name + 10));
         DDS_Dirent overflow(file.c_str());
         scan_dir(ent->d_name, overflow, n);
 
@@ -829,7 +829,7 @@ void Directory::scan_dir(const ACE_TString& relative, DDS_Dirent& dir,
         }
 
         ACE_TString prefix(phys.c_str(), idx);
-        unsigned int serial = ACE_OS::atoi(&phys[idx + 1]);
+        unsigned int serial = static_cast<unsigned int>(ACE_OS::atoi(&phys[idx + 1]));
         unsigned int& counter = long_names_[prefix];
 
         if (serial >= counter) counter = serial + 1;
@@ -853,7 +853,7 @@ void Directory::removing(const ACE_TString& child, bool file)
 
   const ACE_TString& phys = iter->second;
   String_Index_t idx = phys.find(ACE_TEXT("_overflow."));
-  unsigned int bucket = (idx == 0 ? ACE_OS::atoi(&phys[idx + 10]) : 0);
+  unsigned int bucket = (idx == 0 ? static_cast<unsigned int>(ACE_OS::atoi(&phys[idx + 10])) : 0);
 
   if (--overflow_[bucket] == 0 && bucket > 0) {
     overflow_.erase(bucket);

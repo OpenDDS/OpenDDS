@@ -19,7 +19,7 @@ namespace DCPS {
 
 // These operators are used in some inline functions below.  Some
 // compilers require the inline definition to appear before its use.
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 ACE_INLINE
 bool operator==(const DDS::Duration_t& t1, const DDS::Duration_t& t2)
 {
@@ -82,7 +82,7 @@ bool operator!(const DDS::Time_t& t)
          || t.nanosec == DDS::TIME_INVALID_NSEC;
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 ACE_INLINE bool
 operator==(const DDS::Time_t& t1, const DDS::Time_t& t2)
 {
@@ -183,20 +183,13 @@ operator<(const MonotonicTime_t& t1, const MonotonicTime_t& t2)
   return t1.sec < t2.sec || (t1.sec == t2.sec && t1.nanosec < t2.nanosec);
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 ACE_INLINE bool
 operator==(const MonotonicTime_t& t1, const MonotonicTime_t& t2)
 {
   return t1.sec == t2.sec && t1.nanosec == t2.nanosec;
 }
 #endif
-
-ACE_INLINE
-ACE_Time_Value time_to_time_value(const DDS::Time_t& t)
-{
-  ACE_Time_Value tv(t.sec, t.nanosec / 1000);
-  return tv;
-}
 
 ACE_INLINE
 DDS::Time_t time_value_to_time(const ACE_Time_Value& tv)
@@ -208,7 +201,7 @@ DDS::Time_t time_value_to_time(const ACE_Time_Value& tv)
 }
 
 ACE_INLINE
-MonotonicTime_t time_value_to_monotonic_time(const ACE_Time_Value& tv)
+MonotonicTime_t time_value_to_time(const ACE_Time_Value_T<ACE_Monotonic_Time_Policy>& tv)
 {
   MonotonicTime_t t;
   t.sec = tv.sec();
@@ -223,31 +216,29 @@ ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t)
     return ACE_Time_Value::max_time;
   }
 
-  CORBA::LongLong sec = t.sec + t.nanosec/1000/ACE_ONE_SECOND_IN_USECS;
-  CORBA::ULong usec = t.nanosec/1000 % ACE_ONE_SECOND_IN_USECS;
+  const DDS::Int64 sec = t.sec +
+    static_cast<DDS::Int64>(t.nanosec) / 1000 / ACE_ONE_SECOND_IN_USECS;
+  const suseconds_t usec = static_cast<suseconds_t>(t.nanosec / 1000 % ACE_ONE_SECOND_IN_USECS);
 
   if (sec > ACE_Time_Value::max_time.sec()) {
     return ACE_Time_Value::max_time;
   }
-  else {
-    return ACE_Time_Value(ACE_Utils::truncate_cast<time_t>(sec), usec);
-  }
+
+  return ACE_Time_Value(ACE_Utils::truncate_cast<time_t>(sec), usec);
 }
 
 ACE_INLINE
 ACE_Time_Value duration_to_absolute_time_value(const DDS::Duration_t& t,
                                                const ACE_Time_Value& now)
 {
-  CORBA::LongLong sec
-    = t.sec + now.sec() + (t.nanosec/1000 + now.usec())/ACE_ONE_SECOND_IN_USECS;
-  CORBA::ULong usec = (t.nanosec/1000 + now.usec()) % ACE_ONE_SECOND_IN_USECS;
+  const DDS::Int64 sec = t.sec + now.sec()
+    + (static_cast<DDS::Int64>(t.nanosec) / 1000 + now.usec()) / ACE_ONE_SECOND_IN_USECS;
+  const suseconds_t usec = (static_cast<suseconds_t>(t.nanosec) / 1000 + now.usec()) % ACE_ONE_SECOND_IN_USECS;
 
   if (sec > ACE_Time_Value::max_time.sec()) {
     return ACE_Time_Value::max_time;
   }
-  else {
-    return ACE_Time_Value(ACE_Utils::truncate_cast<time_t>(sec), usec);
-  }
+  return ACE_Time_Value(ACE_Utils::truncate_cast<time_t>(sec), usec);
 }
 
 ACE_INLINE

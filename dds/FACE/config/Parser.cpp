@@ -99,6 +99,10 @@ Parser::parse(const char* filename)
   if (status)
     return status;
 
+  const DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
+  // For the configuration to be loaded.
+  ACE_UNUSED_ARG(dpf);
+
   for (ConnectionMap::const_iterator pos = connection_map_.begin(), limit = connection_map_.end();
        pos != limit;
        ++pos) {
@@ -138,11 +142,11 @@ Parser::parse(const char* filename)
 
         DCPS::TransportLocatorSeq trans_info;
 
-        OpenDDS::DCPS::TransportConfig_rch config;
+        OpenDDS::DCPS::TransportConfig_rch tp_config;
 
         if (conn.config_set()) {
-          config = TheTransportRegistry->get_config(conn.config_name());
-          if (config.is_nil()) {
+          tp_config = TheTransportRegistry->get_config(conn.config_name());
+          if (tp_config.is_nil()) {
             ACE_ERROR((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: Could not find config/%s\n"),
                        conn.config_name()));
@@ -150,15 +154,15 @@ Parser::parse(const char* filename)
           }
         }
 
-        if (config.is_nil()) {
-          config = TheTransportRegistry->domain_default_config(conn.domain_id_);
+        if (tp_config.is_nil()) {
+          tp_config = TheTransportRegistry->domain_default_config(conn.domain_id_);
         }
 
-        if (config.is_nil()) {
-          config = TheTransportRegistry->global_config();
+        if (tp_config.is_nil()) {
+          tp_config = TheTransportRegistry->global_config();
         }
 
-        config->populate_locators(trans_info);
+        tp_config->populate_locators(trans_info, conn.domain_id_, 0);
 
         // Typically, we would ensure that trans_info is not empty.
         // However, when using RTPS, trans_info will be empty so don't check.
@@ -213,11 +217,11 @@ Parser::parse(const char* filename)
 
         DCPS::TransportLocatorSeq trans_info;
 
-        OpenDDS::DCPS::TransportConfig_rch config;
+        OpenDDS::DCPS::TransportConfig_rch tp_config;
 
         if (conn.config_set()) {
-          config = TheTransportRegistry->get_config(conn.config_name());
-          if (config.is_nil()) {
+          tp_config = TheTransportRegistry->get_config(conn.config_name());
+          if (tp_config.is_nil()) {
             ACE_ERROR((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: Could not find transport/%s\n"),
                        conn.config_name()));
@@ -225,15 +229,15 @@ Parser::parse(const char* filename)
           }
         }
 
-        if (config.is_nil()) {
-          config = TheTransportRegistry->domain_default_config(conn.domain_id_);
+        if (tp_config.is_nil()) {
+          tp_config = TheTransportRegistry->domain_default_config(conn.domain_id_);
         }
 
-        if (config.is_nil()) {
-          config = TheTransportRegistry->global_config();
+        if (tp_config.is_nil()) {
+          tp_config = TheTransportRegistry->global_config();
         }
 
-        config->populate_locators(trans_info);
+        tp_config->populate_locators(trans_info, conn.domain_id_, 0);
 
         // Typically, we would ensure that trans_info is not empty.
         // However, when using RTPS, trans_info will be empty so don't check.

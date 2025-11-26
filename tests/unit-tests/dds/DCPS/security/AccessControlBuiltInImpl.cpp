@@ -1,4 +1,6 @@
-#ifdef OPENDDS_SECURITY
+#include <dds/DCPS/Definitions.h>
+
+#if OPENDDS_CONFIG_SECURITY
 
 #include <dds/DCPS/security/AccessControlBuiltInImpl.h>
 #include <dds/DCPS/security/OpenSSL_init.h>
@@ -98,10 +100,10 @@ class MockDataReader : public DDS::DataReader {
 
   MOCK_METHOD3(create_readcondition,
       ::DDS::ReadCondition_ptr(::DDS::SampleStateMask sample_states, ::DDS::ViewStateMask view_states, ::DDS::InstanceStateMask instance_states));
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
   MOCK_METHOD5(create_querycondition,
       ::DDS::QueryCondition_ptr(::DDS::SampleStateMask sample_states, ::DDS::ViewStateMask view_states, ::DDS::InstanceStateMask instance_states, const char * query_expression, const ::DDS::StringSeq & query_parameters));
-#endif // OPENDDS_NO_QUERY_CONDITION
+#endif
   MOCK_METHOD1(delete_readcondition,
       ::DDS::ReturnCode_t(::DDS::ReadCondition_ptr a_condition));
   MOCK_METHOD0(delete_contained_entities,

@@ -1,0 +1,7 @@
+project: dcps_test, dcps_rtps_udp {
+  requires += no_opendds_safety_profile built_in_topics
+  idlflags += -SS
+  TypeSupport_Files {
+    NewDevice.idl
+  }
+}

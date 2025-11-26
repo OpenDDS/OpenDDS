@@ -18,7 +18,7 @@ void RelayAddressListener::on_data_available(DDS::DataReader_ptr reader)
 {
   RelayAddressDataReader_var dr = RelayAddressDataReader::_narrow(reader);
   if (!dr) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayAddressListener::on_data_available failed to narrow RtpsRelay::ReaderEntryDataReader\n")));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RelayAddressListener::on_data_available failed to narrow RtpsRelay::ReaderEntryDataReader\n"));
     return;
   }
 
@@ -31,7 +31,7 @@ void RelayAddressListener::on_data_available(DDS::DataReader_ptr reader)
                                    DDS::ANY_VIEW_STATE,
                                    DDS::ANY_INSTANCE_STATE);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayAddressListener::on_data_available failed to take %C\n"), OpenDDS::DCPS::retcode_to_string(ret)));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RelayAddressListener::on_data_available failed to take %C\n", OpenDDS::DCPS::retcode_to_string(ret)));
     return;
   }
 

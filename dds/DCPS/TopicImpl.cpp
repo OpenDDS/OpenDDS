@@ -14,7 +14,6 @@
 #include "Definitions.h"
 #include "Service_Participant.h"
 #include "DomainParticipantImpl.h"
-#include "MonitorFactory.h"
 #include "DCPS_Utils.h"
 #include "transport/framework/TransportExceptions.h"
 
@@ -41,7 +40,6 @@ TopicImpl::TopicImpl(const char*                    topic_name,
 {
   inconsistent_topic_status_.total_count = 0;
   inconsistent_topic_status_.total_count_change = 0;
-  monitor_.reset(TheServiceParticipant->monitor_factory_->create_topic_monitor(this));
 }
 
 TopicImpl::~TopicImpl()
@@ -162,9 +160,6 @@ TopicImpl::enable()
     }
   }
 
-  if (this->monitor_) {
-    monitor_->report();
-  }
   return this->set_enabled();
 }
 

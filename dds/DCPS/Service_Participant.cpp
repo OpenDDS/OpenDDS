@@ -7,23 +7,26 @@
 
 #include "Service_Participant.h"
 
-#include "Logging.h"
-#include "WaitSet.h"
-#include "transport/framework/TransportRegistry.h"
-#include "debug.h"
 #include "BuiltInTopicUtils.h"
 #include "DataDurabilityCache.h"
+#include "DefaultNetworkConfigMonitor.h"
 #include "GuidConverter.h"
-#include "MonitorFactory.h"
+#include "LinuxNetworkConfigMonitor.h"
+#include "Logging.h"
+#include "Qos_Helper.h"
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
-#include "LinuxNetworkConfigMonitor.h"
-#include "DefaultNetworkConfigMonitor.h"
 #include "StaticDiscovery.h"
 #include "ThreadStatusManager.h"
-#include "Qos_Helper.h"
+#include "WaitSet.h"
+#include "debug.h"
+
+#include "transport/framework/TransportRegistry.h"
+
+#include <dds/OpenDDSConfigWrapper.h>
+
 #include "../Version.h"
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #  include "security/framework/SecurityRegistry.h"
 #endif
 
@@ -44,7 +47,7 @@
 #include <ace/config.h>
 
 #include <cstring>
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
 #  include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
 #else
 #  include <fstream>
@@ -54,11 +57,27 @@
 #include "Service_Participant.inl"
 #endif /* __ACE_INLINE__ */
 
+#if !defined (ACE_WIN32)
+extern char **environ;
+#endif
+
+#if OPENDDS_GCC
+// Embed GDB Extension
+asm(
+  ".pushsection \".debug_gdb_scripts\", \"MS\",@progbits,1\n"
+  ".byte 4\n" // 4 means this is an embedded Python script
+  ".ascii \"gdb.inlined-script\\n\"\n"
+  ".incbin \"../tools/scripts/gdbext.py\"\n"
+  ".byte 0\n"
+  ".popsection\n"
+);
+#endif
+
 namespace {
 
 void set_log_file_name(const char* fname)
 {
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
   ACE_LOG_MSG->msg_ostream(fopen(fname, "a"), true);
 #else
   std::ofstream* output_stream = new std::ofstream(fname, ios::app);
@@ -109,9 +128,8 @@ int Service_Participant::zero_argc = 0;
 
 static const ACE_TCHAR DEFAULT_REPO_IOR[] = ACE_TEXT("file://repo.ior");
 
-static const ACE_TCHAR DOMAIN_SECTION_NAME[] = ACE_TEXT("domain");
-static const ACE_TCHAR REPO_SECTION_NAME[]   = ACE_TEXT("repository");
-static const ACE_TCHAR RTPS_SECTION_NAME[]   = ACE_TEXT("rtps_discovery");
+static const String REPO_DISCOVERY_TYPE("repository");
+static const String RTPS_DISCOVERY_TYPE("rtps_discovery");
 
 namespace {
 
@@ -119,7 +137,7 @@ String toupper(const String& x)
 {
   String retval;
   for (String::const_iterator pos = x.begin(), limit = x.end(); pos != limit; ++pos) {
-    retval.push_back(ACE_OS::ace_toupper(*pos));
+    retval.push_back(static_cast<char>(ACE_OS::ace_toupper(*pos)));
   }
   return retval;
 }
@@ -128,29 +146,24 @@ String toupper(const String& x)
 
 Service_Participant::Service_Participant()
   :
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   ORB_argv_(false /*substitute_env_args*/),
 #endif
   time_source_()
-  , reactor_task_(false)
-  , monitor_factory_(0)
   , priority_min_(0)
   , priority_max_(0)
   , shut_down_(false)
   , network_interface_address_topic_(make_rch<InternalTopic<NetworkInterfaceAddress> >())
+  , statistics_topic_(make_rch<StatisticsTopic>())
   , config_topic_(make_rch<InternalTopic<ConfigPair> >())
-  , config_store_(make_rch<ConfigStoreImpl>(config_topic_))
+  , config_store_(make_rch<ConfigStoreImpl>(config_topic_, time_source_))
   , config_reader_(make_rch<InternalDataReader<ConfigPair> >(DataReaderQosBuilder().reliability_reliable().durability_transient_local()))
   , config_reader_listener_(make_rch<ConfigReaderListener>(ref(*this)))
-  , pending_timeout_(0,0) // Can't use OPENDDS_COMMON_DCPS_PENDING_TIMEOUT_default due to initialization order.
+  , pending_timeout_(0,0) // Can't use COMMON_DCPS_PENDING_TIMEOUT_default due to initialization order.
 #ifdef DDS_DEFAULT_DISCOVERY_METHOD
   , default_discovery_(DDS_DEFAULT_DISCOVERY_METHOD)
 #else
-# ifdef OPENDDS_SAFETY_PROFILE
   , default_discovery_(Discovery::DEFAULT_RTPS)
-# else
-  , default_discovery_(Discovery::DEFAULT_REPO)
-# endif
 #endif
 {
   config_topic_->connect(config_reader_);
@@ -224,16 +237,10 @@ Service_Participant::reactor()
   return reactor_task_.get_reactor();
 }
 
-ACE_thread_t
-Service_Participant::reactor_owner() const
+ReactorTask_rch
+Service_Participant::reactor_task()
 {
-  return reactor_task_.get_reactor_owner();
-}
-
-ReactorInterceptor_rch
-Service_Participant::interceptor() const
-{
-  return reactor_task_.interceptor();
+  return rchandle_from(&reactor_task_);
 }
 
 JobQueue_rch
@@ -250,11 +257,6 @@ DDS::ReturnCode_t Service_Participant::shutdown()
 
   if (shut_down_) {
     return DDS::RETCODE_ALREADY_DELETED;
-  }
-
-  if (monitor_factory_) {
-    monitor_factory_->deinitialize();
-    monitor_factory_ = 0;
   }
 
   {
@@ -289,7 +291,7 @@ DDS::ReturnCode_t Service_Participant::shutdown()
       domainRepoMap_.clear();
 
       {
-        ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, network_config_monitor_lock_,
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, ncm_guard, network_config_monitor_lock_,
           DDS::RETCODE_OUT_OF_RESOURCES);
         if (network_config_monitor_) {
           network_config_monitor_->close();
@@ -304,7 +306,7 @@ DDS::ReturnCode_t Service_Participant::shutdown()
 
       discoveryMap_.clear();
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
       transient_data_cache_.reset();
       persistent_data_cache_.reset();
 #endif
@@ -312,7 +314,7 @@ DDS::ReturnCode_t Service_Participant::shutdown()
       discovery_types_.clear();
     }
     TransportRegistry::close();
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     OpenDDS::Security::SecurityRegistry::close();
 #endif
   } catch (const CORBA::Exception& ex) {
@@ -351,7 +353,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
       // The exceptions are -ORBLogFile and -ORBVerboseLogging, which
       // are processed by the service participant. This allows log control
       // even if an ORB is not being used.
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
       ORB_argv_.add(ACE_TEXT("unused_arg_0"));
 #endif
       /* NOTE ABOUT ADDING NEW OPTIONS HERE ==================================
@@ -376,12 +378,12 @@ Service_Participant::get_domain_participant_factory(int &argc,
         } else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-ORB")) < 0) {
           shifter.ignore_arg();
         } else {
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
           ORB_argv_.add(shifter.get_current());
 #endif
           shifter.consume_arg();
           if (shifter.is_parameter_next()) {
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
             ORB_argv_.add(shifter.get_current(), true /*quote_arg*/);
 #endif
             shifter.consume_arg();
@@ -389,69 +391,11 @@ Service_Participant::get_domain_participant_factory(int &argc,
         }
       }
 
+      parse_env();
+
       if (parse_args(argc, argv) != 0) {
         return DDS::DomainParticipantFactory::_nil();
       }
-
-      String config_fname = config_store_->get(OPENDDS_COMMON_DCPS_CONFIG_FILE,
-                                               OPENDDS_COMMON_DCPS_CONFIG_FILE_default);
-      const String default_configuration_file = config_store_->get(OPENDDS_DEFAULT_CONFIGURATION_FILE,
-                                                                   OPENDDS_DEFAULT_CONFIGURATION_FILE_default);
-
-      if (config_fname.empty() && !default_configuration_file.empty()) {
-        config_fname = default_configuration_file;
-      }
-
-      if (config_fname.empty()) {
-        if (log_level >= LogLevel::Info) {
-          ACE_DEBUG((LM_INFO,
-                     "(%P|%t) INFO: Service_Participant::get_domain_participant_factory: "
-                     "no configuration file specified.\n"));
-        }
-
-      } else {
-        // Convenient way to run tests in a different place from ini files.
-        const char* const config_dir = ACE_OS::getenv("OPENDDS_CONFIG_DIR");
-        if (config_dir && config_dir[0]) {
-          String new_path = config_dir;
-          new_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-          new_path += config_fname;
-          config_fname = new_path;
-        }
-
-        // Load configuration only if the configuration file exists.
-        FILE* const in = ACE_OS::fopen(config_fname.c_str(), ACE_TEXT("r"));
-        if (!in) {
-          if (log_level >= LogLevel::Error) {
-            ACE_ERROR((LM_ERROR,
-                       "(%P|%t) ERROR: Service_Participant::get_domain_participant_factory: "
-                       "could not find config file \"%s\": %p\n",
-                       config_fname.c_str(), ACE_TEXT("fopen")));
-          }
-          return DDS::DomainParticipantFactory::_nil();
-
-        } else {
-          ACE_OS::fclose(in);
-
-          if (log_level >= LogLevel::Info) {
-            ACE_DEBUG((LM_INFO,
-                       "(%P|%t) INFO: Service_Participant::get_domain_participant_factory: "
-                       "Going to load configuration from <%s>\n",
-                       config_fname.c_str()));
-          }
-
-          if (this->load_configuration(config_fname) != 0) {
-            if (log_level >= LogLevel::Error) {
-              ACE_ERROR((LM_ERROR,
-                         "(%P|%t) ERROR: Service_Participant::get_domain_participant_factory: "
-                         "load_configuration() failed.\n"));
-            }
-            return DDS::DomainParticipantFactory::_nil();
-          }
-        }
-      }
-
-      config_reader_listener_->on_data_available(config_reader_);
 
 #if OPENDDS_POOL_ALLOCATOR
       // For non-FACE tests, configure pool
@@ -490,41 +434,9 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       dp_factory_servant_ = make_rch<DomainParticipantFactoryImpl>();
 
-      reactor_task_.open_reactor_task(0,
-                                      &thread_status_manager_,
-                                      "Service_Participant");
+      reactor_task_.open_reactor_task(&thread_status_manager_, "Service_Participant");
 
       job_queue_ = make_rch<JobQueue>(reactor_task_.get_reactor());
-
-      const bool monitor_enabled = config_store_->get_boolean(OPENDDS_COMMON_DCPS_MONITOR,
-                                                              OPENDDS_COMMON_DCPS_MONITOR_default);
-
-      if (monitor_enabled) {
-#if !defined(ACE_AS_STATIC_LIBS)
-        ACE_TString directive = ACE_TEXT("dynamic OpenDDS_Monitor Service_Object * OpenDDS_monitor:_make_MonitorFactoryImpl()");
-        ACE_Service_Config::process_directive(directive.c_str());
-#endif
-        this->monitor_factory_ =
-          ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor");
-
-        if (this->monitor_factory_ == 0) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("ERROR: Service_Participant::get_domain_participant_factory, ")
-                     ACE_TEXT("Unable to enable monitor factory.\n")));
-        }
-      }
-
-      if (this->monitor_factory_ == 0) {
-        // Use the stubbed factory
-        MonitorFactory::service_initialize();
-        this->monitor_factory_ =
-          ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor_Default");
-      }
-      if (monitor_enabled) {
-        this->monitor_factory_->initialize();
-      }
-
-      this->monitor_.reset(this->monitor_factory_->create_sp_monitor(this));
     }
 
 #if defined OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
@@ -532,7 +444,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
       ACE_DEBUG((LM_DEBUG,
                  "(%P|%t) Service_Participant::get_domain_participant_factory: Creating LinuxNetworkConfigMonitor\n"));
     }
-    network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_.interceptor());
+    network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(rchandle_from(&reactor_task_));
 #elif defined(OPENDDS_NETWORK_CONFIG_MODIFIER)
     if (DCPS_debug_level >= 1) {
       ACE_DEBUG((LM_DEBUG,
@@ -579,8 +491,62 @@ Service_Participant::get_domain_participant_factory(int &argc,
   return DDS::DomainParticipantFactory::_duplicate(dp_factory_servant_.in());
 }
 
+
+
+void Service_Participant::parse_env()
+{
+#if defined (ACE_WIN32)
+  LPTCH env_strings = GetEnvironmentStrings();
+
+  // If the returned pointer is NULL, exit.
+  if (!env_strings) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Service_Participant::parse_env: Could not get environment strings\n"));
+    }
+    return;
+  }
+
+  LPTSTR env_string = (LPTSTR) env_strings;
+
+  while (*env_string) {
+    parse_env(ACE_TEXT_ALWAYS_CHAR(env_string));
+    env_string += lstrlen(env_string) + 1;
+  }
+  FreeEnvironmentStrings(env_strings);
+
+#else
+
+  for (char** e = environ; *e; ++e) {
+    parse_env(*e);
+  }
+
+#endif
+}
+
+void Service_Participant::parse_env(const String& p)
+{
+  // Only parse environment variables starting with OPENDDS_.
+  if (p.substr(0, 8) == "OPENDDS_") {
+    // Extract everything after OPENDDS_.
+    const String q = p.substr(8);
+    // q should have the form key=value
+    String::size_type pos = q.find('=');
+    if (pos != String::npos) {
+      // Split into key and value.
+      const String key = q.substr(0, pos);
+      const String value = q.substr(pos + 1);
+      config_store_->set(key.c_str(), value);
+      config_reader_listener_->on_data_available(config_reader_);
+    }
+  }
+}
+
 int Service_Participant::parse_args(int& argc, ACE_TCHAR* argv[])
 {
+  int retval = 0;
+  bool config_file_loaded = false;
+
   // Process logging options first, so they are in effect if we need to log
   // while processing other options.
   ACE_Arg_Shifter log_arg_shifter(argc, argv);
@@ -588,12 +554,17 @@ int Service_Participant::parse_args(int& argc, ACE_TCHAR* argv[])
     const ACE_TCHAR* currentArg = 0;
 
     if ((currentArg = log_arg_shifter.get_the_parameter(ACE_TEXT("-ORBLogFile"))) != 0) {
-      config_store_->set_string(OPENDDS_COMMON_ORB_LOG_FILE, ACE_TEXT_ALWAYS_CHAR(currentArg));
+      config_store_->set_string(COMMON_ORB_LOG_FILE, ACE_TEXT_ALWAYS_CHAR(currentArg));
       config_reader_listener_->on_data_available(config_reader_);
       log_arg_shifter.consume_arg();
 
     } else if ((currentArg = log_arg_shifter.get_the_parameter(ACE_TEXT("-ORBVerboseLogging"))) != 0) {
-      config_store_->set_string(OPENDDS_COMMON_ORB_VERBOSE_LOGGING, ACE_TEXT_ALWAYS_CHAR(currentArg));
+      config_store_->set_string(COMMON_ORB_VERBOSE_LOGGING, ACE_TEXT_ALWAYS_CHAR(currentArg));
+      config_reader_listener_->on_data_available(config_reader_);
+      log_arg_shifter.consume_arg();
+
+    } else if ((currentArg = log_arg_shifter.get_the_parameter(ACE_TEXT("-DCPSSingleConfigFile"))) != 0) {
+      config_store_->set_string("CommonDCPSSingleConfigFile", ACE_TEXT_ALWAYS_CHAR(currentArg));
       config_reader_listener_->on_data_available(config_reader_);
       log_arg_shifter.consume_arg();
 
@@ -602,34 +573,97 @@ int Service_Participant::parse_args(int& argc, ACE_TCHAR* argv[])
     }
   }
 
+  // Change the default to false in OpenDDS 4.
+  const bool single_config_file = config_store_->get_boolean("CommonDCPSSingleConfigFile", true);
+  String single_config_file_name;
+
   ACE_Arg_Shifter arg_shifter(argc, argv);
   while (arg_shifter.is_anything_left()) {
 
     const String current = ACE_TEXT_ALWAYS_CHAR(arg_shifter.get_current());
-    if (toupper(current.substr(0, 5)) == "-DCPS" || toupper(current.substr(0, 11)) == "-FEDERATION") {
+    if (current == "-DCPSConfigFile") {
       arg_shifter.consume_arg();
       if (!arg_shifter.is_anything_left()) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: Service_Participant::parse_args: %C requires a parameter\n",
+                     current.c_str()));
+        }
+        retval = -1;
         break;
       }
-      const String key = "OPENDDS_COMMON" + current;
+      if (arg_shifter.is_parameter_next()) {
+        const String filename = ACE_TEXT_ALWAYS_CHAR(arg_shifter.get_current());
+        config_store_->set("CommonDCPSConfigFile", filename);
+        config_reader_listener_->on_data_available(config_reader_);
+        arg_shifter.consume_arg();
+
+        if (single_config_file) {
+          single_config_file_name = filename;
+        } else {
+          if (process_config_file(filename, true)) {
+            config_file_loaded = true;
+          } else {
+            retval = -1;
+          }
+        }
+      } else {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: Service_Participant::parse_args: %C requires a parameter\n",
+                     current.c_str()));
+        }
+        retval = -1;
+        arg_shifter.ignore_arg();
+      }
+    } else if (toupper(current.substr(0, 5)) == "-DCPS" || toupper(current.substr(0, 11)) == "-FEDERATION") {
+      arg_shifter.consume_arg();
+      if (!arg_shifter.is_anything_left()) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: Service_Participant::parse_args: %C requires a parameter\n",
+                     current.c_str()));
+        }
+        retval = -1;
+        break;
+      }
+      const String key = "COMMON" + current;
       if (arg_shifter.is_parameter_next()) {
         config_store_->set_string(key.c_str(), ACE_TEXT_ALWAYS_CHAR(arg_shifter.get_current()));
         config_reader_listener_->on_data_available(config_reader_);
         arg_shifter.consume_arg();
       } else {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: Service_Participant::parse_args: %C requires a parameter\n",
+                     current.c_str()));
+        }
+        retval = -1;
         arg_shifter.ignore_arg();
       }
     } else if (current.substr(0, 8) == "-OpenDDS") {
       arg_shifter.consume_arg();
       if (!arg_shifter.is_anything_left()) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: Service_Participant::parse_args: %C requires a parameter\n",
+                     current.c_str()));
+        }
+        retval = -1;
         break;
       }
-      const String key = "OPENDDS_" + current.substr(8);
+      const String key = current.substr(8);
       if (arg_shifter.is_parameter_next()) {
         config_store_->set_string(key.c_str(), ACE_TEXT_ALWAYS_CHAR(arg_shifter.get_current()));
         config_reader_listener_->on_data_available(config_reader_);
         arg_shifter.consume_arg();
       } else {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: Service_Participant::parse_args: %C requires a parameter\n",
+                     current.c_str()));
+        }
+        retval = -1;
         arg_shifter.ignore_arg();
       }
     } else {
@@ -637,8 +671,195 @@ int Service_Participant::parse_args(int& argc, ACE_TCHAR* argv[])
     }
   }
 
+  if (single_config_file && !single_config_file_name.empty()) {
+    if (process_config_file(single_config_file_name, false)) {
+      config_file_loaded = true;
+    } else {
+      retval = -1;
+    }
+  }
+
+  if (!config_file_loaded) {
+    const String default_configuration_file = config_store_->get(DEFAULT_CONFIGURATION_FILE,
+                                                                 DEFAULT_CONFIGURATION_FILE_default);
+    if (!default_configuration_file.empty()) {
+      if (!process_config_file(default_configuration_file, !single_config_file)) {
+        retval = -1;
+      }
+    }
+  }
+
+  // Register static discovery.
+  add_discovery(static_rchandle_cast<Discovery>(StaticDiscovery::instance()));
+
+  // load any discovery configuration templates before rtps discovery
+  // this will populate the domain_range_templates_
+  int status = load_domain_ranges();
+
+  if (status != 0) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Service_Participant::parse_args: "
+                 "load_domain_ranges() returned %d\n",
+                 status));
+    }
+    return -1;
+  }
+
+
+  // Domain config is loaded after Discovery (see below). Since the domain
+  // could be a domain_range that specifies the DiscoveryTemplate, check
+  // for config templates before loading any config information.
+
+  status = this->load_discovery_configuration(RTPS_DISCOVERY_TYPE, false);
+
+  if (status != 0) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Service_Participant::parse_args: "
+                 "load_discovery_configuration() returned %d\n",
+                 status));
+    }
+    return -1;
+  }
+
+  status = this->load_discovery_configuration(REPO_DISCOVERY_TYPE, false);
+
+  if (status != 0) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Service_Participant::parse_args: "
+                 "load_discovery_configuration() returned %d\n",
+                 status));
+    }
+    return -1;
+  }
+
+  status = TransportRegistry::instance()->load_transport_configuration();
+
+  if (status != 0) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Service_Participant::parse_args: "
+                 "load_transport_configuration () returned %d\n",
+                 status));
+    }
+    return -1;
+  }
+
+  const String global_transport_config = config_store_->get(COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG,
+                                                            COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG_default);
+  if (!global_transport_config.empty()) {
+    TransportConfig_rch config = TransportRegistry::instance()->get_config(global_transport_config);
+    if (config) {
+      TransportRegistry::instance()->global_config(config);
+    } else {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) ERROR: Service_Participant::parse_args: "
+                   "Unable to locate specified global transport config: %C\n",
+                   global_transport_config.c_str()));
+      }
+      return -1;
+    }
+  }
+
+  // Needs to be loaded after the [rtps_discovery/*] and [repository/*]
+  // sections to allow error reporting on bad discovery config names.
+  // Also loaded after the transport configuration so that
+  // DefaultTransportConfig within [domain/*] can use TransportConfig objects.
+  status = load_domain_configuration();
+
+  if (status != 0) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Service_Participant::parse_args: "
+                 "load_domain_configuration () returned %d\n",
+                 status));
+    }
+    return -1;
+  }
+
+  // Needs to be loaded after transport configs and instances and domains.
+  try {
+    status = StaticDiscovery::instance()->load_configuration();
+
+    if (status != 0) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) ERROR: Service_Participant::parse_args: "
+                   "load_discovery_configuration() returned %d\n",
+                   status));
+      }
+      return -1;
+    }
+  } catch (const CORBA::BAD_PARAM& ex) {
+    ex._tao_print_exception("Exception caught in Service_Participant::parse_args: "
+      "trying to load_discovery_configuration()");
+    return -1;
+  }
+
   // Indicates successful parsing of the command line
-  return 0;
+  return retval;
+}
+
+bool
+Service_Participant::process_config_file(const String& config_name,
+                                         bool allow_overwrite)
+{
+  if (config_name.empty()) {
+    if (log_level >= LogLevel::Error) {
+      ACE_DEBUG((LM_INFO,
+                 "(%P|%t) ERROR: Service_Participant::process_config_file: "
+                 "configuration file name is empty.\n"));
+    }
+    return false;
+  }
+
+  String config_fname = config_name;
+
+  // Convenient way to run tests in a different place from ini files.
+  const char* const config_dir = ACE_OS::getenv("OPENDDS_CONFIG_DIR");
+  if (config_dir && config_dir[0]) {
+    String new_path = config_dir;
+    new_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+    new_path += config_fname;
+    config_fname = new_path;
+  }
+
+  // Load configuration only if the configuration file exists.
+  FILE* const in = ACE_OS::fopen(config_fname.c_str(), ACE_TEXT("r"));
+  if (!in) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Service_Participant::process_config_file: "
+                 "could not find config file \"%C\": %p\n",
+                 config_fname.c_str(), ACE_TEXT("fopen")));
+    }
+    return false;
+  }
+
+  ACE_OS::fclose(in);
+
+  if (log_level >= LogLevel::Info) {
+    ACE_DEBUG((LM_INFO,
+               "(%P|%t) INFO: Service_Participant::process_config_file: "
+               "Going to load configuration from \"%C\"\n",
+               config_fname.c_str()));
+  }
+
+  if (load_configuration(config_fname, allow_overwrite) != 0) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Service_Participant::process_config_file: "
+                 "load_configuration() failed.\n"));
+    }
+    return false;
+  }
+
+  config_reader_listener_->on_data_available(config_reader_);
+
+  return true;
 }
 
 void
@@ -712,11 +933,11 @@ Service_Participant::initializeScheduling()
   //
   // Establish the scheduler if specified.
   //
-  const String scheduler_str = config_store_->get(OPENDDS_COMMON_SCHEDULER,
-                                                 OPENDDS_COMMON_SCHEDULER_default);
+  const String scheduler_str = config_store_->get(COMMON_SCHEDULER,
+                                                  COMMON_SCHEDULER_default);
 
-  suseconds_t usec = config_store_->get_int32(OPENDDS_COMMON_SCHEDULER_SLICE,
-                                             OPENDDS_COMMON_SCHEDULER_SLICE_default);
+  suseconds_t usec = config_store_->get_int32(COMMON_SCHEDULER_SLICE,
+                                              COMMON_SCHEDULER_SLICE_default);
   if (usec < 0) {
     usec = 0;
   }
@@ -820,8 +1041,8 @@ Service_Participant::set_repo_ior(const char* ior,
   }
 
   // Create the repository.
-  config_store_->set((String("OPENDDS_REPOSITORY_") + key).c_str(), String("@") + key);
-  const String k = String("OPENDDS_REPOSITORY_") + key + "_RepositoryIor";
+  config_store_->set((String("REPOSITORY_") + key).c_str(), String("@") + key);
+  const String k = String("REPOSITORY_") + key + "_RepositoryIor";
   if (overwrite) {
     config_store_->set(k.c_str(), ior);
   }
@@ -833,15 +1054,14 @@ Service_Participant::set_repo_ior(const char* ior,
                key.c_str(), ior));
   }
 
-  const OPENDDS_STRING repo_type = ACE_TEXT_ALWAYS_CHAR(REPO_SECTION_NAME);
-  if (!discovery_types_.count(repo_type)) {
+  if (!discovery_types_.count(REPO_DISCOVERY_TYPE)) {
     // Re-use a transport registry function to attempt a dynamic load of the
     // library that implements the 'repo_type' (InfoRepoDiscovery)
-    TheTransportRegistry->load_transport_lib(repo_type);
+    TheTransportRegistry->load_transport_lib(REPO_DISCOVERY_TYPE);
   }
 
-  if (discovery_types_.count(repo_type)) {
-    discovery_types_[repo_type]->discovery_config();
+  if (discovery_types_.count(REPO_DISCOVERY_TYPE)) {
+    discovery_types_[REPO_DISCOVERY_TYPE]->discovery_config();
     this->remap_domains(key, key, attach_participant);
     return true;
   }
@@ -856,7 +1076,7 @@ Service_Participant::set_repo_ior(const char* ior,
 bool
 Service_Participant::use_bidir_giop() const
 {
-  return config_store_->get_boolean(OPENDDS_COMMON_DCPS_BIDIR_GIOP, OPENDDS_COMMON_DCPS_BIDIR_GIOP_default);
+  return config_store_->get_boolean(COMMON_DCPS_BIDIR_GIOP, COMMON_DCPS_BIDIR_GIOP_default);
 }
 
 void
@@ -1035,7 +1255,7 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
       }
 
       // Wait to traverse the list and try again.
-      ACE_OS::sleep(backoff);
+      ACE_OS::sleep(static_cast<unsigned int>(backoff));
 
       // Exponentially backoff delay.
       backoff *= this->federation_backoff_multiplier();
@@ -1090,13 +1310,13 @@ Service_Participant::set_default_discovery(const Discovery::RepoKey& key)
     ACE_GUARD(ACE_Thread_Mutex, guard, cached_config_mutex_);
     default_discovery_ = key;
   }
-  config_store_->set_string(OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY, key.c_str());
+  config_store_->set_string(COMMON_DCPS_DEFAULT_DISCOVERY, key.c_str());
 }
 
 Discovery::RepoKey
 Service_Participant::get_default_discovery()
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, cached_config_mutex_, OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY_default);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, cached_config_mutex_, COMMON_DCPS_DEFAULT_DISCOVERY_default);
   return default_discovery_;
 }
 
@@ -1109,11 +1329,12 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
   Discovery::RepoKey repo = get_default_discovery();
 
   // Override with the discovery for the domain range.
-  DomainRange dr_inst("");
-  bool in_range = false;
-  if (get_domain_range_info(domain, dr_inst)) {
-    repo = dr_inst.discovery_template_name(config_store_, repo);
-    in_range = true;
+  DomainRanges::const_iterator dr_pos = domain_ranges_.begin();
+  for (DomainRanges::const_iterator limit = domain_ranges_.end(); dr_pos != limit; ++dr_pos) {
+    if (dr_pos->belongs_to_domain_range(domain)) {
+      repo = dr_pos->discovery_template(config_store_, repo);
+      break;
+    }
   }
 
   // Override with the discovery for the domain.
@@ -1125,8 +1346,8 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
   RepoKeyDiscoveryMap::const_iterator location = discoveryMap_.find(repo);
 
   if (location == discoveryMap_.end()) {
-    if (in_range) {
-      const int ret = configure_domain_range_instance(domain, repo);
+    if (dr_pos != domain_ranges_.end()) {
+      const int ret = configure_domain_range_instance(dr_pos, domain, repo);
 
       // return the newly configured domain and return it
       if (!ret) {
@@ -1169,12 +1390,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
 
     } else if (repo == Discovery::DEFAULT_RTPS) {
 
-      ACE_Configuration_Heap cf;
-      cf.open();
-      ACE_Configuration_Section_Key k;
-      cf.open_section(cf.root_section(), RTPS_SECTION_NAME, true /*create*/, k);
-
-      int status = load_discovery_configuration(cf, RTPS_SECTION_NAME);
+      int status = load_discovery_configuration(RTPS_DISCOVERY_TYPE, true);
 
       if (status != 0) {
         ACE_ERROR((LM_ERROR,
@@ -1237,52 +1453,52 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
 void
 Service_Participant::federation_recovery_duration(int duration)
 {
-  config_store_->set_int32(OPENDDS_COMMON_FEDERATION_RECOVERY_DURATION, duration);
+  config_store_->set_int32(COMMON_FEDERATION_RECOVERY_DURATION, duration);
 }
 
 int
 Service_Participant::federation_recovery_duration() const
 {
-  return config_store_->get_int32(OPENDDS_COMMON_FEDERATION_RECOVERY_DURATION,
-                                 OPENDDS_COMMON_FEDERATION_RECOVERY_DURATION_default);
+  return config_store_->get_int32(COMMON_FEDERATION_RECOVERY_DURATION,
+                                  COMMON_FEDERATION_RECOVERY_DURATION_default);
 }
 
 void
 Service_Participant::federation_initial_backoff_seconds(int value)
 {
-  config_store_->set_int32(OPENDDS_COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS, value);
+  config_store_->set_int32(COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS, value);
 }
 
 int
 Service_Participant::federation_initial_backoff_seconds() const
 {
-  return config_store_->get_int32(OPENDDS_COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS,
-                                 OPENDDS_COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS_default);
+  return config_store_->get_int32(COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS,
+                                  COMMON_FEDERATION_INITIAL_BACKOFF_SECONDS_default);
 }
 
 void
 Service_Participant::federation_backoff_multiplier(int value)
 {
-  config_store_->set_int32(OPENDDS_COMMON_FEDERATION_BACKOFF_MULTIPLIER, value);
+  config_store_->set_int32(COMMON_FEDERATION_BACKOFF_MULTIPLIER, value);
 }
 
 int
 Service_Participant::federation_backoff_multiplier() const
 {
-  return config_store_->get_int32(OPENDDS_COMMON_FEDERATION_BACKOFF_MULTIPLIER,
-                                 OPENDDS_COMMON_FEDERATION_BACKOFF_MULTIPLIER_default);
+  return config_store_->get_int32(COMMON_FEDERATION_BACKOFF_MULTIPLIER,
+                                  COMMON_FEDERATION_BACKOFF_MULTIPLIER_default);
 }
 
 void
 Service_Participant::federation_liveliness(int value)
 {
-  config_store_->set_int32(OPENDDS_COMMON_FEDERATION_LIVELINESS_DURATION, value);
+  config_store_->set_int32(COMMON_FEDERATION_LIVELINESS_DURATION, value);
 }
 
 int
 Service_Participant::federation_liveliness() const
 {
-  return config_store_->get_int32(OPENDDS_COMMON_FEDERATION_LIVELINESS_DURATION, OPENDDS_COMMON_FEDERATION_LIVELINESS_DURATION_default);
+  return config_store_->get_int32(COMMON_FEDERATION_LIVELINESS_DURATION, COMMON_FEDERATION_LIVELINESS_DURATION_default);
 }
 
 void
@@ -1290,25 +1506,25 @@ Service_Participant::scheduler(long value)
 {
   // Using a switch results in a compilation error since THR_SCHED_DEFAULT could be THR_SCHED_RR or THR_SCHED_FIFO.
   if (value == THR_SCHED_DEFAULT) {
-    config_store_->set(OPENDDS_COMMON_SCHEDULER, "SCHED_OTHER");
+    config_store_->set(COMMON_SCHEDULER, "SCHED_OTHER");
   } else if (value == THR_SCHED_RR) {
-    config_store_->set(OPENDDS_COMMON_SCHEDULER, "SCHED_RR");
+    config_store_->set(COMMON_SCHEDULER, "SCHED_RR");
   } else if (value == THR_SCHED_FIFO) {
-    config_store_->set(OPENDDS_COMMON_SCHEDULER, "SCHED_FIFO");
+    config_store_->set(COMMON_SCHEDULER, "SCHED_FIFO");
   } else {
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING,
                  "(%P|%t) WARNING: Service_Participant::scheduler: cannot translate scheduler value %d\n",
                  value));
     }
-    config_store_->set(OPENDDS_COMMON_SCHEDULER, "");
+    config_store_->set(COMMON_SCHEDULER, "");
   }
 }
 
 long
 Service_Participant::scheduler() const
 {
-  const String str = config_store_->get(OPENDDS_COMMON_SCHEDULER, "");
+  const String str = config_store_->get(COMMON_SCHEDULER, "");
   if (str == "SCHED_RR") {
     return THR_SCHED_RR;
   } else if (str == "SCHED_FIFO") {
@@ -1323,20 +1539,20 @@ Service_Participant::scheduler() const
 void
 Service_Participant::publisher_content_filter(bool flag)
 {
-  config_store_->set_boolean(OPENDDS_COMMON_DCPS_PUBLISHER_CONTENT_FILTER, flag);
+  config_store_->set_boolean(COMMON_DCPS_PUBLISHER_CONTENT_FILTER, flag);
 }
 
 bool
 Service_Participant::publisher_content_filter() const
 {
-  return config_store_->get_boolean(OPENDDS_COMMON_DCPS_PUBLISHER_CONTENT_FILTER,
-                                   OPENDDS_COMMON_DCPS_PUBLISHER_CONTENT_FILTER_default);
+  return config_store_->get_boolean(COMMON_DCPS_PUBLISHER_CONTENT_FILTER,
+                                    COMMON_DCPS_PUBLISHER_CONTENT_FILTER_default);
 }
 
 TimeDuration
 Service_Participant::pending_timeout() const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, cached_config_mutex_, OPENDDS_COMMON_DCPS_PENDING_TIMEOUT_default);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, cached_config_mutex_, COMMON_DCPS_PENDING_TIMEOUT_default);
   return pending_timeout_;
 }
 
@@ -1346,7 +1562,7 @@ void Service_Participant::pending_timeout(const TimeDuration& value)
     ACE_GUARD(ACE_Thread_Mutex, guard, cached_config_mutex_);
     pending_timeout_ = value;
   }
-  config_store_->set(OPENDDS_COMMON_DCPS_PENDING_TIMEOUT, value, ConfigStoreImpl::Format_IntegerSeconds);
+  config_store_->set(COMMON_DCPS_PENDING_TIMEOUT, value, ConfigStoreImpl::Format_IntegerSeconds);
 }
 
 MonotonicTimePoint
@@ -1361,66 +1577,66 @@ Service_Participant::new_pending_timeout_deadline() const
 OPENDDS_STRING
 Service_Participant::bit_transport_ip() const
 {
-  return config_store_->get(OPENDDS_COMMON_DCPS_BIT_TRANSPORT_IP_ADDRESS,
-                           OPENDDS_COMMON_DCPS_BIT_TRANSPORT_IP_ADDRESS_default);
+  return config_store_->get(COMMON_DCPS_BIT_TRANSPORT_IP_ADDRESS,
+                            COMMON_DCPS_BIT_TRANSPORT_IP_ADDRESS_default);
 }
 
 int
 Service_Participant::bit_transport_port() const
 {
-  return config_store_->get_int32(OPENDDS_COMMON_DCPS_BIT_TRANSPORT_PORT,
-                                 OPENDDS_COMMON_DCPS_BIT_TRANSPORT_PORT_default);
+  return config_store_->get_int32(COMMON_DCPS_BIT_TRANSPORT_PORT,
+                                  COMMON_DCPS_BIT_TRANSPORT_PORT_default);
 }
 
 void
 Service_Participant::bit_transport_port(int port)
 {
-  config_store_->set_int32(OPENDDS_COMMON_DCPS_BIT_TRANSPORT_PORT, port);
+  config_store_->set_int32(COMMON_DCPS_BIT_TRANSPORT_PORT, port);
 }
 
 int
 Service_Participant::bit_lookup_duration_msec() const
 {
-  return config_store_->get_int32(OPENDDS_COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC, OPENDDS_COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC_default);
+  return config_store_->get_int32(COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC, COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC_default);
 }
 
 void
 Service_Participant::bit_lookup_duration_msec(int msec)
 {
-  config_store_->set_int32(OPENDDS_COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC, msec);
+  config_store_->set_int32(COMMON_DCPS_BIT_LOOKUP_DURATION_MSEC, msec);
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 bool
 Service_Participant::get_security() const
 {
-  return config_store_->get_boolean(OPENDDS_COMMON_DCPS_SECURITY, OPENDDS_COMMON_DCPS_SECURITY_default);
+  return config_store_->get_boolean(COMMON_DCPS_SECURITY, COMMON_DCPS_SECURITY_default);
 }
 
 void
 Service_Participant::set_security(bool b)
 {
-  config_store_->set_boolean(OPENDDS_COMMON_DCPS_SECURITY, b);
+  config_store_->set_boolean(COMMON_DCPS_SECURITY, b);
 }
 #endif
 
 bool
 Service_Participant::get_BIT() const
 {
-  return config_store_->get_boolean(OPENDDS_COMMON_DCPS_BIT, OPENDDS_COMMON_DCPS_BIT_default);
+  return config_store_->get_boolean(COMMON_DCPS_BIT, OPENDDS_CONFIG_BUILT_IN_TOPICS);
 }
 
 void
 Service_Participant::set_BIT(bool b)
 {
-  config_store_->set_boolean(OPENDDS_COMMON_DCPS_BIT, b);
+  config_store_->set_boolean(COMMON_DCPS_BIT, b);
 }
 
 NetworkAddress
 Service_Participant::default_address() const
 {
-  return config_store_->get(OPENDDS_COMMON_DCPS_DEFAULT_ADDRESS,
-                            OPENDDS_COMMON_DCPS_DEFAULT_ADDRESS_default,
+  return config_store_->get(COMMON_DCPS_DEFAULT_ADDRESS,
+                            COMMON_DCPS_DEFAULT_ADDRESS_default,
                             ConfigStoreImpl::Format_No_Port,
                             ConfigStoreImpl::Kind_IPV4);
 }
@@ -1428,40 +1644,40 @@ Service_Participant::default_address() const
 size_t
 Service_Participant::n_chunks() const
 {
-  return config_store_->get_uint32(OPENDDS_COMMON_DCPS_CHUNKS, OPENDDS_COMMON_DCPS_CHUNKS_default);
+  return config_store_->get_uint32(COMMON_DCPS_CHUNKS, COMMON_DCPS_CHUNKS_default);
 }
 
 void
 Service_Participant::n_chunks(size_t chunks)
 {
-  config_store_->set_uint32(OPENDDS_COMMON_DCPS_CHUNKS, static_cast<DDS::UInt32>(chunks));
+  config_store_->set_uint32(COMMON_DCPS_CHUNKS, static_cast<DDS::UInt32>(chunks));
 }
 
 size_t
 Service_Participant::association_chunk_multiplier() const
 {
-  return config_store_->get_uint32(OPENDDS_COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER,
-                                  config_store_->get_uint32(OPENDDS_COMMON_DCPS_CHUNK_ASSOCIATION_MUTLTIPLIER,
-                                                           OPENDDS_COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER_default));
+  return config_store_->get_uint32(COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER,
+                                  config_store_->get_uint32(COMMON_DCPS_CHUNK_ASSOCIATION_MUTLTIPLIER,
+                                                            COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER_default));
 }
 
 void
 Service_Participant::association_chunk_multiplier(size_t multiplier)
 {
-  config_store_->set_uint32(OPENDDS_COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER, static_cast<DDS::UInt32>(multiplier));
+  config_store_->set_uint32(COMMON_DCPS_CHUNK_ASSOCIATION_MULTIPLIER, static_cast<DDS::UInt32>(multiplier));
 }
 
 void
 Service_Participant::liveliness_factor(int factor)
 {
-  config_store_->set_int32(OPENDDS_COMMON_DCPS_LIVELINESS_FACTOR, factor);
+  config_store_->set_int32(COMMON_DCPS_LIVELINESS_FACTOR, factor);
 }
 
 int
 Service_Participant::liveliness_factor() const
 {
-  return config_store_->get_int32(OPENDDS_COMMON_DCPS_LIVELINESS_FACTOR,
-                                 OPENDDS_COMMON_DCPS_LIVELINESS_FACTOR_default);
+  return config_store_->get_int32(COMMON_DCPS_LIVELINESS_FACTOR,
+                                  COMMON_DCPS_LIVELINESS_FACTOR_default);
 }
 
 void
@@ -1472,7 +1688,8 @@ Service_Participant::register_discovery_type(const char* section_name,
 }
 
 int
-Service_Participant::load_configuration(const String& config_fname)
+Service_Participant::load_configuration(const String& config_fname,
+                                        bool allow_overwrite)
 {
   ACE_Configuration_Heap cf;
   int status = 0;
@@ -1494,282 +1711,130 @@ Service_Participant::load_configuration(const String& config_fname)
                       status),
                      -1);
   } else {
-    status = this->load_configuration(cf, ACE_TEXT_CHAR_TO_TCHAR(config_fname.c_str()));
+    status = this->load_configuration(cf, ACE_TEXT_CHAR_TO_TCHAR(config_fname.c_str()), allow_overwrite);
   }
 
   return status;
 }
 
 int
-Service_Participant::load_configuration(
-  ACE_Configuration_Heap& config,
-  const ACE_TCHAR* filename)
+Service_Participant::load_configuration(ACE_Configuration_Heap& config,
+                                        const ACE_TCHAR* filename,
+                                        bool allow_overwrite)
 {
-  process_section(*config_store_, config_reader_, config_reader_listener_, "OPENDDS", config, config.root_section(), ACE_TEXT_ALWAYS_CHAR(filename), false);
-
-  // Register static discovery.
-  add_discovery(static_rchandle_cast<Discovery>(StaticDiscovery::instance()));
-
-  // load any discovery configuration templates before rtps discovery
-  // this will populate the domain_range_templates_
-  int status = load_domain_ranges();
-
-  if (status != 0) {
-    if (log_level >= LogLevel::Error) {
-      ACE_ERROR((LM_ERROR,
-                 "(%P|%t) ERROR: Service_Participant::load_configuration: "
-                 "load_domain_ranges() returned %d\n",
-                 status));
-    }
-    return -1;
-  }
-
-  // Domain config is loaded after Discovery (see below). Since the domain
-  // could be a domain_range that specifies the DiscoveryTemplate, check
-  // for config templates before loading any config information.
-
-  status = this->load_discovery_configuration(config, RTPS_SECTION_NAME);
-
-  if (status != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                      ACE_TEXT("load_discovery_configuration() returned %d\n"),
-                      status),
-                     -1);
-  }
-
-  status = this->load_discovery_configuration(config, REPO_SECTION_NAME);
-
-  if (status != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                      ACE_TEXT("load_discovery_configuration() returned %d\n"),
-                      status),
-                     -1);
-  }
-
-  // load any transport configuration templates before the transport config
-  status = TransportRegistry::instance()->load_transport_templates();
-
-  if (status != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                      ACE_TEXT("load_transport_templates() returned %d\n"),
-                      status),
-                     -1);
-  }
-
-  status = TransportRegistry::instance()->load_transport_configuration(
-             ACE_TEXT_ALWAYS_CHAR(filename), config);
-  const String global_transport_config = config_store_->get(OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG,
-                                                           OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG_default);
-  if (!global_transport_config.empty()) {
-    TransportConfig_rch config = TransportRegistry::instance()->get_config(global_transport_config);
-    if (config) {
-      TransportRegistry::instance()->global_config(config);
-    } else if (TheTransportRegistry->config_has_transport_template(global_transport_config)) {
-      if (DCPS_debug_level > 0) {
-        // This is not an error.
-        ACE_DEBUG((LM_NOTICE,
-                   ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_configuration ")
-                   ACE_TEXT("DCPSGlobalTransportConfig %C is a transport_template\n"),
-                   global_transport_config.c_str()));
-      }
-    } else {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                        ACE_TEXT("Unable to locate specified global transport config: %C\n"),
-                        global_transport_config.c_str()),
-                       -1);
-    }
-  }
-
-  if (status != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                      ACE_TEXT("load_transport_configuration () returned %d\n"),
-                      status),
-                     -1);
-  }
-
-  // Needs to be loaded after the [rtps_discovery/*] and [repository/*]
-  // sections to allow error reporting on bad discovery config names.
-  // Also loaded after the transport configuration so that
-  // DefaultTransportConfig within [domain/*] can use TransportConfig objects.
-  status = this->load_domain_configuration(config, filename);
-
-  if (status != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-                      ACE_TEXT("load_domain_configuration () returned %d\n"),
-                      status),
-                     -1);
-  }
-
-  // Needs to be loaded after transport configs and instances and domains.
-  try {
-    status = StaticDiscovery::instance()->load_configuration();
-
-    if (status != 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-        ACE_TEXT("load_discovery_configuration() returned %d\n"),
-        status),
-        -1);
-    }
-  } catch (const CORBA::BAD_PARAM& ex) {
-    ex._tao_print_exception("Exception caught in Service_Participant::load_configuration: "
-      "trying to load_discovery_configuration()");
-    return -1;
-  }
+  process_section(*config_store_, config_reader_, config_reader_listener_, "", config, config.root_section(), allow_overwrite);
+  TransportRegistry::instance()->add_config_alias(ACE_TEXT_ALWAYS_CHAR(filename), "$file");
 
   return 0;
+}
+
+DDS::DomainId_t
+Service_Participant::DomainConfig::domain_id(RcHandle<ConfigStoreImpl> config_store) const
+{
+  DDS::DomainId_t di = -1;
+
+  // Try using the domain name as an ID
+  if (!convertToInteger(name_, di)) {
+    di = -1;
+  }
+
+  return config_store->get_int32(config_key("DOMAIN_ID").c_str(), di);
+}
+
+String
+Service_Participant::DomainConfig::discovery_config(RcHandle<ConfigStoreImpl> config_store) const
+{
+  const String r = config_store->get(COMMON_DCPS_DEFAULT_DISCOVERY,
+                                     COMMON_DCPS_DEFAULT_DISCOVERY_default);
+  String s = config_store->get(config_key("DOMAIN_REPO_KEY").c_str(), r);
+  if (s == "-1") {
+    s = r;
+  }
+
+  return config_store->get(config_key("DISCOVERY_CONFIG").c_str(), s);
+}
+
+String
+Service_Participant::DomainConfig::default_transport_config(RcHandle<ConfigStoreImpl> config_store) const
+{
+  return config_store->get(config_key("DEFAULT_TRANSPORT_CONFIG").c_str(), "");
 }
 
 int
-Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf,
-                                               const ACE_TCHAR* filename)
+Service_Participant::load_domain_configuration()
 {
-  const ACE_Configuration_Section_Key& root = cf.root_section();
-  ACE_Configuration_Section_Key domain_sect;
-
-  if (cf.open_section(root, DOMAIN_SECTION_NAME, false, domain_sect) != 0) {
-    if (DCPS_debug_level > 0) {
-      // This is not an error if the configuration file does not have
-      // any domain (sub)section. The code default configuration will be used.
-      ACE_DEBUG((LM_NOTICE,
-                 ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_domain_configuration(): ")
-                 ACE_TEXT("failed to open [%s] section - using code default.\n"),
-                 DOMAIN_SECTION_NAME));
-    }
-
-    return 0;
-
-  } else {
-    // Ensure there are no properties in this section
-    ValueMap vm;
-    if (pullValues(cf, domain_sect, vm) > 0) {
-      // There are values inside [domain]
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
-                        ACE_TEXT("domain sections must have a subsection name\n")),
-                       -1);
-    }
-    // Process the subsections of this section (the individual domains)
-    KeyList keys;
-    if (processSections(cf, domain_sect, keys) != 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
-                        ACE_TEXT("too many nesting layers in the [domain] section.\n")),
-                       -1);
-    }
-
-    // Loop through the [domain/*] sections
-    for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
-      OPENDDS_STRING domain_name = it->first;
-
-      ValueMap values;
-      pullValues(cf, it->second, values);
-      DDS::DomainId_t domainId = -1;
-      Discovery::RepoKey repoKey;
-      OPENDDS_STRING perDomainDefaultTportConfig;
-      for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
-        OPENDDS_STRING name = it->first;
-        if (name == "DomainId") {
-          OPENDDS_STRING value = it->second;
-          if (!convertToInteger(value, domainId)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
-                              ACE_TEXT("Illegal integer value for DomainId (%C) in [domain/%C] section.\n"),
-                              value.c_str(), domain_name.c_str()),
-                             -1);
-          }
-          if (DCPS_debug_level > 0) {
-            ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) [domain/%C]: DomainId == %d\n"),
-                       domain_name.c_str(), domainId));
-          }
-        } else if (name == "DomainRepoKey") {
-          // We will still process this for backward compatibility, but
-          // it can now be replaced by "DiscoveryConfig=REPO:<key>"
-          repoKey = it->second;
-          if (repoKey == "-1") {
-            repoKey = Discovery::DEFAULT_REPO;
-          }
-
-          if (DCPS_debug_level > 0) {
-            ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) [domain/%C]: DomainRepoKey == %C\n"),
-                       domain_name.c_str(), repoKey.c_str()));
-          }
-        } else if (name == "DiscoveryConfig") {
-           repoKey = it->second;
-        } else if (name == "DefaultTransportConfig") {
-          if (it->second == "$file") {
-            // When the special string of "$file" is used, substitute the file name
-            perDomainDefaultTportConfig = ACE_TEXT_ALWAYS_CHAR(filename);
-
-          } else {
-            perDomainDefaultTportConfig = it->second;
-          }
-
-        } else {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
-                            ACE_TEXT("Unexpected entry (%C) in [domain/%C] section.\n"),
-                            name.c_str(), domain_name.c_str()),
-                           -1);
-        }
-      }
-
-      if (domainId == -1) {
-        // DomainId parameter is not set, try using the domain name as an ID
-        if (!convertToInteger(domain_name, domainId)) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
-                            ACE_TEXT("Missing DomainId value in [domain/%C] section.\n"),
-                            domain_name.c_str()),
-                           -1);
-        }
-      }
-
-      if (!perDomainDefaultTportConfig.empty()) {
-        TransportRegistry* const reg = TransportRegistry::instance();
-        TransportConfig_rch tc = reg->get_config(perDomainDefaultTportConfig);
-        if (tc.is_nil()) {
-          ACE_ERROR_RETURN((LM_ERROR,
-            ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
-            ACE_TEXT("Unknown transport config %C in [domain/%C] section.\n"),
-            perDomainDefaultTportConfig.c_str(), domain_name.c_str()), -1);
-        } else {
-          reg->domain_default_config(domainId, tc);
-        }
-      }
-
-      // Check to see if the specified discovery configuration has been defined
-      if (!repoKey.empty()) {
-        if ((repoKey != Discovery::DEFAULT_REPO) &&
-            (repoKey != Discovery::DEFAULT_RTPS) &&
-            (repoKey != Discovery::DEFAULT_STATIC) &&
-            (this->discoveryMap_.find(repoKey) == this->discoveryMap_.end())) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
-                            ACE_TEXT("Specified configuration (%C) not found.  Referenced in [domain/%C] section.\n"),
-                            repoKey.c_str(), domain_name.c_str()),
-                           -1);
-        }
-        this->set_repo_domain(domainId, repoKey);
-      }
+  const DCPS::ConfigStoreImpl::StringList sections = config_store_->get_section_names("DOMAIN");
+  for (DCPS::ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
+       pos != limit; ++pos) {
+    const DomainConfig dc(*pos);
+    if (!process_domain(dc.to_domain(config_store_))) {
+      return -1;
     }
   }
 
   return 0;
 }
+
+bool
+Service_Participant::process_domain(const Domain& domain)
+{
+  if (domain.domain_id() == -1) {
+    // DomainId parameter is not set.
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Service_Participant::process_domain: "
+                 "Missing DomainId value in [domain/%C] section.\n",
+                 domain.name().c_str()));
+    }
+    return false;
+  }
+
+  const String& default_transport_config = domain.default_transport_config();
+  if (!default_transport_config.empty()) {
+    TransportRegistry* const reg = TransportRegistry::instance();
+    TransportConfig_rch tc = reg->get_config(default_transport_config);
+    if (tc.is_nil()) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) ERROR: Service_Participant::process_domain: "
+                   "Unknown transport config %C in [domain/%C] section.\n",
+                   default_transport_config.c_str(),
+                   domain.name().c_str()));
+      }
+      return false;
+    } else {
+      reg->domain_default_config(domain.domain_id(), tc);
+    }
+  }
+
+  // Check to see if the specified discovery configuration has been defined
+  const Discovery::RepoKey& discovery_config = domain.discovery_config();
+  if (!discovery_config.empty()) {
+    if ((discovery_config != Discovery::DEFAULT_REPO) &&
+        (discovery_config != Discovery::DEFAULT_RTPS) &&
+        (discovery_config != Discovery::DEFAULT_STATIC) &&
+        (discoveryMap_.find(discovery_config) == discoveryMap_.end())) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) ERROR: Service_Participant::process_domain: "
+                   "Specified configuration (%C) not found.  Referenced in [domain/%C] section.\n",
+                   discovery_config.c_str(),
+                   domain.name().c_str()));
+      }
+      return false;
+    }
+
+    set_repo_domain(domain.domain_id(), discovery_config);
+  }
+
+  return true;
+}
+
 
 int
 Service_Participant::load_domain_ranges()
 {
-  const DCPS::ConfigStoreImpl::StringList sections = config_store_->get_section_names("OPENDDS_DOMAIN_RANGE");
+  const DCPS::ConfigStoreImpl::StringList sections = config_store_->get_section_names("DOMAIN_RANGE");
 
   // Loop through the [DomainRange/*] sections
   for (DCPS::ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
@@ -1792,87 +1857,11 @@ Service_Participant::load_domain_ranges()
   return 0;
 }
 
-int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainId,
+int Service_Participant::configure_domain_range_instance(DomainRanges::const_iterator dr_pos,
+                                                         DDS::DomainId_t domainId,
                                                          const Discovery::RepoKey& name)
 {
-  if (discoveryMap_.find(name) == discoveryMap_.end()) {
-    // create a cf that has [rtps_discovery/name+domainId]
-    // copy sections adding customization
-    DomainRange dr_inst("");
-
-    if (get_domain_range_info(domainId, dr_inst)) {
-      ACE_Configuration_Heap dcf;
-      dcf.open();
-      const ACE_Configuration_Section_Key& root = dcf.root_section();
-
-      // set the transport_config_name
-      domain_to_transport_name_map_[domainId] = dr_inst.transport_config_name(config_store_);
-
-      // create domain instance
-      ACE_Configuration_Section_Key dsect;
-      dcf.open_section(root, DOMAIN_SECTION_NAME, true /* create */, dsect);
-      ACE_Configuration_Section_Key dsub_sect;
-      dcf.open_section(dsect, ACE_TEXT_CHAR_TO_TCHAR(to_dds_string(domainId).c_str()), true /* create */, dsub_sect);
-      dcf.set_string_value(dsub_sect, ACE_TEXT("DiscoveryConfig"), ACE_TEXT_CHAR_TO_TCHAR(name.c_str()));
-      const DCPS::ConfigStoreImpl::StringMap domain_info = dr_inst.domain_info(config_store_);
-      for (DCPS::ConfigStoreImpl::StringMap::const_iterator it = domain_info.begin();
-           it != domain_info.end();
-           ++it) {
-        if (it->first != "DISCOVERY_TEMPLATE") {
-          dcf.set_string_value(dsub_sect, ACE_TEXT_CHAR_TO_TCHAR(it->first.c_str()), ACE_TEXT_CHAR_TO_TCHAR(it->second.c_str()));
-        }
-        if (DCPS_debug_level > 0) {
-          ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) Service_Participant::")
-                     ACE_TEXT("configure_domain_range_instance(): adding %C=%C\n"),
-                     it->first.c_str(), it->second.c_str()));
-        }
-      }
-
-      String cfg_name;
-      if (get_transport_base_config_name(domainId, cfg_name)) {
-        if (TransportRegistry::instance()->config_has_transport_template(cfg_name)) {
-          // create transport instance add default transport config
-          TransportRegistry::instance()->create_transport_template_instance(domainId, cfg_name);
-          const OPENDDS_STRING config_instance_name = TransportRegistry::instance()->get_config_instance_name(domainId);
-          dcf.set_string_value(dsub_sect, ACE_TEXT("DefaultTransportConfig"),
-                               ACE_TEXT_CHAR_TO_TCHAR(config_instance_name.c_str()));
-          if (DCPS_debug_level > 0) {
-            ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) Service_Participant::")
-                       ACE_TEXT("configure_domain_range_instance(): setting DefaultTransportConfig=%C\n"),
-                       config_instance_name.c_str()));
-          }
-        }
-      } else {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                          ACE_TEXT("configure_domain_range_instance(): ")
-                          ACE_TEXT("transport config not found for domain %d\n"),
-                          domainId),
-                         -1);
-      }
-
-      // load domain config
-      int status = this->load_domain_configuration(dcf, 0);
-
-      if (status != 0) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: Service_Participant::configure_domain_range_instance(): ")
-                          ACE_TEXT("load_domain_configuration() returned %d\n"),
-                          status),
-                         -1);
-      }
-
-      if (DCPS_debug_level > 4) {
-        ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range_instance(): ")
-                 ACE_TEXT("configure domain %d.\n"),
-                 domainId));
-      }
-    }
-
-  } else {
+  if (discoveryMap_.find(name) != discoveryMap_.end()) {
     // > 9 to limit number of messages.
     if (DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,
@@ -1880,72 +1869,56 @@ int Service_Participant::configure_domain_range_instance(DDS::DomainId_t domainI
                  ACE_TEXT("domain %d already configured.\n"),
                  domainId));
     }
+    return 0;
   }
+
+  Domain domain(to_dds_string(domainId),
+                domainId,
+                name,
+                dr_pos->default_transport_config(config_store_));
+  if (!process_domain(domain)) {
+    return -1;
+  }
+
+  if (DCPS_debug_level > 4) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) Service_Participant::configure_domain_range_instance(): ")
+               ACE_TEXT("configure domain %d.\n"),
+               domainId));
+  }
+
   return 0;
-}
-
-
-bool
-Service_Participant::belongs_to_domain_range(DDS::DomainId_t domainId) const
-{
-  for (OPENDDS_VECTOR(DomainRange)::const_iterator i = domain_ranges_.begin(); i != domain_ranges_.end(); ++i) {
-    if (i->belongs_to_domain_range(domainId)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-bool
-Service_Participant::get_transport_base_config_name(DDS::DomainId_t domainId, String& name) const
-{
-  const String global_transport_config = config_store_->get(OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG,
-                                                            OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG_default);
-  OPENDDS_MAP(DDS::DomainId_t, OPENDDS_STRING)::const_iterator it = domain_to_transport_name_map_.find(domainId);
-  if ( it != domain_to_transport_name_map_.end()) {
-    name = it->second;
-    return true;
-  } else if (!global_transport_config.empty()) {
-    name = global_transport_config;
-    return true;
-  } else {
-    return false;
-  }
 }
 
 int
-Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
-                                                  const ACE_TCHAR* section_name)
+Service_Participant::load_discovery_configuration(const String& discovery_type,
+                                                  bool force)
 {
-  const ACE_Configuration_Section_Key &root = cf.root_section();
-  ACE_Configuration_Section_Key sect;
-  if (cf.open_section(root, section_name, false, sect) == 0) {
-
-    const OPENDDS_STRING sect_name = ACE_TEXT_ALWAYS_CHAR(section_name);
-    DiscoveryTypes::iterator iter =
-      this->discovery_types_.find(sect_name);
-
-    if (iter == this->discovery_types_.end()) {
-      // See if we can dynamically load the required libraries
-      TheTransportRegistry->load_transport_lib(sect_name);
-      iter = this->discovery_types_.find(sect_name);
-    }
-
-    if (iter != this->discovery_types_.end()) {
-      // discovery code is loaded, process options
-      return iter->second->discovery_config();
-    } else {
-      // No discovery code can be loaded, report an error
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: Service_Participant::")
-                        ACE_TEXT("load_discovery_configuration(): ")
-                        ACE_TEXT("Unable to load libraries for %s\n"),
-                        section_name),
-                       -1);
-    }
+  if (!force && !config_store_->has_prefix(discovery_type.c_str())) {
+    return 0;
   }
-  return 0;
+
+  DiscoveryTypes::iterator iter = discovery_types_.find(discovery_type);
+
+  if (iter == discovery_types_.end()) {
+    // See if we can dynamically load the required libraries
+    TheTransportRegistry->load_transport_lib(discovery_type);
+    iter = discovery_types_.find(discovery_type);
+  }
+
+  if (iter != discovery_types_.end()) {
+    // discovery code is loaded, process options
+    return iter->second->discovery_config();
+  } else {
+    // No discovery code can be loaded, report an error
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                "(%P|%t) ERROR: Service_Participant::load_discovery_configuration: "
+                 "Unable to load libraries for %C\n",
+                 discovery_type.c_str()));
+    }
+    return -1;
+  }
 }
 
 int Service_Participant::DomainRange::parse_domain_range()
@@ -2018,63 +1991,28 @@ int Service_Participant::DomainRange::parse_domain_range()
 }
 
 String
-Service_Participant::DomainRange::discovery_template_name(RcHandle<ConfigStoreImpl> config_store,
-                                                          const String& default_name) const
+Service_Participant::DomainRange::discovery_template(RcHandle<ConfigStoreImpl> config_store,
+                                                     const String& default_name) const
 {
   return config_store->get(config_key("DiscoveryTemplate").c_str(), default_name);
 }
 
 String
-Service_Participant::DomainRange::transport_config_name(RcHandle<ConfigStoreImpl> config_store) const
+Service_Participant::DomainRange::default_transport_config(RcHandle<ConfigStoreImpl> config_store) const
 {
-  const String global_transport_config = config_store->get(OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG,
-                                                           OPENDDS_COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG_default);
+  const String global_transport_config = config_store->get(COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG,
+                                                           COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG_default);
   return config_store->get(config_key("DefaultTransportConfig").c_str(), global_transport_config);
-}
-
-DCPS::ConfigStoreImpl::StringMap
-Service_Participant::DomainRange::domain_info(RcHandle<ConfigStoreImpl> config_store) const
-{
-  return config_store->get_section_values(config_prefix_);
-}
-
-bool
-Service_Participant::has_domain_range() const
-{
-  return !domain_ranges_.empty();
-}
-
-bool
-Service_Participant::get_domain_range_info(const DDS::DomainId_t id, DomainRange& inst)
-{
-  if (has_domain_range()) {
-    for (OPENDDS_VECTOR(DomainRange)::iterator it = domain_ranges_.begin();
-         it != domain_ranges_.end(); ++it) {
-      if (it->belongs_to_domain_range(id)) {
-        inst = *it;
-
-        if (DCPS_debug_level > 0) {
-          ACE_DEBUG((LM_DEBUG,
-                     "(%P|%t) DEBUG: Service_Participant::get_domain_range_info: "
-                     "Domain %d is in %C\n",
-                     id, it->config_prefix().c_str()));
-        }
-
-        return true;
-      }
-    }
-  }
-  return false;
 }
 
 #if OPENDDS_POOL_ALLOCATOR
 void
 Service_Participant::configure_pool()
 {
-  const size_t pool_size = config_store_->get_uint32(OPENDDS_COMMON_POOL_SIZE,
-                                                     OPENDDS_COMMON_POOL_SIZE_default);
-  const size_t pool_granularity = config_store_->get_uint32(OPENDDS_COMMON_POOL_GRANULARITY,
-                                                            OPENDDS_COMMON_POOL_GRANULARITY_default);
+  const size_t pool_size = config_store_->get_uint32(COMMON_POOL_SIZE,
+                                                     COMMON_POOL_SIZE_default);
+  const size_t pool_granularity = config_store_->get_uint32(COMMON_POOL_GRANULARITY,
+                                                            COMMON_POOL_GRANULARITY_default);
   if (pool_size) {
     SafetyProfilePool::instance()->configure_pool(pool_size, pool_granularity);
     SafetyProfilePool::instance()->install();
@@ -2082,7 +2020,7 @@ Service_Participant::configure_pool()
 }
 #endif
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 DataDurabilityCache *
 Service_Participant::get_data_durability_cache(
   DDS::DurabilityQosPolicy const & durability)
@@ -2110,8 +2048,8 @@ Service_Participant::get_data_durability_cache(
       try {
         if (!this->persistent_data_cache_) {
           const String persistent_data_dir =
-            config_store_->get(OPENDDS_COMMON_DCPS_PERSISTENT_DATA_DIR,
-                              OPENDDS_COMMON_DCPS_PERSISTENT_DATA_DIR_default);
+            config_store_->get(COMMON_DCPS_PERSISTENT_DATA_DIR,
+                               COMMON_DCPS_PERSISTENT_DATA_DIR_default);
           this->persistent_data_cache_.reset(new DataDurabilityCache(kind, persistent_data_dir));
         }
 
@@ -2231,7 +2169,7 @@ DDS::Topic_ptr Service_Participant::create_typeless_topic(
 
 void Service_Participant::default_configuration_file(const ACE_TCHAR* path)
 {
-  config_store_->set_string(OPENDDS_DEFAULT_CONFIGURATION_FILE, ACE_TEXT_ALWAYS_CHAR(path));
+  config_store_->set_string(DEFAULT_CONFIGURATION_FILE, ACE_TEXT_ALWAYS_CHAR(path));
 }
 
 ThreadStatusManager& Service_Participant::get_thread_status_manager()
@@ -2254,27 +2192,27 @@ NetworkConfigModifier* Service_Participant::network_config_modifier()
 DDS::Duration_t
 Service_Participant::bit_autopurge_nowriter_samples_delay() const
 {
-  return config_store_->get_duration(OPENDDS_COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY,
-                                    OPENDDS_COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY_default);
+  return config_store_->get_duration(COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY,
+                                     COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY_default);
 }
 
 void
 Service_Participant::bit_autopurge_nowriter_samples_delay(const DDS::Duration_t& delay)
 {
-  config_store_->set_duration(OPENDDS_COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY, delay);
+  config_store_->set_duration(COMMON_BIT_AUTOPURGE_NOWRITER_SAMPLES_DELAY, delay);
 }
 
 DDS::Duration_t
 Service_Participant::bit_autopurge_disposed_samples_delay() const
 {
-  return config_store_->get_duration(OPENDDS_COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY,
-                                    OPENDDS_COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY_default);
+  return config_store_->get_duration(COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY,
+                                     COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY_default);
 }
 
 void
 Service_Participant::bit_autopurge_disposed_samples_delay(const DDS::Duration_t& delay)
 {
-  config_store_->set_duration(OPENDDS_COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY, delay);
+  config_store_->set_duration(COMMON_BIT_AUTOPURGE_DISPOSED_SAMPLES_DELAY, delay);
 }
 
 XTypes::TypeInformation
@@ -2292,7 +2230,7 @@ Service_Participant::get_type_information(DDS::DomainParticipant_ptr participant
   return XTypes::TypeInformation();
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 DDS::ReturnCode_t Service_Participant::get_dynamic_type(DDS::DynamicType_var& type,
   DDS::DomainParticipant_ptr participant, const DDS::BuiltinTopicKey_t& key) const
 {
@@ -2315,64 +2253,59 @@ Service_Participant::get_type_object(DDS::DomainParticipant_ptr participant,
   return XTypes::TypeObject();
 }
 
+namespace {
+  const EnumList<Service_Participant::TypeObjectEncoding> type_object_encoding_kinds[] =
+    {
+      { Service_Participant::Encoding_Normal, "Normal" },
+      { Service_Participant::Encoding_WriteOldFormat, "WriteOldFormat" },
+      { Service_Participant::Encoding_ReadOldFormat, "ReadOldFormat" }
+    };
+}
+
 Service_Participant::TypeObjectEncoding
 Service_Participant::type_object_encoding() const
 {
-  String encoding_str = "Normal";
-  config_store_->get(OPENDDS_COMMON_DCPS_TYPE_OBJECT_ENCODING, encoding_str);
-
-  struct NameValue {
-    const char* name;
-    TypeObjectEncoding value;
-  };
-  static const NameValue entries[] = {
-    {"Normal", Encoding_Normal},
-    {"WriteOldFormat", Encoding_WriteOldFormat},
-    {"ReadOldFormat", Encoding_ReadOldFormat},
-  };
-  for (size_t i = 0; i < sizeof entries / sizeof entries[0]; ++i) {
-    if (0 == std::strcmp(entries[i].name, encoding_str.c_str())) {
-      return entries[i].value;
-    }
-  }
-  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Service_Participant::type_object_encoding: "
-             "invalid encoding %C\n", encoding_str.c_str()));
-
-  return Encoding_Normal;
+  return config_store_->get(COMMON_DCPS_TYPE_OBJECT_ENCODING, Encoding_Normal, type_object_encoding_kinds);
 }
 
 void Service_Participant::type_object_encoding(TypeObjectEncoding encoding)
 {
-  switch (encoding) {
-  case Encoding_Normal:
-    config_store_->set_string(OPENDDS_COMMON_DCPS_TYPE_OBJECT_ENCODING, "Normal");
-    break;
-  case Encoding_WriteOldFormat:
-    config_store_->set_string(OPENDDS_COMMON_DCPS_TYPE_OBJECT_ENCODING, "WriteOldFormat");
-    break;
-  case Encoding_ReadOldFormat:
-    config_store_->set_string(OPENDDS_COMMON_DCPS_TYPE_OBJECT_ENCODING, "ReadOldFormat");
-    break;
-  }
+  config_store_->set(COMMON_DCPS_TYPE_OBJECT_ENCODING, encoding, type_object_encoding_kinds);
 }
 
 void
 Service_Participant::type_object_encoding(const char* encoding)
 {
-  config_store_->set_string(OPENDDS_COMMON_DCPS_TYPE_OBJECT_ENCODING, encoding);
+  config_store_->set(COMMON_DCPS_TYPE_OBJECT_ENCODING, encoding, type_object_encoding_kinds);
 }
 
 unsigned int
 Service_Participant::printer_value_writer_indent() const
 {
-  return config_store_->get_uint32(OPENDDS_COMMON_PRINTER_VALUE_WRITER_INDENT,
-                                  OPENDDS_COMMON_PRINTER_VALUE_WRITER_INDENT_default);
+  return config_store_->get_uint32(COMMON_PRINTER_VALUE_WRITER_INDENT,
+                                   COMMON_PRINTER_VALUE_WRITER_INDENT_default);
 }
 
 void
 Service_Participant::printer_value_writer_indent(unsigned int value)
 {
-  config_store_->set_uint32(OPENDDS_COMMON_PRINTER_VALUE_WRITER_INDENT, value);
+  config_store_->set_uint32(COMMON_PRINTER_VALUE_WRITER_INDENT, value);
+}
+
+TimeDuration
+Service_Participant::statistics_period() const
+{
+  return config_store_->get(COMMON_STATISTICS_PERIOD,
+                            COMMON_STATISTICS_PERIOD_default,
+                            ConfigStoreImpl::Format_FractionalSeconds);
+}
+
+void
+Service_Participant::statistics_period(const TimeDuration& value)
+{
+  config_store_->set(COMMON_STATISTICS_PERIOD,
+                     value,
+                     ConfigStoreImpl::Format_FractionalSeconds);
 }
 
 void
@@ -2386,46 +2319,46 @@ Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_
     const ConfigPair& p = samples[idx];
     const DDS::SampleInfo& info = infos[idx];
     if (info.valid_data) {
-      if (p.key() == OPENDDS_COMMON_ORB_LOG_FILE) {
+      if (p.key() == COMMON_ORB_LOG_FILE) {
         set_log_file_name(p.value().c_str());
-      } else if (p.key() == OPENDDS_COMMON_ORB_VERBOSE_LOGGING) {
-        set_log_verbose(ACE_OS::atoi(p.value().c_str()));
-      } else if (p.key() == OPENDDS_COMMON_DCPS_DEBUG_LEVEL) {
-        set_DCPS_debug_level(ACE_OS::atoi(p.value().c_str()));
-      } else if (p.key() == OPENDDS_COMMON_DCPSRTI_SERIALIZATION) {
+      } else if (p.key() == COMMON_ORB_VERBOSE_LOGGING) {
+        set_log_verbose(static_cast<unsigned long>(ACE_OS::atoi(p.value().c_str())));
+      } else if (p.key() == COMMON_DCPS_DEBUG_LEVEL) {
+        set_DCPS_debug_level(static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str())));
+      } else if (p.key() == COMMON_DCPSRTI_SERIALIZATION) {
         if (ACE_OS::atoi(p.value().c_str()) == 0 && log_level >= LogLevel::Warning) {
           ACE_ERROR((LM_WARNING,
                      ACE_TEXT("(%P|%t) WARNING: ConfigReaderListener::on_data_available: ")
                      ACE_TEXT("Argument ignored: DCPSRTISerialization is required to be enabled\n")));
         }
-      } else if (p.key() == OPENDDS_COMMON_DCPS_TRANSPORT_DEBUG_LEVEL) {
-        OpenDDS::DCPS::Transport_debug_level = ACE_OS::atoi(p.value().c_str());
-      } else if (p.key() == OPENDDS_COMMON_DCPS_THREAD_STATUS_INTERVAL) {
+      } else if (p.key() == COMMON_DCPS_TRANSPORT_DEBUG_LEVEL) {
+        Transport_debug_level = static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str()));
+      } else if (p.key() == COMMON_DCPS_THREAD_STATUS_INTERVAL) {
         service_participant_.thread_status_manager_.thread_status_interval(TimeDuration(ACE_OS::atoi(p.value().c_str())));
-#ifdef OPENDDS_SECURITY
-      } else if (p.key() == OPENDDS_COMMON_DCPS_SECURITY_DEBUG_LEVEL) {
-        security_debug.set_debug_level(ACE_OS::atoi(p.value().c_str()));
-      } else if (p.key() == OPENDDS_COMMON_DCPS_SECURITY_DEBUG) {
+#if OPENDDS_CONFIG_SECURITY
+      } else if (p.key() == COMMON_DCPS_SECURITY_DEBUG_LEVEL) {
+        security_debug.set_debug_level(static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str())));
+      } else if (p.key() == COMMON_DCPS_SECURITY_DEBUG) {
         security_debug.parse_flags(p.value().c_str());
-      } else if (p.key() == OPENDDS_COMMON_DCPS_SECURITY_FAKE_ENCRYPTION) {
+      } else if (p.key() == COMMON_DCPS_SECURITY_FAKE_ENCRYPTION) {
         security_debug.fake_encryption = ACE_OS::atoi(p.value().c_str());
 #endif
-      } else if (p.key() == OPENDDS_COMMON_DCPS_LOG_LEVEL) {
+      } else if (p.key() == COMMON_DCPS_LOG_LEVEL) {
         log_level.set_from_string(p.value().c_str());
-      } else if (p.key() == OPENDDS_COMMON_DCPS_PENDING_TIMEOUT) {
+      } else if (p.key() == COMMON_DCPS_PENDING_TIMEOUT) {
         ACE_GUARD(ACE_Thread_Mutex, guard, service_participant_.cached_config_mutex_);
         service_participant_.pending_timeout_ =
-          service_participant_.config_store_->get(OPENDDS_COMMON_DCPS_PENDING_TIMEOUT,
-                                                  OPENDDS_COMMON_DCPS_PENDING_TIMEOUT_default,
+          service_participant_.config_store_->get(COMMON_DCPS_PENDING_TIMEOUT,
+                                                  COMMON_DCPS_PENDING_TIMEOUT_default,
                                                   ConfigStoreImpl::Format_IntegerSeconds);
-      } else if (p.key() == OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY) {
+      } else if (p.key() == COMMON_DCPS_DEFAULT_DISCOVERY) {
         ACE_GUARD(ACE_Thread_Mutex, guard, service_participant_.cached_config_mutex_);
         service_participant_.default_discovery_ =
-          service_participant_.config_store_->get(OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY,
-                                                  OPENDDS_COMMON_DCPS_DEFAULT_DISCOVERY_default);
-      } else if (p.key() == OPENDDS_CONFIG_DEBUG_LOGGING) {
-        const bool flag = service_participant_.config_store_->get_boolean(OPENDDS_CONFIG_DEBUG_LOGGING,
-                                                                          OPENDDS_CONFIG_DEBUG_LOGGING_default);
+          service_participant_.config_store_->get(COMMON_DCPS_DEFAULT_DISCOVERY,
+                                                  COMMON_DCPS_DEFAULT_DISCOVERY_default);
+      } else if (p.key() == CONFIG_DEBUG_LOGGING) {
+        const bool flag = service_participant_.config_store_->get_boolean(CONFIG_DEBUG_LOGGING,
+                                                                          CONFIG_DEBUG_LOGGING_default);
         service_participant_.config_store_->debug_logging = flag;
       }
     }

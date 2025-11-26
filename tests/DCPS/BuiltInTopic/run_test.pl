@@ -13,7 +13,23 @@ use strict;
 
 PerlDDS::add_lib_path('../FooType4');
 
-my $test = new PerlDDS::TestFramework();
+my %configs = (
+  ir_tcp => {
+    discovery => 'info_repo',
+    file => {
+      common => {
+        DCPSDefaultDiscovery => 'DEFAULT_REPO',
+        DCPSGlobalTransportConfig => '$file'
+      },
+      'transport/tcp' => {
+        transport_type => 'tcp'
+      }
+    }
+  }
+);
+
+my $test = new PerlDDS::TestFramework(configs => \%configs, config => 'ir_tcp');
+
 $test->{add_pending_timeout} = 0;
 $test->enable_console_logging();
 

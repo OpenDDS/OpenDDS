@@ -1,4 +1,4 @@
-project: dcpslib, ../bench_builder_idl_lib, dcps_ts_defaults, rapidjson, msvc_bigobj {
+project: dcps, ../bench_builder_idl_lib, dcps_ts_defaults, rapidjson, msvc_bigobj {
   idlflags      += -Wb,stub_export_include=Bench_Idl_Export.h \
                    -Wb,stub_export_macro=Bench_Idl_Export \
                    -I$(DDS_ROOT)/dds \

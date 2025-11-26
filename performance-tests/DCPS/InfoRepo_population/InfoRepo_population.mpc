@@ -1,8 +1,5 @@
 project(*idl) : dcps_test {
   requires += no_opendds_safety_profile
-  idlflags += -I../Sync -I$(DDS_ROOT)
-  after    += Sync_Idl
-
   TypeSupport_Files {
     Messenger.idl
   }
@@ -10,61 +7,31 @@ project(*idl) : dcps_test {
   custom_only = 1
 }
 
-project(*SyncServer) : taoexe, portableserver, iortable, coverage_optional, dds_macros {
-  requires += no_opendds_safety_profile
-  exename   = syncServer
-  includes += ../Sync
-  libs     += SyncServer
-  libpaths += $(DDS_ROOT)/lib ../Sync
-  after    += *idl Sync_ServerLib
-  avoids   += minimum_corba
-  idlflags += -I../Sync
-
-  IDL_Files {
-    SyncExt.idl
-  }
-
-  Source_Files {
-    SyncServer.cpp
-    SyncExt_i.cpp
-  }
-}
-
-project(*Publisher) : dcpsexe, dcps_test, dcps_tcp {
+project(*Publisher) : dcpsexe, dcps_test, dcps_rtps_udp {
   requires += no_opendds_safety_profile
   exename   = publisher
-  libs     += SyncClient
-  libpaths += ../Sync
-  includes += ../Sync
-  after    += *SyncServer Sync_ClientLib
-  idlflags += -I../Sync
+  after    += *idl
 
   TypeSupport_Files {
     Messenger.idl
   }
 
   Source_Files {
-    SyncClientExt_i.cpp
     publisher.cpp
     Writer.cpp
   }
 }
 
-project(*Subscriber) : dcpsexe, dcps_test, dcps_tcp {
+project(*Subscriber) : dcpsexe, dcps_test, dcps_rtps_udp {
   requires += no_opendds_safety_profile
   exename   = subscriber
-  libs     += SyncClient
-  libpaths += ../Sync
-  includes += ../Sync
-  after    += *Publisher Sync_ClientLib
-  idlflags += -I../Sync
+  after    += *Publisher
 
   TypeSupport_Files {
     Messenger.idl
   }
 
   Source_Files {
-    SyncClientExt_i.cpp
     subscriber.cpp
     DataReaderListener.cpp
   }

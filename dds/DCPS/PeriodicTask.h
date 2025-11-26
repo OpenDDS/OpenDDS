@@ -8,49 +8,28 @@
 #ifndef OPENDDS_DCPS_PERIODIC_TASK_H
 #define OPENDDS_DCPS_PERIODIC_TASK_H
 
+#include "Service_Participant.h"
 #include "RcEventHandler.h"
-#include "ReactorInterceptor.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 
-class PeriodicTask : public virtual RcEventHandler {
+class OpenDDS_Dcps_Export PeriodicTask : public virtual RcEventHandler {
 public:
-  explicit PeriodicTask(RcHandle<ReactorInterceptor> interceptor)
+  explicit PeriodicTask(ReactorTask_rch reactor_task)
     : user_enabled_(false)
-    , interceptor_(interceptor)
     , enabled_(false)
-  {
-    reactor(interceptor->reactor());
-  }
+    , reactor_task_(reactor_task)
+    , timer_(-1)
+  {}
 
   virtual ~PeriodicTask() {}
 
-  void enable(bool reenable, const TimeDuration& period)
-  {
-    {
-      ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-      user_enabled_ = true;
-    }
-    RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
-    if (interceptor) {
-      interceptor->execute_or_enqueue(make_rch<ScheduleEnableCommand>(rchandle_from(this), reenable, period));
-    }
-  }
+  void enable(bool reenable, const TimeDuration& period);
 
-  void disable()
-  {
-    {
-      ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-      user_enabled_ = false;
-    }
-    RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
-    if (interceptor) {
-      interceptor->execute_or_enqueue(make_rch<ScheduleDisableCommand>(rchandle_from(this)));
-    }
-  }
+  void disable();
 
   bool enabled() const
   {
@@ -63,41 +42,44 @@ public:
 private:
   mutable ACE_Thread_Mutex mutex_;
   bool user_enabled_;
-  WeakRcHandle<ReactorInterceptor> interceptor_;
   bool enabled_;
+  const ReactorTask_wrch reactor_task_;
+  long timer_;
 
-  struct ScheduleEnableCommand : public ReactorInterceptor::Command {
+  struct ScheduleEnableCommand : public ReactorTask::Command {
     ScheduleEnableCommand(WeakRcHandle<PeriodicTask> hb, bool reenable, const TimeDuration& period)
-      : periodic_task_(hb), reenable_(reenable), period_(period)
-    { }
+      : periodic_task_(hb)
+      , reenable_(reenable)
+      , period_(period)
+    {}
 
-    virtual void execute()
+    virtual void execute(ReactorWrapper& reactor_wrapper)
     {
       RcHandle<PeriodicTask> periodic_task = periodic_task_.lock();
       if (periodic_task) {
-        periodic_task->enable_i(reenable_, period_);
+        periodic_task->enable_i(reenable_, period_, reactor_wrapper);
       }
     }
 
-    WeakRcHandle<PeriodicTask> const periodic_task_;
+    const WeakRcHandle<PeriodicTask> periodic_task_;
     const bool reenable_;
     const TimeDuration period_;
   };
 
-  struct ScheduleDisableCommand : public ReactorInterceptor::Command {
+  struct ScheduleDisableCommand : public ReactorTask::Command {
     explicit ScheduleDisableCommand(WeakRcHandle<PeriodicTask> hb)
       : periodic_task_(hb)
-    { }
+    {}
 
-    virtual void execute()
+    virtual void execute(ReactorWrapper& reactor_wrapper)
     {
       RcHandle<PeriodicTask> periodic_task = periodic_task_.lock();
       if (periodic_task) {
-        periodic_task->disable_i();
+        periodic_task->disable_i(reactor_wrapper);
       }
     }
 
-    WeakRcHandle<PeriodicTask> const periodic_task_;
+    const WeakRcHandle<PeriodicTask> periodic_task_;
   };
 
   int handle_timeout(const ACE_Time_Value& tv, const void*)
@@ -109,32 +91,9 @@ private:
     return 0;
   }
 
-  void enable_i(bool reenable, const TimeDuration& per)
-  {
-    if (!enabled_) {
-      const long timer =
-        reactor()->schedule_timer(this, 0, ACE_Time_Value::zero, per.value());
+  void enable_i(bool reenable, const TimeDuration& per, ReactorWrapper& reactor_wrapper);
 
-      if (timer == -1) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) PeriodicTask::enable"
-                   " failed to schedule timer %p\n", ACE_TEXT("")));
-      } else {
-        enabled_ = true;
-      }
-    } else if (reenable) {
-      disable_i();
-      enable_i(false, per);
-    }
-  }
-
-  void
-  disable_i()
-  {
-    if (enabled_) {
-      reactor()->cancel_timer(this);
-      enabled_ = false;
-    }
-  }
+  void disable_i(ReactorWrapper& reactor_wrapper);
 };
 
 template <typename Delegate>
@@ -142,14 +101,39 @@ class PmfPeriodicTask : public PeriodicTask {
 public:
   typedef void (Delegate::*PMF)(const MonotonicTimePoint&);
 
-  PmfPeriodicTask(RcHandle<ReactorInterceptor> interceptor, const Delegate& delegate, PMF function)
-    : PeriodicTask(interceptor)
+  PmfPeriodicTask(ReactorTask_rch reactor_task, const Delegate& delegate, PMF function)
+    : PeriodicTask(reactor_task)
     , delegate_(delegate)
-    , function_(function) {}
+    , function_(function)
+    {}
 
 private:
-  WeakRcHandle<Delegate> delegate_;
-  PMF function_;
+  const WeakRcHandle<Delegate> delegate_;
+  const PMF function_;
+
+  void execute(const MonotonicTimePoint& now)
+  {
+    RcHandle<Delegate> handle = delegate_.lock();
+    if (handle) {
+      ((*handle).*function_)(now);
+    }
+  }
+};
+
+template <typename Delegate>
+class PmfPeriodicTask<const Delegate> : public PeriodicTask {
+public:
+  typedef void (Delegate::*CPMF)(const MonotonicTimePoint&) const;
+
+  PmfPeriodicTask(ReactorTask_rch reactor_task, const Delegate& delegate, CPMF function)
+    : PeriodicTask(reactor_task)
+    , delegate_(delegate)
+    , function_(function)
+    {}
+
+private:
+  const WeakRcHandle<Delegate> delegate_;
+  const CPMF function_;
 
   void execute(const MonotonicTimePoint& now)
   {

@@ -147,7 +147,7 @@ void hash_endpoints(::CORBA::Long& hash, const ACE_TCHAR* const endpoints_str)
     const ACE_TCHAR* next = ACE_OS::strstr(curr, delim);
     if (next == 0)
       next = endpoints_str + len;
-    hash_endpoint(hash, curr, (next - curr));
+    hash_endpoint(hash, curr, static_cast<size_t>(next - curr));
     curr = next + 1;
   }
 }
@@ -199,11 +199,11 @@ Config::Config(int argc, ACE_TCHAR** argv)
   }
 
   // Setup the internal storage.
-  this->argv_ = new ACE_TCHAR*[argc + 1](); // argv_[argc] == 0
+  this->argv_ = new ACE_TCHAR*[static_cast<size_t>(argc) + 1](); // argv_[argc] == 0
 
   // Process the federation arguments.  Copy the uninteresting arguments verbatim.
   ArgCopier argCopier(this);
-  std::for_each(&argv[0], &argv[ argc], argCopier);
+  std::for_each(&argv[0], &argv[argc], argCopier);
 
   // Read and process any configuration file.
   this->processFile();
@@ -216,7 +216,6 @@ Config::~Config()
                ACE_TEXT("(%P|%t) INFO: Federator::Config::~FederatorConfig()\n")));
   }
 
-  // We prwn this
   delete [] this->argv_;
 }
 
@@ -324,7 +323,7 @@ Config::processFile()
   }
 
   // Convert to numeric repository key value.
-  this->federationPort_ = ACE_OS::atoi(federationPortString.c_str());
+  this->federationPort_ = static_cast<short>(ACE_OS::atoi(federationPortString.c_str()));
 
   if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,

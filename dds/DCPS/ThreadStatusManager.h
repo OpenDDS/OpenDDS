@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_THREADSTATUSMANAGER_H
 
 #include "dcps_export.h"
+#include "RcEventHandler.h"
 #include "TimeTypes.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -37,24 +38,29 @@ public:
       ThreadStatus_Idle,
     };
 
-    Thread(const String& bit_key)
+    explicit Thread(const String& bit_key)
       : bit_key_(bit_key)
       , timestamp_(SystemTimePoint::now())
-      , status_(ThreadStatus_Active)
       , last_update_(MonotonicTimePoint::now())
-      , current_bucket_(0)
+      , last_status_change_(MonotonicTimePoint::now())
+      , status_(ThreadStatus_Active)
       , nesting_depth_(0)
+      , detail1_(0)
+      , detail2_(0)
+      , current_bucket_(0)
     {}
 
     const String& bit_key() const { return bit_key_; }
     const SystemTimePoint& timestamp() const { return timestamp_; }
     const MonotonicTimePoint& last_update() const { return last_update_; }
+    int detail1() const { return detail1_; }
+    int detail2() const { return detail2_; }
 
     void update(const MonotonicTimePoint& m_now,
                 const SystemTimePoint& s_now,
                 ThreadStatus next_status,
                 const TimeDuration& bucket_limit,
-                bool nested);
+                bool nested, int detail1, int detail2);
     double utilization(const MonotonicTimePoint& now) const;
 
     static const size_t bucket_count = 8;
@@ -62,17 +68,19 @@ public:
   private:
     const String bit_key_;
     SystemTimePoint timestamp_;
+    MonotonicTimePoint last_update_, last_status_change_;
     ThreadStatus status_;
+    size_t nesting_depth_;
+    int detail1_, detail2_;
 
     struct OpenDDS_Dcps_Export Bucket {
       TimeDuration active_time;
       TimeDuration idle_time;
+      TimeDuration total_time() const { return active_time + idle_time; }
     };
-    MonotonicTimePoint last_update_;
     Bucket total_;
-    Bucket bucket_[bucket_count];
+    Bucket buckets_[bucket_count];
     size_t current_bucket_;
-    size_t nesting_depth_;
   };
   typedef OPENDDS_MAP(ThreadId, Thread) Map;
   typedef OPENDDS_LIST(Thread) List;
@@ -93,7 +101,7 @@ public:
     return thread_status_interval_ > TimeDuration::zero_value;
   }
 
-  /// Add the calling thread with the manager.
+  /// Add the calling thread to the manager.
   /// name is for a more human-friendly name that will be appended to the BIT key.
   /// Implicitly makes the thread active and finishes the thread on destruction.
   class Start {
@@ -115,10 +123,10 @@ public:
 
   class Event {
   public:
-    Event(ThreadStatusManager& thread_status_manager)
+    explicit Event(ThreadStatusManager& thread_status_manager, int detail1 = 0, int detail2 = 0)
       : thread_status_manager_(thread_status_manager)
     {
-      thread_status_manager_.active(true);
+      thread_status_manager_.active(true, detail1, detail2);
     }
 
     ~Event()
@@ -157,32 +165,49 @@ public:
     ThreadStatusManager* const thread_status_manager_;
   };
 
+  struct Updater : RcEventHandler {
+    int handle_timeout(const ACE_Time_Value&, const void* arg)
+    {
+      const ThreadStatusManager* const tsmConst = static_cast<const ThreadStatusManager*>(arg);
+      ThreadStatusManager* const tsm = const_cast<ThreadStatusManager*>(tsmConst);
+      tsm->idle();
+      return 0;
+    }
+  };
+
   /// Copy active and idle threads to running and finished threads to
   /// finished.  Only threads updated after start are considered.
   void harvest(const MonotonicTimePoint& start,
                List& running,
                List& finished) const;
 
-#ifdef ACE_HAS_GETTID
-  static inline pid_t gettid()
-  {
-    return syscall(SYS_gettid);
-  }
-#endif
-
 private:
   static ThreadId get_thread_id();
   void add_thread(const String& name);
-  void active(bool nested = false);
-  void idle(bool nested = false);
-  void finished();
+
+  void update_current_thread(Thread::ThreadStatus status, bool nested = false, int detail1 = 0, int detail2 = 0)
+  {
+    update_i(status, false, nested, detail1, detail2);
+  }
+
+  void finished() { update_i(Thread::ThreadStatus_Idle, true, false); }
+
+  void update_i(Thread::ThreadStatus status, bool finished = false,
+                bool nested = false, int detail1 = 0, int detail2 = 0);
+
+  void active(bool nested = false, int detail1 = 0, int detail2 = 0)
+  {
+    update_current_thread(Thread::ThreadStatus_Active, nested, detail1, detail2);
+  }
+
+  void idle(bool nested = false) { update_current_thread(Thread::ThreadStatus_Idle, nested); }
 
   void cleanup(const MonotonicTimePoint& now);
 
   TimeDuration thread_status_interval_;
   TimeDuration bucket_limit_;
   Map map_;
-  List list_;
+  List finished_;
 
   mutable ACE_Thread_Mutex lock_;
 };

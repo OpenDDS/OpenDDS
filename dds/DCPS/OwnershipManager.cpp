@@ -7,12 +7,15 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#include "dds/OpenDDSConfigWrapper.h"
+
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
 
 #include "OwnershipManager.h"
 #include "GuidConverter.h"
 #include "Util.h"
 #include "DataReaderImpl.h"
+
 #include <algorithm>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -138,7 +141,7 @@ OwnershipManager::remove_instance(InstanceState* instance_state)
     InstanceStateVec& states = i->second.instance_states_;
     for (size_t j = 0; j < states.size(); ++j) {
       if (states[j].in() == instance_state) {
-        states.erase(states.begin() + j);
+        states.erase(states.begin() + static_cast<InstanceStateVec::difference_type>(j));
         break;
       }
     }
@@ -332,12 +335,10 @@ OwnershipManager::select_owner(const DDS::InstanceHandle_t& instance_handle,
       // if strength was changed.
       const WriterInfos::iterator the_end = infos.candidates_.end();
 
-      for (WriterInfos::iterator iter = infos.candidates_.begin();
-           iter != the_end; ++iter) {
-
-        if (iter->pub_id_ == pub_id) {
-          if (iter->ownership_strength_ != ownership_strength) {
-            iter->ownership_strength_ = ownership_strength;
+      for (WriterInfos::iterator it = infos.candidates_.begin(); it != the_end; ++it) {
+        if (it->pub_id_ == pub_id) {
+          if (it->ownership_strength_ != ownership_strength) {
+            it->ownership_strength_ = ownership_strength;
           } else {
             sort = false;
           }
@@ -425,4 +426,4 @@ OwnershipManager::remove_owner(const DDS::InstanceHandle_t& instance_handle)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+#endif

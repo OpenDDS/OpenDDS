@@ -12,7 +12,7 @@
 #include "ReceivedDataStrategy.h"
 #include "GuidUtils.h"
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 
 namespace {
 
@@ -81,7 +81,7 @@ private:
 
 } // namespace
 
-#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -102,7 +102,7 @@ ReceivedDataStrategy::add(ReceivedDataElement* data_sample)
   this->rcvd_samples_.add(data_sample);
 }
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 void
 ReceivedDataStrategy::accept_coherent(const GUID_t& writer,
                                       const GUID_t& publisher)

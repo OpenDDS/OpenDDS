@@ -16,7 +16,7 @@
 
 using namespace OpenDDS::DCPS;
 
-bool checkVal(const char* lhs, const char* rhs, const char* name)
+bool checkVal(char* lhs, char* rhs, const char* name)
 {
   if (std::strcmp(lhs, rhs)) {
     std::cout << "ERROR: target's " << name << " \"" << lhs << "\" != \""
@@ -26,10 +26,10 @@ bool checkVal(const char* lhs, const char* rhs, const char* name)
   return true;
 }
 
-bool checkVal(const TAO::String_Manager& lhs, const TAO::String_Manager& rhs,
-             const char* name)
+bool checkVal(TAO::String_Manager& lhs, TAO::String_Manager& rhs,
+              const char* name)
 {
-  return checkVal(lhs.in(), rhs.in(), name);
+  return checkVal(lhs.inout(), rhs.inout(), name);
 }
 
 bool checkVal(const float& lhs, const float& rhs, const char* name)
@@ -78,12 +78,18 @@ bool checkVal(const ACE_CDR::WChar& lhs, const ACE_CDR::WChar& rhs, const char* 
   return true;
 }
 
+struct StringWrapper {
+  StringWrapper(const char* s) : s_(s) {}
+  operator char*() { return &s_[0]; }
+  OpenDDS::DCPS::String s_;
+};
+
 template<typename T>
 T enumToString(const T& t) { return t; }
 
-const char* enumToString(MyEnum e)
+StringWrapper enumToString(MyEnum e)
 {
-  return OpenDDS::DCPS::gen_MyEnum_names[e];
+  return OpenDDS::DCPS::gen_MyEnum_helper->get_name(e);
 }
 
 template<typename T, typename T2>
@@ -92,7 +98,7 @@ bool check(const T& lhs, const T& rhs, const char* name, ACE_Message_Block* amb,
 {
   if (!checkVal(lhs, rhs, name)) return false;
 
-  Message_Block_Ptr mb (amb->duplicate());
+  Message_Block_Ptr mb(amb->duplicate());
   const Encoding encoding(e);
   Serializer ser(mb.get(), encoding);
   Value val = ms.getValue(ser, name);
@@ -167,7 +173,7 @@ bool run_test_i(Encoding::Kind e)
   }
   // Use checkVal for types that aren't supported in MetaStruct::getValue(), such as arrays and unions
   return
-    check(tgt.a.s, src.a.s, "a.s", data.get(), Value::VAL_STRING, meta, &Value::s_, e)
+    check(tgt.a.s.inout(), src.a.s.inout(), "a.s", data.get(), Value::VAL_STRING, meta, &Value::s_, e)
     && check(tgt.a.l, src.a.l, "a.l", data.get(), Value::VAL_INT, meta, &Value::i_, e)
     && check(tgt.a.w, src.a.w, "a.w", data.get(), Value::VAL_INT, meta, &Value::i_, e)
     && check(tgt.a.c, src.a.c, "a.c", data.get(), Value::VAL_CHAR, meta, &Value::c_, e)
@@ -196,7 +202,7 @@ bool run_test_i(Encoding::Kind e)
     && checkVal(tgt.astra[0], src.astra[0], "astra[0]")
     && checkVal(tgt.astra[1], src.astra[1], "astra[1]")
     && checkVal(tgt.astra[2], src.astra[2], "astra[2]")
-    && check(tgt.s, src.s, "s", data.get(), Value::VAL_STRING, meta, &Value::s_, e);
+    && check(tgt.s.inout(), src.s.inout(), "s", data.get(), Value::VAL_STRING, meta, &Value::s_, e);
 }
 
 Encoding::Kind encodings[] = {
@@ -215,11 +221,11 @@ bool run_test()
       << ">(" << Encoding::kind_to_string(e) << ")" << std::endl;
     try {
       success &= run_test_i<Type>(e);
-    } catch (const CORBA::SystemException& e) {
-      e._tao_print_exception("ERROR: ");
+    } catch (const CORBA::SystemException& ex) {
+      ex._tao_print_exception("ERROR: ");
       success = false;
-    } catch (const std::exception& e) {
-      std::cout << "ERROR: exception caught: " << e.what() << std::endl;
+    } catch (const std::exception& ex) {
+      std::cout << "ERROR: exception caught: " << ex.what() << std::endl;
       success = false;
     } catch (...) {
       std::cout << "ERROR: unknown exception in main" << std::endl;

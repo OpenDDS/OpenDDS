@@ -6,6 +6,8 @@
 #ifndef DATAREADER_LISTENER_IMPL
 #define DATAREADER_LISTENER_IMPL
 
+#include <tests/Utils/DistributedConditionSet.h>
+
 #include <dds/DCPS/LocalObject.h>
 
 #include <dds/DdsDcpsSubscriptionC.h>
@@ -19,7 +21,7 @@
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  DataReaderListenerImpl();
+  DataReaderListenerImpl(DistributedConditionSet_rch dcs);
 
   virtual ~DataReaderListenerImpl();
 
@@ -50,23 +52,15 @@ public:
     DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status);
 
-  long num_reads() const {
-    return num_reads_;
-  }
-
-  void mark_rediscovered();
-  bool is_valid(bool check_lease_recovery, bool expect_unmatch) const;
+  bool is_valid() const;
 
 private:
   typedef std::set<CORBA::Long> Counts;
 
+  DistributedConditionSet_rch dcs_;
   DDS::DataReader_var reader_;
-  long                num_reads_;
-  Counts              counts_;
-  bool                valid_;
-  bool                rediscovered_;
-  bool                initial_discovery_data_;
-  bool                rediscovery_data_;
+  Counts counts_;
+  bool valid_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

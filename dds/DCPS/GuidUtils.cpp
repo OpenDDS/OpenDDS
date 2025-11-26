@@ -11,7 +11,7 @@
 #include "Util.h"
 #include "GuidBuilder.h"
 #include "SafetyProfileStreams.h"
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include "RestoreOutputStreamState.h"
 #endif
 
@@ -23,7 +23,7 @@
 
 namespace {
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 inline std::ostream&
 sep(std::ostream& os)
 {
@@ -47,7 +47,7 @@ OPENDDS_STRING
 to_string(const EntityId_t& entityId)
 {
   return to_hex_dds_string(&entityId.entityKey[0], sizeof(EntityKey_t)) +
-    to_dds_string(unsigned(entityId.entityKind), true);
+    to_dds_string(entityId.entityKind, true);
 }
 
 OPENDDS_STRING
@@ -64,7 +64,7 @@ void intersect(const GuidSet& a, const GuidSet& b, GuidSet& result)
                           std::inserter(result, result.end()), GUID_tKeyLessThan());
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 std::ostream&
 operator<<(std::ostream& os, const GUID_t& rhs)
 {

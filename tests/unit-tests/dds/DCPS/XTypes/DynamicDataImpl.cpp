@@ -1,4 +1,6 @@
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #include <DynamicDataImplTypeSupportImpl.h>
 
@@ -353,10 +355,10 @@ void verify_modified_single_value_struct(XTypes::DynamicDataImpl& ddi)
   EXPECT_EQ(DDS::RETCODE_OK, ddi.get_uint32_value(uint32_val, 2));
   EXPECT_EQ(321ul, uint32_val);
 
-  EXPECT_EQ(DDS::RETCODE_OK, ddi.set_int8_value(3, CORBA::Int8(128)));
+  EXPECT_EQ(DDS::RETCODE_OK, ddi.set_int8_value(3, CORBA::Int8(127)));
   CORBA::Int8 int8_val;
   EXPECT_EQ(DDS::RETCODE_OK, ddi.get_int8_value(int8_val, 3));
-  EXPECT_EQ(CORBA::Int8(128), int8_val);
+  EXPECT_EQ(CORBA::Int8(127), int8_val);
 
   EXPECT_EQ(DDS::RETCODE_OK, ddi.set_uint8_value(4, CORBA::UInt8(100)));
   CORBA::UInt8 uint8_val;
@@ -405,10 +407,10 @@ void verify_modified_single_value_struct(XTypes::DynamicDataImpl& ddi)
   EXPECT_EQ(L'D', wchar_val);
 #endif
 
-  EXPECT_EQ(DDS::RETCODE_OK, ddi.set_byte_value(14, CORBA::Octet(0x6789)));
+  EXPECT_EQ(DDS::RETCODE_OK, ddi.set_byte_value(14, CORBA::Octet(0x67)));
   CORBA::Octet byte_val;
   EXPECT_EQ(DDS::RETCODE_OK, ddi.get_byte_value(byte_val, 14));
-  EXPECT_EQ(CORBA::Octet(0x6789), byte_val);
+  EXPECT_EQ(CORBA::Octet(0x67), byte_val);
 
   EXPECT_EQ(DDS::RETCODE_OK, ddi.set_boolean_value(15, false));
   CORBA::Boolean bool_val = false;
@@ -2194,7 +2196,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToStruct)
   // Test reading from the backing store.
   ACE_Message_Block bs_msg(256);
   bs_msg.copy((const char*)single_value_struct, sizeof single_value_struct);
-  DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+  DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
   XTypes::DynamicDataImpl ddi(dt, backstore);
   MutableSingleValueStruct input;
   set_single_value_struct(input);
@@ -2245,7 +2247,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromBackingStore)
 
   ACE_Message_Block bs_msg(256);
   bs_msg.copy((const char*)buffer, sizeof buffer);
-  DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+  DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
   XTypes::DynamicDataImpl ddi(dt, backstore);
   CORBA::Int8 int8_val = 0;
   EXPECT_EQ(DDS::RETCODE_OK, ddi.get_int8_value(int8_val, 3));
@@ -2323,7 +2325,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnion)
     // Read from the backing store
     ACE_Message_Block bs_msg(32);
     bs_msg.copy((const char*)expected_cdr, sizeof expected_cdr);
-    DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+    DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
     XTypes::DynamicDataImpl ddi(dt, backstore);
     verify_int32_union_backing_store(ddi);
   }
@@ -2338,7 +2340,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnion)
     // Test an instance starting with a backing store.
     ACE_Message_Block bs_msg(32);
     bs_msg.copy((const char*)expected_cdr, sizeof expected_cdr);
-    DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+    DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
     XTypes::DynamicDataImpl ddi(dt, backstore);
     verify_uint32_union_backing_store(ddi);
   }
@@ -2451,7 +2453,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnion)
     // Read from the backing store
     ACE_Message_Block bs_msg(32);
     bs_msg.copy((const char*)expected_cdr, sizeof expected_cdr);
-    DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+    DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
     XTypes::DynamicDataImpl ddi(dt, backstore);
     verify_string_union_backing_store(ddi);
   }
@@ -2548,7 +2550,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToStruct)
   // Test reading from the backing store
   ACE_Message_Block bs_msg(512);
   bs_msg.copy((const char*)sequence_struct, sizeof sequence_struct);
-  DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+  DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
   XTypes::DynamicDataImpl ddi(dt, backstore);
   verify_reading_sequence_value_struct(ddi);
 
@@ -2613,7 +2615,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToUnion)
     // Read from the backing store
     ACE_Message_Block bs_msg(64);
     bs_msg.copy((const char*)expected_cdr, sizeof expected_cdr);
-    DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+    DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
     XTypes::DynamicDataImpl ddi(dt, backstore);
     verify_int32s_union_backing_store(ddi);
   }
@@ -2746,7 +2748,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToUnion)
     // Read from the backing store
     ACE_Message_Block bs_msg(64);
     bs_msg.copy((const char*)expected_cdr, sizeof expected_cdr);
-    DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+    DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
     XTypes::DynamicDataImpl ddi(dt, backstore);
     verify_strings_union_backing_store(ddi);
   }
@@ -2786,7 +2788,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToArray)
   // Test reading from the backing store
   ACE_Message_Block bs_msg(64);
   bs_msg.copy((const char*)expected_cdr, sizeof expected_cdr);
-  DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+  DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
   XTypes::DynamicDataImpl ddi(dt, backstore);
 
   DDS::DynamicData_var nested_dd;
@@ -2957,7 +2959,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteStructWithNestedMembers)
   // Read from the backing store
   ACE_Message_Block bs_msg(128);
   bs_msg.copy((const char*)mutable_struct, sizeof mutable_struct);
-  DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+  DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
   XTypes::DynamicDataImpl ddi(dt, backstore);
 
   CORBA::Int8 i_val = 0;
@@ -3091,7 +3093,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteValueToStruct)
   // Read-only from the backing store.
   ACE_Message_Block bs_msg(128);
   bs_msg.copy((const char*)single_value_struct, sizeof single_value_struct);
-  DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+  DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
   XTypes::DynamicDataImpl ddi(dt, backstore);
   AppendableSingleValueStruct input;
   set_single_value_struct(input);
@@ -3123,7 +3125,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteValueToUnion)
     // Read from the backing store
     ACE_Message_Block bs_msg(32);
     bs_msg.copy((const char*)expected_cdr, sizeof expected_cdr);
-    DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+    DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
     XTypes::DynamicDataImpl ddi(dt, backstore);
     verify_int32_union_backing_store(ddi);
   }
@@ -3138,7 +3140,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteValueToUnion)
     // Test an instance starting with a backing store.
     ACE_Message_Block bs_msg(32);
     bs_msg.copy((const char*)expected_cdr, sizeof expected_cdr);
-    DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+    DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
     XTypes::DynamicDataImpl ddi(dt, backstore);
     verify_uint32_union_backing_store(ddi);
   }
@@ -3251,7 +3253,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteValueToUnion)
     // Read from the backing store
     ACE_Message_Block bs_msg(32);
     bs_msg.copy((const char*)expected_cdr, sizeof expected_cdr);
-    DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+    DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
     XTypes::DynamicDataImpl ddi(dt, backstore);
     verify_string_union_backing_store(ddi);
   }
@@ -3314,7 +3316,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteSequenceToStruct)
   // Test reading from the backing store
   ACE_Message_Block bs_msg(512);
   bs_msg.copy((const char*)expected_cdr, sizeof expected_cdr);
-  DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+  DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
   XTypes::DynamicDataImpl ddi(dt, backstore);
   verify_reading_sequence_value_struct(ddi);
 
@@ -3344,7 +3346,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteSequenceToUnion)
     // Read from the backing store
     ACE_Message_Block bs_msg(64);
     bs_msg.copy((const char*)expected_cdr, sizeof expected_cdr);
-    DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+    DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
     XTypes::DynamicDataImpl ddi(dt, backstore);
     verify_int32s_union_backing_store(ddi);
   }
@@ -3467,7 +3469,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteSequenceToUnion)
     // Read from the backing store
     ACE_Message_Block bs_msg(64);
     bs_msg.copy((const char*)expected_cdr, sizeof expected_cdr);
-    DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+    DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
     XTypes::DynamicDataImpl ddi(dt, backstore);
     verify_strings_union_backing_store(ddi);
   }
@@ -3609,7 +3611,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteValueToStruct)
   // Read-only from the backing store.
   ACE_Message_Block bs_msg(128);
   bs_msg.copy((const char*)single_value_struct, sizeof single_value_struct);
-  DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+  DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
   XTypes::DynamicDataImpl ddi(dt, backstore);
   FinalSingleValueStruct input;
   set_single_value_struct(input);
@@ -3640,7 +3642,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteValueToUnion)
     // Read from the backing store
     ACE_Message_Block bs_msg(32);
     bs_msg.copy((const char*)expected_cdr, sizeof expected_cdr);
-    DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+    DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
     XTypes::DynamicDataImpl ddi(dt, backstore);
     verify_int32_union_backing_store(ddi);
   }
@@ -3654,7 +3656,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteValueToUnion)
     // Test an instance starting with a backing store.
     ACE_Message_Block bs_msg(32);
     bs_msg.copy((const char*)expected_cdr, sizeof expected_cdr);
-    DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+    DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
     XTypes::DynamicDataImpl ddi(dt, backstore);
     verify_uint32_union_backing_store(ddi);
   }
@@ -3754,7 +3756,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteValueToUnion)
     // Read from the backing store
     ACE_Message_Block bs_msg(32);
     bs_msg.copy((const char*)expected_cdr, sizeof expected_cdr);
-    DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+    DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
     XTypes::DynamicDataImpl ddi(dt, backstore);
     verify_string_union_backing_store(ddi);
   }
@@ -3814,7 +3816,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteSequenceToStruct)
   // Test reading from the backing store
   ACE_Message_Block bs_msg(512);
   bs_msg.copy((const char*)expected_cdr, sizeof expected_cdr);
-  DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+  DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
   XTypes::DynamicDataImpl ddi(dt, backstore);
   verify_reading_sequence_value_struct(ddi);
 
@@ -3843,7 +3845,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteSequenceToUnion)
     // Read from the backing store
     ACE_Message_Block bs_msg(64);
     bs_msg.copy((const char*)expected_cdr, sizeof expected_cdr);
-    DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+    DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
     XTypes::DynamicDataImpl ddi(dt, backstore);
     verify_int32s_union_backing_store(ddi);
   }
@@ -3952,7 +3954,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteSequenceToUnion)
     // Read from the backing store
     ACE_Message_Block bs_msg(64);
     bs_msg.copy((const char*)expected_cdr, sizeof expected_cdr);
-    DDS::DynamicData_ptr backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
+    DDS::DynamicData_var backstore = new XTypes::DynamicDataXcdrReadImpl(&bs_msg, xcdr2, dt);
     XTypes::DynamicDataImpl ddi(dt, backstore);
     verify_strings_union_backing_store(ddi);
   }
@@ -4348,4 +4350,4 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, String_As_Enum)
   EXPECT_EQ(DDS::RETCODE_OK, data.get_int32_value(eval, MID_my_enum));
   EXPECT_EQ(static_cast<int>(E_UINT64), eval);
 }
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

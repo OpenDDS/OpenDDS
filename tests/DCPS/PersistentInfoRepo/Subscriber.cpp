@@ -7,7 +7,7 @@
 
 #include "tests/Utils/DDSApp.h"
 #include "tests/Utils/Options.h"
-#include "model/Sync.h"
+#include "tests/Utils/StatusMatching.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "tests/Utils/ListenerRecorder.h"
 #include <dds/DCPS/Service_Participant.h>
@@ -150,11 +150,17 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     std::cerr << pid << "Sub Creating Stage " << stage << " reader\n";
     DDS::DataReader_var dr = topic.reader(listener);
 
-
-    {
-      std::cerr << pid << "Sub Stage " << stage
-                << " waiting for 2 writer to come and go" << std::endl;
-      OpenDDS::Model::ReaderSync rs(dr, 2);
+    std::cerr << pid << "Sub Stage " << stage
+              << " waiting for 2 writer to come and go" << std::endl;
+    if (wait_match(dr, 2, Utils::EQ) != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR: %N:%l: main: "
+                 "wait for publisher failed\n"));
+      return -1;
+    }
+    if (wait_match(dr, 0, Utils::EQ) != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR: %N:%l: main: "
+                 "wait for publisher failed\n"));
+      return -1;
     }
     std::cerr << pid << "Sub Stage " << stage << " done waiting\n";
 

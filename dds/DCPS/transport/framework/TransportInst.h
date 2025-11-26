@@ -31,11 +31,6 @@
 
 #include <ace/Synch_Traits.h>
 
-ACE_BEGIN_VERSIONED_NAMESPACE_DECL
-class ACE_Configuration_Heap;
-class ACE_Configuration_Section_Key;
-ACE_END_VERSIONED_NAMESPACE_DECL
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -45,6 +40,8 @@ namespace ICE {
 }
 
 namespace DCPS {
+
+class DomainParticipantImpl;
 
 /**
  * @class TransportInst
@@ -62,7 +59,7 @@ namespace DCPS {
  * The TransportInst object is supplied to the
  * TransportImpl::configure() method.
  */
-class OpenDDS_Dcps_Export TransportInst : public virtual RcObject {
+class OpenDDS_Dcps_Export TransportInst : public RcObject {
 public:
 
   static const long DEFAULT_DATALINK_RELEASE_DELAY = 10000;
@@ -77,14 +74,9 @@ public:
 
   bool is_template() const { return is_template_; }
 
-  /// Overwrite the default configurations with the configuration from the
-  /// given section in the ACE_Configuration_Heap object.
-  virtual int load(ACE_Configuration_Heap& cf,
-                   ACE_Configuration_Section_Key& sect);
-
   /// Diagnostic aid.
-  void dump() const;
-  virtual OPENDDS_STRING dump_to_str() const;
+  void dump(DDS::DomainId_t domain) const;
+  virtual OPENDDS_STRING dump_to_str(DDS::DomainId_t domain) const;
 
   /// Format name of transport configuration parameter for use in
   /// conjunction with dump(std::ostream& os).
@@ -134,6 +126,9 @@ public:
   void receive_preallocated_data_blocks(size_t rpdb);
   size_t receive_preallocated_data_blocks() const;
 
+  void instantiation_rule(const String& rule);
+  String instantiation_rule() const;
+
   /// Does the transport as configured support RELIABLE_RELIABILITY_QOS?
   virtual bool is_reliable() const = 0;
 
@@ -141,21 +136,32 @@ public:
   virtual bool requires_cdr_encapsulation() const { return false; }
 
   /// Populate a transport locator sequence.  Return the number of "locators."
-  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const = 0;
+  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info,
+                                  ConnectionInfoFlags flags,
+                                  DDS::DomainId_t domain,
+                                  DomainParticipantImpl* participant) = 0;
 
-  DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint(DDS::DomainId_t domain,
+                                                     DomainParticipantImpl* participant);
   void rtps_relay_only_now(bool flag);
   void use_rtps_relay_now(bool flag);
   void use_ice_now(bool flag);
 
   virtual void update_locators(const GUID_t& /*remote_id*/,
-                               const TransportLocatorSeq& /*locators*/) {}
+                               const TransportLocatorSeq& /*locators*/,
+                               DDS::DomainId_t /*domain*/,
+                               DomainParticipantImpl* /*participant*/) {}
 
   virtual void get_last_recv_locator(const GUID_t& /*remote_id*/,
-                                     TransportLocator& /*locators*/) {}
+                                     const GuidVendorId_t& /*vendor_id*/,
+                                     TransportLocator& /*locators*/,
+                                     DDS::DomainId_t /*domain*/,
+                                     DomainParticipantImpl* /*participant*/) {}
 
-  ReactorTask_rch reactor_task();
-  EventDispatcher_rch event_dispatcher();
+  ReactorTask_rch reactor_task(DDS::DomainId_t domain,
+                               DomainParticipantImpl* participant);
+  EventDispatcher_rch event_dispatcher(DDS::DomainId_t domain,
+                                       DomainParticipantImpl* participant);
 
   /**
    * @{
@@ -194,9 +200,21 @@ public:
   void count_messages(bool flag);
   bool count_messages() const;
 
-  virtual void append_transport_statistics(TransportStatisticsSequence& /*seq*/) {}
+  virtual void append_transport_statistics(TransportStatisticsSequence& /*seq*/,
+                                           DDS::DomainId_t /*domain*/,
+                                           DomainParticipantImpl* /*participant*/) {}
 
   static void set_port_in_addr_string(OPENDDS_STRING& addr_str, u_short port_number);
+
+  void remove_participant(DDS::DomainId_t domain,
+                          DomainParticipantImpl* participant);
+
+  NetworkAddress actual_local_address(DDS::DomainId_t /*domain*/,
+                                      DomainParticipantImpl* /*participant*/);
+#ifdef ACE_HAS_IPV6
+  NetworkAddress ipv6_actual_local_address(DDS::DomainId_t /*domain*/,
+                                           DomainParticipantImpl* /*participant*/);
+#endif
 
 protected:
 
@@ -216,16 +234,21 @@ private:
 
   friend class TransportClient;
  protected:
-  TransportImpl_rch get_or_create_impl();
-  TransportImpl_rch get_impl();
+  TransportImpl_rch get_or_create_impl(DDS::DomainId_t domain,
+                                       DomainParticipantImpl* participant);
+  TransportImpl_rch get_impl(DDS::DomainId_t domain,
+                             DomainParticipantImpl* participant);
  private:
-  virtual TransportImpl_rch new_impl() = 0;
+  virtual TransportImpl_rch new_impl(DDS::DomainId_t domain,
+                                     DomainParticipantImpl* participant) = 0;
 
   const String name_;
   const String config_prefix_;
   const bool is_template_;
 
-  TransportImpl_rch impl_;
+  typedef OPENDDS_MAP(DomainParticipantImpl*, TransportImpl_rch) ParticipantMap;
+  typedef OPENDDS_MAP(DDS::DomainId_t, ParticipantMap) DomainMap;
+  DomainMap domain_map_;
 };
 
 // Helper to turn a raw value into getters and setters.
@@ -238,9 +261,9 @@ public:
   ConfigValue(Delegate& delegate,
               Setter setter,
               Getter getter)
-    : delegate_(delegate)
-    , setter_(setter)
+    : setter_(setter)
     , getter_(getter)
+    , delegate_(delegate)
   {}
 
   ConfigValue& operator=(T flag)
@@ -266,9 +289,9 @@ public:
   }
 
 private:
-  Delegate& delegate_;
   Setter setter_;
   Getter getter_;
+  Delegate& delegate_;
 };
 
 template <typename Delegate, typename T>
@@ -280,9 +303,9 @@ public:
   ConfigValueRef(Delegate& delegate,
                  Setter setter,
                  Getter getter)
-    : delegate_(delegate)
-    , setter_(setter)
+    : setter_(setter)
     , getter_(getter)
+    , delegate_(delegate)
   {}
 
   ConfigValueRef& operator=(const T& flag)
@@ -308,9 +331,9 @@ public:
   }
 
 private:
-  Delegate& delegate_;
   Setter setter_;
   Getter getter_;
+  Delegate& delegate_;
 };
 
 } // namespace DCPS

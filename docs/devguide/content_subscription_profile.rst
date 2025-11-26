@@ -56,7 +56,7 @@ Creating a content-filtered topic requires the following parameters:
 
 * Filter expression
 
-  An SQL-like expression (:ref:`content_subscription_profile--filter-expressions`) which defines the subset of samples published on the related topic that should be received by the content-filtered topic's data readers.
+  An :ref:`SQL-like expression <content_subscription_profile--filter-expressions>` which defines the subset of samples published on the related topic that should be received by the content-filtered topic's data readers.
 
 * Expression parameters
 
@@ -68,11 +68,11 @@ Once the content-filtered topic has been created, it is used by the subscriber's
 This data reader is functionally equivalent to a normal data reader except that incoming data samples which do not meet the filter expression's criteria are dropped.
 
 Filter expressions are first evaluated at the publisher so that data samples which would be ignored by the subscriber can be dropped before even getting to the transport.
-This feature can be turned off with ``-DCPSPublisherContentFilter 0`` or the equivalent setting in the ``[common]`` section of the configuration file.
-The behavior of non-default ``DEADLINE`` or ``LIVELINESS`` QoS policies may be affected by this policy.
+This feature can be turned off by setting :cfg:prop:`DCPSPublisherContentFilter` to ``0``.
+The behavior of non-default :ref:`qos-deadline` or :ref:`qos-liveliness` policies may be affected by this policy.
 Special consideration must be given to how the "missing" samples impact the QoS behavior, see the document in :ghfile:`docs/design/CONTENT_SUBSCRIPTION`.
 
-.. note:: RTPS_UDP transport does not always do Writer-side filtering.
+.. note:: :ref:`rtps-udp-transport` does not always do Writer-side filtering.
   It does not currently implement transport level filtering, but may be able to filter above the transport layer.
 
 .. _content_subscription_profile--filter-expressions:
@@ -83,9 +83,9 @@ Filter Expressions
 ..
     Sect<5.2.1>
 
-The formal grammar for filter expressions is defined in Annex A of the DDS specification.
+The formal grammar for filter expressions is defined in :omgspec:`dds:Annex B - Syntax for Queries and Filters`.
 This section provides an informal summary of that grammar.
-Query expressions (:ref:`content_subscription_profile--query-expressions`) and topic expressions (:ref:`content_subscription_profile--topic-expressions`) are also defined in Annex A.
+:ref:`Query expressions <content_subscription_profile--query-expressions>` and :ref:`topic expressions <content_subscription_profile--topic-expressions>` are also defined in the DDS specification.
 
 Filter expressions are combinations of one or more predicates.
 Each predicate is a logical expression taking one of two forms:
@@ -141,7 +141,7 @@ Filtering and Dispose/Unregister Samples
 ..
     Sect<5.2.3>
 
-DataReaders without filtering can see samples with the ``valid_data`` field of SampleInfo set to false.
+DataReaders without filtering can see samples with the ``valid_data`` field of ``SampleInfo`` set to ``false``.
 This happens when the matching DataWriter disposes or unregisters the instance.
 Content filtering (whether achieved through Content-Filtered Topics, Query Conditions, or Multi Topics) will filter such samples when the filter expression explicitly uses key fields.
 Filter expressions that don't meet that criteria will result in no such samples passing the filter.

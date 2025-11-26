@@ -15,7 +15,6 @@
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/Util.h"
-#include "dds/DCPS/MonitorFactory.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/ServiceEventDispatcher.h"
 #include "tao/debug.h"
@@ -30,15 +29,14 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-TransportImpl::TransportImpl(TransportInst_rch config)
+TransportImpl::TransportImpl(TransportInst_rch config,
+                             DDS::DomainId_t domain)
   : config_(config)
-  , event_dispatcher_(make_rch<ServiceEventDispatcher>(1))
+  , event_dispatcher_(make_rch<ServiceEventDispatcher>(1u))
   , is_shut_down_(false)
+  , domain_(domain)
 {
   DBG_ENTRY_LVL("TransportImpl", "TransportImpl", 6);
-  if (TheServiceParticipant->monitor_factory_) {
-    monitor_.reset(TheServiceParticipant->monitor_factory_->create_transport_monitor(this));
-  }
 }
 
 TransportImpl::~TransportImpl()
@@ -75,10 +73,6 @@ bool
 TransportImpl::open()
 {
   // Success.
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
-
   if (Transport_debug_level > 0) {
 
     ACE_DEBUG((LM_DEBUG,
@@ -105,9 +99,7 @@ TransportImpl::create_reactor_task(bool useAsyncSend, const OPENDDS_STRING& name
 
   this->reactor_task_= make_rch<ReactorTask>(useAsyncSend);
 
-  if (reactor_task_->open_reactor_task(0,
-                                       &TheServiceParticipant->get_thread_status_manager(),
-                                       name)) {
+  if (reactor_task_->open_reactor_task(&TheServiceParticipant->get_thread_status_manager(), name)) {
     throw Transport::MiscProblem(); // error already logged by TRT::open()
   }
 }
@@ -132,14 +124,6 @@ TransportImpl::release_link_resources(DataLink* link)
 }
 
 void
-TransportImpl::report()
-{
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
-}
-
-void
 TransportImpl::dump()
 {
   ACE_DEBUG((LM_DEBUG,
@@ -151,7 +135,26 @@ OPENDDS_STRING
 TransportImpl::dump_to_str()
 {
   TransportInst_rch cfg = config_.lock();
-  return cfg ? cfg->dump_to_str() : OPENDDS_STRING();
+  return cfg ? cfg->dump_to_str(domain_) : OPENDDS_STRING();
+}
+
+StatisticSeq TransportImpl::stats_template()
+{
+  static const DDS::UInt32 num_local_stats = 2;
+  StatisticSeq stats(num_local_stats);
+  stats.length(num_local_stats);
+  stats[0].name = "TransportImplPendingConnections";
+  stats[1].name = "TransportImplReactorTaskCmdQueue";
+  return stats;
+}
+
+void TransportImpl::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
+{
+  {
+    GuardType guard(pending_connections_lock_);
+    stats[idx++].value = pending_connections_.size();
+  }
+  stats[idx++].value = reactor_task_ ? reactor_task_->command_queue_size() : 0;
 }
 
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Common.h"
-#include "dds/DdsDcpsTopicC.h"
+#include <dds/DdsDcpsTopicC.h>
 
 #include <map>
 #include <mutex>

@@ -19,18 +19,10 @@ RtpsUdpDataLink::get_reactor()
   return reactor_task_->get_reactor();
 }
 
-ACE_INLINE ReactorInterceptor_rch
-RtpsUdpDataLink::get_reactor_interceptor() const
+ACE_INLINE ReactorTask_rch
+RtpsUdpDataLink::get_reactor_task() const
 {
-  if (!reactor_task_) return ReactorInterceptor_rch();
-  return reactor_task_->interceptor();
-}
-
-ACE_INLINE bool
-RtpsUdpDataLink::reactor_is_shut_down()
-{
-  if (!reactor_task_) return true;
-  return reactor_task_->is_shut_down();
+  return reactor_task_;
 }
 
 ACE_INLINE ACE_SOCK_Dgram&
@@ -59,7 +51,7 @@ RtpsUdpDataLink::ipv6_multicast_socket()
 }
 #endif
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 ACE_INLINE DDS::Security::ParticipantCryptoHandle
 RtpsUdpDataLink::local_crypto_handle() const
 {

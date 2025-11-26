@@ -6,21 +6,24 @@
 #ifndef OPENDDS_DCPS_DISCOVERY_H
 #define OPENDDS_DCPS_DISCOVERY_H
 
-#include "RcObject.h"
-#include "RcHandle_T.h"
-#include "unique_ptr.h"
-#include "XTypes/TypeObject.h"
-#include "XTypes/TypeLookupService.h"
+#include "ConditionVariable.h"
 #include "DataReaderCallbacks.h"
 #include "DataWriterCallbacks.h"
-#include "TopicCallbacks.h"
-#include "PoolAllocator.h"
 #include "PoolAllocationBase.h"
-#include "ConditionVariable.h"
+#include "PoolAllocator.h"
+#include "RcHandle_T.h"
+#include "RcObject.h"
+#include "TopicCallbacks.h"
+#include "unique_ptr.h"
+
+#include "XTypes/TypeLookupService.h"
+#include "XTypes/TypeObject.h"
 
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsSubscriptionC.h>
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 #  include <dds/DdsSecurityCoreC.h>
 #endif
 
@@ -58,6 +61,14 @@ struct OpenDDS_Dcps_Export TypeObjReqCond {
 
   DDS::ReturnCode_t wait();
   void done(DDS::ReturnCode_t retcode);
+};
+
+struct OpenDDS_Dcps_Export TypeInformation {
+  TypeInformation();
+  TypeInformation(const XTypes::TypeInformation& typeinfo);
+
+  XTypes::TypeInformation xtypes_type_info_;
+  enum { Flags_None, Flags_FlexibleTypeSupport } flags_;
 };
 
 /**
@@ -108,7 +119,7 @@ public:
     const DDS::DomainParticipantQos& qos,
     XTypes::TypeLookupService_rch tls) = 0;
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant_secure(
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos,
@@ -133,6 +144,12 @@ public:
     const GUID_t& participantId,
     const DDS::DomainParticipantQos& qos) = 0;
 
+  virtual bool enable_flexible_types(
+    DDS::DomainId_t /*domain*/,
+    const GUID_t& /*myParticipantId*/,
+    const GUID_t& /*remoteParticipantId*/,
+    const char* /*typeKey*/)
+  { return false; }
 
   // Topic operations:
 
@@ -188,7 +205,7 @@ public:
                                const DDS::DataWriterQos& qos,
                                const TransportLocatorSeq& transInfo,
                                const DDS::PublisherQos& publisherQos,
-                               const XTypes::TypeInformation& type_info) = 0;
+                               const TypeInformation& type_info) = 0;
 
   virtual bool remove_publication(
     DDS::DomainId_t domainId,
@@ -233,7 +250,7 @@ public:
                                 const char* filterClassName,
                                 const char* filterExpression,
                                 const DDS::StringSeq& exprParams,
-                                const XTypes::TypeInformation& type_info) = 0;
+                                const TypeInformation& type_info) = 0;
 
   virtual bool remove_subscription(
     DDS::DomainId_t domainId,

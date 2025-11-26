@@ -6,9 +6,12 @@
 #include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
 #include "debug.h"
+
 #include "Util.h"
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 #include "PoolAllocator.h"
 #endif
 
@@ -28,14 +31,14 @@ OpenDDS_Dcps_Export TransportDebug transport_debug;
 
 OpenDDS_Dcps_Export LogLevel log_level(LogLevel::Warning);
 OpenDDS_Dcps_Export unsigned int DCPS_debug_level = 0;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 OpenDDS_Dcps_Export SecurityDebug security_debug;
 #endif
 
 void LogLevel::set(LogLevel::Value value)
 {
   level_ = value;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   if (level_ >= Notice) {
     security_debug.set_debug_level(1);
   } else {
@@ -69,7 +72,7 @@ namespace {
     {"info", "INFO", LogLevel::Info},
     {"debug", "DEBUG", LogLevel::Debug}
   };
-};
+}
 
 void LogLevel::set_from_string(const char* name)
 {
@@ -130,7 +133,7 @@ OpenDDS_Dcps_Export void set_DCPS_debug_level(unsigned int lvl)
   DCPS_debug_level = lvl;
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 SecurityDebug::SecurityDebug()
   : fake_encryption(false)
   , force_auth_role(FORCE_AUTH_ROLE_NORMAL)

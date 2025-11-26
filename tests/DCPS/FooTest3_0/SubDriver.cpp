@@ -1,14 +1,18 @@
 #include "SubDriver.h"
 #include "TestException.h"
+#include "DataReaderListener.h"
+#include "DataReaderQCListener.h"
+
+#include "tests/DCPS/common/TestSupport.h"
+#include "tests/Utils/ExceptionStreams.h"
+#include "tests/Utils/StatusMatching.h"
+
 #include "dds/DCPS/AssociationData.h"
-#include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/RestoreOutputStreamState.h"
-#include "DataReaderListener.h"
-#include "DataReaderQCListener.h"
-#include "tests/DCPS/common/TestSupport.h"
-#include "tests/Utils/ExceptionStreams.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include <ace/Arg_Shifter.h>
 #include <ace/Argv_Type_Converter.h>
@@ -30,7 +34,6 @@ SubDriver::SubDriver()
     shutdown_pub_ (1),
     add_new_subscription_ (0),
     shutdown_delay_secs_ (10),
-    sub_ready_filename_(ACE_TEXT("sub_ready.txt")),
     listener_(0),
     qc_usage_ (false)
 {
@@ -45,8 +48,11 @@ SubDriver::~SubDriver()
 void
 SubDriver::run(int& argc, ACE_TCHAR* argv[])
 {
-  init(argc, argv);
-  run();
+  DistributedConditionSet_rch dcs =
+    OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+
+  init(dcs, argc, argv);
+  run(dcs);
 }
 
 
@@ -82,11 +88,6 @@ SubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
           shutdown_delay_secs_ = ACE_OS::atoi (current_arg);
           arg_shifter.consume_arg ();
         }
-      else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-f"))) != 0)
-        {
-          sub_ready_filename_ = current_arg;
-          arg_shifter.consume_arg ();
-        }
       else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0)
         {
           num_disposed_ = ACE_OS::atoi (current_arg);
@@ -117,8 +118,9 @@ SubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
 
 
 void
-SubDriver::init(int& argc, ACE_TCHAR* argv[])
+SubDriver::init(DistributedConditionSet_rch dcs, int& argc, ACE_TCHAR* argv[])
 {
+  dcs->wait_for("sub", "pub", "ready");
   ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
   parse_args(argc, argv);
@@ -180,29 +182,29 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
   }
 
   // Create datareader to test copy_from_topic_qos.
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
   DataReaderQCListenerImpl* qc_listener = 0;
   if (qc_usage_)
   {
-    qc_listener = new DataReaderQCListenerImpl;
+    qc_listener = new DataReaderQCListenerImpl(dcs, num_writes_);
     listener_ = qc_listener;
   }
   else
 #endif
   {
-    listener_ = new DataReaderListenerImpl;
+    listener_ = new DataReaderListenerImpl(dcs, num_writes_);
   }
   ::DDS::DataReaderListener_var drl = listener_;
 
   datareader_
     = subscriber_->create_datareader(topic_.in (),
-                                     DATAREADER_QOS_DEFAULT,
+                                     DATAREADER_QOS_USE_TOPIC_QOS,
                                      drl.in(),
                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (datareader_.in ()));
   TEST_CHECK (participant_->contains_entity(datareader_->get_instance_handle()));
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
   if (qc_usage_)
   {
     DDS::StringSeq params(1);
@@ -221,30 +223,19 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
   }
 #endif
 
-  // Indicate that the subscriber is ready to accept connection
-  FILE* readers_ready = ACE_OS::fopen (sub_ready_filename_.c_str (), ACE_TEXT("w"));
-  if (readers_ready == 0)
-  {
-    ACE_ERROR ((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber ready file\n")));
-  }
-  else
-  {
-    ACE_OS::fclose(readers_ready);
-  }
+  Utils::wait_match(datareader_, 1);
+  dcs->post("sub", "ready");
   // And we are done with the init().
 }
 
 void
-SubDriver::run()
+SubDriver::run(DistributedConditionSet_rch dcs)
 {
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT("(%P|%t) SubDriver::run, ")
               ACE_TEXT(" Wait for publisher.\n")));
 
-  while (this->listener_->samples_read() != num_writes_) {
-    ACE_OS::sleep(1);
-  }
+  dcs->wait_for("sub", "sub", "done");
 
   TEST_CHECK (participant_->contains_entity(datareader_->get_instance_handle()));
 

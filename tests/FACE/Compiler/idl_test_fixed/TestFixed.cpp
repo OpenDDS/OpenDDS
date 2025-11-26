@@ -7,7 +7,6 @@
 
 #include <sstream>
 
-#ifdef ACE_HAS_CDR_FIXED
 bool serialization_test()
 {
     using OpenDDS::DCPS::Encoding;
@@ -44,12 +43,10 @@ bool serialization_test()
 
     return false;
 }
-#endif // ACE_HAS_CDR_FIXED
 
 int ACE_TMAIN(int, ACE_TCHAR*[])
 {
   bool failed = false;
-#ifdef ACE_HAS_CDR_FIXED
   try {
     // Check opendds_idl-generated code.
     failed |= serialization_test();
@@ -116,7 +113,6 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     ACE_ERROR((LM_ERROR, "Caught exception: %C\n", e._info().c_str()));
     failed = true;
   }
-#endif // ACE_HAS_CDR_FIXED
 
   return failed;
 }

@@ -7,14 +7,16 @@
 
 #include "RtpsDiscoveryConfig.h"
 
-#include <dds/DCPS/LogAddr.h>
-#include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/ConfigUtils.h>
-#include <dds/DCPS/DomainParticipantImpl.h>
-#include <dds/DCPS/SubscriberImpl.h>
-#include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/DomainParticipantImpl.h>
+#include <dds/DCPS/LogAddr.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/Registered_Data_Types.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Statistics.h>
+#include <dds/DCPS/SubscriberImpl.h>
 
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/framework/TransportSendStrategy.h>
@@ -34,11 +36,15 @@ using DCPS::TimeDuration;
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   : key_(key)
   , config_(DCPS::make_rch<RtpsDiscoveryConfig>(key))
+  , stats_writer_(DCPS::make_rch<DCPS::StatisticsDataWriter>(DCPS::DataWriterQosBuilder().durability_transient_local(), TheServiceParticipant->time_source()))
+  , stats_task_(DCPS::make_rch<PeriodicTask>(TheServiceParticipant->reactor_task(), *this, &RtpsDiscovery::write_stats))
 {
+  TheServiceParticipant->statistics_topic()->connect(stats_writer_);
 }
 
 RtpsDiscovery::~RtpsDiscovery()
 {
+  TheServiceParticipant->statistics_topic()->disconnect(stats_writer_);
 }
 
 int
@@ -46,7 +52,7 @@ RtpsDiscovery::Config::discovery_config()
 {
   RcHandle<DCPS::ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
 
-  const DCPS::ConfigStoreImpl::StringList sections = config_store->get_section_names("OPENDDS_RTPS_DISCOVERY");
+  const DCPS::ConfigStoreImpl::StringList sections = config_store->get_section_names("RTPS_DISCOVERY");
 
   // Loop through the [rtps_discovery/*] sections
   for (DCPS::ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
@@ -56,14 +62,14 @@ RtpsDiscovery::Config::discovery_config()
     RtpsDiscovery_rch discovery = OpenDDS::DCPS::make_rch<RtpsDiscovery>(rtps_name);
     RtpsDiscoveryConfig_rch config = discovery->config();
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
     if (config_store->has(config->config_key("IceTa").c_str())) {
       if (log_level >= DCPS::LogLevel::Warning) {
         ACE_ERROR((LM_WARNING,
                    "(%P|%t) RtpsDiscovery::Config::discovery_config: "
                    "IceTa is deprecated.  Use Ta in [ice]\n"));
       }
-      config_store->set("OPENDDS_IceTa", config_store->get(config->config_key("IceTa").c_str(), ""));
+      config_store->set("IceTa", config_store->get(config->config_key("IceTa").c_str(), ""));
     }
     if (config_store->has(config->config_key("IceConnectivityCheckTTL").c_str())) {
       if (log_level >= DCPS::LogLevel::Warning) {
@@ -71,7 +77,7 @@ RtpsDiscovery::Config::discovery_config()
                    "(%P|%t) RtpsDiscovery::Config::discovery_config: "
                    "IceConnectivityCheckTTL is deprecated.  Use ConnectivityCheckTTL in [ice]\n"));
       }
-      config_store->set("OPENDDS_IceConnectivityCheckTTL", config_store->get(config->config_key("IceConnectivityCheckTTL").c_str(), ""));
+      config_store->set("IceConnectivityCheckTTL", config_store->get(config->config_key("IceConnectivityCheckTTL").c_str(), ""));
     }
     if (config_store->has(config->config_key("IceChecklistPeriod").c_str())) {
       if (log_level >= DCPS::LogLevel::Warning) {
@@ -79,7 +85,7 @@ RtpsDiscovery::Config::discovery_config()
                    "(%P|%t) RtpsDiscovery::Config::discovery_config: "
                    "IceChecklistPeriod is deprecated.  Use ChecklistPeriod in [ice]\n"));
       }
-      config_store->set("OPENDDS_IceChecklistPeriod", config_store->get(config->config_key("IceChecklistPeriod").c_str(), ""));
+      config_store->set("IceChecklistPeriod", config_store->get(config->config_key("IceChecklistPeriod").c_str(), ""));
     }
     if (config_store->has(config->config_key("IceIndicationPeriod").c_str())) {
       if (log_level >= DCPS::LogLevel::Warning) {
@@ -87,7 +93,7 @@ RtpsDiscovery::Config::discovery_config()
                    "(%P|%t) RtpsDiscovery::Config::discovery_config: "
                    "IceIndicationPeriod is deprecated.  Use IndicationPeriod in [ice]\n"));
       }
-      config_store->set("OPENDDS_IceIndicationPeriod", config_store->get(config->config_key("IceIndicationPeriod").c_str(), ""));
+      config_store->set("IceIndicationPeriod", config_store->get(config->config_key("IceIndicationPeriod").c_str(), ""));
     }
     if (config_store->has(config->config_key("IceNominatedTTL").c_str())) {
       if (log_level >= DCPS::LogLevel::Warning) {
@@ -95,7 +101,7 @@ RtpsDiscovery::Config::discovery_config()
                    "(%P|%t) RtpsDiscovery::Config::discovery_config: "
                    "IceNominatedTTL is deprecated.  Use NominatedTTL in [ice]\n"));
       }
-      config_store->set("OPENDDS_IceNominatedTTL", config_store->get(config->config_key("IceNominatedTTL").c_str(), ""));
+      config_store->set("IceNominatedTTL", config_store->get(config->config_key("IceNominatedTTL").c_str(), ""));
     }
     if (config_store->has(config->config_key("IceServerReflexiveAddressPeriod").c_str())) {
       if (log_level >= DCPS::LogLevel::Warning) {
@@ -103,7 +109,7 @@ RtpsDiscovery::Config::discovery_config()
                    "(%P|%t) RtpsDiscovery::Config::discovery_config: "
                    "IceServerReflexiveAddressPeriod is deprecated.  Use ServerReflexiveAddressPeriod in [ice]\n"));
       }
-      config_store->set("OPENDDS_IceServerReflexiveAddressPeriod", config_store->get(config->config_key("IceServerReflexiveAddressPeriod").c_str(), ""));
+      config_store->set("IceServerReflexiveAddressPeriod", config_store->get(config->config_key("IceServerReflexiveAddressPeriod").c_str(), ""));
     }
     if (config_store->has(config->config_key("IceServerReflexiveIndicationCount").c_str())) {
       if (log_level >= DCPS::LogLevel::Warning) {
@@ -111,7 +117,7 @@ RtpsDiscovery::Config::discovery_config()
                    "(%P|%t) RtpsDiscovery::Config::discovery_config: "
                    "IceServerReflexiveIndicationCount is deprecated.  Use ServerReflexiveIndicationCount in [ice]\n"));
       }
-      config_store->set("OPENDDS_IceServerReflexiveIndicationCount", config_store->get(config->config_key("IceServerReflexiveIndicationCount").c_str(), ""));
+      config_store->set("IceServerReflexiveIndicationCount", config_store->get(config->config_key("IceServerReflexiveIndicationCount").c_str(), ""));
     }
     if (config_store->has(config->config_key("IceDeferredTriggeredCheckTTL").c_str())) {
       if (log_level >= DCPS::LogLevel::Warning) {
@@ -119,7 +125,7 @@ RtpsDiscovery::Config::discovery_config()
                    "(%P|%t) RtpsDiscovery::Config::discovery_config: "
                    "IceDeferredTriggeredCheckTTL is deprecated.  Use DeferredTriggeredCheckTTL in [ice]\n"));
       }
-      config_store->set("OPENDDS_IceDeferredTriggeredCheckTTL", config_store->get(config->config_key("IceDeferredTriggeredCheckTTL").c_str(), ""));
+      config_store->set("IceDeferredTriggeredCheckTTL", config_store->get(config->config_key("IceDeferredTriggeredCheckTTL").c_str(), ""));
     }
     if (config_store->has(config->config_key("IceChangePasswordPeriod").c_str())) {
       if (log_level >= DCPS::LogLevel::Warning) {
@@ -127,9 +133,9 @@ RtpsDiscovery::Config::discovery_config()
                    "(%P|%t) RtpsDiscovery::Config::discovery_config: "
                    "IceChangePasswordPeriod is deprecated.  Use ChangePasswordPeriod in [ice]\n"));
       }
-      config_store->set("OPENDDS_IceChangePasswordPeriod", config_store->get(config->config_key("IceChangePasswordPeriod").c_str(), ""));
+      config_store->set("IceChangePasswordPeriod", config_store->get(config->config_key("IceChangePasswordPeriod").c_str(), ""));
     }
-#endif /* OPENDDS_SECURITY */
+#endif
 
     TheServiceParticipant->add_discovery(discovery);
   }
@@ -188,6 +194,10 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
     // ads.id may change during Spdp constructor
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, participants_lock_, ads);
     participants_[domain][ads.id] = spdp;
+    const DCPS::TimeDuration period = TheServiceParticipant->statistics_period();
+    if (!period.is_zero()) {
+      stats_task_->enable(false, period);
+    }
   } catch (const std::exception& e) {
     ads.id = GUID_UNKNOWN;
     ACE_ERROR((LM_ERROR, "(%P|%t) RtpsDiscovery::add_domain_participant() - "
@@ -197,7 +207,7 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
   return ads;
 }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 DCPS::AddDomainStatus
 RtpsDiscovery::add_domain_participant_secure(
   DDS::DomainId_t domain,
@@ -215,6 +225,10 @@ RtpsDiscovery::add_domain_participant_secure(
       domain, ads.id, qos, this, tls, id, perm, part_crypto));
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, participants_lock_, ads);
     participants_[domain][ads.id] = spdp;
+    const DCPS::TimeDuration period = TheServiceParticipant->statistics_period();
+    if (!period.is_zero()) {
+      stats_task_->enable(false, period);
+    }
   } catch (const std::exception& e) {
     ads.id = GUID_UNKNOWN;
     ACE_ERROR((LM_WARNING, "(%P|%t) RtpsDiscovery::add_domain_participant_secure() - "
@@ -247,7 +261,7 @@ RtpsDiscovery::use_rtps_relay_now(bool after)
   config->use_rtps_relay(after);
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 void
 RtpsDiscovery::use_ice_now(bool after)
 {
@@ -372,7 +386,7 @@ RtpsDiscovery::append_transport_statistics(DDS::DomainId_t domain,
 RcHandle<DCPS::BitSubscriber> RtpsDiscovery::init_bit(DCPS::DomainParticipantImpl* participant)
 {
   DDS::Subscriber_var bit_subscriber;
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (!TheServiceParticipant->get_BIT()) {
     DCPS::RcHandle<DCPS::BitSubscriber> bit_subscriber_rch = DCPS::make_rch<DCPS::BitSubscriber>();
     get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber_rch);
@@ -446,7 +460,7 @@ RcHandle<DCPS::BitSubscriber> RtpsDiscovery::init_bit(DCPS::DomainParticipantImp
     }
     return RcHandle<DCPS::BitSubscriber>();
   }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 
   DCPS::RcHandle<DCPS::BitSubscriber> bit_subscriber_rch = DCPS::make_rch<DCPS::BitSubscriber>(bit_subscriber);
   get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber_rch);
@@ -485,6 +499,9 @@ bool RtpsDiscovery::remove_domain_participant(
   if (domain->second.empty()) {
     participants_.erase(domain);
   }
+  if (participants_.empty() && stats_task_) {
+    stats_task_->disable();
+  }
   g.release();
 
   participant->shutdown();
@@ -509,6 +526,12 @@ bool RtpsDiscovery::update_domain_participant_qos(
   DDS::DomainId_t domain, const GUID_t& participant, const DDS::DomainParticipantQos& qos)
 {
   return get_part(domain, participant)->update_domain_participant_qos(qos);
+}
+
+bool RtpsDiscovery::enable_flexible_types(DDS::DomainId_t domain, const GUID_t& myParticipantId,
+                                          const GUID_t& remoteParticipantId, const char* typeKey)
+{
+  return get_part(domain, myParticipantId)->enable_flexible_types(remoteParticipantId, typeKey);
 }
 
 bool RtpsDiscovery::has_domain_participant(DDS::DomainId_t domain, const GUID_t& local, const GUID_t& remote) const
@@ -587,7 +610,7 @@ bool RtpsDiscovery::add_publication(
   const DDS::DataWriterQos& qos,
   const DCPS::TransportLocatorSeq& transInfo,
   const DDS::PublisherQos& publisherQos,
-  const XTypes::TypeInformation& type_info)
+  const DCPS::TypeInformation& type_info)
 {
   return get_part(domainId, participantId)->add_publication(topicId,
                                                             publication,
@@ -648,7 +671,7 @@ bool RtpsDiscovery::add_subscription(
   const char* filterClassName,
   const char* filterExpr,
   const DDS::StringSeq& params,
-  const XTypes::TypeInformation& type_info)
+  const DCPS::TypeInformation& type_info)
 {
   return get_part(domainId, participantId)->add_subscription(topicId,
                                                              subscription,
@@ -775,6 +798,20 @@ void RtpsDiscovery::request_remote_complete_type_objects(
 {
   ParticipantHandle spdp = get_part(domain, local_participant);
   spdp->request_remote_complete_type_objects(remote_entity, remote_type_info, cond);
+}
+
+void RtpsDiscovery::write_stats(const MonotonicTimePoint&) const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(participants_lock_);
+  DCPS::Statistics statistics;
+  for (DomainParticipantMap::const_iterator domain = participants_.begin(); domain != participants_.end(); ++domain) {
+    for (ParticipantMap::const_iterator part = domain->second.begin(); part != domain->second.end(); ++part) {
+      statistics.id = ("RtpsDiscovery_" + DCPS::GuidConverter(part->first).uniqueParticipantId() + '_'
+                       + DCPS::to_dds_string(domain->first)).c_str();
+      part->second->fill_stats(statistics.stats);
+      stats_writer_->write(statistics);
+    }
+  }
 }
 
 } // namespace DCPS

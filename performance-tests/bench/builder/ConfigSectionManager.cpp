@@ -1,6 +1,6 @@
 #include "ConfigSectionManager.h"
 
-#include "dds/DCPS/Service_Participant.h"
+#include <dds/DCPS/Service_Participant.h>
 
 #include "ace/Configuration.h"
 

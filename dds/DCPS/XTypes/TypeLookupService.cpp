@@ -12,7 +12,7 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 namespace {
 
 using namespace OpenDDS::XTypes;
@@ -45,7 +45,7 @@ TypeLookupService::TypeLookupService()
 
 TypeLookupService::~TypeLookupService()
 {
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   for (GuidTypeMap::const_iterator pos = gt_map_.begin(), limit = gt_map_.end(); pos != limit; ++pos) {
     for (DynamicTypeMap::const_iterator pos2 = pos->second.begin(), limit2 = pos->second.end(); pos2 != limit2; ++pos2) {
       pos2->second->clear();
@@ -57,11 +57,31 @@ TypeLookupService::~TypeLookupService()
 void TypeLookupService::get_type_objects(const TypeIdentifierSeq& type_ids,
                                          TypeIdentifierTypeObjectPairSeq& types) const
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  TypeIdentifierSet tids;
+
   for (unsigned i = 0; i < type_ids.length(); ++i) {
-    TypeMap::const_iterator pos = type_map_.find(type_ids[i]);
-    if (pos != type_map_.end()) {
-      types.append(TypeIdentifierTypeObjectPair(pos->first, pos->second));
+    const TypeIdentifier& tid = type_ids[i];
+    if (tid.kind() != TI_STRONGLY_CONNECTED_COMPONENT) {
+      tids.insert(tid);
+    } else {
+      TypeIdentifier scc_id(tid);
+      for (ACE_CDR::Long j = 1; j <= scc_id.sc_component_id().scc_length; ++j) {
+        scc_id.sc_component_id().scc_index = j;
+        tids.insert(scc_id);
+      }
+    }
+  }
+
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  for (TypeIdentifierSet::const_iterator pos = tids.begin(), limit = tids.end(); pos != limit; ++pos) {
+    const TypeIdentifier& tid = *pos;
+    TypeMap::const_iterator pos2 = type_map_.find(tid);
+    if (pos2 != type_map_.end()) {
+      types.append(TypeIdentifierTypeObjectPair(tid, pos2->second));
+    } else if (DCPS::log_level >= DCPS::LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING,
+                 "(%P|%t) WARNING: TypeLookupService::set_type_objects: "
+                 "unknown type\n"));
     }
   }
 }
@@ -103,25 +123,15 @@ void TypeLookupService::get_type_dependencies(const TypeIdentifierSeq& type_ids,
 void TypeLookupService::get_type_dependencies_i(const TypeIdentifierSeq& type_ids,
   TypeIdentifierWithSizeSeq& dependencies) const
 {
-  OPENDDS_SET(TypeIdentifier) tmp;
   for (unsigned i = 0; i < type_ids.length(); ++i) {
-    const TypeIdentifierWithSizeSeqMap::const_iterator it = type_dependencies_map_.find(type_ids[i]);
+    const TypeIdentifier tid = make_scc_id_or_default(type_ids[i]);
+    const TypeIdentifierWithSizeSeqMap::const_iterator it = type_dependencies_map_.find(tid);
     if (it != type_dependencies_map_.end()) {
       for (unsigned j = 0; j < it->second.length(); ++j) {
-        tmp.insert(it->second[j].type_id);
+        const ACE_CDR::ULong idx = dependencies.length();
+        dependencies.length(idx + 1);
+        dependencies[idx] = it->second[j];
       }
-    }
-  }
-
-  // All dependent TypeIdentifiers are expected to have an entry in the TypeObject cache.
-  dependencies.length(static_cast<unsigned>(tmp.size()));
-  OPENDDS_SET(TypeIdentifier)::const_iterator iter = tmp.begin();
-  for (unsigned i = 0; iter != tmp.end(); ++i, ++iter) {
-    const TypeMap::const_iterator tobj_it = type_map_.find(*iter);
-    if (tobj_it != type_map_.end()) {
-      dependencies[i].type_id = *iter;
-      const size_t sz = DCPS::serialized_size(get_typeobject_encoding(), tobj_it->second);
-      dependencies[i].typeobject_serialized_size = static_cast<unsigned>(sz);
     }
   }
 }
@@ -610,7 +620,7 @@ bool TypeLookupService::complete_to_minimal_type_object(const TypeObject& cto, T
   }
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 DDS::MemberDescriptor* TypeLookupService::complete_struct_member_to_member_descriptor(
   const CompleteStructMember& cm, const DCPS::GUID_t& guid)
 {
@@ -723,7 +733,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
       DDS::MemberDescriptor_var md_var = md;
       md->name(cto.enumerated_type.literal_seq[i].detail.name.c_str());
       // Use Id to convey the value of the enumerator.
-      md->id(cto.enumerated_type.literal_seq[i].common.value);
+      md->id(static_cast<DDS::MemberId>(cto.enumerated_type.literal_seq[i].common.value));
       md->type(dt);
       md->is_default_label(cto.enumerated_type.literal_seq[i].common.flags & IS_DEFAULT);
       md->index(i);
@@ -745,8 +755,10 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
       MemberDescriptorImpl* md = new MemberDescriptorImpl();
       DDS::MemberDescriptor_var md_var = md;
       md->name(cto.bitmask_type.flag_seq[i].detail.name.c_str());
-      const DDS::DynamicType_var temp = type_identifier_to_dynamic(TypeIdentifier(TK_BOOLEAN), guid);
-      md->type(temp);
+      // Use Id to convey the position of bit flag.
+      md->id(cto.bitmask_type.flag_seq[i].common.position);
+      const DDS::DynamicType_var temp2 = type_identifier_to_dynamic(TypeIdentifier(TK_BOOLEAN), guid);
+      md->type(temp2);
       md->index(i);
       dtm->set_descriptor(md);
       dt->insert_dynamic_member(dtm);
@@ -1103,7 +1115,7 @@ DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic(const TypeIde
 
   return dt_var._retn();
 }
-#endif // OPENDDS_SAFETY_PROFILE
+#endif
 
 void TypeLookupService::add_type_dependencies(const TypeIdentifier& type_id,
   const TypeIdentifierWithSizeSeq& dependencies)
@@ -1166,7 +1178,7 @@ bool TypeLookupService::extensibility(TypeFlag extensibility_mask, const TypeIde
   return false;
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 void TypeLookupService::remove_guid_from_dynamic_map(const DCPS::GUID_t& guid)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);

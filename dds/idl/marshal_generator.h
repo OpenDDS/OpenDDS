@@ -26,9 +26,12 @@ public:
                  AST_Type* discriminator,
                  const char* repoid);
 
-  static void generate_dheader_code(const std::string& code, bool dheader_required, bool is_ser_func = true);
+  static void generate_dheader_code(const std::string& code, bool dheader_required,
+                                    bool is_ser_func = true, const char* indent = "  ");
 
   static void gen_field_getValueFromSerialized(AST_Structure* node, const std::string& clazz);
+
+  static void gen_map_skip_over(AST_Map* map);
 
 private:
   void gen_union_default(AST_UnionBranch* branch, const std::string& varname);

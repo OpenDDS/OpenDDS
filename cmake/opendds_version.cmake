@@ -33,4 +33,5 @@ if(NOT DEFINED OPENDDS_VERSION)
     "${_OPENDDS_CMAKE_DIR}/../../dds"
     "${_OPENDDS_CMAKE_DIR}/.."
   )
+  set(OpenDDS_VERSION "${OPENDDS_VERSION}")
 endif()

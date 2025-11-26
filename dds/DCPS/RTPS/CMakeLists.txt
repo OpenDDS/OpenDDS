@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23...3.27)
+cmake_minimum_required(VERSION 3.23...4.0)
 project(opendds_rtps CXX)
 
 find_package(OpenDDS REQUIRED NO_DEFAULTS OpenDDS::Dcps OpenDDS::opendds_idl)
@@ -45,26 +45,35 @@ target_sources(OpenDDS_Rtps
 _opendds_library(OpenDDS_Rtps)
 target_link_libraries(OpenDDS_Rtps PUBLIC OpenDDS::Dcps)
 
-set(ots_args
+set(common_idl_options
   INCLUDE_BASE "${OPENDDS_SOURCE_DIR}"
   USE_EXPORT "dds/DCPS/RTPS/rtps_export.h" OpenDDS_Rtps_Export
 )
+set(tao_idl_options -St -Scdr)
+set(opendds_idl_options -St -SI -Sv -Sx)
 opendds_target_sources(OpenDDS_Rtps
   PUBLIC
     RtpsCore.idl
-    RtpsSecurity.idl
     RtpsRpc.idl
     TypeLookup.idl
-  ${ots_args}
-  SKIP_OPENDDS_IDL
-  TAO_IDL_OPTIONS -St -Scdr
+  TAO_IDL_OPTIONS ${tao_idl_options}
+  OPENDDS_IDL_OPTIONS ${opendds_idl_options}
+  ${common_idl_options}
 )
 opendds_target_sources(OpenDDS_Rtps
   PUBLIC
-    RtpsCore.idl
-    RtpsRpc.idl
-    TypeLookup.idl
-  ${ots_args}
-  SKIP_TAO_IDL
+    RtpsSubmessageKind.idl
+  OPENDDS_IDL_OPTIONS ${opendds_idl_options} -Lspcpp
+  ${common_idl_options}
+)
+opendds_target_sources(OpenDDS_Rtps
+  PUBLIC
+    RtpsSecurity.idl
+  TAO_IDL_OPTIONS ${tao_idl_options}
+  SKIP_OPENDDS_IDL
+  ${common_idl_options}
+)
+set_target_properties(OpenDDS_Rtps PROPERTIES
+  UNITY_BUILD_UNIQUE_ID "OPENDDS_RTPS_UNITY_BUILD_ID"
 )
 opendds_install_interface_files(OpenDDS_Rtps INCLUDE_BASE "${OPENDDS_SOURCE_DIR}")

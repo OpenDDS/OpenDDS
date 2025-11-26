@@ -6,7 +6,9 @@
 #ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_XCDR_READ_IMPL_H
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_XCDR_READ_IMPL_H
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include "DynamicDataBase.h"
 #  include "TypeObject.h"
 
@@ -340,10 +342,6 @@ public:
 
   CORBA::Boolean equals(DDS::DynamicData_ptr other);
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  DDS::ReturnCode_t get_simple_value(DCPS::Value& value, DDS::MemberId id);
-#endif
-
   bool serialized_size(const DCPS::Encoding&, size_t&, DCPS::Sample::Extent) const
   {
     // Not supported.
@@ -587,6 +585,6 @@ OpenDDS_Dcps_Export bool print_dynamic_data(DDS::DynamicData_ptr dd,
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif
 
 #endif // OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_XCDR_READ_IMPL_H

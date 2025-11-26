@@ -9,7 +9,6 @@
 #include "DataReaderCallbacks.h"
 #include "EntityImpl.h"
 #include "Definitions.h"
-#include "DataCollector_T.h"
 #include "DataReaderImpl.h"
 #include "PoolAllocator.h"
 
@@ -27,9 +26,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 class DomainParticipantImpl;
-class Monitor;
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
 class MultiTopicImpl;
 #endif
 
@@ -84,7 +82,7 @@ public:
 
   virtual DDS::SubscriberListener_ptr get_listener();
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 
   virtual DDS::ReturnCode_t begin_access();
 
@@ -119,35 +117,19 @@ public:
   DDS::ReturnCode_t reader_enabled(const char* topic_name,
                                    DataReaderImpl* reader);
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
   DDS::ReturnCode_t multitopic_reader_enabled(DDS::DataReader_ptr reader);
   void remove_from_datareader_set(DataReaderImpl* reader);
 #endif
 
   DDS::SubscriberListener_ptr listener_for(DDS::StatusKind kind);
 
-  /// @name Raw Latency Statistics Configuration Interfaces
-  /// @{
-
-  /// Configure the size of the raw data collection buffer.
-  unsigned int& raw_latency_buffer_size();
-
-  /// Configure the type of the raw data collection buffer.
-  DataCollector<double>::OnFull& raw_latency_buffer_type();
-
-  /// @}
-
   typedef OPENDDS_VECTOR(GUID_t) SubscriptionIdVec;
   /// Populates a std::vector with the SubscriptionIds (GUIDs)
   /// of this Subscriber's Data Readers
   void get_subscription_ids(SubscriptionIdVec& subs);
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  void update_ownership_strength (const GUID_t& pub_id,
-                                  const CORBA::Long& ownership_strength);
-#endif
-
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   void coherent_change_received(const GUID_t& publisher_id,
                                 DataReaderImpl* reader,
                                 Coherent_State& group_state);
@@ -188,7 +170,7 @@ private:
   DataReaderMap                datareader_map_;
   DataReaderSet                datareader_set_;
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
   typedef OPENDDS_MAP(String, DDS::DataReader_var) MultitopicReaderMap;
   MultitopicReaderMap multitopic_reader_map_;
 #endif
@@ -198,12 +180,6 @@ private:
   DDS::DomainId_t              domain_id_;
   GUID_t                       dp_id_;
 
-  /// Bound (or initial reservation) of raw latency buffers.
-  unsigned int raw_latency_buffer_size_;
-
-  /// Type of raw latency data buffers.
-  DataCollector<double>::OnFull raw_latency_buffer_type_;
-
   /// This lock protects datareader_set_. Only this lock needs to
   /// be acquired if only datareader_set_ is accessed.
   ACE_Recursive_Thread_Mutex dr_set_lock_;
@@ -212,9 +188,6 @@ private:
   /// If datareader_set_ is accessed together with other data members,
   /// acquire dr_set_lock_ in the scope of this lock.
   ACE_Recursive_Thread_Mutex   si_lock_;
-
-  /// Monitor object for this entity
-  unique_ptr<Monitor> monitor_;
 
   int access_depth_;
 };

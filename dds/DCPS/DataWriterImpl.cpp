@@ -7,37 +7,39 @@
 
 #include "DataWriterImpl.h"
 
-#include "FeatureDisabledQosCheck.h"
-#include "DomainParticipantImpl.h"
-#include "PublisherImpl.h"
-#include "Service_Participant.h"
-#include "GuidConverter.h"
-#include "TopicImpl.h"
-#include "PublicationInstance.h"
-#include "Serializer.h"
-#include "Transient_Kludge.h"
-#include "DataDurabilityCache.h"
-#include "MonitorFactory.h"
-#include "SendStateDataSampleList.h"
-#include "DataSampleElement.h"
-#include "Util.h"
 #include "DCPS_Utils.h"
-#include "XTypes/TypeObject.h"
+#include "DataDurabilityCache.h"
+#include "DataSampleElement.h"
+#include "Definitions.h"
+#include "DomainParticipantImpl.h"
+#include "FeatureDisabledQosCheck.h"
+#include "GuidConverter.h"
+#include "PublicationInstance.h"
+#include "PublisherImpl.h"
+#include "SendStateDataSampleList.h"
+#include "Serializer.h"
+#include "Service_Participant.h"
+#include "TopicImpl.h"
+#include "Transient_Kludge.h"
 #include "TypeSupportImpl.h"
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#include "Util.h"
+
+#include "XTypes/TypeObject.h"
+
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 #  include "CoherentChangeControl.h"
 #endif
 #include "AssociationData.h"
 #include "transport/framework/EntryExit.h"
 #include "transport/framework/TransportExceptions.h"
 #include "transport/framework/TransportRegistry.h"
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include "BuiltInTopicUtils.h"
 #endif
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
@@ -77,8 +79,8 @@ DataWriterImpl::DataWriterImpl()
   , is_bit_(false)
   , min_suspended_transaction_id_(0)
   , max_suspended_transaction_id_(0)
-  , liveliness_send_task_(make_rch<DWISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &DataWriterImpl::liveliness_send_task))
-  , liveliness_lost_task_(make_rch<DWISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &DataWriterImpl::liveliness_lost_task))
+  , liveliness_send_task_(make_rch<DWISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &DataWriterImpl::liveliness_send_task))
+  , liveliness_lost_task_(make_rch<DWISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &DataWriterImpl::liveliness_lost_task))
   , liveliness_send_interval_(TimeDuration::max_value)
   , liveliness_lost_interval_(TimeDuration::max_value)
   , liveliness_lost_(false)
@@ -100,9 +102,6 @@ DataWriterImpl::DataWriterImpl()
   publication_match_status_.current_count = 0;
   publication_match_status_.current_count_change = 0;
   publication_match_status_.last_subscription_handle = DDS::HANDLE_NIL;
-
-  monitor_.reset(TheServiceParticipant->monitor_factory_->create_data_writer_monitor(this));
-  periodic_monitor_.reset(TheServiceParticipant->monitor_factory_->create_data_writer_periodic_monitor(this));
 }
 
 // This method is called when there are no longer any reference to the
@@ -114,7 +113,7 @@ DataWriterImpl::~DataWriterImpl()
   liveliness_send_task_->cancel();
   liveliness_lost_task_->cancel();
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
   if (participant) {
     XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
@@ -153,9 +152,9 @@ DataWriterImpl::init(
   topic_id_ = topic_servant_->get_id();
   type_name_ = topic_servant_->get_type_name();
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   is_bit_ = topicIsBIT(topic_name_.in(), type_name_.in());
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
   qos_ = qos;
   passed_qos_ = qos;
@@ -244,7 +243,7 @@ DataWriterImpl::add_association(const ReaderAssociation& reader,
     ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
     reader_info_.insert(std::make_pair(reader.readerId,
                                        ReaderInfo(reader.filterClassName,
-                                                  publisher_content_filter_ ? reader.filterExpression : "",
+                                                  publisher_content_filter_ ? reader.filterExpression.in() : "",
                                                   reader.exprParams, participant_servant_,
                                                   reader.readerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS)));
   }
@@ -338,7 +337,7 @@ DataWriterImpl::ReaderInfo::ReaderInfo(const char* filterClassName,
                                        const DDS::StringSeq& params,
                                        WeakRcHandle<DomainParticipantImpl> participant,
                                        bool durable)
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   : participant_(participant)
   , filter_class_name_(filterClassName)
   , filter_(filter)
@@ -360,18 +359,18 @@ DataWriterImpl::ReaderInfo::ReaderInfo(const char* filterClassName,
   ACE_UNUSED_ARG(params);
   ACE_UNUSED_ARG(participant);
 }
-#endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#endif
 
 DataWriterImpl::ReaderInfo::~ReaderInfo()
 {
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   eval_ = RcHandle<FilterEvaluator>();
   RcHandle<DomainParticipantImpl> participant = participant_.lock();
   if (participant && !filter_.empty()) {
     participant->deref_filter_eval(filter_.c_str());
   }
 
-#endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#endif
 }
 
 void
@@ -380,7 +379,7 @@ DataWriterImpl::association_complete_i(const GUID_t& remote_id)
   DBG_ENTRY_LVL("DataWriterImpl", "association_complete_i", 6);
 
   bool reader_durable = false;
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   OPENDDS_STRING filterClassName;
   RcHandle<FilterEvaluator> eval;
   DDS::StringSeq expression_params;
@@ -410,16 +409,12 @@ DataWriterImpl::association_complete_i(const GUID_t& remote_id)
 
     if (it != reader_info_.end()) {
       reader_durable = it->second.durable_;
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
       filterClassName = it->second.filter_class_name_;
       eval = it->second.eval_;
       expression_params = it->second.expression_params_;
 #endif
     }
-  }
-
-  if (this->monitor_) {
-    this->monitor_->report();
   }
 
   if (!is_bit_) {
@@ -484,7 +479,7 @@ DataWriterImpl::association_complete_i(const GUID_t& remote_id)
     // Tell the WriteDataContainer to resend all sending/sent
     // samples.
     this->data_container_->reenqueue_all(remote_id, this->qos_.lifespan
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
                                          , filterClassName, eval.in(), expression_params
 #endif
                                         );
@@ -538,15 +533,14 @@ DataWriterImpl::association_complete_i(const GUID_t& remote_id)
 
       DataSampleHeader header;
       Message_Block_Ptr end_historic_samples(
-        create_control_message(
-          END_HISTORIC_SAMPLES, header, move(data),
-          SystemTimePoint::now().to_dds_time()));
+        create_control_message(END_HISTORIC_SAMPLES, header, OPENDDS_MOVE_NS::move(data),
+          SystemTimePoint::now().to_idl_struct()));
 
       this->controlTracker.message_sent();
       guard.release();
       ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> rev_lock(lock_);
       ACE_Guard<ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> > rev_guard(rev_lock);
-      SendControlStatus ret = send_w_control(list, header, move(end_historic_samples), remote_id);
+      SendControlStatus ret = send_w_control(list, header, OPENDDS_MOVE_NS::move(end_historic_samples), remote_id);
       if (ret == SEND_CONTROL_ERROR) {
         ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
                              ACE_TEXT("DataWriterImpl::association_complete_i: ")
@@ -694,7 +688,7 @@ void DataWriterImpl::replay_durable_data_for(const GUID_t& remote_id)
   DBG_ENTRY_LVL("DataWriterImpl", "replay_durable_data_for", 6);
 
   bool reader_durable = false;
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   OPENDDS_STRING filterClassName;
   RcHandle<FilterEvaluator> eval;
   DDS::StringSeq expression_params;
@@ -706,7 +700,7 @@ void DataWriterImpl::replay_durable_data_for(const GUID_t& remote_id)
 
     if (it != reader_info_.end()) {
       reader_durable = it->second.durable_;
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
       filterClassName = it->second.filter_class_name_;
       eval = it->second.eval_;
       expression_params = it->second.expression_params_;
@@ -719,7 +713,7 @@ void DataWriterImpl::replay_durable_data_for(const GUID_t& remote_id)
     // Tell the WriteDataContainer to resend all sending/sent
     // samples.
     this->data_container_->reenqueue_all(remote_id, this->qos_.lifespan
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
                                          , filterClassName, eval.in(), expression_params
 #endif
                                          );
@@ -772,12 +766,12 @@ void DataWriterImpl::replay_durable_data_for(const GUID_t& remote_id)
       ser << remote_id;
 
       DataSampleHeader header;
-      Message_Block_Ptr end_historic_samples(create_control_message(END_HISTORIC_SAMPLES, header, move(data),
-                                                                    SystemTimePoint::now().to_dds_time()));
+      Message_Block_Ptr end_historic_samples(create_control_message(END_HISTORIC_SAMPLES, header, OPENDDS_MOVE_NS::move(data),
+                                                                    SystemTimePoint::now().to_idl_struct()));
 
       this->controlTracker.message_sent();
       guard.release();
-      const SendControlStatus ret = send_w_control(list, header, move(end_historic_samples), remote_id);
+      const SendControlStatus ret = send_w_control(list, header, OPENDDS_MOVE_NS::move(end_historic_samples), remote_id);
       if (ret == SEND_CONTROL_ERROR) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                    ACE_TEXT("DataWriterImpl::replay_durable_data_for: ")
@@ -802,11 +796,10 @@ void DataWriterImpl::remove_all_associations()
     size = static_cast<CORBA::ULong>(readers_.size());
     readers.length(size);
 
-    RepoIdSet::iterator itEnd = readers_.end();
-    int i = 0;
-
-    for (RepoIdSet::iterator it = readers_.begin(); it != itEnd; ++it) {
-      readers[i ++] = *it;
+    const RepoIdSet::iterator itEnd = readers_.end();
+    DDS::UInt32 i = 0;
+    for (RepoIdSet::iterator it = readers_.begin(); it != itEnd; ++it, ++i) {
+      readers[i] = *it;
     }
   }
 
@@ -899,10 +892,7 @@ void
 DataWriterImpl::update_subscription_params(const GUID_t& readerId,
                                            const DDS::StringSeq& params)
 {
-#ifdef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-  ACE_UNUSED_ARG(readerId);
-  ACE_UNUSED_ARG(params);
-#else
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
   ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
   RepoIdToReaderInfoMap::iterator iter = reader_info_.find(readerId);
@@ -917,7 +907,9 @@ DataWriterImpl::update_subscription_params(const GUID_t& readerId,
                ACE_TEXT(" - writer: %C has no info about reader: %C\n"),
                LogGuid(this->publication_id_).c_str(), LogGuid(readerId).c_str()));
   }
-
+#else
+  ACE_UNUSED_ARG(readerId);
+  ACE_UNUSED_ARG(params);
 #endif
 }
 
@@ -1071,10 +1063,10 @@ DataWriterImpl::send_request_ack()
     create_control_message(
       REQUEST_ACK,
       element->get_header(),
-      move(blk),
-      SystemTimePoint::now().to_dds_time()));
+      OPENDDS_MOVE_NS::move(blk),
+      SystemTimePoint::now().to_idl_struct()));
 
-  element->set_sample(move(sample));
+  element->set_sample(OPENDDS_MOVE_NS::move(sample));
 
   ret = this->data_container_->enqueue_control(element);
 
@@ -1272,12 +1264,11 @@ DataWriterImpl::get_matched_subscriptions(
                    DDS::RETCODE_ERROR);
 
   // Copy out the handles for the current set of subscriptions.
-  int index = 0;
   subscription_handles.length(
     static_cast<CORBA::ULong>(this->id_to_handle_map_.size()));
 
-  for (RepoIdToHandleMap::iterator
-       current = this->id_to_handle_map_.begin();
+  DDS::UInt32 index = 0;
+  for (RepoIdToHandleMap::iterator current = this->id_to_handle_map_.begin();
        current != this->id_to_handle_map_.end();
        ++current, ++index) {
     subscription_handles[index] = current->second;
@@ -1286,7 +1277,7 @@ DataWriterImpl::get_matched_subscriptions(
   return DDS::RETCODE_OK;
 }
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 DDS::ReturnCode_t
 DataWriterImpl::get_matched_subscription_data(
   DDS::SubscriptionBuiltinTopicData & subscription_data,
@@ -1318,7 +1309,7 @@ DataWriterImpl::get_matched_subscription_data(
 
   return ret;
 }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
 DDS::ReturnCode_t
 DataWriterImpl::enable()
@@ -1362,7 +1353,7 @@ DataWriterImpl::enable()
   CORBA::Long max_instances = 0, max_total_samples = 0;
 
   if (qos_.resource_limits.max_samples != DDS::LENGTH_UNLIMITED) {
-    n_chunks_ = qos_.resource_limits.max_samples;
+    n_chunks_ = static_cast<size_t>(qos_.resource_limits.max_samples);
 
     if (qos_.resource_limits.max_instances == DDS::LENGTH_UNLIMITED ||
         (qos_.resource_limits.max_samples < qos_.resource_limits.max_instances)
@@ -1382,7 +1373,7 @@ DataWriterImpl::enable()
   const CORBA::Long max_durable_per_instance =
     qos_.durability.kind == DDS::VOLATILE_DURABILITY_QOS ? 0 : history_depth;
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
   // Get data durability cache if DataWriter QoS requires durable
   // samples.  Publisher servant retains ownership of the cache.
   DataDurabilityCache* const durability_cache =
@@ -1402,7 +1393,7 @@ DataWriterImpl::enable()
       domain_id_,
       topic_name_,
       get_type_name(),
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
       durability_cache,
       qos_.durability_service,
 #endif
@@ -1463,7 +1454,7 @@ DataWriterImpl::enable()
 
   try {
     this->enable_transport(reliable,
-                           this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
+                           this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS, participant.get());
 
   } catch (const Transport::Exception&) {
     ACE_ERROR((LM_ERROR,
@@ -1491,7 +1482,7 @@ DataWriterImpl::enable()
   DDS::PublisherQos pub_qos;
   publisher->get_qos(pub_qos);
 
-  XTypes::TypeInformation type_info;
+  TypeInformation type_info;
   type_support_->to_type_info(type_info);
 
   XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
@@ -1519,7 +1510,7 @@ DataWriterImpl::enable()
       return DDS::RETCODE_ERROR;
     }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
     security_config_ = participant->get_security_config();
     participant_permissions_handle_ = participant->permissions_handle();
     dynamic_type_ = type_support_->get_type();
@@ -1546,11 +1537,7 @@ DataWriterImpl::enable()
   const DDS::ReturnCode_t writer_enabled_result =
     publisher->writer_enabled(topic_name_.in(), this);
 
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
-
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 
   // Move cached data from the durability cache to the unsent data
   // queue.
@@ -1622,10 +1609,6 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
                      ret);
   }
 
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
-
   DataSampleElement* element = 0;
   ret = this->data_container_->obtain_buffer_for_control(element);
   if (ret != DDS::RETCODE_OK) {
@@ -1642,10 +1625,10 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
     create_control_message(
      INSTANCE_REGISTRATION,
      element->get_header(),
-     move(data),
+     OPENDDS_MOVE_NS::move(data),
      source_timestamp));
 
-  element->set_sample(move(sample));
+  element->set_sample(OPENDDS_MOVE_NS::move(sample));
 
   ret = this->data_container_->enqueue_control(element);
 
@@ -1675,7 +1658,7 @@ DataWriterImpl::register_instance_from_durable_data(
                    get_lock(),
                    DDS::RETCODE_ERROR);
 
-  const DDS::ReturnCode_t ret = register_instance_i(handle, move(data), source_timestamp);
+  const DDS::ReturnCode_t ret = register_instance_i(handle, OPENDDS_MOVE_NS::move(data), source_timestamp);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance_from_durable_data: ")
@@ -1736,9 +1719,9 @@ DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
 
   Message_Block_Ptr sample(create_control_message(UNREGISTER_INSTANCE,
                                                   element->get_header(),
-                                                  move(unregistered_sample_data),
+                                                  OPENDDS_MOVE_NS::move(unregistered_sample_data),
                                                   source_timestamp));
-  element->set_sample(move(sample));
+  element->set_sample(OPENDDS_MOVE_NS::move(sample));
 
   ret = this->data_container_->enqueue_control(element);
 
@@ -1808,9 +1791,9 @@ DataWriterImpl::dispose_and_unregister(DDS::InstanceHandle_t handle,
 
   Message_Block_Ptr sample(create_control_message(DISPOSE_UNREGISTER_INSTANCE,
                                                   element->get_header(),
-                                                  move(data_sample),
+                                                  OPENDDS_MOVE_NS::move(data_sample),
                                                   source_timestamp));
-  element->set_sample(move(sample));
+  element->set_sample(OPENDDS_MOVE_NS::move(sample));
 
   ret = this->data_container_->enqueue_control(element);
 
@@ -1903,13 +1886,13 @@ DataWriterImpl::write(Message_Block_Ptr data,
   }
 
   Message_Block_Ptr temp;
-  ret = create_sample_data_message(move(data),
+  ret = create_sample_data_message(OPENDDS_MOVE_NS::move(data),
                                    handle,
                                    element->get_header(),
                                    temp,
                                    source_timestamp,
                                    (filter_out != 0));
-  element->set_sample(move(temp));
+  element->set_sample(OPENDDS_MOVE_NS::move(temp));
 
   if (ret != DDS::RETCODE_OK) {
     data_container_->release_buffer(element);
@@ -1969,13 +1952,18 @@ DataWriterImpl::write(Message_Block_Ptr data,
   return DDS::RETCODE_OK;
 }
 
+void DataWriterImpl::get_flexible_types(const char* key, XTypes::TypeInformation& type_info)
+{
+  type_support_->get_flexible_types(key, type_info);
+}
+
 void
 DataWriterImpl::track_sequence_number(GUIDSeq* filter_out)
 {
   const SequenceNumber sn = get_max_sn();
   ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   // Track individual expected sequence numbers in ReaderInfo
   RepoIdSet excluded;
 
@@ -1999,7 +1987,7 @@ DataWriterImpl::track_sequence_number(GUIDSeq* filter_out)
     iter->second.expected_sequence_ = sn;
   }
 
-#endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#endif
 
 }
 
@@ -2065,9 +2053,9 @@ DataWriterImpl::dispose(DDS::InstanceHandle_t handle,
 
   Message_Block_Ptr sample(create_control_message(DISPOSE_INSTANCE,
                                                   element->get_header(),
-                                                  move(registered_sample_data),
+                                                  OPENDDS_MOVE_NS::move(registered_sample_data),
                                                   source_timestamp));
-  element->set_sample(move(sample));
+  element->set_sample(OPENDDS_MOVE_NS::move(sample));
 
   ret = this->data_container_->enqueue_control(element);
 
@@ -2123,7 +2111,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
                                        Message_Block_Ptr data,
                                        const DDS::Time_t& source_timestamp)
 {
-  header_data.message_id_ = message_id;
+  header_data.message_id_ = static_cast<char>(message_id);
   header_data.byte_order_ =
     this->swap_bytes() ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER;
   header_data.coherent_change_ = false;
@@ -2230,7 +2218,7 @@ DataWriterImpl::create_sample_data_message(Message_Block_Ptr data,
     return DDS::RETCODE_ERROR;
   }
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   header_data.group_coherent_ =
     publisher->qos_.presentation.access_scope
     == DDS::GROUP_PRESENTATION_QOS;
@@ -2317,7 +2305,7 @@ DataWriterImpl::parent() const
   return this->publisher_servant_.lock();
 }
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
 bool
 DataWriterImpl::filter_out(const DataSampleElement& elt,
                            const OPENDDS_STRING& filterClassName,
@@ -2358,7 +2346,7 @@ DataWriterImpl::check_transport_qos(const TransportInst&)
   return true;
 }
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 
 bool
 DataWriterImpl::coherent_changes_pending()
@@ -2421,22 +2409,21 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
 
   DataSampleHeader header;
   Message_Block_Ptr control(
-    create_control_message(
-      END_COHERENT_CHANGES, header, move(data),
-      SystemTimePoint::now().to_dds_time()));
+    create_control_message(END_COHERENT_CHANGES, header, OPENDDS_MOVE_NS::move(data),
+      SystemTimePoint::now().to_idl_struct()));
 
   this->coherent_ = false;
   this->coherent_samples_ = 0;
 
   guard.release();
-  if (this->send_control(header, move(control)) == SEND_CONTROL_ERROR) {
+  if (this->send_control(header, OPENDDS_MOVE_NS::move(control)) == SEND_CONTROL_ERROR) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::end_coherent_changes:")
                ACE_TEXT(" unable to send END_COHERENT_CHANGES control message!\n")));
   }
 }
 
-#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
+#endif
 
 void
 DataWriterImpl::data_dropped(const DataSampleElement* element,
@@ -2545,11 +2532,10 @@ DataWriterImpl::send_liveliness(const MonotonicTimePoint& now)
     DataSampleHeader header;
     Message_Block_Ptr empty;
     Message_Block_Ptr liveliness_msg(
-      create_control_message(
-        DATAWRITER_LIVELINESS, header, move(empty),
-        SystemTimePoint::now().to_dds_time()));
+      create_control_message(DATAWRITER_LIVELINESS, header, OPENDDS_MOVE_NS::move(empty),
+        SystemTimePoint::now().to_idl_struct()));
 
-    if (this->send_control(header, move(liveliness_msg)) == SEND_CONTROL_ERROR) {
+    if (this->send_control(header, OPENDDS_MOVE_NS::move(liveliness_msg)) == SEND_CONTROL_ERROR) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::send_liveliness: ")
                         ACE_TEXT("send_control failed.\n")),
@@ -2568,7 +2554,7 @@ DataWriterImpl::prepare_to_delete()
   this->stop_associating();
   this->terminate_send_if_suspended();
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
   // Trigger data to be persisted, i.e. made durable, if so
   // configured. This needs be called before unregister_instances
   // because unregister_instances may cause instance dispose.
@@ -2579,7 +2565,7 @@ DataWriterImpl::prepare_to_delete()
 #endif
 
   // Unregister all registered instances prior to deletion.
-  unregister_instances(SystemTimePoint::now().to_dds_time());
+  unregister_instances(SystemTimePoint::now().to_idl_struct());
 
   const Observer_rch observer = get_observer(Observer::e_DELETED);
   if (observer) {
@@ -2724,7 +2710,7 @@ DataWriterImpl::lookup_instance_handles(const ReaderIdSeq& ids,
   }
 }
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
 bool
 DataWriterImpl::persist_data()
 {
@@ -2764,7 +2750,7 @@ DataWriterImpl::retrieve_inline_qos_data(TransportSendListener::InlineQosData& q
   qos_data.topic_name = this->topic_name_.in();
 }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 DDS::Security::ParticipantCryptoHandle DataWriterImpl::get_crypto_handle() const
 {
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
@@ -2798,7 +2784,7 @@ DataWriterImpl::send_control(const DataSampleHeader& header,
 {
   controlTracker.message_sent();
 
-  SendControlStatus status = TransportClient::send_control(header, move(msg));
+  SendControlStatus status = TransportClient::send_control(header, OPENDDS_MOVE_NS::move(msg));
 
   if (status != SEND_CONTROL_OK) {
     controlTracker.message_dropped();
@@ -2820,7 +2806,8 @@ void DataWriterImpl::set_wait_pending_deadline(const MonotonicTimePoint& deadlin
 
 void DataWriterImpl::transport_discovery_change()
 {
-  populate_connection_info();
+  RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  populate_connection_info(participant.get());
   const TransportLocatorSeq& trans_conf_info = connection_info();
 
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
@@ -2960,7 +2947,7 @@ DDS::ReturnCode_t DataWriterImpl::dispose_w_timestamp(
   DDS::InstanceHandle_t instance_handle,
   const DDS::Time_t& source_timestamp)
 {
-#if defined(OPENDDS_SECURITY) && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+#if OPENDDS_CONFIG_SECURITY && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
   DDS::DynamicData_var dynamic_data = sample.get_dynamic_data(dynamic_type_);
   DDS::Security::SecurityException ex;
   if (dynamic_data && security_config_ &&
@@ -3034,7 +3021,7 @@ ACE_Message_Block* DataWriterImpl::serialize_sample(const Sample& sample)
     Serializer serializer(mb.get(), encoding);
     if (encapsulated) {
       EncapsulationHeader encap;
-      if (!encap.from_encoding(encoding, type_support_->base_extensibility())) {
+      if (!from_encoding(encap, encoding, type_support_->base_extensibility())) {
         // from_encoding logged the error
         return 0;
       }
@@ -3099,7 +3086,7 @@ DDS::ReturnCode_t DataWriterImpl::get_or_create_instance_handle(
   handle = lookup_instance(sample);
   if (handle == DDS::HANDLE_NIL || !get_handle_instance(handle)) {
     Sample_rch copy = sample.copy(Sample::ReadOnly, Sample::KeyOnly);
-#if defined(OPENDDS_SECURITY) && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+#if OPENDDS_CONFIG_SECURITY && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
     DDS::DynamicData_var dynamic_data = copy->get_dynamic_data(dynamic_type_);
     DDS::Security::SecurityException ex;
     if (dynamic_data && security_config_ &&
@@ -3126,7 +3113,7 @@ DDS::ReturnCode_t DataWriterImpl::get_or_create_instance_handle(
     }
 
     // tell DataWriterLocal and Publisher about the instance.
-    const DDS::ReturnCode_t ret = register_instance_i(handle, move(serialized), source_timestamp);
+    const DDS::ReturnCode_t ret = register_instance_i(handle, OPENDDS_MOVE_NS::move(serialized), source_timestamp);
     // note: the WriteDataContainer/PublicationInstance maintains ownership
     // of the marshalled sample.
     if (ret != DDS::RETCODE_OK) {
@@ -3210,7 +3197,7 @@ DDS::ReturnCode_t DataWriterImpl::write_w_timestamp(
 
   // list of reader GUID_ts that should not get data
   GUIDSeq_var filter_out;
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   if (publisher_content_filter_) {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, reader_info_guard, reader_info_lock_, DDS::RETCODE_ERROR);
     for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
@@ -3246,7 +3233,7 @@ DDS::ReturnCode_t DataWriterImpl::write_sample(
     return DDS::RETCODE_ERROR;
   }
 
-  return write(move(serialized), handle, source_timestamp, filter_out, sample.native_data());
+  return write(OPENDDS_MOVE_NS::move(serialized), handle, source_timestamp, filter_out, sample.native_data());
 }
 
 } // namespace DCPS

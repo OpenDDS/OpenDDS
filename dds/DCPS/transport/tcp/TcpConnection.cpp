@@ -235,7 +235,7 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
     return -1;
   }
 
-  passive_setup_buffer_.wr_ptr(ret);
+  passive_setup_buffer_.wr_ptr(static_cast<size_t>(ret));
   // Parse the setup message: <len><addr><prio>
   // len and prio are network order 32-bit ints
   // addr is a string of length len, including null
@@ -257,7 +257,7 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
       network_resource.to_addr(remote_address_);
 
       ACE_OS::memcpy(&nprio, passive_setup_buffer_.rd_ptr() + hlen, sizeof(nprio));
-      transport_priority_ = ntohl(nprio);
+      transport_priority_ = static_cast<Priority>(ntohl(nprio));
 
       passive_setup_buffer_.reset();
       passive_setup_ = false;
@@ -535,7 +535,7 @@ OpenDDS::DCPS::TcpConnection::on_active_connection_established()
     return -1;
   }
 
-  ACE_UINT32 npriority = htonl(this->transport_priority_);
+  ACE_UINT32 npriority = htonl(static_cast<unsigned int>(this->transport_priority_));
 
   if (this->peer().send_n(&npriority, sizeof(ACE_UINT32)) == -1) {
     if (DCPS_debug_level >= 2) {
@@ -578,7 +578,7 @@ OpenDDS::DCPS::TcpConnection::passive_reconnect_i()
     this->reconnect_state_ = PASSIVE_WAITING_STATE;
     this->link_->notify(DataLink::DISCONNECTED);
 
-    TimeDuration delay = TimeDuration::from_msec(cfg->passive_reconnect_duration());
+    TimeDuration delay = TimeDuration::from_msec(static_cast<ACE_UINT64>(cfg->passive_reconnect_duration()));
     this->reactor()->schedule_timer(this, 0, delay.value(), TimeDuration::zero_value.value());
   }
 }
@@ -906,7 +906,7 @@ OpenDDS::DCPS::TcpConnection::tear_link()
 {
   DBG_ENTRY_LVL("TcpConnection","tear_link",6);
 
-  return link_->release_resources();
+  link_->release_resources();
 }
 
 void

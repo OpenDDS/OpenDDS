@@ -41,15 +41,14 @@ namespace DCPS {
 /// Only called by our TransportImpl object.
 DataLink::DataLink(const TransportImpl_rch& impl, Priority priority, bool is_loopback,
                    bool is_active)
-  : stopped_(false),
-    impl_(impl),
-    transport_priority_(priority),
-    scheduling_release_(false),
-    is_loopback_(is_loopback),
-    is_active_(is_active),
-    started_(false),
-    send_response_listener_("DataLink"),
-    interceptor_(impl->reactor(), impl->reactor_owner())
+  : stopped_(false)
+  , impl_(impl)
+  , transport_priority_(priority)
+  , scheduling_release_(false)
+  , is_loopback_(is_loopback)
+  , is_active_(is_active)
+  , started_(false)
+  , send_response_listener_("DataLink")
 {
   DBG_ENTRY_LVL("DataLink", "DataLink", 6);
 
@@ -79,7 +78,7 @@ DataLink::DataLink(const TransportImpl_rch& impl, Priority priority, bool is_loo
   }
 
   // Initialize transport control sample allocators:
-  datalink_release_delay_ = TimeDuration::from_msec(datalink_release_delay);
+  datalink_release_delay_ = TimeDuration::from_msec(static_cast<ACE_UINT64>(datalink_release_delay));
 
   this->mb_allocator_.reset(new MessageBlockAllocator(control_chunks));
   this->db_allocator_.reset(new DataBlockAllocator(control_chunks));
@@ -127,7 +126,10 @@ DataLink::add_on_start_callback(const TransportClient_wrch& client, const GUID_t
           pending_on_starts_.erase(it);
         }
         guard.release();
-        interceptor_.execute_or_enqueue(make_rch<ImmediateStart>(link, client, remote));
+        TransportImpl_rch impl = impl_.lock();
+        if (impl) {
+          impl->reactor_task()->execute_or_enqueue(make_rch<ImmediateStart>(link, client, remote));
+        }
       } else {
         on_start_callbacks_[remote][client_id] = client;
       }
@@ -509,8 +511,8 @@ DataLink::peer_ids(const GUID_t& local_id) const
 /// with a simultaneous call (in another thread) to one of this
 /// DataLink's make_reservation() methods.
 void
-DataLink::release_reservations(GUID_t remote_id, GUID_t local_id,
-                               DataLinkSetMap& released_locals)
+DataLink::release_reservations(const GUID_t& remote_id, const GUID_t& local_id,
+                               DataLinkSetMap* released_locals)
 {
   DBG_ENTRY_LVL("DataLink", "release_reservations", 6);
 
@@ -541,23 +543,32 @@ DataLink::release_reservations(GUID_t remote_id, GUID_t local_id,
 
     if (this->stopped_) return;
 
-    ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_id];
-    if (rls->size() == 1) {
-      assoc_by_remote_.erase(remote_id);
-      release_remote_required = true;
-    } else {
-      rls->remove(local_id);
-    }
-    RepoIdSet& ris = assoc_by_local_[local_id].associated_;
-    if (ris.size() == 1) {
-      DataLinkSet_rch& links = released_locals[local_id];
-      if (links.is_nil()) {
-        links = make_rch<DataLinkSet>();
+    AssocByRemote::iterator remote_it = assoc_by_remote_.find(remote_id);
+    if (remote_it != assoc_by_remote_.end()) {
+      ReceiveListenerSet_rch& rls = remote_it->second;
+      if (rls->size() == 1) {
+        assoc_by_remote_.erase(remote_id);
+        release_remote_required = true;
+      } else {
+        rls->remove(local_id);
       }
-      links->insert_link(rchandle_from(this));
-      assoc_by_local_.erase(local_id);
-    } else {
-      ris.erase(remote_id);
+    }
+
+    AssocByLocal::iterator local_it = assoc_by_local_.find(local_id);
+    if (local_it != assoc_by_local_.end()) {
+      RepoIdSet& ris = local_it->second.associated_;
+      if (ris.size() == 1) {
+        if (released_locals) {
+          DataLinkSet_rch& links = (*released_locals)[local_id];
+          if (links.is_nil()) {
+            links = make_rch<DataLinkSet>();
+          }
+          links->insert_link(rchandle_from(this));
+        }
+        assoc_by_local_.erase(local_id);
+      } else {
+        ris.erase(remote_id);
+      }
     }
 
     if (assoc_by_local_.empty()) {
@@ -669,9 +680,10 @@ DataLink::send_control(const DataSampleHeader& header, Message_Block_Ptr message
 {
   DBG_ENTRY_LVL("DataLink", "send_control", 6);
 
-  TransportSendControlElement* const elem = new TransportSendControlElement(1, // initial_count
-                                       GUID_UNKNOWN, &send_response_listener_,
-                                       header, move(message));
+  TransportSendControlElement* const elem
+    = new TransportSendControlElement(1, // initial_count
+                                      GUID_UNKNOWN, &send_response_listener_,
+                                      header, OPENDDS_MOVE_NS::move(message));
 
   send_response_listener_.track_message();
 
@@ -767,7 +779,7 @@ DataLink::data_received_i(ReceivedDataSample& sample,
     return;
   }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
   if (sample.header_.content_filter_
       && sample.header_.content_filter_entries_.length()) {
@@ -776,7 +788,7 @@ DataLink::data_received_i(ReceivedDataSample& sample,
     subset.data_received(sample, incl_excl, constrain);
 
   } else {
-#endif /* OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */
+#endif
 
     if (DCPS_debug_level > 9) {
       // Just get the set to do our dirty work by having it iterate over its
@@ -794,10 +806,10 @@ DataLink::data_received_i(ReceivedDataSample& sample,
                  constrain == ReceiveListenerSet::SET_EXCLUDED ? "exclude" : "include", included_ids.c_str()));
     }
     listener_set->data_received(sample, incl_excl, constrain);
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
   }
 
-#endif /* OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */
+#endif
 }
 
 // static
@@ -1194,13 +1206,8 @@ DataLink::handle_send_request_ack(TransportQueueElement* element)
   return true;
 }
 
-bool
-DataLink::Interceptor::reactor_is_shut_down() const {
-  return false;
-}
-
 void
-DataLink::ImmediateStart::execute() {
+DataLink::ImmediateStart::execute(ReactorWrapper&) {
   TransportClient_rch client_lock = client_.lock();
   if (client_lock) {
     client_lock->use_datalink(remote_, link_);
@@ -1246,7 +1253,7 @@ DataLink::replay_durable_data(const GUID_t& local_pub_id, const GUID_t& remote_s
   }
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 std::ostream&
 operator<<(std::ostream& str, const DataLink& value)
 {
@@ -1279,6 +1286,42 @@ DataLink::terminate_send_if_suspended()
   if (strategy) {
     strategy->terminate_send_if_suspended();
   }
+}
+
+StatisticSeq DataLink::stats_template()
+{
+  static const DDS::UInt32 num_local_stats = 9;
+  StatisticSeq stats(num_local_stats);
+  stats.length(num_local_stats);
+  stats[0].name = "DataLinkSendListeners";
+  stats[1].name = "DataLinkRecvListeners";
+  stats[2].name = "DataLinkAssociationsByRemote";
+  stats[3].name = "DataLinkAssociationsByLocal";
+  stats[4].name = "DataLinkAssociationsReleasing";
+  stats[5].name = "DataLinkOnStartCallbacks";
+  stats[6].name = "DataLinkPendingOnStarts";
+  stats[7].name = "DataLinkMessageBlocks";
+  stats[8].name = "DataLinkDataBlocks";
+  return stats;
+}
+
+void DataLink::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
+{
+  {
+    GuardType guard(pub_sub_maps_lock_);
+    stats[idx++].value = send_listeners_.size();
+    stats[idx++].value = recv_listeners_.size();
+    stats[idx++].value = assoc_by_remote_.size();
+    stats[idx++].value = assoc_by_local_.size();
+    stats[idx++].value = assoc_releasing_.size();
+  }
+  {
+    GuardType guard(strategy_lock_);
+    stats[idx++].value = on_start_callbacks_.size();
+    stats[idx++].value = pending_on_starts_.size();
+  }
+  stats[idx++].value = mb_allocator_ ? mb_allocator_->bytes_heap_allocated() : 0;
+  stats[idx++].value = db_allocator_ ? db_allocator_->bytes_heap_allocated() : 0;
 }
 
 }

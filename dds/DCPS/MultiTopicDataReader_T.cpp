@@ -8,7 +8,7 @@
 #ifndef OPENDDS_DCPS_MULTITOPICDATAREADER_T_CPP
 #define OPENDDS_DCPS_MULTITOPICDATAREADER_T_CPP
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
 
 #include <stdexcept>
 #include <sstream>
@@ -21,7 +21,7 @@ namespace DCPS {
 
 template<typename Sample, typename TypedDataReader>
 void
-MultiTopicDataReader_T<Sample, TypedDataReader>::init_typed(DataReaderEx* dr)
+MultiTopicDataReader_T<Sample, TypedDataReader>::init_typed(DDS::DataReader* dr)
 {
   typed_reader_ = TypedDataReader::Interface::_narrow(dr);
 }
@@ -122,7 +122,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
     for (InstanceHandle_t ih = HANDLE_NIL; ret != RETCODE_NO_DATA;) {
       GenericData other_data(other_meta, false);
       SampleInfo info;
-      const ReturnCode_t ret = other_dri->read_next_instance_generic(other_data.ptr_,
+      ret = other_dri->read_next_instance_generic(other_data.ptr_,
         info, ih, READ_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
       if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
         if (log_level >= LogLevel::Notice) {

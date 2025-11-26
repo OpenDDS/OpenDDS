@@ -27,9 +27,9 @@ public:
   AllocHeader();
 
   /** Get alloc size */
-  unsigned int size() const { return is_free() ? -alloc_size_ : alloc_size_; }
+  unsigned int size() const { return static_cast<unsigned int>(is_free() ? -alloc_size_ : alloc_size_); }
   /** Get prev alloc size */
-  unsigned int prev_size() const { return prev_size_; }
+  unsigned int prev_size() const { return static_cast<unsigned int>(prev_size_); }
   /** Is this alloc free */
   bool is_free() const { return alloc_size_ < 0; }
 

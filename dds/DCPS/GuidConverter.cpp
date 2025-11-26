@@ -28,7 +28,7 @@ GuidConverter::GuidConverter(const GUID_t& guid)
 GuidConverter::~GuidConverter()
 {}
 
-long
+unsigned int
 GuidConverter::checksum() const
 {
   return ACE::crc32(reinterpret_cast<const void*>(&guid_), sizeof(guid_));
@@ -156,7 +156,7 @@ GuidConverter::operator OPENDDS_STRING() const
 {
   OPENDDS_STRING ret(to_string(guid_));
   ret += "(";
-  ret += to_dds_string((unsigned long) checksum(), true);
+  ret += to_dds_string(checksum(), true);
   ret += ")";
   return ret;
 }
@@ -171,7 +171,7 @@ GuidConverter::operator std::wstring() const
 }
 #endif
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 std::ostream&
 operator<<(std::ostream& os, const GuidConverter& rhs)
@@ -186,7 +186,7 @@ operator<<(std::wostream& os, const GuidConverter& rhs)
   return os << std::wstring(rhs);
 }
 #endif //DDS_HAS_WCHAR
-#endif //OPENDDS_SAFETY_PROFILE
+#endif
 
 OPENDDS_STRING
 GuidConverter::uniqueParticipantId() const

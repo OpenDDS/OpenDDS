@@ -162,7 +162,7 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
     ACE_DEBUG((LM_DEBUG, "Entered InfoRepoMulticastResponder::handle_input\n"));
 
   // The length of the service name string that follows.
-  CORBA::Short header;
+  ACE_CDR::UShort header;
   // Port to which to reply.
   ACE_UINT16 remote_port;
   // Name of the service for which the client is looking.
@@ -301,14 +301,14 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
   // length as the first element, and ior itself as the second.)
 
   // Length of ior to be sent.
-  const CORBA::Short data_len = ACE_HTONS(static_cast<CORBA::Short>(ior.length()) + 1);
+  ACE_CDR::UShort data_len = ACE_HTONS(static_cast<ACE_CDR::UShort>(ior.length()) + 1);
 
   // Vector to be sent.
   const int cnt = 2;
   iovec iovp[cnt];
 
   // The length of ior to be sent.
-  iovp[0].iov_base = (char *) &data_len;
+  iovp[0].iov_base = reinterpret_cast<char*>(&data_len);
   iovp[0].iov_len  = sizeof(CORBA::Short);
 
   // The ior.

@@ -2,13 +2,16 @@
 //
 
 #include "SimpleDataWriter.h"
-#include "dds/DCPS/DataSampleHeader.h"
-#include "dds/DCPS/SendStateDataSampleList.h"
+
 #include "dds/DCPS/DataSampleElement.h"
-#include "dds/DCPS/transport/framework/TransportSendElement.h"
+#include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/GuidBuilder.h"
 #include "dds/DCPS/GuidConverter.h"
+#include "dds/DCPS/PublicationInstance.h"
+#include "dds/DCPS/SendStateDataSampleList.h"
+
 #include "dds/DCPS/transport/framework/EntryExit.h"
+#include "dds/DCPS/transport/framework/TransportSendElement.h"
 
 #include "ace/SString.h"
 #include "ace/OS_NS_sys_time.h"

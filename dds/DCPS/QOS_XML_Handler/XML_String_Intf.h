@@ -28,10 +28,10 @@ namespace XML
   class XML_Error_Handler;
 }
 
-XERCES_CPP_NAMESPACE_BEGIN
+namespace XERCES_CPP_NAMESPACE {
   class XercesDOMParser;
   class DOMDocument;
-XERCES_CPP_NAMESPACE_END
+}
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

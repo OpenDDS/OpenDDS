@@ -6,8 +6,9 @@
 #include <ast_annotation_appl.h>
 #include <ast_annotation_decl.h>
 #include <ast_annotation_member.h>
-#include <ast_sequence.h>
 #include <ast_array.h>
+#include <ast_map.h>
+#include <ast_sequence.h>
 #include <ast_union.h>
 #include <utl_string.h>
 
@@ -28,6 +29,7 @@ void Annotations::register_all()
   register_one<AppendableAnnotation>();
   register_one<MutableAnnotation>();
   register_one<TryConstructAnnotation>();
+  register_one<ValueAnnotation>();
   register_one<OpenDDS::DataRepresentationAnnotation>();
   register_one<OpenDDS::internal::NoDynamicDataAdapterAnnotation>();
   register_one<OpenDDS::internal::SpecialSerializationAnnotation>();
@@ -132,6 +134,14 @@ ACE_UINT32 get_u32_annotation_member_value(AST_Annotation_Appl* appl,
   return ev->u.ulval;
 }
 
+ACE_INT32 get_i32_annotation_member_value(AST_Annotation_Appl* appl,
+                                          const char* member_name)
+{
+  AST_Expression::AST_ExprValue* const ev =
+    get_annotation_member_ev(appl, member_name, AST_Expression::EV_long);
+  return ev->u.lval;
+}
+
 std::string get_str_annotation_member_value(AST_Annotation_Appl* appl,
                                             const char* member_name)
 {
@@ -150,6 +160,12 @@ template<>
 ACE_UINT32 AnnotationWithValue<ACE_UINT32>::value_from_appl(AST_Annotation_Appl* appl) const
 {
   return get_u32_annotation_member_value(appl, "value");
+}
+
+template<>
+int AnnotationWithValue<ACE_INT32>::value_from_appl(AST_Annotation_Appl* appl) const
+{
+  return get_i32_annotation_member_value(appl, "value");
 }
 
 template<>
@@ -427,6 +443,35 @@ TryConstructFailAction TryConstructAnnotation::union_value(AST_Union* node) cons
   AST_Annotation_Appl* appl = node->disc_annotations().find(declaration());
   if (!appl) { return absent_value; }
   return value_from_appl(appl);
+}
+
+TryConstructFailAction TryConstructAnnotation::map_key(AST_Map* node) const
+{
+  AST_Annotation_Appl* appl = node->key_type_annotations().find(declaration());
+  if (!appl) { return absent_value; }
+  return value_from_appl(appl);
+}
+
+TryConstructFailAction TryConstructAnnotation::map_value(AST_Map* node) const
+{
+  AST_Annotation_Appl* appl = node->value_type_annotations().find(declaration());
+  if (!appl) { return absent_value; }
+  return value_from_appl(appl);
+}
+
+// @value ====================================================================
+
+std::string ValueAnnotation::definition() const
+{
+  return
+    "@annotation value {\n"
+    "  long value;\n"
+    "};\n";
+}
+
+std::string ValueAnnotation::name() const
+{
+  return "value";
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

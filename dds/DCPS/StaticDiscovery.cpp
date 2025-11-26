@@ -2,17 +2,19 @@
 
 #include "StaticDiscovery.h"
 
-#include "debug.h"
-#include "ConfigUtils.h"
-#include "DomainParticipantImpl.h"
-#include "Marked_Default_Qos.h"
-#include "SubscriberImpl.h"
 #include "BuiltInTopicUtils.h"
-#include "Registered_Data_Types.h"
-#include "Qos_Helper.h"
 #include "DataWriterImpl.h"
 #include "DcpsUpcalls.h"
+#include "Definitions.h"
+#include "DomainParticipantImpl.h"
+#include "Marked_Default_Qos.h"
+#include "Qos_Helper.h"
+#include "Registered_Data_Types.h"
+#include "SubscriberImpl.h"
+#include "debug.h"
+
 #include "transport/framework/TransportRegistry.h"
+
 #include "XTypes/TypeAssignability.h"
 
 #include <ctype.h>
@@ -82,16 +84,16 @@ StaticEndpointManager::StaticEndpointManager(const GUID_t& participant_id,
   , participant_id_(participant_id)
   , topic_counter_(0)
   , registry_(registry)
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   , participant_(participant)
 #endif
   , max_type_lookup_service_reply_period_(0)
   , type_lookup_service_sequence_number_(0)
 {
-#ifdef DDS_HAS_MINIMUM_BIT
+#if !OPENDDS_CONFIG_BUILT_IN_TOPICS
   ACE_UNUSED_ARG(participant);
 #endif
-  type_lookup_init(TheServiceParticipant->interceptor());
+  type_lookup_init(TheServiceParticipant->reactor_task());
 }
 
 StaticEndpointManager::~StaticEndpointManager()
@@ -151,12 +153,12 @@ void StaticEndpointManager::init_bit()
       data.group_data = writer.publisher_qos.group_data;
       data.representation = writer.qos.representation;
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
       OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
       if (bit) { // bit may be null if the DomainParticipant is shutting down
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);
       }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
     }
   }
 
@@ -206,12 +208,12 @@ void StaticEndpointManager::init_bit()
       data.group_data = reader.subscriber_qos.group_data;
       data.representation = reader.qos.representation;
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
       OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
       if (bit) { // bit may be null if the DomainParticipant is shutting down
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);
       }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
     }
   }
 }
@@ -344,10 +346,10 @@ StaticEndpointManager::add_publication_i(const GUID_t& writerid,
   }
   const EndpointRegistry::Writer& writer = pos->second;
 
-  for (RepoIdSet::const_iterator pos = writer.best_effort_readers.begin(), limit = writer.best_effort_readers.end();
-       pos != limit;
-       ++pos) {
-    const GUID_t& readerid = *pos;
+  for (RepoIdSet::const_iterator iter = writer.best_effort_readers.begin(), limit = writer.best_effort_readers.end();
+       iter != limit;
+       ++iter) {
+    const GUID_t& readerid = *iter;
     const EndpointRegistry::Reader& reader = registry_.reader_map.find(readerid)->second;
 
     const ReaderAssociation ra =
@@ -358,10 +360,10 @@ StaticEndpointManager::add_publication_i(const GUID_t& writerid,
     }
   }
 
-  for (RepoIdSet::const_iterator pos = writer.reliable_readers.begin(), limit = writer.reliable_readers.end();
-       pos != limit;
-       ++pos) {
-    const GUID_t& readerid = *pos;
+  for (RepoIdSet::const_iterator iter = writer.reliable_readers.begin(), limit = writer.reliable_readers.end();
+       iter != limit;
+       ++iter) {
+    const GUID_t& readerid = *iter;
     const EndpointRegistry::Reader& reader = registry_.reader_map.find(readerid)->second;
     DataWriterCallbacks_rch pl = pub.publication_.lock();
     if (pl) {
@@ -385,10 +387,10 @@ StaticEndpointManager::remove_publication_i(const GUID_t& writerid, LocalPublica
   ReaderIdSeq ids;
   ids.length((CORBA::ULong)writer.reliable_readers.size());
   CORBA::ULong idx = 0;
-  for (RepoIdSet::const_iterator pos = writer.reliable_readers.begin(), limit = writer.reliable_readers.end();
-        pos != limit;
-        ++pos, ++idx) {
-    const GUID_t& readerid = *pos;
+  for (RepoIdSet::const_iterator iter = writer.reliable_readers.begin(), limit = writer.reliable_readers.end();
+       iter != limit;
+       ++iter, ++idx) {
+    const GUID_t& readerid = *iter;
     ids[idx] = readerid;
     DataWriterCallbacks_rch pl = pub.publication_.lock();
     if (pl) {
@@ -414,10 +416,10 @@ StaticEndpointManager::add_subscription_i(const GUID_t& readerid,
   }
   const EndpointRegistry::Reader& reader = pos->second;
 
-  for (RepoIdSet::const_iterator pos = reader.best_effort_writers.begin(), limit = reader.best_effort_writers.end();
-       pos != limit;
-       ++pos) {
-    const GUID_t& writerid = *pos;
+  for (RepoIdSet::const_iterator iter = reader.best_effort_writers.begin(), limit = reader.best_effort_writers.end();
+       iter != limit;
+       ++iter) {
+    const GUID_t& writerid = *iter;
     const EndpointRegistry::Writer& writer = registry_.writer_map.find(writerid)->second;
 
     DDS::OctetSeq type_info;
@@ -430,10 +432,10 @@ StaticEndpointManager::add_subscription_i(const GUID_t& readerid,
     }
   }
 
-  for (RepoIdSet::const_iterator pos = reader.reliable_writers.begin(), limit = reader.reliable_writers.end();
-       pos != limit;
-       ++pos) {
-    const GUID_t& writerid = *pos;
+  for (RepoIdSet::const_iterator iter = reader.reliable_writers.begin(), limit = reader.reliable_writers.end();
+       iter != limit;
+       ++iter) {
+    const GUID_t& writerid = *iter;
     const EndpointRegistry::Writer& writer = registry_.writer_map.find(writerid)->second;
     DataReaderCallbacks_rch sl = sub.subscription_.lock();
     if (sl) {
@@ -457,10 +459,10 @@ DDS::ReturnCode_t StaticEndpointManager::remove_subscription_i(
   WriterIdSeq ids;
   ids.length((CORBA::ULong)reader.reliable_writers.size());
   CORBA::ULong idx = 0;
-  for (RepoIdSet::const_iterator pos = reader.reliable_writers.begin(), limit = reader.reliable_writers.end();
-        pos != limit;
-        ++pos, ++idx) {
-    const GUID_t& writerid = *pos;
+  for (RepoIdSet::const_iterator iter = reader.reliable_writers.begin(), limit = reader.reliable_writers.end();
+       iter != limit;
+       ++iter, ++idx) {
+    const GUID_t& writerid = *iter;
     ids[idx] = writerid;
     DataReaderCallbacks_rch sl = sub.subscription_.lock();
     if (sl) {
@@ -583,7 +585,7 @@ void StaticEndpointManager::cleanup_type_lookup_data(const GuidPrefix_t& /*guid_
   // Do nothing.
 }
 
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 OpenDDS::DCPS::PublicationBuiltinTopicDataDataReaderImpl*
 StaticEndpointManager::pub_bit()
 {
@@ -605,13 +607,13 @@ StaticEndpointManager::sub_bit()
   DDS::DataReader_var d = sub->lookup_datareader(BUILT_IN_SUBSCRIPTION_TOPIC);
   return dynamic_cast<OpenDDS::DCPS::SubscriptionBuiltinTopicDataDataReaderImpl*>(d.in());
 }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 
-void StaticEndpointManager::type_lookup_init(ReactorInterceptor_rch reactor_interceptor)
+void StaticEndpointManager::type_lookup_init(ReactorTask_rch reactor_task)
 {
   if (!type_lookup_reply_deadline_processor_) {
     type_lookup_reply_deadline_processor_ =
-      DCPS::make_rch<StaticEndpointManagerSporadic>(TheServiceParticipant->time_source(), reactor_interceptor,
+      DCPS::make_rch<StaticEndpointManagerSporadic>(TheServiceParticipant->time_source(), reactor_task,
                                                     rchandle_from(this), &StaticEndpointManager::remove_expired_endpoints);
   }
 }
@@ -1370,7 +1372,7 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
     XTypes::serialize_type_info(*reader_type_info, octet_seq_type_info_reader);
     const ReaderAssociation ra = {
       *rTls, TransportLocator(), rTransportContext, reader, *subQos, *drQos,
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
       cfProp->filterClassName, cfProp->filterExpression,
 #else
       "", "",
@@ -1540,7 +1542,8 @@ namespace {
   unsigned char
   fromhex(const OPENDDS_STRING& x, size_t idx)
   {
-    return (hextobyte(x[idx * 2]) << 4) | (hextobyte(x[idx * 2 + 1]));
+    return (hextobyte(static_cast<unsigned char>(x[idx * 2])) << 4)
+      | hextobyte(static_cast<unsigned char>(x[idx * 2 + 1]));
   }
 }
 
@@ -1568,7 +1571,7 @@ EndpointRegistry::build_id(DDS::DomainId_t domain,
   // id.guidPrefix[3] = domain[1]
   // id.guidPrefix[4] = domain[2]
   // id.guidPrefix[5] = domain[3]
-  DDS::DomainId_t netdom = ACE_HTONL(domain);
+  DDS::DomainId_t netdom = static_cast<DDS::DomainId_t>(ACE_HTONL(static_cast<DDS::UInt32>(domain)));
   ACE_OS::memcpy(&id.guidPrefix[2], &netdom, sizeof(DDS::DomainId_t));
   // id.guidPrefix[6] = participant[0]
   // id.guidPrefix[7] = participant[1]
@@ -1624,7 +1627,7 @@ StaticDiscovery::add_domain_participant(DDS::DomainId_t domain,
   return ads;
 }
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
 AddDomainStatus
 StaticDiscovery::add_domain_participant_secure(
   DDS::DomainId_t /*domain*/,
@@ -1658,56 +1661,50 @@ namespace {
   const EnumList<DDS::DurabilityQosPolicyKind> durability_kinds[] =
     {
       { DDS::VOLATILE_DURABILITY_QOS, "VOLATILE" },
-      { DDS::TRANSIENT_LOCAL_DURABILITY_QOS, "TRANSIENT_LOCAL" },
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+      { DDS::TRANSIENT_LOCAL_DURABILITY_QOS, "TRANSIENT_LOCAL" }
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
+      ,
       { DDS::TRANSIENT_DURABILITY_QOS, "TRANSIENT" },
-      { DDS::PERSISTENT_DURABILITY_QOS, "PERSISTENT" },
+      { DDS::PERSISTENT_DURABILITY_QOS, "PERSISTENT" }
 #endif
-      { static_cast<DDS::DurabilityQosPolicyKind>(0), 0 }
     };
 
   const EnumList<DDS::LivelinessQosPolicyKind> liveliness_kinds[] =
     {
       { DDS::AUTOMATIC_LIVELINESS_QOS, "AUTOMATIC" },
       { DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS, "MANUAL_BY_TOPIC" },
-      { DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, "MANUAL_BY_PARTICIPANT" },
-      { static_cast<DDS::LivelinessQosPolicyKind>(0), 0 }
+      { DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, "MANUAL_BY_PARTICIPANT" }
     };
 
   const EnumList<DDS::ReliabilityQosPolicyKind> reliability_kinds[] =
     {
       { DDS::BEST_EFFORT_RELIABILITY_QOS, "BEST_EFFORT" },
-      { DDS::RELIABLE_RELIABILITY_QOS, "RELIABLE" },
-      { static_cast<DDS::ReliabilityQosPolicyKind>(0), 0 }
+      { DDS::RELIABLE_RELIABILITY_QOS, "RELIABLE" }
     };
 
   const EnumList<DDS::DestinationOrderQosPolicyKind> destination_order_kinds[] =
     {
       { DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS, "BY_RECEPTION_TIMESTAMP" },
-      { DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS, "BY_SOURCE_TIMESTAMP" },
-      { static_cast<DDS::DestinationOrderQosPolicyKind>(0), 0 }
+      { DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS, "BY_SOURCE_TIMESTAMP" }
     };
 
   const EnumList<DDS::HistoryQosPolicyKind> history_kinds[] =
     {
       { DDS::KEEP_ALL_HISTORY_QOS, "KEEP_ALL" },
-      { DDS::KEEP_LAST_HISTORY_QOS, "KEEP_LAST" },
-      { static_cast<DDS::HistoryQosPolicyKind>(0), 0 }
+      { DDS::KEEP_LAST_HISTORY_QOS, "KEEP_LAST" }
     };
 
   const EnumList<DDS::OwnershipQosPolicyKind> ownership_kinds[] =
     {
       { DDS::SHARED_OWNERSHIP_QOS, "SHARED" },
-      { DDS::EXCLUSIVE_OWNERSHIP_QOS, "EXCLUSIVE" },
-      { static_cast<DDS::OwnershipQosPolicyKind>(0), 0 }
+      { DDS::EXCLUSIVE_OWNERSHIP_QOS, "EXCLUSIVE" }
     };
 
   const EnumList<DDS::PresentationQosPolicyAccessScopeKind> access_scope_kinds[] =
     {
       { DDS::INSTANCE_PRESENTATION_QOS, "INSTANCE" },
       { DDS::TOPIC_PRESENTATION_QOS, "TOPIC" },
-      { DDS::GROUP_PRESENTATION_QOS, "GROUP" },
-      { static_cast<DDS::PresentationQosPolicyAccessScopeKind>(0), 0 }
+      { DDS::GROUP_PRESENTATION_QOS, "GROUP" }
     };
 
   enum Type {
@@ -1717,8 +1714,7 @@ namespace {
   const EnumList<Type> type_kinds[] =
     {
       { Reader, "reader" },
-      { Writer, "writer" },
-      { static_cast<Type>(0), 0 }
+      { Writer, "writer" }
     };
 
 }
@@ -1744,7 +1740,7 @@ int
 StaticDiscovery::parse_topics()
 {
   RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
-  const ConfigStoreImpl::StringList sections = config_store->get_section_names("OPENDDS_TOPIC");
+  const ConfigStoreImpl::StringList sections = config_store->get_section_names("TOPIC");
 
   // Loop through the [topic/*] sections
   for (ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
@@ -1759,8 +1755,8 @@ StaticDiscovery::parse_topics()
     }
 
     EndpointRegistry::Topic topic;
-    topic.name = config_store->get((String("OPENDDS_TOPIC_") + topic_name + "_NAME").c_str(), topic_name);
-    topic.type_name = config_store->get((String("OPENDDS_TOPIC_") + topic_name + "_TYPE_NAME").c_str(), "");
+    topic.name = config_store->get((String("TOPIC_") + topic_name + "_NAME").c_str(), topic_name);
+    topic.type_name = config_store->get((String("TOPIC_") + topic_name + "_TYPE_NAME").c_str(), "");
     if (topic.type_name.empty()) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) StaticDiscovery::parse_topics ")
@@ -1787,7 +1783,7 @@ int
 StaticDiscovery::parse_datawriterqos()
 {
   RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
-  const ConfigStoreImpl::StringList sections = config_store->get_section_names("OPENDDS_DATAWRITERQOS");
+  const ConfigStoreImpl::StringList sections = config_store->get_section_names("DATAWRITERQOS");
 
   // Loop through the [datawriterqos/*] sections
   for (ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
@@ -1801,7 +1797,7 @@ StaticDiscovery::parse_datawriterqos()
                  datawriterqos_name.c_str()));
     }
 
-    const String prefix = String("OPENDDS_DATAWRITERQOS_") + datawriterqos_name;
+    const String prefix = String("DATAWRITERQOS_") + datawriterqos_name;
 
     DDS::DataWriterQos datawriterqos(TheServiceParticipant->initial_DataWriterQos());
 
@@ -1870,7 +1866,7 @@ int
 StaticDiscovery::parse_datareaderqos()
 {
   RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
-  const ConfigStoreImpl::StringList sections = config_store->get_section_names("OPENDDS_DATAREADERQOS");
+  const ConfigStoreImpl::StringList sections = config_store->get_section_names("DATAREADERQOS");
 
   // Loop through the [datareaderqos/*] sections
   for (ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
@@ -1884,7 +1880,7 @@ StaticDiscovery::parse_datareaderqos()
                   datareaderqos_name.c_str()));
     }
 
-    const String prefix = String("OPENDDS_DATAREADERQOS_") + datareaderqos_name;
+    const String prefix = String("DATAREADERQOS_") + datareaderqos_name;
 
     DDS::DataReaderQos datareaderqos(TheServiceParticipant->initial_DataReaderQos());
 
@@ -1955,7 +1951,7 @@ int
 StaticDiscovery::parse_publisherqos()
 {
   RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
-  const ConfigStoreImpl::StringList sections = config_store->get_section_names("OPENDDS_PUBLISHERQOS");
+  const ConfigStoreImpl::StringList sections = config_store->get_section_names("PUBLISHERQOS");
 
   // Loop through the [publisherqos/*] sections
   for (ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
@@ -1969,7 +1965,7 @@ StaticDiscovery::parse_publisherqos()
                   publisherqos_name.c_str()));
     }
 
-    const String prefix = String("OPENDDS_PUBLISHERQOS_") + publisherqos_name;
+    const String prefix = String("PUBLISHERQOS_") + publisherqos_name;
 
     DDS::PublisherQos publisherqos(TheServiceParticipant->initial_PublisherQos());
 
@@ -1994,7 +1990,7 @@ int
 StaticDiscovery::parse_subscriberqos()
 {
   RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
-  const ConfigStoreImpl::StringList sections = config_store->get_section_names("OPENDDS_SUBSCRIBERQOS");
+  const ConfigStoreImpl::StringList sections = config_store->get_section_names("SUBSCRIBERQOS");
 
   // Loop through the [subscriberqos/*] sections
   for (ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
@@ -2008,7 +2004,7 @@ StaticDiscovery::parse_subscriberqos()
                   subscriberqos_name.c_str()));
     }
 
-    const String prefix = String("OPENDDS_SUBSCRIBERQOS_") + subscriberqos_name;
+    const String prefix = String("SUBSCRIBERQOS_") + subscriberqos_name;
 
     DDS::SubscriberQos subscriberqos(TheServiceParticipant->initial_SubscriberQos());
 
@@ -2033,12 +2029,12 @@ int
 StaticDiscovery::parse_endpoints()
 {
   RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
-  const ConfigStoreImpl::StringList sections = config_store->get_section_names("OPENDDS_ENDPOINT");
+  const ConfigStoreImpl::StringList sections = config_store->get_section_names("ENDPOINT");
 
   // Loop through the [endpoint/*] sections
-  for (ConfigStoreImpl::StringList::const_iterator pos = sections.begin(), limit = sections.end();
-       pos != limit; ++pos) {
-    const String& endpoint_name = *pos;
+  for (ConfigStoreImpl::StringList::const_iterator iter = sections.begin(), limit = sections.end();
+       iter != limit; ++iter) {
+    const String& endpoint_name = *iter;
 
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_NOTICE,
@@ -2047,7 +2043,7 @@ StaticDiscovery::parse_endpoints()
                   endpoint_name.c_str()));
     }
 
-    const String prefix = String("OPENDDS_ENDPOINT_") + endpoint_name;
+    const String prefix = String("ENDPOINT_") + endpoint_name;
 
     int domain;
     {
@@ -2230,7 +2226,7 @@ StaticDiscovery::parse_endpoints()
 
     TransportLocatorSeq trans_info;
     try {
-      config->populate_locators(trans_info);
+      config->populate_locators(trans_info, domain, 0);
     }
     catch (const CORBA::Exception& ex) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -2368,7 +2364,7 @@ StaticDiscovery_rch StaticDiscovery::instance_(make_rch<StaticDiscovery>(Discove
 RcHandle<BitSubscriber> StaticDiscovery::init_bit(DomainParticipantImpl* participant)
 {
   DDS::Subscriber_var bit_subscriber;
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (!TheServiceParticipant->get_BIT()) {
     get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber);
     return RcHandle<BitSubscriber>();
@@ -2441,7 +2437,7 @@ RcHandle<BitSubscriber> StaticDiscovery::init_bit(DomainParticipantImpl* partici
     }
     return RcHandle<BitSubscriber>();
   }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 
   get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber);
 
@@ -2559,9 +2555,9 @@ bool StaticDiscovery::add_publication(
   const DDS::DataWriterQos& qos,
   const DCPS::TransportLocatorSeq& transInfo,
   const DDS::PublisherQos& publisherQos,
-  const XTypes::TypeInformation& type_info)
+  const TypeInformation& type_info)
 {
-  return get_part(domainId, participantId)->add_publication(topicId, publication, qos, transInfo, publisherQos, type_info);
+  return get_part(domainId, participantId)->add_publication(topicId, publication, qos, transInfo, publisherQos, type_info.xtypes_type_info_);
 }
 
 bool StaticDiscovery::remove_publication(
@@ -2607,7 +2603,7 @@ bool StaticDiscovery::add_subscription(
   const char* filterClassName,
   const char* filterExpr,
   const DDS::StringSeq& params,
-  const XTypes::TypeInformation& type_info)
+  const TypeInformation& type_info)
 {
   return get_part(domainId, participantId)->add_subscription(topicId,
                                                              subscription,
@@ -2617,7 +2613,7 @@ bool StaticDiscovery::add_subscription(
                                                              filterClassName,
                                                              filterExpr,
                                                              params,
-                                                             type_info);
+                                                             type_info.xtypes_type_info_);
 }
 
 bool StaticDiscovery::remove_subscription(
@@ -2720,7 +2716,7 @@ void StaticParticipant::remove_discovered_participant(DiscoveredParticipantIter&
     return;
   }
   if (removed) {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
     ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
     ParticipantLocationBuiltinTopicDataDataReaderImpl* loc_bit = part_loc_bit();
     // bit may be null if the DomainParticipant is shutting down
@@ -2746,7 +2742,7 @@ void StaticParticipant::remove_discovered_participant(DiscoveredParticipantIter&
         return;
       }
     }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
     if (DCPS_debug_level > 3) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) LocalParticipant::remove_discovered_participant")
                  ACE_TEXT(" - erasing %C (%B)\n"), LogGuid(iter->first).c_str(), participants_.size()));

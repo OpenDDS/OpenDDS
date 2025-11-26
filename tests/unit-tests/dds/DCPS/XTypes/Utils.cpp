@@ -1,14 +1,18 @@
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include <XTypesUtilsTypeSupportImpl.h>
 #  include <key_annotationTypeSupportImpl.h>
 #  include <DynamicDataImplTypeSupportImpl.h>
 
 #  include <tests/Utils/GtestRc.h>
+#  include <tests/Utils/DataView.h>
 
 #  include <dds/DCPS/XTypes/Utils.h>
 #  include <dds/DCPS/XTypes/TypeLookupService.h>
 #  include <dds/DCPS/XTypes/DynamicDataAdapter.h>
 #  include <dds/DCPS/XTypes/DynamicDataFactory.h>
+#  include <dds/DCPS/XTypes/DynamicDataImpl.h>
 
 #  include <gtest/gtest.h>
 
@@ -104,12 +108,12 @@ TEST_F(dds_DCPS_XTypes_Utils, max_extensibility)
 }
 
 namespace {
-  struct GetKeysCheck{
+  struct GetKeysCheck {
     dds_DCPS_XTypes_Utils& t;
     MemberPathVec expected;
 
-    GetKeysCheck(dds_DCPS_XTypes_Utils& t)
-    : t(t)
+    GetKeysCheck(dds_DCPS_XTypes_Utils& testsuite)
+      : t(testsuite)
     {
     }
 
@@ -232,6 +236,46 @@ TEST_F(dds_DCPS_XTypes_Utils, get_keys)
     c.check<ImpliedKeys::StructC>();
   }
   */
+}
+
+TEST_F(dds_DCPS_XTypes_Utils, member_path_resolve_string_path)
+{
+  add_type<AppendableMaxAppendableStruct>();
+  DDS::DynamicType_var dt = get_dynamic_type<AppendableMaxAppendableStruct>();
+
+  {
+    MemberPath path;
+    EXPECT_RC_OK(path.resolve_string_path(dt, "fmas.fs.value"));
+    EXPECT_EQ(path.level(), 3u);
+    EXPECT_EQ(path.ids[0], 0u);
+    EXPECT_EQ(path.ids[1], 0u);
+    EXPECT_EQ(path.ids[2], 0u);
+  }
+  {
+    MemberPath path;
+    EXPECT_RC_OK(path.resolve_string_path(dt, "fmas.au.value"));
+    EXPECT_EQ(path.level(), 3u);
+    EXPECT_EQ(path.ids[0], 0u);
+    EXPECT_EQ(path.ids[1], 1u);
+    EXPECT_EQ(path.ids[2], 0u);
+  }
+  {
+    MemberPath path;
+    EXPECT_RC_EQ(path.resolve_string_path(dt, "fmas."), DDS::RETCODE_BAD_PARAMETER);
+  }
+  {
+    MemberPath path;
+    EXPECT_RC_EQ(path.resolve_string_path(dt, "fmas.fs.invalid"), DDS::RETCODE_ERROR);
+  }
+
+  // TODO: path with subscript is not supported. Add these when it is supported.
+  add_type<SimpleKeyArray>();
+  DDS::DynamicType_var dt2 = get_dynamic_type<SimpleKeyArray>();
+
+  {
+    MemberPath path;
+    EXPECT_RC_EQ(path.resolve_string_path(dt2, "values[0].key"), DDS::RETCODE_UNSUPPORTED);
+  }
 }
 
 TEST_F(dds_DCPS_XTypes_Utils, member_path_get_member_from_type)
@@ -726,4 +770,182 @@ TEST_F(dds_DCPS_XTypes_Utils, MemberPathParser)
   }
 }
 
-#endif // OPENDDS_SAFETY_PROFILE
+TEST_F(dds_DCPS_XTypes_Utils, MultidimArray)
+{
+  add_type<MultidimArrayStruct>();
+  DDS::DynamicType_var dt = get_dynamic_type<MultidimArrayStruct>();
+  OpenDDS::XTypes::DynamicDataImpl data(dt);
+  DDS::DynamicData_var arr_dd;
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_complex_value(arr_dd, 0));
+  DDS::DynamicType_var arr_type = arr_dd->type();
+  DDS::TypeDescriptor_var arr_td;
+  EXPECT_EQ(DDS::RETCODE_OK, arr_type->get_descriptor(arr_td));
+
+  MultidimArrayStruct mdim_struct;
+  mdim_struct.arr[0][0] = 10;
+  mdim_struct.arr[0][1] = 20;
+  mdim_struct.arr[0][2] = 30;
+  mdim_struct.arr[1][0] = 40;
+  mdim_struct.arr[1][1] = 50;
+  mdim_struct.arr[1][2] = 60;
+  DDS::BoundSeq idx_vec;
+  idx_vec.length(2);
+  for (CORBA::ULong i = 0; i < arr_td->bound()[0]; ++i) {
+    idx_vec[0] = i;
+    for (CORBA::ULong j = 0; j < arr_td->bound()[1]; ++j) {
+      idx_vec[1] = j;
+      CORBA::ULong flat_idx;
+      EXPECT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::flat_index(flat_idx, idx_vec, arr_td->bound()));
+      EXPECT_EQ(i * arr_td->bound()[1] + j, flat_idx);
+      EXPECT_EQ(DDS::RETCODE_OK, arr_dd->set_int32_value(arr_dd->get_member_id_at_index(flat_idx),
+                                                         mdim_struct.arr[i][j]));
+    }
+  }
+
+  const unsigned char expected_cdr[] = {
+    0x00,0x00,0x00,0x18,
+    0x00,0x00,0x00,10, 0x00,0x00,0x00,20, 0x00,0x00,0x00,30,
+    0x00,0x00,0x00,40, 0x00,0x00,0x00,50, 0x00,0x00,0x00,60
+  };
+  ACE_Message_Block buffer(64);
+  OpenDDS::DCPS::Encoding xcdr2(OpenDDS::DCPS::Encoding::KIND_XCDR2, OpenDDS::DCPS::ENDIAN_BIG);
+  OpenDDS::DCPS::Serializer ser(&buffer, xcdr2);
+  ASSERT_TRUE(ser << &data);
+  EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+}
+
+void nameMatches(const MinimalMemberDetail& mmd, const char* name)
+{
+  NameHash nh;
+  hash_member_name(nh, name);
+  EXPECT_TRUE(name_hash_equal(mmd.name_hash, nh));
+}
+
+void nameMatches(const CompleteMemberDetail& cmd, const char* name)
+{
+  EXPECT_EQ(cmd.name, name);
+}
+
+template <typename MCTO> // Minimal/Complete TypeObject
+void checkTO(const MCTO& mcto)
+{
+  EXPECT_EQ(mcto.kind, TK_ENUM);
+  EXPECT_EQ(mcto.enumerated_type.literal_seq.length(), 2u);
+  EXPECT_EQ(mcto.enumerated_type.literal_seq[0].common.value, 0);
+  nameMatches(mcto.enumerated_type.literal_seq[0].detail, "X");
+  EXPECT_EQ(mcto.enumerated_type.literal_seq[1].common.value, 1);
+  nameMatches(mcto.enumerated_type.literal_seq[1].detail, "Z");
+}
+
+void checkTI(const TypeIdentifier& ti, const TypeMap& map)
+{
+  const TypeMap::const_iterator it = map.find(ti);
+  EXPECT_NE(it, map.end());
+  switch (it->second.kind) {
+  case EK_MINIMAL:
+    checkTO(it->second.minimal);
+    break;
+  case EK_COMPLETE:
+    checkTO(it->second.complete);
+    break;
+  }
+}
+
+template <typename CMSMS> // Complete/Minimal StructMemberSeq
+void checkStructMembers(const CMSMS& cmsms, const TypeMap& map)
+{
+  if (cmsms.length() == 1) {
+    return; // nested struct UsesEnumS
+  }
+  EXPECT_EQ(8u, cmsms.length());
+  for (DDS::UInt32 i = 0; i < cmsms.length(); ++i) {
+    const TypeIdentifier& ti = cmsms[i].common.member_type_id;
+    switch (ti.kind()) {
+    case EK_MINIMAL:
+    case EK_COMPLETE:
+      EXPECT_EQ(1u, map.count(ti));
+      break;
+    case TI_PLAIN_SEQUENCE_SMALL:
+      EXPECT_EQ(1u, map.count(*ti.seq_sdefn().element_identifier));
+      break;
+    case TI_PLAIN_ARRAY_SMALL:
+      EXPECT_EQ(1u, map.count(*ti.array_sdefn().element_identifier));
+      break;
+    default:
+      EXPECT_TRUE(false);
+    }
+  }
+}
+
+void checkStruct(const TypeObject& to, const TypeMap& map)
+{
+  switch (to.kind) {
+  case EK_MINIMAL:
+    checkStructMembers(to.minimal.struct_type.member_seq, map);
+    break;
+  case EK_COMPLETE:
+    checkStructMembers(to.complete.struct_type.member_seq, map);
+    break;
+  }
+}
+
+void checkAdded(const TypeMap& map)
+{
+  size_t enums = 0, aliases = 0, structs = 0, unions = 0;
+  for (TypeMap::const_iterator it = map.begin(); it != map.end(); ++it) {
+    TypeKind kind = TK_NONE;
+    switch (it->second.kind) {
+    case EK_MINIMAL:
+      kind = it->second.minimal.kind;
+      break;
+    case EK_COMPLETE:
+      kind = it->second.complete.kind;
+      break;
+    }
+    switch (kind) {
+    case TK_ENUM: ++enums; break;
+    case TK_ALIAS: ++aliases; break;
+    case TK_UNION: ++unions; break;
+    case TK_STRUCTURE:
+      ++structs;
+      checkStruct(it->second, map);
+      break;
+    }
+  }
+  EXPECT_EQ(1u, enums); // Enu_t
+  EXPECT_EQ(2u, aliases); // UsesEnumA, EnuSeq
+  EXPECT_EQ(2u, structs); // UsesEnumS, TestEnums
+  EXPECT_EQ(1u, unions); // UsesEnumU
+}
+
+TEST_F(dds_DCPS_XTypes_Utils, remove_enumerators)
+{
+  const TypeMap& minimalTM = getMinimalTypeMap<XTypesUtils_TestEnums_xtag>();
+  const TypeMap& completeTM = getCompleteTypeMap<XTypesUtils_TestEnums_xtag>();
+  tls_->add(minimalTM.begin(), minimalTM.end());
+  tls_->add(completeTM.begin(), completeTM.end());
+
+  Sequence<DDS::Int32> values_to_remove;
+  values_to_remove.append(1);
+  // Original: enum Enu_t { X, Y, Z };
+  // Modified: enum Enu_t { X, Z };
+
+  TypeMap miniAdded, compAdded;
+  TypeIdentifier newEnumM, newEnumC;
+  const TypeIdentifier newStructM = remove_enumerators(getMinimalTypeIdentifier<XTypesUtils_TestEnums_xtag>(),
+                                                       getMinimalTypeIdentifier<XTypesUtils_Enu_t_xtag>(),
+                                                       values_to_remove, *tls_, miniAdded, &newEnumM);
+  EXPECT_NE(newStructM, TypeIdentifier::None);
+  checkTI(newEnumM, miniAdded);
+  EXPECT_EQ(miniAdded.size(), 6u);
+  checkAdded(miniAdded);
+  const TypeIdentifier newStructC = remove_enumerators(getCompleteTypeIdentifier<XTypesUtils_TestEnums_xtag>(),
+                                                       getCompleteTypeIdentifier<XTypesUtils_Enu_t_xtag>(),
+                                                       values_to_remove, *tls_, compAdded, &newEnumC);
+  EXPECT_NE(newStructC, TypeIdentifier::None);
+  checkTI(newEnumC, compAdded);
+  EXPECT_EQ(compAdded.size(), 6u);
+  checkAdded(compAdded);
+}
+
+#endif

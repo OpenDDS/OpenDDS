@@ -1,0 +1,85 @@
+Released 2025-05-06
+
+Download :ghrelease:`this release on GitHub <v3.32.0>`.
+
+Read `the documentation for this release on Read the Docs <https://opendds.readthedocs.io/en/v3.32.0>`__.
+
+Additions
+=========
+
+- Added :option:`RtpsRelay -LogUtilizationChanges` to RtpsRelay options (:ghpr:`4890`)
+
+- Added :option:`opendds_idl --append-typeobjects` to opendds_idl options.  It can be used to write XTypes Type Objects to a separate output file in addition to normal code generation. (:ghpr:`4898`)
+
+- Added :option:`RtpsRelay -SynchronousOutput` option to RtpsRelay. (:ghpr:`4928`)
+- The TypeLookupService now has support for strongly connected components (recursive types). (:ghpr:`4940`)
+
+Platform Support and Dependencies
+=================================
+
+- ACE/TAO
+
+  - Updated ACE 8/TAO 4 from 8.0.2 to `8.0.3 <https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-8_0_3>`__.
+
+- CMake
+
+  - :cmake:func:`opendds_target_sources`
+
+    - Added support for using the same IDL files in different targets with different options. (:ghpr:`4962`)
+    - It will not automatically generate an export header when all IDL files are scoped ``PRIVATE`` unless :cmake:func:`opendds_target_sources(ALWAYS_GENERATE_LIB_EXPORT_HEADER)` is set to ``TRUE``. (:ghpr:`4962`)
+    - It will not export symbols in code generated from ``PRIVATE`` IDL files. (:ghpr:`4962`)
+    - Added support for the `codegen <https://cmake.org/cmake/help/latest/policy/CMP0171.html>`__ target (CMake 3.31 or later) to build and run IDL compilers on targets with IDL. (:ghpr:`4962`)
+    - :cmake:func:`opendds_target_sources(USE_EXPORT)` will now pass on its arguments to :cmake:func:`opendds_export_header(EXISTING)`. (:ghpr:`4964`)
+
+  - Fixes and improvements for :cmake:func:`opendds_export_header`: (:ghpr:`4954`)
+
+    - ``opendds_export_header`` now allows specifying an existing export header and gives control over what names are used.
+
+    - ``opendds_export_header`` and :cmake:func:`opendds_target_sources` now set symbol visibility to hidden using `CXX_VISIBILITY_PRESET <https://cmake.org/cmake/help/latest/prop_tgt/LANG_VISIBILITY_PRESET.html>`__ and `VISIBILITY_INLINES_HIDDEN <https://cmake.org/cmake/help/latest/prop_tgt/VISIBILITY_INLINES_HIDDEN.html>`__ on platforms where this applies.
+
+    - Fixed Visual Studio failing because of inconsistent linkage of exported symbols when linking between a DLL and a static library.
+
+  - Fixed :ghissue:`issue with building iShapes demo with CMake <4849>`. (:ghpr:`4884`)
+  - Improved C++ standard detection in CMake. (:ghpr:`4884`)
+  - Added :cmake:func:`opendds_bigobj` to set ``/bigobj`` on targets that need it on Windows. (:ghpr:`4954`)
+  - When using CMake 4, fixed relative path issues when working within a symlinked directory, including a warning about `CMP0177 <https://cmake.org/cmake/help/latest/policy/CMP0177.html>`__. (:ghpr:`4959`)
+  - Fixed :ghissue:`issue with CMake being unable to find RapidJSON <4905>` after installing OpenDDS. (:ghpr:`4973`)
+
+  - Fixed reconfigured cross-compiled builds trying to use ``TRUE`` as the path to host tools. (:ghpr:`4986`)
+
+  - Building OpenDDS with CMake
+
+    - The :ref:`shapes-demo` will now be built when :ref:`cmake-building` and :cmake:var:`OPENDDS_QT` is set to ``TRUE``. (:ghpr:`4884`)
+    - Improved support for using Xerces 3.3.0 when building OpenDDS using CMake. (:ghpr:`4926`)
+    - GoogleTest will no longer be installed if it was built as part of the OpenDDS tests. (:ghpr:`4973`)
+    - Added :cmake:var:`OPENDDS_INSTALL_RAPIDJSON` to disable installing RapidJSON automatically. (:ghpr:`4973`)
+    - :cmake:var:`OPENDDS_ACE` and :cmake:var:`OPENDDS_TAO` can now be overrode after OpenDDS is installed. (:ghpr:`4973`)
+    - Fixed :cmake:var:`OPENDDS_COMPILE_WARNINGS=ERROR <OPENDDS_COMPILE_WARNINGS>`, which didn't work before. (:ghpr:`4986`)
+
+- Updated GoogleTest to be compatible with CMake 4. (:ghpr:`4959`)
+
+- OpenDDS's use of ``std::optional`` or an emulation is determined by the configuration file (:ghpr:`4976`)
+
+  - See ``OPENDDS_CONFIG_STD_OPTIONAL`` in ``dds/OpenDDSConfig.h``
+  - Default is to use ``std::optional`` on compilers that support it
+  - See configure script's ``--no-std-optional`` or CMake's ``OPENDDS_STD_OPTIONAL``
+- New configure script option: ``--[no-]static-runtime`` (:ghpr:`4977`, :ghpr:`4983`)
+
+Fixes
+=====
+
+- Added ``RTPS_HARVEST_THREAD_STATUS`` property to select the participant that harvests thread status. (:ghpr:`4887`)
+
+  - This addresses erroneous results from multiple participants harvesting thread status.
+
+  - See :ref:`built_in_topics--openddsinternalthread-topic` for usage.
+- Signal the thread monitor in RtpsRelay listeners to avoid thread monitor timeouts. (:ghpr:`4900`)
+- Introduced a time separation when processed expired discovered participants with RtpsDiscovery. (:ghpr:`4908`)
+
+  - See :cfg:prop:`[rtps_discovery]MinimumCleanupSeparation`.
+
+Documentation
+=============
+
+- Fixed minor typo in documentation of :ref:`ace6tao2` option of :cmake:var:`OPENDDS_ACE_TAO_KIND`. (:ghpr:`4884`)
+

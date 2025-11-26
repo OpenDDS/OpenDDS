@@ -6,7 +6,7 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-cmake_minimum_required(VERSION 3.3...3.27)
+cmake_minimum_required(VERSION 3.3...4.0)
 
 if(OPENDDS_CMAKE_VERBOSE)
   message(STATUS "find_package(OpenDDS) called from ${PROJECT_NAME}")
@@ -15,6 +15,11 @@ set(_opendds_old_cmake_message_indent "${CMAKE_MESSAGE_INDENT}")
 list(APPEND CMAKE_MESSAGE_INDENT "  ")
 
 include("${CMAKE_CURRENT_LIST_DIR}/init.cmake")
+if(NOT _OPENDDS_INIT_CMAKE_COMPLETE)
+  set(CMAKE_MESSAGE_INDENT "${_opendds_cmake_message_indent}")
+  message(SEND_ERROR "init.cmake called from OpenDDSConfig.cmake didn't complete")
+  return()
+endif()
 include("${CMAKE_CURRENT_LIST_DIR}/ace_group.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/tao_group.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/opendds_group.cmake")
@@ -226,7 +231,7 @@ if(_opendds_tao_find_libs OR _opendds_tao_find_exes)
   endif()
 endif()
 
-if(_OPENDDS_CMAKE_BUILT_AND_INSTALLED)
+if(OPENDDS_BUILT_USING_CMAKE AND OPENDDS_USE_PREFIX_PATH)
   include("${CMAKE_CURRENT_LIST_DIR}/opendds_targets.cmake")
   set(OpenDDS_FOUND TRUE)
   foreach(_tgt ${_opendds_required_targets})
@@ -249,13 +254,11 @@ endif()
 if(NOT TARGET OpenDDS::OpenDDS)
   set(_opendds_core_libs
     OpenDDS::Dcps
-    OpenDDS::Multicast
     OpenDDS::Rtps
     OpenDDS::Rtps_Udp
     OpenDDS::InfoRepoDiscovery
     OpenDDS::Shmem
     OpenDDS::Tcp
-    OpenDDS::Udp
   )
   if(OPENDDS_SECURITY)
     list(APPEND _opendds_core_libs OpenDDS::Security)
@@ -277,9 +280,10 @@ if(NOT TARGET OpenDDS::OpenDDS)
   endif()
 endif()
 
-if(NOT TARGET OpenDDS::TestUtils AND DEFINED OPENDDS_SOURCE_DIR)
-  add_library(OpenDDS::TestUtils INTERFACE IMPORTED)
-  target_include_directories(OpenDDS::TestUtils INTERFACE "${OPENDDS_SOURCE_DIR}")
+if(NOT TARGET OpenDDS_TestUtils AND DEFINED OPENDDS_SOURCE_DIR
+    AND IS_DIRECTORY "${OPENDDS_SOURCE_DIR}")
+  add_library(OpenDDS_TestUtils INTERFACE)
+  target_include_directories(OpenDDS_TestUtils SYSTEM INTERFACE "${OPENDDS_SOURCE_DIR}")
 endif()
 
 if(TARGET TAO::tao_idl OR TARGET OpenDDS::opendds_idl)

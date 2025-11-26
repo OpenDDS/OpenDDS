@@ -6,8 +6,6 @@
 namespace RtpsRelay {
 
 class ReaderListenerBase : public DDS::DataReaderListener {
-public:
-
 private:
   void on_requested_deadline_missed(DDS::DataReader_ptr /*reader*/,
                                     const DDS::RequestedDeadlineMissedStatus & /*status*/) override {}

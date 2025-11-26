@@ -119,16 +119,31 @@ TEST(dds_DCPS_ConfigPair, key_has_prefix)
 TEST(dds_DCPS_ConfigStoreImpl, has)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
   EXPECT_FALSE(store.has("key"));
   store.set_boolean("key", true);
   EXPECT_TRUE(store.has("key"));
 }
 
+TEST(dds_DCPS_ConfigStoreImpl, has_prefix)
+{
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
+  EXPECT_FALSE(store.has_prefix("ke"));
+  store.set_boolean("key", true);
+  EXPECT_TRUE(store.has_prefix("k"));
+  EXPECT_TRUE(store.has_prefix("ke"));
+  EXPECT_TRUE(store.has_prefix("key"));
+  EXPECT_FALSE(store.has_prefix("keyv"));
+}
+
 TEST(dds_DCPS_ConfigStoreImpl, set_get_boolean)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
   EXPECT_TRUE(store.get_boolean("key", true));
   EXPECT_FALSE(store.get_boolean("key", false));
   store.set_boolean("key", "true");
@@ -140,7 +155,8 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_boolean)
 TEST(dds_DCPS_ConfigStoreImpl, set_get_int32)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
   EXPECT_EQ(store.get_int32("key", -37), -37);
   store.set_int32("key", -38);
   EXPECT_EQ(store.get_int32("key", -37), -38);
@@ -153,7 +169,8 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_int32)
 TEST(dds_DCPS_ConfigStoreImpl, set_get_uint32)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
   EXPECT_EQ(store.get_uint32("key", 37), 37u);
   store.set_uint32("key", 38);
   EXPECT_EQ(store.get_uint32("key", 37), 38u);
@@ -166,7 +183,8 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_uint32)
 TEST(dds_DCPS_ConfigStoreImpl, set_get_float64)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
   EXPECT_EQ(store.get_float64("key", 1.5), 1.5);
   store.set_float64("key", 2);
   EXPECT_EQ(store.get_float64("key", 1.5), 2);
@@ -177,7 +195,8 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_float64)
 TEST(dds_DCPS_ConfigStoreImpl, set_get_string)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
   CORBA::String_var str = store.get_string("key", "default");
   EXPECT_STREQ(str, "default");
   store.set_string("key", "not default");
@@ -190,7 +209,8 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_duration)
   using OpenDDS::DCPS::operator==;
 
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
   const DDS::Duration_t default_duration = make_duration_t(1,2);
   const DDS::Duration_t duration = make_duration_t(3,4);
   EXPECT_TRUE(store.get_duration("key", default_duration) == default_duration);
@@ -203,7 +223,8 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_duration)
 TEST(dds_DCPS_ConfigStoreImpl, unset)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
   store.set_boolean("key", true);
   store.unset("key");
   EXPECT_FALSE(store.has("key"));
@@ -212,7 +233,8 @@ TEST(dds_DCPS_ConfigStoreImpl, unset)
 TEST(dds_DCPS_ConfigStoreImpl, set_get_String)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
   const String default_string = "default";
   const String other_string = "other";
   EXPECT_EQ(store.get("key", default_string), default_string);
@@ -226,7 +248,8 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_String)
 TEST(dds_DCPS_ConfigStoreImpl, set_get_StringList)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
   ConfigStoreImpl::StringList default_list;
   default_list.push_back("Lorem");
   default_list.push_back("ipsum");
@@ -239,10 +262,28 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_StringList)
   EXPECT_EQ(store.get("key", default_list), other_list);
 }
 
+TEST(dds_DCPS_ConfigStoreImpl, set_get_IntList)
+{
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
+  ConfigStoreImpl::UInt32List default_list;
+  default_list.push_back(1);
+  default_list.push_back(2);
+  default_list.push_back(3);
+  EXPECT_EQ(store.get("key", default_list), default_list);
+
+  ConfigStoreImpl::UInt32List other_list;
+  other_list.push_back(4);
+  store.set("key", other_list);
+  EXPECT_EQ(store.get("key", default_list), other_list);
+}
+
 enum MyConfigStoreEnum {
   ALPHA,
   BETA,
-  GAMMA
+  GAMMA,
+  DELTA
 };
 
 TEST(dds_DCPS_ConfigStoreImpl, set_get_Enum)
@@ -251,21 +292,40 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_Enum)
     {
       { ALPHA, "alpha" },
       { BETA, "beta" },
-      { GAMMA, "gamma" },
-      { static_cast<MyConfigStoreEnum>(0), 0 }
+      { GAMMA, "gamma" }
     };
 
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
+  // Get the default if there is no entry.
   EXPECT_EQ(store.get("key", GAMMA, kinds), GAMMA);
-  store.set("key", "beta");
+
+  // Default not in helper works.
+  EXPECT_EQ(store.get("key", DELTA, kinds), DELTA);
+
+  // Setting with enum works.
+  store.set("key", ALPHA, kinds);
+  EXPECT_EQ(store.get("key", GAMMA, kinds), ALPHA);
+
+  // Setting with string works.
+  store.set("key", "beta", kinds);
+  EXPECT_EQ(store.get("key", GAMMA, kinds), BETA);
+
+  // Setting with enum that is not in helper does nothing.
+  store.set("key", DELTA, kinds);
+  EXPECT_EQ(store.get("key", GAMMA, kinds), BETA);
+
+  // Setting with enum that is not in helper does nothing.
+  store.set("key", "delta", kinds);
   EXPECT_EQ(store.get("key", GAMMA, kinds), BETA);
 }
 
 TEST(dds_DCPS_ConfigStoreImpl, set_get_TimeDuration_seconds)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
   const TimeDuration default_duration(1,2);
   const TimeDuration duration(3);
   EXPECT_EQ(store.get("key", default_duration, ConfigStoreImpl::Format_IntegerSeconds), default_duration);
@@ -278,7 +338,8 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_TimeDuration_seconds)
 TEST(dds_DCPS_ConfigStoreImpl, set_get_TimeDuration_milliseconds)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
   const TimeDuration default_duration(1,2);
   const TimeDuration duration(3,4000);
   EXPECT_EQ(store.get("key", default_duration, ConfigStoreImpl::Format_IntegerMilliseconds), default_duration);
@@ -291,7 +352,8 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_TimeDuration_milliseconds)
 TEST(dds_DCPS_ConfigStoreImpl, set_get_TimeDuration_fractional_seconds)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
   const TimeDuration default_duration(1,500000);
   const TimeDuration duration(2,500000);
   EXPECT_EQ(store.get("key", default_duration, ConfigStoreImpl::Format_FractionalSeconds), default_duration);
@@ -304,7 +366,8 @@ TEST(dds_DCPS_ConfigStoreImpl, set_get_TimeDuration_fractional_seconds)
 TEST(dds_DCPS_ConfigStoreImpl, get_NetworkAddress)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
 
   {
     const NetworkAddress default_value("0.0.0.0:0");
@@ -392,7 +455,8 @@ TEST(dds_DCPS_ConfigStoreImpl, get_NetworkAddress)
 TEST(dds_DCPS_ConfigStoreImpl, get_NetworkAddressSet)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl store(topic, time_source);
 
   {
     NetworkAddressSet default_value;
@@ -482,7 +546,8 @@ TEST(dds_DCPS_ConfigStoreImpl, get_NetworkAddressSet)
 TEST(dds_DCPS_ConfigStoreImpl, take_has_prefix)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl store1(topic);
+  TimeSource time_source;
+  ConfigStoreImpl store1(topic, time_source);
   ConfigReader_rch reader = make_rch<ConfigReader>(store1.datareader_qos());
   topic->connect(reader);
 
@@ -508,7 +573,8 @@ TEST(dds_DCPS_ConfigStoreImpl, process_section)
 {
   JobQueue_rch job_queue = make_rch<JobQueue>(ACE_Reactor::instance());
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl config_store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl config_store(topic, time_source);
   config_store.set("MYPREFIX_MY_SECTION_THIRDKEY", "firstvalue");
   ConfigReader_rch reader = make_rch<ConfigReader>(config_store.datareader_qos());
   RcHandle<Listener> listener = make_rch<Listener>(job_queue);
@@ -522,18 +588,19 @@ TEST(dds_DCPS_ConfigStoreImpl, process_section)
 
   EXPECT_CALL(*listener.get(), on_data_available(reader)).Times(3);
 
-  process_section(config_store, reader, listener, "MYPREFIX", config, config.root_section(), "my file name", false);
+  process_section(config_store, reader, listener, "MYPREFIX", config, config.root_section(), false);
 
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION", "default"), "@my_section");
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_MYKEY", "default"), "myvalue");
-  EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_ANOTHERKEY", "default"), "my file name");
+  EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_ANOTHERKEY", "default"), "$file");
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_THIRDKEY", "default"), "firstvalue");
 }
 
 TEST(dds_DCPS_ConfigStoreImpl, process_section_allow_overwrite)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl config_store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl config_store(topic, time_source);
   config_store.set("MYPREFIX_MY_SECTION_THIRDKEY", "firstvalue");
   ACE_Configuration_Heap config;
   ACE_Configuration_Section_Key section_key;
@@ -543,17 +610,18 @@ TEST(dds_DCPS_ConfigStoreImpl, process_section_allow_overwrite)
   config.set_string_value(section_key, ACE_TEXT("anotherkey"), ACE_TEXT("$file"));
   config.set_string_value(section_key, ACE_TEXT("thirdkey"), ACE_TEXT("secondvalue"));
 
-  process_section(config_store, ConfigReader_rch(), ConfigReaderListener_rch(), "MYPREFIX", config, config.root_section(), "my file name", true);
+  process_section(config_store, ConfigReader_rch(), ConfigReaderListener_rch(), "MYPREFIX", config, config.root_section(), true);
 
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_MYKEY", "default"), "myvalue");
-  EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_ANOTHERKEY", "default"), "my file name");
+  EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_ANOTHERKEY", "default"), "$file");
   EXPECT_EQ(config_store.get("MYPREFIX_MY_SECTION_THIRDKEY", "default"), "secondvalue");
 }
 
 TEST(dds_DCPS_ConfigStoreImpl, get_section_names)
 {
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl config_store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl config_store(topic, time_source);
   config_store.set("MYPREFIX_MY_SECTION", "@my_section");
   config_store.set("MYPREFIX_MY_SECTION_KEY", "not a section");
   config_store.set("MYPREFIX_MY_SECTION2", "@my_section2");
@@ -571,7 +639,8 @@ TEST(dds_DCPS_ConfigStoreImpl, get_section_values)
 {
   JobQueue_rch job_queue = make_rch<JobQueue>(ACE_Reactor::instance());
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
-  ConfigStoreImpl config_store(topic);
+  TimeSource time_source;
+  ConfigStoreImpl config_store(topic, time_source);
   ConfigReader_rch reader = make_rch<ConfigReader>(config_store.datareader_qos());
   RcHandle<Listener> listener = make_rch<Listener>(job_queue);
   ACE_Configuration_Heap config;
@@ -584,13 +653,34 @@ TEST(dds_DCPS_ConfigStoreImpl, get_section_values)
 
   EXPECT_CALL(*listener.get(), on_data_available(reader)).Times(4);
 
-  process_section(config_store, reader, listener, "MYPREFIX", config, config.root_section(), "my file name", false);
+  process_section(config_store, reader, listener, "MYPREFIX", config, config.root_section(), false);
 
   ConfigStoreImpl::StringMap expected_sm;
   expected_sm["MYKEY"] = "myvalue";
-  expected_sm["ANOTHERKEY"] = "my file name";
+  expected_sm["ANOTHERKEY"] = "$file";
   expected_sm["THIRDKEY"] = "secondvalue";
 
   const ConfigStoreImpl::StringMap sm = config_store.get_section_values("MYPREFIX_MY_SECTION");
   EXPECT_EQ(sm, expected_sm);
+}
+
+TEST(dds_DCPS_ConfigStoreImpl, delete_section)
+{
+  ConfigTopic_rch topic = make_rch<ConfigTopic>();
+  TimeSource time_source;
+  ConfigStoreImpl config_store(topic, time_source);
+  config_store.set("MYPREFIX_MY_SECTION", "@my_section");
+  config_store.set("MYPREFIX_MY_SECTION_KEY", "not a section");
+  config_store.set("MYPREFIX_MY_SECTION2", "@my_section2");
+  config_store.set("MYPREFIX_MY_SECTION2_KEY", "not a section");
+  config_store.set("NOTMYPREFIX_MY_SECTION2", "@my_section2");
+  config_store.set("NOTMYPREFIX_MY_SECTION2_KEY", "not a section");
+
+  config_store.unset_section("MYPREFIX");
+  EXPECT_FALSE(config_store.has("MYPREFIX_MY_SECTION"));
+  EXPECT_FALSE(config_store.has("MYPREFIX_MY_SECTION_KEY"));
+  EXPECT_FALSE(config_store.has("MYPREFIX_MY_SECTION2"));
+  EXPECT_FALSE(config_store.has("MYPREFIX_MY_SECTION2_KEY"));
+  EXPECT_TRUE(config_store.has("NOTMYPREFIX_MY_SECTION2"));
+  EXPECT_TRUE(config_store.has("NOTMYPREFIX_MY_SECTION2_KEY"));
 }

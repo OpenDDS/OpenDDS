@@ -6,9 +6,13 @@
 #ifndef OPENDDS_DCPS_XTYPES_UTILS_H
 #define OPENDDS_DCPS_XTYPES_UTILS_H
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include <dds/DCPS/Serializer.h>
 #  include <dds/DCPS/Sample.h>
+#  include <dds/DCPS/DCPS_Utils.h>
+#  include <dds/DCPS/debug.h>
 
 #  include <dds/DdsDynamicDataC.h>
 
@@ -17,6 +21,8 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
+
+class TypeLookupService;
 
 inline bool dynamic_type_is_valid(DDS::DynamicType_ptr type)
 {
@@ -50,19 +56,19 @@ public:
   bool in_subscript;
   DCPS::String subpath;
 
-  MemberPathParser(const char* path)
+  MemberPathParser(const char* a_path)
     : pos(0)
-    , left(path ? std::strlen(path) : 0)
-    , path(left > 0 ? path : 0)
+    , left(a_path ? std::strlen(a_path) : 0)
+    , path(left > 0 ? a_path : 0)
     , error(false)
     , in_subscript(false)
   {
   }
 
-  MemberPathParser(const DCPS::String& path)
+  MemberPathParser(const DCPS::String& a_path)
     : pos(0)
-    , left(path.size())
-    , path(left > 0 ? path.c_str() : 0)
+    , left(a_path.size())
+    , path(left > 0 ? a_path.c_str() : 0)
     , error(false)
     , in_subscript(false)
   {
@@ -238,9 +244,44 @@ inline DCPS::Sample::Extent nested(DCPS::Sample::Extent ext)
   return ext == DCPS::Sample::KeyOnly ? DCPS::Sample::NestedKeyOnly : ext;
 }
 
+// Convert the index vector to an element in a multi-dimensional array into a flat index.
+// See description for ARRAY_TYPE in XTypes 1.3, page 139.
+OpenDDS_Dcps_Export DDS::ReturnCode_t flat_index(CORBA::ULong& flat_idx, const DDS::BoundSeq& idx_vec,
+                                                 const DDS::BoundSeq& dims);
+
+inline bool check_rc_from_get(DDS::ReturnCode_t rc, DDS::MemberId id, DDS::TypeKind tk,
+                              const char* fn_name, DCPS::LogLevel::Value log_thres = DCPS::LogLevel::Notice)
+{
+  if (rc != DDS::RETCODE_OK && rc != DDS::RETCODE_NO_DATA) {
+    if (DCPS::log_level >= log_thres) {
+      ACE_ERROR((DCPS::LogLevel::to_priority(log_thres), "(%P|t) %C: %C: Failed to get %C member ID %u: %C\n",
+                 DCPS::LogLevel::to_string(log_thres), fn_name,
+                 XTypes::typekind_to_string(tk), id, DCPS::retcode_to_string(rc)));
+    }
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Walk the TypeObject graph starting at top_level looking for all TypeIdentifiers
+ * that match enum_type and replacing each of those with a new TypeIdentifier that
+ * represents the orignal enum_type with certain enumerators (represented by the
+ * values sequence) removed.  All newly-generated TypeObjects are inserted into
+ * the type_map with their respective TypeIdentifiers.
+ * The returned TypeIdentifier represents the modified top_level.
+ */
+OpenDDS_Dcps_Export
+TypeIdentifier remove_enumerators(const TypeIdentifier& top_level,
+                                  const TypeIdentifier& enum_type,
+                                  const Sequence<DDS::Int32>& values,
+                                  const TypeLookupService& lookup,
+                                  TypeMap& type_map,
+                                  TypeIdentifier* modified_enum = 0);
+
 } // namespace XTypes
 } // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif
 #endif

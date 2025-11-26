@@ -16,9 +16,10 @@
 
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h>
 //If we need BIT support, pull in TCP so that static builds will have it.
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include <dds/DCPS/transport/tcp/Tcp.h>
 #endif
 
@@ -41,11 +42,7 @@
 InfoRepo::InfoRepo(int argc, ACE_TCHAR *argv[])
 : ior_file_(ACE_TEXT("repo.ior"))
 , listen_address_given_(0)
-#ifdef DDS_HAS_MINIMUM_BIT
-, use_bits_(false)
-#else
-, use_bits_(true)
-#endif
+, use_bits_(OPENDDS_CONFIG_BUILT_IN_TOPICS)
 , resurrect_(true)
 , finalized_(false)
 , servant_finalized_(false)
@@ -259,7 +256,7 @@ InfoRepo::init()
 
   bool use_bidir = true;
 
-  for (int i = 0; i < args.argc() - 1; ++i) {
+  for (size_t i = 0; i < static_cast<size_t>(args.argc()) - 1; ++i) {
     if (0 == ACE_OS::strcmp(args[i], ACE_TEXT("-DCPSBidirGIOP"))) {
       use_bidir = ACE_OS::atoi(args[i + 1]);
       break;
@@ -274,9 +271,10 @@ InfoRepo::init()
         ACE_TEXT("-ORBConnectionHandlerCleanup 1\""),
       ACE_TEXT("-ORBSvcConfDirective"),
       ACE_TEXT("static Resource_Factory \"-ORBFlushingStrategy blocking\""),
-      0
     };
-    args.add((ACE_TCHAR**)config, true /*quote arg*/);
+    for (size_t i = 0; i < sizeof(config) / sizeof(config[0]); ++i) {
+      args.add(config[i], true /*quote arg*/);
+    }
   }
 
   int argc = args.argc();
@@ -328,6 +326,9 @@ InfoRepo::init()
 
   CORBA::String_var objref_str =
     orb_->object_to_string(info_repo);
+
+  // RTPS discovery is the default, change it to InfoRepo
+  TheServiceParticipant->set_default_discovery(OpenDDS::DCPS::Discovery::DEFAULT_REPO);
 
   // Initialize the DomainParticipantFactory
   DDS::DomainParticipantFactory_var dpf =

@@ -5,6 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include <CompleteToMinimalTypeObjectTypeSupportImpl.h>
+
 #include "dds/DCPS/XTypes/TypeObject.h"
 
 #include "gtest/gtest.h"
@@ -100,15 +102,23 @@ TypeObject getTypeObject()
 std::ostream& operator<<(std::ostream& os, const TypeIdentifier& ti)
 {
   std::ostream os_hex(os.rdbuf());
-  os_hex << std::hex << std::showbase;
-  os_hex << "Kind: " << int(ti.kind()) << ' ';
+  os << std::hex << std::showbase;
+  os << "Kind: " << int(ti.kind()) << ' ';
   if (ti.kind() == EK_COMPLETE || ti.kind() == EK_MINIMAL) {
     os_hex << "Equiv Hash: ";
     for (size_t i = 0; i < sizeof ti.equivalence_hash(); ++i) {
       os_hex << int(ti.equivalence_hash()[i]) << ' ';
     }
+  } else if (ti.kind() == TI_STRONGLY_CONNECTED_COMPONENT) {
+    os_hex << "SC Hash Kind: " << int(ti.sc_component_id().sc_component_id.kind);
+    os << " SC Hash: ";
+    for (size_t i = 0; i < sizeof ti.sc_component_id().sc_component_id.hash; ++i) {
+      os_hex << int(ti.sc_component_id().sc_component_id.hash[i]) << ' ';
+    }
+    os << " length: " << ti.sc_component_id().scc_length;
+    os << " index: " << ti.sc_component_id().scc_index;
   }
-  return os << '\n';
+  return os;
 }
 
 TEST(dds_DCPS_XTypes_TypeObject, maintest)
@@ -158,71 +168,6 @@ TEST(dds_DCPS_XTypes_TypeObject, maintest)
   //std::cout << badIdentifier << std::endl;
   const XTypes::TypeIdentifier bad(XTypes::EK_MINIMAL,XTypes::EquivalenceHashWrapper(100, 92, 123, 199, 182, 88, 54, 251, 172, 100, 66, 123, 137, 217));
   EXPECT_EQ(badIdentifier, bad);
-}
-
-TEST(dds_DCPS_XTypes_TypeObject, Optional_equal)
-{
-  Optional<int> uut1;
-  Optional<int> uut2;
-  Optional<int> uut3(3);
-  Optional<int> uut4(3);
-  Optional<int> uut5(4);
-
-  EXPECT_EQ(uut1, uut2);
-  EXPECT_EQ(uut3, uut4);
-
-  EXPECT_NE(uut1, uut3);
-  EXPECT_NE(uut4, uut5);
-}
-
-TEST(dds_DCPS_XTypes_TypeObject, Optional_has_value)
-{
-  Optional<OpenDDS::DCPS::String> opt1;
-  Optional<OpenDDS::DCPS::String> opt2("test");
-
-  EXPECT_FALSE(opt1);
-  EXPECT_FALSE(opt1.has_value());
-  EXPECT_TRUE(opt2);
-  EXPECT_TRUE(opt2.has_value());
-}
-
-TEST(dds_DCPS_XTypes_TypeObject, Optional_destructor)
-{
-  // The Destruction object 'd' will set destroyed to true in
-  // its destructor.
-  bool destroyed = false;
-  Destruction d(destroyed);
-
-  // But, because opt1 will be destroyed first, it should set
-  // destroyed to true first.
-  {
-    Optional<Destruction> opt1(d);
-    EXPECT_TRUE(opt1);
-  }
-
-  // This should be true because the destructor of the Destruction
-  // object inside of the Optional will have run.
-  EXPECT_TRUE(destroyed);
-}
-
-TEST(dds_DCPS_XTypes_TypeObject, Optional_assignment)
-{
-  Optional<OpenDDS::DCPS::String> opt1;
-  Optional<OpenDDS::DCPS::String> opt2("test");
-  Optional<OpenDDS::DCPS::String> opt3;
-  Optional<OpenDDS::DCPS::String> opt4("other");
-
-  opt1 = opt2;
-  EXPECT_EQ(opt1, opt2);
-
-  opt2 = opt1;
-  EXPECT_TRUE(opt2);
-
-  opt4 = opt3;
-  EXPECT_EQ(opt3, opt4);
-
-  opt3 = opt4;
-  EXPECT_FALSE(opt3);
 }
 
 TEST(dds_DCPS_XTypes_TypeObject, Sequence_equal)
@@ -632,9 +577,9 @@ TEST(dds_DCPS_XTypes_TypeObject, AppliedVerbatimAnnotation_equal)
 TEST(dds_DCPS_XTypes_TypeObject, AppliedBuiltinMemberAnnotations_equal)
 {
   AppliedBuiltinMemberAnnotations uut1;
-  uut1.unit = Optional<OpenDDS::DCPS::String>("meters");
+  uut1.unit = std::optional<OpenDDS::DCPS::String>("meters");
   AppliedBuiltinMemberAnnotations uut2;
-  uut2.unit = Optional<OpenDDS::DCPS::String>("meters");
+  uut2.unit = std::optional<OpenDDS::DCPS::String>("meters");
   AppliedBuiltinMemberAnnotations uut3;
 
   EXPECT_EQ(uut1, uut2);
@@ -705,9 +650,9 @@ TEST(dds_DCPS_XTypes_TypeObject, AppliedBuiltinTypeAnnotations_equal)
   value.text = "text";
 
   AppliedBuiltinTypeAnnotations uut1;
-  uut1.verbatim = Optional<AppliedVerbatimAnnotation>(value);
+  uut1.verbatim = std::optional<AppliedVerbatimAnnotation>(value);
   AppliedBuiltinTypeAnnotations uut2;
-  uut2.verbatim = Optional<AppliedVerbatimAnnotation>(value);
+  uut2.verbatim = std::optional<AppliedVerbatimAnnotation>(value);
   AppliedBuiltinTypeAnnotations uut3;
 
   EXPECT_EQ(uut1, uut2);
@@ -1123,12 +1068,12 @@ TEST(dds_DCPS_XTypes_TypeObject, MinimalAliasType_equal)
 TEST(dds_DCPS_XTypes_TypeObject, CompleteElementDetail_equal)
 {
   AppliedBuiltinMemberAnnotations builtin;
-  builtin.unit = Optional<OpenDDS::DCPS::String>("meters");
+  builtin.unit = std::optional<OpenDDS::DCPS::String>("meters");
 
   CompleteElementDetail uut1;
-  uut1.ann_builtin = Optional<AppliedBuiltinMemberAnnotations>(builtin);
+  uut1.ann_builtin = std::optional<AppliedBuiltinMemberAnnotations>(builtin);
   CompleteElementDetail uut2;
-  uut2.ann_builtin = Optional<AppliedBuiltinMemberAnnotations>(builtin);
+  uut2.ann_builtin = std::optional<AppliedBuiltinMemberAnnotations>(builtin);
   CompleteElementDetail uut3;
 
   EXPECT_EQ(uut1, uut2);
@@ -1987,4 +1932,36 @@ TEST(dds_DCPS_XTypes_TypeIdentifierWithSize, TypeIdentifierWithSize_equal)
 
   EXPECT_EQ(uut1, uut2);
   EXPECT_NE(uut2, uut3);
+}
+
+TEST(dds_DCPS_XTypes, make_scc_id_or_default)
+{
+  TypeIdentifier none;
+  EXPECT_EQ(none, make_scc_id_or_default(none));
+
+  TypeIdentifier scc_x(TI_STRONGLY_CONNECTED_COMPONENT, StronglyConnectedComponentId());
+  scc_x.sc_component_id().scc_index = 1;
+  scc_x.sc_component_id().scc_length = 5;
+  TypeIdentifier scc_y(scc_x);
+  scc_y.sc_component_id().scc_index = 0;
+  EXPECT_EQ(scc_y, make_scc_id_or_default(scc_x));
+}
+
+TEST(dds_DCPS_XTypes, compute_dependencies)
+{
+  MyModCompleteToMinimal::CircularStructTypeSupportImpl type_support;
+
+  const TypeIdentifier ti = type_support.getMinimalTypeIdentifier();
+  ASSERT_EQ(ti.kind(), TI_STRONGLY_CONNECTED_COMPONENT);
+  ASSERT_EQ(ti.sc_component_id().scc_index, 1);
+  ASSERT_EQ(ti.sc_component_id().scc_length, 5);
+
+  const TypeMap& tm = type_support.getMinimalTypeMap();
+
+  TypeIdentifierSet dependencies;
+  compute_dependencies(tm, ti, dependencies);
+
+  ASSERT_EQ(dependencies.size(), 1U);
+  const TypeIdentifier& x = *dependencies.begin();
+  ASSERT_EQ(x, make_scc_id_or_default(ti));
 }

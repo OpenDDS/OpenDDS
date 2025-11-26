@@ -29,6 +29,10 @@ public:
   Fixed(FACE::LongDouble val);
   Fixed(const char* str);
 
+  Fixed(const ACE_CDR::Fixed& f)
+    : impl_(f)
+  {}
+
   operator FACE::LongLong() const;
   operator FACE::LongDouble() const;
   Fixed round(FACE::UnsignedShort scale) const;
@@ -51,6 +55,8 @@ public:
 
   FACE::UnsignedShort fixed_digits() const;
   FACE::UnsignedShort fixed_scale() const;
+
+  ACE_CDR::Fixed to_ace_fixed() const { return impl_; }
 
 #ifndef ACE_LACKS_IOSTREAM_TOTALLY
   friend std::istream& operator>>(std::istream& is, Fixed& val)
@@ -115,13 +121,7 @@ public:
   }
 
 protected:
-#ifdef ACE_HAS_CDR_FIXED
   ACE_CDR::Fixed impl_;
-
-  Fixed(const ACE_CDR::Fixed& f)
-    : impl_(f)
-  {}
-#endif
 
   static FACE::LongDouble doubleToLongDouble(FACE::Double d)
   {
@@ -251,14 +251,14 @@ inline FACE::UnsignedShort Fixed::fixed_scale() const
 
 inline void Fixed::enforce(unsigned int digits, unsigned int scale)
 {
-  impl_ = impl_.truncate(scale);
+  impl_ = impl_.truncate(static_cast<ACE_CDR::UShort>(scale));
   if (impl_.fixed_digits() > digits) {
     throw CORBA::DATA_CONVERSION();
   }
 
   if (impl_.fixed_scale() < scale) {
-    const int offset = scale - impl_.fixed_scale();
-    if (offset + impl_.fixed_digits() > int(digits)) {
+    const unsigned int offset = scale - impl_.fixed_scale();
+    if (offset + impl_.fixed_digits() > digits) {
       throw CORBA::DATA_CONVERSION();
     }
 
@@ -293,7 +293,6 @@ public:
 private:
   friend bool operator<<(DCPS::Serializer& ser, const Fixed_T& f)
   {
-#ifdef ACE_HAS_CDR_FIXED
     const int sz = (static_cast<int>(Digits) + 2) / 2;
     int n;
     const FACE::Octet* arr = f.impl_.to_octets(n);
@@ -301,16 +300,10 @@ private:
       arr -= sz - n;
     }
     return ser.write_octet_array(arr, sz);
-#else
-    ACE_UNUSED_ARG(ser);
-    ACE_UNUSED_ARG(f);
-    return false;
-#endif
   }
 
   friend bool operator>>(DCPS::Serializer& ser, Fixed_T& f)
   {
-#ifdef ACE_HAS_CDR_FIXED
     static const unsigned int n = (Digits + 2) / 2;
     FACE::Octet arr[n];
     if (!ser.read_octet_array(arr, n)) {
@@ -318,11 +311,6 @@ private:
     }
     f.impl_ = ACE_CDR::Fixed::from_octets(arr, n, Scale);
     return true;
-#else
-    ACE_UNUSED_ARG(ser);
-    ACE_UNUSED_ARG(f);
-    return false;
-#endif
   }
 };
 

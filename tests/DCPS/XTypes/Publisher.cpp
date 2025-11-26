@@ -5,6 +5,8 @@
 #include "CommonTypeSupportImpl.h"
 
 #include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/Definitions.h>
+
 #include <dds/DCPS/XTypes/DynamicDataFactory.h>
 #include <dds/DCPS/XTypes/Utils.h>
 
@@ -36,7 +38,7 @@ class DynamicWriter {
 public:
   const TypeSupport_var& ts;
   const DataWriter_var& dw;
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
   DynamicData_var dd;
 #endif
   bool success;
@@ -46,7 +48,7 @@ public:
     , dw(dw)
     , success(true)
   {
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
     ACE_ERROR((LM_ERROR, "ERROR: Can't use DynamicData on Safety Profile!\n"));
     success = false;
 #else
@@ -61,7 +63,7 @@ public:
 
   void set_int32(const std::string& path, CORBA::Int32 value)
   {
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
     ACE_UNUSED_ARG(path);
     ACE_UNUSED_ARG(value);
 #else
@@ -84,7 +86,7 @@ public:
 
   void set_string(const std::string& path, const std::string& value)
   {
-#ifdef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_CONFIG_SAFETY_PROFILE
     ACE_UNUSED_ARG(path);
     ACE_UNUSED_ARG(value);
 #else
@@ -107,7 +109,7 @@ public:
 
   ~DynamicWriter()
   {
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
     if (success) {
       DynamicDataWriter::_var_type typed_dw = DynamicDataWriter::_narrow(dw);
       write_sample_i(ts, typed_dw, dd);

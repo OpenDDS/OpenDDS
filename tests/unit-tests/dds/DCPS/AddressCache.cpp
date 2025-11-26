@@ -47,8 +47,8 @@ template<> struct hash<TestKey>
 {
   std::size_t operator()(const TestKey& val) const noexcept
   {
-    uint32_t hash = OpenDDS::DCPS::one_at_a_time_hash(reinterpret_cast<const uint8_t*>(&val.from_), 2 * sizeof (OpenDDS::DCPS::GUID_t));
-    return static_cast<size_t>(hash);
+    const uint32_t hashcode = OpenDDS::DCPS::one_at_a_time_hash(reinterpret_cast<const uint8_t*>(&val.from_), 2 * sizeof (OpenDDS::DCPS::GUID_t));
+    return static_cast<size_t>(hashcode);
   }
 };
 
@@ -81,13 +81,18 @@ TEST(dds_DCPS_AddressCache, store_remove_load_fail)
   AddressCache<TestKey> test_cache_;
   NetworkAddressSet addrs;
   addrs.insert(NetworkAddress("127.0.0.1:1234"));
+  const GUID_t a = {{1, 1, 1}, {{1, 1, 1}, 1}};
+  const GUID_t b = {{2, 2, 2}, {{2, 2, 2}, 2}};
+  const TestKey key(a, b);
 
-  test_cache_.store(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs);
+  test_cache_.store(key, addrs);
   addrs.clear();
 
-  test_cache_.remove(TestKey(GUID_UNKNOWN, GUID_UNKNOWN));
+  ASSERT_FALSE(test_cache_.empty());
+  test_cache_.remove(key);
+  ASSERT_TRUE(test_cache_.empty());
 
-  ASSERT_FALSE(test_cache_.load(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs));
+  ASSERT_FALSE(test_cache_.load(key, addrs));
 }
 
 TEST(dds_DCPS_AddressCache, store_remove_id_load_fail)
@@ -95,13 +100,18 @@ TEST(dds_DCPS_AddressCache, store_remove_id_load_fail)
   AddressCache<TestKey> test_cache_;
   NetworkAddressSet addrs;
   addrs.insert(NetworkAddress("127.0.0.1:1234"));
+  const GUID_t a = {{1, 1, 1}, {{1, 1, 1}, 1}};
+  const GUID_t b = {{2, 2, 2}, {{2, 2, 2}, 2}};
+  const TestKey key(a, b);
 
-  test_cache_.store(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs);
+  test_cache_.store(key, addrs);
   addrs.clear();
 
-  test_cache_.remove_id(GUID_UNKNOWN);
+  ASSERT_FALSE(test_cache_.empty());
+  test_cache_.remove_id(a);
+  ASSERT_TRUE(test_cache_.empty());
 
-  ASSERT_FALSE(test_cache_.load(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs));
+  ASSERT_FALSE(test_cache_.load(key, addrs));
 }
 
 TEST(dds_DCPS_AddressCache, scoped_access_load_success)

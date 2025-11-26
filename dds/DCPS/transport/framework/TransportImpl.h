@@ -11,20 +11,21 @@
 #include "TransportInst.h"
 #include "DataLinkCleanupTask.h"
 
-#include <dds/DCPS/dcps_export.h>
-#include <dds/DCPS/RcObject.h>
-#include <dds/DCPS/PoolAllocator.h>
-#include <dds/DCPS/ReactorTask.h>
-#include <dds/DCPS/ReactorTask_rch.h>
-#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/AtomicBool.h>
 #include <dds/DCPS/DiscoveryListener.h>
 #include <dds/DCPS/EventDispatcher.h>
-#include <dds/DCPS/AtomicBool.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/ReactorTask.h>
+#include <dds/DCPS/ReactorTask_rch.h>
+#include <dds/DCPS/dcps_export.h>
 
-#include <dds/OpenddsDcpsExtC.h>
-#include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DdsDcpsPublicationC.h>
-#ifdef OPENDDS_SECURITY
+#include <dds/DdsDcpsSubscriptionC.h>
+#include <dds/OpenDDSConfigWrapper.h>
+#include <dds/OpenddsDcpsExtC.h>
+#if OPENDDS_CONFIG_SECURITY
 #  include <dds/DdsSecurityCoreC.h>
 #endif
 
@@ -39,7 +40,6 @@ class TransportClient;
 class TransportReceiveListener;
 class DataLink;
 class TransportInst;
-class Monitor;
 struct AssociationData;
 typedef RcHandle<TransportClient> TransportClient_rch;
 typedef WeakRcHandle<TransportClient> TransportClient_wrch;
@@ -84,6 +84,18 @@ public:
   /// TransportLocator object.
   virtual bool connection_info_i(TransportLocator& local_info, ConnectionInfoFlags flags) const = 0;
 
+  virtual NetworkAddress actual_local_address() const
+  {
+    return NetworkAddress::default_IPV4;
+  }
+
+#ifdef ACE_HAS_IPV6
+  virtual NetworkAddress ipv6_actual_local_address() const
+  {
+    return NetworkAddress::default_IPV6;
+  }
+#endif
+
   virtual void register_for_reader(const GUID_t& /*participant*/,
                                    const GUID_t& /*writerid*/,
                                    const GUID_t& /*readerid*/,
@@ -108,6 +120,7 @@ public:
                                const TransportLocatorSeq& /*locators*/) { }
 
   virtual void get_last_recv_locator(const GUID_t& /*remote_id*/,
+                                     const GuidVendorId_t& /*vendor_id*/,
                                      TransportLocator& /*locators*/) {}
 
   virtual void append_transport_statistics(TransportStatisticsSequence& /*seq*/) {}
@@ -116,7 +129,6 @@ public:
   ACE_Reactor_Timer_Interface* timer() const;
 
   ACE_Reactor* reactor() const;
-  ACE_thread_t reactor_owner() const;
   bool is_shut_down() const;
 
   /// Create the reactor task using sync send or optionally async send
@@ -126,8 +138,6 @@ public:
   /// Diagnostic aid.
   void dump();
   OPENDDS_STRING dump_to_str();
-
-  void report();
 
   struct ConnectionAttribs {
     GUID_t local_id_;
@@ -177,8 +187,11 @@ public:
 
   EventDispatcher_rch event_dispatcher() { return event_dispatcher_; }
 
+  DDS::DomainId_t domain() const { return domain_; }
+
 protected:
-  TransportImpl(TransportInst_rch config);
+  TransportImpl(TransportInst_rch config,
+                DDS::DomainId_t domain);
 
   bool open();
 
@@ -258,23 +271,9 @@ private:
                            const ConnectionAttribs& attribs,
                            bool active, bool connect);
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   virtual void local_crypto_handle(DDS::Security::ParticipantCryptoHandle) {}
 #endif
-
-public:
-  /// Called by our friends, the TransportClient, and the DataLink.
-  /// Since this TransportImpl can be attached to many TransportClient
-  /// objects, and each TransportClient object could be "running" in
-  /// a separate thread, we need to protect all of the "reservation"
-  /// methods with a lock.  The protocol is that a client of ours
-  /// must "acquire" our reservation_lock_ before it can proceed to
-  /// call any methods that affect the DataLink reservations.  It
-  /// should release the reservation_lock_ as soon as it is done.
-  int acquire();
-  int tryacquire();
-  int release();
-  int remove();
 
   virtual OPENDDS_STRING transport_type() const = 0;
 
@@ -311,12 +310,13 @@ public:
   /// smart ptr to the associated DL cleanup task
   EventDispatcher_rch event_dispatcher_;
 
-  /// Monitor object for this entity
-  unique_ptr<Monitor> monitor_;
-
 protected:
   /// Id of the last link established.
   AtomicBool is_shut_down_;
+  DDS::DomainId_t domain_;
+
+  static StatisticSeq stats_template();
+  void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
 };
 
 } // namespace DCPS

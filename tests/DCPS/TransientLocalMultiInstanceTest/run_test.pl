@@ -37,22 +37,21 @@ my $sub_opts = $pub_opts;
 
 my $test = new PerlDDS::TestFramework();
 $test->{'wait_after_first_proc'} = 50;
-$test->enable_console_logging();
+#$test->enable_console_logging();
 
 $test->setup_discovery();
 
-$test->process('pub', 'publisher', $pub_opts);
-$test->process('sub1', 'subscriber', $sub_opts);
-$test->process('sub2', 'subscriber', $sub_opts);
+$test->process('pub', 'publisher', "-OpenDDSAppName pub " . $pub_opts);
+$test->process('sub1', 'subscriber', "-OpenDDSAppName sub1 " . $sub_opts);
+$test->process('sub2', 'subscriber', "-OpenDDSAppName sub2 " . $sub_opts);
 
 $test->start_process('sub1');
 
-sleep(2);
+$test->wait_for('sub1', 'ready', max_wait => 5);
 
 $test->start_process('pub');
 
-# Sleep for 2 seconds for publisher to write durable data.
-sleep(2);
+$test->wait_for('pub', 'write done', max_wait => 5);
 
 $test->start_process('sub2');
 

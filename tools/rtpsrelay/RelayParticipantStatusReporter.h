@@ -20,23 +20,23 @@ public:
     , stats_reporter_(stats_reporter)
   {}
 
-  void add_participant(GuidAddrSet::Proxy& proxy,
-                       const OpenDDS::DCPS::GUID_t& repoid,
-                       const DDS::ParticipantBuiltinTopicData& data);
+  void add_participant(const OpenDDS::DCPS::GUID_t& repoid,
+                       const DDS::ParticipantBuiltinTopicData& data,
+                       CORBA::ULong idx,
+                       CORBA::ULong total);
 
   void remove_participant(GuidAddrSet::Proxy& proxy,
-                          const OpenDDS::DCPS::GUID_t& repoid);
+                          const OpenDDS::DCPS::GUID_t& repoid,
+                          CORBA::ULong idx,
+                          CORBA::ULong total);
 
-  void set_alive(const GuidAddrSet::Proxy& proxy,
-                 const OpenDDS::DCPS::GUID_t& repoid,
+  void set_alive(const OpenDDS::DCPS::GUID_t& repoid,
                  bool alive);
 
-  void set_active(const GuidAddrSet::Proxy& proxy,
-                  const OpenDDS::DCPS::GUID_t& repoid,
+  void set_active(const OpenDDS::DCPS::GUID_t& repoid,
                   bool active);
 
-  void set_alive_active(const GuidAddrSet::Proxy& proxy,
-                        const OpenDDS::DCPS::GUID_t& repoid,
+  void set_alive_active(const OpenDDS::DCPS::GUID_t& repoid,
                         bool alive,
                         bool active);
 

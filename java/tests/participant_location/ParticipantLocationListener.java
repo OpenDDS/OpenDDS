@@ -7,9 +7,13 @@
 
 import DDS.*;
 import OpenDDS.DCPS.*;
+
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
+import java.util.concurrent.CountDownLatch;
 
 class ParticipantLocationListener extends DDS._DataReaderListenerLocalBase {
 
@@ -17,6 +21,7 @@ class ParticipantLocationListener extends DDS._DataReaderListenerLocalBase {
   private boolean noIce;
   private boolean noRelay;
   private Map<String, Integer> map = new HashMap<String, Integer>();
+  private Set<String> set = new HashSet<String>();
 
   private CountDownLatch latch;
 
@@ -39,22 +44,32 @@ class ParticipantLocationListener extends DDS._DataReaderListenerLocalBase {
   }
 
   public synchronized void on_data_available(DDS.DataReader reader) {
-    ParticipantLocationBuiltinTopicDataDataReader bitDataReader = ParticipantLocationBuiltinTopicDataDataReaderHelper
-        .narrow(reader);
+    if (reader._is_a(ParticipantLocationBuiltinTopicDataDataReaderHelper.id())) {
+      ParticipantLocationBuiltinTopicDataDataReader bitDataReader = ParticipantLocationBuiltinTopicDataDataReaderHelper.narrow(reader);
 
-    if (bitDataReader == null) {
+      on_data_available_i(bitDataReader);
+      return;
+    }
+
+    ParticipantBuiltinTopicDataDataReader participantBitDataReader = ParticipantBuiltinTopicDataDataReaderHelper.narrow(reader);
+    if (participantBitDataReader != null) {
+      on_data_available_i(participantBitDataReader);
+    } else {
       System.err.println("ParticipantLocationListener on_data_available: narrow failed.");
       System.exit(1);
     }
+  }
 
+  private void on_data_available_i(ParticipantLocationBuiltinTopicDataDataReader bitDataReader) {
     ParticipantLocationBuiltinTopicDataHolder participant = new ParticipantLocationBuiltinTopicDataHolder(
-        new ParticipantLocationBuiltinTopicData(new byte[16], 0, 0, "", new DDS.Time_t(), "", new DDS.Time_t(), "",
-            new DDS.Time_t(), "", new DDS.Time_t(), "", new DDS.Time_t(), "", new DDS.Time_t()));
+      new ParticipantLocationBuiltinTopicData(new byte[16], 0, 0, "", new DDS.Time_t(), "", new DDS.Time_t(), "",
+        new DDS.Time_t(), "", new DDS.Time_t(), "", new DDS.Time_t(), "", new DDS.Time_t(), new DDS.Duration_t(), 0));
     SampleInfoHolder si = new SampleInfoHolder(
         new SampleInfo(0, 0, 0, new DDS.Time_t(), 0, 0, 0, 0, 0, 0, 0, false, 0));
 
-    for (int status = bitDataReader.read_next_sample(participant,
-        si); status == DDS.RETCODE_OK.value; status = bitDataReader.read_next_sample(participant, si)) {
+    for (int status = bitDataReader.read_next_sample(participant, si);
+         status == DDS.RETCODE_OK.value;
+         status = bitDataReader.read_next_sample(participant, si)) {
 
       System.out.println("== " + id + " Participant Location ==");
       System.out.println(" valid: " + si.value.valid_data);
@@ -93,6 +108,7 @@ class ParticipantLocationListener extends DDS._DataReaderListenerLocalBase {
       System.out.println("      : " + participant.value.ice_timestamp.sec);
       System.out.println(" relay: " + participant.value.relay_addr);
       System.out.println("      : " + participant.value.relay_timestamp.sec);
+      System.out.println(" lease: " + participant.value.lease_duration.sec);
 
       // update locations if SampleInfo is valid
       if (si.value.valid_data) {
@@ -106,6 +122,24 @@ class ParticipantLocationListener extends DDS._DataReaderListenerLocalBase {
 
       if (check(false)) {
         latch.countDown();
+      }
+    }
+  }
+
+  private void on_data_available_i(ParticipantBuiltinTopicDataDataReader bitDataReader) {
+    ParticipantBuiltinTopicDataHolder participant = new ParticipantBuiltinTopicDataHolder(
+      new ParticipantBuiltinTopicData(new BuiltinTopicKey_t(new byte[0]), new UserDataQosPolicy(new byte[0])));
+    SampleInfoHolder si = new SampleInfoHolder(
+        new SampleInfo(0, 0, 0, new DDS.Time_t(), 0, 0, 0, 0, 0, 0, 0, false, 0));
+
+    for (int status = bitDataReader.read_next_sample(participant, si);
+         status == DDS.RETCODE_OK.value;
+         status = bitDataReader.read_next_sample(participant, si)) {
+      if (si.value.valid_data) {
+        set.add(guidFormatter(participant.value.key.value));
+        if (check(false)) {
+          latch.countDown();
+        }
       }
     }
   }
@@ -151,6 +185,9 @@ class ParticipantLocationListener extends DDS._DataReaderListenerLocalBase {
     boolean found = false;
     for (Map.Entry entry : map.entrySet()) {
       String key = (String) entry.getKey();
+      if (!set.contains(key)) {
+        continue;
+      }
       Integer mask = (Integer) entry.getValue();
       if (print) {
         System.out.println(id + " " + key + ((mask & OpenDDS.DCPS.LOCATION_LOCAL.value) != 0 ? " LOCAL" : "")

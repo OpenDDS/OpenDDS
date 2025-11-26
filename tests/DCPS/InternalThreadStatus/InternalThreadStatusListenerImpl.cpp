@@ -58,6 +58,7 @@ void InternalThreadStatusListenerImpl::on_data_available(DDS::DataReader_ptr rea
 
     std::cout
       << "  tid: " << thread_info.thread_id << "\n"
+      << "mtime: " << thread_info.monotonic_timestamp.sec << '\n'
       << " time: " << si.source_timestamp.sec << std::endl;
   }
 }

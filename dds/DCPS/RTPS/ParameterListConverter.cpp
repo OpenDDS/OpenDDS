@@ -10,11 +10,13 @@
 #include "MessageUtils.h"
 
 #include <dds/DCPS/DCPS_Utils.h>
-#include <dds/DCPS/GuidUtils.h>
-#include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/DCPS_Utils.h>
-#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/Service_Participant.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <cstring>
 
@@ -23,7 +25,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace RTPS {
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 using DCPS::operator!=;
 #endif
 
@@ -32,8 +34,8 @@ namespace {
   void extract_type_info_param(const Parameter& param, XTypes::TypeInformation& type_info)
   {
     if (!XTypes::deserialize_type_info(type_info, param.type_information())) {
-      type_info.minimal.typeid_with_size.type_id = XTypes::TypeIdentifier();
-      type_info.complete.typeid_with_size.type_id = XTypes::TypeIdentifier();
+      type_info.minimal.typeid_with_size.type_id = XTypes::TypeIdentifier::None;
+      type_info.complete.typeid_with_size.type_id = XTypes::TypeIdentifier::None;
     }
   }
 
@@ -73,7 +75,8 @@ namespace {
   {
     // Convert the tls blob to an RTPS locator seq
     DCPS::LocatorSeq locators;
-    const DDS::ReturnCode_t result = blob_to_locators(dcps_locator.data, locators);
+    VendorId_t vendor_id;
+    const DDS::ReturnCode_t result = blob_to_locators(dcps_locator.data, locators, vendor_id);
     if (result == DDS::RETCODE_OK) {
       const CORBA::ULong locators_len = locators.length();
       for (CORBA::ULong i = 0; i < locators_len; ++i) {
@@ -107,12 +110,13 @@ namespace {
   }
 
   void append_locators_if_present(DCPS::TransportLocatorSeq& list,
-                                  const DCPS::LocatorSeq& rtps_udp_locators)
+                                  const DCPS::LocatorSeq& rtps_udp_locators,
+                                  const VendorId_t& vendor_id)
   {
     if (rtps_udp_locators.length()) {
       DCPS::TransportLocator& tl = list[DCPS::grow(list) - 1];
       tl.transport_type = "rtps_udp";
-      locators_to_blob(rtps_udp_locators, tl.data);
+      locators_to_blob(rtps_udp_locators, vendor_id, tl.data);
     }
   }
 
@@ -195,13 +199,13 @@ namespace {
 
   bool not_default(const DDS::OwnershipStrengthQosPolicy& qos)
   {
-#ifdef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-    ACE_UNUSED_ARG(qos);
-    return false;
-#else
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
     DDS::OwnershipStrengthQosPolicy def_qos =
       TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
     return qos != def_qos;
+#else
+    ACE_UNUSED_ARG(qos);
+    return false;
 #endif
   }
 
@@ -272,7 +276,7 @@ namespace {
     }
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   OpenDDS::Security::DiscoveredParticipantDataKind find_data_kind(const ParameterList& param_list)
   {
     enum FieldMaskNames {
@@ -363,7 +367,7 @@ bool from_param_list(const ParameterList& param_list,
   return true;
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 bool to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
                    ParameterList& param_list)
 {
@@ -495,7 +499,7 @@ bool to_param_list(const ParticipantProxy_t& proxy,
 
   if (proxy.expectsInlineQos) {
     Parameter eiq_param; // Default is false
-    eiq_param.expects_inline_qos(proxy.expectsInlineQos);
+    eiq_param.expects_inline_qos(true);
     DCPS::push_back(param_list, eiq_param);
   }
 
@@ -513,7 +517,7 @@ bool to_param_list(const ParticipantProxy_t& proxy,
     proxy.availableBuiltinEndpoints);
   DCPS::push_back(param_list, be_param);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   Parameter ebe_param;
   ebe_param.extended_builtin_endpoints(
     proxy.availableExtendedBuiltinEndpoints);
@@ -571,12 +575,13 @@ bool from_param_list(const ParameterList& param_list,
 {
   // Start by setting defaults
   proxy.availableBuiltinEndpoints = 0;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   proxy.availableExtendedBuiltinEndpoints = 0;
 #endif
   proxy.expectsInlineQos = false;
   proxy.opendds_participant_flags.bits = 0;
   proxy.opendds_rtps_relay_application_participant = false;
+  proxy.opendds_user_tag = 0;
 
   const CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
@@ -615,7 +620,7 @@ bool from_param_list(const ParameterList& param_list,
         proxy.availableBuiltinEndpoints =
             param.builtin_endpoints();
         break;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       case DDS::Security::PID_EXTENDED_BUILTIN_ENDPOINTS:
         proxy.availableExtendedBuiltinEndpoints =
           param.extended_builtin_endpoints();
@@ -653,6 +658,9 @@ bool from_param_list(const ParameterList& param_list,
         break;
       case PID_OPENDDS_RTPS_RELAY_APPLICATION_PARTICIPANT:
         proxy.opendds_rtps_relay_application_participant = param.opendds_rtps_relay_application_participant();
+        break;
+      case PID_OPENDDS_SPDP_USER_TAG:
+        proxy.opendds_user_tag = param.user_tag();
         break;
       case PID_SENTINEL:
       case PID_PAD:
@@ -734,7 +742,7 @@ bool from_param_list(const ParameterList& param_list,
   return result;
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 bool to_param_list(const OpenDDS::Security::SPDPdiscoveredParticipantData& participant_data,
                    ParameterList& param_list)
 {
@@ -801,7 +809,7 @@ void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataReprese
 bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
                    ParameterList& param_list,
                    bool use_xtypes,
-                   const XTypes::TypeInformation& type_info,
+                   const DCPS::TypeInformation& type_info,
                    bool map)
 {
   // Ignore builtin topic key
@@ -820,8 +828,8 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     DCPS::push_back(param_list, param);
   }
 
-  if (use_xtypes) {
-    add_type_info_param(param_list, type_info);
+  if (use_xtypes && type_info.flags_ == DCPS::TypeInformation::Flags_None) {
+    add_type_info_param(param_list, type_info.xtypes_type_info_);
   }
 
   if (not_default(writer_data.ddsPublicationData.durability)) {
@@ -961,6 +969,7 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
 }
 
 bool from_param_list(const ParameterList& param_list,
+                     const VendorId_t& vendor_id,
                      DCPS::DiscoveredWriterData& writer_data,
                      bool use_xtypes,
                      XTypes::TypeInformation& type_info)
@@ -989,11 +998,11 @@ bool from_param_list(const ParameterList& param_list,
     TheServiceParticipant->initial_UserDataQosPolicy();
   writer_data.ddsPublicationData.ownership =
     TheServiceParticipant->initial_OwnershipQosPolicy();
-#ifdef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  writer_data.ddsPublicationData.ownership_strength.value = 0;
-#else
+#if OPENDDS_CONFIG_OWNERSHIP_KIND_EXCLUSIVE
   writer_data.ddsPublicationData.ownership_strength =
     TheServiceParticipant->initial_OwnershipStrengthQosPolicy();
+#else
+  writer_data.ddsPublicationData.ownership_strength.value = 0;
 #endif
   writer_data.ddsPublicationData.destination_order =
     TheServiceParticipant->initial_DestinationOrderQosPolicy();
@@ -1101,7 +1110,8 @@ bool from_param_list(const ParameterList& param_list,
       case PID_OPENDDS_LOCATOR:
         // Append the rtps_udp_locators, if any, first, to preserve order
         append_locators_if_present(writer_data.writerProxy.allLocators,
-                                   rtps_udp_locators);
+                                   rtps_udp_locators,
+                                   vendor_id);
         rtps_udp_locators.length(0);
         DCPS::push_back(writer_data.writerProxy.allLocators,
                        param.opendds_locator());
@@ -1123,7 +1133,8 @@ bool from_param_list(const ParameterList& param_list,
   }
   // Append additional rtps_udp_locators, if any
   append_locators_if_present(writer_data.writerProxy.allLocators,
-                             rtps_udp_locators);
+                             rtps_udp_locators,
+                             vendor_id);
   rtps_udp_locators.length(0);
   return true;
 }
@@ -1133,7 +1144,7 @@ bool from_param_list(const ParameterList& param_list,
 bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
                    ParameterList& param_list,
                    bool use_xtypes,
-                   const XTypes::TypeInformation& type_info,
+                   const DCPS::TypeInformation& type_info,
                    bool map)
 {
   // Ignore builtin topic key
@@ -1144,8 +1155,8 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     DCPS::push_back(param_list, param);
   }
 
-  if (use_xtypes) {
-    add_type_info_param(param_list, type_info);
+  if (use_xtypes && type_info.flags_ == DCPS::TypeInformation::Flags_None) {
+    add_type_info_param(param_list, type_info.xtypes_type_info_);
   }
 
   {
@@ -1305,6 +1316,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
 }
 
 bool from_param_list(const ParameterList& param_list,
+                     const VendorId_t& vendor_id,
                      DCPS::DiscoveredReaderData& reader_data,
                      bool use_xtypes,
                      XTypes::TypeInformation& type_info)
@@ -1385,7 +1397,7 @@ bool from_param_list(const ParameterList& param_list,
         // Interoperability note:
         // Spec creators for RTPS have reliability indexed at 1
         {
-          const CORBA::Short rtpsKind = param.reliability().kind.value;
+          const CORBA::Short rtpsKind = static_cast<CORBA::Short>(param.reliability().kind.value);
           const CORBA::Short OLD_RELIABLE_VALUE = 3;
           if (rtpsKind == RTPS::RELIABLE || rtpsKind == OLD_RELIABLE_VALUE) {
             reader_data.ddsSubscriptionData.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
@@ -1443,7 +1455,8 @@ bool from_param_list(const ParameterList& param_list,
       case PID_OPENDDS_LOCATOR:
         // Append the rtps_udp_locators, if any, first, to preserve order
         append_locators_if_present(reader_data.readerProxy.allLocators,
-                                   rtps_udp_locators);
+                                   rtps_udp_locators,
+                                   vendor_id);
         rtps_udp_locators.length(0);
         DCPS::push_back(reader_data.readerProxy.allLocators,
                        param.opendds_locator());
@@ -1468,12 +1481,13 @@ bool from_param_list(const ParameterList& param_list,
   }
   // Append additional rtps_udp_locators, if any
   append_locators_if_present(reader_data.readerProxy.allLocators,
-                             rtps_udp_locators);
+                             rtps_udp_locators,
+                             vendor_id);
   rtps_udp_locators.length(0);
   return true;
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 bool to_param_list(const DDS::Security::EndpointSecurityInfo& info,
                    ParameterList& param_list)
 {
@@ -1540,49 +1554,43 @@ bool from_param_list(const ParameterList& param_list,
 bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
                    ParameterList& param_list,
                    bool use_xtypes,
-                   const XTypes::TypeInformation& type_info,
+                   const DCPS::TypeInformation& type_info,
                    bool map)
 {
-  bool result = to_param_list(wrapper.data, param_list, use_xtypes, type_info, map);
-
-  to_param_list(wrapper.security_info, param_list);
-  to_param_list(wrapper.data_tags, param_list);
-
-  return result;
+  return to_param_list(wrapper.data, param_list, use_xtypes, type_info, map)
+    && to_param_list(wrapper.security_info, param_list)
+    && to_param_list(wrapper.data_tags, param_list);
 }
 
 bool from_param_list(const ParameterList& param_list,
+                     const VendorId_t& vendor_id,
                      DiscoveredPublication_SecurityWrapper& wrapper,
                      bool use_xtypes,
                      XTypes::TypeInformation& type_info)
 {
-  bool result = from_param_list(param_list, wrapper.data, use_xtypes, type_info) &&
+  return from_param_list(param_list, vendor_id, wrapper.data, use_xtypes, type_info) &&
     from_param_list(param_list, wrapper.security_info) &&
     from_param_list(param_list, wrapper.data_tags);
-
-  return result;
 }
 
 bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
                    ParameterList& param_list,
                    bool use_xtypes,
-                   const XTypes::TypeInformation& type_info,
+                   const DCPS::TypeInformation& type_info,
                    bool map)
 {
-  bool result = to_param_list(wrapper.data, param_list, use_xtypes, type_info, map);
-
-  to_param_list(wrapper.security_info, param_list);
-  to_param_list(wrapper.data_tags, param_list);
-
-  return result;
+  return to_param_list(wrapper.data, param_list, use_xtypes, type_info, map)
+    && to_param_list(wrapper.security_info, param_list)
+    && to_param_list(wrapper.data_tags, param_list);
 }
 
 bool from_param_list(const ParameterList& param_list,
+                     const VendorId_t& vendor_id,
                      DiscoveredSubscription_SecurityWrapper& wrapper,
                      bool use_xtypes,
                      XTypes::TypeInformation& type_info)
 {
-  bool result = from_param_list(param_list, wrapper.data, use_xtypes, type_info) &&
+  bool result = from_param_list(param_list, vendor_id, wrapper.data, use_xtypes, type_info) &&
     from_param_list(param_list, wrapper.security_info) &&
     from_param_list(param_list, wrapper.data_tags);
 
@@ -1605,7 +1613,7 @@ bool to_param_list(const ICE::AgentInfoMap& ai_map,
     DCPS::push_back(param_list, param_general);
 
     for (ICE::AgentInfo::CandidatesType::const_iterator pos = agent_info.candidates.begin(),
-           limit = agent_info.candidates.end(); pos != limit; ++pos) {
+           ai_limit = agent_info.candidates.end(); pos != ai_limit; ++pos) {
       IceCandidate_t ice_candidate;
       ice_candidate.key = map_pos->first.c_str();
       address_to_locator(ice_candidate.locator, pos->address);

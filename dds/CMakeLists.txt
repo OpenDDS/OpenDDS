@@ -1,5 +1,5 @@
 # CMakeLists for OpenDDS_Dcps
-cmake_minimum_required(VERSION 3.23...3.27)
+cmake_minimum_required(VERSION 3.23...4.0)
 project(opendds_dcps CXX)
 
 set(dcps_lib_deps
@@ -13,12 +13,10 @@ find_package(OpenDDS REQUIRED NO_DEFAULTS TAO::tao_idl OpenDDS::opendds_idl ${dc
 include(opendds_build_helpers)
 
 add_library(OpenDDS_Dcps
-  DCPS/BitPubListenerImpl.cpp
   DCPS/BuiltInTopicUtils.cpp
   DCPS/CoherentChangeControl.cpp
   DCPS/ConditionImpl.cpp
   DCPS/ConfigStoreImpl.cpp
-  DCPS/ConfigUtils.cpp
   DCPS/ConnectionRecords.cpp
   DCPS/ContentFilteredTopicImpl.cpp
   DCPS/DCPS_Utils.cpp
@@ -34,10 +32,12 @@ add_library(OpenDDS_Dcps
   DCPS/DispatchService.cpp
   DCPS/DomainParticipantFactoryImpl.cpp
   DCPS/DomainParticipantImpl.cpp
+  DCPS/EncapsulationHeader.cpp
   DCPS/EntityImpl.cpp
   DCPS/EventDispatcher.cpp
   DCPS/FileSystemStorage.cpp
   DCPS/FilterEvaluator.cpp
+  DCPS/FlexibleTypeSupport.cpp
   DCPS/GroupRakeData.cpp
   DCPS/GuardCondition.cpp
   DCPS/GuidBuilder.cpp
@@ -55,7 +55,7 @@ add_library(OpenDDS_Dcps
   DCPS/MemoryPool.cpp
   DCPS/MessageBlock.cpp
   DCPS/MessageTracker.cpp
-  DCPS/MonitorFactory.cpp
+  DCPS/MultiTask.cpp
   DCPS/MultiTopicDataReaderBase.cpp
   DCPS/MultiTopicImpl.cpp
   DCPS/MulticastManager.cpp
@@ -66,11 +66,11 @@ add_library(OpenDDS_Dcps
   DCPS/Observer.cpp
   DCPS/OwnershipManager.cpp
   DCPS/PeriodicEvent.cpp
+  DCPS/PeriodicTask.cpp
   DCPS/PublisherImpl.cpp
   DCPS/Qos_Helper.cpp
   DCPS/QueryConditionImpl.cpp
   DCPS/RawDataSample.cpp
-  DCPS/ReactorInterceptor.cpp
   DCPS/ReactorTask.cpp
   DCPS/ReadConditionImpl.cpp
   DCPS/ReceivedDataElementList.cpp
@@ -92,6 +92,7 @@ add_library(OpenDDS_Dcps
   DCPS/ServiceEventDispatcher.cpp
   DCPS/Service_Participant.cpp
   DCPS/SporadicEvent.cpp
+  DCPS/SporadicTask.cpp
   DCPS/StaticDiscovery.cpp
   DCPS/StatusConditionImpl.cpp
   DCPS/SubscriberImpl.cpp
@@ -104,12 +105,14 @@ add_library(OpenDDS_Dcps
   DCPS/TopicImpl.cpp
   DCPS/Transient_Kludge.cpp
   DCPS/TypeSupportImpl.cpp
+  DCPS/ValueCommon.cpp
   DCPS/ValueReader.cpp
   DCPS/ValueWriter.cpp
   DCPS/WaitSet.cpp
   DCPS/WriteDataContainer.cpp
   DCPS/WriterDataSampleList.cpp
   DCPS/WriterInfo.cpp
+  DCPS/Xcdr2ValueWriter.cpp
   DCPS/XTypes/DynamicDataAdapter.cpp
   DCPS/XTypes/DynamicDataBase.cpp
   DCPS/XTypes/DynamicDataFactory.cpp
@@ -120,6 +123,7 @@ add_library(OpenDDS_Dcps
   DCPS/XTypes/DynamicTypeImpl.cpp
   DCPS/XTypes/DynamicTypeMemberImpl.cpp
   DCPS/XTypes/DynamicTypeSupport.cpp
+  DCPS/XTypes/DynamicVwrite.cpp
   DCPS/XTypes/IdlScanner.cpp
   DCPS/XTypes/MemberDescriptorImpl.cpp
   DCPS/XTypes/TypeAssignability.cpp
@@ -205,7 +209,6 @@ target_sources(OpenDDS_Dcps
     DCPS/AstNodeWrapper.h
     DCPS/Atomic.h
     DCPS/AtomicBool.h
-    DCPS/BitPubListenerImpl.h
     DCPS/BuiltInTopicDataReaderImpls.h
     DCPS/BuiltInTopicUtils.h
     DCPS/Cached_Allocator_With_Overflow_T.h
@@ -215,14 +218,10 @@ target_sources(OpenDDS_Dcps
     DCPS/ConditionImpl.h
     DCPS/ConditionVariable.h
     DCPS/ConfigStoreImpl.h
-    DCPS/ConfigUtils.h
     DCPS/ConnectionRecords.h
     DCPS/ContentFilteredTopicImpl.h
     DCPS/DCPS_Utils.h
     DCPS/DataBlockLockPool.h
-    DCPS/DataCollector_T.cpp
-    DCPS/DataCollector_T.h
-    DCPS/DataCollector_T.inl
     DCPS/DataDurabilityCache.h
     DCPS/DataReaderCallbacks.h
     DCPS/DataReaderImpl.h
@@ -250,6 +249,8 @@ target_sources(OpenDDS_Dcps
     DCPS/DurabilityArray.h
     DCPS/DurabilityQueue.h
     DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h
+    DCPS/EncapsulationHeader.h
+    DCPS/EndpointCallbacks.h
     DCPS/EntityImpl.h
     DCPS/EventDispatcher.h
     DCPS/FeatureDisabledQosCheck.h
@@ -257,6 +258,7 @@ target_sources(OpenDDS_Dcps
     DCPS/FileSystemStorage.h
     DCPS/FilterEvaluator.h
     DCPS/FilterExpressionGrammar.h
+    DCPS/FlexibleTypeSupport.h
     DCPS/GroupRakeData.h
     DCPS/GuardCondition.h
     DCPS/GuidBuilder.h
@@ -286,7 +288,6 @@ target_sources(OpenDDS_Dcps
     DCPS/MessageBlock.h
     DCPS/MessageTracker.h
     DCPS/Message_Block_Ptr.h
-    DCPS/MonitorFactory.h
     DCPS/MultiTask.h
     DCPS/MultiTopicDataReaderBase.h
     DCPS/MultiTopicDataReader_T.cpp
@@ -318,7 +319,6 @@ target_sources(OpenDDS_Dcps
     DCPS/RcEventHandler.h
     DCPS/RcHandle_T.h
     DCPS/RcObject.h
-    DCPS/ReactorInterceptor.h
     DCPS/ReactorTask.h
     DCPS/ReactorTask.inl
     DCPS/ReactorTask_rch.h
@@ -356,7 +356,7 @@ target_sources(OpenDDS_Dcps
     DCPS/SporadicTask.h
     DCPS/StaticDiscovery.h
     DCPS/StaticIncludes.h
-    DCPS/Stats_T.h
+    DCPS/Statistics.h
     DCPS/StatusConditionImpl.h
     DCPS/SubscriberImpl.h
     DCPS/SubscriptionInstance.h
@@ -379,7 +379,9 @@ target_sources(OpenDDS_Dcps
     DCPS/Transient_Kludge.h
     DCPS/Transient_Kludge.inl
     DCPS/TypeSupportImpl.h
+    DCPS/TypeSupportImpl_T.h
     DCPS/Util.h
+    DCPS/ValueCommon.h
     DCPS/ValueDispatcher.h
     DCPS/ValueHelper.h
     DCPS/ValueReader.h
@@ -390,6 +392,7 @@ target_sources(OpenDDS_Dcps
     DCPS/WriterDataSampleList.inl
     DCPS/WriterInfo.h
     DCPS/XTypes/DynamicDataAdapter.h
+    DCPS/XTypes/DynamicDataAdapterFwd.h
     DCPS/XTypes/DynamicDataBase.h
     DCPS/XTypes/DynamicDataFactory.h
     DCPS/XTypes/DynamicDataImpl.h
@@ -400,6 +403,7 @@ target_sources(OpenDDS_Dcps
     DCPS/XTypes/DynamicTypeImpl.h
     DCPS/XTypes/DynamicTypeMemberImpl.h
     DCPS/XTypes/DynamicTypeSupport.h
+    DCPS/XTypes/DynamicVwrite.h
     DCPS/XTypes/External.h
     DCPS/XTypes/IdlScanner.h
     DCPS/XTypes/MemberDescriptorImpl.h
@@ -410,6 +414,7 @@ target_sources(OpenDDS_Dcps
     DCPS/XTypes/TypeObjectC.h
     DCPS/XTypes/TypeObjectTypeSupportImpl.h
     DCPS/XTypes/Utils.h
+    DCPS/Xcdr2ValueWriter.h
     DCPS/ZeroCopyAllocator_T.cpp
     DCPS/ZeroCopyAllocator_T.h
     DCPS/ZeroCopyAllocator_T.inl
@@ -547,9 +552,12 @@ target_sources(OpenDDS_Dcps
     DCPS/yard/yard_tree.hpp
     Version.h
     Versioned_Namespace.h
+    OpenDDSConfigWrapper.h
+    OpenDDSConfigWrapperC.h
+    OpenDDSConfigWrapper.idl
 )
 target_compile_definitions(OpenDDS_Dcps PUBLIC ${OPENDDS_DCPS_COMPILE_DEFINITIONS})
-_opendds_library(OpenDDS_Dcps MSVC_BIGOBJ)
+_opendds_library(OpenDDS_Dcps BIGOBJ)
 target_include_directories(OpenDDS_Dcps
   PUBLIC
     "$<BUILD_INTERFACE:${OPENDDS_SOURCE_DIR}>"
@@ -599,26 +607,27 @@ opendds_target_sources(OpenDDS_Dcps
   PUBLIC
     DdsDcps.idl
     DdsDcpsConditionSeq.idl # TODO
-    DdsDcpsCore.idl # TODO
     DdsDcpsDataReaderSeq.idl # TODO
     DdsDcpsDomain.idl
-    DdsDcpsGuid.idl # TODO
-    DdsDcpsInfoUtils.idl # TODO
-    DdsDcpsInfrastructure.idl
     DdsDcpsPublication.idl
     DdsDcpsSubscription.idl
     DdsDcpsSubscriptionExt.idl
     DdsDcpsTopic.idl
     DdsDcpsTypeSupportExt.idl
-    DdsSecurityCore.idl # TODO
-    DdsSecurityParams.idl # TODO
-    OpenddsDcpsExt.idl # TODO
   ${opendds_target_sources_args}
+  SKIP_OPENDDS_IDL
 )
 
 opendds_target_sources(OpenDDS_Dcps
   PUBLIC
+    DdsDcpsCore.idl # TODO
+    DdsDcpsGuid.idl # TODO
+    DdsDcpsInfrastructure.idl
+    DdsDcpsInfoUtils.idl # TODO
     DdsDynamicDataSeq.idl
+    DdsSecurityCore.idl # TODO
+    DdsSecurityParams.idl # TODO
+    OpenddsDcpsExt.idl # TODO
   ${opendds_target_sources_args}
 )
 
@@ -630,11 +639,7 @@ opendds_target_sources(OpenDDS_Dcps
     DdsDynamicTypeSupport.idl
   TAO_IDL_OPTIONS -Scdr -Sa
   ${opendds_target_sources_args}
+  SKIP_OPENDDS_IDL
 )
 
-get_target_property(gendir OpenDDS_Dcps OPENDDS_GENERATED_DIRECTORY)
-set(config_file "${gendir}/dds/DCPS/config.h")
-configure_file("${_OPENDDS_CMAKE_DIR}/config.h.in" "${config_file}")
-opendds_install_interface_files(OpenDDS_Dcps INCLUDE_BASE "${OPENDDS_SOURCE_DIR}"
-  EXTRA_GENERATED_FILES "${config_file}"
-)
+opendds_install_interface_files(OpenDDS_Dcps INCLUDE_BASE "${OPENDDS_SOURCE_DIR}")

@@ -17,10 +17,11 @@
 
 #include <iostream>
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
 
-DataReaderQCListenerImpl::DataReaderQCListenerImpl()
-  : DataReaderListenerImpl()
+DataReaderQCListenerImpl::DataReaderQCListenerImpl(DistributedConditionSet_rch dcs,
+                                                   long num_writes)
+  : DataReaderListenerImpl(dcs, num_writes)
 {
 }
 
@@ -49,7 +50,7 @@ void DataReaderQCListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     if (status == DDS::RETCODE_OK) {
       for (CORBA::ULong index = 0; index < si.length(); index++)
         {
-          ++samples_read_;
+          increment_samples_read();
           std::cout << "SampleInfo.valid_data = " << si[index].valid_data << std::endl;
           std::cout << "SampleInfo.sample_rank = " << si[index].sample_rank << std::endl;
           std::cout << "SampleInfo.instance_state = " << si[index].instance_state << std::endl;

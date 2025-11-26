@@ -1,7 +1,9 @@
 #include "LocalDiscovery.h"
 
-#include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/GuidUtils.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 LocalDiscovery::LocalDiscovery()
   : Discovery()
@@ -49,7 +51,7 @@ AddDomainStatus LocalDiscovery::add_domain_participant(
   return ads;
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 AddDomainStatus LocalDiscovery::add_domain_participant_secure(
   DDS::DomainId_t,
   const DDS::DomainParticipantQos&,
@@ -173,7 +175,7 @@ bool LocalDiscovery::add_publication(
   const DDS::DataWriterQos&,
   const TransportLocatorSeq&,
   const DDS::PublisherQos&,
-  const OpenDDS::XTypes::TypeInformation&)
+  const TypeInformation&)
 {
   GUID_t guid = GUID_UNKNOWN;
   guid.guidPrefix[0] = 1;
@@ -219,7 +221,7 @@ bool LocalDiscovery::add_subscription(
   const char*,
   const char*,
   const DDS::StringSeq&,
-  const OpenDDS::XTypes::TypeInformation&)
+  const TypeInformation&)
 {
   return true;
 }

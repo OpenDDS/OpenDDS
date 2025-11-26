@@ -6,12 +6,14 @@
 #ifndef OPENDDS_DCPS_TIME_HELPER_H
 #define OPENDDS_DCPS_TIME_HELPER_H
 
+#include "Definitions.h"
 #include "PoolAllocator.h"
 #include "dcps_export.h"
 
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
 
+#include <ace/Monotonic_Time_Policy.h>
 #include <ace/OS_NS_sys_time.h>
 
 #ifndef ACE_LACKS_PRAGMA_ONCE
@@ -23,14 +25,25 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ACE_INLINE OpenDDS_Dcps_Export
-ACE_Time_Value time_to_time_value(const DDS::Time_t& t);
+template <typename TimeT>
+ACE_Time_Value time_to_time_value(const TimeT& t)
+{
+  ACE_Time_Value tv(t.sec, t.nanosec / 1000);
+  return tv;
+}
+
+template <typename IdlType>
+void time_value_to_time(IdlType& t, const ACE_Time_Value& tv)
+{
+  t.sec = ACE_Utils::truncate_cast<CORBA::Long>(tv.sec());
+  t.nanosec = ACE_Utils::truncate_cast<CORBA::ULong>(tv.usec() * 1000);
+}
 
 ACE_INLINE OpenDDS_Dcps_Export
 DDS::Time_t time_value_to_time(const ACE_Time_Value& tv);
 
 ACE_INLINE OpenDDS_Dcps_Export
-MonotonicTime_t time_value_to_monotonic_time(const ACE_Time_Value& tv);
+MonotonicTime_t time_value_to_time(const ACE_Time_Value_T<ACE_Monotonic_Time_Policy>& tv);
 
 ACE_INLINE OpenDDS_Dcps_Export
 ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t);
@@ -58,7 +71,7 @@ bool valid_duration(DDS::Duration_t const & t);
 ACE_INLINE OpenDDS_Dcps_Export
 bool non_negative_duration(const DDS::Duration_t& t);
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator==(const DDS::Duration_t& t1, const DDS::Duration_t& t2);
 
@@ -81,7 +94,7 @@ bool operator>=(const DDS::Duration_t& t1, const DDS::Duration_t& t2);
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator!(const DDS::Time_t& t);
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator==(const DDS::Time_t& t1, const DDS::Time_t& t2);
 
@@ -116,7 +129,7 @@ DDS::Duration_t operator-(const MonotonicTime_t& t1, const MonotonicTime_t& t2);
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator<(const MonotonicTime_t& t1, const MonotonicTime_t& t2);
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator==(const MonotonicTime_t& t1, const MonotonicTime_t& t2);
 #endif

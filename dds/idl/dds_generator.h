@@ -114,6 +114,21 @@ public:
     UTL_ScopedName* sn, const char* sep, EscapeContext cxt = EscapeContext_Normal);
   static std::string module_scope_helper(
     UTL_ScopedName* sn, const char* sep, EscapeContext cxt = EscapeContext_Normal);
+
+  static bool gen_enum_helper(AST_Enum* node, UTL_ScopedName* name,
+    const std::vector<AST_EnumVal*>& contents, const char* repoid);
+
+  static std::string call_gen_skip_over(AST_Type* type, const std::string& typeName, const std::string& tag);
+
+  static std::string field_type_name(AST_Field* field, AST_Type* field_type = 0);
+
+  /**
+  * For the some situations, like a tag name, the type name we need is the
+  * deepest named type, not the actual type. This will be the name of the
+  * deepest typedef if it's an array or sequence, otherwise the name of the
+  * type.
+  */
+  static AST_Type* deepest_named_type(AST_Type* type);
 };
 
 inline std::string canonical_name(UTL_ScopedName* sn)
@@ -232,10 +247,14 @@ struct ScopedNamespaceGuard  {
   ScopedNamespaceGuard(UTL_ScopedName* name, std::ostream& os,
                        const char* keyword = "namespace")
     : os_(os)
-    , semi_()
     , n_(0)
   {
     const bool idl = !std::strcmp(keyword, "module");
+    const ACE_CString vn_begin = be_global->versioning_begin();
+    if (!idl && !vn_begin.empty()) {
+      os_ << vn_begin << '\n';
+      suffix_ = (be_global->versioning_end() + '\n').c_str();
+    }
     const EscapeContext ec = idl ? EscapeContext_ForGenIdl : EscapeContext_Normal;
     for (n_ = 0; name->tail();
          name = static_cast<UTL_ScopedName*>(name->tail())) {
@@ -250,11 +269,14 @@ struct ScopedNamespaceGuard  {
 
   ~ScopedNamespaceGuard()
   {
-    for (int i = 0; i < n_; ++i) os_ << '}' << semi_ << '\n';
+    for (int i = 0; i < n_; ++i) {
+      os_ << '}' << semi_ << '\n';
+    }
+    os_ << suffix_;
   }
 
   std::ostream& os_;
-  std::string semi_;
+  std::string semi_, suffix_;
   int n_;
 };
 
@@ -417,7 +439,7 @@ namespace AstTypeClassification {
   const Classification CL_UNKNOWN = 0, CL_SCALAR = 1, CL_PRIMITIVE = 2,
     CL_STRUCTURE = 4, CL_STRING = 8, CL_ENUM = 16, CL_UNION = 32, CL_ARRAY = 64,
     CL_SEQUENCE = 128, CL_WIDE = 256, CL_BOUNDED = 512, CL_INTERFACE = 1024,
-    CL_FIXED = 2048;
+    CL_FIXED = 2048, CL_MAP = 4096;
 
   inline Classification classify(AST_Type* type)
   {
@@ -454,10 +476,11 @@ namespace AstTypeClassification {
       return CL_SCALAR | CL_ENUM;
     case AST_Decl::NT_interface:
       return CL_INTERFACE;
-#ifdef ACE_HAS_CDR_FIXED
     case AST_Decl::NT_fixed:
       return CL_FIXED;
-#endif
+    case AST_Decl::NT_map:
+      return CL_MAP |
+        ((dynamic_cast<AST_Map*>(type)->unbounded()) ? 0 : CL_BOUNDED);
     default:
       return CL_UNKNOWN;
     }
@@ -530,7 +553,9 @@ inline std::string to_cxx_type(AST_Type* type, std::size_t& size)
   const AstTypeClassification::Classification cls = AstTypeClassification::classify(type);
   if (cls & AstTypeClassification::CL_ENUM) {
     size = 4;
-    return "ACE_CDR::ULong";
+    // Using the XTypes definition of Enums, this type is signed.
+    // It contradicts the OMG standard CDR definition.
+    return "ACE_CDR::Long";
   }
   if (cls & AstTypeClassification::CL_STRING) {
     return string_type(cls);
@@ -573,6 +598,9 @@ inline std::string to_cxx_type(AST_Type* type, std::size_t& size)
       return "ACE_CDR::Double";
     case AST_PredefinedType::PT_longdouble:
       size = 16;
+      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+        return "long double";
+      }
       return "ACE_CDR::LongDouble";
     case AST_PredefinedType::PT_char:
       size = 1;
@@ -670,13 +698,11 @@ std::ostream& operator<<(std::ostream& o,
     return o << "L\"" << ev.u.wstrval << '"';
   case AST_Expression::EV_string:
     return o << '"' << ev.u.strval->get_string() << '"';
-#ifdef ACE_HAS_CDR_FIXED
   case AST_Expression::EV_fixed: {
     char buf[ACE_CDR::Fixed::MAX_STRING_SIZE];
     ev.u.fixedval.to_string(buf, sizeof buf);
     return o << "\"" << buf << "\"";
   }
-#endif
   case AST_Expression::EV_enum:
   case AST_Expression::EV_longdouble:
   case AST_Expression::EV_any:
@@ -702,12 +728,15 @@ inline std::string bounded_arg(AST_Type* type)
   } else if (cls & CL_SEQUENCE) {
     AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(type);
     arg << seq->max_size()->ev()->u.ulval;
+  } else if (cls & CL_MAP) {
+    AST_Map* const map = dynamic_cast<AST_Map*>(type);
+    arg << map->max_size()->ev()->u.ulval;
   }
   return arg.str();
 }
 
 std::string type_to_default(const std::string& indent, AST_Type* type,
-  const std::string& name, bool is_anonymous = false, bool is_union = false);
+  const std::string& name, bool is_anonymous = false, bool is_union = false, bool is_optional = false);
 
 inline
 void generateBranchLabels(AST_UnionBranch* branch, AST_Type* discriminator,
@@ -786,15 +815,6 @@ struct Intro {
   }
 };
 
-std::string field_type_name(AST_Field* field, AST_Type* field_type = 0);
-
-/**
- * For the some situations, like a tag name, the type name we need is the
- * deepest named type, not the actual type. This will be the name of the
- * deepest typedef if it's an array or sequence, otherwise the name of the
- * type.
- */
-AST_Type* deepest_named_type(AST_Type* type);
 
 typedef std::string (*CommonFn)(
   const std::string& indent, AST_Decl* node,
@@ -813,7 +833,7 @@ void generateCaseBody(
   const bool use_cxx11 = lmap == BE_GlobalData::LANGMAP_CXX11;
   const std::string name = branch->local_name()->get_string();
   if (namePrefix == std::string(">> ")) {
-    std::string brType = field_type_name(branch, branch->field_type());
+    std::string brType = dds_generator::field_type_name(branch, branch->field_type());
     std::string forany;
     AST_Type* br = resolveActualType(branch->field_type());
     Classification br_cls = classify(br);
@@ -840,11 +860,11 @@ void generateCaseBody(
       brType = use_cxx11 ? std::string("std::") + (is_wide ? "w" : "") + "string"
         : nmspace + (is_wide ? "W" : "") + "String_var";
       rhs = use_cxx11 ? "tmp" : "tmp.out()";
-    } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE))) {  //array or seq C++11
+    } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE | CL_MAP))) {  // container C++11
       rhs = "IDL::DistinctType<" + brType + ", "
         + dds_generator::get_tag_name(brType)
         + ">(tmp)";
-    } else if (br_cls & CL_ARRAY) { //array classic
+    } else if (br_cls & CL_ARRAY) { // array classic
       forany = "    " + brType + "_forany fa = tmp;\n";
       rhs = getWrapper("fa", br, WD_INPUT);
     } else { // anything else
@@ -868,7 +888,7 @@ void generateCaseBody(
         "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
         "        return true;\n";
     } else if ((be_global->try_construct(branch) == tryconstructfailaction_trim) && (br_cls & CL_BOUNDED) &&
-                (br_cls & (CL_STRING | CL_SEQUENCE))) {
+                (br_cls & (CL_STRING | CL_SEQUENCE | CL_MAP))) {
       if (is_bound_string) {
         const std::string check_not_empty = "!tmp.empty()";
         const std::string get_length = use_cxx11 ? "tmp.length()" : "ACE_OS::strlen(tmp.c_str())";
@@ -886,9 +906,9 @@ void generateCaseBody(
           "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
           "          return false;\n"
           "        }\n";
-      } else if (br_cls & CL_SEQUENCE) {
+      } else if (br_cls & (CL_SEQUENCE | CL_MAP)) {
         be_global->impl_ <<
-          "        if(strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n"
+          "        if (strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n"
           "          return false;\n"
           "        }\n"
           "        uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp);\n") <<
@@ -1051,7 +1071,7 @@ std::string insert_cxx11_accessor_parens(
   std::string full_var_name(full_var_name_);
   std::string::size_type n = 0;
   while ((n = full_var_name.find('.', n)) != std::string::npos) {
-    if (full_var_name[n-1] != ']') {
+    if (full_var_name[n - 1] != ']') {
       full_var_name.insert(n, "()");
       n += 3;
     } else {
@@ -1232,25 +1252,14 @@ ACE_CDR::ULong container_element_limit(AST_Type* type)
 {
   AST_Type* const act = AstTypeClassification::resolveActualType(type);
   AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(act);
+  AST_Map* const map = dynamic_cast<AST_Map*>(act);
   AST_Array* const arr = dynamic_cast<AST_Array*>(act);
   if (seq && !seq->unbounded()) {
     return seq->max_size()->ev()->u.ulval;
+  } else if (map && !map->unbounded()) {
+    return map->max_size()->ev()->u.ulval;
   } else if (arr) {
     return array_element_count(arr);
-  }
-  return 0;
-}
-
-inline
-AST_Type* container_base_type(AST_Type* type)
-{
-  AST_Type* const act = AstTypeClassification::resolveActualType(type);
-  AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(act);
-  AST_Array* const arr = dynamic_cast<AST_Array*>(act);
-  if (seq) {
-    return seq->base_type();
-  } else if (arr) {
-    return arr->base_type();
   }
   return 0;
 }
@@ -1287,6 +1296,9 @@ inline bool needs_nested_key_only(AST_Type* type)
       result = needs_nested_key_only(dynamic_cast<AST_Array*>(type)->base_type());
     } else if (type_class & CL_SEQUENCE) {
       result = needs_nested_key_only(dynamic_cast<AST_Sequence*>(type)->base_type());
+    } else if (type_class & CL_MAP) {
+      AST_Map* const map = dynamic_cast<AST_Map*>(type);
+      result = needs_nested_key_only(map->key_type()) || needs_nested_key_only(map->value_type());
     } else if (type_class & CL_STRUCTURE) {
       AST_Structure* const struct_node = dynamic_cast<AST_Structure*>(type);
       // TODO(iguessthislldo): Possible optimization: If everything in a struct
@@ -1326,7 +1338,7 @@ inline bool needs_distinct_type(AST_Type* type)
   using namespace AstTypeClassification;
   const Classification type_class = classify(resolveActualType(type));
   return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 &&
-    type_class & (CL_SEQUENCE | CL_ARRAY);
+    type_class & (CL_SEQUENCE | CL_ARRAY | CL_MAP);
 }
 
 const char* const shift_out = "<< ";
@@ -1360,8 +1372,111 @@ inline const char* get_shift_op(const std::string& s)
   return "";
 }
 
+inline std::string extensibility_kind(ExtensibilityKind ek)
+{
+  switch (ek) {
+  case extensibilitykind_final:
+    return "OpenDDS::DCPS::FINAL";
+  case extensibilitykind_appendable:
+    return "OpenDDS::DCPS::APPENDABLE";
+  case extensibilitykind_mutable:
+    return "OpenDDS::DCPS::MUTABLE";
+  default:
+    return "invalid";
+  }
+}
+
+inline std::string type_kind(AST_Type* type)
+{
+  type = AstTypeClassification::resolveActualType(type);
+  switch (type->node_type()) {
+  case AST_Decl::NT_pre_defined: {
+    AST_PredefinedType* pt_type = dynamic_cast<AST_PredefinedType*>(type);
+    if (!pt_type) {
+      return "XTypes::TK_NONE";
+    }
+    switch (pt_type->pt()) {
+    case AST_PredefinedType::PT_long:
+      return "XTypes::TK_INT32";
+    case AST_PredefinedType::PT_ulong:
+      return "XTypes::TK_UINT32";
+    case AST_PredefinedType::PT_longlong:
+      return "XTypes::TK_INT64";
+    case AST_PredefinedType::PT_ulonglong:
+      return "XTypes::TK_UINT64";
+    case AST_PredefinedType::PT_short:
+      return "XTypes::TK_INT16";
+    case AST_PredefinedType::PT_ushort:
+      return "XTypes::TK_UINT16";
+    case AST_PredefinedType::PT_float:
+      return "XTypes::TK_FLOAT32";
+    case AST_PredefinedType::PT_double:
+      return "XTypes::TK_FLOAT64";
+    case AST_PredefinedType::PT_longdouble:
+      return "XTypes::TK_FLOAT128";
+    case AST_PredefinedType::PT_char:
+      return "XTypes::TK_CHAR8";
+    case AST_PredefinedType::PT_wchar:
+      return "XTypes::TK_CHAR16";
+    case AST_PredefinedType::PT_boolean:
+      return "XTypes::TK_BOOLEAN";
+    case AST_PredefinedType::PT_octet:
+      return "XTypes::TK_BYTE";
+    case AST_PredefinedType::PT_int8:
+      return "XTypes::TK_INT8";
+    case AST_PredefinedType::PT_uint8:
+      return "XTypes::TK_UINT8";
+    default:
+      return "XTypes::TK_NONE";
+    }
+  }
+  case AST_Decl::NT_string:
+    return "XTypes::TK_STRING8";
+  case AST_Decl::NT_wstring:
+    return "XTypes::TK_STRING16";
+  case AST_Decl::NT_array:
+    return "XTypes::TK_ARRAY";
+  case AST_Decl::NT_sequence:
+    return "XTypes::TK_SEQUENCE";
+  case AST_Decl::NT_union:
+    return "XTypes::TK_UNION";
+  case AST_Decl::NT_struct:
+    return "XTypes::TK_STRUCTURE";
+  case AST_Decl::NT_enum:
+    return "XTypes::TK_ENUM";
+  case AST_Decl::NT_map:
+    return "XTypes::TK_MAP";
+  default:
+    return "XTypes::TK_NONE";
+  }
+}
+
+inline
+FieldFilter nested(FieldFilter filter_kind)
+{
+  return filter_kind == FieldFilter_KeyOnly ? FieldFilter_NestedKeyOnly : filter_kind;
+}
+
+inline
+bool has_discriminator(AST_Union* u, FieldFilter filter_kind)
+{
+  return be_global->union_discriminator_is_key(u)
+    || filter_kind == FieldFilter_NestedKeyOnly
+    || filter_kind == FieldFilter_All;
+}
+
+inline bool uses_stl_container(AST_Type* type, bool cpp11)
+{
+  return cpp11 || (AstTypeClassification::classify(type) & AstTypeClassification::CL_MAP);
+}
+
+// TODO: Add more fine-grained control of "const" string for the wrapper type and wrapped type.
+// Currently, there is a single bool to control both; that is, either both are "const" or
+// none is "const". But sometimes, we want something like "const KeyOnly<SampleType>&", and
+// not "const KeyOnly<const SampleType>&" or "KeyOnly<SampleType>&".
+
 /// Handling wrapping and unwrapping references in the wrapper types:
-/// NestedKeyOnly, IDL::DistinctType, and *_forany.
+/// NestedKeyOnly, KeyOnly, IDL::DistinctType, and *_forany.
 struct RefWrapper {
   const bool cpp11_;
   AST_Type* const type_;
@@ -1371,6 +1486,8 @@ struct RefWrapper {
   const std::string fieldref_;
   const std::string local_;
   bool is_const_;
+  bool is_optional_;
+  FieldFilter field_filter_;
   bool nested_key_only_;
   bool classic_array_copy_;
   bool dynamic_data_adapter_;
@@ -1385,12 +1502,15 @@ struct RefWrapper {
     , to_wrap_(strip_shift_op(to_wrap))
     , shift_op_(get_shift_op(to_wrap))
     , is_const_(is_const)
+    , is_optional_(false)
+    , field_filter_(FieldFilter_All)
     , nested_key_only_(false)
     , classic_array_copy_(false)
     , dynamic_data_adapter_(false)
     , typedef_node_(0)
     , done_(false)
     , needs_dda_tag_(false)
+    , stl_container_(uses_stl_container(type, cpp11_))
   {
   }
 
@@ -1403,12 +1523,15 @@ struct RefWrapper {
     , fieldref_(strip_shift_op(fieldref))
     , local_(local)
     , is_const_(is_const)
+    , is_optional_(false)
+    , field_filter_(FieldFilter_All)
     , nested_key_only_(false)
     , classic_array_copy_(false)
     , dynamic_data_adapter_(false)
     , typedef_node_(0)
     , done_(false)
     , needs_dda_tag_(false)
+    , stl_container_(uses_stl_container(type, cpp11_))
   {
   }
 
@@ -1423,8 +1546,9 @@ struct RefWrapper {
     const bool forany = classic_array_copy_ || needs_forany(type_);
     const bool distinct_type = needs_distinct_type(type_);
     needs_dda_tag_ = dynamic_data_adapter_ && (forany || distinct_type);
-    nested_key_only_ = nested_key_only_ &&
-      needs_nested_key_only(typedef_node_ ? typedef_node_ : type_);
+    // If field_filter_ is set, this object is being used for vwrite or vread generator.
+    nested_key_only_ = field_filter_ == FieldFilter_NestedKeyOnly ||
+      (nested_key_only_ && needs_nested_key_only(typedef_node_ ? typedef_node_ : type_));
     wrapped_type_name_ = type_name_;
     bool by_ref = true;
 
@@ -1435,6 +1559,10 @@ struct RefWrapper {
       if (local_.size()) {
         ref_ += '.' + local_;
       }
+    }
+
+    if (is_optional_) {
+      ref_ += ".value()";
     }
 
     if (forany && !dynamic_data_adapter_) {
@@ -1461,9 +1589,12 @@ struct RefWrapper {
       ref_ = var_name;
     }
 
+    if (field_filter_ == FieldFilter_KeyOnly) {
+      wrapped_type_name_ = std::string("KeyOnly<") + const_str + wrapped_type_name_ + ">";
+    }
+
     if (nested_key_only_) {
-      wrapped_type_name_ =
-        std::string("NestedKeyOnly<") + const_str + wrapped_type_name_ + ">";
+      wrapped_type_name_ = std::string("NestedKeyOnly<") + const_str + wrapped_type_name_ + ">";
       value_access_post_ = ".value" + value_access_post_;
       const std::string nko_arg = "(" + ref_ + ")";
       if (is_const_) {
@@ -1480,8 +1611,7 @@ struct RefWrapper {
       wrapped_type_name_ =
         std::string("IDL::DistinctType<") + const_str + wrapped_type_name_ +
         ", " + get_tag_name_i() + ">";
-      value_access_pre_ += "(*";
-      value_access_post_ = ".val_)" + value_access_post_;
+      value_access_post_ = ".get()" + value_access_post_;
       const std::string idt_arg = "(" + ref_ + ")";
       if (is_const_) {
         ref_ = wrapped_type_name_ + idt_arg;
@@ -1494,7 +1624,7 @@ struct RefWrapper {
       by_ref = false;
     }
 
-    wrapped_type_name_ = const_str + wrapped_type_name_ + (by_ref ? "&" : "");
+    wrapped_type_name_ = (by_ref ? const_str : "") + wrapped_type_name_ + (by_ref ? "&" : "");
     done_ = true;
     return *this;
   }
@@ -1537,18 +1667,18 @@ struct RefWrapper {
 
   std::string value_access(const std::string& var_name = "") const
   {
-    return value_access_pre_ + get_var_name(var_name) + value_access_post_;
+    return get_var_name(var_name) + value_access_post_;
   }
 
-  std::string seq_check_empty() const
+  std::string check_empty() const
   {
-    return value_access() + (cpp11_ ? ".empty()" : ".length() == 0");
+    return value_access() + (stl_container_ ? ".empty()" : ".length() == 0");
   }
 
-  std::string seq_get_length() const
+  std::string get_length() const
   {
     const std::string value = value_access();
-    return cpp11_ ? "static_cast<uint32_t>(" + value + ".size())" : value + ".length()";
+    return stl_container_ ? "static_cast<uint32_t>(" + value + ".size())" : value + ".length()";
   }
 
   std::string seq_resize(const std::string& new_size) const
@@ -1592,9 +1722,9 @@ private:
   bool done_;
   std::string wrapped_type_name_;
   std::string ref_;
-  std::string value_access_pre_;
   std::string value_access_post_;
   bool needs_dda_tag_;
+  const bool stl_container_;
 
   std::string get_tag_name_i() const
   {
@@ -1607,5 +1737,15 @@ private:
     return dds_generator::get_tag_name(type_name_, qualifier);
   }
 };
+
+inline
+std::string key_only_type_name(AST_Type* type, const std::string& type_name,
+                               FieldFilter field_filter, bool writing)
+{
+  RefWrapper wrapper(type, type_name, "", writing ? true : false);
+  wrapper.field_filter_ = field_filter;
+  const bool has_wrapper = field_filter != FieldFilter_All;
+  return (has_wrapper && !writing ? "const " : "") + wrapper.done().wrapped_type_name();
+}
 
 #endif

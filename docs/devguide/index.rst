@@ -21,10 +21,10 @@ The Developer's Guide explains how to use OpenDDS.
   opendds_idl
   the_dcps_information_repository
   java_bindings
-  modeling_sdk
   alternate_interfaces_to_data
   safety_profile
   dds_security
   internet_enabled_rtps
   xtypes
   faq
+  annex

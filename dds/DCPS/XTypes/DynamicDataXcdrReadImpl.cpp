@@ -5,8 +5,9 @@
 
 #include <DCPS/DdsDcps_pch.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
-#  include "DynamicDataXcdrReadImpl.h"
+#include "DynamicDataXcdrReadImpl.h"
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 #  include "DynamicTypeMemberImpl.h"
 #  include "Utils.h"
@@ -931,7 +932,7 @@ DDS::MemberDescriptor* DynamicDataXcdrReadImpl::get_union_selected_member()
   }
 
   if (has_default) {
-    return default_member._retn();;
+    return default_member._retn();
   }
 
   // The union has no selected member.
@@ -1093,7 +1094,7 @@ bool DynamicDataXcdrReadImpl::skip_to_sequence_element(MemberId id, DDS::Dynamic
     ACE_CDR::ULong length, index;
     return (strm_ >> length) &&
       get_index_from_id(id, index, length) &&
-      strm_.skip(index, size);
+      strm_.skip(index, static_cast<int>(size));
   } else {
     ACE_CDR::ULong length, index;
     if (!strm_.skip_delimiter() || !(strm_ >> length)) {
@@ -1133,7 +1134,7 @@ bool DynamicDataXcdrReadImpl::skip_to_array_element(MemberId id, DDS::DynamicTyp
   ACE_CDR::ULong size;
   if (get_primitive_size(elem_type, size)) {
     ACE_CDR::ULong index;
-    return get_index_from_id(id, index, length) && strm_.skip(index, size);
+    return get_index_from_id(id, index, length) && strm_.skip(index, static_cast<int>(size));
   } else {
     if (!strm_.skip_delimiter()) {
       return false;
@@ -1167,11 +1168,12 @@ bool DynamicDataXcdrReadImpl::skip_to_map_element(MemberId id)
     }
 
     for (ACE_CDR::ULong i = 0; i < index; ++i) {
-      if (!strm_.skip(1, key_size) || !strm_.skip(1, elem_size)) {
+      if (!strm_.skip(1, static_cast<int>(key_size))
+          || !strm_.skip(1, static_cast<int>(elem_size))) {
         return false;
       }
     }
-    return strm_.skip(1, key_size);
+    return strm_.skip(1, static_cast<int>(key_size));
   } else {
     size_t dheader;
     ACE_CDR::ULong index;
@@ -1642,10 +1644,10 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
 
         const DDS::DynamicType_var disc_type = get_base_type(type_desc_->discriminator_type());
         if (ek == DDS::MUTABLE) {
-          unsigned id;
+          unsigned disc_id;
           size_t size;
           bool must_understand;
-          if (!strm_.read_parameter_id(id, size, must_understand)) {
+          if (!strm_.read_parameter_id(disc_id, size, must_understand)) {
             good = false;
             break;
           }
@@ -1662,10 +1664,10 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
       }
 
       if (ek == DDS::MUTABLE) {
-        unsigned id;
+        unsigned mem_id;
         size_t size;
         bool must_understand;
-        if (!strm_.read_parameter_id(id, size, must_understand)) {
+        if (!strm_.read_parameter_id(mem_id, size, must_understand)) {
           good = false;
           break;
         }
@@ -1789,7 +1791,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_values_from_struct(SequenceType& 
       }
       const LBound bit_bound = etd->bound()[0];
       if (bit_bound >= lower && bit_bound <= upper) {
-        const DDS::ReturnCode_t rc = skip_to_struct_member(md, id);
+        rc = skip_to_struct_member(md, id);
         if (rc != DDS::RETCODE_OK) {
           return rc;
         }
@@ -1912,11 +1914,11 @@ bool DynamicDataXcdrReadImpl::get_values_from_sequence(SequenceType& value, Memb
       return skip_to_sequence_element(id) && read_values(value, ElementTypeKind);
     } else if (nested_elem_tk == enum_or_bitmask) {
       // Read from a sequence of sequences of enums or bitmasks.
-      DDS::TypeDescriptor_var td;
-      if (nested_elem_type->get_descriptor(td) != DDS::RETCODE_OK) {
+      DDS::TypeDescriptor_var nested_td;
+      if (nested_elem_type->get_descriptor(nested_td) != DDS::RETCODE_OK) {
         return false;
       }
-      const LBound bit_bound = td->bound()[0];
+      const LBound bit_bound = nested_td->bound()[0];
       return bit_bound >= lower && bit_bound <= upper &&
         skip_to_sequence_element(id) && read_values(value, enum_or_bitmask);
     }
@@ -1953,11 +1955,11 @@ bool DynamicDataXcdrReadImpl::get_values_from_array(SequenceType& value, MemberI
   if (nested_elem_tk == ElementTypeKind) {
     return skip_to_array_element(id) && read_values(value, nested_elem_tk);
   } else if (nested_elem_tk == enum_or_bitmask) {
-    DDS::TypeDescriptor_var td;
-    if (nested_elem_type->get_descriptor(td) != DDS::RETCODE_OK) {
+    DDS::TypeDescriptor_var nested_td;
+    if (nested_elem_type->get_descriptor(nested_td) != DDS::RETCODE_OK) {
       return false;
     }
-    const LBound bit_bound = td->bound()[0];
+    const LBound bit_bound = nested_td->bound()[0];
     return bit_bound >= lower && bit_bound <= upper &&
       skip_to_array_element(id) && read_values(value, nested_elem_tk);
   }
@@ -1993,11 +1995,11 @@ bool DynamicDataXcdrReadImpl::get_values_from_map(SequenceType& value, MemberId 
   if (nested_elem_tk == ElementTypeKind) {
     return skip_to_map_element(id) && read_values(value, nested_elem_tk);
   } else if (nested_elem_tk == enum_or_bitmask) {
-    DDS::TypeDescriptor_var td;
-    if (nested_elem_type->get_descriptor(td) != DDS::RETCODE_OK) {
+    DDS::TypeDescriptor_var nested_td;
+    if (nested_elem_type->get_descriptor(nested_td) != DDS::RETCODE_OK) {
       return false;
     }
-    const LBound bit_bound = td->bound()[0];
+    const LBound bit_bound = nested_td->bound()[0];
     return bit_bound >= lower && bit_bound <= upper &&
       skip_to_map_element(id) && read_values(value, nested_elem_tk);
   }
@@ -2226,6 +2228,21 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDesc
         return DDS::RETCODE_NO_DATA;
       }
     }
+
+    if (member_desc->is_optional()) {
+      bool has_value = false;
+      if (!(strm_ >> ACE_InputCDR::to_boolean(has_value))) {
+        if (DCPS::DCPS_debug_level >= 1) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) DynamicDataXcdrReadImpl::skip_to_struct_member: "
+                     "Failed to read is_present for member ID %d\n", id));
+        }
+        return DDS::RETCODE_ERROR;
+      }
+      if (!has_value) {
+        return DDS::RETCODE_NO_DATA;
+      }
+    }
+
     return DDS::RETCODE_OK;
   } else {
     size_t dheader = 0;
@@ -2493,7 +2510,7 @@ bool DynamicDataXcdrReadImpl::skip_sequence_member(DDS::DynamicType_ptr seq_type
     }
 
     return skip("skip_sequence_member", "Failed to skip a primitive sequence member",
-                length, primitive_size);
+                length, static_cast<int>(primitive_size));
   } else {
     return skip_collection_member(seq_type);
   }
@@ -2510,7 +2527,7 @@ bool DynamicDataXcdrReadImpl::skip_array_member(DDS::DynamicType_ptr array_type)
   ACE_CDR::ULong primitive_size = 0;
   if (get_primitive_size(elem_type, primitive_size)) {
     return skip("skip_array_member", "Failed to skip a primitive array member",
-                bound_total(descriptor), primitive_size);
+                bound_total(descriptor), static_cast<int>(primitive_size));
   } else {
     return skip_collection_member(array_type);
   }
@@ -2539,11 +2556,11 @@ bool DynamicDataXcdrReadImpl::skip_map_member(DDS::DynamicType_ptr map_type)
 
     for (unsigned i = 0; i < length; ++i) {
       if (!skip("skip_map_member", "Failed to skip a key of a primitive map member",
-                1, key_primitive_size)) {
+                1, static_cast<int>(key_primitive_size))) {
         return false;
       }
       if (!skip("skip_map_member", "Failed to skip an element of a primitive map member",
-                1, elem_primitive_size)) {
+                1, static_cast<int>(elem_primitive_size))) {
         return false;
       }
     }
@@ -2890,109 +2907,18 @@ bool DynamicDataXcdrReadImpl::check_xcdr1_mutable_i(DDS::DynamicType_ptr dt, Dyn
       }
       return false;
     }
-    DDS::MemberDescriptor_var descriptor;
-    if (dtm->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+    DDS::MemberDescriptor_var mem_desc;
+    if (dtm->get_descriptor(mem_desc) != DDS::RETCODE_OK) {
       return false;
     }
-    if (!check_xcdr1_mutable_i(descriptor->type(), dtns)) {
+    if (!check_xcdr1_mutable_i(mem_desc->type(), dtns)) {
       return false;
     }
   }
   return true;
 }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-namespace {
-  template <typename T>
-  DDS::ReturnCode_t get_some_value(DCPS::Value& value, DDS::MemberId id, DynamicDataXcdrReadImpl& dyn,
-                                   DDS::ReturnCode_t (DynamicDataXcdrReadImpl::* pmf)(T&, DDS::MemberId))
-  {
-    T v;
-    const DDS::ReturnCode_t ret = (dyn.*pmf)(v, id);
-    if (ret == DDS::RETCODE_OK) {
-      value = v;
-    }
-    return ret;
-  }
-
-  DDS::ReturnCode_t get_some_value(DCPS::Value& value, DDS::MemberId id, DynamicDataXcdrReadImpl& dyn,
-                                   DDS::ReturnCode_t (DynamicDataXcdrReadImpl::* pmf)(char*&, DDS::MemberId))
-  {
-    CORBA::String_var v;
-    const DDS::ReturnCode_t ret = (dyn.*pmf)(v, id);
-    if (ret == DDS::RETCODE_OK) {
-      value = v.in();
-    }
-    return ret;
-  }
-
-  DDS::ReturnCode_t get_some_value(DCPS::Value& value, DDS::MemberId id, DynamicDataXcdrReadImpl& dyn,
-                                   DDS::ReturnCode_t (DynamicDataXcdrReadImpl::* pmf)(ACE_CDR::WChar*&, DDS::MemberId))
-  {
-    CORBA::WString_var v;
-    const DDS::ReturnCode_t ret = (dyn.*pmf)(v, id);
-    if (ret == DDS::RETCODE_OK) {
-      value = v.in();
-    }
-    return ret;
-  }
-}
-
-DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_simple_value(DCPS::Value& value, DDS::MemberId id)
-{
-  DDS::DynamicTypeMember_var dtm;
-  if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
-    return DDS::RETCODE_ERROR;
-  }
-  DDS::MemberDescriptor_var md;
-  if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
-    return DDS::RETCODE_ERROR;
-  }
-  DDS::DynamicType_var member_type = get_base_type(md->type());
-  const TypeKind member_kind = member_type->get_kind();
-  switch (member_kind) {
-  case TK_BOOLEAN:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_boolean_value);
-  case TK_BYTE:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_byte_value);
-  case TK_INT8:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_int8_value);
-  case TK_INT16:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_int16_value);
-  case TK_INT32:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_int32_value);
-  case TK_INT64:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_int64_value_impl);
-  case TK_UINT8:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_uint8_value);
-  case TK_UINT16:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_uint16_value);
-  case TK_UINT32:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_uint32_value);
-  case TK_UINT64:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_uint64_value_impl);
-  case TK_FLOAT32:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_float32_value);
-  case TK_FLOAT64:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_float64_value);
-  case TK_FLOAT128:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_float128_value);
-  case TK_CHAR8:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_char8_value);
-  case TK_CHAR16:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_char16_value);
-  case TK_ENUM:
-  case TK_STRING8:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_string_value);
-  case TK_STRING16:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_wstring_value);
-  default:
-    return DDS::RETCODE_UNSUPPORTED;
-  }
-}
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::String& indent,
                   MemberId member_id);
 
@@ -3319,4 +3245,4 @@ bool print_dynamic_data(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif

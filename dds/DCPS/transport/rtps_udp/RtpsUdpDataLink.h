@@ -17,35 +17,40 @@
 #include "TransactionalRtpsSendQueue.h"
 
 #include <dds/DCPS/transport/framework/DataLink.h>
-#include <dds/DCPS/ReactorTask.h>
-#include <dds/DCPS/ReactorTask_rch.h>
 #include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 #include <dds/DCPS/transport/framework/TransportSendBuffer.h>
 #include <dds/DCPS/transport/framework/TransportStatistics.h>
-#include <dds/DCPS/DataSampleElement.h>
-#include <dds/DCPS/DisjointSequence.h>
-#include <dds/DCPS/GuidConverter.h>
-#include <dds/DCPS/DataBlockLockPool.h>
-#include <dds/DCPS/PoolAllocator.h>
-#include <dds/DCPS/DiscoveryListener.h>
-#include <dds/DCPS/ReactorInterceptor.h>
-#include <dds/DCPS/RcEventHandler.h>
-#include <dds/DCPS/JobQueue.h>
-#include <dds/DCPS/SequenceNumber.h>
-#include <dds/DCPS/AddressCache.h>
-#include <dds/DCPS/Hash.h>
-#include <dds/DCPS/FibonacciSequence.h>
-#include <dds/DCPS/MulticastManager.h>
-#include <dds/DCPS/SporadicEvent.h>
-#include <dds/DCPS/PeriodicEvent.h>
 
-#ifdef OPENDDS_SECURITY
+#include <dds/DCPS/AddressCache.h>
+#include <dds/DCPS/DataBlockLockPool.h>
+#include <dds/DCPS/DataSampleElement.h>
+#include <dds/DCPS/DiscoveryListener.h>
+#include <dds/DCPS/DisjointSequence.h>
+#include <dds/DCPS/FibonacciSequence.h>
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/Hash.h>
+#include <dds/DCPS/JobQueue.h>
+#include <dds/DCPS/MulticastManager.h>
+#include <dds/DCPS/PeriodicEvent.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/RcEventHandler.h>
+#include <dds/DCPS/ReactorTask.h>
+#include <dds/DCPS/ReactorTask_rch.h>
+#include <dds/DCPS/SequenceNumber.h>
+#include <dds/DCPS/SporadicEvent.h>
+
+#include <dds/DCPS/RTPS/MessageTypes.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 #  include <dds/DCPS/security/framework/SecurityConfig.h>
 #  include <dds/DCPS/security/framework/SecurityConfig_rch.h>
 #  include <dds/DCPS/RTPS/ICE/Ice.h>
 #endif
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #  include <dds/DdsSecurityCoreC.h>
 #endif
 
@@ -107,8 +112,7 @@ public:
   RtpsUdpInst_rch config() const;
 
   ACE_Reactor* get_reactor();
-  ReactorInterceptor_rch get_reactor_interceptor() const;
-  bool reactor_is_shut_down();
+  ReactorTask_rch get_reactor_task() const;
 
   ACE_SOCK_Dgram& unicast_socket();
   ACE_SOCK_Dgram_Mcast& multicast_socket();
@@ -175,9 +179,19 @@ public:
                        const TransportReceiveListener_wrch& receive_listener,
                        bool reliable);
 
+  int make_reservation(const GUID_t& remote_publication_id,
+                       const GUID_t& local_subscription_id,
+                       const TransportSendListener_wrch& send_listener,
+                       bool reliable)
+  {
+    // avoid a warning due to overriding one overload of make_reservation() without the other
+    return DataLink::make_reservation(remote_publication_id, local_subscription_id, send_listener, reliable);
+  }
+
   bool associated(const GUID_t& local, const GUID_t& remote,
                   bool local_reliable, bool remote_reliable,
                   bool local_durable, bool remote_durable,
+                  const RTPS::VendorId_t& vendor_id,
                   const MonotonicTime_t& participant_discovered_at,
                   ACE_CDR::ULong participant_flags,
                   SequenceNumber max_sn,
@@ -186,8 +200,6 @@ public:
                   NetworkAddressSet& multicast_addresses,
                   const NetworkAddress& last_addr_hint,
                   bool requires_inline_qos);
-
-  void disassociated(const GUID_t& local, const GUID_t& remote);
 
   void register_for_reader(const GUID_t& writerid,
                            const GUID_t& readerid,
@@ -209,15 +221,18 @@ public:
 
   virtual void pre_stop_i();
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DCPS::RcHandle<ICE::Agent> get_ice_agent() const;
 #endif
   virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint() const;
 
+  virtual SequenceNumber cur_cumulative_ack(const GUID_t& writer,
+                                            const GUID_t& reader) const;
+
   virtual bool is_leading(const GUID_t& writer_id,
                           const GUID_t& reader_id) const;
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   Security::SecurityConfig_rch security_config() const
   {
     ACE_Guard<ACE_Thread_Mutex> guard(security_mutex_);
@@ -246,6 +261,11 @@ public:
   EventDispatcher_rch event_dispatcher() { return event_dispatcher_; }
   RcHandle<JobQueue> get_job_queue() const { return job_queue_; }
 
+  static StatisticSeq stats_template();
+  void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
+  size_t total_remote_reliable_writers() const;
+  std::pair<size_t, size_t> local_reliable_writer_stats() const;
+
 private:
   void on_data_available(RcHandle<InternalDataReader<NetworkInterfaceAddress> > reader);
 
@@ -254,6 +274,9 @@ private:
   NetworkAddressSet get_addresses_i(const GUID_t& local) const;
 
   virtual void stop_i();
+
+  // Force path through customize_queue_element.
+  virtual bool handle_send_request_ack(TransportQueueElement*) { return false; }
 
   virtual TransportQueueElement* customize_queue_element(
     TransportQueueElement* element);
@@ -269,8 +292,8 @@ private:
   RcHandle<JobQueue> job_queue_;
   EventDispatcher_rch event_dispatcher_;
 
-  RtpsUdpSendStrategy_rch send_strategy();
-  RtpsUdpReceiveStrategy_rch receive_strategy();
+  RtpsUdpSendStrategy_rch send_strategy() const;
+  RtpsUdpReceiveStrategy_rch receive_strategy() const;
 
   GuidPrefix_t local_prefix_;
 
@@ -283,7 +306,7 @@ private:
     bool requires_inline_qos_;
     NetworkAddress last_recv_addr_;
     MonotonicTimePoint last_recv_time_;
-    size_t ref_count_;
+    DDS::UInt32 ref_count_;
     bool insert_recv_addr(NetworkAddressSet& aset) const;
   };
 
@@ -338,7 +361,7 @@ private:
   typedef OPENDDS_MAP(FragmentNumberValue, RTPS::FragmentNumberSet) RequestedFragMap;
   typedef OPENDDS_MAP(SequenceNumber, RequestedFragMap) RequestedFragSeqMap;
 
-  struct ReaderInfo : public virtual RcObject {
+  struct ReaderInfo : public RcObject {
     const GUID_t id_;
     const MonotonicTime_t participant_discovered_at_;
     CORBA::Long acknack_recvd_count_, nackfrag_recvd_count_;
@@ -351,7 +374,7 @@ private:
     OPENDDS_MAP(SequenceNumber, TransportQueueElement*) durable_data_;
     MonotonicTimePoint durable_timestamp_;
     const SequenceNumber start_sn_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     SequenceNumber max_pvs_sn_;
     DisjointSequence pvs_outstanding_;
 #endif
@@ -370,7 +393,7 @@ private:
       , participant_flags_(participant_flags)
       , required_acknack_count_(0)
       , start_sn_(start_sn)
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
       , max_pvs_sn_(SequenceNumber::ZERO())
 #endif
     {}
@@ -379,6 +402,7 @@ private:
     void expunge_durable_data();
     bool expecting_durable_data() const;
     SequenceNumber acked_sn() const { return cur_cumulative_ack_.previous(); }
+    SequenceNumber cur_cumulative_ack() const { return cur_cumulative_ack_; }
     bool reflects_heartbeat_count() const;
   };
 
@@ -419,7 +443,7 @@ private:
     }
   };
 
-  class RtpsWriter : public virtual RcObject {
+  class RtpsWriter : public RcObject {
   private:
     ReaderInfoMap remote_readers_;
     RcHandle<ConstSharedRepoIdSet> remote_reader_guids_;
@@ -447,7 +471,7 @@ private:
     const bool durable_;
     bool stopping_;
     CORBA::Long heartbeat_count_;
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     /// Participant Volatile Secure writer
     const bool is_pvs_writer_;
     /// Partcicipant Secure (Reliable SPDP) writer
@@ -489,7 +513,7 @@ private:
     void record_directed(const GUID_t& reader, SequenceNumber seq);
     void update_remote_guids_cache_i(bool add, const GUID_t& guid);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     bool is_pvs_writer() const { return is_pvs_writer_; }
 #else
     bool is_pvs_writer() const { return false; }
@@ -541,6 +565,7 @@ private:
     bool add_reader(const ReaderInfo_rch& reader);
     bool has_reader(const GUID_t& id) const;
     bool is_leading(const GUID_t& id) const;
+    SequenceNumber cur_cumulative_ack(const GUID_t& id) const;
     bool remove_reader(const GUID_t& id);
     size_t reader_count() const;
     CORBA::Long inc_heartbeat_count();
@@ -585,6 +610,7 @@ private:
 
   struct WriterInfo : RcObject {
     const GUID_t id_;
+    const RTPS::VendorId_t vendor_id_;
     const MonotonicTime_t participant_discovered_at_;
     DisjointSequence recvd_;
     typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample) HeldMap;
@@ -595,18 +621,36 @@ private:
     const ACE_CDR::ULong participant_flags_;
 
     WriterInfo(const GUID_t& id,
+               const RTPS::VendorId_t& vendor_id,
                const MonotonicTime_t& participant_discovered_at,
                ACE_CDR::ULong participant_flags)
       : id_(id)
+      , vendor_id_(vendor_id)
       , participant_discovered_at_(participant_discovered_at)
       , hb_last_(SequenceNumber::ZERO())
       , heartbeat_recvd_count_(0)
       , hb_frag_recvd_count_(0)
       , participant_flags_(participant_flags)
+      , acknack_count_(0)
     { }
 
     bool should_nack() const;
     bool sends_directed_hb() const;
+    SequenceNumber preemptive_acknack_base() const
+    {
+      // RTI expects 0 while the spec implies it should be 1.
+      static const RTPS::VendorId_t rti_vendor_id = {{ 0x01, 0x01 }};
+      return vendor_id_ == rti_vendor_id ? 0 : 1;
+    }
+
+    CORBA::Long next_acknack_count()
+    {
+      // Reflect the heartbeat count for OpenDDS.
+      return vendor_id_ == RTPS::VENDORID_OPENDDS ? heartbeat_recvd_count_ : ++acknack_count_;
+    }
+
+  private:
+    CORBA::Long acknack_count_;
   };
   typedef RcHandle<WriterInfo> WriterInfo_rch;
 #ifdef ACE_HAS_CPP11
@@ -616,7 +660,7 @@ private:
 #endif
   typedef OPENDDS_SET(WriterInfo_rch) WriterInfoSet;
 
-  class RtpsReader : public virtual RcObject {
+  class RtpsReader : public RcObject {
   public:
     RtpsReader(const RtpsUdpDataLink_rch& link, const GUID_t& id);
     virtual ~RtpsReader();
@@ -674,7 +718,8 @@ private:
     bool stopping_;
     CORBA::Long nackfrag_count_;
     RcHandle<SporadicEvent> preassociation_task_;
-    TimeDuration heartbeat_period_;
+    const TimeDuration initial_fallback_;
+    FibonacciSequence<TimeDuration> fallback_;
   };
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 
@@ -923,7 +968,7 @@ private:
     GUID_t writer_id_;
   };
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   mutable ACE_Thread_Mutex security_mutex_;
   Security::SecurityConfig_rch security_config_;
   Security::HandleRegistry_rch handle_registry_;
@@ -935,6 +980,8 @@ private:
 
   RcHandle<InternalDataReader<NetworkInterfaceAddress> > network_interface_address_reader_;
   MulticastManager multicast_manager_;
+
+  bool uses_end_historic_control_messages() const { return false; }
 };
 
 } // namespace DCPS

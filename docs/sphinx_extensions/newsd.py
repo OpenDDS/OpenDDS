@@ -6,6 +6,7 @@ from pathlib import Path
 import io
 from datetime import datetime, timezone
 import textwrap
+import unittest
 
 from version_info import VersionInfo
 
@@ -13,6 +14,7 @@ from version_info import VersionInfo
 # These sections are builtin and must appear in this order
 main_sections = {
     'Additions': 100,
+    'Platform Support and Dependencies': 95,
     'Deprecations': 90,
     'Removals': 80,
     'Security': 60,
@@ -27,13 +29,18 @@ ghfile_re = re.compile(r':ghfile:')
 newsd_path = Path(__file__).parent.parent / 'news.d'
 releases_path = newsd_path / '_releases'
 
-def loc_str(loc):
-    if loc is None:
-        path = 'unknown'
-        lineno = 0
-    else:
-        path, lineno = loc
-    return str(path) + ':' + str(lineno)
+
+class ParseError(RuntimeError):
+    def __init__(self, loc, *args):
+        self.message = ' '.join(args)
+        if loc is None:
+            path = None
+            lineno = None
+        else:
+            path, lineno = loc
+        self.path = path
+        self.lineno = lineno
+        super().__init__(f'Parse error at {path}:{lineno}: {self.message}')
 
 
 class PrintHelper:
@@ -67,12 +74,9 @@ class PrintHelper:
             print(file=self.file)
             self.printed_blank_line = True
 
-    def test(self, expected):
+    def test_str(self):
         assert isinstance(self.file, io.StringIO)
-        got = self.file.getvalue()
-        if got != expected:
-            print('ERROR: internal test failed, expected:', expected, 'but got:', got, sep='\n', file=sys.stderr)
-            raise AssertionError()
+        return self.file.getvalue()
 
 
 class Node:
@@ -128,10 +132,11 @@ class Text(Node):
             h.put(self.level - 1, line, decorate=decorate)
 
 
-def test_text():
-    ph = PrintHelper(None)
-    Text(0, set([1, 2]), 3, ['- Item\n  - SubItem\n- Additional Item']).print(ph)
-    ph.test('''\
+class TestText(unittest.TestCase):
+    def test_text(self):
+        ph = PrintHelper(None)
+        Text(0, set([1, 2]), 3, ['- Item\n  - SubItem\n- Additional Item']).print(ph)
+        self.assertEqual(ph.test_str(), '''\
   - Item (:ghpr:`1`, :ghpr:`2`)
     - SubItem
   - Additional Item (:ghpr:`1`, :ghpr:`2`)
@@ -164,9 +169,7 @@ class Section(Node):
             child.last_start_loc = loc
             return child
         if fixed_main_sections:
-            raise KeyError(
-                "Can't define a new main section named {} at {}".format(
-                    repr(name), loc_str(loc)))
+            raise ParseError(loc, f'Can\'t define a new main section named {name!r}')
         child = Section(rank, self, name, last_start_loc=loc)
         self.children.append(child)
         self.sections[name] = child
@@ -198,12 +201,11 @@ class Section(Node):
     def print_all(self, file=sys.stdout):
         version_info = VersionInfo()
         if version_info.is_release:
-            today = datetime.now(timezone.utc).date()
             print((
                 'Released {}\n\n' +
                 'Download :ghrelease:`this release on GitHub <{}>`.\n\n' +
                 'Read `the documentation for this release on Read the Docs <https://opendds.readthedocs.io/en/{}>`__.'
-            ).format(today.isoformat(), version_info.tag, version_info.tag.lower()), file=file)
+            ).format(version_info.release_date.isoformat(), version_info.tag, version_info.tag.lower()), file=file)
         else:
             print('This version is currently still in development, so this list might change.', file=file)
 
@@ -215,33 +217,34 @@ class Section(Node):
             self.print(h)
 
 
-def test_section():
-    root = Section()
-    a = root.get_section('Section A')
-    a.add_text(set([0]), ['- This is some text\n', '- This is a separate item\n'])
-    aa = a.get_section('Section AA')
-    aa.add_text(set([3]), ['- This is some text\n  - This is some more\n'])
-    aa.add_text(set([1]), ['- This is some text  \n  - This is some more\n'])
-    aa.add_text(set([5]), ['- This is some text\n  - This is some more\n    \n'])
-    aa.add_text(set([50]), ['- (Should be second in Section AA)\n'], 9)
-    aaa = aa.get_section('Section AAA (Should be first in Section AA)', 10)
-    aaa.add_text(set([4]), ['- This is some text\n  - This is some more\n'])
-    aab = aa.get_section('Section AAB')
-    aab.add_text(set([10]), ['- This is some text\n'])
-    aaba = aab.get_section('Section AABA')
-    aaba.add_text(set([9]), ['- This is some text\n'])
-    aac = aa.get_section('Section AAC')
-    aac.add_text(set([1]), ['- This is some text\n'])
-    b = root.get_section('Section B')
-    b.add_text(set([12]), ['- This is some text\n'])
-    root.get_section('This should be hidden') \
-        .get_section('This should be hidden') \
-        .get_section('This should be hidden')
+class TestSection(unittest.TestCase):
+    def test_section(self):
+        root = Section()
+        a = root.get_section('Section A')
+        a.add_text(set([0]), ['- This is some text\n', '- This is a separate item\n'])
+        aa = a.get_section('Section AA')
+        aa.add_text(set([3]), ['- This is some text\n  - This is some more\n'])
+        aa.add_text(set([1]), ['- This is some text  \n  - This is some more\n'])
+        aa.add_text(set([5]), ['- This is some text\n  - This is some more\n    \n'])
+        aa.add_text(set([50]), ['- (Should be second in Section AA)\n'], 9)
+        aaa = aa.get_section('Section AAA (Should be first in Section AA)', 10)
+        aaa.add_text(set([4]), ['- This is some text\n  - This is some more\n'])
+        aab = aa.get_section('Section AAB')
+        aab.add_text(set([10]), ['- This is some text\n'])
+        aaba = aab.get_section('Section AABA')
+        aaba.add_text(set([9]), ['- This is some text\n'])
+        aac = aa.get_section('Section AAC')
+        aac.add_text(set([1]), ['- This is some text\n'])
+        b = root.get_section('Section B')
+        b.add_text(set([12]), ['- This is some text\n'])
+        root.get_section('This should be hidden') \
+            .get_section('This should be hidden') \
+            .get_section('This should be hidden')
 
-    ph = PrintHelper(None)
-    ph.show_rank = True
-    root.print(ph)
-    ph.test('''\
+        ph = PrintHelper(None)
+        ph.show_rank = True
+        root.print(ph)
+        self.assertEqual(ph.test_str(), '''\
 
 Section A
 =========
@@ -287,11 +290,6 @@ Section B
 - This is some text (:ghpr:`12`) [Rank 0]
 
 ''')
-
-
-class ParseError(RuntimeError):
-    def __init__(self, loc, *args):
-        super().__init__('Parse error at {}: {}'.format(loc_str(loc), ' '.join(args)))
 
 
 def parse(root, path):
@@ -382,6 +380,7 @@ def rst_title(title):
 def version_ref(version):
     return '.. _' + version.replace('.', '_') + ':\n'
 
+
 def existing_release_notes():
     releases = []
     for p in releases_path.iterdir():
@@ -393,22 +392,25 @@ def existing_release_notes():
 
 
 def print_all_news(file=sys.stdout):
+    # NOTE: ":tocdepth: 2" means don't show subsections like "Additions" in
+    # local table of contents.
     print(textwrap.dedent('''\
-    ..
-      This file is generated by newsd.py from rst files in news.d. The following
-      means don't show subsections like "Additions" in local table of contents.
+        :tocdepth: 2
 
-    :tocdepth: 2
-
-    #############
-    Release Notes
-    #############
-
-    These are all the recent releases of OpenDDS.
-    '''), file=file)
+        #############
+        Release Notes
+        #############
+        '''), file=file)
 
     version_info = VersionInfo()
-    if not version_info.is_release:
+    if version_info.is_release:
+        print('These are all the releases of OpenDDS.\n', file=file)
+    else:
+        print(textwrap.dedent('''\
+            This is the pending release and all the recent releases of OpenDDS.
+            This file is generated by :ghfile:`docs/sphinx_extensions/newsd.py` from the rst files in :ghfile:`docs/news.d`.
+            See :ref:`docs-news` for details.
+            '''), file=file)
         print(version_ref(version_info.v_ver), file=file)
         print(rst_title(version_info.v_ver), file=file)
         parse_newsd().print_all(file=file)
@@ -417,16 +419,11 @@ def print_all_news(file=sys.stdout):
         print(version_ref(f.stem), rst_title(f.stem), f.read_text(), sep='\n', file=file)
 
     print(textwrap.dedent('''\
-    **************
-    Older Releases
-    **************
+        **************
+        Older Releases
+        **************
 
-    Older releases can be found in :ghfile:`NEWS.md`'''), file=file)
-
-
-# Since we can, always do testing.
-test_text()
-test_section()
+        Older releases can be found in :ghfile:`NEWS.md`'''), file=file)
 
 
 if __name__ == '__main__':

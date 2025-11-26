@@ -11,17 +11,19 @@
 #include "RtpsCoreTypeSupportImpl.h"
 #include "rtps_export.h"
 
-#include <dds/DCPS/Hash.h>
-#include <dds/DCPS/Util.h>
-#include <dds/DCPS/Message_Block_Ptr.h>
-#include <dds/DCPS/Serializer.h>
-#include <dds/DCPS/TypeSupportImpl.h>
-#include <dds/DCPS/SequenceNumber.h>
-#include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/Hash.h>
+#include <dds/DCPS/Message_Block_Ptr.h>
+#include <dds/DCPS/SequenceNumber.h>
+#include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/TypeSupportImpl.h>
+#include <dds/DCPS/Util.h>
 
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsInfoUtilsTypeSupportImpl.h>
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <ace/INET_Addr.h>
 #include <ace/Message_Block.h>
@@ -87,11 +89,13 @@ const DCPS::Encoding& get_locators_encoding();
 OpenDDS_Rtps_Export
 DDS::ReturnCode_t blob_to_locators(const DCPS::TransportBLOB& blob,
                                    DCPS::LocatorSeq& locators,
+                                   VendorId_t& vendor_id,
                                    bool* requires_inline_qos = 0,
                                    unsigned int* pBytesRead = 0);
 
 OpenDDS_Rtps_Export
 void locators_to_blob(const DCPS::LocatorSeq& locators,
+                      const VendorId_t& vendor_id,
                       DCPS::TransportBLOB& blob);
 
 OpenDDS_Rtps_Export
@@ -100,11 +104,11 @@ DCPS::LocatorSeq transport_locator_to_locator_seq(const DCPS::TransportLocator& 
 template <typename T>
 void message_block_to_sequence(const ACE_Message_Block& mb_locator, T& out)
 {
-  out.length (CORBA::ULong(mb_locator.length()));
-  std::memcpy (out.get_buffer(), mb_locator.rd_ptr(), mb_locator.length());
+  out.length(CORBA::ULong(mb_locator.length()));
+  std::memcpy(out.get_buffer(), mb_locator.rd_ptr(), mb_locator.length());
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 
 inline bool operator==(const Duration_t& x, const Duration_t& y)
 {
@@ -113,14 +117,14 @@ inline bool operator==(const Duration_t& x, const Duration_t& y)
 
 inline bool operator==(const VendorId_t& v1, const VendorId_t& v2)
 {
-  return (v1.vendorId[0] == v2.vendorId[0] && v1.vendorId[1] == v2.vendorId[1]);
+  return v1.vendorId[0] == v2.vendorId[0] && v1.vendorId[1] == v2.vendorId[1];
 }
 
 #endif
 
 inline bool operator<(const ProtocolVersion_t& v1, const ProtocolVersion_t& v2)
 {
-  return (v1.major < v2.major || (v1.major == v2.major && v1.minor < v2.minor));
+  return v1.major < v2.major || (v1.major == v2.major && v1.minor < v2.minor);
 }
 
 OpenDDS_Rtps_Export
@@ -172,7 +176,14 @@ inline void append_submessage(RTPS::Message& message, const RTPS::DataFragSubmes
   DCPS::push_back(message.submessages, sm);
 }
 
-#ifdef OPENDDS_SECURITY
+inline void append_submessage(RTPS::Message& message, const RTPS::UserTagSubmessage& submessage)
+{
+  RTPS::Submessage sm;
+  sm.unknown_sm(submessage.smHeader);
+  DCPS::push_back(message.submessages, sm);
+}
+
+#if OPENDDS_CONFIG_SECURITY
 inline DDS::Security::ParticipantSecurityAttributesMask
 security_attributes_to_bitmask(const DDS::Security::ParticipantSecurityAttributes& sec_attr)
 {
@@ -228,7 +239,7 @@ handle_to_octets(DDS::Security::NativeCryptoHandle handle)
   DDS::OctetSeq handleOctets(sizeof handle);
   handleOctets.length(handleOctets.maximum());
   unsigned char* rawHandleOctets = handleOctets.get_buffer();
-  unsigned int handleTmp = handle;
+  unsigned int handleTmp = static_cast<unsigned int>(handle);
   for (unsigned int j = sizeof handle; j > 0; --j) {
     rawHandleOctets[j - 1] = handleTmp & 0xff;
     handleTmp >>= 8;
@@ -236,6 +247,52 @@ handle_to_octets(DDS::Security::NativeCryptoHandle handle)
   return handleOctets;
 }
 #endif
+
+// Default values for spec-defined parameters for determining what ports RTPS
+// uses.
+const DDS::UInt16 default_port_base = 7400; // (PB)
+const DDS::UInt16 default_domain_gain = 250; // (DG)
+const DDS::UInt16 default_part_gain = 2; // (PG)
+const DDS::UInt16 default_spdp_multicast_offset = 0; // (D0)
+const DDS::UInt16 default_spdp_unicast_offset = 10; // (D1)
+const DDS::UInt16 default_user_multicast_offset = 1; // (D2)
+const DDS::UInt16 default_user_unicast_offset = 11; // (D3)
+
+// Default values for OpenDDS-specific parameters for determining what ports
+// RTPS uses.
+const DDS::UInt16 default_sedp_multicast_offset = 2; // (DX)
+const DDS::UInt16 default_sedp_unicast_offset = 12; // (DY)
+
+OpenDDS_Rtps_Export
+bool get_rtps_port(DDS::UInt16& port_result, const char* what,
+  DDS::UInt16 port_base, DDS::UInt16 offset,
+  DDS::UInt16 domain, DDS::UInt16 domain_gain,
+  DDS::UInt16 part = 0, DDS::UInt16 part_gain = 0);
+
+enum PortMode {
+  PortMode_System,
+  PortMode_Probe
+};
+
+OpenDDS_Rtps_Export
+PortMode get_port_mode(const String& key, PortMode default_value);
+
+OpenDDS_Rtps_Export
+void set_port_mode(const String& key, PortMode value);
+
+OpenDDS_Rtps_Export
+bool set_rtps_multicast_port(
+  DCPS::NetworkAddress& addr, const char* what,
+  DDS::UInt16 port_base, DDS::UInt16 offset,
+  DDS::UInt16 domain, DDS::UInt16 domain_gain);
+
+OpenDDS_Rtps_Export
+bool set_rtps_unicast_port(
+  DCPS::NetworkAddress& addr, bool& fixed_port,
+  const char* what, PortMode port_mode,
+  DDS::UInt16 port_base, DDS::UInt16 offset,
+  DDS::UInt16 domain, DDS::UInt16 domain_gain,
+  DDS::UInt16 part, DDS::UInt16 part_gain);
 
 } // namespace RTPS
 } // namespace OpenDDS

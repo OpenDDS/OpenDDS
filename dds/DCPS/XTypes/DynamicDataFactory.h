@@ -6,7 +6,9 @@
 #ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_FACTORY_H
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_FACTORY_H
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#include <dds/DCPS/Definitions.h>
+
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include <dds/DCPS/LocalObject.h>
 
 #  include <dds/DdsDynamicDataC.h>
@@ -81,6 +83,6 @@ struct OpenDDS_Dcps_Export Objref_Traits<DDS::DynamicDataFactory> {
 TAO_END_VERSIONED_NAMESPACE_DECL
 #  endif
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif
 
 #endif // OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_FACTORY_H

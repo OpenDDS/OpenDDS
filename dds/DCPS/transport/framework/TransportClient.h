@@ -14,7 +14,6 @@
 
 #include <dds/DCPS/dcps_export.h>
 #include <dds/DCPS/AssociationData.h>
-#include <dds/DCPS/ReactorInterceptor.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/PoolAllocationBase.h>
@@ -22,6 +21,8 @@
 #include <dds/DCPS/RcEventHandler.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/GuidUtils.h>
+
+#include <dds/OpenDDSConfigWrapper.h>
 
 #include <ace/Time_Value.h>
 #include <ace/Event_Handler.h>
@@ -60,14 +61,15 @@ public:
 
   // Local setup:
 
-  void enable_transport(bool reliable, bool durable);
+  void enable_transport(bool reliable, bool durable, DomainParticipantImpl* dpi);
   void enable_transport_using_config(bool reliable, bool durable,
-                                     const TransportConfig_rch& tc);
+                                     const TransportConfig_rch& tc,
+                                     DomainParticipantImpl* dpi);
 
   bool swap_bytes() const { return swap_bytes_; }
   bool cdr_encapsulation() const { return cdr_encapsulation_; }
   const TransportLocatorSeq& connection_info() const { return conn_info_; }
-  void populate_connection_info();
+  void populate_connection_info(DomainParticipantImpl* dpi);
   bool is_reliable() const { return reliable_; }
 
   // Managing associations to remote peers:
@@ -151,6 +153,7 @@ public:
 
   void data_acked(const GUID_t& remote);
 
+  SequenceNumber cur_cumulative_ack(const GUID_t& reader_id) const;
   bool is_leading(const GUID_t& reader_id) const;
 
 protected:
@@ -170,7 +173,7 @@ private:
 
 
 
-#if defined(OPENDDS_SECURITY)
+#if OPENDDS_CONFIG_SECURITY
   virtual DDS::Security::ParticipantCryptoHandle get_crypto_handle() const
   {
     return DDS::HANDLE_NIL;
@@ -204,9 +207,10 @@ private:
   typedef OPENDDS_VECTOR(WeakRcHandle<TransportImpl>) ImplsType;
 
   typedef ACE_Reverse_Lock<ACE_Thread_Mutex> Reverse_Lock_t;
-  struct PendingAssoc : RcEventHandler {
+  struct PendingAssoc : RcObject {
     ACE_Thread_Mutex mutex_;
-    bool active_, scheduled_;
+    bool active_;
+    bool scheduled_;
     ImplsType impls_;
     CORBA::ULong blob_index_;
     AssociationData data_;
@@ -218,12 +222,36 @@ private:
       , scheduled_(false)
       , blob_index_(0)
       , client_(tc_rch)
+      , timeout_task_(make_rch<PendingAssocSporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &PendingAssoc::timeout))
     {}
+
+    ~PendingAssoc()
+    {
+      timeout_task_->cancel();
+    }
 
     void reset_client();
     bool safe_to_remove();
     bool initiate_connect(TransportClient* tc, Guard& guard);
-    int handle_timeout(const ACE_Time_Value& time, const void* arg);
+
+    void schedule(const TimeDuration& delay)
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+      timeout_task_->schedule(delay);
+      scheduled_ = true;
+    }
+
+    void cancel()
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+      timeout_task_->cancel();
+      scheduled_ = false;
+    }
+
+  private:
+    typedef PmfSporadicTask<PendingAssoc> PendingAssocSporadicTask;
+    RcHandle<PendingAssocSporadicTask> timeout_task_;
+    void timeout(const MonotonicTimePoint& now);
   };
 
   typedef RcHandle<PendingAssoc> PendingAssoc_rch;
@@ -232,91 +260,6 @@ private:
   typedef OPENDDS_MULTIMAP_CMP(GUID_t, PendingAssoc_rch, GUID_tKeyLessThan) PrevPendingMap;
 
   void clean_prev_pending();
-
-  class PendingAssocTimer : public ReactorInterceptor {
-  public:
-    PendingAssocTimer(ACE_Reactor* reactor,
-                      ACE_thread_t owner)
-      : ReactorInterceptor(reactor, owner)
-      , timer_id_(-1)
-    { }
-
-    void schedule_timer(TransportClient_rch transport_client, const PendingAssoc_rch& pend)
-    {
-      execute_or_enqueue(make_rch<ScheduleCommand>(this, transport_client, pend));
-    }
-
-    ReactorInterceptor::CommandPtr cancel_timer(const PendingAssoc_rch& pend)
-    {
-      return execute_or_enqueue(make_rch<CancelCommand>(this, pend));
-    }
-
-    void set_id(long id) { timer_id_ = id; }
-    long get_id() const { return timer_id_; }
-
-    virtual bool reactor_is_shut_down() const
-    {
-      return TheServiceParticipant->is_shut_down();
-    }
-
-  private:
-    ~PendingAssocTimer()
-    { }
-
-    class CommandBase : public Command {
-    public:
-      CommandBase(PendingAssocTimer* timer,
-                  const PendingAssoc_rch& assoc)
-        : timer_ (timer)
-        , assoc_ (assoc)
-      { }
-    protected:
-      PendingAssocTimer* timer_;
-      PendingAssoc_rch assoc_;
-    };
-    struct ScheduleCommand : public CommandBase {
-      ScheduleCommand(PendingAssocTimer* timer,
-                      TransportClient_rch transport_client,
-                      const PendingAssoc_rch& assoc)
-        : CommandBase (timer, assoc)
-        , transport_client_ (transport_client)
-      { }
-      virtual void execute()
-      {
-        if (timer_->reactor()) {
-          TransportClient_rch client = transport_client_.lock();
-          if (client) {
-            ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
-            assoc_->scheduled_ = true;
-            long id = timer_->reactor()->schedule_timer(assoc_.in(),
-                                                        client.in(),
-                                                        client->passive_connect_duration_.value());
-            if (id != -1) {
-              timer_->set_id(id);
-            }
-          }
-        }
-      }
-      WeakRcHandle<TransportClient> transport_client_;
-    };
-    struct CancelCommand : public CommandBase {
-      CancelCommand(PendingAssocTimer* timer,
-                    const PendingAssoc_rch& assoc)
-        : CommandBase (timer, assoc)
-      { }
-      virtual void execute()
-      {
-        if (timer_->reactor() && timer_->get_id()) {
-          ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
-          timer_->reactor()->cancel_timer(timer_->get_id());
-          timer_->set_id(-1);
-          assoc_->scheduled_ = false;
-        }
-      }
-    };
-    long timer_id_;
-  };
-  RcHandle<PendingAssocTimer> pending_assoc_timer_;
 
   // Associated Impls and DataLinks:
 

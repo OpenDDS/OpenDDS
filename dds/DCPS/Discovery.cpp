@@ -7,16 +7,17 @@
 
 #include "Discovery.h"
 
-#include "Service_Participant.h"
 #include "BuiltInTopicUtils.h"
-#include "Registered_Data_Types.h"
-#include "Marked_Default_Qos.h"
-#include "SafetyProfileStreams.h"
 #include "DCPS_Utils.h"
+#include "Definitions.h"
+#include "Marked_Default_Qos.h"
+#include "Registered_Data_Types.h"
+#include "SafetyProfileStreams.h"
+#include "Service_Participant.h"
 
 #include <dds/DdsDcpsCoreC.h>
 #include <dds/OpenddsDcpsExtC.h>
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #  include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 #endif
@@ -43,6 +44,15 @@ void TypeObjReqCond::done(DDS::ReturnCode_t retcode)
   cond.notify_all();
 }
 
+TypeInformation::TypeInformation()
+  : flags_(Flags_None)
+{}
+
+TypeInformation::TypeInformation(const XTypes::TypeInformation& typeinfo)
+  : xtypes_type_info_(typeinfo)
+  , flags_(Flags_None)
+{}
+
 const char* Discovery::DEFAULT_REPO = "DEFAULT_REPO";
 const char* Discovery::DEFAULT_RTPS = "DEFAULT_RTPS";
 const char* Discovery::DEFAULT_STATIC = "DEFAULT_STATIC";
@@ -50,7 +60,7 @@ const char* Discovery::DEFAULT_STATIC = "DEFAULT_STATIC";
 DDS::ReturnCode_t
 Discovery::create_bit_topics(DomainParticipantImpl* participant)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
   TypeSupport_var type_support =
     Registered_Data_Types->lookup(participant, BUILT_IN_PARTICIPANT_TOPIC_TYPE);
@@ -322,7 +332,7 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
 
 #else
   ACE_UNUSED_ARG(participant);
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
 
   return DDS::RETCODE_OK;
 }

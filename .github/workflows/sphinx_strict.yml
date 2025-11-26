@@ -1,4 +1,4 @@
-name: sphinx_strict
+name: Sphinx Tests
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     - cron: '0 1 * * SUN'
 
 jobs:
-  build:
+  strict:
     runs-on: ubuntu-latest
     steps:
     - name: checkout OpenDDS
@@ -16,3 +16,13 @@ jobs:
     - name: Run Strict Checks
       run: |
         python3 docs/build.py strict
+
+  linkcheck:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v4
+
+    - name: Run Link Checks
+      run: |
+        python3 docs/build.py linkcheck

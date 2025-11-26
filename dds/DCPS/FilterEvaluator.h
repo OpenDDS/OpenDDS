@@ -10,7 +10,7 @@
 
 #include "Definitions.h"
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#if OPENDDS_CONFIG_CONTENT_SUBSCRIPTION
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "PoolAllocator.h"
@@ -50,6 +50,7 @@ struct OpenDDS_Dcps_Export Value {
   Value(const char* s, bool conversion_preferred = false);
   Value(const std::string& s, bool conversion_preferred = false);
 #ifdef DDS_HAS_WCHAR
+  Value(ACE_OutputCDR::from_wchar wc, bool conversion_preferred = false);
   Value(const std::wstring& s, bool conversion_preferred = false);
 #endif
   Value(const TAO::String_Manager& s, bool conversion_preferred = false);
@@ -83,12 +84,12 @@ struct OpenDDS_Dcps_Export Value {
     char c_;
     double f_;
     ACE_CDR::LongDouble ld_;
-    const char* s_;
+    char* s_;
   };
   bool conversion_preferred_;
 };
 
-class OpenDDS_Dcps_Export FilterEvaluator : public virtual RcObject {
+class OpenDDS_Dcps_Export FilterEvaluator : public RcObject {
 public:
 
   struct AstNodeWrapper;
@@ -123,7 +124,7 @@ public:
    * Returns true if the serialized sample matches the filter.
    */
   bool eval(ACE_Message_Block* serializedSample, Encoding encoding,
-            const TypeSupportImpl& typeSupport,
+            TypeSupportImpl& typeSupport,
             const DDS::StringSeq& params) const
   {
     SerializedForEval data(serializedSample, typeSupport, params, encoding);
@@ -162,12 +163,12 @@ private:
   };
 
   struct SerializedForEval : DataForEval {
-    SerializedForEval(ACE_Message_Block* data, const TypeSupportImpl& type_support,
+    SerializedForEval(ACE_Message_Block* data, TypeSupportImpl& type_support,
                       const DDS::StringSeq& params, Encoding encoding);
     Value lookup(const char* field) const;
     ACE_Message_Block* serialized_;
     Encoding encoding_;
-    const TypeSupportImpl& type_support_;
+    TypeSupportImpl& type_support_;
     mutable OPENDDS_MAP(OPENDDS_STRING, Value) cache_;
     Extensibility exten_;
   };
@@ -188,7 +189,7 @@ public:
   virtual ~MetaStruct();
 
   virtual Value getValue(const void* stru, const char* fieldSpec) const = 0;
-  virtual Value getValue(Serializer& ser, const char* fieldSpec, const TypeSupportImpl* ts = 0) const = 0;
+  virtual Value getValue(Serializer& ser, const char* fieldSpec, TypeSupportImpl* ts = 0) const = 0;
 
   virtual ComparatorBase::Ptr create_qc_comparator(const char* fieldSpec,
     ComparatorBase::Ptr next) const = 0;
@@ -196,7 +197,7 @@ public:
   ComparatorBase::Ptr create_qc_comparator(const char* fieldSpec) const
   { return create_qc_comparator(fieldSpec, ComparatorBase::Ptr()); }
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#if OPENDDS_CONFIG_MULTI_TOPIC
   virtual size_t numDcpsKeys() const = 0;
 
   virtual bool compare(const void* lhs, const void* rhs,
@@ -213,7 +214,7 @@ public:
 
   virtual void* allocate() const = 0;
   virtual void deallocate(void* stru) const = 0;
-#endif /* OPENDDS_NO_MULTI_TOPIC */
+#endif
 };
 
 /// Each user-defined struct type will have an instantiation of this template
@@ -225,5 +226,5 @@ struct MetaStructImpl;
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif
 #endif

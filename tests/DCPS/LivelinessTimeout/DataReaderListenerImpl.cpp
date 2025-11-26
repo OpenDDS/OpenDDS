@@ -173,10 +173,3 @@ void DataReaderListenerImpl::on_subscription_matched (
     ACE_UNUSED_ARG(status) ;
 
   }
-
-  void DataReaderListenerImpl::on_budget_exceeded (
-    ::DDS::DataReader_ptr,
-    const ::OpenDDS::DCPS::BudgetExceededStatus&
-    )
-  {
-  }

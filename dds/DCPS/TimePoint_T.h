@@ -4,8 +4,6 @@
 #include "TimeDuration.h"
 #include "SafeBool_T.h"
 
-#include <dds/DdsDcpsInfoUtilsC.h>
-
 #include <ace/Time_Value_T.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -31,14 +29,15 @@ namespace DCPS {
  * (or docs/internal/dev_guidelines.rst) for background and reasoning for this
  * class.
  */
-template<typename AceClock>
-class TimePoint_T : public SafeBool_T<TimePoint_T<AceClock> > {
+template<typename AceClock, typename IdlType>
+class TimePoint_T : public SafeBool_T<TimePoint_T<AceClock, IdlType> > {
 public:
   typedef AceClock ClockType;
+  typedef IdlType IdlStruct;
   typedef ACE_Time_Value_T<AceClock> ValueType;
 
-  const static TimePoint_T<AceClock> zero_value;
-  const static TimePoint_T<AceClock> max_value;
+  const static TimePoint_T zero_value;
+  const static TimePoint_T max_value;
 
   /**
    * Set to zero_value, which is equal to the epoch (the starting point) of the
@@ -51,19 +50,18 @@ public:
    * necessary.
    *
    * \warning Use these carefully. Make sure ACE_Time_Value is a point in time
-   * and of the right clock type. DDS::Time_t should be in system clock time
-   * and so shouldn't be used with MonotonicTimePoint.
+   * and of the right clock type.
    */
   ///@{
   explicit TimePoint_T(const ACE_Time_Value& ace_time_value);
-  explicit TimePoint_T(const ACE_Time_Value_T<AceClock>& ace_time_value);
-  explicit TimePoint_T(const DDS::Time_t& dds_time);
+  explicit TimePoint_T(const ValueType& ace_time_value);
+  explicit TimePoint_T(const IdlType& from_idl);
   ///@}
 
   /**
    * Get a TimePoint representing the current time of the AceClock.
    */
-  static TimePoint_T<AceClock> now();
+  static TimePoint_T now();
 
   /**
    * Get and set the inner ACE_Time_Value based value. Use value() to pass this
@@ -71,8 +69,8 @@ public:
    * type.
    */
   ///@{
-  const ACE_Time_Value_T<AceClock>& value() const;
-  void value(const ACE_Time_Value_T<AceClock>& ace_time_value);
+  const ValueType& value() const;
+  void value(const ValueType& ace_time_value);
   ///@}
 
   /**
@@ -96,18 +94,12 @@ public:
   void set_to_now();
 
   /**
-   * Convert to DDS::Time_t. This is probably only desirable for the system
-   * time version of this template class, SystemTimePoint.
+   * Convert to the corresponding IDL struct type.
    */
-  DDS::Time_t to_dds_time() const;
+  IdlType to_idl_struct() const;
 
-  /**
-   * Convert to OpenDDS::DCPS::MonotonicTime_t.
-   */
-  MonotonicTime_t to_monotonic_time() const;
-
-  TimePoint_T<AceClock>& operator+=(const TimeDuration& td);
-  TimePoint_T<AceClock>& operator-=(const TimeDuration& td);
+  TimePoint_T& operator+=(const TimeDuration& td);
+  TimePoint_T& operator-=(const TimeDuration& td);
 
 protected:
   /**
@@ -119,35 +111,35 @@ protected:
   ValueType value_;
 };
 
-template<typename AceClock>
-TimePoint_T<AceClock> operator+(const TimeDuration& x, const TimePoint_T<AceClock>& y);
+template<typename AceClock, typename IdlType>
+TimePoint_T<AceClock,  IdlType> operator+(const TimeDuration& x, const TimePoint_T<AceClock, IdlType>& y);
 
-template<typename AceClock>
-TimePoint_T<AceClock> operator+(const TimePoint_T<AceClock>& x, const TimeDuration& y);
+template<typename AceClock, typename IdlType>
+TimePoint_T<AceClock, IdlType> operator+(const TimePoint_T<AceClock, IdlType>& x, const TimeDuration& y);
 
-template<typename AceClock>
-TimeDuration operator-(const TimePoint_T<AceClock>& x, const TimePoint_T<AceClock>& y);
+template<typename AceClock, typename IdlType>
+TimeDuration operator-(const TimePoint_T<AceClock,  IdlType>& x, const TimePoint_T<AceClock, IdlType>& y);
 
-template<typename AceClock>
-TimePoint_T<AceClock> operator-(const TimePoint_T<AceClock>& x, const TimeDuration& y);
+template<typename AceClock, typename IdlType>
+TimePoint_T<AceClock, IdlType> operator-(const TimePoint_T<AceClock, IdlType>& x, const TimeDuration& y);
 
-template<typename AceClock>
-bool operator<(const TimePoint_T<AceClock>& x, const TimePoint_T<AceClock>& y);
+template<typename AceClock, typename IdlType>
+bool operator<(const TimePoint_T<AceClock, IdlType>& x, const TimePoint_T<AceClock, IdlType>& y);
 
-template<typename AceClock>
-bool operator>(const TimePoint_T<AceClock>& x, const TimePoint_T<AceClock>& y);
+template<typename AceClock, typename IdlType>
+bool operator>(const TimePoint_T<AceClock, IdlType>& x, const TimePoint_T<AceClock, IdlType>& y);
 
-template<typename AceClock>
-bool operator<=(const TimePoint_T<AceClock>& x, const TimePoint_T<AceClock>& y);
+template<typename AceClock, typename IdlType>
+bool operator<=(const TimePoint_T<AceClock, IdlType>& x, const TimePoint_T<AceClock, IdlType>& y);
 
-template<typename AceClock>
-bool operator>=(const TimePoint_T<AceClock>& x, const TimePoint_T<AceClock>& y);
+template<typename AceClock, typename IdlType>
+bool operator>=(const TimePoint_T<AceClock, IdlType>& x, const TimePoint_T<AceClock, IdlType>& y);
 
-template<typename AceClock>
-bool operator==(const TimePoint_T<AceClock>& x, const TimePoint_T<AceClock>& y);
+template<typename AceClock, typename IdlType>
+bool operator==(const TimePoint_T<AceClock, IdlType>& x, const TimePoint_T<AceClock, IdlType>& y);
 
-template<typename AceClock>
-bool operator!=(const TimePoint_T<AceClock>& x, const TimePoint_T<AceClock>& y);
+template<typename AceClock, typename IdlType>
+bool operator!=(const TimePoint_T<AceClock, IdlType>& x, const TimePoint_T<AceClock, IdlType>& y);
 
 } // namespace DCPS
 } // namespace OpenDDS
@@ -158,12 +150,6 @@ OPENDDS_END_VERSIONED_NAMESPACE_DECL
 #  include "TimePoint_T.inl"
 #endif /* __ACE_INLINE__ */
 
-#if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
-#  include "TimePoint_T.cpp"
-#endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
-
-#if defined (ACE_TEMPLATES_REQUIRE_PRAGMA)
-#  pragma implementation ("TimePoint_T.cpp")
-#endif /* ACE_TEMPLATES_REQUIRE_PRAGMA */
+#include "TimePoint_T.cpp"
 
 #endif

@@ -129,6 +129,46 @@ string dds_generator::module_scope_helper(UTL_ScopedName* sn, const char* sep, E
   return sname;
 }
 
+bool dds_generator::gen_enum_helper(AST_Enum*, UTL_ScopedName* name,
+  const std::vector<AST_EnumVal*>& contents, const char*)
+{
+  // The EnumHelper is used across multiple generators.
+  be_global->add_include("dds/DCPS/ValueCommon.h", BE_GlobalData::STREAM_CPP);
+  NamespaceGuard ng;
+  const std::string underscores = scoped_helper(name, "_"),
+    scope = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11
+            ? scoped(name) + "::"
+            : "",
+    fwd_decl = be_global->value_reader_writer() ? "" : "class EnumHelper;\n",
+    helper_decl = "const EnumHelper* gen_" + underscores + "_helper",
+    decl_prefix = (be_global->export_macro() == "")
+                  ? std::string("extern ")
+                  : std::string(be_global->export_macro().c_str()) + " extern ";
+
+  be_global->header_ <<
+    fwd_decl <<
+    decl_prefix << helper_decl << ";\n";
+
+  be_global->impl_ <<
+    "const ListEnumHelper::Pair gen_" << underscores << "_pairs[] = {\n";
+
+  for (size_t i = 0; i < contents.size(); ++i) {
+    const std::string idl_name = canonical_name(contents[i]),
+      cxx_name = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11
+                 ? contents[i]->local_name()->get_string()
+                 : scoped(contents[i]->name());
+    be_global->impl_ <<
+      "  {\"" << idl_name << "\", static_cast<ACE_CDR::Long>(" << scope << cxx_name << ")},\n";
+  }
+
+  be_global->impl_ <<
+    "  {0, 0}};\n"
+    "const ListEnumHelper gen_" << underscores << "_helper_impl(gen_" << underscores << "_pairs);\n" <<
+    helper_decl << " = &gen_" << underscores << "_helper_impl;\n\n";
+  return true;
+}
+
+
 void composite_generator::gen_prologue()
 {
   for (vector<dds_generator*>::iterator it(components_.begin());
@@ -333,10 +373,11 @@ string type_to_default_array(const std::string& indent, AST_Type* type, const st
   replace(temp.begin(), temp.end(), '[', '_');
   replace(temp.begin(), temp.end(), ']', '_');
   if (use_cxx11) {
-    string n = scoped(deepest_named_type(type)->name());
+    string n = scoped(dds_generator::deepest_named_type(type)->name());
     if (is_anonymous) {
       n = n.substr(0, n.rfind("::") + 2) + "AnonymousType_" + type->local_name()->get_string();
-      n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq") : n;
+      n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq")
+          : (fld_cls == AST_Decl::NT_map) ? (n + "_map") : n;
     }
     val += indent + "set_default(IDL::DistinctType<" + n + ", " + dds_generator::get_tag_name(n) + ">(" +
       (is_union ? "tmp" : name) + "));\n";
@@ -344,7 +385,8 @@ string type_to_default_array(const std::string& indent, AST_Type* type, const st
     string n = scoped(type->name());
     if (is_anonymous) {
       n = n.substr(0, n.rfind("::") + 2) + "_" + type->local_name()->get_string();
-      n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq") : n;
+      n = (fld_cls == AST_Decl::NT_sequence) ? (n + "_seq")
+          : (fld_cls == AST_Decl::NT_map) ? (n + "_map") : n;
     }
     val = indent + n + "_forany " + temp + "(const_cast<"
       + n + "_slice*>(" + (is_union ? "tmp": name) + "));\n";
@@ -357,7 +399,7 @@ string type_to_default_array(const std::string& indent, AST_Type* type, const st
 }
 
 string type_to_default(const std::string& indent, AST_Type* type, const string& name,
-  bool is_anonymous, bool is_union)
+  bool is_anonymous, bool is_union, bool is_optional)
 {
   AST_Type* actual_type = resolveActualType(type);
   Classification fld_cls = classify(actual_type);
@@ -369,7 +411,10 @@ string type_to_default(const std::string& indent, AST_Type* type, const string& 
     pre = "(";
     post = ")";
   }
-  if (fld_cls & (CL_STRUCTURE | CL_UNION)) {
+
+  if (is_optional) {
+    return indent + name + ".reset();\n";
+  } else if (fld_cls & (CL_STRUCTURE | CL_UNION)) {
     return indent + "set_default(" + name + (is_union ? "()" : "") + ");\n";
   } else if (fld_cls & CL_ARRAY) {
     return type_to_default_array(
@@ -379,12 +424,14 @@ string type_to_default(const std::string& indent, AST_Type* type, const string& 
     // Must be changed, if support for @default_literal is desired.
     AST_Enum* enu = dynamic_cast<AST_Enum*>(actual_type);
     UTL_ScopeActiveIterator i(enu, UTL_Scope::IK_decls);
-    AST_EnumVal *item = dynamic_cast<AST_EnumVal*>(i.item());
+    AST_EnumVal* item = dynamic_cast<AST_EnumVal*>(i.item());
     if (use_cxx11) {
       def_val = scoped(type->name()) + "::" + item->local_name()->get_string();
     } else {
       def_val = scoped(item->name());
     }
+  } else if (fld_cls & CL_MAP) {
+    return indent + name + ".clear();\n";
   } else if (fld_cls & CL_SEQUENCE) {
     string seq_resize_func = (use_cxx11) ? "resize" : "length";
     if (is_union) {
@@ -422,24 +469,31 @@ string type_to_default(const std::string& indent, AST_Type* type, const string& 
   return indent + name + pre + def_val + post + ";\n";
 }
 
-std::string field_type_name(AST_Field* field, AST_Type* field_type)
+std::string dds_generator::field_type_name(AST_Field* field, AST_Type* field_type)
 {
   if (!field_type) {
     field_type = field->field_type();
   }
   const Classification cls = classify(field_type);
-  const std::string name = (cls & CL_STRING) ?
-    string_type(cls) : scoped(deepest_named_type(field_type)->name());
+  std::string name;
+  if (cls & CL_STRING) {
+    name = string_type(cls);
+  } else if (cls & CL_PRIMITIVE) {
+    size_t size = 0;
+    name = to_cxx_type(deepest_named_type(field_type), size);
+  } else {
+    name = scoped(deepest_named_type(field_type)->name());
+  }
   if (field) {
     FieldInfo af(*field);
-    if (af.as_base_ && af.type_->anonymous()) {
+    if (af.anonymous()) {
       return af.scoped_type_;
     }
   }
   return name;
 }
 
-AST_Type* deepest_named_type(AST_Type* type)
+AST_Type* dds_generator::deepest_named_type(AST_Type* type)
 {
   AST_Type* consider = type;
   AST_Type* named_type = type;
@@ -448,4 +502,22 @@ AST_Type* deepest_named_type(AST_Type* type)
     consider = dynamic_cast<AST_Typedef*>(named_type)->base_type();
   }
   return named_type;
+}
+
+std::string dds_generator::call_gen_skip_over(AST_Type* type, const std::string& typeName, const std::string& tag)
+{
+  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+  std::string pre, post;
+  const Classification cls = classify(type);
+  if (!use_cxx11 && (cls & CL_ARRAY)) {
+    post = "_forany";
+  } else if (use_cxx11 && (cls & (CL_ARRAY | CL_SEQUENCE | CL_MAP))) {
+    pre = "IDL::DistinctType<";
+    post = ", " + tag + ">";
+  }
+  return
+    "    if (!gen_skip_over(strm, static_cast<" + pre + typeName + post
+    + "*>(0))) {\n"
+    "      return false;\n"
+    "    }\n";
 }

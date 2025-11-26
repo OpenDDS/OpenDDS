@@ -100,8 +100,7 @@ ShmemDataLink::open(const std::string& peer_address)
   VDBG_LVL((LM_DEBUG, "(%P|%t) ShmemDataLink::open: link[%@] open to peer %C\n",
             this, peer_address_.c_str()), 1);
 
-  assoc_resends_task_ = make_rch<SmPeriodicTask>(reactor_task_->interceptor(),
-    ref(*this), &ShmemDataLink::resend_association_msgs);
+  assoc_resends_task_ = make_rch<PeriodicAssocResend>(reactor_task_, ref(*this));
   ShmemInst_rch cfg = config();
   if (!cfg) {
     return false;
@@ -159,7 +158,7 @@ ShmemDataLink::send_association_msg(const GUID_t& local, const GUID_t& remote)
   Serializer ser(message.get(), encoding_unaligned_native);
   ser << remote;
   send_strategy_->link_released(false);
-  TransportControlElement* send_element = new TransportControlElement(move(message));
+  TransportControlElement* send_element = new TransportControlElement(OPENDDS_MOVE_NS::move(message));
   this->send_i(send_element, false);
 }
 
@@ -250,13 +249,6 @@ RcHandle<ShmemTransport>
 ShmemDataLink::transport() const
 {
   return dynamic_rchandle_cast<ShmemTransport>(impl());
-}
-
-ShmemAllocator*
-ShmemDataLink::peer_allocator()
-{
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, peer_alloc_mutex_, 0);
-  return peer_alloc_;
 }
 
 ShmemAllocator*

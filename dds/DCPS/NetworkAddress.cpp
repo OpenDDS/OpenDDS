@@ -8,7 +8,6 @@
 #include "NetworkAddress.h"
 
 #include "Hash.h"
-#include "LogAddr.h"
 
 #include <cstring>
 
@@ -179,12 +178,12 @@ void NetworkAddress::to_addr(ACE_INET_Addr& addr) const
   addr.set_addr(const_cast<ip46*>(&inet_addr_), sizeof (inet_addr_));
 }
 
-ACE_INT16 NetworkAddress::get_type() const
+ACE_UINT16 NetworkAddress::get_type() const
 {
-  return static_cast<ACE_INT16>(inet_addr_.in4_.sin_family);
+  return inet_addr_.in4_.sin_family;
 }
 
-void NetworkAddress::set_type(ACE_INT16 type)
+void NetworkAddress::set_type(ACE_UINT16 type)
 {
   inet_addr_.in4_.sin_family = type;
 }

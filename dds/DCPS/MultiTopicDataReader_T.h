@@ -8,7 +8,9 @@
 #ifndef OPENDDS_DCPS_MULTITOPICDATAREADER_T_H
 #define OPENDDS_DCPS_MULTITOPICDATAREADER_T_H
 
-#ifndef OPENDDS_NO_MULTI_TOPIC
+#include "Definitions.h"
+
+#if OPENDDS_CONFIG_MULTI_TOPIC
 
 #include "MultiTopicDataReaderBase.h"
 
@@ -30,7 +32,7 @@ public:
 
   MultiTopicDataReader_T() {}
 
-  void init_typed(DataReaderEx* dr);
+  void init_typed(DDS::DataReader* dr);
   const MetaStruct& getResultingMeta();
   void incoming_sample(void* sample, const DDS::SampleInfo& info,
                        const char* topic, const MetaStruct& meta);
@@ -193,9 +195,7 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#ifdef ACE_TEMPLATES_REQUIRE_SOURCE
 #include "MultiTopicDataReader_T.cpp"
-#endif
 
 #endif
 #endif

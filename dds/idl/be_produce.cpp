@@ -132,7 +132,9 @@ string to_macro(const char* fn)
   ACE_UINT64 msec;
   now.msec(msec);
 
-  msec += ACE_OS::getpid() + (size_t) ACE_OS::thr_self();
+  msec += static_cast<ACE_UINT64>(ACE_OS::getpid()) +
+    // On some platforms, the type of ACE_thread_t is a pointer instead of an integer:
+   (ACE_UINT64) ACE_OS::thr_self();
 
   unsigned int seed = static_cast<unsigned int>(msec);
 
@@ -142,7 +144,7 @@ string to_macro(const char* fn)
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
   for (unsigned int n = 0; n < NUM_CHARS; ++n) {
-    ret += alphanum[ACE_OS::rand_r(&seed) % (sizeof(alphanum) - 1)];
+    ret += alphanum[ACE_OS::rand_r(&seed) % static_cast<int>(sizeof(alphanum) - 1)];
   }
 
   return ret;
@@ -200,6 +202,7 @@ void postprocess(const char* fn, ostringstream& content,
       if (be_global->language_mapping() == BE_GlobalData::LANGMAP_FACE_CXX ||
           be_global->language_mapping() == BE_GlobalData::LANGMAP_SP_CXX) {
         out <<
+          "#include <dds/DCPS/Definitions.h>\n\n"
           "#include <tao/orbconf.h>\n"
           "#include <tao/Basic_Types_IDLv4.h>\n"
           "TAO_BEGIN_VERSIONED_NAMESPACE_DECL\n"
@@ -252,10 +255,7 @@ void postprocess(const char* fn, ostringstream& content,
   case BE_GlobalData::STREAM_IDL: {
     macrofied = to_macro(fn);
     out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';
-
-#ifdef ACE_HAS_CDR_FIXED
     out << "#define __OPENDDS_IDL_HAS_FIXED\n";
-#endif
 
     string filebase(be_global->filename());
     const size_t idx = filebase.find_last_of("/\\"); // allow either slash
@@ -276,7 +276,7 @@ void postprocess(const char* fn, ostringstream& content,
     // to make namespaces with names based on the file instead.
     std::string prefix = to_macro(fn);
     for (size_t i = 0; i < prefix.size(); ++i) {
-      prefix[i] = tolower(prefix[i]);
+      prefix[i] = static_cast<char>(tolower(prefix[i]));
     }
     out <<
       "\n"

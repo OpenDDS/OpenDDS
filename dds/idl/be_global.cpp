@@ -49,6 +49,7 @@ BE_GlobalData::BE_GlobalData()
   , suppress_idl_(false)
   , suppress_typecode_(false)
   , suppress_xtypes_(false)
+  , gen_typeobject_override_(false)
   , no_default_gen_(false)
   , generate_itl_(false)
   , generate_value_reader_writer_(true)
@@ -66,6 +67,7 @@ BE_GlobalData::BE_GlobalData()
   , default_try_construct_(tryconstructfailaction_discard)
   , old_typeobject_encoding_(false)
   , old_typeobject_member_order_(false)
+  , typeobject_stream_(0)
 {
   default_data_representation_.set_all(true);
 
@@ -76,6 +78,7 @@ BE_GlobalData::BE_GlobalData()
 
 BE_GlobalData::~BE_GlobalData()
 {
+  delete typeobject_stream_;
 }
 
 void
@@ -379,6 +382,8 @@ BE_GlobalData::parse_args(long& i, char** av)
       xtypes_complete(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-Gequality")) {
       generate_equality(true);
+    } else if (0 == ACE_OS::strcasecmp(av[i], "-Gtypeobject")) {
+      gen_typeobject_override(true);
     } else {
       invalid_option(av[i]);
     }
@@ -486,6 +491,8 @@ BE_GlobalData::parse_args(long& i, char** av)
       old_typeobject_encoding_ = true;
     } else if (!strcmp(av[i], "--old-typeobject-member-order")) {
       old_typeobject_member_order_ = true;
+    } else if (!strcmp(av[i], "--append-typeobjects")) {
+      typeobject_stream_ = new std::ofstream(av[++i], std::ios::app);
     } else {
       invalid_option(av[i]);
     }
@@ -543,9 +550,10 @@ void
 BE_GlobalData::set_inc_paths(const char* cmdline)
 {
   ACE_ARGV argv(ACE_TEXT_CHAR_TO_TCHAR(cmdline), false);
-  for (int i = 0; i < argv.argc(); ++i) {
+  const size_t argc = static_cast<size_t>(argv.argc());
+  for (size_t i = 0; i < argc; ++i) {
     string arg = ACE_TEXT_ALWAYS_CHAR(argv[i]);
-    if (arg == "-I" && i + 1 < argv.argc()) {
+    if (arg == "-I" && i + 1 < argc) {
       add_inc_path(ACE_TEXT_ALWAYS_CHAR(argv[++i]));
     } else if (arg.substr(0, 2) == "-I") {
       add_inc_path(arg.c_str() + 2);
@@ -980,6 +988,26 @@ TryConstructFailAction BE_GlobalData::union_discriminator_try_construct(AST_Unio
   return try_construct_annotation->union_value(node);
 }
 
+bool BE_GlobalData::value(AST_Decl* node, ACE_INT32& value) const
+{
+  ValueAnnotation* annotation = dynamic_cast<ValueAnnotation*>(builtin_annotations_["::@value"]);
+  return annotation->node_value_exists(node, value);
+}
+
+TryConstructFailAction BE_GlobalData::map_key_try_construct(AST_Map* node)
+{
+  TryConstructAnnotation* try_construct_annotation =
+    dynamic_cast<TryConstructAnnotation*>(builtin_annotations_["::@try_construct"]);
+  return try_construct_annotation->map_key(node);
+}
+
+TryConstructFailAction BE_GlobalData::map_value_try_construct(AST_Map* node)
+{
+  TryConstructAnnotation* try_construct_annotation =
+    dynamic_cast<TryConstructAnnotation*>(builtin_annotations_["::@try_construct"]);
+  return try_construct_annotation->map_value(node);
+}
+
 OpenDDS::DataRepresentation BE_GlobalData::data_representations(
   AST_Decl* node) const
 {
@@ -1051,7 +1079,7 @@ OpenDDS::XTypes::MemberId BE_GlobalData::get_id(AST_Field* field)
     return pos->second;
   }
   be_util::misc_error_and_abort("Could not get member id for field");
-  return -1;
+  return OpenDDS::XTypes::MEMBER_ID_INVALID;
 }
 
 bool BE_GlobalData::dynamic_data_adapter(AST_Decl* node) const

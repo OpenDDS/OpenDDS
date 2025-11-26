@@ -10,12 +10,10 @@
 
 #include "DataReaderListenerImpl.h"
 
-using OpenDDS::Model::NullReaderListener;
-
 class SeqReaderListenerImpl : public DataReaderListenerImpl
 {
 public:
-  SeqReaderListenerImpl();
+  SeqReaderListenerImpl(DistributedConditionSet_rch dcs);
 
 protected:
   virtual void take_samples(

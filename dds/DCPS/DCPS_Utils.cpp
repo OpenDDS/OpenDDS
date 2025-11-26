@@ -15,7 +15,7 @@
 #include <ace/ACE.h> /* For ACE::wild_match() */
 #include <ace/OS_NS_string.h>
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 #  include "dds/DdsSecurityCoreC.h"
 #endif
 
@@ -55,7 +55,7 @@ const char* retcode_to_string(DDS::ReturnCode_t value)
     return "No data";
   case DDS::RETCODE_ILLEGAL_OPERATION:
     return "Illegal operation";
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   case DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY:
     return "Not allowed by security";
 #endif
@@ -409,7 +409,7 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
   return compatible;
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 using OpenDDS::DCPS::operator==;
 #endif
 bool should_check_association_upon_change(const DDS::DataReaderQos & qos1,

@@ -10,21 +10,17 @@
 #include "CommonIoStatsReportHelper.h"
 
 #include <dds/DCPS/JsonValueWriter.h>
+#include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/Statistics.h>
 
 namespace RtpsRelay {
 
 class RelayStatisticsReporter {
 public:
   RelayStatisticsReporter(const Config& config,
-                          RelayStatisticsDataWriter_var writer)
-    : config_(config)
-    , writer_(writer)
-  {
-    DDS::Topic_var topic = writer_->get_topic();
-    topic_name_ = topic->get_name();
-    log_relay_statistics_.relay_id(config.relay_id());
-    publish_relay_statistics_.relay_id(config.relay_id());
-  }
+                          RelayStatisticsDataWriter_var writer);
+
+  ~RelayStatisticsReporter();
 
   void input_message(size_t byte_count,
                      const OpenDDS::DCPS::TimeDuration& time,
@@ -183,14 +179,6 @@ public:
     report(guard, now);
   }
 
-  void spdp_replay_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    log_relay_statistics_.spdp_replay_sub_count() = count;
-    publish_relay_statistics_.spdp_replay_sub_count() = count;
-    report(guard, now);
-  }
-
   void relay_address_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -223,14 +211,6 @@ public:
     report(guard, now);
   }
 
-  void spdp_replay_pub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    log_relay_statistics_.spdp_replay_pub_count() = count;
-    publish_relay_statistics_.spdp_replay_pub_count() = count;
-    report(guard, now);
-  }
-
   void admission_deferral_count(const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -255,12 +235,157 @@ public:
     report(guard, now);
   }
 
+  void total_client_ips(size_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto size32 = static_cast<uint32_t>(size);
+    log_relay_statistics_.total_client_ips(size32);
+    publish_relay_statistics_.total_client_ips(size32);
+    report(guard, now);
+  }
+
+  void total_client_ports(size_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto size32 = static_cast<uint32_t>(size);
+    log_relay_statistics_.total_client_ports(size32);
+    publish_relay_statistics_.total_client_ports(size32);
+    report(guard, now);
+  }
+
   void rejected_address_map_size(uint32_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     log_relay_statistics_.rejected_address_map_size(std::max(log_relay_statistics_.rejected_address_map_size(), size));
     publish_relay_statistics_.rejected_address_map_size(std::max(publish_relay_statistics_.rejected_address_map_size(), size));
     report(guard, now);
+  }
+
+  void deactivation_queue_size(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.deactivation_queue_size() = count32;
+    publish_relay_statistics_.deactivation_queue_size() = count32;
+    report(guard, now);
+  }
+
+  void expiration_queue_size(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.expiration_queue_size() = count32;
+    publish_relay_statistics_.expiration_queue_size() = count32;
+    report(guard, now);
+  }
+
+  void admission_queue_size(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.admission_queue_size() = count32;
+    publish_relay_statistics_.admission_queue_size() = count32;
+    report(guard, now);
+  }
+
+  void partition_slots(size_t used, size_t free)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto used32 = static_cast<uint32_t>(used),
+      free32 = static_cast<uint32_t>(free);
+    log_relay_statistics_.client_partitions().slots() = used32;
+    publish_relay_statistics_.client_partitions().slots() = used32;
+    log_relay_statistics_.client_partitions().free_slots() = free32;
+    publish_relay_statistics_.client_partitions().free_slots() = free32;
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
+  }
+
+  void partitions(size_t count)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.client_partitions().count() = count32;
+    publish_relay_statistics_.client_partitions().count() = count32;
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
+  }
+
+  void partition_index_cache(size_t count)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.client_partitions().partition_index_cache() = count32;
+    publish_relay_statistics_.client_partitions().partition_index_cache() = count32;
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
+  }
+
+  void partition_index_nodes(size_t count)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.client_partitions().partition_index_nodes() = count32;
+    publish_relay_statistics_.client_partitions().partition_index_nodes() = count32;
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
+  }
+
+  void partition_guids(size_t count_main, size_t count_cache)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count_main),
+      cache32 = static_cast<uint32_t>(count_cache);
+    log_relay_statistics_.client_partitions().guids() = count32;
+    publish_relay_statistics_.client_partitions().guids() = count32;
+    log_relay_statistics_.client_partitions().guids_cache() = cache32;
+    publish_relay_statistics_.client_partitions().guids_cache() = cache32;
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
+  }
+
+  void relay_partition_addresses(size_t count)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.relay_partitions().addresses() = count32;
+    publish_relay_statistics_.relay_partitions().addresses() = count32;
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
+  }
+
+  void relay_partition_index_cache(size_t count)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.relay_partitions().partition_index_cache() = count32;
+    publish_relay_statistics_.relay_partitions().partition_index_cache() = count32;
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
+  }
+
+  void relay_partition_index_nodes(size_t count)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.relay_partitions().partition_index_nodes() = count32;
+    publish_relay_statistics_.relay_partitions().partition_index_nodes() = count32;
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
+  }
+
+  void relay_partition_slots(size_t count)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.relay_partitions().slots() = count32;
+    publish_relay_statistics_.relay_partitions().slots() = count32;
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
+  }
+
+  void admission_state_changed(bool admitting)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (admitting) {
+      ++log_relay_statistics_.transitions_to_admitting();
+      ++publish_relay_statistics_.transitions_to_admitting();
+    } else {
+      ++log_relay_statistics_.transitions_to_nonadmitting();
+      ++publish_relay_statistics_.transitions_to_nonadmitting();
+    }
+    report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
   }
 
   void report()
@@ -270,7 +395,6 @@ public:
   }
 
 private:
-
   void report(ACE_Guard<ACE_Thread_Mutex>& guard,
               const OpenDDS::DCPS::MonotonicTimePoint& now,
               bool force = false)
@@ -279,52 +403,20 @@ private:
     publish_report(guard, now, force);
   }
 
-  void log_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
-                  bool force)
-  {
-    if (!log_helper_.prepare_report(log_relay_statistics_, now, force, config_.log_relay_statistics())) {
-      return;
-    }
-
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name_.in(), OpenDDS::DCPS::to_json(log_relay_statistics_).c_str()));
-
-    log_helper_.reset(log_relay_statistics_, now);
-    log_relay_statistics_.new_address_count(0);
-    log_relay_statistics_.expired_address_count(0);
-    log_relay_statistics_.admission_deferral_count(0);
-    log_relay_statistics_.max_ips_per_client(0);
-  }
-
+  void log_report(const OpenDDS::DCPS::MonotonicTimePoint& now, bool force);
   void publish_report(ACE_Guard<ACE_Thread_Mutex>& guard,
                       const OpenDDS::DCPS::MonotonicTimePoint& now,
-                      bool force)
-  {
-    if (!publish_helper_.prepare_report(publish_relay_statistics_, now, force, config_.publish_relay_statistics())) {
-      return;
-    }
+                      bool force);
 
-    const auto writer_copy = writer_;
-    const auto stats_copy = publish_relay_statistics_;
+  void get_opendds_stats(std::vector<OpenDDSModuleStatistics>& out);
+  static void get_process_stats(RelayStatistics& out);
 
-    publish_helper_.reset(publish_relay_statistics_, now);
-    publish_relay_statistics_.new_address_count(0);
-    publish_relay_statistics_.expired_address_count(0);
-    publish_relay_statistics_.admission_deferral_count(0);
-    publish_relay_statistics_.max_ips_per_client(0);
-
-    guard.release();
-
-    const auto ret = writer_copy->write(stats_copy, DDS::HANDLE_NIL);
-    if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
-        "RelayStatisticsReporter::publish_report failed to write relay statistics\n"));
-    }
-  }
+  static void log_json(const std::string& label, const std::string& json);
 
   mutable ACE_Thread_Mutex mutex_;
   const Config& config_;
 
-  typedef CommonIoStatsReportHelper<RelayStatistics> Helper;
+  using Helper = CommonIoStatsReportHelper<RelayStatistics>;
 
   RelayStatistics log_relay_statistics_;
   Helper log_helper_;
@@ -333,7 +425,9 @@ private:
   Helper publish_helper_;
 
   RelayStatisticsDataWriter_var writer_;
-  CORBA::String_var topic_name_;
+  std::string topic_name_;
+
+  OpenDDS::DCPS::StatisticsDataReader_rch internal_reader_;
 };
 
 }

@@ -6,16 +6,17 @@
 #ifndef OPENDDS_DCPS_GUIDUTILS_H
 #define OPENDDS_DCPS_GUIDUTILS_H
 
-#include "dcps_export.h"
+#include "Definitions.h"
+#include "Hash.h"
 #include "PoolAllocator.h"
 #include "Serializer.h"
-#include "Hash.h"
 #include "Util.h"
+#include "dcps_export.h"
 
 #include <dds/DdsDcpsGuidC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 #  include <iosfwd>
 #endif
 #include <cstring>
@@ -114,7 +115,7 @@ typedef GuidSet RepoIdSet;
 
 const size_t guid_cdr_size = 16;
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 inline bool
 operator==(const GUID_t& lhs, const GUID_t& rhs)
 {
@@ -140,7 +141,7 @@ bool equal_guid_prefixes(const GUID_t& lhs, const GUID_t& rhs)
   return equal_guid_prefixes(lhs.guidPrefix, rhs.guidPrefix);
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 inline bool
 operator==(const EntityId_t& lhs, const EntityId_t& rhs)
 {
@@ -172,7 +173,7 @@ to_string(const GUID_t& guid);
 OpenDDS_Dcps_Export OPENDDS_STRING
 to_string(const EntityId_t& entityId);
 
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !OPENDDS_CONFIG_SAFETY_PROFILE
 // Serialize to ASCII Hex string: "xxxx.xxxx.xxxx.xxxx"
 OpenDDS_Dcps_Export std::ostream&
 operator<<(std::ostream& os, const GUID_t& rhs);
@@ -259,9 +260,9 @@ struct OpenDDS_Dcps_Export GuidPair {
   GUID_t local;
   GUID_t remote;
 
-  GuidPair(const GUID_t& local, const GUID_t& remote)
-  : local(local)
-  , remote(remote)
+  GuidPair(const GUID_t& a_local, const GUID_t& a_remote)
+  : local(a_local)
+  , remote(a_remote)
   {
   }
 

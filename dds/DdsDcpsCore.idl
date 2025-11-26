@@ -11,10 +11,11 @@
 #include "tao/ShortSeq.pidl"
 #include "tao/StringSeq.pidl"
 #include "tao/LongSeq.pidl"
+#include <dds/OpenDDSConfigWrapper.idl>
 
 #define HANDLE_TYPE_NATIVE long
 
-#if defined __OPENDDS_IDL && !defined DDS_HAS_MINIMUM_BIT
+#if defined __OPENDDS_IDL && OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  define BUILT_IN_TOPIC_TYPE @topic
 #  define BUILT_IN_TOPIC_KEY @key
 #else

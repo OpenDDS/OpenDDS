@@ -16,7 +16,6 @@
 #include "GuidConverter.h"
 #include "Marked_Default_Qos.h"
 #include "TopicImpl.h"
-#include "MonitorFactory.h"
 #include "transport/framework/ReceivedDataSample.h"
 #include "transport/framework/DataLinkSet.h"
 #include "transport/framework/TransportImpl.h"
@@ -37,7 +36,7 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t      handle,
   default_datawriter_qos_(TheServiceParticipant->initial_DataWriterQos()),
   listener_mask_(mask),
   listener_(DDS::PublisherListener::_duplicate(a_listener)),
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
   change_depth_(0),
 #endif
   domain_id_(participant->get_domain_id()),
@@ -46,9 +45,7 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t      handle,
   sequence_number_(),
   reverse_pi_lock_(pi_lock_),
   publisher_id_(id)
-{
-  monitor_.reset(TheServiceParticipant->monitor_factory_->create_publisher_monitor(this));
-}
+{}
 
 PublisherImpl::~PublisherImpl()
 {
@@ -299,10 +296,6 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
     dw_servant->cleanup();
   }
 
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
-
   RcHandle<DomainParticipantImpl> participant = this->participant_.lock();
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
@@ -470,10 +463,10 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
         for (PublicationMap::iterator iter = publication_map_.begin();
             iter != publication_map_.end();
             ++iter) {
-          DDS::DataWriterQos qos = iter->second->qos_;
+          DDS::DataWriterQos dw_qos = iter->second->qos_;
           GUID_t id = iter->second->get_guid();
           std::pair<DwIdToQosMap::iterator, bool> pair =
-              idToQosMap.insert(DwIdToQosMap::value_type(id, qos));
+              idToQosMap.insert(DwIdToQosMap::value_type(id, dw_qos));
 
           if (!pair.second) {
             if (DCPS_debug_level > 0) {
@@ -624,7 +617,7 @@ PublisherImpl::resume_publications()
   return DDS::RETCODE_OK;
 }
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 
 DDS::ReturnCode_t
 PublisherImpl::begin_coherent_changes()
@@ -755,7 +748,7 @@ PublisherImpl::end_coherent_changes()
   return DDS::RETCODE_OK;
 }
 
-#endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
+#endif
 
 DDS::ReturnCode_t
 PublisherImpl::wait_for_acknowledgments(
@@ -877,10 +870,6 @@ PublisherImpl::enable()
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
-
   this->set_enabled();
 
   if (qos_.entity_factory.autoenable_created_entities) {
@@ -946,10 +935,6 @@ PublisherImpl::writer_enabled(const char*     topic_name,
           LogGuid(publication_id).c_str()));
     }
     return DDS::RETCODE_ERROR;
-  }
-
-  if (this->monitor_) {
-    this->monitor_->report();
   }
 
   return DDS::RETCODE_OK;

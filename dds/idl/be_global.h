@@ -40,19 +40,12 @@ class AST_Annotation_Decl;
 
 class BE_GlobalData {
 public:
-  // = TITLE
-  //    BE_GlobalData
-  //
-  // = DESCRIPTION
-  //    Storage of global data specific to the compiler back end
-  //
+
   BE_GlobalData();
 
   virtual ~BE_GlobalData();
 
   // Data accessors.
-
-  const char* holding_scope_name() const;
 
   void destroy();
   // Cleanup function.
@@ -170,6 +163,9 @@ public:
   bool suppress_typecode() const { return suppress_typecode_; }
   bool suppress_xtypes() const { return suppress_xtypes_; }
 
+  bool gen_typeobject_override() const { return gen_typeobject_override_; }
+  void gen_typeobject_override(bool value) { gen_typeobject_override_ = value; }
+
   static bool writeFile(const char* fileName, const std::string& content);
 
   /**
@@ -179,13 +175,6 @@ public:
    * Does not check for specific types of types (struct vs array).
    */
   bool is_topic_type(AST_Decl* node);
-
-  /**
-   * Nested property of the root module. Assuming there are no annotations, all
-   * potential topic types inherit this value. True by default unless
-   * --no-default-nested was passed.
-   */
-  bool root_default_nested() const;
 
   /**
    * If node has the key annotation, this sets value to the key annotation
@@ -236,6 +225,11 @@ public:
   TryConstructFailAction array_element_try_construct(AST_Array* node);
   TryConstructFailAction union_discriminator_try_construct(AST_Union* node);
 
+  bool value(AST_Decl* node, ACE_INT32& value) const;
+
+  TryConstructFailAction map_key_try_construct(AST_Map* node);
+  TryConstructFailAction map_value_try_construct(AST_Map* node);
+
   OpenDDS::DataRepresentation data_representations(AST_Decl* node) const;
 
   OpenDDS::XTypes::MemberId compute_id(AST_Structure* stru, AST_Field* field, AutoidKind auto_id,
@@ -243,6 +237,8 @@ public:
   OpenDDS::XTypes::MemberId get_id(AST_Field* field);
 
   bool is_nested(AST_Decl* node);
+
+  std::ostream* typeobject_stream() const { return typeobject_stream_; }
 
   bool default_enum_extensibility_zero() const
   {
@@ -261,6 +257,7 @@ private:
   const char* filename_;
 
   bool java_, suppress_idl_, suppress_typecode_, suppress_xtypes_,
+    gen_typeobject_override_,
     no_default_gen_, generate_itl_,
     generate_value_reader_writer_,
     generate_xtypes_complete_, face_ts_, generate_equality_;
@@ -289,6 +286,7 @@ private:
   GlobalMemberIdCollisionMap member_id_collision_map_;
   bool old_typeobject_encoding_;
   bool old_typeobject_member_order_;
+  std::ostream* typeobject_stream_;
 
   bool is_default_nested(UTL_Scope* scope);
   AutoidKind scoped_autoid(UTL_Scope* scope) const;

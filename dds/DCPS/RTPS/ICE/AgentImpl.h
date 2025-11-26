@@ -5,7 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifdef OPENDDS_SECURITY
+#include "dds/DCPS/Definitions.h"
+
+#if OPENDDS_CONFIG_SECURITY
 #ifndef OPENDDS_DCPS_RTPS_ICE_AGENTIMPL_H
 #define OPENDDS_DCPS_RTPS_ICE_AGENTIMPL_H
 
@@ -17,10 +19,10 @@
 #include "Ice.h"
 #include "Task.h"
 
-#include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/InternalDataReader.h"
-#include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/SporadicTask.h"
+
 #include "dds/Versioned_Namespace.h"
 
 #include <ace/Time_Value.h>
@@ -36,7 +38,6 @@ class AgentImpl
   : public virtual Agent
   , public virtual DCPS::ShutdownListener
   , public virtual DCPS::InternalDataReaderListener<DCPS::NetworkInterfaceAddress>
-  , public DCPS::ReactorInterceptor
 {
 public:
   AgentImpl();
@@ -147,9 +148,10 @@ private:
   };
   std::priority_queue<Item> tasks_;
   DCPS::MonotonicTimePoint last_execute_;
+  DCPS::RcHandle<DCPS::SporadicTask> task_task_;
 
   bool reactor_is_shut_down() const;
-  int handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/);
+  void process_tasks(const DCPS::MonotonicTimePoint& now);
 
   void check_invariants() const;
 };
@@ -160,4 +162,4 @@ private:
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* OPENDDS_RTPS_ICE_AGENT_IMPL_H */
-#endif /* OPENDDS_SECURITY */
+#endif

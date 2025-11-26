@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -14,6 +12,7 @@
 #include <dds/DCPS/NetworkAddress.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
 #include <dds/DCPS/RTPS/ICE/Ice.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 #include <dds/DCPS/transport/framework/TransportInst.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -86,33 +85,67 @@ public:
   void send_delay(const TimeDuration& sd);
   TimeDuration send_delay() const;
 
-  virtual int load(ACE_Configuration_Heap& cf,
-                   ACE_Configuration_Section_Key& sect);
-
   /// Diagnostic aid.
-  virtual OPENDDS_STRING dump_to_str() const;
+  virtual OPENDDS_STRING dump_to_str(DDS::DomainId_t domain) const;
 
   bool is_reliable() const { return true; }
   bool requires_cdr_encapsulation() const { return true; }
 
-  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const;
+  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info,
+                                  ConnectionInfoFlags flags,
+                                  DDS::DomainId_t domain,
+                                  DomainParticipantImpl* participant);
   const TransportBLOB* get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) const;
 
+  RTPS::PortMode port_mode() const;
+  void port_mode(RTPS::PortMode value);
+
+  void pb(DDS::UInt16 port_base);
+  DDS::UInt16 pb() const;
+
+  void dg(DDS::UInt16 domain_gain);
+  DDS::UInt16 dg() const;
+
+  void pg(DDS::UInt16 participant_gain);
+  DDS::UInt16 pg() const;
+
+  void d2(DDS::UInt16 multicast_offset);
+  DDS::UInt16 d2() const;
+
+  void d3(DDS::UInt16 unicast_offset);
+  DDS::UInt16 d3() const;
+
+  bool set_multicast_port(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const;
+  bool set_unicast_port(DCPS::NetworkAddress& addr, bool& fixed_port,
+    DDS::DomainId_t domain, DDS::UInt16 part_id) const;
+
+  bool multicast_address(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const;
   void multicast_group_address(const NetworkAddress& addr);
-  NetworkAddress multicast_group_address() const;
+  NetworkAddress multicast_group_address(DDS::DomainId_t domain) const;
+
+  void init_participant_port_id(DDS::UInt16 part_id);
+  DDS::UInt16 init_participant_port_id() const;
 
   void local_address(const NetworkAddress& addr);
   NetworkAddress local_address() const;
+  bool unicast_address(DCPS::NetworkAddress& addr, bool& fixed_port,
+    DDS::DomainId_t domain, DDS::UInt16 part_id) const;
 
   void advertised_address(const NetworkAddress& addr);
   NetworkAddress advertised_address() const;
 
 #ifdef ACE_HAS_IPV6
+  bool ipv6_multicast_address(DCPS::NetworkAddress& addr, DDS::DomainId_t domain) const;
   void ipv6_multicast_group_address(const NetworkAddress& addr);
-  NetworkAddress ipv6_multicast_group_address() const;
+  NetworkAddress ipv6_multicast_group_address(DDS::DomainId_t domain) const;
+
+  void ipv6_init_participant_port_id(DDS::UInt16 part_id);
+  DDS::UInt16 ipv6_init_participant_port_id() const;
 
   void ipv6_local_address(const NetworkAddress& addr);
   NetworkAddress ipv6_local_address() const;
+  bool ipv6_unicast_address(DCPS::NetworkAddress& addr, bool& fixed_port,
+    DDS::DomainId_t domain, DDS::UInt16 part_id) const;
 
   void ipv6_advertised_address(const NetworkAddress& addr);
   NetworkAddress ipv6_advertised_address() const;
@@ -130,12 +163,19 @@ public:
   NetworkAddress stun_server_address() const;
 
   void update_locators(const GUID_t& remote_id,
-                       const TransportLocatorSeq& locators);
+                       const TransportLocatorSeq& locators,
+                       DDS::DomainId_t domain,
+                       DomainParticipantImpl* participant);
 
   void get_last_recv_locator(const GUID_t& /*remote_id*/,
-                             TransportLocator& /*locators*/);
+                             const GuidVendorId_t& /*vendor_id*/,
+                             TransportLocator& /*locators*/,
+                             DDS::DomainId_t domain,
+                             DomainParticipantImpl* participant);
 
-  void append_transport_statistics(TransportStatisticsSequence& seq);
+  void append_transport_statistics(TransportStatisticsSequence& seq,
+                                   DDS::DomainId_t domain,
+                                   DomainParticipantImpl* participant);
 
 private:
   friend class RtpsUdpType;
@@ -144,16 +184,13 @@ private:
   explicit RtpsUdpInst(const OPENDDS_STRING& name,
                        bool is_template);
 
-  TransportImpl_rch new_impl();
+  TransportImpl_rch new_impl(DDS::DomainId_t domain,
+                             DomainParticipantImpl* participant);
 
   friend class RTPS::Sedp;
   friend class RtpsUdpTransport;
   TransportReceiveListener_rch opendds_discovery_default_listener_;
   GUID_t opendds_discovery_guid_;
-  NetworkAddress actual_local_address_;
-#ifdef ACE_HAS_IPV6
-  NetworkAddress ipv6_actual_local_address_;
-#endif
 };
 
 } // namespace DCPS

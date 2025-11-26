@@ -1,0 +1,2586 @@
+Mon May 05 18:40:04 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 9f2a9e8dd4e750de4dd01f849e800cda46d400ef
+
+          Merge pull request #4998 from OpenDDS/workflows/update-ace-tao
+
+          Update ACE/TAO to 8.0.3
+
+Mon May 05 18:39:40 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 6a557053172ccf5acb7dda13fdc85512e00c4f98
+
+          Merge pull request #4997 from iguessthislldo/igtd/sphinx-gha-anno
+
+          GHA Annotations and Better Link Check for Sphinx
+
+Mon May 05 18:39:12 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 72b783012944b5d8a7d0a7785ec1d3fd2e72b5e5
+
+          Merge pull request #4984 from jrw972/dev-guide-interoperability
+
+          DevGuide lacks section on interoperability
+
+Mon May 05 18:35:56 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit a3950ccbfc3d8ee19c8c61cc9d9c47dd9508f813
+
+          Merge pull request #4973 from
+          iguessthislldo/igtd/cmake-install-testing
+
+          Fixes for using CMake with Installed OpenDDS
+
+Mon May 05 17:16:29 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit f67f62da70829ee531f08c1f653c27679cd4a93a
+
+          Merge pull request #4996 from mitza-oci/monitor-namespace
+
+          Use the Monitor namespace in OpenDDS for the monitor library
+
+Mon May 05 13:36:09 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit e52516bb6f38058cf55a870cc96737ff9c8509ff
+
+        * tools/monitor/MonitorDataStorage.cpp:
+        * tools/monitor/MonitorDataStorage.h:
+        * tools/monitor/MonitorDataStorage.inl:
+        * tools/monitor/MonitorTask.cpp:
+        * tools/monitor/Options.cpp:
+
+          Updated Monitor GUI
+
+Sun May 04 12:36:53 UTC 2025  Johnny Willemsen  <johnny@jwillemsen.nl>
+        commit 274d5409e9d5050e03afebf40477f15094f56fe4
+
+        * acetao.ini:
+        * docs/news.d/automated-update-ace8tao4.rst:
+
+          Update ACE/TAO to 8.0.3
+
+          Updated:
+          - ACE 8/TAO 4 from 8.0.2 to
+          [8.0.3](https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-8_0_3).
+
+Sun May 04 04:27:41 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 4d61e8d0d52b88e3c514f45156ebea87bde3b98f
+
+        * NEWS.md:
+        * docs/build.py:
+        * docs/conf.py:
+        * docs/news.d/_releases/v3.24.2.rst:
+        * docs/news.d/_releases/v3.26.0.rst:
+        * docs/news.d/_releases/v3.28.0.rst:
+        * docs/sphinx_extensions/links.py:
+        * docs/sphinx_extensions/newsd.py:
+        * docs/sphinx_extensions/opendds_logging.py:
+
+          GHA Annotations and Better Link Check for Sphinx
+
+          This should make Sphinx output the correct annotation in RST
+          files in
+          the PR in most situations except for when the content causing the
+          error
+          is in a news fragment. News fragments are used to generate two
+          files at
+          runtime, so the source info that Sphinx has for these files
+          doesn't
+          create the correct annotation in the PR.
+
+          Also tried to improve link checking so it fails less often. This
+          includes:
+
+          - Ignoring `:ghfile:` links. It's not really needed because
+          they're
+          checked locally. There's also a lot of them so it takes a while
+          to
+          check them and the there's a greater chance for something going
+          wrong.
+          - Ignoring links that fail with 409 HTTP status code. They happen
+          a lot.
+          - Turning redirects on GitHub PR and issue links into errors
+          because
+          that means something is wrong with the link.
+
+Sat May 03 01:07:11 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 1b1df34300b2cc8ef77e64f9226cfc36fadc287f
+
+        * .github/workflows/build_and_test.yml:
+
+          OpenDDS Aritifacts Not Built on D drive
+
+          Thought I needed an almost clean repo, but I need the whole repo.
+          Clean
+          test directories used for CMake tests. Please let this work.
+
+Fri May 02 23:29:27 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit bfe4172a5d4b729ca26d7d23daa75ac1523fd5a5
+
+        * .github/workflows/build_and_test.yml:
+        * cmake/init.cmake:
+
+          Try OpenDDS_ROOT
+
+Fri May 02 21:33:09 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit f0740c9061ba2d6b6f92429f9d1b493c6a13d0f0
+
+        * .github/workflows/build_and_test.yml:
+        * cmake/OpenDDSConfig.cmake:
+        * cmake/ace_group.cmake:
+        * cmake/import_common.cmake:
+        * cmake/init.cmake:
+        * cmake/tao_group.cmake:
+        * tests/cmake/install/CMakeLists.txt:
+        * tests/cmake/install/library/CMakeLists.txt:
+
+          Try to Fix CI
+
+          Also:
+          - Give more information about `config.cmake`
+          - Exit immediately if `init.cmake` failed
+          - Fix policy max
+          - Some misc. tweaks
+          - Removed unused variable
+
+Fri May 02 20:36:15 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 03e55c4eace513453390720decf999b532d82783
+
+        * tests/DCPS/Monitor/DPMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DRMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DRPerMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DWMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DWPerMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/PublisherMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/SPMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/SubscriberMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/TopicMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/TransportMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/monitor.cpp:
+
+          Updated monitor test
+
+Fri May 02 16:01:24 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit b685a3c59c4e49ea7d9a373200bd079c049cb171
+
+        * dds/monitor/DPMonitorImpl.cpp:
+        * dds/monitor/DPMonitorImpl.h:
+        * dds/monitor/DRMonitorImpl.cpp:
+        * dds/monitor/DRMonitorImpl.h:
+        * dds/monitor/DRPeriodicMonitorImpl.cpp:
+        * dds/monitor/DRPeriodicMonitorImpl.h:
+        * dds/monitor/DWMonitorImpl.cpp:
+        * dds/monitor/DWMonitorImpl.h:
+        * dds/monitor/DWPeriodicMonitorImpl.cpp:
+        * dds/monitor/DWPeriodicMonitorImpl.h:
+        * dds/monitor/MonitorFactoryImpl.cpp:
+        * dds/monitor/MonitorFactoryImpl.h:
+        * dds/monitor/PublisherMonitorImpl.cpp:
+        * dds/monitor/PublisherMonitorImpl.h:
+        * dds/monitor/SPMonitorImpl.cpp:
+        * dds/monitor/SPMonitorImpl.h:
+        * dds/monitor/SubscriberMonitorImpl.cpp:
+        * dds/monitor/SubscriberMonitorImpl.h:
+        * dds/monitor/TopicMonitorImpl.cpp:
+        * dds/monitor/TopicMonitorImpl.h:
+        * dds/monitor/TransportMonitorImpl.cpp:
+        * dds/monitor/TransportMonitorImpl.h:
+        * dds/monitor/monitor.idl:
+
+          Use the Monitor namespace in OpenDDS for the monitor library
+
+Fri Apr 25 16:44:08 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit faf5bea1343e71fc8bd03a5ceb18cc34f94530a9
+
+        * docs/devguide/introduction.rst:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/devguide/xtypes.rst:
+
+          DevGuide lacks section on interoperability
+
+          Problem
+          -------
+
+          The DevGuide lacks a section describing how to configure OpenDDS
+          for
+          interoperability.
+
+          Solution
+          --------
+
+          Add a section for interoperability.
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+          Co-authored-by: Son Dihn <dihns@objectcomputing.com>
+          Co-authored-by: Adam Mitz <mitza@objectcomputing.com>
+
+Fri May 02 16:20:33 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 396c4f343dd40f12b26b87e4d342bcae7f867de8
+
+          Merge pull request #4986 from
+          iguessthislldo/igtd/more-cmake-fixes
+
+          Misc CMake Fixes
+
+Fri May 02 16:01:12 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 7b64a620d0221f79ec89c0be247558ff66a42821
+
+        * .github/workflows/build_and_test.yml:
+        * .github/workflows/cmake.yml:
+        * cmake/OpenDDSConfig.cmake:
+        * tests/CMakeLists.txt:
+        * tests/cmake/CMakeLists.txt:
+        * tests/cmake/install/CMakeLists.txt:
+
+          More CI Fixes
+
+          - Add --verbose to CMake builds b/c they should probably have
+          them.
+          - Test utils isn't a system include anymore and that's messing up
+          the
+          include order. It used to be imported which implies a system
+          include,
+          but I think `IMPORTED INTERFACE` isn't supported by CMake 3.3.
+          - Fix Windows CI
+          - Install CMake test needs to avoid OPENDDS_BUILT_USING_CMAKE
+
+Fri May 02 14:45:11 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit a755fc58df43328f5fabcaa0025020210842cdb6
+
+          Merge remote-tracking branch 'upstream/master' into
+          igtd/cmake-install-testing
+
+Fri May 02 14:36:04 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit df5e5177c78a59220a5266aca5ac053ef55c6a40
+
+          Merge pull request #4989 from OpenDDS/mitza-configure-patch
+
+          Fixed invalid CMake variable name generated by configure
+
+Fri May 02 14:11:01 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 58253e19261ec9f693e10ce4c331a0190d4ac9a6
+
+        * .github/workflows/build_and_test.yml:
+        * .github/workflows/cmake.yml:
+        * tests/cmake/CMakeLists.txt:
+        * tests/cmake/generated_global/idl/CMakeLists.txt:
+
+          Try to Fix CI
+
+Fri May 02 13:11:01 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 3bf4b50051cb9481cfe94e935e7b29b951d2a89a
+
+        * .github/workflows/cmake.yml:
+
+          Don't Delete ACE/TAO
+
+Fri May 02 12:57:03 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit cb5ade0692d8da75028a21e58bb60e06574541fb
+
+        * .github/workflows/build_and_test.yml:
+        * .github/workflows/cmake.yml:
+        * CMakeLists.txt:
+        * docs/devguide/building/cmake.rst:
+        * docs/devguide/building/index.rst:
+        * docs/news.d/cmake-install.rst:
+
+          Add News, Update CI and Docs
+
+Thu May 01 18:17:16 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 231735291716f98b9e3437ff853b358a24a1a3d6
+
+        * docs/devguide/building/cmake.rst:
+        * docs/news.d/try_compile.rst:
+
+          Respond to Review
+
+Thu May 01 17:50:21 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit d8ee7bdfd98962c93b589fcc4b6f347d75f022f9
+
+        * cmake/init.cmake:
+
+          unset needed before set in CMake
+
+Wed Apr 30 19:22:58 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit d6c0569743f21f7351e94b0c0259f43862ee475d
+
+        * .github/workflows/build_and_test.yml:
+
+          Build CMake test without explicit CXX_STANDARD setting
+
+Wed Apr 30 19:22:36 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit baf71aff3d3508648c8607a4ec02cda214c6f6b3
+
+        * cmake/init.cmake:
+
+          support --std=c++03 with CMake
+
+Wed Apr 30 18:56:53 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit b093fc021a212698a6985ca93aca0c6fbbff3ed0
+
+          Merge branch 'master' into igtd/cmake-install-testing
+
+Wed Apr 30 17:23:37 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2ac9e676640209589f30b3e894e80fc29c246408
+
+        * configure:
+
+          Fixed invalid CMake variable name generated by configure
+
+          Looks like a bug introduced in #4487 resulted in a duplicated
+          OPENDDS_ prefix on this one variable.
+
+Tue Apr 29 18:35:54 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit cc443c3ba7a792a8182a96c8ebb3243f1756e0df
+
+          Merge pull request #4980 from mitza-oci/warnings
+
+          Fixed warnings
+
+Mon Apr 28 18:46:32 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 9bcc5b2b6e2fbdfb5d445b2e1be168d948d53477
+
+          Merge pull request #4987 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-6.16.0
+
+          Bump docker/build-push-action from 6.15.0 to 6.16.0
+
+Mon Apr 28 08:01:26 UTC 2025  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit f4a083e0a108c07a4f935ce957b4b7367a91bdd0
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 6.15.0 to 6.16.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 6.15.0 to 6.16.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/471d1dc4e07e5cdedd4c2171150001c434f0b7a4...14487ce63c7a62a4a324b0bfb37086795e31c6c1)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-version: 6.16.0
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Sat Apr 26 01:36:50 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 9a7630ad938e3efe5c4fe9b53afd60235ab513b2
+
+        * cmake/get_ace_tao.cmake:
+        * cmake/import_common.cmake:
+        * cmake/opendds_build_helpers.cmake:
+        * cmake/opendds_utils.cmake:
+        * docs/devguide/building/cmake.rst:
+        * docs/news.d/cmake-export.rst:
+        * docs/news.d/cmake-misc.rst:
+        * docs/news.d/cmake-use-export.rst:
+        * docs/news.d/cmake-xerces.rst:
+        * docs/news.d/opendds_target_sources.rst:
+        * docs/news.d/try_compile.rst:
+
+          Misc CMake Fixes
+
+          - Fixed reconfigured cross-compiled builds trying to use `TRUE`
+          as the path to host tools.
+          - Fixed `OPENDDS_COMPILE_WARNINGS=ERROR`, which didn't work
+          before.
+          - As part of this, added common INI file reading function for
+          CMake.
+          - Restructure CMake News
+          - Try to improve news and documention from #4964
+
+Fri Apr 25 23:59:06 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit f9497628c504ca5fe286099aa7e1a1510278a5da
+
+        * dds/DCPS/ConfigStoreImpl.cpp:
+        * dds/DCPS/LinuxNetworkConfigMonitor.cpp:
+        * dds/DCPS/NetworkResource.cpp:
+        * dds/DCPS/RepoIdGenerator.cpp:
+        * dds/DCPS/RepoIdGenerator.h:
+        * dds/InfoRepo/FederatorConfig.cpp:
+
+          Address Warnings on Android NDK r25c
+
+Fri Apr 25 20:55:45 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 6927f2f9b6a86b78f60f47c8a36abb22e7c4c443
+
+        * dds/DCPS/FilterEvaluator.cpp:
+        * dds/DCPS/LinuxNetworkConfigMonitor.cpp:
+        * dds/DCPS/LinuxNetworkConfigMonitor.h:
+        * dds/DCPS/RTPS/MessageUtils.cpp:
+        * dds/DCPS/Time_Helper.inl:
+        * dds/DCPS/ValueHelper.h:
+        * dds/DCPS/XTypes/TypeAssignability.cpp:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/yard/yard_parser.hpp:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+
+          More fixes from CI
+
+Fri Apr 25 18:42:16 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 0b0f9466424b5a9d53f1a1908a7cd6c86a45d0f0
+
+          Merge pull request #4983 from iguessthislldo/igtd/cmake-tweaks
+
+          A CMake Variable for if OpenDDS was CMake-built
+
+Thu Apr 24 18:40:56 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 5de0d745529e1181afce7069d48a1fb2f579853f
+
+        * cmake/ace_group.cmake:
+        * configure:
+        * docs/news.d/configure-static-runtime.rst:
+
+          Review and Fix News
+
+Thu Apr 24 18:08:38 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 172f33f470d1534db570ab96fb65b60963fa3351
+
+        * cmake/OpenDDSConfig.cmake:
+        * cmake/ace_group.cmake:
+        * cmake/config.cmake.in:
+        * cmake/init.cmake:
+        * configure:
+        * docs/devguide/building/cmake.rst:
+        * docs/news.d/configure-static-runtime.rst:
+
+          A CMake Variable for if OpenDDS was CMake-built
+
+          Also fixed `version-added` in CMake docs.
+
+Thu Apr 24 17:17:07 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 529d6c4dd06b60b2b97d478f7e68ce0131dd1d8a
+
+        * tools/monitor/MonitorDataStorage.cpp:
+        * tools/monitor/MonitorDataStorage.inl:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Son Dinh <technology789@gmail.com>
+
+Thu Apr 24 16:25:56 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7f30c9452beb2614a9f73273bf8a655612064592
+
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/RapidJsonWrapper.h:
+        * dds/DCPS/Time_Helper.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * tests/DCPS/Compiler/key_annotation/main.cpp:
+        * tests/DCPS/Compiler/xcdr/xcdr.cpp:
+        * tools/inspect/Inspect.cpp:
+        * tools/rtpsrelay/RelayHandler.cpp:
+        * tools/rtpsrelay/RelayHandler.h:
+        * tools/rtpsrelay/RelayHttpMetaDiscovery.cpp:
+        * tools/rtpsrelay/RtpsRelay.cpp:
+        * tools/rtpsrelay/StatisticsWriterListener.h:
+
+          fixed warnings from CI
+
+Wed Apr 23 21:02:11 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit d90896c87df8e2721a51fed41684c384d0e76431
+
+        * tools/dds/rtpsrelaylib/Name.h:
+
+          fixed bug
+
+Wed Apr 23 20:04:58 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 6091d36155808da0e80d9e762a80c38ba1a32d52
+
+        * tools/dds/rtpsrelaylib/Name.h:
+        * tools/monitor/GvOptions.cpp:
+        * tools/monitor/GvOptions.h:
+        * tools/monitor/MonitorDataStorage.cpp:
+        * tools/monitor/MonitorDataStorage.inl:
+        * tools/monitor/Node.cpp:
+        * tools/monitor/NodeOptions.cpp:
+        * tools/monitor/NodeOptions.h:
+        * tools/monitor/RepoSelect.cpp:
+        * tools/monitor/RepoSelect.h:
+        * tools/monitor/TreeNode.h:
+        * tools/monitor/Viewer.cpp:
+
+          more warnings
+
+Wed Apr 23 18:34:14 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 20b7e4201bd2c9a298eced5f8ef2533f67331625
+
+          Merge pull request #4979 from jrw972/rtps-relay-memory-leak
+
+          RtpsRelay leaks memory for incomplete discoveries
+
+Wed Apr 23 18:33:33 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 6fa6ef532b4c602f57c5ed23ffc48a0c0f28a0e3
+
+          Merge pull request #4978 from jrw972/rtps-relay-stress-test
+
+          RtpsRelay stress test is misconfigured
+
+Wed Apr 23 18:32:00 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 818502d0912f3cf3591b40e718d9620a9d41c7e9
+
+        * .github/workflows/build_and_test.yml:
+
+          Build GoogleTest Again
+
+Wed Apr 23 17:13:58 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit b4e26d001f3685869f6f5df4326ed44dcae3c525
+
+        * dds/InfoRepo/InfoRepoMulticastResponder.cpp:
+
+          replaced C-style cast, fixed constness
+
+Wed Apr 23 14:12:09 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 57664fbc29f88a9f78f9e36dbb926bdc23819ee8
+
+        * build.ini:
+        * dds/DCPS/QOS_XML_Handler/QOS_Common.cpp:
+        * dds/DCPS/SequenceIterator.h:
+        * dds/DCPS/security/CryptoBuiltInImpl.cpp:
+        * dds/DCPS/security/SSL/Certificate.cpp:
+        * dds/DCPS/security/SSL/DiffieHellman.cpp:
+        * dds/DCPS/security/SSL/PrivateKey.cpp:
+        * dds/DCPS/security/SSL/SignedDocument.cpp:
+        * dds/DCPS/security/UtilityImpl.cpp:
+        * dds/DCPS/security/UtilityImpl.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * dds/FACE/FaceTSS.cpp:
+        * dds/FACE/config/QosSettings.cpp:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/FederatorConfig.cpp:
+        * dds/InfoRepo/InfoRepoMulticastResponder.cpp:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/idl2jni/codegen/im_jni.cpp:
+        * java/idl2jni/runtime/i2jrt_TAOObject.cpp:
+        * java/idl2jni/runtime/idl2jni_runtime.cpp:
+        * tools/dds/rtpsrelaylib/Name.h:
+        * tools/modeling/codegen/model/Config.cpp:
+        * tools/modeling/codegen/model/Entities.cpp:
+        * tools/monitor/Edge.h:
+        * tools/monitor/GvOptions.h:
+        * tools/monitor/MonitorDataModel.h:
+        * tools/monitor/Node.cpp:
+        * tools/monitor/NodeGenerator.h:
+        * tools/monitor/NodeOptions.cpp:
+        * tools/monitor/NodeOptions.h:
+        * tools/monitor/QosFormatter.cpp:
+        * tools/monitor/QosFormatter.h:
+        * tools/monitor/RepoSelect.cpp:
+        * tools/monitor/RepoSelect.h:
+        * tools/monitor/TreeNode.h:
+        * tools/monitor/Viewer.cpp:
+        * tools/monitor/Viewer.h:
+
+          Fixed warnings
+
+Wed Apr 23 14:11:21 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit e2c4cbda657a8ebf247f80c78a7d36669999b4fb
+
+        * tools/rtpsrelay/GuidPartitionTable.cpp:
+
+          RtpsRelay leaks memory for incomplete discoveries
+
+          Problem
+          -------
+
+          Observations:
+
+          1. `GuidPartitionTable::lookup` creates a cache entry if it does
+          not
+          exist.
+          2. The discovery of a publication or subscription removes
+          the cache entry if it exists and the partitions change.
+          3. The removal of a publication or subscription removes the cache
+          entry if it exists.
+          4. `GuidPartitionTable::lookup` can be called before discovery
+          completes.
+
+          In a scenario where discovery completes, the cache is eventually
+          correct, that is, it is correct after the first lookup that
+          follows
+          the last publication or subscription.
+
+          In a scenario where dicovery doesn't complete, then the cache
+          entry is
+          created (1 and 4) but not removed (2 and 3).
+
+          Solution
+          --------
+
+          Only create a cache entry if the set of partitions is not empty
+          which
+          implies discovery is in progress or has completed.
+
+Wed Apr 23 14:07:40 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit c8e7d25591b4ae2b96d17cdc093714e944b56186
+
+        * tests/DCPS/RtpsRelay/Smoke/participant_relay_2.ini:
+        * tests/DCPS/RtpsRelay/Smoke/stress_relay_1.ini:
+
+          RtpsRelay stress test is misconfigured
+
+          Problem
+          -------
+
+          `stress_relay_1.ini` contains incorrect settings for
+          `SpdpRtpsRelayAddress` and `SedpRtpsRelayAddress`.
+
+          `participant_relay_2.ini` doesn't match
+          `participant_relay_1.ini`.
+
+          Solution
+          --------
+
+          Correct the settings and add missing settngs.
+
+Tue Apr 22 18:57:57 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit c154a18eada170b25e6773fe632f1ffac2f8aadc
+
+          Merge pull request #4977 from mitza-oci/config-static-runtime
+
+          configure script option --static-runtime
+
+Tue Apr 22 18:34:52 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit f7d123bd4d4f3241004724a6eb25ee9eb00ea100
+
+          Merge pull request #4970 from jrw972/rtps-relay-stress-test
+
+          RtpsRelay lacks a stress test
+
+Mon Apr 21 19:55:32 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit d4da433f9ed478d7d9d5c8271a7fec0214058d75
+
+        * .github/workflows/build_and_test.yml:
+        * cmake/ace_group.cmake:
+        * cmake/build_ace_tao.cmake:
+        * cmake/configure_ace_tao.pl:
+
+          Updated CMake scripts and CI
+
+Mon Apr 21 18:04:57 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 3d30373708f1ef7c9935c91471779350bb654745
+
+        * tests/DCPS/RtpsRelay/Smoke/publisher.cpp:
+        * tests/DCPS/RtpsRelay/Smoke/run_stress_test1.py:
+        * tests/DCPS/RtpsRelay/Smoke/subscriber.cpp:
+        * tools/scripts/dpm.py:
+
+          From review
+
+Mon Apr 21 13:51:07 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 83826ad179f42dc71fb4cf74b89a1687c7aac089
+
+        * .github/workflows/build_and_test.yml:
+
+          Updated CI
+
+Mon Apr 21 04:33:14 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 78e624afe4bac00004eb05bc4d0080e591be5143
+
+        * tests/DCPS/C++11/CMakeLists.txt:
+        * tests/DCPS/C++11/Messenger/CMakeLists.txt:
+
+          /c++/cxx/
+
+Mon Apr 21 02:46:14 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 1215fe6af289874a35f8d3001cfc1f1264e61993
+
+        * tests/cmake/Messenger/CMakeLists.txt:
+
+          Remove Invalid add_subdirectory
+
+Mon Apr 21 02:18:25 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit b09a70d1350d01028c6a4a7daff33630c63dcf93
+
+        * .github/workflows/build_and_test.yml:
+        * CMakeLists.txt:
+        * examples_and_tests.cmake:
+        * tests/CMakeLists.txt:
+        * tests/DCPS/C++11/CMakeLists.txt:
+        * tests/cmake/Messenger/C++11_Messenger/CMakeLists.txt  tests/DCPS/C++11/Messenger/CMakeLists.txt:
+        * tests/DCPS/CMakeLists.txt:
+        * tests/DCPS/Compiler/CMakeLists.txt:
+        * tests/cmake/C++11_typecode/CMakeLists.txt  tests/DCPS/Compiler/typecode/CMakeLists.txt:
+        * tests/cmake/CMakeLists.txt:
+
+          Build GoogleTest without FetchContent
+
+          Also:
+          - Remove extra tests file
+          - Move C++11 Messenger and typecode CMake tests
+
+Sun Apr 20 07:13:11 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 31768a1241d84cb05e72b29ae5d938a5aa661615
+
+        * .github/workflows/build_and_test.yml:
+        * CMakeLists.txt:
+        * cmake/OpenDDSConfig.cmake:
+        * cmake/opendds_target_sources.cmake:
+        * configure:
+        * tests/CMakeLists.txt:
+        * tests/DCPS/Compiler/char_literals/CMakeLists.txt:
+        * tests/DCPS/Compiler/xcdr/CMakeLists.txt:
+        * tests/DCPS/HelloWorld/CMakeLists.txt:
+        * tests/DCPS/Messenger/CMakeLists.txt:
+        * tests/auto_run_tests.pl:
+        * tests/cmake/Messenger/Messenger_1/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_Space/CMakeLists.txt:
+        * tests/cmake/ctest-to-auto-run-tests.py:
+        * tests/cmake/generated_global/cpp/CMakeLists.txt:
+        * tools/scripts/lint.pl:
+
+          Maybe Fix Missing GoogleTest in CI
+
+          Also:
+          - Fixes for CMake 3.3
+          - Fix OPENDDS_GTEST variable made by configure
+          - Use correct cmake_minimum_required versions
+          - Small fixes for auto_run_tests.pl and
+          ctest-to-auto-run-tests.py
+          - Fix typo in lint.pl
+
+Sun Apr 20 02:41:37 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 9d756109c05b4b7faa86998229b602854787cd42
+
+        * .github/workflows/build_and_test.yml:
+        * bin/PerlDDS/Run_Test.pm:
+        * configure:
+        * dds/DdsDcps.mpc:
+
+          Fix OPENDDS_RAPIDJSON_USE_PREFIX_PATH in MPC
+
+          Also add log message for not finding an executable in a test.
+
+Fri Apr 18 20:45:14 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit eae5d0e2bb44fb72de659a2208024aea09200f03
+
+        * .github/workflows/build_and_test.yml:
+        * docs/news.d/configure-static-runtime.rst:
+
+          NEWS
+
+          And bump cache version for GitHub Actions
+
+Fri Apr 18 20:37:24 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7671a3f730f7fd5d2f9ccd95103f5e817ecd1764
+
+        * .github/workflows/build_and_test.yml:
+        * cmake/ace_group.cmake:
+        * configure:
+
+          configure script option --static-runtime
+
+          This is meant to be used in combination with --static.
+
+          Using Visual C++, default is to link statically to the platform
+          runtime
+          libraries so specify --no-static-runtime to use DLLs.
+
+          Using gnuace, --static-runtime adds static_stdlibs=1 to
+          platform_macros.GNU, which some platforms use.
+
+Fri Apr 18 18:32:35 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 3e7310e4ff96ab4c4a3622eedb21c503b0f4f7be
+
+          Merge pull request #4975 from mitza-oci/warnings
+
+          Fixed warnings in OpenDDS_Rtps and OpenDDS_Rtps_Udp
+
+Fri Apr 18 13:39:41 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 6811ad4dcaffbec7948f450ac5cf22b9bd3966dd
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+
+          fixed another warning
+
+Thu Apr 17 18:37:41 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 64ba26138ba37414379451ce2ff26094421eeff6
+
+          Merge pull request #4976 from mitza-oci/optional-config
+
+          Make the use of std::optional a build-time configured value
+
+Thu Apr 17 17:59:16 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1b9aab50459fbbd4a036defcb3a587bb13b3413f
+
+        * docs/news.d/configure-std-optional.rst:
+
+          RST formatting
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Thu Apr 17 16:00:03 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7b9af721b5d1af8c7fd8d927496641dbc054f629
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Updated RtpsUdpReceiveStrategy.cpp
+
+Thu Apr 17 13:42:00 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit a19975a4d7d55196e1eb9a532a85e3b36e60c5df
+
+        * configure:
+        * docs/devguide/building/index.rst:
+        * docs/news.d/configure-std-optional.rst:
+
+          Added docs and updated configure script
+
+Thu Apr 17 13:12:05 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit c98e3fc92b4b261205f777e5edf3e823765a60fd
+
+        * build.ini:
+        * dds/DCPS/RTPS/GuidGenerator.cpp:
+        * dds/DCPS/RTPS/ICE/Checklist.cpp:
+        * dds/DCPS/RTPS/ICE/Checklist.h:
+        * dds/DCPS/RTPS/ICE/EndpointManager.cpp:
+        * dds/DCPS/RTPS/ICE/EndpointManager.h:
+        * dds/DCPS/RTPS/ICE/Stun.cpp:
+        * dds/DCPS/RTPS/ICE/Task.h:
+        * dds/DCPS/RTPS/MessageUtils.cpp:
+        * dds/DCPS/RTPS/MessageUtils.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/tcp/TcpSynchResource.cpp:
+
+          Fixed warnings in OpenDDS_Rtps and OpenDDS_Rtps_Udp
+
+Wed Apr 16 20:37:33 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 28d9dc8a741e1640f73cfdd5f364ddd2afdbeb1f
+
+        * cmake/init.cmake:
+
+          Added CMake CXX17 and STD_OPTIONAL features
+
+Tue Apr 08 15:46:39 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit ca20dec31cd07af09c1f5756dd4cb520a00d2bda
+
+        * tests/DCPS/RtpsRelay/Smoke/.gitignore:
+        * tests/DCPS/RtpsRelay/Smoke/Args.h:
+        * tests/DCPS/RtpsRelay/Smoke/DataReaderListener.cpp:
+        * tests/DCPS/RtpsRelay/Smoke/DataReaderListener.h:
+        * tests/DCPS/RtpsRelay/Smoke/DataWriterListenerImpl.h:
+        * tests/DCPS/RtpsRelay/Smoke/ParticipantBit.h:
+        * tests/DCPS/RtpsRelay/Smoke/Smoke.mpc:
+        * tests/DCPS/RtpsRelay/Smoke/Writer.cpp:
+        * tests/DCPS/RtpsRelay/Smoke/Writer.h:
+        * tests/DCPS/RtpsRelay/Smoke/monitor.cpp:
+        * tests/DCPS/RtpsRelay/Smoke/participant_relay_1.ini:
+        * tests/DCPS/RtpsRelay/Smoke/participant_relay_2.ini:
+        * tests/DCPS/RtpsRelay/Smoke/publisher.cpp:
+        * tests/DCPS/RtpsRelay/Smoke/run_stress_test1.py:
+        * tests/DCPS/RtpsRelay/Smoke/stress_relay_1.ini:
+        * tests/DCPS/RtpsRelay/Smoke/stress_relay_2.ini:
+        * tests/DCPS/RtpsRelay/Smoke/subscriber.cpp:
+        * tools/scripts/dpm.py:
+
+          RtpsRelay lacks a stress test
+
+          Problem
+          -------
+
+          The RtpsRelay has to deal with "bad" behaviors from clients.
+          Sometimes, these bad behaviors induce resource leaks. The relay
+          will
+          benefit from a repeatable test that can discover these resource
+          leaks.
+
+          Solution
+          --------
+
+          Add such a test.
+
+Wed Apr 16 14:27:23 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 023519f2d984ce723c125bc03b5ba51d5d27266a
+
+        * configure:
+        * dds/DCPS/optional.h:
+        * dds/OpenDDSConfig.h.in:
+
+          Make the use of std::optional a config value
+
+          This makes it consistent across the middleware and application
+
+Wed Apr 16 13:16:58 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 5f036a5f476f0b5523891e6ddb972dbaca74a81f
+
+          Merge pull request #4971 from mitza-oci/warnings
+
+          Fixed compiler warnings
+
+Wed Apr 16 11:45:44 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 87d88a709804e856c5ddcb069a3e6098acc059d6
+
+        * configure:
+
+          Fix Typo
+
+Wed Apr 16 11:22:15 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit d477f673029e106267ce92029cbc1fdca906c664
+
+        * .github/workflows/build_and_test.yml:
+        * CMakeLists.txt:
+        * DevGuideExamples/DCPS/Messenger/CMakeLists.txt:
+        * tests/cmake/CTestCustom.cmake  cmake/CTestCustom.cmake:
+        * cmake/OpenDDSConfig.cmake:
+        * cmake/get_ace_tao.cmake:
+        * cmake/init.cmake:
+        * cmake/opendds_testing.cmake:
+        * configure:
+        * examples_and_tests.cmake:
+        * tests/CMakeLists.txt:
+        * tests/DCPS/CMakeLists.txt:
+        * tests/DCPS/Compiler/CMakeLists.txt:
+        * tests/DCPS/Compiler/char_literals/CMakeLists.txt:
+        * tests/DCPS/Compiler/xcdr/CMakeLists.txt:
+        * tests/DCPS/HelloWorld/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_2/CMakeLists.txt  tests/DCPS/Messenger/CMakeLists.txt:
+        * tests/auto_run_tests.pl:
+        * tests/cmake/CMakeLists.txt:
+        * tests/cmake/Messenger/C++11_Messenger/CMakeLists.txt:
+        * tests/cmake/Messenger/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_1/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_Space/CMakeLists.txt:
+        * tests/cmake/Nested_IDL/CMakeLists.txt:
+        * tests/cmake/ace_tao_only/CMakeLists.txt:
+        * tests/cmake/ctest-to-auto-run-tests.py:
+        * tests/cmake/dump_ctest_info.cmake:
+        * tests/cmake/generated_global/CMakeLists.txt:
+        * tests/cmake/generated_global/cpp/CMakeLists.txt:
+        * tests/cmake/generated_global/idl/CMakeLists.txt:
+        * tests/cmake/install/CMakeLists.txt:
+        * tests/cmake/install/library/CMakeLists.txt:
+
+          Merge CMake-Built and MPC-Built CMake Test Sets
+
+          To make it easier to use CMake tests using an installed OpenDDS.
+
+          Also added `tests/DCPS/Compiler/xcdr`, and `tests/DCPS/Messenger`
+          (from
+          Messenger_2 CMake test) to CMake. This is based on what's left
+          unmerged
+          in https://github.com/OpenDDS/OpenDDS/pull/4374 minus adding the
+          unit
+          tests to CMake.
+
+Wed Apr 16 09:50:05 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 38786edec90080979808959174c1a070756ffbaa
+
+        * CMakeLists.txt:
+        * cmake/config.cmake.in:
+        * cmake/opendds_group.cmake:
+        * configure:
+
+          Use Prefix-Installed RapidJSON in CMake
+
+          Fixes https://github.com/OpenDDS/OpenDDS/issues/4905
+
+Wed Apr 16 08:59:22 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 3932b37b8dd0b645bc2afe70eba0ee4c10684f1e
+
+        * cmake/dds_idl_sources.cmake:
+        * dds/DCPS/RTPS/CMakeLists.txt:
+
+          Fix Missing Header in Installed OpenDDS with CMake
+
+          This was the generated header added by `RtpsSubmessageKind.idl`.
+          https://github.com/OpenDDS/OpenDDS/pull/4519. It uses `-Lspcpp`,
+          which
+          wasn't being handled properly by `opendds_target_sources` and the
+          installation mechanism for generated files.
+
+Tue Apr 15 19:32:35 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3bff9462d37e49a8a2d4836eae0f0360e606e945
+
+        * dds/DCPS/FilterEvaluator.cpp:
+        * dds/DCPS/FilterExpressionGrammar.h:
+
+          fixed remaing filtering issues
+
+Tue Apr 15 19:31:53 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit b19059a8ab8cb1076149eb9fcda104b910799c32
+
+        * .github/workflows/build_u14_gcc4.Dockerfile:
+
+          GitHub Actions: Use GCC 4.6 for pragma warning support
+
+Tue Apr 15 19:31:09 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit d46cc82ce92ab88ed67e9eca93b1324bb604ae6f
+
+        * dds/DCPS/DisjointSequence.cpp:
+
+          fixed overflow; refactored common expressions
+
+Tue Apr 15 19:21:14 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 756ed702a305819ad75a1cacb286def0c2077308
+
+          Merge pull request #4972 from mitza-oci/rtpsrelay-statistics
+
+          RtpsRelay: Add sizes of key data structures to reported
+          statistics
+
+Tue Apr 15 15:52:09 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit d4383cd5494ac1f9d4a0c43ca42bab74c888c6d2
+
+        * tools/rtpsrelay/RelayStatisticsReporter.h:
+
+          fixed bug
+
+Mon Apr 14 15:50:10 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit ccafb7da7b6b749a5262495833c40e2bd337591a
+
+        * tools/dds/rtpsrelaylib/Relay.idl:
+        * tools/rtpsrelay/GuidAddrSet.cpp:
+        * tools/rtpsrelay/GuidAddrSet.h:
+        * tools/rtpsrelay/RelayStatisticsReporter.h:
+
+          Added stats for nested data structures in GuidAddrSet
+
+Fri Apr 11 19:31:21 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 626fe749e9138a69d82a22141dc4ccdda21a0ce3
+
+        * dds/idl/be_produce.cpp:
+        * tests/DCPS/MetaStruct/MetaStructTest.cpp:
+
+          Fixed broken builds
+
+Fri Apr 11 18:26:24 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1d11ab7f6072c4476ce5f11600550c6e492ef0f3
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/ConfigStoreImpl.cpp:
+        * dds/DCPS/DataCollector_T.cpp:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DisjointSequence.cpp:
+        * dds/DCPS/EncapsulationHeader.cpp:
+        * dds/DCPS/FileSystemStorage.cpp:
+        * dds/DCPS/FilterEvaluator.cpp:
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterExpressionGrammar.h:
+        * dds/DCPS/LinuxNetworkConfigMonitor.cpp:
+        * dds/DCPS/MemoryPool.cpp:
+        * dds/DCPS/MemoryPool.h:
+        * dds/DCPS/MessageBlock.cpp:
+        * dds/DCPS/NetworkAddress.cpp:
+        * dds/DCPS/NetworkAddress.h:
+        * dds/DCPS/OwnershipManager.cpp:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/StaticDiscovery.cpp:
+        * dds/DCPS/ThreadStatusManager.cpp:
+        * dds/DCPS/TypeSupportImpl.cpp:
+        * dds/DCPS/ValueHelper.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.cpp:
+        * dds/DCPS/XTypes/DynamicDataImpl.h:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * dds/DCPS/XTypes/DynamicTypeSupport.cpp:
+        * dds/DCPS/XTypes/IdlScanner.h:
+        * dds/DCPS/XTypes/TypeAssignability.cpp:
+        * dds/DCPS/XTypes/TypeLookupService.cpp:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/MessageDropper.cpp:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/PriorityKey.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.inl:
+        * dds/DCPS/transport/framework/ReceivedDataSample.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+        * dds/DCPS/transport/framework/TransportSendControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendElement.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_produce.cpp:
+        * dds/idl/dds_visitor.cpp:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/typeobject_generator.cpp:
+        * dds/idl/value_reader_generator.cpp:
+        * dds/idl/value_writer_generator.cpp:
+
+          Fixed compiler warnings
+
+          ...mostly related to type conversions
+
+Fri Apr 11 18:17:54 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 29d8b9bcc610092b855b8f53e9b5c40cb771bbdf
+
+        * tools/dds/rtpsrelaylib/PartitionIndex.h:
+        * tools/dds/rtpsrelaylib/Relay.idl:
+        * tools/rtpsrelay/GuidAddrSet.cpp:
+        * tools/rtpsrelay/GuidPartitionTable.cpp:
+        * tools/rtpsrelay/GuidPartitionTable.h:
+        * tools/rtpsrelay/RelayPartitionTable.h:
+        * tools/rtpsrelay/RelayStatisticsReporter.h:
+        * tools/rtpsrelay/RtpsRelay.cpp:
+
+          Add sizes of key data structures to reported statistics
+
+Thu Apr 10 18:32:56 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 7d60b884c0c8763ed9bd220947f9e3d9fc17fcf2
+
+          Merge pull request #4964 from sonndinh/cmake-custom-export
+
+          Update CMake support for custom export header
+
+Thu Apr 10 18:32:28 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 50db7294ee94e867a06fcb4f41e033d8c7a4fd5a
+
+          Merge pull request #4969 from iguessthislldo/igtd/massif-util
+
+          Script to Analyze Massif Memory Profiler Output
+
+Thu Apr 10 17:51:31 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 9f831191858323738935b5868cc6368520218cfd
+
+        * tools/scripts/massif-diff.py:
+
+          Correct help for options
+
+Thu Apr 10 17:26:45 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit b332cab2aa87f31baba2c9cb87ab30455197a8c4
+
+        * tools/scripts/massif-diff.py:
+
+          Script to Analyze Massif Memory Profiler Output
+
+Wed Apr 09 22:00:20 UTC 2025  Son Dinh  <technology789@gmail.com>
+        commit 6272730a0c3973e06d6f3183c4b9accbc4e1e8ac
+
+        * cmake/opendds_target_sources.cmake:
+
+          Update cmake/opendds_target_sources.cmake
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Wed Apr 09 19:48:07 UTC 2025  Son Dinh  <dinhs@objectcomputing.com>
+        commit d88701d8fc135ec9e098397468f4b755cd60a233
+
+        * cmake/opendds_target_sources.cmake:
+        * docs/news.d/cmake-use-export.rst:
+
+          Call opendds_export_header instead of manually set BUILD_DLL and
+          HAS_DLL macros
+
+Mon Apr 07 18:32:55 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit d33ad53a24fa3a6cbf2f667ed0beb6f14ac79ead
+
+          Merge pull request #4966 from mitza-oci/misc
+
+          Simplify SpdpTransport::handle_input and fix warning in generated
+          code
+
+Sat Apr 05 13:05:14 UTC 2025  Son Dinh  <dinhs@objectcomputing.com>
+        commit 4a21c8bc0ce9149bf88786b06dd50477fd73c645
+
+        * cmake/opendds_target_sources.cmake:
+
+          Fixing builds
+
+Fri Apr 04 20:10:56 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 28b6c2206327bf1d51bdeae8d7c6e579b46ece8e
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/idl/value_reader_generator.cpp:
+
+          Simplify SpdpTransport::handle_input and fix warning in generated
+          code
+
+Fri Apr 04 18:21:31 UTC 2025  Son Dinh  <dinhs@objectcomputing.com>
+        commit 0a3e0783f2d4c8d818f02953c76108ea85d5e06a
+
+          Merge from master
+
+Thu Apr 03 18:38:25 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 99b7653a64285cd03898148604af06f68894a373
+
+          Merge pull request #4961 from mitza-oci/warnings
+
+          Remove virtual inheritance of RcObject in cases that don't need
+          it
+
+Thu Apr 03 18:33:27 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 05bce3b40b7608026520003970e26e06d4f345ad
+
+          Merge pull request #4962 from iguessthislldo/igtd/cmake4
+
+          Isolate `opendds_target_sources` Code Generation
+
+Thu Apr 03 03:46:29 UTC 2025  Son Dinh  <dinhs@objectcomputing.com>
+        commit db30bdb23aa67af96ffe3b96cbecf2f1aa47a9a4
+
+        * cmake/opendds_target_sources.cmake:
+
+          Update support for custom export header
+
+Wed Apr 02 20:16:15 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 500321ccd37b47e8cd57ea52cd22534ad12a677e
+
+        * .github/workflows/WinFlexBison_CMakePresets.json:
+        * .github/workflows/build_and_test.yml:
+        * cmake/opendds_target_sources.cmake:
+        * docs/devguide/building/cmake.rst:
+
+          Update WinFlexBison in CI
+
+          Also some minor tweaks to news and opendds_target_sources.
+
+Wed Apr 02 18:30:24 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 242839040b25d0555256c44aa43fa07877a31821
+
+        * cmake/opendds_target_sources.cmake:
+        * docs/devguide/building/cmake.rst:
+        * docs/news.d/cmake-xerces.rst:
+        * docs/news.d/opendds_target_sources.rst:
+        * tests/cmake/idl_compiler_tests/CMakeLists.txt:
+
+          Don't Export Symbols for PRIVATE IDL Files
+
+          Also update news and docs.
+
+Wed Apr 02 13:48:08 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit b8ad0b113522dd1738841c10455217737d40457e
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.cpp:
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+
+          Apply the workaround from Spdp's use of PmfPeriodicTask to
+          ShmemDataLink
+
+Wed Apr 02 01:17:39 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit ef96fe151b21c19155da14fbe3c13a6668984d10
+
+        * CMakeLists.txt:
+        * DevGuideExamples/DCPS/Messenger/CMakeLists.txt:
+        * cmake/dds_idl_sources.cmake:
+        * cmake/opendds_target_sources.cmake:
+        * cmake/opendds_utils.cmake:
+        * cmake/tao_idl_sources.cmake:
+        * dds/CMakeLists.txt:
+        * dds/DCPS/CMakeLists.txt:
+        * dds/DCPS/InfoRepoDiscovery/CMakeLists.txt:
+        * dds/DCPS/QOS_XML_Handler/CMakeLists.txt:
+        * dds/DCPS/RTPS/CMakeLists.txt:
+        * dds/DCPS/security/CMakeLists.txt:
+        * dds/DCPS/transport/multicast/CMakeLists.txt:
+        * dds/DCPS/transport/rtps_udp/CMakeLists.txt:
+        * dds/DCPS/transport/shmem/CMakeLists.txt:
+        * dds/DCPS/transport/tcp/CMakeLists.txt:
+        * dds/DCPS/transport/udp/CMakeLists.txt:
+        * dds/InfoRepo/CMakeLists.txt:
+        * dds/idl/CMakeLists.txt:
+        * examples/CMakeLists.txt:
+        * examples/DCPS/CMakeLists.txt:
+        * examples/DCPS/ishapes/CMakeLists.txt:
+        * tests/CMakeLists.txt:
+        * tests/DCPS/CMakeLists.txt:
+        * tests/DCPS/Compiler/CMakeLists.txt:
+        * tests/DCPS/Compiler/char_literals/CMakeLists.txt:
+        * tests/DCPS/HelloWorld/CMakeLists.txt:
+        * tests/cmake/C++11_typecode/CMakeLists.txt:
+        * tests/cmake/CMakeLists.txt:
+        * tests/cmake/Messenger/C++11_Messenger/CMakeLists.txt:
+        * tests/cmake/Messenger/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_1/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_2/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_Space/CMakeLists.txt:
+        * tests/cmake/Nested_IDL/CMakeLists.txt:
+        * tests/cmake/ace_tao_only/CMakeLists.txt:
+        * tests/cmake/generated_global/CMakeLists.txt:
+        * tests/cmake/generated_global/cpp/CMakeLists.txt:
+        * tests/cmake/generated_global/idl/CMakeLists.txt:
+        * tests/cmake/idl_compiler_tests/CMakeLists.txt:
+        * tests/cmake/include_subdir/CMakeLists.txt:
+        * tests/cmake/install/CMakeLists.txt:
+        * tests/cmake/install/library/CMakeLists.txt:
+        * tests/cmake/install/user/CMakeLists.txt:
+        * tools/dds/rtpsrelaylib/CMakeLists.txt:
+        * tools/inspect/CMakeLists.txt:
+        * tools/rtpsrelay/CMakeLists.txt:
+        * tools/scripts/lint.pl:
+
+          Isolate `opendds_target_sources` Code Generation
+
+          This was prompted by build failures in Ninja with CMake 4.0 in
+          https://github.com/OpenDDS/OpenDDS/pull/4959 caused by setting
+          the CMake
+          "max policy version" from 3.27 to 4.0. They seem to be related to
+          https://cmake.org/cmake/help/latest/policy/CMP0154.html. CMake is
+          trying
+          to optimize the Ninja build by assuming generated files are
+          "private" by
+          default in targets using file sets so it can defer generating
+          them.
+          OpenDDS built using CMake does use file sets, but it doesn't use
+          file
+          sets for IDL-generated files, so Ninja might attempt to build
+          source
+          files that use IDL-generated headers before those headers are
+          generated.
+
+          We could use `target_sources(... FILE_SET ...)` within
+          `opendds_target_sources` to create a file set for generated
+          headers, but
+          it would be problematic:
+          - It requires the file set to be installed using
+          `install(TARGETS ... FILE_SET ...)` and this is something the
+          user has
+          to do because seems like it can only be called once per target.
+          - Not only can we not do it for them, but they would be forced
+          into
+          doing it by CMake, even if they don't want to setup installation
+          for
+          the target at that moment or at all.
+          - Right now the design of `opendds_target_sources` is explicitly
+          trying
+          to be flexible by being agnostic about the installation method of
+          generated files and our documentation explicitly says this.
+
+          The workaround for this is to create separate custom targets for
+          each
+          IDL file that have to be executed first.
+          As part of this I went ahead with
+          https://github.com/OpenDDS/OpenDDS/issues/4306
+          (`opendds_target_sources`
+          Should Generate Files Independently Per-Target Instead of
+          Per-CMakeLists) creating separate custom targets probably makes
+          sharing
+          the IDL command target even harder than it was before.
+
+          This all allows the "max policy version" to be set for 4.0.
+
+          Also:
+          - Move `include(GNUInstallDirs)` to `opendds_util.cmake` for
+          `opendds_install_interface_files`.
+          - Support CMake's `codegen` target to compile IDL when CMake
+          supports
+          it: https://cmake.org/cmake/help/latest/policy/CMP0171.html
+          - `opendds_target_sources` shouldn't automatically generate an
+          export
+          header there's only `PRIVATE` IDL files.
+
+Tue Apr 01 20:42:16 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit aa5fea702841c5de283c797114176c434b32e224
+
+        * dds/DCPS/NetworkConfigMonitor.h:
+        * dds/DCPS/Service_Participant.h:
+
+          ShutdownListener and NetworkConfigMonitor shouldn't have changed
+          in the previous commit
+
+Tue Apr 01 18:33:01 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit eae0a715d114d19fdd05dfb5d64434a059a69be7
+
+          Merge pull request #4960 from mitza-oci/flextypes
+
+          Additional use case for flexible type support
+
+Tue Apr 01 13:23:19 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 69bffc93ca7ed48ae7ad55f7570ee336b7b747a1
+
+          Merge remote-tracking branch 'upstream/master' into warnings
+
+Tue Apr 01 13:21:26 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 0718e2a9aa0dd7bdab6cfe50aa9e924dfcbea526
+
+          Merge remote-tracking branch 'upstream/master' into flextypes
+
+Tue Apr 01 13:16:33 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 24a567de9d38edb6e1d8668bc3c6dee262540e5d
+
+          Merge pull request #4959 from iguessthislldo/igtd/cmake4
+
+          Better Compatibility with CMake 4
+
+Tue Apr 01 01:00:58 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 2551a6c0b4cc22a499a190baa369efa0e01c7a71
+
+        * CMakeLists.txt:
+        * DevGuideExamples/DCPS/Messenger/CMakeLists.txt:
+        * dds/CMakeLists.txt:
+        * dds/DCPS/CMakeLists.txt:
+        * dds/DCPS/InfoRepoDiscovery/CMakeLists.txt:
+        * dds/DCPS/QOS_XML_Handler/CMakeLists.txt:
+        * dds/DCPS/RTPS/CMakeLists.txt:
+        * dds/DCPS/security/CMakeLists.txt:
+        * dds/DCPS/transport/multicast/CMakeLists.txt:
+        * dds/DCPS/transport/rtps_udp/CMakeLists.txt:
+        * dds/DCPS/transport/shmem/CMakeLists.txt:
+        * dds/DCPS/transport/tcp/CMakeLists.txt:
+        * dds/DCPS/transport/udp/CMakeLists.txt:
+        * dds/InfoRepo/CMakeLists.txt:
+        * dds/idl/CMakeLists.txt:
+        * examples/CMakeLists.txt:
+        * examples/DCPS/CMakeLists.txt:
+        * examples/DCPS/ishapes/CMakeLists.txt:
+        * tests/CMakeLists.txt:
+        * tests/DCPS/CMakeLists.txt:
+        * tests/DCPS/Compiler/CMakeLists.txt:
+        * tests/DCPS/Compiler/char_literals/CMakeLists.txt:
+        * tests/DCPS/HelloWorld/CMakeLists.txt:
+        * tests/cmake/C++11_typecode/CMakeLists.txt:
+        * tests/cmake/CMakeLists.txt:
+        * tests/cmake/Messenger/C++11_Messenger/CMakeLists.txt:
+        * tests/cmake/Messenger/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_1/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_2/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_Space/CMakeLists.txt:
+        * tests/cmake/Nested_IDL/CMakeLists.txt:
+        * tests/cmake/ace_tao_only/CMakeLists.txt:
+        * tests/cmake/generated_global/CMakeLists.txt:
+        * tests/cmake/generated_global/cpp/CMakeLists.txt:
+        * tests/cmake/generated_global/idl/CMakeLists.txt:
+        * tests/cmake/idl_compiler_tests/CMakeLists.txt:
+        * tests/cmake/include_subdir/CMakeLists.txt:
+        * tests/cmake/install/CMakeLists.txt:
+        * tests/cmake/install/library/CMakeLists.txt:
+        * tests/cmake/install/user/CMakeLists.txt:
+        * tools/dds/rtpsrelaylib/CMakeLists.txt:
+        * tools/inspect/CMakeLists.txt:
+        * tools/rtpsrelay/CMakeLists.txt:
+        * tools/scripts/lint.pl:
+
+          Revert CMake "Max Policy" to 3.27
+
+Mon Mar 31 20:01:38 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 1b7f7084ada1a5f118e5a64af6f2cfab5a936d90
+
+        * cmake/get_ace_tao.cmake:
+        * tools/scripts/lint.pl:
+
+          Comply with FetchContent Change
+
+Mon Mar 31 20:52:19 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit e74d4598892fbcc17bc28b0a7147bf0ee9d01f4f
+
+        * dds/DCPS/AddressCache.h:
+        * dds/DCPS/Comparator_T.h:
+        * dds/DCPS/DispatchService.h:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/EventDispatcher.h:
+        * dds/DCPS/FileSystemStorage.h:
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/NetworkConfigMonitor.h:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/SubscriptionInstance.h:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.h:
+        * dds/DCPS/transport/framework/ThreadSynchStrategy.h:
+        * dds/DCPS/transport/framework/ThreadSynchWorker.h:
+        * dds/DCPS/transport/framework/TransportConfig.h:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportReassembly.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/multicast/MulticastSessionFactory.h:
+        * dds/DCPS/transport/rtps_udp/ConstSharedRepoIdSet.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+
+          Remove virtual inheritance of RcObject in cases that don't need
+          it
+
+Wed Mar 19 17:14:05 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit c59110e7cbf3dea0afed8d2974592cf2a641e1f8
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+
+          Additional use case for flexible type support
+
+          The GUID of a remote peer may be known before discovery starts
+
+          (cherry picked from commit
+          a82a2c9c5edb4ec3febfa8e96267e0f6700e7bc9)
+
+          # Conflicts:
+          #       dds/DCPS/RTPS/Sedp.cpp
+          #       dds/DCPS/RTPS/Spdp.cpp
+
+Mon Mar 31 18:05:16 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 174332f15d607921d578914ffcca144de5194b37
+
+        * .gitmodules:
+        * CMakeLists.txt:
+        * DevGuideExamples/DCPS/Messenger/CMakeLists.txt:
+        * cmake/opendds_target_sources.cmake:
+        * cmake/opendds_utils.cmake:
+        * dds/CMakeLists.txt:
+        * dds/DCPS/CMakeLists.txt:
+        * dds/DCPS/InfoRepoDiscovery/CMakeLists.txt:
+        * dds/DCPS/QOS_XML_Handler/CMakeLists.txt:
+        * dds/DCPS/RTPS/CMakeLists.txt:
+        * dds/DCPS/security/CMakeLists.txt:
+        * dds/DCPS/transport/multicast/CMakeLists.txt:
+        * dds/DCPS/transport/rtps_udp/CMakeLists.txt:
+        * dds/DCPS/transport/shmem/CMakeLists.txt:
+        * dds/DCPS/transport/tcp/CMakeLists.txt:
+        * dds/DCPS/transport/udp/CMakeLists.txt:
+        * dds/InfoRepo/CMakeLists.txt:
+        * dds/idl/CMakeLists.txt:
+        * docs/news.d/cmake4.rst:
+        * examples/CMakeLists.txt:
+        * examples/DCPS/CMakeLists.txt:
+        * examples/DCPS/ishapes/CMakeLists.txt:
+        * tests/CMakeLists.txt:
+        * tests/DCPS/CMakeLists.txt:
+        * tests/DCPS/Compiler/CMakeLists.txt:
+        * tests/DCPS/Compiler/char_literals/CMakeLists.txt:
+        * tests/DCPS/HelloWorld/CMakeLists.txt:
+        * tests/cmake/C++11_typecode/CMakeLists.txt:
+        * tests/cmake/CMakeLists.txt:
+        * tests/cmake/Messenger/C++11_Messenger/CMakeLists.txt:
+        * tests/cmake/Messenger/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_1/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_2/CMakeLists.txt:
+        * tests/cmake/Messenger/Messenger_Space/CMakeLists.txt:
+        * tests/cmake/Nested_IDL/CMakeLists.txt:
+        * tests/cmake/ace_tao_only/CMakeLists.txt:
+        * tests/cmake/generated_global/CMakeLists.txt:
+        * tests/cmake/generated_global/cpp/CMakeLists.txt:
+        * tests/cmake/generated_global/idl/CMakeLists.txt:
+        * tests/cmake/idl_compiler_tests/CMakeLists.txt:
+        * tests/cmake/include_subdir/CMakeLists.txt:
+        * tests/cmake/install/CMakeLists.txt:
+        * tests/cmake/install/library/CMakeLists.txt:
+        * tests/cmake/install/user/CMakeLists.txt:
+        * tests/googletest:
+        * tools/dds/rtpsrelaylib/CMakeLists.txt:
+        * tools/inspect/CMakeLists.txt:
+        * tools/rtpsrelay/CMakeLists.txt:
+        * tools/scripts/lint.pl:
+
+          Better Compatibility with CMake 4
+
+          - Update GoogleTest submodule to
+          https://github.com/OpenDDS/googletest/pull/1
+
+          - Update `cmake_minimum_required` to 4.0 to include new policies.
+          Also
+          added a check for `cmake_minimum_required` to the lint script.
+
+          - Fix relative path issues when working within symlinked
+          directory,
+          including a warning about
+          https://cmake.org/cmake/help/latest/policy/CMP0177.html.
+
+Mon Mar 31 18:35:24 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 761e976b6a5ed0cce8a7649f0f3d0a7857c5bcc3
+
+          Merge pull request #4954 from iguessthislldo/igtd/cmake-export
+
+          Consolidate and Correct CMake Export Header Code
+
+Fri Mar 28 21:59:01 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 6b9d31fef581d32540a3e2af8117e0a18ee46640
+
+        * docs/devguide/building/cmake.rst:
+
+          Apply suggestions from code review
+
+          Co-authored-by: Son Dinh <technology789@gmail.com>
+          Co-authored-by: Adam Mitz <mitza@objectcomputing.com>
+
+Fri Mar 28 18:32:13 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit a750133e98cb2fe7aa53e3e865523577a16bb8a4
+
+          Merge pull request #4958 from sonndinh/cmake-consistent-vars
+
+          Get CMake parent scope variable names from arguments
+
+Thu Mar 27 23:43:49 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 2d2e74955a69308df92de356f4a28599361eebcb
+
+        * docs/devguide/building/cmake.rst:
+        * docs/news.d/cmake-export.rst:
+
+          Tweaks to News and CMake Docs
+
+Thu Mar 27 23:32:09 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 1b01cf7a9e2d3209b1e7b97c5e3c85557705dbad
+
+        * docs/sphinx_extensions/cmake_domain.py:
+
+          Fix Multiple Args in Args in CMake Sphinx Domain
+
+Thu Mar 27 23:28:18 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 94f4da3d061d75b354d55bf2ac1686deaec5d06a
+
+        * docs/sphinx_extensions/cmake_domain.py:
+
+          Allow spaces in func args in CMake Sphinx domain
+
+Thu Mar 27 18:46:48 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 7dbb99b455f22f4e32f9b3f72376d669d40c7683
+
+        * cmake/opendds_build_helpers.cmake:
+        * cmake/opendds_utils.cmake:
+        * dds/CMakeLists.txt:
+        * dds/DCPS/transport/rtps_udp/CMakeLists.txt:
+        * dds/InfoRepo/CMakeLists.txt:
+        * docs/devguide/building/cmake.rst:
+        * docs/news.d/cmake-export.rst:
+        * docs/news.d/try_compile.rst:
+        * tools/dds/rtpsrelaylib/CMakeLists.txt:
+
+          Add News, CMake Docs, Rename bigobj
+
+Thu Mar 27 17:50:13 UTC 2025  Son Dinh  <dinhs@objectcomputing.com>
+        commit 3f5e50ff68ac2bbddf15ecf48fd3ec8a7d0a44c1
+
+        * cmake/opendds_target_sources.cmake:
+
+          Get variable names from parent scope consistently
+
+Wed Mar 26 18:29:50 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit fb035be3f4b7597b83cd060376c8da97d4fb97a4
+
+        * cmake/opendds_utils.cmake:
+
+          Also set VISIBILITY_INLINES_HIDDEN
+
+Thu Mar 20 01:49:27 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 0359c0853b743f04697ac0522862387bab4a1ffc
+
+        * cmake/dds_idl_sources.cmake:
+        * cmake/export.h.in:
+        * cmake/init.cmake:
+        * cmake/opendds_build_helpers.cmake:
+        * cmake/opendds_target_sources.cmake:
+        * cmake/opendds_utils.cmake:
+        * cmake/tao_idl_sources.cmake:
+        * dds/DCPS/CMakeLists.txt:
+        * dds/DCPS/QOS_XML_Handler/CMakeLists.txt:
+        * dds/InfoRepo/CMakeLists.txt:
+
+          Fixes and Improvements for CMake Export Headers
+
+          - `opendds_export_header`
+          - Consolidate all CMake export header code in in
+          `opendds_export_header` and allow using an existing export header
+          and give control over names.
+          - Fix an issue on Windows where public export macro should be set
+          to
+          override the ACE default. This allows `OpenDDS_Util` to always be
+          a
+          static library in CMake.
+          - This function (and therefore `opendds_target_sources`) will now
+          set
+          symbol visibility to hidden to make the export header useful on
+          platforms where this applies. This also overrides a workaround in
+          ACE for macOS.
+          - Added a function to set `/bigobj` on targets that need it on
+          Windows.
+          - Moved these and other functions to a new CMake files for
+          functions.
+
+Mon Mar 24 18:59:10 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit ad94894f20e677da3b7664461f96e4f86c2554f6
+
+          Merge pull request #4955 from jrw972/rtps-relay-thread-checks
+
+          Additional thread updates in RtpsRelay
+
+Mon Mar 24 18:53:57 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 28d554b2bf040d19bec4599962a79f09cebf4f7b
+
+        * tools/rtpsrelay/RelayPartitionsListener.cpp:
+
+          Additional thread updates in RtpsRelay
+
+Tue Mar 18 18:34:27 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit c6d94fcbb43b72374e1102e6482eb78e062cb11b
+
+          Merge pull request #4952 from
+          OpenDDS/dependabot/github_actions/docker/login-action-3.4.0
+
+          Bump docker/login-action from 3.3.0 to 3.4.0
+
+Mon Mar 17 07:44:53 UTC 2025  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 45d3d45589cee1774f3a987d58a709c7acd1adec
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/login-action from 3.3.0 to 3.4.0
+
+          Bumps
+          [docker/login-action](https://github.com/docker/login-action)
+          from 3.3.0 to 3.4.0.
+          - [Release
+          notes](https://github.com/docker/login-action/releases)
+          -
+          [Commits](https://github.com/docker/login-action/compare/9780b0c442fbb1117ed29e0efdff1e18412f7567...74a5d142397b4f367a81961eba4e8cd7edddf772)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/login-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Thu Mar 13 21:33:55 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 894474f4cfc83df61f240588905909a5c90bcb96
+
+          Merge pull request #4947 from
+          jrw972/flexible-types-delay-association
+
+          FlexibleTypes delay association
+
+Thu Mar 13 18:37:24 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 142210dc9a01550139358419338e1bc4440c249f
+
+          Merge pull request #4949 from sonndinh/cmake-devguide
+
+          Minor update to CMake docs
+
+Thu Mar 13 18:21:18 UTC 2025  Son Dinh  <dinhs@objectcomputing.com>
+        commit ff200255f29317be6adb683e1ad10a90ad2f5f95
+
+        * docs/devguide/building/cmake.rst:
+
+          Minor update
+
+Wed Mar 05 19:44:30 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit a6e9276c5aab523a452f2836843d1b839cf87974
+
+        * dds/DCPS/RTPS/AssociationRecord.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+
+          FlexibleTypes delay association
+
+          Problem
+          -------
+
+          Enabling flexible types causes new publications and subscriptions
+          to
+          be written. These are outside of the durable data which means
+          they go
+          through a delay, heartbeat, and acknack cycle.  This delays
+          association since there is definitely a match but the local match
+          cannot proceed without confirmation that the remote received the
+          local
+          publication/subscription.  The goal is to eliminate the delay.
+
+          Solution
+          --------
+
+          - Keep track of endpoints that write samples when enabling
+          flexible
+          types.
+          - Request acknowledgement on these endpoints.
+          - Enable support for request acknowledgements in RTPS.
+          - Update the progressive association logic to only require the
+          reader
+          to acknowledge the relevant publication/subscription.
+
+Wed Mar 12 18:33:48 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit b2f6778fbe5a254276637849055452ea5453c516
+
+        * docs/news.d/scc_support.rst:
+
+          Add news for #4940 (#4948)
+
+          * Add news for #4940
+
+Tue Mar 11 18:38:07 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit c8bd8aded14db6ee702db7188fba55c913f90b78
+
+          Merge pull request #4940 from jrw972/typelook-sccs
+
+          TypeLookupService doesn't support SCCs
+
+Thu Mar 06 14:51:07 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit ba3c026423cce413671e8f035ba8b30f487bab58
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/TypeSupportImpl.cpp:
+        * dds/DCPS/XTypes/TypeLookupService.cpp:
+        * dds/DCPS/XTypes/TypeObject.cpp:
+        * dds/DCPS/XTypes/TypeObject.h:
+        * tests/unit-tests/dds/DCPS/XTypes/TypeObject.cpp:
+
+          TypeLookupService doesn't support SCCs
+
+          Problem
+          -------
+
+          The TypeLookupService doesn't support strongly connected
+          components (SCCs) correctly.
+
+          Solution
+          --------
+
+          * Add the SCCId to dependencies when necessary (fixes
+          `getTypeDependencies`).
+          * Update `getTypes` to consolidate type identifiers and send all
+          components of an SCC.
+
+Thu Mar 06 19:53:58 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit e978b3b68ae83231077cc5a7e23baa89bc5bafad
+
+          Merge pull request #4926 from mitza-oci/update-vcpkg
+
+          Updated git hash of vcpkg used by GitHub Actions and improve
+          Xerces CMake support
+
+Wed Mar 05 19:31:29 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 05a9a22eadd8258a36196a763c676f45ed35a1f0
+
+        * cmake/init.cmake:
+        * docs/news.d/cmake-xerces.rst:
+
+          Add News and Fix Typo
+
+Tue Mar 04 22:36:18 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 251ff94ec218ca38e78029ad920e5467ba2acc2b
+
+        * cmake/init.cmake:
+
+          Try to get Xerces Root from Common Directory
+
+Mon Mar 03 19:36:26 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit e21bcfec0a76479caf6254bfdc68238de60a6278
+
+          Merge pull request #4932 from mitza-oci/log_progress
+
+          Added log_progress messages for type lookup server-side
+
+Mon Mar 03 19:35:19 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit cecc75e61199725f5c417c19b94a648ebd919d2e
+
+          Merge pull request #4933 from OpenDDS/jwillemsen-patch-1
+
+          Update README.md
+
+Mon Mar 03 19:34:28 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit ba6a7e7a508c0b0a8681e9a4c566189574d2e09b
+
+          Merge pull request #4934 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-6.15.0
+
+          Bump docker/build-push-action from 6.14.0 to 6.15.0
+
+Mon Mar 03 19:34:01 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 93f9cc9cfbf91f192db21fd53a771248077ef68f
+
+          Merge pull request #4935 from
+          OpenDDS/dependabot/github_actions/docker/metadata-action-5.7.0
+
+          Bump docker/metadata-action from 5.6.1 to 5.7.0
+
+Mon Mar 03 07:09:36 UTC 2025  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit c960ab8c17d3017572e8473052863cb95d97d085
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/metadata-action from 5.6.1 to 5.7.0
+
+          Bumps
+          [docker/metadata-action](https://github.com/docker/metadata-action)
+          from 5.6.1 to 5.7.0.
+          - [Release
+          notes](https://github.com/docker/metadata-action/releases)
+          -
+          [Commits](https://github.com/docker/metadata-action/compare/369eb591f429131d6889c46b94e711f089e6ca96...902fa8ec7d6ecbf8d84d538b9b233a880e428804)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/metadata-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Mon Mar 03 07:09:34 UTC 2025  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 6c6f8c8dd3a7dfe955516e763b61170e1fd69ed2
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 6.14.0 to 6.15.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 6.14.0 to 6.15.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/0adf9959216b96bec444f325f1e493d4aa344497...471d1dc4e07e5cdedd4c2171150001c434f0b7a4)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Sat Mar 01 09:14:17 UTC 2025  Johnny Willemsen  <jwillemsen@remedy.nl>
+        commit b31e7e3df3a0d2d062d32e81eba9a23dcd855e0a
+
+        * README.md:
+
+          Update README.md
+
+          Removed RHEL 8.0 and Yocto, not testing anymore with these
+
+Fri Feb 28 21:26:05 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1ec3d7358cb212caf8e21ac2dd30f058ddf5c285
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Added log_progress messages for type lookup server-side
+
+          (cherry picked from commit
+          96a8cdd19c23896babc9e411e450edc36cb73a3c)
+
+Fri Feb 28 19:36:32 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 869c043ab610f3f97446d5a8e74f0c96046b1123
+
+          Merge pull request #4928 from
+          OpenDDS/rtps-relay-synchronous-output
+
+          RtpsRelay output queue may be ill-behaved
+
+Fri Feb 28 19:34:08 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit f2e2a644466f59f0ebbf0d7f369b8b70bc2366a4
+
+          Merge pull request #4930 from iguessthislldo/igtd/sphinx-fixes
+
+          Fixes for Sphinx
+
+Fri Feb 28 07:53:02 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 0feeb37e93172146211b43fa65ea3b7475784312
+
+        * cmake/init.cmake:
+
+          Try XercesC_INCLUDE_DIR
+
+          Instead of XercesC_INCLUDE_DIRs.
+
+Thu Feb 27 22:12:21 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit b771141859071c7a0f532046005118714aaa7efe
+
+        * docs/build.py:
+        * docs/conf.py:
+        * docs/devguide/opendds_idl.rst:
+        * docs/news.d/rtps-cleanup-separation.rst:
+
+          Fixes for Sphinx
+
+          - Fix bug in `build.py` that caused the "sphinx strict" job to
+          pass when
+          it shouldn't have.
+          - Fix RST from https://github.com/OpenDDS/OpenDDS/pull/4898 and
+          https://github.com/OpenDDS/OpenDDS/pull/4908.
+          - Fix issue with recursive path errors by explicitly listing
+          additional
+          static files for the HTML build. This should also reduce the size
+          of
+          the output files.
+
+Thu Feb 27 19:35:37 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 148d0612cd847920e9ed4fc8c3a838e8d2cb65ba
+
+          Merge pull request #4927 from mitza-oci/remove-link
+
+          Removed link to gnu.org in dev guidelines doc
+
+Thu Feb 27 18:54:45 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit df11ba7cc09e19c689939d3b7aa8c11ff02379a9
+
+        * .github/workflows/cmake.yml:
+        * .github/workflows/ishapes.yml:
+
+          Updated git hash of vcpkg used by GitHub Actions
+
+Wed Feb 26 21:58:08 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit d5b155753ef3ed9d587473dfb9dbd6c3a969daa1
+
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/news.d/rtpsrelay-synchronous-output.rst:
+        * tests/DCPS/RtpsRelay/Smoke/run_test.pl:
+        * tools/rtpsrelay/Config.h:
+        * tools/rtpsrelay/RelayHandler.cpp:
+        * tools/rtpsrelay/RelayHandler.h:
+        * tools/rtpsrelay/RtpsRelay.cpp:
+
+          RtpsRelay output queue may be ill-behaved
+
+          Problem
+          -------
+
+          The RtpsRelay uses an output queue. When a message needs to be
+          sent,
+          the message is placed on a queue and a handler is registered with
+          the
+          reactor if necessary.  When the handler is invoked, a message is
+          removed from the queue and sent. This avoid errors from the send
+          buffer being full since the socket is non-blocking.
+
+          This design has shown to have undesirable behavior which stems
+          from a
+          lack of fairness between input and output processing. That is,
+          given
+          that both tasks are ready, there is no guarantee that one will
+          not be
+          systematically preferred over another. Given a high enough input
+          rate, the output task will fall behind and the queue will grow.
+
+          Solution
+          --------
+
+          Introduce a `-SynchronousOutput` option that sends messages as
+          soon as
+          possible instead of queueing them and waiting on the reactor. In
+          this
+          configuration, it is possible that the output socket will not be
+          ready
+          and return an error indicating that a write would block.
+
+Wed Feb 26 20:26:48 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit cb7b22449c11c06236743367f15f6956f8b021a7
+
+        * docs/internal/dev_guidelines.rst:
+
+          Removed link to gnu.org in dev guidelines doc
+
+          This is causing the linkcheck CI script to fail
+
+Wed Feb 26 19:49:30 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit efb322dc42d0d91196b8ba084e2c999737943af1
+
+        * .github/workflows/build_and_test.yml:
+
+          Updated git hash of vcpkg used by GitHub Actions
+
+Tue Feb 25 21:56:38 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 35fe1b0fcc217549fde9333212f3f4f74579cb15
+
+          Merge pull request #4908 from OpenDDS/rtps-discovery-cleanup
+
+          RtpsDiscovery thread can be unresponsive during cleanup
+
+Mon Feb 24 16:42:55 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 7deff171ef24453bc7635da0aaa613be748af7ea
+
+        * dds/DCPS/RTPS/RtpsDiscoveryConfig.cpp:
+        * dds/DCPS/RTPS/RtpsDiscoveryConfig.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/SporadicTask.cpp:
+        * dds/DCPS/SporadicTask.h:
+        * docs/devguide/run_time_configuration.rst:
+        * docs/news.d/rtps-cleanup-separation.rst:
+
+          RtpsDiscovery thread can be unresponsive during cleanup
+
+          Problem
+          -------
+
+          The leases for remote participants can expire within a short
+          amount of
+          time. The current cleanup logic processes all participants that
+          have
+          expired up until the most recent sampling of now. If participants
+          remain, the cleanup task is rescheduled by comparing the first
+          participant to expire against the most recent sample of now. This
+          delay can be negative due to the time needed for cleanup and the
+          sampling of now. Consequently, the cleanup task can preempt other
+          tasks from running, such as those for thread monitoring.
+
+          Solution
+          --------
+
+          Process one expired remote participant at a time and enforce at
+          least
+          a 1ms delay between cleanup attempts.
+
+Mon Feb 24 19:40:19 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 37cb95d8f4ac27e555ac8f75a11144125a675960
+
+          Merge pull request #4907 from
+          OpenDDS/dependabot/github_actions/docker/build-push-action-6.14.0
+
+          Bump docker/build-push-action from 6.13.0 to 6.14.0
+
+Mon Feb 24 07:09:05 UTC 2025  dependabot[bot]  <49699333+dependabot[bot]@users.noreply.github.com>
+        commit 7527491e53902473fe7200dfc771cb5789be49b3
+
+        * .github/workflows/docker_image.yml:
+
+          Bump docker/build-push-action from 6.13.0 to 6.14.0
+
+          Bumps
+          [docker/build-push-action](https://github.com/docker/build-push-action)
+          from 6.13.0 to 6.14.0.
+          - [Release
+          notes](https://github.com/docker/build-push-action/releases)
+          -
+          [Commits](https://github.com/docker/build-push-action/compare/ca877d9245402d1537745e0e356eab47c3520991...0adf9959216b96bec444f325f1e493d4aa344497)
+
+          ---
+          updated-dependencies:
+          - dependency-name: docker/build-push-action
+          dependency-type: direct:production
+          update-type: version-update:semver-minor
+          ...
+
+          Signed-off-by: dependabot[bot] <support@github.com>
+
+Fri Feb 21 19:34:32 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 9544b60573e407440056f4b5d617b6f808438f05
+
+          Merge pull request #4884 from
+          iguessthislldo/igtd/cmake-try-compile
+
+          Fix CMake iShapes and Comply with CMP0165
+
+Fri Feb 21 14:14:37 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3476a63346a0eac779da6f053ae309cc32584e12
+
+          Merge pull request #4906 from mitza-oci/clang19
+
+          Fixed warnings and errors on clang 18/19
+
+Thu Feb 20 21:04:36 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 7a6b614427c184dae82a5d8c2804d5722094bbdf
+
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/yard/yard_base_grammar.hpp:
+        * dds/DCPS/yard/yard_text_grammar.hpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/unit-tests/dds/DCPS/transport/framework/CopyChainVisitor.cpp:
+
+          Fixed warnings and errors on clang 18/19
+
+Thu Feb 20 19:38:12 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 96fa6dd67d6e767fcda084c19124630d72157da6
+
+          Merge pull request #4901 from
+          OpenDDS/ishapes-complete-type-objects
+
+          iShapes demo doesn't have complete type objects
+
+Thu Feb 20 19:37:47 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 49bc255b4c29459b192f11198d2b028215248464
+
+          Merge pull request #4904 from mitza-oci/warnings
+
+          Fixed a compiler warning due to mismatched types
+
+Thu Feb 20 02:57:19 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 5e178267e2f49de327e08b3730b5a3a2c464b405
+
+        * .github/workflows/cmake.yml:
+        * CMakeLists.txt:
+        * cmake/init.cmake:
+        * docs/devguide/building/cmake.rst:
+        * docs/news.d/try_compile.rst:
+        * examples/CMakeLists.txt:
+        * examples/DCPS/CMakeLists.txt:
+        * tests/cmake/CMakeLists.txt:
+
+          Add Shapes Demo to CMake Build
+
+          And enable it in a CI build. Also made more improvements to C++
+          standard
+          code.
+
+Thu Feb 20 02:24:22 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 907e1bcf73948144e40b8a4eff29196eb8779e01
+
+        * cmake/get_ace_tao.cmake:
+        * docs/devguide/building/dependencies.rst:
+        * docs/news.d/try_compile.rst:
+
+          Fix Typo in OPENDDS_ACE_TAO_KIND ACE6/TAO2 Value
+
+          Also check for OPENDDS_ACE_TAO_KIND invalid values instead of
+          letting
+          them cause other weird errors.
+
+Wed Feb 19 21:36:18 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 1c444b2bdcb58b166314620672de5e72a5dc0834
+
+        * dds/DCPS/Qos_Helper.inl:
+
+          Fixed a compiler warning due to mismatched types
+
+Wed Feb 19 21:34:40 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 73cc9888cf2ae7c1b171bbe8f1345ef102ecc999
+
+          Merge pull request #4903 from mitza-oci/idl-typeobjects
+
+          Restore comment in generated code for complete TypeObjects
+
+Wed Feb 19 19:38:12 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit bce230f35f5a8e466c227babe6797b4071720047
+
+          Merge pull request #4893 from jrw972/ubuntu-24.04
+
+          Ubuntu 20.04 to Ubuntu 24.04
+
+Wed Feb 19 19:28:13 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit da7928db7764f3bb1e65e7f4a6d217e059fcc052
+
+        * .github/workflows/build_and_test.yml:
+        * docs/news.d/try_compile.rst:
+
+          Add News and Add CMake iShapes to CI
+
+Tue Feb 18 19:20:53 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 2c7df1b6f900a79deac6c0a63cb816ae34c40de3
+
+        * examples/DCPS/ishapes/CMakeLists.txt:
+        * examples/DCPS/ishapes/ishapes.mpc:
+
+          iShapes demo doesn't have complete type objects
+
+          Problem
+          -------
+
+          The iShapes demo doesn't have complete type objects which is
+          something other vendors expect.
+
+          Solution
+          --------
+
+          Add complete type objects.
+
+Wed Feb 19 15:40:41 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 78de87ab77924a4b554f0523b5b64aea41be221f
+
+        * dds/idl/typeobject_generator.cpp:
+
+          Restore comment in generated code for complete TypeObjects
+
+          This was accidentally lost in the change for PR #4898
+
+Wed Feb 19 14:56:52 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 69cc236ebcfbb104d987ce01953631d29950e0e2
+
+          Merge pull request #4900 from OpenDDS/rtps-relay-events
+
+          Service Participant thread doesn't update thread status
+
+Tue Feb 18 19:07:54 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit a3416730e32a12b6d2c43332a229f5ac1445534d
+
+        * docs/news.d/rtpsrelay-service-participant.rst:
+        * tools/rtpsrelay/ParticipantListener.cpp:
+        * tools/rtpsrelay/PublicationListener.cpp:
+        * tools/rtpsrelay/RelayParticipantStatusReporter.cpp:
+        * tools/rtpsrelay/RelayParticipantStatusReporter.h:
+        * tools/rtpsrelay/SubscriptionListener.cpp:
+
+          Service Participant thread doesn't update thread status
+
+          Problem
+          -------
+
+          The Service Participant thread invokes the BIT listeners in the
+          RtpsRelay. Given large enough batches, the listeners can occupy
+          the
+          processor long enough for the thread monitoring logic to trip.
+
+          Solution
+          --------
+
+          Add events for each sample to update the thread status.
+
+          Add logging to show the size of the batches.
+
+Wed Feb 19 10:31:49 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 332b15568eb32c62604d69aa0f5cf8a909eeb4aa
+
+        * cmake/init.cmake:
+        * cmake/test_cxx_std.cpp:
+
+          Unset Result Before try_compile
+
+          - Android CI build was failing because it was getting -std=c++23
+          in the
+          ACE/TAO build when the clang version didn't recognize that.
+          Ultimately
+          this was because try_compile sets the result as a cache variable
+          and
+          the try_compile was seen as always succeeding. I'm not sure how
+          this
+          wasn't a problem before, but these changes try to work around
+          that
+          regardless.
+
+          - Test to make sure standard is at least C++ 9999 always fails.
+          This
+          should prevent the try_compile test from always working like it
+          did.
+
+          - Check to make sure C++ standard isn't higher than what compiler
+          or
+          CMake support in the ACE/TAO min standard check. Otherwise it
+          will try
+          to use a standard that's too high and try_compile will give an
+          unhelpful error.
+
+Tue Feb 18 19:38:20 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 88742d0a19c2e3eb77dd66662bfc01fa66554e46
+
+          Merge pull request #4898 from mitza-oci/idl-typeobjects
+
+          opendds_idl: options to write TypeObjects to a separate file
+
+Thu Feb 13 21:00:54 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit dfe2becf72c6d2f72f19e43bddc7ab58c91bc9b6
+
+        * .github/workflows/build_and_test.yml:
+
+          Ubuntu 20.04 to Ubuntu 24.04
+
+Mon Feb 17 17:00:18 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit c8d9741d7f0e9d64c708ec58dc41d3fd3a2b3f04
+
+        * docs/devguide/building/index.rst:
+        * docs/devguide/opendds_idl.rst:
+        * docs/news.d/opendds_idl-options.rst:
+
+          Updated documentation
+
+Fri Feb 14 21:24:06 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 6c248b5e89e60a75b4974a076a8923b7144ff262
+
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_global.h:
+        * dds/idl/dds_visitor.cpp:
+        * dds/idl/typeobject_generator.cpp:
+        * dds/idl/typeobject_generator.h:
+
+          opendds_idl: options to write TypeObjects to a separate file
+
+Fri Feb 14 16:39:30 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit a1e06c922c01036dbd38d5fdd720a983616bed5e
+
+          Merge pull request #4894 from iguessthislldo/igtd/release-year
+
+          Use Release Year in Sphinx Copyright
+
+Thu Feb 13 21:00:02 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 0d5fd3951238a35b17321c496c0c9bb98072779b
+
+        * docs/conf.py:
+        * docs/news.d/harvest_control.rst:
+        * docs/sphinx_extensions/version_info.py:
+
+          Use Release Year in Sphinx Copyright
+
+          Fixes https://github.com/OpenDDS/OpenDDS/issues/4891
+
+          It will use the year from VERSION.txt if it's a release, else
+          doesn't
+          include a year.
+
+          Also fixed a link issue with
+          https://github.com/OpenDDS/OpenDDS/pull/4887
+
+Thu Feb 13 02:42:44 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit da4426c58b89f4171e18a83f8a4a08f4df6a1ca2
+
+          Merge pull request #4890 from mitza-oci/relay-logging
+
+          New RtpsRelay option -LogUtilizationChanges
+
+Thu Feb 13 02:42:11 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 170ad6a60c5d3b859322615b7820420a8687edba
+
+          Merge pull request #4887 from jrw972/rtps-harvest-thread-status
+
+          Thread monitors may be starved for data
+
+Wed Feb 12 16:31:09 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 0e3e86564d8190f9fbd2875b09c03f5a4df5b515
+
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * docs/devguide/built_in_topics.rst:
+        * docs/news.d/harvest_control.rst:
+        * tests/DCPS/InternalThreadStatus/publisher.cpp:
+        * tools/rtpsrelay/RtpsRelay.cpp:
+
+          Thread monitors may be starved for data
+
+          Problem
+          -------
+
+          When thread status monitoring is enabled, all participants that
+          use
+          RTPS discovery will harvest the thread status from the monitor
+          and
+          publish it on the OpenDDSInternalThread BIT. If there are
+          multiple
+          participants, they will each harvest. Typically, an application
+          will
+          only look at one of the BIT readers with the result being that
+          any
+          monitoring logic may be operating on an incomplete set of data.
+
+          Solution
+          --------
+
+          Add a property `RTPS_HARVEST_THREAD_STATUS` that enables
+          harvesting
+          for particular participants.
+
+Wed Feb 12 20:12:39 UTC 2025  Adam Mitz  <mitza@objectcomputing.com>
+        commit 3e1a0bbda7e4315272dc162adfe3af81e8ea4022
+
+        * docs/devguide/internet_enabled_rtps.rst:
+        * docs/news.d/rtpsrelay-log-utilization-changes.rst:
+        * tools/rtpsrelay/Config.h:
+        * tools/rtpsrelay/RelayThreadMonitor.cpp:
+        * tools/rtpsrelay/RtpsRelay.cpp:
+
+          New RtpsRelay option -LogUtilizationChanges
+
+Mon Feb 10 19:37:39 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit e3822265ff9ea70bf47d0f77b62223d456a7b86f
+
+          Merge pull request #4881 from
+          jrw972/flexible-type-support-dependencies
+
+          TypeLookup fails with missing dependencies
+
+Fri Feb 07 09:17:13 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 2618c284f7a74e78b57dc5b46c2f25115124d98e
+
+        * cmake/ace_group.cmake:
+        * cmake/init.cmake:
+        * cmake/opendds_version.cmake:
+        * examples/DCPS/ishapes/CMakeLists.txt:
+
+          Fix CMake iShapes and Comply with CMP0165
+
+          Fixes https://github.com/OpenDDS/OpenDDS/issues/4849
+
+          Changes from https://github.com/OpenDDS/OpenDDS/pull/4487 require
+          C++
+          language to be enabled in CMake, which it basically is all the
+          time
+          through `project(... LANGUAGES CXX)` expect in ishapes. There
+          `find_project(OpenDDS)` was used to get the OpenDDS version
+          before
+          `project` enabled C++ which results in `try_compile` failing
+          fatally.
+          These changes both make sure C and C++ are enabled early in CMake
+          initialization and switch the `project` and `find_package` to
+          comply with
+          https://cmake.org/cmake/help/latest/policy/CMP0165.html#policy:CMP0165
+
+          Also changed the C++ standard checks to include the min C++
+          standard
+          (currently C++98/03), so it would never mistake a broken compiler
+          setup
+          with a compiler that only supports the min standard.
+
+Tue Feb 04 19:03:21 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit cd026862d6b2ef3c9cbacd60aefcfb0d7589e3a1
+
+        * dds/DCPS/FlexibleTypeSupport.cpp:
+        * dds/DCPS/FlexibleTypeSupport.h:
+        * dds/DCPS/XTypes/TypeObject.cpp:
+
+          Update dds/DCPS/FlexibleTypeSupport.cpp
+
+          Co-authored-by: Fred Hornsey <fred@hornsey.us>
+
+Thu Jan 30 20:51:07 UTC 2025  Justin Wilson  <wilsonj@objectcomputing.com>
+        commit 736bd23d7556883a8a2890d932b1d27ef91af3aa
+
+        * dds/DCPS/FlexibleTypeSupport.cpp:
+        * dds/DCPS/FlexibleTypeSupport.h:
+        * dds/DCPS/TypeSupportImpl.h:
+        * dds/DCPS/XTypes/TypeObject.cpp:
+
+          TypeLookup fails with missing dependencies
+
+          Problem
+          -------
+
+          Type dependencies are not calculated for DataReaders. This has
+          two
+          implications:
+          1. The list of dependencies returned is empty.
+          2. A request for the TypeObject of the type of the DataReader
+          will
+          succeed but a request for a dependency will fail.
+
+          Dependencies generated via FlexibleTypes were not calculated.
+
+          The algorithm for computing dependencies erroneously inserted the
+          top-level type.
+
+          Solution
+          --------
+
+          * Calculate dependcies for DataReaders.
+          * Add dependency support for FlexibleTypes.
+          * Correct the dependency algorithm.
+
+Wed Jan 29 22:21:26 UTC 2025  Fred Hornsey  <hornseyf@objectcomputing.com>
+
+        * PROBLEM-REPORT-FORM:
+        * VERSION.txt:
+        * dds/Version.h:
+
+          OpenDDS Post Release 3.31.0
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

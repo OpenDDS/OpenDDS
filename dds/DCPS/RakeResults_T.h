@@ -12,6 +12,7 @@
 #endif
 
 #include "Comparator_T.h"
+#include "Definitions.h"
 #include "PoolAllocator.h"
 #include "RakeData.h"
 #include "TypeSupportImpl.h"
@@ -38,9 +39,9 @@ public:
   RakeResults(DataReaderImpl* reader,
               SampleSeq& received_data,
               DDS::SampleInfoSeq& info_seq,
-              CORBA::Long max_samples,
+              CORBA::ULong max_samples,
               DDS::PresentationQosPolicy presentation,
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
               DDS::QueryCondition_ptr cond,
 #endif
               Operation_t oper);
@@ -67,7 +68,7 @@ private:
   SampleSeq& received_data_;
   DDS::SampleInfoSeq& info_seq_;
   CORBA::ULong max_samples_;
-#ifndef OPENDDS_NO_QUERY_CONDITION
+#if OPENDDS_CONFIG_QUERY_CONDITION
   DDS::QueryCondition_ptr cond_;
 #endif
   Operation_t oper_;
@@ -120,8 +121,6 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#if defined (ACE_TEMPLATES_REQUIRE_SOURCE)
 #include "RakeResults_T.cpp"
-#endif /* ACE_TEMPLATES_REQUIRE_SOURCE */
 
 #endif /* RAKERESULTS_H  */

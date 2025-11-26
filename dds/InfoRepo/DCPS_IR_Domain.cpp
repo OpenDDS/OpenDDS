@@ -11,15 +11,16 @@
 #include "DCPS_IR_Topic_Description.h"
 #include "DomainParticipantListener_i.h"
 
-#include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
-#include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/RepoIdConverter.h>
+#include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Transient_Kludge.h>
-#include <dds/DCPS/DCPS_Utils.h>
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 #  include <dds/DCPS/transport/framework/TransportRegistry.h>
 #  include <dds/DCPS/BuiltInTopicUtils.h>
 #endif
@@ -212,7 +213,7 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i(OpenDDS::DCPS::GUID_t& to
                      topicName,
                      dataTypeName));
     description = desc.get();
-    int descriptionAddition = add_topic_description(move(desc));
+    int descriptionAddition = add_topic_description(OPENDDS_MOVE_NS::move(desc));
 
     if (0 != descriptionAddition) {
       topicId = OpenDDS::DCPS::GUID_UNKNOWN;
@@ -258,7 +259,7 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i(OpenDDS::DCPS::GUID_t& to
       publish_topic_bit(topic.get());
 
       // Keep a reference to easily locate the topic by id.
-      this->idToTopicMap_[topicId] = move(topic);
+      this->idToTopicMap_[topicId] = OPENDDS_MOVE_NS::move(topic);
 
     }
     break;
@@ -460,12 +461,7 @@ DCPS_IR_Domain::find_topic_description(
   }
 }
 
-#if defined (DDS_HAS_MINIMUM_BIT)
-int DCPS_IR_Domain::init_built_in_topics(bool /* federated */, bool /*persistent*/)
-{
-  return 1;
-}
-#else
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 int DCPS_IR_Domain::init_built_in_topics(bool federated, bool persistent)
 {
   // Indicates that BIT subscriber and datareaders should not be created.
@@ -525,14 +521,14 @@ int DCPS_IR_Domain::init_built_in_topics(bool federated, bool persistent)
   useBIT_ = true;
   return 0;
 }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
-
-#if defined (DDS_HAS_MINIMUM_BIT)
-int DCPS_IR_Domain::reassociate_built_in_topic_pubs()
+#else
+int DCPS_IR_Domain::init_built_in_topics(bool /* federated */, bool /*persistent*/)
 {
   return 1;
 }
-#else
+#endif
+
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 int DCPS_IR_Domain::reassociate_built_in_topic_pubs()
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
@@ -560,11 +556,16 @@ int DCPS_IR_Domain::reassociate_built_in_topic_pubs()
 
   return 0;
 }
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#else
+int DCPS_IR_Domain::reassociate_built_in_topic_pubs()
+{
+  return 1;
+}
+#endif
 
 int DCPS_IR_Domain::init_built_in_topics_topics()
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
   try {
     DDS::TopicQos topic_qos;
@@ -693,15 +694,10 @@ int DCPS_IR_Domain::init_built_in_topics_topics()
 #else
 
   return 1;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 }
 
-#if defined (DDS_HAS_MINIMUM_BIT)
-int DCPS_IR_Domain::init_built_in_topics_datawriters(bool /* federated */)
-{
-  return 1;
-}
-#else
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 int DCPS_IR_Domain::init_built_in_topics_datawriters(bool federated)
 {
 
@@ -802,11 +798,16 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters(bool federated)
   }
   return 0;
 }
-#endif // defined (DDS_HAS_MINIMUM_BIT)
+#else
+int DCPS_IR_Domain::init_built_in_topics_datawriters(bool /* federated */)
+{
+  return 1;
+}
+#endif
 
 int DCPS_IR_Domain::init_built_in_topics_transport(bool persistent)
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
   try {
     std::string config_name =
@@ -851,12 +852,12 @@ int DCPS_IR_Domain::init_built_in_topics_transport(bool persistent)
 #else
   ACE_UNUSED_ARG (persistent);
   return 1;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 }
 
 int DCPS_IR_Domain::cleanup_built_in_topics()
 {
-#ifndef DDS_HAS_MINIMUM_BIT
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   if (useBIT_ && bitParticipant_) {
     useBIT_ = false;
     using OpenDDS::DCPS::retcode_to_string;
@@ -907,7 +908,7 @@ int DCPS_IR_Domain::add_topic_description(OpenDDS::DCPS::unique_ptr<DCPS_IR_Topi
             desc->get_dataTypeName(),
             discard)) {
   case -1:
-    this->topicDescriptions_[desc_ptr->get_name()] = move(desc);
+    this->topicDescriptions_[desc_ptr->get_name()] = OPENDDS_MOVE_NS::move(desc);
 
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
@@ -1022,7 +1023,7 @@ DCPS_IR_Domain::last_participant_key(long key)
 
 void DCPS_IR_Domain::publish_participant_bit(DCPS_IR_Participant* participant)
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
   if (useBIT_ && !participant->isBitPublisher()) {
     try {
@@ -1052,12 +1053,12 @@ void DCPS_IR_Domain::publish_participant_bit(DCPS_IR_Participant* participant)
 
 #else
   ACE_UNUSED_ARG(participant);
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 }
 
 void DCPS_IR_Domain::publish_topic_bit(DCPS_IR_Topic* topic)
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
   if (useBIT_) {
     DCPS_IR_Topic_Description* desc =
@@ -1112,13 +1113,13 @@ void DCPS_IR_Domain::publish_topic_bit(DCPS_IR_Topic* topic)
 
 #else
   ACE_UNUSED_ARG(topic);
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 }
 
 void DCPS_IR_Domain::publish_subscription_bit(DCPS_IR_Subscription* subscription)
 {
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
   if (useBIT_) {
     DCPS_IR_Topic_Description* desc =
@@ -1179,13 +1180,13 @@ void DCPS_IR_Domain::publish_subscription_bit(DCPS_IR_Subscription* subscription
 
 #else
   ACE_UNUSED_ARG(subscription);
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
 }
 
 void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
   if (useBIT_) {
 
@@ -1259,13 +1260,13 @@ void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
 
 #else
   ACE_UNUSED_ARG(publication);
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
 }
 
 void DCPS_IR_Domain::dispose_participant_bit(DCPS_IR_Participant* participant)
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
   if (useBIT_) {
     if (!participant->isBitPublisher()) {
@@ -1308,12 +1309,12 @@ void DCPS_IR_Domain::dispose_participant_bit(DCPS_IR_Participant* participant)
 
 #else
   ACE_UNUSED_ARG(participant);
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 }
 
 void DCPS_IR_Domain::dispose_topic_bit(DCPS_IR_Topic* topic)
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
   if (useBIT_) {
     if (!topic->is_bit()) {
@@ -1358,12 +1359,12 @@ void DCPS_IR_Domain::dispose_topic_bit(DCPS_IR_Topic* topic)
 
 #else
   ACE_UNUSED_ARG(topic);
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 }
 
 void DCPS_IR_Domain::dispose_subscription_bit(DCPS_IR_Subscription* subscription)
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
   if (useBIT_) {
     if (!subscription->is_bit()) {
@@ -1408,12 +1409,12 @@ void DCPS_IR_Domain::dispose_subscription_bit(DCPS_IR_Subscription* subscription
 
 #else
   ACE_UNUSED_ARG(subscription);
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 }
 
 void DCPS_IR_Domain::dispose_publication_bit(DCPS_IR_Publication* publication)
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
 
   if (useBIT_) {
     if (!publication->is_bit()) {
@@ -1457,7 +1458,7 @@ void DCPS_IR_Domain::dispose_publication_bit(DCPS_IR_Publication* publication)
 
 #else
   ACE_UNUSED_ARG(publication);
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 }
 
 void DCPS_IR_Domain::remove_topic_id_mapping(const OpenDDS::DCPS::GUID_t& topicId)

@@ -71,10 +71,6 @@ public:
     DDS::DataReader_ptr reader,
     const OpenDDS::DCPS::SubscriptionLostStatus& status);
 
-  virtual void on_budget_exceeded(
-    DDS::DataReader_ptr reader,
-    const OpenDDS::DCPS::BudgetExceededStatus& status);
-
 private:
   /// Our repository key.  If we trigger, this is the key to the
   /// repository that has been lost.

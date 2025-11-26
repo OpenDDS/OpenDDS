@@ -51,10 +51,10 @@ MinimalMemberDetail::MinimalMemberDetail(const OPENDDS_STRING& name)
 #undef max
 #endif
 
-AppliedBuiltinMemberAnnotations::AppliedBuiltinMemberAnnotations(const Optional<DCPS::String>& a_unit,
-                                                                 const Optional<AnnotationParameterValue>& a_min,
-                                                                 const Optional<AnnotationParameterValue>& a_max,
-                                                                 const Optional<DCPS::String>& a_hash_id)
+AppliedBuiltinMemberAnnotations::AppliedBuiltinMemberAnnotations(const std::optional<DCPS::String>& a_unit,
+                                                                 const std::optional<AnnotationParameterValue>& a_min,
+                                                                 const std::optional<AnnotationParameterValue>& a_max,
+                                                                 const std::optional<DCPS::String>& a_hash_id)
   : unit(a_unit)
   , min(a_min)
   , max(a_max)
@@ -67,6 +67,8 @@ TypeIdentifier::TypeIdentifier(ACE_CDR::Octet kind)
 {
   activate();
 }
+
+const TypeIdentifier TypeIdentifier::None;
 
 void TypeIdentifier::activate(const TypeIdentifier* other)
 {
@@ -235,6 +237,20 @@ TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const PlainArrayLElemDefn& ldef
 {
   activate();
   array_ldefn() = ldefn;
+}
+
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const PlainMapSTypeDefn& sdefn)
+  : kind_(k)
+{
+  activate();
+  map_sdefn() = sdefn;
+}
+
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const PlainMapLTypeDefn& ldefn)
+  : kind_(k)
+{
+  activate();
+  map_ldefn() = ldefn;
 }
 
 TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const EquivalenceHashWrapper& eh)
@@ -464,644 +480,653 @@ bool has_type_object(const TypeIdentifier& ti)
     ti.kind() != TK_NONE;
 }
 
+TypeIdentifier make_scc_id_or_default(const TypeIdentifier& tid)
+{
+  if (tid.kind() != TI_STRONGLY_CONNECTED_COMPONENT) {
+    return tid;
+  }
+
+  TypeIdentifier scc_id(tid);
+  scc_id.sc_component_id().scc_index = 0;
+  return scc_id;
+}
+
+const TypeMap TypeMapBuilder::EmptyMap;
+
 namespace {
-template <typename T>
-void compute_dependencies(const TypeMap& type_map,
-                          const Sequence<T>& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies);
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const TypeIdentifier& type_identifier,
+                              TypeIdentifierSet& dependencies);
 
-void compute_dependencies(const TypeMap& type_map,
-                          const CommonAliasBody& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.related_type, dependencies);
-}
+  void compute_dependencies_j(const TypeMap& type_map,
+                              const TypeIdentifier& type_identifier,
+                              TypeIdentifierSet& dependencies);
 
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalAliasBody& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.common, dependencies);
-}
+  template <typename T>
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const Sequence<T>& type,
+                              TypeIdentifierSet& dependencies);
 
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalAliasType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.body, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const AppliedAnnotation& ann,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, ann.annotation_typeid, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const Optional<AppliedAnnotationSeq>& ann_seq,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  if (ann_seq) {
-    compute_dependencies(type_map, ann_seq.value(), dependencies);
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CommonAliasBody& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.related_type, dependencies);
   }
-}
 
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteTypeDetail& type_detail,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type_detail.ann_custom, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteAliasHeader& header,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, header.detail, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteAliasBody& body,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, body.common, dependencies);
-  compute_dependencies(type_map, body.ann_custom, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteAliasType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.header, dependencies);
-  compute_dependencies(type_map, type.body, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CommonAnnotationParameter& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.member_type_id, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalAnnotationParameter& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.common, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalAnnotationType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.member_seq, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteAnnotationParameter& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.common, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteAnnotationType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.member_seq, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalStructHeader& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.base_type, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CommonStructMember& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.member_type_id, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalStructMember& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.common, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalStructType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.header, dependencies);
-  compute_dependencies(type_map, type.member_seq, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteStructHeader& header,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, header.base_type, dependencies);
-  compute_dependencies(type_map, header.detail, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteMemberDetail& detail,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, detail.ann_custom, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteStructMember& member,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, member.common, dependencies);
-  compute_dependencies(type_map, member.detail, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteStructType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.header, dependencies);
-  compute_dependencies(type_map, type.member_seq, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CommonDiscriminatorMember& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.type_id, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalDiscriminatorMember& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.common, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CommonUnionMember& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.type_id, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalUnionMember& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.common, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalUnionType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.discriminator, dependencies);
-  compute_dependencies(type_map, type.member_seq, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteUnionHeader& header,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, header.detail, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteDiscriminatorMember& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.common, dependencies);
-  compute_dependencies(type_map, type.ann_custom, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteUnionMember& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.common, dependencies);
-  compute_dependencies(type_map, type.detail, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteUnionType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.header, dependencies);
-  compute_dependencies(type_map, type.discriminator, dependencies);
-  compute_dependencies(type_map, type.member_seq, dependencies);
-}
-
-void compute_dependencies(const TypeMap&,
-                          const MinimalBitsetType&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // Doesn't have any dependencies.
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteBitsetHeader& header,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, header.detail, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteBitfield& field,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, field.detail, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteBitsetType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.header, dependencies);
-  compute_dependencies(type_map, type.field_seq, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CommonCollectionElement& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.type, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalCollectionElement& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.common, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalSequenceType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.element, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteCollectionHeader& header,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  if (header.detail) {
-    compute_dependencies(type_map, header.detail.value(), dependencies);
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const MinimalAliasBody& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.common, dependencies);
   }
-}
 
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteElementDetail& detail,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, detail.ann_custom, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteCollectionElement& element,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, element.common, dependencies);
-  compute_dependencies(type_map, element.detail, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteSequenceType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.header, dependencies);
-  compute_dependencies(type_map, type.element, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalArrayType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.element, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteArrayHeader& header,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, header.detail, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteArrayType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.header, dependencies);
-  compute_dependencies(type_map, type.element, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalMapType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.key, dependencies);
-  compute_dependencies(type_map, type.element, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteMapType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.header, dependencies);
-  compute_dependencies(type_map, type.key, dependencies);
-  compute_dependencies(type_map, type.element, dependencies);
-}
-
-void compute_dependencies(const TypeMap&,
-                          const MinimalEnumeratedType&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // Doesn't have any dependencies.
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteEnumeratedHeader& header,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, header.detail, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteEnumeratedLiteral& literal,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, literal.detail, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteEnumeratedType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.header, dependencies);
-  compute_dependencies(type_map, type.literal_seq, dependencies);
-}
-
-void compute_dependencies(const TypeMap&,
-                          const MinimalBitmaskType&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // Doesn't have any dependencies.
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteBitflag& bitflag,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, bitflag.detail, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteBitmaskType& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.header, dependencies);
-  compute_dependencies(type_map, type.flag_seq, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const MinimalTypeObject& type_object,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  switch (type_object.kind) {
-  case TK_ALIAS:
-    compute_dependencies(type_map, type_object.alias_type, dependencies);
-    break;
-  case TK_ANNOTATION:
-    compute_dependencies(type_map, type_object.annotation_type, dependencies);
-    break;
-  case TK_STRUCTURE:
-    compute_dependencies(type_map, type_object.struct_type, dependencies);
-    break;
-  case TK_UNION:
-    compute_dependencies(type_map, type_object.union_type, dependencies);
-    break;
-  case TK_BITSET:
-    compute_dependencies(type_map, type_object.bitset_type, dependencies);
-    break;
-  case TK_SEQUENCE:
-    compute_dependencies(type_map, type_object.sequence_type, dependencies);
-    break;
-  case TK_ARRAY:
-    compute_dependencies(type_map, type_object.array_type, dependencies);
-    break;
-  case TK_MAP:
-    compute_dependencies(type_map, type_object.map_type, dependencies);
-    break;
-  case TK_ENUM:
-    compute_dependencies(type_map, type_object.enumerated_type, dependencies);
-    break;
-  case TK_BITMASK:
-    compute_dependencies(type_map, type_object.bitmask_type, dependencies);
-    break;
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const MinimalAliasType& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.body, dependencies);
   }
-}
 
-void compute_dependencies(const TypeMap& type_map,
-                          const CompleteTypeObject& type_object,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  switch (type_object.kind) {
-  case TK_ALIAS:
-    compute_dependencies(type_map, type_object.alias_type, dependencies);
-    break;
-  case TK_ANNOTATION:
-    compute_dependencies(type_map, type_object.annotation_type, dependencies);
-    break;
-  case TK_STRUCTURE:
-    compute_dependencies(type_map, type_object.struct_type, dependencies);
-    break;
-  case TK_UNION:
-    compute_dependencies(type_map, type_object.union_type, dependencies);
-    break;
-  case TK_BITSET:
-    compute_dependencies(type_map, type_object.bitset_type, dependencies);
-    break;
-  case TK_SEQUENCE:
-    compute_dependencies(type_map, type_object.sequence_type, dependencies);
-    break;
-  case TK_ARRAY:
-    compute_dependencies(type_map, type_object.array_type, dependencies);
-    break;
-  case TK_MAP:
-    compute_dependencies(type_map, type_object.map_type, dependencies);
-    break;
-  case TK_ENUM:
-    compute_dependencies(type_map, type_object.enumerated_type, dependencies);
-    break;
-  case TK_BITMASK:
-    compute_dependencies(type_map, type_object.bitmask_type, dependencies);
-    break;
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const AppliedAnnotation& ann,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, ann.annotation_typeid, dependencies);
   }
-}
 
-void compute_dependencies(const TypeMap& type_map,
-                          const TypeObject& type_object,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  switch (type_object.kind) {
-  case EK_COMPLETE:
-    compute_dependencies(type_map, type_object.complete, dependencies);
-    break;
-  case EK_MINIMAL:
-    compute_dependencies(type_map, type_object.minimal, dependencies);
-    break;
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const std::optional<AppliedAnnotationSeq>& ann_seq,
+                              TypeIdentifierSet& dependencies)
+  {
+    if (ann_seq) {
+      compute_dependencies_i(type_map, ann_seq.value(), dependencies);
+    }
   }
-}
 
-void compute_dependencies(const TypeMap&,
-                          const StringSTypeDefn&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // Do nothing.
-}
-
-void compute_dependencies(const TypeMap&,
-                          const StringLTypeDefn&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // Do nothing.
-}
-
-void compute_dependencies(const TypeMap&,
-                          const PlainCollectionHeader&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // Do nothing.
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const PlainSequenceSElemDefn& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.header, dependencies);
-  compute_dependencies(type_map, *type.element_identifier, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const PlainSequenceLElemDefn& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.header, dependencies);
-  compute_dependencies(type_map, *type.element_identifier, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const PlainArraySElemDefn& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.header, dependencies);
-  compute_dependencies(type_map, *type.element_identifier, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const PlainArrayLElemDefn& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.header, dependencies);
-  compute_dependencies(type_map, *type.element_identifier, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const PlainMapSTypeDefn& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.header, dependencies);
-  compute_dependencies(type_map, *type.element_identifier, dependencies);
-  compute_dependencies(type_map, *type.key_identifier, dependencies);
-}
-
-void compute_dependencies(const TypeMap& type_map,
-                          const PlainMapLTypeDefn& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  compute_dependencies(type_map, type.header, dependencies);
-  compute_dependencies(type_map, *type.element_identifier, dependencies);
-  compute_dependencies(type_map, *type.key_identifier, dependencies);
-}
-
-void compute_dependencies(const TypeMap&,
-                          const StronglyConnectedComponentId&,
-                          OPENDDS_SET(TypeIdentifier)&)
-{
-  // Do nothing.
-}
-
-template <typename T>
-void compute_dependencies(const TypeMap& type_map,
-                          const Sequence<T>& type,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
-{
-  for (typename Sequence<T>::const_iterator pos = type.begin(), limit = type.end(); pos != limit; ++pos) {
-    compute_dependencies(type_map, *pos, dependencies);
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteTypeDetail& type_detail,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type_detail.ann_custom, dependencies);
   }
-}
 
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteAliasHeader& header,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, header.detail, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteAliasBody& body,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, body.common, dependencies);
+    compute_dependencies_i(type_map, body.ann_custom, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteAliasType& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.header, dependencies);
+    compute_dependencies_i(type_map, type.body, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CommonAnnotationParameter& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.member_type_id, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const MinimalAnnotationParameter& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.common, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const MinimalAnnotationType& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.member_seq, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteAnnotationParameter& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.common, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteAnnotationType& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.member_seq, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const MinimalStructHeader& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.base_type, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CommonStructMember& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.member_type_id, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const MinimalStructMember& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.common, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const MinimalStructType& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.header, dependencies);
+    compute_dependencies_i(type_map, type.member_seq, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteStructHeader& header,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, header.base_type, dependencies);
+    compute_dependencies_i(type_map, header.detail, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteMemberDetail& detail,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, detail.ann_custom, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteStructMember& member,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, member.common, dependencies);
+    compute_dependencies_i(type_map, member.detail, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteStructType& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.header, dependencies);
+    compute_dependencies_i(type_map, type.member_seq, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CommonDiscriminatorMember& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.type_id, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const MinimalDiscriminatorMember& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.common, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CommonUnionMember& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.type_id, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const MinimalUnionMember& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.common, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const MinimalUnionType& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.discriminator, dependencies);
+    compute_dependencies_i(type_map, type.member_seq, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteUnionHeader& header,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, header.detail, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteDiscriminatorMember& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.common, dependencies);
+    compute_dependencies_i(type_map, type.ann_custom, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteUnionMember& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.common, dependencies);
+    compute_dependencies_i(type_map, type.detail, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteUnionType& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.header, dependencies);
+    compute_dependencies_i(type_map, type.discriminator, dependencies);
+    compute_dependencies_i(type_map, type.member_seq, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap&,
+                              const MinimalBitsetType&,
+                              TypeIdentifierSet&)
+  {
+    // Doesn't have any dependencies.
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteBitsetHeader& header,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, header.detail, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteBitfield& field,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, field.detail, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteBitsetType& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.header, dependencies);
+    compute_dependencies_i(type_map, type.field_seq, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CommonCollectionElement& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.type, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const MinimalCollectionElement& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.common, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const MinimalSequenceType& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.element, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteCollectionHeader& header,
+                              TypeIdentifierSet& dependencies)
+  {
+    if (header.detail) {
+      compute_dependencies_i(type_map, header.detail.value(), dependencies);
+    }
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteElementDetail& detail,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, detail.ann_custom, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteCollectionElement& element,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, element.common, dependencies);
+    compute_dependencies_i(type_map, element.detail, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteSequenceType& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.header, dependencies);
+    compute_dependencies_i(type_map, type.element, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const MinimalArrayType& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.element, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteArrayHeader& header,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, header.detail, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteArrayType& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.header, dependencies);
+    compute_dependencies_i(type_map, type.element, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const MinimalMapType& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.key, dependencies);
+    compute_dependencies_i(type_map, type.element, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteMapType& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.header, dependencies);
+    compute_dependencies_i(type_map, type.key, dependencies);
+    compute_dependencies_i(type_map, type.element, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap&,
+                              const MinimalEnumeratedType&,
+                              TypeIdentifierSet&)
+  {
+    // Doesn't have any dependencies.
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteEnumeratedHeader& header,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, header.detail, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteEnumeratedLiteral& literal,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, literal.detail, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteEnumeratedType& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.header, dependencies);
+    compute_dependencies_i(type_map, type.literal_seq, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap&,
+                              const MinimalBitmaskType&,
+                              TypeIdentifierSet&)
+  {
+    // Doesn't have any dependencies.
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteBitflag& bitflag,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, bitflag.detail, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const CompleteBitmaskType& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.header, dependencies);
+    compute_dependencies_i(type_map, type.flag_seq, dependencies);
+  }
+
+  template <typename T>
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const T& type_object, // MinimalTypeObject, CompleteTypeObject
+                              TypeIdentifierSet& dependencies)
+  {
+    switch (type_object.kind) {
+    case TK_ALIAS:
+      compute_dependencies_i(type_map, type_object.alias_type, dependencies);
+      break;
+    case TK_ANNOTATION:
+      compute_dependencies_i(type_map, type_object.annotation_type, dependencies);
+      break;
+    case TK_STRUCTURE:
+      compute_dependencies_i(type_map, type_object.struct_type, dependencies);
+      break;
+    case TK_UNION:
+      compute_dependencies_i(type_map, type_object.union_type, dependencies);
+      break;
+    case TK_BITSET:
+      compute_dependencies_i(type_map, type_object.bitset_type, dependencies);
+      break;
+    case TK_SEQUENCE:
+      compute_dependencies_i(type_map, type_object.sequence_type, dependencies);
+      break;
+    case TK_ARRAY:
+      compute_dependencies_i(type_map, type_object.array_type, dependencies);
+      break;
+    case TK_MAP:
+      compute_dependencies_i(type_map, type_object.map_type, dependencies);
+      break;
+    case TK_ENUM:
+      compute_dependencies_i(type_map, type_object.enumerated_type, dependencies);
+      break;
+    case TK_BITMASK:
+      compute_dependencies_i(type_map, type_object.bitmask_type, dependencies);
+      break;
+    }
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const TypeObject& type_object,
+                              TypeIdentifierSet& dependencies)
+  {
+    switch (type_object.kind) {
+    case EK_COMPLETE:
+      compute_dependencies_i(type_map, type_object.complete, dependencies);
+      break;
+    case EK_MINIMAL:
+      compute_dependencies_i(type_map, type_object.minimal, dependencies);
+      break;
+    }
+  }
+
+  void compute_dependencies_i(const TypeMap&,
+                              const StringSTypeDefn&,
+                              TypeIdentifierSet&)
+  {
+    // Do nothing.
+  }
+
+  void compute_dependencies_i(const TypeMap&,
+                              const StringLTypeDefn&,
+                              TypeIdentifierSet&)
+  {
+    // Do nothing.
+  }
+
+  void compute_dependencies_i(const TypeMap&,
+                              const PlainCollectionHeader&,
+                              TypeIdentifierSet&)
+  {
+    // Do nothing.
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const PlainSequenceSElemDefn& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.header, dependencies);
+    compute_dependencies_i(type_map, *type.element_identifier, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const PlainSequenceLElemDefn& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.header, dependencies);
+    compute_dependencies_i(type_map, *type.element_identifier, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const PlainArraySElemDefn& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.header, dependencies);
+    compute_dependencies_i(type_map, *type.element_identifier, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const PlainArrayLElemDefn& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.header, dependencies);
+    compute_dependencies_i(type_map, *type.element_identifier, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const PlainMapSTypeDefn& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.header, dependencies);
+    compute_dependencies_i(type_map, *type.element_identifier, dependencies);
+    compute_dependencies_i(type_map, *type.key_identifier, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const PlainMapLTypeDefn& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    compute_dependencies_i(type_map, type.header, dependencies);
+    compute_dependencies_i(type_map, *type.element_identifier, dependencies);
+    compute_dependencies_i(type_map, *type.key_identifier, dependencies);
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const StronglyConnectedComponentId& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    // An SCCId (identifies the entire component.)
+    TypeIdentifier scc_id(TI_STRONGLY_CONNECTED_COMPONENT, type);
+    for (ACE_CDR::Long i = 1; i <= scc_id.sc_component_id().scc_length; ++i) {
+      scc_id.sc_component_id().scc_index = i;
+      TypeMap::const_iterator pos = type_map.find(scc_id);
+      if (pos != type_map.end()) {
+        compute_dependencies_i(type_map, pos->second, dependencies);
+      }
+    }
+  }
+
+  template <typename T>
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const Sequence<T>& type,
+                              TypeIdentifierSet& dependencies)
+  {
+    for (typename Sequence<T>::const_iterator pos = type.begin(), limit = type.end(); pos != limit; ++pos) {
+      compute_dependencies_i(type_map, *pos, dependencies);
+    }
+  }
+
+  void compute_dependencies_i(const TypeMap& type_map,
+                              const TypeIdentifier& type_identifier,
+                              TypeIdentifierSet& dependencies)
+  {
+    const TypeIdentifier scc_id = make_scc_id_or_default(type_identifier);
+
+    if (dependencies.count(scc_id) != 0) {
+      return;
+    }
+
+    if (scc_id.kind() != TK_NONE) {
+      dependencies.insert(scc_id);
+    }
+
+    compute_dependencies_j(type_map, scc_id, dependencies);
+  }
+
+  void compute_dependencies_j(const TypeMap& type_map,
+                              const TypeIdentifier& type_identifier,
+                              TypeIdentifierSet& dependencies)
+  {
+    switch (type_identifier.kind()) {
+    case TI_STRING8_SMALL:
+    case TI_STRING16_SMALL:
+      compute_dependencies_i(type_map, type_identifier.string_sdefn(), dependencies);
+      break;
+    case TI_STRING8_LARGE:
+    case TI_STRING16_LARGE:
+      compute_dependencies_i(type_map, type_identifier.string_ldefn(), dependencies);
+      break;
+    case TI_PLAIN_SEQUENCE_SMALL:
+      compute_dependencies_i(type_map, type_identifier.seq_sdefn(), dependencies);
+      break;
+    case TI_PLAIN_SEQUENCE_LARGE:
+      compute_dependencies_i(type_map, type_identifier.seq_ldefn(), dependencies);
+      break;
+    case TI_PLAIN_ARRAY_SMALL:
+      compute_dependencies_i(type_map, type_identifier.array_sdefn(), dependencies);
+      break;
+    case TI_PLAIN_ARRAY_LARGE:
+      compute_dependencies_i(type_map, type_identifier.array_ldefn(), dependencies);
+      break;
+    case TI_PLAIN_MAP_SMALL:
+      compute_dependencies_i(type_map, type_identifier.map_sdefn(), dependencies);
+      break;
+    case TI_PLAIN_MAP_LARGE:
+      compute_dependencies_i(type_map, type_identifier.map_ldefn(), dependencies);
+      break;
+    case TI_STRONGLY_CONNECTED_COMPONENT:
+      compute_dependencies_i(type_map, type_identifier.sc_component_id(), dependencies);
+      break;
+    case EK_COMPLETE:
+    case EK_MINIMAL:
+      {
+        TypeMap::const_iterator pos = type_map.find(type_identifier);
+        if (pos != type_map.end()) {
+          compute_dependencies_i(type_map, pos->second, dependencies);
+        }
+        break;
+      }
+    }
+  }
 }
 
 void compute_dependencies(const TypeMap& type_map,
                           const TypeIdentifier& type_identifier,
-                          OPENDDS_SET(TypeIdentifier)& dependencies)
+                          TypeIdentifierSet& dependencies)
 {
-  if (dependencies.count(type_identifier) != 0) {
-    return;
-  }
-
-  dependencies.insert(type_identifier);
-
-  switch (type_identifier.kind()) {
-  case TI_STRING8_SMALL:
-  case TI_STRING16_SMALL:
-    compute_dependencies(type_map, type_identifier.string_sdefn(), dependencies);
-    break;
-  case TI_STRING8_LARGE:
-  case TI_STRING16_LARGE:
-    compute_dependencies(type_map, type_identifier.string_ldefn(), dependencies);
-    break;
-  case TI_PLAIN_SEQUENCE_SMALL:
-    compute_dependencies(type_map, type_identifier.seq_sdefn(), dependencies);
-    break;
-  case TI_PLAIN_SEQUENCE_LARGE:
-    compute_dependencies(type_map, type_identifier.seq_ldefn(), dependencies);
-    break;
-  case TI_PLAIN_ARRAY_SMALL:
-    compute_dependencies(type_map, type_identifier.array_sdefn(), dependencies);
-    break;
-  case TI_PLAIN_ARRAY_LARGE:
-    compute_dependencies(type_map, type_identifier.array_ldefn(), dependencies);
-    break;
-  case TI_PLAIN_MAP_SMALL:
-    compute_dependencies(type_map, type_identifier.map_sdefn(), dependencies);
-    break;
-  case TI_PLAIN_MAP_LARGE:
-    compute_dependencies(type_map, type_identifier.map_ldefn(), dependencies);
-    break;
-  case TI_STRONGLY_CONNECTED_COMPONENT:
-    compute_dependencies(type_map, type_identifier.sc_component_id(), dependencies);
-    break;
-  case EK_COMPLETE:
-  case EK_MINIMAL:
-    {
-      TypeMap::const_iterator pos = type_map.find(type_identifier);
-      if (pos != type_map.end()) {
-        compute_dependencies(type_map, pos->second, dependencies);
-      }
-      break;
-    }
-  }
+  compute_dependencies_j(type_map, type_identifier, dependencies);
 }
 
 bool write_empty_xcdr2_nonfinal(DCPS::Serializer& strm)
@@ -3820,8 +3845,9 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
   case XTypes::TK_STRING16:
 #ifdef DDS_HAS_WCHAR
     return (strm >> Serializer::ToBoundedString<wchar_t>(uni.string16_value(), 128));
-#endif
+#else
     return false;
+#endif
   default:
     return (strm >> uni.extended_value());
   }

@@ -12,6 +12,7 @@
 #include "DataSampleHeader.h"
 #include "DataWriterCallbacks.h"
 #include "Definitions.h"
+#include "EncapsulationHeader.h"
 #include "GuidUtils.h"
 #include "MessageTracker.h"
 #include "Message_Block_Ptr.h"
@@ -23,10 +24,12 @@
 #include "Time_Helper.h"
 #include "TopicImpl.h"
 #include "WriteDataContainer.h"
+#include "unique_ptr.h"
+
 #include "transport/framework/TransportClient.h"
 #include "transport/framework/TransportSendListener.h"
-#include "unique_ptr.h"
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
 #  include "FilterEvaluator.h"
 #endif
 
@@ -51,7 +54,6 @@ namespace DCPS {
 
 class PublisherImpl;
 class DomainParticipantImpl;
-class Monitor;
 class DataSampleElement;
 class SendStateDataSampleList;
 struct AssociationData;
@@ -183,11 +185,11 @@ public:
   virtual DDS::ReturnCode_t get_matched_subscriptions(
     DDS::InstanceHandleSeq & subscription_handles);
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#if OPENDDS_CONFIG_BUILT_IN_TOPICS
   virtual DDS::ReturnCode_t get_matched_subscription_data(
     DDS::SubscriptionBuiltinTopicData & subscription_data,
     DDS::InstanceHandle_t subscription_handle);
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 
   virtual DDS::ReturnCode_t enable();
 
@@ -346,7 +348,7 @@ public:
 
   virtual bool check_transport_qos(const TransportInst& inst);
 
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+#if OPENDDS_CONFIG_OBJECT_MODEL_PROFILE
 
   /// Are coherent changes pending?
   bool coherent_changes_pending();
@@ -442,7 +444,7 @@ public:
                              const DDS::Time_t& source_timestamp,
                              bool content_filter);
 
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#if OPENDDS_CONFIG_PERSISTENCE_PROFILE
   /// Make sent data available beyond the lifetime of this
   /// @c DataWriter.
   bool persist_data();
@@ -464,7 +466,7 @@ public:
 
   virtual RcHandle<EntityImpl> parent() const;
 
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
   bool filter_out(const DataSampleElement& elt,
                   const OPENDDS_STRING& filterClassName,
                   const FilterEvaluator& evaluator,
@@ -566,7 +568,7 @@ protected:
   ACE_Thread_Mutex reader_info_lock_;
 
   struct ReaderInfo {
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+#if OPENDDS_CONFIG_CONTENT_FILTERED_TOPIC
     WeakRcHandle<DomainParticipantImpl> participant_;
     OPENDDS_STRING filter_class_name_;
     OPENDDS_STRING filter_;
@@ -672,6 +674,9 @@ protected:
 
 private:
 
+  void get_flexible_types(const char* key,
+                          XTypes::TypeInformation& type_info);
+
   void track_sequence_number(GUIDSeq* filter_out);
 
   void notify_publication_lost(const DDS::InstanceHandleSeq& handles);
@@ -711,7 +716,7 @@ private:
     return this->qos_.transport_priority.value;
   }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
   DDS::Security::ParticipantCryptoHandle get_crypto_handle() const;
 #endif
 
@@ -807,13 +812,6 @@ private:
   ACE_UINT64 max_suspended_transaction_id_;
   SendStateDataSampleList available_data_list_;
 
-  /// Monitor object for this entity
-  unique_ptr<Monitor> monitor_;
-
-  /// Periodic Monitor object for this entity
-  unique_ptr<Monitor> periodic_monitor_;
-
-
   // Do we need to set the sequence repair header bit?
   //   must call prior to incrementing sequence number
   bool need_sequence_repair();
@@ -851,7 +849,7 @@ private:
   bool insert_instance(DDS::InstanceHandle_t handle, Sample_rch& sample);
   InstanceValuesToHandles::iterator find_instance(const Sample& sample);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 protected:
   Security::SecurityConfig_rch security_config_;
   DDS::Security::PermissionsHandle participant_permissions_handle_;

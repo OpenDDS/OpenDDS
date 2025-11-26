@@ -25,8 +25,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ShmemTransport::ShmemTransport(const ShmemInst_rch& inst)
-  : TransportImpl(inst)
+ShmemTransport::ShmemTransport(const ShmemInst_rch& inst,
+                                 DDS::DomainId_t domain)
+  : TransportImpl(inst, domain)
 {
   if (!(configure_i(inst) && open())) {
     throw Transport::UnableToCreate();
@@ -153,7 +154,7 @@ ShmemTransport::configure_i(const ShmemInst_rch& config)
 #  elif defined OPENDDS_SHMEM_UNIX
   alloc_opts.base_addr_ = 0;
   alloc_opts.segment_size_ = config->pool_size();
-  alloc_opts.minimum_bytes_ = alloc_opts.segment_size_;
+  alloc_opts.minimum_bytes_ = static_cast<ACE_OFF_T>(alloc_opts.segment_size_);
   alloc_opts.max_segments_ = 1;
 #  endif /* OPENDDS_SHMEM_WINDOWS */
 
@@ -254,7 +255,7 @@ ShmemTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags fl
 {
   ShmemInst_rch cfg = config();
   if (cfg) {
-    cfg->populate_locator(info, flags);
+    cfg->populate_locator(info, flags, domain_, 0);
     return true;
   }
   return false;
@@ -328,7 +329,7 @@ ShmemTransport::ReadTask::stop()
   }
   stopped_ = true;
   ACE_OS::sema_post(&semaphore_);
-  ThreadStatusManager::Sleeper s(TheServiceParticipant->get_thread_status_manager());;
+  ThreadStatusManager::Sleeper s(TheServiceParticipant->get_thread_status_manager());
   wait();
 }
 

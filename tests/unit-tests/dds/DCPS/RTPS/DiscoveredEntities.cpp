@@ -8,14 +8,13 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include <dds/DCPS/RTPS/DiscoveredEntities.h>
 #include <dds/DCPS/Time_Helper.h>
 
-#ifdef OPENDDS_SECURITY
-#  include <dds/DCPS/RTPS/RtpsSecurityC.h>
-#endif
+#include <dds/DCPS/RTPS/DiscoveredEntities.h>
 
-#ifdef OPENDDS_SECURITY
+#include <dds/OpenDDSConfigWrapper.h>
+
+#if OPENDDS_CONFIG_SECURITY
 #  include <dds/DCPS/RTPS/RtpsSecurityC.h>
 #endif
 
@@ -30,7 +29,7 @@ TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredParticipant_ctor)
     EXPECT_EQ(uut.location_ih_, DDS::HANDLE_NIL);
     EXPECT_EQ(uut.bit_ih_, DDS::HANDLE_NIL);
     EXPECT_EQ(uut.seq_reset_count_, 0);
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     EXPECT_EQ(uut.have_spdp_info_, false);
     EXPECT_EQ(uut.have_sedp_info_, false);
     EXPECT_EQ(uut.have_auth_req_msg_, false);
@@ -83,8 +82,10 @@ TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredParticipant_ctor)
     EXPECT_EQ(uut.location_data_.ice6_timestamp.nanosec, 0u);
     EXPECT_EQ(uut.location_data_.relay6_timestamp.sec, 0);
     EXPECT_EQ(uut.location_data_.relay6_timestamp.nanosec, 0u);
+    EXPECT_EQ(uut.location_data_.lease_duration.sec, 0);
+    EXPECT_EQ(uut.location_data_.lease_duration.nanosec, 0u);
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     EXPECT_EQ(uut.have_spdp_info_, false);
     EXPECT_EQ(uut.have_sedp_info_, false);
     EXPECT_EQ(uut.have_auth_req_msg_, false);
@@ -106,7 +107,7 @@ TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredParticipant_ctor)
   }
 }
 
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
 TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredParticipant_has_security_data)
 {
   DiscoveredParticipant uut;
@@ -126,7 +127,7 @@ TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredSubscription_ctor)
     EXPECT_EQ(uut.bit_ih_, DDS::HANDLE_NIL);
     EXPECT_EQ(uut.participant_discovered_at_, monotonic_time_zero());
     EXPECT_EQ(uut.transport_context_, 0u);
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     EXPECT_EQ(uut.have_ice_agent_info_, false);
     // Can't compare IDL defined type.
     //EXPECT_EQ(uut.security_attribs_.base, DDS::Security::TopicSecurityAttributes());
@@ -150,7 +151,7 @@ TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredSubscription_ctor)
     EXPECT_EQ(uut.bit_ih_, DDS::HANDLE_NIL);
     EXPECT_EQ(uut.participant_discovered_at_, monotonic_time_zero());
     EXPECT_EQ(uut.transport_context_, 0u);
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     // Can't compare IDL defined type.
     //EXPECT_EQ(uut.security_attribs_, DDS::Security::EndpointSecurityAttributes());
     EXPECT_EQ(uut.have_ice_agent_info_, false);
@@ -174,7 +175,7 @@ TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredPublication_ctor)
     EXPECT_EQ(uut.bit_ih_, DDS::HANDLE_NIL);
     EXPECT_EQ(uut.participant_discovered_at_, monotonic_time_zero());
     EXPECT_EQ(uut.transport_context_, 0u);
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     EXPECT_EQ(uut.have_ice_agent_info_, false);
     // Can't compare IDL defined type.
     //EXPECT_EQ(uut.security_attribs_.base, DDS::Security::TopicSecurityAttributes());
@@ -198,7 +199,7 @@ TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredPublication_ctor)
     EXPECT_EQ(uut.bit_ih_, DDS::HANDLE_NIL);
     EXPECT_EQ(uut.participant_discovered_at_, monotonic_time_zero());
     EXPECT_EQ(uut.transport_context_, 0u);
-#ifdef OPENDDS_SECURITY
+#if OPENDDS_CONFIG_SECURITY
     // Can't compare IDL defined type.
     //EXPECT_EQ(uut.security_attribs_, DDS::Security::EndpointSecurityAttributes());
     EXPECT_EQ(uut.have_ice_agent_info_, false);

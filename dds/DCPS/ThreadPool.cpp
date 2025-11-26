@@ -10,8 +10,6 @@
 #include "Definitions.h"
 #include "ThreadPool.h"
 
-#include "Definitions.h"
-
 #include <ace/Guard_T.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -28,7 +26,7 @@ ThreadPool::ThreadPool(size_t count, FunPtr fun, void* arg)
 #ifdef OPENDDS_NO_THREAD_JOIN
  , finished_threads_(0)
 #endif
- , ids_(count, ACE_thread_t())
+ , ids_(count)
 {
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
