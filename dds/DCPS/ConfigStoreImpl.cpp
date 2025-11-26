@@ -230,9 +230,7 @@ ConfigStoreImpl::get_int32(const char* key,
     const DDS::SampleInfo& info = infos[idx];
     if (info.valid_data) {
       DDS::Int32 x = 0;
-      if (sample.value() == "DURATION_INFINITE_SEC") {
-        retval = DDS::DURATION_INFINITE_SEC;
-      } else if (DCPS::convertToInteger(sample.value(), x)) {
+      if (DCPS::convertToInteger(sample.value(), x)) {
         retval = x;
       } else {
         retval = value;
@@ -297,6 +295,55 @@ ConfigStoreImpl::get_uint32(const char* key,
 
   if (debug_logging) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get_int32: %C=%u\n",
+               CONFIG_DEBUG_LOGGING,
+               cp.key().c_str(),
+               retval));
+
+  }
+
+  return retval;
+}
+
+void
+ConfigStoreImpl::set_int64(const char* key,
+                           DDS::Int64 value)
+{
+  set(key, to_dds_string(value));
+}
+
+DDS::Int64
+ConfigStoreImpl::get_int64(const char* key,
+                           DDS::Int64 value)
+{
+  const ConfigPair cp(key, "");
+  DDS::Int64 retval = value;
+  DCPS::InternalDataReader<ConfigPair>::SampleSequence samples;
+  DCPS::InternalSampleInfoSequence infos;
+  config_reader_->read_instance(samples, infos, DDS::LENGTH_UNLIMITED, cp,
+                                DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+  for (size_t idx = 0; idx != samples.size(); ++idx) {
+    const ConfigPair& sample = samples[idx];
+    const DDS::SampleInfo& info = infos[idx];
+    if (info.valid_data) {
+      DDS::Int64 x = 0;
+      if (sample.value() == "DURATION_INFINITE_SEC") {
+        retval = DDS::DURATION_INFINITE_SEC;
+      } else if (DCPS::convertToInteger(sample.value(), x)) {
+        retval = x;
+      } else {
+        retval = value;
+        if (log_level >= LogLevel::Warning) {
+          ACE_ERROR((LM_WARNING,
+                     ACE_TEXT("(%P|%t) WARNING: ConfigStoreImpl::get_int64: ")
+                     ACE_TEXT("failed to parse int64 for %C=%C\n"),
+                     sample.key().c_str(), sample.value().c_str()));
+        }
+      }
+    }
+  }
+
+  if (debug_logging) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) %C: ConfigStoreImpl::get_int64: %C=%d\n",
                CONFIG_DEBUG_LOGGING,
                cp.key().c_str(),
                retval));

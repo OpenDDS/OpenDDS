@@ -134,17 +134,22 @@ public:
   void set_int32(const char* key,
                  DDS::Int32 value);
   DDS::Int32 get_int32(const char* key,
-                        DDS::Int32 value);
+                       DDS::Int32 value);
 
   void set_uint32(const char* key,
                   DDS::UInt32 value);
   DDS::UInt32 get_uint32(const char* key,
-                          DDS::UInt32 value);
+                         DDS::UInt32 value);
+
+void set_int64(const char* key,
+                 DDS::Int64 value);
+  DDS::Int64 get_int64(const char* key,
+                       DDS::Int64 value);
 
   void set_float64(const char* key,
                    DDS::Float64 value);
   DDS::Float64 get_float64(const char* key,
-                            DDS::Float64 value);
+                           DDS::Float64 value);
 
   void set_string(const char* key,
                   const char* value);

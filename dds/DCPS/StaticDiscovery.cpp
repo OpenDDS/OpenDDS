@@ -1805,26 +1805,26 @@ StaticDiscovery::parse_datawriterqos()
       config_store->get((prefix + "_DURABILITY_KIND").c_str(), datawriterqos.durability.kind, durability_kinds);
 
     datawriterqos.deadline.period.sec =
-      config_store->get_int32((prefix + "_DEADLINE_PERIOD_SEC").c_str(), datawriterqos.deadline.period.sec);
+      config_store->get_int64((prefix + "_DEADLINE_PERIOD_SEC").c_str(), datawriterqos.deadline.period.sec);
     datawriterqos.deadline.period.nanosec =
       config_store->get_uint32((prefix + "_DEADLINE_PERIOD_NANOSEC").c_str(), datawriterqos.deadline.period.nanosec);
 
     datawriterqos.latency_budget.duration.sec =
-      config_store->get_int32((prefix + "_LATENCY_BUDGET_DURATION_SEC").c_str(), datawriterqos.latency_budget.duration.sec);
+      config_store->get_int64((prefix + "_LATENCY_BUDGET_DURATION_SEC").c_str(), datawriterqos.latency_budget.duration.sec);
     datawriterqos.latency_budget.duration.nanosec =
       config_store->get_uint32((prefix + "_LATENCY_BUDGET_DURATION_NANOSEC").c_str(), datawriterqos.latency_budget.duration.nanosec);
 
     datawriterqos.liveliness.kind =
       config_store->get((prefix + "_LIVELINESS_KIND").c_str(), datawriterqos.liveliness.kind, liveliness_kinds);
     datawriterqos.liveliness.lease_duration.sec =
-      config_store->get_int32((prefix + "_LIVELINESS_LEASE_DURATION_SEC").c_str(), datawriterqos.liveliness.lease_duration.sec);
+      config_store->get_int64((prefix + "_LIVELINESS_LEASE_DURATION_SEC").c_str(), datawriterqos.liveliness.lease_duration.sec);
     datawriterqos.liveliness.lease_duration.nanosec =
       config_store->get_uint32((prefix + "_LIVELINESS_LEASE_DURATION_NANOSEC").c_str(), datawriterqos.liveliness.lease_duration.nanosec);
 
     datawriterqos.reliability.kind =
       config_store->get((prefix + "_RELIABILITY_KIND").c_str(), datawriterqos.reliability.kind, reliability_kinds);
     datawriterqos.reliability.max_blocking_time.sec =
-      config_store->get_int32((prefix + "_RELIABILITY_MAX_BLOCKING_TIME_SEC").c_str(), datawriterqos.reliability.max_blocking_time.sec);
+      config_store->get_int64((prefix + "_RELIABILITY_MAX_BLOCKING_TIME_SEC").c_str(), datawriterqos.reliability.max_blocking_time.sec);
     datawriterqos.reliability.max_blocking_time.nanosec =
       config_store->get_uint32((prefix + "_RELIABILITY_MAX_BLOCKING_TIME_NANOSEC").c_str(), datawriterqos.reliability.max_blocking_time.nanosec);
 
@@ -1847,7 +1847,7 @@ StaticDiscovery::parse_datawriterqos()
       config_store->get_int32((prefix + "_TRANSPORT_PRIORITY_VALUE").c_str(), datawriterqos.transport_priority.value);
 
     datawriterqos.lifespan.duration.sec =
-      config_store->get_int32((prefix + "_LIFESPAN_DURATION_SEC").c_str(), datawriterqos.lifespan.duration.sec);
+      config_store->get_int64((prefix + "_LIFESPAN_DURATION_SEC").c_str(), datawriterqos.lifespan.duration.sec);
     datawriterqos.lifespan.duration.nanosec =
       config_store->get_uint32((prefix + "_LIFESPAN_DURATION_NANOSEC").c_str(), datawriterqos.lifespan.duration.nanosec);
 
@@ -1888,26 +1888,26 @@ StaticDiscovery::parse_datareaderqos()
       config_store->get((prefix + "_DURABILITY_KIND").c_str(), datareaderqos.durability.kind, durability_kinds);
 
     datareaderqos.deadline.period.sec =
-      config_store->get_int32((prefix + "_DEADLINE_PERIOD_SEC").c_str(), datareaderqos.deadline.period.sec);
+      config_store->get_int64((prefix + "_DEADLINE_PERIOD_SEC").c_str(), datareaderqos.deadline.period.sec);
     datareaderqos.deadline.period.nanosec =
       config_store->get_uint32((prefix + "_DEADLINE_PERIOD_NANOSEC").c_str(), datareaderqos.deadline.period.nanosec);
 
     datareaderqos.latency_budget.duration.sec =
-      config_store->get_int32((prefix + "_LATENCY_BUDGET_DURATION_SEC").c_str(), datareaderqos.latency_budget.duration.sec);
+      config_store->get_int64((prefix + "_LATENCY_BUDGET_DURATION_SEC").c_str(), datareaderqos.latency_budget.duration.sec);
     datareaderqos.latency_budget.duration.nanosec =
       config_store->get_uint32((prefix + "_LATENCY_BUDGET_DURATION_NANOSEC").c_str(), datareaderqos.latency_budget.duration.nanosec);
 
     datareaderqos.liveliness.kind =
       config_store->get((prefix + "_LIVELINESS_KIND").c_str(), datareaderqos.liveliness.kind, liveliness_kinds);
     datareaderqos.liveliness.lease_duration.sec =
-      config_store->get_int32((prefix + "_LIVELINESS_LEASE_DURATION_SEC").c_str(), datareaderqos.liveliness.lease_duration.sec);
+      config_store->get_int64((prefix + "_LIVELINESS_LEASE_DURATION_SEC").c_str(), datareaderqos.liveliness.lease_duration.sec);
     datareaderqos.liveliness.lease_duration.nanosec =
       config_store->get_uint32((prefix + "_LIVELINESS_LEASE_DURATION_NANOSEC").c_str(), datareaderqos.liveliness.lease_duration.nanosec);
 
     datareaderqos.reliability.kind =
       config_store->get((prefix + "_RELIABILITY_KIND").c_str(), datareaderqos.reliability.kind, reliability_kinds);
     datareaderqos.reliability.max_blocking_time.sec =
-      config_store->get_int32((prefix + "_RELIABILITY_MAX_BLOCKING_TIME_SEC").c_str(), datareaderqos.reliability.max_blocking_time.sec);
+      config_store->get_int64((prefix + "_RELIABILITY_MAX_BLOCKING_TIME_SEC").c_str(), datareaderqos.reliability.max_blocking_time.sec);
     datareaderqos.reliability.max_blocking_time.nanosec =
       config_store->get_uint32((prefix + "_RELIABILITY_MAX_BLOCKING_TIME_NANOSEC").c_str(), datareaderqos.reliability.max_blocking_time.nanosec);
 
@@ -1927,17 +1927,17 @@ StaticDiscovery::parse_datareaderqos()
       config_store->get_int32((prefix + "_RESOURCE_LIMITS_MAX_SAMPLES_PER_INSTANCE").c_str(), datareaderqos.resource_limits.max_samples_per_instance);
 
     datareaderqos.time_based_filter.minimum_separation.sec =
-      config_store->get_int32((prefix + "_TIME_BASED_FILTER_MINIMUM_SEPARATION_SEC").c_str(), datareaderqos.time_based_filter.minimum_separation.sec);
+      config_store->get_int64((prefix + "_TIME_BASED_FILTER_MINIMUM_SEPARATION_SEC").c_str(), datareaderqos.time_based_filter.minimum_separation.sec);
     datareaderqos.time_based_filter.minimum_separation.nanosec =
       config_store->get_uint32((prefix + "_TIME_BASED_FILTER_MINIMUM_SEPARATION_NANOSEC").c_str(), datareaderqos.time_based_filter.minimum_separation.nanosec);
 
     datareaderqos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec =
-      config_store->get_int32((prefix + "_READER_DATA_LIFECYCLE_AUTOPURGE_NOWRITER_SAMPLES_DELAY_SEC").c_str(), datareaderqos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec);
+      config_store->get_int64((prefix + "_READER_DATA_LIFECYCLE_AUTOPURGE_NOWRITER_SAMPLES_DELAY_SEC").c_str(), datareaderqos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec);
     datareaderqos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec =
       config_store->get_uint32((prefix + "_READER_DATA_LIFECYCLE_AUTOPURGE_NOWRITER_SAMPLES_DELAY_NANOSEC").c_str(), datareaderqos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec);
 
     datareaderqos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec =
-      config_store->get_int32((prefix + "_READER_DATA_LIFECYCLE_AUTOPURGE_DISPOSED_SAMPLES_DELAY_SEC").c_str(), datareaderqos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec);
+      config_store->get_int64((prefix + "_READER_DATA_LIFECYCLE_AUTOPURGE_DISPOSED_SAMPLES_DELAY_SEC").c_str(), datareaderqos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec);
     datareaderqos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec =
       config_store->get_uint32((prefix + "_READER_DATA_LIFECYCLE_AUTOPURGE_DISPOSED_SAMPLES_DELAY_NANOSEC").c_str(), datareaderqos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec);
 
