@@ -168,7 +168,7 @@ struct OpenDDS_Dcps_Export DataSampleHeader : public PoolAllocationBase {
   /// 'stale' and should be discarded by associated DataReader.
   /// These fields are optional and are controlled by the
   /// lifespan_duration_ flag.
-  ACE_INT32 lifespan_duration_sec_;
+  ACE_INT64 lifespan_duration_sec_;
   ACE_UINT32 lifespan_duration_nanosec_;  // Corresponding IDL is unsigned.
   //@}
 
