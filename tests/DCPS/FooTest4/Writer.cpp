@@ -82,7 +82,7 @@ Writer::start()
       builder.entityKey(1);
       builder.entityKind(OpenDDS::DCPS::ENTITYKIND_OPENDDS_NIL_WRITER);
 
-      sample.header_.source_timestamp_sec_ = static_cast<ACE_INT32>(now.sec());
+      sample.header_.source_timestamp_sec_ = now.sec();
       sample.header_.source_timestamp_nanosec_ = now.usec() * 1000;
 
       dr_servant->data_received(sample);

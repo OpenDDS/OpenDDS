@@ -1399,7 +1399,7 @@ RtpsUdpReceiveStrategy::MessageReceiver::fill_header(
 {
   using namespace RTPS;
   if (have_timestamp_) {
-    header.source_timestamp_sec_ = static_cast<ACE_INT32>(timestamp_.seconds);
+    header.source_timestamp_sec_ = timestamp_.seconds;
     header.source_timestamp_nanosec_ =
       DCPS::uint32_fractional_seconds_to_nanoseconds(timestamp_.fraction);
   }
