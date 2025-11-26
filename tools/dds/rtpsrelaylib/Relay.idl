@@ -118,18 +118,6 @@ module RtpsRelay {
     Duration_t output_processing_time;
   };
 
-  const string PARTICIPANT_STATISTICS_TOPIC_NAME = "Participant Statistics";
-  @topic
-  @mutable
-  @autoid(HASH)
-  struct ParticipantStatistics {
-    @key GUID_t guid;
-    @key string name;
-    Duration_t session_time;
-    ProtocolStatistics rtps;
-    ProtocolStatistics stun;
-  };
-
   const string HANDLER_STATISTICS_TOPIC_NAME = "Handler Statistics";
   @topic
   @mutable
@@ -228,6 +216,20 @@ module RtpsRelay {
   struct RelayConfig {
     @key string relay_id;
     map<string, string> config;
+  };
+
+  enum Action {
+    ACTION_ADD,
+    ACTION_REMOVE // Not implemented yet
+  };
+
+  const string RELAY_DENIED_PARTITIONS_TOPIC_NAME = "Relay Denied Partitions";
+  @topic
+  @mutable
+  @autoid(HASH)
+  struct RelayDeniedPartitions {
+    StringSequence partitions;
+    Action add_or_remove;
   };
 };
 

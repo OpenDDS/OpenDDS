@@ -35,6 +35,86 @@ DCPS::String equivalence_hash_to_string(const EquivalenceHash& equivalence_hash)
   return DCPS::to_dds_string(&equivalence_hash[0], sizeof equivalence_hash);
 }
 
+PlainSequenceSElemDefn::PlainSequenceSElemDefn()
+  : bound(INVALID_SBOUND)
+{}
+
+PlainSequenceSElemDefn::PlainSequenceSElemDefn(const PlainCollectionHeader& a_header,
+                                               const SBound& a_bound,
+                                               const TypeIdentifier& a_element_identifier)
+  : header(a_header)
+  , bound(a_bound)
+  , element_identifier(a_element_identifier)
+{}
+
+PlainSequenceLElemDefn::PlainSequenceLElemDefn()
+  : bound(INVALID_LBOUND)
+{}
+
+PlainSequenceLElemDefn::PlainSequenceLElemDefn(const PlainCollectionHeader& a_header,
+                                               const LBound& a_bound,
+                                               const TypeIdentifier& a_element_identifier)
+  : header(a_header)
+  , bound(a_bound)
+  , element_identifier(a_element_identifier)
+{}
+
+PlainArraySElemDefn::PlainArraySElemDefn()
+{}
+
+PlainArraySElemDefn::PlainArraySElemDefn(const PlainCollectionHeader& a_header,
+                                         const SBoundSeq& a_array_bound_seq,
+                                         const TypeIdentifier& a_element_identifier)
+  : header(a_header)
+  , array_bound_seq(a_array_bound_seq)
+  , element_identifier(a_element_identifier)
+{}
+
+PlainArrayLElemDefn::PlainArrayLElemDefn()
+{}
+
+PlainArrayLElemDefn::PlainArrayLElemDefn(const PlainCollectionHeader& a_header,
+                                         const LBoundSeq& a_array_bound_seq,
+                                         const TypeIdentifier& a_element_identifier)
+  : header(a_header)
+  , array_bound_seq(a_array_bound_seq)
+  , element_identifier(a_element_identifier)
+{}
+
+PlainMapSTypeDefn::PlainMapSTypeDefn()
+  : bound(INVALID_SBOUND)
+  , key_flags(0)
+{}
+
+PlainMapSTypeDefn::PlainMapSTypeDefn(const PlainCollectionHeader& a_header,
+                                     const SBound& a_bound,
+                                     const TypeIdentifier& a_element_identifier,
+                                     const CollectionElementFlag& a_key_flags,
+                                     const TypeIdentifier& a_key_identifier)
+  : header(a_header)
+  , bound(a_bound)
+  , element_identifier(a_element_identifier)
+  , key_flags(a_key_flags)
+  , key_identifier(a_key_identifier)
+{}
+
+PlainMapLTypeDefn::PlainMapLTypeDefn()
+  : bound(INVALID_LBOUND)
+  , key_flags(0)
+{}
+
+PlainMapLTypeDefn::PlainMapLTypeDefn(const PlainCollectionHeader& a_header,
+                                     const LBound& a_bound,
+                                     const TypeIdentifier& a_element_identifier,
+                                     const CollectionElementFlag& a_key_flags,
+                                     const TypeIdentifier& a_key_identifier)
+  : header(a_header)
+  , bound(a_bound)
+  , element_identifier(a_element_identifier)
+  , key_flags(a_key_flags)
+  , key_identifier(a_key_identifier)
+{}
+
 MinimalMemberDetail::MinimalMemberDetail(const OPENDDS_STRING& name)
 {
   unsigned char result[16];

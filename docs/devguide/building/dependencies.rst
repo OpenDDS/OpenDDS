@@ -64,8 +64,10 @@ DOC Group :acetaorel:`ace6tao2`
 .. _ace7tao3:
 
 DOC Group :acetaorel:`ace7tao3`
+  This branch of ACE/TAO is no longer maintained.  Using one of the maintained branches is recommended.
+
   Pass ``--doc-group3`` to the configure script to download this version.
-  :ref:`CMake <cmake-building>` will download this version by default.
+  :ref:`CMake <cmake-building>` will download this version if :cmake:var:`OPENDDS_ACE_TAO_KIND` is set to ``ace7tao3``.
 
   This version requires a C++14-capable compiler.
 
@@ -77,7 +79,7 @@ DOC Group :acetaorel:`ace7tao3`
 
 DOC Group :acetaorel:`ace8tao4`
   Pass ``--ace-tao=ace8tao4`` to the configure script to download this version.
-  :ref:`CMake <cmake-building>` will download this version if :cmake:var:`OPENDDS_ACE_TAO_KIND` is set to ``ace8tao4``.
+  :ref:`CMake <cmake-building>` will download this version by default.
 
   This version requires a C++17-capable compiler.
 

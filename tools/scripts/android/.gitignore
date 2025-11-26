@@ -1,0 +1,13 @@
+/settings.sh
+
+/android-ndk-*
+/*-toolchain
+/commandlinetools-*
+/android-sdk
+
+/Python-*
+/openssl-*
+/libiconv-*
+/xerces-c-*
+/secdeps_prefix
+/*_source

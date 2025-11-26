@@ -291,13 +291,11 @@ void VerticalHandler::stop()
 }
 
 void VerticalHandler::venqueue_message(const ACE_INET_Addr& addr,
-                                       ParticipantStatisticsReporter& to_psr,
                                        const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                        const OpenDDS::DCPS::MonotonicTimePoint& now,
                                        MessageType type)
 {
   enqueue_message(addr, msg, now, type);
-  to_psr.output_message(msg->length(), type);
 }
 
 CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
@@ -339,7 +337,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
 
     GuidAddrSet::Proxy proxy(guid_addr_set_);
     OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, READ_MASK | SIGNAL_MASK, handle_as_int);
-    record_activity(proxy, addr_port, now, src_guid, type, msg_len, from_application_participant);
+    record_activity(proxy, addr_port, now, src_guid, from_application_participant);
 
     cache_message(proxy, src_guid, to, msg, now);
 
@@ -359,6 +357,9 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     if (do_normal_processing(proxy, remote_address, src_guid, to, admitted, send_to_application_participant, msg, now, sent)) {
       StringSet to_partitions;
       guid_partition_table_.lookup(to_partitions, src_guid);
+      if (guid_partition_table_.is_denied(to_partitions)) {
+        proxy.deny(src_guid);
+      }
       sent += send(proxy, src_guid, to_partitions, to, send_to_application_participant, msg, now);
     }
     return sent;
@@ -399,7 +400,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     }
 
     OpenDDS::STUN::Message response;
-    bool response_needed = true;
+    bool response_needed = false;
 
     switch (message.method) {
     case OpenDDS::STUN::BINDING:
@@ -441,15 +442,11 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
         (src_guid == config_.application_participant_guid());
       bool allow_stun_responses = true;
 
-      ParticipantStatisticsReporter& from_psr =
-        record_activity(proxy, addr_port, now, src_guid, type, msg_len, from_application_participant, &allow_stun_responses);
+      record_activity(proxy, addr_port, now, src_guid, from_application_participant, &allow_stun_responses);
 
       if (allow_stun_responses && response_needed) {
-        const auto bytes_sent = send(remote_address, std::move(response), now);
+        send(remote_address, std::move(response), now);
         ++messages_sent;
-        if (bytes_sent) {
-          from_psr.output_message(bytes_sent, type);
-        }
       }
 
       bool admitted = false;
@@ -466,17 +463,15 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
   }
 }
 
-ParticipantStatisticsReporter&
+void
 VerticalHandler::record_activity(GuidAddrSet::Proxy& proxy,
                                  const AddrPort& remote_address,
                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
                                  const OpenDDS::DCPS::GUID_t& src_guid,
-                                 MessageType msg_type,
-                                 const size_t& msg_len,
                                  bool from_application_participant,
                                  bool* allow_stun_responses)
 {
-  return proxy.record_activity(remote_address, now, src_guid, msg_type, msg_len, from_application_participant, allow_stun_responses, *this);
+  proxy.record_activity(remote_address, now, src_guid, from_application_participant, allow_stun_responses, *this);
 }
 
 bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser,
@@ -646,8 +641,7 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
         if (p != proxy.end()) {
           p->second.foreach_addr(port(),
                                  [&](const ACE_INET_Addr& address) {
-                                   venqueue_message(address,
-                                                    *p->second.select_stats_reporter(port()), msg, now, type);
+                                   venqueue_message(address, msg, now, type);
                                    ++sent;
           });
         }
@@ -656,9 +650,7 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
   }
 
   if (send_to_application_participant) {
-    venqueue_message(application_participant_addr_,
-      proxy.participant_statistics_reporter(config_.application_participant_guid(), now, port()),
-      msg, now, type);
+    venqueue_message(application_participant_addr_, msg, now, type);
     ++sent;
   }
 
@@ -766,8 +758,7 @@ CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr&,
     if (p != proxy.end()) {
       p->second.foreach_addr(port(),
                              [&](const ACE_INET_Addr& addr) {
-                               vertical_handler_->venqueue_message(addr,
-                                                                   *p->second.select_stats_reporter(port()), msg, now, type);
+                               vertical_handler_->venqueue_message(addr, msg, now, type);
                                ++sent;
                              });
     }
@@ -931,8 +922,7 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
         if (pos != proxy.end()) {
           pos->second.foreach_addr(port(),
                                    [&](const ACE_INET_Addr& addr) {
-                                     venqueue_message(addr,
-                                                      *pos->second.select_stats_reporter(port()), msg, now, MessageType::Rtps);
+                                     venqueue_message(addr, msg, now, MessageType::Rtps);
                                      ++sent;
           });
         }
@@ -1017,8 +1007,7 @@ bool SedpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
         if (pos != proxy.end()) {
           pos->second.foreach_addr(port(),
                                    [&](const ACE_INET_Addr& addr) {
-                                     venqueue_message(addr,
-                                                      *pos->second.select_stats_reporter(port()), msg, now, MessageType::Rtps);
+                                     venqueue_message(addr, msg, now, MessageType::Rtps);
                                      ++sent;
                                    });
         }

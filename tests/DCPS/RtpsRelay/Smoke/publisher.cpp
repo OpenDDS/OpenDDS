@@ -290,7 +290,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
         dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in());
 
-      OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::RtpsDiscovery> disc = OpenDDS::DCPS::static_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(TheServiceParticipant->get_discovery(42));
+      OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::RtpsDiscovery> disc = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(TheServiceParticipant->get_discovery(42));
       const OpenDDS::DCPS::GUID_t guid = dp_impl->get_id();
       OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::TransportInst> discovery_inst = disc->sedp_transport_inst(42, guid);
       discovery_inst->count_messages(true);

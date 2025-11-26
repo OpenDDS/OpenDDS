@@ -698,13 +698,28 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
   config_reader_ = make_rch<ConfigReader>(ConfigStoreImpl::datareader_qos(), rchandle_from(this));
   TheServiceParticipant->config_topic()->connect(config_reader_);
 
-  const TimeDuration period = TheServiceParticipant->statistics_period();
-  if (!period.is_zero()) {
-    stats_task_ = make_rch<PeriodicTask>(reactor_task(), *this, &RtpsUdpTransport::write_stats);
-    stats_task_->enable(false, period);
-  }
-
+  setup_stats_task(TheServiceParticipant->statistics_period());
   return true;
+}
+
+void RtpsUdpTransport::setup_stats_task(const TimeDuration& period)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(stats_mutex_);
+  if (period == stats_task_period_) {
+    return;
+  }
+  stats_task_period_ = period;
+
+  if (period.is_zero()) {
+    if (stats_task_) {
+      stats_task_->disable();
+    }
+  } else {
+    if (!stats_task_) {
+      stats_task_ = make_rch<PeriodicTask>(reactor_task(), *this, &RtpsUdpTransport::write_stats);
+    }
+    stats_task_->enable(true, period);
+  }
 }
 
 void RtpsUdpTransport::client_stop(const GUID_t& localId)
@@ -753,7 +768,6 @@ RtpsUdpTransport::on_data_available(ConfigReader_rch)
 {
   const RtpsUdpInst_rch cfg = config();
   OPENDDS_ASSERT(cfg);
-  RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
   const String& config_prefix = cfg->config_prefix();
   bool has_prefix = false;
 
@@ -764,7 +778,13 @@ RtpsUdpTransport::on_data_available(ConfigReader_rch)
   for (size_t idx = 0; idx != samples.size(); ++idx) {
     const ConfigPair& sample = samples[idx];
 
-    if (sample.key_has_prefix(config_prefix)) {
+    if (sample.key() == COMMON_STATISTICS_PERIOD) {
+      TimeDuration period;
+      if (ConfigStoreImpl::convert_value(sample, ConfigStoreImpl::Format_FractionalSeconds, period)) {
+        setup_stats_task(period);
+      }
+
+    } else if (sample.key_has_prefix(config_prefix)) {
       has_prefix = true;
 
 #if OPENDDS_CONFIG_SECURITY

@@ -47,13 +47,11 @@ int RelayThreadMonitor::svc()
 {
   OpenDDS::DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   ThreadStatusManager::Start s(thread_status_manager, "RtpsRelay RelayThreadMonitor");
-  const TimeDuration thread_status_interval = thread_status_manager.thread_status_interval();
-  const int safety_factor = config_.thread_status_safety_factor();
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, -1);
 
-  for (auto count = 0; running_; count = (count + 1) % safety_factor) {
-    condition_.wait_until(MonotonicTimePoint::now() + thread_status_interval, thread_status_manager);
+  for (auto count = 0; running_; count = (count + 1) % config_.thread_status_safety_factor()) {
+    condition_.wait_until(MonotonicTimePoint::now() + thread_status_manager.thread_status_interval(), thread_status_manager);
     if (!running_) {
       break;
     }
@@ -70,7 +68,7 @@ int RelayThreadMonitor::svc()
       continue;
     }
 
-    const SystemTimePoint expire = SystemTimePoint::now() - thread_status_interval * safety_factor;
+    const SystemTimePoint expire = SystemTimePoint::now() - thread_status_manager.thread_status_interval() * config_.thread_status_safety_factor();
     const auto log_all_threads = count == 0 && config_.log_thread_status();
     std::vector<DDS::UInt32> late_thread_indexes;
 
@@ -104,8 +102,8 @@ int RelayThreadMonitor::svc()
     for (const auto idx : late_thread_indexes) {
       const SystemTimePoint timestamp(infos[idx].source_timestamp);
       const auto& thread = datas[idx];
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RelayThreadMonitor::svc thread %C (%d, %d) last update %#T.  Aborting...\n",
-                 thread.thread_id.in(), thread.detail1, thread.detail2, &timestamp.value()));
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RelayThreadMonitor::svc thread %C (%C, %d) last update %#T.  Aborting...\n",
+                 thread.thread_id.in(), decompose_thread_detail1(thread.detail1).c_str(), thread.detail2, &timestamp.value()));
     }
 
     if (!late_thread_indexes.empty()) {
@@ -145,6 +143,42 @@ void RelayThreadMonitor::on_data_available(DDS::DataReader_ptr /*reader*/)
       utilization_.erase(datas[idx].thread_id.in());
     }
   }
+}
+
+std::string RelayThreadMonitor::decompose_thread_detail1(int detail) const
+{
+  std::string result;
+  if (detail & ACE_Event_Handler::READ_MASK) {
+    result += "READ_MASK";
+  }
+  if (detail & ACE_Event_Handler::WRITE_MASK) {
+    result += result.empty() ? "WRITE_MASK" : " | WRITE_MASK";
+  }
+  if (detail & ACE_Event_Handler::EXCEPT_MASK) {
+    result += result.empty() ? "EXCEPT_MASK" : " | EXCEPT_MASK";
+  }
+  if (detail & ACE_Event_Handler::ACCEPT_MASK) {
+    result += result.empty() ? "ACCEPT_MASK" : " | ACCEPT_MASK";
+  }
+  if (detail & ACE_Event_Handler::CONNECT_MASK) {
+    result += result.empty() ? "CONNECT_MASK" : " | CONNECT_MASK";
+  }
+  if (detail & ACE_Event_Handler::TIMER_MASK) {
+    result += result.empty() ? "TIMER_MASK" : " | TIMER_MASK";
+  }
+  if (detail & ACE_Event_Handler::QOS_MASK) {
+    result += result.empty() ? "QOS_MASK" : " | QOS_MASK";
+  }
+  if (detail & ACE_Event_Handler::GROUP_QOS_MASK) {
+    result += result.empty() ? "GROUP_QOS_MASK" : " | GROUP_QOS_MASK";
+  }
+  if (detail & ACE_Event_Handler::SIGNAL_MASK) {
+    result += result.empty() ? "SIGNAL_MASK" : " | SIGNAL_MASK";
+  }
+  if (detail & ACE_Event_Handler::DONT_CALL) {
+    result += result.empty() ? "DONT_CALL" : " | DONT_CALL";
+  }
+  return result;
 }
 
 }

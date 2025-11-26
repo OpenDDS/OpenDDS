@@ -441,18 +441,15 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
       erase_member(id);
       DDS::DynamicData_var opt_val;
       if (backing_store_ && backing_store_->get_complex_value(opt_val, id) == DDS::RETCODE_OK) {
+#if OPENDDS_CONFIG_IDL_MAP
         // The backing store is read-only, so to remove the optional member we need to
         // invalidate the backing store. Save all the members that are in the backing store
         // but not in the container.
-        DDS::DynamicTypeMembersById_var members_var;
-        if (type_->get_all_members(members_var) != DDS::RETCODE_OK) {
+        DDS::DynamicTypeMembersById members;
+        if (type_->get_all_members(members) != DDS::RETCODE_OK) {
           return DDS::RETCODE_ERROR;
         }
-        DynamicTypeMembersByIdImpl* members = dynamic_cast<DynamicTypeMembersByIdImpl*>(members_var.in());
-        if (!members) {
-          return DDS::RETCODE_ERROR;
-        }
-        for (DynamicTypeMembersByIdImpl::const_iterator it = members->begin(); it != members->end(); ++it) {
+        for (DDS::DynamicTypeMembersById::const_iterator it = members.begin(); it != members.end(); ++it) {
           const DDS::MemberId mid = it->first;
           if (mid == id) {
             continue;
@@ -477,6 +474,9 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
           }
         }
         set_backing_store(0);
+#else
+        return DDS::RETCODE_UNSUPPORTED;
+#endif
       }
       break;
     }
@@ -795,16 +795,13 @@ bool DynamicDataImpl::is_default_member_selected(CORBA::Long disc_val, DDS::Memb
     return false;
   }
 
-  DDS::DynamicTypeMembersById_var members_var;
-  if (type_->get_all_members(members_var) != DDS::RETCODE_OK) {
-    return false;
-  }
-  DynamicTypeMembersByIdImpl* members = dynamic_cast<DynamicTypeMembersByIdImpl*>(members_var.in());
-  if (!members) {
+#if OPENDDS_CONFIG_IDL_MAP
+  DDS::DynamicTypeMembersById members;
+  if (type_->get_all_members(members) != DDS::RETCODE_OK) {
     return false;
   }
 
-  for (DynamicTypeMembersByIdImpl::const_iterator it = members->begin(); it != members->end(); ++it) {
+  for (DDS::DynamicTypeMembersById::const_iterator it = members.begin(); it != members.end(); ++it) {
     if (it->first == default_id) continue;
 
     DDS::MemberDescriptor_var md;
@@ -819,6 +816,11 @@ bool DynamicDataImpl::is_default_member_selected(CORBA::Long disc_val, DDS::Memb
     }
   }
   return true;
+#else
+  ACE_UNUSED_ARG(disc_val);
+  ACE_UNUSED_ARG(default_id);
+  return false;
+#endif
 }
 
 DynamicDataImpl::SingleValue::SingleValue()

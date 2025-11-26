@@ -1,7 +1,6 @@
 #ifndef RTPSRELAY_GUID_ADDR_SET_H_
 #define RTPSRELAY_GUID_ADDR_SET_H_
 
-#include "ParticipantStatisticsReporter.h"
 #include "RelayStatisticsReporter.h"
 #include "RelayThreadMonitor.h"
 
@@ -31,11 +30,9 @@ using IpToPorts = std::unordered_map<ACE_INET_Addr, PortSet, InetAddrHash>;
 struct AddrSetStats {
   bool allow_rtps = false;
   bool allow_stun_responses = true;
+  bool in_denied_partition = false;
   bool seen_spdp_message = false;
   IpToPorts ip_to_ports;
-  ParticipantStatisticsReporter spdp_stats_reporter;
-  ParticipantStatisticsReporter sedp_stats_reporter;
-  ParticipantStatisticsReporter data_stats_reporter;
   OpenDDS::DCPS::Lockable_Message_Block_Ptr spdp_message;
   OpenDDS::DCPS::MonotonicTimePoint session_start;
   OpenDDS::DCPS::MonotonicTimePoint deactivation;
@@ -44,15 +41,11 @@ struct AddrSetStats {
   size_t& total_ips;
   size_t& total_ports;
 
-  AddrSetStats(const OpenDDS::DCPS::GUID_t& guid,
-               const OpenDDS::DCPS::MonotonicTimePoint& a_session_start,
+  AddrSetStats(const OpenDDS::DCPS::MonotonicTimePoint& a_session_start,
                RelayStatisticsReporter& a_relay_stats_reporter,
                size_t& a_total_ips,
                size_t& a_total_ports)
-    : spdp_stats_reporter(rtps_guid_to_relay_guid(guid), "SPDP")
-    , sedp_stats_reporter(rtps_guid_to_relay_guid(guid), "SEDP")
-    , data_stats_reporter(rtps_guid_to_relay_guid(guid), "DATA")
-    , session_start(a_session_start)
+    : session_start(a_session_start)
     , relay_stats_reporter(a_relay_stats_reporter)
     , total_ips(a_total_ips)
     , total_ports(a_total_ports)
@@ -93,20 +86,6 @@ struct AddrSetStats {
       }
     }
     return false;
-  }
-
-  ParticipantStatisticsReporter* select_stats_reporter(Port port)
-  {
-    switch (port) {
-    case SPDP:
-      return &spdp_stats_reporter;
-    case SEDP:
-      return &sedp_stats_reporter;
-    case DATA:
-      return &data_stats_reporter;
-    }
-
-    return nullptr;
   }
 
   OpenDDS::DCPS::TimeDuration get_session_time(const OpenDDS::DCPS::MonotonicTimePoint& now) const
@@ -223,25 +202,15 @@ public:
       return gas_.find_or_create(guid, now);
     }
 
-    ParticipantStatisticsReporter&
+    void
     record_activity(const AddrPort& remote_address,
                     const OpenDDS::DCPS::MonotonicTimePoint& now,
                     const OpenDDS::DCPS::GUID_t& src_guid,
-                    MessageType msg_type,
-                    const size_t& msg_len,
                     bool from_application_participant,
                     bool* allow_stun_responses,
                     const RelayHandler& handler)
     {
-      return gas_.record_activity(remote_address, now, src_guid, msg_type, msg_len, from_application_participant, allow_stun_responses, handler);
-    }
-
-    ParticipantStatisticsReporter&
-    participant_statistics_reporter(const OpenDDS::DCPS::GUID_t& guid,
-                                    const OpenDDS::DCPS::MonotonicTimePoint& now,
-                                    Port port)
-    {
-      return *find_or_create(guid, now).second.select_stats_reporter(port);
+      gas_.record_activity(remote_address, now, src_guid, from_application_participant, allow_stun_responses, handler);
     }
 
     bool ignore_rtps(bool from_application_participant,
@@ -311,6 +280,11 @@ public:
       gas_.populate_relay_status(relay_status);
     }
 
+    void deny(const OpenDDS::DCPS::GUID_t& guid)
+    {
+      gas_.deny(guid);
+    }
+
   private:
     GuidAddrSet& gas_;
 
@@ -324,12 +298,10 @@ private:
   CreatedAddrSetStats find_or_create(const OpenDDS::DCPS::GUID_t& guid,
                                      const OpenDDS::DCPS::MonotonicTimePoint& now);
 
-  ParticipantStatisticsReporter&
+  void
   record_activity(const AddrPort& remote_address,
                   const OpenDDS::DCPS::MonotonicTimePoint& now,
                   const OpenDDS::DCPS::GUID_t& src_guid,
-                  MessageType msg_type,
-                  const size_t& msg_len,
                   bool from_application_participant,
                   bool* allow_stun_responses,
                   const RelayHandler& handler);
@@ -392,6 +364,8 @@ private:
   void process_drain_state(const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   void populate_relay_status(RelayStatus& relay_status);
+
+  void deny(const OpenDDS::DCPS::GUID_t& guid);
 
   struct AdmissionControlInfo {
     AdmissionControlInfo(const OpenDDS::DCPS::GuidPrefix_t& prefix, const OpenDDS::DCPS::MonotonicTimePoint& admitted)

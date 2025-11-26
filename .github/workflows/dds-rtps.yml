@@ -63,7 +63,7 @@ jobs:
         cmake -S . -B build
         cmake --build build -- -j4
     - name: upload shape_main artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: dds-rtps/srcCxx/opendds-cmake/build/shape_main

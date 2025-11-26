@@ -2,6 +2,9 @@ name: "MPC Builds"
 
 on:
   push:
+    branches-ignore:
+      - 'dependabot/**'
+      - 'workflows/**'
     paths:
       - '**'
       # Don't run this workflow if the only files that changed are the
@@ -57,7 +60,7 @@ env:
   TRIGGERING_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
   VCPKG_INSTALLED_DIR: ${{ github.workspace }}\vcpkg\installed
   CTEST_OUTPUT_ON_FAILURE: ON
-  VCPKG_GIT_COMMIT: d5ec528843d29e3a52d745a64b469f810b2cedbf
+  VCPKG_GIT_COMMIT: dd3097e305afa53f7b4312371f62058d2e665320
   SCOREBOARD_UPLOAD_BRANCH: refs/heads/master
 
 jobs:
@@ -131,7 +134,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -155,7 +158,7 @@ jobs:
         ref: Latest_Micro
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_i0_xer0_artifact
         path: ACE_TAO
@@ -208,7 +211,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -241,7 +244,7 @@ jobs:
         ref: Latest_Micro
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_i0_xer0_artifact
         path: ACE_TAO
@@ -256,7 +259,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u24_i0_xer0_js0_j17_artifact
         path: OpenDDS
@@ -317,12 +320,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -333,7 +336,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -452,7 +455,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -480,7 +483,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u22_o1d0v1_xer0_j11_artifact
         path: OpenDDS
@@ -609,7 +612,7 @@ jobs:
         tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -661,7 +664,7 @@ jobs:
           --tests \
           --compile-warnings=WARNING
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u22_esafe_js0_artifact
         path: OpenDDS
@@ -705,7 +708,7 @@ jobs:
         tar --exclude='ACE_TAO' -uvf ../../${{ github.job }}.tar target
         xz -3 ../../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -738,7 +741,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u22_esafe_js0_artifact
         path: OpenDDS
@@ -748,7 +751,7 @@ jobs:
         cd OpenDDS
         tar xvfJ ACE_TAO_u22_esafe_js0.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u22_esafe_js0_artifact
         path: OpenDDS/build
@@ -815,12 +818,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -831,7 +834,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -938,7 +941,7 @@ jobs:
         tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -991,7 +994,7 @@ jobs:
           --tests \
           --compile-warnings=WARNING
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u22_bsafe_js0_FM-1f_artifact
         path: OpenDDS
@@ -1035,7 +1038,7 @@ jobs:
         tar --exclude='ACE_TAO' -uvf ../../${{ github.job }}.tar target
         xz -3 ../../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -1068,7 +1071,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u22_bsafe_js0_FM-1f_artifact
         path: OpenDDS
@@ -1078,7 +1081,7 @@ jobs:
         cd OpenDDS
         tar xvfJ ACE_TAO_u22_bsafe_js0_FM-1f.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u22_bsafe_js0_FM-1f_artifact
         path: OpenDDS/build
@@ -1145,12 +1148,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -1161,7 +1164,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -1242,7 +1245,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -1268,7 +1271,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u22_d0i0v1_sec_js0_FM-08_artifact
         path: ACE_TAO
@@ -1314,7 +1317,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -1349,7 +1352,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u22_d0i0v1_sec_js0_FM-08_artifact
         path: ACE_TAO
@@ -1364,7 +1367,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u22_d0i0v1_sec_js0_FM-08_artifact
         path: OpenDDS
@@ -1425,12 +1428,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -1441,7 +1444,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -1532,7 +1535,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -1560,7 +1563,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_clang18_i0w1_sec_artifact
         path: ACE_TAO
@@ -1620,7 +1623,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -1657,7 +1660,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_clang18_i0w1_sec_artifact
         path: ACE_TAO
@@ -1672,7 +1675,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u24_clang18_i0w1_sec_artifact
         path: OpenDDS
@@ -1734,12 +1737,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -1750,7 +1753,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -1764,7 +1767,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  ACE_TAO_u24_clang17_sec_js0:
+  ACE_TAO_u24_clang20_sec_js0:
 
     runs-on: ubuntu-24.04
 
@@ -1786,17 +1789,23 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
+    - name: add LLVM apt repo llvm-toolchain-noble-20
+      run: |
+        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        sudo apt-add-repository "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-20 main"
+    - name: install clang-20
+      run: sudo apt-get -y install clang-20
     - name: get compiler version
       shell: bash
       run: |
-        export COMPILER_VERSION=$(clang++-17 --version 2>&1 | head -n 1)
+        export COMPILER_VERSION=$(clang++-20 --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v4
       with:
         path: ${{ github.job }}.tar.xz
-        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c03_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -1813,8 +1822,8 @@ jobs:
         ./configure \
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
-          --compiler=clang++-17 \
-          --std=c++11 \
+          --compiler=clang++-20 \
+          --std=c++23 \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --tests \
           --security \
@@ -1840,16 +1849,16 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_u24_clang17_sec_js0:
+  build_u24_clang20_sec_js0:
 
     runs-on: ubuntu-24.04
 
-    needs: ACE_TAO_u24_clang17_sec_js0
+    needs: ACE_TAO_u24_clang20_sec_js0
 
     steps:
     - name: Update apt indexes
@@ -1868,28 +1877,34 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
-        name: ACE_TAO_u24_clang17_sec_js0_artifact
+        name: ACE_TAO_u24_clang20_sec_js0_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_clang17_sec_js0.tar.xz
+        tar xvfJ ACE_TAO_u24_clang20_sec_js0.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v5
       with:
         path: OpenDDS
         submodules: true
+    - name: add LLVM apt repo llvm-toolchain-noble-20
+      run: |
+        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        sudo apt-add-repository "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-20 main"
+    - name: install clang-20
+      run: sudo apt-get -y install clang-20
     - name: configure OpenDDS
       run: |
         cd OpenDDS
         ./configure \
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
-          --compiler=clang++-17 \
-          --std=c++11 \
+          --compiler=clang++-20 \
+          --std=c++23 \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --tests \
           --security \
@@ -1914,8 +1929,8 @@ jobs:
         source setenv.sh
         cmake -S . -B build \
           -DOPENDDS_JUST_BUILD_TESTS=TRUE \
-          -DCMAKE_CXX_STANDARD=11 \
-          -DCMAKE_CXX_COMPILER=clang++-17
+          -DCMAKE_CXX_STANDARD=23 \
+          -DCMAKE_CXX_COMPILER=clang++-20
         cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -1927,16 +1942,16 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_u24_clang17_sec_js0:
+  cmake_u24_clang20_sec_js0:
 
     runs-on: ubuntu-24.04
 
-    needs: build_u24_clang17_sec_js0
+    needs: build_u24_clang20_sec_js0
 
     permissions:
       contents: read
@@ -1964,30 +1979,30 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
-        name: ACE_TAO_u24_clang17_sec_js0_artifact
+        name: ACE_TAO_u24_clang20_sec_js0_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_clang17_sec_js0.tar.xz
+        tar xvfJ ACE_TAO_u24_clang20_sec_js0.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v5
       with:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
-        name: build_u24_clang17_sec_js0_artifact
+        name: build_u24_clang20_sec_js0_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u24_clang17_sec_js0.tar.xz
+        tar xvfJ build_u24_clang20_sec_js0.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -2041,12 +2056,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -2057,7 +2072,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -2147,7 +2162,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -2175,7 +2190,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_gcc13_d0w1_cpp03_artifact
         path: ACE_TAO
@@ -2234,7 +2249,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -2267,7 +2282,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_gcc13_d0w1_cpp03_artifact
         path: ACE_TAO
@@ -2282,7 +2297,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u24_gcc13_d0w1_cpp03_artifact
         path: OpenDDS
@@ -2343,12 +2358,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -2359,7 +2374,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -2445,7 +2460,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -2473,7 +2488,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_gcc12_i0_js0_j_artifact
         path: ACE_TAO
@@ -2521,7 +2536,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -2554,7 +2569,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_gcc12_i0_js0_j_artifact
         path: ACE_TAO
@@ -2569,7 +2584,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u24_gcc12_i0_js0_j_artifact
         path: OpenDDS
@@ -2630,12 +2645,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -2646,7 +2661,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -2724,7 +2739,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -2748,7 +2763,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u22_i0_xer0_artifact
         path: ACE_TAO
@@ -2794,7 +2809,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -2827,7 +2842,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u22_i0_xer0_artifact
         path: ACE_TAO
@@ -2842,7 +2857,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u22_i0_xer0_artifact
         path: OpenDDS
@@ -2903,12 +2918,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -2919,7 +2934,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -3032,7 +3047,7 @@ jobs:
         tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO build/host/setenv.sh build/host/VERSION.txt
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -3090,7 +3105,7 @@ jobs:
           --tests \
           --compile-warnings=WARNING
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_gcc14_bsafe_js0_FM-2c_artifact
         path: OpenDDS
@@ -3137,7 +3152,7 @@ jobs:
         tar --exclude='ACE_TAO' -uvf ../../${{ github.job }}.tar target
         xz -3 ../../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -3213,7 +3228,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -3240,7 +3255,7 @@ jobs:
         repository: DOCGroup/ACE_TAO
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_acem_j_qt_ws_sec_artifact
         path: ACE_TAO
@@ -3307,7 +3322,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -3343,7 +3358,7 @@ jobs:
         repository: DOCGroup/ACE_TAO
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_acem_j_qt_ws_sec_artifact
         path: ACE_TAO
@@ -3358,7 +3373,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u24_acem_j_qt_ws_sec_artifact
         path: OpenDDS
@@ -3419,12 +3434,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -3435,7 +3450,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -3527,7 +3542,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -3555,7 +3570,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_p1_asan_artifact
         path: ACE_TAO
@@ -3616,7 +3631,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -3653,7 +3668,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_p1_asan_artifact
         path: ACE_TAO
@@ -3668,7 +3683,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u24_p1_asan_sec_artifact
         path: OpenDDS
@@ -3730,12 +3745,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -3746,7 +3761,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -3836,7 +3851,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -3864,7 +3879,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_p1_tsan_artifact
         path: ACE_TAO
@@ -3914,7 +3929,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -3951,7 +3966,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_p1_tsan_artifact
         path: ACE_TAO
@@ -3966,7 +3981,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u24_p1_tsan_sec_artifact
         path: OpenDDS
@@ -4028,12 +4043,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -4044,7 +4059,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -4136,7 +4151,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -4164,7 +4179,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_p1_ubsan_artifact
         path: ACE_TAO
@@ -4226,7 +4241,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -4263,7 +4278,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_p1_ubsan_artifact
         path: ACE_TAO
@@ -4278,7 +4293,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u24_p1_ubsan_sec_artifact
         path: OpenDDS
@@ -4340,12 +4355,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -4356,7 +4371,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -4378,7 +4393,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: openssl3_u24_artifact
     - name: extract openssl artifact
@@ -4454,7 +4469,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -4467,7 +4482,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: openssl3_u24_artifact
     - name: extract openssl artifact
@@ -4491,7 +4506,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_p1_artifact
         path: ACE_TAO
@@ -4540,7 +4555,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -4557,7 +4572,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: openssl3_u24_artifact
     - name: extract openssl artifact
@@ -4586,7 +4601,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_p1_artifact
         path: ACE_TAO
@@ -4601,7 +4616,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u24_p1_sec_artifact
         path: OpenDDS
@@ -4662,12 +4677,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -4678,7 +4693,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -4704,7 +4719,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: openssl3_u24_artifact
     - name: extract openssl artifact
@@ -4733,7 +4748,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_p1_artifact
         path: ACE_TAO
@@ -4748,7 +4763,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u24_p1_sec_artifact
         path: OpenDDS
@@ -4800,12 +4815,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -4816,7 +4831,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -4853,7 +4868,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_p1_artifact
         path: ACE_TAO
@@ -4914,7 +4929,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -4951,7 +4966,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u24_p1_artifact
         path: ACE_TAO
@@ -4966,7 +4981,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u24_p1_j8_FM-1f_artifact
         path: OpenDDS
@@ -5027,12 +5042,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -5043,7 +5058,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -5129,7 +5144,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -5155,7 +5170,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u22_w1_artifact
         path: ACE_TAO
@@ -5201,7 +5216,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -5236,7 +5251,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u22_w1_artifact
         path: ACE_TAO
@@ -5251,7 +5266,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u22_w1a1_sec_artifact
         path: OpenDDS
@@ -5312,12 +5327,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -5328,7 +5343,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -5363,7 +5378,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u22_w1_artifact
         path: ACE_TAO
@@ -5424,7 +5439,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -5459,7 +5474,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u22_w1_artifact
         path: ACE_TAO
@@ -5474,7 +5489,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u22_w1_j_FM-2f_artifact
         path: OpenDDS
@@ -5535,12 +5550,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -5551,7 +5566,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -5631,7 +5646,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -5659,7 +5674,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u22_stat_qt_ws_sec_artifact
         path: ACE_TAO
@@ -5710,7 +5725,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -5747,7 +5762,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u22_stat_qt_ws_sec_artifact
         path: ACE_TAO
@@ -5763,7 +5778,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u22_stat_qt_ws_sec_artifact
         path: OpenDDS
@@ -5832,12 +5847,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -5848,7 +5863,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -5901,7 +5916,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u22_stat_qt_ws_sec_artifact
         path: ACE_TAO
@@ -5912,7 +5927,7 @@ jobs:
         tar xvfJ ACE_TAO_u22_stat_qt_ws_sec.tar.xz
         rm ACE_TAO_u22_stat_qt_ws_sec.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u22_stat_qt_ws_sec_artifact
         path: OpenDDS
@@ -6012,12 +6027,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -6028,7 +6043,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -6081,7 +6096,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u22_stat_qt_ws_sec_artifact
         path: ACE_TAO
@@ -6092,7 +6107,7 @@ jobs:
         tar xvfJ ACE_TAO_u22_stat_qt_ws_sec.tar.xz
         rm ACE_TAO_u22_stat_qt_ws_sec.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u22_stat_qt_ws_sec_artifact
         path: OpenDDS
@@ -6178,12 +6193,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -6194,7 +6209,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -6247,7 +6262,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u22_stat_qt_ws_sec_artifact
         path: ACE_TAO
@@ -6258,7 +6273,7 @@ jobs:
         tar xvfJ ACE_TAO_u22_stat_qt_ws_sec.tar.xz
         rm ACE_TAO_u22_stat_qt_ws_sec.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u22_stat_qt_ws_sec_artifact
         path: OpenDDS
@@ -6344,12 +6359,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -6360,7 +6375,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -6409,7 +6424,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u22_stat_qt_ws_sec_artifact
         path: ACE_TAO
@@ -6425,7 +6440,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u22_stat_qt_ws_sec_artifact
         path: OpenDDS
@@ -6500,12 +6515,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -6516,7 +6531,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -6602,7 +6617,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -6628,7 +6643,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u22_j_cft0_FM-37_artifact
         path: ACE_TAO
@@ -6689,7 +6704,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -6724,7 +6739,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_u22_j_cft0_FM-37_artifact
         path: ACE_TAO
@@ -6739,7 +6754,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_u22_j_cft0_FM-37_artifact
         path: OpenDDS
@@ -6800,12 +6815,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -6816,7 +6831,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -6912,7 +6927,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -6950,7 +6965,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
@@ -7002,7 +7017,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -7048,7 +7063,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
@@ -7059,7 +7074,7 @@ jobs:
         tar xvfJ ACE_TAO_w25_p1_stat_js0.tar.xz
         rm -f ACE_TAO_w25_p1_stat_js0.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w25_p1_stat_js0_artifact
         path: OpenDDS
@@ -7124,12 +7139,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -7140,7 +7155,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -7196,7 +7211,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
@@ -7207,7 +7222,7 @@ jobs:
         tar xvfJ ACE_TAO_w25_p1_stat_js0.tar.xz
         rm -f ACE_TAO_w25_p1_stat_js0.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w25_p1_stat_js0_artifact
         path: OpenDDS
@@ -7303,12 +7318,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -7319,7 +7334,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -7366,7 +7381,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
@@ -7377,7 +7392,7 @@ jobs:
         tar xvfJ ACE_TAO_w25_p1_stat_js0.tar.xz
         rm -f ACE_TAO_w25_p1_stat_js0.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w25_p1_stat_js0_artifact
         path: OpenDDS
@@ -7471,12 +7486,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -7487,7 +7502,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -7534,7 +7549,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
@@ -7545,7 +7560,7 @@ jobs:
         tar xvfJ ACE_TAO_w25_p1_stat_js0.tar.xz
         rm -f ACE_TAO_w25_p1_stat_js0.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w25_p1_stat_js0_artifact
         path: OpenDDS
@@ -7641,12 +7656,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -7657,7 +7672,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -7713,7 +7728,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_p1_stat_js0_artifact
         path: OpenDDS/ACE_TAO
@@ -7724,7 +7739,7 @@ jobs:
         tar xvfJ ACE_TAO_w25_p1_stat_js0.tar.xz
         rm -f ACE_TAO_w25_p1_stat_js0.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w25_p1_stat_js0_artifact
         path: OpenDDS
@@ -7806,12 +7821,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -7822,7 +7837,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -7920,7 +7935,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -7958,7 +7973,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
@@ -8012,7 +8027,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -8059,7 +8074,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
@@ -8070,7 +8085,7 @@ jobs:
         tar xvfJ ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
         rm -f ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS
@@ -8135,12 +8150,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -8151,7 +8166,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -8207,7 +8222,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
@@ -8218,7 +8233,7 @@ jobs:
         tar xvfJ ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
         rm -f ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS
@@ -8318,12 +8333,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -8334,7 +8349,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -8381,7 +8396,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
@@ -8392,7 +8407,7 @@ jobs:
         tar xvfJ ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
         rm -f ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS
@@ -8487,12 +8502,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -8503,7 +8518,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -8550,7 +8565,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
@@ -8561,7 +8576,7 @@ jobs:
         tar xvfJ ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
         rm -f ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS
@@ -8658,12 +8673,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -8674,7 +8689,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -8730,7 +8745,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS/ACE_TAO
@@ -8741,7 +8756,7 @@ jobs:
         tar xvfJ ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
         rm -f ACE_TAO_w25_re_p1_stat_FM-08.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w25_re_p1_stat_FM-08_artifact
         path: OpenDDS
@@ -8825,12 +8840,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -8841,7 +8856,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -8863,7 +8878,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: openssl3_w25_artifact
     - name: extract openssl artifact
@@ -8950,7 +8965,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -8963,7 +8978,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: openssl3_w25_artifact
     - name: extract openssl artifact
@@ -8997,7 +9012,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_re_o1p1_sec_artifact
         path: OpenDDS/ACE_TAO
@@ -9065,7 +9080,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -9082,7 +9097,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: openssl3_w25_artifact
     - name: extract openssl artifact
@@ -9121,7 +9136,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_re_o1p1_sec_artifact
         path: OpenDDS/ACE_TAO
@@ -9132,7 +9147,7 @@ jobs:
         tar xvfJ ACE_TAO_w25_re_o1p1_sec.tar.xz
         rm -f ACE_TAO_w25_re_o1p1_sec.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w25_re_o1p1_sec_artifact
         path: OpenDDS
@@ -9200,12 +9215,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -9216,7 +9231,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -9242,7 +9257,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: openssl3_w25_artifact
     - name: extract openssl artifact
@@ -9281,7 +9296,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_re_o1p1_sec_artifact
         path: OpenDDS/ACE_TAO
@@ -9292,7 +9307,7 @@ jobs:
         tar xvfJ ACE_TAO_w25_re_o1p1_sec.tar.xz
         rm -f ACE_TAO_w25_re_o1p1_sec.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w25_re_o1p1_sec_artifact
         path: OpenDDS
@@ -9391,12 +9406,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -9407,7 +9422,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -9463,7 +9478,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_re_o1p1_sec_artifact
         path: OpenDDS/ACE_TAO
@@ -9474,7 +9489,7 @@ jobs:
         tar xvfJ ACE_TAO_w25_re_o1p1_sec.tar.xz
         rm -f ACE_TAO_w25_re_o1p1_sec.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w25_re_o1p1_sec_artifact
         path: OpenDDS
@@ -9557,12 +9572,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -9573,7 +9588,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -9599,7 +9614,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: openssl3_w25_artifact
     - name: extract openssl artifact
@@ -9638,7 +9653,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_re_o1p1_sec_artifact
         path: OpenDDS/ACE_TAO
@@ -9651,7 +9666,7 @@ jobs:
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w25_re_o1p1_sec_artifact
         path: OpenDDS
@@ -9733,12 +9748,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -9749,7 +9764,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -9839,7 +9854,7 @@ jobs:
         tar cvhf ${{ github.job }}.tar wireshark wsbuild wireshark-win64-libs-3.6
         xz -3 ${{ github.job }}.tar
     - name: upload Wireshark artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -9931,7 +9946,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -9944,7 +9959,7 @@ jobs:
 
     steps:
     - name: download Wireshark artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: wireshark_w25-release_artifact
     - name: extract Wireshark artifact
@@ -9978,7 +9993,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS/ACE_TAO
@@ -10040,7 +10055,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -10078,7 +10093,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS/ACE_TAO
@@ -10089,7 +10104,7 @@ jobs:
         tar xvfJ ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
         rm -f ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS
@@ -10157,12 +10172,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -10173,7 +10188,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -10229,7 +10244,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS/ACE_TAO
@@ -10240,7 +10255,7 @@ jobs:
         tar xvfJ ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
         rm -f ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS
@@ -10338,12 +10353,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -10354,7 +10369,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -10410,7 +10425,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS/ACE_TAO
@@ -10421,7 +10436,7 @@ jobs:
         tar xvfJ ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
         rm -f ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS
@@ -10504,12 +10519,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -10520,7 +10535,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -10576,7 +10591,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS/ACE_TAO
@@ -10587,7 +10602,7 @@ jobs:
         tar xvfJ ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
         rm -f ACE_TAO_w25_re_j_ws_FM-1f.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w25_re_j_ws_FM-1f_artifact
         path: OpenDDS
@@ -10670,12 +10685,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -10686,7 +10701,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -10789,7 +10804,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -10833,7 +10848,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w22_x86_i0_artifact
         path: ACE_TAO
@@ -10878,7 +10893,7 @@ jobs:
         xz -3 ../${{ github.job }}.tar
         mv ../${{ github.job }}.tar.xz $GITHUB_WORKSPACE
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -10926,7 +10941,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w22_x86_i0_artifact
         path: ACE_TAO
@@ -10937,7 +10952,7 @@ jobs:
         tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
         rm -f ACE_TAO_w22_x86_i0.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w22_x86_i0_sec_artifact
         path: OpenDDS
@@ -11006,12 +11021,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: C:\OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -11022,7 +11037,7 @@ jobs:
         cd /c/OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: C:\OpenDDS\${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -11079,7 +11094,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w22_x86_i0_artifact
         path: ACE_TAO
@@ -11090,7 +11105,7 @@ jobs:
         tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
         rm -f ACE_TAO_w22_x86_i0.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w22_x86_i0_sec_artifact
         path: OpenDDS
@@ -11160,12 +11175,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: C:\OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -11176,7 +11191,7 @@ jobs:
         cd /c/OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: C:\OpenDDS\${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -11224,7 +11239,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w22_x86_i0_artifact
         path: OpenDDS/ACE_TAO
@@ -11269,7 +11284,7 @@ jobs:
         xz -3 ../${{ github.job }}.tar
         mv ../${{ github.job }}.tar.xz $GITHUB_WORKSPACE
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -11317,7 +11332,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w22_x86_i0_artifact
         path: OpenDDS/ACE_TAO
@@ -11328,7 +11343,7 @@ jobs:
         tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
         rm -f ACE_TAO_w22_x86_i0.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w22_x86_i0_j_FM-1f_artifact
         path: OpenDDS
@@ -11398,12 +11413,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: c:/OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -11414,7 +11429,7 @@ jobs:
         cd /c/OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: c:/OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -11508,7 +11523,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -11546,7 +11561,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w22_p1_artifact
         path: OpenDDS/ACE_TAO
@@ -11596,7 +11611,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -11643,7 +11658,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w22_p1_artifact
         path: OpenDDS/ACE_TAO
@@ -11654,7 +11669,7 @@ jobs:
         tar xvfJ ACE_TAO_w22_p1.tar.xz
         rm -f ACE_TAO_w22_p1.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w22_p1_artifact
         path: OpenDDS
@@ -11719,12 +11734,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -11735,7 +11750,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -11791,7 +11806,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w22_p1_artifact
         path: OpenDDS/ACE_TAO
@@ -11802,7 +11817,7 @@ jobs:
         tar xvfJ ACE_TAO_w22_p1.tar.xz
         rm -f ACE_TAO_w22_p1.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w22_p1_artifact
         path: OpenDDS
@@ -11887,12 +11902,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -11903,7 +11918,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -11959,7 +11974,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w22_p1_artifact
         path: OpenDDS/ACE_TAO
@@ -11970,7 +11985,7 @@ jobs:
         tar xvfJ ACE_TAO_w22_p1.tar.xz
         rm -f ACE_TAO_w22_p1.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w22_p1_artifact
         path: OpenDDS
@@ -12052,12 +12067,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -12068,7 +12083,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -12124,7 +12139,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_w22_p1_artifact
         path: OpenDDS/ACE_TAO
@@ -12137,7 +12152,7 @@ jobs:
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_w22_p1_artifact
         path: OpenDDS
@@ -12217,12 +12232,12 @@ jobs:
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS\${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -12233,7 +12248,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -12323,7 +12338,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs gtar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -12350,7 +12365,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_m13_sec_artifact
         path: ACE_TAO
@@ -12399,7 +12414,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs gtar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -12435,7 +12450,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_m13_sec_artifact
         path: ACE_TAO
@@ -12450,7 +12465,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_m13_sec_artifact
         path: OpenDDS
@@ -12497,12 +12512,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -12513,7 +12528,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -12558,7 +12573,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_m13_sec_artifact
         path: ACE_TAO
@@ -12573,7 +12588,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_m13_sec_artifact
         path: OpenDDS
@@ -12620,12 +12635,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -12636,7 +12651,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -12672,7 +12687,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_m13_sec_artifact
         path: ACE_TAO
@@ -12735,7 +12750,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs gtar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -12771,7 +12786,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_m13_sec_artifact
         path: ACE_TAO
@@ -12786,7 +12801,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_m13_j_FM-1f_artifact
         path: OpenDDS
@@ -12833,12 +12848,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -12849,7 +12864,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -12894,7 +12909,7 @@ jobs:
         ref: ace6tao2
         path: ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_m13_sec_artifact
         path: ACE_TAO
@@ -12909,7 +12924,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_m13_j_FM-1f_artifact
         path: OpenDDS
@@ -12956,12 +12971,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -12972,7 +12987,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -13057,7 +13072,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs gtar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -13089,7 +13104,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_m14_o1d0_sec_artifact
         path: OpenDDS/ACE_TAO
@@ -13135,7 +13150,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs gtar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -13176,7 +13191,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_m14_o1d0_sec_artifact
         path: OpenDDS/ACE_TAO
@@ -13186,7 +13201,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         gtar xvfJ ACE_TAO_m14_o1d0_sec.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_m14_o1d0_sec_artifact
         path: OpenDDS
@@ -13236,12 +13251,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -13252,7 +13267,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -13302,7 +13317,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_m14_o1d0_sec_artifact
         path: OpenDDS/ACE_TAO
@@ -13312,7 +13327,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         gtar xvfJ ACE_TAO_m14_o1d0_sec.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_m14_o1d0_sec_artifact
         path: OpenDDS
@@ -13362,12 +13377,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -13378,7 +13393,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -13466,7 +13481,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs gtar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -13499,7 +13514,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_m14_i0_j_FM-1f_artifact
         path: OpenDDS/ACE_TAO
@@ -13560,7 +13575,7 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3- | xargs gtar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -13601,7 +13616,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_m14_i0_j_FM-1f_artifact
         path: OpenDDS/ACE_TAO
@@ -13611,7 +13626,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         gtar xvfJ ACE_TAO_m14_i0_j_FM-1f.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_m14_i0_j_FM-1f_artifact
         path: OpenDDS
@@ -13661,12 +13676,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -13677,7 +13692,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -13727,7 +13742,7 @@ jobs:
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: ACE_TAO_m14_i0_j_FM-1f_artifact
         path: OpenDDS/ACE_TAO
@@ -13737,7 +13752,7 @@ jobs:
         cd OpenDDS/ACE_TAO
         gtar xvfJ ACE_TAO_m14_i0_j_FM-1f.tar.xz
     - name: download OpenDDS artifact
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v6
       with:
         name: build_m14_i0_j_FM-1f_artifact
         path: OpenDDS
@@ -13787,12 +13802,12 @@ jobs:
         EOF
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_autobuild_output
         path: OpenDDS/${{ github.job }}_autobuild_workspace
     - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
+      uses: google-github-actions/auth@v3
       with:
         workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
         service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
@@ -13803,7 +13818,7 @@ jobs:
         cd OpenDDS
         echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
     - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v2'
+      uses: 'google-github-actions/upload-cloud-storage@v3'
       with:
         path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
         destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
@@ -13863,7 +13878,7 @@ jobs:
         tar cvf ${{ github.job }}.tar openssl_install
         xz -3 ${{ github.job }}.tar
     - name: upload openssl artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
@@ -13918,7 +13933,7 @@ jobs:
         tar cvhf ${{ github.job }}.tar openssl3
         xz -3 ${{ github.job }}.tar
     - name: upload openssl artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz

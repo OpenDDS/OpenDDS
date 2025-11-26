@@ -129,14 +129,16 @@ public:
 
   /// @name User Interface
   /// @{
-  void write(const T& sample)
+  bool write(const T& sample)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
 
     const DDS::Time_t source_timestamp = time_source_.dds_time_t_now();
+    bool changed = true; // if not durable, act like sample was changed
 
     if (qos_.durability.kind == DDS::TRANSIENT_LOCAL_DURABILITY_QOS) {
       const std::pair<typename InstanceMap::iterator, bool> p = instance_map_.insert(std::make_pair(sample, SampleHolder()));
+      changed = p.second || p.first->second.empty() || !(p.first->second.latest() == sample);
       p.first->second.write(sample, source_timestamp, qos_);
     }
 
@@ -146,6 +148,7 @@ public:
     }
 
     write_set(sample, source_timestamp, readers_);
+    return changed;
   }
 
   void dispose(const T& sample)
@@ -240,6 +243,7 @@ private:
   class SampleHolder {
   public:
     bool empty() const { return samples_.empty(); }
+    T latest() const { return samples_.back().first; }
 
     void add_reader(InternalDataReader_rch reader, RcHandle<InternalEntity> writer)
     {

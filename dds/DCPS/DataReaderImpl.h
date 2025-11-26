@@ -39,15 +39,14 @@
 #include "transport/framework/TransportClient.h"
 #include "transport/framework/TransportReceiveListener.h"
 
-#include <dds/DdsDcpsTopicC.h>
-#include <dds/DdsDcpsSubscriptionExtC.h>
 #include <dds/DdsDcpsDomainC.h>
-#include <dds/DdsDcpsTopicC.h>
 #include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsSubscriptionExtC.h>
+#include <dds/DdsDcpsTopicC.h>
 
-#include <ace/String_Base.h>
-#include <ace/Reverse_Lock_T.h>
 #include <ace/Reactor.h>
+#include <ace/Reverse_Lock_T.h>
+#include <ace/String_Base.h>
 
 #include <memory>
 
@@ -111,12 +110,11 @@ private:
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
-class OpenDDS_Dcps_Export AbstractSamples
-{
+class OpenDDS_Dcps_Export AbstractSamples {
 public:
-  virtual ~AbstractSamples(){}
-  virtual void reserve(CORBA::ULong size)=0;
-  virtual void push_back(const DDS::SampleInfo& info, const void* sample)=0;
+  virtual ~AbstractSamples() {}
+  virtual void reserve(CORBA::ULong size) = 0;
+  virtual void push_back(const DDS::SampleInfo& info, const void* sample) = 0;
 };
 
 #endif
@@ -344,12 +342,11 @@ public:
   {
     return static_cast<size_t>(depth_);
   }
+
   size_t get_n_chunks() const
   {
     return n_chunks_;
   }
-
-  void liveliness_lost();
 
   void remove_all_associations();
 
@@ -377,8 +374,6 @@ public:
   /// Release all instances held by the reader.
   virtual void release_all_instances() = 0;
 
-  ACE_Reactor_Timer_Interface* get_reactor();
-
   GUID_t get_topic_id();
   GUID_t get_dp_id();
 
@@ -397,11 +392,12 @@ public:
   // therefore, we must lock the domain pariticipant when using  OwnershipManager.
   class OwnershipManagerPtr {
   public:
-    OwnershipManagerPtr(DataReaderImpl* reader)
-      : participant_( (reader && reader->is_exclusive_ownership_) ? reader->participant_servant_.lock() : RcHandle<DomainParticipantImpl>())
+    explicit OwnershipManagerPtr(DataReaderImpl* reader)
+      : participant_((reader && reader->is_exclusive_ownership_) ? reader->participant_servant_.lock() : RcHandle<DomainParticipantImpl>())
     {
     }
     operator bool() const { return participant_.in(); }
+    void reset() { participant_.reset(); }
     OwnershipManager* operator->() const
     {
       return participant_ ? participant_->ownership_manager() : 0;
@@ -414,7 +410,7 @@ public:
 
   struct OwnershipManagerScopedAccess {
     OwnershipManagerScopedAccess() : om_(0), lock_result_(0) {}
-    explicit OwnershipManagerScopedAccess(DataReaderImpl::OwnershipManagerPtr om) : om_(om), lock_result_(om_ ? om_->instance_lock_acquire() : 0) {}
+    explicit OwnershipManagerScopedAccess(OwnershipManagerPtr om) : om_(om), lock_result_(om_ ? om_->instance_lock_acquire() : 0) {}
     ~OwnershipManagerScopedAccess() { release(); }
 
     void swap(OwnershipManagerScopedAccess& rhs)
@@ -431,7 +427,7 @@ public:
       if (om_ && !lock_result_) {
         result = om_->instance_lock_release();
       }
-      om_ = 0;
+      om_.reset();
       lock_result_ = 0;
       return result;
     }
@@ -520,23 +516,23 @@ public:
                         DDS::ViewStateMask view_states,
                         DDS::InstanceStateMask instance_states);
 
-  void accept_coherent (const GUID_t& writer_id,
-                        const GUID_t& publisher_id);
-  void reject_coherent (const GUID_t& writer_id,
-                        const GUID_t& publisher_id);
-  void coherent_change_received (const GUID_t& publisher_id, Coherent_State& result);
+  void accept_coherent(const GUID_t& writer_id,
+                       const GUID_t& publisher_id);
+  void reject_coherent(const GUID_t& writer_id,
+                       const GUID_t& publisher_id);
+  void coherent_change_received(const GUID_t& publisher_id, Coherent_State& result);
 
-  void coherent_changes_completed (DataReaderImpl* reader);
+  void coherent_changes_completed(DataReaderImpl* reader);
 
-  void reset_coherent_info (const GUID_t& writer_id,
-                            const GUID_t& publisher_id);
+  void reset_coherent_info(const GUID_t& writer_id,
+                           const GUID_t& publisher_id);
 #endif
 
   // Called upon subscriber qos change to update the local cache.
   void set_subscriber_qos(const DDS::SubscriberQos & qos);
 
   // Set the instance related writers to reevaluate the owner.
-  void reset_ownership (DDS::InstanceHandle_t instance);
+  void reset_ownership(DDS::InstanceHandle_t instance);
 
   virtual RcHandle<EntityImpl> parent() const;
 
@@ -632,8 +628,8 @@ protected:
   // type specific DataReader's part of enable.
   virtual DDS::ReturnCode_t enable_specific() = 0;
 
-  void sample_info(DDS::SampleInfo & sample_info,
-                   const ReceivedDataElement *ptr);
+  void sample_info(DDS::SampleInfo& sample_info,
+                   const ReceivedDataElement* ptr);
 
   CORBA::Long total_samples() const;
 
@@ -752,7 +748,6 @@ private:
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   bool verify_coherent_changes_completion(WriterInfo* writer);
-  bool coherent_change_received(WriterInfo* writer);
 #endif
 
   RcHandle<BitSubscriber> get_builtin_subscriber_proxy() const
@@ -767,7 +762,8 @@ private:
 
   DDS::DomainId_t domain_id() const { return this->domain_id_; }
 
-  Priority get_priority_value(const AssociationData& data) const {
+  Priority get_priority_value(const AssociationData& data) const
+  {
     return data.publication_transport_priority_;
   }
 
@@ -799,7 +795,7 @@ private:
   // subscriber_servant_ has to be a weak pinter because it may be used from the
   // transport reactor thread and that thread doesn't have the owenership of the
   // the subscriber_servant_ object.
-  WeakRcHandle<SubscriberImpl>              subscriber_servant_;
+  WeakRcHandle<SubscriberImpl> subscriber_servant_;
 
   CORBA::Long                  depth_;
   size_t                       n_chunks_;
@@ -867,8 +863,7 @@ private:
   AtomicBool statistics_enabled_;
 
   /// publications writing to this reader.
-  typedef OPENDDS_MAP_CMP(GUID_t, WriterInfo_rch,
-                   GUID_tKeyLessThan) WriterMapType;
+  typedef OPENDDS_MAP_CMP(GUID_t, WriterInfo_rch, GUID_tKeyLessThan) WriterMapType;
 
   WriterMapType writers_;
 
