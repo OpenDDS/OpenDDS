@@ -157,7 +157,7 @@ struct OpenDDS_Dcps_Export DataSampleHeader : public PoolAllocationBase {
   /// DESTINATION_ORDER and LIFESPAN policy behaviors of subscriptions.
   /// It is also required to be present for all data in the
   /// SampleInfo structure supplied along with each data sample.
-  ACE_INT32 source_timestamp_sec_;
+  ACE_INT64 source_timestamp_sec_;
   ACE_UINT32 source_timestamp_nanosec_; // Corresponding IDL is unsigned.
   //@}
 
@@ -168,7 +168,7 @@ struct OpenDDS_Dcps_Export DataSampleHeader : public PoolAllocationBase {
   /// 'stale' and should be discarded by associated DataReader.
   /// These fields are optional and are controlled by the
   /// lifespan_duration_ flag.
-  ACE_INT32 lifespan_duration_sec_;
+  ACE_INT64 lifespan_duration_sec_;
   ACE_UINT32 lifespan_duration_nanosec_;  // Corresponding IDL is unsigned.
   //@}
 

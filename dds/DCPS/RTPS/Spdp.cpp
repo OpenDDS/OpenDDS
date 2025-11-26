@@ -2363,7 +2363,7 @@ ParticipantData_t Spdp::build_local_pdata(
       , 0
     },
     { // Duration_t (leaseDuration)
-      static_cast<CORBA::Long>(lease_duration_.value().sec()),
+      lease_duration_.value().sec(),
       0 // we are not supporting fractional seconds in the lease duration
     },
     participant_discovered_at_

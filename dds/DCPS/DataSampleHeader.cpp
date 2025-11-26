@@ -235,6 +235,7 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   }
   serialized_size(encoding, serialized_size_, sequence_);
 
+  // @todo RTPS has 32bit second field, need to convert from user level 64bit to RTPS 32bit
   if (!(reader >> this->source_timestamp_sec_)) {
     return;
   }
@@ -246,6 +247,7 @@ DataSampleHeader::init(ACE_Message_Block* buffer)
   serialized_size_ += sizeof(source_timestamp_nanosec_);
 
   if (this->lifespan_duration_) {
+  // @todo RTPS has 32bit second field, need to convert from user level 64bit to RTPS 32bit
     if (!(reader >> this->lifespan_duration_sec_)) {
       return;
     }
@@ -306,10 +308,12 @@ operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
 
   writer << value.message_length_;
   writer << value.sequence_;
+  // @todo RTPS has 32bit second field, need to convert from user level 64bit to RTPS 32bit
   writer << value.source_timestamp_sec_;
   writer << value.source_timestamp_nanosec_;
 
   if (value.lifespan_duration_) {
+  // @todo RTPS has 32bit second field, need to convert from user level 64bit to RTPS 32bit
     writer << value.lifespan_duration_sec_;
     writer << value.lifespan_duration_nanosec_;
   }

@@ -360,6 +360,7 @@ namespace OpenDDS
       offset += len;
 
       // hf_sample_timestamp
+      // @todo RTPS has 32bit second field, need to convert from user level 64bit to RTPS 32bit
       len = sizeof(sample.source_timestamp_sec_) +
         sizeof(sample.source_timestamp_nanosec_);
       if (sample.message_id_ != TRANSPORT_CONTROL)
@@ -376,6 +377,7 @@ namespace OpenDDS
       // hf_sample_lifespan
       if (sample.lifespan_duration_)
         {
+          // @todo RTPS has 32bit second field, need to convert from user level 64bit to RTPS 32bit
           len = sizeof(sample.lifespan_duration_sec_) +
             sizeof(sample.lifespan_duration_nanosec_);
           if (sample.message_id_ != TRANSPORT_CONTROL)

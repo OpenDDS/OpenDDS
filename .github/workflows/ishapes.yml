@@ -8,7 +8,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  VCPKG_GIT_COMMIT: d5ec528843d29e3a52d745a64b469f810b2cedbf
+  VCPKG_GIT_COMMIT: 74e6536215718009aae747d86d84b78376bf9e09
 
 jobs:
 
