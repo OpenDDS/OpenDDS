@@ -26,7 +26,6 @@ details.
 * [Dependencies](#dependencies)
   * [ACE/TAO](#acetao)
   * [Perl](#perl)
-  * [Optional Dependencies](#optional-dependencies)
 * [Supported Platforms](#supported-platforms)
   * [Operating Systems](#operating-systems)
   * [Compilers](#compilers)
