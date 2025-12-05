@@ -75,8 +75,7 @@ sub get_relay_args {
         "-VerticalAddress ${port_digit}444",
         "-HorizontalAddress 127.0.0.1:11${port_digit}44",
         "-MetaDiscoveryAddress 127.0.0.1:808${n}",
-        "-ORBVerboseLogging 1",
-        "-SynchronousOutput 1"
+        "-ORBVerboseLogging 1"
     );
 }
 
