@@ -92,4 +92,72 @@ GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_
   return result;
 }
 
+void GuidPartitionTable::deny_partitions(const DeniedPartitions& partitions)
+{
+  std::unordered_set<std::string> partitions_to_drain;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, denied_partitions_mutex_);
+
+    // Collect partitions that have not already been denied.
+    for (const auto& partition : partitions) {
+      const auto res = denied_partitions_.insert(partition);
+      if (res.second) {
+        partitions_to_drain.insert(partition.first);
+      }
+    }
+
+    if (!denied_partitions_.empty() && !pending_denied_partitions_cleanup_) {
+      if (this->reactor()->schedule_timer(this, 0, config_.denied_partitions_timeout().value()) == -1) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: GuidPartitionTable::deny_partitions: Failed to schedule denied partitions cleanup timer (%p)\n", "schedule_timer"));
+      } else {
+        pending_denied_partitions_cleanup_ = true;
+      }
+    }
+  }
+
+  GuidSet guids_to_drain;
+  lookup(guids_to_drain, partitions_to_drain);
+  GuidAddrSet::Proxy proxy(guid_addr_set_);
+  for (const auto& guid : guids_to_drain) {
+    proxy.deny(guid);
+  }
+}
+
+int GuidPartitionTable::handle_timeout(const ACE_Time_Value& now, const void*)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, denied_partitions_mutex_, -1);
+
+  const auto cutoff_time = OpenDDS::DCPS::MonotonicTimePoint(now) - config_.denied_partitions_timeout();
+  for (auto it = denied_partitions_.begin(); it != denied_partitions_.end();) {
+    if (it->second <= cutoff_time) {
+      it = denied_partitions_.erase(it);
+    } else {
+      ++it;
+    }
+  }
+
+  if (denied_partitions_.empty()) {
+    pending_denied_partitions_cleanup_ = false;
+  } else {
+    if (this->reactor()->schedule_timer(this, 0, config_.denied_partitions_timeout().value()) == -1) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: GuidPartitionTable::handle_timeout:: Failed to schedule denied partitions cleanup timer (%p)\n", "schedule_timer"));
+      pending_denied_partitions_cleanup_ = false;
+    }
+  }
+
+  return 0;
+}
+
+bool GuidPartitionTable::is_denied(const StringSet& partitions) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, denied_partitions_mutex_, false);
+
+  for (const auto& partition : partitions) {
+    if (denied_partitions_.find(partition) != denied_partitions_.end()) {
+      return true;
+    }
+  }
+  return false;
+}
+
 }

@@ -336,6 +336,9 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     if (do_normal_processing(proxy, remote_address, src_guid, to, admitted, send_to_application_participant, msg, now, sent)) {
       StringSet to_partitions;
       guid_partition_table_.lookup(to_partitions, src_guid);
+      if (guid_partition_table_.is_denied(to_partitions)) {
+        proxy.deny(src_guid);
+      }
       sent += send(proxy, src_guid, to_partitions, to, send_to_application_participant, msg, now);
     }
     return sent;

@@ -96,6 +96,9 @@ bool Config::from_arg(ACE_Arg_Shifter_T<char>& args)
   } else if ((arg = args.get_the_parameter("-DrainInterval"))) {
     drain_interval(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
     args.consume_arg();
+  } else if ((arg = args.get_the_parameter("-DeniedPartitionsTimeout"))) {
+    denied_partitions_timeout(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
+    args.consume_arg();
   } else {
     return false;
   }
@@ -201,6 +204,9 @@ void Config::set_defaults()
   cached_admission_max_participants_low_water_.default_if_empty([&](size_t default_val) {
     TheServiceParticipant->config_store()->set_uint64(RTPS_RELAY_MAX_PARTICIPANTS_LOW_WATER, default_val);
   });
+  cached_denied_partitions_timeout_.default_if_empty([&](const TimeDuration& default_val) {
+    TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT, default_val.to_dds_duration());
+  });
 }
 
 void Config::on_data_available(InternalDataReader_rch reader)
@@ -259,6 +265,8 @@ void Config::on_data_available(InternalDataReader_rch reader)
         cached_admission_max_participants_high_water_.set(pair.value());
       } else if (pair.key() == RTPS_RELAY_MAX_PARTICIPANTS_LOW_WATER) {
         cached_admission_max_participants_low_water_.set(pair.value());
+      } else if (pair.key() == RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT) {
+        cached_denied_partitions_timeout_.set(pair.value());
       }
     }
   }

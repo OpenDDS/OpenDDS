@@ -110,7 +110,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
 
   switch (drain_state_) {
   case DrainState::DS_NORMAL:
-    if (!addr_set_stats.allow_stun_responses) {
+    if (!addr_set_stats.allow_stun_responses && !addr_set_stats.in_denied_partition) {
       addr_set_stats.allow_stun_responses = true;
       --mark_count_;
     }
@@ -422,6 +422,16 @@ void GuidAddrSet::populate_relay_status(RelayStatus& relay_status)
   relay_status.drain_state_change(drain_state_change_);
   relay_status.local_active_participants(static_cast<uint32_t>(guid_addr_set_map_.size()));
   relay_status.marked_participants(static_cast<uint32_t>(mark_count_));
+}
+
+void GuidAddrSet::deny(const OpenDDS::DCPS::GUID_t& guid)
+{
+  const auto it = guid_addr_set_map_.find(guid);
+  if (it != guid_addr_set_map_.end() && it->second.allow_stun_responses) {
+    it->second.allow_stun_responses = false;
+    it->second.in_denied_partition = true;
+    ++mark_count_;
+  }
 }
 
 void GuidAddrSet::ConfigReaderListener::on_data_available(InternalDataReader_rch reader)
