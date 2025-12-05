@@ -9,10 +9,6 @@ namespace RtpsRelay {
 
 GuidAddrSet::~GuidAddrSet()
 {
-  // if (drain_task_) {
-  //   drain_task_->cancel();
-  // }
-
   TheServiceParticipant->config_topic()->disconnect(config_reader_);
 }
 

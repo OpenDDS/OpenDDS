@@ -54,9 +54,7 @@ const char RTPS_HARVEST_THREAD_STATUS[] = "OpenDDS.Rtps.HarvestThreadStatus";
  * discovery.
  *
  */
-class OpenDDS_Rtps_Export RtpsDiscovery
-  : public virtual DCPS::Discovery
-  , public virtual DCPS::ConfigListener {
+class OpenDDS_Rtps_Export RtpsDiscovery : public virtual DCPS::Discovery {
 public:
   explicit RtpsDiscovery(const RepoKey& key);
   ~RtpsDiscovery();
@@ -354,9 +352,6 @@ private:
   void create_bit_dr(DDS::TopicDescription_ptr topic, const char* type,
                      DCPS::SubscriberImpl* sub,
                      const DDS::DataReaderQos& qos);
-
-  DCPS::ConfigReader_rch config_reader_;
-  void on_data_available(DCPS::ConfigReader_rch reader);
 
 public:
   class Config : public Discovery::Config {

@@ -59,7 +59,7 @@ struct AddrSetStats {
       iter = ip_to_ports.insert(std::make_pair(addr_only, PortSet())).first;
     }
 
-    relay_stats_reporter_.max_ips_per_client(static_cast<uint32_t>(ip_to_ports.size()), now);
+    relay_stats_reporter.max_ips_per_client(static_cast<uint32_t>(ip_to_ports.size()), now);
 
     std::map<u_short, OpenDDS::DCPS::MonotonicTimePoint>* port_map = nullptr;
     switch (remote_address.port) {

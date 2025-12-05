@@ -747,14 +747,7 @@ RtpsUdpTransport::on_data_available(ConfigReader_rch)
                        DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
   for (size_t idx = 0; idx != samples.size(); ++idx) {
     const ConfigPair& sample = samples[idx];
-
-    if (sample.key() == COMMON_STATISTICS_PERIOD) {
-      TimeDuration period;
-      if (ConfigStoreImpl::convert_value(sample, ConfigStoreImpl::Format_FractionalSeconds, period)) {
-        setup_stats_task(period);
-      }
-
-    } else if (sample.key_has_prefix(config_prefix)) {
+    if (sample.key_has_prefix(config_prefix)) {
       has_prefix = true;
 
 #if OPENDDS_CONFIG_SECURITY

@@ -13,7 +13,6 @@
 #endif /* __ACE_INLINE__ */
 
 #include "Service_Participant.h"
-#include "Timers.h"
 
 #include <ace/Select_Reactor.h>
 #include <ace/WFMO_Reactor.h>
@@ -41,7 +40,7 @@ ReactorTask::ReactorTask(bool useAsyncSend)
 #endif
   , timer_queue_(0)
   , thread_status_manager_(0)
-  , thread_status_timer_(ReactorWrapper::InvalidTimerId)
+  , thread_status_timer_(Timers::InvalidTimerId)
 {
   ACE_UNUSED_ARG(useAsyncSend);
 }
@@ -161,15 +160,14 @@ int ReactorTask::svc()
     state_ = STATE_RUNNING;
     condition_.notify_all();
   }
-  Timers::TimerId thread_status_timer = Timers::InvalidTimerId;
 
   if (thread_status_manager_->update_thread_status()) {
-    tsm_updater_handler = make_rch<ThreadStatusManager::Updater>();
-    const TimeDuration period = thread_status_manager_->thread_status_interval();
-    thread_status_timer = Timers::schedule(reactor_, *tsm_updater_handler, thread_status_manager_,
-                                           period, period);
+    tsm_updater_handler_ = make_rch<ThreadStatusManager::Updater>();
+    thread_status_period_ = thread_status_manager_->thread_status_interval();
+    thread_status_timer_ = Timers::schedule(reactor_, *tsm_updater_handler_, thread_status_manager_,
+                                            thread_status_period_, thread_status_period_);
 
-    if (thread_status_timer == Timers::InvalidTimerId) {
+    if (thread_status_timer_ == Timers::InvalidTimerId) {
       if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: ReactorTask::svc: failed to "
                               "schedule timer for ThreadStatusManager::Updater\n"));
@@ -186,8 +184,8 @@ int ReactorTask::svc()
 
   TheServiceParticipant->config_topic()->disconnect(config_reader);
 
-  if (thread_status_timer != Timers::InvalidTimerId) {
-    Timers::cancel(reactor_, thread_status_timer);
+  if (thread_status_timer_ != Timers::InvalidTimerId) {
+    Timers::cancel(reactor_, thread_status_timer_);
   }
 
   return 0;
@@ -277,16 +275,16 @@ void ReactorTask::on_data_available(InternalDataReader_rch reader)
         continue;
       }
       thread_status_period_ = per;
-      if (thread_status_timer_ != ReactorWrapper::InvalidTimerId) {
-        reactor_wrapper_.cancel(thread_status_timer_);
+      if (thread_status_timer_ != Timers::InvalidTimerId) {
+        Timers::cancel(reactor_, thread_status_timer_);
       }
       if (per) {
         if (!tsm_updater_handler_) {
           tsm_updater_handler_ = make_rch<ThreadStatusManager::Updater>();
         }
 
-        thread_status_timer_ = reactor_wrapper_.schedule(*tsm_updater_handler_, thread_status_manager_, per, per);
-        if (thread_status_timer_ == ReactorWrapper::InvalidTimerId && log_level >= LogLevel::Notice) {
+        thread_status_timer_ = Timers::schedule(reactor_, *tsm_updater_handler_, thread_status_manager_, per, per);
+        if (thread_status_timer_ == Timers::InvalidTimerId && log_level >= LogLevel::Notice) {
           ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: ReactorTask::on_data_available: failed to "
                                 "schedule timer for ThreadStatusManager::Updater\n"));
         }

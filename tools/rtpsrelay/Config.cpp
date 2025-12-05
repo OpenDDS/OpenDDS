@@ -84,12 +84,6 @@ bool Config::from_arg(ACE_Arg_Shifter_T<char>& args)
   } else if ((arg = args.get_the_parameter("-RunTime"))) {
     run_time(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
     args.consume_arg();
-  } else if ((arg = args.get_the_parameter("-HandlerThreads"))) {
-    handler_threads(static_cast<size_t>(std::atoi(arg)));
-    args.consume_arg();
-  } else if ((arg = args.get_the_parameter("-SynchronousOutput"))) {
-    synchronous_output(ACE_OS::atoi(arg));
-    args.consume_arg();
   } else if ((arg = args.get_the_parameter("-MaxIpsPerClient"))) {
     max_ips_per_client(static_cast<size_t>(ACE_OS::atoi(arg)));
     args.consume_arg();

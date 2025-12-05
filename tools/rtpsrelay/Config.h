@@ -420,7 +420,7 @@ public:
 
   size_t admission_max_participants_low_water() const
   {
-    return admission_max_participants_low_water_;
+    return cached_admission_max_participants_low_water_.get();
   }
 
   void drain_interval(const OpenDDS::DCPS::TimeDuration& value)

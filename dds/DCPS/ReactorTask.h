@@ -17,6 +17,7 @@
 #include "SafetyProfileStreams.h"
 #include "ConditionVariable.h"
 #include "ThreadStatusManager.h"
+#include "Timers.h"
 
 #include <ace/Task.h>
 #include <ace/Synch_Traits.h>
@@ -122,6 +123,9 @@ private:
   // thread status reporting
   String name_;
   ThreadStatusManager* thread_status_manager_;
+  Timers::TimerId thread_status_timer_;
+  RcHandle<RcEventHandler> tsm_updater_handler_;
+  TimeDuration thread_status_period_;
 };
 
 } // namespace DCPS

@@ -26,6 +26,7 @@ private:
   int handle_timeout(const ACE_Time_Value& now, const void* token) override;
 
 private:
+  const Config& config_;
   GuidAddrSet& guid_addr_set_;
   const DDS::Publisher_var relay_publisher_;
   RelayStatisticsReporter& relay_statistics_reporter_;

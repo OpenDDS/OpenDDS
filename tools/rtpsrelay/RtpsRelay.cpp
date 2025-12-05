@@ -475,9 +475,6 @@ int run(int argc, ACE_TCHAR* argv[])
   }
 
   RelayStatisticsReporter relay_statistics_reporter(config, relay_statistics_writer);
-  const RcHandle<RelayStatisticsReporter> reporter_rch{&relay_statistics_reporter, inc_count{}};
-  const auto stats_reporter_config_reader = make_rch<OpenDDS::DCPS::ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(), reporter_rch);
-  TheServiceParticipant->config_topic()->connect(stats_reporter_config_reader);
 
   DDS::DataWriterListener_var relay_statistics_writer_listener =
     new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::relay_statistics_sub_count);
@@ -913,7 +910,7 @@ int run(int argc, ACE_TCHAR* argv[])
                                                          internal_config_listener);
   TheServiceParticipant->config_topic()->connect(internal_config_reader);
 
-  RelayStatusReporter relay_status_reporter(config, *guid_addr_set, relay_publisher, reactor, relay_statistics_reporter);
+  RelayStatusReporter relay_status_reporter(config, guid_addr_set, relay_publisher, reactor, relay_statistics_reporter);
   if (config.publish_relay_status() && !relay_status_reporter.setup_writer()) {
     return EXIT_FAILURE;
   }
@@ -963,7 +960,6 @@ int run(int argc, ACE_TCHAR* argv[])
 
   TheServiceParticipant->config_topic()->disconnect(internal_config_reader);
   TheServiceParticipant->config_topic()->disconnect(config_reader);
-  TheServiceParticipant->config_topic()->disconnect(stats_reporter_config_reader);
   TheServiceParticipant->config_topic()->disconnect(status_reporter_config_reader);
 
   application_participant->delete_contained_entities();

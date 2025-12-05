@@ -32,6 +32,7 @@ public:
 
   Port port() const { return port_; }
 
+  ACE_HANDLE get_handle() const override { return socket_.get_handle(); }
 protected:
   RelayHandler(const Config& config,
                const std::string& name,
@@ -47,8 +48,6 @@ protected:
                        const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                        const OpenDDS::DCPS::MonotonicTimePoint& now,
                        MessageType type);
-
-  ACE_HANDLE get_handle() const override { return socket_.get_handle(); }
 
   virtual CORBA::ULong process_message(const ACE_INET_Addr& remote,
                                        const OpenDDS::DCPS::MonotonicTimePoint& now,
@@ -297,6 +296,15 @@ public:
               const DDS::Security::CryptoTransform_var& crypto,
               HandlerStatisticsReporter& stats_reporter);
 };
+
+inline int handle_to_int(ACE_HANDLE handle)
+{
+#ifdef ACE_WIN32
+  return static_cast<int>(reinterpret_cast<intptr_t>(handle));
+#else
+  return handle;
+#endif
+}
 
 }
 

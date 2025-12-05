@@ -13,7 +13,7 @@
 
 namespace RtpsRelay {
 
-class RelayStatisticsReporter : public OpenDDS::DCPS::ConfigListener {
+class RelayStatisticsReporter {
 public:
   RelayStatisticsReporter(const Config& config,
                           RelayStatisticsDataWriter_var writer);
@@ -277,10 +277,6 @@ private:
   void publish_report(ACE_Guard<ACE_Thread_Mutex>& guard,
                       const OpenDDS::DCPS::MonotonicTimePoint& now,
                       bool force);
-
-  void on_data_available(InternalDataReader_rch reader) override;
-  void configure_stats_period(const OpenDDS::DCPS::TimeDuration& log,
-                              const OpenDDS::DCPS::TimeDuration& publish) const;
 
   static void log_json(const std::string& label, const std::string& json);
 
