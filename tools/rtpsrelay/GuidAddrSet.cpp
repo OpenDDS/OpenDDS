@@ -386,9 +386,8 @@ void GuidAddrSet::drain_state(DrainState ds, const DDS::Time_t& now)
     case DrainState::DS_NORMAL:
       mark_budget_ = 0;
       if (drain_timer_id_ != -1 && this->reactor()->cancel_timer(drain_timer_id_) != 1) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: GuidAddrSet::drain_state: "
-                   "Failed to cancel drain timer Id %d.\n", drain_timer_id_));
-        return;
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: GuidAddrSet::drain_state: "
+                   "Timer Id %d may have already expired.\n", drain_timer_id_));
       }
       drain_timer_id_ = -1;
       break;
@@ -407,9 +406,11 @@ void GuidAddrSet::drain_state(DrainState ds, const DDS::Time_t& now)
 int GuidAddrSet::handle_timeout(const ACE_Time_Value&, const void*)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, -1);
-  ++mark_budget_;
-  schedule_drain_timer();
-  return -1;
+  if (drain_state_ == DrainState::DS_DRAINING) {
+    ++mark_budget_;
+    schedule_drain_timer();
+  }
+  return 0;
 }
 
 void GuidAddrSet::populate_relay_status(RelayStatus& relay_status)
