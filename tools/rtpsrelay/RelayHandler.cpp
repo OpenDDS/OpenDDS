@@ -285,6 +285,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
                                               const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                               MessageType& type)
 {
+  auto& statusManager = TheServiceParticipant->get_thread_status_manager();
   const auto msg_len = msg->length();
   {
     GuidAddrSet::Proxy proxy(guid_addr_set_);
@@ -316,7 +317,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       (src_guid == config_.application_participant_guid());
 
     GuidAddrSet::Proxy proxy(guid_addr_set_);
-    OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, READ_MASK | SIGNAL_MASK, handle_as_int);
+    OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager);
     record_activity(proxy, addr_port, now, src_guid, type, msg_len, from_application_participant);
 
     cache_message(proxy, src_guid, to, msg, now);
@@ -377,7 +378,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     }
 
     OpenDDS::STUN::Message response;
-    bool response_needed = true;
+    bool response_needed = false;
 
     switch (message.method) {
     case OpenDDS::STUN::BINDING:
@@ -412,7 +413,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
 
     if (has_guid) {
       GuidAddrSet::Proxy proxy(guid_addr_set_);
-      OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, READ_MASK | GROUP_QOS_MASK, handle_as_int);
+      OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager);
 
       const bool from_application_participant =
         (remote_address == application_participant_addr_) &&
@@ -433,14 +434,14 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       bool admitted = false;
       proxy.ignore_rtps(from_application_participant, src_guid, now, admitted);
       if (admitted && spdp_handler_) {
-        sent += spdp_handler_->send_to_application_participant(proxy, src_guid, now);
+        messages_sent += spdp_handler_->send_to_application_participant(proxy, src_guid, now);
       }
     } else if (response_needed) {
       send(remote_address, std::move(response), now);
       ++messages_sent;
     }
 
-    return sent;
+    return messages_sent;
   }
 }
 

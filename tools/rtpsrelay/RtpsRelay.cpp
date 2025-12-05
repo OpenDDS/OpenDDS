@@ -774,9 +774,9 @@ int run(int argc, ACE_TCHAR* argv[])
 
   RelayParticipantStatusReporter relay_participant_status_reporter(config, relay_participant_status_writer, relay_statistics_reporter);
   RelayThreadMonitor* relay_thread_monitor = new RelayThreadMonitor(config);
-  GuidAddrSet guid_addr_set(config, rtps_discovery, relay_participant_status_reporter, relay_statistics_reporter, *relay_thread_monitor);
   ACE_Reactor reactor_(new ACE_Select_Reactor, true);
   const auto reactor = &reactor_;
+  GuidAddrSet guid_addr_set(config, rtps_discovery, relay_participant_status_reporter, relay_statistics_reporter, *relay_thread_monitor, reactor);
   GuidPartitionTable guid_partition_table(config, spdp_horizontal_addr, relay_partitions_writer, spdp_replay_writer);
   RelayPartitionTable relay_partition_table;
   relay_statistics_reporter.report();
@@ -808,10 +808,6 @@ int run(int argc, ACE_TCHAR* argv[])
   spdp_vertical_handler.horizontal_handler(&spdp_horizontal_handler);
   sedp_vertical_handler.horizontal_handler(&sedp_horizontal_handler);
   data_vertical_handler.horizontal_handler(&data_horizontal_handler);
-
-  guid_addr_set.spdp_vertical_handler(&spdp_vertical_handler);
-  guid_addr_set.sedp_vertical_handler(&sedp_vertical_handler);
-  guid_addr_set.data_vertical_handler(&data_vertical_handler);
 
   spdp_vertical_handler.spdp_handler(&spdp_vertical_handler);
   sedp_vertical_handler.spdp_handler(&spdp_vertical_handler);

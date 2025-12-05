@@ -9,9 +9,9 @@ namespace RtpsRelay {
 
 GuidAddrSet::~GuidAddrSet()
 {
-  if (drain_task_) {
-    drain_task_->cancel();
-  }
+  // if (drain_task_) {
+  //   drain_task_->cancel();
+  // }
 
   TheServiceParticipant->config_topic()->disconnect(config_reader_);
 }
@@ -387,23 +387,33 @@ void GuidAddrSet::admit_state(AdmitState as, const DDS::Time_t& now)
   }
 }
 
+bool GuidAddrSet::schedule_drain_timer()
+{
+  drain_timer_id_ = this->reactor()->schedule_timer(this, 0, drain_interval_.value(), ACE_Time_Value());
+  if (drain_timer_id_ == -1) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: GuidAddrSet::drain_state: Failed to schedule drain timer (%p).\n", "schedule_timer"));
+    return false;
+  }
+  return true;
+}
+
 void GuidAddrSet::drain_state(DrainState ds, const DDS::Time_t& now)
 {
-  if (!drain_task_) {
-    drain_task_ = OpenDDS::DCPS::make_rch<GuidAddrSetSporadicTask>(TheServiceParticipant->time_source(),
-                                                                   reactor_task_,
-                                                                   rchandle_from(this),
-                                                                   &GuidAddrSet::process_drain_state);
-  }
-
   if (drain_state_ != ds) {
     switch (ds) {
     case DrainState::DS_NORMAL:
       mark_budget_ = 0;
-      drain_task_->cancel();
+      if (drain_timer_id_ != -1 && this->reactor()->cancel_timer(drain_timer_id_) != 1) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: GuidAddrSet::drain_state: "
+                   "Failed to cancel drain timer Id %d.\n", drain_timer_id_));
+        return;
+      }
+      drain_timer_id_ = -1;
       break;
     case DrainState::DS_DRAINING:
-      drain_task_->schedule(drain_interval_);
+      if (!schedule_drain_timer()) {
+        return;
+      }
       break;
     }
 
@@ -412,11 +422,12 @@ void GuidAddrSet::drain_state(DrainState ds, const DDS::Time_t& now)
   }
 }
 
-void GuidAddrSet::process_drain_state(const OpenDDS::DCPS::MonotonicTimePoint&)
+int GuidAddrSet::handle_timeout(const ACE_Time_Value&, const void*)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, -1);
   ++mark_budget_;
-  drain_task_->schedule(drain_interval_);
+  schedule_drain_timer();
+  return -1;
 }
 
 void GuidAddrSet::populate_relay_status(RelayStatus& relay_status)

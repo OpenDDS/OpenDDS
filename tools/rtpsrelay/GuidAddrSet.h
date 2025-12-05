@@ -233,7 +233,7 @@ struct RemoteHash {
 class RelayHandler;
 class RelayParticipantStatusReporter;
 
-class GuidAddrSet {
+class GuidAddrSet : public ACE_Event_Handler {
 public:
   using GuidAddrSetMap = std::unordered_map<OpenDDS::DCPS::GUID_t, AddrSetStats, GuidHash>;
 
@@ -254,9 +254,11 @@ public:
               OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery,
               RelayParticipantStatusReporter& relay_participant_status_reporter,
               RelayStatisticsReporter& relay_stats_reporter,
-              RelayThreadMonitor& relay_thread_monitor)
-    : config_(config)
-    , config_reader_listener_(OpenDDS::DCPS::make_rch<ConfigReaderListener>(DCPS::ref(*this)))
+              RelayThreadMonitor& relay_thread_monitor,
+              ACE_Reactor* reactor)
+    : ACE_Event_Handler(reactor)
+    , config_(config)
+    , config_reader_listener_(OpenDDS::DCPS::make_rch<ConfigReaderListener>(OpenDDS::DCPS::ref(*this)))
     , config_reader_(OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(), config_reader_listener_))
     , rtps_discovery_(rtps_discovery)
     , relay_participant_status_reporter_(relay_participant_status_reporter)
@@ -401,6 +403,8 @@ public:
     Proxy& operator=(Proxy&&) = delete;
   };
 
+  int handle_timeout(const ACE_Time_Value& now, const void* token) override;
+
 private:
   CreatedAddrSetStats find_or_create(const OpenDDS::DCPS::GUID_t& guid,
                                      const OpenDDS::DCPS::MonotonicTimePoint& now);
@@ -464,7 +468,7 @@ private:
     drain_interval_ = di;
   }
 
-  void process_drain_state(const OpenDDS::DCPS::MonotonicTimePoint& now);
+  bool schedule_drain_timer();
 
   void populate_relay_status(RelayStatus& relay_status);
 
@@ -486,9 +490,6 @@ private:
   RelayParticipantStatusReporter& relay_participant_status_reporter_;
   RelayStatisticsReporter& relay_stats_reporter_;
   RelayThreadMonitor& relay_thread_monitor_;
-  RelayHandler* spdp_vertical_handler_;
-  RelayHandler* sedp_vertical_handler_;
-  RelayHandler* data_vertical_handler_;
   GuidAddrSetMap guid_addr_set_map_;
 
   using RemoteMap = std::unordered_map<Remote, OpenDDS::DCPS::GUID_t, RemoteHash>;
@@ -506,9 +507,6 @@ private:
   bool participant_admission_limit_reached_ = false;
   mutable bool last_admit_ = true;
 
-  using GuidAddrSetSporadicTask = OpenDDS::DCPS::PmfSporadicTask<GuidAddrSet>;
-  using GuidAddrSetSporadicTask_rch = OpenDDS::DCPS::RcHandle<GuidAddrSetSporadicTask>;
-
   AdmitState admit_state_ = AdmitState::AS_NORMAL;
   DDS::Time_t admit_state_change_ = {0, 0};
   DrainState drain_state_ = DrainState::DS_NORMAL;
@@ -516,7 +514,9 @@ private:
   OpenDDS::DCPS::TimeDuration drain_interval_;
   size_t mark_budget_ = 0;
   size_t mark_count_ = 0;
-  GuidAddrSetSporadicTask_rch drain_task_;
+
+  using TimerId = long;
+  TimerId drain_timer_id_ = -1;
 };
 
 }

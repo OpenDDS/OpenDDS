@@ -376,6 +376,13 @@ public:
     return synchronous_output_;
   }
 
+  void drain_interval(const OpenDDS::DCPS::TimeDuration& value)
+  {
+    TheServiceParticipant->config_store()->set(RTPS_RELAY_DRAIN_INTERVAL,
+                                               value,
+                                               OpenDDS::DCPS::ConfigStoreImpl::Format_IntegerMilliseconds);
+  }
+
 private:
   std::string relay_id_;
   OpenDDS::DCPS::GUID_t application_participant_guid_;
