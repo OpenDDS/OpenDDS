@@ -133,73 +133,73 @@ void Config::set_defaults()
 {
   using OpenDDS::DCPS::TimeDuration;
   cached_lifespan_.default_if_empty([&](const TimeDuration& default_val) {
-    lifespan(default_val);
+    TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_LIFESPAN, default_val.to_dds_duration());
   });
   cached_inactive_period_.default_if_empty([&](const TimeDuration& default_val) {
-    inactive_period(default_val);
+    TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_INACTIVE_PERIOD, default_val.to_dds_duration());
   });
   cached_log_warnings_.default_if_empty([&](bool default_val) {
-    log_warnings(default_val);
+    TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_WARNINGS, default_val);
   });
   cached_log_discovery_.default_if_empty([&](bool default_val) {
-    log_discovery(default_val);
+    TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_DISCOVERY, default_val);
   });
   cached_log_activity_.default_if_empty([&](bool default_val) {
-    log_activity(default_val);
+    TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_ACTIVITY, default_val);
   });
   cached_log_http_.default_if_empty([&](bool default_val) {
-    log_http(default_val);
+    TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_HTTP, default_val);
   });
   cached_log_thread_status_.default_if_empty([&](bool default_val) {
-    log_thread_status(default_val);
+    TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_THREAD_STATUS, default_val);
   });
   cached_thread_status_safety_factor_.default_if_empty([&](int default_val) {
-    thread_status_safety_factor(default_val);
+    TheServiceParticipant->config_store()->set_int32(RTPS_RELAY_THREAD_STATUS_SAFETY_FACTOR, default_val);
   });
   cached_utilization_limit_.default_if_empty([&](double default_val) {
-    utilization_limit(default_val);
+    TheServiceParticipant->config_store()->set_float64(RTPS_RELAY_UTILIZATION_LIMIT, default_val);
   });
   cached_log_utilization_changes_.default_if_empty([&](bool default_val) {
-    log_utilization_changes(default_val);
+    TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_UTILIZATION_CHANGES, default_val);
   });
   cached_log_relay_statistics_.default_if_empty([&](const TimeDuration& default_val) {
-    log_relay_statistics(default_val);
+    TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_LOG_RELAY_STATISTICS, default_val.to_dds_duration());
   });
   cached_log_handler_statistics_.default_if_empty([&](const TimeDuration& default_val) {
-    log_handler_statistics(default_val);
+    TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_LOG_HANDLER_STATISTICS, default_val.to_dds_duration());
   });
   cached_publish_relay_statistics_.default_if_empty([&](const TimeDuration& default_val) {
-    publish_relay_statistics(default_val);
+    TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_PUBLISH_RELAY_STATISTICS, default_val.to_dds_duration());
   });
   cached_publish_handler_statistics_.default_if_empty([&](const TimeDuration& default_val) {
-    publish_handler_statistics(default_val);
+    TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_PUBLISH_HANDLER_STATISTICS, default_val.to_dds_duration());
   });
   cached_publish_relay_status_.default_if_empty([&](const TimeDuration& default_val) {
-    publish_relay_status(default_val);
+    TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_PUBLISH_RELAY_STATUS, default_val.to_dds_duration());
   });
   cached_publish_relay_status_liveliness_.default_if_empty([&](const TimeDuration& default_val) {
-    publish_relay_status_liveliness(default_val);
+    TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_PUBLISH_RELAY_STATUS_LIVELINESS, default_val.to_dds_duration());
   });
   cached_restart_detection_.default_if_empty([&](bool default_val) {
-    restart_detection(default_val);
+    TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_RESTART_DETECTION, default_val);
   });
   cached_admission_control_queue_size_.default_if_empty([&](size_t default_val) {
-    admission_control_queue_size(default_val);
+    TheServiceParticipant->config_store()->set_uint64(RTPS_RELAY_ADMISSION_CONTROL_QUEUE_SIZE, default_val);
   });
   cached_admission_control_queue_duration_.default_if_empty([&](const TimeDuration& default_val) {
-    admission_control_queue_duration(default_val);
+    TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_ADMISSION_CONTROL_QUEUE_DURATION, default_val.to_dds_duration());
   });
   cached_max_ips_per_client_.default_if_empty([&](size_t default_val) {
-    max_ips_per_client(default_val);
+    TheServiceParticipant->config_store()->set_uint64(RTPS_RELAY_MAX_IPS_PER_CLIENT, default_val);
   });
   cached_rejected_address_duration_.default_if_empty([&](const TimeDuration& default_val) {
-    rejected_address_duration(default_val);
+    TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_REJECTED_ADDRESS_DURATION, default_val.to_dds_duration());
   });
   cached_admission_max_participants_high_water_.default_if_empty([&](size_t default_val) {
-    admission_max_participants_high_water(default_val);
+    TheServiceParticipant->config_store()->set_uint64(RTPS_RELAY_MAX_PARTICIPANTS_HIGH_WATER, default_val);
   });
   cached_admission_max_participants_low_water_.default_if_empty([&](size_t default_val) {
-    admission_max_participants_low_water(default_val);
+    TheServiceParticipant->config_store()->set_uint64(RTPS_RELAY_MAX_PARTICIPANTS_LOW_WATER, default_val);
   });
 }
 
