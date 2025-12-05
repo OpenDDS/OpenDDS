@@ -32,13 +32,15 @@ namespace RTPS {
 using DCPS::TimeDuration;
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
-  : key_(key)
+  : InternalDataReaderListener(TheServiceParticipant->job_queue())
+  , key_(key)
   , config_(DCPS::make_rch<RtpsDiscoveryConfig>(key))
 {
 }
 
 RtpsDiscovery::~RtpsDiscovery()
 {
+  TheServiceParticipant->config_topic()->disconnect(config_reader_);
 }
 
 int
@@ -224,6 +226,25 @@ RtpsDiscovery::add_domain_participant_secure(
   return ads;
 }
 #endif
+
+void RtpsDiscovery::setup_stats_task(const DCPS::TimeDuration& period)
+{
+  if (period == stats_task_period_) {
+    return;
+  }
+  stats_task_period_ = period;
+
+  if (period.is_zero()) {
+    stats_task_->disable();
+  } else {
+    stats_task_->enable(true, period);
+  }
+
+  if (!config_reader_) {
+    config_reader_ = DCPS::make_rch<DCPS::ConfigReader>(DCPS::ConfigStoreImpl::datareader_qos(), rchandle_from(this));
+    TheServiceParticipant->config_topic()->connect(config_reader_);
+  }
+}
 
 void
 RtpsDiscovery::signal_liveliness(const DDS::DomainId_t domain_id,
@@ -775,6 +796,24 @@ void RtpsDiscovery::request_remote_complete_type_objects(
 {
   ParticipantHandle spdp = get_part(domain, local_participant);
   spdp->request_remote_complete_type_objects(remote_entity, remote_type_info, cond);
+}
+
+void RtpsDiscovery::on_data_available(DCPS::ConfigReader_rch reader)
+{
+  DCPS::ConfigReader::SampleSequence samples;
+  DCPS::InternalSampleInfoSequence infos;
+  reader->read(samples, infos, DDS::LENGTH_UNLIMITED,
+               DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+  for (size_t idx = 0; idx != samples.size(); ++idx) {
+    const DCPS::ConfigPair& sample = samples[idx];
+
+    if (sample.key() == DCPS::COMMON_STATISTICS_PERIOD) {
+      DCPS::TimeDuration period;
+      if (DCPS::ConfigStoreImpl::convert_value(sample, DCPS::ConfigStoreImpl::Format_FractionalSeconds, period)) {
+        setup_stats_task(period);
+      }
+    }
+  }
 }
 
 } // namespace DCPS

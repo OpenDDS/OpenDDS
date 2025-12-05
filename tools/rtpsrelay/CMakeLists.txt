@@ -10,10 +10,10 @@ find_package(OpenDDS REQUIRED ${dep_libs} built_in_topics safety_profile=FALSE)
 include(opendds_build_helpers)
 
 add_executable(RtpsRelay
+  Config.cpp
   GuidAddrSet.cpp
   GuidPartitionTable.cpp
   ParticipantListener.cpp
-  ParticipantStatisticsReporter.cpp
   PublicationListener.cpp
   RelayAddressListener.cpp
   RelayConfigControlListener.cpp

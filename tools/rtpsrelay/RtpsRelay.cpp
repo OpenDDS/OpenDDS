@@ -7,7 +7,6 @@
 
 #include "GuidPartitionTable.h"
 #include "ParticipantListener.h"
-#include "ParticipantStatisticsReporter.h"
 #include "PublicationListener.h"
 #include "RelayAddressListener.h"
 #include "RelayConfigControlListener.h"
@@ -111,11 +110,22 @@ namespace {
 
 int run(int argc, ACE_TCHAR* argv[])
 {
+  using OpenDDS::DCPS::RcHandle;
+  using OpenDDS::DCPS::inc_count;
+  using OpenDDS::DCPS::make_rch;
+  using OpenDDS::DCPS::ref;
+
   DDS::DomainParticipantFactory_var factory = TheParticipantFactoryWithArgs(argc, argv);
   if (!factory) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to initialize participant factory\n")));
     return EXIT_FAILURE;
   }
+
+  Config config;
+  const RcHandle<Config> config_rch{&config, inc_count{}};
+  const auto config_reader = make_rch<OpenDDS::DCPS::ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(), config_rch);
+  TheServiceParticipant->config_topic()->connect(config_reader);
+  OpenDDS::DCPS::ConfigStoreImpl::log_changes = true;
 
   DDS::DomainId_t relay_domain = 0;
   ACE_INET_Addr nic_horizontal, nic_vertical, meta_discovery_addr;
@@ -123,7 +133,6 @@ int run(int argc, ACE_TCHAR* argv[])
   std::string meta_discovery_content = "{}";
   std::string meta_discovery_content_path;
   std::string user_data;
-  Config config;
 
   std::string identity_ca_file;
   std::string permissions_ca_file;
@@ -161,112 +170,8 @@ int run(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-RelayDomain"))) {
       relay_domain = ACE_OS::atoi(arg);
       args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-ApplicationDomain"))) {
-      config.application_domain(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-Lifespan"))) {
-      config.lifespan(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-InactivePeriod"))) {
-      config.inactive_period(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-BufferSize"))) {
-      config.buffer_size(ACE_OS::atoi(arg));
-      args.consume_arg();
     } else if ((arg = args.get_the_parameter("-UserData"))) {
       user_data = arg;
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-AllowEmptyPartition"))) {
-      config.allow_empty_partition(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogWarnings"))) {
-      config.log_warnings(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogDiscovery"))) {
-      config.log_discovery(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogActivity"))) {
-      config.log_activity(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogHttp"))) {
-      config.log_http(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogThreadStatus"))) {
-      config.log_thread_status(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-ThreadStatusSafetyFactor"))) {
-      config.thread_status_safety_factor(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-UtilizationLimit"))) {
-      config.utilization_limit(ACE_OS::atof(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogUtilizationChanges"))) {
-      config.log_utilization_changes(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogRelayStatistics"))) {
-      config.log_relay_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogHandlerStatistics"))) {
-      config.log_handler_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogParticipantStatistics"))) {
-      config.log_participant_statistics(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-PublishRelayStatistics"))) {
-      config.publish_relay_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-PublishHandlerStatistics"))) {
-      config.publish_handler_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-PublishParticipantStatistics"))) {
-      config.publish_participant_statistics(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-PublishRelayStatusLiveliness"))) {
-      config.publish_relay_status_liveliness(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-PublishRelayStatus"))) {
-      config.publish_relay_status(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-RestartDetection"))) {
-      config.restart_detection(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-AdmissionControlQueueSize"))) {
-      config.admission_control_queue_size(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-AdmissionControlQueueDuration"))) {
-      config.admission_control_queue_duration(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-AdmissionMaxParticipantsRange"))) {
-      auto conv = std::atoi(arg);
-      if (conv <= 0) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Argument for -AdmissionMaxParticipantsRange option must be positive: %d\n", conv));
-        return EXIT_FAILURE;
-      }
-      config.admission_max_participants_low_water(conv);
-      const auto dash = std::strchr(arg, '-');
-      if (!dash) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Argument for -AdmissionMaxParticipantsRange option must contain a '-': %C\n", arg));
-        return EXIT_FAILURE;
-      }
-      conv = std::atoi(dash + 1);
-      if (conv <= 0) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Argument for -AdmissionMaxParticipantsRange option must be positive: %d\n", conv));
-        return EXIT_FAILURE;
-      }
-      if (static_cast<size_t>(conv) < config.admission_max_participants_low_water()) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: High value for -AdmissionMaxParticipantsRange option must be greater than or equal to low value\n"));
-        return EXIT_FAILURE;
-      }
-      config.admission_max_participants_high_water(conv);
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-RunTime"))) {
-      config.run_time(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-MaxIpsPerClient"))) {
-      config.max_ips_per_client(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-RejectedAddressDuration"))) {
-      config.rejected_address_duration(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-IdentityCA"))) {
       identity_ca_file = file + arg;
@@ -292,17 +197,14 @@ int run(int argc, ACE_TCHAR* argv[])
       permissions_file = file + arg;
       secure = true;
       args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-Id"))) {
-      config.relay_id(arg);
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-DrainInterval"))) {
-      config.drain_interval(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
+    } else if (config.from_arg(args)) {
+      // no-op
     } else {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Invalid option: %C\n", args.get_current()));
       return EXIT_FAILURE;
     }
   }
+  config.set_defaults();
 
   if (!meta_discovery_content_path.empty()) {
     std::ifstream in(meta_discovery_content_path.c_str());
@@ -513,24 +415,6 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  ParticipantStatisticsTypeSupport_var participant_statistics_ts = new ParticipantStatisticsTypeSupportImpl;
-  if (participant_statistics_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to register ParticipantStatistics type\n")));
-    return EXIT_FAILURE;
-  }
-  CORBA::String_var participant_statistics_type_name = participant_statistics_ts->get_type_name();
-
-  DDS::Topic_var participant_statistics_topic =
-    relay_participant->create_topic(PARTICIPANT_STATISTICS_TOPIC_NAME.c_str(),
-                                    participant_statistics_type_name,
-                                    TOPIC_QOS_DEFAULT, nullptr,
-                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-  if (!participant_statistics_topic) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Participant Statistics topic\n")));
-    return EXIT_FAILURE;
-  }
-
   // Setup relay publisher and subscriber.
   DDS::PublisherQos publisher_qos;
   relay_participant->get_default_publisher_qos(publisher_qos);
@@ -591,6 +475,9 @@ int run(int argc, ACE_TCHAR* argv[])
   }
 
   RelayStatisticsReporter relay_statistics_reporter(config, relay_statistics_writer);
+  const RcHandle<RelayStatisticsReporter> reporter_rch{&relay_statistics_reporter, inc_count{}};
+  const auto stats_reporter_config_reader = make_rch<OpenDDS::DCPS::ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(), reporter_rch);
+  TheServiceParticipant->config_topic()->connect(stats_reporter_config_reader);
 
   DDS::DataWriterListener_var relay_statistics_writer_listener =
     new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::relay_statistics_sub_count);
@@ -609,27 +496,6 @@ int run(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to narrow Handler Statistics data writer\n")));
     return EXIT_FAILURE;
   }
-
-  DDS::DataWriterQos participant_statistics_writer_qos = writer_qos;
-  participant_statistics_writer_qos.writer_data_lifecycle.autodispose_unregistered_instances = false;
-  DDS::DataWriterListener_var participant_statistics_writer_listener =
-    new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::participant_statistics_sub_count);
-  DDS::DataWriter_var participant_statistics_writer_var = relay_publisher->create_datawriter(participant_statistics_topic, participant_statistics_writer_qos, participant_statistics_writer_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  if (!participant_statistics_writer_var) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Participant Statistics data writer\n")));
-    return EXIT_FAILURE;
-  }
-
-  ParticipantStatisticsDataWriter_var participant_statistics_writer = ParticipantStatisticsDataWriter::_narrow(participant_statistics_writer_var);
-  if (!participant_statistics_writer) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to narrow Participant Statistics data writer\n")));
-    return EXIT_FAILURE;
-  }
-
-  ParticipantStatisticsReporter::config = &config;
-  ParticipantStatisticsReporter::writer = participant_statistics_writer;
-  DDS::Topic_var participant_stats_topic = participant_statistics_writer->get_topic();
-  ParticipantStatisticsReporter::topic_name = participant_stats_topic->get_name();
 
   // Configure ports and addresses.
   auto port_horizontal = nic_horizontal.get_port_number();
@@ -917,13 +783,20 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: Application Participant GUID %C\n"), OpenDDS::DCPS::LogGuid(config.application_participant_guid()).c_str()));
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SPDP Horizontal listening on %C\n"), OpenDDS::DCPS::LogAddr(spdp_horizontal_addr).c_str()));
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SEDP Horizontal listening on %C\n"), OpenDDS::DCPS::LogAddr(sedp_horizontal_addr).c_str()));
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: Data Horizontal listening on %C\n"), OpenDDS::DCPS::LogAddr(data_horizontal_addr).c_str()));
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SPDP Vertical listening on %C\n"), OpenDDS::DCPS::LogAddr(spdp_vertical_addr).c_str()));
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: SEDP Vertical listening on %C\n"), OpenDDS::DCPS::LogAddr(sedp_vertical_addr).c_str()));
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: Data Vertical listening on %C\n"), OpenDDS::DCPS::LogAddr(data_vertical_addr).c_str()));
+  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Application Participant GUID %C Id %C\n",
+    OpenDDS::DCPS::LogGuid(config.application_participant_guid()).c_str(), config.relay_id().c_str()));
+  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SPDP Horizontal %d listening on %C\n",
+    handle_to_int(spdp_horizontal_handler.get_handle()), OpenDDS::DCPS::LogAddr(spdp_horizontal_addr).c_str()));
+  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SEDP Horizontal %d listening on %C\n",
+    handle_to_int(sedp_horizontal_handler.get_handle()), OpenDDS::DCPS::LogAddr(sedp_horizontal_addr).c_str()));
+  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Data Horizontal %d listening on %C\n",
+    handle_to_int(data_horizontal_handler.get_handle()), OpenDDS::DCPS::LogAddr(data_horizontal_addr).c_str()));
+  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SPDP Vertical %d listening on %C\n",
+    handle_to_int(spdp_vertical_handler.get_handle()), OpenDDS::DCPS::LogAddr(spdp_vertical_addr).c_str()));
+  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SEDP Vertical %d listening on %C\n",
+    handle_to_int(sedp_vertical_handler.get_handle()), OpenDDS::DCPS::LogAddr(sedp_vertical_addr).c_str()));
+  ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Data Vertical %d listening on %C\n",
+    handle_to_int(data_vertical_handler.get_handle()), OpenDDS::DCPS::LogAddr(data_vertical_addr).c_str()));
 
   // Write about the relay.
   DDS::DataWriterListener_var relay_address_writer_listener =
@@ -961,32 +834,6 @@ int run(int argc, ACE_TCHAR* argv[])
   ret = relay_address_writer->write(relay_address, DDS::HANDLE_NIL);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to write Relay Address\n")));
-    return EXIT_FAILURE;
-  }
-
-  DDS::DataWriterQos relay_status_writer_qos;
-  relay_publisher->get_default_datawriter_qos(relay_status_writer_qos);
-
-  relay_status_writer_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
-  relay_status_writer_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  relay_status_writer_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
-  relay_status_writer_qos.history.depth = 1;
-  if (config.publish_relay_status_liveliness() != OpenDDS::DCPS::TimeDuration::zero_value) {
-    relay_status_writer_qos.liveliness.lease_duration = config.publish_relay_status_liveliness().to_dds_duration();
-    relay_status_writer_qos.liveliness.kind = DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
-  }
-
-  DDS::DataWriterListener_var relay_status_writer_listener =
-    new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::relay_status_sub_count);
-  DDS::DataWriter_var relay_status_writer_var = relay_publisher->create_datawriter(relay_status_topic, relay_status_writer_qos, relay_status_writer_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  if (!relay_status_writer_var) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Status data writer\n")));
-    return EXIT_FAILURE;
-  }
-
-  RelayStatusDataWriter_var relay_status_writer = RelayStatusDataWriter::_narrow(relay_status_writer_var);
-  if (!relay_status_writer) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to narrow Relay Status data writer\n")));
     return EXIT_FAILURE;
   }
 
@@ -1060,13 +907,19 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
   const auto internal_config_listener =
-    OpenDDS::DCPS::make_rch<InternalConfigListener>(relay_config_status_data_writer, config.relay_id());
+    make_rch<InternalConfigListener>(relay_config_status_data_writer, config.relay_id());
   const auto internal_config_reader =
-    OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(),
+    make_rch<OpenDDS::DCPS::ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(),
                                                          internal_config_listener);
   TheServiceParticipant->config_topic()->connect(internal_config_reader);
 
-  RelayStatusReporter relay_status_reporter(config, guid_addr_set, relay_status_writer, reactor);
+  RelayStatusReporter relay_status_reporter(config, *guid_addr_set, relay_publisher, reactor, relay_statistics_reporter);
+  if (config.publish_relay_status() && !relay_status_reporter.setup_writer()) {
+    return EXIT_FAILURE;
+  }
+  const RcHandle<RelayStatusReporter> status_reporter_rch{&relay_status_reporter, inc_count{}};
+  const auto status_reporter_config_reader = make_rch<OpenDDS::DCPS::ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(), status_reporter_rch);
+  TheServiceParticipant->config_topic()->connect(status_reporter_config_reader);
 
   RelayHttpMetaDiscovery relay_http_meta_discovery(config, meta_discovery_content_type, meta_discovery_content, guid_addr_set);
   if (relay_http_meta_discovery.open(meta_discovery_addr, reactor) != 0) {
@@ -1109,6 +962,9 @@ int run(int argc, ACE_TCHAR* argv[])
   }
 
   TheServiceParticipant->config_topic()->disconnect(internal_config_reader);
+  TheServiceParticipant->config_topic()->disconnect(config_reader);
+  TheServiceParticipant->config_topic()->disconnect(stats_reporter_config_reader);
+  TheServiceParticipant->config_topic()->disconnect(status_reporter_config_reader);
 
   application_participant->delete_contained_entities();
   factory->delete_participant(application_participant);

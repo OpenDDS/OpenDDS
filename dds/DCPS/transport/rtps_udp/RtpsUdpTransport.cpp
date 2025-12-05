@@ -738,7 +738,6 @@ RtpsUdpTransport::on_data_available(ConfigReader_rch)
 {
   const RtpsUdpInst_rch cfg = config();
   OPENDDS_ASSERT(cfg);
-  RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
   const String& config_prefix = cfg->config_prefix();
   bool has_prefix = false;
 
@@ -749,7 +748,13 @@ RtpsUdpTransport::on_data_available(ConfigReader_rch)
   for (size_t idx = 0; idx != samples.size(); ++idx) {
     const ConfigPair& sample = samples[idx];
 
-    if (sample.key_has_prefix(config_prefix)) {
+    if (sample.key() == COMMON_STATISTICS_PERIOD) {
+      TimeDuration period;
+      if (ConfigStoreImpl::convert_value(sample, ConfigStoreImpl::Format_FractionalSeconds, period)) {
+        setup_stats_task(period);
+      }
+
+    } else if (sample.key_has_prefix(config_prefix)) {
       has_prefix = true;
 
 #if OPENDDS_CONFIG_SECURITY

@@ -41,6 +41,7 @@ ReactorTask::ReactorTask(bool useAsyncSend)
 #endif
   , timer_queue_(0)
   , thread_status_manager_(0)
+  , thread_status_timer_(ReactorWrapper::InvalidTimerId)
 {
   ACE_UNUSED_ARG(useAsyncSend);
 }
@@ -71,6 +72,7 @@ void ReactorTask::cleanup()
   }
 #endif
 
+  job_queue(JobQueue_rch());
   delete reactor_;
   reactor_ = 0;
   delete timer_queue_;
@@ -159,9 +161,7 @@ int ReactorTask::svc()
     state_ = STATE_RUNNING;
     condition_.notify_all();
   }
-
   Timers::TimerId thread_status_timer = Timers::InvalidTimerId;
-  RcHandle<RcEventHandler> tsm_updater_handler;
 
   if (thread_status_manager_->update_thread_status()) {
     tsm_updater_handler = make_rch<ThreadStatusManager::Updater>();
@@ -177,12 +177,19 @@ int ReactorTask::svc()
     }
   }
 
+  ConfigReaderListener_rch this_rch(this, inc_count());
+  ConfigReader_rch config_reader = make_rch<ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(), this_rch);
+  TheServiceParticipant->config_topic()->connect(config_reader);
+
   ThreadStatusManager::Sleeper sleeper(thread_status_manager_);
   reactor_->run_reactor_event_loop();
+
+  TheServiceParticipant->config_topic()->disconnect(config_reader);
 
   if (thread_status_timer != Timers::InvalidTimerId) {
     Timers::cancel(reactor_, thread_status_timer);
   }
+
   return 0;
 }
 
@@ -255,6 +262,37 @@ void ReactorTask::reactor(ACE_Reactor* reactor)
 ACE_Reactor* ReactorTask::reactor() const
 {
   return ACE_Event_Handler::reactor();
+}
+
+void ReactorTask::on_data_available(InternalDataReader_rch reader)
+{
+  OpenDDS::DCPS::ConfigReader::SampleSequence samples;
+  OpenDDS::DCPS::InternalSampleInfoSequence infos;
+  reader->read(samples, infos, DDS::LENGTH_UNLIMITED,
+               DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+  for (size_t idx = 0; idx != samples.size(); ++idx) {
+    if (infos[idx].valid_data && samples[idx].key() == COMMON_DCPS_THREAD_STATUS_INTERVAL) {
+      const TimeDuration per(std::atoi(samples[idx].value().c_str()));
+      if (per == thread_status_period_) {
+        continue;
+      }
+      thread_status_period_ = per;
+      if (thread_status_timer_ != ReactorWrapper::InvalidTimerId) {
+        reactor_wrapper_.cancel(thread_status_timer_);
+      }
+      if (per) {
+        if (!tsm_updater_handler_) {
+          tsm_updater_handler_ = make_rch<ThreadStatusManager::Updater>();
+        }
+
+        thread_status_timer_ = reactor_wrapper_.schedule(*tsm_updater_handler_, thread_status_manager_, per, per);
+        if (thread_status_timer_ == ReactorWrapper::InvalidTimerId && log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: ReactorTask::on_data_available: failed to "
+                                "schedule timer for ThreadStatusManager::Updater\n"));
+        }
+      }
+    }
+  }
 }
 
 } // namespace DCPS

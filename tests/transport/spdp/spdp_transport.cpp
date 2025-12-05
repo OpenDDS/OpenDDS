@@ -86,6 +86,7 @@ struct TestParticipant: ACE_Event_Handler {
   TestParticipant(ACE_SOCK_Dgram& sock, const OpenDDS::DCPS::GuidPrefix_t& prefix)
     : sock_(sock)
     , recv_mb_(64 * 1024)
+    , user_tag_(0)
   {
     assign(destination_prefix_, GUIDPREFIX_UNKNOWN);
     const Header hdr = {
@@ -127,6 +128,11 @@ struct TestParticipant: ACE_Event_Handler {
     assign(destination_prefix_, dst);
   }
 
+  void set_usertag(ACE_CDR::ULong tag)
+  {
+    user_tag_ = tag;
+  }
+
   bool send_data(const OpenDDS::DCPS::EntityId_t& writer,
                  const SequenceNumber_t& seq, OpenDDS::RTPS::ParameterList& plist, const ACE_INET_Addr& send_to)
   {
@@ -138,9 +144,13 @@ struct TestParticipant: ACE_Event_Handler {
     };
 
     const Encoding encoding(Encoding::KIND_XCDR1, OpenDDS::DCPS::ENDIAN_LITTLE);
+    const UserTagSubmessage utag = { {SUBMESSAGE_KIND_USER_TAG, FLAG_E, uint32_cdr_size}, user_tag_ };
     InfoDestinationSubmessage idst = { {INFO_DST, FLAG_E, 0}, {0} };
     size_t size = 0;
     serialized_size(encoding, size, hdr_);
+    if (user_tag_) {
+      serialized_size(encoding, size, utag);
+    }
     if (!equal_guid_prefixes(destination_prefix_, GUIDPREFIX_UNKNOWN)) {
       serialized_size(encoding, size, idst);
     }
@@ -154,6 +164,14 @@ struct TestParticipant: ACE_Event_Handler {
     if (!(ser << hdr_)) {
       ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize message headers\n"));
       return false;
+    }
+
+    if (user_tag_) {
+      if (!(ser << utag)) {
+        ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize UserTagSubmessage\n"));
+        return false;
+      }
+      user_tag_ = 0;
     }
 
     if (!equal_guid_prefixes(destination_prefix_, GUIDPREFIX_UNKNOWN)) {
@@ -249,6 +267,7 @@ struct TestParticipant: ACE_Event_Handler {
   Header hdr_;
   ACE_Message_Block recv_mb_;
   GuidPrefix_t destination_prefix_;
+  ACE_CDR::ULong user_tag_;
 };
 
 
@@ -301,7 +320,10 @@ bool run_test()
   RtpsDiscovery rd("test");
   const ACE_INET_Addr local_addr(u_short(7575), "0.0.0.0");
   rd.config()->spdp_local_address(NetworkAddress(local_addr));
-  rd.config()->spdp_user_tag(0x99887766);
+  static const ACE_CDR::ULong user_tag = 0x99887766;
+  OpenDDS::RTPS::RtpsDiscoveryConfig::UserTagList ignored;
+  ignored.push_back(user_tag);
+  rd.config()->ignored_spdp_user_tags(ignored);
   const DDS::DomainId_t domain = 0;
   const DDS::DomainParticipantQos qos = TheServiceParticipant->initial_DomainParticipantQos();
   GUID_t id = rd.generate_participant_guid();
@@ -461,6 +483,18 @@ bool run_test()
   reactor_wait();
   if (spdp_friend.check_for_participant(false)) {
     ACE_DEBUG((LM_DEBUG, "ERROR: Info Destination test resulted in discovery when it shouldn't\n"));
+    return false;
+  }
+
+  ACE_DEBUG((LM_DEBUG, "Ignore User Tag Test\n"));
+  part1.set_usertag(user_tag); // The next send_data will insert a UserTagSubmessage before Data.
+  if (!part1.send_data(test_part_guid.entityId, seq, plist, send_addr)) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: Ignore User Tag test couldn't send\n"));
+    return false;
+  }
+  reactor_wait();
+  if (spdp_friend.check_for_participant(false)) {
+    ACE_DEBUG((LM_DEBUG, "ERROR: Ignore User Tag test resulted in discovery when it shouldn't\n"));
     return false;
   }
 

@@ -146,7 +146,7 @@ Service_Participant::Service_Participant()
   , shut_down_(false)
   , network_interface_address_topic_(make_rch<InternalTopic<NetworkInterfaceAddress> >())
   , config_topic_(make_rch<InternalTopic<ConfigPair> >())
-  , config_store_(make_rch<ConfigStoreImpl>(config_topic_))
+  , config_store_(make_rch<ConfigStoreImpl>(config_topic_, time_source_))
   , config_reader_(make_rch<InternalDataReader<ConfigPair> >(DataReaderQosBuilder().reliability_reliable().durability_transient_local()))
   , config_reader_listener_(make_rch<ConfigReaderListener>(ref(*this)))
   , pending_timeout_(0,0) // Can't use COMMON_DCPS_PENDING_TIMEOUT_default due to initialization order.
@@ -440,8 +440,8 @@ Service_Participant::get_domain_participant_factory(int &argc,
       dp_factory_servant_ = make_rch<DomainParticipantFactoryImpl>();
 
       reactor_task_.open_reactor_task(&thread_status_manager_, "Service_Participant");
-
       job_queue_ = make_rch<JobQueue>(reactor_task_.get_reactor());
+      reactor_task_.job_queue(job_queue_);
 
       const bool monitor_enabled = config_store_->get_boolean(COMMON_DCPS_MONITOR,
                                                               COMMON_DCPS_MONITOR_default);
@@ -523,6 +523,8 @@ Service_Participant::get_domain_participant_factory(int &argc,
     }
   }
 
+  config_reader_listener_->job_queue(job_queue_);
+  config_reader_->set_listener(config_reader_listener_);
   return DDS::DomainParticipantFactory::_duplicate(dp_factory_servant_.in());
 }
 

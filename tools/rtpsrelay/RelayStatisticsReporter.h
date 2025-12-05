@@ -13,18 +13,10 @@
 
 namespace RtpsRelay {
 
-class RelayStatisticsReporter {
+class RelayStatisticsReporter : public OpenDDS::DCPS::ConfigListener {
 public:
   RelayStatisticsReporter(const Config& config,
-                          RelayStatisticsDataWriter_var writer)
-    : config_(config)
-    , writer_(writer)
-  {
-    DDS::Topic_var topic = writer_->get_topic();
-    topic_name_ = topic->get_name();
-    log_relay_statistics_.relay_id(config.relay_id());
-    publish_relay_statistics_.relay_id(config.relay_id());
-  }
+                          RelayStatisticsDataWriter_var writer);
 
   void input_message(size_t byte_count,
                      const OpenDDS::DCPS::TimeDuration& time,
@@ -280,46 +272,17 @@ private:
   }
 
   void log_report(const OpenDDS::DCPS::MonotonicTimePoint& now,
-                  bool force)
-  {
-    if (!log_helper_.prepare_report(log_relay_statistics_, now, force, config_.log_relay_statistics())) {
-      return;
-    }
-
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) STAT: %C %C\n"), topic_name_.in(), OpenDDS::DCPS::to_json(log_relay_statistics_).c_str()));
-
-    log_helper_.reset(log_relay_statistics_, now);
-    log_relay_statistics_.new_address_count(0);
-    log_relay_statistics_.expired_address_count(0);
-    log_relay_statistics_.admission_deferral_count(0);
-    log_relay_statistics_.max_ips_per_client(0);
-  }
+                  bool force);
 
   void publish_report(ACE_Guard<ACE_Thread_Mutex>& guard,
                       const OpenDDS::DCPS::MonotonicTimePoint& now,
-                      bool force)
-  {
-    if (!publish_helper_.prepare_report(publish_relay_statistics_, now, force, config_.publish_relay_statistics())) {
-      return;
-    }
+                      bool force);
 
-    const auto writer_copy = writer_;
-    const auto stats_copy = publish_relay_statistics_;
+  void on_data_available(InternalDataReader_rch reader) override;
+  void configure_stats_period(const OpenDDS::DCPS::TimeDuration& log,
+                              const OpenDDS::DCPS::TimeDuration& publish) const;
 
-    publish_helper_.reset(publish_relay_statistics_, now);
-    publish_relay_statistics_.new_address_count(0);
-    publish_relay_statistics_.expired_address_count(0);
-    publish_relay_statistics_.admission_deferral_count(0);
-    publish_relay_statistics_.max_ips_per_client(0);
-
-    guard.release();
-
-    const auto ret = writer_copy->write(stats_copy, DDS::HANDLE_NIL);
-    if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
-        "RelayStatisticsReporter::publish_report failed to write relay statistics\n"));
-    }
-  }
+  static void log_json(const std::string& label, const std::string& json);
 
   mutable ACE_Thread_Mutex mutex_;
   const Config& config_;
@@ -333,7 +296,7 @@ private:
   Helper publish_helper_;
 
   RelayStatisticsDataWriter_var writer_;
-  CORBA::String_var topic_name_;
+  std::string topic_name_;
 };
 
 }

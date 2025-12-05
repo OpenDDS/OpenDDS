@@ -8,7 +8,9 @@
 #ifndef OPENDDS_DCPS_REACTORTASK_H
 #define OPENDDS_DCPS_REACTORTASK_H
 
-#include "dcps_export.h"
+#include "ConditionVariable.h"
+#include "ConfigStoreImpl.h"
+#include "Definitions.h"
 #include "RcObject.h"
 #include "TimeTypes.h"
 #include "ReactorInterceptor.h"
@@ -31,12 +33,14 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export ReactorTask : public virtual ACE_Task_Base,
-  public virtual RcObject {
-
+class OpenDDS_Dcps_Export ReactorTask
+  : public virtual ACE_Task_Base
+  , public virtual RcObject
+  , public ConfigListener
+{
 public:
 
-  explicit ReactorTask(bool useAsyncSend);
+  explicit ReactorTask(bool useAsyncSend = false);
   virtual ~ReactorTask();
 
 public:
@@ -72,6 +76,8 @@ private:
 
   void cleanup();
   void wait_for_startup_i() const;
+
+  void on_data_available(InternalDataReader_rch reader);
 
   typedef ACE_SYNCH_MUTEX LockType;
   typedef ACE_Guard<LockType> GuardType;

@@ -141,7 +141,7 @@ InfoRepoDiscovery::InfoRepoDiscovery(const String& name)
   , config_prefix_(ConfigPair::canonicalize("REPOSITORY_" + name))
   , use_bidir_giop_(TheServiceParticipant->use_bidir_giop())
   , orb_from_user_(false)
-  , config_store_(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic()))
+  , config_store_(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic(), TheServiceParticipant->time_source()))
 {
   init_bidir_giop();
 }
@@ -153,7 +153,7 @@ InfoRepoDiscovery::InfoRepoDiscovery(const String& name,
   , info_(info)
   , use_bidir_giop_(TheServiceParticipant->use_bidir_giop())
   , orb_from_user_(false)
-  , config_store_(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic()))
+  , config_store_(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic(), TheServiceParticipant->time_source()))
 {
   init_bidir_giop();
 }

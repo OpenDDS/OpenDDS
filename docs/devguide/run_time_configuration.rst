@@ -1493,6 +1493,11 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     Otherwise this submessage's content is the 4-byte unsigned integer ``<i>``.
     User tags from received SPDP messages are available to the application using the ParticipantLocation built-in topic.
 
+  .. prop:: IgnoredSpdpUserTags=<t1>[,<t2>]...
+    :default: Empty list
+
+    Incoming :ref:`SPDP <spdp>` messages with a UserTag matching any of these values will be ignored.
+
 .. _config-ports-used-by-rtps-disc:
 
 Ports Used by RTPS Discovery

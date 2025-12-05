@@ -5,7 +5,6 @@
 #include "GuidAddrSet.h"
 #include "GuidPartitionTable.h"
 #include "HandlerStatisticsReporter.h"
-#include "ParticipantStatisticsReporter.h"
 #include "RelayPartitionTable.h"
 #include "RelayStatisticsReporter.h"
 
@@ -118,7 +117,6 @@ public:
   }
 
   void venqueue_message(const ACE_INET_Addr& addr,
-                        ParticipantStatisticsReporter& stats_reporter,
                         const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                         const OpenDDS::DCPS::MonotonicTimePoint& now,
                         MessageType type);
@@ -145,14 +143,12 @@ protected:
                                const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                MessageType& type) override;
 
-  ParticipantStatisticsReporter& record_activity(GuidAddrSet::Proxy& proxy,
-                                                 const AddrPort& remote_address,
-                                                 const OpenDDS::DCPS::MonotonicTimePoint& now,
-                                                 const OpenDDS::DCPS::GUID_t& src_guid,
-                                                 MessageType msg_type,
-                                                 const size_t& msg_len,
-                                                 bool from_application_participant,
-                                                 bool* allow_stun_responses = 0);
+void record_activity(GuidAddrSet::Proxy& proxy,
+                     const AddrPort& remote_address,
+                     const OpenDDS::DCPS::MonotonicTimePoint& now,
+                     const OpenDDS::DCPS::GUID_t& src_guid,
+                     bool from_application_participant,
+                     bool* allow_stun_responses = 0);
 
   CORBA::ULong send(GuidAddrSet::Proxy& proxy,
                     const OpenDDS::DCPS::GUID_t& src_guid,
