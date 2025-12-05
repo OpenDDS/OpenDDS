@@ -29,7 +29,9 @@ struct InetAddrHash {
 typedef std::unordered_map<ACE_INET_Addr, PortSet, InetAddrHash> IpToPorts;
 
 struct AddrSetStats {
-  bool allow_rtps;
+  bool allow_rtps = false;
+  bool allow_stun_responses = true;
+  bool seen_spdp_message = false;
   IpToPorts ip_to_ports;
   ParticipantStatisticsReporter spdp_stats_reporter;
   ParticipantStatisticsReporter sedp_stats_reporter;
@@ -42,13 +44,12 @@ struct AddrSetStats {
 
   AddrSetStats(const OpenDDS::DCPS::GUID_t& guid,
                const OpenDDS::DCPS::MonotonicTimePoint& a_session_start,
-               RelayStatisticsReporter& relay_stats_reporter)
-    : allow_rtps(false)
-    , spdp_stats_reporter(rtps_guid_to_relay_guid(guid), "SPDP")
+               RelayStatisticsReporter& a_relay_stats_reporter)
+    : spdp_stats_reporter(rtps_guid_to_relay_guid(guid), "SPDP")
     , sedp_stats_reporter(rtps_guid_to_relay_guid(guid), "SEDP")
     , data_stats_reporter(rtps_guid_to_relay_guid(guid), "DATA")
     , session_start(a_session_start)
-    , relay_stats_reporter_(relay_stats_reporter)
+    , relay_stats_reporter_(a_relay_stats_reporter)
   {}
 
   bool upsert_address(const AddrPort& remote_address,
@@ -232,43 +233,42 @@ struct RemoteHash {
 class RelayHandler;
 class RelayParticipantStatusReporter;
 
-class GuidAddrSet {
+class GuidAddrSet : public ACE_Event_Handler {
 public:
-  typedef std::unordered_map<OpenDDS::DCPS::GUID_t, AddrSetStats, GuidHash> GuidAddrSetMap;
+  using GuidAddrSetMap = std::unordered_map<OpenDDS::DCPS::GUID_t, AddrSetStats, GuidHash>;
+
+  class ConfigReaderListener : public OpenDDS::DCPS::ConfigListener {
+  public:
+    explicit ConfigReaderListener(GuidAddrSet& guid_addr_set)
+      : InternalDataReaderListener(TheServiceParticipant->job_queue())
+      , guid_addr_set_(guid_addr_set)
+    {}
+
+    void on_data_available(InternalDataReader_rch reader) override;
+
+  private:
+    GuidAddrSet& guid_addr_set_;
+  };
 
   GuidAddrSet(const Config& config,
               OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery,
               RelayParticipantStatusReporter& relay_participant_status_reporter,
               RelayStatisticsReporter& relay_stats_reporter,
-              RelayThreadMonitor& relay_thread_monitor)
-    : config_(config)
+              RelayThreadMonitor& relay_thread_monitor,
+              ACE_Reactor* reactor)
+    : ACE_Event_Handler(reactor)
+    , config_(config)
+    , config_reader_listener_(OpenDDS::DCPS::make_rch<ConfigReaderListener>(OpenDDS::DCPS::ref(*this)))
+    , config_reader_(OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(), config_reader_listener_))
     , rtps_discovery_(rtps_discovery)
     , relay_participant_status_reporter_(relay_participant_status_reporter)
     , relay_stats_reporter_(relay_stats_reporter)
     , relay_thread_monitor_(relay_thread_monitor)
-    , spdp_vertical_handler_(0)
-    , sedp_vertical_handler_(0)
-    , data_vertical_handler_(0)
-    , participant_admission_limit_reached_(false)
-  {}
-
-  void spdp_vertical_handler(RelayHandler* spdp_vertical_handler)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    spdp_vertical_handler_ = spdp_vertical_handler;
+    TheServiceParticipant->config_topic()->connect(config_reader_);
   }
 
-  void sedp_vertical_handler(RelayHandler* sedp_vertical_handler)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    sedp_vertical_handler_ = sedp_vertical_handler;
-  }
-
-  void data_vertical_handler(RelayHandler* data_vertical_handler)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    data_vertical_handler_ = data_vertical_handler;
-  }
+  ~GuidAddrSet();
 
   using CreatedAddrSetStats = std::pair<bool, AddrSetStats&>;
 
@@ -307,9 +307,11 @@ public:
                     const OpenDDS::DCPS::GUID_t& src_guid,
                     MessageType msg_type,
                     const size_t& msg_len,
+                    bool from_application_participant,
+                    bool* allow_stun_responses,
                     const RelayHandler& handler)
     {
-      return gas_.record_activity(remote_address, now, src_guid, msg_type, msg_len, handler);
+      return gas_.record_activity(remote_address, now, src_guid, msg_type, msg_len, from_application_participant, allow_stun_responses, handler);
     }
 
     ParticipantStatisticsReporter&
@@ -372,6 +374,26 @@ public:
       return gas_.admitting();
     }
 
+    void admit_state(AdmitState as, const DDS::Time_t& now)
+    {
+      gas_.admit_state(as, now);
+    }
+
+    void drain_state(DrainState ds, const DDS::Time_t& now)
+    {
+      gas_.drain_state(ds, now);
+    }
+
+    void drain_interval(const OpenDDS::DCPS::TimeDuration& di)
+    {
+      gas_.drain_interval(di);
+    }
+
+    void populate_relay_status(RelayStatus& relay_status)
+    {
+      gas_.populate_relay_status(relay_status);
+    }
+
   private:
     GuidAddrSet& gas_;
 
@@ -381,19 +403,11 @@ public:
     Proxy& operator=(Proxy&&) = delete;
   };
 
+  int handle_timeout(const ACE_Time_Value& now, const void* token) override;
+
 private:
   CreatedAddrSetStats find_or_create(const OpenDDS::DCPS::GUID_t& guid,
-                                     const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    auto it = guid_addr_set_map_.find(guid);
-    const bool create = it == guid_addr_set_map_.end();
-    if (create) {
-      const auto it_bool_pair =
-        guid_addr_set_map_.insert(std::make_pair(guid, AddrSetStats(guid, now, relay_stats_reporter_)));
-      it = it_bool_pair.first;
-    }
-    return CreatedAddrSetStats(create, it->second);
-  }
+                                     const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   ParticipantStatisticsReporter&
   record_activity(const AddrPort& remote_address,
@@ -401,6 +415,8 @@ private:
                   const OpenDDS::DCPS::GUID_t& src_guid,
                   MessageType msg_type,
                   const size_t& msg_len,
+                  bool from_application_participant,
+                  bool* allow_stun_responses,
                   const RelayHandler& handler);
 
   void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now);
@@ -411,7 +427,12 @@ private:
   {
     const size_t limit = config_.admission_control_queue_size();
     const bool limit_okay = !limit || admission_control_queue_.size() < limit;
-    return !participant_admission_limit_reached_ && limit_okay && relay_thread_monitor_.threads_okay();
+    const bool admit = !participant_admission_limit_reached_ && limit_okay && relay_thread_monitor_.threads_okay() &&
+      admit_state_ == AdmitState::AS_NORMAL && drain_state_ == DrainState::DS_NORMAL;
+    if (admit != last_admit_) {
+      last_admit_ = admit;
+    }
+    return admit;
   }
 
   bool ignore_rtps(bool from_application_participant,
@@ -439,6 +460,18 @@ private:
 
   void check_participants_limit();
 
+  void admit_state(AdmitState ds, const DDS::Time_t& now);
+  void drain_state(DrainState ds, const DDS::Time_t& now);
+
+  void drain_interval(const OpenDDS::DCPS::TimeDuration& di)
+  {
+    drain_interval_ = di;
+  }
+
+  bool schedule_drain_timer();
+
+  void populate_relay_status(RelayStatus& relay_status);
+
   struct AdmissionControlInfo {
     AdmissionControlInfo(const OpenDDS::DCPS::GuidPrefix_t& prefix, const OpenDDS::DCPS::MonotonicTimePoint& admitted)
      : admitted_(admitted)
@@ -451,15 +484,15 @@ private:
   typedef std::deque<AdmissionControlInfo> AdmissionControlQueue;
 
   const Config& config_;
+  OpenDDS::DCPS::ConfigReaderListener_rch config_reader_listener_;
+  OpenDDS::DCPS::ConfigReader_rch config_reader_;
   OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery_;
   RelayParticipantStatusReporter& relay_participant_status_reporter_;
   RelayStatisticsReporter& relay_stats_reporter_;
   RelayThreadMonitor& relay_thread_monitor_;
-  RelayHandler* spdp_vertical_handler_;
-  RelayHandler* sedp_vertical_handler_;
-  RelayHandler* data_vertical_handler_;
   GuidAddrSetMap guid_addr_set_map_;
-  typedef std::unordered_map<Remote, OpenDDS::DCPS::GUID_t, RemoteHash> RemoteMap;
+
+  using RemoteMap = std::unordered_map<Remote, OpenDDS::DCPS::GUID_t, RemoteHash>;
   RemoteMap remote_map_;
   typedef std::list<std::pair<OpenDDS::DCPS::MonotonicTimePoint, OpenDDS::DCPS::GUID_t> > DeactivationGuidQueue;
   DeactivationGuidQueue deactivation_guid_queue_;
@@ -471,7 +504,19 @@ private:
   typedef std::list<RejectedAddressMapType::iterator> RejectedAddressExpirationQueue;
   RejectedAddressExpirationQueue rejected_address_expiration_queue_;
   mutable ACE_Thread_Mutex mutex_;
-  bool participant_admission_limit_reached_;
+  bool participant_admission_limit_reached_ = false;
+  mutable bool last_admit_ = true;
+
+  AdmitState admit_state_ = AdmitState::AS_NORMAL;
+  DDS::Time_t admit_state_change_ = {0, 0};
+  DrainState drain_state_ = DrainState::DS_NORMAL;
+  DDS::Time_t drain_state_change_ = {0, 0};
+  OpenDDS::DCPS::TimeDuration drain_interval_;
+  size_t mark_budget_ = 0;
+  size_t mark_count_ = 0;
+
+  using TimerId = long;
+  TimerId drain_timer_id_ = -1;
 };
 
 }

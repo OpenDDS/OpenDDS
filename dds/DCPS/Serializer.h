@@ -842,13 +842,14 @@ struct NestedKeyOnly {
 namespace IDL {
   // Although similar to C++11 reference_wrapper, this template has the
   // additional Tag parameter to allow the IDL compiler to generate distinct
-  // overloads for sequence/array typedefs that map to the same C++ types.
+  // overloads for sequence/array/map typedefs that map to the same C++ types.
   template <typename T, typename /*Tag*/>
   struct DistinctType {
     typedef T value_type;
     T* val_;
     DistinctType(T& val) : val_(&val) {}
     operator T&() const { return *val_; }
+    T& get() const { return *val_; }
   };
 }
 

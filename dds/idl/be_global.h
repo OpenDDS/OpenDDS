@@ -238,6 +238,9 @@ public:
 
   bool value(AST_Decl* node, ACE_INT32& value) const;
 
+  TryConstructFailAction map_key_try_construct(AST_Map* node);
+  TryConstructFailAction map_value_try_construct(AST_Map* node);
+
   OpenDDS::DataRepresentation data_representations(AST_Decl* node) const;
 
   OpenDDS::XTypes::MemberId compute_id(AST_Structure* stru, AST_Field* field, AutoidKind auto_id,

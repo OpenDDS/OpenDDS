@@ -1,13 +1,29 @@
 #ifndef RTPSRELAY_CONFIG_H_
 #define RTPSRELAY_CONFIG_H_
 
-#include <dds/DCPS/TimeDuration.h>
 #include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/TimeDuration.h>
 #include <dds/DdsDcpsInfrastructureC.h>
+
+#include <dds/rtpsrelaylib/RelayC.h>
 
 #include <list>
 
 namespace RtpsRelay {
+const char RTPS_RELAY_ADMIT_STATE[] = "RTPS_RELAY_ADMIT_STATE";
+const OpenDDS::DCPS::EnumList<AdmitState> admit_state_encoding[] =
+  {
+    { AdmitState::AS_NORMAL, "Normal" },
+    { AdmitState::AS_NOT_ADMITTING, "NotAdmitting" }
+  };
+const char RTPS_RELAY_DRAIN_STATE[] = "RTPS_RELAY_DRAIN_STATE";
+const OpenDDS::DCPS::EnumList<DrainState> drain_state_encoding[] =
+  {
+    { DrainState::DS_NORMAL, "Normal" },
+    { DrainState::DS_DRAINING, "Draining" }
+  };
+const char RTPS_RELAY_DRAIN_INTERVAL[] = "RTPS_RELAY_DRAIN_INTERVAL";
 
 class Config {
 public:
@@ -347,6 +363,13 @@ public:
   size_t admission_max_participants_low_water() const
   {
     return admission_max_participants_low_water_;
+  }
+
+  void drain_interval(const OpenDDS::DCPS::TimeDuration& value)
+  {
+    TheServiceParticipant->config_store()->set(RTPS_RELAY_DRAIN_INTERVAL,
+                                               value,
+                                               OpenDDS::DCPS::ConfigStoreImpl::Format_IntegerMilliseconds);
   }
 
 private:

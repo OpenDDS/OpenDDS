@@ -261,7 +261,7 @@ OpenDDS supports the following building blocks, with notes/caveats listed below 
 
 * Anonymous Types
 
-  * There is limited support for anonymous types when they appear as sequence/array instantiations directly as struct field types.
+  * There is limited support for anonymous types when they appear as sequence/array/map instantiations directly as struct field types.
     Using an explicitly-named type is recommended.
 
 * Annotations
@@ -272,7 +272,9 @@ OpenDDS supports the following building blocks, with notes/caveats listed below 
 
 * Extended Data Types
 
-  * The integer types ``int8``, ``uint8``, ``int16``, ``uin16``, ``int32`` ``uint32``, ``int64``, and ``uint64`` are supported.
+  * The integer types ``int8``, ``uint8`` and the type aliases ``int16``, ``uin16``, ``int32`` ``uint32``, ``int64``, and ``uint64`` are supported.
+
+  * Maps are supported.  Map key types may be basic types, strings, enums, or aliases of any of these types.
 
   * The rest of the building block is not supported.
 

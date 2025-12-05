@@ -1,0 +1,11 @@
+project: dcps_test, opendds_cxx11, googletest, msvc_bigobj {
+  exename = maps
+  includes += .
+  Source_Files {
+    main.cpp
+  }
+  idlflags += -I.
+  TypeSupport_Files {
+    test.idl
+  }
+}

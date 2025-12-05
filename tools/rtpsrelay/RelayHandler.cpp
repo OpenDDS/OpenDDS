@@ -285,6 +285,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
                                               const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                               MessageType& type)
 {
+  auto& statusManager = TheServiceParticipant->get_thread_status_manager();
   const auto msg_len = msg->length();
   {
     GuidAddrSet::Proxy proxy(guid_addr_set_);
@@ -311,14 +312,15 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       return 0;
     }
 
-    GuidAddrSet::Proxy proxy(guid_addr_set_);
-    record_activity(proxy, addr_port, now, src_guid, type, msg_len);
-
-    cache_message(proxy, src_guid, to, msg, now);
-
     const bool from_application_participant =
       (remote_address == application_participant_addr_) &&
       (src_guid == config_.application_participant_guid());
+
+    GuidAddrSet::Proxy proxy(guid_addr_set_);
+    OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager);
+    record_activity(proxy, addr_port, now, src_guid, type, msg_len, from_application_participant);
+
+    cache_message(proxy, src_guid, to, msg, now);
 
     bool admitted = false;
     if (proxy.ignore_rtps(from_application_participant, src_guid, now, admitted)) {
@@ -375,20 +377,20 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       has_guid = true;
     }
 
-    size_t bytes_sent = 0;
+    OpenDDS::STUN::Message response;
+    bool response_needed = false;
 
     switch (message.method) {
     case OpenDDS::STUN::BINDING:
       {
         if (message.class_ == OpenDDS::STUN::REQUEST) {
-          OpenDDS::STUN::Message response;
           response.class_ = OpenDDS::STUN::SUCCESS_RESPONSE;
           response.method = OpenDDS::STUN::BINDING;
           std::memcpy(response.transaction_id.data, message.transaction_id.data, sizeof(message.transaction_id.data));
           response.append_attribute(OpenDDS::STUN::make_mapped_address(remote_address));
           response.append_attribute(OpenDDS::STUN::make_xor_mapped_address(remote_address));
           response.append_attribute(OpenDDS::STUN::make_fingerprint());
-          bytes_sent = send(remote_address, std::move(response), now);
+          response_needed = true;
         } else if (message.class_ == OpenDDS::STUN::INDICATION) {
           // Do nothing.
         } else {
@@ -402,32 +404,44 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       // Unknown method.  Stop processing.
       HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C Unknown STUN method from %C\n"),
         name_.c_str(), OpenDDS::DCPS::LogAddr(remote_address).c_str()));
-      bytes_sent = send(remote_address, make_bad_request_error_response(message, "Bad Request: Unknown method"), now);
+      response = make_bad_request_error_response(message, "Bad Request: Unknown method");
+      response_needed = true;
       break;
     }
 
-    CORBA::ULong sent = bytes_sent ? 0 : 1;
+    CORBA::ULong messages_sent = 0;
 
     if (has_guid) {
       GuidAddrSet::Proxy proxy(guid_addr_set_);
-      ParticipantStatisticsReporter& from_psr =
-        record_activity(proxy, addr_port, now, src_guid, type, msg_len);
-      if (bytes_sent) {
-        from_psr.output_message(bytes_sent, type);
-      }
+      OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager);
 
       const bool from_application_participant =
         (remote_address == application_participant_addr_) &&
         (src_guid == config_.application_participant_guid());
+      bool allow_stun_responses = true;
+
+      ParticipantStatisticsReporter& from_psr =
+        record_activity(proxy, addr_port, now, src_guid, type, msg_len, from_application_participant, &allow_stun_responses);
+
+      if (allow_stun_responses && response_needed) {
+        const auto bytes_sent = send(remote_address, std::move(response), now);
+        ++messages_sent;
+        if (bytes_sent) {
+          from_psr.output_message(bytes_sent, type);
+        }
+      }
 
       bool admitted = false;
       proxy.ignore_rtps(from_application_participant, src_guid, now, admitted);
       if (admitted && spdp_handler_) {
-        sent += spdp_handler_->send_to_application_participant(proxy, src_guid, now);
+        messages_sent += spdp_handler_->send_to_application_participant(proxy, src_guid, now);
       }
+    } else if (response_needed) {
+      send(remote_address, std::move(response), now);
+      ++messages_sent;
     }
 
-    return sent;
+    return messages_sent;
   }
 }
 
@@ -437,9 +451,11 @@ VerticalHandler::record_activity(GuidAddrSet::Proxy& proxy,
                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
                                  const OpenDDS::DCPS::GUID_t& src_guid,
                                  MessageType msg_type,
-                                 const size_t& msg_len)
+                                 const size_t& msg_len,
+                                 bool from_application_participant,
+                                 bool* allow_stun_responses)
 {
-  return proxy.record_activity(remote_address, now, src_guid, msg_type, msg_len, *this);
+  return proxy.record_activity(remote_address, now, src_guid, msg_type, msg_len, from_application_participant, allow_stun_responses, *this);
 }
 
 bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser,

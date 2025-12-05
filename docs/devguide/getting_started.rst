@@ -63,7 +63,7 @@ Here is the IDL file that defines our Message data type:
 The ``@topic`` annotation marks a data type that can be used as a topic's type.
 This must be a structure or a union.
 The structure or union may contain basic types (short, long, float, etc.
-), enumerations, strings, sequences, arrays, structures, and unions.
+), enumerations, strings, sequences, maps, arrays, structures, and unions.
 See :ref:`introduction--idl-compliance` for more details on the use of IDL for OpenDDS topic types.
 The IDL above defines the structure Message in the Messenger module for use in this example.
 

@@ -25,6 +25,7 @@ struct FieldInfo {
     typedef ACE_Strong_Bound_Ptr<const EleLen, ACE_Null_Mutex> Container;
     Container base_container_;
     std::size_t len_;
+    AST_Type* map_key_;
     explicit EleLen(AST_Type* type);
     bool operator<(const EleLen& o) const;
   };
@@ -32,7 +33,7 @@ struct FieldInfo {
 
   static const std::string scope_op;
   static bool cxx11();
-  static std::string at_pfx();
+  static std::string anonymous_type_prefix();
   static std::string scoped_type(AST_Type& field_type, const std::string& field_name);
   static std::string underscore(const std::string& scoped);
   static std::string ref(const std::string& scoped, const std::string& const_s = "const ");
@@ -47,6 +48,7 @@ struct FieldInfo {
   const AstTypeClassification::Classification cls_;
   AST_Array* arr_;
   AST_Sequence* seq_;
+  AST_Map* map_;
   AST_Type* as_base_;
   AST_Type* as_act_;
   const AstTypeClassification::Classification as_cls_;

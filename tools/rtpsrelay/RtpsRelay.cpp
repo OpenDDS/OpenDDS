@@ -10,6 +10,7 @@
 #include "ParticipantStatisticsReporter.h"
 #include "PublicationListener.h"
 #include "RelayAddressListener.h"
+#include "RelayConfigControlListener.h"
 #include "RelayHandler.h"
 #include "RelayHttpMetaDiscovery.h"
 #include "RelayPartitionTable.h"
@@ -77,6 +78,35 @@ namespace {
   const unsigned short DEFAULT_HORIZONTAL = 17400;
   const unsigned short DEFAULT_VERTICAL = 7400;
   const unsigned short DEFAULT_META = 8080;
+
+  struct InternalConfigListener : OpenDDS::DCPS::ConfigListener {
+    InternalConfigListener(const RelayConfigDataWriter_var& writer, const std::string& id)
+      : InternalDataReaderListener{TheServiceParticipant->job_queue()}
+      , writer_{writer}
+      , config_{id, {}}
+    {}
+
+    void on_data_available(InternalDataReader_rch reader) override
+    {
+      OpenDDS::DCPS::ConfigReader::SampleSequence samples;
+      OpenDDS::DCPS::InternalSampleInfoSequence infos;
+      reader->read(samples, infos, DDS::LENGTH_UNLIMITED,
+                   DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+      for (size_t idx = 0; idx != samples.size(); ++idx) {
+        const auto& info = infos[idx];
+        const auto& pair = samples[idx];
+        if (info.valid_data) {
+          config_.config()[pair.key()] = pair.value();
+        } else if (info.instance_state != DDS::ALIVE_INSTANCE_STATE) {
+          config_.config().erase(pair.key());
+        }
+      }
+      writer_->write(config_, DDS::HANDLE_NIL);
+    }
+
+    RelayConfigDataWriter_var writer_;
+    RelayConfig config_;
+  };
 }
 
 int run(int argc, ACE_TCHAR* argv[])
@@ -264,6 +294,9 @@ int run(int argc, ACE_TCHAR* argv[])
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-Id"))) {
       config.relay_id(arg);
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-DrainInterval"))) {
+      config.drain_interval(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
     } else {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Invalid option: %C\n", args.get_current()));
@@ -741,9 +774,9 @@ int run(int argc, ACE_TCHAR* argv[])
 
   RelayParticipantStatusReporter relay_participant_status_reporter(config, relay_participant_status_writer, relay_statistics_reporter);
   RelayThreadMonitor* relay_thread_monitor = new RelayThreadMonitor(config);
-  GuidAddrSet guid_addr_set(config, rtps_discovery, relay_participant_status_reporter, relay_statistics_reporter, *relay_thread_monitor);
   ACE_Reactor reactor_(new ACE_Select_Reactor, true);
   const auto reactor = &reactor_;
+  GuidAddrSet guid_addr_set(config, rtps_discovery, relay_participant_status_reporter, relay_statistics_reporter, *relay_thread_monitor, reactor);
   GuidPartitionTable guid_partition_table(config, spdp_horizontal_addr, relay_partitions_writer, spdp_replay_writer);
   RelayPartitionTable relay_partition_table;
   relay_statistics_reporter.report();
@@ -775,10 +808,6 @@ int run(int argc, ACE_TCHAR* argv[])
   spdp_vertical_handler.horizontal_handler(&spdp_horizontal_handler);
   sedp_vertical_handler.horizontal_handler(&sedp_horizontal_handler);
   data_vertical_handler.horizontal_handler(&data_horizontal_handler);
-
-  guid_addr_set.spdp_vertical_handler(&spdp_vertical_handler);
-  guid_addr_set.sedp_vertical_handler(&sedp_vertical_handler);
-  guid_addr_set.data_vertical_handler(&data_vertical_handler);
 
   spdp_vertical_handler.spdp_handler(&spdp_vertical_handler);
   sedp_vertical_handler.spdp_handler(&spdp_vertical_handler);
@@ -961,6 +990,72 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
+  RelayConfigTypeSupport_var relay_config_ts = new RelayConfigTypeSupportImpl;
+  if (relay_config_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to register RelayConfig type\n"));
+    return EXIT_FAILURE;
+  }
+  CORBA::String_var relay_config_type_name = relay_config_ts->get_type_name();
+
+  DDS::Topic_var relay_config_control_topic =
+    relay_participant->create_topic(RELAY_CONFIG_CONTROL_TOPIC_NAME.c_str(), relay_config_type_name,
+                                    TOPIC_QOS_DEFAULT, nullptr, 0);
+  if (!relay_config_control_topic) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create %C\n", RELAY_CONFIG_CONTROL_TOPIC_NAME.c_str()));
+    return EXIT_FAILURE;
+  }
+
+  DDS::StringSeq filter_params(1);
+  filter_params.length(1);
+  filter_params[0] = config.relay_id().c_str();
+  DDS::ContentFilteredTopic_var cft_config_ctrl =
+    relay_participant->create_contentfilteredtopic("Filtered Relay Config Control", relay_config_control_topic,
+                                                   "relay_id = %0", filter_params);
+  if (!cft_config_ctrl) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Content-Filtered Topic for %C\n",
+               RELAY_CONFIG_CONTROL_TOPIC_NAME.c_str()));
+    return EXIT_FAILURE;
+  }
+
+  DDS::DataReaderQos relay_config_control_qos;
+  relay_subscriber->get_default_datareader_qos(relay_config_control_qos);
+  relay_config_control_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+
+  DDS::DataReaderListener_var relay_config_control_listener(new RelayConfigControlListener);
+  DDS::DataReader_var relay_config_control_reader =
+    relay_subscriber->create_datareader(cft_config_ctrl, relay_config_control_qos,
+                                        relay_config_control_listener, DDS::DATA_AVAILABLE_STATUS);
+  if (!relay_config_control_reader) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create %C data reader\n", RELAY_CONFIG_CONTROL_TOPIC_NAME.c_str()));
+    return EXIT_FAILURE;
+  }
+
+  DDS::Topic_var relay_config_status_topic =
+    relay_participant->create_topic(RELAY_CONFIG_STATUS_TOPIC_NAME.c_str(), relay_config_type_name,
+                                    TOPIC_QOS_DEFAULT, nullptr, 0);
+  if (!relay_config_status_topic) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create %C\n", RELAY_CONFIG_STATUS_TOPIC_NAME.c_str()));
+    return EXIT_FAILURE;
+  }
+
+  DDS::DataWriter_var relay_config_status_writer =
+    relay_publisher->create_datawriter(relay_config_status_topic, writer_qos, nullptr, 0);
+  if (!relay_config_status_writer) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create %C data writer\n", RELAY_CONFIG_STATUS_TOPIC_NAME.c_str()));
+    return EXIT_FAILURE;
+  }
+  RelayConfigDataWriter_var relay_config_status_data_writer = RelayConfigDataWriter::_narrow(relay_config_status_writer);
+  if (!relay_config_status_data_writer) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to narrow %C data writer\n", RELAY_CONFIG_STATUS_TOPIC_NAME.c_str()));
+    return EXIT_FAILURE;
+  }
+  const auto internal_config_listener =
+    OpenDDS::DCPS::make_rch<InternalConfigListener>(relay_config_status_data_writer, config.relay_id());
+  const auto internal_config_reader =
+    OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(),
+                                                         internal_config_listener);
+  TheServiceParticipant->config_topic()->connect(internal_config_reader);
+
   RelayStatusReporter relay_status_reporter(config, guid_addr_set, relay_status_writer, reactor);
 
   RelayHttpMetaDiscovery relay_http_meta_discovery(config, meta_discovery_content_type, meta_discovery_content, guid_addr_set);
@@ -1002,6 +1097,8 @@ int run(int argc, ACE_TCHAR* argv[])
   } else {
     reactor->run_reactor_event_loop();
   }
+
+  TheServiceParticipant->config_topic()->disconnect(internal_config_reader);
 
   application_participant->delete_contained_entities();
   factory->delete_participant(application_participant);
