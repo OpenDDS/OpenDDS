@@ -385,12 +385,18 @@ void GuidAddrSet::drain_state(DrainState ds, const DDS::Time_t& now)
     switch (ds) {
     case DrainState::DS_NORMAL:
       mark_budget_ = 0;
-      if (drain_timer_id_ != -1 && this->reactor()->cancel_timer(drain_timer_id_) != 1) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: GuidAddrSet::drain_state: "
-                   "Failed to cancel drain timer Id %d.\n", drain_timer_id_));
-        return;
+      if (drain_timer_id_ != -1) {
+        int cancel_result = this->reactor()->cancel_timer(drain_timer_id_);
+        if (cancel_result != 1) {
+          // Log warning but continue (timer may have already fired)
+          ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: GuidAddrSet::drain_state: "
+                     "Timer Id %d already completed or expired.\n", drain_timer_id_));
+        }
       }
       drain_timer_id_ = -1;
+      drain_state_ = ds;
+      drain_state_change_ = now;
+      participant_admission_limit_reached_ = false;
       break;
     case DrainState::DS_DRAINING:
       if (!schedule_drain_timer()) {
