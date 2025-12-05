@@ -1,13 +1,29 @@
 #ifndef RTPSRELAY_CONFIG_H_
 #define RTPSRELAY_CONFIG_H_
 
-#include <dds/DCPS/TimeDuration.h>
 #include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/TimeDuration.h>
 #include <dds/DdsDcpsInfrastructureC.h>
+
+#include <dds/rtpsrelaylib/RelayC.h>
 
 #include <list>
 
 namespace RtpsRelay {
+const char RTPS_RELAY_ADMIT_STATE[] = "RTPS_RELAY_ADMIT_STATE";
+const OpenDDS::DCPS::EnumList<AdmitState> admit_state_encoding[] =
+  {
+    { AdmitState::AS_NORMAL, "Normal" },
+    { AdmitState::AS_NOT_ADMITTING, "NotAdmitting" }
+  };
+const char RTPS_RELAY_DRAIN_STATE[] = "RTPS_RELAY_DRAIN_STATE";
+const OpenDDS::DCPS::EnumList<DrainState> drain_state_encoding[] =
+  {
+    { DrainState::DS_NORMAL, "Normal" },
+    { DrainState::DS_DRAINING, "Draining" }
+  };
+const char RTPS_RELAY_DRAIN_INTERVAL[] = "RTPS_RELAY_DRAIN_INTERVAL";
 
 class Config {
 public:
@@ -37,6 +53,7 @@ public:
     , max_ips_per_client_(0)
     , admission_max_participants_high_water_(0)
     , admission_max_participants_low_water_(0)
+    , synchronous_output_(false)
   {}
 
   void relay_id(const std::string& value)
@@ -349,6 +366,16 @@ public:
     return admission_max_participants_low_water_;
   }
 
+  void synchronous_output(bool flag)
+  {
+    synchronous_output_ = flag;
+  }
+
+  bool synchronous_output() const
+  {
+    return synchronous_output_;
+  }
+
 private:
   std::string relay_id_;
   OpenDDS::DCPS::GUID_t application_participant_guid_;
@@ -381,6 +408,7 @@ private:
   OpenDDS::DCPS::TimeDuration rejected_address_duration_;
   size_t admission_max_participants_high_water_;
   size_t admission_max_participants_low_water_;
+  bool synchronous_output_;
 };
 
 }
