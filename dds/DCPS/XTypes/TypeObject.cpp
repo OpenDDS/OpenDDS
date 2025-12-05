@@ -237,6 +237,20 @@ TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const PlainArrayLElemDefn& ldef
   array_ldefn() = ldefn;
 }
 
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const PlainMapSTypeDefn& sdefn)
+  : kind_(k)
+{
+  activate();
+  map_sdefn() = sdefn;
+}
+
+TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const PlainMapLTypeDefn& ldefn)
+  : kind_(k)
+{
+  activate();
+  map_ldefn() = ldefn;
+}
+
 TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const EquivalenceHashWrapper& eh)
   : kind_(k)
 {

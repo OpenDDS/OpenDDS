@@ -34,6 +34,7 @@
 #include <ast_predefined_type.h>
 #include <ast_root.h>
 #include <ast_sequence.h>
+#include <ast_map.h>
 #include <ast_structure.h>
 #include <ast_union.h>
 #include <ast_valuetype.h>
@@ -476,9 +477,23 @@ dds_visitor::visit_union_fwd(AST_UnionFwd* node)
 // *** All methods below here are unimplemented (or trivially implemented) ***
 
 int
+dds_visitor::visit_array(AST_Array*)
+{
+  // arrays appear in typedefs or in other types (struct, union, etc.)
+  return 0;
+}
+
+int
 dds_visitor::visit_sequence(AST_Sequence*)
 {
-  //sequences always appear as typedefs, see visit_typedef ()
+  // sequences appear in typedefs or in other types (struct, union, etc.)
+  return 0;
+}
+
+int
+dds_visitor::visit_map(AST_Map*)
+{
+  // maps appear in typedefs or in other types (struct, union, etc.)
   return 0;
 }
 
@@ -500,13 +515,6 @@ int
 dds_visitor::visit_attribute(AST_Attribute*)
 {
   // attributes are taken care of by visit_interface ()
-  return 0;
-}
-
-int
-dds_visitor::visit_array(AST_Array*)
-{
-  //arrays always appear as typedefs, see visit_typedef ()
   return 0;
 }
 

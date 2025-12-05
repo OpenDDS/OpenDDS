@@ -61,28 +61,134 @@ const char OTHER_USER_DATA[] = "The Subscriber";
 
 void writer_test(const DDS::DataWriter_var& dw)
 {
-  // Start writing threads
-  std::cout << "Creating Writer" << std::endl;
-  Writer* writer = args.check_lease_recovery ? new Writer(dw, 30, true) : new Writer(dw, 10, false);
-  std::cout << "Starting Writer" << std::endl;
-  writer->start();
+  // Write samples
+  Messenger::MessageDataWriter_var message_dw = Messenger::MessageDataWriter::_narrow(dw.in());
 
-  while (!writer->is_finished()) {
-    ACE_Time_Value small_time(0, 250000);
-    ACE_OS::sleep(small_time);
+  Messenger::Message message;
+  message.subject_id = 99;
+  message.from         = "Comic Book Guy";
+  message.subject      = "Review";
+  message.text         = "Worst. Movie. Ever.";
+  message.count        = 0;
+
+  {
+    const DDS::ReturnCode_t error = message_dw->write(message, DDS::HANDLE_NIL);
+    if (error != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l: svc()")
+                 ACE_TEXT(" ERROR: write returned %C!\n"), OpenDDS::DCPS::retcode_to_string(error)));
+    }
   }
 
-  std::cout << "Writer finished " << std::endl;
-  writer->end();
+  if (args.check_lease_recovery) {
+    dcs->wait_for("Publisher", "Subscriber", "count_0");;
+    if (args.expect_unmatch) {
+      dcs->wait_for("Publisher", "Publisher", "on_publication_matched_2_1_1_1");
+    } else {
+      dcs->wait_for("Publisher", "Subscriber", "on_subscription_matched_2_1_1_1");
+    }
+  }
 
-  std::cout << "Writer wait for ACKS" << std::endl;
+  message.count        = 1;
+  {
+    const DDS::ReturnCode_t error = message_dw->write(message, DDS::HANDLE_NIL);
+    if (error != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l: svc()")
+                 ACE_TEXT(" ERROR: write returned %C!\n"), OpenDDS::DCPS::retcode_to_string(error)));
+    }
+  }
+  dcs->wait_for("Publisher", "Subscriber", "count_1");;
+}
 
-  DDS::Duration_t timeout =
-    { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-  dw->wait_for_acknowledgments(timeout);
+void stress_test(const DDS::DataWriter_var& dw,
+                 const DDS::DomainParticipant_var& participant,
+                 const CORBA::String_var& type_name,
+                 const DDS::Publisher_var& publisher)
+{
+  // Create additional topics, writers, and populate with data.
+  DDS::DataWriterQos qos;
+  dw->get_qos(qos);
 
-  std::cerr << "deleting DW" << std::endl;
-  delete writer;
+  Messenger::Message message;
+  message.subject_id = 99;
+  message.from         = "Comic Book Guy";
+  message.subject      = "Review";
+  message.text         = "Worst. Movie. Ever.";
+  message.count        = 0;
+
+  for (std::size_t idx = 0; idx != 24; ++idx) {
+    std::string topic_name = "Movie Discussion List ";
+    topic_name += OpenDDS::DCPS::to_dds_string(idx);
+
+    DDS::Topic_var topic =
+      participant->create_topic(topic_name.c_str(),
+                                type_name.in(),
+                                TOPIC_QOS_DEFAULT,
+                                DDS::TopicListener::_nil(),
+                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    DDS::DataWriter_var local_dw =
+      publisher->create_datawriter(topic.in(),
+                                   qos,
+                                   0,
+                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    Messenger::MessageDataWriter_var message_local_dw = Messenger::MessageDataWriter::_narrow(local_dw.in());
+
+    for (std::size_t instance = 0, instance_limit = rand() % 26; instance != instance_limit; ++instance) {
+      message.subject_id = static_cast<DDS::Int32>(instance);
+      message.text = std::string(rand() % (1400 * 6), 'c').c_str();
+      message_local_dw->write(message, DDS::HANDLE_NIL);
+    }
+  }
+
+  // Write samples
+  Messenger::MessageDataWriter_var message_dw = Messenger::MessageDataWriter::_narrow(dw.in());
+
+  message.subject_id = 99;
+  message.from         = "Comic Book Guy";
+  message.subject      = "Review";
+  message.text         = "Worst. Movie. Ever.";
+  message.count        = 0;
+
+  DDS::WaitSet_var waiter = new DDS::WaitSet;
+
+  ShutdownHandler shutdown_handler;
+  waiter->attach_condition(shutdown_handler.guard_);
+
+  DDS::ConditionSeq active;
+  const DDS::Duration_t timeout = {1, 0};
+
+  bool running = true;
+  DDS::ReturnCode_t ret;
+  while (running) {
+    ret = waiter->wait(active, timeout);
+
+    if (ret == DDS::RETCODE_TIMEOUT) {
+      ret = message_dw->write(message, DDS::HANDLE_NIL);
+      if (ret != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("%N:%l: svc()")
+                   ACE_TEXT(" ERROR: write returned %C!\n"), OpenDDS::DCPS::retcode_to_string(ret)));
+      }
+      ++message.count;
+      continue;
+    }
+
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l: svc()")
+                 ACE_TEXT(" ERROR: wait returned %C!\n"), OpenDDS::DCPS::retcode_to_string(ret)));
+      running = false;
+      break;
+    }
+
+    for (unsigned i = 0; running && active.length() > i; ++i) {
+      if (active[i] == shutdown_handler.guard_) {
+        running = false;
+      }
+    }
+  }
 }
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])

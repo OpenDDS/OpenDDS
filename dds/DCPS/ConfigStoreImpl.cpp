@@ -310,7 +310,7 @@ ConfigStoreImpl::get_float64(const char* key,
     const DDS::SampleInfo& info = infos[idx];
     if (info.valid_data) {
       DDS::Float64 x = 0;
-      if (DCPS::convertToDouble(sample.value(), x)) {
+      if (DCPS::convertToFloating(sample.value(), x)) {
         retval = x;
       } else {
         retval = value;
@@ -607,7 +607,7 @@ ConfigStoreImpl::get(const char* key,
       case Format_FractionalSeconds:
         {
           double x = 0.0;
-          if (DCPS::convertToDouble(sample.value(), x)) {
+          if (DCPS::convertToFloating(sample.value(), x)) {
             retval = TimeDuration::from_double(x);
           } else {
             retval = value;

@@ -13,7 +13,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-// Called whenever we encounter a struct, union, sequence, or array.
+// Called whenever we encounter a struct, union, sequence, map, or array.
 // When that happens, create a new instance of SerializedSizeState that stores the states of
 // the byte stream and the information of the type encountered, including its kind
 // and extensibility that helps decide when a header, e.g. Dheader or Emheader, is
@@ -34,7 +34,7 @@ bool Xcdr2ValueWriter::begin_ssize_complex(Extensibility extensibility, Collecti
         // Copy the current size from the enclosing type so that the total size
         // can be built up cumulatively by this type.
         state.total_size = size_states_.top().total_size;
-        if (coll_kind == SEQUENCE_KIND) { // Sequence length
+        if (coll_kind == SEQUENCE_KIND || coll_kind == MAP_KIND) { // Sequence/map length
           primitive_serialized_size_ulong(encoding_, state.total_size);
         }
         must_cache_size = false;
@@ -53,12 +53,13 @@ bool Xcdr2ValueWriter::begin_ssize_complex(Extensibility extensibility, Collecti
       // Since this is a member of a mutable type, there was a call to
       // serialized_size_parameter_id before this which already accounts for
       // any alignment in front of the Emheader for this member.
-      // For members which are not struct, union, sequence, or array, the size
+      // For members which are not struct, union, sequence, map, or array, the size
       // of the member is cached directly in the write_* methods.
       if (extensibility == APPENDABLE || extensibility == MUTABLE) {
         serialized_size_delimiter(encoding_, state.total_size);
       }
-      if (coll_kind == SEQUENCE_KIND) { // Sequence length
+      if (coll_kind == SEQUENCE_KIND ||  // Sequence/map length
+          (coll_kind == MAP_KIND && extensibility == FINAL)) {
         primitive_serialized_size_ulong(encoding_, state.total_size);
       }
     }
@@ -133,7 +134,7 @@ bool Xcdr2ValueWriter::begin_ssize_aggregated_member(bool optional, bool present
 }
 
 bool Xcdr2ValueWriter::begin_serialize_complex(Extensibility extensibility, CollectionKind ck,
-                                               ACE_CDR::ULong seq_length)
+                                               ACE_CDR::ULong seq_map_length)
 {
   if (!ser_) {
     if (log_level >= LogLevel::Notice) {
@@ -176,8 +177,9 @@ bool Xcdr2ValueWriter::begin_serialize_complex(Extensibility extensibility, Coll
     ++pos_;
   }
 
-  if (ck == SEQUENCE_KIND) {
-    if (!(*ser_ << seq_length)) {
+  // maps without a DHeader have a 32-bit length prefix (like sequences)
+  if (ck == SEQUENCE_KIND || (ck == MAP_KIND && extensibility == FINAL)) {
+    if (!(*ser_ << seq_map_length)) {
       return false;
     }
   }
@@ -220,12 +222,12 @@ bool Xcdr2ValueWriter::begin_serialize_aggregated_member(unsigned id, bool must_
   return true;
 }
 
-bool Xcdr2ValueWriter::begin_complex(Extensibility extensibility, CollectionKind ck, ACE_CDR::ULong seq_length)
+bool Xcdr2ValueWriter::begin_complex(Extensibility extensibility, CollectionKind ck, ACE_CDR::ULong length)
 {
   if (mode_ == SERIALIZATION_SIZE_MODE) {
     return begin_ssize_complex(extensibility, ck);
   } else {
-    return begin_serialize_complex(extensibility, ck, seq_length);
+    return begin_serialize_complex(extensibility, ck, length);
   }
 }
 
@@ -355,6 +357,51 @@ bool Xcdr2ValueWriter::begin_element(ACE_CDR::ULong /*idx*/)
 }
 
 bool Xcdr2ValueWriter::end_element()
+{
+  return true;
+}
+
+bool Xcdr2ValueWriter::begin_map(XTypes::TypeKind key_kind, XTypes::TypeKind value_kind)
+{
+  DDS::UInt32 len = 0;
+  if (mode_ == SERIALIZATION_SIZE_MODE) {
+    map_lengths_.push_back(0u);
+    map_lengths_index_.push(map_lengths_.size() - 1);
+  } else if (!map_lengths_.empty()) {
+    len = map_lengths_.front();
+    map_lengths_.pop_front();
+  }
+  const bool primitive = XTypes::is_primitive(key_kind) && XTypes::is_primitive(value_kind);
+  return begin_complex(primitive ? FINAL : APPENDABLE, MAP_KIND, len);
+}
+
+bool Xcdr2ValueWriter::end_map()
+{
+  if (mode_ == SERIALIZATION_SIZE_MODE) {
+    map_lengths_index_.pop();
+  }
+  return end_complex();
+}
+
+bool Xcdr2ValueWriter::begin_key()
+{
+  if (mode_ == SERIALIZATION_SIZE_MODE) {
+    ++map_lengths_[map_lengths_index_.top()];
+  }
+  return true;
+}
+
+bool Xcdr2ValueWriter::end_key()
+{
+  return true;
+}
+
+bool Xcdr2ValueWriter::begin_value()
+{
+  return true;
+}
+
+bool Xcdr2ValueWriter::end_value()
 {
   return true;
 }

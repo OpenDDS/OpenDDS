@@ -986,6 +986,20 @@ bool BE_GlobalData::value(AST_Decl* node, ACE_INT32& value) const
   return annotation->node_value_exists(node, value);
 }
 
+TryConstructFailAction BE_GlobalData::map_key_try_construct(AST_Map* node)
+{
+  TryConstructAnnotation* try_construct_annotation =
+    dynamic_cast<TryConstructAnnotation*>(builtin_annotations_["::@try_construct"]);
+  return try_construct_annotation->map_key(node);
+}
+
+TryConstructFailAction BE_GlobalData::map_value_try_construct(AST_Map* node)
+{
+  TryConstructAnnotation* try_construct_annotation =
+    dynamic_cast<TryConstructAnnotation*>(builtin_annotations_["::@try_construct"]);
+  return try_construct_annotation->map_value(node);
+}
+
 OpenDDS::DataRepresentation BE_GlobalData::data_representations(
   AST_Decl* node) const
 {

@@ -1,0 +1,49 @@
+struct TestStruct {
+  int32 id;
+  string msg;
+};
+
+enum TEST_ENUM {TEST1, TEST2, TEST3};
+
+typedef sequence<TestStruct, 12> TestStructSeq;
+typedef map<int32, TestStruct, 11> TestStructMap;
+typedef map<int32, string, 10> TestIntStringMap;
+typedef sequence<TestIntStringMap> TestMapSeq;
+typedef TestStructMap TestMapArray[3];
+
+union TestUnion switch (TEST_ENUM) {
+case TEST1:
+  TestIntStringMap intStringMap;
+case TEST2:
+  TestStructMap intStructMap;
+};
+
+struct TreeNode;
+typedef map<string, TreeNode> NodeMap;
+struct TreeNode {
+  string data;
+  NodeMap nodes;
+};
+
+@topic
+struct Data {
+  map<int32, int32, 9> intIntMap;
+  map<string, string> stringStringMap;
+  @optional TestIntStringMap intStringMap;
+
+  map<TEST_ENUM, int32, 8> enumIntMap;
+  map<int32, TEST_ENUM> intEnumMap;
+
+  @optional map<string, TestStruct> stringStructsMap;
+  TestStructMap intStructsMap;
+
+  TestMapSeq sequenceOfMaps;
+  sequence<TestStructMap> anonSequenceOfMaps;
+  TestMapArray arrayOfMaps;
+  TestIntStringMap anonArrayOfMaps[2];
+
+  map<string, @try_construct(TRIM) TestStructSeq> stringSequenceMap;
+
+  map<string, @try_construct TestStructMap> stringMapMap;
+};
+

@@ -117,6 +117,18 @@ public:
 
   static bool gen_enum_helper(AST_Enum* node, UTL_ScopedName* name,
     const std::vector<AST_EnumVal*>& contents, const char* repoid);
+
+  static std::string call_gen_skip_over(AST_Type* type, const std::string& typeName, const std::string& tag);
+
+  static std::string field_type_name(AST_Field* field, AST_Type* field_type = 0);
+
+  /**
+  * For the some situations, like a tag name, the type name we need is the
+  * deepest named type, not the actual type. This will be the name of the
+  * deepest typedef if it's an array or sequence, otherwise the name of the
+  * type.
+  */
+  static AST_Type* deepest_named_type(AST_Type* type);
 };
 
 inline std::string canonical_name(UTL_ScopedName* sn)
@@ -427,7 +439,7 @@ namespace AstTypeClassification {
   const Classification CL_UNKNOWN = 0, CL_SCALAR = 1, CL_PRIMITIVE = 2,
     CL_STRUCTURE = 4, CL_STRING = 8, CL_ENUM = 16, CL_UNION = 32, CL_ARRAY = 64,
     CL_SEQUENCE = 128, CL_WIDE = 256, CL_BOUNDED = 512, CL_INTERFACE = 1024,
-    CL_FIXED = 2048;
+    CL_FIXED = 2048, CL_MAP = 4096;
 
   inline Classification classify(AST_Type* type)
   {
@@ -466,6 +478,9 @@ namespace AstTypeClassification {
       return CL_INTERFACE;
     case AST_Decl::NT_fixed:
       return CL_FIXED;
+    case AST_Decl::NT_map:
+      return CL_MAP |
+        ((dynamic_cast<AST_Map*>(type)->unbounded()) ? 0 : CL_BOUNDED);
     default:
       return CL_UNKNOWN;
     }
@@ -713,6 +728,9 @@ inline std::string bounded_arg(AST_Type* type)
   } else if (cls & CL_SEQUENCE) {
     AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(type);
     arg << seq->max_size()->ev()->u.ulval;
+  } else if (cls & CL_MAP) {
+    AST_Map* const map = dynamic_cast<AST_Map*>(type);
+    arg << map->max_size()->ev()->u.ulval;
   }
   return arg.str();
 }
@@ -797,15 +815,6 @@ struct Intro {
   }
 };
 
-std::string field_type_name(AST_Field* field, AST_Type* field_type = 0);
-
-/**
- * For the some situations, like a tag name, the type name we need is the
- * deepest named type, not the actual type. This will be the name of the
- * deepest typedef if it's an array or sequence, otherwise the name of the
- * type.
- */
-AST_Type* deepest_named_type(AST_Type* type);
 
 typedef std::string (*CommonFn)(
   const std::string& indent, AST_Decl* node,
@@ -824,7 +833,7 @@ void generateCaseBody(
   const bool use_cxx11 = lmap == BE_GlobalData::LANGMAP_CXX11;
   const std::string name = branch->local_name()->get_string();
   if (namePrefix == std::string(">> ")) {
-    std::string brType = field_type_name(branch, branch->field_type());
+    std::string brType = dds_generator::field_type_name(branch, branch->field_type());
     std::string forany;
     AST_Type* br = resolveActualType(branch->field_type());
     Classification br_cls = classify(br);
@@ -851,11 +860,11 @@ void generateCaseBody(
       brType = use_cxx11 ? std::string("std::") + (is_wide ? "w" : "") + "string"
         : nmspace + (is_wide ? "W" : "") + "String_var";
       rhs = use_cxx11 ? "tmp" : "tmp.out()";
-    } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE))) {  //array or seq C++11
+    } else if (use_cxx11 && (br_cls & (CL_ARRAY | CL_SEQUENCE | CL_MAP))) {  // container C++11
       rhs = "IDL::DistinctType<" + brType + ", "
         + dds_generator::get_tag_name(brType)
         + ">(tmp)";
-    } else if (br_cls & CL_ARRAY) { //array classic
+    } else if (br_cls & CL_ARRAY) { // array classic
       forany = "    " + brType + "_forany fa = tmp;\n";
       rhs = getWrapper("fa", br, WD_INPUT);
     } else { // anything else
@@ -879,7 +888,7 @@ void generateCaseBody(
         "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
         "        return true;\n";
     } else if ((be_global->try_construct(branch) == tryconstructfailaction_trim) && (br_cls & CL_BOUNDED) &&
-                (br_cls & (CL_STRING | CL_SEQUENCE))) {
+                (br_cls & (CL_STRING | CL_SEQUENCE | CL_MAP))) {
       if (is_bound_string) {
         const std::string check_not_empty = "!tmp.empty()";
         const std::string get_length = use_cxx11 ? "tmp.length()" : "ACE_OS::strlen(tmp.c_str())";
@@ -897,9 +906,9 @@ void generateCaseBody(
           "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
           "          return false;\n"
           "        }\n";
-      } else if (br_cls & CL_SEQUENCE) {
+      } else if (br_cls & (CL_SEQUENCE | CL_MAP)) {
         be_global->impl_ <<
-          "        if(strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n"
+          "        if (strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n"
           "          return false;\n"
           "        }\n"
           "        uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp);\n") <<
@@ -1062,7 +1071,7 @@ std::string insert_cxx11_accessor_parens(
   std::string full_var_name(full_var_name_);
   std::string::size_type n = 0;
   while ((n = full_var_name.find('.', n)) != std::string::npos) {
-    if (full_var_name[n-1] != ']') {
+    if (full_var_name[n - 1] != ']') {
       full_var_name.insert(n, "()");
       n += 3;
     } else {
@@ -1243,25 +1252,14 @@ ACE_CDR::ULong container_element_limit(AST_Type* type)
 {
   AST_Type* const act = AstTypeClassification::resolveActualType(type);
   AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(act);
+  AST_Map* const map = dynamic_cast<AST_Map*>(act);
   AST_Array* const arr = dynamic_cast<AST_Array*>(act);
   if (seq && !seq->unbounded()) {
     return seq->max_size()->ev()->u.ulval;
+  } else if (map && !map->unbounded()) {
+    return map->max_size()->ev()->u.ulval;
   } else if (arr) {
     return array_element_count(arr);
-  }
-  return 0;
-}
-
-inline
-AST_Type* container_base_type(AST_Type* type)
-{
-  AST_Type* const act = AstTypeClassification::resolveActualType(type);
-  AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(act);
-  AST_Array* const arr = dynamic_cast<AST_Array*>(act);
-  if (seq) {
-    return seq->base_type();
-  } else if (arr) {
-    return arr->base_type();
   }
   return 0;
 }
@@ -1298,6 +1296,9 @@ inline bool needs_nested_key_only(AST_Type* type)
       result = needs_nested_key_only(dynamic_cast<AST_Array*>(type)->base_type());
     } else if (type_class & CL_SEQUENCE) {
       result = needs_nested_key_only(dynamic_cast<AST_Sequence*>(type)->base_type());
+    } else if (type_class & CL_MAP) {
+      AST_Map* const map = dynamic_cast<AST_Map*>(type);
+      result = needs_nested_key_only(map->key_type()) || needs_nested_key_only(map->value_type());
     } else if (type_class & CL_STRUCTURE) {
       AST_Structure* const struct_node = dynamic_cast<AST_Structure*>(type);
       // TODO(iguessthislldo): Possible optimization: If everything in a struct
@@ -1337,7 +1338,7 @@ inline bool needs_distinct_type(AST_Type* type)
   using namespace AstTypeClassification;
   const Classification type_class = classify(resolveActualType(type));
   return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 &&
-    type_class & (CL_SEQUENCE | CL_ARRAY);
+    type_class & (CL_SEQUENCE | CL_ARRAY | CL_MAP);
 }
 
 const char* const shift_out = "<< ";
@@ -1443,6 +1444,8 @@ inline std::string type_kind(AST_Type* type)
     return "XTypes::TK_STRUCTURE";
   case AST_Decl::NT_enum:
     return "XTypes::TK_ENUM";
+  case AST_Decl::NT_map:
+    return "XTypes::TK_MAP";
   default:
     return "XTypes::TK_NONE";
   }
@@ -1460,6 +1463,11 @@ bool has_discriminator(AST_Union* u, FieldFilter filter_kind)
   return be_global->union_discriminator_is_key(u)
     || filter_kind == FieldFilter_NestedKeyOnly
     || filter_kind == FieldFilter_All;
+}
+
+inline bool uses_stl_container(AST_Type* type, bool cpp11)
+{
+  return cpp11 || (AstTypeClassification::classify(type) & AstTypeClassification::CL_MAP);
 }
 
 // TODO: Add more fine-grained control of "const" string for the wrapper type and wrapped type.
@@ -1502,6 +1510,7 @@ struct RefWrapper {
     , typedef_node_(0)
     , done_(false)
     , needs_dda_tag_(false)
+    , stl_container_(uses_stl_container(type, cpp11_))
   {
   }
 
@@ -1522,6 +1531,7 @@ struct RefWrapper {
     , typedef_node_(0)
     , done_(false)
     , needs_dda_tag_(false)
+    , stl_container_(uses_stl_container(type, cpp11_))
   {
   }
 
@@ -1601,8 +1611,7 @@ struct RefWrapper {
       wrapped_type_name_ =
         std::string("IDL::DistinctType<") + const_str + wrapped_type_name_ +
         ", " + get_tag_name_i() + ">";
-      value_access_pre_ += "(*";
-      value_access_post_ = ".val_)" + value_access_post_;
+      value_access_post_ = ".get()" + value_access_post_;
       const std::string idt_arg = "(" + ref_ + ")";
       if (is_const_) {
         ref_ = wrapped_type_name_ + idt_arg;
@@ -1615,7 +1624,7 @@ struct RefWrapper {
       by_ref = false;
     }
 
-    wrapped_type_name_ = const_str + wrapped_type_name_ + (by_ref ? "&" : "");
+    wrapped_type_name_ = (by_ref ? const_str : "") + wrapped_type_name_ + (by_ref ? "&" : "");
     done_ = true;
     return *this;
   }
@@ -1658,18 +1667,18 @@ struct RefWrapper {
 
   std::string value_access(const std::string& var_name = "") const
   {
-    return value_access_pre_ + get_var_name(var_name) + value_access_post_;
+    return get_var_name(var_name) + value_access_post_;
   }
 
-  std::string seq_check_empty() const
+  std::string check_empty() const
   {
-    return value_access() + (cpp11_ ? ".empty()" : ".length() == 0");
+    return value_access() + (stl_container_ ? ".empty()" : ".length() == 0");
   }
 
-  std::string seq_get_length() const
+  std::string get_length() const
   {
     const std::string value = value_access();
-    return cpp11_ ? "static_cast<uint32_t>(" + value + ".size())" : value + ".length()";
+    return stl_container_ ? "static_cast<uint32_t>(" + value + ".size())" : value + ".length()";
   }
 
   std::string seq_resize(const std::string& new_size) const
@@ -1713,9 +1722,9 @@ private:
   bool done_;
   std::string wrapped_type_name_;
   std::string ref_;
-  std::string value_access_pre_;
   std::string value_access_post_;
   bool needs_dda_tag_;
+  const bool stl_container_;
 
   std::string get_tag_name_i() const
   {
