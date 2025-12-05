@@ -23,7 +23,7 @@ GuidAddrSet::CreatedAddrSetStats GuidAddrSet::find_or_create(const OpenDDS::DCPS
   const bool create = it == guid_addr_set_map_.end();
   if (create) {
     const auto it_bool_pair =
-      guid_addr_set_map_.insert(std::make_pair(guid, AddrSetStats(guid, now, relay_stats_reporter_, total_ips_, total_ports_)));
+      guid_addr_set_map_.insert(std::make_pair(guid, AddrSetStats(guid, now, relay_stats_reporter_)));
     it = it_bool_pair.first;
     relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
   }

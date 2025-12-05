@@ -44,14 +44,12 @@ struct AddrSetStats {
 
   AddrSetStats(const OpenDDS::DCPS::GUID_t& guid,
                const OpenDDS::DCPS::MonotonicTimePoint& a_session_start,
-               RelayStatisticsReporter& a_relay_stats_reporter,
-               size_t& a_total_ips,
-               size_t& a_total_ports)
+               RelayStatisticsReporter& a_relay_stats_reporter)
     : spdp_stats_reporter(rtps_guid_to_relay_guid(guid), "SPDP")
     , sedp_stats_reporter(rtps_guid_to_relay_guid(guid), "SEDP")
     , data_stats_reporter(rtps_guid_to_relay_guid(guid), "DATA")
     , session_start(a_session_start)
-    , relay_stats_reporter_(relay_stats_reporter)
+    , relay_stats_reporter_(a_relay_stats_reporter)
   {}
 
   bool upsert_address(const AddrPort& remote_address,
@@ -258,9 +256,8 @@ public:
               RelayStatisticsReporter& relay_stats_reporter,
               RelayThreadMonitor& relay_thread_monitor)
     : config_(config)
-    , config_reader_listener_(OpenDDS::DCPS::make_rch<ConfigReaderListener>(ref(*this)))
+    , config_reader_listener_(OpenDDS::DCPS::make_rch<ConfigReaderListener>(DCPS::ref(*this)))
     , config_reader_(OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(), config_reader_listener_))
-    , reactor_task_(reactor_task)
     , rtps_discovery_(rtps_discovery)
     , relay_participant_status_reporter_(relay_participant_status_reporter)
     , relay_stats_reporter_(relay_stats_reporter)
@@ -406,17 +403,7 @@ public:
 
 private:
   CreatedAddrSetStats find_or_create(const OpenDDS::DCPS::GUID_t& guid,
-                                     const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    auto it = guid_addr_set_map_.find(guid);
-    const bool create = it == guid_addr_set_map_.end();
-    if (create) {
-      const auto it_bool_pair =
-        guid_addr_set_map_.insert(std::make_pair(guid, AddrSetStats(guid, now, relay_stats_reporter_)));
-      it = it_bool_pair.first;
-    }
-    return CreatedAddrSetStats(create, it->second);
-  }
+                                     const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   ParticipantStatisticsReporter&
   record_activity(const AddrPort& remote_address,
@@ -440,7 +427,6 @@ private:
       admit_state_ == AdmitState::AS_NORMAL && drain_state_ == DrainState::DS_NORMAL;
     if (admit != last_admit_) {
       last_admit_ = admit;
-      relay_stats_reporter_.admission_state_changed(admit);
     }
     return admit;
   }
@@ -496,7 +482,6 @@ private:
   const Config& config_;
   OpenDDS::DCPS::ConfigReaderListener_rch config_reader_listener_;
   OpenDDS::DCPS::ConfigReader_rch config_reader_;
-  OpenDDS::DCPS::ReactorTask_rch reactor_task_;
   OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery_;
   RelayParticipantStatusReporter& relay_participant_status_reporter_;
   RelayStatisticsReporter& relay_stats_reporter_;
@@ -505,8 +490,6 @@ private:
   RelayHandler* sedp_vertical_handler_;
   RelayHandler* data_vertical_handler_;
   GuidAddrSetMap guid_addr_set_map_;
-  size_t total_ips_ = 0;
-  size_t total_ports_ = 0;
 
   using RemoteMap = std::unordered_map<Remote, OpenDDS::DCPS::GUID_t, RemoteHash>;
   RemoteMap remote_map_;
