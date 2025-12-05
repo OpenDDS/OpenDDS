@@ -301,7 +301,7 @@ RtpsDiscoveryCore::RtpsDiscoveryCore(RcHandle<RtpsDiscoveryConfig> config,
 {}
 
 Sedp::Sedp(const GUID_t& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
-  : config_store_(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic()))
+  : config_store_(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic(), TheServiceParticipant->time_source()))
   , spdp_(owner)
   , lock_(lock)
   , participant_id_(participant_id)

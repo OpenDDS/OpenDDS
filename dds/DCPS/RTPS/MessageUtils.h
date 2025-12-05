@@ -175,6 +175,13 @@ inline void append_submessage(RTPS::Message& message, const RTPS::DataFragSubmes
   DCPS::push_back(message.submessages, sm);
 }
 
+inline void append_submessage(RTPS::Message& message, const RTPS::UserTagSubmessage& submessage)
+{
+  RTPS::Submessage sm;
+  sm.unknown_sm(submessage.smHeader);
+  DCPS::push_back(message.submessages, sm);
+}
+
 #if OPENDDS_CONFIG_SECURITY
 inline DDS::Security::ParticipantSecurityAttributesMask
 security_attributes_to_bitmask(const DDS::Security::ParticipantSecurityAttributes& sec_attr)

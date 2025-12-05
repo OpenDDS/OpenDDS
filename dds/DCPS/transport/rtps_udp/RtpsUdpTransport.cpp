@@ -738,7 +738,6 @@ RtpsUdpTransport::on_data_available(ConfigReader_rch)
 {
   const RtpsUdpInst_rch cfg = config();
   OPENDDS_ASSERT(cfg);
-  RcHandle<ConfigStoreImpl> config_store = TheServiceParticipant->config_store();
   const String& config_prefix = cfg->config_prefix();
   bool has_prefix = false;
 
@@ -748,7 +747,6 @@ RtpsUdpTransport::on_data_available(ConfigReader_rch)
                        DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
   for (size_t idx = 0; idx != samples.size(); ++idx) {
     const ConfigPair& sample = samples[idx];
-
     if (sample.key_has_prefix(config_prefix)) {
       has_prefix = true;
 

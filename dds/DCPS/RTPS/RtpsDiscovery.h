@@ -54,7 +54,7 @@ const char RTPS_HARVEST_THREAD_STATUS[] = "OpenDDS.Rtps.HarvestThreadStatus";
  * discovery.
  *
  */
-class OpenDDS_Rtps_Export RtpsDiscovery : public DCPS::Discovery {
+class OpenDDS_Rtps_Export RtpsDiscovery : public virtual DCPS::Discovery {
 public:
   explicit RtpsDiscovery(const RepoKey& key);
   ~RtpsDiscovery();

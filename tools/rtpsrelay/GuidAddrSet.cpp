@@ -9,10 +9,6 @@ namespace RtpsRelay {
 
 GuidAddrSet::~GuidAddrSet()
 {
-  // if (drain_task_) {
-  //   drain_task_->cancel();
-  // }
-
   TheServiceParticipant->config_topic()->disconnect(config_reader_);
 }
 
@@ -23,19 +19,17 @@ GuidAddrSet::CreatedAddrSetStats GuidAddrSet::find_or_create(const OpenDDS::DCPS
   const bool create = it == guid_addr_set_map_.end();
   if (create) {
     const auto it_bool_pair =
-      guid_addr_set_map_.insert(std::make_pair(guid, AddrSetStats(guid, now, relay_stats_reporter_)));
+      guid_addr_set_map_.insert(std::make_pair(guid, AddrSetStats(now, relay_stats_reporter_)));
     it = it_bool_pair.first;
     relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
   }
   return {create, it->second};
 }
 
-ParticipantStatisticsReporter&
+void
 GuidAddrSet::record_activity(const AddrPort& remote_address,
                              const OpenDDS::DCPS::MonotonicTimePoint& now,
                              const OpenDDS::DCPS::GUID_t& src_guid,
-                             MessageType msg_type,
-                             const size_t& msg_len,
                              bool from_application_participant,
                              bool* allow_stun_responses,
                              const RelayHandler& handler)
@@ -114,10 +108,6 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
     expiration_guid_addr_queue_.push_back(std::make_pair(expiration, ga));
   }
 
-  ParticipantStatisticsReporter& stats_reporter =
-    *addr_set_stats.select_stats_reporter(remote_address.port);
-  stats_reporter.input_message(msg_len, msg_type);
-
   switch (drain_state_) {
   case DrainState::DS_NORMAL:
     if (!addr_set_stats.allow_stun_responses) {
@@ -137,8 +127,6 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
   if (allow_stun_responses) {
     *allow_stun_responses = addr_set_stats.allow_stun_responses;
   }
-
-  return stats_reporter;
 }
 
 void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now)
@@ -151,7 +139,7 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
       ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::process_expirations "
                  "Rejected address %C expired %C ago, removing from rejected address map.\n",
                  OpenDDS::DCPS::LogAddr((*it)->first).c_str(),
-                 ago.str().c_str()));
+                 ago.sec_str().c_str()));
     }
     rejected_address_map_.erase(*it);
     rejected_address_expiration_queue_.erase(it++);
@@ -217,7 +205,7 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
                  "%C %C expired %C ago %C into session ips=%B total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
                  guid_to_string(ga.guid).c_str(),
                  OpenDDS::DCPS::LogAddr(ga.address.addr).c_str(),
-                 ago.str().c_str(),
+                 ago.sec_str().c_str(),
                  get_session_time(ga.guid, now).sec_str().c_str(),
                  addr_stats.ip_to_ports.size(),
                  guid_addr_set_map_.size(),
@@ -309,12 +297,6 @@ void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid,
 {
   AddrSetStats& addr_stats = it->second;
   const auto session_time = addr_stats.get_session_time(now);
-  addr_stats.spdp_stats_reporter.report(addr_stats.session_start, now);
-  addr_stats.spdp_stats_reporter.unregister();
-  addr_stats.sedp_stats_reporter.report(addr_stats.session_start, now);
-  addr_stats.sedp_stats_reporter.unregister();
-  addr_stats.data_stats_reporter.report(addr_stats.session_start, now);
-  addr_stats.data_stats_reporter.unregister();
 
   for (const auto& by_ip : addr_stats.ip_to_ports) {
     const auto remote_iter = remote_map_.find(Remote(by_ip.first, guid));
@@ -404,9 +386,8 @@ void GuidAddrSet::drain_state(DrainState ds, const DDS::Time_t& now)
     case DrainState::DS_NORMAL:
       mark_budget_ = 0;
       if (drain_timer_id_ != -1 && this->reactor()->cancel_timer(drain_timer_id_) != 1) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: GuidAddrSet::drain_state: "
-                   "Failed to cancel drain timer Id %d.\n", drain_timer_id_));
-        return;
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: GuidAddrSet::drain_state: "
+                   "Timer Id %d may have already expired.\n", drain_timer_id_));
       }
       drain_timer_id_ = -1;
       break;
@@ -425,9 +406,11 @@ void GuidAddrSet::drain_state(DrainState ds, const DDS::Time_t& now)
 int GuidAddrSet::handle_timeout(const ACE_Time_Value&, const void*)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, -1);
-  ++mark_budget_;
-  schedule_drain_timer();
-  return -1;
+  if (drain_state_ == DrainState::DS_DRAINING) {
+    ++mark_budget_;
+    schedule_drain_timer();
+  }
+  return 0;
 }
 
 void GuidAddrSet::populate_relay_status(RelayStatus& relay_status)

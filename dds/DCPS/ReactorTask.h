@@ -8,13 +8,16 @@
 #ifndef OPENDDS_DCPS_REACTORTASK_H
 #define OPENDDS_DCPS_REACTORTASK_H
 
-#include "dcps_export.h"
+#include "ConditionVariable.h"
+#include "ConfigStoreImpl.h"
+#include "Definitions.h"
 #include "RcObject.h"
 #include "TimeTypes.h"
 #include "ReactorInterceptor.h"
 #include "SafetyProfileStreams.h"
 #include "ConditionVariable.h"
 #include "ThreadStatusManager.h"
+#include "Timers.h"
 
 #include <ace/Task.h>
 #include <ace/Synch_Traits.h>
@@ -31,12 +34,14 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export ReactorTask : public virtual ACE_Task_Base,
-  public virtual RcObject {
-
+class OpenDDS_Dcps_Export ReactorTask
+  : public virtual ACE_Task_Base
+  , public virtual RcObject
+  , public ConfigListener
+{
 public:
 
-  explicit ReactorTask(bool useAsyncSend);
+  explicit ReactorTask(bool useAsyncSend = false);
   virtual ~ReactorTask();
 
 public:
@@ -72,6 +77,8 @@ private:
 
   void cleanup();
   void wait_for_startup_i() const;
+
+  void on_data_available(InternalDataReader_rch reader);
 
   typedef ACE_SYNCH_MUTEX LockType;
   typedef ACE_Guard<LockType> GuardType;
@@ -116,6 +123,9 @@ private:
   // thread status reporting
   String name_;
   ThreadStatusManager* thread_status_manager_;
+  Timers::TimerId thread_status_timer_;
+  RcHandle<RcEventHandler> tsm_updater_handler_;
+  TimeDuration thread_status_period_;
 };
 
 } // namespace DCPS

@@ -5,7 +5,6 @@
 #include "GuidAddrSet.h"
 #include "GuidPartitionTable.h"
 #include "HandlerStatisticsReporter.h"
-#include "ParticipantStatisticsReporter.h"
 #include "RelayPartitionTable.h"
 #include "RelayStatisticsReporter.h"
 
@@ -33,6 +32,7 @@ public:
 
   Port port() const { return port_; }
 
+  ACE_HANDLE get_handle() const override { return socket_.get_handle(); }
 protected:
   RelayHandler(const Config& config,
                const std::string& name,
@@ -48,8 +48,6 @@ protected:
                        const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                        const OpenDDS::DCPS::MonotonicTimePoint& now,
                        MessageType type);
-
-  ACE_HANDLE get_handle() const override { return socket_.get_handle(); }
 
   virtual CORBA::ULong process_message(const ACE_INET_Addr& remote,
                                        const OpenDDS::DCPS::MonotonicTimePoint& now,
@@ -118,7 +116,6 @@ public:
   }
 
   void venqueue_message(const ACE_INET_Addr& addr,
-                        ParticipantStatisticsReporter& stats_reporter,
                         const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                         const OpenDDS::DCPS::MonotonicTimePoint& now,
                         MessageType type);
@@ -145,14 +142,12 @@ protected:
                                const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                MessageType& type) override;
 
-  ParticipantStatisticsReporter& record_activity(GuidAddrSet::Proxy& proxy,
-                                                 const AddrPort& remote_address,
-                                                 const OpenDDS::DCPS::MonotonicTimePoint& now,
-                                                 const OpenDDS::DCPS::GUID_t& src_guid,
-                                                 MessageType msg_type,
-                                                 const size_t& msg_len,
-                                                 bool from_application_participant,
-                                                 bool* allow_stun_responses = 0);
+void record_activity(GuidAddrSet::Proxy& proxy,
+                     const AddrPort& remote_address,
+                     const OpenDDS::DCPS::MonotonicTimePoint& now,
+                     const OpenDDS::DCPS::GUID_t& src_guid,
+                     bool from_application_participant,
+                     bool* allow_stun_responses = 0);
 
   CORBA::ULong send(GuidAddrSet::Proxy& proxy,
                     const OpenDDS::DCPS::GUID_t& src_guid,
@@ -301,6 +296,15 @@ public:
               const DDS::Security::CryptoTransform_var& crypto,
               HandlerStatisticsReporter& stats_reporter);
 };
+
+inline int handle_to_int(ACE_HANDLE handle)
+{
+#ifdef ACE_WIN32
+  return static_cast<int>(reinterpret_cast<intptr_t>(handle));
+#else
+  return handle;
+#endif
+}
 
 }
 
