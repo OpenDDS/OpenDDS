@@ -3298,6 +3298,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       snris_insert(acked_sn == max_seqnum ? leading_readers_ : lagging_readers_, reader);
       previous_acked_sn = acked_sn;
       check_leader_lagger();
+      fallback_.set(initial_fallback_);
       heartbeat_->schedule(fallback_.get());
 
       if (reader->durable_) {
@@ -3858,6 +3859,7 @@ RtpsUdpDataLink::RtpsWriter::make_leader_lagger(const GUID_t& reader_id,
             lagging_readers_[previous_max_sn] = leading_pos->second;
           }
           leading_readers_.erase(leading_pos);
+          fallback_.set(initial_fallback_);
           heartbeat_->schedule(fallback_.get());
         }
       }
@@ -3881,6 +3883,7 @@ RtpsUdpDataLink::RtpsWriter::make_leader_lagger(const GUID_t& reader_id,
       if (acked_sn == previous_max_sn && previous_max_sn != max_sn_) {
         snris_erase(leading_readers_, acked_sn, reader);
         snris_insert(lagging_readers_, reader);
+        fallback_.set(initial_fallback_);
         heartbeat_->schedule(fallback_.get());
       }
     }
@@ -3909,6 +3912,7 @@ RtpsUdpDataLink::RtpsWriter::make_lagger_leader(const ReaderInfo_rch& reader,
   snris_erase(previous_acked_sn == previous_max_sn ? leading_readers_ : lagging_readers_, previous_acked_sn, reader);
   snris_insert(acked_sn == max_sn ? leading_readers_ : lagging_readers_, reader);
   if (acked_sn != max_sn) {
+    fallback_.set(initial_fallback_);
     heartbeat_->schedule(fallback_.get());
   }
 }
