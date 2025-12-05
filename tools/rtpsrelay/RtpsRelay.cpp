@@ -665,7 +665,7 @@ int run(int argc, ACE_TCHAR* argv[])
   ACE_Reactor reactor_(new ACE_Select_Reactor, true);
   const auto reactor = &reactor_;
   GuidAddrSet guid_addr_set(config, rtps_discovery, relay_participant_status_reporter, relay_statistics_reporter, *relay_thread_monitor, reactor);
-  GuidPartitionTable guid_partition_table(config, spdp_horizontal_addr, relay_partitions_writer, spdp_replay_writer);
+  GuidPartitionTable guid_partition_table(config, spdp_horizontal_addr, guid_addr_set, relay_partitions_writer, spdp_replay_writer, reactor);
   RelayPartitionTable relay_partition_table;
   relay_statistics_reporter.report();
 
