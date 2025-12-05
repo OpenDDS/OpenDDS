@@ -19,7 +19,7 @@ void RelayConfigControlListener::on_data_available(DDS::DataReader_ptr reader)
   RelayConfig control;
   DDS::SampleInfo info;
   while (control_reader->take_next_sample(control, info) == DDS::RETCODE_OK) {
-    if (info.valid_data) {
+    if (info.valid_data && info.instance_state == DDS::ALIVE_INSTANCE_STATE) {
       for (const auto& p : control.config()) {
         TheServiceParticipant->config_store()->set(p.first, p.second);
       }
