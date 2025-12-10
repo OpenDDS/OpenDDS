@@ -1605,7 +1605,7 @@ void Service_Participant::pending_timeout(const TimeDuration& value)
     ACE_GUARD(ACE_Thread_Mutex, guard, cached_config_mutex_);
     pending_timeout_ = value;
   }
-  config_store_->set(COMMON_DCPS_PENDING_TIMEOUT, value, ConfigStoreImpl::Format_IntegerSeconds);
+  config_store_->set(COMMON_DCPS_PENDING_TIMEOUT, value, ConfigStoreImpl::Format_FractionalSeconds);
 }
 
 MonotonicTimePoint
@@ -2393,7 +2393,7 @@ Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_
         service_participant_.pending_timeout_ =
           service_participant_.config_store_->get(COMMON_DCPS_PENDING_TIMEOUT,
                                                   COMMON_DCPS_PENDING_TIMEOUT_default,
-                                                  ConfigStoreImpl::Format_IntegerSeconds);
+                                                  ConfigStoreImpl::Format_FractionalSeconds);
       } else if (p.key() == COMMON_DCPS_DEFAULT_DISCOVERY) {
         ACE_GUARD(ACE_Thread_Mutex, guard, service_participant_.cached_config_mutex_);
         service_participant_.default_discovery_ =
