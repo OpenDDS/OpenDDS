@@ -33,7 +33,7 @@ namespace DCPS {
 TransportImpl::TransportImpl(TransportInst_rch config,
                              DDS::DomainId_t domain)
   : config_(config)
-  , event_dispatcher_(make_rch<ServiceEventDispatcher>(1))
+  , event_dispatcher_(make_rch<ServiceEventDispatcher>(1u))
   , is_shut_down_(false)
   , domain_(domain)
 {
@@ -101,11 +101,12 @@ TransportImpl::add_pending_connection(const TransportClient_rch& client, DataLin
 void
 TransportImpl::create_reactor_task(bool useAsyncSend, const OPENDDS_STRING& name)
 {
-  if (is_shut_down_ || this->reactor_task_.in()) {
+  if (is_shut_down_ || reactor_task_) {
     return;
   }
 
-  this->reactor_task_= make_rch<ReactorTask>(useAsyncSend);
+  reactor_task_ = make_rch<ReactorTask>(useAsyncSend);
+  reactor_task_->job_queue(TheServiceParticipant->job_queue());
 
   if (reactor_task_->open_reactor_task(&TheServiceParticipant->get_thread_status_manager(), name)) {
     throw Transport::MiscProblem(); // error already logged by TRT::open()
@@ -152,6 +153,25 @@ TransportImpl::dump_to_str()
 {
   TransportInst_rch cfg = config_.lock();
   return cfg ? cfg->dump_to_str(domain_) : OPENDDS_STRING();
+}
+
+StatisticSeq TransportImpl::stats_template()
+{
+  static const DDS::UInt32 num_local_stats = 2;
+  StatisticSeq stats(num_local_stats);
+  stats.length(num_local_stats);
+  stats[0].name = "TransportImplPendingConnections";
+  stats[1].name = "TransportImplReactorTaskCmdQueue";
+  return stats;
+}
+
+void TransportImpl::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
+{
+  {
+    GuardType guard(pending_connections_lock_);
+    stats[idx++].value = pending_connections_.size();
+  }
+  stats[idx++].value = reactor_task_ ? reactor_task_->command_queue_size() : 0;
 }
 
 }

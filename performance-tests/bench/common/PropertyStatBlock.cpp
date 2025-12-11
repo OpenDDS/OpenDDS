@@ -338,7 +338,7 @@ void PropertyStatBlock::finalize()
 
   if (count) {
     // calculate median
-    std::sort(median_buffer_.begin(), median_buffer_.begin() + count);
+    std::sort(median_buffer_.begin(), median_buffer_.begin() + static_cast<ptrdiff_t>(count));
     if (count % 2 == 0) {
       median_result = (median_buffer_[(count / 2) - 1] + median_buffer_[count / 2]) / 2.0;
     } else {
@@ -349,7 +349,7 @@ void PropertyStatBlock::finalize()
     for (size_t i = 0; i < count; ++i) {
       mad_buffer[i] = fabs(median_buffer_[i] - median_result);
     }
-    std::sort(mad_buffer.begin(), mad_buffer.begin() + count);
+    std::sort(mad_buffer.begin(), mad_buffer.begin() + static_cast<ptrdiff_t>(count));
     if (count % 2 == 0) {
       mad_result = (mad_buffer[(count / 2) - 1] + mad_buffer[count / 2]) / 2.0;
     } else {

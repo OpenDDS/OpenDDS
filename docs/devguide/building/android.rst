@@ -101,15 +101,15 @@ In addition to OpenDDS and the Android NDK you will also need the following soft
   - Follow all the install/update steps from the msys2.org website.
 
 - `Strawberry Perl <https://strawberryperl.com/>`__
-- OpenDDS Host tools build using Visual Studio
+- OpenDDS Host tools (built using Visual Studio)
 
   - In a separate copy of OpenDDS, build OpenDDS as described in :doc:`/devguide/building/index` using Visual Studio, except use the ``--host-tools-only`` configure script option.
     This OpenDDS (and the ACE+TAO it uses) must be the same version as the one used to build for Android.
+  - The host tools depend on the Visual C++ compiler ``cl.exe`` as their default preprocessor, make sure it's available on the ``PATH`` for the Android build.
   - If you want to use Java in the Android build, also pass the ``--java`` configure script option here as described in :ref:`android-java`.
-    You will also need to pass it to the configure script build for
-    Android when that comes.
+    You will also need to pass it to the configure script when configuring the build for Android.
 
-Finally, all paths being passed to GNU Make must not contain spaces because ACE's gnuace make scripts don't handle those paths correctly on Windows.
+Finally, all paths being passed to GNU Make must not contain spaces because ACE's gnuace makefiles don't handle those paths correctly on Windows.
 This means the NDK, toolchain, MSYS2, JDK, OpenDDS source, OpenDDS host tools, etc. must not contain any spaces in their paths.
 
 ****************************
@@ -156,12 +156,12 @@ To build OpenDDS with with a Android standalone toolchain, a standalone toolchai
 
 .. tab:: Windows
 
-  Android NDK includes Python in ``prebuilt\windows-x86_64\bin`` for 64-bit Windows NDKs.
+  Android NDK includes Python in ``toolchains\llvm\prebuilt\windows-x86_64\python3`` for 64-bit Windows NDKs.
   For the example above, assuming ``%NDK%`` is the location of the NDK and ``%TOOLCHAIN%`` is the desired location of the toolchain, run this command instead:
 
   .. code-block:: batch
 
-    %NDK%\prebuilt\windows-x86_64\bin\python %NDK%\build\tools\make_standalone_toolchain.py --arch %ARCH_ARG% --api %MIN_API% --install-dir %TOOLCHAIN%
+    %NDK%\toolchains\llvm\prebuilt\windows-x86_64\python3\python %NDK%\build\tools\make_standalone_toolchain.py --arch %ARCH_ARG% --api %MIN_API% --install-dir %TOOLCHAIN%
 
 The ``--arch`` argument for ``make_standalone_toolchain.py`` and ``--macros=android_abi=<ARCH>`` argument for the configure script must match according to :ref:`this table <android_abi>`.
 
@@ -180,16 +180,18 @@ To configure and build OpenDDS after this, run:
 
   .. code-block:: batch
 
+    set PATH=C:\msys64\usr\bin;%PATH%;%TOOLCHAIN%\bin
     configure --target=android --macros=android_abi=%ABI% --host-tools=%HOST_DDS%
-    set PATH=%PATH%;%TOOLCHAIN%\bin;C:\msys64\usr\bin
-    make
+    make XERCESLIB=xerces-c-3.2
     REM Pass -j/--jobs with an appropriate value or this'll take a while...
 
   .. note::
 
     - Pass ``--host-tools`` with the location of the OpenDDS host tools that were built using Visual Studio must be passed to ``configure``.
 
-    - You will need MSYS2 utilities in your ``%PATH%``.
+    - In addition to the ``PATH`` directories shown above, the Visual C++ compiler ``cl.exe`` must be on the PATH since it will be used as the preprocessor by default.
+
+    - You will need MSYS2 utilities in your ``%PATH%``.  Since Windows has its own ``bash.exe``, these utilities must come before the system PATH entries.
 
     - Run these commands in a new Visual Studio command prompt that is different from where you configured the host tools.
 
@@ -222,7 +224,7 @@ android_abi
 
 The architecture to cross-target.
 When using ACE6/TAO2 it is optional as it defaults to ``armeabi-v7a``.
-When using ACE7/ACE3 it is required.
+When using ACE8/TAO4 it is required.
 
 The valid options are:
 
@@ -350,10 +352,10 @@ This can be accomplished by either disabling the generation of the shared librar
 
   1. Start the MSYS2 MSYS development shell using the start menu shortcut or ``C:\msys64\msys2_shell.cmd -msys``
   2. ``cd /c/your/location/of/OpenSSL-source``
-  3. ``export ANDROID_NDK_HOME=/c/your/location/of/ndk-standalone-toolchain``
-  4. ``PATH+=:$ANDROID_NDK_HOME/bin``
+  3. ``export ANDROID_NDK_ROOT=/c/your/location/of/ndk-standalone-toolchain``
+  4. ``PATH+=:$ANDROID_NDK_ROOT/bin``
   5. ``./Configure --prefix=$SSL_ROOT android-arm no-tests no-shared`` (or replace ``-arm`` with a different platform like ``-arm64``, see OpenSSL's ``NOTES.ANDROID`` file)
-  6. ``make install_sw``
+  6. ``make AR=llvm-ar install_sw``
 
 Xerces
 ------
@@ -362,11 +364,11 @@ Xerces C++ is also required for OpenDDS Security.
 It does not support Android specifically, but it comes with a CMake build script that can be paired with the Android NDK's CMake toolchain.
 
 Xerces requires a supported "transcoder" library.
-For API levels greater than or equal to 28 one of these, GNU libiconv, is included with Android.
-Before 28 any of the transcoders supported by Xerces would work theoretically but GNU libiconv was the one tested.
-If GNU libiconv is used, build it as an archive library (``--disable-shared``) so that the users of Xerces (ACE and OpenDDS) don't need to be aware of it as an additional runtime dependency.
+For API levels greater than or equal to 28, a transcoder -- GNU libiconv -- is included with Android.
+Before 28 any of the transcoders supported by Xerces would work but GNU libiconv was the one tested.
+If GNU libiconv is used, build it as an archive library (``--disable-shared``) so that the users of Xerces (ACE and OpenDDS) don't need it as an additional runtime dependency.
 
-Download `GNU libiconv <https://ftp.gnu.org/pub/gnu/libiconv>`__ version 1.16 source code and extract the archive.
+Download `GNU libiconv <https://ftp.gnu.org/pub/gnu/libiconv/>`__ version 1.16 source code and extract the archive.
 
 Cross-compiling on Windows
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -387,13 +389,13 @@ GNU libiconv
 Xerces
 """"""
 
-A modified version of Xerces C++ hosted on `OpenDDS GitHub organization <https://github.com/OpenDDS/xerces-c/tree/android>`__ has support for an external GNU libiconv.
-Download this version using git (``android`` branch) or the via `ZIP archive <https://github.com/OpenDDS/xerces-c/archive/android.zip>`__.
+A modified version of Xerces C++ hosted on `OpenDDS GitHub organization <https://github.com/OpenDDS/xerces-c/tree/xerces-3.2-android>`__ has support for an external GNU libiconv.
+Download this version using git (``xerces-3.2-android`` branch) or the via `ZIP archive <https://github.com/OpenDDS/xerces-c/archive/xerces-3.2-android.zip>`__.
 
-Start the Microsoft Visual Studio command prompt for C++ development (for example "x64 Native Tools Command Prompt for VS 2019").
+Start the Microsoft Visual Studio command prompt for C++ development (for example "x64 Native Tools Command Prompt for VS 2022").
 
 ``cmake`` and ``ninja`` should be on the PATH.
-They can be installed as on option component in the Visual Studio installer (see "C++ CMake tools for Windows"), or downloaded separately.
+They can be installed as an optional component in the Visual Studio installer (see "C++ CMake tools for Windows"), or downloaded separately.
 
 Set environment variables based on the NDK location and Android configuration selected:
 

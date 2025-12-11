@@ -441,18 +441,15 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
       erase_member(id);
       DDS::DynamicData_var opt_val;
       if (backing_store_ && backing_store_->get_complex_value(opt_val, id) == DDS::RETCODE_OK) {
+#if OPENDDS_CONFIG_IDL_MAP
         // The backing store is read-only, so to remove the optional member we need to
         // invalidate the backing store. Save all the members that are in the backing store
         // but not in the container.
-        DDS::DynamicTypeMembersById_var members_var;
-        if (type_->get_all_members(members_var) != DDS::RETCODE_OK) {
+        DDS::DynamicTypeMembersById members;
+        if (type_->get_all_members(members) != DDS::RETCODE_OK) {
           return DDS::RETCODE_ERROR;
         }
-        DynamicTypeMembersByIdImpl* members = dynamic_cast<DynamicTypeMembersByIdImpl*>(members_var.in());
-        if (!members) {
-          return DDS::RETCODE_ERROR;
-        }
-        for (DynamicTypeMembersByIdImpl::const_iterator it = members->begin(); it != members->end(); ++it) {
+        for (DDS::DynamicTypeMembersById::const_iterator it = members.begin(); it != members.end(); ++it) {
           const DDS::MemberId mid = it->first;
           if (mid == id) {
             continue;
@@ -477,6 +474,9 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
           }
         }
         set_backing_store(0);
+#else
+        return DDS::RETCODE_UNSUPPORTED;
+#endif
       }
       break;
     }
@@ -795,16 +795,13 @@ bool DynamicDataImpl::is_default_member_selected(CORBA::Long disc_val, DDS::Memb
     return false;
   }
 
-  DDS::DynamicTypeMembersById_var members_var;
-  if (type_->get_all_members(members_var) != DDS::RETCODE_OK) {
-    return false;
-  }
-  DynamicTypeMembersByIdImpl* members = dynamic_cast<DynamicTypeMembersByIdImpl*>(members_var.in());
-  if (!members) {
+#if OPENDDS_CONFIG_IDL_MAP
+  DDS::DynamicTypeMembersById members;
+  if (type_->get_all_members(members) != DDS::RETCODE_OK) {
     return false;
   }
 
-  for (DynamicTypeMembersByIdImpl::const_iterator it = members->begin(); it != members->end(); ++it) {
+  for (DDS::DynamicTypeMembersById::const_iterator it = members.begin(); it != members.end(); ++it) {
     if (it->first == default_id) continue;
 
     DDS::MemberDescriptor_var md;
@@ -819,6 +816,11 @@ bool DynamicDataImpl::is_default_member_selected(CORBA::Long disc_val, DDS::Memb
     }
   }
   return true;
+#else
+  ACE_UNUSED_ARG(disc_val);
+  ACE_UNUSED_ARG(default_id);
+  return false;
+#endif
 }
 
 DynamicDataImpl::SingleValue::SingleValue()
@@ -910,13 +912,13 @@ DynamicDataImpl::SingleValue::~SingleValue()
   case TK_BOOLEAN:
     SINGLE_VALUE_DESTRUCT(from_boolean);
   case TK_STRING8:
-    CORBA::string_free((char*)str_);
+    CORBA::string_free(str_);
     break;
 #ifdef DDS_HAS_WCHAR
   case TK_CHAR16:
     SINGLE_VALUE_DESTRUCT(from_wchar);
   case TK_STRING16:
-    CORBA::wstring_free((CORBA::WChar*)wstr_);
+    CORBA::wstring_free(wstr_);
     break;
 #endif
   }
@@ -959,7 +961,7 @@ template<> const ACE_OutputCDR::from_boolean& DynamicDataImpl::SingleValue::get(
   return *static_cast<ACE_OutputCDR::from_boolean*>(active_);
 }
 
-template<> const char* const& DynamicDataImpl::SingleValue::get() const { return str_; }
+template<> char* const& DynamicDataImpl::SingleValue::get() const { return str_; }
 
 #ifdef DDS_HAS_WCHAR
 template<> const ACE_OutputCDR::from_wchar& DynamicDataImpl::SingleValue::get() const
@@ -967,7 +969,7 @@ template<> const ACE_OutputCDR::from_wchar& DynamicDataImpl::SingleValue::get() 
   return *static_cast<ACE_OutputCDR::from_wchar*>(active_);
 }
 
-template<> const CORBA::WChar* const& DynamicDataImpl::SingleValue::get() const { return wstr_; }
+template<> CORBA::WChar* const& DynamicDataImpl::SingleValue::get() const { return wstr_; }
 #endif
 
 char* DynamicDataImpl::SingleValue::get_string() const { return CORBA::string_dup(str_); }
@@ -3396,7 +3398,7 @@ bool DynamicDataImpl::move_single_to_complex_i(const const_single_iterator& it,
     break;
   }
   case TK_STRING8: {
-    const char* str = it->second.get<const char*>();
+    const char* str = it->second.get<char*>();
     const size_t len = ACE_OS::strlen(str);
     for (CORBA::ULong i = 0; i < len; ++i) {
       data->insert_single(i, ACE_OutputCDR::from_char(str[i]));
@@ -3405,7 +3407,7 @@ bool DynamicDataImpl::move_single_to_complex_i(const const_single_iterator& it,
   }
 #ifdef DDS_HAS_WCHAR
   case TK_STRING16: {
-    const CORBA::WChar* wstr = it->second.get<const CORBA::WChar*>();
+    const CORBA::WChar* wstr = it->second.get<CORBA::WChar*>();
     const size_t len = ACE_OS::strlen(wstr);
     for (CORBA::ULong i = 0; i < len; ++i) {
       data->insert_single(i, ACE_OutputCDR::from_wchar(wstr[i]));
@@ -5137,7 +5139,7 @@ bool serialized_size(const Encoding& encoding, size_t& size, const KeyOnly<DDS::
 
 // Serialize header for a basic member.
 // The return code @rc must be either NO_DATA or OK.
-bool serialize_dynamic_basic_member_header(Serializer& ser, void* value, DDS::ReturnCode_t rc,
+bool serialize_dynamic_basic_member_header(Serializer& ser, const void* value, DDS::ReturnCode_t rc,
   DDS::MemberId id, DDS::TypeKind tk, DDS::ExtensibilityKind extensibility,
   CORBA::Boolean optional, CORBA::Boolean must_understand)
 {
@@ -5159,12 +5161,12 @@ bool serialize_dynamic_basic_member_header(Serializer& ser, void* value, DDS::Re
         return false;
       }
     } else if (tk == TK_STRING8) {
-      const char* str = (const char*)value;
+      const char* str = static_cast<const char*>(value);
       serialized_size_string_value(encoding, member_size, str);
     }
 #ifdef DDS_HAS_WCHAR
     else if (tk == TK_STRING16) {
-      const CORBA::WChar* wstr = (const CORBA::WChar*)value;
+      const CORBA::WChar* wstr = static_cast<const CORBA::WChar*>(value);
       serialized_size_wstring_value(encoding, member_size, wstr);
     }
 #endif
@@ -5332,7 +5334,7 @@ bool serialize_dynamic_member(Serializer& ser, DDS::DynamicData_ptr data,
     CORBA::String_var val;
     rc = data->get_string_value(val, id);
     if (!XTypes::check_rc_from_get(rc, id, treat_member_as, "serialize_dynamic_member") ||
-        !serialize_dynamic_basic_member_header(ser, (void*)val.in(), rc, id, TK_STRING8,
+        !serialize_dynamic_basic_member_header(ser, val.in(), rc, id, TK_STRING8,
                                                extensibility, optional, must_understand)) {
       return false;
     }
@@ -5346,7 +5348,7 @@ bool serialize_dynamic_member(Serializer& ser, DDS::DynamicData_ptr data,
     CORBA::WString_var val;
     rc = data->get_wstring_value(val, id);
     if (!XTypes::check_rc_from_get(rc, id, treat_member_as, "serialize_dynamic_member") ||
-        !serialize_dynamic_basic_member_header(ser, (void*)val.in(), rc, id, TK_STRING16,
+        !serialize_dynamic_basic_member_header(ser, val.in(), rc, id, TK_STRING16,
                                                extensibility, optional, must_understand)) {
       return false;
     }

@@ -16,8 +16,8 @@ _opendds_group(OpenDDS DEFAULT_REQUIRED OpenDDS::Dcps OpenDDS::opendds_idl)
 _opendds_group_lib(Dcps
   DEPENDS
     ACE::ACE
-    TAO::TAO
     # TODO: These are omitted with safety profile
+    TAO::TAO
     TAO::Valuetype
     TAO::PortableServer
     TAO::BiDirGIOP
@@ -27,6 +27,7 @@ _opendds_group_lib(Federator DEPENDS OpenDDS::InfoRepoLib)
 _opendds_group_lib(InfoRepoDiscovery
   DEPENDS
     OpenDDS::Dcps
+    OpenDDS::Tcp
     TAO::PortableServer
     TAO::BiDirGIOP
     TAO::PI
@@ -62,7 +63,7 @@ _opendds_group_lib(QOS_XML_XSC_Handler DEPENDS OpenDDS::Dcps ACE::XML_Utils)
 _opendds_group_lib(RtpsRelayLib DEPENDS OpenDDS::Dcps)
 
 _opendds_group_exe(opendds_idl HOST_TOOL)
-foreach(_exe DCPSInfoRepo RtpsRelay dcpsinfo_dump inspect repoctl)
+foreach(_exe DCPSInfoRepo RtpsRelay RtpsRelayControl dcpsinfo_dump inspect repoctl)
   _opendds_group_exe("${_exe}")
 endforeach()
 
@@ -80,9 +81,13 @@ endif()
 set(OPENDDS_DCPS_INCLUDE_DIRS ${OPENDDS_INCLUDE_DIRS})
 set(OPENDDS_DCPS_COMPILE_DEFINITIONS)
 if(OPENDDS_RAPIDJSON)
+  if(OPENDDS_RAPIDJSON_USE_PREFIX_PATH)
+    set(OPENDDS_RAPIDJSON "${_OPENDDS_ROOT}")
+  endif()
   list(APPEND OPENDDS_DCPS_INCLUDE_DIRS "${OPENDDS_RAPIDJSON}/include")
   list(APPEND OPENDDS_DCPS_COMPILE_DEFINITIONS OPENDDS_RAPIDJSON)
 endif()
+list(REMOVE_DUPLICATES OPENDDS_DCPS_INCLUDE_DIRS)
 
 if(NOT OPENDDS_BUILT_IN_TOPICS)
   list(APPEND OPENDDS_DCPS_COMPILE_DEFINITIONS DDS_HAS_MINIMUM_BIT)

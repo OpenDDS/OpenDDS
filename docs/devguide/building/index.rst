@@ -604,7 +604,7 @@ These are all the variables that are exclusive to building OpenDDS with CMake:
 
 .. cmake:var:: OPENDDS_ACE_TAO_KIND
 
-  The default is ``ace7tao3`` for :ref:`ACE 7/TAO 3 <ace7tao3>`.
+  The default is ``ace8tao4`` for :ref:`ACE 8/TAO 4 <ace8tao4>`.
   See :ref:`here <deps-ace-tao>` for other versions of ACE/TAO.
 
   .. versionadded:: 3.27
@@ -675,7 +675,6 @@ These are all the variables that are exclusive to building OpenDDS with CMake:
   The default for this is ``TRUE``.
 
 .. cmake:var:: OPENDDS_BOOTTIME_TIMERS
-  :no-contents-entry:
 
   .. versionadded:: 3.28
 
@@ -690,6 +689,21 @@ These are all the variables that are exclusive to building OpenDDS with CMake:
   If set to ``ERROR``, enables additional compiler warnings which are treated as errors when compiling OpenDDS.
 
   .. versionadded:: 3.28
+
+.. cmake:var:: OPENDDS_STD_OPTIONAL
+
+  If set to ``ON``, OpenDDS uses C++17's ``std::optional`` template in its API.
+  If set to ``OFF``, OpenDDS emulates ``std::optional`` with its own data type.
+  Default is ``ON`` when the compiler supports C++17 or higher.
+
+  .. versionadded:: 3.32
+
+.. cmake:var:: OPENDDS_INSTALL_RAPIDJSON
+
+  Install the headers of :cmake:var:`OPENDDS_RAPIDJSON` with OpenDDS.
+  Default is ``TRUE`` if OpenDDS uses its own RapidJSON, else ``FALSE`` if a ``OPENDDS_RAPIDJSON`` path was passed by the user.
+
+  .. versionadded:: 3.32
 
 .. _cmake-building-speed:
 

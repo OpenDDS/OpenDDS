@@ -1,5 +1,5 @@
 # CMakeLists for OpenDDS_Dcps
-cmake_minimum_required(VERSION 3.23...3.27)
+cmake_minimum_required(VERSION 3.23...4.0)
 project(opendds_dcps CXX)
 
 set(dcps_lib_deps
@@ -363,6 +363,7 @@ target_sources(OpenDDS_Dcps
     DCPS/SporadicTask.h
     DCPS/StaticDiscovery.h
     DCPS/StaticIncludes.h
+    DCPS/Statistics.h
     DCPS/Stats_T.h
     DCPS/StatusConditionImpl.h
     DCPS/SubscriberImpl.h
@@ -565,7 +566,7 @@ target_sources(OpenDDS_Dcps
     OpenDDSConfigWrapper.idl
 )
 target_compile_definitions(OpenDDS_Dcps PUBLIC ${OPENDDS_DCPS_COMPILE_DEFINITIONS})
-_opendds_library(OpenDDS_Dcps MSVC_BIGOBJ)
+_opendds_library(OpenDDS_Dcps BIGOBJ)
 target_include_directories(OpenDDS_Dcps
   PUBLIC
     "$<BUILD_INTERFACE:${OPENDDS_SOURCE_DIR}>"
@@ -615,26 +616,27 @@ opendds_target_sources(OpenDDS_Dcps
   PUBLIC
     DdsDcps.idl
     DdsDcpsConditionSeq.idl # TODO
-    DdsDcpsCore.idl # TODO
     DdsDcpsDataReaderSeq.idl # TODO
     DdsDcpsDomain.idl
-    DdsDcpsGuid.idl # TODO
-    DdsDcpsInfoUtils.idl # TODO
-    DdsDcpsInfrastructure.idl
     DdsDcpsPublication.idl
     DdsDcpsSubscription.idl
     DdsDcpsSubscriptionExt.idl
     DdsDcpsTopic.idl
     DdsDcpsTypeSupportExt.idl
-    DdsSecurityCore.idl # TODO
-    DdsSecurityParams.idl # TODO
-    OpenddsDcpsExt.idl # TODO
   ${opendds_target_sources_args}
+  SKIP_OPENDDS_IDL
 )
 
 opendds_target_sources(OpenDDS_Dcps
   PUBLIC
+    DdsDcpsCore.idl # TODO
+    DdsDcpsGuid.idl # TODO
+    DdsDcpsInfrastructure.idl
+    DdsDcpsInfoUtils.idl # TODO
     DdsDynamicDataSeq.idl
+    DdsSecurityCore.idl # TODO
+    DdsSecurityParams.idl # TODO
+    OpenddsDcpsExt.idl # TODO
   ${opendds_target_sources_args}
 )
 
@@ -646,6 +648,7 @@ opendds_target_sources(OpenDDS_Dcps
     DdsDynamicTypeSupport.idl
   TAO_IDL_OPTIONS -Scdr -Sa
   ${opendds_target_sources_args}
+  SKIP_OPENDDS_IDL
 )
 
 opendds_install_interface_files(OpenDDS_Dcps INCLUDE_BASE "${OPENDDS_SOURCE_DIR}")

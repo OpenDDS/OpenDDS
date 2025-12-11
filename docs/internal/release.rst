@@ -224,11 +224,11 @@ Before Running the Release Script
 
   - The following `Perl CPAN modules <http://www.cpan.org/modules/INSTALL.html>`__ are required (`Perl core modules <https://perldoc.perl.org/modules>`__ should not be listed here):
 
-    - `Pithub <https://metacpan.org/pod/Pithub>`__
-    - `Net::SFTP::Foreign <https://metacpan.org/pod/Net::SFTP::Foreign>`__
-    - `Time::Piece <https://metacpan.org/pod/Time::Piece>`__
-    - `LWP::UserAgent <https://metacpan.org/pod/LWP::UserAgent>`__
-    - `LWP::Protocol::https <https://metacpan.org/pod/LWP::Protocol::https>`__
+    - ``Pithub``
+    - ``Net::SFTP::Foreign``
+    - ``Time::Piece``
+    - ``LWP::UserAgent``
+    - ``LWP::Protocol::https``
 
     To install them run:
 

@@ -1543,7 +1543,8 @@ namespace {
   unsigned char
   fromhex(const OPENDDS_STRING& x, size_t idx)
   {
-    return (hextobyte(x[idx * 2]) << 4) | (hextobyte(x[idx * 2 + 1]));
+    return (hextobyte(static_cast<unsigned char>(x[idx * 2])) << 4)
+      | hextobyte(static_cast<unsigned char>(x[idx * 2 + 1]));
   }
 }
 
@@ -1571,7 +1572,7 @@ EndpointRegistry::build_id(DDS::DomainId_t domain,
   // id.guidPrefix[3] = domain[1]
   // id.guidPrefix[4] = domain[2]
   // id.guidPrefix[5] = domain[3]
-  DDS::DomainId_t netdom = ACE_HTONL(domain);
+  DDS::DomainId_t netdom = static_cast<DDS::DomainId_t>(ACE_HTONL(static_cast<DDS::UInt32>(domain)));
   ACE_OS::memcpy(&id.guidPrefix[2], &netdom, sizeof(DDS::DomainId_t));
   // id.guidPrefix[6] = participant[0]
   // id.guidPrefix[7] = participant[1]

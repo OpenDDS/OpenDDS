@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23...3.27)
+cmake_minimum_required(VERSION 3.23...4.0)
 project(opendds_qos_xml_xsc_handler CXX)
 
 set(deps OpenDDS::Dcps ACE::XML_Utils)
@@ -47,5 +47,7 @@ target_sources(OpenDDS_QOS_XML_XSC_Handler
     XML_String_Intf.h
     dds_qos.hpp
 )
-_opendds_library(OpenDDS_QOS_XML_XSC_Handler EXPORT_SYMBOLS_NAME OpenDDS_XML_QOS_Handler)
+_opendds_library(OpenDDS_QOS_XML_XSC_Handler
+  EXPORT_MACRO_PREFIX OpenDDS_XML_QOS_Handler
+)
 target_link_libraries(OpenDDS_QOS_XML_XSC_Handler PUBLIC ${deps})

@@ -1416,7 +1416,7 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     If :ref:`dds_security` is enabled, the :ref:`Participant's USER_DATA QoS <quality_of_service--user-data>` is omitted from unsecured discovery messages.
 
   .. prop:: UseXTypes=no|minimal|complete
-    :default: :val:`no`
+    :default: :val:`minimal`
 
     Enables discovery extensions from the XTypes specification.
     Participants exchange topic type information in endpoint announcements and extended type information using the Type Lookup Service.
@@ -1502,6 +1502,11 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     If ``<i>`` is 0 (the default), the submessage is not added.
     Otherwise this submessage's content is the 4-byte unsigned integer ``<i>``.
     User tags from received SPDP messages are available to the application using the ParticipantLocation built-in topic.
+
+  .. prop:: IgnoredSpdpUserTags=<t1>[,<t2>]...
+    :default: Empty list
+
+    Incoming :ref:`SPDP <spdp>` messages with a UserTag matching any of these values will be ignored.
 
 .. _config-ports-used-by-rtps-disc:
 

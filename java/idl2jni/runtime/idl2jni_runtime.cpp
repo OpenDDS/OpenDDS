@@ -55,13 +55,12 @@ JniArgv::JniArgv(JNIEnv *jni, jobject string_seq_holder)
 {
   jobjectArray ss_j = deholderize<jobjectArray> (jni, string_seq_holder,
                                                  "[Ljava/lang/String;");
-  jsize len = jni->GetArrayLength(ss_j);
+  const size_t len = static_cast<size_t>(jni->GetArrayLength(ss_j));
   argv_.resize(len);
   orb_argv_.resize(len);
 
-  for (jsize i = 0; i < len; ++i) {
-    jstring jstr =
-      static_cast<jstring>(jni->GetObjectArrayElement(ss_j, i));
+  for (size_t i = 0; i < len; ++i) {
+    jstring jstr = static_cast<jstring>(jni->GetObjectArrayElement(ss_j, static_cast<jsize>(i)));
     {
       JStringMgr jsm(jni, jstr);
       argv_[i] = jsm.c_str();
@@ -71,7 +70,7 @@ JniArgv::JniArgv(JNIEnv *jni, jobject string_seq_holder)
   }
 
   jni->DeleteLocalRef(ss_j);
-  argc_ = len;
+  argc_ = static_cast<int>(len);
 }
 
 JniArgv::~JniArgv()
@@ -79,9 +78,9 @@ JniArgv::~JniArgv()
   jobjectArray outArray =
     jni_->NewObjectArray(argc_, jni_->FindClass("java/lang/String"), 0);
 
-  for (jsize i = 0; i < argc_; ++i) {
+  for (size_t i = 0; i < static_cast<size_t>(argc_); ++i) {
     jstring str = jni_->NewStringUTF(orb_argv_[i]);
-    jni_->SetObjectArrayElement(outArray, i, str);
+    jni_->SetObjectArrayElement(outArray, static_cast<jsize>(i), str);
     jni_->DeleteLocalRef(str);
   }
 
@@ -356,7 +355,7 @@ void throw_java_exception(JNIEnv *jni, const CORBA::SystemException &se)
   if (clazz == jni->FindClass ("org/omg/CORBA/" #NAME))                    \
   {                                                                        \
     jfieldID fid_min = jni->GetFieldID(clazz, "minor", "I");               \
-    jint minor = jni->GetIntField(excep, fid_min);                         \
+    CORBA::ULong minor = static_cast<CORBA::ULong>(jni->GetIntField(excep, fid_min)); \
     jfieldID fid_comp = jni->GetFieldID(                                   \
       clazz, "completed", "Lorg/omg/CORBA/CompletionStatus;");             \
     jobject comp_obj = jni->GetObjectField(excep, fid_comp);               \

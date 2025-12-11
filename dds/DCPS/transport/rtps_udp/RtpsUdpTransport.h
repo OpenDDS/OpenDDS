@@ -12,8 +12,10 @@
 
 #include <dds/DCPS/ConnectionRecords.h>
 #include <dds/DCPS/FibonacciSequence.h>
+#include <dds/DCPS/PeriodicTask.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/SporadicTask.h>
+#include <dds/DCPS/Statistics.h>
 
 #include <dds/DCPS/RTPS/ICE/Ice.h>
 #include <dds/DCPS/RTPS/RtpsCoreC.h>
@@ -151,7 +153,7 @@ public:
     if (transport_statistics_.count_messages()) {
       ssize_t bytes = 0;
       for (int i = 0; i < num_blocks; ++i) {
-        bytes += iov[i].iov_len;
+        bytes += static_cast<ssize_t>(iov[i].iov_len);
       }
       const InternalMessageCountKey key(remote_address, key_kind, remote_address == rtps_relay_address_);
       transport_statistics_.message_count[key].send_fail(bytes);
@@ -254,8 +256,9 @@ private:
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl, public ConfigListener {
 public:
-  RtpsUdpTransport(const RtpsUdpInst_rch& inst,
-                   DDS::DomainId_t domain);
+  RtpsUdpTransport(const RtpsUdpInst_rch& inst, DDS::DomainId_t domain);
+  ~RtpsUdpTransport();
+
   RtpsUdpInst_rch config() const;
 #if OPENDDS_CONFIG_SECURITY
   DCPS::RcHandle<ICE::Agent> get_ice_agent() const;
@@ -420,6 +423,20 @@ private:
   friend class RtpsUdpReceiveStrategy;
 
   RtpsUdpCore core_;
+
+  StatisticsDataWriter_rch stats_writer_;
+  typedef PmfPeriodicTask<const RtpsUdpTransport> PeriodicTask;
+  RcHandle<PeriodicTask> stats_task_;
+  TimeDuration stats_task_period_;
+  mutable ACE_Thread_Mutex stats_mutex_;
+
+  void setup_stats_task(const TimeDuration& period);
+
+  static StatisticSeq stats_template();
+  const StatisticSeq stats_template_;
+
+  void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
+  void write_stats(const MonotonicTimePoint&) const;
 };
 
 } // namespace DCPS

@@ -260,7 +260,9 @@ namespace XTypes {
 
     TypeObjectHashId()
       : kind(EK_NONE)
-    {}
+    {
+      std::memset(hash, 0, sizeof(hash));
+    }
 
     TypeObjectHashId(const EquivalenceKind& a_kind,
                      const EquivalenceHashWrapper& a_hash)
@@ -399,132 +401,94 @@ namespace XTypes {
     }
   };
 
-  struct PlainSequenceSElemDefn {
+  struct OpenDDS_Dcps_Export PlainSequenceSElemDefn {
     PlainCollectionHeader header;
     SBound bound;
     External<TypeIdentifier> element_identifier;
 
-    PlainSequenceSElemDefn()
-      : bound(INVALID_SBOUND)
-    {}
+    PlainSequenceSElemDefn();
 
     PlainSequenceSElemDefn(const PlainCollectionHeader& a_header,
                            const SBound& a_bound,
-                           const TypeIdentifier& a_element_identifier)
-      : header(a_header)
-      , bound(a_bound)
-      , element_identifier(a_element_identifier)
-    {}
+                           const TypeIdentifier& a_element_identifier);
 
     bool operator<(const PlainSequenceSElemDefn& other) const;
   };
 
-  struct PlainSequenceLElemDefn {
+  struct OpenDDS_Dcps_Export PlainSequenceLElemDefn {
     PlainCollectionHeader header;
     LBound bound;
     External<TypeIdentifier> element_identifier;
 
-    PlainSequenceLElemDefn()
-      : bound(INVALID_LBOUND)
-    {}
+    PlainSequenceLElemDefn();
 
     PlainSequenceLElemDefn(const PlainCollectionHeader& a_header,
                            const LBound& a_bound,
-                           const TypeIdentifier& a_element_identifier)
-      : header(a_header)
-      , bound(a_bound)
-      , element_identifier(a_element_identifier)
-    {}
+                           const TypeIdentifier& a_element_identifier);
 
     bool operator<(const PlainSequenceLElemDefn& other) const;
   };
 
-  struct PlainArraySElemDefn {
+  struct OpenDDS_Dcps_Export PlainArraySElemDefn {
     PlainCollectionHeader header;
     SBoundSeq array_bound_seq;
     External<TypeIdentifier> element_identifier;
 
-    PlainArraySElemDefn() {}
+    PlainArraySElemDefn();
 
     PlainArraySElemDefn(const PlainCollectionHeader& a_header,
                         const SBoundSeq& a_array_bound_seq,
-                        const TypeIdentifier& a_element_identifier)
-      : header(a_header)
-      , array_bound_seq(a_array_bound_seq)
-      , element_identifier(a_element_identifier)
-    {}
+                        const TypeIdentifier& a_element_identifier);
 
     bool operator<(const PlainArraySElemDefn& other) const;
   };
 
-  struct PlainArrayLElemDefn {
+  struct OpenDDS_Dcps_Export PlainArrayLElemDefn {
     PlainCollectionHeader header;
     LBoundSeq array_bound_seq;
     External<TypeIdentifier> element_identifier;
 
-    PlainArrayLElemDefn() {}
+    PlainArrayLElemDefn();
 
     PlainArrayLElemDefn(const PlainCollectionHeader& a_header,
                         const LBoundSeq& a_array_bound_seq,
-                        const TypeIdentifier& a_element_identifier)
-      : header(a_header)
-      , array_bound_seq(a_array_bound_seq)
-      , element_identifier(a_element_identifier)
-    {}
+                        const TypeIdentifier& a_element_identifier);
 
     bool operator<(const PlainArrayLElemDefn& other) const;
   };
 
-  struct PlainMapSTypeDefn {
+  struct OpenDDS_Dcps_Export PlainMapSTypeDefn {
     PlainCollectionHeader header;
     SBound bound;
     External<TypeIdentifier> element_identifier;
     CollectionElementFlag key_flags;
     External<TypeIdentifier> key_identifier;
 
-    PlainMapSTypeDefn()
-      : bound(INVALID_SBOUND)
-      , key_flags(0)
-    {}
+    PlainMapSTypeDefn();
 
     PlainMapSTypeDefn(const PlainCollectionHeader& a_header,
                       const SBound& a_bound,
                       const TypeIdentifier& a_element_identifier,
                       const CollectionElementFlag& a_key_flags,
-                      const TypeIdentifier& a_key_identifier)
-      : header(a_header)
-      , bound(a_bound)
-      , element_identifier(a_element_identifier)
-      , key_flags(a_key_flags)
-      , key_identifier(a_key_identifier)
-    {}
+                      const TypeIdentifier& a_key_identifier);
 
     bool operator<(const PlainMapSTypeDefn& other) const;
   };
 
-  struct PlainMapLTypeDefn {
+  struct OpenDDS_Dcps_Export PlainMapLTypeDefn {
     PlainCollectionHeader header;
     LBound bound;
     External<TypeIdentifier> element_identifier;
     CollectionElementFlag key_flags;
     External<TypeIdentifier> key_identifier;
 
-    PlainMapLTypeDefn()
-      : bound(INVALID_LBOUND)
-      , key_flags(0)
-    {}
+    PlainMapLTypeDefn();
 
     PlainMapLTypeDefn(const PlainCollectionHeader& a_header,
                       const LBound& a_bound,
                       const TypeIdentifier& a_element_identifier,
                       const CollectionElementFlag& a_key_flags,
-                      const TypeIdentifier& a_key_identifier)
-      : header(a_header)
-      , bound(a_bound)
-      , element_identifier(a_element_identifier)
-      , key_flags(a_key_flags)
-      , key_identifier(a_key_identifier)
-    {}
+                      const TypeIdentifier& a_key_identifier);
 
     bool operator<(const PlainMapLTypeDefn& other) const;
   };
@@ -661,6 +625,8 @@ namespace XTypes {
     TypeIdentifier(ACE_CDR::Octet kind, const PlainSequenceLElemDefn& ldefn);
     TypeIdentifier(ACE_CDR::Octet kind, const PlainArraySElemDefn& sdefn);
     TypeIdentifier(ACE_CDR::Octet kind, const PlainArrayLElemDefn& ldefn);
+    TypeIdentifier(ACE_CDR::Octet kind, const PlainMapSTypeDefn& sdefn);
+    TypeIdentifier(ACE_CDR::Octet kind, const PlainMapLTypeDefn& ldefn);
     TypeIdentifier(ACE_CDR::Octet kind, const EquivalenceHashWrapper& equivalence_hash);
     TypeIdentifier(ACE_CDR::Octet kind, const StronglyConnectedComponentId& sc_component_id);
 
@@ -3366,9 +3332,15 @@ namespace XTypes {
     static const TypeMap EmptyMap;
   };
 
+  typedef OPENDDS_SET(TypeIdentifier) TypeIdentifierSet;
+
+  OpenDDS_Dcps_Export
+  TypeIdentifier make_scc_id_or_default(const TypeIdentifier& tid);
+
+  OpenDDS_Dcps_Export
   void compute_dependencies(const TypeMap& type_map,
                             const TypeIdentifier& type_identifier,
-                            OPENDDS_SET(TypeIdentifier)& dependencies);
+                            TypeIdentifierSet& dependencies);
 
   OpenDDS_Dcps_Export
   const char* typekind_to_string(TypeKind tk);

@@ -59,6 +59,15 @@ public:
                        const TransportReceiveListener_wrch& receive_listener,
                        bool reliable);
 
+  int make_reservation(const GUID_t& remote_publication_id,
+                       const GUID_t& local_subscription_id,
+                       const TransportSendListener_wrch& send_listener,
+                       bool reliable)
+  {
+    // avoid a warning due to overriding one overload of make_reservation() without the other
+    return DataLink::make_reservation(remote_publication_id, local_subscription_id, send_listener, reliable);
+  }
+
   void request_ack_received(ReceivedDataSample& sample);
   void stop_resend_association_msgs(const GUID_t& local, const GUID_t& remote);
 
@@ -94,8 +103,28 @@ private:
   ACE_Thread_Mutex assoc_resends_mutex_;
   typedef std::set<GuidPair> AssocResends;
   AssocResends assoc_resends_;
-  typedef PmfPeriodicTask<ShmemDataLink> SmPeriodicTask;
-  DCPS::RcHandle<SmPeriodicTask> assoc_resends_task_;
+
+  // This is essentially PmfPeriodicTask<ShmemDataLink>, but using that
+  // directly was causing warnings on MSVC x86.  There is only one member
+  // function that's used with a PeriodicTask.
+  struct PeriodicAssocResend : DCPS::PeriodicTask {
+    PeriodicAssocResend(DCPS::ReactorTask_rch reactor_task, const ShmemDataLink& delegate)
+      : PeriodicTask(reactor_task)
+      , delegate_(delegate)
+    {}
+
+    void execute(const MonotonicTimePoint& now)
+    {
+      const DCPS::RcHandle<ShmemDataLink> handle = delegate_.lock();
+      if (handle) {
+        handle->resend_association_msgs(now);
+      }
+    }
+
+    const DCPS::WeakRcHandle<ShmemDataLink> delegate_;
+  };
+
+  DCPS::RcHandle<PeriodicAssocResend> assoc_resends_task_;
 };
 
 } // namespace DCPS

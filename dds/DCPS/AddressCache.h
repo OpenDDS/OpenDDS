@@ -25,7 +25,7 @@ namespace DCPS {
 
 typedef OPENDDS_SET_CMP(GUID_t, GUID_tKeyLessThan) GuidSet;
 
-struct AddressCacheEntry : public virtual RcObject {
+struct AddressCacheEntry : public RcObject {
 
   AddressCacheEntry()
     : expires_(MonotonicTimePoint::max_value)
@@ -230,6 +230,12 @@ public:
   bool empty() const
   {
     return map_.empty() && id_map_.empty();
+  }
+
+  size_t size() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return map_.size() + id_map_.size();
   }
 
 private:

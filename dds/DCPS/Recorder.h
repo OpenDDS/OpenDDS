@@ -72,7 +72,7 @@ public:
   /**
    *  Find the bit key for a given repo id.
    */
-  virtual DDS::ReturnCode_t repoid_to_bit_key(const DCPS::GUID_t&     id,
+  virtual DDS::ReturnCode_t repoid_to_bit_key(const DCPS::GUID_t& id,
                                               DDS::BuiltinTopicKey_t& key) = 0;
 #endif
 
@@ -80,22 +80,22 @@ public:
    * Set the Quality of Service settings for the Recorder.
    *
    */
-  virtual DDS::ReturnCode_t set_qos (const DDS::SubscriberQos & subscriber_qos,
-                                     const DDS::DataReaderQos & datareader_qos)=0;
+  virtual DDS::ReturnCode_t set_qos(const DDS::SubscriberQos& subscriber_qos,
+                                    const DDS::DataReaderQos& datareader_qos) = 0;
 
   /**
    * Get the Quality of Service settings for the Recorder.
    *
    */
-  virtual DDS::ReturnCode_t get_qos (DDS::SubscriberQos & subscriber_qos,
-                                     DDS::DataReaderQos & datareader_qos)=0;
+  virtual DDS::ReturnCode_t get_qos(DDS::SubscriberQos& subscriber_qos,
+                                    DDS::DataReaderQos& datareader_qos) = 0;
 
   /**
    * Change the listener for this Recorder.
    *
    */
-  virtual DDS::ReturnCode_t set_listener (const RecorderListener_rch & a_listener,
-                                          DDS::StatusMask              mask = DEFAULT_STATUS_MASK )=0;
+  virtual DDS::ReturnCode_t set_listener(const RecorderListener_rch& a_listener,
+                                         DDS::StatusMask mask = DEFAULT_STATUS_MASK) = 0;
 
   /**
    * Get the listener for this Recorder.

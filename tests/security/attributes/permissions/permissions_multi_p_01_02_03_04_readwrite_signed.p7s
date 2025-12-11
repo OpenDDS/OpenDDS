@@ -1,12 +1,12 @@
 MIME-Version: 1.0
-Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha-256"; boundary="----C38497FE2AC07AEDA2590E69E656B3C7"
+Content-Type: multipart/signed; protocol="application/x-pkcs7-signature"; micalg="sha-256"; boundary="----7E6A15497959F9940A930421E1572E00"
 
 This is an S/MIME signed message
 
-------C38497FE2AC07AEDA2590E69E656B3C7
+------7E6A15497959F9940A930421E1572E00
 Content-Type: text/plain
 
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="utf-8"?>
 <dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.omg.org/spec/DDS-SECURITY/20170901/omg_shared_ca_permissions.xsd">
   <permissions>
     <grant name="widgets_grant_readwrite_domain_0">
@@ -15,7 +15,7 @@ Content-Type: text/plain
       <validity>
         <!-- Format is CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm] in GMT -->
         <not_before>2015-09-15T01:00:00</not_before>
-        <not_after>2025-09-15T01:00:00</not_after>
+        <not_after>2035-06-27T03:13:14.908199+00:00</not_after>
       </validity>
       <allow_rule>
         <domains>
@@ -525,7 +525,7 @@ Content-Type: text/plain
       <validity>
         <!-- Format is CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm] in GMT -->
         <not_before>2015-09-15T01:00:00</not_before>
-        <not_after>2025-09-15T01:00:00</not_after>
+        <not_after>2035-06-27T03:13:14.908199+00:00</not_after>
       </validity>
       <allow_rule>
         <domains>
@@ -1035,7 +1035,7 @@ Content-Type: text/plain
       <validity>
         <!-- Format is CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm] in GMT -->
         <not_before>2015-09-15T01:00:00</not_before>
-        <not_after>2025-09-15T01:00:00</not_after>
+        <not_after>2035-06-27T03:13:14.908199+00:00</not_after>
       </validity>
       <allow_rule>
         <domains>
@@ -1545,7 +1545,7 @@ Content-Type: text/plain
       <validity>
         <!-- Format is CCYY-MM-DDThh:mm:ss[Z|(+|-)hh:mm] in GMT -->
         <not_before>2015-09-15T01:00:00</not_before>
-        <not_after>2025-09-15T01:00:00</not_after>
+        <not_after>2035-06-27T03:13:14.908199+00:00</not_after>
       </validity>
       <allow_rule>
         <domains>
@@ -2052,7 +2052,7 @@ Content-Type: text/plain
   </permissions>
 </dds>
 
-------C38497FE2AC07AEDA2590E69E656B3C7
+------7E6A15497959F9940A930421E1572E00
 Content-Type: application/x-pkcs7-signature; name="smime.p7s"
 Content-Transfer-Encoding: base64
 Content-Disposition: attachment; filename="smime.p7s"
@@ -2085,16 +2085,16 @@ T2JqZWN0IENvbXB1dGluZyAoVGVzdCBQZXJtaXNzaW9ucyBDQSkxLzAtBgNVBAMM
 Jk9iamVjdCBDb21wdXRpbmcgKFRlc3QgUGVybWlzc2lvbnMgQ0EpMScwJQYJKoZI
 hvcNAQkBFhhpbmZvQG9iamVjdGNvbXB1dGluZy5jb20CCQCkjopvwK438jANBglg
 hkgBZQMEAgEFAKCB5DAYBgkqhkiG9w0BCQMxCwYJKoZIhvcNAQcBMBwGCSqGSIb3
-DQEJBTEPFw0yMzEwMTYxNDUwMTlaMC8GCSqGSIb3DQEJBDEiBCCJWxmzU4igldXl
-4AYqk0k8snSYN6VHkf+UPSQ0KdlNCDB5BgkqhkiG9w0BCQ8xbDBqMAsGCWCGSAFl
+DQEJBTEPFw0yNTA5MjcwMzEzMjJaMC8GCSqGSIb3DQEJBDEiBCBYG9DpjpBNEu9D
++u8oXsnoF4JhvuUmoU5a9L8+3FY2/jB5BgkqhkiG9w0BCQ8xbDBqMAsGCWCGSAFl
 AwQBKjALBglghkgBZQMEARYwCwYJYIZIAWUDBAECMAoGCCqGSIb3DQMHMA4GCCqG
 SIb3DQMCAgIAgDANBggqhkiG9w0DAgIBQDAHBgUrDgMCBzANBggqhkiG9w0DAgIB
-KDANBgkqhkiG9w0BAQEFAASCAQB8r58BqVtZOPxdmfl1cIhWZ0MM26ceDWBwtlA2
-60scqAMcV/Z1Vl7YHF/4mHCWR77o3xe0cPL/HqbqjuPnPHjKlEd3Ore7uxp9x2KJ
-Oylv9Q39WWcizMRmc/UGl5B3GmyD9I7PpqrHC181vfAHXIhTm0e0VnoWpuQNDkFM
-+qnJAc7EmpPLnU5EPn24SPUSaJXHszeCQhs2z4Iot7bGjNgCtOrrrTqx2xocjcnG
-dzZBGKRIsPRHQ89X+UkKPFKQlnFs1Jb6DZKuHiEwQWb6tr0HsaZqrpBQZ6Xs9MEo
-z4oFLT2uG1BEKAjN/2Y9Kk4JTKSYMhqo9JPD7uIB3sv4gf3p
+KDANBgkqhkiG9w0BAQEFAASCAQAHAAYRH1Ws3nI4YTTqdDq8feVHzgoRTEjQKZ7e
+Jml2C9+GrUfVaGm/cnnMns687wq412MNw71NpL5LrrTmfEm3dvyG4yfmBBGoRrDU
+QeD2ly6pq+cArIJuBWNsDzn6P4SP9gSxTN8Ic+q5AENgLkptHi7MyBY9zoDNpp+/
+1fYI4CLRq46dvvy8sZ5Rx0nq/sAXEC/e2jF0P1hrD7UdpOYZR4/Sw8Jr7BCAK3qH
++O8JNGAVx+XMISAQ3lI95mE5oOX9VHSS7/aOgIJs+ILwZObNhsl8UB4hzX50gsO+
+lBCDEa7ABsrDxzdUzAMBf+21kMqPz/DZ03JLandtSNTq2w2Z
 
-------C38497FE2AC07AEDA2590E69E656B3C7--
+------7E6A15497959F9940A930421E1572E00--
 

@@ -543,20 +543,16 @@ DDS::ReturnCode_t vwrite_primitive_collection(
 template <typename ValueT, typename HelperT>
 bool set_enumerated_helper(const DDS::DynamicType_var& type, HelperT& helper)
 {
-  DDS::DynamicTypeMembersById_var members_var;
-  if (type->get_all_members(members_var) != DDS::RETCODE_OK) {
-    return false;
-  }
-  OpenDDS::XTypes::DynamicTypeMembersByIdImpl* members =
-    dynamic_cast<OpenDDS::XTypes::DynamicTypeMembersByIdImpl*>(members_var.in());
-  if (!members) {
+#if OPENDDS_CONFIG_IDL_MAP
+  DDS::DynamicTypeMembersById members;
+  if (type->get_all_members(members) != DDS::RETCODE_OK) {
     return false;
   }
 
-  OPENDDS_VECTOR(typename HelperT::Pair) pairs(members->size());
+  OPENDDS_VECTOR(typename HelperT::Pair) pairs(members.size());
   size_t i = 0;
-  for (OpenDDS::XTypes::DynamicTypeMembersByIdImpl::const_iterator it = members->begin();
-       it != members->end(); ++it, ++i) {
+  for (DDS::DynamicTypeMembersById::const_iterator it = members.begin();
+       it != members.end(); ++it, ++i) {
     DDS::MemberDescriptor_var md;
     if (it->second->get_descriptor(md) != DDS::RETCODE_OK) {
       return false;
@@ -566,6 +562,11 @@ bool set_enumerated_helper(const DDS::DynamicType_var& type, HelperT& helper)
   }
   helper.pairs(pairs);
   return true;
+#else
+  ACE_UNUSED_ARG(type);
+  ACE_UNUSED_ARG(helper);
+  return false;
+#endif
 }
 
 // Argument containing_tk and params only apply when this is a member of a struct or union,

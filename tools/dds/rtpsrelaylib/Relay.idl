@@ -37,6 +37,16 @@ module RtpsRelay {
     @key EntityId_t entityId;
   };
 
+  enum AdmitState {
+    AS_NORMAL,
+    AS_NOT_ADMITTING
+  };
+
+  enum DrainState {
+    DS_NORMAL,
+    DS_DRAINING // gradually removing existing clients
+  };
+
   typedef sequence<string> StringSequence;
   typedef sequence<GUID_t> GuidSequence;
 
@@ -61,6 +71,12 @@ module RtpsRelay {
   struct RelayStatus {
     @key string relay_id;
     boolean admitting;
+    AdmitState admit_state;
+    DDS::Time_t admit_state_change;
+    DrainState drain_state;
+    DDS::Time_t drain_state_change;
+    unsigned long local_active_participants;
+    unsigned long marked_participants;
   };
 
   const string RELAY_PARTICIPANT_STATUS_TOPIC_NAME = "Relay Participant Status";
@@ -75,14 +91,6 @@ module RtpsRelay {
     boolean alive;
     DDS::Time_t alive_ts;
     DDS::UserDataQosPolicy user_data;
-  };
-
-  const string SPDP_REPLAY_TOPIC_NAME = "SPDP Replay";
-  @topic
-  struct SpdpReplay {
-    StringSequence partitions;
-    string address;
-    GUID_t guid;
   };
 
   struct RelayHeader {
@@ -110,18 +118,6 @@ module RtpsRelay {
     Duration_t output_processing_time;
   };
 
-  const string PARTICIPANT_STATISTICS_TOPIC_NAME = "Participant Statistics";
-  @topic
-  @mutable
-  @autoid(HASH)
-  struct ParticipantStatistics {
-    @key GUID_t guid;
-    @key string name;
-    Duration_t session_time;
-    ProtocolStatistics rtps;
-    ProtocolStatistics stun;
-  };
-
   const string HANDLER_STATISTICS_TOPIC_NAME = "Handler Statistics";
   @topic
   @mutable
@@ -136,6 +132,34 @@ module RtpsRelay {
     unsigned long error_count;
     unsigned long max_queue_size;
     Duration_t max_queue_latency;
+  };
+
+  @mutable
+  @autoid(HASH)
+  struct ClientPartitionStatistics {
+    unsigned long slots;
+    unsigned long free_slots;
+    unsigned long count;
+    unsigned long partition_index_cache;
+    unsigned long partition_index_nodes;
+    unsigned long guids;
+    unsigned long guids_cache;
+  };
+
+  @mutable
+  @autoid(HASH)
+  struct RelayPartitionStatistics {
+    unsigned long addresses;
+    unsigned long partition_index_cache;
+    unsigned long partition_index_nodes;
+    unsigned long slots;
+  };
+
+  @mutable
+  @autoid(HASH)
+  struct OpenDDSModuleStatistics {
+    string id;
+    map<string, unsigned long long> stats;
   };
 
   const string RELAY_STATISTICS_TOPIC_NAME = "Relay Statistics";
@@ -162,16 +186,50 @@ module RtpsRelay {
     unsigned long participant_statistics_sub_count;
     unsigned long relay_partitions_sub_count;
     unsigned long relay_participant_status_sub_count;
-    unsigned long spdp_replay_sub_count;
     unsigned long relay_address_sub_count;
     unsigned long relay_status_sub_count;
     unsigned long relay_partitions_pub_count;
     unsigned long relay_address_pub_count;
-    unsigned long spdp_replay_pub_count;
     unsigned long admission_deferral_count;
     unsigned long remote_map_size;
     unsigned long max_ips_per_client;
+    unsigned long total_client_ips;
+    unsigned long total_client_ports;
     unsigned long rejected_address_map_size;
+    unsigned long deactivation_queue_size;
+    unsigned long expiration_queue_size;
+    unsigned long admission_queue_size;
+    unsigned long transitions_to_admitting;
+    unsigned long transitions_to_nonadmitting;
+    unsigned long virtual_memory_kb;
+    ClientPartitionStatistics client_partitions;
+    RelayPartitionStatistics relay_partitions;
+    sequence<OpenDDSModuleStatistics> opendds_modules;
+  };
+
+  const string RELAY_CONFIG_CONTROL_TOPIC_NAME = "Relay Config Control";
+  const string RELAY_CONFIG_STATUS_TOPIC_NAME = "Relay Config Status";
+
+  @topic
+  @mutable
+  @autoid(HASH)
+  struct RelayConfig {
+    @key string relay_id;
+    map<string, string> config;
+  };
+
+  enum Action {
+    ACTION_ADD,
+    ACTION_REMOVE // Not implemented yet
+  };
+
+  const string RELAY_DENIED_PARTITIONS_TOPIC_NAME = "Relay Denied Partitions";
+  @topic
+  @mutable
+  @autoid(HASH)
+  struct RelayDeniedPartitions {
+    StringSequence partitions;
+    Action add_or_remove;
   };
 };
 

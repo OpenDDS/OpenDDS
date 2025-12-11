@@ -1182,6 +1182,12 @@ void TransportClient::data_acked(const GUID_t& remote)
   send_listener->data_acked(remote);
 }
 
+SequenceNumber TransportClient::cur_cumulative_ack(const GUID_t& reader_id) const
+{
+  OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);
+  return links_.cur_cumulative_ack(guid_, reader_id);
+}
+
 bool TransportClient::is_leading(const GUID_t& reader_id) const
 {
   OPENDDS_ASSERT(guid_ != GUID_UNKNOWN);

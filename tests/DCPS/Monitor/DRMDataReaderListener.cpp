@@ -31,8 +31,8 @@ DRMDataReaderListenerImpl::~DRMDataReaderListenerImpl()
 void DRMDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
   try {
-    OpenDDS::DCPS::DataReaderReportDataReader_var drm_dr =
-      OpenDDS::DCPS::DataReaderReportDataReader::_narrow(reader);
+    OpenDDS::Monitor::DataReaderReportDataReader_var drm_dr =
+      OpenDDS::Monitor::DataReaderReportDataReader::_narrow(reader);
 
     if (CORBA::is_nil(drm_dr.in())) {
       ACE_ERROR((LM_ERROR,
@@ -41,10 +41,10 @@ void DRMDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       ACE_OS::exit(-1);
     }
 
-    OpenDDS::DCPS::DataReaderReport drr;
+    OpenDDS::Monitor::DataReaderReport drr;
     DDS::SampleInfo si;
 
-    DDS::ReturnCode_t status = drm_dr->take_next_sample(drr, si) ;
+    DDS::ReturnCode_t status = drm_dr->take_next_sample(drr, si);
 
     if (status == DDS::RETCODE_OK) {
       cout << "SampleInfo.sample_rank = " << si.sample_rank << endl;

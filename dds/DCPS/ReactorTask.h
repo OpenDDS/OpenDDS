@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_REACTORTASK_H
 
 #include "ConditionVariable.h"
+#include "ConfigStoreImpl.h"
 #include "Definitions.h"
 #include "RcEventHandler.h"
 #include "RcObject.h"
@@ -17,14 +18,22 @@
 #include "TimeTypes.h"
 #include "dcps_export.h"
 
-#include <ace/Task.h>
-#include <ace/Synch_Traits.h>
-#include <ace/Timer_Heap_T.h>
+#include <ace/Hash_Map_Manager_T.h>
 #include <ace/Event_Handler_Handle_Timeout_Upcall.h>
+#include <ace/Synch_Traits.h>
+#include <ace/Task.h>
+#include <ace/Timer_Heap_T.h>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Proactor;
 class ACE_Reactor;
+#ifdef ACE_HAS_MAC_OSX
+template <>
+class ACE_Hash<ACE_thread_t> {
+public:
+  unsigned long operator()(const ACE_thread_t&) const;
+};
+#endif
 ACE_END_VERSIONED_NAMESPACE_DECL
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -92,12 +101,24 @@ private:
 class OpenDDS_Dcps_Export ReactorTask
   : public virtual ACE_Task_Base
   , public virtual RcObject
+  , public ConfigListener
 {
 public:
-  // Takes ownership of the reactor.
-  explicit ReactorTask(bool useAsyncSend);
+  explicit ReactorTask(bool useAsyncSend = false);
   virtual ~ReactorTask();
 
+  // Use init_reactor_task (and not open_reactor_task) to initialize this
+  // object without spawning a thread.
+  // A subsequent call to run_reactor can optionally spawn threads to
+  // run the reactor.
+  // Takes ownership of the reactor.
+  int init_reactor_task(ThreadStatusManager* thread_status_manager = 0,
+                        const String& name = "",
+                        ACE_Reactor* reactor = 0);
+
+  // Use open_reactor_task (and not init_reactor_task) to spawn a single thread
+  // that runs the reactor until stop().
+  // Takes ownership of the reactor.
   int open_reactor_task(ThreadStatusManager* thread_status_manager = 0,
                         const String& name = "",
                         ACE_Reactor* reactor = 0);
@@ -105,6 +126,13 @@ public:
   virtual int open(void*) { return open_reactor_task(); }
   virtual int svc();
   virtual int close(u_long flags = 0);
+
+  // Block and run the reactor until it's shut down or run_time expires.
+  // If run_time is 0, the run time is unlimited.
+  // If threads > 1, spawn that number of threads and wait until they all complete.
+  //   The reactor must be capable of multi-threaded execution (see TP_Reactor).
+  // If threads == 1, run the reactor directly in this function.
+  int run_reactor(size_t threads, const TimeDuration& run_time);
 
   void stop();
 
@@ -129,14 +157,23 @@ public:
   CommandPtr execute_or_enqueue(CommandPtr command);
   void wait_until_empty();
 
+  size_t command_queue_size() const;
+
   OPENDDS_POOL_ALLOCATION_FWD
 
 private:
   virtual void reactor(ACE_Reactor* reactor);
   virtual ACE_Reactor* reactor() const;
 
+  int init_i(ThreadStatusManager* thread_status_manager,
+             const String& name,
+             ACE_Reactor* reactor);
+
   void cleanup();
   void wait_for_startup_i() const;
+  int run_reactor_i();
+
+  void on_data_available(InternalDataReader_rch reader);
 
   typedef ACE_SYNCH_MUTEX LockType;
   typedef ACE_Guard<LockType> GuardType;
@@ -145,13 +182,22 @@ private:
     ACE_Event_Handler*, ACE_Event_Handler_Handle_Timeout_Upcall,
     ACE_SYNCH_RECURSIVE_MUTEX, MonotonicClock> TimerQueueType;
 
+  struct ThreadEqual {
+    bool operator()(const ACE_thread_t& lhs, const ACE_thread_t& rhs) const
+    {
+      return ACE_OS::thr_equal(lhs, rhs);
+    }
+  };
+
   mutable LockType lock_;
   mutable ConditionVariableType condition_;
-  enum State { STATE_UNINITIALIZED, STATE_OPENING, STATE_RUNNING, STATE_SHUT_DOWN };
+  enum State { STATE_UNINITIALIZED, STATE_RUNNING, STATE_SHUT_DOWN };
   State state_;
   ACE_Reactor* reactor_;
-  ACE_thread_t reactor_owner_;
+  ACE_Hash_Map_Manager_Ex<ACE_thread_t, int, ACE_Hash<ACE_thread_t>, ThreadEqual, ACE_Null_Mutex> reactor_owners_;
   ACE_Proactor* proactor_;
+  size_t n_threads_;
+  TimeDuration run_time_;
 
 #if defined ACE_WIN32 && defined ACE_HAS_WIN32_OVERLAPPED_IO
 #define OPENDDS_REACTOR_TASK_ASYNC
@@ -179,6 +225,9 @@ private:
   // thread status reporting
   String name_;
   ThreadStatusManager* thread_status_manager_;
+  ReactorWrapper::TimerId thread_status_timer_;
+  RcHandle<RcEventHandler> tsm_updater_handler_;
+  TimeDuration thread_status_period_;
 };
 
 class OpenDDS_Dcps_Export RegisterHandler : public ReactorTask::Command {

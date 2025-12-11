@@ -13,6 +13,7 @@
 
 #include <dds/DCPS/AtomicBool.h>
 #include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/Statistics.h>
 #include <dds/DCPS/debug.h>
 
 #include <dds/OpenDDSConfigWrapper.h>
@@ -54,7 +55,9 @@ const char RTPS_HARVEST_THREAD_STATUS[] = "OpenDDS.Rtps.HarvestThreadStatus";
  * discovery.
  *
  */
-class OpenDDS_Rtps_Export RtpsDiscovery : public DCPS::Discovery {
+class OpenDDS_Rtps_Export RtpsDiscovery
+  : public virtual DCPS::Discovery
+  , public virtual DCPS::ConfigListener {
 public:
   explicit RtpsDiscovery(const RepoKey& key);
   ~RtpsDiscovery();
@@ -342,7 +345,7 @@ private:
 
   const RepoKey key_;
 
-  // This mutex protects everything else
+  // This mutex protects everything else, except stats data members
   mutable ACE_Thread_Mutex lock_;
 
   RtpsDiscoveryConfig_rch config_;
@@ -355,6 +358,19 @@ private:
   void create_bit_dr(DDS::TopicDescription_ptr topic, const char* type,
                      DCPS::SubscriberImpl* sub,
                      const DDS::DataReaderQos& qos);
+
+  DCPS::StatisticsDataWriter_rch stats_writer_;
+  typedef DCPS::PmfPeriodicTask<const RtpsDiscovery> PeriodicTask;
+  DCPS::RcHandle<PeriodicTask> stats_task_;
+  DCPS::TimeDuration stats_task_period_;
+  // Seperate mutex to reduce contention on lock_
+  mutable ACE_Thread_Mutex stats_lock_;
+
+  void setup_stats_task(const DCPS::TimeDuration& period);
+  void write_stats(const MonotonicTimePoint&) const;
+
+  DCPS::ConfigReader_rch config_reader_;
+  void on_data_available(DCPS::ConfigReader_rch reader);
 
 public:
   class Config : public Discovery::Config {

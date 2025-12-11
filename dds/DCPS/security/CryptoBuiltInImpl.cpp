@@ -106,7 +106,7 @@ namespace {
   const unsigned int BLOCK_LEN_BYTES = 16;
   const unsigned int MAX_BLOCKS_PER_SESSION = 1024;
 
-  KeyMaterial_AES_GCM_GMAC make_key(unsigned int key_id, bool encrypt)
+  KeyMaterial_AES_GCM_GMAC make_key(NativeCryptoHandle key_id, bool encrypt)
   {
     KeyMaterial_AES_GCM_GMAC k;
 
@@ -120,8 +120,9 @@ namespace {
     k.master_salt.length(KEY_LEN_BYTES);
     RAND_bytes(k.master_salt.get_buffer(), KEY_LEN_BYTES);
 
+    const DDS::UInt32 key_id_u = static_cast<DDS::UInt32>(key_id);
     for (unsigned int i = 0; i < sizeof k.sender_key_id; ++i) {
-      k.sender_key_id[i] = static_cast<ACE_CDR::Octet>(key_id >> (8 * i));
+      k.sender_key_id[i] = static_cast<ACE_CDR::Octet>(key_id_u >> (8 * i));
     }
 
     k.master_sender_key.length(KEY_LEN_BYTES);
@@ -241,10 +242,10 @@ namespace {
   struct PrivateKey {
     EVP_PKEY* pkey_;
     explicit PrivateKey(const KeyOctetSeq& key)
-      : pkey_(EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, 0, key.get_buffer(), key.length()))
+      : pkey_(EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, 0, key.get_buffer(), static_cast<int>(key.length())))
     {}
     explicit PrivateKey(const DDS::OctetSeq& key)
-      : pkey_(EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, 0, key.get_buffer(), key.length()))
+      : pkey_(EVP_PKEY_new_mac_key(EVP_PKEY_HMAC, 0, key.get_buffer(), static_cast<int>(key.length())))
     {}
     operator EVP_PKEY*() { return pkey_; }
     ~PrivateKey() { EVP_PKEY_free(pkey_); }
@@ -353,7 +354,7 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawriter(
       }
     }
     if (security_attributes.is_payload_protected) {
-      const unsigned int key_id = used_h ? generate_handle() : h;
+      const NativeCryptoHandle key_id = used_h ? generate_handle() : h;
       const KeyMaterial_AES_GCM_GMAC key = make_key(key_id, plugin_attribs & FLAG_IS_PAYLOAD_ENCRYPTED);
       DCPS::push_back(keys, key);
       if (security_debug.bookkeeping && !security_debug.showkeys) {
@@ -1268,7 +1269,7 @@ bool CryptoBuiltInImpl::encrypt(const KeyMaterial& master, Session& sess,
   out.length(plain.length() + BLOCK_LEN_BYTES - 1);
   unsigned char* const out_buffer = out.get_buffer();
   if (EVP_EncryptUpdate(ctx, out_buffer, &len,
-                        plain.get_buffer(), plain.length()) != 1) {
+                        plain.get_buffer(), static_cast<int>(plain.length())) != 1) {
     return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::encrypt - EVP_EncryptUpdate", ERR_peek_last_error());
   }
 
@@ -1277,7 +1278,7 @@ bool CryptoBuiltInImpl::encrypt(const KeyMaterial& master, Session& sess,
     return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::encrypt - EVP_EncryptFinal_ex", ERR_peek_last_error());
   }
 
-  out.length(len + padLen);
+  out.length(static_cast<DDS::UInt32>(len + padLen));
 
   if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, sizeof footer.common_mac,
                           &footer.common_mac) == 1) {
@@ -1308,7 +1309,7 @@ bool CryptoBuiltInImpl::authtag(const KeyMaterial& master, Session& sess,
   }
 
   int n;
-  if (EVP_EncryptUpdate(ctx, 0, &n, plain.get_buffer(), plain.length()) != 1) {
+  if (EVP_EncryptUpdate(ctx, 0, &n, plain.get_buffer(), static_cast<int>(plain.length())) != 1) {
     return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::authtag - EVP_EncryptUpdate", ERR_peek_last_error());
   }
 
@@ -1376,7 +1377,7 @@ namespace {
 
     unsigned char flags;
     ser_in >> ACE_InputCDR::to_octet(flags);
-    const int flag_e = flags & RTPS::FLAG_E;
+    const unsigned int flag_e = flags & RTPS::FLAG_E;
     ser_in.swap_bytes(ACE_CDR_BYTE_ORDER != flag_e);
 
     ACE_UINT16 submessageLength;
@@ -1584,7 +1585,7 @@ bool CryptoBuiltInImpl::encode_rtps_message(
   CORBA::Long& receiving_participant_crypto_list_index,
   SecurityException& ex)
 {
-  receiving_participant_crypto_list_index = receiving_participant_crypto_list.length();
+  receiving_participant_crypto_list_index = static_cast<DDS::Int32>(receiving_participant_crypto_list.length());
   if (DDS::HANDLE_NIL == sending_participant_crypto) {
     // DDS-Security v1.1 8.5.1.9.4
     // This operation may optionally not perform any transformation of the input RTPS message.
@@ -1880,7 +1881,7 @@ bool CryptoBuiltInImpl::decrypt(const KeyMaterial& master, Session& sess,
   unsigned char* const out_buffer = out.get_buffer();
   int len;
   if (EVP_DecryptUpdate(ctx, out_buffer, &len,
-                        reinterpret_cast<const unsigned char*>(ciphertext), n)
+                        reinterpret_cast<const unsigned char*>(ciphertext), static_cast<int>(n))
       != 1) {
     return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::decrypt - EVP_DecryptUpdate", ERR_peek_last_error());
   }
@@ -1892,7 +1893,7 @@ bool CryptoBuiltInImpl::decrypt(const KeyMaterial& master, Session& sess,
 
   int len2;
   if (EVP_DecryptFinal_ex(ctx, out_buffer + len, &len2) == 1) {
-    out.length(len + len2);
+    out.length(static_cast<DDS::UInt32>(len + len2));
     return true;
   }
   return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::decrypt - EVP_DecryptFinal_ex", ERR_peek_last_error());
@@ -1927,7 +1928,7 @@ bool CryptoBuiltInImpl::verify(const KeyMaterial& master, Session& sess,
 
   int len;
   if (EVP_DecryptUpdate(ctx, 0, &len,
-                        reinterpret_cast<const unsigned char*>(in), n) != 1) {
+                        reinterpret_cast<const unsigned char*>(in), static_cast<int>(n)) != 1) {
     return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::verify - EVP_DecryptUpdate", ERR_peek_last_error());
   }
 

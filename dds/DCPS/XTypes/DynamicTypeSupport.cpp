@@ -75,7 +75,7 @@ namespace OpenDDS {
       {
         const char* const dot = std::strchr(field, '.');
         if (dot) {
-          const String local(field, dot - field);
+          const String local(field, static_cast<size_t>(dot - field));
           const DDS::MemberId id = dd->get_member_id_by_name(local.c_str());
           DDS::DynamicData_var nested;
           if (dd->get_complex_value(nested, id) != DDS::RETCODE_OK) {
@@ -95,7 +95,7 @@ namespace OpenDDS {
       ComparatorBase::Ptr create_qc_comparator(const char* field, ComparatorBase::Ptr next) const
       {
         const char* const dot = std::strchr(field, '.');
-        return dot ? make_nested_cmp(String(field, dot - field), make_dynamic_cmp(dot + 1), next)
+        return dot ? make_nested_cmp(String(field, static_cast<size_t>(dot - field)), make_dynamic_cmp(dot + 1), next)
           : make_dynamic_cmp(field, next);
       }
 

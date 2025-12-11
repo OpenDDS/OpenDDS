@@ -179,6 +179,15 @@ public:
                        const TransportReceiveListener_wrch& receive_listener,
                        bool reliable);
 
+  int make_reservation(const GUID_t& remote_publication_id,
+                       const GUID_t& local_subscription_id,
+                       const TransportSendListener_wrch& send_listener,
+                       bool reliable)
+  {
+    // avoid a warning due to overriding one overload of make_reservation() without the other
+    return DataLink::make_reservation(remote_publication_id, local_subscription_id, send_listener, reliable);
+  }
+
   bool associated(const GUID_t& local, const GUID_t& remote,
                   bool local_reliable, bool remote_reliable,
                   bool local_durable, bool remote_durable,
@@ -217,6 +226,9 @@ public:
 #endif
   virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint() const;
 
+  virtual SequenceNumber cur_cumulative_ack(const GUID_t& writer,
+                                            const GUID_t& reader) const;
+
   virtual bool is_leading(const GUID_t& writer_id,
                           const GUID_t& reader_id) const;
 
@@ -249,6 +261,11 @@ public:
   EventDispatcher_rch event_dispatcher() { return event_dispatcher_; }
   RcHandle<JobQueue> get_job_queue() const { return job_queue_; }
 
+  static StatisticSeq stats_template();
+  void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
+  size_t total_remote_reliable_writers() const;
+  std::pair<size_t, size_t> local_reliable_writer_stats() const;
+
 private:
   void on_data_available(RcHandle<InternalDataReader<NetworkInterfaceAddress> > reader);
 
@@ -257,6 +274,9 @@ private:
   NetworkAddressSet get_addresses_i(const GUID_t& local) const;
 
   virtual void stop_i();
+
+  // Force path through customize_queue_element.
+  virtual bool handle_send_request_ack(TransportQueueElement*) { return false; }
 
   virtual TransportQueueElement* customize_queue_element(
     TransportQueueElement* element);
@@ -272,8 +292,8 @@ private:
   RcHandle<JobQueue> job_queue_;
   EventDispatcher_rch event_dispatcher_;
 
-  RtpsUdpSendStrategy_rch send_strategy();
-  RtpsUdpReceiveStrategy_rch receive_strategy();
+  RtpsUdpSendStrategy_rch send_strategy() const;
+  RtpsUdpReceiveStrategy_rch receive_strategy() const;
 
   GuidPrefix_t local_prefix_;
 
@@ -341,7 +361,7 @@ private:
   typedef OPENDDS_MAP(FragmentNumberValue, RTPS::FragmentNumberSet) RequestedFragMap;
   typedef OPENDDS_MAP(SequenceNumber, RequestedFragMap) RequestedFragSeqMap;
 
-  struct ReaderInfo : public virtual RcObject {
+  struct ReaderInfo : public RcObject {
     const GUID_t id_;
     const MonotonicTime_t participant_discovered_at_;
     CORBA::Long acknack_recvd_count_, nackfrag_recvd_count_;
@@ -382,6 +402,7 @@ private:
     void expunge_durable_data();
     bool expecting_durable_data() const;
     SequenceNumber acked_sn() const { return cur_cumulative_ack_.previous(); }
+    SequenceNumber cur_cumulative_ack() const { return cur_cumulative_ack_; }
     bool reflects_heartbeat_count() const;
   };
 
@@ -422,7 +443,7 @@ private:
     }
   };
 
-  class RtpsWriter : public virtual RcObject {
+  class RtpsWriter : public RcObject {
   private:
     ReaderInfoMap remote_readers_;
     RcHandle<ConstSharedRepoIdSet> remote_reader_guids_;
@@ -544,6 +565,7 @@ private:
     bool add_reader(const ReaderInfo_rch& reader);
     bool has_reader(const GUID_t& id) const;
     bool is_leading(const GUID_t& id) const;
+    SequenceNumber cur_cumulative_ack(const GUID_t& id) const;
     bool remove_reader(const GUID_t& id);
     size_t reader_count() const;
     CORBA::Long inc_heartbeat_count();
@@ -638,7 +660,7 @@ private:
 #endif
   typedef OPENDDS_SET(WriterInfo_rch) WriterInfoSet;
 
-  class RtpsReader : public virtual RcObject {
+  class RtpsReader : public RcObject {
   public:
     RtpsReader(const RtpsUdpDataLink_rch& link, const GUID_t& id);
     virtual ~RtpsReader();

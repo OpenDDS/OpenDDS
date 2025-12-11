@@ -413,6 +413,8 @@ XML
 
     The annotation is :ref:`xtypes--anno-opendds-data-representation-xml`.
 
+.. _xtypes--xcdr1:
+
 XCDR1
     This is the pre-XTypes standard CDR extended with XTypes features.
     Support is limited to non-XTypes features, see :ref:`xtypes--xcdr1-support` for details.
@@ -420,6 +422,8 @@ XCDR1
     The ``DataRepresentationId_t`` value is ``DDS::XCDR_DATA_REPRESENTATION``
 
     The annotation is :ref:`xtypes--anno-opendds-data-representation-xcdr1`.
+
+.. _xtypes--xcdr2:
 
 XCDR2
     This is default for writers when using the :ref:`rtps-udp-transport` and should be preferred in most cases.
@@ -480,7 +484,7 @@ In general though two topic types and their nested types are compatible if:
   * Changing a ``@final`` struct
   * Adding a member in the middle of an ``@appendable`` struct
 
-* Length bounds of strings and sequences are the same or greater
+* Length bounds of strings, sequences, and maps are the same or greater
 * Lengths of arrays are exactly the same
 * The keys of the types match exactly
 * Shared member IDs match when required, like when they are final or are being used as keys
@@ -705,10 +709,10 @@ If no try construct annotation is added, it will default to discard.
 ..
     Sect<16.6.4.1>
 
-Applies to: structure and union members, sequence and array elements
+Applies to: structure and union members; sequence, array, and map elements
 
 The use_default try construct annotation will set the member whose deserialization failed to a default value which is determined by the XTypes specification.
-Sequences will be of length 0, with the same type as the original sequence.
+Sequences/maps will be of length 0, with the same type as the original sequence/map.
 Primitives will be set equal to 0.
 Strings will be replaced with the empty string.
 Arrays will be of the same length but have each element set to the default value.
@@ -722,10 +726,10 @@ Enums will be set to the first enumerator defined.
 ..
     Sect<16.6.4.2>
 
-Applies to: structure and union members, sequence and array elements
+Applies to: structure and union members; sequence, array, and map elements
 
 The trim try construct annotation will, if possible, shorten a received value to one fitting the receiver's bound.
-As such, trim only makes logical sense on bounded strings and bounded sequences.
+As such, trim only makes logical sense on bounded strings and bounded sequences/maps.
 
 .. _xtypes--anno-try-construct-discard:
 
@@ -735,7 +739,7 @@ As such, trim only makes logical sense on bounded strings and bounded sequences.
 ..
     Sect<16.6.4.3>
 
-Applies to: structure and union members, sequence and array elements
+Applies to: structure and union members; sequence, array, and map elements
 
 The discard try construct annotation will "throw away" the sample if an element fails to deserialize.
 
@@ -1506,6 +1510,8 @@ The Dynamic Language Binding doesn't currently support:
 
 * XCDRv1 Data Representation
 
+* Maps
+
 * Constructing types at runtime
 
 .. _xtypes--unimplemented-features:
@@ -1538,8 +1544,6 @@ Type System
 
 ..
     Sect<16.8.1>
-
-* IDL ``map`` type
 
 * IDL ``bitmask`` type
 

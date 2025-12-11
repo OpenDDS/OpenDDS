@@ -125,7 +125,7 @@ set_duration_qos_value(DDS::Duration_t& target,
       target.nanosec=DDS::DURATION_INFINITE_NSEC;
       return true;
     }
-    target.nanosec = atoi(value);
+    target.nanosec = static_cast<DDS::UInt32>(atoi(value));
     return true;
   }
   return false;
@@ -166,7 +166,7 @@ set_partition_name_qos(
     // Value can be a comma-separated list
     const char* start = value;
     while (const char* next_comma = std::strchr(start, ',')) {
-      const size_t size = next_comma - start;
+      const size_t size = static_cast<size_t>(next_comma - start);
       const OPENDDS_STRING temp(start, size);
       // Add to QOS
       target.name.length(target.name.length() + 1);

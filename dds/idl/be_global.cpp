@@ -550,9 +550,10 @@ void
 BE_GlobalData::set_inc_paths(const char* cmdline)
 {
   ACE_ARGV argv(ACE_TEXT_CHAR_TO_TCHAR(cmdline), false);
-  for (int i = 0; i < argv.argc(); ++i) {
+  const size_t argc = static_cast<size_t>(argv.argc());
+  for (size_t i = 0; i < argc; ++i) {
     string arg = ACE_TEXT_ALWAYS_CHAR(argv[i]);
-    if (arg == "-I" && i + 1 < argv.argc()) {
+    if (arg == "-I" && i + 1 < argc) {
       add_inc_path(ACE_TEXT_ALWAYS_CHAR(argv[++i]));
     } else if (arg.substr(0, 2) == "-I") {
       add_inc_path(arg.c_str() + 2);
@@ -991,6 +992,20 @@ bool BE_GlobalData::value(AST_Decl* node, ACE_INT32& value) const
 {
   ValueAnnotation* annotation = dynamic_cast<ValueAnnotation*>(builtin_annotations_["::@value"]);
   return annotation->node_value_exists(node, value);
+}
+
+TryConstructFailAction BE_GlobalData::map_key_try_construct(AST_Map* node)
+{
+  TryConstructAnnotation* try_construct_annotation =
+    dynamic_cast<TryConstructAnnotation*>(builtin_annotations_["::@try_construct"]);
+  return try_construct_annotation->map_key(node);
+}
+
+TryConstructFailAction BE_GlobalData::map_value_try_construct(AST_Map* node)
+{
+  TryConstructAnnotation* try_construct_annotation =
+    dynamic_cast<TryConstructAnnotation*>(builtin_annotations_["::@try_construct"]);
+  return try_construct_annotation->map_value(node);
 }
 
 OpenDDS::DataRepresentation BE_GlobalData::data_representations(

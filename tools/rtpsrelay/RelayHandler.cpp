@@ -82,7 +82,7 @@ int RelayHandler::open(const ACE_INET_Addr& address)
     return -1;
   }
 
-  const int buffer_size = config_.buffer_size();
+  int buffer_size = config_.buffer_size();
 
   if (socket_.set_option(SOL_SOCKET,
                          SO_SNDBUF,
@@ -112,7 +112,7 @@ int RelayHandler::open(const ACE_INET_Addr& address)
 
 int RelayHandler::handle_input(ACE_HANDLE handle)
 {
-  OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+  OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager(), READ_MASK, handle_to_int(handle));
 
   const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
@@ -136,7 +136,8 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
   }
 
   // Allocate at least one byte so that recv cannot return early.
-  OpenDDS::DCPS::Lockable_Message_Block_Ptr buffer(new ACE_Message_Block(std::max(inlen, 1)), message_block_locking_);
+  const auto n = static_cast<size_t>(std::max(inlen, 1));
+  OpenDDS::DCPS::Lockable_Message_Block_Ptr buffer(new ACE_Message_Block(n), message_block_locking_);
 
   const auto bytes = socket_.recv(buffer->wr_ptr(), buffer->space(), remote);
 
@@ -155,7 +156,7 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
     return 0;
   }
 
-  buffer->length(bytes);
+  buffer->length(static_cast<size_t>(bytes));
   MessageType type = MessageType::Unknown;
   const CORBA::ULong generated_messages = process_message(remote, now, buffer, type);
   stats_reporter_.max_gain(generated_messages, now);
@@ -165,13 +166,15 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
   return 0;
 }
 
-int RelayHandler::handle_output(ACE_HANDLE)
+int RelayHandler::handle_output(ACE_HANDLE handle)
 {
-  OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+  auto& statusManager = TheServiceParticipant->get_thread_status_manager();
+  OpenDDS::DCPS::ThreadStatusManager::Event ev(statusManager, WRITE_MASK, handle_to_int(handle));
 
   const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, outgoing_mutex_, 0);
+  OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, WRITE_MASK | DONT_CALL, handle_to_int(handle));
 
   if (!outgoing_.empty()) {
     const auto& out = outgoing_.front();
@@ -288,13 +291,11 @@ void VerticalHandler::stop()
 }
 
 void VerticalHandler::venqueue_message(const ACE_INET_Addr& addr,
-                                       ParticipantStatisticsReporter& to_psr,
                                        const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                        const OpenDDS::DCPS::MonotonicTimePoint& now,
                                        MessageType type)
 {
   enqueue_message(addr, msg, now, type);
-  to_psr.output_message(msg->length(), type);
 }
 
 CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_address,
@@ -302,11 +303,13 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
                                               const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                               MessageType& type)
 {
+  auto& statusManager = TheServiceParticipant->get_thread_status_manager();
+  const auto handle_as_int = handle_to_int(get_handle());
   const auto msg_len = msg->length();
   {
     GuidAddrSet::Proxy proxy(guid_addr_set_);
+    OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, READ_MASK | DONT_CALL, handle_as_int);
     proxy.maintain_admission_queue(now);
-    proxy.process_expirations(now);
     if (!proxy.check_address(remote_address)) {
       stats_reporter_.ignored_message(msg_len, now, type);
       return 0;
@@ -328,14 +331,15 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       return 0;
     }
 
-    GuidAddrSet::Proxy proxy(guid_addr_set_);
-    record_activity(proxy, addr_port, now, src_guid, type, msg_len);
-
-    cache_message(proxy, src_guid, to, msg, now);
-
     const bool from_application_participant =
       (remote_address == application_participant_addr_) &&
       (src_guid == config_.application_participant_guid());
+
+    GuidAddrSet::Proxy proxy(guid_addr_set_);
+    OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, READ_MASK | SIGNAL_MASK, handle_as_int);
+    record_activity(proxy, addr_port, now, src_guid, from_application_participant);
+
+    cache_message(proxy, src_guid, to, msg, now);
 
     bool admitted = false;
     if (proxy.ignore_rtps(from_application_participant, src_guid, now, admitted)) {
@@ -353,6 +357,9 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     if (do_normal_processing(proxy, remote_address, src_guid, to, admitted, send_to_application_participant, msg, now, sent)) {
       StringSet to_partitions;
       guid_partition_table_.lookup(to_partitions, src_guid);
+      if (guid_partition_table_.is_denied(to_partitions)) {
+        proxy.deny(src_guid);
+      }
       sent += send(proxy, src_guid, to_partitions, to, send_to_application_participant, msg, now);
     }
     return sent;
@@ -392,20 +399,20 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       has_guid = true;
     }
 
-    size_t bytes_sent = 0;
+    OpenDDS::STUN::Message response;
+    bool response_needed = false;
 
     switch (message.method) {
     case OpenDDS::STUN::BINDING:
       {
         if (message.class_ == OpenDDS::STUN::REQUEST) {
-          OpenDDS::STUN::Message response;
           response.class_ = OpenDDS::STUN::SUCCESS_RESPONSE;
           response.method = OpenDDS::STUN::BINDING;
           std::memcpy(response.transaction_id.data, message.transaction_id.data, sizeof(message.transaction_id.data));
           response.append_attribute(OpenDDS::STUN::make_mapped_address(remote_address));
           response.append_attribute(OpenDDS::STUN::make_xor_mapped_address(remote_address));
           response.append_attribute(OpenDDS::STUN::make_fingerprint());
-          bytes_sent = send(remote_address, std::move(response), now);
+          response_needed = true;
         } else if (message.class_ == OpenDDS::STUN::INDICATION) {
           // Do nothing.
         } else {
@@ -419,44 +426,52 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       // Unknown method.  Stop processing.
       HANDLER_WARNING((LM_WARNING, "(%P|%t) WARNING: VerticalHandler::process_message %C Unknown STUN method from %C\n",
         name_.c_str(), OpenDDS::DCPS::LogAddr(remote_address).c_str()));
-      bytes_sent = send(remote_address, make_bad_request_error_response(message, "Bad Request: Unknown method"), now);
+      response = make_bad_request_error_response(message, "Bad Request: Unknown method");
+      response_needed = true;
       break;
     }
 
-    CORBA::ULong messages_sent = bytes_sent ? 0 : 1;
+    CORBA::ULong messages_sent = 0;
 
     if (has_guid) {
       GuidAddrSet::Proxy proxy(guid_addr_set_);
-      ParticipantStatisticsReporter& from_psr =
-        record_activity(proxy, addr_port, now, src_guid, type, msg_len);
-      if (bytes_sent) {
-        from_psr.output_message(bytes_sent, type);
-      }
+      OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, READ_MASK | GROUP_QOS_MASK, handle_as_int);
 
       const bool from_application_participant =
         (remote_address == application_participant_addr_) &&
         (src_guid == config_.application_participant_guid());
+      bool allow_stun_responses = true;
+
+      record_activity(proxy, addr_port, now, src_guid, from_application_participant, &allow_stun_responses);
+
+      if (allow_stun_responses && response_needed) {
+        send(remote_address, std::move(response), now);
+        ++messages_sent;
+      }
 
       bool admitted = false;
       proxy.ignore_rtps(from_application_participant, src_guid, now, admitted);
       if (admitted && spdp_handler_) {
         messages_sent += spdp_handler_->send_to_application_participant(proxy, src_guid, now);
       }
+    } else if (response_needed) {
+      send(remote_address, std::move(response), now);
+      ++messages_sent;
     }
 
     return messages_sent;
   }
 }
 
-ParticipantStatisticsReporter&
+void
 VerticalHandler::record_activity(GuidAddrSet::Proxy& proxy,
                                  const AddrPort& remote_address,
                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
                                  const OpenDDS::DCPS::GUID_t& src_guid,
-                                 MessageType msg_type,
-                                 const size_t& msg_len)
+                                 bool from_application_participant,
+                                 bool* allow_stun_responses)
 {
-  return proxy.record_activity(remote_address, now, src_guid, msg_type, msg_len, *this);
+  proxy.record_activity(remote_address, now, src_guid, from_application_participant, allow_stun_responses, *this);
 }
 
 bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser,
@@ -625,9 +640,8 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
         auto p = proxy.find(guid);
         if (p != proxy.end()) {
           p->second.foreach_addr(port(),
-                                 [=, &sent, &msg](const ACE_INET_Addr& addr) {
-                                   venqueue_message(addr,
-                                                    *p->second.select_stats_reporter(port()), msg, now, type);
+                                 [&](const ACE_INET_Addr& address) {
+                                   venqueue_message(address, msg, now, type);
                                    ++sent;
           });
         }
@@ -636,9 +650,7 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
   }
 
   if (send_to_application_participant) {
-    venqueue_message(application_participant_addr_,
-      proxy.participant_statistics_reporter(config_.application_participant_guid(), now, port()),
-      msg, now, type);
+    venqueue_message(application_participant_addr_, msg, now, type);
     ++sent;
   }
 
@@ -712,13 +724,11 @@ void HorizontalHandler::enqueue_or_send_message(const ACE_INET_Addr& addr,
   RelayHandler::enqueue_message(addr, header_block, now, MessageType::Rtps);
 }
 
-CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr& from,
+CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr&,
                                                 const OpenDDS::DCPS::MonotonicTimePoint& now,
                                                 const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                                 MessageType& type)
 {
-  ACE_UNUSED_ARG(from);
-
   type = MessageType::Rtps;
 
   OpenDDS::RTPS::MessageParser mp(*msg);
@@ -739,14 +749,16 @@ CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr& from,
 
   guid_partition_table_.lookup(guids, relay_header.to_partitions(), to_guids);
   GuidAddrSet::Proxy proxy(vertical_handler_->guid_addr_set());
+  OpenDDS::DCPS::ThreadStatusManager::Event evLocked(TheServiceParticipant->get_thread_status_manager(),
+    READ_MASK | DONT_CALL, handle_to_int(get_handle()));
+
   CORBA::ULong sent = 0;
   for (const auto& guid : guids) {
     const auto p = proxy.find(guid);
     if (p != proxy.end()) {
       p->second.foreach_addr(port(),
-                             [=, &sent, &msg](const ACE_INET_Addr& addr) {
-                               vertical_handler_->venqueue_message(addr,
-                                                                   *p->second.select_stats_reporter(port()), msg, now, type);
+                             [&](const ACE_INET_Addr& addr) {
+                               vertical_handler_->venqueue_message(addr, msg, now, type);
                                ++sent;
                              });
     }
@@ -865,7 +877,7 @@ void SpdpHandler::cache_message(GuidAddrSet::Proxy& proxy,
   if (to.empty()) {
     const auto pos = proxy.find(src_guid);
     if (pos != proxy.end()) {
-      if (!pos->second.spdp_message) {
+      if (!pos->second.seen_spdp_message) {
         pos->second.common_name = extract_common_name(*msg, src_guid);
         if (config_.log_activity()) {
           ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SpdpHandler::cache_message %C got first SPDP %C into session dds.cert.sn %C\n",
@@ -873,8 +885,9 @@ void SpdpHandler::cache_message(GuidAddrSet::Proxy& proxy,
                      pos->second.get_session_time(now).sec_str().c_str(),
                      pos->second.common_name.c_str()));
         }
+        pos->second.spdp_message = msg;
+        pos->second.seen_spdp_message = true;
       }
-      pos->second.spdp_message = msg;
     }
   }
 }
@@ -908,9 +921,8 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
         const auto pos = proxy.find(guid);
         if (pos != proxy.end()) {
           pos->second.foreach_addr(port(),
-                                   [=, &sent, &msg](const ACE_INET_Addr& addr) {
-                                     venqueue_message(addr,
-                                                      *pos->second.select_stats_reporter(port()), msg, now, MessageType::Rtps);
+                                   [&](const ACE_INET_Addr& addr) {
+                                     venqueue_message(addr, msg, now, MessageType::Rtps);
                                      ++sent;
           });
         }
@@ -933,16 +945,6 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
   return true;
 }
 
-void SpdpHandler::replay(const SpdpReplay& spdp_replay)
-{
-  ACE_GUARD(ACE_Thread_Mutex, g, replay_queue_mutex_);
-  const bool notify = replay_queue_.empty();
-  replay_queue_.push_back(spdp_replay);
-  if (notify) {
-    reactor()->notify(this);
-  }
-}
-
 CORBA::ULong SpdpHandler::send_to_application_participant(GuidAddrSet::Proxy& proxy,
                                                           const OpenDDS::DCPS::GUID_t& guid,
                                                           const OpenDDS::DCPS::MonotonicTimePoint& now)
@@ -956,66 +958,9 @@ CORBA::ULong SpdpHandler::send_to_application_participant(GuidAddrSet::Proxy& pr
     return 0;
   }
 
-  return send(proxy, guid, StringSet(), GuidSet(), true, pos->second.spdp_message, now);
-}
-
-
-int SpdpHandler::handle_exception(ACE_HANDLE /*fd*/)
-{
-  OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
-
-  ReplayQueue q;
-
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, replay_queue_mutex_, 0);
-    std::swap(q, replay_queue_);
-  }
-
-  const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
-
-  // Fan-in refers to the idea that the SPDP messages for participants
-  // in a common partition need to go to the guid in the replay
-  // message.  Fan-out refers to the idea that the SPDP message of the
-  // guid in the replay message needs to go out to the other
-  // participants in a common partition.
-
-  for (const auto& r : q) {
-    const ACE_INET_Addr fan_in_replay_address(r.address().c_str());
-    const auto fan_in_to_guid = relay_guid_to_rtps_guid(r.guid());
-    GuidSet fan_in_to_guid_set;
-    fan_in_to_guid_set.insert(fan_in_to_guid);
-
-    GuidSet fan_in_from_guids;
-    guid_partition_table_.lookup(fan_in_from_guids, r.partitions(), GuidSet());
-
-    bool do_fan_out = false;
-    for (const auto& fan_in_from_guid : fan_in_from_guids) {
-      if (fan_in_from_guid == fan_in_to_guid) {
-        do_fan_out = true;
-        continue;
-      }
-
-      GuidAddrSet::Proxy proxy(guid_addr_set_);
-      const auto pos = proxy.find(fan_in_from_guid);
-      if (pos != proxy.end() && pos->second.spdp_message) {
-        // Send the SPDP message horizontally.  We may be sending to ourselves which is okay.
-        horizontal_handler_->enqueue_or_send_message(fan_in_replay_address, StringSet(), fan_in_to_guid_set, pos->second.spdp_message, now);
-      }
-    }
-
-    if (do_fan_out) {
-      GuidAddrSet::Proxy proxy(guid_addr_set_);
-      const auto pos = proxy.find(fan_in_to_guid);
-      if (pos != proxy.end() && pos->second.spdp_message) {
-        // The partitions in the replay message may be a subset of the actual partitions.
-        StringSet to_partitions;
-        guid_partition_table_.lookup(to_partitions, fan_in_to_guid);
-        send(proxy, fan_in_to_guid, to_partitions, GuidSet(), false, pos->second.spdp_message, now);
-      }
-    }
-  }
-
-  return 0;
+  const auto ret = send(proxy, guid, StringSet(), GuidSet(), true, pos->second.spdp_message, now);
+  pos->second.spdp_message = OpenDDS::DCPS::Lockable_Message_Block_Ptr{};
+  return ret;
 }
 
 SedpHandler::SedpHandler(const Config& config,
@@ -1061,9 +1006,8 @@ bool SedpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
         const auto pos = proxy.find(guid);
         if (pos != proxy.end()) {
           pos->second.foreach_addr(port(),
-                                   [=, &sent, &msg](const ACE_INET_Addr& addr) {
-                                     venqueue_message(addr,
-                                                      *pos->second.select_stats_reporter(port()), msg, now, MessageType::Rtps);
+                                   [&](const ACE_INET_Addr& addr) {
+                                     venqueue_message(addr, msg, now, MessageType::Rtps);
                                      ++sent;
                                    });
         }

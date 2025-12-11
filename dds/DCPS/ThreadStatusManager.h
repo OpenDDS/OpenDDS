@@ -38,25 +38,29 @@ public:
       ThreadStatus_Idle,
     };
 
-    Thread(const String& bit_key)
+    explicit Thread(const String& bit_key)
       : bit_key_(bit_key)
       , timestamp_(SystemTimePoint::now())
       , last_update_(MonotonicTimePoint::now())
       , last_status_change_(MonotonicTimePoint::now())
       , status_(ThreadStatus_Active)
       , nesting_depth_(0)
+      , detail1_(0)
+      , detail2_(0)
       , current_bucket_(0)
     {}
 
     const String& bit_key() const { return bit_key_; }
     const SystemTimePoint& timestamp() const { return timestamp_; }
     const MonotonicTimePoint& last_update() const { return last_update_; }
+    int detail1() const { return detail1_; }
+    int detail2() const { return detail2_; }
 
     void update(const MonotonicTimePoint& m_now,
                 const SystemTimePoint& s_now,
                 ThreadStatus next_status,
                 const TimeDuration& bucket_limit,
-                bool nested);
+                bool nested, int detail1, int detail2);
     double utilization(const MonotonicTimePoint& now) const;
 
     static const size_t bucket_count = 8;
@@ -67,6 +71,7 @@ public:
     MonotonicTimePoint last_update_, last_status_change_;
     ThreadStatus status_;
     size_t nesting_depth_;
+    int detail1_, detail2_;
 
     struct OpenDDS_Dcps_Export Bucket {
       TimeDuration active_time;
@@ -118,10 +123,10 @@ public:
 
   class Event {
   public:
-    explicit Event(ThreadStatusManager& thread_status_manager)
+    explicit Event(ThreadStatusManager& thread_status_manager, int detail1 = 0, int detail2 = 0)
       : thread_status_manager_(thread_status_manager)
     {
-      thread_status_manager_.active(true);
+      thread_status_manager_.active(true, detail1, detail2);
     }
 
     ~Event()
@@ -180,16 +185,21 @@ private:
   static ThreadId get_thread_id();
   void add_thread(const String& name);
 
-  void update_current_thread(Thread::ThreadStatus status, bool nested = false)
+  void update_current_thread(Thread::ThreadStatus status, bool nested = false, int detail1 = 0, int detail2 = 0)
   {
-    update_i(status, false, nested);
+    update_i(status, false, nested, detail1, detail2);
   }
 
   void finished() { update_i(Thread::ThreadStatus_Idle, true, false); }
 
-  void update_i(Thread::ThreadStatus status, bool finished = false, bool nested = false);
+  void update_i(Thread::ThreadStatus status, bool finished = false,
+                bool nested = false, int detail1 = 0, int detail2 = 0);
 
-  void active(bool nested = false) { update_current_thread(Thread::ThreadStatus_Active, nested); }
+  void active(bool nested = false, int detail1 = 0, int detail2 = 0)
+  {
+    update_current_thread(Thread::ThreadStatus_Active, nested, detail1, detail2);
+  }
+
   void idle(bool nested = false) { update_current_thread(Thread::ThreadStatus_Idle, nested); }
 
   void cleanup(const MonotonicTimePoint& now);

@@ -288,7 +288,7 @@ DataReaderImpl::add_association(const WriterAssociation& writer,
       statistics_.insert(
         StatsMapType::value_type(
           writer_id,
-          WriterStats(raw_latency_buffer_size_, raw_latency_buffer_type_)));
+          WriterStats(static_cast<int>(raw_latency_buffer_size_), raw_latency_buffer_type_)));
     }
 
     // If this is a durable reader
@@ -632,22 +632,18 @@ DataReaderImpl::remove_all_associations()
   stop_associating();
 
   OpenDDS::DCPS::WriterIdSeq writers;
-  int size;
+  DDS::UInt32 size;
 
   {
     ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
-    size = static_cast<int>(writers_.size());
+    size = static_cast<DDS::UInt32>(writers_.size());
     writers.length(size);
 
     WriterMapType::iterator curr_writer = writers_.begin();
     WriterMapType::iterator end_writer = writers_.end();
-
-    int i = 0;
-
-    while (curr_writer != end_writer) {
-      writers[i++] = curr_writer->first;
-      ++curr_writer;
+    for (DDS::UInt32 i = 0; curr_writer != end_writer; ++i, ++curr_writer) {
+      writers[i] = curr_writer->first;
     }
   }
 
@@ -1055,9 +1051,9 @@ DataReaderImpl::get_matched_publications(
       DDS::RETCODE_ERROR);
 
   // Copy out the handles for the current set of publications.
-  int index = 0;
   publication_handles.length(static_cast<CORBA::ULong>(this->publication_id_to_handle_map_.size()));
 
+  DDS::UInt32 index = 0;
   for (RepoIdToHandleMap::iterator
       current = this->publication_id_to_handle_map_.begin();
       current != this->publication_id_to_handle_map_.end();
@@ -1157,7 +1153,7 @@ DataReaderImpl::enable()
   }
 
   if (qos_.resource_limits.max_samples != DDS::LENGTH_UNLIMITED) {
-    n_chunks_ = qos_.resource_limits.max_samples;
+    n_chunks_ = static_cast<size_t>(qos_.resource_limits.max_samples);
   }
 
   //else using value from Service_Participant
@@ -1831,9 +1827,8 @@ DataReaderImpl::state_updated(DDS::InstanceHandle_t handle)
   state_updated_i(handle);
 }
 
-OpenDDS::DCPS::WriterStats::WriterStats(
-    int amount,
-    DataCollector<double>::OnFull type) : stats_(amount, type)
+OpenDDS::DCPS::WriterStats::WriterStats(int amount, DataCollector<double>::OnFull type)
+  : stats_(static_cast<unsigned int>(amount), type)
 {
 }
 
@@ -2213,13 +2208,12 @@ DataReaderImpl::get_latency_stats(
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(statistics_lock_);
   stats.length(static_cast<CORBA::ULong>(this->statistics_.size()));
-  int index = 0;
-
+  DDS::UInt32 index = 0;
   for (StatsMapType::const_iterator current = this->statistics_.begin();
       current != this->statistics_.end();
       ++current, ++index) {
-    stats[ index] = current->second.get_stats();
-    stats[ index].publication = current->first;
+    stats[index] = current->second.get_stats();
+    stats[index].publication = current->first;
   }
 }
 #endif
@@ -2641,12 +2635,6 @@ void DataReaderImpl::post_read_or_take()
     subscriber->set_status_changed_flag(
       DDS::DATA_ON_READERS_STATUS, false);
   }
-}
-
-ACE_Reactor_Timer_Interface*
-DataReaderImpl::get_reactor()
-{
-  return this->reactor_;
 }
 
 OpenDDS::DCPS::GUID_t

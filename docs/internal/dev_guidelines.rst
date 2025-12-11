@@ -446,6 +446,10 @@ For a ``Doodad.cpp`` file in :ghfile:`dds/DCPS`, the includes could look like:
   #include <unistd.h>
   #include <stdlib.h>
 
+*****************
+Usage Conventions
+*****************
+
 Initialization
 ==============
 

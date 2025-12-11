@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -12,19 +10,20 @@
 #include "ReactorTask.inl"
 #endif /* __ACE_INLINE__ */
 
+#include "debug.h"
 #include "RcHandle_T.h"
 #include "Service_Participant.h"
-#include "debug.h"
 
-#include <ace/Select_Reactor.h>
-#include <ace/WFMO_Reactor.h>
+#include <ace/ACE.h>
+#include <ace/OS_NS_Thread.h>
 #include <ace/Proactor.h>
 #include <ace/Proactor_Impl.h>
+#include <ace/Select_Reactor.h>
+#include <ace/WFMO_Reactor.h>
 #include <ace/WIN32_Proactor.h>
-#include <ace/OS_NS_Thread.h>
 
-#include <exception>
 #include <cstring>
+#include <exception>
 
 #if OPENDDS_CONFIG_BOOTTIME_TIMERS
 #  if defined __linux__ && __linux__
@@ -32,6 +31,17 @@
 #  else
 #    error Unsupported platform for OPENDDS_CONFIG_BOOTTIME_TIMERS
 #  endif
+#endif
+
+#ifdef ACE_HAS_MAC_OSX
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+unsigned long ACE_Hash<ACE_thread_t>::operator()(const ACE_thread_t& t) const
+{
+  char bytes[sizeof t];
+  std::memcpy(bytes, &t, sizeof t);
+  return ACE::hash_pjw(bytes, sizeof t);
+}
+ACE_END_VERSIONED_NAMESPACE_DECL
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -43,16 +53,18 @@ ReactorTask::ReactorTask(bool useAsyncSend)
   : condition_(lock_)
   , state_(STATE_UNINITIALIZED)
   , reactor_(0)
-  , reactor_owner_(ACE_OS::NULL_thread)
   , proactor_(0)
+  , n_threads_(1)
 #ifdef OPENDDS_REACTOR_TASK_ASYNC
   , use_async_send_(useAsyncSend)
 #endif
   , timer_queue_(0)
   , reactor_state_(RS_NONE)
   , thread_status_manager_(0)
+  , thread_status_timer_(ReactorWrapper::InvalidTimerId)
 {
   ACE_UNUSED_ARG(useAsyncSend);
+  reactor_owners_.open(64);
 }
 
 ReactorTask::~ReactorTask()
@@ -62,7 +74,7 @@ ReactorTask::~ReactorTask()
 
 void ReactorTask::wait_for_startup_i() const
 {
-  while (state_ == STATE_UNINITIALIZED || state_ == STATE_OPENING) {
+  while (state_ == STATE_UNINITIALIZED) {
     condition_.wait(thread_status_manager_ ?
                       *thread_status_manager_ :
                       TheServiceParticipant->get_thread_status_manager());
@@ -82,18 +94,25 @@ void ReactorTask::cleanup()
   }
 #endif
 
+  job_queue(JobQueue_rch());
   delete reactor_;
   reactor_ = 0;
   delete timer_queue_;
   timer_queue_ = 0;
 }
 
-int ReactorTask::open_reactor_task(ThreadStatusManager* thread_status_manager,
+int ReactorTask::init_reactor_task(ThreadStatusManager* thread_status_manager,
                                    const String& name,
                                    ACE_Reactor* reactor)
 {
   GuardType guard(lock_);
+  return init_i(thread_status_manager, name, reactor);
+}
 
+int ReactorTask::init_i(ThreadStatusManager* thread_status_manager,
+                        const String& name,
+                        ACE_Reactor* reactor)
+{
   // If we've already been opened, let's clean up the old stuff
   cleanup();
 
@@ -117,6 +136,8 @@ int ReactorTask::open_reactor_task(ThreadStatusManager* thread_status_manager,
     proactor_ = 0;
   }
 
+  ACE_Event_Handler::reactor(reactor_);
+
   if (!timer_queue_) {
     timer_queue_ = new TimerQueueType();
     reactor_->timer_queue(timer_queue_);
@@ -124,13 +145,20 @@ int ReactorTask::open_reactor_task(ThreadStatusManager* thread_status_manager,
 
   if (!reactor_wrapper_.open(reactor_)) {
     if (log_level >= LogLevel::Error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: ReactorTask::open_reactor_task: could not open ReactorWrapper\n"));
+      ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: ReactorTask::init_i: could not open ReactorWrapper\n"));
     }
     return -1;
   }
 
-  state_ = STATE_OPENING;
-  condition_.notify_all();
+  return 0;
+}
+
+int ReactorTask::open_reactor_task(ThreadStatusManager* thread_status_manager,
+                                   const String& name,
+                                   ACE_Reactor* reactor)
+{
+  GuardType guard(lock_);
+  init_i(thread_status_manager, name, reactor);
 
   if (activate(THR_NEW_LWP | THR_JOINABLE, 1) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -148,6 +176,10 @@ int ReactorTask::open_reactor_task(ThreadStatusManager* thread_status_manager,
 
 int ReactorTask::svc()
 {
+  if (n_threads_ > 1) {
+    return run_reactor_i();
+  }
+
   ThreadStatusManager::Start s(*thread_status_manager_, name_);
 
   {
@@ -171,7 +203,7 @@ int ReactorTask::svc()
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: Failed to change the reactor's owner().\n"));
     }
-    reactor_owner_ = ACE_Thread_Manager::instance()->thr_self();
+    reactor_owners_.bind(ACE_Thread_Manager::instance()->thr_self(), 1);
 
     ACE_Event_Handler::reactor(reactor_);
 
@@ -180,16 +212,13 @@ int ReactorTask::svc()
     condition_.notify_all();
   }
 
-  ReactorWrapper::TimerId thread_status_timer = ReactorWrapper::InvalidTimerId;
-  RcHandle<RcEventHandler> tsm_updater_handler;
-
   if (thread_status_manager_->update_thread_status()) {
-    tsm_updater_handler = make_rch<ThreadStatusManager::Updater>();
-    const TimeDuration period = thread_status_manager_->thread_status_interval();
-    thread_status_timer = reactor_wrapper_.schedule(*tsm_updater_handler, thread_status_manager_,
-                                                    period, period);
+    tsm_updater_handler_ = make_rch<ThreadStatusManager::Updater>();
+    thread_status_period_ = thread_status_manager_->thread_status_interval();
+    thread_status_timer_ = reactor_wrapper_.schedule(*tsm_updater_handler_, thread_status_manager_,
+                                                     thread_status_period_, thread_status_period_);
 
-    if (thread_status_timer == ReactorWrapper::InvalidTimerId) {
+    if (thread_status_timer_ == ReactorWrapper::InvalidTimerId) {
       if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: ReactorTask::svc: failed to "
                               "schedule timer for ThreadStatusManager::Updater\n"));
@@ -197,13 +226,87 @@ int ReactorTask::svc()
     }
   }
 
+  ConfigReaderListener_rch this_rch(this, inc_count());
+  ConfigReader_rch config_reader = make_rch<ConfigReader>(TheServiceParticipant->config_store()->datareader_qos(), this_rch);
+  TheServiceParticipant->config_topic()->connect(config_reader);
+
   ThreadStatusManager::Sleeper sleeper(thread_status_manager_);
   reactor_->run_reactor_event_loop();
 
-  if (thread_status_timer != ReactorWrapper::InvalidTimerId) {
-    reactor_wrapper_.cancel(thread_status_timer);
+  TheServiceParticipant->config_topic()->disconnect(config_reader);
+
+  if (thread_status_timer_ != ReactorWrapper::InvalidTimerId) {
+    reactor_wrapper_.cancel(thread_status_timer_);
   }
+
   return 0;
+}
+
+int ReactorTask::run_reactor(size_t threads, const TimeDuration& run_time)
+{
+  n_threads_ = threads;
+  run_time_ = run_time;
+  if (threads == 1) {
+    const ACE_thread_t self = ACE_Thread_Manager::instance()->thr_self();
+    if (reactor_->owner(self) != 0) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Failed to change the reactor's owner().\n"));
+    }
+    reactor_owners_.bind(self, 1);
+    return run_reactor_i();
+  }
+  int status = activate(THR_NEW_LWP | THR_JOINABLE | THR_INHERIT_SCHED, static_cast<int>(threads));
+  if (status != EXIT_SUCCESS) {
+    return status;
+  }
+  status = wait();
+
+  GuardType guard(lock_);
+  reactor_owners_.unbind_all();
+  state_ = STATE_SHUT_DOWN;
+  condition_.notify_all();
+  return status;
+}
+
+int ReactorTask::run_reactor_i()
+{
+  {
+    GuardType guard(lock_);
+    state_ = STATE_RUNNING;
+    condition_.notify_all();
+  }
+  const bool has_run_time = !run_time_.is_zero();
+  const MonotonicTimePoint end_time = MonotonicTimePoint::now() + run_time_;
+
+  if (thread_status_manager_->update_thread_status()) {
+    ThreadStatusManager::Start thread_status_monitoring_active(*thread_status_manager_, name_);
+
+    while (!has_run_time || MonotonicTimePoint::now() < end_time) {
+      ACE_Time_Value t = thread_status_manager_->thread_status_interval().value();
+      ThreadStatusManager::Sleeper s(thread_status_manager_);
+      if (reactor_->run_reactor_event_loop(t, 0) != 0) {
+        break;
+      }
+    }
+
+  } else if (has_run_time) {
+    while (MonotonicTimePoint::now() < end_time) {
+      ACE_Time_Value t = (end_time - MonotonicTimePoint::now()).value();
+      if (reactor_->run_reactor_event_loop(t, 0) != 0) {
+        break;
+      }
+    }
+
+  } else {
+    reactor_->run_reactor_event_loop();
+  }
+
+  if (n_threads_ == 1) {
+    GuardType guard(lock_);
+    reactor_owners_.unbind_all();
+    state_ = STATE_SHUT_DOWN;
+    condition_.notify_all();
+  }
+  return EXIT_SUCCESS;
 }
 
 int ReactorTask::close(u_long flags)
@@ -272,7 +375,7 @@ void ReactorTask::stop()
 bool ReactorTask::on_thread() const
 {
   GuardType guard(lock_);
-  return ACE_OS::thr_equal(reactor_owner_, ACE_Thread::self());
+  return reactor_owners_.find(ACE_Thread::self()) == EXIT_SUCCESS;
 }
 
 void ReactorTask::reactor(ACE_Reactor* reactor)
@@ -293,9 +396,9 @@ ReactorTask::CommandPtr ReactorTask::execute_or_enqueue(CommandPtr command)
 
   GuardType guard(lock_);
 
-  // Only allow immediate execution if running on the reactor thread, otherwise we risk deadlock
+  // Only allow immediate execution if running on a reactor thread, otherwise we risk deadlock
   // when calling into the reactor object.
-  const bool is_owner = ACE_OS::thr_equal(reactor_owner_, ACE_Thread::self());
+  const bool is_owner = reactor_owners_.find(ACE_Thread::self()) == EXIT_SUCCESS;
 
   // If state is set to processing, the contents of command_queue_ have been swapped out
   // so immediate execution may run jobs out of the expected order.
@@ -364,6 +467,43 @@ void ReactorTask::process_command_queue_i(ACE_Guard<ACE_Thread_Mutex>& guard,
   } else {
     reactor_state_ = RS_NONE;
     condition_.notify_all();
+  }
+}
+
+size_t ReactorTask::command_queue_size() const
+{
+  GuardType guard(lock_);
+  return command_queue_.size();
+}
+
+void ReactorTask::on_data_available(InternalDataReader_rch reader)
+{
+  OpenDDS::DCPS::ConfigReader::SampleSequence samples;
+  OpenDDS::DCPS::InternalSampleInfoSequence infos;
+  reader->read(samples, infos, DDS::LENGTH_UNLIMITED,
+               DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+  for (size_t idx = 0; idx != samples.size(); ++idx) {
+    if (infos[idx].valid_data && samples[idx].key() == COMMON_DCPS_THREAD_STATUS_INTERVAL) {
+      const TimeDuration per(std::atoi(samples[idx].value().c_str()));
+      if (per == thread_status_period_) {
+        continue;
+      }
+      thread_status_period_ = per;
+      if (thread_status_timer_ != ReactorWrapper::InvalidTimerId) {
+        reactor_wrapper_.cancel(thread_status_timer_);
+      }
+      if (per) {
+        if (!tsm_updater_handler_) {
+          tsm_updater_handler_ = make_rch<ThreadStatusManager::Updater>();
+        }
+
+        thread_status_timer_ = reactor_wrapper_.schedule(*tsm_updater_handler_, thread_status_manager_, per, per);
+        if (thread_status_timer_ == ReactorWrapper::InvalidTimerId && log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: ReactorTask::on_data_available: failed to "
+                                "schedule timer for ThreadStatusManager::Updater\n"));
+        }
+      }
+    }
   }
 }
 

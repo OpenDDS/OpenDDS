@@ -825,7 +825,6 @@ private:
   bool need_sequence_repair();
   bool need_sequence_repair_i() const;
 
-  DDS::ReturnCode_t send_end_historic_samples(const GUID_t& readerId);
   DDS::ReturnCode_t send_request_ack();
 
   // Lock used to synchronize remove_associations calls from discovery

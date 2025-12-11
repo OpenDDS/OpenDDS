@@ -151,14 +151,14 @@ Service_Participant::Service_Participant()
   ORB_argv_(false /*substitute_env_args*/),
 #endif
   time_source_()
-  , reactor_task_(false)
   , monitor_factory_(0)
   , priority_min_(0)
   , priority_max_(0)
   , shut_down_(false)
   , network_interface_address_topic_(make_rch<InternalTopic<NetworkInterfaceAddress> >())
+  , statistics_topic_(make_rch<StatisticsTopic>())
   , config_topic_(make_rch<InternalTopic<ConfigPair> >())
-  , config_store_(make_rch<ConfigStoreImpl>(config_topic_))
+  , config_store_(make_rch<ConfigStoreImpl>(config_topic_, time_source_))
   , config_reader_(make_rch<InternalDataReader<ConfigPair> >(DataReaderQosBuilder().reliability_reliable().durability_transient_local()))
   , config_reader_listener_(make_rch<ConfigReaderListener>(ref(*this)))
   , pending_timeout_(0,0) // Can't use COMMON_DCPS_PENDING_TIMEOUT_default due to initialization order.
@@ -446,8 +446,8 @@ Service_Participant::get_domain_participant_factory(int &argc,
       dp_factory_servant_ = make_rch<DomainParticipantFactoryImpl>();
 
       reactor_task_.open_reactor_task(&thread_status_manager_, "Service_Participant");
-
       job_queue_ = make_rch<JobQueue>(reactor_task_.get_reactor());
+      reactor_task_.job_queue(job_queue_);
 
       const bool monitor_enabled = config_store_->get_boolean(COMMON_DCPS_MONITOR,
                                                               COMMON_DCPS_MONITOR_default);
@@ -529,6 +529,8 @@ Service_Participant::get_domain_participant_factory(int &argc,
     }
   }
 
+  config_reader_listener_->job_queue(job_queue_);
+  config_reader_->set_listener(config_reader_listener_);
   return DDS::DomainParticipantFactory::_duplicate(dp_factory_servant_.in());
 }
 
@@ -1296,7 +1298,7 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
       }
 
       // Wait to traverse the list and try again.
-      ACE_OS::sleep(backoff);
+      ACE_OS::sleep(static_cast<unsigned int>(backoff));
 
       // Exponentially backoff delay.
       backoff *= this->federation_backoff_multiplier();
@@ -1603,7 +1605,7 @@ void Service_Participant::pending_timeout(const TimeDuration& value)
     ACE_GUARD(ACE_Thread_Mutex, guard, cached_config_mutex_);
     pending_timeout_ = value;
   }
-  config_store_->set(COMMON_DCPS_PENDING_TIMEOUT, value, ConfigStoreImpl::Format_IntegerSeconds);
+  config_store_->set(COMMON_DCPS_PENDING_TIMEOUT, value, ConfigStoreImpl::Format_FractionalSeconds);
 }
 
 MonotonicTimePoint
@@ -2333,6 +2335,22 @@ Service_Participant::printer_value_writer_indent(unsigned int value)
   config_store_->set_uint32(COMMON_PRINTER_VALUE_WRITER_INDENT, value);
 }
 
+TimeDuration
+Service_Participant::statistics_period() const
+{
+  return config_store_->get(COMMON_STATISTICS_PERIOD,
+                            COMMON_STATISTICS_PERIOD_default,
+                            ConfigStoreImpl::Format_FractionalSeconds);
+}
+
+void
+Service_Participant::statistics_period(const TimeDuration& value)
+{
+  config_store_->set(COMMON_STATISTICS_PERIOD,
+                     value,
+                     ConfigStoreImpl::Format_FractionalSeconds);
+}
+
 void
 Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_rch reader)
 {
@@ -2347,9 +2365,9 @@ Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_
       if (p.key() == COMMON_ORB_LOG_FILE) {
         set_log_file_name(p.value().c_str());
       } else if (p.key() == COMMON_ORB_VERBOSE_LOGGING) {
-        set_log_verbose(ACE_OS::atoi(p.value().c_str()));
+        set_log_verbose(static_cast<unsigned long>(ACE_OS::atoi(p.value().c_str())));
       } else if (p.key() == COMMON_DCPS_DEBUG_LEVEL) {
-        set_DCPS_debug_level(ACE_OS::atoi(p.value().c_str()));
+        set_DCPS_debug_level(static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str())));
       } else if (p.key() == COMMON_DCPSRTI_SERIALIZATION) {
         if (ACE_OS::atoi(p.value().c_str()) == 0 && log_level >= LogLevel::Warning) {
           ACE_ERROR((LM_WARNING,
@@ -2357,12 +2375,12 @@ Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_
                      ACE_TEXT("Argument ignored: DCPSRTISerialization is required to be enabled\n")));
         }
       } else if (p.key() == COMMON_DCPS_TRANSPORT_DEBUG_LEVEL) {
-        OpenDDS::DCPS::Transport_debug_level = ACE_OS::atoi(p.value().c_str());
+        Transport_debug_level = static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str()));
       } else if (p.key() == COMMON_DCPS_THREAD_STATUS_INTERVAL) {
         service_participant_.thread_status_manager_.thread_status_interval(TimeDuration(ACE_OS::atoi(p.value().c_str())));
 #if OPENDDS_CONFIG_SECURITY
       } else if (p.key() == COMMON_DCPS_SECURITY_DEBUG_LEVEL) {
-        security_debug.set_debug_level(ACE_OS::atoi(p.value().c_str()));
+        security_debug.set_debug_level(static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str())));
       } else if (p.key() == COMMON_DCPS_SECURITY_DEBUG) {
         security_debug.parse_flags(p.value().c_str());
       } else if (p.key() == COMMON_DCPS_SECURITY_FAKE_ENCRYPTION) {
@@ -2375,7 +2393,7 @@ Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_
         service_participant_.pending_timeout_ =
           service_participant_.config_store_->get(COMMON_DCPS_PENDING_TIMEOUT,
                                                   COMMON_DCPS_PENDING_TIMEOUT_default,
-                                                  ConfigStoreImpl::Format_IntegerSeconds);
+                                                  ConfigStoreImpl::Format_FractionalSeconds);
       } else if (p.key() == COMMON_DCPS_DEFAULT_DISCOVERY) {
         ACE_GUARD(ACE_Thread_Mutex, guard, service_participant_.cached_config_mutex_);
         service_participant_.default_discovery_ =

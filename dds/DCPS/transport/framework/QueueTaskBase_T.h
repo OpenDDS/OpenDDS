@@ -110,7 +110,6 @@ public:
     DBG_ENTRY("QueueTaskBase","svc");
 
     ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-    const TimeDuration thread_status_interval = thread_status_manager.thread_status_interval();
 
     ThreadStatusManager::Start s(thread_status_manager, "QueueTaskBase");
 
@@ -124,14 +123,14 @@ public:
 
         if (this->queue_.is_empty() && !shutdown_initiated_) {
           if (thread_status_manager.update_thread_status()) {
-            MonotonicTimePoint expire = MonotonicTimePoint::now() + thread_status_interval;
+            MonotonicTimePoint expire = MonotonicTimePoint::now() + thread_status_manager.thread_status_interval();
 
             do {
               work_available_.wait_until(expire, thread_status_manager);
 
               MonotonicTimePoint now = MonotonicTimePoint::now();
               if (now > expire) {
-                expire = now + thread_status_interval;
+                expire = now + thread_status_manager.thread_status_interval();
               }
             } while (this->queue_.is_empty() && !shutdown_initiated_);
           } else {

@@ -7,10 +7,13 @@
 import sys
 import os
 import re
+import logging
 from pathlib import Path
 
 from docutils.transforms import Transform
 from docutils import nodes
+
+from sphinx.util.logging import NAMESPACE as sphinx_root_logger
 
 docs_path = Path(__file__).parent
 opendds_root_path = docs_path.parent
@@ -18,10 +21,17 @@ ext = (docs_path / 'sphinx_extensions').resolve()
 sys.path.append(str(ext))
 github_links_root_path = str(opendds_root_path)
 
+import newsd
 from mpc_lexer import MpcLexer
-from newsd import print_all_news, parse_newsd
 from version_info import VersionInfo
 from links import add_omg_spec
+from opendds_logging import GhaAnnotationHandler, create_gha_annotation, replace_files
+
+
+# Make Sphinx output GitHub Actions annotations
+logging.getLogger(sphinx_root_logger).addHandler(
+    GhaAnnotationHandler(replace_files=replace_files))
+
 
 # Custom Values ---------------------------------------------------------------
 
@@ -86,17 +96,25 @@ if is_release:
     github_links_release_tag = opendds_version_info.tag
 ace6tao2_version = opendds_version_info.ace6tao2_version
 ace7tao3_version = opendds_version_info.ace7tao3_version
-if opendds_version_info.release_year:
-    copyright = f'{opendds_version_info.release_year} {copyright}'
+if opendds_version_info.release_date:
+    copyright = f'{opendds_version_info.release_date.year} {copyright}'
 
-# Generate news for all releases
-with (docs_path / 'news.rst').open('w') as f:
-    print_all_news(file=f)
+# Handle News Generation
+try:
+    # Generate news for all releases
+    with (docs_path / 'news.rst').open('w') as f:
+        newsd.print_all_news(file=f)
 
-# Generate news used for NEWS.md and Markdown release notes for GitHub
-with (docs_path / 'this-release.rst').open('w') as f:
-    print(':orphan:\n', file=f)
-    parse_newsd().print_all(file=f)
+    # Generate news used for NEWS.md and Markdown release notes for GitHub
+    with (docs_path / 'this-release.rst').open('w') as f:
+        print(':orphan:\n', file=f)
+        newsd.parse_newsd().print_all(file=f)
+except newsd.ParseError as e:
+    anno = create_gha_annotation(
+        'error', e.message, title='news', file=e.path, line=e.lineno, replace_files=replace_files)
+    if anno:
+        print(anno)
+    raise
 
 
 # -- General configuration ---------------------------------------------------
@@ -145,17 +163,10 @@ numfig = False
 
 highlight_language = 'none'
 
+linkcheck_retries = 3
 linkcheck_ignore = [
     # Linkcheck doesn't work with GitHub anchors
     r'^https?://github\.com/.*#.+$',
-    # Returns 403 for some reason
-    r'^https?://docs\.github\.com/.*$',
-    r'^https://www.dds-foundation.org/.*$',
-    r'^https://www.corba.org/.*$',
-    # UTF-8 decode errors (trying to parse PDF as HTML?), shouldn't check these anyways
-    r'^https?://www\.omg\.org/spec/.*/PDF.*$',
-    # OMG Member link, will always redirect to a login page
-    r'https://issues.omg.org/browse/.*$'
 ]
 
 intersphinx_mapping = {

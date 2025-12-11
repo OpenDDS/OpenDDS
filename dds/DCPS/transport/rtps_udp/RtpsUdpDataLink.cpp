@@ -344,10 +344,10 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
   }
 
   if (cfg->send_buffer_size() > 0) {
-    const int snd_size = cfg->send_buffer_size();
+    int snd_size = cfg->send_buffer_size();
     if (unicast_socket_.set_option(SOL_SOCKET,
                                 SO_SNDBUF,
-                                (void *) &snd_size,
+                                &snd_size,
                                 sizeof(snd_size)) < 0
         && errno != ENOTSUP) {
       if (DCPS_debug_level > 0) {
@@ -376,10 +376,10 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
   }
 
   if (cfg->rcv_buffer_size() > 0) {
-    const int rcv_size = cfg->rcv_buffer_size();
+    int rcv_size = cfg->rcv_buffer_size();
     if (unicast_socket_.set_option(SOL_SOCKET,
                                 SO_RCVBUF,
-                                (void *) &rcv_size,
+                                &rcv_size,
                                 sizeof(int)) < 0
         && errno != ENOTSUP) {
       if (DCPS_debug_level > 0) {
@@ -1850,6 +1850,11 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
   const SequenceNumber start = to_opendds_seqnum(gap.gapStart);
   const SequenceNumber base = to_opendds_seqnum(gap.gapList.bitmapBase);
 
+  if (Transport_debug_level > 5) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsReader::process_gap_i: %C -> %C start %q base %q bits %u\n",
+      LogGuid(src).c_str(), LogGuid(id_).c_str(), start.getValue(), base.getValue(), gap.gapList.numBits));
+  }
+
   if (start < base) {
     writer->recvd_.insert(SequenceRange(start, base.previous()));
   } else if (start != base) {
@@ -2371,7 +2376,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(const WriterInfo_rch& writer,
             break;
           }
         } else {
-          if ((0xffffffff << (32 - (num_bits % 32))) & bitmap[i]) {
+          if ((0xffffffff << (32 - (num_bits % 32))) & static_cast<DDS::UInt32>(bitmap[i])) {
             break;
           }
         }
@@ -2849,7 +2854,7 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVec& meta_submessages
                 if (res.sm_.heartbeat_sm().count.value != map_pair.new_) {
                   update_required_acknack_count(res.src_guid_, res.dst_guid_, map_pair.new_);
                 }
-                res.sm_.heartbeat_sm().smHeader.flags &= ~RTPS::OPENDDS_FLAG_R;
+                res.sm_.heartbeat_sm().smHeader.flags &= static_cast<ACE_CDR::Octet>(~RTPS::OPENDDS_FLAG_R);
               }
             }
             map_pair.is_new_assigned_ = true;
@@ -2960,7 +2965,7 @@ RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(MetaSubmessageVec& meta_subme
       fnSet.numBits = std::min(CORBA::ULong(256), iter->second.value);
       fnSet.bitmap.length((fnSet.numBits + 31) / 32);
       for (CORBA::ULong i = 0; i < fnSet.bitmap.length(); ++i) {
-        fnSet.bitmap[i] = 0xFFFFFFFF;
+        fnSet.bitmap[i] = -1;
       }
     }
   }
@@ -3298,6 +3303,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       snris_insert(acked_sn == max_seqnum ? leading_readers_ : lagging_readers_, reader);
       previous_acked_sn = acked_sn;
       check_leader_lagger();
+      fallback_.set(initial_fallback_);
       heartbeat_->schedule(fallback_.get());
 
       if (reader->durable_) {
@@ -3769,7 +3775,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
       meta_submessage.sm_.heartbeat_sm().smHeader.flags |= RTPS::OPENDDS_FLAG_R;
       gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
       reader->required_acknack_count_ = heartbeat_count_;
-      meta_submessage.sm_.heartbeat_sm().smHeader.flags &= ~RTPS::OPENDDS_FLAG_R;
+      meta_submessage.sm_.heartbeat_sm().smHeader.flags &= static_cast<ACE_CDR::Octet>(~RTPS::OPENDDS_FLAG_R);
     } else {
       gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
     }
@@ -3858,6 +3864,7 @@ RtpsUdpDataLink::RtpsWriter::make_leader_lagger(const GUID_t& reader_id,
             lagging_readers_[previous_max_sn] = leading_pos->second;
           }
           leading_readers_.erase(leading_pos);
+          fallback_.set(initial_fallback_);
           heartbeat_->schedule(fallback_.get());
         }
       }
@@ -3881,6 +3888,7 @@ RtpsUdpDataLink::RtpsWriter::make_leader_lagger(const GUID_t& reader_id,
       if (acked_sn == previous_max_sn && previous_max_sn != max_sn_) {
         snris_erase(leading_readers_, acked_sn, reader);
         snris_insert(lagging_readers_, reader);
+        fallback_.set(initial_fallback_);
         heartbeat_->schedule(fallback_.get());
       }
     }
@@ -3909,6 +3917,7 @@ RtpsUdpDataLink::RtpsWriter::make_lagger_leader(const ReaderInfo_rch& reader,
   snris_erase(previous_acked_sn == previous_max_sn ? leading_readers_ : lagging_readers_, previous_acked_sn, reader);
   snris_insert(acked_sn == max_sn ? leading_readers_ : lagging_readers_, reader);
   if (acked_sn != max_sn) {
+    fallback_.set(initial_fallback_);
     heartbeat_->schedule(fallback_.get());
   }
 }
@@ -4541,6 +4550,19 @@ RtpsUdpDataLink::RtpsWriter::add_elem_awaiting_ack(TransportQueueElement* elemen
   elems_not_acked_.insert(SnToTqeMap::value_type(element->sequence(), element));
 }
 
+SequenceNumber
+RtpsUdpDataLink::RtpsWriter::cur_cumulative_ack(const GUID_t& reader_id) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+
+  ReaderInfoMap::const_iterator iter = remote_readers_.find(reader_id);
+  if (iter != remote_readers_.end()) {
+    return iter->second->cur_cumulative_ack();
+  }
+
+  return SequenceNumber::ZERO();
+}
+
 bool
 RtpsUdpDataLink::RtpsWriter::is_leading(const GUID_t& reader_id) const
 {
@@ -4611,13 +4633,13 @@ RtpsUdpDataLink::transport() const
 }
 
 RtpsUdpSendStrategy_rch
-RtpsUdpDataLink::send_strategy()
+RtpsUdpDataLink::send_strategy() const
 {
   return dynamic_rchandle_cast<RtpsUdpSendStrategy>(send_strategy_);
 }
 
 RtpsUdpReceiveStrategy_rch
-RtpsUdpDataLink::receive_strategy()
+RtpsUdpDataLink::receive_strategy() const
 {
   return dynamic_rchandle_cast<RtpsUdpReceiveStrategy>(receive_strategy_);
 }
@@ -4692,7 +4714,7 @@ bool RtpsUdpDataLink::RemoteInfo::insert_recv_addr(NetworkAddressSet& aset) cons
   if (!last_recv_addr_) {
     return false;
   }
-  const ACE_INT16 last_addr_type = last_recv_addr_.get_type();
+  const ACE_UINT16 last_addr_type = last_recv_addr_.get_type();
   NetworkAddress limit;
   limit.set_type(last_addr_type);
   NetworkAddressSet::const_iterator it = unicast_addrs_.lower_bound(limit);
@@ -4831,6 +4853,24 @@ RtpsUdpDataLink::get_ice_endpoint() const
   return ti ? ti->get_ice_endpoint() : WeakRcHandle<ICE::Endpoint>();
 }
 
+SequenceNumber
+RtpsUdpDataLink::cur_cumulative_ack(const GUID_t& writer_id,
+                                    const GUID_t& reader_id) const
+{
+  RtpsWriterMap::mapped_type writer;
+
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, writers_lock_, false);
+    RtpsWriterMap::const_iterator pos = writers_.find(writer_id);
+    if (pos == writers_.end()) {
+      return false;
+    }
+    writer = pos->second;
+  }
+
+  return writer->cur_cumulative_ack(reader_id);
+}
+
 bool RtpsUdpDataLink::is_leading(const GUID_t& writer_id,
                                  const GUID_t& reader_id) const
 {
@@ -4869,6 +4909,107 @@ void RtpsUdpDataLink::RtpsReader::log_remote_counts(const char* funcname)
       preassociation_writers_.size(), remote_writers_.size()));
   }
 }
+
+StatisticSeq RtpsUdpDataLink::stats_template()
+{
+  static const DDS::UInt32 num_local_stats = 16;
+  const StatisticSeq base = DataLink::stats_template(),
+    send = RtpsUdpSendStrategy::stats_template(),
+    recv = RtpsUdpReceiveStrategy::stats_template();
+  StatisticSeq stats(base.length() + num_local_stats + send.length() + recv.length());
+  stats.length(stats.maximum());
+  for (DDS::UInt32 i = 0; i < base.length(); ++i) {
+    stats[i].name = base[i].name;
+  }
+  const DDS::UInt32 local_offset = base.length();
+  stats[local_offset].name = "RtpsUdpDataLinkJobQueue";
+  stats[local_offset + 1].name = "RtpsUdpDataLinkLocators";
+  stats[local_offset + 2].name = "RtpsUdpDataLinkLocatorCache";
+  stats[local_offset + 3].name = "RtpsUdpDataLinkBundlingCache";
+  stats[local_offset + 4].name = "RtpsUdpDataLinkMessageBlocks";
+  stats[local_offset + 5].name = "RtpsUdpDataLinkDataBlocks";
+  stats[local_offset + 6].name = "RtpsUdpDataLinkWriters";
+  stats[local_offset + 7].name = "RtpsUdpDataLinkRemoteReaders";
+  stats[local_offset + 8].name = "RtpsUdpDataLinkSendBuffers";
+  stats[local_offset + 9].name = "RtpsUdpDataLinkPendingReliableReaders";
+  stats[local_offset + 10].name = "RtpsUdpDataLinkReaders";
+  stats[local_offset + 11].name = "RtpsUdpDataLinkRemoteWriters";
+  stats[local_offset + 12].name = "RtpsUdpDataLinkReadersOfWriter";
+  stats[local_offset + 13].name = "RtpsUdpDataLinkWriterToBestEffort";
+  stats[local_offset + 14].name = "RtpsUdpDataLinkSendQueue";
+  stats[local_offset + 15].name = "RtpsUdpDataLinkFlushSendQueue";
+  const DDS::UInt32 send_offset = local_offset + num_local_stats;
+  for (DDS::UInt32 i = 0; i < send.length(); ++i) {
+    stats[send_offset + i].name = send[i].name;
+  }
+  const DDS::UInt32 recv_offset = send_offset + send.length();
+  for (DDS::UInt32 i = 0; i < recv.length(); ++i) {
+    stats[recv_offset + i].name = recv[i].name;
+  }
+  return stats;
+}
+
+void RtpsUdpDataLink::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
+{
+  DataLink::fill_stats(stats, idx);
+  stats[idx++].value = job_queue_ ? job_queue_->size() : 0;
+  stats[idx++].value = locators_.size();
+  stats[idx++].value = locator_cache_.size();
+  stats[idx++].value = bundling_cache_.size();
+  stats[idx++].value = mb_allocator_.bytes_heap_allocated();
+  stats[idx++].value = db_allocator_.bytes_heap_allocated();
+  stats[idx++].value = writers_.size();
+  const std::pair<size_t, size_t> local_writer_stats = local_reliable_writer_stats();
+  stats[idx++].value = local_writer_stats.first;
+  stats[idx++].value = local_writer_stats.second;
+  stats[idx++].value = pending_reliable_readers_.size();
+  stats[idx++].value = readers_.size();
+  stats[idx++].value = total_remote_reliable_writers();
+  stats[idx++].value = readers_of_writer_.size();
+  stats[idx++].value = writer_to_seq_best_effort_readers_.size();
+  stats[idx++].value = sq_.size();
+  {
+    ACE_Guard<ACE_Thread_Mutex> fsq_guard(fsq_mutex_);
+    stats[idx++].value = fsq_vec_size_;
+  }
+  const RtpsUdpSendStrategy_rch send = send_strategy();
+  if (send) {
+    send->fill_stats(stats, idx);
+  }
+  const RtpsUdpReceiveStrategy_rch recv = receive_strategy();
+  if (recv) {
+    recv->fill_stats(stats, idx);
+  }
+}
+
+size_t RtpsUdpDataLink::total_remote_reliable_writers() const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(readers_lock_);
+  size_t writers = 0;
+  for (RtpsReaderMap::const_iterator iter = readers_.begin(); iter != readers_.end(); ++iter) {
+    writers += iter->second->writer_count();
+  }
+  return writers;
+}
+
+std::pair<size_t, size_t> RtpsUdpDataLink::local_reliable_writer_stats() const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(writers_lock_);
+  const RtpsWriterMap writers(writers_);
+  guard.release();
+
+  size_t readers = 0;
+  size_t buffer_size = 0;
+  for (RtpsWriterMap::const_iterator iter = writers.begin(); iter != writers.end(); ++iter) {
+    readers += iter->second->reader_count();
+    const RcHandle<SingleSendBuffer> sb = iter->second->get_send_buff();
+    if (sb) {
+      buffer_size += sb->size();
+    }
+  }
+  return std::make_pair(readers, buffer_size);
+}
+
 
 } // namespace DCPS
 } // namespace OpenDDS

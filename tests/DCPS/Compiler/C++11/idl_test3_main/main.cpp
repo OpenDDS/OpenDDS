@@ -251,7 +251,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     //=====================================================================
     Xyz::StructOfArrayOfOctet val;
 
-    for (CORBA::ULong ii =0; ii < ARRAY_LEN; ii++) {
+    for (CORBA::Octet ii = 0; ii < ARRAY_LEN; ++ii) {
       val.f()[ii] = ii;
     }
 
@@ -416,7 +416,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     Xyz::StructOfSeqOfOctet val;
     val.field().resize(SEQ_LEN);
 
-    for (CORBA::ULong ii =0; ii < SEQ_LEN; ii++) {
+    for (CORBA::Octet ii = 0; ii < SEQ_LEN; ++ii) {
       val.field()[ii] = ii;
     }
 

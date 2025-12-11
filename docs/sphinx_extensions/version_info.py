@@ -2,6 +2,8 @@
 
 import re
 import configparser
+import time
+import datetime
 from pathlib import Path
 
 
@@ -12,6 +14,7 @@ with (opendds_root_path / 'dds/Version.h').open() as f:
 
 with (opendds_root_path / 'VERSION.txt').open() as f:
     version_txt_file = f.read()
+
 
 class VersionInfo:
 
@@ -42,13 +45,7 @@ class VersionInfo:
         vparts = {p: self.get(int, p + '_version') for p in ('major', 'minor', 'micro')}
         self.ver = '{major}.{minor}.{micro}'.format(**vparts)
         self.v_ver = 'v' + self.ver
-        if vparts['major'] >= 4:
-            self.tag = self.v_ver
-        else:
-            fmt_str = 'DDS-{major}.{minor}'
-            if vparts['micro'] > 0:
-                fmt_str += '.{micro}'
-            self.tag = fmt_str.format(**vparts)
+        self.tag = self.v_ver
 
         # Read values from acetao.ini
         ini = configparser.ConfigParser(interpolation=None)
@@ -58,13 +55,16 @@ class VersionInfo:
                 name = f'{sec.name}_{k}'.replace('-', '_').replace('.', '_')
                 setattr(self, name, sec[k])
 
-        # Get release year from VERSION.txt
-        self.release_year = None
+        # Get release date from VERSION.txt
+        self.release_date_str = None
+        self.release_date = None
         if self.is_release:
-            m = re.search(r'released \w+ \d+ (\d+)', version_txt_file)
+            m = re.search(r'released (\w+ \d+ \d+)', version_txt_file)
             if not m:
                 raise ValueError('Could not find release date in VERSION.txt')
-            self.release_year = int(m[1])
+            self.release_date_str = m[1]
+            self.release_date = datetime.date(*(time.strptime(self.release_date_str, '%b %d %Y')[0:3]))
+
 
 if __name__ == '__main__':
     for k, v in vars(VersionInfo()).items():

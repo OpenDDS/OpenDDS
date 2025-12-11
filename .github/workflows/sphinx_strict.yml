@@ -2,6 +2,9 @@ name: Sphinx Tests
 
 on:
   push:
+    branches-ignore:
+      - 'dependabot/**'
+      - 'workflows/**'
   pull_request:
   schedule:
     - cron: '0 1 * * SUN'
@@ -11,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: checkout OpenDDS
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Run Strict Checks
       run: |
@@ -21,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: checkout OpenDDS
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Run Link Checks
       run: |

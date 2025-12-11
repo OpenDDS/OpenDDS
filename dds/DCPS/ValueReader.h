@@ -93,6 +93,13 @@ public:
   virtual bool begin_element() = 0;
   virtual bool end_element() = 0;
 
+  virtual bool begin_map(XTypes::TypeKind key_kind, XTypes::TypeKind value_kind) = 0;
+  virtual bool end_map() = 0;
+  virtual bool begin_key() = 0;
+  virtual bool end_key() = 0;
+  virtual bool begin_value() = 0;
+  virtual bool end_value() = 0;
+
   virtual bool read_boolean(ACE_CDR::Boolean& value) = 0;
   virtual bool read_byte(ACE_CDR::Octet& value) = 0;
 #if OPENDDS_HAS_EXPLICIT_INTS

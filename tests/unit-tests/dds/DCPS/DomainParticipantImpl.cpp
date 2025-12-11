@@ -14,18 +14,9 @@ namespace {
     GUID_t not_default_repo_id() {
       GUID_t result;
       int i = 1;
-      result.guidPrefix[ 0] =  i += 2;
-      result.guidPrefix[ 1] =  i += 2;
-      result.guidPrefix[ 2] =  i += 2;
-      result.guidPrefix[ 3] =  i += 2;
-      result.guidPrefix[ 4] =  i += 2;
-      result.guidPrefix[ 5] =  i += 2;
-      result.guidPrefix[ 6] =  i += 2;
-      result.guidPrefix[ 7] =  i += 2;
-      result.guidPrefix[ 8] =  i += 2;
-      result.guidPrefix[ 9] =  i += 2;
-      result.guidPrefix[10] =  i += 2;
-      result.guidPrefix[11] =  i += 2;
+      for (int idx = 0; idx < 12; ++idx) {
+        result.guidPrefix[idx] = static_cast<DDS::Byte>(i += 2);
+      }
       result.entityId.entityKey[0] = 0;
       result.entityId.entityKey[1] = 0;
       result.entityId.entityKey[2] = 0;
@@ -35,10 +26,7 @@ namespace {
   };
 
   long entityKey(const GUID_t& id) {
-    long result = (((id.entityId.entityKey[0]  << 8) |
-                     id.entityId.entityKey[1]) << 8) |
-                     id.entityId.entityKey[2];
-    return result;
+    return (((id.entityId.entityKey[0] << 8) | id.entityId.entityKey[1]) << 8) | id.entityId.entityKey[2];
   }
 };
 

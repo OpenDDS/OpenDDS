@@ -10,6 +10,8 @@
 #ifdef __GNUC__
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#  pragma GCC diagnostic ignored "-Wdeprecated-enum-enum-conversion"
+#  pragma GCC diagnostic ignored "-Wsign-conversion"
 #endif
 
 #include <QtWidgets/QMenu>

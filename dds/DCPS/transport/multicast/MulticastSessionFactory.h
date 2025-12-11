@@ -30,8 +30,7 @@ class MulticastDataLink;
 class MulticastSession;
 typedef RcHandle<MulticastSession> MulticastSession_rch;
 
-class OpenDDS_Multicast_Export MulticastSessionFactory
-  : public virtual RcObject {
+class OpenDDS_Multicast_Export MulticastSessionFactory : public RcObject {
 public:
   virtual ~MulticastSessionFactory();
 

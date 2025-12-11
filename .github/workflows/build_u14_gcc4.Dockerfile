@@ -3,7 +3,7 @@ FROM ubuntu:14.04
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     curl \
-    g++-4.4 \
+    g++-4.6 \
     make \
     libxerces-c-dev \
     libssl-dev \
@@ -17,6 +17,6 @@ RUN cd /opt && \
     tar xzf cmake-3.22.1-linux-x86_64.tar.gz
 
 RUN cd /opt/OpenDDS && \
-    ./configure --compiler 'g++-4.4' --security --tests --no-rapidjson --cmake=/opt/cmake-3.22.1-linux-x86_64/bin/cmake && \
-    ln -s $(which g++-4.4) bin/g++ && \
+    ./configure --compiler 'g++-4.6' --optimize --security --tests --no-rapidjson --cmake=/opt/cmake-3.22.1-linux-x86_64/bin/cmake && \
+    ln -s $(which g++-4.6) bin/g++ && \
     make -j $(($(nproc)+1))

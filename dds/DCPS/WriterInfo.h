@@ -79,7 +79,7 @@ enum Coherent_State {
 #endif
 
 /// Keeps track of a DataWriter's liveliness for a DataReader.
-class OpenDDS_Dcps_Export WriterInfo : public virtual RcObject {
+class OpenDDS_Dcps_Export WriterInfo : public RcObject {
 public:
   WriterInfo(const WriterInfoListener_rch& reader,
              const GUID_t& writer_id,

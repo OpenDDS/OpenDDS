@@ -5,7 +5,6 @@
 #include "GuidAddrSet.h"
 #include "GuidPartitionTable.h"
 #include "HandlerStatisticsReporter.h"
-#include "ParticipantStatisticsReporter.h"
 #include "RelayPartitionTable.h"
 #include "RelayStatisticsReporter.h"
 
@@ -33,6 +32,8 @@ public:
 
   Port port() const { return port_; }
 
+  ACE_HANDLE get_handle() const override { return socket_.get_handle(); }
+
 protected:
   RelayHandler(const Config& config,
                const std::string& name,
@@ -48,8 +49,6 @@ protected:
                        const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                        const OpenDDS::DCPS::MonotonicTimePoint& now,
                        MessageType type);
-
-  ACE_HANDLE get_handle() const override { return socket_.get_handle(); }
 
   virtual CORBA::ULong process_message(const ACE_INET_Addr& remote,
                                        const OpenDDS::DCPS::MonotonicTimePoint& now,
@@ -68,11 +67,11 @@ private:
     Element(const ACE_INET_Addr& a_address,
             const OpenDDS::DCPS::Lockable_Message_Block_Ptr& a_message_block,
             const OpenDDS::DCPS::MonotonicTimePoint& a_timestamp,
-            MessageType type)
+            MessageType a_type)
       : address(a_address)
       , message_block(a_message_block)
       , timestamp(a_timestamp)
-      , type(type)
+      , type(a_type)
     {}
   };
   ssize_t send_i(const Element& out,
@@ -118,7 +117,6 @@ public:
   GuidAddrSet& guid_addr_set() { return guid_addr_set_; }
 
   void venqueue_message(const ACE_INET_Addr& addr,
-                        ParticipantStatisticsReporter& stats_reporter,
                         const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                         const OpenDDS::DCPS::MonotonicTimePoint& now,
                         MessageType type);
@@ -145,12 +143,12 @@ protected:
                                const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                MessageType& type) override;
 
-  ParticipantStatisticsReporter& record_activity(GuidAddrSet::Proxy& proxy,
-                                                 const AddrPort& remote_address,
-                                                 const OpenDDS::DCPS::MonotonicTimePoint& now,
-                                                 const OpenDDS::DCPS::GUID_t& src_guid,
-                                                 MessageType msg_type,
-                                                 const size_t& msg_len);
+void record_activity(GuidAddrSet::Proxy& proxy,
+                     const AddrPort& remote_address,
+                     const OpenDDS::DCPS::MonotonicTimePoint& now,
+                     const OpenDDS::DCPS::GUID_t& src_guid,
+                     bool from_application_participant,
+                     bool* allow_stun_responses = 0);
 
   CORBA::ULong send(GuidAddrSet::Proxy& proxy,
                     const OpenDDS::DCPS::GUID_t& src_guid,
@@ -230,16 +228,11 @@ public:
               const ACE_INET_Addr& application_participant_addr,
               HandlerStatisticsReporter& stats_reporter);
 
-  void replay(const SpdpReplay& spdp_replay);
-
   CORBA::ULong send_to_application_participant(GuidAddrSet::Proxy& proxy,
                                                const OpenDDS::DCPS::GUID_t& guid,
                                                const OpenDDS::DCPS::MonotonicTimePoint& now);
 
 private:
-  using ReplayQueue = std::vector<SpdpReplay>;
-  ReplayQueue replay_queue_;
-  ACE_Thread_Mutex replay_queue_mutex_;
 
   void cache_message(GuidAddrSet::Proxy& proxy,
                      const OpenDDS::DCPS::GUID_t& src_guid,
@@ -256,8 +249,6 @@ private:
                             const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                             const OpenDDS::DCPS::MonotonicTimePoint& now,
                             CORBA::ULong& sent) override;
-
-  int handle_exception(ACE_HANDLE fd) override;
 };
 
 class SedpHandler : public VerticalHandler {
@@ -299,6 +290,15 @@ public:
               const DDS::Security::CryptoTransform_var& crypto,
               HandlerStatisticsReporter& stats_reporter);
 };
+
+inline int handle_to_int(ACE_HANDLE handle)
+{
+#ifdef ACE_WIN32
+  return static_cast<int>(reinterpret_cast<intptr_t>(handle));
+#else
+  return handle;
+#endif
+}
 
 }
 

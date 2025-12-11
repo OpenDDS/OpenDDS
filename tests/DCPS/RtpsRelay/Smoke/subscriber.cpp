@@ -10,6 +10,7 @@
 
 #include <dds/DCPS/JsonValueWriter.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/WaitSet.h>
@@ -42,67 +43,70 @@ const char id_cert_file[] = "file:../../../security/certs/identity/test_particip
 const char id_key_file[] = "file:../../../security/certs/identity/test_participant_03_private_key.pem";
 const char governance_file[] = "file:./governance_signed.p7s";
 const char permissions_file[] = "file:./permissions_subscriber_signed.p7s";
-
-void append(DDS::PropertySeq& props, const char* name, const char* value, bool propagate = false)
-{
-  const DDS::Property_t prop = {name, value, propagate};
-  const unsigned int len = props.length();
-  props.length(len + 1);
-  props[len] = prop;
-}
 #endif
 
 Args args;
 
-bool reliable = false;
-bool wait_for_acks = false;
-
 const char USER_DATA[] = "The Subscriber";
 const char OTHER_USER_DATA[] = "The Publisher";
 
-int reader_test(const DDS::DataReader_var& reader, DataReaderListenerImpl* listener)
+void stress_test(const DDS::DataReader_var& dr,
+                 const DDS::DomainParticipant_var& participant,
+                 const CORBA::String_var& type_name,
+                 const DDS::Subscriber_var& subscriber)
 {
-  // Block until Publisher completes
-  DDS::StatusCondition_var condition = reader->get_statuscondition();
-  condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
+  // Create additional topics and readers.
+  DDS::DataReaderQos qos;
+  dr->get_qos(qos);
 
-  DDS::WaitSet_var ws = new DDS::WaitSet;
-  ws->attach_condition(condition);
+  for (std::size_t idx = 0; idx != 24; ++idx) {
+    std::string topic_name = "Movie Discussion List ";
+    topic_name += OpenDDS::DCPS::to_dds_string(idx);
 
-  DDS::Duration_t timeout =
-    { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+    DDS::Topic_var topic =
+      participant->create_topic(topic_name.c_str(),
+                                type_name.in(),
+                                TOPIC_QOS_DEFAULT,
+                                DDS::TopicListener::_nil(),
+                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-  DDS::ConditionSeq conditions;
-  DDS::SubscriptionMatchedStatus matches = { 0, 0, 0, 0, 0 };
+    DataReaderListenerImpl* const listener_servant = new DataReaderListenerImpl(DistributedConditionSet_rch());
+    DDS::DataReaderListener_var listener(listener_servant);
 
-  while (true) {
-    if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), EXIT_FAILURE);
-    }
-    if (!args.expect_unmatch) {
-      if (matches.current_count == 0 && matches.total_count > 0) {
-        break;
-      }
-    } else {
-      if (matches.current_count == 1 && matches.total_count > 1) {
-        listener->mark_rediscovered();
-      }
-      if (matches.current_count == 0 && matches.total_count > 1) {
-        break;
-      }
-    }
-    if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: wait() failed!\n")), EXIT_FAILURE);
-    }
+    DDS::DataReader_var local_dr =
+      subscriber->create_datareader(topic.in(),
+                                    qos,
+                                    listener,
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   }
 
-  const auto status = listener->is_valid(args.check_lease_recovery, args.expect_unmatch) ? EXIT_SUCCESS : EXIT_FAILURE;
-  ws->detach_condition(condition);
-  return status;
+  DDS::WaitSet_var waiter = new DDS::WaitSet;
+
+  ShutdownHandler shutdown_handler;
+  waiter->attach_condition(shutdown_handler.guard_);
+
+  DDS::ConditionSeq active;
+  const DDS::Duration_t timeout = {DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
+
+  bool running = true;
+  DDS::ReturnCode_t ret;
+  while (running) {
+    ret = waiter->wait(active, timeout);
+
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l: svc()")
+                 ACE_TEXT(" ERROR: wait returned %C!\n"), OpenDDS::DCPS::retcode_to_string(ret)));
+      running = false;
+      break;
+    }
+
+    for (unsigned i = 0; running && active.length() > i; ++i) {
+      if (active[i] == shutdown_handler.guard_) {
+        running = false;
+      }
+    }
+  }
 }
 
 int
@@ -110,6 +114,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int status = EXIT_SUCCESS;
   try {
+    DistributedConditionSet_rch dcs = OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
@@ -131,12 +137,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 #if OPENDDS_CONFIG_SECURITY
     if (TheServiceParticipant->get_security()) {
       DDS::PropertySeq& props = part_qos.property.value;
-      append(props, DDS::Security::Properties::AuthIdentityCA, auth_ca_file);
-      append(props, DDS::Security::Properties::AuthIdentityCertificate, id_cert_file);
-      append(props, DDS::Security::Properties::AuthPrivateKey, id_key_file);
-      append(props, DDS::Security::Properties::AccessPermissionsCA, perm_ca_file);
-      append(props, DDS::Security::Properties::AccessGovernance, governance_file);
-      append(props, DDS::Security::Properties::AccessPermissions, permissions_file);
+      OpenDDS::DCPS::Qos_Helper::append(props, DDS::Security::Properties::AuthIdentityCA, TheServiceParticipant->config_store()->get("AuthIdentityCA", auth_ca_file));
+      OpenDDS::DCPS::Qos_Helper::append(props, DDS::Security::Properties::AuthIdentityCertificate, TheServiceParticipant->config_store()->get("AuthIdentityCertificate", id_cert_file));
+      OpenDDS::DCPS::Qos_Helper::append(props, DDS::Security::Properties::AuthPrivateKey, TheServiceParticipant->config_store()->get("AuthPrivateKey", id_key_file));
+      OpenDDS::DCPS::Qos_Helper::append(props, DDS::Security::Properties::AccessPermissionsCA, TheServiceParticipant->config_store()->get("AccessPermissionsCA", perm_ca_file));
+      OpenDDS::DCPS::Qos_Helper::append(props, DDS::Security::Properties::AccessGovernance, TheServiceParticipant->config_store()->get("AccessGovernance", governance_file));
+      OpenDDS::DCPS::Qos_Helper::append(props, DDS::Security::Properties::AccessPermissions, TheServiceParticipant->config_store()->get("AccessPermissions", permissions_file));
     }
 #endif
 
@@ -156,7 +162,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
       dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in());
 
-    OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::RtpsDiscovery> disc = OpenDDS::DCPS::static_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(TheServiceParticipant->get_discovery(42));
+    OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::RtpsDiscovery> disc = OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(TheServiceParticipant->get_discovery(42));
     const OpenDDS::DCPS::GUID_t guid = dp_impl->get_id();
     OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::TransportInst> discovery_inst = disc->sedp_transport_inst(42, guid);
     discovery_inst->count_messages(true);
@@ -205,13 +211,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // Create DataReader
-    DataReaderListenerImpl* const listener_servant = new DataReaderListenerImpl;
+    DataReaderListenerImpl* const listener_servant = new DataReaderListenerImpl(dcs);
     DDS::DataReaderListener_var listener(listener_servant);
 
     DDS::DataReaderQos dr_qos;
     sub->get_default_datareader_qos(dr_qos);
-    std::cout << "Reliable DataReader" << std::endl;
     dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+    dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
     DDS::DataReader_var reader =
       sub->create_datareader(topic.in(),
@@ -226,13 +232,17 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     if (args.participant_bit_expected_instances > 0) {
-      status = test_participant_discovery(participant, args.participant_bit_expected_instances,
+      status = test_participant_discovery(dcs, participant, args.participant_bit_expected_instances,
                                           USER_DATA, OTHER_USER_DATA, disc->config()->resend_period());
+    } else if (args.stress_test) {
+      stress_test(reader, participant, type_name, sub);
+      status = EXIT_SUCCESS;
     } else {
-      status = reader_test(reader, listener_servant);
+      dcs->wait_for("Subscriber", "Subscriber", "count_1");
+      status = listener_servant->is_valid() ? EXIT_SUCCESS : EXIT_FAILURE;
 
 #if OPENDDS_HAS_JSON_VALUE_WRITER
-      std::cout << "Subscriber Guid: " << OpenDDS::DCPS::LogGuid(guid).c_str() << std::endl;
+      ACE_DEBUG((LM_DEBUG, "Subscriber Guid: %C\n", OpenDDS::DCPS::LogGuid(guid).c_str()));
       OpenDDS::DCPS::TransportStatisticsSequence stats;
       disc->append_transport_statistics(42, guid, stats);
       if (transport_inst) {
@@ -240,7 +250,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       for (unsigned int i = 0; i != stats.length(); ++i) {
-        std::cout << "Subscriber Transport Statistics: " << OpenDDS::DCPS::to_json(stats[i]) << std::endl;
+        ACE_DEBUG((LM_DEBUG, "Subscriber Transport Statistics: %C\n", OpenDDS::DCPS::to_json(stats[i]).c_str()));
       }
 #endif
     }
@@ -249,7 +259,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     participant->delete_contained_entities();
     dpf->delete_participant(participant.in());
     TheServiceParticipant->shutdown();
-
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
     status = EXIT_FAILURE;

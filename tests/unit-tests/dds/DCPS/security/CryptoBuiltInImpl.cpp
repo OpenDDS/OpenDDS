@@ -647,7 +647,7 @@ protected:
   {
     seq.length(length);
     for (CORBA::ULong ndx = 0; ndx < length; ++ndx) {
-      seq[ndx] = ndx + 1;
+      seq[ndx] = static_cast<typename T::value_type>(ndx + 1);
     }
   }
 
@@ -752,16 +752,16 @@ TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest, encode_datawrite
 
   // Test each position to see if a NIL reader is handled properly
   DDS::Security::DatareaderCryptoHandleSeq& readers = get_readers();
-  for (::CORBA::Long n = 0; n < NUM_READERS; ++n) {
+  for (::CORBA::ULong n = 0; n < NUM_READERS; ++n) {
     // Temporarily replace the value at N with a NIL handle
     DDS::Security::DatareaderCryptoHandle temp = readers[n];
     readers[n] = DDS::HANDLE_NIL;
-    ::CORBA::Long index = n;
+    ::CORBA::Long index = static_cast<CORBA::Long>(n);
 
     EXPECT_FALSE(get_inst().encode_datawriter_submessage(
       output, get_buffer(), handle, readers, index, ex));
     EXPECT_EQ(0U, output.length());
-    EXPECT_EQ(n, index);
+    EXPECT_EQ(static_cast<CORBA::Long>(n), index);
 
     // Restore the handle before next iteration
     readers[n] = temp;

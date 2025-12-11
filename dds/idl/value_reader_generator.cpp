@@ -10,6 +10,7 @@
 #include "field_info.h"
 
 #include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
 
 #include <global_extern.h>
 #include <utl_identifier.h>
@@ -68,7 +69,7 @@ namespace {
                     const std::string& idx, int level, FieldFilter filter_kind)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    const std::string indent(level * 2, ' ');
+    const std::string indent(size_t(level) * 2, ' ');
     const Classification c = classify(array->base_type());
     const bool primitive = c & CL_PRIMITIVE;
     // When we have a primitive type the last dimension is read using the read_*_array
@@ -111,7 +112,7 @@ namespace {
   {
     // TODO: Take advantage of the size.
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    const std::string indent(level * 2, ' ');
+    const std::string indent(size_t(level) * 2, ' ');
     const std::string elem_tk = type_kind(sequence->base_type());
     be_global->impl_ <<
       indent << "if (!value_reader.begin_sequence(" << elem_tk << ")) return false;\n" <<
@@ -122,8 +123,7 @@ namespace {
     } else {
       if (!sequence->unbounded()) {
         be_global->impl_ << indent << "  if (" << idx << " >= " << expression << ".maximum()) return false;\n";
-        be_global->impl_ << indent << "  const ACE_CDR::ULong len = " << expression << ".length();\n";
-        be_global->impl_ << indent << "  " << expression << ".length(len + 1);\n";
+        be_global->impl_ << indent << "  " << expression << ".length(" << expression << ".length() + 1);\n";
       } else {
         be_global->impl_ << indent << " OpenDDS::DCPS::grow(" << expression << ");\n";
       }
@@ -138,39 +138,70 @@ namespace {
       indent << "if (!value_reader.end_sequence()) return false;\n";
   }
 
+  void map_helper(const std::string& expression, const AST_Map* map, int level, FieldFilter filter_kind)
+  {
+    const std::string indent(static_cast<size_t>(level * 2), ' ');
+    AST_Type* const actualKey = resolveActualType(map->key_type());
+    const Classification clsKey = classify(actualKey);
+    const std::string key_tk = type_kind(map->key_type()),
+      value_tk = type_kind(map->value_type()),
+      localKeyType = (clsKey & CL_STRING) ? "String" : scoped(map->key_type()->name()),
+      keyName = "key" + OpenDDS::DCPS::to_dds_string(level);
+    be_global->impl_ <<
+      indent << "if (!value_reader.begin_map(" << key_tk << ", " << value_tk << ")) return false;\n" <<
+      indent << "while (value_reader.elements_remaining()) {\n" <<
+      indent << "  if (!value_reader.begin_key()) return false;\n" <<
+      indent << "  " << localKeyType << ' ' << keyName << ";\n";
+    generate_read(keyName, "", "", map->key_type(), "", level + 1, nested(filter_kind));
+    be_global->impl_ <<
+      indent << "  if (!value_reader.end_key()) return false;\n" <<
+      indent << "  if (!value_reader.begin_value()) return false;\n";
+    generate_read(expression, '[' + keyName + ']', "value", map->value_type(), "i", level + 1, nested(filter_kind));
+    be_global->impl_ <<
+      indent << "  if (!value_reader.end_value()) return false;\n" <<
+      indent << "}\n" <<
+      indent << "if (!value_reader.end_map()) return false;\n";
+  }
+
   void generate_read(const std::string& expression, const std::string& accessor,
                      const std::string& field_name, AST_Type* type, const std::string& idx,
                      int level, FieldFilter filter_kind, bool optional)
   {
-    AST_Type* const actual = resolveActualType(type);
+    const std::string indent(size_t(level) * 2 + (optional ? 2 : 0), ' ');
 
+    AST_Type* const actual = resolveActualType(type);
     const Classification c = classify(actual);
 
-    const std::string indent(level * 2 + (optional ? 2 : 0), ' ');
     if (optional) {
       be_global->impl_ <<
         indent.substr(0, indent.size() - 2) << "if (value_reader.member_has_value()) {\n";
     }
 
     // If the field is optional we need to create a temporary to read the value into before we can assign it to the optional
-    const bool create_tmp  = optional && !(c & CL_STRING);
+    const bool create_tmp = optional && !(c & CL_STRING);
     const std::string var_name = create_tmp ? "tmp" : expression + accessor;
     if (create_tmp) {
       std::string tmp_type = scoped(type->name());
-      if (c & (CL_ARRAY | CL_SEQUENCE)) {
+      if (c & (CL_ARRAY | CL_SEQUENCE | CL_MAP)) {
         tmp_type = FieldInfo::scoped_type(*type, field_name);
       }
       be_global->impl_ <<
         indent << tmp_type << " tmp;\n";
     }
-
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+
     if (c & CL_SEQUENCE) {
       AST_Sequence* const sequence = dynamic_cast<AST_Sequence*>(actual);
       sequence_helper(var_name, sequence, idx, level, filter_kind);
+
     } else if (c & CL_ARRAY) {
       AST_Array* const array = dynamic_cast<AST_Array*>(actual);
       array_helper(var_name, array, 0, idx, level, filter_kind);
+
+    } else if (c & CL_MAP) {
+      AST_Map* const map = dynamic_cast<AST_Map*>(actual);
+      map_helper(var_name, map, level, filter_kind);
+
     } else if (c & CL_FIXED) {
       be_global->impl_ <<
         indent << "::ACE_CDR::Fixed fixed;\n" <<
@@ -202,6 +233,7 @@ namespace {
         be_global->impl_ <<
           indent << "if (!value_reader.read_" << primitive_type(pt) << '(' << var_name << ")) return false;\n";
       }
+
     } else {
       std::string value_expr = (create_tmp ? "tmp" : expression + accessor);
       if (!(c & CL_ENUM)) {
@@ -249,7 +281,7 @@ namespace {
                             const std::string&)
   {
     AST_Type* const actual = resolveActualType(type);
-    std::string decl = field_type_name(dynamic_cast<AST_Field*>(branch), type);
+    std::string decl = dds_generator::field_type_name(dynamic_cast<AST_Field*>(branch), type);
 
     const Classification c = classify(actual);
     if (c & CL_STRING) {

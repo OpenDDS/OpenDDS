@@ -14,11 +14,11 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace DCPS {
+namespace Monitor {
 
 
-DRPeriodicMonitorImpl::DRPeriodicMonitorImpl(DataReaderImpl* dr,
-              OpenDDS::DCPS::DataReaderPeriodicReportDataWriter_ptr dr_per_writer)
+DRPeriodicMonitorImpl::DRPeriodicMonitorImpl(DCPS::DataReaderImpl* dr,
+                                             DataReaderPeriodicReportDataWriter_ptr dr_per_writer)
   : dr_(dr),
     dr_per_writer_(DataReaderPeriodicReportDataWriter::_duplicate(dr_per_writer))
 {
@@ -39,7 +39,7 @@ DRPeriodicMonitorImpl::report() {
 }
 
 
-} // namespace DCPS
-} // namespace OpenDDS
+}
+}
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

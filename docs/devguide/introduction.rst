@@ -261,7 +261,7 @@ OpenDDS supports the following building blocks, with notes/caveats listed below 
 
 * Anonymous Types
 
-  * There is limited support for anonymous types when they appear as sequence/array instantiations directly as struct field types.
+  * There is limited support for anonymous types when they appear as sequence/array/map instantiations directly as struct field types.
     Using an explicitly-named type is recommended.
 
 * Annotations
@@ -272,9 +272,108 @@ OpenDDS supports the following building blocks, with notes/caveats listed below 
 
 * Extended Data Types
 
-  * The integer types ``int8``, ``uint8``, ``int16``, ``uin16``, ``int32`` ``uint32``, ``int64``, and ``uint64`` are supported.
+  * The integer types ``int8``, ``uint8`` and the type aliases ``int16``, ``uin16``, ``int32`` ``uint32``, ``int64``, and ``uint64`` are supported.
+
+  * Maps are supported.
+    They map to C++ ``std::map`` in both the classic IDL-to-C++ and IDL-to-C++11 mappings.
+    Known limitations:
+
+    * Map key types must be basic types, strings, enums, or aliases of any of these types.
+    * Support might be incomplete in the classic IDL-to-C++ mapping compared to the IDL-to-C++11 mapping.
+    * Using maps in IDL-to-Java mapping and ``DynamicData`` is currently not supported.
 
   * The rest of the building block is not supported.
+
+*********************************************
+Building and Configuring for Interoperability
+*********************************************
+
+The two components needed for interoperability are the :ref:`RTPS Discovery library <rtps-disc>` and the :ref:`RTPS/UDP transport library <rtps-udp-transport>`.
+Both of these libraries are built and installed by default.
+Those using a custom build system need to make sure that these libraries are available to the application.
+
+As of OpenDDS 3, these components will not be used by default and must be configured.
+This can be done via :ref:`environment variables, command-line options, configuration files, and/or code <config-store-keys>`.
+
+The following configuration file snippet changes the default discovery to RTPS and the default transport to RTPS/UDP.
+
+.. code-block:: ini
+
+    [common]
+    DCPSDefaultDiscovery=RtpsDiscovery
+    DCPSGlobalTransportConfig=rtps_config
+
+    [config/rtps_config]
+    transports=the_rtps_transport
+
+    [transport/the_rtps_transport]
+    transport_type=rtps_udp
+
+    [rtps_discovery/RtpsDiscovery]
+    UseXTypes=complete
+
+The following code accomplishes the same:
+
+.. code-block:: cpp
+
+    using namespace OpenDDS::DCPS;
+    using namespace OpenDDS::RTPS;
+    TransportConfig_rch config =
+      TransportRegistry::instance()->create_config("rtps_config");
+    TransportInst_rch inst =
+      TransportRegistry::instance()->create_inst("the_rtps_transport", "rtps_udp");
+    config->instances_.push_back(inst);
+    TransportRegistry::instance()->global_config(config);
+
+    RtpsDiscovery_rch disc = make_rch<RtpsDiscovery>("RtpsDiscovery");
+    disc->use_xtypes(RtpsDiscoveryConfig::XTYPES_COMPLETE);
+    TheServiceParticipant->add_discovery(static_rchandle_cast<Discovery>(disc));
+    TheServiceParticipant->set_default_discovery(disc->key());
+
+Basic interoperability in DDS requires 1) all participants are in the same domain, 2) DataWriters and DataReaders must agree on the name of Topics, and 3) the QoS for DataWriters and DataReaders must be compatible.
+
+Security is another dimension of interoperability.
+Participants must agree on the identity and permissions certificate authorities, governance, and have sufficient permissions.
+See :ref:`dds_security` for the details of using DDS Security with OpenDDS.
+
+The remaining concern for interoperability is the use of :ref:`xtypes` features.
+See :ref:`xtypes--unimplemented-features` and :ref:`xtypes--differences-from-the-specification`.
+If XTypes is not being used, then see :ref:`xtypes--interoperability-with-non-xtypes-implementations`.
+
+Many DDS implementations require the use of complete type objects.
+OpenDDS defaults to using minimal type objects.
+See :ref:`xtypes--enabling-use-of-completetypeobjects`.
+
+:ref:`opendds_idl` has options for changing the defaults when processing types.
+Using these options may reduce the number of annotations needed in IDL.
+See :option:`opendds_idl --default-nested`, :option:`opendds_idl --default-extensibility`, :option:`opendds_idl --default-autoid`, and :option:`opendds_idl --default-try-construct`.
+
+XTypes :ref:`xtypes--data-representation` determines the format used by DataWriters to encode samples and the set of formats that can be used by a DataReader to decode samples.
+The set of formats for a DataReader must include the formats used by the DataWriters for interoperability.
+The two interoperable formats supported by OpenDDS are :ref:`xtypes--xcdr1` and :ref:`xtypes--xcdr2`.
+OpenDDS has limited support for XCDR1 (see :ref:`xtypes--xcdr1-support`).
+OpenDDS DataReaders default to XCDR1 and XCDR2 and OpenDDS DataWriters default to XCDR2.
+For interoperability, the data representation should be considered and adjusted appropriately.
+
+The data representation can be changed using the :ref:`qos-data-representation`.
+The non-standard :ref:`xtypes--anno-opendds-data-representation-xcdr1` and :ref:`xtypes--anno-opendds-data-representation-xcdr2` annotations can be used to limit the values that can be used in the :ref:`qos-data-representation`.
+See :ref:`xtypes--data-representation` for an example of setting the :ref:`qos-data-representation`.
+
+Failures in interoperability are often silent.
+A good first step is to enable :ref:`run_time_configuration--logging` and check for errors and warnings.
+The DDS API can assist in debugging but often lacks the detail to correct issues.
+See :ref:`built_in_topics` and :ref:`conditions_and_listeners` for details.
+If logging and introspection is not enough, then the next step is usually a packet capture and analysis, e.g., Wireshark.
+The capture should show the following sequence:
+
+1. Participants discovering one another.
+2. Authentication if using security.
+3. Key exchange if using security.
+4. An exchange of publications and subscriptions.
+5. An exchange of type information if using XTypes and the types are not identical.
+6. Messages exchanged between writers and readers.
+
+The DDS PSIG of the OMG has `repositories for interoperability testing <https://github.com/omg-dds>`__.
 
 .. _introduction--extensions-to-the-dds-specification:
 

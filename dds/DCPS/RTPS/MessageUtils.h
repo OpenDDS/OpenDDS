@@ -175,6 +175,13 @@ inline void append_submessage(RTPS::Message& message, const RTPS::DataFragSubmes
   DCPS::push_back(message.submessages, sm);
 }
 
+inline void append_submessage(RTPS::Message& message, const RTPS::UserTagSubmessage& submessage)
+{
+  RTPS::Submessage sm;
+  sm.unknown_sm(submessage.smHeader);
+  DCPS::push_back(message.submessages, sm);
+}
+
 #if OPENDDS_CONFIG_SECURITY
 inline DDS::Security::ParticipantSecurityAttributesMask
 security_attributes_to_bitmask(const DDS::Security::ParticipantSecurityAttributes& sec_attr)
@@ -231,7 +238,7 @@ handle_to_octets(DDS::Security::NativeCryptoHandle handle)
   DDS::OctetSeq handleOctets(sizeof handle);
   handleOctets.length(handleOctets.maximum());
   unsigned char* rawHandleOctets = handleOctets.get_buffer();
-  unsigned int handleTmp = handle;
+  unsigned int handleTmp = static_cast<unsigned int>(handle);
   for (unsigned int j = sizeof handle; j > 0; --j) {
     rawHandleOctets[j - 1] = handleTmp & 0xff;
     handleTmp >>= 8;

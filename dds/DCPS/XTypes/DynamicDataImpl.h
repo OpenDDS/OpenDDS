@@ -494,7 +494,7 @@ private:
 
     // Return a duplication of the stored string/wstring.
     // Used for the get_* interfaces of DynamicData.
-    // Caller is responsible for release the returned string.
+    // Caller is responsible for releasing the returned string.
     char* get_string() const;
     CORBA::WChar* get_wstring() const;
 
@@ -516,10 +516,10 @@ private:
       unsigned char char8_[sizeof(ACE_OutputCDR::from_char)];
       unsigned char byte_[sizeof(ACE_OutputCDR::from_octet)];
       unsigned char boolean_[sizeof(ACE_OutputCDR::from_boolean)];
-      const char* str_;
+      char* str_;
 #ifdef DDS_HAS_WCHAR
       unsigned char char16_[sizeof(ACE_OutputCDR::from_wchar)];
-      const CORBA::WChar* wstr_;
+      CORBA::WChar* wstr_;
 #endif
     };
   };

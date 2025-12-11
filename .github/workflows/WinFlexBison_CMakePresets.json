@@ -3,7 +3,10 @@
     "configurePresets": [
         {
             "name": "config1",
-            "binaryDir": "build"
+            "binaryDir": "build",
+            "cacheVariables": {
+                "CMAKE_POLICY_VERSION_MINIMUM": "3.5"
+            }
         }
     ],
     "buildPresets": [

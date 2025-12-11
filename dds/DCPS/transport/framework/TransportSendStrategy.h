@@ -17,7 +17,9 @@
 #include "TransportReplacedElement.h"
 #include "TransportRetainedElement.h"
 
-#include "dds/DCPS/Atomic.h"
+#include <dds/OpenddsDcpsExtC.h>
+
+#include <dds/DCPS/Atomic.h>
 #include <dds/DCPS/DataBlockLockPool.h>
 #include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h>
@@ -168,6 +170,9 @@ public:
   /// @return operation succeeded
   bool fragmentation_helper(
     TransportQueueElement* original_element, TqeVector& elements_to_send);
+
+  static StatisticSeq stats_template();
+  void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
 
 protected:
 
@@ -423,7 +428,7 @@ private:
 
   /// This lock will protect critical sections of code that play a
   /// role in the sending of data.
-  LockType lock_;
+  mutable LockType lock_;
 
   /// Cached allocator for TransportReplaceElement.
   MessageBlockAllocator replaced_element_mb_allocator_;

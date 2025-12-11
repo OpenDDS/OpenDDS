@@ -259,7 +259,7 @@ InfoRepo::init()
 
   bool use_bidir = true;
 
-  for (int i = 0; i < args.argc() - 1; ++i) {
+  for (size_t i = 0; i < static_cast<size_t>(args.argc()) - 1; ++i) {
     if (0 == ACE_OS::strcmp(args[i], ACE_TEXT("-DCPSBidirGIOP"))) {
       use_bidir = ACE_OS::atoi(args[i + 1]);
       break;
@@ -274,9 +274,10 @@ InfoRepo::init()
         ACE_TEXT("-ORBConnectionHandlerCleanup 1\""),
       ACE_TEXT("-ORBSvcConfDirective"),
       ACE_TEXT("static Resource_Factory \"-ORBFlushingStrategy blocking\""),
-      0
     };
-    args.add((ACE_TCHAR**)config, true /*quote arg*/);
+    for (size_t i = 0; i < sizeof(config) / sizeof(config[0]); ++i) {
+      args.add(config[i], true /*quote arg*/);
+    }
   }
 
   int argc = args.argc();

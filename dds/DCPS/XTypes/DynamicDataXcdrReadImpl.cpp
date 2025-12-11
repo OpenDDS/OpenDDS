@@ -597,7 +597,8 @@ bool DynamicDataXcdrReadImpl::get_union_item_count()
     return false;
   }
 
-  DDS::DynamicTypeMembersById_var members;
+#if OPENDDS_CONFIG_IDL_MAP
+  DDS::DynamicTypeMembersById members;
   rc = type_->get_all_members(members);
   if (rc != DDS::RETCODE_OK) {
     if (log_level >= LogLevel::Warning) {
@@ -606,11 +607,7 @@ bool DynamicDataXcdrReadImpl::get_union_item_count()
     }
     return false;
   }
-  DynamicTypeMembersByIdImpl* members_impl = dynamic_cast<DynamicTypeMembersByIdImpl*>(members.in());
-  if (!members_impl) {
-    return false;
-  }
-  for (DynamicTypeMembersByIdImpl::const_iterator it = members_impl->begin(); it != members_impl->end(); ++it) {
+  for (DDS::DynamicTypeMembersById::const_iterator it = members.begin(); it != members.end(); ++it) {
     DDS::MemberDescriptor_var md;
     rc = it->second->get_descriptor(md);
     if (rc != DDS::RETCODE_OK) {
@@ -632,9 +629,11 @@ bool DynamicDataXcdrReadImpl::get_union_item_count()
       }
     }
   }
-
   item_count_ = 1;
   return true;
+#else
+  return false;
+#endif
 }
 
 DDS::UInt32 DynamicDataXcdrReadImpl::get_item_count()
@@ -901,18 +900,15 @@ DDS::MemberDescriptor* DynamicDataXcdrReadImpl::get_union_selected_member()
     return 0;
   }
 
-  DDS::DynamicTypeMembersById_var members;
+#if OPENDDS_CONFIG_IDL_MAP
+  DDS::DynamicTypeMembersById members;
   if (type_->get_all_members(members) != DDS::RETCODE_OK) {
-    return 0;
-  }
-  DynamicTypeMembersByIdImpl* members_impl = dynamic_cast<DynamicTypeMembersByIdImpl*>(members.in());
-  if (!members_impl) {
     return 0;
   }
 
   bool has_default = false;
   DDS::MemberDescriptor_var default_member;
-  for (DynamicTypeMembersByIdImpl::const_iterator it = members_impl->begin(); it != members_impl->end(); ++it) {
+  for (DDS::DynamicTypeMembersById::const_iterator it = members.begin(); it != members.end(); ++it) {
     DDS::MemberDescriptor_var md;
     if (it->second->get_descriptor(md) != DDS::RETCODE_OK) {
       return 0;
@@ -933,7 +929,7 @@ DDS::MemberDescriptor* DynamicDataXcdrReadImpl::get_union_selected_member()
   if (has_default) {
     return default_member._retn();
   }
-
+#endif
   // The union has no selected member.
   return 0;
 }
@@ -1093,7 +1089,7 @@ bool DynamicDataXcdrReadImpl::skip_to_sequence_element(MemberId id, DDS::Dynamic
     ACE_CDR::ULong length, index;
     return (strm_ >> length) &&
       get_index_from_id(id, index, length) &&
-      strm_.skip(index, size);
+      strm_.skip(index, static_cast<int>(size));
   } else {
     ACE_CDR::ULong length, index;
     if (!strm_.skip_delimiter() || !(strm_ >> length)) {
@@ -1133,7 +1129,7 @@ bool DynamicDataXcdrReadImpl::skip_to_array_element(MemberId id, DDS::DynamicTyp
   ACE_CDR::ULong size;
   if (get_primitive_size(elem_type, size)) {
     ACE_CDR::ULong index;
-    return get_index_from_id(id, index, length) && strm_.skip(index, size);
+    return get_index_from_id(id, index, length) && strm_.skip(index, static_cast<int>(size));
   } else {
     if (!strm_.skip_delimiter()) {
       return false;
@@ -1167,11 +1163,12 @@ bool DynamicDataXcdrReadImpl::skip_to_map_element(MemberId id)
     }
 
     for (ACE_CDR::ULong i = 0; i < index; ++i) {
-      if (!strm_.skip(1, key_size) || !strm_.skip(1, elem_size)) {
+      if (!strm_.skip(1, static_cast<int>(key_size))
+          || !strm_.skip(1, static_cast<int>(elem_size))) {
         return false;
       }
     }
-    return strm_.skip(1, key_size);
+    return strm_.skip(1, static_cast<int>(key_size));
   } else {
     size_t dheader;
     ACE_CDR::ULong index;
@@ -2508,7 +2505,7 @@ bool DynamicDataXcdrReadImpl::skip_sequence_member(DDS::DynamicType_ptr seq_type
     }
 
     return skip("skip_sequence_member", "Failed to skip a primitive sequence member",
-                length, primitive_size);
+                length, static_cast<int>(primitive_size));
   } else {
     return skip_collection_member(seq_type);
   }
@@ -2525,7 +2522,7 @@ bool DynamicDataXcdrReadImpl::skip_array_member(DDS::DynamicType_ptr array_type)
   ACE_CDR::ULong primitive_size = 0;
   if (get_primitive_size(elem_type, primitive_size)) {
     return skip("skip_array_member", "Failed to skip a primitive array member",
-                bound_total(descriptor), primitive_size);
+                bound_total(descriptor), static_cast<int>(primitive_size));
   } else {
     return skip_collection_member(array_type);
   }
@@ -2554,11 +2551,11 @@ bool DynamicDataXcdrReadImpl::skip_map_member(DDS::DynamicType_ptr map_type)
 
     for (unsigned i = 0; i < length; ++i) {
       if (!skip("skip_map_member", "Failed to skip a key of a primitive map member",
-                1, key_primitive_size)) {
+                1, static_cast<int>(key_primitive_size))) {
         return false;
       }
       if (!skip("skip_map_member", "Failed to skip an element of a primitive map member",
-                1, elem_primitive_size)) {
+                1, static_cast<int>(elem_primitive_size))) {
         return false;
       }
     }
@@ -2785,18 +2782,15 @@ bool DynamicDataXcdrReadImpl::skip_all()
         return false;
       }
 
-      DDS::DynamicTypeMembersById_var members;
+#if OPENDDS_CONFIG_IDL_MAP
+      DDS::DynamicTypeMembersById members;
       if (type_->get_all_members(members) != DDS::RETCODE_OK) {
-        return false;
-      }
-      DynamicTypeMembersByIdImpl* members_impl = dynamic_cast<DynamicTypeMembersByIdImpl*>(members.in());
-      if (!members_impl) {
         return false;
       }
 
       bool has_default = false;
       DDS::MemberDescriptor_var default_member;
-      for (DynamicTypeMembersByIdImpl::const_iterator it = members_impl->begin(); it != members_impl->end(); ++it) {
+      for (DDS::DynamicTypeMembersById::const_iterator it = members.begin(); it != members.end(); ++it) {
         DDS::MemberDescriptor_var md;
         if (it->second->get_descriptor(md) != DDS::RETCODE_OK) {
           return false;
@@ -2826,6 +2820,9 @@ bool DynamicDataXcdrReadImpl::skip_all()
                    ACE_TEXT(" selected member and a discriminator with value %d\n"), label));
       }
       return true;
+#else
+      return false;
+#endif
     }
   }
 }

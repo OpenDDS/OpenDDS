@@ -216,6 +216,8 @@ public:
 
   VendorId_t get_vendor_id_i(const GUID_t& guid) const;
 
+  OPENDDS_SET(DDS::UInt32) get_ignored_user_tags() const;
+
   void ignore_domain_participant(const GUID_t& ignoreId);
 
   void remove_domain_participant(const GUID_t& removeId);
@@ -355,6 +357,8 @@ public:
     sedp_->request_remote_complete_type_objects(remote_entity, remote_type_info, cond);
   }
 
+  void fill_stats(DCPS::StatisticSeq& stats) const;
+
 protected:
   Sedp& endpoint_manager() { return *sedp_; }
 
@@ -407,6 +411,9 @@ private:
 #endif
   XTypes::TypeLookupService_rch type_lookup_service_;
 
+  typedef OPENDDS_MAP_CMP(GUID_t, DCPS::String, GUID_tKeyLessThan) GuidToString;
+  GuidToString flexible_types_pre_discovery_;
+
   // Participant:
   const DDS::DomainId_t domain_;
   DCPS::GUID_t guid_;
@@ -441,7 +448,11 @@ private:
                                            const DDS::Security::ParticipantStatelessMessage& msg);
   DCPS::MonotonicTimePoint schedule_handshake_resend(const DCPS::TimeDuration& time, const DCPS::GUID_t& guid);
   bool match_authenticated(const DCPS::GUID_t& guid, DiscoveredParticipantIter& iter);
-  void attempt_authentication(const DiscoveredParticipantIter& iter, bool from_discovery);
+  DDS::Security::ValidationResult_t pre_check_auth(const DiscoveredParticipantIter& iter,
+                                                   DDS::Security::SecurityException& se);
+  void attempt_authentication(const DiscoveredParticipantIter& iter, bool from_discovery,
+                              const DDS::Security::ValidationResult_t* validation = 0,
+                              const DDS::Security::SecurityException* sec_except = 0);
   void update_agent_info(const DCPS::GUID_t& local_guid, const ICE::AgentInfo& agent_info);
   void remove_agent_info(const DCPS::GUID_t& local_guid);
 #endif
@@ -479,12 +490,33 @@ private:
       DCPS::WeakRcHandle<SpdpTransport> tport_;
     };
 
+    // This is essentially PmfPeriodicTask<SpdpTransport>, but using that
+    // directly was causing warnings on MSVC x86.  There is only one member
+    // function that's used with a PeriodicTask.
+    struct PeriodicThreadStatus : DCPS::PeriodicTask {
+      PeriodicThreadStatus(DCPS::ReactorTask_rch reactor_task, const SpdpTransport& delegate)
+        : PeriodicTask(reactor_task)
+        , delegate_(delegate)
+      {}
+
+      void execute(const MonotonicTimePoint& now)
+      {
+        const DCPS::RcHandle<SpdpTransport> handle = delegate_.lock();
+        if (handle) {
+          handle->thread_status_task(now);
+        }
+      }
+
+      const DCPS::WeakRcHandle<SpdpTransport> delegate_;
+    };
+
     explicit SpdpTransport(DCPS::RcHandle<Spdp> outer);
     ~SpdpTransport();
 
     const ACE_SOCK_Dgram& choose_recv_socket(ACE_HANDLE h) const;
-
     virtual int handle_input(ACE_HANDLE h);
+
+    void init_thread_status_task();
 
     void open(const DCPS::ReactorTask_rch& reactor_task,
               const DCPS::JobQueue_rch& job_queue);
@@ -543,7 +575,6 @@ private:
     DCPS::MulticastManager multicast_manager_;
     DCPS::NetworkAddressSet send_addrs_;
     ACE_Message_Block buff_, wbuff_;
-    typedef DCPS::PmfPeriodicTask<SpdpTransport> SpdpPeriodic;
     typedef DCPS::PmfSporadicTask<SpdpTransport> SpdpSporadic;
     typedef DCPS::PmfMultiTask<SpdpTransport> SpdpMulti;
     void send_local(const DCPS::MonotonicTimePoint& now);
@@ -554,7 +585,7 @@ private:
     void process_lease_expirations(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpSporadic> lease_expiration_task_;
     void thread_status_task(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpPeriodic> thread_status_task_;
+    DCPS::RcHandle<PeriodicThreadStatus> thread_status_task_;
     DCPS::RcHandle<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> > network_interface_address_reader_;
 #if OPENDDS_CONFIG_SECURITY
     void process_handshake_deadlines(const DCPS::MonotonicTimePoint& now);
@@ -571,6 +602,7 @@ private:
 #endif
     bool network_is_unreachable_;
     bool ice_endpoint_added_;
+    OPENDDS_SET(DDS::UInt32) ignored_user_tags_;
 
     DCPS::MonotonicTimePoint last_thread_status_harvest_;
     DCPS::ConfigReader_rch config_reader_;
@@ -672,6 +704,11 @@ private:
   size_t n_participants_in_authentication_;
   void set_auth_state(DiscoveredParticipant& dp, AuthState state);
 #endif
+
+  static DCPS::StatisticSeq stats_template();
+  const DCPS::StatisticSeq stats_template_;
+  size_t total_location_updates_, total_builtin_pending_, total_builtin_associated_,
+    total_writer_pending_, total_writer_associated_, total_reader_pending_, total_reader_associated_;
 
   friend class ::DDS_TEST;
 };
