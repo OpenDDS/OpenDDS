@@ -1379,6 +1379,10 @@ my %all_sanitizers = (
     configh => ['#define ACE_INITIALIZE_MEMORY_BEFORE_USE'],
     compiler_args => ['-fno-sanitize=enum'],
   },
+  profile => {
+    fsanitize => '',
+    linker_args => ['-rdynamic']
+  }
 );
 my %enabled_sanitizers = ();
 if (exists $opts{'sanitize'}) {
@@ -1395,15 +1399,20 @@ if (exists $opts{'sanitize'}) {
 }
 
 my @fsanitize = ();
+my @profile = ();
 my @sanitizer_compiler_args = ();
 my @sanitizer_linker_args = ();
 for my $name (sort(keys(%enabled_sanitizers))) {
   my $sanitizer = $enabled_sanitizers{$name};
-  push(@fsanitize, $sanitizer->{fsanitize});
+  if (not $sanitizer->{fsanitize} eq '') {
+    push(@fsanitize, $sanitizer->{fsanitize});
+  }
   if (exists($sanitizer->{env})) {
     for my $env (keys(%{$sanitizer->{env}})) {
       setEnv($env, $sanitizer->{env}->{$env});
     }
+  } else {
+    push(@profile, 'profile');
   }
   if (exists($sanitizer->{configh})) {
     push(@{$opts{'configh'}}, @{$sanitizer->{configh}});
@@ -1415,13 +1424,18 @@ for my $name (sort(keys(%enabled_sanitizers))) {
     push(@sanitizer_linker_args, @{$sanitizer->{linker_args}});
   }
 }
-if (scalar(@fsanitize)) {
+if (scalar(@fsanitize) || scalar(@profile)) {
   if (!$debug) {
     die("ERROR: Using sanitizers requires --debug");
   }
-  my @common = ('-ggdb', '-fsanitize=' . join(',', @fsanitize));
-  @sanitizer_compiler_args = ('-O1', @common, '-fno-omit-frame-pointer', @sanitizer_compiler_args);
+  my @common = ('-ggdb');
+  if (scalar(@fsanitize)) {
+    push(@fsanitize, '-fsanitize=' . join(',', @fsanitize));
+  }
+  @sanitizer_compiler_args = ('-Og', @common, '-fno-omit-frame-pointer', @sanitizer_compiler_args);
   @sanitizer_linker_args = (@common, @sanitizer_linker_args);
+  print('sanitizer_compiler_args = ' . join(', ', @sanitizer_compiler_args) . "\n");
+  print('sanitizer_linker_args = ' . join(', ', @sanitizer_linker_args) . "\n");
 }
 
 sub compiler {
@@ -1514,7 +1528,7 @@ sub write_platform_macros {
     if ($opts{'prefix'}) {
       print $PMG "INSTALL_PREFIX=" . $opts{'prefix'} . "\n";
     }
-    if (scalar(@fsanitize)) {
+    if (scalar(@fsanitize) || scalar(@profile)) {
       print $PMG
         'CPPFLAGS += ' . join(' ', @sanitizer_compiler_args) . "\n" .
         'LDFLAGS += ' . join(' ', @sanitizer_linker_args) . "\n";

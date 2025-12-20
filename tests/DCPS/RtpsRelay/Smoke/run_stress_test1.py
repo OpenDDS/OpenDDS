@@ -114,7 +114,11 @@ class ProcMan:
     def run(self, nick, *cmd, **env):
         env_dict = os.environ.copy()
         env_dict.update(env)
-        proc = subprocess.Popen(cmd, preexec_fn=os.setsid, env=env_dict)
+        if "mutrace" in cmd:
+            with open(nick + ".stderr.txt", 'w') as f:
+                proc = subprocess.Popen(cmd, preexec_fn=os.setsid, env=env_dict, stderr=f)
+        else:
+            proc = subprocess.Popen(cmd, preexec_fn=os.setsid, env=env_dict)
         log('RUN', nick, proc.pid, proc.args)
         self.procs[proc.pid] = (nick, proc)
         return proc
@@ -329,12 +333,13 @@ class RelaySched(OneshotSched):
         valgrind = []
         if self.profile:
             valgrind = [
-                'valgrind', '--tool=massif', '--threshold=.0001',
-                '--max-snapshots=200', '--detailed-freq=1', '--xtree-memory=full'
+                'mutrace', '--hash-size=337337'
             ]
         return self.proc_man.run(f'relay-{self.uid}',
                                  *valgrind,
                                  DDS_ROOT / 'bin' / 'RtpsRelay',
+                                 '-RunTime', '60',
+                                 '-HandlerThreads', '2',
                                  '-DCPSConfigFile', f'stress_relay_{self.uid}.ini',
                                  '-ORBVerboseLogging', '1',
                                  '-ApplicationDomain', '42',

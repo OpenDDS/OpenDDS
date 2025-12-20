@@ -917,6 +917,8 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
+  exit(0);
+
   if (run_thread_mon) {
     relay_thread_monitor->stop();
   }
