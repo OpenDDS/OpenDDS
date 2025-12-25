@@ -25,6 +25,7 @@
 #include <dds/DCPS/RcEventHandler.h>
 #include <dds/DCPS/RcObject.h>
 #include <dds/DCPS/ReactorTask.h>
+#include <dds/DCPS/ReactorEvent.h>
 #include <dds/DCPS/SporadicTask.h>
 #include <dds/DCPS/TimeTypes.h>
 
@@ -542,6 +543,7 @@ private:
 #endif
 
     void on_data_available(DCPS::RcHandle<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> > reader);
+    void handle_network_interface_updates();
 
     DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
@@ -580,6 +582,7 @@ private:
     void send_local(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpMulti> local_send_task_;
     void send_directed(const DCPS::MonotonicTimePoint& now);
+    DCPS::RcHandle<DCPS::ReactorEvent> network_interface_updates_event_;
     DCPS::RcHandle<SpdpSporadic> directed_send_task_;
     OPENDDS_LIST(DCPS::GUID_t) directed_guids_;
     void process_lease_expirations(const DCPS::MonotonicTimePoint& now);
