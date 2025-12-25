@@ -8,9 +8,9 @@
 #ifndef OPENDDS_DCPS_JOB_QUEUE_H
 #define OPENDDS_DCPS_JOB_QUEUE_H
 
-#include "RcEventHandler.h"
-#include "PoolAllocator.h"
 #include "dcps_export.h"
+
+#include "EventDispatcher.h"
 
 #include <ace/Reactor.h>
 #include <ace/Thread_Mutex.h>
@@ -21,10 +21,11 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class Job : public virtual RcObject {
+class Job : public EventBase {
 public:
   virtual ~Job() { }
   virtual void execute() = 0;
+  void handle_event() { execute(); }
 };
 typedef RcHandle<Job> JobPtr;
 
@@ -54,33 +55,24 @@ private:
   }
 };
 
-class OpenDDS_Dcps_Export JobQueue : public virtual RcEventHandler {
+class OpenDDS_Dcps_Export JobQueue : public virtual RcObject {
 public:
-  explicit JobQueue(ACE_Reactor* reactor);
+  explicit JobQueue(EventDispatcher_rch event_dispatcher);
 
   void enqueue(JobPtr job)
   {
-    ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
-    const bool empty = job_queue_.empty();
-    job_queue_.push_back(job);
-    if (empty) {
-      guard.release();
-      reactor()->notify(this);
-    }
+    event_dispatcher_->dispatch(dynamic_rchandle_cast<EventBase>(job));
   }
 
+  // TODO FIXME Either implement EventDispatcher 'size' equivalent or remove references to JobQueue
+  // size() where used (e.g. RtpsRelay statistics reporting)
   size_t size() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, 0);
-    return job_queue_.size();
+    return 0;
   }
 
 private:
-  mutable ACE_Thread_Mutex mutex_;
-  typedef OPENDDS_VECTOR(JobPtr) Queue;
-  Queue job_queue_;
-
-  int handle_exception(ACE_HANDLE fd);
+  EventDispatcher_rch event_dispatcher_;
 };
 
 typedef RcHandle<JobQueue> JobQueue_rch;

@@ -36,6 +36,7 @@
 #include <dds/DCPS/RcEventHandler.h>
 #include <dds/DCPS/ReactorTask.h>
 #include <dds/DCPS/ReactorTask_rch.h>
+#include <dds/DCPS/ReactorEvent.h>
 #include <dds/DCPS/SequenceNumber.h>
 #include <dds/DCPS/SporadicEvent.h>
 
@@ -268,6 +269,7 @@ public:
 
 private:
   void on_data_available(RcHandle<InternalDataReader<NetworkInterfaceAddress> > reader);
+  void handle_network_interface_updates();
 
   // Internal non-locking versions of the above
   NetworkAddressSet get_addresses_i(const GUID_t& local, const GUID_t& remote) const;
@@ -979,6 +981,7 @@ private:
   void accumulate_addresses(const GUID_t& local, const GUID_t& remote, NetworkAddressSet& addresses, bool prefer_unicast = false) const;
 
   RcHandle<InternalDataReader<NetworkInterfaceAddress> > network_interface_address_reader_;
+  RcHandle<ReactorEvent> network_interface_updates_event_;
   MulticastManager multicast_manager_;
 
   bool uses_end_historic_control_messages() const { return false; }
