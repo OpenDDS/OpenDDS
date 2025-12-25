@@ -17,6 +17,7 @@
 #include "Qos_Helper.h"
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
+#include "ServiceEventDispatcher.h"
 #include "StaticDiscovery.h"
 #include "ThreadStatusManager.h"
 #include "WaitSet.h"
@@ -151,6 +152,7 @@ Service_Participant::Service_Participant()
   ORB_argv_(false /*substitute_env_args*/),
 #endif
   time_source_()
+  , reactor_task_(make_rch<ReactorTask>())
   , monitor_factory_(0)
   , priority_min_(0)
   , priority_max_(0)
@@ -234,19 +236,19 @@ Service_Participant::time_source() const
 ACE_Reactor_Timer_Interface*
 Service_Participant::timer()
 {
-  return reactor_task_.get_reactor();
+  return reactor_task_->get_reactor();
 }
 
 ACE_Reactor*
 Service_Participant::reactor()
 {
-  return reactor_task_.get_reactor();
+  return reactor_task_->get_reactor();
 }
 
 ReactorTask_rch
 Service_Participant::reactor_task()
 {
-  return rchandle_from(&reactor_task_);
+  return reactor_task_;
 }
 
 JobQueue_rch
@@ -313,7 +315,11 @@ DDS::ReturnCode_t Service_Participant::shutdown()
 
       domain_ranges_.clear();
 
-      reactor_task_.stop();
+      if (event_dispatcher_) {
+        event_dispatcher_->shutdown(true);
+        event_dispatcher_.reset();
+      }
+      reactor_task_->stop();
 
       discoveryMap_.clear();
 
@@ -445,9 +451,11 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       dp_factory_servant_ = make_rch<DomainParticipantFactoryImpl>();
 
-      reactor_task_.open_reactor_task(&thread_status_manager_, "Service_Participant");
-      job_queue_ = make_rch<JobQueue>(reactor_task_.get_reactor());
-      reactor_task_.job_queue(job_queue_);
+      event_dispatcher_ = make_rch<ServiceEventDispatcher>(1);
+
+      reactor_task_->open_reactor_task(&thread_status_manager_, "Service_Participant");
+      job_queue_ = make_rch<JobQueue>(event_dispatcher_);
+      reactor_task_->job_queue(job_queue_);
 
       const bool monitor_enabled = config_store_->get_boolean(COMMON_DCPS_MONITOR,
                                                               COMMON_DCPS_MONITOR_default);
@@ -485,7 +493,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
       ACE_DEBUG((LM_DEBUG,
                  "(%P|%t) Service_Participant::get_domain_participant_factory: Creating LinuxNetworkConfigMonitor\n"));
     }
-    network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(rchandle_from(&reactor_task_));
+    network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_);
 #elif defined(OPENDDS_NETWORK_CONFIG_MODIFIER)
     if (DCPS_debug_level >= 1) {
       ACE_DEBUG((LM_DEBUG,

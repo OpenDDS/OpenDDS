@@ -46,7 +46,6 @@ TransportImpl::TransportImpl(TransportInst_rch config,
 TransportImpl::~TransportImpl()
 {
   DBG_ENTRY_LVL("TransportImpl", "~TransportImpl", 6);
-  event_dispatcher_->shutdown(true);
 }
 
 bool
@@ -62,11 +61,11 @@ TransportImpl::shutdown()
 
   is_shut_down_ = true;
 
+  event_dispatcher_->shutdown(true);
+
   if (!this->reactor_task_.is_nil()) {
     this->reactor_task_->stop();
   }
-
-  event_dispatcher_->shutdown(true);
 
   // Tell our subclass about the "shutdown event".
   this->shutdown_i();

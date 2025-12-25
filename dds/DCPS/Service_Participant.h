@@ -664,8 +664,9 @@ private:
   ACE_ARGV ORB_argv_;
 #endif
 
+  EventDispatcher_rch event_dispatcher_;
   const TimeSource time_source_;
-  ReactorTask reactor_task_;
+  ReactorTask_rch reactor_task_;
   JobQueue_rch job_queue_;
 
   RcHandle<DomainParticipantFactoryImpl> dp_factory_servant_;
