@@ -26,7 +26,7 @@
 #include <dds/DCPS/RcObject.h>
 #include <dds/DCPS/ReactorTask.h>
 #include <dds/DCPS/ReactorEvent.h>
-#include <dds/DCPS/SporadicTask.h>
+#include <dds/DCPS/SporadicEvent.h>
 #include <dds/DCPS/TimeTypes.h>
 
 #include <dds/DCPS/security/framework/SecurityConfig_rch.h>
@@ -577,28 +577,28 @@ private:
     DCPS::MulticastManager multicast_manager_;
     DCPS::NetworkAddressSet send_addrs_;
     ACE_Message_Block buff_, wbuff_;
-    typedef DCPS::PmfSporadicTask<SpdpTransport> SpdpSporadic;
+    typedef DCPS::PmfEvent<SpdpTransport> SpdpTransportEvent;
     typedef DCPS::PmfMultiTask<SpdpTransport> SpdpMulti;
     void send_local(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpMulti> local_send_task_;
-    void send_directed(const DCPS::MonotonicTimePoint& now);
+    void send_directed();
     DCPS::RcHandle<DCPS::ReactorEvent> network_interface_updates_event_;
-    DCPS::RcHandle<SpdpSporadic> directed_send_task_;
+    DCPS::SporadicEvent_rch directed_send_event_;
     OPENDDS_LIST(DCPS::GUID_t) directed_guids_;
-    void process_lease_expirations(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpSporadic> lease_expiration_task_;
+    void process_lease_expirations();
+    DCPS::SporadicEvent_rch lease_expiration_event_;
     void thread_status_task(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<PeriodicThreadStatus> thread_status_task_;
     DCPS::RcHandle<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> > network_interface_address_reader_;
 #if OPENDDS_CONFIG_SECURITY
-    void process_handshake_deadlines(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpSporadic> handshake_deadline_task_;
-    void process_handshake_resends(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpSporadic> handshake_resend_task_;
-    void send_relay(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpSporadic> relay_spdp_task_;
-    void relay_stun_task(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpSporadic> relay_stun_task_;
+    void process_handshake_deadlines();
+    DCPS::SporadicEvent_rch handshake_deadline_event_;
+    void process_handshake_resends();
+    DCPS::SporadicEvent_rch handshake_resend_event_;
+    void send_relay();
+    DCPS::SporadicEvent_rch relay_spdp_event_;
+    void relay_stun_task();
+    DCPS::SporadicEvent_rch relay_stun_event_;
     ICE::ServerReflexiveStateMachine relay_srsm_;
     void process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange);
     void disable_relay_stun_task();
