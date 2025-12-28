@@ -12,6 +12,7 @@
 #include "rtps_export.h"
 
 #include <dds/DCPS/AtomicBool.h>
+#include <dds/DCPS/PeriodicTask.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/Statistics.h>
 #include <dds/DCPS/debug.h>

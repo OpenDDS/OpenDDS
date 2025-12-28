@@ -66,6 +66,12 @@ bool PeriodicEvent::enabled() const
   return timer_id_ > 0;
 }
 
+RcHandle<EventBase> PeriodicEvent::event() const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  return event_;
+}
+
 void PeriodicEvent::handle_event_scheduling()
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);

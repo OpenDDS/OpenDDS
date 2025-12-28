@@ -59,6 +59,12 @@ public:
   bool enabled() const;
 
   /**
+   * Get a handle to the internal (non-periodic) event (useful for manual off-period scheduling)
+   * @return A handle to the internal event
+   */
+  RcHandle<EventBase> event() const;
+
+  /**
    * For use by EventDispatcher
    */
   void handle_event();
