@@ -50,6 +50,8 @@ public:
 
   void shorten_current_wait(const TimeDuration& period);
 
+  void shorten_current_wait(const TimeDuration& period);
+
   /**
    * Disable the PeriodicEvent, canceling the scheduled base event if enabled.
    */
