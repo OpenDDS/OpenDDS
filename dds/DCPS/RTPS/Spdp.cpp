@@ -2522,7 +2522,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
   }
 #endif
 
-  local_send_task_ = DCPS::make_rch<SpdpMulti>(reactor_task, outer->config_->resend_period(), rchandle_from(this), &SpdpTransport::send_local);
+  local_send_event_ = DCPS::make_rch<DCPS::PeriodicEvent>(outer->sedp_->event_dispatcher(), DCPS::make_rch<SpdpTransportEvent>(rchandle_from(this), &SpdpTransport::send_local));
 
   if (outer->config_->periodic_directed_spdp()) {
     directed_send_event_ =
@@ -2642,13 +2642,14 @@ void Spdp::SpdpTransport::register_handlers(DCPS::ReactorWrapper& reactor_wrappe
 void
 Spdp::SpdpTransport::enable_periodic_tasks()
 {
-  if (local_send_task_) {
-    local_send_task_->enable(TimeDuration::zero_value);
+  DCPS::RcHandle<Spdp> outer = outer_.lock();
+  if (!outer) return;
+
+  if (local_send_event_) {
+    local_send_event_->enable(outer->config_->resend_period(), true);
   }
 
-  DCPS::RcHandle<Spdp> outer = outer_.lock();
 #if OPENDDS_CONFIG_SECURITY
-  if (!outer) return;
 
   outer->sedp_->core().reset_relay_spdp_task_falloff();
   relay_spdp_event_->schedule(TimeDuration::zero_value);
@@ -2730,8 +2731,8 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
     relay_stun_event_->cancel();
   }
 #endif
-  if (local_send_task_) {
-    local_send_task_->disable();
+  if (local_send_event_) {
+    local_send_event_->disable();
   }
   if (directed_send_event_) {
     directed_send_event_->cancel();
@@ -2764,9 +2765,9 @@ Spdp::SpdpTransport::shorten_local_sender_delay_i()
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  if (local_send_task_) {
+  if (local_send_event_) {
     const TimeDuration quick_resend = outer->resend_period_ * outer->quick_resend_ratio_;
-    local_send_task_->enable(std::max(quick_resend, outer->min_resend_delay_));
+    local_send_event_->shorten_current_wait(std::max(quick_resend, outer->min_resend_delay_));
   }
 }
 
@@ -4505,7 +4506,7 @@ void Spdp::SpdpTransport::send_relay()
 }
 #endif
 
-void Spdp::SpdpTransport::send_local(const DCPS::MonotonicTimePoint& /*now*/)
+void Spdp::SpdpTransport::send_local()
 {
   write(SEND_MULTICAST);
 }
