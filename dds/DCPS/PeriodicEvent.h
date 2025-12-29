@@ -47,6 +47,8 @@ public:
    */
   void enable(const TimeDuration& period, bool immediate_dispatch = true, bool strict_timing = true);
 
+  void shorten_current_wait(const TimeDuration& period);
+
   /**
    * Disable the PeriodicEvent, canceling the scheduled base event if enabled.
    */
