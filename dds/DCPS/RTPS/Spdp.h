@@ -17,7 +17,6 @@
 #include <dds/DCPS/Discovery.h>
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/JobQueue.h>
-#include <dds/DCPS/MultiTask.h>
 #include <dds/DCPS/MulticastManager.h>
 #include <dds/DCPS/PeriodicEvent.h>
 #include <dds/DCPS/PoolAllocationBase.h>
@@ -558,9 +557,8 @@ private:
     DCPS::NetworkAddressSet send_addrs_;
     ACE_Message_Block buff_, wbuff_;
     typedef DCPS::PmfEvent<SpdpTransport> SpdpTransportEvent;
-    typedef DCPS::PmfMultiTask<SpdpTransport> SpdpMulti;
-    void send_local(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<SpdpMulti> local_send_task_;
+    void send_local();
+    DCPS::PeriodicEvent_rch local_send_event_;
     void send_directed();
     DCPS::RcHandle<DCPS::ReactorEvent> network_interface_updates_event_;
     DCPS::SporadicEvent_rch directed_send_event_;
