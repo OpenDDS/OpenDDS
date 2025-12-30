@@ -12,7 +12,7 @@
 #include "rtps_export.h"
 
 #include <dds/DCPS/AtomicBool.h>
-#include <dds/DCPS/PeriodicTask.h>
+#include <dds/DCPS/PeriodicEvent.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/Statistics.h>
 #include <dds/DCPS/debug.h>
@@ -361,14 +361,14 @@ private:
                      const DDS::DataReaderQos& qos);
 
   DCPS::StatisticsDataWriter_rch stats_writer_;
-  typedef DCPS::PmfPeriodicTask<const RtpsDiscovery> PeriodicTask;
-  DCPS::RcHandle<PeriodicTask> stats_task_;
-  DCPS::TimeDuration stats_task_period_;
+  typedef DCPS::PmfEvent<RtpsDiscovery> RtpsDiscoveryEvent;
+  DCPS::PeriodicEvent_rch stats_event_;
+  DCPS::TimeDuration stats_event_period_;
   // Seperate mutex to reduce contention on lock_
   mutable ACE_Thread_Mutex stats_lock_;
 
-  void setup_stats_task(const DCPS::TimeDuration& period);
-  void write_stats(const MonotonicTimePoint&) const;
+  void setup_stats_event(const DCPS::TimeDuration& period);
+  void write_stats();
 
   DCPS::ConfigReader_rch config_reader_;
   void on_data_available(DCPS::ConfigReader_rch reader);
