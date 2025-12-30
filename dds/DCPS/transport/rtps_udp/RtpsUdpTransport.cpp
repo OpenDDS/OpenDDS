@@ -697,27 +697,27 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
   config_reader_ = make_rch<ConfigReader>(ConfigStoreImpl::datareader_qos(), rchandle_from(this));
   TheServiceParticipant->config_topic()->connect(config_reader_);
 
-  setup_stats_task(TheServiceParticipant->statistics_period());
+  setup_stats_event(TheServiceParticipant->statistics_period());
   return true;
 }
 
-void RtpsUdpTransport::setup_stats_task(const TimeDuration& period)
+void RtpsUdpTransport::setup_stats_event(const TimeDuration& period)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(stats_mutex_);
-  if (period == stats_task_period_) {
+  if (period == stats_event_period_) {
     return;
   }
-  stats_task_period_ = period;
+  stats_event_period_ = period;
 
   if (period.is_zero()) {
-    if (stats_task_) {
-      stats_task_->disable();
+    if (stats_event_) {
+      stats_event_->disable();
     }
   } else {
-    if (!stats_task_) {
-      stats_task_ = make_rch<PeriodicTask>(reactor_task(), *this, &RtpsUdpTransport::write_stats);
+    if (!stats_event_) {
+      stats_event_ = make_rch<PeriodicEvent>(event_dispatcher(), make_rch<RtpsUdpTransportEvent>(rchandle_from(this), &RtpsUdpTransport::write_stats));
     }
-    stats_task_->enable(true, period);
+    stats_event_->enable(period);
   }
 }
 
@@ -780,7 +780,7 @@ RtpsUdpTransport::on_data_available(ConfigReader_rch)
     if (sample.key() == COMMON_STATISTICS_PERIOD) {
       TimeDuration period;
       if (ConfigStoreImpl::convert_value(sample, ConfigStoreImpl::Format_FractionalSeconds, period)) {
-        setup_stats_task(period);
+        setup_stats_event(period);
       }
 
     } else if (sample.key_has_prefix(config_prefix)) {
@@ -1190,7 +1190,7 @@ void RtpsUdpTransport::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
   }
 }
 
-void RtpsUdpTransport::write_stats(const MonotonicTimePoint&) const
+void RtpsUdpTransport::write_stats()
 {
   DCPS::Statistics statistics = {config()->name().c_str(), stats_template_};
   DDS::UInt32 idx = 0;

@@ -12,7 +12,6 @@
 
 #include <dds/DCPS/ConnectionRecords.h>
 #include <dds/DCPS/FibonacciSequence.h>
-#include <dds/DCPS/PeriodicTask.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/SporadicTask.h>
 #include <dds/DCPS/Statistics.h>
@@ -425,18 +424,18 @@ private:
   RtpsUdpCore core_;
 
   StatisticsDataWriter_rch stats_writer_;
-  typedef PmfPeriodicTask<const RtpsUdpTransport> PeriodicTask;
-  RcHandle<PeriodicTask> stats_task_;
-  TimeDuration stats_task_period_;
+  typedef PmfEvent<RtpsUdpTransport> RtpsUdpTransportEvent;
+  DCPS::PeriodicEvent_rch stats_event_;
+  TimeDuration stats_event_period_;
   mutable ACE_Thread_Mutex stats_mutex_;
 
-  void setup_stats_task(const TimeDuration& period);
+  void setup_stats_event(const TimeDuration& period);
 
   static StatisticSeq stats_template();
   const StatisticSeq stats_template_;
 
   void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
-  void write_stats(const MonotonicTimePoint&) const;
+  void write_stats();
 };
 
 } // namespace DCPS
