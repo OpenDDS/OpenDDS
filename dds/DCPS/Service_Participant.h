@@ -230,6 +230,8 @@ public:
 
   JobQueue_rch job_queue() const;
 
+  EventDispatcher_rch event_dispatcher() const;
+
   void set_shutdown_listener(RcHandle<ShutdownListener> listener);
 
   /**

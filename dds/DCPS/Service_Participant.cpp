@@ -257,6 +257,12 @@ Service_Participant::job_queue() const
   return job_queue_;
 }
 
+EventDispatcher_rch
+Service_Participant::event_dispatcher() const
+{
+  return event_dispatcher_;
+}
+
 DDS::ReturnCode_t Service_Participant::shutdown()
 {
   if (DCPS_debug_level >= 1) {
