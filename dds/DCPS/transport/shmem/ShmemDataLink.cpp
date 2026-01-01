@@ -105,7 +105,7 @@ ShmemDataLink::open(const std::string& peer_address)
   if (!cfg) {
     return false;
   }
-  event_dispatcher_->schedule(assoc_resends_event_->event(), MonotonicTimePoint::now() + cfg->association_resend_period());
+  assoc_resends_event_->enable(cfg->association_resend_period());
 
   return true;
 }
