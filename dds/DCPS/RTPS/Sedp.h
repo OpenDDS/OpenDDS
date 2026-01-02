@@ -40,7 +40,7 @@
 #include <dds/DCPS/RcHandle_T.h>
 #include <dds/DCPS/Registered_Data_Types.h>
 #include <dds/DCPS/NetworkAddress.h>
-#include <dds/DCPS/SporadicTask.h>
+#include <dds/DCPS/SporadicEvent.h>
 #include <dds/DCPS/TopicDetails.h>
 #include <dds/DCPS/AtomicBool.h>
 
@@ -538,12 +538,11 @@ private:
   void rtps_relay_address(const DCPS::NetworkAddress& address);
   void stun_server_address(const DCPS::NetworkAddress& address);
 
-  void type_lookup_init(DCPS::ReactorTask_rch reactor_task)
+  void type_lookup_init()
   {
     if (!type_lookup_reply_deadline_processor_) {
       type_lookup_reply_deadline_processor_ =
-        DCPS::make_rch<EndpointManagerSporadic>(TheServiceParticipant->time_source(), reactor_task,
-                                                rchandle_from(this), &Sedp::remove_expired_endpoints);
+        DCPS::make_rch<DCPS::SporadicEvent>(event_dispatcher_, DCPS::make_rch<DCPS::PmfEvent<Sedp> >(rchandle_from(this), &Sedp::remove_expired_endpoints));
     }
   }
 
@@ -1394,15 +1393,13 @@ protected:
   typedef OPENDDS_MAP(MatchingPair, MatchingData) MatchingDataMap;
   typedef MatchingDataMap::iterator MatchingDataIter;
 
-  typedef DCPS::PmfSporadicTask<Sedp> EndpointManagerSporadic;
-
   void match(const GUID_t& writer, const GUID_t& reader);
 
   bool need_type_info(const XTypes::TypeInformation* type_info,
                       bool& need_minimal,
                       bool& need_complete) const;
 
-  void remove_expired_endpoints(const MonotonicTimePoint& /*now*/);
+  void remove_expired_endpoints();
 
   void match_continue(UsedEndpoints& ue,
                       const GUID_t& writer, const GUID_t& reader);
@@ -1525,7 +1522,7 @@ protected:
   XTypes::TypeLookupService_rch type_lookup_service_;
   OrigSeqNumberMap orig_seq_numbers_;
   MatchingDataMap matching_data_buffer_;
-  RcHandle<EndpointManagerSporadic> type_lookup_reply_deadline_processor_;
+  DCPS::SporadicEvent_rch type_lookup_reply_deadline_processor_;
   TimeDuration max_type_lookup_service_reply_period_;
   DCPS::SequenceNumber type_lookup_service_sequence_number_;
   const bool use_xtypes_;
