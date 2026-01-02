@@ -13,7 +13,7 @@
 #include <dds/DCPS/ConnectionRecords.h>
 #include <dds/DCPS/FibonacciSequence.h>
 #include <dds/DCPS/PoolAllocator.h>
-#include <dds/DCPS/SporadicTask.h>
+#include <dds/DCPS/SporadicEvent.h>
 #include <dds/DCPS/Statistics.h>
 
 #include <dds/DCPS/RTPS/ICE/Ice.h>
@@ -217,23 +217,23 @@ public:
   }
 
 #if OPENDDS_CONFIG_SECURITY
-  void reset_relay_stun_task_falloff()
+  void reset_relay_stun_event_falloff()
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    relay_stun_task_falloff_.set(heartbeat_period_);
+    relay_stun_event_falloff_.set(heartbeat_period_);
   }
 
-  TimeDuration advance_relay_stun_task_falloff()
+  TimeDuration advance_relay_stun_event_falloff()
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    relay_stun_task_falloff_.advance(ICE::Configuration::instance()->server_reflexive_address_period());
-    return relay_stun_task_falloff_.get();
+    relay_stun_event_falloff_.advance(ICE::Configuration::instance()->server_reflexive_address_period());
+    return relay_stun_event_falloff_.get();
   }
 
-  void set_relay_stun_task_falloff()
+  void set_relay_stun_event_falloff()
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    relay_stun_task_falloff_.set(ICE::Configuration::instance()->server_reflexive_address_period());
+    relay_stun_event_falloff_.set(ICE::Configuration::instance()->server_reflexive_address_period());
   }
 #endif
 
@@ -250,7 +250,7 @@ private:
   NetworkAddress stun_server_address_;
   MessageDropper message_dropper_;
   InternalTransportStatistics transport_statistics_;
-  FibonacciSequence<TimeDuration> relay_stun_task_falloff_;
+  FibonacciSequence<TimeDuration> relay_stun_event_falloff_;
 };
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl, public ConfigListener {
@@ -266,7 +266,7 @@ public:
 #if OPENDDS_CONFIG_SECURITY
   ICE::ServerReflexiveStateMachine& relay_srsm() { return relay_srsm_; }
   void process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange);
-  void disable_relay_stun_task();
+  void disable_relay_stun_event();
 #endif
 
   virtual void update_locators(const GUID_t& /*remote*/,
@@ -404,9 +404,8 @@ private:
   };
   RcHandle<IceEndpoint> ice_endpoint_;
 
-  typedef PmfSporadicTask<RtpsUdpTransport> Sporadic;
-  void relay_stun_task(const MonotonicTimePoint& now);
-  RcHandle<Sporadic> relay_stun_task_;
+  void relay_stun_event();
+  DCPS::SporadicEvent_rch relay_stun_event_;
   ICE::ServerReflexiveStateMachine relay_srsm_;
 
   void start_ice();
