@@ -528,7 +528,7 @@ Sedp::init(const GUID_t& guid,
   // may not be reflected.
   event_dispatcher_ = transport_inst_->event_dispatcher(domainId, 0);
   job_queue_ = DCPS::make_rch<DCPS::JobQueue>(event_dispatcher_);
-  type_lookup_init(reactor_task_);
+  type_lookup_init();
 
   // Configure and enable each reader/writer
   const bool reliable = true;
@@ -7336,7 +7336,7 @@ bool Sedp::need_type_info(const XTypes::TypeInformation* type_info,
   return need_minimal || need_complete;
 }
 
-void Sedp::remove_expired_endpoints(const MonotonicTimePoint& /*now*/)
+void Sedp::remove_expired_endpoints()
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   const MonotonicTimePoint now = MonotonicTimePoint::now();
