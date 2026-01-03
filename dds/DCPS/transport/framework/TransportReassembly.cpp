@@ -320,6 +320,7 @@ void TransportReassembly::check_expirations(const MonotonicTimePoint& now)
 size_t TransportReassembly::total_frags() const
 {
   size_t total = 0;
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   for (FragInfoMap::const_iterator iter = fragments_.begin(); iter != fragments_.end(); ++iter) {
     total += iter->second.total_frags_;
   }
