@@ -4961,7 +4961,10 @@ void RtpsUdpDataLink::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
 {
   DataLink::fill_stats(stats, idx);
   stats[idx++].value = job_queue_ ? job_queue_->size() : 0;
-  stats[idx++].value = locators_.size();
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
+    stats[idx++].value = locators_.size();
+  }
   stats[idx++].value = locator_cache_.size();
   stats[idx++].value = bundling_cache_.size();
   stats[idx++].value = mb_allocator_.bytes_heap_allocated();
