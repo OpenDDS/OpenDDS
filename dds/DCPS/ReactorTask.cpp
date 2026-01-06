@@ -420,7 +420,7 @@ ReactorTask::CommandPtr ReactorTask::execute_or_enqueue(CommandPtr command)
 
   // But depending on whether we're running it immediately or not, we either process or notify
   if (immediate) {
-    process_command_queue_i(guard, local_reactor);
+    process_command_queue_i();
   } else if (reactor_state_ == RS_NONE) {
     reactor_state_ = RS_NOTIFIED;
     guard.release();
@@ -442,12 +442,11 @@ int ReactorTask::handle_exception(ACE_HANDLE /*fd*/)
   ThreadStatusManager::Event ev(*thread_status_manager_);
 
   GuardType guard(lock_);
-  process_command_queue_i(guard, reactor_);
+  process_command_queue_i();
   return 0;
 }
 
-void ReactorTask::process_command_queue_i(ACE_Guard<ACE_Thread_Mutex>& guard,
-                                          ACE_Reactor* reactor)
+void ReactorTask::process_command_queue_i()
 {
   Queue cq;
   ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
@@ -460,11 +459,7 @@ void ReactorTask::process_command_queue_i(ACE_Guard<ACE_Thread_Mutex>& guard,
       (*pos)->execute(reactor_wrapper_);
     }
   }
-  if (!command_queue_.empty()) {
-    reactor_state_ = RS_NOTIFIED;
-    guard.release();
-    reactor->notify(this);
-  } else {
+  if (command_queue_.empty()) {
     reactor_state_ = RS_NONE;
     condition_.notify_all();
   }
