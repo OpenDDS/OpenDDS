@@ -11,6 +11,7 @@
 
 #include "Stun.h"
 
+#include <dds/DCPS/AtomicBool.h>
 #include <dds/DCPS/Ice.h>
 #include <dds/DCPS/TimeTypes.h>
 #include <dds/DCPS/RcObject.h>
@@ -188,6 +189,19 @@ public:
     return server_reflexive_address_ != ACE_INET_Addr();
   }
 
+  void reset()
+  {
+    message_class_ = STUN::REQUEST;
+    message_ = STUN::Message();
+    unset_stun_server_address_ = ACE_INET_Addr();
+    stun_server_address_ = ACE_INET_Addr();
+    server_reflexive_address_ = ACE_INET_Addr();
+    send_count_ = 0;
+    timestamp_ = DCPS::MonotonicTimePoint();
+    latency_ = DCPS::TimeDuration();
+    latency_available_ = false;
+  }
+
 private:
   StateChange start(const ACE_INET_Addr& address, size_t indication_count_limit, const DCPS::GuidPrefix_t& guid_prefix);
   StateChange stop();
@@ -203,7 +217,7 @@ private:
   size_t send_count_;
   DCPS::MonotonicTimePoint timestamp_;
   DCPS::TimeDuration latency_;
-  bool latency_available_;
+  DCPS::AtomicBool latency_available_;
  };
 
 } // namespace ICE

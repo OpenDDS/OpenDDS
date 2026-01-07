@@ -1151,7 +1151,7 @@ RtpsUdpTransport::disable_relay_stun_event()
     deferred_connection_records_.clear();
   }
 
-  relay_srsm_ = ICE::ServerReflexiveStateMachine();
+  relay_srsm_.reset();
 #endif
 }
 

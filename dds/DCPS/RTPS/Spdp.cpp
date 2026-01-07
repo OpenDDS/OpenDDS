@@ -4487,7 +4487,7 @@ void Spdp::SpdpTransport::disable_relay_stun_task()
     outer->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer->bit_subscriber_, false, connection_record));
   }
 
-  relay_srsm_ = ICE::ServerReflexiveStateMachine();
+  relay_srsm_.reset();
 #endif
 }
 
