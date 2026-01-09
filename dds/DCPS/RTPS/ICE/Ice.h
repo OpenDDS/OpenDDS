@@ -160,55 +160,30 @@ public:
   // Return None otherwise.
   StateChange receive(const STUN::Message& message);
 
-  const STUN::Message& message() const { return message_; }
-  const ACE_INET_Addr& unset_stun_server_address() const { return unset_stun_server_address_; }
-  const ACE_INET_Addr& stun_server_address() const { return stun_server_address_; }
+  STUN::Message message() const;
 
-  bool is_response(const STUN::Message& message) const
-  {
-    return message.transaction_id() == message_.transaction_id();
-  }
+  ACE_INET_Addr unset_stun_server_address() const;
+  ACE_INET_Addr stun_server_address() const;
 
-  DCPS::TimeDuration latency() const
-  {
-    return latency_;
-  }
+  bool is_response(const STUN::Message& message) const;
 
-  bool latency_available() const
-  {
-    return latency_available_;
-  }
+  DCPS::TimeDuration latency() const;
 
-  void latency_available(bool flag)
-  {
-    latency_available_ = flag;
-  }
+  bool latency_available() const;
+  void latency_available(bool flag);
 
-  bool connected() const
-  {
-    return server_reflexive_address_ != ACE_INET_Addr();
-  }
+  bool connected() const;
 
-  void reset()
-  {
-    message_class_ = STUN::REQUEST;
-    message_.reset();
-    unset_stun_server_address_ = ACE_INET_Addr();
-    stun_server_address_ = ACE_INET_Addr();
-    server_reflexive_address_ = ACE_INET_Addr();
-    send_count_ = 0;
-    timestamp_ = DCPS::MonotonicTimePoint();
-    latency_ = DCPS::TimeDuration();
-    latency_available_ = false;
-  }
+  void reset();
 
 private:
-  StateChange start(const ACE_INET_Addr& address, size_t indication_count_limit, const DCPS::GuidPrefix_t& guid_prefix);
-  StateChange stop();
-  StateChange next_send(size_t indication_count_limit, const DCPS::GuidPrefix_t& guid_prefix);
-  StateChange success_response(const STUN::Message& message);
-  StateChange error_response(const STUN::Message& message);
+  StateChange start_i(const ACE_INET_Addr& address, size_t indication_count_limit, const DCPS::GuidPrefix_t& guid_prefix);
+  StateChange stop_i();
+  StateChange next_send_i(size_t indication_count_limit, const DCPS::GuidPrefix_t& guid_prefix);
+  StateChange success_response_i(const STUN::Message& message);
+  StateChange error_response_i(const STUN::Message& message);
 
+  mutable ACE_Thread_Mutex mutex_;
   STUN::Class message_class_;
   STUN::Message message_;
   ACE_INET_Addr unset_stun_server_address_;
@@ -217,7 +192,7 @@ private:
   size_t send_count_;
   DCPS::MonotonicTimePoint timestamp_;
   DCPS::TimeDuration latency_;
-  DCPS::AtomicBool latency_available_;
+  bool latency_available_;
  };
 
 } // namespace ICE
