@@ -280,7 +280,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
 
   DCPS::Serializer serializer(head, STUN::encoding);
   STUN::Message message;
-  message.block = head;
+  message.block(head);
   if (serializer >> message) {
     tport.core().recv(ra, MCK_STUN, ret);
 

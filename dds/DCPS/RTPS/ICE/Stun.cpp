@@ -605,19 +605,135 @@ bool TransactionId::operator!=(const TransactionId& other) const
   return (memcmp(this->data, other.data, sizeof(data)) != 0);
 }
 
+void Message::append_attribute(const Attribute& attribute)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  append_attribute_i(attribute);
+}
+
+void Message::append_attribute_i(const Attribute& attribute)
+{
+  attributes_.push_back(attribute);
+  length_ += (4 + attribute.length() + 3) & ~3;
+
+  if (attribute.type == MESSAGE_INTEGRITY) {
+    length_for_message_integrity_ = length_;
+  }
+}
+
+ACE_UINT16 Message::length() const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  return length_;
+}
+
+ACE_UINT16 Message::length_for_message_integrity() const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  return length_for_message_integrity_;
+}
+
+void Message::password(const std::string& password)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  password_ = password;
+}
+
+std::string Message::password() const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  return password_;
+}
+
+Class Message::get_class() const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  return class_;
+}
+
+void Message::set_class(Class val)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  class_ = val;
+}
+
+Method Message::method() const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  return method_;
+}
+
+void Message::method(Method method)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  method_ = method;
+}
+
+void Message::block(ACE_Message_Block* block)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  block_ = block;
+}
+
 void Message::generate_transaction_id()
 {
-  TheSecurityRegistry->builtin_config()->get_utility()->generate_random_bytes(transaction_id.data, sizeof(transaction_id.data));
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  TheSecurityRegistry->builtin_config()->get_utility()->generate_random_bytes(transaction_id_.data, sizeof(transaction_id_.data));
+}
+
+TransactionId Message::transaction_id() const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  return transaction_id_;
+}
+
+void Message::transaction_id(const TransactionId& id)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  transaction_id_ = id;
 }
 
 void Message::clear_transaction_id()
 {
-  ACE_OS::memset(transaction_id.data, 0, sizeof(transaction_id.data));
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  ACE_OS::memset(transaction_id_.data, 0, sizeof(transaction_id_.data));
+}
+
+void Message::reset(Class c, Method m)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  class_ = c;
+  method_ = m;
+  transaction_id_ = TransactionId();
+  block_ = 0;
+  password_.clear();
+  attributes_.clear();
+  length_ = 0;
+  length_for_message_integrity_ = 0;
+}
+
+Message& Message::operator=(const Message& rhs)
+{
+  if (&rhs != this) {
+    ACE_Guard<ACE_Thread_Mutex> guard1(this < &rhs ? mutex_ : rhs.mutex_);
+    ACE_Guard<ACE_Thread_Mutex> guard2(this < &rhs ? rhs.mutex_ : mutex_);
+    class_ = rhs.class_;
+    method_ = rhs.method_;
+    transaction_id_ = rhs.transaction_id_;
+    block_ = rhs.block_ ? rhs.block_->duplicate() : rhs.block_;
+    password_ = rhs.password_;
+    attributes_ = rhs.attributes_;
+    length_ = rhs.length_;
+    length_for_message_integrity_ = rhs.length_for_message_integrity_;
+  }
+  return *this;
 }
 
 std::vector<AttributeType> Message::unknown_comprehension_required_attributes() const
 {
   std::vector<AttributeType> retval;
+
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
 
   for (AttributesType::const_iterator pos = attributes_.begin(), limit = attributes_.end(); pos != limit; ++pos) {
     const AttributesType::value_type& attribute = *pos;
@@ -644,14 +760,15 @@ std::vector<AttributeType> Message::unknown_comprehension_required_attributes() 
 
 bool Message::get_mapped_address(ACE_INET_Addr& address) const
 {
-  for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  for (STUN::Message::const_iterator pos = attributes_.begin(), limit = attributes_.end(); pos != limit; ++pos) {
     if (pos->type == STUN::XOR_MAPPED_ADDRESS) {
       address = pos->mapped_address;
       return true;
     }
   }
 
-  for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+  for (STUN::Message::const_iterator pos = attributes_.begin(), limit = attributes_.end(); pos != limit; ++pos) {
     if (pos->type == STUN::MAPPED_ADDRESS) {
       address = pos->mapped_address;
       return true;
@@ -665,7 +782,8 @@ bool Message::get_priority(ACE_UINT32& priority) const
 {
   bool flag = false;
 
-  for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  for (STUN::Message::const_iterator pos = attributes_.begin(), limit = attributes_.end(); pos != limit; ++pos) {
     if (pos->type == STUN::PRIORITY) {
       flag = true;
       priority = pos->priority;
@@ -680,7 +798,8 @@ bool Message::get_username(std::string& username) const
 {
   bool flag = false;
 
-  for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  for (STUN::Message::const_iterator pos = attributes_.begin(), limit = attributes_.end(); pos != limit; ++pos) {
     if (pos->type == STUN::USERNAME) {
       flag = true;
       username = pos->username;
@@ -693,7 +812,8 @@ bool Message::get_username(std::string& username) const
 
 bool Message::has_message_integrity() const
 {
-  for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  for (STUN::Message::const_iterator pos = attributes_.begin(), limit = attributes_.end(); pos != limit; ++pos) {
     if (pos->type == STUN::MESSAGE_INTEGRITY) {
       return true;
     }
@@ -706,10 +826,11 @@ bool Message::verify_message_integrity(const std::string& pass) const
 {
   bool verified = false;
 
-  for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  for (STUN::Message::const_iterator pos = attributes_.begin(), limit = attributes_.end(); pos != limit; ++pos) {
     if (pos->type == STUN::MESSAGE_INTEGRITY) {
       unsigned char computed_message_integrity[20];
-      compute_message_integrity(pass, computed_message_integrity);
+      compute_message_integrity_i(pass, computed_message_integrity);
       verified = memcmp(computed_message_integrity, pos->message_integrity, 20) == 0;
       // Use the last.
     }
@@ -718,24 +839,24 @@ bool Message::verify_message_integrity(const std::string& pass) const
   return verified;
 }
 
-void Message::compute_message_integrity(const std::string& pass, unsigned char message_integrity[20]) const
+void Message::compute_message_integrity_i(const std::string& pass, unsigned char message_integrity[20]) const
 {
-  ACE_Message_Block* amb = this->block->duplicate();
+  ACE_Message_Block* amb = block_->duplicate();
   amb->rd_ptr(amb->base());
   DCPS::Serializer serializer(amb, encoding);
 
   // Write the length and resize for hashing.
   amb->wr_ptr(amb->base() + 2);
-  ACE_UINT16 message_length = length_for_message_integrity();
+  ACE_UINT16 message_length = length_for_message_integrity_;
   serializer << message_length;
-  amb->wr_ptr(amb->base() + HEADER_SIZE + length_for_message_integrity() - 24);
+  amb->wr_ptr(amb->base() + HEADER_SIZE + length_for_message_integrity_ - 24);
 
   // Compute the SHA1.
   TheSecurityRegistry->builtin_config()->get_utility()->hmac(message_integrity, amb->rd_ptr(), amb->length(), pass);
 
   // Write the correct length.
   amb->wr_ptr(amb->base() + 2);
-  message_length = length();
+  message_length = length_;
   serializer << message_length;
 
   amb->release();
@@ -743,7 +864,8 @@ void Message::compute_message_integrity(const std::string& pass, unsigned char m
 
 bool Message::has_error_code() const
 {
-  for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  for (STUN::Message::const_iterator pos = attributes_.begin(), limit = attributes_.end(); pos != limit; ++pos) {
     if (pos->type == STUN::ERROR_CODE) {
       return true;
     }
@@ -754,7 +876,8 @@ bool Message::has_error_code() const
 
 ACE_UINT16 Message::get_error_code() const
 {
-  for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  for (STUN::Message::const_iterator pos = attributes_.begin(), limit = attributes_.end(); pos != limit; ++pos) {
     if (pos->type == STUN::ERROR_CODE) {
       return pos->error.code;
     }
@@ -765,7 +888,8 @@ ACE_UINT16 Message::get_error_code() const
 
 std::string Message::get_error_reason() const
 {
-  for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  for (STUN::Message::const_iterator pos = attributes_.begin(), limit = attributes_.end(); pos != limit; ++pos) {
     if (pos->type == STUN::ERROR_CODE) {
       return pos->error.reason;
     }
@@ -776,7 +900,8 @@ std::string Message::get_error_reason() const
 
 bool Message::has_unknown_attributes() const
 {
-  for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  for (STUN::Message::const_iterator pos = attributes_.begin(), limit = attributes_.end(); pos != limit; ++pos) {
     if (pos->type == STUN::UNKNOWN_ATTRIBUTES) {
       return true;
     }
@@ -787,7 +912,8 @@ bool Message::has_unknown_attributes() const
 
 std::vector<AttributeType> Message::get_unknown_attributes() const
 {
-  for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  for (STUN::Message::const_iterator pos = attributes_.begin(), limit = attributes_.end(); pos != limit; ++pos) {
     if (pos->type == STUN::UNKNOWN_ATTRIBUTES) {
       return pos->unknown_attributes;
     }
@@ -798,7 +924,8 @@ std::vector<AttributeType> Message::get_unknown_attributes() const
 
 bool Message::has_fingerprint() const
 {
-  for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  for (STUN::Message::const_iterator pos = attributes_.begin(), limit = attributes_.end(); pos != limit; ++pos) {
     if (pos->type == STUN::FINGERPRINT) {
       return true;
     }
@@ -807,14 +934,14 @@ bool Message::has_fingerprint() const
   return false;
 }
 
-ACE_UINT32 Message::compute_fingerprint() const
+ACE_UINT32 Message::compute_fingerprint_i() const
 {
-  ACE_Message_Block* amb = this->block->duplicate();
+  ACE_Message_Block* amb = block_->duplicate();
   amb->rd_ptr(amb->base());
   DCPS::Serializer serializer(amb, encoding);
 
   // Resize for hashing.
-  amb->wr_ptr(amb->base() + HEADER_SIZE + length() - 8);
+  amb->wr_ptr(amb->base() + HEADER_SIZE + length_ - 8);
 
   // Compute the CRC-32
   ACE_UINT32 crc = ACE::crc32(amb->rd_ptr(), amb->length());
@@ -826,7 +953,8 @@ ACE_UINT32 Message::compute_fingerprint() const
 
 bool Message::has_ice_controlled() const
 {
-  for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  for (STUN::Message::const_iterator pos = attributes_.begin(), limit = attributes_.end(); pos != limit; ++pos) {
     if (pos->type == STUN::ICE_CONTROLLED) {
       return true;
     }
@@ -837,7 +965,8 @@ bool Message::has_ice_controlled() const
 
 bool Message::has_ice_controlling() const
 {
-  for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  for (STUN::Message::const_iterator pos = attributes_.begin(), limit = attributes_.end(); pos != limit; ++pos) {
     if (pos->type == STUN::ICE_CONTROLLING) {
       return true;
     }
@@ -848,7 +977,8 @@ bool Message::has_ice_controlling() const
 
 bool Message::has_use_candidate() const
 {
-  for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  for (STUN::Message::const_iterator pos = attributes_.begin(), limit = attributes_.end(); pos != limit; ++pos) {
     if (pos->type == STUN::USE_CANDIDATE) {
       return true;
     }
@@ -859,7 +989,8 @@ bool Message::has_use_candidate() const
 
 bool Message::get_guid_prefix(DCPS::GuidPrefix_t& guid_prefix) const
 {
-  for (STUN::Message::const_iterator pos = begin(), limit = end(); pos != limit; ++pos) {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  for (STUN::Message::const_iterator pos = attributes_.begin(), limit = attributes_.end(); pos != limit; ++pos) {
     if (pos->type == STUN::GUID_PREFIX) {
       std::memcpy(guid_prefix, pos->guid_prefix, sizeof(guid_prefix));
       return true;
@@ -869,7 +1000,7 @@ bool Message::get_guid_prefix(DCPS::GuidPrefix_t& guid_prefix) const
   return false;
 }
 
-bool operator>>(DCPS::Serializer& serializer, Message& message)
+bool Message::deserialize(DCPS::Serializer& serializer)
 {
   ACE_UINT16 message_type;
   ACE_UINT16 message_length;
@@ -891,8 +1022,10 @@ bool operator>>(DCPS::Serializer& serializer, Message& message)
     return false;
   }
 
-  message.class_ = static_cast<Class>(((message_type & (1 << 8)) >> 7) | ((message_type & (1 << 4)) >> 4));
-  message.method = static_cast<Method>(((message_type & 0x3E00) >> 2) | ((message_type & 0xE0) >> 1) | (message_type & 0xF));
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+
+  class_ = static_cast<Class>(((message_type & (1 << 8)) >> 7) | ((message_type & (1 << 4)) >> 4));
+  method_ = static_cast<Method>(((message_type & 0x3E00) >> 2) | ((message_type & 0xE0) >> 1) | (message_type & 0xF));
 
   if (!(serializer >> magic_cookie)) {
     return false;
@@ -902,7 +1035,7 @@ bool operator>>(DCPS::Serializer& serializer, Message& message)
     return false;
   }
 
-  if (!serializer.read_octet_array(message.transaction_id.data, 12)) {
+  if (!serializer.read_octet_array(transaction_id_.data, 12)) {
     return false;
   }
 
@@ -916,23 +1049,23 @@ bool operator>>(DCPS::Serializer& serializer, Message& message)
 
   while (serializer.length() != 0) {
     Attribute attribute;
-    AttributeHolder holder(attribute, message.transaction_id);
+    AttributeHolder holder(attribute, transaction_id_);
 
     if (!(serializer >> holder)) {
       return false;
     }
 
-    message.append_attribute(attribute);
+    append_attribute_i(attribute);
 
     if ((have_integrity && attribute.type != FINGERPRINT) || have_fingerprint) {
       return false;
     }
 
-    if (attribute.type == FINGERPRINT && attribute.fingerprint != message.compute_fingerprint()) {
+    if (attribute.type == FINGERPRINT && attribute.fingerprint != compute_fingerprint_i()) {
       return false;
     }
 
-    if (message.length() > message_length) {
+    if (length_ > message_length) {
       return false;
     }
 
@@ -943,10 +1076,11 @@ bool operator>>(DCPS::Serializer& serializer, Message& message)
   return true;
 }
 
-bool operator<<(DCPS::Serializer& serializer, const Message& message)
+bool Message::serialize(DCPS::Serializer& serializer) const
 {
-  const ACE_UINT16 message_class = static_cast<ACE_UINT16>(message.class_);
-  const ACE_UINT16 message_method = static_cast<ACE_UINT16>(message.method);
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  const ACE_UINT16 message_class = static_cast<ACE_UINT16>(class_);
+  const ACE_UINT16 message_method = static_cast<ACE_UINT16>(method_);
   ACE_UINT16 message_type =
     ((message_method & 0xF80) << 2) |
     ((message_class & 0x2) << 7) |
@@ -955,30 +1089,40 @@ bool operator<<(DCPS::Serializer& serializer, const Message& message)
     (message_method & 0x000F);
   serializer << message_type;
 
-  ACE_UINT16 message_length = message.length();
+  ACE_UINT16 message_length = length_;
   serializer << message_length;
   serializer << MAGIC_COOKIE;
-  serializer.write_octet_array(message.transaction_id.data, sizeof(message.transaction_id.data));
+  serializer.write_octet_array(transaction_id_.data, sizeof(transaction_id_.data));
 
-  for (Message::const_iterator pos = message.begin(), limit = message.end();
+  for (Message::const_iterator pos = attributes_.begin(), limit = attributes_.end();
        pos != limit; ++pos) {
     const Attribute& attribute = *pos;
 
     if (attribute.type == MESSAGE_INTEGRITY) {
       // Compute the hash.
-      message.compute_message_integrity(message.password, const_cast<Attribute&>(attribute).message_integrity);
+      compute_message_integrity_i(password_, const_cast<Attribute&>(attribute).message_integrity);
     }
 
     else if (attribute.type == FINGERPRINT) {
       // Compute the hash.
-      const_cast<Attribute&>(attribute).fingerprint = message.compute_fingerprint();
+      const_cast<Attribute&>(attribute).fingerprint = compute_fingerprint_i();
     }
 
-    ConstAttributeHolder holder(attribute, message.transaction_id);
+    ConstAttributeHolder holder(attribute, transaction_id_);
     serializer << holder;
   }
 
   return true;
+}
+
+bool operator>>(DCPS::Serializer& serializer, Message& message)
+{
+  return message.deserialize(serializer);
+}
+
+bool operator<<(DCPS::Serializer& serializer, const Message& message)
+{
+  return message.serialize(serializer);
 }
 
 } // namespace STUN
