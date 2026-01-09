@@ -3367,7 +3367,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
 
   DCPS::Serializer serializer(&buff_, STUN::encoding);
   STUN::Message message;
-  message.block = &buff_;
+  message.block(&buff_);
   if (serializer >> message) {
     outer->sedp_->core().recv(remote_na, DCPS::MCK_STUN, bytes);
 
@@ -3465,7 +3465,7 @@ Spdp::SendStun::execute()
   ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
   tport->wbuff_.reset();
   Serializer serializer(&tport->wbuff_, STUN::encoding);
-  const_cast<STUN::Message&>(message_).block = &tport->wbuff_;
+  const_cast<STUN::Message&>(message_).block(&tport->wbuff_);
   serializer << message_;
 
 #ifdef OPENDDS_TESTING_FEATURES
