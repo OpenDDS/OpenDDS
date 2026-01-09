@@ -382,6 +382,7 @@ private:
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 
 #ifndef DDS_HAS_MINIMUM_BIT
+  mutable ACE_Thread_Mutex deferred_connection_records_mutex_;
   ConnectionRecords deferred_connection_records_;
 #endif
 
