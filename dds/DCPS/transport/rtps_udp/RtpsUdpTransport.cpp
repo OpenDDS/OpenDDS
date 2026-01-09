@@ -1088,25 +1088,32 @@ RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChang
 
   switch (sc) {
   case ICE::ServerReflexiveStateMachine::SRSM_None:
-    if (relay_srsm_.latency_available()) {
+    {
+      if (relay_srsm_.latency_available()) {
+        connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
+        connection_record.latency = relay_srsm_.latency().to_dds_duration();
+        relay_srsm_.latency_available(false);
+        ACE_Guard<ACE_Thread_Mutex> guard(deferred_connection_records_mutex_);
+        deferred_connection_records_.push_back(std::make_pair(true, connection_record));
+      }
+      break;
+    }
+  case ICE::ServerReflexiveStateMachine::SRSM_Set:
+  case ICE::ServerReflexiveStateMachine::SRSM_Change:
+    {
+      // Lengthen to normal period.
+      core_.set_relay_stun_event_falloff();
       connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
       connection_record.latency = relay_srsm_.latency().to_dds_duration();
       relay_srsm_.latency_available(false);
+      ACE_Guard<ACE_Thread_Mutex> guard(deferred_connection_records_mutex_);
       deferred_connection_records_.push_back(std::make_pair(true, connection_record));
+      break;
     }
-    break;
-  case ICE::ServerReflexiveStateMachine::SRSM_Set:
-  case ICE::ServerReflexiveStateMachine::SRSM_Change:
-    // Lengthen to normal period.
-    core_.set_relay_stun_event_falloff();
-    connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
-    connection_record.latency = relay_srsm_.latency().to_dds_duration();
-    relay_srsm_.latency_available(false);
-    deferred_connection_records_.push_back(std::make_pair(true, connection_record));
-    break;
   case ICE::ServerReflexiveStateMachine::SRSM_Unset:
     {
       connection_record.address = DCPS::LogAddr(relay_srsm_.unset_stun_server_address()).c_str();
+      ACE_Guard<ACE_Thread_Mutex> guard(deferred_connection_records_mutex_);
       deferred_connection_records_.push_back(std::make_pair(false, connection_record));
       break;
     }
@@ -1116,9 +1123,11 @@ RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChang
     return;
   }
 
+  ACE_Guard<ACE_Thread_Mutex> guard(deferred_connection_records_mutex_);
   if (!deferred_connection_records_.empty()) {
     job_queue_->enqueue(DCPS::make_rch<WriteConnectionRecords>(bit_sub_, deferred_connection_records_));
     deferred_connection_records_.clear();
+    guard.release();
   }
 
 #else
@@ -1139,6 +1148,7 @@ RtpsUdpTransport::disable_relay_stun_event()
 
   if (relay_srsm_.stun_server_address() != ACE_INET_Addr()) {
     connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
+    ACE_Guard<ACE_Thread_Mutex> guard(deferred_connection_records_mutex_);
     deferred_connection_records_.push_back(std::make_pair(false, connection_record));
   }
 
@@ -1146,9 +1156,11 @@ RtpsUdpTransport::disable_relay_stun_event()
     return;
   }
 
+  ACE_Guard<ACE_Thread_Mutex> guard(deferred_connection_records_mutex_);
   if (!deferred_connection_records_.empty()) {
     job_queue_->enqueue(DCPS::make_rch<WriteConnectionRecords>(bit_sub_, deferred_connection_records_));
     deferred_connection_records_.clear();
+    guard.release();
   }
 
   relay_srsm_.reset();
@@ -1179,11 +1191,13 @@ void RtpsUdpTransport::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
 {
   TransportImpl::fill_stats(stats, idx);
   stats[idx++].value = job_queue_ ? job_queue_->size() : 0;
-  stats[idx++].value =
 #if !OPENDDS_CONFIG_SECURITY || defined DDS_HAS_MINIMUM_BIT
-    0;
+  stats[idx++].value = 0;
 #else
-    deferred_connection_records_.size();
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(deferred_connection_records_mutex_);
+    stats[idx++].value = deferred_connection_records_.size();
+  }
 #endif
   if (link_) {
     link_->fill_stats(stats, idx);
