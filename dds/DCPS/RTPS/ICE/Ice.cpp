@@ -296,7 +296,9 @@ ServerReflexiveStateMachine::receive(const STUN::Message& message)
   latency_ = DCPS::MonotonicTimePoint::now() - timestamp_;
   latency_available_ = true;
 
-  switch (message.class_) {
+  const STUN::Class msg_class = message.get_class();
+
+  switch (msg_class) {
   case STUN::SUCCESS_RESPONSE:
     return success_response(message);
 
@@ -305,11 +307,11 @@ ServerReflexiveStateMachine::receive(const STUN::Message& message)
 
   case STUN::REQUEST:
   case STUN::INDICATION:
-    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::receive: WARNING Unsupported STUN message class %d\n"), message.class_));
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::receive: WARNING Unsupported STUN message class %d\n"), msg_class));
     return SRSM_None;
   }
 
-  ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::receive: WARNING Unknown STUN message class %d\n"), message.class_));
+  ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::receive: WARNING Unknown STUN message class %d\n"), msg_class));
   return SRSM_None;
 }
 
@@ -365,9 +367,7 @@ ServerReflexiveStateMachine::next_send(size_t indication_count_limit,
     send_count_ = 0;
   }
 
-  message_ = STUN::Message();
-  message_.class_ = message_class_;
-  message_.method = STUN::BINDING;
+  message_.reset(message_class_, STUN::BINDING);
   message_.generate_transaction_id();
   message_.append_attribute(STUN::make_guid_prefix(guid_prefix));
   message_.append_attribute(STUN::make_fingerprint());
@@ -426,7 +426,7 @@ ServerReflexiveStateMachine::success_response(const STUN::Message& message)
 ServerReflexiveStateMachine::StateChange
 ServerReflexiveStateMachine::error_response(const STUN::Message& message)
 {
-  if (message.method != STUN::BINDING) {
+  if (message.method() != STUN::BINDING) {
     if (DCPS::DCPS_debug_level > 0) {
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) ServerReflexiveStateMachine::error_response: "

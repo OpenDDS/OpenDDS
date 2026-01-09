@@ -166,7 +166,7 @@ public:
 
   bool is_response(const STUN::Message& message) const
   {
-    return message.transaction_id == message_.transaction_id;
+    return message.transaction_id() == message_.transaction_id();
   }
 
   DCPS::TimeDuration latency() const
@@ -192,7 +192,7 @@ public:
   void reset()
   {
     message_class_ = STUN::REQUEST;
-    message_ = STUN::Message();
+    message_.reset();
     unset_stun_server_address_ = ACE_INET_Addr();
     stun_server_address_ = ACE_INET_Addr();
     server_reflexive_address_ = ACE_INET_Addr();

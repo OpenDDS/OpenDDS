@@ -997,7 +997,7 @@ RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN
 
   ACE_Message_Block block(20 + message.length());
   DCPS::Serializer serializer(&block, STUN::encoding);
-  const_cast<STUN::Message&>(message).block = &block;
+  const_cast<STUN::Message&>(message).block(&block);
   serializer << message;
 
   iovec iov[MAX_SEND_BLOCKS];
