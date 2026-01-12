@@ -7,6 +7,7 @@
 #include "Args.h"
 
 #include <tests/Utils/DistributedConditionSet.h>
+#include <tests/Utils/StatusMatching.h>
 
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
@@ -116,6 +117,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT("ERROR: %N:%l: main() -")
                         ACE_TEXT(" _narrow failed!\n")),
                         -1);
+    }
+
+    // Block until writer matches reader (data won't be discarded)
+    if (Utils::wait_match(writer, 1, Utils::EQ)) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): Error waiting for match for writer\n"));
+      return EXIT_FAILURE;
     }
 
     // Block until Recorder joins
