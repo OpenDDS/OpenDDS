@@ -217,7 +217,9 @@ private:
   ReactorState reactor_state_;
 
   int handle_exception(ACE_HANDLE /*fd*/);
-  void process_command_queue_i();
+  // void process_command_queue_i();
+  void process_command_queue_i(ACE_Guard<ACE_Thread_Mutex>& guard,
+                               ACE_Reactor* reactor);
 
   ReactorWrapper reactor_wrapper_;
 
