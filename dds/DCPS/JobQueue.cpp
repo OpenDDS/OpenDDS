@@ -38,11 +38,11 @@ int JobQueue::handle_exception(ACE_HANDLE /*fd*/)
     (*pos)->execute();
   }
 
-  // ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, -1);
-  // if (!job_queue_.empty()) {
-  //   guard.release();
-  //   reactor()->notify(this);
-  // }
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, -1);
+  if (!job_queue_.empty()) {
+    guard.release();
+    reactor()->notify(this);
+  }
 
   return 0;
 }
