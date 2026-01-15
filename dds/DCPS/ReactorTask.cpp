@@ -59,7 +59,7 @@ ReactorTask::ReactorTask(bool useAsyncSend)
   , use_async_send_(useAsyncSend)
 #endif
   , timer_queue_(0)
-  , reactor_state_(RS_NONE)
+  , reactor_notified_(false)
   , processing_(false)
   , thread_status_manager_(0)
   , thread_status_timer_(ReactorWrapper::InvalidTimerId)
@@ -422,8 +422,8 @@ ReactorTask::CommandPtr ReactorTask::execute_or_enqueue(CommandPtr command)
   // But depending on whether we're running it immediately or not, we either process or notify
   if (immediate) {
     process_command_queue_i();
-  } else if (reactor_state_ == RS_NONE) {
-    reactor_state_ = RS_NOTIFIED;
+  } else if (!reactor_notified_) {
+    reactor_notified_ = true;
     guard.release();
     local_reactor->notify(this);
   }
@@ -433,7 +433,7 @@ ReactorTask::CommandPtr ReactorTask::execute_or_enqueue(CommandPtr command)
 void ReactorTask::wait_until_empty()
 {
   GuardType guard(lock_);
-  while (reactor_state_ != RS_NONE || processing_) {
+  while (reactor_notified_ || processing_) {
     condition_.wait(*thread_status_manager_);
   }
 }
@@ -456,7 +456,7 @@ void ReactorTask::process_command_queue_i()
   if (!command_queue_.empty()) {
     cq.swap(command_queue_);
     // The current notification is being processed, reset to allow a new notification
-    reactor_state_ = RS_NONE;
+    reactor_notified_ = false;
     ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex> > rev_guard(rev_lock);
     for (Queue::const_iterator pos = cq.begin(), limit = cq.end(); pos != limit; ++pos) {
       (*pos)->execute(reactor_wrapper_);
@@ -464,7 +464,7 @@ void ReactorTask::process_command_queue_i()
   }
 
   processing_ = false;
-  if (reactor_state_ == RS_NONE) {
+  if (!reactor_notified_) {
     condition_.notify_all();
   }
 }

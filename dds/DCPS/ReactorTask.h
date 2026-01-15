@@ -210,11 +210,7 @@ private:
   Queue command_queue_;
 
   // Whether the reactor has been notified about pending commands
-  enum ReactorState {
-    RS_NONE,
-    RS_NOTIFIED,
-  };
-  ReactorState reactor_state_;
+  bool reactor_notified_;
 
   // Whether the reactor thread is currently processing commands
   bool processing_;
