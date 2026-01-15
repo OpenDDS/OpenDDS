@@ -62,11 +62,12 @@ env:
   VCPKG_GIT_COMMIT: 74e6536215718009aae747d86d84b78376bf9e09
   VCPKG_TOOLCHAIN_FILE: ${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake
   CTEST_OUTPUT_ON_FAILURE: ON
+  CMAKE_OPENDDS_MIN: 3.20
 
 jobs:
-  u22:
+  u24:
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout OpenDDS
@@ -88,7 +89,7 @@ jobs:
       run: sudo apt-get -y install libxerces-c-dev qtbase5-dev
     - uses: lukka/get-cmake@latest
       with:
-        cmakeVersion: "3.23"
+        cmakeVersion: '${{ env.CMAKE_OPENDDS_MIN }}'
         ninjaVersion: "latest"
     - name: Configure
       run: |
@@ -145,9 +146,9 @@ jobs:
         cd OpenDDS/build-tests
         ctest
 
-  u22_stat:
+  u24_stat:
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout OpenDDS
@@ -216,9 +217,9 @@ jobs:
         cd OpenDDS/build-tests
         ctest
 
-  u22_no_features:
+  u24_no_features:
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout OpenDDS
@@ -268,9 +269,9 @@ jobs:
         cd OpenDDS/build
         ctest
 
-  u22_android29:
+  u24_android29:
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout OpenDDS
@@ -285,7 +286,7 @@ jobs:
         add-to-path: false
     - uses: lukka/get-cmake@latest
       with:
-        cmakeVersion: "3.24"
+        cmakeVersion: '${{ env.CMAKE_OPENDDS_MIN }}'
         ninjaVersion: "latest"
     - name: Configure Host Tools
       run: |
@@ -389,7 +390,7 @@ jobs:
         runVcpkgInstall: true
     - uses: lukka/get-cmake@latest
       with:
-        cmakeVersion: "3.23"
+        cmakeVersion: '${{ env.CMAKE_OPENDDS_MIN }}'
         ninjaVersion: "latest"
     - name: Checkout OpenDDS
       uses: actions/checkout@v6

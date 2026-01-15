@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23...4.0)
+cmake_minimum_required(VERSION 3.14...4.0)
 project(opendds_tcp CXX)
 
 set(deps OpenDDS::Dcps)
@@ -17,8 +17,8 @@ add_library(OpenDDS_Tcp
   TcpSynchResource.cpp
   TcpTransport.cpp
 )
-target_sources(OpenDDS_Tcp
-  PUBLIC FILE_SET HEADERS BASE_DIRS "${OPENDDS_SOURCE_DIR}" FILES
+_opendds_headers(OpenDDS_Tcp
+  PUBLIC
     Tcp.h
     TcpAcceptor.h
     TcpConnection.h

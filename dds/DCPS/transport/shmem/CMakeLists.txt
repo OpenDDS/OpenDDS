@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23...4.0)
+cmake_minimum_required(VERSION 3.14...4.0)
 project(opendds_shmem CXX)
 
 set(deps OpenDDS::Dcps)
@@ -14,8 +14,8 @@ add_library(OpenDDS_Shmem
   ShmemSendStrategy.cpp
   ShmemTransport.cpp
 )
-target_sources(OpenDDS_Shmem
-  PUBLIC FILE_SET HEADERS BASE_DIRS "${OPENDDS_SOURCE_DIR}" FILES
+_opendds_headers(OpenDDS_Shmem
+  PUBLIC
     Shmem.h
     ShmemAllocator.h
     ShmemDataLink.h
