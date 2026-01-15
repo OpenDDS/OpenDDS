@@ -308,7 +308,7 @@ jobs:
           -G Ninja \
           -DBUILD_SHARED_LIBS=TRUE \
           -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-29 \
-          --toolchain ${{ steps.setup-ndk.outputs.ndk-path }}/build/cmake/android.toolchain.cmake \
+          -DCMAKE_TOOLCHAIN_FILE=${{ steps.setup-ndk.outputs.ndk-path }}/build/cmake/android.toolchain.cmake \
           -DOPENDDS_COMPILE_WARNINGS=WARNING \
           -DOPENDDS_CMAKE_VERBOSE=all \
           -DOPENDDS_HOST_TOOLS=$(realpath build-host)
