@@ -62,7 +62,7 @@ env:
   VCPKG_GIT_COMMIT: 74e6536215718009aae747d86d84b78376bf9e09
   VCPKG_TOOLCHAIN_FILE: ${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake
   CTEST_OUTPUT_ON_FAILURE: ON
-  CMAKE_OPENDDS_MIN: 3.20
+  CMAKE_OPENDDS_MIN: '3.20'
 
 jobs:
   u24:

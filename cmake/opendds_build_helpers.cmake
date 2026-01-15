@@ -30,11 +30,16 @@ function(_opendds_target target scope)
   endif()
   set_target_properties(${target} PROPERTIES EXPORT_NAME "${name}")
 
-  if(OPENDDS_COMPILE_WARNINGS STREQUAL "WARNING" OR OPENDDS_COMPILE_WARNINGS STREQUAL "ERROR")
+  # Interface libraries can only have INTERFACE scoped things and warnings
+  # shouldn't have an INTERFACE or PUBLIC scope.
+  _opendds_eval(is_interface_lib target_type STREQUAL "INTERFACE_LIBRARY")
+  _opendds_eval(warnings OPENDDS_COMPILE_WARNINGS STREQUAL "WARNING")
+  _opendds_eval(error_on_warnings OPENDDS_COMPILE_WARNINGS STREQUAL "ERROR")
+  if(NOT is_interface_lib AND (warnings OR error_on_warnings))
     set(prefix "_OPENDDS_BUILD_${CMAKE_CXX_COMPILER_ID}_")
     string(REPLACE " " ";" outvar "${${prefix}warning}")
     target_compile_options(${target} PRIVATE ${outvar})
-    if(OPENDDS_COMPILE_WARNINGS STREQUAL "ERROR")
+    if(error_on_warnings)
       string(REPLACE " " ";" outvar "${${prefix}error}")
       target_compile_options(${target} PRIVATE ${outvar})
     endif()
@@ -75,10 +80,7 @@ endfunction()
 function(_opendds_headers_file_set target scope base_dir headers install_headers)
   if(headers)
     get_target_property(target_type ${target} TYPE)
-    set(is_interface FALSE)
-    if(target_type STREQUAL "INTERFACE_LIBRARY")
-      set(is_interface TRUE)
-    endif()
+    _opendds_eval(is_interface_lib target_type STREQUAL "INTERFACE_LIBRARY")
 
     if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.23)
       target_sources(${target}
@@ -95,7 +97,7 @@ function(_opendds_headers_file_set target scope base_dir headers install_headers
 
       # Make the headers visible in IDEs, needs to be PRIVATE, but this doesn't
       # work before 3.19 for interface libraries like OpenDDS_Config.
-      if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.19 OR NOT is_interface)
+      if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.19 OR NOT is_interface_lib)
         target_sources(${target} PRIVATE ${headers})
         # Make sure CMake doesn't try to compile the "_T.cpp" headers
         foreach(header IN LISTS headers)
@@ -157,16 +159,15 @@ function(_opendds_library target)
     "${no_value_options}" "${single_value_options}" "${multi_value_options}" ${ARGN})
 
   get_target_property(target_type ${target} TYPE)
+  _opendds_eval(is_interface_lib target_type STREQUAL "INTERFACE_LIBRARY")
   set(lib_scope PUBLIC)
-  set(is_interface FALSE)
-  if(target_type STREQUAL "INTERFACE_LIBRARY")
+  if(is_interface_lib)
     set(lib_scope INTERFACE)
-    set(is_interface TRUE)
   endif()
 
   _opendds_target(${target} ${lib_scope})
 
-  if(NOT is_interface)
+  if(NOT is_interface_lib)
     # Put library in BINARY_DIR/lib
     set_target_properties(${target} PROPERTIES
       RUNTIME_OUTPUT_DIRECTORY "${OPENDDS_LIB_DIR}"
