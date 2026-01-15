@@ -271,13 +271,13 @@ jobs:
 
   android:
     runs-on: ubuntu-24.04
-    name: Android (${{ matrix.name }})
+    name: Android (CMake ${{ matrix.cmake }} ${{ matrix.generator }})
     strategy:
       fail-fast: false
       matrix:
         include:
           - generator: 'Unix Makefiles'
-            cmake: '${{ env.CMAKE_OPENDDS_MIN }}'
+            cmake: '3.20'
           - generator: "Ninja"
             cmake: '3.24'
     steps:
