@@ -209,16 +209,14 @@ private:
   typedef OPENDDS_VECTOR(CommandPtr) Queue;
   Queue command_queue_;
 
-  enum ReactorState {
-    RS_NONE,
-    RS_NOTIFIED,
-    RS_PROCESSING
-  };
-  ReactorState reactor_state_;
+  // Whether the reactor has been notified about pending commands
+  bool reactor_notified_;
+
+  // Whether the reactor thread is currently processing commands
+  bool processing_;
 
   int handle_exception(ACE_HANDLE /*fd*/);
-  void process_command_queue_i(ACE_Guard<ACE_Thread_Mutex>& guard,
-                               ACE_Reactor* reactor);
+  void process_command_queue_i();
 
   ReactorWrapper reactor_wrapper_;
 
