@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23...4.0)
+cmake_minimum_required(VERSION 3.14...4.0)
 project(opendds_qos_xml_xsc_handler CXX)
 
 set(deps OpenDDS::Dcps ACE::XML_Utils)
@@ -19,8 +19,8 @@ add_library(OpenDDS_QOS_XML_XSC_Handler
   XML_String_Intf.cpp
   dds_qos.cpp
 )
-target_sources(OpenDDS_QOS_XML_XSC_Handler
-  PUBLIC FILE_SET HEADERS BASE_DIRS "${OPENDDS_SOURCE_DIR}" FILES
+_opendds_headers(OpenDDS_QOS_XML_XSC_Handler
+  PUBLIC
     DataReaderQos_Handler.h
     DataWriterQos_Handler.h
     OpenDDS_XML_QOS_Handler_Export.h

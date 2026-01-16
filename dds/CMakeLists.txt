@@ -1,5 +1,5 @@
 # CMakeLists for OpenDDS_Dcps
-cmake_minimum_required(VERSION 3.23...4.0)
+cmake_minimum_required(VERSION 3.14...4.0)
 project(opendds_dcps CXX)
 
 set(dcps_lib_deps
@@ -193,10 +193,8 @@ add_library(OpenDDS_Dcps
   DCPS/transport/framework/TransportStrategy.cpp
   DCPS/transport/framework/TransportType.cpp
 )
-target_sources(OpenDDS_Dcps
-  PUBLIC FILE_SET HEADERS
-  BASE_DIRS "${OPENDDS_SOURCE_DIR}"
-  FILES
+_opendds_headers(OpenDDS_Dcps
+  PUBLIC
     ../FACE/Fixed.h
     ../FACE/OpenDDS_FACE_Export.h
     ../FACE/Sequence.h

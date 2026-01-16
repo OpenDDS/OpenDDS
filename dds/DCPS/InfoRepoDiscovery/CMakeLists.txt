@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23...4.0)
+cmake_minimum_required(VERSION 3.14...4.0)
 project(opendds_info_repo_discovery CXX)
 
 set(lib_deps OpenDDS::Dcps OpenDDS::Tcp TAO::TAO TAO::PI)
@@ -11,8 +11,8 @@ add_library(OpenDDS_InfoRepoDiscovery
   FailoverListener.cpp
   InfoRepoDiscovery.cpp
 )
-target_sources(OpenDDS_InfoRepoDiscovery
-  PUBLIC FILE_SET HEADERS BASE_DIRS "${OPENDDS_SOURCE_DIR}" FILES
+_opendds_headers(OpenDDS_InfoRepoDiscovery
+  PUBLIC
     DataReaderRemoteImpl.h
     InfoRepoDiscovery_Export.h
     FailoverListener.h

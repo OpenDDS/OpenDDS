@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.3...4.0)
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/opendds_version.cmake")
-if(CMAKE_VERSION VERSION_LESS 3.9)
+if(CMAKE_VERSION VERSION_LESS 3.12)
   project(opendds VERSION "${OPENDDS_VERSION}" LANGUAGES CXX)
 else()
   project(opendds
@@ -37,8 +37,10 @@ if(OPENDDS_JUST_BUILD_TESTS)
   find_package(OpenDDS REQUIRED)
   _opendds_add_examples_and_tests()
   return()
-elseif(CMAKE_VERSION VERSION_LESS 3.23)
-  message(FATAL_ERROR "Building OpenDDS with CMake requires CMake 3.23 or later")
+elseif(CMAKE_VERSION VERSION_LESS 3.20 AND CMAKE_UNITY_BUILD)
+  message(FATAL_ERROR "Building OpenDDS with CMake using a unity build requires CMake 3.20 or later")
+elseif(CMAKE_VERSION VERSION_LESS 3.14)
+  message(FATAL_ERROR "Building OpenDDS with CMake requires CMake 3.14 or later")
 endif()
 
 include(CMakePackageConfigHelpers)
@@ -67,6 +69,10 @@ set(_OPENDDS_CMAKE_DIR "${OPENDDS_SOURCE_DIR}/cmake" CACHE INTERNAL "")
 # Get and build ACE/TAO if OPENDDS_ACE wasn't defined and initialize the core
 # of the CMake support in init.cmake.
 if(NOT DEFINED OPENDDS_ACE OR DEFINED ACE_IS_BEING_BUILT)
+  if(CMAKE_VERSION VERSION_LESS 3.20)
+    message(FATAL_ERROR "Building OpenDDS and ACE/TAO requires CMake 3.20 or later."
+      "ACE/TAO must be built separately")
+  endif()
   # This is before init.cmake so init.cmake can get the features from ACE if
   # ACE was already built.
   include("${_OPENDDS_CMAKE_DIR}/get_ace_tao.cmake")
@@ -100,6 +106,8 @@ if(OPENDDS_RAPIDJSON)
   set(OPENDDS_HAS_RAPIDJSON TRUE)
 endif()
 
+include(opendds_build_helpers)
+
 # Generate OpenDDSConfig.h, make it available for all targets (see
 # opendds_build_helpers.cmake), and install it.
 set(OPENDDS_CONFIG_AUTO_STATIC_INCLUDES 1) # Always true for CMake builds
@@ -109,18 +117,8 @@ set(OPENDDS_CONFIG_INCLUDE_DIR "${config_out_dir}" CACHE INTERNAL "")
 set(config_out_file "${config_out_dir}/${config_file}")
 configure_file("${config_file}.in" "${config_out_file}")
 add_library(OpenDDS_Config INTERFACE)
-target_include_directories(OpenDDS_Config
-  INTERFACE
-    "$<BUILD_INTERFACE:${config_out_dir}>"
-    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-)
-target_sources(OpenDDS_Config
-  INTERFACE FILE_SET HEADERS BASE_DIRS "${config_out_dir}" FILES "${config_out_file}")
-install(TARGETS OpenDDS_Config
-  EXPORT opendds_targets
-  FILE_SET HEADERS
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
+_opendds_headers(OpenDDS_Config BASE_DIR "${config_out_dir}" INTERFACE "${config_out_file}")
+_opendds_library(OpenDDS_Config)
 
 if(NOT CMAKE_CROSSCOMPILING OR OPENDDS_JUST_BUILD_HOST_TOOLS)
   add_subdirectory(dds/DCPS) # OpenDDS_Util

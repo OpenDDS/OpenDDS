@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23...4.0)
+cmake_minimum_required(VERSION 3.14...4.0)
 project(opendds_udp CXX)
 
 set(deps OpenDDS::Dcps)
@@ -14,8 +14,8 @@ add_library(OpenDDS_Udp
   UdpSendStrategy.cpp
   UdpTransport.cpp
 )
-target_sources(OpenDDS_Udp
-  PUBLIC FILE_SET HEADERS BASE_DIRS "${OPENDDS_SOURCE_DIR}" FILES
+_opendds_headers(OpenDDS_Udp
+  PUBLIC
     Udp.h
     UdpDataLink.h
     UdpDataLink.inl
