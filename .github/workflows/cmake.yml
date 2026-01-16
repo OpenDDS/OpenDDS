@@ -316,7 +316,7 @@ jobs:
       run: |
         cd OpenDDS
         cmake -B build-target \
-          -G Ninja \
+          -G '${{ matrix.generator }}' \
           -DBUILD_SHARED_LIBS=TRUE \
           -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-29 \
           -DCMAKE_TOOLCHAIN_FILE=${{ steps.setup-ndk.outputs.ndk-path }}/build/cmake/android.toolchain.cmake \
