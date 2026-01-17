@@ -2530,6 +2530,9 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
                                    rchandle_from(this), &SpdpTransport::send_directed);
   }
 
+  network_interface_updates_event_ =
+    DCPS::make_rch<DCPS::ReactorEvent>(reactor_task->get_reactor(), DCPS::make_rch<DCPS::PmfEvent<SpdpTransport> >(rchandle_from(this), &SpdpTransport::handle_network_interface_updates));
+
   lease_expiration_task_ =
     DCPS::make_rch<SpdpSporadic>(TheServiceParticipant->time_source(), reactor_task,
                                  rchandle_from(this), &SpdpTransport::process_lease_expirations);
@@ -3683,10 +3686,19 @@ void Spdp::SpdpTransport::on_data_available(DCPS::RcHandle<DCPS::InternalDataRea
   if (!outer) return;
 
   ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
-  if (outer->shutting_down()) {
+  if (outer->shutdown_flag_) {
     return;
   }
 
+  outer->sedp_->event_dispatcher()->dispatch(network_interface_updates_event_);
+}
+
+void Spdp::SpdpTransport::handle_network_interface_updates()
+{
+  DCPS::RcHandle<Spdp> outer = outer_.lock();
+  if (!outer) return;
+
+  ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
   if (outer->shutdown_flag_) {
     return;
   }
@@ -3718,10 +3730,6 @@ void Spdp::SpdpTransport::on_data_available(DCPS::ConfigReader_rch)
   if (!outer) return;
 
   ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
-  if (outer->shutting_down()) {
-    return;
-  }
-
   if (outer->shutdown_flag_) {
     return;
   }

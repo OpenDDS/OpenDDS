@@ -671,8 +671,7 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
 
   create_reactor_task(false, "RtpsUdpTransport" + config->name());
 
-  ACE_Reactor* reactor = reactor_task()->get_reactor();
-  job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
+  job_queue_ = DCPS::make_rch<DCPS::JobQueue>(event_dispatcher());
 
 #if OPENDDS_CONFIG_SECURITY
   if (core_.use_ice()) {

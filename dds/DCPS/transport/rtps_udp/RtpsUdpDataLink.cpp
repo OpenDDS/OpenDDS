@@ -78,7 +78,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
              false,     // is_loopback
              false)     // is_active
   , reactor_task_(reactor_task)
-  , job_queue_(make_rch<JobQueue>(reactor_task->get_reactor()))
+  , job_queue_(make_rch<JobQueue>(transport->event_dispatcher()))
   , event_dispatcher_(transport->event_dispatcher())
   , mb_allocator_(TheServiceParticipant->association_chunk_multiplier())
   , db_allocator_(TheServiceParticipant->association_chunk_multiplier())
@@ -99,6 +99,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
   , ice_agent_(ICE::Agent::instance())
 #endif
   , network_interface_address_reader_(make_rch<InternalDataReader<NetworkInterfaceAddress> >(DCPS::DataReaderQosBuilder().reliability_reliable().durability_transient_local(), rchandle_from(this)))
+  , network_interface_updates_event_(DCPS::make_rch<DCPS::ReactorEvent>(reactor_task->get_reactor(), DCPS::make_rch<DCPS::PmfEvent<RtpsUdpDataLink> >(rchandle_from(this), &RtpsUdpDataLink::handle_network_interface_updates)))
 {
 #if OPENDDS_CONFIG_SECURITY
   const GUID_t guid = make_id(local_prefix, ENTITYID_PARTICIPANT);
@@ -108,6 +109,8 @@ RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
   send_strategy_ = make_rch<RtpsUdpSendStrategy>(this, local_prefix);
   receive_strategy_ = make_rch<RtpsUdpReceiveStrategy>(this, local_prefix, ref(TheServiceParticipant->get_thread_status_manager()));
   assign(local_prefix_, local_prefix);
+
+
 
   this->job_queue(job_queue_);
 }
@@ -426,6 +429,11 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
 }
 
 void RtpsUdpDataLink::on_data_available(RcHandle<InternalDataReader<NetworkInterfaceAddress> >)
+{
+  event_dispatcher_->dispatch(network_interface_updates_event_);
+}
+
+void RtpsUdpDataLink::handle_network_interface_updates()
 {
   InternalDataReader<NetworkInterfaceAddress>::SampleSequence samples;
   InternalSampleInfoSequence infos;

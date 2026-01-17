@@ -526,9 +526,8 @@ Sedp::init(const GUID_t& guid,
   // One should assume that the transport is configured after this
   // point.  Changes to transport_inst_ or rtps_inst after this line
   // may not be reflected.
-  ACE_Reactor* reactor = reactor_task_->get_reactor();
-  job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
   event_dispatcher_ = transport_inst_->event_dispatcher(domainId, 0);
+  job_queue_ = DCPS::make_rch<DCPS::JobQueue>(event_dispatcher_);
   type_lookup_init(reactor_task_);
 
   // Configure and enable each reader/writer
