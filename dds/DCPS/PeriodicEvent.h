@@ -47,6 +47,8 @@ public:
    */
   void enable(const TimeDuration& period, bool immediate_dispatch = true, bool strict_timing = true);
 
+  void shorten_current_wait(const TimeDuration& period);
+
   /**
    * Disable the PeriodicEvent, canceling the scheduled base event if enabled.
    */
@@ -57,6 +59,12 @@ public:
    * @return true if the PeriodicEvent is currently enabled
    */
   bool enabled() const;
+
+  /**
+   * Get a handle to the internal (non-periodic) event (useful for manual off-period scheduling)
+   * @return A handle to the internal event
+   */
+  RcHandle<EventBase> event() const;
 
   /**
    * For use by EventDispatcher
@@ -81,6 +89,7 @@ private:
   MonotonicTimePoint expiration_;
   long timer_id_;
 };
+typedef RcHandle<PeriodicEvent> PeriodicEvent_rch;
 
 } // DCPS
 } // OpenDDS
