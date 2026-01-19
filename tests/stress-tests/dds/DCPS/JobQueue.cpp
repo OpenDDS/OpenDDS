@@ -89,7 +89,7 @@ TEST(dds_DCPS_JobQueue, MaxInternalQueue)
   EXPECT_GE(0, 0);
 }
 
-TEST(dds_DCPS_JobQueue, MaxNotificaitonQueue)
+TEST(dds_DCPS_JobQueue, MaxNotificationQueue)
 {
   // OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::ReactorTask> reactor_task = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ReactorTask>();
   // reactor_task->open_reactor_task(&tsm, "JobQueue Stress Test");
