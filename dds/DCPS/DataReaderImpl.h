@@ -27,6 +27,7 @@
 #include "RcHandle_T.h"
 #include "RcObject.h"
 #include "Service_Participant.h"
+#include "SporadicEvent.h"
 #include "Stats_T.h"
 #include "SubscriptionInstance.h"
 #include "TimeTypes.h"
@@ -838,8 +839,8 @@ private:
   typedef OPENDDS_MULTIMAP(MonotonicTimePoint, SubscriptionInstance_rch) DeadlineQueue;
   DeadlineQueue deadline_queue_;
   bool deadline_queue_enabled_;
-  typedef PmfSporadicTask<DataReaderImpl> DRISporadicTask;
-  RcHandle<DRISporadicTask> deadline_task_;
+  typedef PmfNowEvent<DataReaderImpl> DRIEvent;
+  SporadicEvent_rch deadline_task_;
 
   void schedule_deadline(SubscriptionInstance_rch instance,
                          bool timer_called);
