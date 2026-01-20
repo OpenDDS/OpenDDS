@@ -116,17 +116,9 @@ DomainParticipantImpl::DomainParticipantImpl(
   , participant_handles_(handle_generator)
   , pub_id_gen_(dp_id_)
   , automatic_liveliness_timer_(make_rch<AutomaticLivelinessTimer>(ref(*this)))
-  , automatic_liveliness_task_(make_rch<AutomaticLivelinessTask>(
-    TheServiceParticipant->time_source(),
-    TheServiceParticipant->reactor_task(),
-    automatic_liveliness_timer_,
-    &LivelinessTimer::execute))
+  , automatic_liveliness_task_(make_rch<SporadicEvent>(TheServiceParticipant->event_dispatcher(), make_rch<AutomaticLivelinessTimerEvent>(automatic_liveliness_timer_, &LivelinessTimer::execute)))
   , participant_liveliness_timer_(make_rch<ParticipantLivelinessTimer>(ref(*this)))
-  , participant_liveliness_task_(make_rch<ParticipantLivelinessTask>(
-    TheServiceParticipant->time_source(),
-    TheServiceParticipant->reactor_task(),
-    participant_liveliness_timer_,
-    &LivelinessTimer::execute))
+  , participant_liveliness_task_(make_rch<SporadicEvent>(TheServiceParticipant->event_dispatcher(), make_rch<ParticipantLivelinessTimerEvent>( participant_liveliness_timer_, &LivelinessTimer::execute)))
 {
   (void) this->set_listener(a_listener, mask);
   monitor_.reset(TheServiceParticipant->monitor_factory_->create_dp_monitor(this));
