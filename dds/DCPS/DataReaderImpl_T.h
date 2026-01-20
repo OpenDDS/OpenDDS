@@ -122,7 +122,7 @@ namespace OpenDDS {
     typedef OpenDDS::DCPS::Cached_Allocator_With_Overflow<MessageTypeMemoryBlock, ACE_Thread_Mutex>  DataAllocator;
 
     DataReaderImpl_T()
-      : filter_delayed_sample_task_(make_rch<DRISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &DataReaderImpl_T::filter_delayed))
+      : filter_delayed_sample_task_(make_rch<SporadicEvent>(TheServiceParticipant->event_dispatcher(), make_rch<DRIEvent>(rchandle_from(this), &DataReaderImpl_T::filter_delayed)))
       , marshal_skip_serialize_(false)
     {
       initialize_lookup_maps();
@@ -2467,9 +2467,9 @@ unique_ptr<DataAllocator> data_allocator_;
 InstanceMap instance_map_;
 ReverseInstanceMap reverse_instance_map_;
 
-typedef DCPS::PmfSporadicTask<DataReaderImpl_T> DRISporadicTask;
+typedef DCPS::PmfNowEvent<DataReaderImpl_T> DRIEvent;
 
-RcHandle<DRISporadicTask> filter_delayed_sample_task_;
+SporadicEvent_rch filter_delayed_sample_task_;
 #ifdef OPENDDS_HAS_STD_SHARED_PTR
 typedef std::shared_ptr<const OpenDDS::DCPS::DataSampleHeader> DataSampleHeader_ptr;
 #else
