@@ -355,7 +355,7 @@ TransportClient::PendingAssoc::safe_to_remove()
 }
 
 void
-TransportClient::PendingAssoc::timeout(const MonotonicTimePoint&)
+TransportClient::PendingAssoc::timeout()
 {
   RcHandle<TransportClient> client;
   {
