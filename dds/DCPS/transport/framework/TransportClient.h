@@ -222,7 +222,7 @@ private:
       , scheduled_(false)
       , blob_index_(0)
       , client_(tc_rch)
-      , timeout_task_(make_rch<PendingAssocSporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &PendingAssoc::timeout))
+      , timeout_task_(make_rch<SporadicEvent>(TheServiceParticipant->event_dispatcher(), make_rch<PendingAssocEvent>(rchandle_from(this), &PendingAssoc::timeout)))
     {}
 
     ~PendingAssoc()
@@ -249,9 +249,9 @@ private:
     }
 
   private:
-    typedef PmfSporadicTask<PendingAssoc> PendingAssocSporadicTask;
-    RcHandle<PendingAssocSporadicTask> timeout_task_;
-    void timeout(const MonotonicTimePoint& now);
+    typedef PmfEvent<PendingAssoc> PendingAssocEvent;
+    SporadicEvent_rch timeout_task_;
+    void timeout();
   };
 
   typedef RcHandle<PendingAssoc> PendingAssoc_rch;
