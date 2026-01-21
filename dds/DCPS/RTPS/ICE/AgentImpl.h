@@ -22,7 +22,7 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/InternalDataReader.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/SporadicTask.h"
+#include "dds/DCPS/SporadicEvent.h"
 
 #include "dds/Versioned_Namespace.h"
 
@@ -149,7 +149,7 @@ private:
   };
   std::priority_queue<Item> tasks_;
   DCPS::MonotonicTimePoint last_execute_;
-  DCPS::RcHandle<DCPS::SporadicTask> task_task_;
+  DCPS::SporadicEvent_rch task_task_;
 
   bool reactor_is_shut_down() const;
   void process_tasks(const DCPS::MonotonicTimePoint& now);
