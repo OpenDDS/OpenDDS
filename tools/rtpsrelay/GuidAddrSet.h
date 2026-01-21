@@ -6,6 +6,7 @@
 
 #include <dds/rtpsrelaylib/Utility.h>
 
+#include <dds/DCPS/SporadicTask.h>
 #include <dds/DCPS/TimeTypes.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 
