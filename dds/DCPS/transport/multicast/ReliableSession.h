@@ -60,10 +60,10 @@ public:
   virtual void syn_hook(const SequenceNumber& seq);
 
 private:
-  typedef PmfSporadicTask<ReliableSession> Sporadic;
-  RcHandle<Sporadic> nak_watchdog_;
+  typedef PmfEvent<ReliableSession> ReliableSessionEvent;
+  SporadicEvent_rch nak_watchdog_;
   TimeDuration nak_delay();
-  void process_naks(const MonotonicTimePoint& /*now*/);
+  void process_naks();
 
   DisjointSequence nak_sequence_;
 
