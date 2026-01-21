@@ -94,7 +94,7 @@ StaticEndpointManager::StaticEndpointManager(const GUID_t& participant_id,
 #ifdef DDS_HAS_MINIMUM_BIT
   ACE_UNUSED_ARG(participant);
 #endif
-  type_lookup_init(TheServiceParticipant->reactor_task());
+  type_lookup_init();
 }
 
 StaticEndpointManager::~StaticEndpointManager()
@@ -610,12 +610,11 @@ StaticEndpointManager::sub_bit()
 }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-void StaticEndpointManager::type_lookup_init(ReactorTask_rch reactor_task)
+void StaticEndpointManager::type_lookup_init()
 {
   if (!type_lookup_reply_deadline_processor_) {
     type_lookup_reply_deadline_processor_ =
-      DCPS::make_rch<StaticEndpointManagerSporadic>(TheServiceParticipant->time_source(), reactor_task,
-                                                    rchandle_from(this), &StaticEndpointManager::remove_expired_endpoints);
+      make_rch<SporadicEvent>(TheServiceParticipant->event_dispatcher(), make_rch<StaticEndpointManagerEvent>(rchandle_from(this), &StaticEndpointManager::remove_expired_endpoints));
   }
 }
 
