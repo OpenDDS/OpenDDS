@@ -401,7 +401,7 @@ jobs:
         runVcpkgInstall: true
     - uses: lukka/get-cmake@latest
       with:
-        cmakeVersion: '${{ env.CMAKE_OPENDDS_MIN }}'
+        cmakeVersion: '3.21'
         ninjaVersion: "latest"
     - name: Checkout OpenDDS
       uses: actions/checkout@v6
