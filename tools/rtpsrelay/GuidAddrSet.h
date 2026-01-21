@@ -6,7 +6,7 @@
 
 #include <dds/rtpsrelaylib/Utility.h>
 
-#include <dds/DCPS/SporadicTask.h>
+#include <dds/DCPS/SporadicEvent.h>
 #include <dds/DCPS/TimeTypes.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 
@@ -412,11 +412,10 @@ private:
   bool participant_admission_limit_reached_ = false;
   mutable bool last_admit_ = true;
 
-  using GuidAddrSetSporadicTask = OpenDDS::DCPS::PmfSporadicTask<GuidAddrSet>;
-  using GuidAddrSetSporadicTask_rch = OpenDDS::DCPS::RcHandle<GuidAddrSetSporadicTask>;
-  GuidAddrSetSporadicTask_rch rejected_address_expiration_task_;
-  GuidAddrSetSporadicTask_rch deactivation_task_;
-  GuidAddrSetSporadicTask_rch expiration_task_;
+  using GuidAddrSetEvent = OpenDDS::DCPS::PmfNowEvent<GuidAddrSet>;
+  OpenDDS::DCPS::SporadicEvent_rch rejected_address_expiration_task_;
+  OpenDDS::DCPS::SporadicEvent_rch deactivation_task_;
+  OpenDDS::DCPS::SporadicEvent_rch expiration_task_;
 
   AdmitState admit_state_ = AdmitState::AS_NORMAL;
   DDS::Time_t admit_state_change_ = {0, 0};
@@ -425,7 +424,7 @@ private:
   OpenDDS::DCPS::TimeDuration drain_interval_;
   size_t mark_budget_ = 0;
   size_t mark_count_ = 0;
-  GuidAddrSetSporadicTask_rch drain_task_;
+  OpenDDS::DCPS::SporadicEvent_rch drain_task_;
 };
 
 }
