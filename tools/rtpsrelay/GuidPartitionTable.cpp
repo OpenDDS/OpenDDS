@@ -171,10 +171,8 @@ void GuidPartitionTable::lookup(StringSet& partitions, const OpenDDS::DCPS::GUID
       }
 
       if (!denied_partitions_.empty() && !denied_partitions_cleanup_task_) {
-        denied_partitions_cleanup_task_ = OpenDDS::DCPS::make_rch<DeniedPartitionsCleanupSporadicTask>(TheServiceParticipant->time_source(),
-                                                                   reactor_task_,
-                                                                   rchandle_from(this),
-                                                                   &GuidPartitionTable::cleanup_denied_partitions);
+        const auto base = OpenDDS::DCPS::make_rch<GuidPartitionTableEvent>(rchandle_from(this), &GuidPartitionTable::cleanup_denied_partitions);
+        denied_partitions_cleanup_task_ = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::SporadicEvent>(TheServiceParticipant->event_dispatcher(), base);
       }
 
       if (!denied_partitions_.empty() && !pending_denied_partitions_cleanup_) {
