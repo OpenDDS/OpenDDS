@@ -14,8 +14,9 @@
 #include "ace/Global_Macros.h"
 #include "ace/Truncate.h"
 
-#include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/GuidConverter.h"
+#include "dds/DCPS/ReactorEvent.h"
+#include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/TimeTypes.h"
 
 #include <cstdlib>
@@ -35,8 +36,9 @@ ReliableSession::ReliableSession(RcHandle<ReactorTask> reactor_task,
                                  MulticastPeer remote_peer)
   : MulticastSession(reactor_task, link, remote_peer)
   , nak_watchdog_(make_rch<SporadicEvent>(TheServiceParticipant->event_dispatcher(),
-                                          make_rch<ReliableSessionEvent>(rchandle_from(this),
-                                                                         &ReliableSession::process_naks)))
+                                          make_rch<ReactorEvent>(reactor_task->get_reactor(),
+                                                                 make_rch<ReliableSessionEvent>(rchandle_from(this),
+                                                                                                &ReliableSession::process_naks))))
   , nak_timeout_(link->config()->nak_timeout())
   , nak_delay_intervals_(link->config()->nak_delay_intervals())
   , nak_max_(link->config()->nak_max())
