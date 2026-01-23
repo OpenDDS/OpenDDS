@@ -33,7 +33,7 @@ namespace DCPS {
 TransportImpl::TransportImpl(TransportInst_rch config,
                              DDS::DomainId_t domain)
   : config_(config)
-  , event_dispatcher_(make_rch<ServiceEventDispatcher>(1u))
+  , event_dispatcher_(make_rch<ServiceEventDispatcher>(4u))
   , is_shut_down_(false)
   , domain_(domain)
 {
