@@ -4969,15 +4969,23 @@ void RtpsUdpDataLink::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
   stats[idx++].value = bundling_cache_.size();
   stats[idx++].value = mb_allocator_.bytes_heap_allocated();
   stats[idx++].value = db_allocator_.bytes_heap_allocated();
-  stats[idx++].value = writers_.size();
-  const std::pair<size_t, size_t> local_writer_stats = local_reliable_writer_stats();
-  stats[idx++].value = local_writer_stats.first;
-  stats[idx++].value = local_writer_stats.second;
-  stats[idx++].value = pending_reliable_readers_.size();
-  stats[idx++].value = readers_.size();
-  stats[idx++].value = total_remote_reliable_writers();
-  stats[idx++].value = readers_of_writer_.size();
-  stats[idx++].value = writer_to_seq_best_effort_readers_.size();
+
+  // writer side stats (needs writers_lock_)
+  size_t local_writer_count, remote_reliable_reader_count, aggregate_reader_buffer_size;
+  local_reliable_writer_stats(local_writer_count, remote_reliable_reader_count, aggregate_reader_buffer_size);
+  stats[idx++].value = local_writer_count;
+  stats[idx++].value = remote_reliable_reader_count;
+  stats[idx++].value = aggregate_reader_buffer_size;
+
+  // reader side stats (needs readers_lock_)
+  size_t local_reader_count, remote_reliable_writer_count, pending_reliable_readers_count, readers_of_writer_count, writer_to_seq_best_effort_readers_count;
+  local_reliable_reader_stats(local_reader_count, remote_reliable_writer_count, pending_reliable_readers_count, readers_of_writer_count, writer_to_seq_best_effort_readers_count);
+  stats[idx++].value = pending_reliable_readers_count;
+  stats[idx++].value = local_reader_count;
+  stats[idx++].value = remote_reliable_writer_count;
+  stats[idx++].value = readers_of_writer_count;
+  stats[idx++].value = writer_to_seq_best_effort_readers_count;
+
   stats[idx++].value = sq_.size();
   {
     ACE_Guard<ACE_Thread_Mutex> fsq_guard(fsq_mutex_);
@@ -4993,32 +5001,39 @@ void RtpsUdpDataLink::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
   }
 }
 
-size_t RtpsUdpDataLink::total_remote_reliable_writers() const
+void RtpsUdpDataLink::local_reliable_reader_stats(size_t& local_reader_count, size_t& remote_reliable_writer_count, size_t& pending_reliable_readers_count, size_t& readers_of_writer_count, size_t& writer_to_seq_best_effort_readers_count) const
 {
+  remote_reliable_writer_count = 0;
+
   ACE_Guard<ACE_Thread_Mutex> guard(readers_lock_);
-  size_t writers = 0;
+
+  local_reader_count = readers_.size();
+  pending_reliable_readers_count = pending_reliable_readers_.size();
+  readers_of_writer_count = readers_of_writer_.size();
+  writer_to_seq_best_effort_readers_count = writer_to_seq_best_effort_readers_.size();
+
   for (RtpsReaderMap::const_iterator iter = readers_.begin(); iter != readers_.end(); ++iter) {
-    writers += iter->second->writer_count();
+    remote_reliable_writer_count += iter->second->writer_count();
   }
-  return writers;
 }
 
-std::pair<size_t, size_t> RtpsUdpDataLink::local_reliable_writer_stats() const
+void RtpsUdpDataLink::local_reliable_writer_stats(size_t& local_writer_count, size_t& remote_reliable_reader_count, size_t& aggregate_reader_buffer_size) const
 {
+  remote_reliable_reader_count = 0;
+  aggregate_reader_buffer_size = 0;
+
   ACE_Guard<ACE_Thread_Mutex> guard(writers_lock_);
   const RtpsWriterMap writers(writers_);
   guard.release();
 
-  size_t readers = 0;
-  size_t buffer_size = 0;
+  local_writer_count = writers.size();
   for (RtpsWriterMap::const_iterator iter = writers.begin(); iter != writers.end(); ++iter) {
-    readers += iter->second->reader_count();
+    remote_reliable_reader_count += iter->second->reader_count();
     const RcHandle<SingleSendBuffer> sb = iter->second->get_send_buff();
     if (sb) {
-      buffer_size += sb->size();
+      aggregate_reader_buffer_size += sb->size();
     }
   }
-  return std::make_pair(readers, buffer_size);
 }
 
 
