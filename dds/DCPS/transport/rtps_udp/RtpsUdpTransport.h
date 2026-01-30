@@ -282,6 +282,9 @@ public:
   const RtpsUdpCore& core() const { return core_; }
 
 private:
+#if OPENDDS_CONFIG_SECURITY
+  void process_relay_sra_i(ICE::ServerReflexiveStateMachine::StateChange);
+#endif
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
                                                const TransportClient_rch& client);
