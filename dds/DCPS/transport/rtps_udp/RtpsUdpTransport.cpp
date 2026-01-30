@@ -168,9 +168,11 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
                                    const ConnectionAttribs& attribs,
                                    const TransportClient_rch& client)
 {
-  bit_sub_ = client->get_builtin_subscriber_proxy();
+  RcHandle<BitSubscriber> bit_sub = client->get_builtin_subscriber_proxy();
 
   GuardThreadType guard_links(links_lock_);
+
+  bit_sub_ = bit_sub;
 
   if (is_shut_down()) {
     return AcceptConnectResult();
@@ -202,9 +204,11 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
                                   const ConnectionAttribs& attribs,
                                   const TransportClient_rch& client)
 {
-  bit_sub_ = client->get_builtin_subscriber_proxy();
+  RcHandle<BitSubscriber> bit_sub = client->get_builtin_subscriber_proxy();
 
   GuardThreadType guard_links(links_lock_);
+
+  bit_sub_ = bit_sub;
 
   if (is_shut_down()) {
     return AcceptConnectResult();
@@ -1071,7 +1075,7 @@ RtpsUdpTransport::relay_stun_event()
   if ((core_.use_rtps_relay() || core_.rtps_relay_only()) &&
       relay_address != ACE_INET_Addr() &&
       !equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
-    process_relay_sra(relay_srsm_.send(relay_address, ICE::Configuration::instance()->server_reflexive_indication_count(), local_prefix_));
+    process_relay_sra_i(relay_srsm_.send(relay_address, ICE::Configuration::instance()->server_reflexive_indication_count(), local_prefix_));
     ice_endpoint_->send(relay_address, relay_srsm_.message());
     relay_stun_event_->schedule(core_.advance_relay_stun_event_falloff());
   }
@@ -1079,6 +1083,17 @@ RtpsUdpTransport::relay_stun_event()
 
 void
 RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange sc)
+{
+#ifndef DDS_HAS_MINIMUM_BIT
+  GuardThreadType guard_links(links_lock_);
+  process_relay_sra_i(sc);
+#else
+  ACE_UNUSED_ARG(sc);
+#endif
+}
+
+void
+RtpsUdpTransport::process_relay_sra_i(ICE::ServerReflexiveStateMachine::StateChange sc)
 {
 #ifndef DDS_HAS_MINIMUM_BIT
   DCPS::ConnectionRecord connection_record;
@@ -1152,13 +1167,18 @@ RtpsUdpTransport::disable_relay_stun_event()
     deferred_connection_records_.push_back(std::make_pair(false, connection_record));
   }
 
-  if (!bit_sub_) {
-    return;
+  RcHandle<BitSubscriber> bit_sub;
+  {
+    GuardThreadType guard_links(links_lock_);
+    if (!bit_sub_) {
+      return;
+    }
+    bit_sub = bit_sub_;
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(deferred_connection_records_mutex_);
   if (!deferred_connection_records_.empty()) {
-    job_queue_->enqueue(DCPS::make_rch<WriteConnectionRecords>(bit_sub_, deferred_connection_records_));
+    job_queue_->enqueue(DCPS::make_rch<WriteConnectionRecords>(bit_sub, deferred_connection_records_));
     deferred_connection_records_.clear();
     guard.release();
   }
