@@ -2571,11 +2571,8 @@ void Spdp::SpdpTransport::init_thread_status_task()
   const DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  if (!thread_status_task_ && outer->harvest_thread_status_) {
-    const DCPS::RcHandle<Sedp> sedp = outer->sedp_;
-    if (!sedp) return;
-    const DCPS::ReactorTask_rch reactor_task = sedp->reactor_task();
-    thread_status_task_ = DCPS::make_rch<PeriodicThreadStatus>(reactor_task, ref(*this));
+  if (!thread_status_harvester_ && outer->harvest_thread_status_) {
+    thread_status_harvester_ = DCPS::make_rch<ThreadStatusHarvester>(outer);
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
 }
@@ -2665,10 +2662,7 @@ Spdp::SpdpTransport::enable_periodic_tasks()
 #endif
 
 #ifndef DDS_HAS_MINIMUM_BIT
-  const DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-  if (thread_status_manager.update_thread_status() && outer->harvest_thread_status_) {
-    thread_status_task_->enable(false, thread_status_manager.thread_status_interval());
-  }
+  thread_status_harvester_->start();
 #endif /* DDS_HAS_MINIMUM_BIT */
 }
 
@@ -2745,9 +2739,6 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
   }
   if (lease_expiration_task_) {
     lease_expiration_task_->cancel();
-  }
-  if (thread_status_task_) {
-    thread_status_task_->disable();
   }
 
   ACE_Reactor* reactor = reactor_task->get_reactor();
@@ -3741,11 +3732,11 @@ void Spdp::SpdpTransport::on_data_available(DCPS::ConfigReader_rch)
     if (sample.key() == DCPS::COMMON_DCPS_THREAD_STATUS_INTERVAL) {
       const TimeDuration val(std::atoi(sample.value().c_str()));
       init_thread_status_task();
-      if (thread_status_task_) {
+      if (thread_status_harvester_) {
         if (val) {
-          thread_status_task_->enable(true, val);
+          thread_status_harvester_->enable();
         } else {
-          thread_status_task_->disable();
+          thread_status_harvester_->disable();
         }
       }
     } else if (sample.key_has_prefix(config_prefix)) {
@@ -4541,43 +4532,6 @@ Spdp::SpdpTransport::process_lease_expirations(const DCPS::MonotonicTimePoint& n
   if (!outer) return;
 
   outer->process_lease_expirations(now);
-}
-
-void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& now)
-{
-  ACE_UNUSED_ARG(now);
-#ifndef DDS_HAS_MINIMUM_BIT
-  DCPS::RcHandle<Spdp> outer = outer_.lock();
-  if (!outer) return;
-
-  if (DCPS::DCPS_debug_level > 4) {
-    ACE_DEBUG((LM_DEBUG,
-               "(%P|%t) Spdp::SpdpTransport::thread_status_task(): Updating internal thread status BIT.\n"));
-  }
-
-  ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
-
-  typedef DCPS::ThreadStatusManager::List List;
-  List running;
-  List removed;
-  TheServiceParticipant->get_thread_status_manager().harvest(last_thread_status_harvest_, running, removed);
-  last_thread_status_harvest_ = now;
-  for (List::const_iterator i = removed.begin(); i != removed.end(); ++i) {
-    DCPS::InternalThreadBuiltinTopicData data;
-    data.thread_id = i->bit_key().c_str();
-    outer->bit_subscriber_->remove_thread_status(data);
-  }
-  for (List::const_iterator i = running.begin(); i != running.end(); ++i) {
-    DCPS::InternalThreadBuiltinTopicData data;
-    data.thread_id = i->bit_key().c_str();
-    data.utilization = i->utilization(now);
-    data.monotonic_timestamp = i->last_update().to_idl_struct();
-    data.detail1 = i->detail1();
-    data.detail2 = i->detail2();
-    outer->bit_subscriber_->add_thread_status(data, DDS::NEW_VIEW_STATE, i->timestamp());
-  }
-
-#endif /* DDS_HAS_MINIMUM_BIT */
 }
 
 #if OPENDDS_CONFIG_SECURITY

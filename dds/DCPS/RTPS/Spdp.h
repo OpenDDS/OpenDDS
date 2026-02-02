@@ -19,7 +19,7 @@
 #include <dds/DCPS/JobQueue.h>
 #include <dds/DCPS/MultiTask.h>
 #include <dds/DCPS/MulticastManager.h>
-#include <dds/DCPS/PeriodicTask.h>
+#include <dds/DCPS/ThreadStatusHarvester.h>
 #include <dds/DCPS/PoolAllocationBase.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/RcEventHandler.h>
@@ -490,26 +490,6 @@ private:
       DCPS::WeakRcHandle<SpdpTransport> tport_;
     };
 
-    // This is essentially PmfPeriodicTask<SpdpTransport>, but using that
-    // directly was causing warnings on MSVC x86.  There is only one member
-    // function that's used with a PeriodicTask.
-    struct PeriodicThreadStatus : DCPS::PeriodicTask {
-      PeriodicThreadStatus(DCPS::ReactorTask_rch reactor_task, const SpdpTransport& delegate)
-        : PeriodicTask(reactor_task)
-        , delegate_(delegate)
-      {}
-
-      void execute(const MonotonicTimePoint& now)
-      {
-        const DCPS::RcHandle<SpdpTransport> handle = delegate_.lock();
-        if (handle) {
-          handle->thread_status_task(now);
-        }
-      }
-
-      const DCPS::WeakRcHandle<SpdpTransport> delegate_;
-    };
-
     explicit SpdpTransport(DCPS::RcHandle<Spdp> outer);
     ~SpdpTransport();
 
@@ -584,8 +564,7 @@ private:
     OPENDDS_LIST(DCPS::GUID_t) directed_guids_;
     void process_lease_expirations(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpSporadic> lease_expiration_task_;
-    void thread_status_task(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<PeriodicThreadStatus> thread_status_task_;
+    ThreadStatusHarvester_rch thread_status_harvester_;
     DCPS::RcHandle<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> > network_interface_address_reader_;
 #if OPENDDS_CONFIG_SECURITY
     void process_handshake_deadlines(const DCPS::MonotonicTimePoint& now);
@@ -604,7 +583,6 @@ private:
     bool ice_endpoint_added_;
     OPENDDS_SET(DDS::UInt32) ignored_user_tags_;
 
-    DCPS::MonotonicTimePoint last_thread_status_harvest_;
     DCPS::ConfigReader_rch config_reader_;
     void on_data_available(DCPS::ConfigReader_rch reader);
   };
