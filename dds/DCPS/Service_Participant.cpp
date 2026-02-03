@@ -457,7 +457,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       dp_factory_servant_ = make_rch<DomainParticipantFactoryImpl>();
 
-      event_dispatcher_ = make_rch<ServiceEventDispatcher>(4u);
+      event_dispatcher_ = make_rch<ServiceEventDispatcher>(1u);
 
       reactor_task_->open_reactor_task(&thread_status_manager_, "Service_Participant");
       job_queue_ = make_rch<JobQueue>(event_dispatcher_);
