@@ -1650,7 +1650,6 @@ void DataReaderImpl::notify_read_conditions()
 {
   //sample lock is already held
   ReadConditionSet local_read_conditions = read_conditions_;
-  ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
   for (ReadConditionSet::iterator it = local_read_conditions.begin(),
       end = local_read_conditions.end(); it != end; ++it) {
