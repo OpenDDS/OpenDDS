@@ -1646,21 +1646,33 @@ DataReaderImpl::check_transport_qos(const TransportInst& ti)
   return true;
 }
 
-void DataReaderImpl::notify_read_conditions()
-{
-  //sample lock is already held
-  ReadConditionSet local_read_conditions = read_conditions_;
+namespace {
 
-  for (ReadConditionSet::iterator it = local_read_conditions.begin(),
-      end = local_read_conditions.end(); it != end; ++it) {
-    ConditionImpl* ci = dynamic_cast<ConditionImpl*>(it->in());
+class SignalAll: public EventBase {
+public:
+  SignalAll(const DDS::ReadCondition_var& rc) : rc_(rc) {}
+  void handle_event() {
+    ConditionImpl* ci = dynamic_cast<ConditionImpl*>(rc_.in());
     if (ci) {
       ci->signal_all();
     } else {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::notify_read_conditions: ")
+        ACE_TEXT("(%P|%t) ERROR: SignalAll::handle_event: ")
         ACE_TEXT("Failed to obtain ConditionImpl - can't notify.\n")));
     }
+  }
+private:
+  DDS::ReadCondition_var rc_;
+};
+
+}
+
+void DataReaderImpl::notify_read_conditions()
+{
+  //sample lock is already held
+  for (ReadConditionSet::iterator it = read_conditions_.begin(),
+      end = read_conditions_.end(); it != end; ++it) {
+    TheServiceParticipant->event_dispatcher()->dispatch(make_rch<SignalAll>(*it));
   }
 }
 
