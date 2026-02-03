@@ -10,6 +10,7 @@
 
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "ConditionImpl.h"
+#include "RcHandle_T.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -28,7 +29,7 @@ class ReadConditionImpl
 public:
   ReadConditionImpl(DataReaderImpl* dr, DDS::SampleStateMask sample_states,
                     DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states)
-  : parent_(dr)
+  : parent_(rchandle_from(dr))
   , sample_states_(sample_states)
   , view_states_(view_states)
   , instance_states_(instance_states) {}
@@ -46,7 +47,7 @@ public:
   DDS::DataReader_ptr get_datareader();
 
 protected:
-  DataReaderImpl* parent_;
+  WeakRcHandle<DataReaderImpl> parent_;
   DDS::SampleStateMask sample_states_;
   DDS::ViewStateMask view_states_;
   DDS::InstanceStateMask instance_states_;
