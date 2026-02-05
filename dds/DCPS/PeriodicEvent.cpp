@@ -31,17 +31,21 @@ void PeriodicEvent::enable(const TimeDuration& period, bool immediate_dispatch, 
     EventDispatcher_rch dispatcher = dispatcher_.lock();
     if (dispatcher) {
       const MonotonicTimePoint expiration = now + period;
-      long id = dispatcher->schedule(rchandle_from(this), expiration);
-      if (id > 0) {
+      if (immediate_dispatch) {
         period_ = period;
-        expiration_ = expiration;
-        timer_id_ = id;
+        expiration_ = now;
         strict_timing_ = strict_timing;
-        if (immediate_dispatch) {
-          dispatcher->dispatch(rchandle_from(this));
+        dispatcher->dispatch(rchandle_from(this));
+      } else {
+        long id = dispatcher->schedule(rchandle_from(this), expiration);
+        if (id > 0) {
+          period_ = period;
+          expiration_ = expiration;
+          timer_id_ = id;
+          strict_timing_ = strict_timing;
+        } else if (log_level >= LogLevel::Warning) {
+          ACE_ERROR((LM_WARNING, "(%P|%t) PeriodicEvent::enable: failed to schedule\n"));
         }
-      } else if (log_level >= LogLevel::Warning) {
-        ACE_ERROR((LM_WARNING, "(%P|%t) PeriodicEvent::enable: failed to schedule\n"));
       }
     }
   }

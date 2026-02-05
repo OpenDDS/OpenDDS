@@ -32,6 +32,12 @@ public:
     return call_count_;
   }
 
+  void reset()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    call_count_ = 0;
+  }
+
   void wait(size_t target)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -139,16 +145,25 @@ TEST(dds_DCPS_PeriodicEvent, ImmediateDispatch)
   OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>();
   OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::PeriodicEvent> periodic = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::PeriodicEvent>(dispatcher, test_event);
 
-  const OpenDDS::DCPS::MonotonicTimePoint now = OpenDDS::DCPS::MonotonicTimePoint::now();
   // Should dispatch at most 4 calls in 1.8s
-  const OpenDDS::DCPS::MonotonicTimePoint deadline = now + OpenDDS::DCPS::TimeDuration(1, 800000);
+  const OpenDDS::DCPS::TimeDuration span = OpenDDS::DCPS::TimeDuration(1, 800000);
+  const OpenDDS::DCPS::TimeDuration period = OpenDDS::DCPS::TimeDuration(0, 500000);
+  OpenDDS::DCPS::MonotonicTimePoint deadline = OpenDDS::DCPS::MonotonicTimePoint::now() + span;
 
-  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), true, false);
+  // Immediate dispatch but not strict timing
+  periodic->enable(period, true, false);
   test_event->wait_until(deadline);
   periodic->disable();
-
   EXPECT_LE(test_event->call_count(), 4);
 
-  std::cout << "dds_DCPS_PeriodicEvent_ImmediateDispatch: Number of actual calls: " << test_event->call_count() << std::endl;
+  test_event->reset();
+  deadline = OpenDDS::DCPS::MonotonicTimePoint::now() + span;
+
+  // Immediate dispatch and strict timing
+  periodic->enable(period, true, true);
+  test_event->wait_until(deadline);
+  periodic->disable();
+  EXPECT_LE(test_event->call_count(), 4);
+
   dispatcher->shutdown(true);
 }
