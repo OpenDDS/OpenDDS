@@ -87,7 +87,7 @@ SimpleStatBlock consolidate(const SimpleStatBlock& sb1, const SimpleStatBlock& s
   result.min_ = std::min(sb1.min_, sb2.min_);
   result.max_ = std::max(sb1.max_, sb2.max_);
   if (result.sample_count_ > 0) {
-    result.mean_ = (sb1.mean_ * static_cast<double>(sb1.sample_count_) + sb2.mean_ * static_cast<double>(sb2.sample_count_)) / result.sample_count_;
+    result.mean_ = (sb1.mean_ * static_cast<double>(sb1.sample_count_) + sb2.mean_ * static_cast<double>(sb2.sample_count_)) / static_cast<double>(result.sample_count_);
   }
   const double delta = sb1.mean_ - sb2.mean_;
   const double delta_scale_factor = static_cast<double>(sb1.sample_count_) * static_cast<double>(sb2.sample_count_) / static_cast<double>(result.sample_count_);
@@ -175,12 +175,12 @@ SimpleStatBlock consolidate(const std::vector<SimpleStatBlock>& vec)
     } else {
       result.min_ = std::min(result.min_, it->min_);
       result.max_ = std::max(result.max_, it->max_);
-      const double delta = result.mean_ - it->mean_;
-      const double delta_scale_factor = static_cast<double>(old_sample_count) * static_cast<double>(it->sample_count_) / static_cast<double>(result.sample_count_);
       if (result.sample_count_ > 0) {
-        result.mean_ = (result.mean_ * static_cast<double>(old_sample_count) + it->mean_ * static_cast<double>(it->sample_count_)) / result.sample_count_;
+        const double delta = result.mean_ - it->mean_;
+        const double delta_scale_factor = static_cast<double>(old_sample_count) * static_cast<double>(it->sample_count_) / static_cast<double>(result.sample_count_);
+        result.mean_ = (result.mean_ * static_cast<double>(old_sample_count) + it->mean_ * static_cast<double>(it->sample_count_)) / static_cast<double>(result.sample_count_);
+        result.var_x_sample_count_ += it->var_x_sample_count_ + delta * delta * delta_scale_factor;
       }
-      result.var_x_sample_count_ += it->var_x_sample_count_ + delta * delta * delta_scale_factor;
       result.median_sample_count_ += it->median_sample_count_;
     }
   }
@@ -277,8 +277,8 @@ PropertyStatBlock::PropertyStatBlock(Builder::PropertySeq& seq, const std::strin
 
 void PropertyStatBlock::update(double value, const Builder::TimeStamp& time)
 {
-  auto prev_mean = mean_->value.double_prop();
-  auto prev_var_x_sample_count = var_x_sample_count_->value.double_prop();
+  const double prev_mean = mean_->value.double_prop();
+  const double prev_var_x_sample_count = var_x_sample_count_->value.double_prop();
 
   size_t next_median_buffer_index = static_cast<size_t>(sample_count_->value.ull_prop() % median_buffer_.size());
 
@@ -290,12 +290,17 @@ void PropertyStatBlock::update(double value, const Builder::TimeStamp& time)
   if (value < min_->value.double_prop()) {
     min_->value.double_prop(value);
   }
+
   if (max_->value.double_prop() < value) {
     max_->value.double_prop(value);
   }
-  if (sample_count_->value.ull_prop() == 0) {
+
+  // sample_count should always be >= 1 by this point
+  OPENDDS_ASSERT(sample_count_->value.ull_prop() >= 1);
+
+  if (sample_count_->value.ull_prop() == 1) {
     mean_->value.double_prop(value);
-    var_x_sample_count_->value.double_prop(value);
+    // variance remains 0 until we have 2 samples, so don't touch var_x_sample_count_ here
   } else {
     // Incremental mean calculation (doesn't require storing all the data)
     mean_->value.double_prop(prev_mean + ((value - prev_mean) / static_cast<double>(sample_count_->value.ull_prop())));
