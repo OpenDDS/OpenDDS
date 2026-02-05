@@ -27,7 +27,7 @@ void PeriodicEvent::enable(const TimeDuration& period, bool immediate_dispatch, 
 {
   const MonotonicTimePoint now = MonotonicTimePoint::now();
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (timer_id_ < 1) {
+  if (period_.is_zero()) {
     EventDispatcher_rch dispatcher = dispatcher_.lock();
     if (dispatcher) {
       const MonotonicTimePoint expiration = now + period;
@@ -62,12 +62,13 @@ void PeriodicEvent::disable()
       }
     }
   }
+  period_ = TimeDuration::zero_value;
 }
 
 bool PeriodicEvent::enabled() const
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  return timer_id_ > 0;
+  return period_ != TimeDuration::zero_value;
 }
 
 void PeriodicEvent::handle_event_scheduling()
