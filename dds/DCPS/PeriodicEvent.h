@@ -72,6 +72,11 @@ private:
 
   void handle_event_scheduling();
 
+  bool enabled_i() const
+  {
+    return !period_.is_zero();
+  }
+
   mutable ACE_Thread_Mutex mutex_;
   mutable ACE_Thread_Mutex event_mutex_;
   WeakRcHandle<EventDispatcher> dispatcher_;
