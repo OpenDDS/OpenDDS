@@ -16,6 +16,24 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+String ThreadInfo::get_bit_key() const
+{
+  return to_dds_string(thread_id) + (name.empty() ? "" : (" (" + name + ")"));
+}
+
+ThreadStatusManager::Thread::Thread(const String& name, const ThreadId& thread_id, ACE_thread_t handle)
+  : info_({name, thread_id, handle})
+  , bit_key_(info_.get_bit_key())
+  , timestamp_(SystemTimePoint::now())
+  , last_update_(MonotonicTimePoint::now())
+  , last_status_change_(MonotonicTimePoint::now())
+  , status_(ThreadStatus_Active)
+  , nesting_depth_(0)
+  , detail1_(0)
+  , detail2_(0)
+  , current_bucket_(0)
+{}
+
 void ThreadStatusManager::Thread::update(const MonotonicTimePoint& m_now,
                                          const SystemTimePoint& s_now,
                                          ThreadStatus next_status,
@@ -84,7 +102,7 @@ double ThreadStatusManager::Thread::utilization(const MonotonicTimePoint& now) c
   return 0;
 }
 
-ThreadStatusManager::ThreadId ThreadStatusManager::get_thread_id()
+ThreadId ThreadStatusManager::get_thread_id()
 {
 #ifdef ACE_WIN32
   return static_cast<unsigned>(ACE_Thread::self());
@@ -104,16 +122,24 @@ void ThreadStatusManager::add_thread(const String& name)
   }
 
   const ThreadId thread_id = get_thread_id();
-
-  const String bit_key = to_dds_string(thread_id) + (name.empty() ? "" : (" (" + name + ")"));
+  const Thread thread(name, thread_id, ACE_OS::thr_self());
 
   if (DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatusManager::add_thread: "
-               "adding thread %C\n", bit_key.c_str()));
+               "adding thread %C\n", thread.bit_key().c_str()));
   }
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  map_.insert(std::make_pair(thread_id, Thread(bit_key)));
+  map_.insert(std::make_pair(thread_id, thread));
+  if (thread_status_listener_) {
+    thread_status_listener_->on_thread_started(thread.info());
+  }
+}
+
+void ThreadStatusManager::set_thread_status_listener(ThreadStatusListener* listener)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  thread_status_listener_ = listener;
 }
 
 void ThreadStatusManager::update_i(Thread::ThreadStatus status, bool finished,
@@ -131,10 +157,14 @@ void ThreadStatusManager::update_i(Thread::ThreadStatus status, bool finished,
 
   const Map::iterator pos = map_.find(thread_id);
   if (pos != map_.end()) {
-    pos->second.update(m_now, s_now, status, bucket_limit_, nested, detail1, detail2);
+    Thread& thread = pos->second;
+    thread.update(m_now, s_now, status, bucket_limit_, nested, detail1, detail2);
     if (finished) {
-      finished_.push_back(pos->second);
+      finished_.push_back(thread);
       map_.erase(pos);
+      if (thread_status_listener_) {
+        thread_status_listener_->on_thread_finished(thread.info());
+      }
     }
   }
   cleanup(m_now);

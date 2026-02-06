@@ -2220,6 +2220,11 @@ ThreadStatusManager& Service_Participant::get_thread_status_manager()
   return thread_status_manager_;
 }
 
+void Service_Participant::set_thread_status_listener(ThreadStatusListener* listener)
+{
+  thread_status_manager_.set_thread_status_listener(listener);
+}
+
 ACE_Thread_Mutex& Service_Participant::get_static_xtypes_lock()
 {
   return xtypes_lock_;
