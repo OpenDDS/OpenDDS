@@ -496,7 +496,8 @@ private:
     const ACE_SOCK_Dgram& choose_recv_socket(ACE_HANDLE h) const;
     virtual int handle_input(ACE_HANDLE h);
 
-    void init_thread_status_event();
+    void init_thread_status_event(const TimeDuration& interval);
+    void enable_disable_thread_status_event();
 
     void open(const DCPS::ReactorTask_rch& reactor_task,
               const DCPS::JobQueue_rch& job_queue);
@@ -566,7 +567,11 @@ private:
     void process_lease_expirations();
     DCPS::SporadicEvent_rch lease_expiration_event_;
     void thread_status_task();
+#ifndef DDS_HAS_MINIMUM_BIT
     DCPS::PeriodicEvent_rch thread_status_event_;
+    DCPS::TimeDuration harvest_thread_status_interval_;
+    DCPS::MonotonicTimePoint last_thread_status_harvest_;
+#endif
     DCPS::RcHandle<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> > network_interface_address_reader_;
 #if OPENDDS_CONFIG_SECURITY
     void process_handshake_deadlines();
@@ -585,7 +590,6 @@ private:
     bool ice_endpoint_added_;
     OPENDDS_SET(DDS::UInt32) ignored_user_tags_;
 
-    DCPS::MonotonicTimePoint last_thread_status_harvest_;
     DCPS::ConfigReader_rch config_reader_;
     void on_data_available(DCPS::ConfigReader_rch reader);
   };

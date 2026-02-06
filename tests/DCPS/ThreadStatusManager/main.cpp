@@ -138,20 +138,8 @@ bool read_status(DDS::WaitSet_var ws, InternalThreadBuiltinTopicDataDataReader_v
   return found;
 }
 
-int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+int tms_test(InternalThreadBuiltinTopicDataDataReader_var itbtd_reader, DDS::WaitSet_var ws)
 {
-  DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-  DDS::DomainParticipantQos participant_qos;
-  dpf->get_default_participant_qos(participant_qos);
-  DDS::PropertySeq& properties = participant_qos.property.value;
-  Qos_Helper::append(properties, OpenDDS::RTPS::RTPS_HARVEST_THREAD_STATUS, "true");
-  const DDS::DomainId_t domain = 0;
-  DDS::DomainParticipant_var participant = dpf->create_participant(domain, participant_qos, 0, DEFAULT_STATUS_MASK);
-  if (!participant) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to create participant\n"));
-    return EXIT_FAILURE;
-  }
-
   ACE_Thread_Mutex mutex;
   ACE_Condition<ACE_Thread_Mutex> cv(mutex);
   TestThread task(mutex, cv);
@@ -159,18 +147,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to start test thread\n"));
     return EXIT_FAILURE;
   }
-
-  DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
-  DDS::DataReader_var reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC);
-  InternalThreadBuiltinTopicDataDataReader_var itbtd_reader = InternalThreadBuiltinTopicDataDataReader::_narrow(reader);
-  if (!itbtd_reader) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to narrow internal thread builtin topic data reader\n"));
-    return EXIT_FAILURE;
-  }
-
-  DDS::ReadCondition_var read_cond = reader->create_readcondition(DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
-  DDS::WaitSet_var ws = new DDS::WaitSet;
-  ws->attach_condition(read_cond);
 
   MonotonicTimePoint thread_start, event1_start, event1_end, event2_start, event2_end, thread_end;
 
@@ -226,6 +202,62 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       event2_end.to_idl_struct().sec, event2_end.to_idl_struct().nanosec,
       event1_end.to_idl_struct().sec, event1_end.to_idl_struct().nanosec));
     ret = EXIT_FAILURE;
+  }
+
+  return ret;
+}
+
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+{
+  DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
+  DDS::DomainParticipantQos participant_qos;
+  dpf->get_default_participant_qos(participant_qos);
+  DDS::PropertySeq& properties = participant_qos.property.value;
+  Qos_Helper::append(properties, OpenDDS::RTPS::RTPS_HARVEST_THREAD_STATUS, "true");
+  const DDS::DomainId_t domain = 0;
+  DDS::DomainParticipant_var participant = dpf->create_participant(domain, participant_qos, 0, DEFAULT_STATUS_MASK);
+  if (!participant) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to create participant\n"));
+    return EXIT_FAILURE;
+  }
+
+  DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
+  DDS::DataReader_var reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC);
+  InternalThreadBuiltinTopicDataDataReader_var itbtd_reader = InternalThreadBuiltinTopicDataDataReader::_narrow(reader);
+  if (!itbtd_reader) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to narrow internal thread builtin topic data reader\n"));
+    return EXIT_FAILURE;
+  }
+
+  DDS::ReadCondition_var read_cond = reader->create_readcondition(DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+  DDS::WaitSet_var ws = new DDS::WaitSet;
+  ws->attach_condition(read_cond);
+
+  // Run test with initial config
+  int ret = tms_test(itbtd_reader, ws);
+
+  if (ret == EXIT_SUCCESS) {
+    const char* const status_prop = OpenDDS::DCPS::COMMON_DCPS_THREAD_STATUS_INTERVAL;
+    OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::ConfigStoreImpl> config_store =
+      TheServiceParticipant->config_store();
+
+    // Turn off thread status reporting and expect no messages
+    const DDS::UInt32 orig = config_store->get_uint32(status_prop, 0);
+    config_store->set_uint32(status_prop, 0);
+    ACE_OS::sleep(orig * 2);
+    const DDS::Duration_t waittime = {5, 0};
+    DDS::ConditionSeq active;
+    DDS::ReturnCode_t rc = ws->wait(active, waittime);
+    if (rc != DDS::RETCODE_TIMEOUT) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: got unexpected thread status message\n"));
+      ret = EXIT_FAILURE;
+    }
+
+    // Turn it back on do the testing again
+    if (ret == EXIT_SUCCESS) {
+      config_store->set_uint32(status_prop, orig);
+      ret = tms_test(itbtd_reader, ws);
+    }
   }
 
   // Cleanup

@@ -17,19 +17,36 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export ThreadStatusManager {
-public:
-
 #if defined (ACE_WIN32)
-  typedef unsigned ThreadId;
+typedef unsigned ThreadId;
 #else
 #  ifdef ACE_HAS_GETTID
-  typedef pid_t ThreadId;
+typedef pid_t ThreadId;
 #  else
-  typedef String ThreadId;
+typedef String ThreadId;
 #  endif
 #endif /* ACE_WIN32 */
 
+struct OpenDDS_Dcps_Export ThreadInfo {
+  /// What the thread is being used for
+  String name;
+  /// ID used to help generate thread status BIT key
+  ThreadId thread_id;
+  /// This is p_thread_t on Linux and thread handle on Windows
+  ACE_thread_t handle;
+
+  String get_bit_key() const;
+};
+
+class OpenDDS_Dcps_Export ThreadStatusListener {
+public:
+  virtual ~ThreadStatusListener() {}
+  virtual void on_thread_started(const ThreadInfo& thread) = 0;
+  virtual void on_thread_finished(const ThreadInfo& thread) = 0;
+};
+
+class OpenDDS_Dcps_Export ThreadStatusManager {
+public:
   class OpenDDS_Dcps_Export Thread {
   public:
     enum ThreadStatus {
@@ -37,18 +54,9 @@ public:
       ThreadStatus_Idle,
     };
 
-    explicit Thread(const String& bit_key)
-      : bit_key_(bit_key)
-      , timestamp_(SystemTimePoint::now())
-      , last_update_(MonotonicTimePoint::now())
-      , last_status_change_(MonotonicTimePoint::now())
-      , status_(ThreadStatus_Active)
-      , nesting_depth_(0)
-      , detail1_(0)
-      , detail2_(0)
-      , current_bucket_(0)
-    {}
+    Thread(const String& name, const ThreadId& thread_id, ACE_thread_t handle);
 
+    const ThreadInfo& info() const { return info_; }
     const String& bit_key() const { return bit_key_; }
     const SystemTimePoint& timestamp() const { return timestamp_; }
     const MonotonicTimePoint& last_update() const { return last_update_; }
@@ -65,6 +73,7 @@ public:
     static const size_t BUCKET_COUNT = 8;
 
   private:
+    const ThreadInfo info_;
     const String bit_key_;
     SystemTimePoint timestamp_;
     MonotonicTimePoint last_update_, last_status_change_;
@@ -90,10 +99,7 @@ public:
 
   typedef OPENDDS_LIST(Thread) List;
 
-  ThreadStatusManager()
-    : enabled_(false)
-  {}
-
+  void set_thread_status_listener(ThreadStatusListener* listener);
   void thread_status_interval(const TimeDuration& thread_status_interval);
   const TimeDuration& thread_status_interval() const;
   bool update_thread_status() const;
@@ -181,22 +187,77 @@ public:
 private:
   static ThreadId get_thread_id();
 
-  struct ThreadContainer {
-    ThreadContainer() : enabled_(false) {}
+  /// Store copies of these from the parent to avoid needing to access it.
+  class ManagerInfo {
+  public:
+    ManagerInfo()
+      : thread_status_listener_(0)
+    {
+    }
 
-    // Store copies of these from the parent to avoid needing to access it.
+    const TimeDuration& thread_status_interval() const
+    {
+      return thread_status_interval_;
+    }
+
+    const TimeDuration& bucket_limit() const
+    {
+      return bucket_limit_;
+    }
+
+    void thread_status_interval(const TimeDuration& interval)
+    {
+      thread_status_interval_ = interval;
+      bucket_limit_ = interval / static_cast<double>(Thread::BUCKET_COUNT);
+    }
+
+    void set_thread_status_listener(ThreadStatusListener* listener)
+    {
+      thread_status_listener_ = listener;
+    }
+
+    bool update_thread_status() const
+    {
+      return thread_status_interval_ || thread_status_listener_;
+    }
+
+    void on_thread_started(const Thread& thread) const
+    {
+      if (thread_status_listener_) {
+        thread_status_listener_->on_thread_started(thread.info());
+      }
+    }
+
+    void on_thread_finished(const Thread& thread) const
+    {
+      if (thread_status_listener_) {
+        thread_status_listener_->on_thread_finished(thread.info());
+      }
+    }
+
+  protected:
     TimeDuration thread_status_interval_;
     TimeDuration bucket_limit_;
-    bool enabled_;
+    ThreadStatusListener* thread_status_listener_;
+  };
 
+  class ThreadContainer {
+  public:
+    void set_manager_info(const ManagerInfo& manager_info);
+    void add_thread(const Thread& thread);
+    void update(Thread::ThreadStatus status, bool finished, bool nested, int detail1, int detail2,
+      const MonotonicTimePoint& m_now, const SystemTimePoint& s_now, const ThreadId& thread_id);
+    void harvest(const MonotonicTimePoint& start, List& running, List& finished) const;
+
+  protected:
+    ManagerInfo manager_info_;
     Map map_;
     List finished_;
     mutable ACE_Thread_Mutex mutex_;
-
-    void cleanup(const MonotonicTimePoint& now);
   };
 
-  ThreadContainer& get_container(ThreadId tid);
+  ThreadContainer& get_container(const ThreadId& tid);
+  void update_manager_info(const ManagerInfo& copy);
   void add_thread(const String& name);
 
   void update_i(Thread::ThreadStatus status, bool finished = false,
@@ -222,9 +283,7 @@ private:
     update_current_thread(Thread::ThreadStatus_Idle, nested);
   }
 
-  TimeDuration thread_status_interval_;
-  TimeDuration bucket_limit_;
-  bool enabled_;
+  ManagerInfo manager_info_;
   mutable ACE_Thread_Mutex lock_;
 
   static const size_t NUM_CONTAINERS = 11;
