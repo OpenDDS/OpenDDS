@@ -9,8 +9,7 @@
 #define OPENDDS_DCPS_REACTOR_EVENT_H
 
 #include "EventDispatcher.h"
-
-#include "ace/Event_Handler.h"
+#include "RcEventHandler.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -22,7 +21,7 @@ namespace DCPS {
    function within a reactor callback (i.e. on the reactor thread). This is handy for avoiding
    deadlocks when calling into ACE_Reactor-aware functions (e.g. calling join on a multicast socket).
  */
-class OpenDDS_Dcps_Export ReactorEvent : public EventBase, public ACE_Event_Handler {
+class OpenDDS_Dcps_Export ReactorEvent : public virtual EventBase, public virtual RcEventHandler {
 public:
 
   /**
