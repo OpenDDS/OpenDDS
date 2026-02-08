@@ -712,6 +712,7 @@ namespace OpenDDS {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_, false);
 
     TopicDescriptionPtr<TopicImpl> topic(topic_servant_);
+    if (!topic) return false;
     TypeSupport* const ts = topic->get_type_support();
     TypeSupportImpl* const type_support = dynamic_cast<TypeSupportImpl*>(ts);
     const bool filter_has_non_key_fields = type_support ? evaluator.has_non_key_fields(*type_support) : true;
