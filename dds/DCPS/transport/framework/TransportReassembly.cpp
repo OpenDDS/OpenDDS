@@ -33,6 +33,43 @@ TransportReassembly::FragSample::FragSample(const FragmentRange& fragRange,
 {
 }
 
+TransportReassembly::FragSample::FragSample(const FragmentRange& fragRange,
+                                          ReceivedDataSample&& data)
+  : frag_range_(fragRange)
+  , rec_ds_(std::move(data))
+{
+}
+
+TransportReassembly::FragSample::FragSample(const TransportReassembly::FragSample& other)
+  : frag_range_(other.frag_range_)
+  , rec_ds_(other.rec_ds_)
+{
+}
+
+TransportReassembly::FragSample::FragSample(TransportReassembly::FragSample&& other)
+  : frag_range_(std::move(other.frag_range_))
+  , rec_ds_(std::move(other.rec_ds_))
+{
+}
+
+TransportReassembly::FragSample& TransportReassembly::FragSample::operator=(const TransportReassembly::FragSample& rhs)
+{
+  if (this != &rhs) {
+    frag_range_ = rhs.frag_range_;
+    rec_ds_ = rhs.rec_ds_;
+  }
+  return *this;
+}
+
+TransportReassembly::FragSample& TransportReassembly::FragSample::operator=(TransportReassembly::FragSample&& rhs)
+{
+  if (this != &rhs) {
+    frag_range_ = std::move(rhs.frag_range_);
+    rec_ds_ = std::move(rhs.rec_ds_);
+  }
+  return *this;
+}
+
 TransportReassembly::TransportReassembly(const TimeDuration& timeout)
   : timeout_(timeout)
 {
@@ -364,6 +401,11 @@ TransportReassembly::FragInfo::FragInfo(const FragInfo& val)
   *this = val;
 }
 
+TransportReassembly::FragInfo::FragInfo(FragInfo&& val)
+{
+  *this = val;
+}
+
 TransportReassembly::FragInfo&
 TransportReassembly::FragInfo::operator=(const FragInfo& rhs)
 {
@@ -381,6 +423,30 @@ TransportReassembly::FragInfo::operator=(const FragInfo& rhs)
     for (FragGapList::iterator it = gap_list_.begin(); it != gap_list_.end(); ++it) {
       gap_finder_[it->second] = it;
     }
+  }
+  return *this;
+}
+
+TransportReassembly::FragInfo&
+TransportReassembly::FragInfo::operator=(FragInfo&& rhs)
+{
+  if (this != &rhs) {
+    have_first_ = std::move(rhs.have_first_);
+    sample_list_ = std::move(rhs.sample_list_);
+    gap_list_ = std::move(rhs.gap_list_);
+    total_frags_ = std::move(rhs.total_frags_);
+    expiration_ = std::move(rhs.expiration_);
+    sample_finder_.clear();
+    gap_finder_.clear();
+    sample_finder_ = std::move(rhs.sample_finder_);
+    gap_finder_ = std::move(rhs.gap_finder_);
+    /*
+    for (FragSampleList::iterator it = sample_list_.begin(); it != sample_list_.end(); ++it) {
+      sample_finder_[it->frag_range_.second] = it;
+    }
+    for (FragGapList::iterator it = gap_list_.begin(); it != gap_list_.end(); ++it) {
+      gap_finder_[it->second] = it;
+    }*/
   }
   return *this;
 }
@@ -422,8 +488,8 @@ TransportReassembly::FragInfo::insert(const FragmentRange& fragRange, ReceivedDa
     FragSample& fr = *it;
     if (next < fr.frag_range_.first) {
       // insert before 'it'
-      sample_finder_[fragRange.second] = sample_list_.insert(it, FragSample(fragRange, data));
-      data.clear();
+      sample_finder_[fragRange.second] = sample_list_.insert(it, FragSample(fragRange, std::move(data)));
+      // data.clear();
       VDBG((LM_DEBUG, "(%P|%t) TransportReassembly::insert: (SN: %q) inserted %q-%q on the left of %q-%q\n", sn, fragRange.first, fragRange.second, fr.frag_range_.first, fr.frag_range_.second));
       return true;
 
@@ -436,7 +502,7 @@ TransportReassembly::FragInfo::insert(const FragmentRange& fragRange, ReceivedDa
       }
       fr.rec_ds_.header_ = joined;
       if (fr.rec_ds_.has_data() && data.has_data()) {
-        fr.rec_ds_.prepend(data);
+        fr.rec_ds_.prepend(std::move(data));
       } else {
         fr.rec_ds_.clear();
         data.clear();
@@ -474,7 +540,7 @@ TransportReassembly::FragInfo::insert(const FragmentRange& fragRange, ReceivedDa
       }
       fr.rec_ds_.header_ = joined;
       if (fr.rec_ds_.has_data() && data.has_data()) {
-        fr.rec_ds_.append(data);
+        fr.rec_ds_.append(std::move(data));
       } else {
         fr.rec_ds_.clear();
         data.clear();
@@ -483,7 +549,7 @@ TransportReassembly::FragInfo::insert(const FragmentRange& fragRange, ReceivedDa
       VDBG((LM_DEBUG, "(%P|%t) TransportReassembly::insert: (SN: %q) combined %q-%q with %q-%q on the right, removing and recursingly inserting\n", sn, fragRange.first, fragRange.second, fr.frag_range_.first, fr.frag_range_.second));
 
       FragmentRange range(fr.frag_range_.first, fragRange.second);
-      ReceivedDataSample copy(fr.rec_ds_);
+      ReceivedDataSample copy(std::move(fr.rec_ds_));
 
       sample_list_.erase(it);
       sample_finder_.erase(fit);
@@ -498,9 +564,9 @@ TransportReassembly::FragInfo::insert(const FragmentRange& fragRange, ReceivedDa
   }
 
   // add to end of list
-  sample_finder_[fragRange.second] = sample_list_.insert(sample_list_.end(), FragSample(fragRange, data));
+  sample_finder_[fragRange.second] = sample_list_.insert(sample_list_.end(), FragSample(fragRange, std::move(data)));
   VDBG((LM_DEBUG, "(%P|%t) TransportReassembly::insert: (SN: %q) inserting %q-%q at the end of the fragment buffer list\n", sn, fragRange.first, fragRange.second));
-  data.clear();
+  // data.clear();
   return true;
 }
 

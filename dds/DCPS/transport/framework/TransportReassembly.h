@@ -121,6 +121,15 @@ private:
   struct FragSample {
     FragSample(const FragmentRange& fragRange,
               const ReceivedDataSample& data);
+    FragSample(const FragmentRange& fragRange,
+              ReceivedDataSample&& data);
+
+
+    FragSample(const FragSample&);
+    FragSample(FragSample&&);
+
+    FragSample& operator=(const FragSample&);
+    FragSample& operator=(FragSample&&);
 
     FragmentRange frag_range_;
     ReceivedDataSample rec_ds_;
@@ -136,8 +145,10 @@ private:
     FragInfo();
     FragInfo(bool hf, const FragSampleList& rl, ACE_UINT32 tf, const MonotonicTimePoint& expiration);
     FragInfo(const FragInfo& val);
+    FragInfo(FragInfo&& other);
 
     FragInfo& operator=(const FragInfo& rhs);
+    FragInfo& operator=(FragInfo&& rhs);
 
     bool insert(const FragmentRange& fragRange, ReceivedDataSample& data);
 

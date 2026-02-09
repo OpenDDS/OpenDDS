@@ -32,6 +32,40 @@ ReceivedDataSample::ReceivedDataSample(const ACE_Message_Block& payload)
   } while (amb);
 }
 
+ReceivedDataSample::ReceivedDataSample(const ReceivedDataSample& other)
+  : header_(other.header_)
+  , fragment_size_(other.fragment_size_)
+  , blocks_(other.blocks_)
+{
+}
+
+ReceivedDataSample::ReceivedDataSample(ReceivedDataSample&& other)
+  : header_(std::move(other.header_))
+  , fragment_size_(std::move(other.fragment_size_))
+  , blocks_(std::move(other.blocks_))
+{
+}
+
+ReceivedDataSample& ReceivedDataSample::operator=(const ReceivedDataSample& rhs)
+{
+  if (this != &rhs) {
+    header_ = rhs.header_;
+    fragment_size_ = rhs.fragment_size_;
+    blocks_ = rhs.blocks_;
+  }
+  return *this;
+}
+
+ReceivedDataSample& ReceivedDataSample::operator=(ReceivedDataSample&& rhs)
+{
+  if (this != &rhs) {
+    header_ = std::move(rhs.header_);
+    fragment_size_ = std::move(rhs.fragment_size_);
+    blocks_ = std::move(rhs.blocks_);
+  }
+  return *this;
+}
+
 size_t ReceivedDataSample::data_length() const
 {
   size_t len = 0;
@@ -131,7 +165,21 @@ void ReceivedDataSample::prepend(ReceivedDataSample& prefix)
   prefix.clear();
 }
 
+void ReceivedDataSample::prepend(ReceivedDataSample&& prefix)
+{
+  OPENDDS_MOVE_OR_COPY(prefix.blocks_.begin(), prefix.blocks_.end(),
+                       std::inserter(blocks_, blocks_.begin()));
+  prefix.clear();
+}
+
 void ReceivedDataSample::append(ReceivedDataSample& suffix)
+{
+  OPENDDS_MOVE_OR_COPY(suffix.blocks_.begin(), suffix.blocks_.end(),
+                       std::back_inserter(blocks_));
+  suffix.clear();
+}
+
+void ReceivedDataSample::append(ReceivedDataSample&& suffix)
 {
   OPENDDS_MOVE_OR_COPY(suffix.blocks_.begin(), suffix.blocks_.end(),
                        std::back_inserter(blocks_));

@@ -39,6 +39,12 @@ public:
 
   explicit ReceivedDataSample(const ACE_Message_Block& payload);
 
+  ReceivedDataSample(const ReceivedDataSample& other);
+  ReceivedDataSample(ReceivedDataSample&& other);
+
+  ReceivedDataSample& operator=(const ReceivedDataSample& rhs);
+  ReceivedDataSample& operator=(ReceivedDataSample&& rhs);
+
   /// The demarshalled sample header.
   DataSampleHeader header_;
 
@@ -71,6 +77,7 @@ public:
   /// @param prefix the source ReceivedDataSample, its data will be removed and
   /// taken over by this ReceivedDataSample
   void prepend(ReceivedDataSample& prefix);
+  void prepend(ReceivedDataSample&& prefix);
 
   /// @brief Update this ReceivedDataSample's data payload to include
   /// the suffix's data payload after any existing bytes.
@@ -78,6 +85,7 @@ public:
   /// @param suffix the source ReceivedDataSample, its data will be removed and
   /// taken over by this ReceivedDataSample
   void append(ReceivedDataSample& suffix);
+  void append(ReceivedDataSample&& suffix);
 
   /// @brief Add passed-in data to payload bytes
   /// @param data start of bytes to add to the payload (makes a copy)
