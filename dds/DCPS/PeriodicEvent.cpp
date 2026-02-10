@@ -53,9 +53,8 @@ bool PeriodicEvent::enable(const TimeDuration& period, bool immediate_dispatch, 
         }
       }
     }
-    return false;
   }
-  return true;
+  return false;
 }
 
 void PeriodicEvent::shorten_current_wait(const TimeDuration& period)
