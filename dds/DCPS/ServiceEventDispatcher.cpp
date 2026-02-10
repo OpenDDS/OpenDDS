@@ -90,6 +90,12 @@ size_t ServiceEventDispatcher::cancel(long id)
   return result;
 }
 
+size_t ServiceEventDispatcher::queue_size() const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  return dispatcher_ ? dispatcher_->queue_size() : 0;
+}
+
 } // DCPS
 } // OpenDDS
 

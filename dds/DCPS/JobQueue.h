@@ -64,11 +64,9 @@ public:
     event_dispatcher_->dispatch(dynamic_rchandle_cast<EventBase>(job));
   }
 
-  // TODO FIXME Either implement EventDispatcher 'size' equivalent or remove references to JobQueue
-  // size() where used (e.g. RtpsRelay statistics reporting)
   size_t size() const
   {
-    return 0;
+    return event_dispatcher_->queue_size();
   }
 
 private:
