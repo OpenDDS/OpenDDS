@@ -120,8 +120,8 @@ TEST(dds_DCPS_PeriodicEvent, NoDoubleExec)
   OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::PeriodicEvent> periodic = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::PeriodicEvent>(dispatcher, test_event);
 
   EXPECT_TRUE(periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, false));
-  EXPECT_TRUE(periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, false));
-  EXPECT_TRUE(periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, true));
+  EXPECT_FALSE(periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, false));
+  EXPECT_FALSE(periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, true));
 
   test_event->wait(1);
   EXPECT_EQ(test_event->call_count(), 1u);
@@ -129,8 +129,8 @@ TEST(dds_DCPS_PeriodicEvent, NoDoubleExec)
   periodic->disable();
 
   EXPECT_TRUE(periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, true));
-  EXPECT_TRUE(periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, true));
-  EXPECT_TRUE(periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, false));
+  EXPECT_FALSE(periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, true));
+  EXPECT_FALSE(periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, false));
 
   test_event->wait(2);
   EXPECT_EQ(test_event->call_count(), 2u);
