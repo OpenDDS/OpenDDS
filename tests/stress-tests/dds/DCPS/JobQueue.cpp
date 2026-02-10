@@ -42,14 +42,10 @@ public:
 
   void execute()
   {
-    // static OpenDDS::DCPS::Atomic<size_t> execution_count(0);
-    // const size_t execution = ++execution_count;
     ACE_Guard<ACE_Thread_Mutex> lock(mutex_);
     OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::JobQueue> queue = job_queue_.lock();
     if (queue) {
-      // ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TestJob::execute() - Execution %d: current_count_ %d\n"), execution, current_count_));
       for (size_t i = 0; ++current_count_ < count_max_ && i < count_per_execute_; ++i) {
-        // ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TestJob::execute() - Execution %d: current_count_ %d, i = %i\n"), execution, current_count_, i));
         queue->enqueue(rchandle_from(this));
       }
     }
@@ -70,12 +66,7 @@ public:
 
 TEST(dds_DCPS_JobQueue, MaxInternalQueue)
 {
-  // OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::ReactorTask> reactor_task = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ReactorTask>();
-  // reactor_task->open_reactor_task(&tsm, "JobQueue Stress Test");
-
   OpenDDS::DCPS::EventDispatcher_rch event_dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(1);
-
-  // OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::JobQueue> job_queue = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::JobQueue>(reactor_task->get_reactor());
   OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::JobQueue> job_queue = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::JobQueue>(event_dispatcher);
 
   OpenDDS::DCPS::RcHandle<TestJob> test_job = OpenDDS::DCPS::make_rch<TestJob>(job_queue, 10000000, 1000);
@@ -83,7 +74,6 @@ TEST(dds_DCPS_JobQueue, MaxInternalQueue)
 
   test_job->wait_for_max_count();
 
-  // reactor_task->close();
   event_dispatcher->shutdown(true);
 
   EXPECT_GE(0, 0);
@@ -91,9 +81,6 @@ TEST(dds_DCPS_JobQueue, MaxInternalQueue)
 
 TEST(dds_DCPS_JobQueue, MaxNotificationQueue)
 {
-  // OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::ReactorTask> reactor_task = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ReactorTask>();
-  // reactor_task->open_reactor_task(&tsm, "JobQueue Stress Test");
-
   OpenDDS::DCPS::EventDispatcher_rch event_dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(1);
 
   OPENDDS_VECTOR(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::JobQueue>) queue_vec;
@@ -102,7 +89,6 @@ TEST(dds_DCPS_JobQueue, MaxNotificationQueue)
   const size_t limit = 100000;
 
   for (size_t i = 0; i < limit; ++i) {
-    // queue_vec.push_back(OpenDDS::DCPS::make_rch<OpenDDS::DCPS::JobQueue>(reactor_task->get_reactor()));
     queue_vec.push_back(OpenDDS::DCPS::make_rch<OpenDDS::DCPS::JobQueue>(event_dispatcher));
     job_vec.push_back(OpenDDS::DCPS::make_rch<TestJob>(queue_vec.back(), 100, 1));
   }
@@ -115,7 +101,6 @@ TEST(dds_DCPS_JobQueue, MaxNotificationQueue)
     job_vec[i]->wait_for_max_count();
   }
 
-  // reactor_task->close();
   event_dispatcher->shutdown(true);
 
   EXPECT_GE(0, 0);
