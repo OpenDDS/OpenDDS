@@ -342,6 +342,7 @@ target_sources(OpenDDS_Dcps
     DCPS/RepoIdBuilder.inl
     DCPS/RepoIdConverter.h
     DCPS/RepoIdGenerator.h
+    DCPS/ResizeSeqNoInit.h
     DCPS/RestoreOutputStreamState.h
     DCPS/SafeBool_T.h
     DCPS/SafetyProfilePool.h

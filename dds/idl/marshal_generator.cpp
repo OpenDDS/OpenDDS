@@ -730,13 +730,15 @@ namespace {
       }
 
       if (elem_cls & CL_PRIMITIVE) {
+        be_global->add_include("dds/DCPS/ResizeSeqNoInit.h");
+
         // if we are a bounded primitive, we read to our max then return false
         if (!seq->unbounded()) {
           be_global->impl_ <<
             "  if (length > " << bound << ") {\n"
             "    new_length = " << bound << ";\n"
             "  }\n"
-            "  " << wrapper.seq_resize("new_length");
+            "  resize_seq_no_init(" << wrapper.value_access() << ", new_length);\n";
           if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
             be_global->impl_ <<
             "  for (CORBA::ULong i = 0; i < new_length; ++i) {\n"
@@ -758,7 +760,7 @@ namespace {
             "  }\n";
         } else {
           be_global->impl_ <<
-            "  " << wrapper.seq_resize("new_length");
+            "  resize_seq_no_init(" << wrapper.value_access() << ", new_length);\n";
           if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
             be_global->impl_ <<
               "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
