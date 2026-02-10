@@ -91,8 +91,8 @@ void PeriodicEvent::shorten_current_wait(const TimeDuration& period)
         if (id > 0) {
           expiration_ = expiration;
           timer_id_ = id;
-        } else {
-          ACE_ERROR((LM_WARNING, "(%P|%t) PeriodicEvent::shorten_current_wait: failed to reschedule\n"));
+        } else if (log_level >= LogLevel::Warning) {
+          ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: PeriodicEvent::shorten_current_wait: failed to reschedule\n"));
         }
       }
     }

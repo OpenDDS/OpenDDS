@@ -18,8 +18,8 @@ namespace DCPS {
 
 /**
  * ReactorEvent is an event which, when triggered, will attempt to run the specified handle_event
-   function within a reactor callback (i.e. on the reactor thread). This is handy for avoiding
-   deadlocks when calling into ACE_Reactor-aware functions (e.g. calling join on a multicast socket).
+ * function within a reactor callback (i.e. on the reactor thread). This is handy for avoiding
+ * deadlocks when calling into ACE_Reactor-aware functions (e.g. calling join on a multicast socket).
  */
 class OpenDDS_Dcps_Export ReactorEvent : public virtual EventBase, public virtual RcEventHandler {
 public:
