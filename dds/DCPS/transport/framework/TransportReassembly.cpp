@@ -506,7 +506,7 @@ TransportReassembly::FragInfo::insert(const FragmentRange& fragRange, ReceivedDa
       }
       fr.rec_ds_.header_ = joined;
       if (fr.rec_ds_.has_data() && data.has_data()) {
-        fr.rec_ds_.prepend(OPENDDS_MAYBE_MOVE(data));
+        fr.rec_ds_.prepend(data);
       } else {
         fr.rec_ds_.clear();
         data.clear();
@@ -544,7 +544,7 @@ TransportReassembly::FragInfo::insert(const FragmentRange& fragRange, ReceivedDa
       }
       fr.rec_ds_.header_ = joined;
       if (fr.rec_ds_.has_data() && data.has_data()) {
-        fr.rec_ds_.append(OPENDDS_MAYBE_MOVE(data));
+        fr.rec_ds_.append(data);
       } else {
         fr.rec_ds_.clear();
         data.clear();
