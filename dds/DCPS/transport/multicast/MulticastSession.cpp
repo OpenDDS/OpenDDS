@@ -28,7 +28,7 @@ namespace {
   const Encoding::Kind encoding_kind = Encoding::KIND_UNALIGNED_CDR;
 }
 
-MulticastSession::MulticastSession(RcHandle<ReactorTask> reactor_task,
+MulticastSession::MulticastSession(RcHandle<ReactorTask>,
                                    MulticastDataLink* link,
                                    MulticastPeer remote_peer)
   : link_(link)
