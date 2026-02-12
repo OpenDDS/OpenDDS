@@ -41,7 +41,7 @@ bool PeriodicEvent::enable(const TimeDuration& period, bool immediate_dispatch, 
         }
         return okay;
       } else {
-        long id = dispatcher->schedule(rchandle_from(this), expiration);
+        const long id = dispatcher->schedule(rchandle_from(this), expiration);
         if (id > 0) {
           period_ = period;
           expiration_ = expiration;
@@ -62,11 +62,11 @@ void PeriodicEvent::shorten_current_wait(const TimeDuration& period)
   const MonotonicTimePoint now = MonotonicTimePoint::now();
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   if (timer_id_ > 0) {
-    EventDispatcher_rch dispatcher = dispatcher_.lock();
+    const EventDispatcher_rch dispatcher = dispatcher_.lock();
     if (dispatcher) {
       const MonotonicTimePoint expiration = now + period;
       if (expiration < expiration_ && dispatcher->cancel(timer_id_)) {
-        long id = dispatcher->schedule(rchandle_from(this), expiration);
+        const long id = dispatcher->schedule(rchandle_from(this), expiration);
         if (id > 0) {
           expiration_ = expiration;
           timer_id_ = id;
@@ -109,10 +109,10 @@ void PeriodicEvent::handle_event_scheduling()
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   timer_id_ = 0;
   if (enabled_i()) {
-    EventDispatcher_rch dispatcher = dispatcher_.lock();
+    const EventDispatcher_rch dispatcher = dispatcher_.lock();
     if (dispatcher) {
       const MonotonicTimePoint expiration = (strict_timing_ ? expiration_ : MonotonicTimePoint::now()) + period_;
-      long id = dispatcher->schedule(rchandle_from(this), expiration);
+      const long id = dispatcher->schedule(rchandle_from(this), expiration);
       if (id > 0) {
         expiration_ = expiration;
         timer_id_ = id;
