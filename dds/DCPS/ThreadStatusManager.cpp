@@ -104,7 +104,6 @@ double ThreadStatusManager::Thread::utilization(const MonotonicTimePoint& now) c
 
   bool ThreadStatusManager::update_thread_status() const
   {
-    // TODO(sonndinh): AtomicBool?
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
     return enabled_;
   }
@@ -124,15 +123,18 @@ ThreadStatusManager::ThreadId ThreadStatusManager::get_thread_id()
 
 size_t ThreadStatusManager::get_container()
 {
-  // TODO(sonndinh): return a container index from thread id
   const ThreadId tid = get_thread_id();
-  ACE_UNUSED_ARG(tid);
-#ifdef ACE_WIN32
-  return tid % NUM_CONTAINERS;
-#elif defined ACE_HAS_GETTID
-  return 0u;
+#if defined (ACE_WIN32) || defined (ACE_HAS_GETTID)
+  return static_cast<size_t>(tid) % NUM_CONTAINERS;
 #else
-  return 0u;
+  const unsigned char* data = reinterpret_cast<const unsigned char*>(tid.c_str());
+  // FNV-1a hash method
+  unsigned hash = 2166136261u;
+  for (size_t i = 0; i < tid.length(); ++i) {
+    hash ^= data[i];
+    hash *= 16777619u;
+  }
+  return static_cast<size_t>(hash) % NUM_CONTAINERS;
 #endif
 }
 

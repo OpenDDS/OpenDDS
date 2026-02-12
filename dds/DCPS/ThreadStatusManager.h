@@ -23,7 +23,6 @@ public:
 #if defined (ACE_WIN32)
   typedef unsigned ThreadId;
 #else
-
 #  ifdef ACE_HAS_GETTID
   typedef pid_t ThreadId;
 #  else
@@ -204,7 +203,7 @@ private:
   bool enabled_;
   mutable ACE_Thread_Mutex lock_;
 
-  static const size_t NUM_CONTAINERS = 8;
+  static const size_t NUM_CONTAINERS = 11;
 
   struct ThreadContainer {
     ThreadContainer()
