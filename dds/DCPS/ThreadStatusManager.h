@@ -63,7 +63,7 @@ public:
                 bool nested, int detail1, int detail2);
     double utilization(const MonotonicTimePoint& now) const;
 
-    static const size_t bucket_count = 8;
+    static const size_t BUCKET_COUNT = 8;
 
   private:
     const String bit_key_;
@@ -79,27 +79,17 @@ public:
       TimeDuration total_time() const { return active_time + idle_time; }
     };
     Bucket total_;
-    Bucket buckets_[bucket_count];
+    Bucket buckets_[BUCKET_COUNT];
     size_t current_bucket_;
   };
   typedef OPENDDS_MAP(ThreadId, Thread) Map;
   typedef OPENDDS_LIST(Thread) List;
 
-  void thread_status_interval(const TimeDuration& thread_status_interval)
-  {
-    thread_status_interval_ = thread_status_interval;
-    bucket_limit_ = thread_status_interval / static_cast<double>(Thread::bucket_count);
-  }
+  ThreadStatusManager();
 
-  const TimeDuration& thread_status_interval() const
-  {
-    return thread_status_interval_;
-  }
-
-  bool update_thread_status() const
-  {
-    return thread_status_interval_ > TimeDuration::zero_value;
-  }
+  void thread_status_interval(const TimeDuration& thread_status_interval);
+  const TimeDuration& thread_status_interval() const;
+  bool update_thread_status() const;
 
   /// Add the calling thread to the manager.
   /// name is for a more human-friendly name that will be appended to the BIT key.
@@ -183,33 +173,52 @@ public:
 
 private:
   static ThreadId get_thread_id();
+  size_t get_container();
   void add_thread(const String& name);
+
+  void update_i(Thread::ThreadStatus status, bool finished = false,
+                bool nested = false, int detail1 = 0, int detail2 = 0);
 
   void update_current_thread(Thread::ThreadStatus status, bool nested = false, int detail1 = 0, int detail2 = 0)
   {
     update_i(status, false, nested, detail1, detail2);
   }
 
-  void finished() { update_i(Thread::ThreadStatus_Idle, true, false); }
-
-  void update_i(Thread::ThreadStatus status, bool finished = false,
-                bool nested = false, int detail1 = 0, int detail2 = 0);
+  void finished()
+  {
+    update_i(Thread::ThreadStatus_Idle, true, false);
+  }
 
   void active(bool nested = false, int detail1 = 0, int detail2 = 0)
   {
     update_current_thread(Thread::ThreadStatus_Active, nested, detail1, detail2);
   }
 
-  void idle(bool nested = false) { update_current_thread(Thread::ThreadStatus_Idle, nested); }
-
-  void cleanup(const MonotonicTimePoint& now);
+  void idle(bool nested = false)
+  {
+    update_current_thread(Thread::ThreadStatus_Idle, nested);
+  }
 
   TimeDuration thread_status_interval_;
   TimeDuration bucket_limit_;
-  Map map_;
-  List finished_;
-
+  bool enabled_;
   mutable ACE_Thread_Mutex lock_;
+
+  static const size_t NUM_CONTAINERS = 8;
+
+  struct ThreadContainer {
+    ThreadContainer()
+      : outer_(0)
+    {}
+
+    const ThreadStatusManager* outer_;
+    Map map_;
+    List finished_;
+    mutable ACE_Thread_Mutex mutex_;
+
+    void cleanup(const MonotonicTimePoint& now);
+  };
+  ThreadContainer containers_[NUM_CONTAINERS];
 };
 
 } // namespace DCPS
