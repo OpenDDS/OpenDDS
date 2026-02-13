@@ -122,6 +122,16 @@ private:
     FragSample(const FragmentRange& fragRange,
               const ReceivedDataSample& data);
 
+#ifdef ACE_HAS_CPP11
+    FragSample(const FragmentRange& fragRange,
+              ReceivedDataSample&& data);
+    FragSample(const FragSample&) = default;
+    FragSample(FragSample&&) = default;
+
+    FragSample& operator=(const FragSample&) = default;
+    FragSample& operator=(FragSample&&) = default;
+#endif
+
     FragmentRange frag_range_;
     ReceivedDataSample rec_ds_;
   };
@@ -138,6 +148,11 @@ private:
     FragInfo(const FragInfo& val);
 
     FragInfo& operator=(const FragInfo& rhs);
+
+#ifdef ACE_HAS_CPP11
+    FragInfo(FragInfo&& other) = default;
+    FragInfo& operator=(FragInfo&& rhs) = default;
+#endif
 
     bool insert(const FragmentRange& fragRange, ReceivedDataSample& data);
 
