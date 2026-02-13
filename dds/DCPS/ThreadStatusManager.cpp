@@ -84,29 +84,33 @@ double ThreadStatusManager::Thread::utilization(const MonotonicTimePoint& now) c
   return 0;
 }
 
-  ThreadStatusManager::ThreadStatusManager()
-    : enabled_(false)
-  {}
-
-  void ThreadStatusManager::thread_status_interval(const TimeDuration& thread_status_interval)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    thread_status_interval_ = thread_status_interval;
-    bucket_limit_ = thread_status_interval / static_cast<double>(Thread::BUCKET_COUNT);
-    enabled_ = thread_status_interval_ > TimeDuration::zero_value ? true : false;
+ThreadStatusManager::ThreadStatusManager()
+  : enabled_(false)
+{
+  for (size_t i = 0; i < NUM_CONTAINERS; ++i) {
+    containers_[i].outer_ = this;
   }
+}
 
-  const TimeDuration& ThreadStatusManager::thread_status_interval() const
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, TimeDuration::zero_value);
-    return thread_status_interval_;
-  }
+void ThreadStatusManager::thread_status_interval(const TimeDuration& thread_status_interval)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  thread_status_interval_ = thread_status_interval;
+  bucket_limit_ = thread_status_interval / static_cast<double>(Thread::BUCKET_COUNT);
+  enabled_ = thread_status_interval_ > TimeDuration::zero_value ? true : false;
+}
 
-  bool ThreadStatusManager::update_thread_status() const
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-    return enabled_;
-  }
+const TimeDuration& ThreadStatusManager::thread_status_interval() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, TimeDuration::zero_value);
+  return thread_status_interval_;
+}
+
+bool ThreadStatusManager::update_thread_status() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  return enabled_;
+}
 
 ThreadStatusManager::ThreadId ThreadStatusManager::get_thread_id()
 {
@@ -155,7 +159,6 @@ void ThreadStatusManager::add_thread(const String& name)
 
   ThreadContainer& container = containers_[get_container()];
   ACE_GUARD(ACE_Thread_Mutex, g, container.mutex_);
-  container.outer_ = this;
   container.map_.insert(std::make_pair(thread_id, Thread(bit_key)));
 }
 
