@@ -435,6 +435,8 @@ public:
 
   DCPS::JobQueue_rch job_queue() const { return job_queue_; }
 
+  DCPS::EventDispatcher_rch event_dispatcher() const { return event_dispatcher_; }
+
   void append_transport_statistics(DCPS::TransportStatisticsSequence& seq);
 
   void ignore(const GUID_t& to_ignore);

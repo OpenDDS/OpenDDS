@@ -2551,7 +2551,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
 #endif
 
   if (TheServiceParticipant->get_thread_status_manager().update_thread_status() && outer->harvest_thread_status_) {
-    init_thread_status_task();
+    init_thread_status_event();
   }
 
   // Connect the listeners last so that the tasks are created.
@@ -2565,17 +2565,18 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
 }
 
 
-void Spdp::SpdpTransport::init_thread_status_task()
+void Spdp::SpdpTransport::init_thread_status_event()
 {
 #ifndef DDS_HAS_MINIMUM_BIT
   const DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  if (!thread_status_task_ && outer->harvest_thread_status_) {
+  if (!thread_status_event_ && outer->harvest_thread_status_) {
     const DCPS::RcHandle<Sedp> sedp = outer->sedp_;
     if (!sedp) return;
-    const DCPS::ReactorTask_rch reactor_task = sedp->reactor_task();
-    thread_status_task_ = DCPS::make_rch<PeriodicThreadStatus>(reactor_task, ref(*this));
+
+    thread_status_event_ = DCPS::make_rch<DCPS::PeriodicEvent>(sedp->event_dispatcher(),
+      DCPS::make_rch<SpdpTransportEvent>(rchandle_from(this), &SpdpTransport::thread_status_task));
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
 }
@@ -2654,9 +2655,8 @@ Spdp::SpdpTransport::enable_periodic_tasks()
   }
 
   DCPS::RcHandle<Spdp> outer = outer_.lock();
-#if OPENDDS_CONFIG_SECURITY
   if (!outer) return;
-
+#if OPENDDS_CONFIG_SECURITY
   outer->sedp_->core().reset_relay_spdp_task_falloff();
   relay_spdp_task_->schedule(TimeDuration::zero_value);
 
@@ -2667,7 +2667,13 @@ Spdp::SpdpTransport::enable_periodic_tasks()
 #ifndef DDS_HAS_MINIMUM_BIT
   const DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   if (thread_status_manager.update_thread_status() && outer->harvest_thread_status_) {
-    thread_status_task_->enable(false, thread_status_manager.thread_status_interval());
+    const TimeDuration period = thread_status_manager.thread_status_interval();
+    if (!thread_status_event_->enable(period, false)) {
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Spdp::SpdpTransport::enable_periodic_tasks: "
+                   "failed to enable thread status harvesting with period: %C\n", period.str().c_str()));
+      }
+    }
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
 }
@@ -2746,8 +2752,8 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
   if (lease_expiration_task_) {
     lease_expiration_task_->cancel();
   }
-  if (thread_status_task_) {
-    thread_status_task_->disable();
+  if (thread_status_event_) {
+    thread_status_event_->disable();
   }
 
   ACE_Reactor* reactor = reactor_task->get_reactor();
@@ -3740,12 +3746,16 @@ void Spdp::SpdpTransport::on_data_available(DCPS::ConfigReader_rch)
     const DCPS::ConfigPair& sample = samples[idx];
     if (sample.key() == DCPS::COMMON_DCPS_THREAD_STATUS_INTERVAL) {
       const TimeDuration val(std::atoi(sample.value().c_str()));
-      init_thread_status_task();
-      if (thread_status_task_) {
+      init_thread_status_event();
+      if (thread_status_event_) {
+        thread_status_event_->disable();
         if (val) {
-          thread_status_task_->enable(true, val);
-        } else {
-          thread_status_task_->disable();
+          if (!thread_status_event_->enable(val)) {
+            if (log_level >= LogLevel::Warning) {
+              ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Spdp::SpdpTransport::on_data_available: "
+                         "failed to enable thread status harvesting with period: %C\n", val.str().c_str()));
+            }
+          }
         }
       }
     } else if (sample.key_has_prefix(config_prefix)) {
@@ -4543,9 +4553,8 @@ Spdp::SpdpTransport::process_lease_expirations(const DCPS::MonotonicTimePoint& n
   outer->process_lease_expirations(now);
 }
 
-void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& now)
+void Spdp::SpdpTransport::thread_status_task()
 {
-  ACE_UNUSED_ARG(now);
 #ifndef DDS_HAS_MINIMUM_BIT
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
@@ -4561,6 +4570,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& now
   List running;
   List removed;
   TheServiceParticipant->get_thread_status_manager().harvest(last_thread_status_harvest_, running, removed);
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
   last_thread_status_harvest_ = now;
   for (List::const_iterator i = removed.begin(); i != removed.end(); ++i) {
     DCPS::InternalThreadBuiltinTopicData data;

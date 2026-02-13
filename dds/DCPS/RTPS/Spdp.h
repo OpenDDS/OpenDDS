@@ -20,6 +20,7 @@
 #include <dds/DCPS/MultiTask.h>
 #include <dds/DCPS/MulticastManager.h>
 #include <dds/DCPS/PeriodicTask.h>
+#include <dds/DCPS/PeriodicEvent.h>
 #include <dds/DCPS/PoolAllocationBase.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/RcEventHandler.h>
@@ -490,33 +491,13 @@ private:
       DCPS::WeakRcHandle<SpdpTransport> tport_;
     };
 
-    // This is essentially PmfPeriodicTask<SpdpTransport>, but using that
-    // directly was causing warnings on MSVC x86.  There is only one member
-    // function that's used with a PeriodicTask.
-    struct PeriodicThreadStatus : DCPS::PeriodicTask {
-      PeriodicThreadStatus(DCPS::ReactorTask_rch reactor_task, const SpdpTransport& delegate)
-        : PeriodicTask(reactor_task)
-        , delegate_(delegate)
-      {}
-
-      void execute(const MonotonicTimePoint& now)
-      {
-        const DCPS::RcHandle<SpdpTransport> handle = delegate_.lock();
-        if (handle) {
-          handle->thread_status_task(now);
-        }
-      }
-
-      const DCPS::WeakRcHandle<SpdpTransport> delegate_;
-    };
-
     explicit SpdpTransport(DCPS::RcHandle<Spdp> outer);
     ~SpdpTransport();
 
     const ACE_SOCK_Dgram& choose_recv_socket(ACE_HANDLE h) const;
     virtual int handle_input(ACE_HANDLE h);
 
-    void init_thread_status_task();
+    void init_thread_status_event();
 
     void open(const DCPS::ReactorTask_rch& reactor_task,
               const DCPS::JobQueue_rch& job_queue);
@@ -575,6 +556,7 @@ private:
     DCPS::MulticastManager multicast_manager_;
     DCPS::NetworkAddressSet send_addrs_;
     ACE_Message_Block buff_, wbuff_;
+    typedef DCPS::PmfEvent<SpdpTransport> SpdpTransportEvent;
     typedef DCPS::PmfSporadicTask<SpdpTransport> SpdpSporadic;
     typedef DCPS::PmfMultiTask<SpdpTransport> SpdpMulti;
     void send_local(const DCPS::MonotonicTimePoint& now);
@@ -584,8 +566,8 @@ private:
     OPENDDS_LIST(DCPS::GUID_t) directed_guids_;
     void process_lease_expirations(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpSporadic> lease_expiration_task_;
-    void thread_status_task(const DCPS::MonotonicTimePoint& now);
-    DCPS::RcHandle<PeriodicThreadStatus> thread_status_task_;
+    void thread_status_task();
+    DCPS::PeriodicEvent_rch thread_status_event_;
     DCPS::RcHandle<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> > network_interface_address_reader_;
 #if OPENDDS_CONFIG_SECURITY
     void process_handshake_deadlines(const DCPS::MonotonicTimePoint& now);
