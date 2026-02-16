@@ -39,6 +39,14 @@ public:
 
   explicit ReceivedDataSample(const ACE_Message_Block& payload);
 
+#ifdef ACE_HAS_CPP11
+  ReceivedDataSample(const ReceivedDataSample& other) = default;
+  ReceivedDataSample& operator=(const ReceivedDataSample& rhs) = default;
+
+  ReceivedDataSample(ReceivedDataSample&& other) = default;
+  ReceivedDataSample& operator=(ReceivedDataSample&& rhs) = default;
+#endif
+
   /// The demarshalled sample header.
   DataSampleHeader header_;
 
