@@ -2567,8 +2567,7 @@ void Spdp::SpdpTransport::init_thread_status_event()
   if (!thread_status_event_ && outer->harvest_thread_status_) {
     const DCPS::RcHandle<Sedp> sedp = outer->sedp_;
     if (!sedp) return;
-    const DCPS::ReactorTask_rch reactor_task = sedp->reactor_task();
-    thread_status_event_ = DCPS::make_rch<DCPS::PeriodicEvent>(outer->sedp_->event_dispatcher(), DCPS::make_rch<SpdpTransportEvent>(rchandle_from(this), &SpdpTransport::thread_status_task));
+    thread_status_event_ = DCPS::make_rch<DCPS::PeriodicEvent>(sedp->event_dispatcher(), DCPS::make_rch<SpdpTransportEvent>(rchandle_from(this), &SpdpTransport::thread_status_task));
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
 }
@@ -2661,7 +2660,7 @@ Spdp::SpdpTransport::enable_periodic_tasks()
 #ifndef DDS_HAS_MINIMUM_BIT
   const DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   if (thread_status_manager.update_thread_status() && outer->harvest_thread_status_) {
-    outer->sedp_->event_dispatcher()->schedule(thread_status_event_, MonotonicTimePoint::now() + thread_status_manager.thread_status_interval());
+    thread_status_event_->enable(thread_status_manager.thread_status_interval());
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
 }
