@@ -78,27 +78,6 @@ void PeriodicEvent::shorten_current_wait(const TimeDuration& period)
   }
 }
 
-void PeriodicEvent::shorten_current_wait(const TimeDuration& period)
-{
-  const MonotonicTimePoint now = MonotonicTimePoint::now();
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (timer_id_ > 0) {
-    EventDispatcher_rch dispatcher = dispatcher_.lock();
-    if (dispatcher) {
-      const MonotonicTimePoint expiration = now + period;
-      if (expiration < expiration_ && dispatcher->cancel(timer_id_)) {
-        long id = dispatcher->schedule(rchandle_from(this), expiration);
-        if (id > 0) {
-          expiration_ = expiration;
-          timer_id_ = id;
-        } else if (log_level >= LogLevel::Warning) {
-          ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: PeriodicEvent::shorten_current_wait: failed to reschedule\n"));
-        }
-      }
-    }
-  }
-}
-
 void PeriodicEvent::disable()
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -117,12 +96,6 @@ bool PeriodicEvent::enabled() const
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   return enabled_i();
-}
-
-RcHandle<EventBase> PeriodicEvent::event() const
-{
-  ACE_Guard<ACE_Thread_Mutex> guard(event_mutex_);
-  return event_;
 }
 
 RcHandle<EventBase> PeriodicEvent::event() const
