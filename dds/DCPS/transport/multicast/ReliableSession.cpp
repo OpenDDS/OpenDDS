@@ -14,8 +14,9 @@
 #include "ace/Global_Macros.h"
 #include "ace/Truncate.h"
 
-#include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/GuidConverter.h"
+#include "dds/DCPS/ReactorEvent.h"
+#include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/TimeTypes.h"
 
 #include <cstdlib>
@@ -34,10 +35,10 @@ ReliableSession::ReliableSession(RcHandle<ReactorTask> reactor_task,
                                  MulticastDataLink* link,
                                  MulticastPeer remote_peer)
   : MulticastSession(reactor_task, link, remote_peer)
-  , nak_watchdog_(make_rch<Sporadic>(TheServiceParticipant->time_source(),
-                                     reactor_task,
-                                     rchandle_from(this),
-                                     &ReliableSession::process_naks))
+  , nak_watchdog_(make_rch<SporadicEvent>(TheServiceParticipant->event_dispatcher(),
+                                          make_rch<ReactorEvent>(reactor_task->get_reactor(),
+                                                                 make_rch<ReliableSessionEvent>(rchandle_from(this),
+                                                                                                &ReliableSession::process_naks))))
   , nak_timeout_(link->config()->nak_timeout())
   , nak_delay_intervals_(link->config()->nak_delay_intervals())
   , nak_max_(link->config()->nak_max())
@@ -694,7 +695,7 @@ ReliableSession::nak_delay()
 }
 
 void
-ReliableSession::process_naks(const MonotonicTimePoint& /*now*/)
+ReliableSession::process_naks()
 {
   // Expire outstanding repair requests that have not yet been
   // fulfilled; this prevents NAK implosions due to remote

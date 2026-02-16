@@ -26,9 +26,11 @@
 
 void generate_transaction_id(OpenDDS::STUN::Message& message)
 {
+  OpenDDS::STUN::TransactionId id;
   for (size_t idx = 0; idx != 12; ++idx) {
-    message.transaction_id.data[idx] = rand();
+    id.data[idx] = rand();
   }
+  message.transaction_id(id);
 }
 
 bool send(int& status,
@@ -37,7 +39,7 @@ bool send(int& status,
           OpenDDS::STUN::Message& request)
 {
   OpenDDS::DCPS::Message_Block_Shared_Ptr block(new ACE_Message_Block(OpenDDS::STUN::HEADER_SIZE + request.length()));
-  request.block = block.get();
+  request.block(block.get());
   OpenDDS::DCPS::Serializer serializer(block.get(), OpenDDS::STUN::encoding);
   if (!(serializer << request)) {
     std::cerr << "ERROR: Failed to serialize request" << std::endl;
@@ -74,7 +76,7 @@ bool recv(int& status,
   OpenDDS::DCPS::Message_Block_Shared_Ptr buffer(new ACE_Message_Block(data_block));
   buffer->length(bytes_received);
 
-  response.block = buffer.get();
+  response.block(buffer.get());
   OpenDDS::DCPS::Serializer deserializer(buffer.get(), OpenDDS::STUN::encoding);
   if (!(deserializer >> response)) {
     std::cerr << "ERROR: Failed to deserialize response" << std::endl;
@@ -92,9 +94,7 @@ bool test_success(int& status,
 {
   std::cerr << (test_name ? test_name : __func__) << std::endl;
   bool retval = true;
-  OpenDDS::STUN::Message request;
-  request.class_ = OpenDDS::STUN::REQUEST;
-  request.method = OpenDDS::STUN::BINDING;
+  OpenDDS::STUN::Message request(OpenDDS::STUN::REQUEST, OpenDDS::STUN::BINDING);
   generate_transaction_id(request);
   request.append_attribute(OpenDDS::STUN::make_fingerprint());
 
@@ -107,19 +107,19 @@ bool test_success(int& status,
     return false;
   }
 
-  if (response.class_ != OpenDDS::STUN::SUCCESS_RESPONSE) {
+  if (response.get_class() != OpenDDS::STUN::SUCCESS_RESPONSE) {
     std::cerr << "ERROR: Incorrect message class" << std::endl;
     status = EXIT_FAILURE;
     retval = false;
   }
 
-  if (response.method != request.method) {
+  if (response.method() != request.method()) {
     std::cerr << "ERROR: Incorrect method" << std::endl;
     status = EXIT_FAILURE;
     retval = false;
   }
 
-  if (response.transaction_id != request.transaction_id) {
+  if (response.transaction_id() != request.transaction_id()) {
     std::cerr << "ERROR: Incorrect transaction id" << std::endl;
     status = EXIT_FAILURE;
     retval = false;
@@ -148,9 +148,7 @@ bool test_unknown_method(int& status,
 {
   std::cerr << __func__ << std::endl;
   bool retval = true;
-  OpenDDS::STUN::Message request;
-  request.class_ = OpenDDS::STUN::REQUEST;
-  request.method = static_cast<OpenDDS::STUN::Method>(2);
+  OpenDDS::STUN::Message request(OpenDDS::STUN::REQUEST, static_cast<OpenDDS::STUN::Method>(2));
   generate_transaction_id(request);
   request.append_attribute(OpenDDS::STUN::make_fingerprint());
 
@@ -163,19 +161,19 @@ bool test_unknown_method(int& status,
     return false;
   }
 
-  if (response.class_ != OpenDDS::STUN::ERROR_RESPONSE) {
+  if (response.get_class() != OpenDDS::STUN::ERROR_RESPONSE) {
     std::cerr << "ERROR: Incorrect message class" << std::endl;
     status = EXIT_FAILURE;
     retval = false;
   }
 
-  if (response.method != request.method) {
+  if (response.method() != request.method()) {
     std::cerr << "ERROR: Incorrect method" << std::endl;
     status = EXIT_FAILURE;
     retval = false;
   }
 
-  if (response.transaction_id != request.transaction_id) {
+  if (response.transaction_id() != request.transaction_id()) {
     std::cerr << "ERROR: Incorrect transaction id" << std::endl;
     status = EXIT_FAILURE;
     retval = false;
@@ -214,9 +212,7 @@ bool test_no_fingerprint(int& status,
 {
   std::cerr << __func__ << std::endl;
   bool retval = true;
-  OpenDDS::STUN::Message request;
-  request.class_ = OpenDDS::STUN::REQUEST;
-  request.method = OpenDDS::STUN::BINDING;
+  OpenDDS::STUN::Message request(OpenDDS::STUN::REQUEST, OpenDDS::STUN::BINDING);
   generate_transaction_id(request);
 
   if (!send(status, socket, remote, request)) {
@@ -228,19 +224,19 @@ bool test_no_fingerprint(int& status,
     return false;
   }
 
-  if (response.class_ != OpenDDS::STUN::ERROR_RESPONSE) {
+  if (response.get_class() != OpenDDS::STUN::ERROR_RESPONSE) {
     std::cerr << "ERROR: Incorrect message class" << std::endl;
     status = EXIT_FAILURE;
     retval = false;
   }
 
-  if (response.method != request.method) {
+  if (response.method() != request.method()) {
     std::cerr << "ERROR: Incorrect method" << std::endl;
     status = EXIT_FAILURE;
     retval = false;
   }
 
-  if (response.transaction_id != request.transaction_id) {
+  if (response.transaction_id() != request.transaction_id()) {
     std::cerr << "ERROR: Incorrect transaction id" << std::endl;
     status = EXIT_FAILURE;
     retval = false;

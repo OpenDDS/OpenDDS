@@ -121,6 +121,12 @@ public:
     return cancel(fun_ptr_proxy<T>, &ref);
   }
 
+  /**
+   * Get the internal event queue size
+   * @return the number of currently queued (dispatched, but not yet handled) events
+   */
+  size_t queue_size() const;
+
 private:
 
   static ACE_THR_FUNC_RETURN run(void* arg);

@@ -16,7 +16,7 @@
 
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/TimeTypes.h>
-#include <dds/DCPS/SporadicTask.h>
+#include <dds/DCPS/SporadicEvent.h>
 #include <dds/Versioned_Namespace.h>
 
 #include <dds/DdsSecurityCoreC.h>
@@ -258,12 +258,11 @@ private:
   typedef std::map<DDS::Security::IdentityHandle, DDS::Security::PermissionsHandle> ACIdentityMap;
   ACIdentityMap local_identity_map_;
 
-  class RevokePermissionsTask : public DCPS::SporadicTask {
+  class RevokePermissionsManager : public DCPS::RcObject {
   public:
-    RevokePermissionsTask(const DCPS::TimeSource& time_source,
-                          DCPS::ReactorTask_rch reactor_task,
-                          AccessControlBuiltInImpl& impl);
-    virtual ~RevokePermissionsTask();
+    RevokePermissionsManager(AccessControlBuiltInImpl& impl);
+    virtual ~RevokePermissionsManager();
+
     void insert(DDS::Security::PermissionsHandle pm_handle, const time_t& expiration);
     void erase(DDS::Security::PermissionsHandle pm_handle);
 
@@ -271,18 +270,20 @@ private:
     typedef OPENDDS_MAP(DDS::Security::PermissionsHandle, time_t) HandleToExpiration;
     typedef OPENDDS_MULTIMAP(time_t, DDS::Security::PermissionsHandle) ExpirationToHandle;
 
-    virtual void execute(const DCPS::MonotonicTimePoint& now);
+    void process();
 
     AccessControlBuiltInImpl& impl_;
+    DCPS::SporadicEvent_rch revokation_event_;
 
     mutable ACE_Thread_Mutex lock_;
     HandleToExpiration handle_to_expiration_;
     ExpirationToHandle expiration_to_handle_;
   };
-  typedef DCPS::RcHandle<RevokePermissionsTask> RevokePermissionsTask_rch;
+  typedef DCPS::PmfEvent<RevokePermissionsManager> RevokePermissionsManagerEvent;
+  typedef DCPS::RcHandle<RevokePermissionsManager> RevokePermissionsManager_rch;
 
-  RevokePermissionsTask_rch local_rp_task_;
-  RevokePermissionsTask_rch remote_rp_task_;
+  RevokePermissionsManager_rch local_rp_task_;
+  RevokePermissionsManager_rch remote_rp_task_;
 
   int generate_handle();
 
@@ -293,7 +294,7 @@ private:
 
   DDS::Security::AccessControlListener_ptr listener_ptr_;
 
-  RevokePermissionsTask_rch& make_task(RevokePermissionsTask_rch& task);
+  RevokePermissionsManager_rch& make_task(RevokePermissionsManager_rch& task);
 
   static time_t utc_now();
 

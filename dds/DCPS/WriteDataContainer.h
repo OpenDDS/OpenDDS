@@ -15,7 +15,7 @@
 #include "PoolAllocator.h"
 #include "PoolAllocationBase.h"
 #include "Message_Block_Ptr.h"
-#include "SporadicTask.h"
+#include "SporadicEvent.h"
 #include "ConditionVariable.h"
 #include "TimeTypes.h"
 
@@ -556,7 +556,8 @@ private:
 #endif
 
   /// Timer responsible for reporting missed offered deadlines.
-  RcHandle<DCPS::PmfSporadicTask<WriteDataContainer> > deadline_task_;
+  typedef DCPS::PmfNowEvent<WriteDataContainer> WriteDataContainerEvent;
+  SporadicEvent_rch deadline_task_;
   TimeDuration deadline_period_; // TimeDuration::zero_value means no deadline.
   typedef OPENDDS_MULTIMAP(MonotonicTimePoint, PublicationInstance_rch) DeadlineMapType;
   DeadlineMapType deadline_map_;
