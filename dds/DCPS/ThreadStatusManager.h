@@ -17,19 +17,37 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export ThreadStatusManager {
-public:
-
 #if defined (ACE_WIN32)
-  typedef unsigned ThreadId;
+typedef unsigned ThreadId;
 #else
 
 #  ifdef ACE_HAS_GETTID
-  typedef pid_t ThreadId;
+typedef pid_t ThreadId;
 #  else
-  typedef String ThreadId;
+typedef String ThreadId;
 #  endif
 #endif /* ACE_WIN32 */
+
+struct OpenDDS_Dcps_Export ThreadInfo {
+  String name;
+  ThreadId thread_id;
+  ACE_thread_t handle;
+
+  String get_bit_key() const;
+};
+
+class OpenDDS_Dcps_Export ThreadStatusListener {
+public:
+  virtual ~ThreadStatusListener() {}
+  virtual void on_thread_started(const ThreadInfo& thread) = 0;
+  virtual void on_thread_finished(const ThreadInfo& thread) = 0;
+};
+
+class OpenDDS_Dcps_Export ThreadStatusManager {
+public:
+  ThreadStatusManager()
+    : thread_status_listener_(0)
+  {}
 
   class OpenDDS_Dcps_Export Thread {
   public:
@@ -38,18 +56,9 @@ public:
       ThreadStatus_Idle,
     };
 
-    explicit Thread(const String& bit_key)
-      : bit_key_(bit_key)
-      , timestamp_(SystemTimePoint::now())
-      , last_update_(MonotonicTimePoint::now())
-      , last_status_change_(MonotonicTimePoint::now())
-      , status_(ThreadStatus_Active)
-      , nesting_depth_(0)
-      , detail1_(0)
-      , detail2_(0)
-      , current_bucket_(0)
-    {}
+    Thread(const String& name, const ThreadId& thread_id, ACE_thread_t handle);
 
+    const ThreadInfo& info() const { return info_; }
     const String& bit_key() const { return bit_key_; }
     const SystemTimePoint& timestamp() const { return timestamp_; }
     const MonotonicTimePoint& last_update() const { return last_update_; }
@@ -66,6 +75,7 @@ public:
     static const size_t bucket_count = 8;
 
   private:
+    const ThreadInfo info_;
     const String bit_key_;
     SystemTimePoint timestamp_;
     MonotonicTimePoint last_update_, last_status_change_;
@@ -98,8 +108,10 @@ public:
 
   bool update_thread_status() const
   {
-    return thread_status_interval_ > TimeDuration::zero_value;
+    return thread_status_interval_ > TimeDuration::zero_value || thread_status_listener_;
   }
+
+  void set_thread_status_listener(ThreadStatusListener* listener);
 
   /// Add the calling thread to the manager.
   /// name is for a more human-friendly name that will be appended to the BIT key.
@@ -208,6 +220,7 @@ private:
   TimeDuration bucket_limit_;
   Map map_;
   List finished_;
+  ThreadStatusListener* thread_status_listener_;
 
   mutable ACE_Thread_Mutex lock_;
 };
