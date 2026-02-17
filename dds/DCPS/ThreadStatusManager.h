@@ -84,7 +84,9 @@ public:
   typedef OPENDDS_MAP(ThreadId, Thread) Map;
   typedef OPENDDS_LIST(Thread) List;
 
-  ThreadStatusManager();
+  ThreadStatusManager()
+    : enabled_(false)
+  {}
 
   void thread_status_interval(const TimeDuration& thread_status_interval);
   const TimeDuration& thread_status_interval() const;
@@ -172,7 +174,7 @@ public:
 
 private:
   static ThreadId get_thread_id();
-  size_t get_container();
+  size_t get_container(ThreadId tid);
   void add_thread(const String& name);
 
   void update_i(Thread::ThreadStatus status, bool finished = false,
@@ -206,11 +208,13 @@ private:
   static const size_t NUM_CONTAINERS = 11;
 
   struct ThreadContainer {
-    ThreadContainer()
-      : outer_(0)
-    {}
+    ThreadContainer() {}
 
-    const ThreadStatusManager* outer_;
+    // Store copies of these from the parent to avoid needing to access it.
+    TimeDuration thread_status_interval_;
+    TimeDuration bucket_limit_;
+    bool enabled_;
+
     Map map_;
     List finished_;
     mutable ACE_Thread_Mutex mutex_;
