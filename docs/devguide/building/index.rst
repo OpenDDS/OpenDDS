@@ -538,7 +538,9 @@ Building OpenDDS Using CMake
 
 .. versionadded:: 3.26
 
-OpenDDS can be built with CMake 3.23 or later.
+OpenDDS can be built with CMake 3.14 or later if :ref:`cmake-building-ace-tao` is prebuilt.
+It's recommended to use a newer CMake if possible though.
+Building ACE/TAO at the same time requires CMake 3.20.
 
 Configuring and Building
 ========================
@@ -579,7 +581,9 @@ ACE/TAO
 
 A prebuilt ACE/TAO can be passed using :cmake:var:`OPENDDS_ACE`.
 In that case :ref:`cmake-feature-vars` will be automatically derived from ACE's ``default.features`` file.
+
 If :cmake:var:`OPENDDS_ACE` is not passed, then ACE/TAO will be built.
+This requires CMake 3.20 or later.
 When building ACE/TAO a release is downloaded by default, but source can also be provided using :cmake:var:`OPENDDS_ACE_TAO_SRC` or cloned using :cmake:var:`OPENDDS_ACE_TAO_GIT`.
 :cmake:var:`OPENDDS_ACE_TAO_KIND` controls what version of ACE/TAO is downloaded for both releases and :cmake:var:`OPENDDS_ACE_TAO_GIT`.
 
@@ -711,6 +715,7 @@ Speeding up the Build
 ---------------------
 
 A major speed up supported by all the CMake generators are `unity builds <https://cmake.org/cmake/help/latest/prop_tgt/UNITY_BUILD.html>`__.
+For OpenDDS this requires CMake 3.20 and later.
 This makes it so that multiple C++ source files are compiled at the same time by a compiler process.
 This can be enabled by passing ``-DCMAKE_UNITY_BUILD=TRUE`` to the CMake configure command as shown in the example.
 If there are problems with building, e.g. redefinition errors, then pass ``-DCMAKE_UNITY_BUILD=FALSE`` to override the cache variable in an existing build directory and disable unity builds.

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23...4.0)
+cmake_minimum_required(VERSION 3.14...4.0)
 project(opendds_security CXX)
 
 set(deps OpenDDS::Rtps ACE::XML_Utils)
@@ -28,8 +28,8 @@ add_library(OpenDDS_Security
   TokenWriter.cpp
   UtilityImpl.cpp
 )
-target_sources(OpenDDS_Security
-  PUBLIC FILE_SET HEADERS BASE_DIRS "${OPENDDS_SOURCE_DIR}" FILES
+_opendds_headers(OpenDDS_Security
+  PUBLIC
     AccessControl/DomainIdSet.h
     AccessControl/Governance.h
     AccessControl/LocalAccessCredentialData.h
