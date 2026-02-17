@@ -1,6 +1,7 @@
 #include <dds/DCPS/InternalDataReader.h>
 
 #include <dds/DCPS/Qos_Helper.h>
+#include <dds/DCPS/ServiceEventDispatcher.h>
 
 #include <gtestWrapper.h>
 
@@ -57,9 +58,30 @@ namespace {
   public:
     Listener(JobQueue_rch job_queue)
       : InternalDataReaderListener<Sample>(job_queue)
+      , cv_(mutex_)
+      , count_(0)
     {}
 
-    MOCK_METHOD1(on_data_available, void(RcHandle<ReaderType>));
+    void on_data_available(RcHandle<ReaderType>)
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+      ++count_;
+      cv_.notify_all();
+    }
+
+    void wait_for_count(size_t target_count)
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+      while (count_ < target_count) {
+        cv_.wait(tsm_);
+      }
+    }
+
+  private:
+    OpenDDS::DCPS::ThreadStatusManager tsm_;
+    ACE_Thread_Mutex mutex_;
+    OpenDDS::DCPS::ConditionVariable<ACE_Thread_Mutex> cv_;
+    size_t count_;
   };
 }
 
@@ -203,7 +225,8 @@ TEST(dds_DCPS_InternalDataReader, listener)
 {
   Sample sample("key");
 
-  JobQueue_rch job_queue = make_rch<JobQueue>(ACE_Reactor::instance());
+  OpenDDS::DCPS::EventDispatcher_rch event_dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(1);
+  JobQueue_rch job_queue = make_rch<JobQueue>(event_dispatcher);
   RcHandle<Listener> listener = make_rch<Listener>(job_queue);
   RcHandle<InternalEntity> writer = make_rch<InternalEntity>();
   RcHandle<ReaderType> reader = make_rch<ReaderType>(DataReaderQosBuilder().reliability_reliable(),
@@ -211,13 +234,9 @@ TEST(dds_DCPS_InternalDataReader, listener)
 
   EXPECT_EQ(reader->get_listener(), listener);
 
-  // This increases the reference count on reader which prevents the destruction and check of the listener.
-  EXPECT_CALL(*listener.get(), on_data_available(reader));
-
   reader->write(writer, sample, time1);
 
-  ACE_Time_Value tv(1,0);
-  ACE_Reactor::run_event_loop(tv);
+  listener->wait_for_count(1);
 
   reader->set_listener(RcHandle<Listener>());
 }

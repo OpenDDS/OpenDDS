@@ -385,12 +385,14 @@ DomainParticipantImpl::delete_subscriber(
 DDS::Subscriber_ptr
 DomainParticipantImpl::get_builtin_subscriber()
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, subscribers_protector_, DDS::Subscriber_ptr());
   return bit_subscriber_->get();
 }
 
 RcHandle<BitSubscriber>
 DomainParticipantImpl::get_builtin_subscriber_proxy()
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, subscribers_protector_, RcHandle<BitSubscriber>());
   return bit_subscriber_;
 }
 
@@ -1081,7 +1083,10 @@ DomainParticipantImpl::delete_contained_entities()
     handler->wait();
   }
 
-  bit_subscriber_.reset();
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, subscribers_protector_, RcHandle<BitSubscriber>());
+    bit_subscriber_.reset();
+  }
 
   Registered_Data_Types->unregister_participant(this);
 
