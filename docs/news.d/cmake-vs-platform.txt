@@ -1,0 +1,10 @@
+.. news-prs: 5157
+
+.. news-start-section: Platform Support and Dependencies
+
+.. news-start-section: CMake
+- Replace CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE with CMAKE_VS_PLATFORM_NAME to fit cross-compile scenario on Windows.
+
+.. news-end-section
+
+.. news-end-section
