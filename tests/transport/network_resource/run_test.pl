@@ -13,7 +13,7 @@ my $status = 0;
 my $test = new PerlDDS::TestFramework();
 $test->process("nr", "NetworkResource", "");
 $test->start_process("nr");
-my $retcode = $test->finish(20);
+my $retcode = $test->finish(30);
 if ($retcode != 0) {
   $status = 1;
 }

@@ -27,11 +27,20 @@ FragKey::FragKey(const GUID_t& pubId,
 GUID_tKeyLessThan FragKey::compare_;
 
 TransportReassembly::FragSample::FragSample(const FragmentRange& fragRange,
-                                          const ReceivedDataSample& data)
+                                            const ReceivedDataSample& data)
   : frag_range_(fragRange)
   , rec_ds_(data)
 {
 }
+
+#ifdef ACE_HAS_CPP11
+TransportReassembly::FragSample::FragSample(const FragmentRange& fragRange,
+                                            ReceivedDataSample&& data)
+  : frag_range_(fragRange)
+  , rec_ds_(std::move(data))
+{
+}
+#endif
 
 TransportReassembly::TransportReassembly(const TimeDuration& timeout)
   : timeout_(timeout)
@@ -375,6 +384,13 @@ namespace {
   }
 }
 
+#ifdef ACE_HAS_CPP11
+#define OPENDDS_MAYBE_MOVE std::move
+#else
+#define OPENDDS_MAYBE_MOVE
+#endif
+
+
 bool
 TransportReassembly::FragInfo::insert(const FragmentRange& fragRange, ReceivedDataSample& data)
 {
@@ -403,7 +419,7 @@ TransportReassembly::FragInfo::insert(const FragmentRange& fragRange, ReceivedDa
     FragSample& fr = *it;
     if (next < fr.frag_range_.first) {
       // insert before 'it'
-      sample_finder_[fragRange.second] = sample_list_.insert(it, FragSample(fragRange, data));
+      sample_finder_[fragRange.second] = sample_list_.insert(it, FragSample(fragRange, OPENDDS_MAYBE_MOVE(data)));
       data.clear();
       VDBG((LM_DEBUG, "(%P|%t) TransportReassembly::insert: (SN: %q) inserted %q-%q on the left of %q-%q\n", sn, fragRange.first, fragRange.second, fr.frag_range_.first, fr.frag_range_.second));
       return true;
@@ -464,7 +480,7 @@ TransportReassembly::FragInfo::insert(const FragmentRange& fragRange, ReceivedDa
       VDBG((LM_DEBUG, "(%P|%t) TransportReassembly::insert: (SN: %q) combined %q-%q with %q-%q on the right, removing and recursingly inserting\n", sn, fragRange.first, fragRange.second, fr.frag_range_.first, fr.frag_range_.second));
 
       FragmentRange range(fr.frag_range_.first, fragRange.second);
-      ReceivedDataSample copy(fr.rec_ds_);
+      ReceivedDataSample copy(OPENDDS_MAYBE_MOVE(fr.rec_ds_));
 
       sample_list_.erase(it);
       sample_finder_.erase(fit);
@@ -479,7 +495,7 @@ TransportReassembly::FragInfo::insert(const FragmentRange& fragRange, ReceivedDa
   }
 
   // add to end of list
-  sample_finder_[fragRange.second] = sample_list_.insert(sample_list_.end(), FragSample(fragRange, data));
+  sample_finder_[fragRange.second] = sample_list_.insert(sample_list_.end(), FragSample(fragRange, OPENDDS_MAYBE_MOVE(data)));
   VDBG((LM_DEBUG, "(%P|%t) TransportReassembly::insert: (SN: %q) inserting %q-%q at the end of the fragment buffer list\n", sn, fragRange.first, fragRange.second));
   data.clear();
   return true;

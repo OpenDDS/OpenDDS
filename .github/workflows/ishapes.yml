@@ -8,7 +8,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  VCPKG_GIT_COMMIT: dd3097e305afa53f7b4312371f62058d2e665320
+  VCPKG_GIT_COMMIT: 74e6536215718009aae747d86d84b78376bf9e09
 
 jobs:
 
@@ -20,18 +20,18 @@ jobs:
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout OpenDDS
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         repository: DOCGroup/ACE_TAO
         ref: Latest_Micro
         path: OpenDDS/ACE_TAO
     - name: checkout MPC
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         repository: DOCGroup/MPC
         path: OpenDDS/ACE_TAO/ACE/MPC
@@ -47,7 +47,7 @@ jobs:
         cd OpenDDS
         make -j4 ishapes
     - name: upload ishapes artifact
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ github.job }}_artifact
         path: OpenDDS/examples/DCPS/ishapes/ishapes
@@ -56,12 +56,12 @@ jobs:
     runs-on: windows-2022
     steps:
     - name: checkout OpenDDS
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         repository: DOCGroup/ACE_TAO
         ref: Latest_Micro
@@ -80,7 +80,7 @@ jobs:
         vcpkgGitCommitId: '${{ env.VCPKG_GIT_COMMIT }}'
         runVcpkgInstall: true
     - name: checkout MPC
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         repository: DOCGroup/MPC
         path: OpenDDS/ACE_TAO/ACE/MPC
@@ -103,7 +103,7 @@ jobs:
         call setenv.cmd
         msbuild -p:Configuration=Release,Platform=x64 -m -t:ishapes DDS_TAOv2_all.sln
     - name: upload ishapes artifact
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ github.job }}_artifact
         path: OpenDDS/examples/DCPS/ishapes/Static_Release/ishapes.exe

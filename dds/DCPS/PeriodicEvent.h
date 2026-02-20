@@ -44,8 +44,11 @@ public:
    * @param period the time period used to schedule / reschedule the base event
    * @param immediate_dispatch set to true to immediately dispatch base event
    * @param strict_timing set to true to strictly calculate scheduled dispatch times
+   * @return true if the initial dispatch or schedule succeeds
    */
-  void enable(const TimeDuration& period, bool immediate_dispatch = true, bool strict_timing = true);
+  bool enable(const TimeDuration& period, bool immediate_dispatch = true, bool strict_timing = true);
+
+  void shorten_current_wait(const TimeDuration& period);
 
   /**
    * Disable the PeriodicEvent, canceling the scheduled base event if enabled.
@@ -57,6 +60,12 @@ public:
    * @return true if the PeriodicEvent is currently enabled
    */
   bool enabled() const;
+
+  /**
+   * Get a handle to the internal (non-periodic) event (useful for manual off-period scheduling)
+   * @return A handle to the internal event
+   */
+  RcHandle<EventBase> event() const;
 
   /**
    * For use by EventDispatcher
@@ -71,6 +80,11 @@ public:
 private:
 
   void handle_event_scheduling();
+
+  bool enabled_i() const
+  {
+    return !period_.is_zero();
+  }
 
   mutable ACE_Thread_Mutex mutex_;
   mutable ACE_Thread_Mutex event_mutex_;
