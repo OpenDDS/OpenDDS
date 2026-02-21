@@ -149,6 +149,12 @@ size_t DispatchService::cancel(FunPtr fun, void* arg)
   return count;
 }
 
+size_t DispatchService::queue_size() const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  return event_queue_.size();
+}
+
 ACE_THR_FUNC_RETURN DispatchService::run(void* arg)
 {
   DispatchService& dispatcher = *static_cast<DispatchService*>(arg);

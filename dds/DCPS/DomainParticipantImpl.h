@@ -17,7 +17,7 @@
 #include "PoolAllocator.h"
 #include "Recorder.h"
 #include "Replayer.h"
-#include "SporadicTask.h"
+#include "SporadicEvent.h"
 #include "TimeTypes.h"
 #include "TopicImpl.h"
 
@@ -616,8 +616,8 @@ private:
     }
   };
   RcHandle<AutomaticLivelinessTimer> automatic_liveliness_timer_;
-  typedef PmfSporadicTask<AutomaticLivelinessTimer> AutomaticLivelinessTask;
-  RcHandle<AutomaticLivelinessTask> automatic_liveliness_task_;
+  typedef PmfNowEvent<AutomaticLivelinessTimer> AutomaticLivelinessTimerEvent;
+  SporadicEvent_rch automatic_liveliness_task_;
 
   class ParticipantLivelinessTimer : public LivelinessTimer {
   public:
@@ -636,8 +636,8 @@ private:
     }
   };
   RcHandle<ParticipantLivelinessTimer> participant_liveliness_timer_;
-  typedef PmfSporadicTask<ParticipantLivelinessTimer> ParticipantLivelinessTask;
-  RcHandle<ParticipantLivelinessTask> participant_liveliness_task_;
+  typedef PmfNowEvent<ParticipantLivelinessTimer> ParticipantLivelinessTimerEvent;
+  SporadicEvent_rch participant_liveliness_task_;
 
   TimeDuration liveliness_check_interval(DDS::LivelinessQosPolicyKind kind);
   bool participant_liveliness_activity_after(const MonotonicTimePoint& tv);

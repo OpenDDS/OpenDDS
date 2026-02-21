@@ -1299,11 +1299,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   return CommonUtilities::increment_handle(next_handle_);
 }
 
-AccessControlBuiltInImpl::RevokePermissionsTask_rch&
-AccessControlBuiltInImpl::make_task(RevokePermissionsTask_rch& task)
+AccessControlBuiltInImpl::RevokePermissionsManager_rch&
+AccessControlBuiltInImpl::make_task(RevokePermissionsManager_rch& task)
 {
   if (!task) {
-    task = DCPS::make_rch<RevokePermissionsTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), DCPS::ref(*this));
+    task = DCPS::make_rch<RevokePermissionsManager>(DCPS::ref(*this));
   }
   return task;
 }
@@ -1562,18 +1562,18 @@ void AccessControlBuiltInImpl::parse_class_id(
 
 }
 
-AccessControlBuiltInImpl::RevokePermissionsTask::RevokePermissionsTask(const DCPS::TimeSource& time_source,
-                                                                       DCPS::ReactorTask_rch reactor_task,
-                                                                       AccessControlBuiltInImpl& impl)
-  : SporadicTask(time_source, reactor_task)
-  , impl_(impl)
-{ }
+AccessControlBuiltInImpl::RevokePermissionsManager::RevokePermissionsManager(AccessControlBuiltInImpl& impl)
+  : impl_(impl)
+{
+  DCPS::EventBase_rch base = DCPS::make_rch<RevokePermissionsManagerEvent>(rchandle_from(this), &AccessControlBuiltInImpl::RevokePermissionsManager::process);
+  revokation_event_ = DCPS::make_rch<DCPS::SporadicEvent>(TheServiceParticipant->event_dispatcher(), base);
+}
 
-AccessControlBuiltInImpl::RevokePermissionsTask::~RevokePermissionsTask()
+AccessControlBuiltInImpl::RevokePermissionsManager::~RevokePermissionsManager()
 {
   if (DCPS::security_debug.bookkeeping) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
-               ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsTask::~RevokePermissionsTask %@ handle_to_expiration_ %B expiration_to_handle_ %B\n"),
+               ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsManager::~RevokePermissionsManager %@ handle_to_expiration_ %B expiration_to_handle_ %B\n"),
                this,
                handle_to_expiration_.size(),
                expiration_to_handle_.size()));
@@ -1588,7 +1588,7 @@ namespace {
 }
 
 void
-AccessControlBuiltInImpl::RevokePermissionsTask::insert(::DDS::Security::PermissionsHandle pm_handle,
+AccessControlBuiltInImpl::RevokePermissionsManager::insert(::DDS::Security::PermissionsHandle pm_handle,
                                                         const time_t& expiration)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
@@ -1608,7 +1608,7 @@ AccessControlBuiltInImpl::RevokePermissionsTask::insert(::DDS::Security::Permiss
 
   if (DCPS::security_debug.bookkeeping) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
-               ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsTask::insert handle_to_expiration_ (total %B)\n"),
+               ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsManager::insert handle_to_expiration_ (total %B)\n"),
                handle_to_expiration_.size()));
   }
 
@@ -1617,21 +1617,21 @@ AccessControlBuiltInImpl::RevokePermissionsTask::insert(::DDS::Security::Permiss
 
   if (DCPS::security_debug.bookkeeping) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
-               ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsTask::insert expiration_to_handle_ (total %B)\n"),
+               ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsManager::insert expiration_to_handle_ (total %B)\n"),
                expiration_to_handle_.size()));
   }
 
   if (!empty_before && pos == expiration_to_handle_.begin()) {
-    cancel();
+    revokation_event_->cancel();
   }
 
   if (pos == expiration_to_handle_.begin()) {
-    schedule(duration);
+    revokation_event_->schedule(duration);
   }
 }
 
 void
-AccessControlBuiltInImpl::RevokePermissionsTask::erase(::DDS::Security::PermissionsHandle pm_handle)
+AccessControlBuiltInImpl::RevokePermissionsManager::erase(::DDS::Security::PermissionsHandle pm_handle)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
@@ -1649,7 +1649,7 @@ AccessControlBuiltInImpl::RevokePermissionsTask::erase(::DDS::Security::Permissi
       expiration_to_handle_.erase(er.first++);
       if (DCPS::security_debug.bookkeeping) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
-                   ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsTask::erase expiration_to_handle_ (total %B)\n"),
+                   ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsManager::erase expiration_to_handle_ (total %B)\n"),
                    expiration_to_handle_.size()));
       }
     } else {
@@ -1660,13 +1660,13 @@ AccessControlBuiltInImpl::RevokePermissionsTask::erase(::DDS::Security::Permissi
   handle_to_expiration_.erase(pm_handle);
   if (DCPS::security_debug.bookkeeping) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
-               ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsTask::execute handle_to_expiration_ (total %B)\n"),
+               ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsManager::process handle_to_expiration_ (total %B)\n"),
                handle_to_expiration_.size()));
   }
 }
 
 void
-AccessControlBuiltInImpl::RevokePermissionsTask::execute(const DCPS::MonotonicTimePoint& /*now*/)
+AccessControlBuiltInImpl::RevokePermissionsManager::process()
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
@@ -1679,45 +1679,45 @@ AccessControlBuiltInImpl::RevokePermissionsTask::execute(const DCPS::MonotonicTi
     const ::DDS::Security::PermissionsHandle pm_handle = pos->second;
     ACPermsMap::iterator iter = impl_.local_ac_perms_.find(pm_handle);
     if (iter == impl_.local_ac_perms_.end()) {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::execute: ")
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::process: ")
                  ACE_TEXT("pm_handle %d not found!\n"), pm_handle));
     }
     impl_.local_ac_perms_.erase(iter);
     if (DCPS::security_debug.bookkeeping) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
-                 ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsTask::execute local_ac_perms_ (total %B)\n"),
+                 ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsManager::process local_ac_perms_ (total %B)\n"),
                  impl_.local_ac_perms_.size()));
     }
 
     // If a listener exists, call on_revoke_permissions
     if (impl_.listener_ptr_ && !impl_.listener_ptr_->on_revoke_permissions(&impl_, pm_handle)) {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::execute: ")
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::process: ")
                  ACE_TEXT("on_revoke_permissions failed for pm_handle %d!\n"), pm_handle));
     }
 
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::execute: Completed...\n")));
+                 ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::Revoke_Permissions_Timer::process: Completed...\n")));
     }
 
     handle_to_expiration_.erase(pm_handle);
     if (DCPS::security_debug.bookkeeping) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
-                 ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsTask::execute handle_to_expiration_ (total %B)\n"),
+                 ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsManager::process handle_to_expiration_ (total %B)\n"),
                  handle_to_expiration_.size()));
     }
 
     expiration_to_handle_.erase(pos++);
     if (DCPS::security_debug.bookkeeping) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
-                 ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsTask::execute expiration_to_handle_ (total %B)\n"),
+                 ACE_TEXT("AccessControlBuiltInImpl::RevokePermissionsManager::process expiration_to_handle_ (total %B)\n"),
                  expiration_to_handle_.size()));
     }
   }
 
   if (!expiration_to_handle_.empty()) {
     const TimeDuration duration = std::min(TimeDuration(expiration_to_handle_.begin()->first - cur_utc_time), MAX_DURATION);
-    schedule(duration);
+    revokation_event_->schedule(duration);
   }
 }
 
