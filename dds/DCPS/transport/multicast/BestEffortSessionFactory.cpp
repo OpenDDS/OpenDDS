@@ -21,6 +21,7 @@ BestEffortSessionFactory::requires_send_buffer() const
 
 MulticastSession_rch
 BestEffortSessionFactory::create(RcHandle<EventDispatcher> event_dispatcher,
+                                 ACE_Reactor*,
                                  MulticastDataLink* link,
                                  MulticastPeer remote_peer)
 {

@@ -27,6 +27,7 @@ public:
   virtual int requires_send_buffer() const;
 
   virtual MulticastSession_rch create(RcHandle<EventDispatcher> event_dispatcher,
+                                      ACE_Reactor* reactor,
                                       MulticastDataLink* link,
                                       MulticastPeer remote_peer);
 };

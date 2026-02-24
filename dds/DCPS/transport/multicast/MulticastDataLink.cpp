@@ -178,7 +178,7 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
   MulticastSession_rch session;
   MulticastTransport_rch mt = transport();
   if (mt) {
-    session = session_factory_->create(mt->event_dispatcher(), this, remote_peer);
+    session = session_factory_->create(mt->event_dispatcher(), mt->reactor_task()->get_reactor(), this, remote_peer);
     if (session.is_nil()) {
       ACE_ERROR_RETURN((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: ")
