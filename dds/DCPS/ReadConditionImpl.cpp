@@ -16,8 +16,9 @@ namespace DCPS {
 
 CORBA::Boolean ReadConditionImpl::get_trigger_value()
 {
-  return parent_->contains_sample(sample_states_,
-                                  view_states_, instance_states_);
+  RcHandle<DataReaderImpl> parent = parent_.lock();
+  return parent ? parent->contains_sample(sample_states_,
+                                          view_states_, instance_states_) : false;
 }
 
 DDS::SampleStateMask ReadConditionImpl::get_sample_state_mask()
@@ -37,7 +38,8 @@ DDS::InstanceStateMask ReadConditionImpl::get_instance_state_mask()
 
 DDS::DataReader_ptr ReadConditionImpl::get_datareader()
 {
-  return DDS::DataReader::_duplicate(parent_);
+  RcHandle<DataReaderImpl> parent = parent_.lock();
+  return parent ? DDS::DataReader::_duplicate(parent.get()) : 0;
 }
 
 } // namespace DCPS

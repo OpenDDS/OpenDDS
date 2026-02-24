@@ -11,7 +11,7 @@
 #include "Definitions.h"
 #include "GuidUtils.h"
 #include "PoolAllocator.h"
-#include "SporadicTask.h"
+#include "SporadicEvent.h"
 #include "TimeTypes.h"
 #include "dcps_export.h"
 
@@ -229,9 +229,9 @@ private:
   /// the owner is updated.
   bool registered_;
 
-  RcHandle<SporadicTask> release_task_;
+  SporadicEvent_rch release_task_;
 
-  void do_release(const MonotonicTimePoint& now);
+  void do_release();
 };
 
 } // namespace DCPS

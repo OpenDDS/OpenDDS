@@ -77,7 +77,12 @@ TestBase::fini()
 {
   fini_i();  // delegate to child
 
-  this->participant_->delete_contained_entities();
+  const DDS::ReturnCode_t rc = this->participant_->delete_contained_entities();
+  if (rc != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("ERROR: %N:%l: TestBase::fini() -")
+               ACE_TEXT(" delete_contained_entities failed with %C!\n"), OpenDDS::DCPS::retcode_to_string(rc)));
+  }
 
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
   dpf->delete_participant(this->participant_);
