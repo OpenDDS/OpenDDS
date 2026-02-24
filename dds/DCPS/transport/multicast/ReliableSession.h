@@ -28,6 +28,7 @@ class OpenDDS_Multicast_Export ReliableSession
   : public MulticastSession {
 public:
   ReliableSession(RcHandle<EventDispatcher> event_dispatcher,
+                  ACE_Reactor* reactor,
                   MulticastDataLink* link,
                   MulticastPeer remote_peer);
 

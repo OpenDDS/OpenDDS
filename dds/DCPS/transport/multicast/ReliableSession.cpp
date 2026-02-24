@@ -32,12 +32,14 @@ namespace {
 }
 
 ReliableSession::ReliableSession(RcHandle<EventDispatcher> event_dispatcher,
+                                 ACE_Reactor* reactor,
                                  MulticastDataLink* link,
                                  MulticastPeer remote_peer)
   : MulticastSession(event_dispatcher, link, remote_peer)
   , nak_watchdog_(make_rch<SporadicEvent>(event_dispatcher,
-                                          make_rch<ReliableSessionEvent>(rchandle_from(this),
-                                                                         &ReliableSession::process_naks)))
+                                          make_rch<ReactorEvent>(reactor,
+                                                                 make_rch<ReliableSessionEvent>(rchandle_from(this),
+                                                                                                &ReliableSession::process_naks))))
   , nak_timeout_(link->config()->nak_timeout())
   , nak_delay_intervals_(link->config()->nak_delay_intervals())
   , nak_max_(link->config()->nak_max())
