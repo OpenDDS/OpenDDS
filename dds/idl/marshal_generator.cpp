@@ -738,7 +738,7 @@ namespace {
             "  if (length > " << bound << ") {\n"
             "    new_length = " << bound << ";\n"
             "  }\n"
-            "  resize_seq_no_init(" << wrapper.value_access() << ", new_length);\n";
+            "  resize_bounded_seq_no_init(" << wrapper.value_access() << ", new_length);\n";
           if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
             be_global->impl_ <<
             "  for (CORBA::ULong i = 0; i < new_length; ++i) {\n"
@@ -760,7 +760,7 @@ namespace {
             "  }\n";
         } else {
           be_global->impl_ <<
-            "  resize_seq_no_init(" << wrapper.value_access() << ", new_length);\n";
+            "  resize_unbounded_seq_no_init(" << wrapper.value_access() << ", new_length);\n";
           if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
             be_global->impl_ <<
               "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
