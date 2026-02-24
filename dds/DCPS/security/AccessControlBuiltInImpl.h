@@ -258,10 +258,10 @@ private:
   typedef std::map<DDS::Security::IdentityHandle, DDS::Security::PermissionsHandle> ACIdentityMap;
   ACIdentityMap local_identity_map_;
 
-  class RevokePermissionsManager : public DCPS::RcObject {
+  class RevokePermissions : public DCPS::RcObject {
   public:
-    RevokePermissionsManager(AccessControlBuiltInImpl& impl);
-    virtual ~RevokePermissionsManager();
+    explicit RevokePermissions(AccessControlBuiltInImpl& impl);
+    virtual ~RevokePermissions();
 
     void insert(DDS::Security::PermissionsHandle pm_handle, const time_t& expiration);
     void erase(DDS::Security::PermissionsHandle pm_handle);
@@ -279,11 +279,11 @@ private:
     HandleToExpiration handle_to_expiration_;
     ExpirationToHandle expiration_to_handle_;
   };
-  typedef DCPS::PmfEvent<RevokePermissionsManager> RevokePermissionsManagerEvent;
-  typedef DCPS::RcHandle<RevokePermissionsManager> RevokePermissionsManager_rch;
+  typedef DCPS::PmfEvent<RevokePermissions> RevokePermissionsEvent;
+  typedef DCPS::RcHandle<RevokePermissions> RevokePermissions_rch;
 
-  RevokePermissionsManager_rch local_rp_task_;
-  RevokePermissionsManager_rch remote_rp_task_;
+  RevokePermissions_rch local_rp_task_;
+  RevokePermissions_rch remote_rp_task_;
 
   int generate_handle();
 
@@ -294,7 +294,7 @@ private:
 
   DDS::Security::AccessControlListener_ptr listener_ptr_;
 
-  RevokePermissionsManager_rch& make_task(RevokePermissionsManager_rch& task);
+  RevokePermissions_rch& make_task(RevokePermissions_rch& task);
 
   static time_t utc_now();
 

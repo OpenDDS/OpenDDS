@@ -1650,14 +1650,14 @@ namespace {
 
 class SignalAll: public EventBase {
 public:
-  SignalAll(const DDS::ReadCondition_var& rc) : rc_(rc) {}
+  explicit SignalAll(const DDS::ReadCondition_var& rc) : rc_(rc) {}
   void handle_event() {
     ConditionImpl* ci = dynamic_cast<ConditionImpl*>(rc_.in());
     if (ci) {
       ci->signal_all();
     } else {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: SignalAll::handle_event: ")
+        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl.cpp SignalAll::handle_event: ")
         ACE_TEXT("Failed to obtain ConditionImpl - can't notify.\n")));
     }
   }

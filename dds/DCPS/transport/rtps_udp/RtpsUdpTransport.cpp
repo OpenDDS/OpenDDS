@@ -1142,7 +1142,6 @@ RtpsUdpTransport::process_relay_sra_i(ICE::ServerReflexiveStateMachine::StateCha
   if (!deferred_connection_records_.empty()) {
     job_queue_->enqueue(DCPS::make_rch<WriteConnectionRecords>(bit_sub_, deferred_connection_records_));
     deferred_connection_records_.clear();
-    guard.release();
   }
 
 #else

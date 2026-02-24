@@ -18,7 +18,7 @@ CORBA::Boolean ReadConditionImpl::get_trigger_value()
 {
   RcHandle<DataReaderImpl> parent = parent_.lock();
   return parent ? parent->contains_sample(sample_states_,
-                                  view_states_, instance_states_) : false;
+                                          view_states_, instance_states_) : false;
 }
 
 DDS::SampleStateMask ReadConditionImpl::get_sample_state_mask()

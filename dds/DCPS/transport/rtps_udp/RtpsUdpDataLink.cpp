@@ -110,8 +110,6 @@ RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
   receive_strategy_ = make_rch<RtpsUdpReceiveStrategy>(this, local_prefix, ref(TheServiceParticipant->get_thread_status_manager()));
   assign(local_prefix_, local_prefix);
 
-
-
   this->job_queue(job_queue_);
 }
 
