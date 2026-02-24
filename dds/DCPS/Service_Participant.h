@@ -12,6 +12,7 @@
 #include "Discovery.h"
 #include "DomainParticipantFactoryImpl.h"
 #include "JobQueue.h"
+#include "EventDispatcher.h"
 #include "MonitorFactory.h"
 #include "NetworkConfigModifier.h"
 #include "NetworkConfigMonitor.h"
@@ -229,6 +230,8 @@ public:
   ReactorTask_rch reactor_task();
 
   JobQueue_rch job_queue() const;
+
+  EventDispatcher_rch event_dispatcher() const;
 
   void set_shutdown_listener(RcHandle<ShutdownListener> listener);
 
@@ -664,6 +667,7 @@ private:
   ACE_ARGV ORB_argv_;
 #endif
 
+  EventDispatcher_rch event_dispatcher_;
   const TimeSource time_source_;
   ReactorTask reactor_task_;
   JobQueue_rch job_queue_;

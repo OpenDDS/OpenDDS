@@ -11,7 +11,7 @@
 #include "GuidUtils.h"
 #include "Marked_Default_Qos.h"
 #include "PoolAllocator.h"
-#include "SporadicTask.h"
+#include "SporadicEvent.h"
 #include "TopicDetails.h"
 #include "WaitSet.h"
 #include "dcps_export.h"
@@ -361,7 +361,7 @@ public:
   SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-  void type_lookup_init(ReactorTask_rch reactor_task);
+  void type_lookup_init();
   void type_lookup_fini();
   void type_lookup_service(const XTypes::TypeLookupService_rch type_lookup_service);
 
@@ -459,8 +459,8 @@ private:
 #endif
 
   XTypes::TypeLookupService_rch type_lookup_service_;
-  typedef PmfSporadicTask<StaticEndpointManager> StaticEndpointManagerSporadic;
-  RcHandle<StaticEndpointManagerSporadic> type_lookup_reply_deadline_processor_;
+  typedef PmfNowEvent<StaticEndpointManager> StaticEndpointManagerEvent;
+  SporadicEvent_rch type_lookup_reply_deadline_processor_;
   TimeDuration max_type_lookup_service_reply_period_;
   SequenceNumber type_lookup_service_sequence_number_;
 

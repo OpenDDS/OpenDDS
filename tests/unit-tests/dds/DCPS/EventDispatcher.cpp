@@ -95,6 +95,7 @@ struct TestEventDispatcher : public OpenDDS::DCPS::EventDispatcher {
   bool dispatch(OpenDDS::DCPS::EventBase_rch) { return false; }
   long schedule(OpenDDS::DCPS::EventBase_rch, const OpenDDS::DCPS::MonotonicTimePoint&) { return -1; }
   size_t cancel(long) { return 0; }
+  size_t queue_size() const { return 0; }
 };
 
 } // (anonymous) namespace

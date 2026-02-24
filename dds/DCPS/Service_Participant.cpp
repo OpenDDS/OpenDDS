@@ -17,6 +17,7 @@
 #include "Qos_Helper.h"
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
+#include "ServiceEventDispatcher.h"
 #include "StaticDiscovery.h"
 #include "ThreadStatusManager.h"
 #include "WaitSet.h"
@@ -255,6 +256,12 @@ Service_Participant::job_queue() const
   return job_queue_;
 }
 
+EventDispatcher_rch
+Service_Participant::event_dispatcher() const
+{
+  return event_dispatcher_;
+}
+
 DDS::ReturnCode_t Service_Participant::shutdown()
 {
   if (DCPS_debug_level >= 1) {
@@ -313,6 +320,10 @@ DDS::ReturnCode_t Service_Participant::shutdown()
 
       domain_ranges_.clear();
 
+      if (event_dispatcher_) {
+        event_dispatcher_->shutdown(true);
+        event_dispatcher_.reset();
+      }
       reactor_task_.stop();
 
       discoveryMap_.clear();
@@ -444,6 +455,8 @@ Service_Participant::get_domain_participant_factory(int &argc,
       this->initializeScheduling();
 
       dp_factory_servant_ = make_rch<DomainParticipantFactoryImpl>();
+
+      event_dispatcher_ = make_rch<ServiceEventDispatcher>(1u);
 
       reactor_task_.open_reactor_task(&thread_status_manager_, "Service_Participant");
       job_queue_ = make_rch<JobQueue>(reactor_task_.get_reactor());
