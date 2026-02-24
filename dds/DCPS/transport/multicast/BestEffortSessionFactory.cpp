@@ -20,11 +20,11 @@ BestEffortSessionFactory::requires_send_buffer() const
 }
 
 MulticastSession_rch
-BestEffortSessionFactory::create(RcHandle<ReactorTask> reactor_task,
+BestEffortSessionFactory::create(RcHandle<EventDispatcher> event_dispatcher,
                                  MulticastDataLink* link,
                                  MulticastPeer remote_peer)
 {
-  return make_rch<BestEffortSession>(reactor_task, link, remote_peer);
+  return make_rch<BestEffortSession>(event_dispatcher, link, remote_peer);
 }
 
 } // namespace DCPS
