@@ -27,7 +27,7 @@ namespace DCPS {
 class OpenDDS_Multicast_Export ReliableSession
   : public MulticastSession {
 public:
-  ReliableSession(RcHandle<ReactorTask> reactor_task,
+  ReliableSession(RcHandle<EventDispatcher> event_dispatcher,
                   MulticastDataLink* link,
                   MulticastPeer remote_peer);
 

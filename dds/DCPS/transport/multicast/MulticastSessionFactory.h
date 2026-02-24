@@ -36,7 +36,7 @@ public:
 
   virtual int requires_send_buffer() const = 0;
 
-  virtual MulticastSession_rch create(RcHandle<ReactorTask> reactor_task,
+  virtual MulticastSession_rch create(RcHandle<EventDispatcher> event_dispatcher,
                                       MulticastDataLink* link,
                                       MulticastPeer remote_peer) = 0;
 };

@@ -28,7 +28,7 @@ namespace {
   const Encoding::Kind encoding_kind = Encoding::KIND_UNALIGNED_CDR;
 }
 
-MulticastSession::MulticastSession(RcHandle<ReactorTask>,
+MulticastSession::MulticastSession(RcHandle<EventDispatcher> event_dispatcher,
                                    MulticastDataLink* link,
                                    MulticastPeer remote_peer)
   : link_(link)
@@ -38,7 +38,7 @@ MulticastSession::MulticastSession(RcHandle<ReactorTask>,
   , active_(true)
   , reassembly_(link->config()->fragment_reassembly_timeout())
   , acked_(false)
-  , syn_watchdog_(make_rch<SporadicEvent>(TheServiceParticipant->event_dispatcher(),
+  , syn_watchdog_(make_rch<SporadicEvent>(event_dispatcher,
                                           make_rch<MulticastSessionEvent>(rchandle_from(this),
                                                                           &MulticastSession::send_all_syn)))
   , initial_syn_delay_(link->config()->syn_interval())

@@ -17,6 +17,7 @@
 #include "ace/Synch_Traits.h"
 
 #include "dds/DCPS/RcObject.h"
+#include "dds/DCPS/EventDispatcher.h"
 #include "dds/DCPS/transport/framework/TransportHeader.h"
 #include "dds/DCPS/transport/framework/TransportReassembly.h"
 #include "dds/DCPS/RcEventHandler.h"
@@ -80,7 +81,7 @@ protected:
 
   MulticastPeer remote_peer_;
 
-  MulticastSession(RcHandle<ReactorTask> reactor_task,
+  MulticastSession(RcHandle<EventDispatcher> event_dispatcher,
                    MulticastDataLink* link,
                    MulticastPeer remote_peer);
 
