@@ -31,6 +31,11 @@ namespace FaceTypes {
   class Sequence;
 }
 
+namespace SafetyProfile {
+  template <typename T, typename Bounds, typename Elts>
+  class Sequence;
+}
+
 namespace DCPS {
 
 bool OpenDDS_Dcps_Export get_init_in_optional_init_allocator();
@@ -51,6 +56,24 @@ template <typename T, typename Bounds, typename Elts>
 void resize_bounded_seq_no_init(
   OpenDDS::FaceTypes::Sequence<T, Bounds, Elts>& seq,
   typename OpenDDS::FaceTypes::Sequence<T, Bounds, Elts>::size_type new_length)
+{
+  resize_unbounded_seq_no_init(seq, new_length);
+}
+
+/// Resize unbounded safety profile sequences without zero-initializing new elements.
+template <typename T, typename Bounds, typename Elts>
+void resize_unbounded_seq_no_init(
+  OpenDDS::SafetyProfile::Sequence<T, Bounds, Elts>& seq,
+  typename OpenDDS::SafetyProfile::Sequence<T, Bounds, Elts>::size_type new_length)
+{
+  seq.length(new_length);
+}
+
+/// Resize bounded safety profile sequences without zero-initializing new elements.
+template <typename T, typename Bounds, typename Elts>
+void resize_bounded_seq_no_init(
+  OpenDDS::SafetyProfile::Sequence<T, Bounds, Elts>& seq,
+  typename OpenDDS::SafetyProfile::Sequence<T, Bounds, Elts>::size_type new_length)
 {
   resize_unbounded_seq_no_init(seq, new_length);
 }

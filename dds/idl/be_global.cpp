@@ -1086,6 +1086,5 @@ bool BE_GlobalData::no_init_before_deserialize(AST_Decl* node) const
 {
   typedef OpenDDS::NoInitBeforeDeserializeAnnotation Anno;
   const Anno* const anno = builtin_annotations_.get<Anno>();
-  std::cout << "no_init_before_deserialize" << anno->find_on(node) << std::endl;
-  return true;
+  return anno->find_on(node);
 }

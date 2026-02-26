@@ -1,0 +1,14 @@
+/no_init_before_deserializeC.cpp
+/no_init_before_deserializeC.h
+/no_init_before_deserializeC.inl
+/no_init_before_deserializeS.cpp
+/no_init_before_deserializeS.h
+/no_init_before_deserializeTypeSupport.idl
+/no_init_before_deserializeTypeSupportC.cpp
+/no_init_before_deserializeTypeSupportC.h
+/no_init_before_deserializeTypeSupportC.inl
+/no_init_before_deserializeTypeSupportImpl.cpp
+/no_init_before_deserializeTypeSupportImpl.h
+/no_init_before_deserializeTypeSupportS.cpp
+/no_init_before_deserializeTypeSupportS.h
+/no_init_before_deserialize_test_classic

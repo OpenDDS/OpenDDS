@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 
 #include <dds/DCPS/ResizeSeqNoInit.h>
+#include <dds/DCPS/SafetyProfileSequence.h>
 #include <dds/DdsDcpsCoreC.h>
 #include <FACE/Sequence.h>
 
@@ -78,28 +79,28 @@ TEST(dds_DCPS_ResizeSeqNoInit, resize_unbounded_seq_no_init_tao_sequence_to_empt
   EXPECT_EQ(seq.length(), 0u);
 }
 
-namespace {
+namespace Face {
   typedef OpenDDS::FaceTypes::Unbounded Unbounded;
   typedef OpenDDS::FaceTypes::Bounded<10> Bounded10;
 
-  class FaceOctetSeq : public OpenDDS::FaceTypes::Sequence<CORBA::Octet, Unbounded> {
+  class OctetSeq : public OpenDDS::FaceTypes::Sequence<CORBA::Octet, Unbounded> {
     typedef OpenDDS::FaceTypes::Sequence<CORBA::Octet, Unbounded> Base;
   public:
-    FaceOctetSeq() : Base() {}
-    FaceOctetSeq(const FaceOctetSeq& other) : Base(other) {}
+    OctetSeq() : Base() {}
+    OctetSeq(const OctetSeq& other) : Base(other) {}
   };
 
-  class FaceBoundedOctetSeq : public OpenDDS::FaceTypes::Sequence<CORBA::Octet, Bounded10> {
+  class BoundedOctetSeq : public OpenDDS::FaceTypes::Sequence<CORBA::Octet, Bounded10> {
     typedef OpenDDS::FaceTypes::Sequence<CORBA::Octet, Bounded10> Base;
   public:
-    FaceBoundedOctetSeq() : Base() {}
-    FaceBoundedOctetSeq(const FaceBoundedOctetSeq& other) : Base(other) {}
+    BoundedOctetSeq() : Base() {}
+    BoundedOctetSeq(const BoundedOctetSeq& other) : Base(other) {}
   };
 }
 
 TEST(dds_DCPS_ResizeSeqNoInit, resize_unbounded_seq_no_init_face_sequence_grow)
 {
-  FaceOctetSeq seq;
+  Face::OctetSeq seq;
   seq.length(3);
   seq[0] = 0xAA;
   seq[1] = 0xBB;
@@ -115,7 +116,7 @@ TEST(dds_DCPS_ResizeSeqNoInit, resize_unbounded_seq_no_init_face_sequence_grow)
 
 TEST(dds_DCPS_ResizeSeqNoInit, resize_unbounded_seq_no_init_face_sequence_shrink)
 {
-  FaceOctetSeq seq;
+  Face::OctetSeq seq;
   seq.length(5);
   seq[0] = 0x11;
   seq[1] = 0x22;
@@ -129,7 +130,7 @@ TEST(dds_DCPS_ResizeSeqNoInit, resize_unbounded_seq_no_init_face_sequence_shrink
 
 TEST(dds_DCPS_ResizeSeqNoInit, resize_bounded_seq_no_init_face_sequence_grow)
 {
-  FaceBoundedOctetSeq seq;
+  Face::BoundedOctetSeq seq;
   seq.length(3);
   seq[0] = 0xAA;
   seq[1] = 0xBB;
@@ -145,7 +146,86 @@ TEST(dds_DCPS_ResizeSeqNoInit, resize_bounded_seq_no_init_face_sequence_grow)
 
 TEST(dds_DCPS_ResizeSeqNoInit, resize_bounded_seq_no_init_face_sequence_shrink)
 {
-  FaceBoundedOctetSeq seq;
+  Face::BoundedOctetSeq seq;
+  seq.length(5);
+  seq[0] = 0x11;
+  seq[1] = 0x22;
+
+  resize_bounded_seq_no_init(seq, 2);
+
+  EXPECT_EQ(seq.length(), 2u);
+  EXPECT_EQ(seq[0], 0x11);
+  EXPECT_EQ(seq[1], 0x22);
+}
+
+namespace Sp {
+  typedef OpenDDS::SafetyProfile::Unbounded Unbounded;
+  typedef OpenDDS::SafetyProfile::Bounded<10> Bounded10;
+
+  class OctetSeq : public OpenDDS::SafetyProfile::Sequence<CORBA::Octet, Unbounded> {
+    typedef OpenDDS::SafetyProfile::Sequence<CORBA::Octet, Unbounded> Base;
+  public:
+    OctetSeq() : Base() {}
+    OctetSeq(const OctetSeq& other) : Base(other) {}
+  };
+
+  class BoundedOctetSeq : public OpenDDS::SafetyProfile::Sequence<CORBA::Octet, Bounded10> {
+    typedef OpenDDS::SafetyProfile::Sequence<CORBA::Octet, Bounded10> Base;
+  public:
+    BoundedOctetSeq() : Base() {}
+    BoundedOctetSeq(const BoundedOctetSeq& other) : Base(other) {}
+  };
+}
+
+TEST(dds_DCPS_ResizeSeqNoInit, resize_unbounded_seq_no_init_sp_sequence_grow)
+{
+  Sp::OctetSeq seq;
+  seq.length(3);
+  seq[0] = 0xAA;
+  seq[1] = 0xBB;
+  seq[2] = 0xCC;
+
+  resize_unbounded_seq_no_init(seq, 5);
+
+  EXPECT_EQ(seq.length(), 5u);
+  EXPECT_EQ(seq[0], 0xAA);
+  EXPECT_EQ(seq[1], 0xBB);
+  EXPECT_EQ(seq[2], 0xCC);
+}
+
+TEST(dds_DCPS_ResizeSeqNoInit, resize_unbounded_seq_no_init_sp_sequence_shrink)
+{
+  Sp::OctetSeq seq;
+  seq.length(5);
+  seq[0] = 0x11;
+  seq[1] = 0x22;
+
+  resize_unbounded_seq_no_init(seq, 2);
+
+  EXPECT_EQ(seq.length(), 2u);
+  EXPECT_EQ(seq[0], 0x11);
+  EXPECT_EQ(seq[1], 0x22);
+}
+
+TEST(dds_DCPS_ResizeSeqNoInit, resize_bounded_seq_no_init_sp_sequence_grow)
+{
+  Sp::BoundedOctetSeq seq;
+  seq.length(3);
+  seq[0] = 0xAA;
+  seq[1] = 0xBB;
+  seq[2] = 0xCC;
+
+  resize_bounded_seq_no_init(seq, 5);
+
+  EXPECT_EQ(seq.length(), 5u);
+  EXPECT_EQ(seq[0], 0xAA);
+  EXPECT_EQ(seq[1], 0xBB);
+  EXPECT_EQ(seq[2], 0xCC);
+}
+
+TEST(dds_DCPS_ResizeSeqNoInit, resize_bounded_seq_no_init_sp_sequence_shrink)
+{
+  Sp::BoundedOctetSeq seq;
   seq.length(5);
   seq[0] = 0x11;
   seq[1] = 0x22;
