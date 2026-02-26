@@ -32,7 +32,7 @@ void ThreadStatusManager::Thread::update(const MonotonicTimePoint& m_now,
       (next_status == ThreadStatus_Active && nesting_depth_ == 1) ||
       (next_status == ThreadStatus_Idle && nesting_depth_ == 0)) {
     if (buckets_[current_bucket_].total_time() > bucket_limit) {
-      current_bucket_ = (current_bucket_ + 1) % bucket_count;
+      current_bucket_ = (current_bucket_ + 1) % BUCKET_COUNT;
       Bucket& current = buckets_[current_bucket_];
       total_.active_time -= current.active_time;
       current.active_time = 0;
@@ -84,6 +84,38 @@ double ThreadStatusManager::Thread::utilization(const MonotonicTimePoint& now) c
   return 0;
 }
 
+void ThreadStatusManager::thread_status_interval(const TimeDuration& thread_status_interval)
+{
+  TimeDuration bucket_limit;
+  bool enabled;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    thread_status_interval_ = thread_status_interval;
+    bucket_limit = bucket_limit_ = thread_status_interval / static_cast<double>(Thread::BUCKET_COUNT);
+    enabled = enabled_ = thread_status_interval_ > TimeDuration::zero_value ? true : false;
+  }
+
+  for (size_t i = 0; i < NUM_CONTAINERS; ++i) {
+    ThreadContainer& container = containers_[i];
+    ACE_GUARD(ACE_Thread_Mutex, g, container.mutex_);
+    container.thread_status_interval_ = thread_status_interval;
+    container.bucket_limit_ = bucket_limit;
+    container.enabled_ = enabled;
+  }
+}
+
+const TimeDuration& ThreadStatusManager::thread_status_interval() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, TimeDuration::zero_value);
+  return thread_status_interval_;
+}
+
+bool ThreadStatusManager::update_thread_status() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  return enabled_;
+}
+
 ThreadStatusManager::ThreadId ThreadStatusManager::get_thread_id()
 {
 #ifdef ACE_WIN32
@@ -94,6 +126,22 @@ ThreadStatusManager::ThreadId ThreadStatusManager::get_thread_id()
   char buffer[32];
   const size_t len = ACE_OS::thr_id(buffer, 32);
   return String(buffer, len);
+#endif
+}
+
+size_t ThreadStatusManager::get_container(ThreadId tid)
+{
+#if defined (ACE_WIN32) || defined (ACE_HAS_GETTID)
+  return static_cast<size_t>(tid) % NUM_CONTAINERS;
+#else
+  const unsigned char* data = reinterpret_cast<const unsigned char*>(tid.c_str());
+  // FNV-1a hash method
+  unsigned hash = 2166136261u;
+  for (size_t i = 0; i < tid.length(); ++i) {
+    hash ^= data[i];
+    hash *= 16777619u;
+  }
+  return static_cast<size_t>(hash) % NUM_CONTAINERS;
 #endif
 }
 
@@ -112,57 +160,60 @@ void ThreadStatusManager::add_thread(const String& name)
                "adding thread %C\n", bit_key.c_str()));
   }
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  map_.insert(std::make_pair(thread_id, Thread(bit_key)));
+  ThreadContainer& container = containers_[get_container(thread_id)];
+  ACE_GUARD(ACE_Thread_Mutex, g, container.mutex_);
+  container.map_.insert(std::make_pair(thread_id, Thread(bit_key)));
 }
 
 void ThreadStatusManager::update_i(Thread::ThreadStatus status, bool finished,
                                    bool nested, int detail1, int detail2)
 {
-  if (!update_thread_status()) {
-    return;
-  }
-
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-
   const MonotonicTimePoint m_now = MonotonicTimePoint::now();
   const SystemTimePoint s_now = SystemTimePoint::now();
   const ThreadId thread_id = get_thread_id();
 
-  const Map::iterator pos = map_.find(thread_id);
-  if (pos != map_.end()) {
-    pos->second.update(m_now, s_now, status, bucket_limit_, nested, detail1, detail2);
+  ThreadContainer& container = containers_[get_container(thread_id)];
+  ACE_GUARD(ACE_Thread_Mutex, g, container.mutex_);
+
+  if (!container.enabled_) {
+    return;
+  }
+
+  const Map::iterator pos = container.map_.find(thread_id);
+  if (pos != container.map_.end()) {
+    pos->second.update(m_now, s_now, status, container.bucket_limit_, nested, detail1, detail2);
     if (finished) {
-      finished_.push_back(pos->second);
-      map_.erase(pos);
+      container.finished_.push_back(pos->second);
+      container.map_.erase(pos);
     }
   }
-  cleanup(m_now);
+  container.cleanup(m_now);
 }
 
 void ThreadStatusManager::harvest(const MonotonicTimePoint& start,
                                   ThreadStatusManager::List& running,
                                   ThreadStatusManager::List& finished) const
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-
-  for (Map::const_iterator pos = map_.begin(), limit = map_.end(); pos != limit; ++pos) {
-    if (pos->second.last_update() > start) {
-      running.push_back(pos->second);
+  for (size_t i = 0; i < NUM_CONTAINERS; ++i) {
+    const ThreadContainer& curr = containers_[i];
+    ACE_GUARD(ACE_Thread_Mutex, g, curr.mutex_);
+    for (Map::const_iterator pos = curr.map_.begin(), limit = curr.map_.end(); pos != limit; ++pos) {
+      if (pos->second.last_update() > start) {
+        running.push_back(pos->second);
+      }
     }
-  }
 
-  for (List::const_iterator pos = finished_.begin(), limit = finished_.end(); pos != limit; ++pos) {
-    if (pos->last_update() > start) {
-      finished.push_back(*pos);
+    for (List::const_iterator pos = curr.finished_.begin(), limit = curr.finished_.end(); pos != limit; ++pos) {
+      if (pos->last_update() > start) {
+        finished.push_back(*pos);
+      }
     }
   }
 }
 
-void ThreadStatusManager::cleanup(const MonotonicTimePoint& now)
+void ThreadStatusManager::ThreadContainer::cleanup(const MonotonicTimePoint& now)
 {
   const MonotonicTimePoint cutoff = now - 10 * thread_status_interval_;
-
   while (!finished_.empty() && finished_.front().last_update() < cutoff) {
     finished_.pop_front();
   }
