@@ -62,11 +62,12 @@ env:
   VCPKG_GIT_COMMIT: 66c0373dc7fca549e5803087b9487edfe3aca0a1
   VCPKG_TOOLCHAIN_FILE: ${{ github.workspace }}\vcpkg\scripts\buildsystems\vcpkg.cmake
   CTEST_OUTPUT_ON_FAILURE: ON
+  CMAKE_OPENDDS_MIN: '3.20'
 
 jobs:
-  u22:
+  u24:
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout OpenDDS
@@ -88,7 +89,7 @@ jobs:
       run: sudo apt-get -y install libxerces-c-dev qtbase5-dev
     - uses: lukka/get-cmake@latest
       with:
-        cmakeVersion: "3.23"
+        cmakeVersion: '${{ env.CMAKE_OPENDDS_MIN }}'
         ninjaVersion: "latest"
     - name: Configure
       run: |
@@ -145,9 +146,9 @@ jobs:
         cd OpenDDS/build-tests
         ctest
 
-  u22_stat:
+  u24_stat:
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout OpenDDS
@@ -216,9 +217,9 @@ jobs:
         cd OpenDDS/build-tests
         ctest
 
-  u22_no_features:
+  u24_no_features:
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout OpenDDS
@@ -268,10 +269,17 @@ jobs:
         cd OpenDDS/build
         ctest
 
-  u22_android29:
-
-    runs-on: ubuntu-22.04
-
+  android:
+    runs-on: ubuntu-24.04
+    name: Android (CMake ${{ matrix.cmake }} ${{ matrix.generator }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - generator: 'Unix Makefiles'
+            cmake: '3.20'
+          - generator: "Ninja"
+            cmake: '3.24'
     steps:
     - name: Checkout OpenDDS
       uses: actions/checkout@v6
@@ -285,13 +293,17 @@ jobs:
         add-to-path: false
     - uses: lukka/get-cmake@latest
       with:
-        cmakeVersion: "3.24"
+        cmakeVersion: '${{ matrix.cmake }}'
         ninjaVersion: "latest"
+    - name: Set Parallel Jobs for Makefiles
+      if: matrix.generator == 'Unix Makefiles'
+      run: |
+        echo "CMAKE_BUILD_PARALLEL_LEVEL=$(getconf _NPROCESSORS_ONLN)" >> $GITHUB_ENV
     - name: Configure Host Tools
       run: |
         cd OpenDDS
         cmake -B build-host \
-          -G Ninja \
+          -G '${{ matrix.generator }}' \
           -DBUILD_SHARED_LIBS=FALSE \
           -DOPENDDS_COMPILE_WARNINGS=WARNING \
           -DOPENDDS_JUST_BUILD_HOST_TOOLS=TRUE
@@ -304,10 +316,10 @@ jobs:
       run: |
         cd OpenDDS
         cmake -B build-target \
-          -G Ninja \
+          -G '${{ matrix.generator }}' \
           -DBUILD_SHARED_LIBS=TRUE \
           -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-29 \
-          --toolchain ${{ steps.setup-ndk.outputs.ndk-path }}/build/cmake/android.toolchain.cmake \
+          -DCMAKE_TOOLCHAIN_FILE=${{ steps.setup-ndk.outputs.ndk-path }}/build/cmake/android.toolchain.cmake \
           -DOPENDDS_COMPILE_WARNINGS=WARNING \
           -DOPENDDS_CMAKE_VERBOSE=all \
           -DOPENDDS_HOST_TOOLS=$(realpath build-host)
@@ -389,7 +401,7 @@ jobs:
         runVcpkgInstall: true
     - uses: lukka/get-cmake@latest
       with:
-        cmakeVersion: "3.23"
+        cmakeVersion: '3.21'
         ninjaVersion: "latest"
     - name: Checkout OpenDDS
       uses: actions/checkout@v6

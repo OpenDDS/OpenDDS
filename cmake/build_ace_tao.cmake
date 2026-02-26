@@ -139,9 +139,13 @@ elseif(_OPENDDS_MPC_TYPE MATCHES "^vs" OR _OPENDDS_MPC_TYPE MATCHES "^vc")
     endif()
   endforeach()
 
+  set(vs_platform "${CMAKE_VS_PLATFORM_NAME}")
+  if(NOT vs_platform)
+    set(vs_platform "${CMAKE_VS_PLATFORM_NAME_DEFAULT}")
+  endif()
   list(APPEND _build_cmd
     MSBuild "${sln}" "-maxcpucount"
-    "-property:Configuration=$<CONFIG>,Platform=${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}"
+    "-property:Configuration=$<CONFIG>,Platform=${vs_platform}"
     "$<IF:$<BOOL:${_opendds_std}>,-property:LanguageStandard=stdcpp${_opendds_std},>"
   )
 

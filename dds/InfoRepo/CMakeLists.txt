@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23...4.0)
+cmake_minimum_required(VERSION 3.14...4.0)
 project(opendds_info_repo CXX)
 
 set(lib_dep_libs
@@ -39,8 +39,8 @@ add_library(OpenDDS_Federator
   FederatorManagerImpl_updates.cpp
   InfoRepoMulticastResponder.cpp
 )
-target_sources(OpenDDS_Federator
-  PUBLIC FILE_SET HEADERS BASE_DIRS "${OPENDDS_SOURCE_DIR}" FILES
+_opendds_headers(OpenDDS_Federator
+  PUBLIC
     federator_export.h
     UpdateListener_T.h
     UpdateReceiver_T.h
@@ -58,8 +58,8 @@ opendds_target_sources(OpenDDS_Federator
 opendds_install_interface_files(OpenDDS_Federator INCLUDE_BASE "${OPENDDS_SOURCE_DIR}")
 
 add_library(OpenDDS_InfoRepoServ DCPSInfoRepoServ.cpp)
-target_sources(OpenDDS_InfoRepoServ
-  PUBLIC FILE_SET HEADERS BASE_DIRS "${OPENDDS_SOURCE_DIR}" FILES
+_opendds_headers(OpenDDS_InfoRepoServ
+  PUBLIC
     DCPSInfoRepoServ.h
 )
 _opendds_library(OpenDDS_InfoRepoServ)

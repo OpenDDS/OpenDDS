@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23...4.0)
+cmake_minimum_required(VERSION 3.14...4.0)
 project(opendds_rtps_relay_lib CXX)
 
 set(deps
@@ -11,8 +11,9 @@ add_library(OpenDDS_RtpsRelayLib
   Name.cpp
 )
 set_target_properties(OpenDDS_RtpsRelayLib PROPERTIES OUTPUT_NAME OpenDDS_RtpsRelay)
-target_sources(OpenDDS_RtpsRelayLib
-  PUBLIC FILE_SET HEADERS BASE_DIRS "${OPENDDS_SOURCE_DIR}/tools" FILES
+_opendds_headers(OpenDDS_RtpsRelayLib
+  BASE_DIR "${OPENDDS_SOURCE_DIR}/tools"
+  PUBLIC
     Name.h
     PartitionIndex.h
     Utility.h
