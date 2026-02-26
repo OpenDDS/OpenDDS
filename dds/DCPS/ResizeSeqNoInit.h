@@ -6,7 +6,8 @@
 #ifndef OPENDDS_DCPS_RESIZE_SEQ_NO_INIT_H
 #define OPENDDS_DCPS_RESIZE_SEQ_NO_INIT_H
 
-#include <dds/DCPS/dcps_export.h>
+#include "dcps_export.h"
+
 #include <dds/Versioned_Namespace.h>
 
 #include <tao/Basic_Types.h>
@@ -14,7 +15,6 @@
 #include <ace/config-lite.h>
 
 #ifdef ACE_HAS_CPP11
-#  include <type_traits>
 #  include <vector>
 #  include <memory>
 #endif
@@ -32,6 +32,8 @@ namespace FaceTypes {
 }
 
 namespace DCPS {
+
+bool OpenDDS_Dcps_Export get_init_in_optional_init_allocator();
 
 /// Resize unbounded FACE sequences without zero-initializing new elements.
 template <typename T, typename Bounds, typename Elts>
@@ -54,21 +56,11 @@ void resize_bounded_seq_no_init(
 }
 
 #ifdef ACE_HAS_CPP11
-extern thread_local OpenDDS_Dcps_Export bool init_in_optional_init_allocator;
-
 struct OpenDDS_Dcps_Export InitInOptionalInitAllocator {
   const bool prev_value;
 
-  InitInOptionalInitAllocator(bool value)
-  : prev_value(init_in_optional_init_allocator)
-  {
-    init_in_optional_init_allocator = value;
-  }
-
-  ~InitInOptionalInitAllocator()
-  {
-    init_in_optional_init_allocator = prev_value;
-  }
+  InitInOptionalInitAllocator(bool value);
+  ~InitInOptionalInitAllocator();
 };
 
 template <typename T, typename Alloc = std::allocator<T>>
@@ -88,7 +80,7 @@ public:
   template <typename U>
   void construct(U* ptr) noexcept(std::is_nothrow_default_constructible<U>::value)
   {
-    if (init_in_optional_init_allocator) {
+    if (get_init_in_optional_init_allocator()) {
       ::new (static_cast<void*>(ptr)) U();
     } else {
       ::new (static_cast<void*>(ptr)) U;
@@ -149,6 +141,7 @@ typename Seq::value_type* resize_tao_seq_no_init(Seq& seq, CORBA::ULong new_leng
 
 /// C++03 SFINAE helper to prevent std::vector and FACE sequences from matching
 /// since there is no single TAO sequence type.
+/// TODO: replace with std::void_t in C++17
 template <typename T>
 struct VoidIfExists {
   typedef void type;

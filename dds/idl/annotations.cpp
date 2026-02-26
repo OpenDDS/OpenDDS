@@ -31,6 +31,7 @@ void Annotations::register_all()
   register_one<TryConstructAnnotation>();
   register_one<ValueAnnotation>();
   register_one<OpenDDS::DataRepresentationAnnotation>();
+  register_one<OpenDDS::NoInitBeforeDeserializeAnnotation>();
   register_one<OpenDDS::internal::NoDynamicDataAdapterAnnotation>();
   register_one<OpenDDS::internal::SpecialSerializationAnnotation>();
 }
@@ -46,7 +47,7 @@ Annotations::~Annotations()
   }
 }
 
-Annotation* Annotations::operator[](const std::string& annotation) const
+AnnotationBaseDoNotUse* Annotations::operator[](const std::string& annotation) const
 {
   const MapType::const_iterator i = map_.find(annotation);
   if (i == map_.end()) {
@@ -55,36 +56,26 @@ Annotation* Annotations::operator[](const std::string& annotation) const
   return i->second;
 }
 
-Annotation::Annotation()
+AnnotationBaseDoNotUse::AnnotationBaseDoNotUse()
 : declaration_(0)
 {
 }
 
-Annotation::~Annotation()
+AnnotationBaseDoNotUse::~AnnotationBaseDoNotUse()
 {
 }
 
-std::string Annotation::module() const
-{
-  return "::";
-}
-
-std::string Annotation::fullname() const
-{
-  return module() + std::string("@") + name();
-}
-
-AST_Annotation_Decl* Annotation::declaration() const
+AST_Annotation_Decl* AnnotationBaseDoNotUse::declaration() const
 {
   return declaration_;
 }
 
-AST_Annotation_Appl* Annotation::find_on(AST_Decl* node) const
+AST_Annotation_Appl* AnnotationBaseDoNotUse::find_on(AST_Decl* node) const
 {
   return node->annotations().find(declaration_);
 }
 
-void Annotation::cache()
+void AnnotationBaseDoNotUse::cache()
 {
   idl_global->eval(definition().c_str());
   UTL_Scope* root = idl_global->scopes().bottom();
@@ -150,30 +141,6 @@ std::string get_str_annotation_member_value(AST_Annotation_Appl* appl,
   return ev->u.strval->get_string();
 }
 
-template<>
-bool AnnotationWithValue<bool>::value_from_appl(AST_Annotation_Appl* appl) const
-{
-  return get_bool_annotation_member_value(appl, "value");
-}
-
-template<>
-ACE_UINT32 AnnotationWithValue<ACE_UINT32>::value_from_appl(AST_Annotation_Appl* appl) const
-{
-  return get_u32_annotation_member_value(appl, "value");
-}
-
-template<>
-int AnnotationWithValue<ACE_INT32>::value_from_appl(AST_Annotation_Appl* appl) const
-{
-  return get_i32_annotation_member_value(appl, "value");
-}
-
-template<>
-std::string AnnotationWithValue<std::string>::value_from_appl(AST_Annotation_Appl* appl) const
-{
-  return get_str_annotation_member_value(appl, "value");
-}
-
 // @key ======================================================================
 
 std::string KeyAnnotation::definition() const
@@ -182,11 +149,6 @@ std::string KeyAnnotation::definition() const
     "@annotation key {\n"
     "  boolean value default TRUE;\n"
     "};\n";
-}
-
-std::string KeyAnnotation::name() const
-{
-  return "key";
 }
 
 bool KeyAnnotation::union_value(AST_Union* node) const
@@ -211,11 +173,6 @@ std::string TopicAnnotation::definition() const
     "};\n";
 }
 
-std::string TopicAnnotation::name() const
-{
-  return "topic";
-}
-
 TopicValue TopicAnnotation::value_from_appl(AST_Annotation_Appl* appl) const
 {
   TopicValue value;
@@ -234,11 +191,6 @@ std::string NestedAnnotation::definition() const
     "};\n";
 }
 
-std::string NestedAnnotation::name() const
-{
-  return "nested";
-}
-
 // @default_nested ===========================================================
 
 std::string DefaultNestedAnnotation::definition() const
@@ -249,11 +201,6 @@ std::string DefaultNestedAnnotation::definition() const
     "};\n";
 }
 
-std::string DefaultNestedAnnotation::name() const
-{
-  return "default_nested";
-}
-
 // @id =======================================================================
 
 std::string IdAnnotation::definition() const
@@ -262,11 +209,6 @@ std::string IdAnnotation::definition() const
     "@annotation id {\n"
     "  unsigned long value;\n"
     "};\n";
-}
-
-std::string IdAnnotation::name() const
-{
-  return "id";
 }
 
 // @autoid ===================================================================
@@ -283,11 +225,6 @@ std::string AutoidAnnotation::definition() const
     "};\n";
 }
 
-std::string AutoidAnnotation::name() const
-{
-  return "autoid";
-}
-
 // @hashid ===================================================================
 
 std::string HashidAnnotation::definition() const
@@ -296,11 +233,6 @@ std::string HashidAnnotation::definition() const
     "@annotation hashid {\n"
     "  string value default \"\";"
     "};\n";
-}
-
-std::string HashidAnnotation::name() const
-{
-  return "hashid";
 }
 
 // @optional =================================================================
@@ -313,11 +245,6 @@ std::string OptionalAnnotation::definition() const
     "};\n";
 }
 
-std::string OptionalAnnotation::name() const
-{
-  return "optional";
-}
-
 // @must_understand =================================================================
 
 std::string MustUnderstandAnnotation::definition() const
@@ -328,11 +255,6 @@ std::string MustUnderstandAnnotation::definition() const
     "};\n";
 }
 
-std::string MustUnderstandAnnotation::name() const
-{
-  return "must_understand";
-}
-
 // @external =================================================================
 
 std::string ExternalAnnotation::definition() const
@@ -341,11 +263,6 @@ std::string ExternalAnnotation::definition() const
     "@annotation external {\n"
     "  boolean value default TRUE;"
     "};\n";
-}
-
-std::string ExternalAnnotation::name() const
-{
-  return "external";
 }
 
 // @extensibility ============================================================
@@ -363,21 +280,11 @@ std::string ExtensibilityAnnotation::definition() const
     "};\n";
 }
 
-std::string ExtensibilityAnnotation::name() const
-{
-  return "extensibility";
-}
-
 // @final ====================================================================
 
 std::string FinalAnnotation::definition() const
 {
   return "@annotation final {};\n";
-}
-
-std::string FinalAnnotation::name() const
-{
-  return "final";
 }
 
 // @appendable ===============================================================
@@ -387,21 +294,11 @@ std::string AppendableAnnotation::definition() const
   return "@annotation appendable {};\n";
 }
 
-std::string AppendableAnnotation::name() const
-{
-  return "appendable";
-}
-
 // @mutable ==================================================================
 
 std::string MutableAnnotation::definition() const
 {
   return "@annotation mutable {};\n";
-}
-
-std::string MutableAnnotation::name() const
-{
-  return "mutable";
 }
 
 // @try_construct ============================================================
@@ -417,11 +314,6 @@ std::string TryConstructAnnotation::definition() const
     "  };\n"
     "  TryConstructFailAction value default USE_DEFAULT;\n"
     "};\n";
-}
-
-std::string TryConstructAnnotation::name() const
-{
-  return "try_construct";
 }
 
 TryConstructFailAction TryConstructAnnotation::sequence_element_value(AST_Sequence* node) const
@@ -469,11 +361,6 @@ std::string ValueAnnotation::definition() const
     "};\n";
 }
 
-std::string ValueAnnotation::name() const
-{
-  return "value";
-}
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 
@@ -493,11 +380,6 @@ namespace OpenDDS {
       "    Kind_t kind;\n"
       "  };\n"
       "};\n";
-  }
-
-  std::string DataRepresentationAnnotation::name() const
-  {
-    return "data_representation";
   }
 
   bool DataRepresentationAnnotation::node_value_exists(
@@ -538,11 +420,6 @@ namespace OpenDDS {
       }
     }
     return value;
-  }
-
-  std::string DataRepresentationAnnotation::module() const
-  {
-    return "::OpenDDS::";
   }
 }
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

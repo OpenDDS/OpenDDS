@@ -85,6 +85,7 @@ add_library(OpenDDS_Dcps
   DCPS/RepoIdBuilder.cpp
   DCPS/RepoIdConverter.cpp
   DCPS/RepoIdGenerator.cpp
+  DCPS/ResizeSeqNoInit.cpp
   DCPS/SafetyProfilePool.cpp
   DCPS/SafetyProfileSequences.cpp
   DCPS/SafetyProfileStreams.cpp
