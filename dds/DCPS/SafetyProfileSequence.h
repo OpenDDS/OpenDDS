@@ -358,6 +358,9 @@ namespace SafetyProfile {
   template <typename T>
   inline void DefaultEltPolicy<T>::copy_n(const T* in, seq_size_type n, T* out)
   {
+    if (!(in && out)) {
+      return;
+    }
     std::memcpy(out, in, n * sizeof(T));
   }
 
@@ -609,7 +612,9 @@ namespace SafetyProfile {
     }
 
     Sequence tmp(len, len, allocate(len), true);
-    Elts::move_n(buffer_, length_, tmp.buffer_);
+    if (buffer_) {
+      Elts::move_n(buffer_, length_, tmp.buffer_);
+    }
     swap(tmp);
   }
 
