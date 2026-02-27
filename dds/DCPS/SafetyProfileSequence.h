@@ -6,6 +6,8 @@
 #include "Definitions.h"
 #include "Serializer.h"
 
+#include <dds/Versioned_Namespace.h>
+
 #include <tao/Array_VarOut_T.h> // Array_Traits
 #include <tao/String_Manager_T.h>
 
@@ -14,6 +16,8 @@
 #include <utility>
 #include <cstddef>
 #include <cstring>
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace SafetyProfile {
@@ -680,5 +684,7 @@ namespace SafetyProfile {
   }
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* dds_DCPS_SafetyProfileSequence_h */

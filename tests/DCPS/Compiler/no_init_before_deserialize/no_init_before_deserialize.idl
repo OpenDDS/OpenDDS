@@ -1,3 +1,5 @@
+#include <tao/FloatSeq.pidl>
+
 typedef sequence<float> FloatSeq;
 typedef sequence<float, 10> BoundedFloatSeq;
 @OpenDDS::no_init_before_deserialize

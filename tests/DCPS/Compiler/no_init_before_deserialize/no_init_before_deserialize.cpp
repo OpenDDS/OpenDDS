@@ -3,6 +3,8 @@
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
 
+#include <ace/OS_main.h>
+
 #include <iostream>
 
 using namespace OpenDDS::DCPS;
@@ -71,7 +73,7 @@ void copy_no_init_vector(const Seq& seq)
 }
 #endif
 
-int main()
+int ACE_TMAIN(int, ACE_TCHAR*[])
 {
   NoInitBeforeDeserializeStruct original;
   fill_seq(FIELD(original.float_seq), seq_len);
