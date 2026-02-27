@@ -28,7 +28,7 @@ namespace {
   const Encoding::Kind encoding_kind = Encoding::KIND_UNALIGNED_CDR;
 }
 
-MulticastSession::MulticastSession(RcHandle<ReactorTask> reactor_task,
+MulticastSession::MulticastSession(RcHandle<EventDispatcher> event_dispatcher,
                                    MulticastDataLink* link,
                                    MulticastPeer remote_peer)
   : link_(link)
@@ -38,10 +38,9 @@ MulticastSession::MulticastSession(RcHandle<ReactorTask> reactor_task,
   , active_(true)
   , reassembly_(link->config()->fragment_reassembly_timeout())
   , acked_(false)
-  , syn_watchdog_(make_rch<Sporadic>(TheServiceParticipant->time_source(),
-                                     reactor_task,
-                                     rchandle_from(this),
-                                     &MulticastSession::send_all_syn))
+  , syn_watchdog_(make_rch<SporadicEvent>(event_dispatcher,
+                                          make_rch<MulticastSessionEvent>(rchandle_from(this),
+                                                                          &MulticastSession::send_all_syn)))
   , initial_syn_delay_(link->config()->syn_interval())
   , config_name(link->config()->name())
 {}
@@ -188,7 +187,7 @@ MulticastSession::syn_received(const Message_Block_Ptr& control)
 }
 
 void
-MulticastSession::send_all_syn(const MonotonicTimePoint& /*now*/)
+MulticastSession::send_all_syn()
 {
   ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
   for (PendingRemoteMap::const_iterator pos1 = pending_remote_map_.begin(), limit1 = pending_remote_map_.end();

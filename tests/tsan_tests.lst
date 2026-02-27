@@ -131,6 +131,8 @@ tests/DCPS/Thrasher/run_test.pl medium rtps durable: !DCPS_MIN RTPS !LYNXOS
 tests/DCPS/Thrasher/run_test.pl high rtps durable: !DCPS_MIN RTPS !LYNXOS !OPENDDS_SAFETY_PROFILE
 #tests/DCPS/Thrasher/run_test.pl aggressive rtps durable: !DCPS_MIN RTPS !LYNXOS !OPENDDS_SAFETY_PROFILE
 
+tests/DCPS/DomainRange/run_test.pl: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE
+
 performance-tests/bench/unit-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS CXX11 RAPIDJSON
 
 #performance-tests/bench/run_test.pl ci-disco --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
@@ -161,3 +163,5 @@ tests/DCPS/RtpsRelay/Smoke/run_lease_duration_test.pl secure: !DCPS_MIN CXX11 RT
 tests/DCPS/RtpsRelay/Smoke/run_lease_duration_test.pl reverse secure: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE RAPIDJSON
 tests/DCPS/RtpsRelay/STUN/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE RAPIDJSON
 tests/DCPS/RtpsRelay/STUN/run_test.pl ipv6: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE IPV6 RAPIDJSON
+
+tests/security/ConcurrentAuthLimit/run_test.pl: !DCPS_MIN CXX11 RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE RAPIDJSON

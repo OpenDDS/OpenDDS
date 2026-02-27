@@ -92,6 +92,7 @@ namespace {
       OpenDDS::DCPS::InternalSampleInfoSequence infos;
       reader->read(samples, infos, DDS::LENGTH_UNLIMITED,
                    DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
       for (size_t idx = 0; idx != samples.size(); ++idx) {
         const auto& info = infos[idx];
         const auto& pair = samples[idx];
@@ -104,6 +105,7 @@ namespace {
       writer_->write(config_, DDS::HANDLE_NIL);
     }
 
+    mutable ACE_Thread_Mutex mutex_;
     RelayConfigDataWriter_var writer_;
     RelayConfig config_;
   };

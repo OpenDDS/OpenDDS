@@ -33,6 +33,8 @@ public:
 
   size_t cancel(long id);
 
+  size_t queue_size() const;
+
 private:
 
   mutable ACE_Thread_Mutex mutex_;

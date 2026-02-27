@@ -84,9 +84,11 @@ CORBA::Boolean
 QueryConditionImpl::get_trigger_value()
 {
   if (hasFilter()) {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard2, parent_->sample_lock_, false);
+    RcHandle<DataReaderImpl> parent = parent_.lock();
+    if (!parent) return false;
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard2, parent->sample_lock_, false);
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
-    return parent_->contains_sample_filtered(sample_states_, view_states_,
+    return parent->contains_sample_filtered(sample_states_, view_states_,
       instance_states_, evaluator_, query_parameters_);
   } else {
     return ReadConditionImpl::get_trigger_value();
@@ -95,7 +97,9 @@ QueryConditionImpl::get_trigger_value()
 
 TypeSupportImpl* QueryConditionImpl::get_type_support() const
 {
-  DDS::TopicDescription_var td = parent_->get_topicdescription();
+  RcHandle<DataReaderImpl> parent = parent_.lock();
+  if (!parent) return 0;
+  DDS::TopicDescription_var td = parent->get_topicdescription();
   TopicDescriptionImpl* const tdi = dynamic_cast<TopicDescriptionImpl*>(td.in());
   TypeSupport* const ts = tdi ? tdi->get_type_support() : 0;
   return dynamic_cast<TypeSupportImpl*>(ts);

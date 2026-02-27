@@ -105,9 +105,9 @@ public:
                         CORBA::Long bitmap[], CORBA::ULong length,
                         CORBA::ULong& numBits) const;
 
-  size_t fragments_size() const { return fragments_.size(); }
-  size_t queue_size() const { return expiration_queue_.size(); }
-  size_t completed_size() const { return completed_.size(); }
+  size_t fragments_size() const;
+  size_t queue_size() const;
+  size_t completed_size() const;
   size_t total_frags() const;
 
 private:

@@ -17,10 +17,11 @@
 #include "ace/Synch_Traits.h"
 
 #include "dds/DCPS/RcObject.h"
+#include "dds/DCPS/EventDispatcher.h"
 #include "dds/DCPS/transport/framework/TransportHeader.h"
 #include "dds/DCPS/transport/framework/TransportReassembly.h"
 #include "dds/DCPS/RcEventHandler.h"
-#include "dds/DCPS/SporadicTask.h"
+#include "dds/DCPS/SporadicEvent.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Reactor;
@@ -44,7 +45,7 @@ public:
   virtual bool is_reliable() { return false;}
 
   void syn_received(const Message_Block_Ptr& control);
-  void send_all_syn(const MonotonicTimePoint& now);
+  void send_all_syn();
   void send_syn(const GUID_t& local_writer,
                 const GUID_t& remote_reader);
 
@@ -80,7 +81,7 @@ protected:
 
   MulticastPeer remote_peer_;
 
-  MulticastSession(RcHandle<ReactorTask> reactor_task,
+  MulticastSession(RcHandle<EventDispatcher> event_dispatcher,
                    MulticastDataLink* link,
                    MulticastPeer remote_peer);
 
@@ -121,8 +122,8 @@ private:
 
   ACE_Thread_Mutex ack_lock_;
 
-  typedef PmfSporadicTask<MulticastSession> Sporadic;
-  RcHandle<Sporadic> syn_watchdog_;
+  typedef PmfEvent<MulticastSession> MulticastSessionEvent;
+  SporadicEvent_rch syn_watchdog_;
   TimeDuration syn_delay_;
   const TimeDuration initial_syn_delay_;
   String config_name;

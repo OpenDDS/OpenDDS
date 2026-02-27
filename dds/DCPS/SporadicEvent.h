@@ -72,6 +72,7 @@ private:
   MonotonicTimePoint expiration_;
   long timer_id_;
 };
+typedef RcHandle<SporadicEvent> SporadicEvent_rch;
 
 } // DCPS
 } // OpenDDS
