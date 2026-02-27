@@ -1,0 +1,15 @@
+project(no_init_before_deserialize_cpp11): dcps_test, opendds_cxx11 {
+  exename = no_init_before_deserialize_cpp11
+  includes += .
+  macros += CPP11_MAPPING=1
+
+  idlflags += -I..
+
+  TypeSupport_Files {
+    ../no_init_before_deserialize.idl
+  }
+
+  Source_Files {
+    ../no_init_before_deserialize.cpp
+  }
+}
