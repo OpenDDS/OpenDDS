@@ -733,13 +733,16 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
    */
 
 #if OPENDDS_CONFIG_SECURITY
-  case SEC_PREFIX:
+  case SEC_PREFIX: {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(readers_mutex_);
     secure_prefix_ = submessage.security_sm();
     break;
-
-  case SEC_POSTFIX:
+  }
+  case SEC_POSTFIX: {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(readers_mutex_);
     deliver_from_secure(submessage, remote_addr);
     break;
+  }
 #endif
 
   default:
@@ -1438,13 +1441,13 @@ void RtpsUdpReceiveStrategy::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) c
     ACE_Guard<ACE_Recursive_Thread_Mutex> guard(readers_mutex_);
     stats[idx++].value = readers_withheld_.size();
     stats[idx++].value = readers_selected_.size();
-  }
   stats[idx++].value =
 #if OPENDDS_CONFIG_SECURITY
     secure_submessages_.size();
 #else
     0;
 #endif
+  }
   stats[idx++].value = reassembly_.fragments_size();
   stats[idx++].value = reassembly_.total_frags();
   stats[idx++].value = reassembly_.queue_size();
