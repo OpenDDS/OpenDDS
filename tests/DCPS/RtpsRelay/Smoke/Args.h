@@ -28,6 +28,7 @@ struct Args {
   bool stress_test = false;
   bool terminate_on_data = false;
   bool drain_test = false;
+  bool deny_partitions_test = false;
 
   int parse(int argc, ACE_TCHAR* argv[]);
 };
@@ -35,7 +36,7 @@ struct Args {
 inline int
 Args::parse(int argc, ACE_TCHAR* argv[])
 {
-  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("lep:b:sd"));
+  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("lep:b:sdr"));
 
   int c;
   while ((c = get_opts()) != -1) {
@@ -58,8 +59,11 @@ Args::parse(int argc, ACE_TCHAR* argv[])
     case 'd':
       drain_test = true;
       break;
+    case 'r':
+      deny_partitions_test = true;
+      break;
     case '?':
-      ACE_ERROR_RETURN((LM_ERROR, "usage: %s [-lesd] [-p partition] [-b particpant_bit_expected_instances]\n", argv[0]), EXIT_FAILURE);
+      ACE_ERROR_RETURN((LM_ERROR, "usage: %s [-lesdr] [-p partition] [-b particpant_bit_expected_instances]\n", argv[0]), EXIT_FAILURE);
     }
   }
 
