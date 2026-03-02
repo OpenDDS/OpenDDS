@@ -16,29 +16,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-JobQueue::JobQueue(ACE_Reactor* reactor)
+JobQueue::JobQueue(EventDispatcher_rch event_dispatcher)
+  : event_dispatcher_(event_dispatcher)
 {
-  this->reactor(reactor);
-}
-
-int JobQueue::handle_exception(ACE_HANDLE /*fd*/)
-{
-  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-  ThreadStatusManager::Event ev(thread_status_manager);
-
-  Queue q;
-
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, -1);
-    q.swap(job_queue_);
-  }
-
-  for (Queue::const_iterator pos = q.begin(), limit = q.end(); pos != limit; ++pos) {
-    ThreadStatusManager::Event event(thread_status_manager);
-    (*pos)->execute();
-  }
-
-  return 0;
 }
 
 } // namespace DCPS

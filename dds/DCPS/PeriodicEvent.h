@@ -95,6 +95,7 @@ private:
   MonotonicTimePoint expiration_;
   long timer_id_;
 };
+typedef RcHandle<PeriodicEvent> PeriodicEvent_rch;
 
 } // DCPS
 } // OpenDDS

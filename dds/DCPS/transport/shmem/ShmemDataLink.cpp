@@ -39,7 +39,7 @@ ShmemDataLink::ShmemDataLink(const RcHandle<ShmemTransport>& transport)
   , send_strategy_(make_rch<ShmemSendStrategy>(this))
   , recv_strategy_(make_rch<ShmemReceiveStrategy>(this))
   , peer_alloc_(0)
-  , reactor_task_(transport->reactor_task())
+  , event_dispatcher_(transport->event_dispatcher())
 {
 }
 
@@ -100,12 +100,12 @@ ShmemDataLink::open(const std::string& peer_address)
   VDBG_LVL((LM_DEBUG, "(%P|%t) ShmemDataLink::open: link[%@] open to peer %C\n",
             this, peer_address_.c_str()), 1);
 
-  assoc_resends_task_ = make_rch<PeriodicAssocResend>(reactor_task_, ref(*this));
+  assoc_resends_event_ = make_rch<PeriodicEvent>(event_dispatcher_, make_rch<PmfEvent<ShmemDataLink> >(rchandle_from(this), &ShmemDataLink::resend_association_msgs));
   ShmemInst_rch cfg = config();
   if (!cfg) {
     return false;
   }
-  assoc_resends_task_->enable(false, cfg->association_resend_period());
+  assoc_resends_event_->enable(cfg->association_resend_period());
 
   return true;
 }
@@ -162,7 +162,7 @@ ShmemDataLink::send_association_msg(const GUID_t& local, const GUID_t& remote)
   this->send_i(send_element, false);
 }
 
-void ShmemDataLink::resend_association_msgs(const MonotonicTimePoint&)
+void ShmemDataLink::resend_association_msgs()
 {
   VDBG((LM_DEBUG, "(%P|%t) ShmemDataLink::resend_association_msgs\n"));
 
@@ -226,7 +226,7 @@ ShmemDataLink::stop_i()
   {
     ACE_GUARD(ACE_Thread_Mutex, g, assoc_resends_mutex_);
     assoc_resends_.clear();
-    assoc_resends_task_->disable();
+    assoc_resends_event_->disable();
   }
 
   {
