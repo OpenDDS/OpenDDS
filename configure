@@ -1429,7 +1429,7 @@ my @profiling_compiler_args = ();
 my @profiling_linker_args = ();
 if ($opts{'profiling'}) {
   my @common = ('-ggdb');
-  @profiling_compiler_args = ('-O3', @common, '-fno-omit-frame-pointer');
+  @profiling_compiler_args = ('-O3', @common, '-fno-omit-frame-pointer', @profiling_compiler_args);
   @profiling_linker_args = (@common);
 }
 
