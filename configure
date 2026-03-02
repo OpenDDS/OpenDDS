@@ -3105,17 +3105,18 @@ sub write_cmake_file {
     print_cmake_config($fh, 'features', \%features);
     print_cmake_config($fh, 'mpcopts', \@mpcopts);
 
-    print $fh "\n# Sanitizers\n";
+    print $fh "\n# Enabled Sanitizers\n";
     for my $name (sort(keys(%all_sanitizers))) {
       print_cmake_config($fh, $name, exists($enabled_sanitizers{$name}) ? 1 : 0);
     }
     if (scalar(@fsanitize)) {
+      print $fh "\n# Sanitizer Args\n";
       print_cmake_config($fh, 'SANITIZER_COMPILER_ARGS', \@sanitizer_compiler_args);
       print_cmake_config($fh, 'SANITIZER_LINKER_ARGS', \@sanitizer_linker_args);
     }
 
-    print $fh "\n# Profiling\n";
     if ($opts{'profiling'}) {
+      print $fh "\n# Profiling Args\n";
       print_cmake_config($fh, 'PROFILING_COMPILER_ARGS', \@profiling_compiler_args);
       print_cmake_config($fh, 'PROFILING_LINKER_ARGS', \@profiling_linker_args);
     }
