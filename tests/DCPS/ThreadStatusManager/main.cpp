@@ -2,7 +2,6 @@
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/WaitSet.h>
-#include <dds/DCPS/StaticIncludes.h>
 
 #include <ace/Task.h>
 
@@ -146,12 +145,6 @@ bool read_status(DDS::WaitSet_var ws, InternalThreadBuiltinTopicDataDataReader_v
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
-  // Create a participant that harvests thread status every one second
-  // ACE_TCHAR* argv[] = { const_cast<ACE_TCHAR*>(ACE_TEXT("-DCPSThreadStatusInterval")),
-  //                       const_cast<ACE_TCHAR*>(ACE_TEXT("1")),
-  //                       const_cast<ACE_TCHAR*>(ACE_TEXT("-DCPSDefaultDiscovery")),
-  //                       const_cast<ACE_TCHAR*>(ACE_TEXT("DEFAULT_RTPS")) };
-  // int argc = sizeof(argv) / sizeof(argv[0]);
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
   DDS::DomainParticipantQos participant_qos;
   dpf->get_default_participant_qos(participant_qos);
@@ -161,7 +154,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::DomainParticipant_var participant = dpf->create_participant(domain, participant_qos, 0, DEFAULT_STATUS_MASK);
   if (!participant) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to create participant\n"));
-    return -1;
+    return EXIT_FAILURE;
   }
 
   ACE_Thread_Mutex mutex;
@@ -169,7 +162,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TestThread task(cv);
   if (task.start() != 0) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to start test thread\n"));
-    return -1;
+    return EXIT_FAILURE;
   }
 
   DDS::Subscriber_var bit_subscriber = participant->get_builtin_subscriber();
@@ -177,7 +170,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   InternalThreadBuiltinTopicDataDataReader_var itbtd_reader = InternalThreadBuiltinTopicDataDataReader::_narrow(reader);
   if (!itbtd_reader) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to narrow internal thread builtin topic data reader\n"));
-    return -1;
+    return EXIT_FAILURE;
   }
 
   DDS::ReadCondition_var read_cond = reader->create_readcondition(DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
@@ -189,31 +182,31 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   // Notify the test thread to proceed after reading the thread status in each step
   if (!read_status(ws, itbtd_reader, thread_start, task)) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to read test thread's start status\n"));
-    return -1;
+    return EXIT_FAILURE;
   }
   cv.broadcast();
 
   if (!read_status(ws, itbtd_reader, event1_start, task, false, EVENT1_DETAIL1, EVENT1_DETAIL2)) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to read test thread's event1 begin status\n"));
-    return -1;
+    return EXIT_FAILURE;
   }
   cv.broadcast();
 
   if (!read_status(ws, itbtd_reader, event2_start, task, false, EVENT2_DETAIL1, EVENT2_DETAIL2)) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to read test thread's event2 begin status\n"));
-    return -1;
+    return EXIT_FAILURE;
   }
   cv.broadcast();
 
   if (!read_status(ws, itbtd_reader, event2_end, task)) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to read test thread's event2 end status\n"));
-    return -1;
+    return EXIT_FAILURE;
   }
   cv.broadcast();
 
   if (!read_status(ws, itbtd_reader, event1_end, task)) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to read test thread's event1 end status\n"));
-    return -1;
+    return EXIT_FAILURE;
   }
   cv.broadcast();
 
@@ -221,29 +214,34 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   // so thread_end is just passed here, but its value is not used for anything.
   if (!read_status(ws, itbtd_reader, thread_end, task, true)) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to read test thread's end status\n"));
-    return -1;
+    return EXIT_FAILURE;
   }
 
   // Check that the timestamps are in the correct order
+  bool ret = EXIT_SUCCESS;
   if (!(thread_start < event1_start)) {
     ACE_ERROR((LM_WARNING, "(%P|%t) ERROR: main - thread_start ({%d sec, %u nsec}) should be before event1_start ({%d sec, %u nsec})\n",
       thread_start.to_idl_struct().sec, thread_start.to_idl_struct().nanosec,
       event1_start.to_idl_struct().sec, event1_start.to_idl_struct().nanosec));
+    ret = EXIT_FAILURE;
   }
   if (!(event1_start < event2_start)) {
     ACE_ERROR((LM_WARNING, "(%P|%t) ERROR: main - event1_start ({%d sec, %u nsec}) should be before event2_start ({%d sec, %u nsec})\n",
       event1_start.to_idl_struct().sec, event1_start.to_idl_struct().nanosec,
       event2_start.to_idl_struct().sec, event2_start.to_idl_struct().nanosec));
+    ret = EXIT_FAILURE;
   }
   if (!(event2_start < event2_end)) {
     ACE_ERROR((LM_WARNING, "(%P|%t) ERROR: main - event2_start ({%d sec, %u nsec}) should be before event2_end ({%d sec, %u nsec})\n",
       event2_start.to_idl_struct().sec, event2_start.to_idl_struct().nanosec,
       event2_end.to_idl_struct().sec, event2_end.to_idl_struct().nanosec));
+    ret = EXIT_FAILURE;
   }
   if (!(event2_end < event1_end)) {
     ACE_ERROR((LM_WARNING, "(%P|%t) ERROR: main - event2_end ({%d sec, %u nsec}) should be before event1_end ({%d sec, %u nsec})\n",
       event2_end.to_idl_struct().sec, event2_end.to_idl_struct().nanosec,
       event1_end.to_idl_struct().sec, event1_end.to_idl_struct().nanosec));
+    ret = EXIT_FAILURE;
   }
 
   // Cleanup
@@ -251,6 +249,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   participant->delete_contained_entities();
   dpf->delete_participant(participant);
   TheServiceParticipant->shutdown();
+
+  return ret;
 }
 
 #endif

@@ -10,7 +10,6 @@ use PerlDDS::Run_Test;
 use strict;
 
 my $test = new PerlDDS::TestFramework();
-$test->setup_discovery();
 
 $test->process("tsm", "threadstatusmanager", " -DCPSThreadStatusInterval 1 -DCPSDefaultDiscovery DEFAULT_RTPS");
 $test->start_process("tsm");
