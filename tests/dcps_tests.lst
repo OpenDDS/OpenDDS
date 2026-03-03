@@ -520,3 +520,4 @@ tests/DCPS/WaitSetLivelinessLost/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/WaitSetLivelinessLost/run_test.pl rtps_disc: !DCPS_MIN !OPENDDS_SAFETY_PROFILE RTPS
 
 tests/DCPS/Maps/run_test.pl: !DCPS_MIN CXX11
+tests/DCPS/ThreadStatusManager/run_test.pl: RTPS !DCPS_MIN !NO_BUILT_IN_TOPICS

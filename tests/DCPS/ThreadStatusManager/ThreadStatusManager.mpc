@@ -1,0 +1,5 @@
+project: dcpsexe, dcps_test {
+  exename = threadstatusmanager
+  requires += built_in_topics
+  idlflags += -SS
+}
