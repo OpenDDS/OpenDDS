@@ -23,25 +23,56 @@ PeriodicEvent::PeriodicEvent(EventDispatcher_rch dispatcher, EventBase_rch event
 {
 }
 
-void PeriodicEvent::enable(const TimeDuration& period, bool immediate_dispatch, bool strict_timing)
+bool PeriodicEvent::enable(const TimeDuration& period, bool immediate_dispatch, bool strict_timing)
 {
   const MonotonicTimePoint now = MonotonicTimePoint::now();
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (timer_id_ < 1) {
+  if (!enabled_i()) {
     EventDispatcher_rch dispatcher = dispatcher_.lock();
     if (dispatcher) {
       const MonotonicTimePoint expiration = now + period;
-      long id = dispatcher->schedule(rchandle_from(this), expiration);
-      if (id > 0) {
+      if (immediate_dispatch) {
         period_ = period;
-        expiration_ = expiration;
-        timer_id_ = id;
+        expiration_ = now;
         strict_timing_ = strict_timing;
-        if (immediate_dispatch) {
-          dispatcher->dispatch(rchandle_from(this));
+        const bool okay = dispatcher->dispatch(rchandle_from(this));
+        if (!okay) {
+          period_ = TimeDuration::zero_value;
         }
-      } else if (log_level >= LogLevel::Warning) {
-        ACE_ERROR((LM_WARNING, "(%P|%t) PeriodicEvent::enable: failed to schedule\n"));
+        return okay;
+      } else {
+        const long id = dispatcher->schedule(rchandle_from(this), expiration);
+        if (id > 0) {
+          period_ = period;
+          expiration_ = expiration;
+          timer_id_ = id;
+          strict_timing_ = strict_timing;
+          return true;
+        } else if (log_level >= LogLevel::Warning) {
+          ACE_ERROR((LM_WARNING, "(%P|%t) PeriodicEvent::enable: failed to schedule\n"));
+        }
+      }
+    }
+  }
+  return false;
+}
+
+void PeriodicEvent::shorten_current_wait(const TimeDuration& period)
+{
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  if (timer_id_ > 0) {
+    const EventDispatcher_rch dispatcher = dispatcher_.lock();
+    if (dispatcher) {
+      const MonotonicTimePoint expiration = now + period;
+      if (expiration < expiration_ && dispatcher->cancel(timer_id_)) {
+        const long id = dispatcher->schedule(rchandle_from(this), expiration);
+        if (id > 0) {
+          expiration_ = expiration;
+          timer_id_ = id;
+        } else {
+          ACE_ERROR((LM_WARNING, "(%P|%t) PeriodicEvent::shorten_current_wait: failed to reschedule\n"));
+        }
       }
     }
   }
@@ -58,25 +89,34 @@ void PeriodicEvent::disable()
       }
     }
   }
+  period_ = TimeDuration::zero_value;
 }
 
 bool PeriodicEvent::enabled() const
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  return timer_id_ > 0;
+  return enabled_i();
+}
+
+RcHandle<EventBase> PeriodicEvent::event() const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(event_mutex_);
+  return event_;
 }
 
 void PeriodicEvent::handle_event_scheduling()
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   timer_id_ = 0;
-  EventDispatcher_rch dispatcher = dispatcher_.lock();
-  if (dispatcher) {
-    const MonotonicTimePoint expiration = (strict_timing_ ? expiration_ : MonotonicTimePoint::now()) + period_;
-    long id = dispatcher->schedule(rchandle_from(this), expiration);
-    if (id > 0) {
-      expiration_ = expiration;
-      timer_id_ = id;
+  if (enabled_i()) {
+    const EventDispatcher_rch dispatcher = dispatcher_.lock();
+    if (dispatcher) {
+      const MonotonicTimePoint expiration = (strict_timing_ ? expiration_ : MonotonicTimePoint::now()) + period_;
+      const long id = dispatcher->schedule(rchandle_from(this), expiration);
+      if (id > 0) {
+        expiration_ = expiration;
+        timer_id_ = id;
+      }
     }
   }
 }

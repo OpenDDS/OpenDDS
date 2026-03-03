@@ -92,6 +92,13 @@ bool DynamicSample::deserialize(Serializer& ser)
   }
   mb->wr_ptr(len);
 
+  if (!data_) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicSample::deserialize: data_ is null, cannot deserialize\n"));
+    }
+    return false;
+  }
+
   const DDS::DynamicType_var type = data_->type();
   DDS::DynamicData_var back = new DynamicDataXcdrReadImpl(mb.get(), ser.encoding(), type, extent_);
   data_ = new DynamicDataImpl(type, back);

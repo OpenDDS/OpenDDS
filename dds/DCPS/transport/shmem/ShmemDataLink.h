@@ -15,7 +15,7 @@
 #include "ShmemTransport_rch.h"
 
 #include <dds/DCPS/GuidUtils.h>
-#include <dds/DCPS/PeriodicTask.h>
+#include <dds/DCPS/PeriodicEvent.h>
 #include <dds/DCPS/transport/framework/DataLink.h>
 
 #include <string>
@@ -93,38 +93,18 @@ protected:
 
 private:
   void send_association_msg(const GUID_t& local, const GUID_t& remote);
-  void resend_association_msgs(const MonotonicTimePoint& now);
+  void resend_association_msgs();
 
   std::string peer_address_;
   ShmemAllocator* peer_alloc_;
   ACE_Thread_Mutex peer_alloc_mutex_;
-  ReactorTask_rch reactor_task_;
+  EventDispatcher_rch event_dispatcher_;
 
   ACE_Thread_Mutex assoc_resends_mutex_;
   typedef std::set<GuidPair> AssocResends;
   AssocResends assoc_resends_;
 
-  // This is essentially PmfPeriodicTask<ShmemDataLink>, but using that
-  // directly was causing warnings on MSVC x86.  There is only one member
-  // function that's used with a PeriodicTask.
-  struct PeriodicAssocResend : DCPS::PeriodicTask {
-    PeriodicAssocResend(DCPS::ReactorTask_rch reactor_task, const ShmemDataLink& delegate)
-      : PeriodicTask(reactor_task)
-      , delegate_(delegate)
-    {}
-
-    void execute(const MonotonicTimePoint& now)
-    {
-      const DCPS::RcHandle<ShmemDataLink> handle = delegate_.lock();
-      if (handle) {
-        handle->resend_association_msgs(now);
-      }
-    }
-
-    const DCPS::WeakRcHandle<ShmemDataLink> delegate_;
-  };
-
-  DCPS::RcHandle<PeriodicAssocResend> assoc_resends_task_;
+  DCPS::PeriodicEvent_rch assoc_resends_event_;
 };
 
 } // namespace DCPS

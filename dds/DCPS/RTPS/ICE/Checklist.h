@@ -125,7 +125,7 @@ struct ConnectivityCheck {
   }
   void password(const std::string& a_password)
   {
-    request_.password = a_password;
+    request_.password(a_password);
   }
 private:
   CandidatePair candidate_pair_;
@@ -136,7 +136,7 @@ private:
 
 inline bool operator==(const ConnectivityCheck& a_cc, const STUN::TransactionId& a_tid)
 {
-  return a_cc.request().transaction_id == a_tid;
+  return a_cc.request().transaction_id() == a_tid;
 }
 
 inline bool operator==(const ConnectivityCheck& a_cc, const CandidatePair& a_cp)

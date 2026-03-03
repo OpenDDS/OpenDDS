@@ -8,7 +8,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  VCPKG_GIT_COMMIT: 74e6536215718009aae747d86d84b78376bf9e09
+  VCPKG_GIT_COMMIT: 66c0373dc7fca549e5803087b9487edfe3aca0a1
 
 jobs:
 
@@ -47,7 +47,7 @@ jobs:
         cd OpenDDS
         make -j4 ishapes
     - name: upload ishapes artifact
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ github.job }}_artifact
         path: OpenDDS/examples/DCPS/ishapes/ishapes
@@ -103,7 +103,7 @@ jobs:
         call setenv.cmd
         msbuild -p:Configuration=Release,Platform=x64 -m -t:ishapes DDS_TAOv2_all.sln
     - name: upload ishapes artifact
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: ${{ github.job }}_artifact
         path: OpenDDS/examples/DCPS/ishapes/Static_Release/ishapes.exe

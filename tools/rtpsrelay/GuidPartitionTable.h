@@ -204,9 +204,8 @@ private:
 
   DeniedPartitions denied_partitions_;
 
-  using DeniedPartitionsCleanupSporadicTask = OpenDDS::DCPS::PmfSporadicTask<GuidPartitionTable>;
-  using DeniedPartitionsCleanupSporadicTask_rch = OpenDDS::DCPS::RcHandle<DeniedPartitionsCleanupSporadicTask>;
-  DeniedPartitionsCleanupSporadicTask_rch denied_partitions_cleanup_task_;
+  using GuidPartitionTableEvent = OpenDDS::DCPS::PmfNowEvent<GuidPartitionTable>;
+  OpenDDS::DCPS::SporadicEvent_rch denied_partitions_cleanup_task_;
   bool pending_denied_partitions_cleanup_ = false;
 
   mutable ACE_Thread_Mutex mutex_;

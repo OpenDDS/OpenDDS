@@ -138,6 +138,12 @@ public:
    */
   virtual size_t cancel(long id) = 0;
 
+  /**
+   * Get the internal event queue size
+   * @return the number of currently queued (dispatched, but not yet handled) events
+   */
+  virtual size_t queue_size() const = 0;
+
 };
 typedef RcHandle<EventDispatcher> EventDispatcher_rch;
 

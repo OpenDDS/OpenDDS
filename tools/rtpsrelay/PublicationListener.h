@@ -26,7 +26,7 @@ private:
   OpenDDS::DCPS::DomainParticipantImpl* participant_;
   GuidPartitionTable& guid_partition_table_;
   RelayStatisticsReporter& stats_reporter_;
-  size_t count_;
+  OpenDDS::DCPS::Atomic<size_t> count_;
 };
 
 }

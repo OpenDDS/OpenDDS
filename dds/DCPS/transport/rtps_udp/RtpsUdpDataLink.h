@@ -36,6 +36,7 @@
 #include <dds/DCPS/RcEventHandler.h>
 #include <dds/DCPS/ReactorTask.h>
 #include <dds/DCPS/ReactorTask_rch.h>
+#include <dds/DCPS/ReactorEvent.h>
 #include <dds/DCPS/SequenceNumber.h>
 #include <dds/DCPS/SporadicEvent.h>
 
@@ -263,11 +264,12 @@ public:
 
   static StatisticSeq stats_template();
   void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
-  size_t total_remote_reliable_writers() const;
-  std::pair<size_t, size_t> local_reliable_writer_stats() const;
+  void local_reliable_reader_stats(size_t& local_reader_count, size_t& remote_reliable_writer_count, size_t& pending_reliable_readers_count, size_t& readers_of_writer_count, size_t& writer_to_seq_best_effort_readers_count) const;
+  void local_reliable_writer_stats(size_t& local_writer_count, size_t& remote_reliable_reader_count, size_t& aggregate_reader_buffer_size) const;
 
 private:
   void on_data_available(RcHandle<InternalDataReader<NetworkInterfaceAddress> > reader);
+  void handle_network_interface_updates();
 
   // Internal non-locking versions of the above
   NetworkAddressSet get_addresses_i(const GUID_t& local, const GUID_t& remote) const;
@@ -806,7 +808,6 @@ private:
   ///   along with anything else that fits the 'writers side activity' of the datalink
   /// - locators_lock_ protects locators_ (and therefore calls to get_addresses_i())
   ///   for both remote writers and remote readers
-  /// - send_queues_lock protects thread_send_queues_
   mutable ACE_Thread_Mutex readers_lock_;
   mutable ACE_Thread_Mutex writers_lock_;
   mutable ACE_Thread_Mutex locators_lock_;
@@ -979,6 +980,7 @@ private:
   void accumulate_addresses(const GUID_t& local, const GUID_t& remote, NetworkAddressSet& addresses, bool prefer_unicast = false) const;
 
   RcHandle<InternalDataReader<NetworkInterfaceAddress> > network_interface_address_reader_;
+  RcHandle<ReactorEvent> network_interface_updates_event_;
   MulticastManager multicast_manager_;
 
   bool uses_end_historic_control_messages() const { return false; }

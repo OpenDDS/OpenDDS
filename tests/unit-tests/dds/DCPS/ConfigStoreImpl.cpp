@@ -2,6 +2,7 @@
 
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/LogAddr.h>
+#include <dds/DCPS/ServiceEventDispatcher.h>
 
 #include <gtestWrapper.h>
 
@@ -584,7 +585,8 @@ namespace {
 
 TEST(dds_DCPS_ConfigStoreImpl, process_section)
 {
-  JobQueue_rch job_queue = make_rch<JobQueue>(ACE_Reactor::instance());
+  OpenDDS::DCPS::EventDispatcher_rch event_dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(1);
+  JobQueue_rch job_queue = make_rch<JobQueue>(event_dispatcher);
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
   TimeSource time_source;
   ConfigStoreImpl config_store(topic, time_source);
@@ -650,7 +652,8 @@ TEST(dds_DCPS_ConfigStoreImpl, get_section_names)
 
 TEST(dds_DCPS_ConfigStoreImpl, get_section_values)
 {
-  JobQueue_rch job_queue = make_rch<JobQueue>(ACE_Reactor::instance());
+  OpenDDS::DCPS::EventDispatcher_rch event_dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(1);
+  JobQueue_rch job_queue = make_rch<JobQueue>(event_dispatcher);
   ConfigTopic_rch topic = make_rch<ConfigTopic>();
   TimeSource time_source;
   ConfigStoreImpl config_store(topic, time_source);
