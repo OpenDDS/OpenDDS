@@ -5,6 +5,14 @@ set(_OPENDDS_UTILS_CMAKE TRUE)
 
 include(GNUInstallDirs)
 
+macro(_opendds_eval out_var)
+  if(${ARGN})
+    set(${out_var} TRUE)
+  else()
+    set(${out_var} FALSE)
+  endif()
+endmacro()
+
 function(_opendds_get_generated_output_dir target output_dir_var)
   set(no_value_options MKDIR)
   set(single_value_options O_OPT)

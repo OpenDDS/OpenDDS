@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.23...4.0)
+cmake_minimum_required(VERSION 3.14...4.0)
 project(opendds_rtps CXX)
 
 find_package(OpenDDS REQUIRED NO_DEFAULTS OpenDDS::Dcps OpenDDS::opendds_idl)
@@ -20,8 +20,8 @@ add_library(OpenDDS_Rtps
   ICE/Checklist.cpp
   ICE/AgentImpl.cpp
 )
-target_sources(OpenDDS_Rtps
-  PUBLIC FILE_SET HEADERS BASE_DIRS "${OPENDDS_SOURCE_DIR}" FILES
+_opendds_headers(OpenDDS_Rtps
+  PUBLIC
     AssociationRecord.h
     DiscoveredEntities.h
     GuidGenerator.h
