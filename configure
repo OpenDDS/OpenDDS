@@ -208,6 +208,7 @@ my @specs =
     'static!', 'Static libraries (no)',
     'static-runtime!', 'Link to static platform runtime libraries',
     'ipv6!', 'IPv6 support (no)',
+    'profiling!', 'Set optimization and debug levels appropriate for profiling (no)',
     'sanitize=s@', 'Build with a sanitizer, can pass multiple times' .
       $argIndent . 'or one list separated by commas, combining asan' .
       $argIndent . "and tsan isn't recommended (no sanitizers)" .
@@ -1424,6 +1425,14 @@ if (scalar(@fsanitize)) {
   @sanitizer_linker_args = (@common, @sanitizer_linker_args);
 }
 
+my @profiling_compiler_args = ();
+my @profiling_linker_args = ();
+if ($opts{'profiling'}) {
+  my @common = ('-ggdb');
+  @profiling_compiler_args = ('-O3', @common, '-fno-omit-frame-pointer', @profiling_compiler_args);
+  @profiling_linker_args = (@common);
+}
+
 sub compiler {
   my %buildEnv = %{shift()};
   return ($buildEnv{'build'} eq 'target' && $opts{'target-compiler'}) ?
@@ -1518,6 +1527,11 @@ sub write_platform_macros {
       print $PMG
         'CPPFLAGS += ' . join(' ', @sanitizer_compiler_args) . "\n" .
         'LDFLAGS += ' . join(' ', @sanitizer_linker_args) . "\n";
+    }
+    if ($opts{'profiling'}) {
+      print $PMG
+        'CPPFLAGS += ' . join(' ', @profiling_compiler_args) . "\n" .
+        'LDFLAGS += ' . join(' ', @profiling_linker_args) . "\n";
     }
     my $plat = $opts{$buildEnv{'build'}};
     if ($pi->{'aceplatform'}) {
@@ -3091,13 +3105,20 @@ sub write_cmake_file {
     print_cmake_config($fh, 'features', \%features);
     print_cmake_config($fh, 'mpcopts', \@mpcopts);
 
-    print $fh "\n# Sanitizers\n";
+    print $fh "\n# Enabled Sanitizers\n";
     for my $name (sort(keys(%all_sanitizers))) {
       print_cmake_config($fh, $name, exists($enabled_sanitizers{$name}) ? 1 : 0);
     }
     if (scalar(@fsanitize)) {
+      print $fh "\n# Sanitizer Args\n";
       print_cmake_config($fh, 'SANITIZER_COMPILER_ARGS', \@sanitizer_compiler_args);
       print_cmake_config($fh, 'SANITIZER_LINKER_ARGS', \@sanitizer_linker_args);
+    }
+
+    if ($opts{'profiling'}) {
+      print $fh "\n# Profiling Args\n";
+      print_cmake_config($fh, 'PROFILING_COMPILER_ARGS', \@profiling_compiler_args);
+      print_cmake_config($fh, 'PROFILING_LINKER_ARGS', \@profiling_linker_args);
     }
   };
 
