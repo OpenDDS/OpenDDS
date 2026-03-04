@@ -61,7 +61,7 @@ TransportImpl::shutdown()
 
   is_shut_down_ = true;
 
-  event_dispatcher_->shutdown(true);
+  event_dispatcher_->shutdown(false);
 
   if (!this->reactor_task_.is_nil()) {
     this->reactor_task_->stop();

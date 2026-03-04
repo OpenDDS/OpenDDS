@@ -322,7 +322,7 @@ DDS::ReturnCode_t Service_Participant::shutdown()
       domain_ranges_.clear();
 
       if (event_dispatcher_) {
-        event_dispatcher_->shutdown(true);
+        event_dispatcher_->shutdown(false);
         event_dispatcher_.reset();
       }
       reactor_task_->stop();
