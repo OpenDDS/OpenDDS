@@ -9,6 +9,7 @@
 
 #include "ThreadStatusManager.h"
 #include "SafetyProfileStreams.h"
+#include "Hash.h"
 #include "debug.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -135,12 +136,7 @@ size_t ThreadStatusManager::get_container(ThreadId tid)
   return static_cast<size_t>(tid) % NUM_CONTAINERS;
 #else
   const unsigned char* data = reinterpret_cast<const unsigned char*>(tid.c_str());
-  // FNV-1a hash method
-  unsigned hash = 2166136261u;
-  for (size_t i = 0; i < tid.length(); ++i) {
-    hash ^= data[i];
-    hash *= 16777619u;
-  }
+  const unsigned hash = fnv_1a_hash(data, tid.length());
   return static_cast<size_t>(hash) % NUM_CONTAINERS;
 #endif
 }

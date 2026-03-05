@@ -16,8 +16,9 @@ const int EVENT2_DETAIL2 = 4;
 
 class TestThread : public ACE_Task_Base {
 public:
-  TestThread(ACE_Condition<ACE_Thread_Mutex>& cv)
-    : cv_(cv)
+  TestThread(ACE_Thread_Mutex& mutex, ACE_Condition<ACE_Thread_Mutex>& cv)
+    : mutex_(mutex)
+    , cv_(cv)
     , id_("dds_DCPS_ThreadStatusManager_TestThread")
   {}
 
@@ -35,6 +36,7 @@ private:
 
     // For each event, wait for the main thread to signal to proceed
     ThreadStatusManager::Start start(tsm, id_);
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     if (cv_.wait() != 0) {
       ACE_ERROR((LM_ERROR, "(%P|%t) TestThread::svc: failed waiting on cv_ after \"start\" began\n"));
       return -1;
@@ -67,6 +69,7 @@ private:
     return 0;
   }
 
+  ACE_Thread_Mutex& mutex_;
   ACE_Condition<ACE_Thread_Mutex>& cv_;
   String id_;
 };
@@ -159,7 +162,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   ACE_Thread_Mutex mutex;
   ACE_Condition<ACE_Thread_Mutex> cv(mutex);
-  TestThread task(cv);
+  TestThread task(mutex, cv);
   if (task.start() != 0) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to start test thread\n"));
     return EXIT_FAILURE;

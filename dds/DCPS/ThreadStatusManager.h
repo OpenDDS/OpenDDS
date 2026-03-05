@@ -81,7 +81,13 @@ public:
     Bucket buckets_[BUCKET_COUNT];
     size_t current_bucket_;
   };
+
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(ThreadId, Thread) Map;
+#else
   typedef OPENDDS_MAP(ThreadId, Thread) Map;
+#endif
+
   typedef OPENDDS_LIST(Thread) List;
 
   ThreadStatusManager()
@@ -208,7 +214,7 @@ private:
   static const size_t NUM_CONTAINERS = 11;
 
   struct ThreadContainer {
-    ThreadContainer() {}
+    ThreadContainer() : enabled_(false) {}
 
     // Store copies of these from the parent to avoid needing to access it.
     TimeDuration thread_status_interval_;
