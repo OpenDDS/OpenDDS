@@ -29,8 +29,11 @@ typedef String ThreadId;
 #endif /* ACE_WIN32 */
 
 struct OpenDDS_Dcps_Export ThreadInfo {
+  /// What the thread is being used for
   String name;
+  /// ID used to help generate thread status BIT key
   ThreadId thread_id;
+  /// This is p_thread_t on Linux and thread handle on Windows
   ACE_thread_t handle;
 
   String get_bit_key() const;

@@ -608,6 +608,7 @@ public:
     return config_store_;
   }
 
+  /// Set listener for thread start and finish, see ThreadStatusManager.h
   void set_thread_status_listener(ThreadStatusListener* listener);
 
 private:
