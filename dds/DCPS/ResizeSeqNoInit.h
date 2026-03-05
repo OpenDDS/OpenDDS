@@ -57,6 +57,7 @@ void resize_bounded_seq_no_init(
   OpenDDS::FaceTypes::Sequence<T, Bounds, Elts>& seq,
   typename OpenDDS::FaceTypes::Sequence<T, Bounds, Elts>::size_type new_length)
 {
+  // No difference from unbounded
   resize_unbounded_seq_no_init(seq, new_length);
 }
 
@@ -75,6 +76,7 @@ void resize_bounded_seq_no_init(
   OpenDDS::SafetyProfile::Sequence<T, Bounds, Elts>& seq,
   typename OpenDDS::SafetyProfile::Sequence<T, Bounds, Elts>::size_type new_length)
 {
+  // No difference from unbounded
   resize_unbounded_seq_no_init(seq, new_length);
 }
 
@@ -82,7 +84,7 @@ void resize_bounded_seq_no_init(
 struct OpenDDS_Dcps_Export InitInOptionalInitAllocator {
   const bool prev_value;
 
-  InitInOptionalInitAllocator(bool value);
+  explicit bool InitInOptionalInitAllocator(bool value);
   ~InitInOptionalInitAllocator();
 };
 
@@ -94,7 +96,7 @@ protected:
 public:
   template<typename U>
   struct rebind {
-      using other = OptionalInitAllocator<U, typename Traits::template rebind_alloc<U>>;
+    using other = OptionalInitAllocator<U, typename Traits::template rebind_alloc<U>>;
   };
 
   using Alloc::Alloc;
@@ -125,9 +127,14 @@ using OptionalInitVector = std::vector<T, OptionalInitAllocator<T>>;
 template <typename T, typename Alloc>
 void resize_unbounded_seq_no_init(std::vector<T, Alloc>& vec, typename std::vector<T, Alloc>::size_type new_length)
 {
-  // This is the most painful version of resize_seq_no_init. The std::vector
-  // needs a custom allocator (OptionalInitVector). This will almost certainly
-  // be slower than a vanilla std::vector unless optimization is enabled.
+  // This is the most annoying version of resize_seq_no_init. The std::vector
+  // needs a custom allocator (OptionalInitVector) to override initialization
+  // of elements because std::vector itself doesn't give a way to avoid
+  // initialization. This will almost certainly be slower than a vanilla
+  // std::vector unless optimization is enabled. Here
+  // InitInOptionalInitAllocator sets a global variable that
+  // OptionalInitAllocator checks to see if elements should be initialized or
+  // not.
   InitInOptionalInitAllocator skip_init(false);
   vec.resize(new_length);
 }
@@ -136,6 +143,7 @@ void resize_unbounded_seq_no_init(std::vector<T, Alloc>& vec, typename std::vect
 template <typename T, typename Alloc>
 void resize_bounded_seq_no_init(std::vector<T, Alloc>& vec, typename std::vector<T, Alloc>::size_type new_length)
 {
+  // No difference from unbounded
   resize_unbounded_seq_no_init(vec, new_length);
 }
 #endif

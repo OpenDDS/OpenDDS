@@ -329,6 +329,15 @@ For example:
     int32 value;
   };
 
+.. _opendds_idl--xtypes-annotations:
+
+XTypes Annotations
+------------------
+
+See :ref:`here <xtypes--idl-annotations>` for annotations related to XTypes.
+
+.. _opendds_idl--opendds-specific-annotations:
+
 OpenDDS-Specific Annotations
 ----------------------------
 
@@ -339,9 +348,11 @@ OpenDDS-Specific Annotations
 
 Applies to: sequence typedefs, anonymous sequence struct members, anonymous sequence union members (only when :ref:`opendds_idl--using-the-idl-to-c-11-mapping`)
 
-When deserializing a very long sequence of primitive values, a significant portion of time could be spent zero-initializing the memory of the expanded receiving type before inserting the actual values.
-The sequences other mappings can avoid doing this without any user intervention, but the :ref:`IDL-to-C++11 mapping <opendds_idl--using-the-idl-to-c-11-mapping>` requires a special ``std::vector`` type to do this.
-This type will not be assignable with normal ``std::vector`` types because it's using a custom allocator.
-In addition, it should be noted that builds using the IDL-to-C++11 mapping must be optimized to get any benefit from this, otherwise the deserialization will probably be slower.
+.. important:: Builds using the IDL-to-C++11 mapping will probably need to be optimized to get any benefit from this, otherwise the deserialization will probably be slower.
+
+When deserializing a very large sequence of primitive values, a significant portion of time could be spent zero-initializing the memory of the receiving type before setting the actual values.
+Zero-initializing in this case isn't required because all the elements are going to be set.
+While the classic TAO mapping can avoid this without any user intervention, the :ref:`IDL-to-C++11 mapping <opendds_idl--using-the-idl-to-c-11-mapping>` requires a special ``std::vector`` type with a custom allocator to do this.
+This is not the default because of potential slowdown and the fact this type will not be assignable with normal ``std::vector`` types as it's using a custom allocator.
 
 .. versionadded:: 3.34.0
