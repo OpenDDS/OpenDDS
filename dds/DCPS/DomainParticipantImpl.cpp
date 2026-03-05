@@ -1076,7 +1076,7 @@ DomainParticipantImpl::delete_contained_entities()
   }
 
   {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, subscribers_protector_, RcHandle<BitSubscriber>());
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, subscribers_protector_, DDS::RETCODE_ERROR);
     bit_subscriber_.reset();
   }
 
