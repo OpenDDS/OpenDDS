@@ -14,22 +14,22 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-thread_local bool init_in_optional_init_allocator = true;
+thread_local bool optional_init_allocator_must_init = true;
 
-OpenDDS_Dcps_Export bool get_init_in_optional_init_allocator()
+OpenDDS_Dcps_Export bool get_optional_init_allocator_must_init()
 {
-  return init_in_optional_init_allocator;
+  return optional_init_allocator_must_init;
 }
 
-InitInOptionalInitAllocator::InitInOptionalInitAllocator(bool value)
-: prev_value(init_in_optional_init_allocator)
+OptionalInitAllocatorScopedSetter::OptionalInitAllocatorScopedSetter(bool value)
+: prev_value(optional_init_allocator_must_init)
 {
-  init_in_optional_init_allocator = value;
+  optional_init_allocator_must_init = value;
 }
 
-InitInOptionalInitAllocator::~InitInOptionalInitAllocator()
+OptionalInitAllocatorScopedSetter::~OptionalInitAllocatorScopedSetter()
 {
-  init_in_optional_init_allocator = prev_value;
+  optional_init_allocator_must_init = prev_value;
 }
 
 } // namespace DCPS

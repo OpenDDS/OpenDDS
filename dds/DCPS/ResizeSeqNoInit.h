@@ -38,7 +38,7 @@ namespace SafetyProfile {
 
 namespace DCPS {
 
-bool OpenDDS_Dcps_Export get_init_in_optional_init_allocator();
+bool OpenDDS_Dcps_Export get_optional_init_allocator_must_init();
 
 /// Resize unbounded FACE sequences without zero-initializing new elements.
 template <typename T, typename Bounds, typename Elts>
@@ -81,11 +81,11 @@ void resize_bounded_seq_no_init(
 }
 
 #ifdef ACE_HAS_CPP11
-struct OpenDDS_Dcps_Export InitInOptionalInitAllocator {
+struct OpenDDS_Dcps_Export OptionalInitAllocatorScopedSetter {
   const bool prev_value;
 
-  explicit InitInOptionalInitAllocator(bool value);
-  ~InitInOptionalInitAllocator();
+  explicit OptionalInitAllocatorScopedSetter(bool value);
+  ~OptionalInitAllocatorScopedSetter();
 };
 
 template <typename T, typename Alloc = std::allocator<T>>
@@ -105,7 +105,7 @@ public:
   template <typename U>
   void construct(U* ptr) noexcept(std::is_nothrow_default_constructible<U>::value)
   {
-    if (get_init_in_optional_init_allocator()) {
+    if (get_optional_init_allocator_must_init()) {
       ::new (static_cast<void*>(ptr)) U();
     } else {
       ::new (static_cast<void*>(ptr)) U;
@@ -132,10 +132,10 @@ void resize_unbounded_seq_no_init(std::vector<T, Alloc>& vec, typename std::vect
   // of elements because std::vector itself doesn't give a way to avoid
   // initialization. This will almost certainly be slower than a vanilla
   // std::vector unless optimization is enabled. Here
-  // InitInOptionalInitAllocator sets a global variable that
+  // OptionalInitAllocatorScopedSetter sets a global variable that
   // OptionalInitAllocator checks to see if elements should be initialized or
   // not.
-  InitInOptionalInitAllocator skip_init(false);
+  OptionalInitAllocatorScopedSetter skip_init(false);
   vec.resize(new_length);
 }
 
