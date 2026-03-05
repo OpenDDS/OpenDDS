@@ -84,7 +84,7 @@ void resize_bounded_seq_no_init(
 struct OpenDDS_Dcps_Export InitInOptionalInitAllocator {
   const bool prev_value;
 
-  explicit bool InitInOptionalInitAllocator(bool value);
+  explicit InitInOptionalInitAllocator(bool value);
   ~InitInOptionalInitAllocator();
 };
 
