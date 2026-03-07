@@ -9,6 +9,7 @@
 #include "dds/Versioned_Namespace.h"
 #include "Definitions.h"
 #include "unique_ptr.h"
+#include "SafeBool_T.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -21,7 +22,7 @@ struct keep_count {};
 /// Templated Reference counted handle to a pointer.
 /// A non-DDS specific helper class.
 template <typename T>
-class RcHandle {
+class RcHandle : public SafeBool_T<RcHandle<T> > {
 public:
   RcHandle()
     : ptr_(0)
@@ -151,7 +152,7 @@ public:
     return retval;
   }
 
-  operator bool() const
+  bool boolean_test() const
   {
     return in() != 0;
   }
