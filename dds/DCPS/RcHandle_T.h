@@ -157,14 +157,14 @@ public:
     return in() != 0;
   }
 
-  bool operator==(const RcHandle& rhs) const
+  friend bool operator==(const RcHandle& lhs, const RcHandle& rhs)
   {
-    return in() == rhs.in();
+    return lhs.in() == rhs.in();
   }
 
-  bool operator!=(const RcHandle& rhs) const
+  friend bool operator!=(const RcHandle& lhs, const RcHandle& rhs)
   {
-    return in() != rhs.in();
+    return lhs.in() != rhs.in();
   }
 
   bool operator < (const RcHandle& rhs) const
