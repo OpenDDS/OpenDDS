@@ -6,6 +6,8 @@
 #include "Definitions.h"
 #include "Serializer.h"
 
+#include <dds/Versioned_Namespace.h>
+
 #include <tao/Array_VarOut_T.h> // Array_Traits
 #include <tao/String_Manager_T.h>
 
@@ -14,6 +16,8 @@
 #include <utility>
 #include <cstddef>
 #include <cstring>
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace SafetyProfile {
@@ -354,6 +358,9 @@ namespace SafetyProfile {
   template <typename T>
   inline void DefaultEltPolicy<T>::copy_n(const T* in, seq_size_type n, T* out)
   {
+    if (!(in && out)) {
+      return;
+    }
     std::memcpy(out, in, n * sizeof(T));
   }
 
@@ -605,7 +612,9 @@ namespace SafetyProfile {
     }
 
     Sequence tmp(len, len, allocate(len), true);
-    Elts::move_n(buffer_, length_, tmp.buffer_);
+    if (buffer_) {
+      Elts::move_n(buffer_, length_, tmp.buffer_);
+    }
     swap(tmp);
   }
 
@@ -680,5 +689,7 @@ namespace SafetyProfile {
   }
 }
 }
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif /* dds_DCPS_SafetyProfileSequence_h */

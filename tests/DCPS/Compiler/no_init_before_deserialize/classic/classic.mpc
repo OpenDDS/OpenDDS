@@ -1,0 +1,19 @@
+project(no_init_before_deserialize_classic): dcps_test {
+  exename = no_init_before_deserialize_classic
+  includes += .
+  macros += CPP11_MAPPING=0
+
+  idlflags += -I..
+
+  IDL_Files {
+    ../no_init_before_deserialize.idl
+  }
+
+  TypeSupport_Files {
+    ../no_init_before_deserialize.idl
+  }
+
+  Source_Files {
+    ../no_init_before_deserialize.cpp
+  }
+}

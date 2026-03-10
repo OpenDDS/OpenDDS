@@ -248,6 +248,7 @@ public:
   bool dynamic_data_adapter(AST_Decl* node) const;
 
   bool special_serialization(AST_Decl* node, std::string& template_name) const;
+  bool no_init_before_deserialize(AST_Decl* node) const;
 
   void generate_equality(bool flag) { generate_equality_ = flag; }
   bool generate_equality() const { return generate_equality_; }

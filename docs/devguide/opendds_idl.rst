@@ -1,8 +1,8 @@
 .. _opendds_idl:
 
-###########
-opendds_idl
-###########
+###############
+``opendds_idl``
+###############
 
 .. program:: opendds_idl
 
@@ -27,9 +27,9 @@ Subsequent sections describe all of the command-line options and the ways that `
 
 .. _opendds_idl--opendds-idl-command-line-options:
 
-********************************
-opendds_idl Command Line Options
-********************************
+************************************
+``opendds_idl`` Command Line Options
+************************************
 
 ..
     Sect<8.1>
@@ -301,3 +301,58 @@ When using MPC to generate projects, the ``opendds_cxx11`` base project should b
 If the generated code will be part of a shared library, use the ``-Wb,export_include`` option (in addition to ``-Wb,export_macro``) so that the generated headers have an ``#include`` for the export header.
 
 When using CMake to generate projects, see :doc:`/devguide/building/cmake`.
+
+.. _opendds_idl--usage:
+
+*********
+IDL Usage
+*********
+
+.. _opendds_idl--annotations:
+
+Annotations
+===========
+
+..
+    Sect<16.6>
+
+In IDL, annotations are a way of indicating meta-information about a type or part of a type.
+They usually precede what is being annotated and start with a ``@`` followed by the name of the annotation and optionally arguments like a function call.
+For example:
+
+.. code-block:: omg-idl
+
+  @topic
+  @mutable
+  struct TopicType {
+    @id(100)
+    int32 value;
+  };
+
+.. _opendds_idl--xtypes-annotations:
+
+XTypes Annotations
+------------------
+
+See :ref:`here <xtypes--idl-annotations>` for annotations related to XTypes.
+
+.. _opendds_idl--opendds-specific-annotations:
+
+OpenDDS-Specific Annotations
+----------------------------
+
+.. _opendds_idl-opendds-no_init_before_deserialize:
+
+``@OpenDDS::no_init_before_deserialize``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Applies to: sequence typedefs, anonymous sequence struct members, anonymous sequence union members (only when :ref:`opendds_idl--using-the-idl-to-c-11-mapping`)
+
+.. important:: Builds using the IDL-to-C++11 mapping will probably need to be optimized to get any benefit from this, otherwise the deserialization will probably be slower.
+
+When deserializing a very large sequence of primitive values, a significant portion of time could be spent zero-initializing the memory of the receiving type before setting the actual values.
+Zero-initializing in this case isn't required because all the elements are going to be set.
+While the classic TAO mapping can avoid this without any user intervention, the :ref:`IDL-to-C++11 mapping <opendds_idl--using-the-idl-to-c-11-mapping>` requires a special ``std::vector`` type with a custom allocator to do this.
+This is not the default because of potential slowdown and the fact this type will not be assignable with normal ``std::vector`` types as it's using a custom allocator.
+
+.. versionadded:: 3.34.0

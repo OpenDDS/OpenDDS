@@ -1,0 +1,22 @@
+#include <tao/FloatSeq.pidl>
+
+typedef sequence<float> FloatSeq;
+typedef sequence<float, 10> BoundedFloatSeq;
+@OpenDDS::no_init_before_deserialize
+typedef sequence<float> NoInitFloatSeq;
+@OpenDDS::no_init_before_deserialize
+typedef sequence<float, 10> BoundedNoInitFloatSeq;
+
+struct NoInitBeforeDeserializeStruct {
+  FloatSeq float_seq;
+  BoundedFloatSeq bounded_float_seq;
+  NoInitFloatSeq no_init_float_seq;
+  BoundedNoInitFloatSeq bounded_no_init_float_seq;
+
+  sequence<float> anon_float_seq;
+  sequence<float, 12> anon_bounded_float_seq;
+  @OpenDDS::no_init_before_deserialize
+  sequence<float> anon_no_init_float_seq;
+  @OpenDDS::no_init_before_deserialize
+  sequence<float, 12> anon_bounded_no_init_float_seq;
+};
