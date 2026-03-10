@@ -163,7 +163,7 @@ void ThreadStatusManager::update_i(Thread::ThreadStatus status, bool finished,
       finished_.push_back(thread);
       map_.erase(pos);
       if (thread_status_listener_) {
-        thread_status_listener_->on_thread_finished(finished_.back());
+        thread_status_listener_->on_thread_finished(finished_.back().info());
       }
     }
   }
