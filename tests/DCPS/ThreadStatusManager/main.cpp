@@ -2,10 +2,9 @@
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/InstanceState.h>
 
 #include <ace/Task.h>
-
-#ifndef DDS_HAS_MINIMUM_BIT
 
 using namespace OpenDDS::DCPS;
 
@@ -74,22 +73,9 @@ private:
   String id_;
 };
 
-const char* instance_state(DDS::InstanceStateKind instance_state)
-{
-  switch (instance_state) {
-    case DDS::ALIVE_INSTANCE_STATE:
-      return "ALIVE";
-    case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
-      return "NOT_ALIVE_DISPOSED";
-    case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
-      return "NOT_ALIVE_NO_WRITERS";
-    default:
-      return "UNKNOWN";
-  }
-}
-
 bool read_status(DDS::WaitSet_var ws, InternalThreadBuiltinTopicDataDataReader_var dr, MonotonicTimePoint& timestamp,
-                 const TestThread& task, bool thread_end = false, int expected_detail1 = 0, int expected_detail2 = 0)
+                 const TestThread& task, ACE_Condition<ACE_Thread_Mutex>& cv, const char* status,
+                 bool thread_end = false, int expected_detail1 = 0, int expected_detail2 = 0)
 {
   const DDS::Duration_t infinite = {DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
   DDS::ConditionSeq active;
@@ -136,12 +122,18 @@ bool read_status(DDS::WaitSet_var ws, InternalThreadBuiltinTopicDataDataReader_v
             }
             if (infos[0].instance_state != DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
               ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: read_status - expect instance_state NOT_ALIVE_DISPOSED, received %C\n",
-                instance_state(infos[0].instance_state)));
+                InstanceState::instance_state_string(infos[0].instance_state)));
             }
           }
         }
       }
     }
+  }
+
+  if (!found) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: read_status - failed to read test thread's %C status\n", status));
+  } else {
+    cv.broadcast();
   }
   return found;
 }
@@ -183,45 +175,34 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   MonotonicTimePoint thread_start, event1_start, event1_end, event2_start, event2_end, thread_end;
 
   // Notify the test thread to proceed after reading the thread status in each step
-  if (!read_status(ws, itbtd_reader, thread_start, task)) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to read test thread's start status\n"));
+  if (!read_status(ws, itbtd_reader, thread_start, task, cv, "start")) {
     return EXIT_FAILURE;
   }
-  cv.broadcast();
 
-  if (!read_status(ws, itbtd_reader, event1_start, task, false, EVENT1_DETAIL1, EVENT1_DETAIL2)) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to read test thread's event1 begin status\n"));
+  if (!read_status(ws, itbtd_reader, event1_start, task, cv, "event1 begin", false, EVENT1_DETAIL1, EVENT1_DETAIL2)) {
     return EXIT_FAILURE;
   }
-  cv.broadcast();
 
-  if (!read_status(ws, itbtd_reader, event2_start, task, false, EVENT2_DETAIL1, EVENT2_DETAIL2)) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to read test thread's event2 begin status\n"));
+  if (!read_status(ws, itbtd_reader, event2_start, task, cv, "event2 begin", false, EVENT2_DETAIL1, EVENT2_DETAIL2)) {
     return EXIT_FAILURE;
   }
-  cv.broadcast();
 
-  if (!read_status(ws, itbtd_reader, event2_end, task)) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to read test thread's event2 end status\n"));
+  if (!read_status(ws, itbtd_reader, event2_end, task, cv, "event2 end")) {
     return EXIT_FAILURE;
   }
-  cv.broadcast();
 
-  if (!read_status(ws, itbtd_reader, event1_end, task)) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to read test thread's event1 end status\n"));
+  if (!read_status(ws, itbtd_reader, event1_end, task, cv, "event1 end")) {
     return EXIT_FAILURE;
   }
-  cv.broadcast();
 
   // The thread status sample corresponding to the thread end event is a disposed sample,
   // so thread_end is just passed here, but its value is not used for anything.
-  if (!read_status(ws, itbtd_reader, thread_end, task, true)) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to read test thread's end status\n"));
+  if (!read_status(ws, itbtd_reader, thread_end, task, cv, "end", true)) {
     return EXIT_FAILURE;
   }
 
   // Check that the timestamps are in the correct order
-  bool ret = EXIT_SUCCESS;
+  int ret = EXIT_SUCCESS;
   if (!(thread_start < event1_start)) {
     ACE_ERROR((LM_WARNING, "(%P|%t) ERROR: main - thread_start ({%d sec, %u nsec}) should be before event1_start ({%d sec, %u nsec})\n",
       thread_start.to_idl_struct().sec, thread_start.to_idl_struct().nanosec,
@@ -255,5 +236,3 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   return ret;
 }
-
-#endif

@@ -1,5 +1,4 @@
 project: dcpsexe, dcps_test, dcps_rtps_udp {
   exename = threadstatusmanager
   requires += built_in_topics
-  idlflags += -SS
 }

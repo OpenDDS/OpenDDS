@@ -180,7 +180,23 @@ public:
 
 private:
   static ThreadId get_thread_id();
-  size_t get_container(ThreadId tid);
+
+  struct ThreadContainer {
+    ThreadContainer() : enabled_(false) {}
+
+    // Store copies of these from the parent to avoid needing to access it.
+    TimeDuration thread_status_interval_;
+    TimeDuration bucket_limit_;
+    bool enabled_;
+
+    Map map_;
+    List finished_;
+    mutable ACE_Thread_Mutex mutex_;
+
+    void cleanup(const MonotonicTimePoint& now);
+  };
+
+  ThreadContainer& get_container(ThreadId tid);
   void add_thread(const String& name);
 
   void update_i(Thread::ThreadStatus status, bool finished = false,
@@ -212,21 +228,6 @@ private:
   mutable ACE_Thread_Mutex lock_;
 
   static const size_t NUM_CONTAINERS = 11;
-
-  struct ThreadContainer {
-    ThreadContainer() : enabled_(false) {}
-
-    // Store copies of these from the parent to avoid needing to access it.
-    TimeDuration thread_status_interval_;
-    TimeDuration bucket_limit_;
-    bool enabled_;
-
-    Map map_;
-    List finished_;
-    mutable ACE_Thread_Mutex mutex_;
-
-    void cleanup(const MonotonicTimePoint& now);
-  };
   ThreadContainer containers_[NUM_CONTAINERS];
 };
 

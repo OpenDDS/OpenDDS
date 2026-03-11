@@ -93,7 +93,7 @@ void ThreadStatusManager::thread_status_interval(const TimeDuration& thread_stat
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     thread_status_interval_ = thread_status_interval;
     bucket_limit = bucket_limit_ = thread_status_interval / static_cast<double>(Thread::BUCKET_COUNT);
-    enabled = enabled_ = thread_status_interval_ > TimeDuration::zero_value ? true : false;
+    enabled = enabled_ = thread_status_interval_;
   }
 
   for (size_t i = 0; i < NUM_CONTAINERS; ++i) {
@@ -130,14 +130,14 @@ ThreadStatusManager::ThreadId ThreadStatusManager::get_thread_id()
 #endif
 }
 
-size_t ThreadStatusManager::get_container(ThreadId tid)
+ThreadStatusManager::ThreadContainer& ThreadStatusManager::get_container(ThreadId tid)
 {
 #if defined (ACE_WIN32) || defined (ACE_HAS_GETTID)
-  return static_cast<size_t>(tid) % NUM_CONTAINERS;
+  return containers_[static_cast<size_t>(tid) % NUM_CONTAINERS];
 #else
   const unsigned char* data = reinterpret_cast<const unsigned char*>(tid.c_str());
   const unsigned hash = fnv_1a_hash(data, tid.length());
-  return static_cast<size_t>(hash) % NUM_CONTAINERS;
+  return containers_[static_cast<size_t>(hash) % NUM_CONTAINERS];
 #endif
 }
 
@@ -156,7 +156,7 @@ void ThreadStatusManager::add_thread(const String& name)
                "adding thread %C\n", bit_key.c_str()));
   }
 
-  ThreadContainer& container = containers_[get_container(thread_id)];
+  ThreadContainer& container = get_container(thread_id);
   ACE_GUARD(ACE_Thread_Mutex, g, container.mutex_);
   container.map_.insert(std::make_pair(thread_id, Thread(bit_key)));
 }
@@ -168,7 +168,7 @@ void ThreadStatusManager::update_i(Thread::ThreadStatus status, bool finished,
   const SystemTimePoint s_now = SystemTimePoint::now();
   const ThreadId thread_id = get_thread_id();
 
-  ThreadContainer& container = containers_[get_container(thread_id)];
+  ThreadContainer& container = get_container(thread_id);
   ACE_GUARD(ACE_Thread_Mutex, g, container.mutex_);
 
   if (!container.enabled_) {
