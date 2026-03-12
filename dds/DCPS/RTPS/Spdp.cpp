@@ -1440,7 +1440,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
   purge_handshake_deadlines(iter);
   dp.handshake_deadline_ = DCPS::MonotonicTimePoint::now() + max_auth_time_;
   handshake_deadlines_.insert(std::make_pair(dp.handshake_deadline_, guid));
-  sedp_->event_dispatcher()->schedule(tport_->handshake_deadline_event_, MonotonicTimePoint::now() + max_auth_time_);
+  tport_->handshake_deadline_event_->schedule(max_auth_time_);
 
   DDS::Security::ValidationResult_t vr = validation ? *validation : DDS::Security::VALIDATION_FAILED;
   static const DDS::Security::SecurityException default_sec_except = {"", 0, 0};
