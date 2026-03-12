@@ -41,6 +41,17 @@ inline uint32_t one_at_a_time_hash(const uint8_t* key, size_t length, uint32_t s
 }
 #endif
 
+inline unsigned fnv_1a_hash(const unsigned char* data, size_t length)
+{
+  // Refer to https://en.wikipedia.org/wiki/Fowler-Noll-Vo_hash_function for more information.
+  unsigned hash = 2166136261u;
+  for (size_t i = 0; i < length; ++i) {
+    hash ^= data[i];
+    hash *= 16777619u;
+  }
+  return hash;
+}
+
 }
 }
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
