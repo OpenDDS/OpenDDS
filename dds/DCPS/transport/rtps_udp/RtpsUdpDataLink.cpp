@@ -500,6 +500,9 @@ RtpsUdpDataLink::update_locators(const GUID_t& remote_id,
 
   remove_locator_and_bundling_cache(remote_id);
 
+  NetworkAddressSet unicast_addresses_backup;
+  NetworkAddressSet multicast_addresses_backup;
+
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
 
   RemoteInfo* info = 0;
@@ -521,7 +524,13 @@ RtpsUdpDataLink::update_locators(const GUID_t& remote_id,
   const bool log_change = DCPS_debug_level >= 4;
   const bool log_unicast_change = log_change && info->unicast_addrs_ != unicast_addresses;
   const bool log_multicast_change = log_change && info->multicast_addrs_ != multicast_addresses;
+  if (log_unicast_change) {
+    unicast_addresses_backup = unicast_addresses;
+  }
   info->unicast_addrs_.swap(unicast_addresses);
+  if (log_multicast_change) {
+    multicast_addresses_backup = multicast_addresses;
+  }
   info->multicast_addrs_.swap(multicast_addresses);
   info->requires_inline_qos_ = requires_inline_qos;
   if (add_ref) {
@@ -533,12 +542,22 @@ RtpsUdpDataLink::update_locators(const GUID_t& remote_id,
   if (log_unicast_change) {
     for (NetworkAddressSet::const_iterator pos = unicast_addresses.begin(), limit = unicast_addresses.end();
          pos != limit; ++pos) {
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::update_locators %C was previously at %C\n"),
+                 LogGuid(remote_id).c_str(), LogAddr(*pos).c_str()));
+    }
+    for (NetworkAddressSet::const_iterator pos = unicast_addresses_backup.begin(), limit = unicast_addresses_backup.end();
+         pos != limit; ++pos) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::update_locators %C is now at %C\n"),
                  LogGuid(remote_id).c_str(), LogAddr(*pos).c_str()));
     }
   }
   if (log_multicast_change) {
     for (NetworkAddressSet::const_iterator pos = multicast_addresses.begin(), limit = multicast_addresses.end();
+         pos != limit; ++pos) {
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::update_locators %C was previously at %C\n"),
+                 LogGuid(remote_id).c_str(), LogAddr(*pos).c_str()));
+    }
+    for (NetworkAddressSet::const_iterator pos = multicast_addresses_backup.begin(), limit = multicast_addresses_backup.end();
          pos != limit; ++pos) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::update_locators %C is now at %C\n"),
                  LogGuid(remote_id).c_str(), LogAddr(*pos).c_str()));
