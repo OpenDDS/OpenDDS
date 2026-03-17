@@ -283,8 +283,10 @@ TransportInst::instantiation_rule() const
 
 TransportImpl_rch
 TransportInst::get_or_create_impl(DDS::DomainId_t domain,
-                                  DomainParticipantImpl* participant)
+                                  const GUID_t& guid)
 {
+  GUID_t participant = guid;
+
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, lock_, TransportImpl_rch());
 
   // Only use the domain to find the impl is if this inst is a template.
@@ -292,12 +294,13 @@ TransportInst::get_or_create_impl(DDS::DomainId_t domain,
   DDS::DomainId_t find_domain = domain;
   if (is_template_) {
     if (instantiation_rule() != "per_participant") {
-      participant = 0;
+      participant = GUID_UNKNOWN;
     }
   } else {
     find_domain = 0;
-    participant = 0;
+    participant = GUID_UNKNOWN;
   }
+  participant.entityId = ENTITYID_PARTICIPANT;
 
   if (!shutting_down_) {
     try {
@@ -320,7 +323,7 @@ TransportInst::get_or_create_impl(DDS::DomainId_t domain,
 
 void
 TransportInst::remove_participant(DDS::DomainId_t domain,
-                                  DomainParticipantImpl* participant)
+                                  const GUID_t& participant)
 {
   ACE_GUARD(ACE_SYNCH_MUTEX, g, lock_);
 
@@ -344,18 +347,21 @@ TransportInst::remove_participant(DDS::DomainId_t domain,
 
 TransportImpl_rch
 TransportInst::get_impl(DDS::DomainId_t domain,
-                        DomainParticipantImpl* participant)
+                        const GUID_t& guid) const
 {
+  GUID_t participant = guid;
+
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, lock_, TransportImpl_rch());
 
   if (is_template_) {
     if (instantiation_rule() != "per_participant") {
-      participant = 0;
+      participant = GUID_UNKNOWN;
     }
   } else {
     domain = 0;
-    participant = 0;
+    participant = GUID_UNKNOWN;
   }
+  participant.entityId = ENTITYID_PARTICIPANT;
 
   DomainMap::const_iterator pos = domain_map_.find(domain);
   if (pos != domain_map_.end()) {
@@ -396,7 +402,7 @@ TransportInst::set_port_in_addr_string(OPENDDS_STRING& addr_str, u_short port_nu
 
 WeakRcHandle<OpenDDS::ICE::Endpoint>
 TransportInst::get_ice_endpoint(DDS::DomainId_t domain,
-                                DomainParticipantImpl* participant)
+                                const GUID_t& participant)
 {
   const TransportImpl_rch temp = get_or_create_impl(domain, participant);
   return temp ? temp->get_ice_endpoint() : WeakRcHandle<OpenDDS::ICE::Endpoint>();
@@ -422,7 +428,7 @@ TransportInst::use_ice_now(bool flag)
 
 ReactorTask_rch
 TransportInst::reactor_task(DDS::DomainId_t domain,
-                            DomainParticipantImpl* participant)
+                            const GUID_t& participant)
 {
   const TransportImpl_rch temp = get_or_create_impl(domain, participant);
   return temp ? temp->reactor_task() : ReactorTask_rch();
@@ -430,11 +436,27 @@ TransportInst::reactor_task(DDS::DomainId_t domain,
 
 EventDispatcher_rch
 TransportInst::event_dispatcher(DDS::DomainId_t domain,
-                                DomainParticipantImpl* participant)
+                                const GUID_t& participant)
 {
   const TransportImpl_rch temp = get_or_create_impl(domain, participant);
   return temp ? temp->event_dispatcher() : EventDispatcher_rch();
 }
+
+NetworkAddress
+TransportInst::actual_local_address(DDS::DomainId_t /*domain*/,
+                                    const GUID_t& /*participant*/) const
+{
+  return NetworkAddress::default_IPV4;
+}
+
+#ifdef ACE_HAS_IPV6
+NetworkAddress
+TransportInst::ipv6_actual_local_address(DDS::DomainId_t /*domain*/,
+                                         const GUID_t& /*participant*/) const
+{
+  return NetworkAddress::default_IPV6;
+}
+#endif
 
 } // DCPS
 } // OpenDDS

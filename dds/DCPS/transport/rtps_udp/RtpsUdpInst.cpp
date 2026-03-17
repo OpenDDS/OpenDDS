@@ -42,10 +42,6 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name,
   , responsive_mode_(*this, &RtpsUdpInst::responsive_mode, &RtpsUdpInst::responsive_mode)
   , send_delay_(*this, &RtpsUdpInst::send_delay, &RtpsUdpInst::send_delay)
   , opendds_discovery_guid_(GUID_UNKNOWN)
-  , actual_local_address_(NetworkAddress::default_IPV4)
-#ifdef ACE_HAS_IPV6
-  , ipv6_actual_local_address_(NetworkAddress::default_IPV6)
-#endif
 {}
 
 void
@@ -658,7 +654,8 @@ RtpsUdpInst::dump_to_str(DDS::DomainId_t domain) const
 size_t
 RtpsUdpInst::populate_locator(TransportLocator& info,
                               ConnectionInfoFlags flags,
-                              DDS::DomainId_t domain) const
+                              DDS::DomainId_t domain,
+                              const GUID_t& participant) const
 {
   using namespace OpenDDS::RTPS;
 
@@ -679,8 +676,13 @@ RtpsUdpInst::populate_locator(TransportLocator& info,
   }
 #endif
 
+  NetworkAddress my_actual_local_address = actual_local_address(domain, participant);
+#ifdef ACE_HAS_IPV6
+  NetworkAddress my_ipv6_actual_local_address = ipv6_actual_local_address(domain, participant);
+#endif
+
   if (flags & CONNINFO_UNICAST) {
-    const NetworkAddress addr = (actual_local_address_ == NetworkAddress::default_IPV4) ? local_address() : actual_local_address_;
+    const NetworkAddress addr = (my_actual_local_address == NetworkAddress::default_IPV4) ? local_address() : my_actual_local_address;
     if (addr != NetworkAddress::default_IPV4) {
       if (advertised_address() != NetworkAddress::default_IPV4) {
         grow(locators);
@@ -707,7 +709,7 @@ RtpsUdpInst::populate_locator(TransportLocator& info,
       }
     }
 #ifdef ACE_HAS_IPV6
-    const NetworkAddress addr6 = (ipv6_actual_local_address_ == NetworkAddress::default_IPV6) ? ipv6_local_address() : ipv6_actual_local_address_;
+    const NetworkAddress addr6 = (my_ipv6_actual_local_address == NetworkAddress::default_IPV6) ? ipv6_local_address() : my_ipv6_actual_local_address;
     if (addr6 != NetworkAddress::default_IPV6) {
       if (ipv6_advertised_address() != NetworkAddress::default_IPV6) {
         grow(locators);
@@ -758,7 +760,7 @@ void
 RtpsUdpInst::update_locators(const GUID_t& remote_id,
                              const TransportLocatorSeq& locators,
                              DDS::DomainId_t domain,
-                             DomainParticipantImpl* participant)
+                             const GUID_t& participant)
 {
   TransportImpl_rch imp = get_or_create_impl(domain, participant);
   if (imp) {
@@ -772,7 +774,7 @@ RtpsUdpInst::get_last_recv_locator(const GUID_t& remote_id,
                                    const GuidVendorId_t& vendor_id,
                                    TransportLocator& locator,
                                    DDS::DomainId_t domain,
-                                   DomainParticipantImpl* participant)
+                                   const GUID_t& participant)
 {
   TransportImpl_rch imp = get_or_create_impl(domain, participant);
   if (imp) {
@@ -784,7 +786,7 @@ RtpsUdpInst::get_last_recv_locator(const GUID_t& remote_id,
 void
 RtpsUdpInst::append_transport_statistics(TransportStatisticsSequence& seq,
                                          DDS::DomainId_t domain,
-                                         DomainParticipantImpl* participant)
+                                         const GUID_t& participant)
 {
   TransportImpl_rch imp = get_or_create_impl(domain, participant);
   if (imp) {
@@ -792,6 +794,32 @@ RtpsUdpInst::append_transport_statistics(TransportStatisticsSequence& seq,
     rtps_impl->append_transport_statistics(seq);
   }
 }
+
+NetworkAddress
+RtpsUdpInst::actual_local_address(DDS::DomainId_t domain,
+                                  const GUID_t& participant) const
+{
+  TransportImpl_rch imp = get_impl(domain, participant);
+  if (imp) {
+    RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
+    return rtps_impl->core().actual_local_address();
+  }
+  return NetworkAddress::default_IPV4;
+}
+
+#ifdef ACE_HAS_IPV6
+NetworkAddress
+RtpsUdpInst::ipv6_actual_local_address(DDS::DomainId_t domain,
+                                  const GUID_t& participant) const
+{
+  TransportImpl_rch imp = get_impl(domain, participant);
+  if (imp) {
+    RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
+    return rtps_impl->core().ipv6_actual_local_address();
+  }
+  return NetworkAddress::default_IPV6;
+}
+#endif
 
 } // namespace DCPS
 } // namespace OpenDDS

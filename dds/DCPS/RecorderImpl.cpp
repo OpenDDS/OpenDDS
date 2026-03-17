@@ -887,7 +887,7 @@ RecorderImpl::enable()
     try {
       enable_transport(qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS,
                        qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS,
-                       participant_servant_);
+                       participant_servant_->get_id());
     } catch (const Transport::Exception&) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RecorderImpl::enable: Transport Exception\n"));

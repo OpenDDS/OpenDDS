@@ -348,7 +348,7 @@ ReplayerImpl::enable()
 
   try {
     this->enable_transport(reliable,
-                           this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS, participant_servant_);
+                           this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS, participant_servant_->get_id());
 
   } catch (const Transport::Exception&) {
     ACE_ERROR((LM_ERROR,

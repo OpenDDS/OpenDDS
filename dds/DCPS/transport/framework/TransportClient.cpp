@@ -80,7 +80,7 @@ TransportClient::clean_prev_pending()
 }
 
 void
-TransportClient::enable_transport(bool reliable, bool durable, DomainParticipantImpl* dpi)
+TransportClient::enable_transport(bool reliable, bool durable, const GUID_t& guid)
 {
   // Search for a TransportConfig to use:
   TransportConfig_rch tc;
@@ -117,13 +117,13 @@ TransportClient::enable_transport(bool reliable, bool durable, DomainParticipant
     throw Transport::NotConfigured();
   }
 
-  enable_transport_using_config(reliable, durable, tc, dpi);
+  enable_transport_using_config(reliable, durable, tc, guid);
 }
 
 void
 TransportClient::enable_transport_using_config(bool reliable, bool durable,
                                                const TransportConfig_rch& tc,
-                                               DomainParticipantImpl* dpi)
+                                               const GUID_t& guid)
 {
   config_ = tc;
   swap_bytes_ = tc->swap_bytes_;
@@ -140,7 +140,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
     }
   }
 
-  populate_connection_info(dpi);
+  populate_connection_info(guid);
 
   const size_t n = tc->instances_.size();
 
@@ -148,7 +148,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
     TransportInst_rch inst = tc->instances_[i];
 
     if (check_transport_qos(*inst)) {
-      TransportImpl_rch impl = inst->get_or_create_impl(domain_id(), dpi);
+      TransportImpl_rch impl = inst->get_or_create_impl(domain_id(), guid);
 
       if (impl) {
         impls_.push_back(impl);
@@ -171,7 +171,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
 }
 
 void
-TransportClient::populate_connection_info(DomainParticipantImpl* dpi)
+TransportClient::populate_connection_info(const GUID_t& guid)
 {
   conn_info_.length(0);
 
@@ -179,7 +179,7 @@ TransportClient::populate_connection_info(DomainParticipantImpl* dpi)
   for (size_t i = 0; i < n; ++i) {
     TransportInst_rch inst = config_->instances_[i];
     if (check_transport_qos(*inst)) {
-      TransportImpl_rch impl = inst->get_or_create_impl(domain_id(), dpi);
+      TransportImpl_rch impl = inst->get_or_create_impl(domain_id(), guid);
       if (impl) {
         const CORBA::ULong idx = DCPS::grow(conn_info_) - 1;
         impl->connection_info(conn_info_[idx], CONNINFO_ALL);

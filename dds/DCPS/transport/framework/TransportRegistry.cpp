@@ -12,12 +12,12 @@
 #include "TransportType.h"
 
 #include <dds/DCPS/debug.h>
+#include <dds/DCPS/DomainParticipantImpl.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/Util.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/EntityImpl.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
-
 #include <dds/DdsDcpsInfrastructureC.h>
 
 #include <ace/Singleton.h>
@@ -450,7 +450,7 @@ TransportRegistry::released() const
 
 void
 TransportRegistry::remove_participant(DDS::DomainId_t domain,
-                                      DomainParticipantImpl* participant)
+                                      const GUID_t& participant)
 {
   GuardType guard(lock_);
   for (InstMap::const_iterator pos = inst_map_.begin(), limit = inst_map_.end(); pos != limit; ++pos) {

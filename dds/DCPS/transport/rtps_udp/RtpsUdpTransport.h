@@ -237,6 +237,32 @@ public:
   }
 #endif
 
+  void actual_local_address(const NetworkAddress& address)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    actual_local_address_ = address;
+  }
+
+  NetworkAddress actual_local_address() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return actual_local_address_;
+  }
+
+#ifdef ACE_HAS_IPV6
+  void ipv6_actual_local_address(const NetworkAddress& address)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    ipv6_actual_local_address_ = address;
+  }
+
+  NetworkAddress ipv6_actual_local_address() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return ipv6_actual_local_address_;
+  }
+#endif
+
 private:
   mutable ACE_Thread_Mutex mutex_;
   const TimeDuration send_delay_;
@@ -251,6 +277,10 @@ private:
   MessageDropper message_dropper_;
   InternalTransportStatistics transport_statistics_;
   FibonacciSequence<TimeDuration> relay_stun_event_falloff_;
+  NetworkAddress actual_local_address_;
+#ifdef ACE_HAS_IPV6
+  NetworkAddress ipv6_actual_local_address_;
+#endif
 };
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl, public ConfigListener {

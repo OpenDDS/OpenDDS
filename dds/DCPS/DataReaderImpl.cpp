@@ -1189,7 +1189,7 @@ DataReaderImpl::enable()
   if (topic_servant_ && !transport_disabled_) {
     try {
       this->enable_transport(this->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS,
-                             this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS, participant.get());
+                             this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS, participant->get_id());
     } catch (const Transport::Exception&) {
       ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable, ")
@@ -3257,7 +3257,7 @@ DDS::Security::ParticipantCryptoHandle DataReaderImpl::get_crypto_handle() const
 void DataReaderImpl::transport_discovery_change()
 {
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
-  populate_connection_info(participant.get());
+  populate_connection_info(participant->get_id());
   const TransportLocatorSeq& trans_conf_info = connection_info();
   const GUID_t dp_id_copy = dp_id_;
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);

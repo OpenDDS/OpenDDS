@@ -21,7 +21,7 @@ class SimpleTransportClient : public OpenDDS::DCPS::TransportClient
       try
         {
           exceptionThrown = false;
-          this->enable_transport(false, false, 0);
+          this->enable_transport(false, false, repoId_);
         } catch (const OpenDDS::DCPS::Transport::Exception&) {
               exceptionThrown = true;
         } catch (const CORBA::BAD_PARAM& ) {
