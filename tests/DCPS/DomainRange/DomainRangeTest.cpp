@@ -61,7 +61,9 @@ public:
     }
 
     // Block until Subscriber is available
-    Utils::wait_match(writer_, static_cast<unsigned int>(total_readers_));
+    Utils::wait_match(writer_, static_cast<unsigned int>(total_readers_), Utils::EQ);
+
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) WriterTask::svc - fully matched for writer_id: %C\n", writer_id_.c_str()));
 
     // Write samples
     Messenger::Message message;
@@ -92,7 +94,7 @@ public:
 private:
   OPENDDS_STRING writer_id_;
   DDS::DataWriter_var writer_;
-  int total_readers_;
+  const int total_readers_;
 };
 
 ACE_Thread_Mutex readers_done_lock;
@@ -325,10 +327,14 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         task.wait();
       }
 
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Writer task %C complete\n", writer_id.c_str()));
+
       ACE_Guard<ACE_Thread_Mutex> g(readers_done_lock);
       while (readers_done != TOTAL_READERS) {
         readers_done_cond.wait();
       }
+
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) All readers have received all samples\n"));
 
       // Clean-up!
       for (int x = 0; x < TOTAL_READERS; ++x) {
@@ -336,8 +342,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         dpf->delete_participant(participants[x]);
       }
 
-      // Block until Subscriber goes away
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Waiting for readers to disassociate\n"));
+
+      // Block until Subscribers go away
       Utils::wait_match(writer, 0, Utils::EQ);
+
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) All readers gone. Final cleanup.\n"));
 
       pub_participant->delete_contained_entities();
       dpf->delete_participant(pub_participant);
