@@ -68,7 +68,7 @@ RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst,
   , stats_writer_(make_rch<StatisticsDataWriter>(DataWriterQosBuilder().durability_transient_local(), TheServiceParticipant->time_source()))
   , stats_template_(stats_template())
 {
-  assign(local_prefix_, GUIDPREFIX_UNKNOWN);
+  core_.set_local_prefix(GUIDPREFIX_UNKNOWN);
   if (!(configure_i(inst) && open())) {
     throw Transport::UnableToCreate();
   }
@@ -114,8 +114,10 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
     return RtpsUdpDataLink_rch();
   }
 
-  if (equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
-    assign(local_prefix_, local_prefix);
+  GuidPrefix_t temp_local_prefix;
+  core_.get_local_prefix(temp_local_prefix);
+  if (equal_guid_prefixes(temp_local_prefix, GUIDPREFIX_UNKNOWN)) {
+    core_.set_local_prefix(local_prefix);
 #if OPENDDS_CONFIG_SECURITY
     core_.reset_relay_stun_event_falloff();
     relay_stun_event_->schedule(TimeDuration::zero_value);
@@ -371,7 +373,9 @@ RtpsUdpTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags 
 {
   RtpsUdpInst_rch cfg = config();
   if (cfg) {
-    cfg->populate_locator(info, flags, domain_, make_part_guid(local_prefix_));
+    GuidPrefix_t local_prefix;
+    core_.get_local_prefix(local_prefix);
+    cfg->populate_locator(info, flags, domain_, make_part_guid(local_prefix));
     return true;
   }
   return false;
@@ -1073,10 +1077,12 @@ RtpsUdpTransport::relay_stun_event()
 
   const ACE_INET_Addr relay_address = core_.rtps_relay_address().to_addr();
 
+  GuidPrefix_t local_prefix;
+  core_.get_local_prefix(local_prefix);
   if ((core_.use_rtps_relay() || core_.rtps_relay_only()) &&
       relay_address != ACE_INET_Addr() &&
-      !equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
-    process_relay_sra_i(relay_srsm_.send(relay_address, ICE::Configuration::instance()->server_reflexive_indication_count(), local_prefix_));
+      !equal_guid_prefixes(local_prefix, GUIDPREFIX_UNKNOWN)) {
+    process_relay_sra_i(relay_srsm_.send(relay_address, ICE::Configuration::instance()->server_reflexive_indication_count(), local_prefix));
     ice_endpoint_->send(relay_address, relay_srsm_.message());
     relay_stun_event_->schedule(core_.advance_relay_stun_event_falloff());
   }

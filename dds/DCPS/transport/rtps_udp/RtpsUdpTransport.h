@@ -263,6 +263,18 @@ public:
   }
 #endif
 
+  void set_local_prefix(const GuidPrefix_t& local_prefix)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    assign(local_prefix_, local_prefix);
+  }
+
+  void get_local_prefix(GuidPrefix_t& local_prefix) const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    assign(local_prefix, local_prefix_);
+  }
+
 private:
   mutable ACE_Thread_Mutex mutex_;
   const TimeDuration send_delay_;
@@ -281,6 +293,7 @@ private:
 #ifdef ACE_HAS_IPV6
   NetworkAddress ipv6_actual_local_address_;
 #endif
+  GuidPrefix_t local_prefix_;
 };
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl, public ConfigListener {
@@ -393,7 +406,6 @@ private:
   ThreadLockType links_lock_;
 
   RcHandle<BitSubscriber> bit_sub_;
-  GuidPrefix_t local_prefix_;
 
   /// RTPS uses only one link per transport.
   /// This link can be safely reused by any clients that belong to the same
