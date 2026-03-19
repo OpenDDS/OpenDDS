@@ -1,6 +1,8 @@
 ---
 layout: page
 title: Building Tactical Microgrid Standard Systems Using OpenDDS
+order: 83
+hide_submenu: true
 ---
 <p class="author">
 Son Dinh, Senior Software Engineer (Object Computing, Inc.)<br>

@@ -59,7 +59,9 @@
           {% assign slash = p.url | split: '/' %}
           {% assign redirect = false %}
           {% assign external_override = false %}
-          {% if p contains 'external_override' %}{% assign external_override = p.external_override %}{% endif %}
+          {% if p contains 'external_override' %}
+            {% assign external_override = p.external_override %}
+          {% endif %}
           {% if p contains 'redirect' and p.redirect and external_override != true %}
             {% assign redirect = true %}
           {% endif %}
@@ -78,6 +80,17 @@
                       or omit_from_sitemap
                       or p.url == '/redirects.json' %}
             {% assign indent = slash.size %}
+            {% assign level_p1 = level | plus: 1 %}
+            {% if indent > level_p1 %}
+              {% comment %}
+              This is a janky way to cause an error in strict mode as a
+              workaround to the fact that Liquid doesn't have a way to emit an
+              error. Error if the level this thing is tracking doesn't match
+              the directory depth.
+              {% endcomment %}
+              {% capture error_msg %}MENU_HIERARCHY_BROKEN{{ p.url | replace: "/", "_" }}_expected_level_{{ level_p1 }}_or_less_but_got_{{ indent }}{% endcapture %}
+              {% include {{ error_msg }} %}
+            {% endif %}
             {% assign level_m1 = level | minus: 1 %}
             {% assign last = p.url | slice: -1, 1 %}
             {% for i in (indent..level_m1) %}</ul></li>{% endfor %}
@@ -119,6 +132,7 @@
                       {% endif %}
                       </a>
                     </li>
+              {% assign level = slash.size | plus: 1 %}
             {% else %}
                 <li><a class="page-link" href="{{p.url | prepend: site.baseurl}}">
                   {% if menu_title %}
@@ -127,8 +141,8 @@
                     {{ p.title }}
                   {% endif %}
                 </a></li>
+              {% assign level = slash.size %}
             {% endif %}
-            {% assign level = slash.size %}
           {% endunless %}
         {% endfor %}
         {% assign terminate_ul_count = level | minus: start_level %}
