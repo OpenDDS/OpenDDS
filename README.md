@@ -36,6 +36,14 @@ bundle exec jekyll serve
 
 It will print the URL of the locally hosted site.
 
+### Strict Build
+
+This will command will catch errors with the Liquid templetess.
+
+```
+bundle exec jekyll build --config _config.yml,_config_strict.yml
+```
+
 ## Running `htmlproofer.sh` Locally
 
 [`htmlproofer.sh`](htmlproofer.sh) is a wrapper around

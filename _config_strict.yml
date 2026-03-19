@@ -1,0 +1,13 @@
+# Strict mode settings for development/testing
+# Usage: bundle exec jekyll build --config _config.yml,_config_strict.yml
+
+strict_front_matter: true
+
+liquid:
+  error_mode: strict
+  strict_variables: true
+  strict_filters: true
+
+# Disable feed plugin (not compatible with strict_variables)
+feed:
+  path: ""
