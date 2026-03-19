@@ -8,7 +8,7 @@ order: 73
 <div id="contenttext">
 
   <div class="bodytext" style="padding:12px;" align="justify">
-    <a name="Applications"><span class="headertext">Application Programming</span></a>
+    <span id="Applications" class="headertext">Application Programming</span>
     <p>Once a model has been transformed into C++ libraries,
       applications can then link these libraries. The generated C++ code is intended to be
       used along with an OpenDDS C++ support library to reduce the amount of
@@ -37,9 +37,9 @@ int main(int argc, char* argv[])
   </div>
 
   <div class="panel" align="justify">
-    <a name="Building"><span class="colortitle">Building</span></a>
+    <span id="Building" class="colortitle">Building</span>
     <span class="bodytext"><br />
-      <p>Included in the files generated are <a href="http://www.objectcomputing.com/products/MPC">MPC</a> files
+      <p>Included in the files generated are <a href="{{ site.data.docgroup.mpc }}">MPC</a> files
         that specify how to build a C++ library representing the model from the generated source. Using
         MPC, files such as makefiles or Visual Studio project files can be generated, making it easy to
         build the C++ library.</p>
@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
   </div>
 
   <div class="bodytext" style="padding:12px;" align="justify">
-    <a name="Dependencies"><span class="colortitle">Dependencies Between Models</span></a>
+    <span id="Dependencies" class="colortitle">Dependencies Between Models</span>
     <p>
       The generated model library could depend on other generated model libraries.
       For example, there could be an external data type library which is generated

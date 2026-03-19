@@ -8,7 +8,7 @@ order: 72
 <div id="contenttext">
 
   <div class="bodytext" align="justify">
-    <a name="Overview"><span class="headertext">Model Code Generation</span></a>
+    <span id="Overview" class="headertext">Model Code Generation</span>
     <p>Once an OpenDDS model has been defined using the modeling tool, it can be transformed into C++ code using
       the code generation tool. Using the MPC build files included with the generated code, a C++ library based on
       the model file can easily be
@@ -21,7 +21,7 @@ order: 72
 
 
   <div class="panel" align="justify">
-    <a name="Customize"><span class="colortitle">Customization</span></a>
+    <span id="Customize" class="colortitle">Customization</span>
     <span class="bodytext"><br />
       <p>The configuration for transports (TCP, UDP, and Multicast) can done using the code generation tool. A publisher or subscriber
         transport ID in the model is associated with a transport configuration with the same ID.
@@ -43,7 +43,7 @@ order: 72
 
 
   <div class="bodytext" align="justify">
-    <a name="Build"><span class="headertext">Build Paths</span></a>
+    <span id="Build" class="headertext">Build Paths</span>
     <p>Elements within model files may refer to elements in external model
       files.  To enable the generated code to mirror this referencing, the
       location of the external generated code needs to be provided.
@@ -60,7 +60,7 @@ order: 72
 
 
   <div class="panel" align="justify">
-    <a name="Generation"><span class="colortitle">Generation</span></a>
+    <span id="Generation" class="colortitle">Generation</span>
     <span class="bodytext"><br />
       <p>After any transport configuration has been defined and/or build paths specified, the IDL, C++,
         and build support files can be generated in a directory within the Eclipse workspace specified by

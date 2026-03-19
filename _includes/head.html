@@ -8,10 +8,10 @@
 
     <link rel="stylesheet" href="{{ "/css/main.css" | prepend: site.baseurl }}">
 
-    {% if page.CSS %}
+    {% if page contains 'CSS' %}
     <link rel="stylesheet" href="{{ page.CSS | prepend: site.baseurl }}">
     {% endif %}
-    
-    <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
+
+    <link rel="canonical" href="{{ page.url | replace:'index.html','' | absolute_url }}">
     <link rel="icon" type="image/png" href="{{"/images/opendds_favicon.png" | prepend: site.baseurl}}"/>
 </head>

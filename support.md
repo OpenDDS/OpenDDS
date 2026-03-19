@@ -7,7 +7,7 @@ categories: [opendds]
 
 ## Commercial Support
 
-### [Object Computing, Inc. (OCI)](https://objectcomputing.com/)
+### [Object Computing, Inc. (OCI)]({{ site.data.oci.homepage }})
 
 Members of the core OpenDDS development team are available to provide training, consulting, code review, troubleshooting, and more.
 OCI's pre-paid support packages enable you and your team to get the help you need when you need it at economical hourly rates.
@@ -26,11 +26,11 @@ Remedy IT also offers [training courses](https://www.remedy.nl/training/overview
 
 View the [GitHub issues list]({{ site.github.issues_url }}) for the OpenDDS project. Please search the list to see if your issue has already been reported before submitting a new one.
 
-The [GitHub Discussions]({{ site.opendds.discussions_uri }}) for the OpenDDS project can be used to ask questions and get help.
+The [GitHub Discussions]({{ site.data.opendds.discussions_uri }}) for the OpenDDS project can be used to ask questions and get help.
 
 ### Online Documentation
 
-The documentation for OpenDDS is available on [Read the Docs]({{ site.latest_docs_url }}).
+The documentation for OpenDDS is available on [Read the Docs]({{ site.data.opendds.latest_docs_url }}).
 
 ### YouTube
 
