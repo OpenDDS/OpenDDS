@@ -2558,7 +2558,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
 void Spdp::SpdpTransport::init_thread_status_event(const TimeDuration& interval)
 {
 #ifdef DDS_HAS_MINIMUM_BIT
-  ACE_UNSUED_ARG(interval)
+  ACE_UNUSED_ARG(interval);
 #else
   harvest_thread_status_interval_ = TimeDuration::zero_value;
   if (!interval) {
