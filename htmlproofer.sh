@@ -47,7 +47,9 @@ url_ignore_list=(
   # New pages will have invalid "Edit this page on GitHub" links until they are
   # merged into the main repo's gh-pages.
   '/github\.com\/OpenDDS\/OpenDDS\/blob\/gh-pages\//'
-  '/allaboutcookies.org\//'
+  '/allaboutcookies\.org\//'
+  '/dds-foundation\.org\//'
+  '/axcioma\.org\//'
 )
 url_ignore_arg="$(printf ",%s" "${url_ignore_list[@]}")"
 url_ignore_arg="${url_ignore_arg:1}"
