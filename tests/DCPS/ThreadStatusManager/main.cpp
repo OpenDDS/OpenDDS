@@ -138,7 +138,7 @@ bool read_status(DDS::WaitSet_var ws, InternalThreadBuiltinTopicDataDataReader_v
   return found;
 }
 
-int tms_test(InternalThreadBuiltinTopicDataDataReader_var itbtd_reader, DDS::WaitSet_var ws)
+int tsm_test(InternalThreadBuiltinTopicDataDataReader_var itbtd_reader, DDS::WaitSet_var ws)
 {
   ACE_Thread_Mutex mutex;
   ACE_Condition<ACE_Thread_Mutex> cv(mutex);
@@ -176,6 +176,8 @@ int tms_test(InternalThreadBuiltinTopicDataDataReader_var itbtd_reader, DDS::Wai
   if (!read_status(ws, itbtd_reader, thread_end, task, cv, "end", true)) {
     return EXIT_FAILURE;
   }
+
+  task.wait();
 
   // Check that the timestamps are in the correct order
   int ret = EXIT_SUCCESS;
@@ -234,7 +236,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ws->attach_condition(read_cond);
 
   // Run test with initial config
-  int ret = tms_test(itbtd_reader, ws);
+  int ret = tsm_test(itbtd_reader, ws);
 
   if (ret == EXIT_SUCCESS) {
     const char* const status_prop = OpenDDS::DCPS::COMMON_DCPS_THREAD_STATUS_INTERVAL;
@@ -256,7 +258,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     // Turn it back on do the testing again
     if (ret == EXIT_SUCCESS) {
       config_store->set_uint32(status_prop, orig);
-      ret = tms_test(itbtd_reader, ws);
+      ret = tsm_test(itbtd_reader, ws);
     }
   }
 

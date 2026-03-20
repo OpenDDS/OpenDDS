@@ -159,10 +159,6 @@ void ThreadStatusManager::ThreadContainer::set_manager_info(const ManagerInfo& m
 void ThreadStatusManager::ThreadContainer::add_thread(const Thread& thread)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  if (!manager_info_.update_thread_status()) {
-    return;
-  }
-
   map_.insert(std::make_pair(thread.info().thread_id, thread));
   manager_info_.on_thread_started(thread);
 }
@@ -243,6 +239,10 @@ void ThreadStatusManager::add_thread(const String& name)
   if (DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatusManager::add_thread: "
                "adding thread %C\n", thread.bit_key().c_str()));
+  }
+
+  if (!update_thread_status()) {
+    return;
   }
 
   get_container(thread_id).add_thread(thread);
