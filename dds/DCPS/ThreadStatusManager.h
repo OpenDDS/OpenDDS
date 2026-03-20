@@ -101,11 +101,7 @@ public:
 
   void set_thread_status_listener(ThreadStatusListener* listener);
   void thread_status_interval(const TimeDuration& thread_status_interval);
-  const TimeDuration& thread_status_interval() const;
-
-  /// Track thread status internally, either periodically for the thread status
-  /// or for the listener on thread start and finish.
-  bool update_thread_status() const;
+  TimeDuration thread_status_interval() const;
 
   /// Add the calling thread to the manager.
   /// name is for a more human-friendly name that will be appended to the BIT key.

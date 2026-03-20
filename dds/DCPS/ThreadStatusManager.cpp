@@ -125,16 +125,10 @@ void ThreadStatusManager::thread_status_interval(const TimeDuration& thread_stat
   update_manager_info(copy);
 }
 
-const TimeDuration& ThreadStatusManager::thread_status_interval() const
+TimeDuration ThreadStatusManager::thread_status_interval() const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, TimeDuration::zero_value);
   return manager_info_.thread_status_interval();
-}
-
-bool ThreadStatusManager::update_thread_status() const
-{
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  return manager_info_.update_thread_status();
 }
 
 ThreadId ThreadStatusManager::get_thread_id()
@@ -154,11 +148,20 @@ void ThreadStatusManager::ThreadContainer::set_manager_info(const ManagerInfo& m
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   manager_info_ = manager_info;
+  if (!manager_info_.thread_status_interval()) {
+    finished_.clear();
+  }
+  if (!manager_info_.update_thread_status()) {
+    map_.clear();
+  }
 }
 
 void ThreadStatusManager::ThreadContainer::add_thread(const Thread& thread)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  if (!manager_info_.update_thread_status()) {
+    return;
+  }
   map_.insert(std::make_pair(thread.info().thread_id, thread));
   manager_info_.on_thread_started(thread);
 }
@@ -172,22 +175,30 @@ void ThreadStatusManager::ThreadContainer::update(
     return;
   }
 
+  const bool update_thread_details = manager_info_.thread_status_interval();
+  if (!update_thread_details && !finished) {
+    // We don't need to continue if we have a listener and we're not publishing
+    // the thead status topic and the thread is not finished. For the listener
+    // we are only waiting for the thread to finish.
+    return;
+  }
+
   const Map::iterator pos = map_.find(thread_id);
-  const bool use_finished = manager_info_.thread_status_interval();
   if (pos != map_.end()) {
     Thread& thread = pos->second;
-    thread.update(m_now, s_now, status, manager_info_.bucket_limit(), nested, detail1, detail2);
+    if (update_thread_details) {
+      thread.update(m_now, s_now, status, manager_info_.bucket_limit(), nested, detail1, detail2);
+    }
     if (finished) {
       manager_info_.on_thread_finished(thread);
-      if (use_finished) {
+      if (update_thread_details) {
         finished_.push_back(thread);
       }
       map_.erase(pos);
     }
   }
 
-  // Cleanup finished, empty it if the thread_status_interval has been disabled
-  if (use_finished || !finished_.empty()) {
+  if (update_thread_details) {
     const MonotonicTimePoint cutoff = m_now - 10 * manager_info_.thread_status_interval();
     while (!finished_.empty() && finished_.front().last_update() < cutoff) {
       finished_.pop_front();
@@ -239,10 +250,6 @@ void ThreadStatusManager::add_thread(const String& name)
   if (DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatusManager::add_thread: "
                "adding thread %C\n", thread.bit_key().c_str()));
-  }
-
-  if (!update_thread_status()) {
-    return;
   }
 
   get_container(thread_id).add_thread(thread);

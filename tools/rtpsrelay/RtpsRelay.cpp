@@ -907,7 +907,7 @@ int run(int argc, ACE_TCHAR* argv[])
   }
   ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Meta Discovery listening on %C\n", OpenDDS::DCPS::LogAddr(meta_discovery_addr).c_str()));
 
-  const auto run_thread_mon = TheServiceParticipant->get_thread_status_manager().update_thread_status();
+  const auto run_thread_mon = TheServiceParticipant->get_thread_status_manager().thread_status_interval();
   if (run_thread_mon && relay_thread_monitor->start() != EXIT_SUCCESS) {
     ACE_ERROR((LM_ERROR, "(%P:%t) ERROR: Failed to start Relay Thread Monitor\n"));
     return EXIT_FAILURE;
