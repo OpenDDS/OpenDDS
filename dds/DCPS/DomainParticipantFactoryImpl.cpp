@@ -199,7 +199,7 @@ DomainParticipantFactoryImpl::delete_participant(
     }
   }
 
-  TheTransportRegistry->remove_participant(domain_id, the_servant);
+  TheTransportRegistry->remove_participant(domain_id, dp_id);
 
   return DDS::RETCODE_OK;
 }

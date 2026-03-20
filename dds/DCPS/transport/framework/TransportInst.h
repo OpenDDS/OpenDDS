@@ -41,8 +41,6 @@ namespace ICE {
 
 namespace DCPS {
 
-class DomainParticipantImpl;
-
 /**
  * @class TransportInst
  *
@@ -135,10 +133,11 @@ public:
   /// Populate a transport locator sequence.  Return the number of "locators."
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info,
                                   ConnectionInfoFlags flags,
-                                  DDS::DomainId_t domain) const = 0;
+                                  DDS::DomainId_t domain,
+                                  const GUID_t& participant) const = 0;
 
   DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint(DDS::DomainId_t domain,
-                                                     DomainParticipantImpl* participant);
+                                                     const GUID_t& participant);
   void rtps_relay_only_now(bool flag);
   void use_rtps_relay_now(bool flag);
   void use_ice_now(bool flag);
@@ -146,18 +145,27 @@ public:
   virtual void update_locators(const GUID_t& /*remote_id*/,
                                const TransportLocatorSeq& /*locators*/,
                                DDS::DomainId_t /*domain*/,
-                               DomainParticipantImpl* /*participant*/) {}
+                               const GUID_t& /*participant*/) {}
 
   virtual void get_last_recv_locator(const GUID_t& /*remote_id*/,
                                      const GuidVendorId_t& /*vendor_id*/,
                                      TransportLocator& /*locators*/,
                                      DDS::DomainId_t /*domain*/,
-                                     DomainParticipantImpl* /*participant*/) {}
+                                     const GUID_t& /*participant*/) {}
 
   ReactorTask_rch reactor_task(DDS::DomainId_t domain,
-                               DomainParticipantImpl* participant);
+                               const GUID_t& participant);
+
   EventDispatcher_rch event_dispatcher(DDS::DomainId_t domain,
-                                       DomainParticipantImpl* participant);
+                                       const GUID_t& participant);
+
+  virtual NetworkAddress actual_local_address(DDS::DomainId_t /*domain*/,
+                                              const GUID_t& /*participant*/) const;
+
+#ifdef ACE_HAS_IPV6
+  virtual NetworkAddress ipv6_actual_local_address(DDS::DomainId_t /*domain*/,
+                                                   const GUID_t& /*participant*/) const;
+#endif
 
   /**
    * @{
@@ -198,12 +206,12 @@ public:
 
   virtual void append_transport_statistics(TransportStatisticsSequence& /*seq*/,
                                            DDS::DomainId_t /*domain*/,
-                                           DomainParticipantImpl* /*participant*/) {}
+                                           const GUID_t& /*participant*/) {}
 
   static void set_port_in_addr_string(OPENDDS_STRING& addr_str, u_short port_number);
 
   void remove_participant(DDS::DomainId_t domain,
-                          DomainParticipantImpl* participant);
+                          const GUID_t& participant);
 
 protected:
 
@@ -224,9 +232,9 @@ private:
   friend class TransportClient;
  protected:
   TransportImpl_rch get_or_create_impl(DDS::DomainId_t domain,
-                                       DomainParticipantImpl* participant);
+                                       const GUID_t& participant);
   TransportImpl_rch get_impl(DDS::DomainId_t domain,
-                             DomainParticipantImpl* participant);
+                             const GUID_t& participant) const;
  private:
   virtual TransportImpl_rch new_impl(DDS::DomainId_t domain) = 0;
 
@@ -236,7 +244,7 @@ private:
   const String config_prefix_;
   const bool is_template_;
 
-  typedef OPENDDS_MAP(DomainParticipantImpl*, TransportImpl_rch) ParticipantMap;
+  typedef OPENDDS_MAP(GUID_t, TransportImpl_rch) ParticipantMap;
   typedef OPENDDS_MAP(DDS::DomainId_t, ParticipantMap) DomainMap;
   DomainMap domain_map_;
 };

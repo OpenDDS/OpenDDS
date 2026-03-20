@@ -64,7 +64,7 @@ private:
   OPENDDS_STRING id_;
   DDS::DomainId_t domain_;
   const int expected_samples_;
-  int received_samples_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, int> received_samples_;
   callback_t done_callback_;
 };
 

@@ -93,7 +93,8 @@ public:
 
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info,
                                   ConnectionInfoFlags flags,
-                                  DDS::DomainId_t domain) const;
+                                  DDS::DomainId_t domain,
+                                  const GUID_t& participant) const;
   const TransportBLOB* get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) const;
 
   RTPS::PortMode port_mode() const;
@@ -164,17 +165,25 @@ public:
   void update_locators(const GUID_t& remote_id,
                        const TransportLocatorSeq& locators,
                        DDS::DomainId_t domain,
-                       DomainParticipantImpl* participant);
+                       const GUID_t& participant);
 
   void get_last_recv_locator(const GUID_t& /*remote_id*/,
                              const GuidVendorId_t& /*vendor_id*/,
                              TransportLocator& /*locators*/,
                              DDS::DomainId_t domain,
-                             DomainParticipantImpl* participant);
+                             const GUID_t& participant);
 
   void append_transport_statistics(TransportStatisticsSequence& seq,
                                    DDS::DomainId_t domain,
-                                   DomainParticipantImpl* participant);
+                                   const GUID_t& participant);
+
+  NetworkAddress actual_local_address(DDS::DomainId_t domain,
+                                      const GUID_t& participant) const;
+
+#ifdef ACE_HAS_IPV6
+  NetworkAddress ipv6_actual_local_address(DDS::DomainId_t domain,
+                                           const GUID_t& participant) const;
+#endif
 
 private:
   friend class RtpsUdpType;
@@ -189,10 +198,6 @@ private:
   friend class RtpsUdpTransport;
   TransportReceiveListener_rch opendds_discovery_default_listener_;
   GUID_t opendds_discovery_guid_;
-  NetworkAddress actual_local_address_;
-#ifdef ACE_HAS_IPV6
-  NetworkAddress ipv6_actual_local_address_;
-#endif
 };
 
 } // namespace DCPS

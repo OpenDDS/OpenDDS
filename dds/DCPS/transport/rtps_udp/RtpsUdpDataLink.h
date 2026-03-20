@@ -875,7 +875,7 @@ private:
         }
         if (to_call.empty()) {
           if (transport_debug.log_dropped_messages) {
-            ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::datawreader_dispatch - %C -> X no local readers\n", LogGuid(src).c_str()));
+            ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::datareader_dispatch - %C -> X no local readers\n", LogGuid(src).c_str()));
           }
           return;
         }
