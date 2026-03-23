@@ -185,9 +185,18 @@ public:
   typedef AttributesType::const_iterator const_iterator;
 
   Message(Class c = REQUEST, Method m = BINDING)
-  : class_(c), method_(m), block_(0), length_(0), length_for_message_integrity_(0) {}
+    : class_(c), method_(m), block_(0), length_(0), length_for_message_integrity_(0) {}
 
-  Message(const Message& val) { *this = val; }
+  ~Message()
+  {
+    ACE_Message_Block::release(block_);
+  }
+
+  Message(const Message& val)
+    : block_(0)
+  {
+    *this = val;
+  }
 
   void generate_transaction_id();
   TransactionId transaction_id() const;
