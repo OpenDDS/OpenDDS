@@ -673,7 +673,7 @@ void Message::block(ACE_Message_Block* block)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   ACE_Message_Block::release(block_);
-  block_ = block ? block->duplicate() : block;
+  block_ = ACE_Message_Block::duplicate(block);
 }
 
 void Message::generate_transaction_id()
@@ -723,7 +723,7 @@ Message& Message::operator=(const Message& rhs)
     method_ = rhs.method_;
     transaction_id_ = rhs.transaction_id_;
     ACE_Message_Block::release(block_);
-    block_ = rhs.block_ ? rhs.block_->duplicate() : rhs.block_;
+    block_ = ACE_Message_Block::duplicate(rhs.block_);
     password_ = rhs.password_;
     attributes_ = rhs.attributes_;
     length_ = rhs.length_;
