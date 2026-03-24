@@ -673,7 +673,7 @@ void Message::block(ACE_Message_Block* block)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   ACE_Message_Block::release(block_);
-  block_ = block->duplicate();
+  block_ = block ? block->duplicate() : block;
 }
 
 void Message::generate_transaction_id()
