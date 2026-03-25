@@ -185,6 +185,7 @@ const size_t COMMON_POOL_SIZE_default = 1024 * 1024 * 16;
 class DataDurabilityCache;
 #endif
 class ThreadStatusManager;
+class ThreadStatusListener;
 
 const char DEFAULT_ORB_NAME[] = "OpenDDS_DCPS";
 
@@ -608,6 +609,9 @@ public:
   {
     return config_store_;
   }
+
+  /// Set listener for thread start and finish, see ThreadStatusManager.h
+  void set_thread_status_listener(ThreadStatusListener* listener);
 
 private:
 

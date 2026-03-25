@@ -2543,9 +2543,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
   relay_stun_event_ = DCPS::make_rch<DCPS::SporadicEvent>(outer->sedp_->event_dispatcher(), DCPS::make_rch<SpdpTransportEvent>(rchandle_from(this), &SpdpTransport::relay_stun_task));
 #endif
 
-  if (TheServiceParticipant->get_thread_status_manager().update_thread_status() && outer->harvest_thread_status_) {
-    init_thread_status_event();
-  }
+  init_thread_status_event();
 
   // Connect the listeners last so that the tasks are created.
   DCPS::ConfigListener::job_queue(job_queue);
@@ -2557,19 +2555,37 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
   TheServiceParticipant->network_interface_address_topic()->connect(network_interface_address_reader_);
 }
 
-
 void Spdp::SpdpTransport::init_thread_status_event()
 {
 #ifndef DDS_HAS_MINIMUM_BIT
+  if (thread_status_event_) {
+    return;
+  }
+
   const DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  if (!thread_status_event_ && outer->harvest_thread_status_) {
+  if (outer->harvest_thread_status_) {
     const DCPS::RcHandle<Sedp> sedp = outer->sedp_;
     if (!sedp) return;
     thread_status_event_ = DCPS::make_rch<DCPS::PeriodicEvent>(sedp->event_dispatcher(), DCPS::make_rch<SpdpTransportEvent>(rchandle_from(this), &SpdpTransport::thread_status_task));
   }
-#endif /* DDS_HAS_MINIMUM_BIT */
+#endif
+}
+
+void Spdp::SpdpTransport::enable_thread_status_event(const TimeDuration& interval)
+{
+#ifdef DDS_HAS_MINIMUM_BIT
+  ACE_UNUSED_ARG(interval);
+#else
+  if (thread_status_event_) {
+    if (interval) {
+      thread_status_event_->enable(interval);
+    } else {
+      thread_status_event_->disable();
+    }
+  }
+#endif
 }
 
 Spdp::SpdpTransport::~SpdpTransport()
@@ -2649,7 +2665,6 @@ Spdp::SpdpTransport::enable_periodic_tasks()
   }
 
 #if OPENDDS_CONFIG_SECURITY
-
   outer->sedp_->core().reset_relay_spdp_task_falloff();
   relay_spdp_event_->schedule(TimeDuration::zero_value);
 
@@ -2657,12 +2672,7 @@ Spdp::SpdpTransport::enable_periodic_tasks()
   relay_stun_event_->schedule(TimeDuration::zero_value);
 #endif
 
-#ifndef DDS_HAS_MINIMUM_BIT
-  const DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-  if (thread_status_manager.update_thread_status() && outer->harvest_thread_status_) {
-    thread_status_event_->enable(thread_status_manager.thread_status_interval());
-  }
-#endif /* DDS_HAS_MINIMUM_BIT */
+  enable_thread_status_event(TheServiceParticipant->get_thread_status_manager().thread_status_interval());
 }
 
 void
@@ -2739,9 +2749,11 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
   if (lease_expiration_event_) {
     lease_expiration_event_->cancel();
   }
+#ifndef DDS_HAS_MINIMUM_BIT
   if (thread_status_event_) {
     thread_status_event_->disable();
   }
+#endif
 
   ACE_Reactor* reactor = reactor_task->get_reactor();
   const ACE_Reactor_Mask mask =
@@ -3737,15 +3749,7 @@ void Spdp::SpdpTransport::on_data_available(DCPS::ConfigReader_rch)
   for (size_t idx = 0; idx != samples.size(); ++idx) {
     const DCPS::ConfigPair& sample = samples[idx];
     if (sample.key() == DCPS::COMMON_DCPS_THREAD_STATUS_INTERVAL) {
-      const TimeDuration val(std::atoi(sample.value().c_str()));
-      init_thread_status_event();
-      if (thread_status_event_) {
-        if (val) {
-          thread_status_event_->enable(val);
-        } else {
-          thread_status_event_->disable();
-        }
-      }
+      enable_thread_status_event(TimeDuration(std::atoi(sample.value().c_str())));
     } else if (sample.key_has_prefix(config_prefix)) {
       has_prefix = true;
 #if OPENDDS_CONFIG_SECURITY
@@ -4542,9 +4546,9 @@ Spdp::SpdpTransport::process_lease_expirations()
   outer->process_lease_expirations(MonotonicTimePoint::now());
 }
 
+#ifndef DDS_HAS_MINIMUM_BIT
 void Spdp::SpdpTransport::thread_status_task()
 {
-#ifndef DDS_HAS_MINIMUM_BIT
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
@@ -4575,9 +4579,8 @@ void Spdp::SpdpTransport::thread_status_task()
     data.detail2 = i->detail2();
     outer->bit_subscriber_->add_thread_status(data, DDS::NEW_VIEW_STATE, i->timestamp());
   }
-
-#endif /* DDS_HAS_MINIMUM_BIT */
 }
+#endif
 
 #if OPENDDS_CONFIG_SECURITY
 void Spdp::SpdpTransport::process_handshake_deadlines()
