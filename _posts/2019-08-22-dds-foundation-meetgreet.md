@@ -5,7 +5,7 @@ categories: news
 author: The OpenDDS Team
 ---
 
-The [DDS Foundation](https://www.dds-foundation.org) and [Object Management Group (OMG)](https://www.omg.org) invite you to a [free evening reception](https://www.omg.org/events/tn-19/special-events/DDS-Meet-Greet.htm) for DDS practitioners and researchers who wish to gain the latest information and insights on DDS, the proven data connectivity standard for mission-critical, industrial-grade applications.
+The [DDS Foundation](https://dds-foundation.org) and [Object Management Group (OMG)](https://www.omg.org) invite you to a [free evening reception](https://www.omg.org/events/tn-19/special-events/DDS-Meet-Greet.htm) for DDS practitioners and researchers who wish to gain the latest information and insights on DDS, the proven data connectivity standard for mission-critical, industrial-grade applications.
 
 This 2-hour informal event will feature leading academic researchers discussing their work with DDS, posters of selected research projects, a panel presentation, and live demonstrations.
 

@@ -6,7 +6,6 @@ categories: [opendds]
 ---
 OCI publishes Middleware News Brief and SETT (Software Engineering Tech Trends) articles on a number of topics.  The following are related to OpenDDS:
 
-- [Building Tactical Microgrid Standard Systems Using OpenDDS](TMS/TMS.markdown)
 - [Custom Bridges Between RESTful Web Services and DDS]({{ site.data.oci.pub_base }}/SETT/custom-bridges-between-restful-web-services-and-dds)
 - [Converting a RESTful Webservice to OpenDDS: Security]({{ site.data.oci.pub_base }}/mnb/2022/07/15/converting-restful-webservice-opendds-security)
 - [Bridging OpenDDS and MQTT Messaging]({{ site.data.oci.pub_base }}/mnb/2022/06/01/bridging-opendds-and-mqtt-messaging)

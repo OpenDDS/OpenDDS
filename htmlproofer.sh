@@ -48,7 +48,7 @@ url_ignore_list=(
   # merged into the main repo's gh-pages.
   '/github\.com\/OpenDDS\/OpenDDS\/blob\/gh-pages\//'
   '/allaboutcookies\.org\//'
-  '/dds-foundation\.org\//'
+  '/dds-foundation\.org/'
   '/axcioma\.org\//'
 )
 url_ignore_arg="$(printf ",%s" "${url_ignore_list[@]}")"
