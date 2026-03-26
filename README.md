@@ -6,7 +6,7 @@ static website generator](https://jekyllrb.com/).
 ## Building and Viewing Locally
 
 Pushing to the `gh-pages` branch causes Github to update opendds.org. It can
-also be built and viewed locally. For first time installes make sure Ruby is
+also be built and viewed locally. For first time installs make sure Ruby is
 installed and install bundler:
 
 ```
