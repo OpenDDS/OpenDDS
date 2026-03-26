@@ -6,13 +6,27 @@ static website generator](https://jekyllrb.com/).
 ## Building and Viewing Locally
 
 Pushing to the `gh-pages` branch causes Github to update opendds.org. It can
-also be built and viewed locally. To do this make sure Ruby is installed and
-then run these commands in this directory to install the dependencies:
+also be built and viewed locally. For first time installs make sure Ruby is
+installed and install bundler:
 
 ```
 gem install bundler
+# will need sudo on Unix-like systems
+```
+
+Run this command in this directory to install the dependencies:
+
+```
 bundle install
 ```
+
+This may produce an error like:
+
+```
+Gem::Ext::BuildError: ERROR: Failed to build gem native extension.
+```
+
+On Debian/Ubuntu systems run `sudo apt install ruby-dev` and try again.
 
 Then to generate the website and start a web server for it, run:
 
@@ -21,6 +35,14 @@ bundle exec jekyll serve
 ```
 
 It will print the URL of the locally hosted site.
+
+### Strict Build
+
+This will command will catch errors with the Liquid templetess.
+
+```
+bundle exec jekyll build --config _config.yml,_config_strict.yml
+```
 
 ## Running `htmlproofer.sh` Locally
 

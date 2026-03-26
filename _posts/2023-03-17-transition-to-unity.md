@@ -20,7 +20,7 @@ Dr. Ebrahim Moshiri, founder of St. Louis-based technology company,
 [Object Computing, Inc.](https://objectcomputing.com/) (OCI), envisioned a radically new way
 of serving the community by extending all of the openly available
 tools and systems that OCI had been building, supporting, and
-advancing for the last three decades. The [Unity Foundation](https://unityfoundation.io/#projects) was
+advancing for the last three decades. The [Unity Foundation](https://unityfoundation.io/projects) was
 organized to drive the engineering of a new kind of CommUNITY
 Infrastructure and data sharing ecosystem that, through collaborations
 and partnerships with other St. Louis based organizations, can address
@@ -32,7 +32,7 @@ organize, and share data.
 As a commitment to reusable and interoperable technologies to
 facilitate greater access and capability for all users, OCI made
 significant investments in establishing three OSS product
-Foundations - the [OpenDDS Foundation](https://opendds.org/foundation/)™, the [Micronaut
+Foundations - the [OpenDDS Foundation](https://opendds.org)™, the [Micronaut
 Foundation](https://micronaut.io/foundation/)™, and the [Grails Foundation](https://grails.org/foundation/index.html)™. These
 non-profit entities are solely focused on ensuring the continuity and
 sustainability of our OSS products. Today, thousands of software
@@ -61,4 +61,4 @@ for those who need it most.
 To learn more about the Unity Foundation, [click here](https://unityfoundation.io/).
 
 To learn more about how you or your organization can support the
-OpenDDS Foundation, please [check us out](https://opendds.org/foundation/)!
+OpenDDS Foundation, please [check us out](https://opendds.org)!

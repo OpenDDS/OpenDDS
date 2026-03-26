@@ -8,16 +8,16 @@ on:
   workflow_dispatch:
 
 jobs:
-  jekyll:
-    runs-on: ubuntu-20.04
+  jekyll-upload:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v5
 
       - name: Setup ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.6
+          ruby-version: 3.4
 
       - name: Jekyll
         uses: limjh16/jekyll-action-ts@v2
@@ -29,6 +29,39 @@ jobs:
         with:
           name: Site
           path: _site
+
+  jekyll-strict:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.4
+
+      - name: Jekyll
+        uses: limjh16/jekyll-action-ts@v2
+        with:
+          enable_cache: true
+          custom_opts: '--config _config.yml,_config_strict.yml'
+
+  jekyll-htmlproofer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.4
+
+      - name: Jekyll
+        uses: limjh16/jekyll-action-ts@v2
+        with:
+          enable_cache: true
 
       - name: Run htmlproofer
         run: bash htmlproofer.sh

@@ -1,4 +1,16 @@
+#!/bin/bash
+
 site_dir="${site_dir:-_site}"
+check_path="$site_dir"
+
+while getopts "p:" opt; do
+  case "$opt" in
+    p)
+      check_path="$OPTARG"
+      ;;
+  esac
+done
+shift $((OPTIND - 1))
 
 # Absolute URLs to the website with a domain won't work unless we are serving
 # from that address at the same time. Use --url-swap to replace the URLs with
@@ -35,23 +47,22 @@ url_ignore_list=(
   # New pages will have invalid "Edit this page on GitHub" links until they are
   # merged into the main repo's gh-pages.
   '/github\.com\/OpenDDS\/OpenDDS\/blob\/gh-pages\//'
+  '/allaboutcookies\.org\//'
+  '/dds-foundation\.org/'
+  '/axcioma\.org\//'
 )
 url_ignore_arg="$(printf ",%s" "${url_ignore_list[@]}")"
 url_ignore_arg="${url_ignore_arg:1}"
 
 # NOTE: $(:) is a nop command that can be used like an inline comment.
-exec bundle exec htmlproofer "$site_dir" \
-  --check-html \
-  --check-img-http \
+exec bundle exec htmlproofer "$check_path" \
+  --root-dir "$site_dir" \
   $(: TODO: --enforce-https \ ) \
-  --report-invalid-tags \
-  --report-eof-tags \
-  --report-mismatched-tags \
-  --url-swap "$url_swap_arg" \
-  --file-ignore "$file_ignore_arg" \
-  --url-ignore "$url_ignore_arg" \
+  --swap-urls "$url_swap_arg" \
+  --ignore-files "$file_ignore_arg" \
+  --ignore-urls "$url_ignore_arg" \
   $(: 'Removing this adds almost 500 errors. Ignore for the time being.') \
-  --empty-alt-ignore \
+  --ignore-missing-alt \
   $(: 'Sites like github.com wont like it if we make too many requests too quickly.') \
-  --hydra-config '{ "max_concurrency": 1 }' \
+  --hydra '{ "max_concurrency": 1 }' \
   "$@"

@@ -7,7 +7,7 @@ author: Object Computing, Inc.
 
 We're pleased to announce that Object Computing and the OpenDDS™ team have launched a not-for-profit foundation to support and collectively lead the open source OpenDDS project.
 
-The [OpenDDS Foundation's](/foundation) mission is to:
+The OpenDDS Foundation's mission is to:
 
 - Ensure technical innovation and advancement of the OpenDDS project as a free and open public use toolkit for a growing global community
 - Evangelize and promote OpenDDS technology as a leading implementation of the Object Management Group's (OMG's) Data-Distribution Service (DDS) standard
