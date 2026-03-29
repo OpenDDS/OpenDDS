@@ -14,4 +14,11 @@ module Optional {
     @optional sequence<int32> seq_field;
     @optional TestStruct struct_field;
   };
+
+  union TestUnion_Octet switch(long) {
+  case 1:
+    @optional short myshort;
+  default:
+    @optional long mylong;
+  };
 };
