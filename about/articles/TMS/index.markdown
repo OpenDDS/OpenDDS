@@ -17,7 +17,7 @@ In a subsequent section, we provide more details about OpenDDS and how it is a v
 ## Overview of Tactical Microgrid Standard
 
 Traditional power systems used in tactical deployments have several drawbacks from not having a standardized communication and control interface.
-Figure 1 demonstrates typical microgrid configurations and their drawbacks prior to TMS (refer to the materials published by Tactical Microgrid Standard Industry Day, 2025 [^11] for more defail).
+Figure 1 demonstrates typical microgrid configurations and their drawbacks prior to TMS (refer to the materials published by Tactical Microgrid Standard Industry Day, 2025 [^11] for more detail).
 
 <p align="center">
   <img src="images/BeforeTMS.jpg" width="600"/><br>
@@ -47,8 +47,8 @@ TMS addresses the second problem, at the communication level, by adopting Object
 By building on top of a proven technology in DDS, TMS inherits the advantages that DDS provides, including interoperability of equipment from different vendors, even if each vendor uses a different DDS implementation.
 This allows a microgrid to flexibly expand or shrink its scale while being able to connect devices from different suppliers.
 
-TMS addresses the third problem by introducing control devices that monitor the microgrid and has the ability to make decisions automatically with the presence of a situational awareness module.
-In addition to the automatic commands, it also allows an operator to issue commands manually.
+TMS addresses the third problem by introducing control devices that monitor the microgrid and have the ability to make decisions automatically with the presence of a situational awareness module.
+In addition to the automatic commands, the control devices also allows an operator to issue commands manually.
 The commands, either automatic or manual, are sent to the corresponding devices using DDS.
 The control devices have a global view of the whole grid that creates an opportunity for further enhancements to optimize the microgrid’s operation even more.
 TMS also provides a mechanism for failover with a [microgrid controller selection algorithm](#appendix) to avoid a single point of failure.
@@ -125,7 +125,7 @@ OpenDDS, an open-source implementation of DDS, supports all of the DDS specifica
 In particular, it implements DDS-XTypes for extensible and dynamic topic types and its necessary IDL extensions, DDS-RTPS for interoperability with other DDS implementations, and DDS Security.
 
 In the next section, we demonstrate an application that simulates a TMS-compliant microgrid using OpenDDS.
-In a subsequent section, we provide more details on and references to OpenDDS resources.
+Later in this article, we provide more details on and references to OpenDDS resources.
 
 ## TMS Demo Using OpenDDS
 
@@ -139,7 +139,7 @@ The following diagram shows the components of the simulated microgrid.
   Figure 4: Components of the simulated microgrid
 </p>
 
-Except the CLI, each device implementation, including SRC, DIST, LOAD, and MC, can run multiple instances simultaneously.
+Except for the CLI, each device implementation, including SRC, DIST, LOAD, and MC, can run multiple instances simultaneously.
 This simulates an actual microgrid with multiple power devices of the same category, for example, a SRC with a fuel generator can co-exist with another SRC with solar panels.
 Multiple simultaneous instances of microgrid controllers are also desirable to provide redundancy and failover capability in the event that the main controller fails.
 
@@ -581,7 +581,7 @@ When the power device receives a heartbeat from any MC, it starts a New MC timer
 When this timer expires, the device selects an active MC from the list of available MCs (transition T2).
 
 When there are multiple candidates for an active MC, the power device selects the MC with highest `priorityRanking` in the nested member `MicrogridControllerInfo` of the `DeviceInfo` sample published by the MCs.
-If multiple MCs have the equal `priorityRanking` value, the MC with first identity alphabetically is selected.
+If multiple MCs have equal `priorityRanking` values, the MC with lexicographically first identity is selected.
 Due to this, the MC that triggered the New MC timer is not necessarily the selected MC.
 
 Transition T3 is similar to what we described for each individual MC.
@@ -589,7 +589,7 @@ That is, each time a heartbeat is received from the active MC, the Missed Heartb
 Unlike the unselected MCs, for the active MC, we have to use actual timers to drive its state transitions.
 If the Missed Heartbeat timer expires, the power device transitions to the *Active MC Unavailable* state, and schedules a Lost Active MC timer with a duration of 6 seconds (transition T4).
 
-If a heartbeat is received from the active MC while the Lost Active MC timer hasn’t expired yet, the power device moves back to the *Active MC Available* state (transition T5).
+If a heartbeat is received from the active MC while the Lost Active MC timer hasn’t expired, the power device moves back to the *Active MC Available* state (transition T5).
 Receipt of heartbeats from non-active MCs does not affect this timer.
 If, however, the Lost Active MC timer expires, the power device will move to the *No Active MC* state (transition T6) and have two options.
 
@@ -600,7 +600,9 @@ Assuming there is no network partition, it is expected that after transitions T2
 The second case occurs when there is no available MC for the power device to select.
 This happens when all MCs have missed their heartbeats, and the global, coordinating state *No Available MCs* is set (transition T8).
 In this case, a No MC timer with a duration of 10 seconds is scheduled.
-This timer is concurrent with the Lost Active MC timer: it is scheduled at the same time as the Lost Active MC timer if the active MC is the last MC that missed heartbeat, or after the Lost Active MC timer is scheduled if the last available MC becomes unavailable while the Lost Active MC timer is pending.
+This timer is concurrent with the Lost Active MC timer.
+When they are scheduled in relative to each other depends on whether the active MC is the last MC that missed heartbeat -- if it is, the No MC timer is scheduled at the same time as the Lost Active MC timer.
+Otherwise, the No MC timer is scheduled after the Lost Active MC timer when the last available MC becomes unavailable.
 
 If a heartbeat is received from any MC while the No MC timer is pending, the No MC timer is cancelled, and the power device moves to the *No MC* state and starts a New MC timer to trigger the next selection of a new active MC.
 However, if the No MC timer expires without any heartbeats received, the power device doesn’t have any active MC and has to process the `CONFIG_ON_COMMS_LOSS` configuration.
