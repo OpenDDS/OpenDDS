@@ -221,7 +221,7 @@ int ReactorTask::svc()
 
     if (thread_status_timer_ == ReactorWrapper::InvalidTimerId) {
       if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: ReactorTask::svc: failed to "
+        ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: ReactorTask::svc: failed to "
                               "schedule timer for ThreadStatusManager::Updater\n"));
       }
     }

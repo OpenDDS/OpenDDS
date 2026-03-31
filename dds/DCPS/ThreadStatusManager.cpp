@@ -178,7 +178,7 @@ void ThreadStatusManager::ThreadContainer::update(
   const bool update_thread_details = manager_info_.thread_status_interval();
   if (!update_thread_details && !finished) {
     // We don't need to continue if we have a listener and we're not publishing
-    // the thead status topic and the thread is not finished. For the listener
+    // the thread status topic and the thread is not finished. For the listener
     // we are only waiting for the thread to finish.
     return;
   }
