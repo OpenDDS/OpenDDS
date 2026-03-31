@@ -23,8 +23,8 @@
         </svg>
       </span></label>
 {% comment %}
-      <!-- 
-        The Following is useful for assessing the menu structure 
+      <!--
+        The Following is useful for assessing the menu structure
         un-comment it to get an overview of the current page ordering
       -->
       {% assign sorted_pages = site.pages | sort: "order"  %}
@@ -57,16 +57,22 @@
         {% assign counter = 0 %}
         {% for p in sorted_pages %}
           {% assign slash = p.url | split: '/' %}
-          {% if p.redirect and p.external_override != true%}
+          {% assign redirect = false %}
+          {% assign external_override = false %}
+          {% if p contains 'external_override' %}
+            {% assign external_override = p.external_override %}
+          {% endif %}
+          {% if p contains 'redirect' and p.redirect and external_override != true %}
             {% assign redirect = true %}
-          {% else %}
-            {% assign redirect = false %}
           {% endif %}
-          {% if p.sitemap == false and p.external_override != true %}
+          {% assign omit_from_sitemap = false %}
+          {% if p contains 'sitemap' and p.sitemap == false and external_override != true %}
             {% assign omit_from_sitemap = true %}
-          {% else %}
-            {% assign omit_from_sitemap = false %}
           {% endif %}
+          {% assign menu_title = nil %}
+          {% if p contains 'menu_title' %}{% assign menu_title = p.menu_title %}{% endif %}
+          {% assign hide_submenu = false %}
+          {% if p contains 'hide_submenu' %}{% assign hide_submenu = p.hide_submenu %}{% endif %}
           {% unless slash == empty
                       or redirect
                       or p.url == '/'
@@ -74,32 +80,43 @@
                       or omit_from_sitemap
                       or p.url == '/redirects.json' %}
             {% assign indent = slash.size %}
+            {% assign level_p1 = level | plus: 1 %}
+            {% if indent > level_p1 %}
+              {% comment %}
+              This is a janky way to cause an error in strict mode as a
+              workaround to the fact that Liquid doesn't have a way to emit an
+              error. Error if the level this thing is tracking doesn't match
+              the directory depth.
+              {% endcomment %}
+              {% capture error_msg %}MENU_HIERARCHY_BROKEN{{ p.url | replace: "/", "_" }}_expected_level_{{ level_p1 }}_or_less_but_got_{{ indent }}{% endcapture %}
+              {% include {{ error_msg }} %}
+            {% endif %}
             {% assign level_m1 = level | minus: 1 %}
             {% assign last = p.url | slice: -1, 1 %}
             {% for i in (indent..level_m1) %}</ul></li>{% endfor %}
-            {% if last == '/' and p.external_override != true %}
+            {% if last == '/' and external_override != true %}
                 <li>
-                  {% if p.hide_submenu != true %}
+                  {% if hide_submenu != true %}
                   <input type="checkbox" id="drop-{{counter}}"/>
-                  
+
                   <label for="drop-{{counter}}" class="toggle">
-                    {% if p.menu_title %}
-                      {{ p.menu_title }}
-                    {% else %}      
-                      {{ p.title }} 
-                    {% endif %}                  
+                    {% if menu_title %}
+                      {{ menu_title }}
+                    {% else %}
+                      {{ p.title }}
+                    {% endif %}
                     <span class="arrow">&#9660;</span>
                   </label>
                   {% endif %}
 
                   <a class="page-link" href="{{p.url | prepend: site.baseurl}}">
-                    {% if p.menu_title %}
-                      {{ p.menu_title }}
-                    {% else %}      
-                      {{ p.title }} 
+                    {% if menu_title %}
+                      {{ menu_title }}
+                    {% else %}
+                      {{ p.title }}
                     {% endif %}
 
-                    {% if p.hide_submenu != true %}
+                    {% if hide_submenu != true %}
                       <span class="arrow">&#96{% if indent > 2 %}54{% else %}60{% endif %};</span>
                     {% endif %}
                   </a>
@@ -107,24 +124,25 @@
               {% assign counter = counter | plus: 1 %}
                   <ul class="sub-menu">
                     <li class="mobile">
-                      <a class="page-link" href="{{p.url | prepend: site.baseurl}}">                      
-                        {% if p.menu_title %}
-                        {{ p.menu_title }}
-                      {% else %}      
-                        {{ p.title }} 
+                      <a class="page-link" href="{{p.url | prepend: site.baseurl}}">
+                        {% if menu_title %}
+                        {{ menu_title }}
+                      {% else %}
+                        {{ p.title }}
                       {% endif %}
                       </a>
                     </li>
+              {% assign level = slash.size | plus: 1 %}
             {% else %}
                 <li><a class="page-link" href="{{p.url | prepend: site.baseurl}}">
-                  {% if p.menu_title %}
-                    {{ p.menu_title }}
-                  {% else %}      
-                    {{ p.title }} 
+                  {% if menu_title %}
+                    {{ menu_title }}
+                  {% else %}
+                    {{ p.title }}
                   {% endif %}
                 </a></li>
+              {% assign level = slash.size %}
             {% endif %}
-            {% assign level = slash.size %}
           {% endunless %}
         {% endfor %}
         {% assign terminate_ul_count = level | minus: start_level %}

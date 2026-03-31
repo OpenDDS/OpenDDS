@@ -8,7 +8,7 @@ order: 70
 <div id="contenttext">
 
   <div class="bodytext" align="justify">
-    <a name="Overview"><span class="headertext">Introduction</span></a>
+    <span id="Overview" class="headertext">Introduction</span>
     <p>
       OpenDDS includes the OpenDDS Modeling Software Development Kit (SDK).  This is a set of tools
       to simplify using the Object Management Group (OMG) Data Distribution Service (DDS).
@@ -25,11 +25,11 @@ order: 70
       UML modeling elements and should
       be familiar to users of other UML tools.  The elements
       available for describing a model are based on the
-      metamodel described in <a href="http://www.omg.org/cgi-bin/doc?ptc/10-05-17.pdf">
+      metamodel described in <a href="https://www.omg.org/cgi-bin/doc?ptc/10-05-17.pdf">
         UML Profile For Data Distribution Specification</a> (OMG: ptc/2010-05-17).
       In turn, this specification reflects the DDS Platform
       Independent Model (PIM) defined in
-      <a href="http://www.omg.org/cgi-bin/doc?formal/07-01-01">Data Distribution Service for Real-time Systems</a>
+      <a href="https://www.omg.org/cgi-bin/doc?formal/07-01-01">Data Distribution Service for Real-time Systems</a>
       (OMG: formal/07-01-01).
   </p>
 
@@ -48,11 +48,11 @@ order: 70
   </p>
 
   <p>
-    The SDK is built on top of the <a href="http://www.eclipse.org/modeling/emf/">Eclipse Modeling Framework</a> (EMF).
-    Because of the <a href="http://en.wikipedia.org/wiki/List_of_Eclipse_Modeling_Framework_based_software">universal acceptance of EMF</a>,
+    The SDK is built on top of the <a href="https://www.eclipse.org/modeling/emf/">Eclipse Modeling Framework</a> (EMF).
+    Because of the <a href="https://en.wikipedia.org/wiki/List_of_Eclipse_Modeling_Framework_based_software">universal acceptance of EMF</a>,
     it is feasible to consider interoperability with other modeling tools.
     In addition, the OpenDDS Modeling SDK model files use the standards-based
-    <a href="http://www.omg.org/spec/XMI/">XML Metadata Interchange</a> (XMI) format.
+    <a href="https://www.omg.org/spec/XMI/">XML Metadata Interchange</a> (XMI) format.
     This provides further opportunity for interoperability with tools that work with XMI files. To simplify this interoperability,
     the semantic model information is in one file and the graphical representation is in another. This separation allows diagrams to be
     created from semantic models obtained by other tools.
@@ -70,7 +70,7 @@ order: 70
 </div>
 
 <div class="panel" align="justify">
-  <a name="Plug-ins"><span class="headertext">Eclipse Plug-ins</span></a>
+  <span name="Plug-ins" class="headertext">Eclipse Plug-ins</span>
   <span class="bodytext"><br />
     <p>
       OpenDDS Modeling is provided via Eclipse plug-ins that include
@@ -107,7 +107,7 @@ order: 70
 </div>
 
 <div class="bodytext" align="justify">
-  <a name="Capture"><span class="colortitle">Model Capture</span></a>
+  <span id="Capture" class="colortitle">Model Capture</span>
   <p>
     As mentioned in the introduction,
     a UML model defining DCPS elements and policies along
@@ -116,7 +116,7 @@ order: 70
     The elements of the UML model follows the structure of
     the DDS UML Platform Independent Model (PIM) defined in
     the DDS specification
-    (<a href="http://www.omg.org/cgi-bin/doc?formal/07-01-01">OMG: formal/07-01-01</a>).
+    (<a href="https://www.omg.org/cgi-bin/doc?formal/07-01-01">OMG: formal/07-01-01</a>).
   </p>
 
   <p>
@@ -181,7 +181,7 @@ order: 70
 
 
 <div class="panel" align="justify">
-  <a name="Generation"><span class="headertext">Code Generation</span></a>
+  <span id="Generation" class="headertext">Code Generation</span>
   <span class="bodytext"><br />
     <p>
       Source code is then generated from the captured model
@@ -287,7 +287,7 @@ order: 70
       </table>
     <p>
     The build support files are based on the
-    <a href="http://www.objectcomputing.com/products/MPC">MPC</a>
+    <a href="{{ site.data.docgroup.mpc }}">MPC</a>
     portable build system used by OpenDDS itself.  It can be used to
     generate makefiles or project files for building the model
     libraries according to the development environment.
@@ -302,7 +302,7 @@ order: 70
 
 
 <div class="bodytext" align="justify">
-  <a name="Programming"><span class="colortitle">Programming</span></a>
+  <span id="Programming" class="colortitle">Programming</span>
   <p>
     In order to use the middleware defined by a model,
     applications need to link in the generated code.
@@ -328,7 +328,7 @@ order: 70
 </div>
 
 <div class="panel" align="justify">
-  <a name="MoreInformation"><span class="headertext">Getting More Information</span></a>
+  <span id="MoreInformation" class="headertext">Getting More Information</span>
   <span class="bodytext"><br />
     <p>
       For further information about the OpenDDS Modeling SDK:
@@ -336,7 +336,7 @@ order: 70
     <ul>
       <li>Training in OpenDDS Programming with C++ and the OpenDDS Modeling SDK
         is available from Object Computing, Inc. (OCI). See
-        <a href="http://ocitraining.com/coursecatalog">
+        <a href="{{ site.data.oci.training }}">
           Course Offerings - Distributed Computing</a> for
         descriptions of these and other Distributed Computing course offerings
         from OCI.</li>
