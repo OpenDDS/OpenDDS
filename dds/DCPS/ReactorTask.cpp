@@ -213,15 +213,15 @@ int ReactorTask::svc()
     condition_.notify_all();
   }
 
-  if (thread_status_manager_->update_thread_status()) {
+  thread_status_period_ = thread_status_manager_->thread_status_interval();
+  if (thread_status_period_) {
     tsm_updater_handler_ = make_rch<ThreadStatusManager::Updater>();
-    thread_status_period_ = thread_status_manager_->thread_status_interval();
     thread_status_timer_ = reactor_wrapper_.schedule(*tsm_updater_handler_, thread_status_manager_,
                                                      thread_status_period_, thread_status_period_);
 
     if (thread_status_timer_ == ReactorWrapper::InvalidTimerId) {
       if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: ReactorTask::svc: failed to "
+        ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: ReactorTask::svc: failed to "
                               "schedule timer for ThreadStatusManager::Updater\n"));
       }
     }
@@ -278,11 +278,12 @@ int ReactorTask::run_reactor_i()
   const bool has_run_time = !run_time_.is_zero();
   const MonotonicTimePoint end_time = MonotonicTimePoint::now() + run_time_;
 
-  if (thread_status_manager_->update_thread_status()) {
+  const TimeDuration thread_status_interval = thread_status_manager_->thread_status_interval();
+  if (thread_status_interval) {
     ThreadStatusManager::Start thread_status_monitoring_active(*thread_status_manager_, name_);
 
     while (!has_run_time || MonotonicTimePoint::now() < end_time) {
-      ACE_Time_Value t = thread_status_manager_->thread_status_interval().value();
+      ACE_Time_Value t = thread_status_interval.value();
       ThreadStatusManager::Sleeper s(thread_status_manager_);
       if (reactor_->run_reactor_event_loop(t, 0) != 0) {
         break;

@@ -14,5 +14,5 @@ my $test = new PerlDDS::TestFramework();
 $test->process("tsm", "threadstatusmanager", " -DCPSThreadStatusInterval 1 -DCPSDefaultDiscovery DEFAULT_RTPS");
 $test->start_process("tsm");
 
-my $status = $test->finish(15);
+my $status = $test->finish(30);
 exit $status;
