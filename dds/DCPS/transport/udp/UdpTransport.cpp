@@ -276,14 +276,24 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
   if (!cfg) {
     return;
   }
+  if (data.data_length() < sizeof(Priority)) {
+    VDBG((LM_DEBUG, "(%P|%t) UdpTransport::passive_connection received short data sample\n"));
+    return;
+  }
   const size_t blob_len = data.data_length() - sizeof(Priority);
   Message_Block_Ptr payload(data.data());
   Priority priority;
   Serializer serializer(payload.get(), encoding_kind);
-  serializer >> priority;
+  if (!(serializer >> priority)) {
+    VDBG((LM_DEBUG, "(%P|%t) UdpTransport::passive_connection failed to read priority\n"));
+    return;
+  }
   TransportBLOB blob(static_cast<CORBA::ULong>(blob_len));
   blob.length(blob.maximum());
-  serializer.read_octet_array(blob.get_buffer(), blob.length());
+  if (!serializer.read_octet_array(blob.get_buffer(), blob.length())) {
+    VDBG((LM_DEBUG, "(%P|%t) UdpTransport::passive_connection failed to read blob\n"));
+    return;
+  }
 
   // Send an ack so that the active side can return from
   // connect_datalink_i().  This is just a single byte of
