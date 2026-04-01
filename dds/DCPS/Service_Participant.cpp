@@ -2296,7 +2296,11 @@ Service_Participant::get_type_information(DDS::DomainParticipant_ptr participant
 DDS::ReturnCode_t Service_Participant::get_dynamic_type(DDS::DynamicType_var& type,
   DDS::DomainParticipant_ptr participant, const DDS::BuiltinTopicKey_t& key) const
 {
-  return dynamic_cast<DomainParticipantImpl*>(participant)->get_dynamic_type(type, key);
+  DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
+  if (!participant_servant) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+  return participant_servant->get_dynamic_type(type, key);
 }
 #endif
 
