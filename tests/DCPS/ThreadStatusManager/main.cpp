@@ -45,7 +45,7 @@ public:
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     while (state != state_) {
       if (cv_.wait() != 0) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) TestThread::wait_for_state: failed waiting on cv_\n"));
+        ACE_ERROR((LM_ERROR, "(%P|%t) TestThread::wait_for_state: failed waiting for state %d on cv_\n", state));
         throw false;
       }
     }
