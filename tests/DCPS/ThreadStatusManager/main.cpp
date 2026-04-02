@@ -13,6 +13,11 @@ const int EVENT1_DETAIL2 = 2;
 const int EVENT2_DETAIL1 = 3;
 const int EVENT2_DETAIL2 = 4;
 
+namespace {
+  const ACE_Time_Value config_poll_interval(0, 100000);
+  const DDS::Duration_t config_wait_time = {10, 0};
+}
+
 class TestThread : public ACE_Task_Base {
 public:
 
@@ -99,6 +104,20 @@ private:
   TestThreadState state_;
   String id_;
 };
+
+bool wait_for_thread_status_interval(const TimeDuration& expected)
+{
+  const MonotonicTimePoint deadline = MonotonicTimePoint::now() + TimeDuration(config_wait_time);
+  while (MonotonicTimePoint::now() < deadline) {
+    if (TheServiceParticipant->get_thread_status_manager().thread_status_interval() == expected) {
+      return true;
+    }
+    ACE_OS::sleep(config_poll_interval);
+  }
+  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: wait_for_thread_status_interval - timed out waiting for interval to become {%d sec, %u nsec}\n",
+    expected.value().sec(), expected.value().usec() * 1000u));
+  return false;
+}
 
 bool read_status(DDS::WaitSet_var ws, InternalThreadBuiltinTopicDataDataReader_var dr, MonotonicTimePoint& timestamp,
                  TestThread& task, TestThread::TestThreadState new_state, const char* status,
@@ -262,6 +281,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ws->attach_condition(read_cond);
 
   // Run test with initial config
+  const DDS::UInt32 initial_interval = TheServiceParticipant->config_store()->get_uint32(
+    OpenDDS::DCPS::COMMON_DCPS_THREAD_STATUS_INTERVAL, 0);
+  if (!wait_for_thread_status_interval(TimeDuration(initial_interval))) {
+    return EXIT_FAILURE;
+  }
   int ret = tsm_test(itbtd_reader, ws);
 
   if (ret == EXIT_SUCCESS) {
@@ -284,7 +308,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     // Turn it back on do the testing again
     if (ret == EXIT_SUCCESS) {
       config_store->set_uint32(status_prop, orig);
-      ret = tsm_test(itbtd_reader, ws);
+      if (!wait_for_thread_status_interval(TimeDuration(orig))) {
+        ret = EXIT_FAILURE;
+      } else {
+        ret = tsm_test(itbtd_reader, ws);
+      }
     }
   }
 
