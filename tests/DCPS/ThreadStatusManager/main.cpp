@@ -59,7 +59,8 @@ public:
   void set_state(TestThreadState state)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    if (state <= state_) {
+    // Currently, state progression progresses precisely by one each time
+    if (state != state_ + 1) {
       ACE_ERROR((LM_ERROR, "(%P|%t) TestThread::set_state: Unexpected state '%d' when current state is '%d'\n", state, state_));
       throw false;
     }
@@ -296,7 +297,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     // Turn off thread status reporting and expect no messages
     const DDS::UInt32 orig = config_store->get_uint32(status_prop, 0);
     config_store->set_uint32(status_prop, 0);
-    ACE_OS::sleep(orig * 2);
+    if (!wait_for_thread_status_interval(TimeDuration(0))) {
+      return EXIT_FAILURE;
+    }
     const DDS::Duration_t waittime = {5, 0};
     DDS::ConditionSeq active;
     DDS::ReturnCode_t rc = ws->wait(active, waittime);
