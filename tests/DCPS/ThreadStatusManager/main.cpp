@@ -13,11 +13,28 @@ const int EVENT1_DETAIL2 = 2;
 const int EVENT2_DETAIL1 = 3;
 const int EVENT2_DETAIL2 = 4;
 
+namespace {
+  const ACE_Time_Value config_poll_interval(0, 100000);
+  const DDS::Duration_t config_wait_time = {10, 0};
+}
+
 class TestThread : public ACE_Task_Base {
 public:
-  TestThread(ACE_Thread_Mutex& mutex, ACE_Condition<ACE_Thread_Mutex>& cv)
-    : mutex_(mutex)
-    , cv_(cv)
+
+  enum TestThreadState {
+    TTS_NONE = 0,
+    TTS_START = 1,
+    TTS_E1_BEGIN = 2,
+    TTS_E2_BEGIN = 3,
+    TTS_E2_END = 4,
+    TTS_E1_END = 5,
+    TTS_STOP = 6
+  };
+
+  TestThread()
+    : mutex_()
+    , cv_(mutex_)
+    , state_(TTS_NONE)
     , id_("dds_DCPS_ThreadStatusManager_TestThread")
   {}
 
@@ -28,6 +45,32 @@ public:
 
   String id() const { return id_; }
 
+  void wait_for_state(TestThreadState state) const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    while (state != state_) {
+      if (cv_.wait() != 0) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) TestThread::wait_for_state: failed waiting for state %d on cv_\n", state));
+        throw false;
+      }
+    }
+  }
+
+  void set_state(TestThreadState state)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    // Currently, state progression progresses precisely by one each time
+    if (state != state_ + 1) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) TestThread::set_state: Unexpected state '%d' when current state is '%d'\n", state, state_));
+      throw false;
+    }
+    const bool notify = state != state_;
+    state_ = state;
+    if (notify) {
+      cv_.broadcast();
+    }
+  }
+
 private:
   int svc()
   {
@@ -35,46 +78,50 @@ private:
 
     // For each event, wait for the main thread to signal to proceed
     ThreadStatusManager::Start start(tsm, id_);
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    if (cv_.wait() != 0) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) TestThread::svc: failed waiting on cv_ after \"start\" began\n"));
-      return -1;
-    }
+
+    wait_for_state(TTS_START);
 
     {
       ThreadStatusManager::Event event1(tsm, EVENT1_DETAIL1, EVENT1_DETAIL2);
-      if (cv_.wait() != 0) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) TestThread::svc: failed waiting on cv_ after \"event1\" began\n"));
-        return -1;
-      }
+
+      wait_for_state(TTS_E1_BEGIN);
 
       {
         ThreadStatusManager::Event event2(tsm, EVENT2_DETAIL1, EVENT2_DETAIL2);
-        if (cv_.wait() != 0) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) TestThread::svc: failed waiting on cv_ after \"event2\" began\n"));
-          return -1;
-        }
+
+        wait_for_state(TTS_E2_BEGIN);
       }
-      if (cv_.wait() != 0) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) TestThread::svc: failed waiting on cv_ after \"event2\" ended\n"));
-        return -1;
-      }
+
+      wait_for_state(TTS_E2_END);
     }
-    if (cv_.wait() != 0) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) TestThread::svc: failed waiting on cv_ after \"event1\" ended\n"));
-      return -1;
-    }
+
+    wait_for_state(TTS_E1_END);
 
     return 0;
   }
 
-  ACE_Thread_Mutex& mutex_;
-  ACE_Condition<ACE_Thread_Mutex>& cv_;
+  mutable ACE_Thread_Mutex mutex_;
+  mutable ACE_Condition<ACE_Thread_Mutex> cv_;
+  TestThreadState state_;
   String id_;
 };
 
+bool wait_for_thread_status_interval(const TimeDuration& expected)
+{
+  const MonotonicTimePoint deadline = MonotonicTimePoint::now() + TimeDuration(config_wait_time);
+  while (MonotonicTimePoint::now() < deadline) {
+    if (TheServiceParticipant->get_thread_status_manager().thread_status_interval() == expected) {
+      return true;
+    }
+    ACE_OS::sleep(config_poll_interval);
+  }
+  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: wait_for_thread_status_interval - timed out waiting for interval to become {%d sec, %u nsec}\n",
+    expected.value().sec(), expected.value().usec() * 1000u));
+  return false;
+}
+
 bool read_status(DDS::WaitSet_var ws, InternalThreadBuiltinTopicDataDataReader_var dr, MonotonicTimePoint& timestamp,
-                 const TestThread& task, ACE_Condition<ACE_Thread_Mutex>& cv, const char* status,
+                 TestThread& task, TestThread::TestThreadState new_state, const char* status,
                  bool thread_end = false, int expected_detail1 = 0, int expected_detail2 = 0)
 {
   const DDS::Duration_t infinite = {DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
@@ -133,16 +180,15 @@ bool read_status(DDS::WaitSet_var ws, InternalThreadBuiltinTopicDataDataReader_v
   if (!found) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: read_status - failed to read test thread's %C status\n", status));
   } else {
-    cv.broadcast();
+    task.set_state(new_state);
   }
   return found;
 }
 
 int tsm_test(InternalThreadBuiltinTopicDataDataReader_var itbtd_reader, DDS::WaitSet_var ws)
 {
-  ACE_Thread_Mutex mutex;
-  ACE_Condition<ACE_Thread_Mutex> cv(mutex);
-  TestThread task(mutex, cv);
+  TestThread task;
+
   if (task.start() != 0) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main - failed to start test thread\n"));
     return EXIT_FAILURE;
@@ -151,29 +197,29 @@ int tsm_test(InternalThreadBuiltinTopicDataDataReader_var itbtd_reader, DDS::Wai
   MonotonicTimePoint thread_start, event1_start, event1_end, event2_start, event2_end, thread_end;
 
   // Notify the test thread to proceed after reading the thread status in each step
-  if (!read_status(ws, itbtd_reader, thread_start, task, cv, "start")) {
+  if (!read_status(ws, itbtd_reader, thread_start, task, TestThread::TTS_START, "start")) {
     return EXIT_FAILURE;
   }
 
-  if (!read_status(ws, itbtd_reader, event1_start, task, cv, "event1 begin", false, EVENT1_DETAIL1, EVENT1_DETAIL2)) {
+  if (!read_status(ws, itbtd_reader, event1_start, task, TestThread::TTS_E1_BEGIN, "event1 begin", false, EVENT1_DETAIL1, EVENT1_DETAIL2)) {
     return EXIT_FAILURE;
   }
 
-  if (!read_status(ws, itbtd_reader, event2_start, task, cv, "event2 begin", false, EVENT2_DETAIL1, EVENT2_DETAIL2)) {
+  if (!read_status(ws, itbtd_reader, event2_start, task, TestThread::TTS_E2_BEGIN, "event2 begin", false, EVENT2_DETAIL1, EVENT2_DETAIL2)) {
     return EXIT_FAILURE;
   }
 
-  if (!read_status(ws, itbtd_reader, event2_end, task, cv, "event2 end")) {
+  if (!read_status(ws, itbtd_reader, event2_end, task, TestThread::TTS_E2_END, "event2 end")) {
     return EXIT_FAILURE;
   }
 
-  if (!read_status(ws, itbtd_reader, event1_end, task, cv, "event1 end")) {
+  if (!read_status(ws, itbtd_reader, event1_end, task, TestThread::TTS_E1_END, "event1 end")) {
     return EXIT_FAILURE;
   }
 
   // The thread status sample corresponding to the thread end event is a disposed sample,
   // so thread_end is just passed here, but its value is not used for anything.
-  if (!read_status(ws, itbtd_reader, thread_end, task, cv, "end", true)) {
+  if (!read_status(ws, itbtd_reader, thread_end, task, TestThread::TTS_STOP, "stop", true)) {
     return EXIT_FAILURE;
   }
 
@@ -236,6 +282,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ws->attach_condition(read_cond);
 
   // Run test with initial config
+  const DDS::UInt32 initial_interval = TheServiceParticipant->config_store()->get_uint32(
+    OpenDDS::DCPS::COMMON_DCPS_THREAD_STATUS_INTERVAL, 0);
+  if (!wait_for_thread_status_interval(TimeDuration(initial_interval))) {
+    return EXIT_FAILURE;
+  }
   int ret = tsm_test(itbtd_reader, ws);
 
   if (ret == EXIT_SUCCESS) {
@@ -246,6 +297,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     // Turn off thread status reporting and expect no messages
     const DDS::UInt32 orig = config_store->get_uint32(status_prop, 0);
     config_store->set_uint32(status_prop, 0);
+    // Unfortunatly, we don't have a "clean" way to wait for the config change to propagate all the
+    // way into the SPDP timer's cancelation, only into the Service_Partipant config store,
+    // so the safest thing to do here is just wait until we know for sure the timer is definitely done
     ACE_OS::sleep(orig * 2);
     const DDS::Duration_t waittime = {5, 0};
     DDS::ConditionSeq active;
@@ -258,7 +312,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     // Turn it back on do the testing again
     if (ret == EXIT_SUCCESS) {
       config_store->set_uint32(status_prop, orig);
-      ret = tsm_test(itbtd_reader, ws);
+      if (!wait_for_thread_status_interval(TimeDuration(orig))) {
+        ret = EXIT_FAILURE;
+      } else {
+        ret = tsm_test(itbtd_reader, ws);
+      }
     }
   }
 
