@@ -62,6 +62,7 @@ public:
 
   static const long DEFAULT_DATALINK_RELEASE_DELAY = 10000;
   static const size_t DEFAULT_DATALINK_CONTROL_CHUNKS = 32u;
+  static const size_t DEFAULT_EVENT_DISPATCHER_THREADS = 1u;
 
   const String& name() const { return name_; }
   const String& config_prefix() const { return config_prefix_; }
@@ -98,6 +99,11 @@ public:
   /// send without backpressure.
   void thread_per_connection(bool tpc);
   bool thread_per_connection() const;
+
+  /// Number of threads used by this transport's EventDispatcher.
+  /// A value of 0 reuses the Service_Participant EventDispatcher.
+  void event_dispatcher_threads(size_t edt);
+  size_t event_dispatcher_threads() const;
 
   /// Delay in milliseconds that the datalink should be released after all
   /// associations are removed. The default value is 10 seconds.

@@ -474,6 +474,12 @@ For example:
 
     See :ref:`config-disc` for details about configuring discovery.
 
+  .. prop:: DCPSEventDispatcherThreads=<n>
+    :default: ``1``
+
+    Number of threads used by the process-wide ``EventDispatcher`` created by ``Service_Participant``.
+    This dispatcher is used by OpenDDS internal services and must always have at least one thread.
+
   .. prop:: DCPSGlobalTransportConfig=<name>|$file
     :default: The default configuration is used as described in :ref:`run_time_configuration--overview`.
 
@@ -2431,6 +2437,13 @@ See :ref:`plugins` for more information.
     This option will increase performance when writing to multiple data readers on different process as long as the overhead of thread context switching does not outweigh the benefits of parallel writes.
     This balance of network performance to context switching overhead is best determined by experimenting.
     If a machine has multiple network cards, it may improve performance by creating a transport for each network card.
+
+  .. prop:: event_dispatcher_threads=<n>
+    :default: ``1``
+
+    Number of threads used by the transport instance's ``EventDispatcher``.
+    Set this to ``0`` to reuse the global ``Service_Participant`` event dispatcher instead of creating a transport-local dispatcher.
+    This can reduce thread counts when a process contains many transport instances.
 
   .. prop:: datalink_release_delay=<msec>
     :default: ``10000`` (10 sec)

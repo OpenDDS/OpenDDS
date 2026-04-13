@@ -300,6 +300,7 @@ private:
 
   /// smart ptr to the associated DL cleanup task
   EventDispatcher_rch event_dispatcher_;
+  bool owns_event_dispatcher_;
 
   /// Monitor object for this entity
   unique_ptr<Monitor> monitor_;

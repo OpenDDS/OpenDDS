@@ -56,6 +56,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(TheServiceParticipant->publisher_content_filter() == false);
     TEST_CHECK(TheServiceParticipant->get_default_discovery() == "MyDefaultDiscovery");
     TEST_CHECK(TheServiceParticipant->default_address() == NetworkAddress(u_short(0), "127.0.0.1"));
+    TEST_CHECK(TheServiceParticipant->event_dispatcher_thread_count() == 4);
     TEST_CHECK(TheServiceParticipant->federation_recovery_duration() == 800);
     TEST_CHECK(TheServiceParticipant->federation_initial_backoff_seconds() == 2);
     TEST_CHECK(TheServiceParticipant->federation_backoff_multiplier() == 3);
@@ -74,6 +75,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(tcp_inst->max_samples_per_packet() == 3);
     TEST_CHECK(tcp_inst->optimum_packet_size() == 2048);
     TEST_CHECK(tcp_inst->thread_per_connection() == true);
+    TEST_CHECK(tcp_inst->event_dispatcher_threads() == 3);
     TEST_CHECK(tcp_inst->datalink_release_delay() == 5000);
     TEST_CHECK(tcp_inst->datalink_control_chunks() == 16);
     TEST_CHECK(tcp_inst->local_address() == "localhost:");
@@ -87,6 +89,13 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TransportInst_rch inst2 = TransportRegistry::instance()->get_inst("anothertcp");
     TEST_CHECK(inst2);
     TEST_CHECK(inst2->name() == "anothertcp");
+    TEST_CHECK(inst2->event_dispatcher_threads() == 0);
+
+    const EventDispatcher_rch global_event_dispatcher =
+      TheServiceParticipant->event_dispatcher();
+    TEST_CHECK(global_event_dispatcher);
+    TEST_CHECK(tcp_inst->event_dispatcher(0, GUID_UNKNOWN) != global_event_dispatcher);
+    TEST_CHECK(inst2->event_dispatcher(0, GUID_UNKNOWN) == global_event_dispatcher);
 
     TransportConfig_rch config = TransportRegistry::instance()->get_config("myconfig");
     TEST_CHECK(config);
