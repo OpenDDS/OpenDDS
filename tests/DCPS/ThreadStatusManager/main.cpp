@@ -300,7 +300,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     // Unfortunatly, we don't have a "clean" way to wait for the config change to propagate all the
     // way into the SPDP timer's cancelation, only into the Service_Partipant config store,
     // so the safest thing to do here is just wait until we know for sure the timer is definitely done
-    ACE_OS::sleep(orig * 2);
+    ACE_OS::sleep(1); // Assume any updates here are pre-cancelation updates (config still propagating)
     const DDS::Duration_t waittime = {5, 0};
     DDS::ConditionSeq active;
     DDS::ReturnCode_t rc = ws->wait(active, waittime);
