@@ -7,6 +7,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
+#include "debug.h"
 #include "ServiceEventDispatcher.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -14,8 +15,29 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+namespace {
+
+void handle_cancel_and_release(EventBase* ptr)
+{
+  if (!ptr) {
+    return;
+  }
+
+  try {
+    ptr->handle_cancel();
+  } catch (...) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: ServiceEventDispatcher: handle_cancel threw an exception\n"));
+    }
+  }
+
+  ptr->_remove_ref();
+}
+
+}
+
 ServiceEventDispatcher::ServiceEventDispatcher(size_t count)
- : dispatcher_(make_rch<DispatchService>(count))
+ : dispatcher_(make_rch<DispatchService>(count ? count : 1))
 {
 }
 
@@ -35,17 +57,17 @@ void ServiceEventDispatcher::shutdown(bool immediate)
     DispatchService::EventQueue remaining;
     local->shutdown(immediate, &remaining);
     for (DispatchService::EventQueue::iterator it = remaining.begin(), limit = remaining.end(); it != limit; ++it) {
-      EventBase* ptr = static_cast<EventBase*>(it->second);
-      if (ptr) {
-        ptr->handle_cancel();
-        ptr->_remove_ref();
-      }
+      handle_cancel_and_release(static_cast<EventBase*>(it->second));
     }
   }
 }
 
 bool ServiceEventDispatcher::dispatch(EventBase_rch event)
 {
+  if (!event) {
+    return false;
+  }
+
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   if (!dispatcher_) {
     return false;
@@ -60,6 +82,10 @@ bool ServiceEventDispatcher::dispatch(EventBase_rch event)
 
 long ServiceEventDispatcher::schedule(EventBase_rch event, const MonotonicTimePoint& expiration)
 {
+  if (!event) {
+    return -1;
+  }
+
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   if (!dispatcher_) {
     return -1;
@@ -74,18 +100,21 @@ long ServiceEventDispatcher::schedule(EventBase_rch event, const MonotonicTimePo
 
 size_t ServiceEventDispatcher::cancel(long id)
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (!dispatcher_) {
-    return 0;
-  }
-  void* arg = 0;
-  const size_t result = dispatcher_->cancel(id, &arg);
-  if (result) {
-    EventBase* ptr = static_cast<EventBase*>(arg);
-    if (ptr) {
-      ptr->handle_cancel();
-      ptr->_remove_ref();
+  EventBase* ptr = 0;
+  size_t result = 0;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (!dispatcher_) {
+      return 0;
     }
+    void* arg = 0;
+    result = dispatcher_->cancel(id, &arg);
+    if (result) {
+      ptr = static_cast<EventBase*>(arg);
+    }
+  }
+  if (result) {
+    handle_cancel_and_release(ptr);
   }
   return result;
 }

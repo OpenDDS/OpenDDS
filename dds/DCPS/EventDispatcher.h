@@ -28,13 +28,17 @@ struct OpenDDS_Dcps_Export EventBase : virtual RcObject {
   virtual ~EventBase();
 
   /// Called when the event is dispatched by an EventDispatcher
+  /// Implementations may throw. The dispatcher will catch and route failures to
+  /// handle_error(), then suppress any exception that escapes.
   virtual void handle_event() = 0;
 
-  /// Only called when an exception is caught during handle_event
+  /// Called when an exception is caught during handle_event().
+  /// Implementations may throw; any exception that escapes is suppressed.
   virtual void handle_error();
 
   /// Called when the dispatch or schedule of an event is canceled by an
-  /// EventDispatcher, for example when immediate shutdown is requested
+  /// EventDispatcher, for example when immediate shutdown is requested.
+  /// Implementations may throw; any exception that escapes is suppressed.
   virtual void handle_cancel();
 
   void operator()();
@@ -102,6 +106,11 @@ private:
  * event objects derived from EventBase either for immediate dispatch (dispatch)
  * or for future scheduled dispatch (schedule). Scheduled dispatches return id
  * values which can be used to cancel the dispatch before the scheduled time.
+ *
+ * EventDispatcher intentionally defines only light-weight semantics common to
+ * a range of possible implementations. In particular, callers should not infer
+ * a strict relative execution order between callbacks unless a specific
+ * implementation explicitly documents one.
  */
 class OpenDDS_Dcps_Export EventDispatcher : public RcObject {
 public:
@@ -111,21 +120,27 @@ public:
 
   /**
    * Request shutdown of this EventDispatcher, which prevents sucessful future
-   * calls to either dispatch or schedule and cancels all scheduled events.
+   * calls to either dispatch or schedule and cancels any still-scheduled
+   * events. The treatment of already accepted immediate work depends on the
+   * implementation and the value of immediate. Callbacks already in progress
+   * are not preempted by this interface.
+   *
+   * Any execution-order or draining details during shutdown are
+   * implementation-specific.
    * @param immediate prevent any further dispatches from event queue, otherwise allow current queue to empty
    */
   virtual void shutdown(bool immediate = false) = 0;
 
   /**
    * Dispatch an event.
-   * @param event the event to dispatch
-   * @return true if event successfully enqueue, otherwise false
+   * @param event the event to dispatch; null events are ignored
+   * @return true if the event is successfully accepted, otherwise false
    */
   virtual bool dispatch(EventBase_rch event) = 0;
 
   /**
    * Schedule the future dispatch of an event.
-   * @param event the event to dispatch
+   * @param event the event to dispatch; null events are ignored
    * @param expiration the requested dispatch time (no earlier than)
    * @return -1 on a failure, otherwise the timer id for the future dispatch
    */
@@ -140,7 +155,9 @@ public:
 
   /**
    * Get the internal event queue size
-   * @return the number of currently queued (dispatched, but not yet handled) events
+   * @return the number of currently queued immediate events that have been
+   * accepted for dispatch but not yet started; scheduled timer entries are not
+   * included
    */
   virtual size_t queue_size() const = 0;
 
