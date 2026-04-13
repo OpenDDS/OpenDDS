@@ -177,6 +177,11 @@ int ReactorTask::open_reactor_task(ThreadStatusManager* thread_status_manager,
 
 int ReactorTask::svc()
 {
+  // Every activated ACE task thread ends with close(), which drops a
+  // self-reference. Take that reference here for both single-threaded and
+  // multi-threaded reactor execution.
+  _add_ref();
+
   if (n_threads_ > 1) {
     return run_reactor_i();
   }
@@ -185,12 +190,6 @@ int ReactorTask::svc()
 
   {
     GuardType guard(lock_);
-
-    // First off - We need to obtain our own reference to ourselves such
-    // that we don't get deleted while still running in our own thread.
-    // In essence, our current thread "owns" a copy of our reference.
-    // It's all done with the magic of intrusive reference counting!
-    _add_ref();
 
     // Ignore all signals to avoid
     //     ERROR: <something descriptive> Interrupted system call
