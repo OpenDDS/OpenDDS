@@ -38,6 +38,11 @@ namespace {
     STATUS_INFO_DISPOSE = { { 0, 0, 0, 1 } },
     STATUS_INFO_UNREGISTER = { { 0, 0, 0, 2 } },
     STATUS_INFO_DISPOSE_UNREGISTER = { { 0, 0, 0, 3 } };
+
+  bool has_valid_cursor(const ACE_Message_Block& mb)
+  {
+    return mb.rd_ptr() && mb.wr_ptr() && mb.rd_ptr() <= mb.wr_ptr();
+  }
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -67,16 +72,23 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
 
   // valid_ is false here, it will only be set to true if there is a Submessage
 
-  // Manually grab the first two bytes for the SubmessageKind and the byte order
-  if (mb.length() == 0) {
+  // Do not trust length() when rd_ptr() has already been advanced out of range.
+  if (!has_valid_cursor(mb)) {
     return;
   }
 
-  const SubmessageKind kind = static_cast<SubmessageKind>(*mb.rd_ptr());
+  const size_t contiguous_length = static_cast<size_t>(mb.wr_ptr() - mb.rd_ptr());
+  if (contiguous_length == 0 || mb.total_length() < SMHDR_SZ) {
+    return;
+  }
+
+  // Manually grab the first two bytes for the SubmessageKind and the byte order.
+  const SubmessageKind kind =
+    static_cast<SubmessageKind>(static_cast<ACE_CDR::Octet>(*mb.rd_ptr()));
 
   ACE_CDR::Octet flags = 0;
 
-  if (mb.length() > 1) {
+  if (contiguous_length > 1) {
     flags = static_cast<ACE_CDR::Octet>(mb.rd_ptr()[1]);
   } else if (mb.cont() && mb.cont()->length() > 0) {
     flags = static_cast<ACE_CDR::Octet>(mb.cont()->rd_ptr()[0]);
@@ -148,6 +160,10 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
 #undef CASE_SMKIND
 
   if (valid_) {
+    if (message_length_ < SMHDR_SZ) {
+      valid_ = false;
+      return;
+    }
 
     frag_ = (kind == DATA_FRAG);
     data_ = (kind == DATA);

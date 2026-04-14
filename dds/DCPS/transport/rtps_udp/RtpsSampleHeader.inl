@@ -37,8 +37,8 @@ RtpsSampleHeader::operator=(ACE_Message_Block& mb)
   valid_ = false;
   frag_ = false;
   data_ = false;
+  serialized_size_ = 0;
   // message_length_ should not be reset here
-  // serialized_size_ doesn't need to be reset, init() will set it (if valid_)
   init(mb);
   return *this;
 }

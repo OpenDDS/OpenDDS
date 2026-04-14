@@ -32,6 +32,13 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+namespace {
+  bool has_valid_cursor(const ACE_Message_Block& mb)
+  {
+    return mb.rd_ptr() && mb.wr_ptr() && mb.rd_ptr() <= mb.wr_ptr();
+  }
+}
+
 RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link,
                                                const GuidPrefix_t& local_prefix,
                                                ThreadStatusManager& thread_status_manager)
@@ -154,8 +161,16 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
     while (bytes_remaining_unsigned > 0) {
       data_sample_header_.pdu_remaining(bytes_remaining_unsigned);
       data_sample_header_ = *cur_rb;
-      bytes_remaining_unsigned -= static_cast<ACE_UINT32>(data_sample_header_.get_serialized_size());
       if (!check_header(data_sample_header_)) {
+        return 0;
+      }
+      const ACE_UINT32 serialized_size = static_cast<ACE_UINT32>(data_sample_header_.get_serialized_size());
+      if (!has_valid_cursor(*cur_rb) || serialized_size > bytes_remaining_unsigned) {
+        return 0;
+      }
+      bytes_remaining_unsigned -= serialized_size;
+      const ACE_UINT32 message_length = data_sample_header_.message_length();
+      if (message_length > bytes_remaining_unsigned) {
         return 0;
       }
       ReceivedDataSample rds = data_sample_header_.message_length() ? ReceivedDataSample(*cur_rb) : ReceivedDataSample();
@@ -175,8 +190,8 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
           deliver_sample(rds, remote_address);
         }
       }
-      cur_rb->rd_ptr(data_sample_header_.message_length());
-      bytes_remaining_unsigned -= static_cast<ACE_UINT32>(data_sample_header_.message_length());
+      cur_rb->rd_ptr(message_length);
+      bytes_remaining_unsigned -= message_length;
 
       // For the reassembly algorithm, the 'last_fragment_' header bit only
       // applies to the first DataSampleHeader in the TransportHeader
@@ -1041,17 +1056,20 @@ RtpsUdpReceiveStrategy::check_header(const RtpsTransportHeader& header)
 bool
 RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
 {
+  if (!header.valid()) {
+    return false;
+  }
 
 #if OPENDDS_CONFIG_SECURITY
   if (secure_prefix_.smHeader.submessageId) {
-    return header.valid();
+    return true;
   }
 #endif
 
   receiver_.submsg(header.submessage_);
 
   // save fragmentation details for use in reassemble()
-  if (header.valid() && header.submessage_._d() == RTPS::DATA_FRAG) {
+  if (header.submessage_._d() == RTPS::DATA_FRAG) {
     const RTPS::DataFragSubmessage& rtps = header.submessage_.data_frag_sm();
     frags_.first = rtps.fragmentStartingNum.value;
     frags_.second = RtpsSampleHeader::last_fragment(rtps);
@@ -1059,7 +1077,7 @@ RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
     total_frags_ = RtpsSampleHeader::total_fragments(rtps);
   }
 
-  return header.valid();
+  return true;
 }
 
 void
