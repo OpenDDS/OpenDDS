@@ -160,7 +160,8 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
 #undef CASE_SMKIND
 
   if (valid_) {
-    if (message_length_ < SMHDR_SZ) {
+    const size_t available_size = message_length_ ? message_length_ : starting_length;
+    if (available_size < SMHDR_SZ) {
       valid_ = false;
       return;
     }
@@ -171,13 +172,13 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
     // serialized_size_ is # of bytes of submessage we have read from "mb"
     serialized_size_ = starting_length - mb.total_length();
 
-    const ACE_CDR::UShort remaining = static_cast<ACE_CDR::UShort>(message_length_ - SMHDR_SZ);
+    const size_t remaining = available_size - SMHDR_SZ;
 
     if (octetsToNextHeader == 0 && kind != PAD && kind != INFO_TS) {
       // see RTPS v2.1 section 9.4.5.1.3
       // In this case the current Submessage extends to the end of Message,
       // so we will use the message_length_ that was set in pdu_remaining().
-      octetsToNextHeader = remaining;
+      octetsToNextHeader = static_cast<ACE_CDR::UShort>(remaining);
 
     } else if (octetsToNextHeader > remaining) {
       valid_ = false;
