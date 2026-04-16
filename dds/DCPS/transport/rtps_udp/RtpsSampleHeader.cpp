@@ -38,11 +38,6 @@ namespace {
     STATUS_INFO_DISPOSE = { { 0, 0, 0, 1 } },
     STATUS_INFO_UNREGISTER = { { 0, 0, 0, 2 } },
     STATUS_INFO_DISPOSE_UNREGISTER = { { 0, 0, 0, 3 } };
-
-  bool has_valid_cursor(const ACE_Message_Block& mb)
-  {
-    return mb.rd_ptr() && mb.wr_ptr() && mb.rd_ptr() <= mb.wr_ptr();
-  }
 }
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -64,6 +59,12 @@ operator==(const StatusInfo_t& lhs, const StatusInfo_t& rhs)
 
 }
 namespace DCPS {
+
+bool
+RtpsSampleHeader::has_valid_cursor(const ACE_Message_Block& mb)
+{
+  return mb.rd_ptr() && mb.wr_ptr() && mb.rd_ptr() <= mb.wr_ptr();
+}
 
 void
 RtpsSampleHeader::init(ACE_Message_Block& mb)

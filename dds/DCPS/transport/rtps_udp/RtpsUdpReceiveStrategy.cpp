@@ -32,13 +32,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-namespace {
-  bool has_valid_cursor(const ACE_Message_Block& mb)
-  {
-    return mb.rd_ptr() && mb.wr_ptr() && mb.rd_ptr() <= mb.wr_ptr();
-  }
-}
-
 RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link,
                                                const GuidPrefix_t& local_prefix,
                                                ThreadStatusManager& thread_status_manager)
@@ -165,7 +158,7 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
         return 0;
       }
       const ACE_UINT32 serialized_size = static_cast<ACE_UINT32>(data_sample_header_.get_serialized_size());
-      if (!has_valid_cursor(*cur_rb) || serialized_size > bytes_remaining_unsigned) {
+      if (!RtpsSampleHeader::has_valid_cursor(*cur_rb) || serialized_size > bytes_remaining_unsigned) {
         return 0;
       }
       bytes_remaining_unsigned -= serialized_size;
