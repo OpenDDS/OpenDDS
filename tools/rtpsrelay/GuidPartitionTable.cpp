@@ -221,4 +221,22 @@ void GuidPartitionTable::lookup(StringSet& partitions, const OpenDDS::DCPS::GUID
     return false;
   }
 
+  void GuidPartitionTable::update_cert_id_cache(const std::string& key, const StringSet& partitions)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, cert_id_cache_mutex_);
+    if (!partitions.empty()) {
+      cert_id_to_partitions_[key] = partitions;
+    } else {
+      cert_id_to_partitions_.erase(key);
+    }
+  }
+
+  void GuidPartitionTable::lookup_cert_id_cache(StringSet& partitions, const std::string& key) const
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, cert_id_cache_mutex_);
+    const auto it = cert_id_to_partitions_.find(key);
+    if (it != cert_id_to_partitions_.end()) {
+      partitions = it->second;
+    }
+  }
 }

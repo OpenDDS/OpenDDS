@@ -106,6 +106,9 @@ const DDS::UInt64 RTPS_RELAY_MAX_PARTICIPANTS_LOW_WATER_default = 0;
 const char RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT[] = "RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT";
 const DDS::Duration_t RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT_default = {900, 0}; // 15 minutes
 
+// const char RTPS_RELAY_CERTIFICATE_ID_PATTERN[] = "RTPS_RELAY_CERTIFICATE_ID_PATTERN";
+// const std::string RTPS_RELAY_CERTIFICATE_ID_PATTERN_default = "";
+
 /// Configuration values for the RtpsRelay
 ///
 /// Each value uses one of these implementation strategies:
@@ -475,6 +478,16 @@ public:
     return cached_denied_partitions_timeout_.get();
   }
 
+  void certificate_id_pattern(const std::string& pattern)
+  {
+    certificate_id_pattern_ = pattern;
+  }
+
+  std::string certificate_id_pattern() const
+  {
+    return certificate_id_pattern_;
+  }
+
   static bool to_time_duration(const std::string& value, OpenDDS::DCPS::TimeDuration& out);
 
 private:
@@ -577,6 +590,7 @@ private:
   OpenDDS::DCPS::TimeDuration run_time_;
   bool synchronous_output_ = false;
   size_t handler_threads_ = 1;
+  std::string certificate_id_pattern_;
   // end of variables without ConfigStore support
 };
 

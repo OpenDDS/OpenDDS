@@ -12,6 +12,8 @@
 
 #include <ace/INET_Addr.h>
 
+#include <regex>
+
 namespace RtpsRelay {
 
 struct PortSet {
@@ -28,6 +30,46 @@ struct InetAddrHash {
 
 using IpToPorts = std::unordered_map<ACE_INET_Addr, PortSet, InetAddrHash>;
 
+struct IdentityInfo {
+  std::string cert_sn; // IdentityToken's dds.cert.sn
+  std::string ca_sn; // IdentityToken's dds.ca.sn
+  std::string cert_id;
+
+  bool populated() const
+  {
+    return !cert_sn.empty() && !ca_sn.empty();
+  }
+
+  // Extract a component from dds.cert.sn using the user-provided pattern, e.g., "CN=([\d]+)-.*",
+  // that is used as a look up key into the cert Id to partitions cache.
+  void match_cert_id(const std::string& pattern)
+  {
+    if (pattern.empty()) {
+      return;
+    }
+
+    try {
+      std::regex re(pattern);
+      std::smatch match;
+      if (std::regex_search(cert_sn, match, re) && match.size() > 1) {
+        cert_id = match.str(1);
+      } else {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: GuidPartitionTable::extract_cert_id: pattern '%C' did not match cert_sn '%C'\n",
+          pattern.c_str(), cert_sn.c_str()));
+      }
+    } catch (const std::regex_error& e) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: GuidPartitionTable::extract_cert_id: exception caught for pattern '%C' cert_sn '%C': %C\n",
+        pattern.c_str(), cert_sn.c_str(), e.what()));
+    }
+    return;
+  }
+
+  std::string get_cert_id() const
+  {
+    return !cert_id.empty() ? cert_id : cert_sn;
+  }
+};
+
 struct AddrSetStats {
   bool allow_rtps = false;
   bool allow_stun_responses = true;
@@ -38,7 +80,7 @@ struct AddrSetStats {
   OpenDDS::DCPS::MonotonicTimePoint session_start;
   OpenDDS::DCPS::MonotonicTimePoint deactivation;
   RelayStatisticsReporter& relay_stats_reporter;
-  std::string common_name;
+  IdentityInfo identity_info;
   size_t& total_ips;
   size_t& total_ports;
 
@@ -214,12 +256,12 @@ public:
       gas_.record_activity(remote_address, now, src_guid, from_application_participant, allow_stun_responses, handler);
     }
 
-    bool ignore_rtps(bool from_application_participant,
-                     const OpenDDS::DCPS::GUID_t& guid,
-                     const OpenDDS::DCPS::MonotonicTimePoint& now,
-                     bool& admitted)
+    bool defer_client(bool from_application_participant,
+                      const OpenDDS::DCPS::GUID_t& guid,
+                      const OpenDDS::DCPS::MonotonicTimePoint& now,
+                      bool& admitted)
     {
-      return gas_.ignore_rtps(from_application_participant, guid, now, admitted);
+      return gas_.defer_client(from_application_participant, guid, now, admitted);
     }
 
     OpenDDS::DCPS::TimeDuration get_session_time(const OpenDDS::DCPS::GUID_t& guid,
@@ -329,10 +371,10 @@ private:
     return admit;
   }
 
-  bool ignore_rtps(bool from_application_participant,
-                   const OpenDDS::DCPS::GUID_t& guid,
-                   const OpenDDS::DCPS::MonotonicTimePoint& now,
-                   bool& admitted);
+  bool defer_client(bool from_application_participant,
+                    const OpenDDS::DCPS::GUID_t& guid,
+                    const OpenDDS::DCPS::MonotonicTimePoint& now,
+                    bool& admitted);
 
   void remove(const OpenDDS::DCPS::GUID_t& guid,
               GuidAddrSetMap::iterator it,

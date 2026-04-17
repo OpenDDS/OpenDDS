@@ -338,7 +338,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     cache_message(proxy, src_guid, to, msg, now);
 
     bool admitted = false;
-    if (proxy.ignore_rtps(from_application_participant, src_guid, now, admitted)) {
+    if (proxy.defer_client(from_application_participant, src_guid, now, admitted)) {
       stats_reporter_.ignored_message(msg_len, now, type);
       return 0;
     }
@@ -355,6 +355,17 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       guid_partition_table_.lookup(to_partitions, src_guid);
       if (guid_partition_table_.is_denied(to_partitions)) {
         proxy.deny(src_guid);
+      }
+
+      if (to_partitions.empty()) {
+        const auto pos = proxy.find(src_guid);
+        if (pos != proxy.end()) {
+          const IdentityInfo& id_info = pos->second.identity_info;
+          const std::string key = id_info.get_cert_id();
+          if (!key.empty()) {
+            guid_partition_table_.lookup_cert_id_cache(to_partitions, key);
+          }
+        }
       }
       sent += send(proxy, src_guid, to_partitions, to, send_to_application_participant, msg, now);
     }
@@ -447,7 +458,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       }
 
       bool admitted = false;
-      proxy.ignore_rtps(from_application_participant, src_guid, now, admitted);
+      proxy.defer_client(from_application_participant, src_guid, now, admitted);
       if (admitted && spdp_handler_) {
         messages_sent += spdp_handler_->send_to_application_participant(proxy, src_guid, now);
       }
@@ -478,8 +489,6 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
                                     bool check_submessages,
                                     const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
-  ACE_UNUSED_ARG(msg);
-
   if (!message_parser.parseHeader()) {
     HANDLER_ERROR((LM_ERROR, "(%P|%t) ERROR: VerticalHandler::parse_message %C failed to deserialize RTPS header\n", name_.c_str()));
     return false;
@@ -578,13 +587,15 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
           OpenDDS::DCPS::EntityId_t writerId;
           if (!(message_parser >> readerId) ||
               !(message_parser >> writerId)) {
-            HANDLER_ERROR((LM_ERROR, "(%P|%t) ERROR: VerticalHandler::parse_message %C could not parse submessage from %C\n", name_.c_str(), guid_to_string(src_guid).c_str()));
+            HANDLER_ERROR((LM_ERROR, "(%P|%t) ERROR: VerticalHandler::parse_message %C could not parse submessage from %C\n",
+              name_.c_str(), guid_to_string(src_guid).c_str()));
             return false;
           }
           if (rtps_discovery_->get_crypto_handle(config_.application_domain(), config_.application_participant_guid()) != DDS::HANDLE_NIL &&
               !(OpenDDS::DCPS::RtpsUdpDataLink::separate_message(writerId) ||
                 writerId == OpenDDS::DCPS::ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER)) {
-            HANDLER_WARNING((LM_WARNING, "(%P|%t) WARNING: VerticalHandler::parse_message %C submessage from %C with id %d could not be verified writerId=%02X%02X%02X%02X\n", name_.c_str(), guid_to_string(src_guid).c_str(), submessage_header.submessageId, writerId.entityKey[0], writerId.entityKey[1], writerId.entityKey[2], writerId.entityKind));
+            HANDLER_WARNING((LM_WARNING, "(%P|%t) WARNING: VerticalHandler::parse_message %C submessage from %C with id %d could not be verified writerId=%02X%02X%02X%02X\n",
+              name_.c_str(), guid_to_string(src_guid).c_str(), submessage_header.submessageId, writerId.entityKey[0], writerId.entityKey[1], writerId.entityKey[2], writerId.entityKind));
             return false;
           }
         }
@@ -780,13 +791,14 @@ SpdpHandler::SpdpHandler(const Config& config,
 {}
 
 namespace {
-  std::string extract_common_name(const ACE_Message_Block& msg,
-                                  const OpenDDS::DCPS::GUID_t& src_guid)
+  IdentityInfo extract_identity(const ACE_Message_Block& msg,
+                                const OpenDDS::DCPS::GUID_t& src_guid)
   {
+    IdentityInfo identity{};
     OpenDDS::RTPS::MessageParser message_parser(msg);
     if (!message_parser.parseHeader()) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_common_name() could not parse header\n"));
-      return "";
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_identity: could not parse header\n"));
+      return identity;
     }
 
     while (message_parser.parseSubmessageHeader()) {
@@ -803,8 +815,8 @@ namespace {
             !(message_parser >> readerId) ||
             !(message_parser >> writerId) ||
             !(message_parser >> writerSequenceNumber)) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_common_name() could not parse submessage\n"));
-          return "";
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_identity: could not parse submessage\n"));
+          return identity;
         }
 
         if (writerId != OpenDDS::DCPS::ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER) {
@@ -814,14 +826,14 @@ namespace {
         }
 
         if (!message_parser.serializer().skip(octetsToInlineQos - 16)) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_common_name() could not parse submessage\n"));
-          return "";
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_identity: could not parse submessage\n"));
+          return identity;
         }
 
         OpenDDS::RTPS::ParameterList inlineQos;
         if ((submessage_header.flags & OpenDDS::RTPS::FLAG_Q) && !(message_parser >> inlineQos)) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_common_name() could not parse submessage\n"));
-          return "";
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_identity: could not parse submessage\n"));
+          return identity;
         }
 
         if (submessage_header.flags & OpenDDS::RTPS::FLAG_D) {
@@ -830,14 +842,14 @@ namespace {
           OpenDDS::DCPS::Encoding enc;
           if (!(message_parser >> encap) || !to_encoding(enc, encap, OpenDDS::DCPS::MUTABLE)
                                          || enc.kind() != OpenDDS::DCPS::Encoding::KIND_XCDR1) {
-            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_common_name() - failed to deserialize encapsulation header for SPDP from %C\n",
+            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_identity: failed to deserialize encapsulation header for SPDP from %C\n",
                        OpenDDS::DCPS::LogGuid(src_guid).c_str()));
-            return "";
+            return identity;
           }
           message_parser.serializer().encoding(enc);
           if (!(message_parser >> plist)) {
-            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_common_name() - failed to deserialize data payload for SPDP\n"));
-            return "";
+            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_identity: failed to deserialize data payload for SPDP\n"));
+            return identity;
           }
 
           for (CORBA::ULong i = 0; i != plist.length(); ++i) {
@@ -848,7 +860,12 @@ namespace {
                 for (CORBA::ULong j = 0; j != idt.properties.length(); ++j) {
                   const DDS::Property_t& prop = idt.properties[j];
                   if (std::strcmp(OpenDDS::Security::dds_cert_sn, prop.name.in()) == 0) {
-                    return std::string(prop.value.in());
+                    identity.cert_sn = prop.value.in();
+                  } else if (std::strcmp(OpenDDS::Security::dds_ca_sn, prop.name.in()) == 0) {
+                    identity.ca_sn = prop.value.in();
+                  }
+                  if (identity.populated()) {
+                    return identity;
                   }
                 }
               }
@@ -861,7 +878,7 @@ namespace {
       message_parser.skipSubmessageContent();
     }
 
-    return "";
+    return identity;
   }
 }
 
@@ -871,16 +888,19 @@ void SpdpHandler::cache_message(GuidAddrSet::Proxy& proxy,
                                 const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                 const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
-  if (to.empty()) {
+  const bool undirected_spdp = to.empty();
+  if (undirected_spdp) {
     const auto pos = proxy.find(src_guid);
     if (pos != proxy.end()) {
       if (!pos->second.seen_spdp_message) {
-        pos->second.common_name = extract_common_name(*msg, src_guid);
+        pos->second.identity_info = extract_identity(*msg, src_guid);
+        pos->second.identity_info.match_cert_id(config_.certificate_id_pattern());
         if (config_.log_activity()) {
-          ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SpdpHandler::cache_message %C got first SPDP %C into session dds.cert.sn %C\n",
+          ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SpdpHandler::cache_message %C got first SPDP %C into session dds.cert.sn %C dds.ca.sn %C\n",
                      guid_to_string(src_guid).c_str(),
                      pos->second.get_session_time(now).sec_str().c_str(),
-                     pos->second.common_name.c_str()));
+                     pos->second.identity_info.cert_sn.c_str(),
+                     pos->second.identity_info.ca_sn.c_str()));
         }
         pos->second.spdp_message = msg;
         pos->second.seen_spdp_message = true;

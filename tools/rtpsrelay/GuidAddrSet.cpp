@@ -404,10 +404,10 @@ void GuidAddrSet::maintain_admission_queue(const OpenDDS::DCPS::MonotonicTimePoi
   relay_stats_reporter_.admission_queue_size(admission_control_queue_.size(), now);
 }
 
-bool GuidAddrSet::ignore_rtps(bool from_application_participant,
-                              const OpenDDS::DCPS::GUID_t& guid,
-                              const OpenDDS::DCPS::MonotonicTimePoint& now,
-                              bool& admitted)
+bool GuidAddrSet::defer_client(bool from_application_participant,
+                               const OpenDDS::DCPS::GUID_t& guid,
+                               const OpenDDS::DCPS::MonotonicTimePoint& now,
+                               bool& admitted)
 {
   const auto pos = guid_addr_set_map_.find(guid);
   if (pos == guid_addr_set_map_.end()) {
@@ -423,7 +423,7 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
     pos->second.allow_rtps = true;
 
     if (config_.log_activity()) {
-      ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::ignore_rtps %C was admitted %C into session\n",
+      ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::defer_client: %C was admitted %C into session\n",
                  guid_to_string(guid).c_str(),
                  pos->second.get_session_time(now).sec_str().c_str()));
     }
@@ -451,7 +451,7 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
   admitted = true;
 
   if (config_.log_activity()) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::ignore_rtps %C was admitted %C into session\n",
+    ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::defer_client: %C was admitted %C into session\n",
                guid_to_string(guid).c_str(),
                pos->second.get_session_time(now).sec_str().c_str()));
   }

@@ -105,6 +105,9 @@ bool Config::from_arg(ACE_Arg_Shifter_T<char>& args)
   } else if ((arg = args.get_the_parameter("-DeniedPartitionsTimeout"))) {
     denied_partitions_timeout(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
     args.consume_arg();
+  } else if ((arg = args.get_the_parameter("-CertificateIdPattern"))) {
+    certificate_id_pattern(arg);
+    args.consume_arg();
   } else {
     return false;
   }
