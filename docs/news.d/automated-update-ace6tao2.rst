@@ -4,6 +4,6 @@
 .. news-prs: none
 .. news-start-section: Platform Support and Dependencies
 .. news-start-section: ACE/TAO
-- Updated ACE 6/TAO 2 from 6.5.22 to `6.5.23 <https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_23>`__.
+- Updated ACE 6/TAO 2 from 6.5.23 to `6.5.24 <https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_24>`__.
 .. news-end-section
 .. news-end-section
