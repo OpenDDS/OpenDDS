@@ -15,7 +15,6 @@
 #include "ace/Truncate.h"
 
 #include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/ReactorEvent.h"
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/TimeTypes.h"
 
@@ -36,10 +35,11 @@ ReliableSession::ReliableSession(RcHandle<EventDispatcher> event_dispatcher,
                                  MulticastDataLink* link,
                                  MulticastPeer remote_peer)
   : MulticastSession(event_dispatcher, link, remote_peer)
+  , nak_process_event_(make_rch<ReactorEvent>(reactor,
+                                              make_rch<ReliableSessionEvent>(rchandle_from(this),
+                                                                             &ReliableSession::process_naks)))
   , nak_watchdog_(make_rch<SporadicEvent>(event_dispatcher,
-                                          make_rch<ReactorEvent>(reactor,
-                                                                 make_rch<ReliableSessionEvent>(rchandle_from(this),
-                                                                                                &ReliableSession::process_naks))))
+                                          nak_process_event_))
   , nak_timeout_(link->config()->nak_timeout())
   , nak_delay_intervals_(link->config()->nak_delay_intervals())
   , nak_max_(link->config()->nak_max())
@@ -49,6 +49,7 @@ ReliableSession::ReliableSession(RcHandle<EventDispatcher> event_dispatcher,
 ReliableSession::~ReliableSession()
 {
   nak_watchdog_->cancel();
+  nak_process_event_->disable();
 }
 
 bool
@@ -656,6 +657,7 @@ ReliableSession::start(bool active, bool acked)
     return true;  // already started
   }
 
+  reset_stopped();
   this->active_  = active;
   {
     //can't call accept_datalink while holding lock due to possible reactor deadlock with passive_connection
@@ -680,6 +682,7 @@ void
 ReliableSession::stop()
 {
   MulticastSession::stop();
+  nak_process_event_->disable();
   this->nak_watchdog_->cancel();
 }
 
@@ -698,6 +701,10 @@ ReliableSession::nak_delay()
 void
 ReliableSession::process_naks()
 {
+  if (is_stopped()) {
+    return;
+  }
+
   // Expire outstanding repair requests that have not yet been
   // fulfilled; this prevents NAK implosions due to remote
   // peers becoming unresponsive:
@@ -707,7 +714,9 @@ ReliableSession::process_naks()
   // to remote peers from which we are missing data:
   send_naks();
 
-  nak_watchdog_->schedule(nak_delay());
+  if (!is_stopped()) {
+    nak_watchdog_->schedule(nak_delay());
+  }
 }
 
 } // namespace DCPS
