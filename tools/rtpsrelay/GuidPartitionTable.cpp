@@ -221,22 +221,32 @@ void GuidPartitionTable::lookup(StringSet& partitions, const OpenDDS::DCPS::GUID
     return false;
   }
 
-  void GuidPartitionTable::update_cert_id_cache(const std::string& key, const StringSet& partitions)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, cert_id_cache_mutex_);
-    if (!partitions.empty()) {
-      cert_id_to_partitions_[key] = partitions;
-    } else {
-      cert_id_to_partitions_.erase(key);
+void GuidPartitionTable::update_cert_partitions_cache(const std::string& key, const StringSet& partitions)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, cert_to_partitions_mutex_);
+  if (!key.empty() && !partitions.empty()) {
+    cert_to_partitions_[key] = partitions;
+    if (config_.log_activity()) {
+      std::string parts_str;
+      for (const auto& p : partitions) {
+        if (!parts_str.empty()) parts_str += ",";
+        parts_str += p;
+      }
+      ACE_DEBUG((LM_INFO,
+                 "(%P|%t) INFO: GuidPartitionTable::update_cert_partitions_cache: "
+                 "key=%C partitions=[%C] partition count=%B cache size=%B\n",
+                 key.c_str(), parts_str.c_str(), partitions.size(), cert_to_partitions_.size()));
     }
   }
+}
 
-  void GuidPartitionTable::lookup_cert_id_cache(StringSet& partitions, const std::string& key) const
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, cert_id_cache_mutex_);
-    const auto it = cert_id_to_partitions_.find(key);
-    if (it != cert_id_to_partitions_.end()) {
-      partitions = it->second;
-    }
+void GuidPartitionTable::lookup_cert_partitions_cache(StringSet& partitions, const std::string& key) const
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, cert_to_partitions_mutex_);
+  const auto it = cert_to_partitions_.find(key);
+  if (it != cert_to_partitions_.end()) {
+    partitions = it->second;
   }
+}
+
 }

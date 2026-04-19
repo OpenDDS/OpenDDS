@@ -59,6 +59,17 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
         const auto repoid = participant_->get_repoid(info.instance_handle);
         const auto r = guid_partition_table_.insert(repoid, data.partition.name);
 
+        // Cache all partitions corresponding to this participant
+        StringSet all_partitions;
+        const auto part_guid = make_part_guid(repoid);
+        guid_partition_table_.lookup(all_partitions, part_guid);
+        std::string cert_id;
+        {
+          GuidAddrSet::Proxy proxy(*guid_addr_set_);
+          cert_id = proxy.get_cert_id(part_guid);
+        }
+        guid_partition_table_.update_cert_partitions_cache(cert_id, all_partitions);
+
         if (r == GuidPartitionTable::ADDED) {
           if (config_.log_discovery()) {
             GuidAddrSet::Proxy proxy(*guid_addr_set_);

@@ -363,7 +363,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
           const IdentityInfo& id_info = pos->second.identity_info;
           const std::string key = id_info.get_cert_id();
           if (!key.empty()) {
-            guid_partition_table_.lookup_cert_id_cache(to_partitions, key);
+            guid_partition_table_.lookup_cert_partitions_cache(to_partitions, key);
           }
         }
       }

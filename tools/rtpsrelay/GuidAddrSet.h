@@ -33,7 +33,7 @@ using IpToPorts = std::unordered_map<ACE_INET_Addr, PortSet, InetAddrHash>;
 struct IdentityInfo {
   std::string cert_sn; // IdentityToken's dds.cert.sn
   std::string ca_sn; // IdentityToken's dds.ca.sn
-  std::string cert_id;
+  std::string cert_id; // Lookup key for the cached partitions corresponding to this cert_sn
 
   bool populated() const
   {
@@ -52,6 +52,8 @@ struct IdentityInfo {
       std::regex re(pattern);
       std::smatch match;
       if (std::regex_search(cert_sn, match, re) && match.size() > 1) {
+        // Take the first group match
+        // TODO: Does this need to be configurable?
         cert_id = match.str(1);
       } else {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: GuidPartitionTable::extract_cert_id: pattern '%C' did not match cert_sn '%C'\n",
@@ -326,6 +328,15 @@ public:
     void deny(const OpenDDS::DCPS::GUID_t& guid)
     {
       gas_.deny(guid);
+    }
+
+    std::string get_cert_id(const OpenDDS::DCPS::GUID_t& guid)
+    {
+      const auto it = find(guid);
+      if (it != end()) {
+        return it->second.identity_info.get_cert_id();
+      }
+      return {};
     }
 
   private:
