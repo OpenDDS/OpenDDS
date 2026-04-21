@@ -74,21 +74,30 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
   // valid_ is false here, it will only be set to true if there is a Submessage
 
   // Do not trust length() when rd_ptr() has already been advanced out of range.
-  if (!has_valid_cursor(mb)) {
+  ACE_Message_Block* mb_ptr = &mb;
+  while (mb_ptr) {
+    if (!has_valid_cursor(*mb_ptr)) {
+      return;
+    }
+    mb_ptr = mb_ptr->cont();
+  }
+
+  const size_t starting_length = mb.total_length();
+
+  if (starting_length < SMHDR_SZ) {
     return;
   }
 
   const size_t contiguous_length = static_cast<size_t>(mb.wr_ptr() - mb.rd_ptr());
-  if (contiguous_length == 0 || mb.total_length() < SMHDR_SZ) {
-    return;
-  }
 
   // Manually grab the first two bytes for the SubmessageKind and the byte order.
+
+  // The first byte is SubmessageKind
   const SubmessageKind kind =
     static_cast<SubmessageKind>(static_cast<ACE_CDR::Octet>(*mb.rd_ptr()));
 
+  // The second byte is flags
   ACE_CDR::Octet flags = 0;
-
   if (contiguous_length > 1) {
     flags = static_cast<ACE_CDR::Octet>(mb.rd_ptr()[1]);
   } else if (mb.cont() && mb.cont()->length() > 0) {
@@ -97,7 +106,6 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
     return;
   }
 
-  const size_t starting_length = mb.total_length();
   Serializer ser(&mb, Encoding::KIND_XCDR1,
     (flags & FLAG_E) ? ENDIAN_LITTLE : ENDIAN_BIG);
 
