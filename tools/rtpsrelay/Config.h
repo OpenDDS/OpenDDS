@@ -106,9 +106,6 @@ const DDS::UInt64 RTPS_RELAY_MAX_PARTICIPANTS_LOW_WATER_default = 0;
 const char RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT[] = "RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT";
 const DDS::Duration_t RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT_default = {900, 0}; // 15 minutes
 
-// const char RTPS_RELAY_CERTIFICATE_ID_PATTERN[] = "RTPS_RELAY_CERTIFICATE_ID_PATTERN";
-// const std::string RTPS_RELAY_CERTIFICATE_ID_PATTERN_default = "";
-
 /// Configuration values for the RtpsRelay
 ///
 /// Each value uses one of these implementation strategies:

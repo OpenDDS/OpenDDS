@@ -59,15 +59,33 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
         const auto repoid = participant_->get_repoid(info.instance_handle);
         const auto r = guid_partition_table_.insert(repoid, data.partition.name);
 
-        // Cache all partitions corresponding to this participant
-        StringSet all_partitions;
+        // TODO(sonndinh): Move to a common place so PublicationListener can also use it.
+        // If this is an endpoint from a participant that has initiated async discovery,
+        // the participant needs to be removed from the pending recipients sets of all
+        // participants it has initiated async discovery with.
         const auto part_guid = make_part_guid(repoid);
-        guid_partition_table_.lookup(all_partitions, part_guid);
         std::string cert_id;
         {
           GuidAddrSet::Proxy proxy(*guid_addr_set_);
-          cert_id = proxy.get_cert_id(part_guid);
+          auto iter = proxy.find(part_guid);
+          if (iter != proxy.end()) {
+            const auto& initiated_async_disc_with = iter->second.initiated_async_discovery_with;
+            for (const auto& other_part : initiated_async_disc_with) {
+              auto other_iter = proxy.find(other_part);
+              if (other_iter != proxy.end()) {
+                // TODO(sonndinh): Probably also need to clean up when part_guid goes away to avoid leak when
+                // part_guid goes away before PublicationListener/SubscriptionListener is called back?
+                other_iter->second.pending_recipients.erase(part_guid);
+              }
+            }
+            iter->second.initiated_async_discovery_with.clear();
+            cert_id = iter->second.identity_info.get_cert_id();
+          }
         }
+
+        // Cache all partitions corresponding to this participant
+        StringSet all_partitions;
+        guid_partition_table_.lookup(all_partitions, part_guid);
         guid_partition_table_.update_cert_partitions_cache(cert_id, all_partitions);
 
         if (r == GuidPartitionTable::ADDED) {
@@ -77,7 +95,7 @@ void SubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
                        "(%P|%t) INFO: SubscriptionListener::on_data_available "
                        "add local reader %C %C %C into session [%u/%u]\n",
                        guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str(),
-                       proxy.get_session_time(make_part_guid(repoid), now).sec_str().c_str(),
+                       proxy.get_session_time(part_guid, now).sec_str().c_str(),
                        idx, infos.length()));
           }
           stats_reporter_.local_readers(++count_, OpenDDS::DCPS::MonotonicTimePoint::now());

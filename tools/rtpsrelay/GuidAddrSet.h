@@ -30,6 +30,7 @@ struct InetAddrHash {
 
 using IpToPorts = std::unordered_map<ACE_INET_Addr, PortSet, InetAddrHash>;
 
+// TODO(sonndinh): Make this a class with private data members
 struct IdentityInfo {
   std::string cert_sn; // IdentityToken's dds.cert.sn
   std::string ca_sn; // IdentityToken's dds.ca.sn
@@ -83,6 +84,15 @@ struct AddrSetStats {
   OpenDDS::DCPS::MonotonicTimePoint deactivation;
   RelayStatisticsReporter& relay_stats_reporter;
   IdentityInfo identity_info;
+
+  // Set of participants that this participant has initiated async discovery with.
+  // Used to clean up the pending recipients sets of those participants.
+  GuidSet initiated_async_discovery_with;
+
+  // Set of participants that have initiated async discovery with this participant, and
+  // are waiting for messages from it.
+  GuidSet pending_recipients;
+
   size_t& total_ips;
   size_t& total_ports;
 
