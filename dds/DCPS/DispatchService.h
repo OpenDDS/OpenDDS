@@ -68,7 +68,7 @@ public:
   virtual ~DispatchService();
 
   /**
-   * Request shutdown of this DispatchService, which prevents sucessful future
+   * Request shutdown of this DispatchService, which prevents successful future
    * calls to either dispatch or schedule and cancels all still-scheduled
    * events.
    *

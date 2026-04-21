@@ -450,7 +450,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
     custom_plugin->wait_for(CHECK_LOCAL_DATAWRITER_REGISTER_INSTANCE_FALSE);
 
-    ACE_DEBUG((LM_DEBUG, "SCENARIO: check_local_datawriter_register_instance sucess\n"));
+    ACE_DEBUG((LM_DEBUG, "SCENARIO: check_local_datawriter_register_instance success\n"));
     custom_plugin->reset_flags();
     custom_plugin->set_return(true, true);
     const DDS::InstanceHandle_t ih = mdatawriter2->register_instance(message);

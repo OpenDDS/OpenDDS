@@ -119,7 +119,7 @@ public:
   virtual ~EventDispatcher();
 
   /**
-   * Request shutdown of this EventDispatcher, which prevents sucessful future
+   * Request shutdown of this EventDispatcher, which prevents successful future
    * calls to either dispatch or schedule and cancels any still-scheduled
    * events. The treatment of already accepted immediate work depends on the
    * implementation and the value of immediate. Callbacks already in progress
