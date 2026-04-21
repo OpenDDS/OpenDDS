@@ -1779,6 +1779,8 @@ Service_Participant::event_dispatcher_thread_count() const
                  value,
                  COMMON_DCPS_EVENT_DISPATCHER_THREADS_default));
     }
+    config_store_->set_uint32(COMMON_DCPS_EVENT_DISPATCHER_THREADS,
+                              static_cast<DDS::UInt32>(COMMON_DCPS_EVENT_DISPATCHER_THREADS_default));
     return COMMON_DCPS_EVENT_DISPATCHER_THREADS_default;
   }
 
