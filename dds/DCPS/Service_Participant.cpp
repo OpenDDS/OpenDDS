@@ -38,6 +38,8 @@
 #include <ace/Configuration_Import_Export.h>
 #include <ace/Malloc_Allocator.h>
 #include <ace/OS_NS_ctype.h>
+
+#include <limits>
 #include <ace/OS_NS_sys_utsname.h>
 #include <ace/OS_NS_unistd.h>
 #include <ace/Reactor.h>
@@ -2447,6 +2449,21 @@ Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_
         Transport_debug_level = static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str()));
       } else if (p.key() == COMMON_DCPS_THREAD_STATUS_INTERVAL) {
         service_participant_.thread_status_manager_.thread_status_interval(TimeDuration(ACE_OS::atoi(p.value().c_str())));
+      } else if (p.key() == COMMON_DCPS_EVENT_DISPATCHER_THREADS) {
+        DDS::Int64 value = 0;
+        if (!convertToInteger(p.value(), value)
+            || value < static_cast<DDS::Int64>(COMMON_DCPS_EVENT_DISPATCHER_THREADS_default)
+            || value > static_cast<DDS::Int64>(std::numeric_limits<DDS::UInt32>::max())) {
+          if (log_level >= LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING,
+                       ACE_TEXT("(%P|%t) WARNING: ConfigReaderListener::on_data_available: ")
+                       ACE_TEXT("configured value %C for %C is invalid, using %B\n"),
+                       p.value().c_str(),
+                       COMMON_DCPS_EVENT_DISPATCHER_THREADS,
+                       COMMON_DCPS_EVENT_DISPATCHER_THREADS_default));
+          }
+          service_participant_.event_dispatcher_thread_count(COMMON_DCPS_EVENT_DISPATCHER_THREADS_default);
+        }
 #if OPENDDS_CONFIG_SECURITY
       } else if (p.key() == COMMON_DCPS_SECURITY_DEBUG_LEVEL) {
         security_debug.set_debug_level(static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str())));
