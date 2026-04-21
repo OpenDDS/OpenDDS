@@ -57,6 +57,8 @@ public:
 
 private:
 
+  static void handle_cancel_and_release(EventBase* ptr);
+
   mutable ACE_Thread_Mutex mutex_;
   DispatchService_rch dispatcher_;
 };

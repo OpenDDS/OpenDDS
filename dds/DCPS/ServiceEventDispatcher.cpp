@@ -15,9 +15,17 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-namespace {
+ServiceEventDispatcher::ServiceEventDispatcher(size_t count)
+ : dispatcher_(make_rch<DispatchService>(count ? count : 1))
+{
+}
 
-void handle_cancel_and_release(EventBase* ptr)
+ServiceEventDispatcher::~ServiceEventDispatcher()
+{
+  shutdown();
+}
+
+void ServiceEventDispatcher::handle_cancel_and_release(EventBase* ptr)
 {
   if (!ptr) {
     return;
@@ -27,23 +35,11 @@ void handle_cancel_and_release(EventBase* ptr)
     ptr->handle_cancel();
   } catch (...) {
     if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: ServiceEventDispatcher: handle_cancel threw an exception\n"));
+      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ServiceEventDispatcher::handle_cancel_and_release: Event's handle_cancel() threw an exception\n")));
     }
   }
 
   ptr->_remove_ref();
-}
-
-}
-
-ServiceEventDispatcher::ServiceEventDispatcher(size_t count)
- : dispatcher_(make_rch<DispatchService>(count ? count : 1))
-{
-}
-
-ServiceEventDispatcher::~ServiceEventDispatcher()
-{
-  shutdown();
 }
 
 void ServiceEventDispatcher::shutdown(bool immediate)
