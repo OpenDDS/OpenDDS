@@ -11,12 +11,14 @@ include(opendds_build_helpers)
 
 add_executable(RtpsRelay
   Config.cpp
+  EndpointListener.cpp
   GuidAddrSet.cpp
   GuidPartitionTable.cpp
   ParticipantListener.cpp
   PublicationListener.cpp
   RelayAddressListener.cpp
   RelayConfigControlListener.cpp
+  RelayDeniedPartitionsListener.cpp
   RelayHandler.cpp
   RelayHttpMetaDiscovery.cpp
   RelayParticipantStatusReporter.cpp
@@ -26,7 +28,6 @@ add_executable(RtpsRelay
   RelayThreadMonitor.cpp
   RtpsRelay.cpp
   SubscriptionListener.cpp
-  RelayDeniedPartitionsListener.cpp
 )
 _opendds_executable(RtpsRelay)
 target_link_libraries(RtpsRelay PRIVATE ${dep_libs})
