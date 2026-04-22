@@ -20,11 +20,31 @@ class OpenDDS_Dcps_Export ServiceEventDispatcher : public EventDispatcher {
 public:
   /**
    * Create a ServiceEventDispatcher
-   * @param count the requested size of the internal thread pool (see DispatchService)
+   *
+   * ServiceEventDispatcher uses DispatchService as its execution engine.
+   * Immediate events are accepted onto a FIFO queue. Scheduled events become
+   * eligible at or after their expiration time and are then transferred onto
+   * that same queue. With multiple worker threads, callback start and
+   * completion order is not otherwise guaranteed.
+   *
+   * @param count the requested size of the internal thread pool (see
+   * DispatchService); values less than 1 are treated as 1
    */
   explicit ServiceEventDispatcher(size_t count = 1);
   virtual ~ServiceEventDispatcher();
 
+  /**
+   * Request shutdown of this ServiceEventDispatcher.
+   *
+   * If immediate is false, already queued immediate events are allowed to
+   * drain before shutdown completes. Still-scheduled timer events are canceled.
+   *
+   * If immediate is true, still-scheduled timer events and queued immediate
+   * events that have not started are canceled.
+   *
+   * Events canceled by ServiceEventDispatcher have handle_cancel() invoked.
+   * Callbacks already in progress are not interrupted by shutdown.
+   */
   void shutdown(bool immediate = false);
 
   bool dispatch(EventBase_rch event);
@@ -36,6 +56,8 @@ public:
   size_t queue_size() const;
 
 private:
+
+  static void handle_cancel_and_release(EventBase* ptr);
 
   mutable ACE_Thread_Mutex mutex_;
   DispatchService_rch dispatcher_;

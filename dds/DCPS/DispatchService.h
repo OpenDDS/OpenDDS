@@ -53,6 +53,14 @@ public:
 
   /**
    * Create a DispatchService
+   *
+   * DispatchService is a light-weight execution service built around a FIFO
+   * queue for immediate work and a time-ordered queue for scheduled work.
+   * Scheduled callbacks are moved to the immediate queue once they expire. When
+   * more than one worker thread is configured, execution may proceed
+   * concurrently, so dequeue order should not be interpreted as a global
+   * completion-order guarantee.
+   *
    * @param count the requested size of the internal thread pool
    */
   explicit DispatchService(size_t count = 1);
@@ -60,8 +68,20 @@ public:
   virtual ~DispatchService();
 
   /**
-   * Request shutdown of this DispatchService, which prevents sucessful future
-   * calls to either dispatch or schedule and cancels all scheduled events.
+   * Request shutdown of this DispatchService, which prevents successful future
+   * calls to either dispatch or schedule and cancels all still-scheduled
+   * events.
+   *
+   * If immediate is false, work already in the immediate event queue is
+   * allowed to drain before shutdown completes.
+   *
+   * If immediate is true, queued immediate work that has not started is
+   * returned in pending if requested, otherwise discarded.
+   *
+   * Callbacks already in progress are not interrupted by shutdown. A scheduled
+   * callback that has already been moved to the immediate queue is treated as
+   * immediate work for shutdown purposes.
+   *
    * @param immediate prevent any further dispatches from event queue, otherwise allow current queue to empty
    * @param pending An EventQueue object in which to store canceled events in case extra processing is required
    */
@@ -71,7 +91,7 @@ public:
    * Dispatch an event
    * @param fun the function pointer to dispatch
    * @param arg the argument to pass during dispatch
-   * @return true if event successfully enqueue, otherwise false
+   * @return true if event successfully enqueued, otherwise false
    */
   DispatchStatus dispatch(FunPtr fun, void* arg = 0);
 
@@ -123,7 +143,9 @@ public:
 
   /**
    * Get the internal event queue size
-   * @return the number of currently queued (dispatched, but not yet handled) events
+   * @return the number of currently queued immediate events that have been
+   * accepted for dispatch but not yet started; scheduled timer entries are not
+   * included
    */
   size_t queue_size() const;
 

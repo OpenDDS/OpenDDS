@@ -7,6 +7,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
+#include "debug.h"
 #include "EventDispatcher.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -31,7 +32,13 @@ void EventBase::operator()()
   try {
     handle_event();
   } catch (...) {
-    handle_error();
+    try {
+      handle_error();
+    } catch (...) {
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: EventBase::operator(): handle_error threw an exception\n"));
+      }
+    }
   }
   // In order to avoid extra allocations for containers of RcHandle<EventBase>
   // implementations of EventDispatcher will increase the reference count of
