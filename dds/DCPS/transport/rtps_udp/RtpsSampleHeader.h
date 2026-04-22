@@ -100,6 +100,8 @@ public:
   static FragmentNumber last_fragment(const RTPS::DataFragSubmessage& df);
   static ACE_UINT32 total_fragments(const RTPS::DataFragSubmessage& df);
 
+  static bool has_valid_cursor(const ACE_Message_Block& mb);
+
 private:
   static void process_iqos(DataSampleHeader& opendds,
                            const RTPS::ParameterList& iqos);
