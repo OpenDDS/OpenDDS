@@ -62,7 +62,7 @@ public:
 
   static const long DEFAULT_DATALINK_RELEASE_DELAY = 10000;
   static const size_t DEFAULT_DATALINK_CONTROL_CHUNKS = 32u;
-  static const size_t DEFAULT_EVENT_DISPATCHER_THREADS = 0u;
+  static const size_t DEFAULT_EVENT_DISPATCHER_THREADS = 1u;
 
   const String& name() const { return name_; }
   const String& config_prefix() const { return config_prefix_; }
