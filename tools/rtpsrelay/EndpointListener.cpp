@@ -4,7 +4,6 @@ namespace RtpsRelay {
 
 GuidPartitionTable::Result EndpointListener::update_partitions_info(OpenDDS::DCPS::GUID_t repoid, const DDS::StringSeq& partitions)
 {
-  // TODO(sonndinh): Add log for async discovery cache?
   const auto r = guid_partition_table_.insert(repoid, partitions);
 
   // If this is an endpoint from a participant that has initiated async discovery,
@@ -26,7 +25,7 @@ GuidPartitionTable::Result EndpointListener::update_partitions_info(OpenDDS::DCP
         }
       }
       iter->second.initiated_async_discovery_with.clear();
-      cert_id = iter->second.identity_info.get_cert_id();
+      cert_id = iter->second.identity_info.cert_id();
     }
   }
 

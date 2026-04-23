@@ -106,6 +106,9 @@ const DDS::UInt64 RTPS_RELAY_MAX_PARTICIPANTS_LOW_WATER_default = 0;
 const char RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT[] = "RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT";
 const DDS::Duration_t RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT_default = {900, 0}; // 15 minutes
 
+const char RTPS_RELAY_LOG_ASYNC_DISCOVERY[] = "RTPS_RELAY_LOG_ASYNC_DISCOVERY";
+const bool RTPS_RELAY_LOG_ASYNC_DISCOVERY_default = false;
+
 /// Configuration values for the RtpsRelay
 ///
 /// Each value uses one of these implementation strategies:
@@ -485,6 +488,17 @@ public:
     return certificate_id_pattern_;
   }
 
+  void log_async_discovery(bool flag)
+  {
+    TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_ASYNC_DISCOVERY, flag);
+    cached_log_async_discovery_.set(flag);
+  }
+
+  bool log_async_discovery() const
+  {
+    return cached_log_async_discovery_.get();
+  }
+
   static bool to_time_duration(const std::string& value, OpenDDS::DCPS::TimeDuration& out);
 
 private:
@@ -572,6 +586,7 @@ private:
   CachedValue<size_t, OpenDDS::DCPS::convertToInteger> cached_admission_max_participants_high_water_{RTPS_RELAY_MAX_PARTICIPANTS_HIGH_WATER_default};
   CachedValue<size_t, OpenDDS::DCPS::convertToInteger> cached_admission_max_participants_low_water_{RTPS_RELAY_MAX_PARTICIPANTS_LOW_WATER_default};
   CachedValue<OpenDDS::DCPS::TimeDuration, to_time_duration> cached_denied_partitions_timeout_{OpenDDS::DCPS::TimeDuration{RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT_default}};
+  CachedValue<bool, OpenDDS::DCPS::ConfigStoreImpl::convert_value> cached_log_async_discovery_{RTPS_RELAY_LOG_ASYNC_DISCOVERY_default};
 
   // start of variables without ConfigStore support
   std::string relay_id_;

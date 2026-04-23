@@ -30,19 +30,29 @@ struct InetAddrHash {
 
 using IpToPorts = std::unordered_map<ACE_INET_Addr, PortSet, InetAddrHash>;
 
-// TODO(sonndinh): Make this a class with private data members
-struct IdentityInfo {
-  std::string cert_sn; // IdentityToken's dds.cert.sn
-  std::string ca_sn; // IdentityToken's dds.ca.sn
-  std::string cert_id; // Lookup key for the cached partitions corresponding to this cert_sn
-
-  bool populated() const
+class IdentityInfo {
+public:
+  std::string cert_sn() const
   {
-    return !cert_sn.empty() && !ca_sn.empty();
+    return cert_sn_;
   }
 
-  // Extract a component from dds.cert.sn using the user-provided pattern, e.g., "CN=([\d]+)-.*",
-  // that is used as a look up key into the cert Id to partitions cache.
+  void cert_sn(const std::string& cert_sn)
+  {
+    cert_sn_ = cert_sn;
+  }
+
+  void ca_sn(const std::string& ca_sn)
+  {
+    ca_sn_ = ca_sn;
+  }
+
+  std::string ca_sn() const
+  {
+    return ca_sn_;
+  }
+
+  // Extract a component from dds.cert.sn using the user-provided pattern, e.g., "CN=([\d]+)-.*".
   void match_cert_id(const std::string& pattern)
   {
     if (pattern.empty()) {
@@ -52,25 +62,35 @@ struct IdentityInfo {
     try {
       std::regex re(pattern);
       std::smatch match;
-      if (std::regex_search(cert_sn, match, re) && match.size() > 1) {
+      if (std::regex_search(cert_sn_, match, re) && match.size() > 1) {
         // Take the first group match
-        // TODO: Does this need to be configurable?
-        cert_id = match.str(1);
+        cert_id_ = match.str(1);
       } else {
-        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: GuidPartitionTable::extract_cert_id: pattern '%C' did not match cert_sn '%C'\n",
-          pattern.c_str(), cert_sn.c_str()));
+        ACE_DEBUG((LM_INFO, "(%P|%t) INFO: IndentityInfo::match_cert_id: pattern '%C' did not match dds.cert.sn '%C'\n",
+          pattern.c_str(), cert_sn_.c_str()));
       }
     } catch (const std::regex_error& e) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: GuidPartitionTable::extract_cert_id: exception caught for pattern '%C' cert_sn '%C': %C\n",
-        pattern.c_str(), cert_sn.c_str(), e.what()));
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: IdentityInfo::match_cert_id: exception caught for pattern '%C' dds.cert.sn '%C': %C\n",
+        pattern.c_str(), cert_sn_.c_str(), e.what()));
     }
     return;
   }
 
-  std::string get_cert_id() const
+  // Use as key into the partitions cache for asynchronous discovery if it is non-empty
+  std::string cert_id() const
   {
-    return !cert_id.empty() ? cert_id : cert_sn;
+    return cert_id_;
   }
+
+private:
+  // IdentityToken's dds.cert.sn
+  std::string cert_sn_;
+
+  // IdentityToken's dds.ca.sn
+  std::string ca_sn_;
+
+  // Lookup key for the cached partitions corresponding to this cert_sn
+  std::string cert_id_;
 };
 
 struct AddrSetStats {
@@ -340,11 +360,11 @@ public:
       gas_.deny(guid);
     }
 
-    std::string get_cert_id(const OpenDDS::DCPS::GUID_t& guid)
+    std::string cert_id(const OpenDDS::DCPS::GUID_t& guid)
     {
       const auto it = find(guid);
       if (it != end()) {
-        return it->second.identity_info.get_cert_id();
+        return it->second.identity_info.cert_id();
       }
       return {};
     }

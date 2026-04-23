@@ -108,6 +108,9 @@ bool Config::from_arg(ACE_Arg_Shifter_T<char>& args)
   } else if ((arg = args.get_the_parameter("-CertificateIdPattern"))) {
     certificate_id_pattern(arg);
     args.consume_arg();
+  } else if ((arg = args.get_the_parameter("-LogAsyncDiscovery"))) {
+    log_async_discovery(ACE_OS::atoi(arg));
+    args.consume_arg();
   } else {
     return false;
   }
@@ -216,6 +219,9 @@ void Config::set_defaults()
   cached_denied_partitions_timeout_.default_if_empty([&](const TimeDuration& default_val) {
     TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT, default_val.to_dds_duration());
   });
+  cached_log_async_discovery_.default_if_empty([&](bool default_val) {
+    TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_ASYNC_DISCOVERY, default_val);
+  });
 }
 
 void Config::on_data_available(InternalDataReader_rch reader)
@@ -276,6 +282,8 @@ void Config::on_data_available(InternalDataReader_rch reader)
         cached_admission_max_participants_low_water_.set(pair.value());
       } else if (pair.key() == RTPS_RELAY_DENIED_PARTITIONS_TIMEOUT) {
         cached_denied_partitions_timeout_.set(pair.value());
+      } else if (pair.key() == RTPS_RELAY_LOG_ASYNC_DISCOVERY) {
+        cached_log_async_discovery_.set(pair.value());
       }
     }
   }
