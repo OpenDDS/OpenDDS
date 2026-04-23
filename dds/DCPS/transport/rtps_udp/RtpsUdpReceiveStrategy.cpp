@@ -535,9 +535,10 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
 #if OPENDDS_CONFIG_SECURITY
   const SubmessageKind kind = rsh.submessage_._d();
 
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(readers_mutex_);
+
   if (secure_prefix_.smHeader.submessageId == SEC_PREFIX && kind != SEC_POSTFIX) {
     // secure envelope in progress, defer processing
-    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(readers_mutex_);
     secure_submessages_.push_back(rsh.submessage_);
     if (kind == DATA) {
       secure_sample_ = sample;
