@@ -40,6 +40,8 @@ OpenDDS::DCPS::TcpInst::dump_to_str(DDS::DomainId_t domain) const
   os << formatNameForDump("local_address")                 << this->local_address() << std::endl;
   os << formatNameForDump("pub_address")                   << this->pub_address_str() << std::endl;
   os << formatNameForDump("enable_nagle_algorithm")        << (this->enable_nagle_algorithm() ? "true" : "false") << std::endl;
+  os << formatNameForDump("send_buffer_size")              << this->send_buffer_size() << std::endl;
+  os << formatNameForDump("rcv_buffer_size")               << this->rcv_buffer_size() << std::endl;
   os << formatNameForDump("conn_retry_initial_delay")      << this->conn_retry_initial_delay() << std::endl;
   os << formatNameForDump("conn_retry_backoff_multiplier") << this->conn_retry_backoff_multiplier() << std::endl;
   os << formatNameForDump("conn_retry_attempts")           << this->conn_retry_attempts() << std::endl;
@@ -98,6 +100,30 @@ bool
 OpenDDS::DCPS::TcpInst::enable_nagle_algorithm() const
 {
   return TheServiceParticipant->config_store()->get_boolean(config_key("ENABLE_NAGLE_ALGORITHM").c_str(), false);
+}
+
+void
+OpenDDS::DCPS::TcpInst::send_buffer_size(ACE_INT32 sbs)
+{
+  TheServiceParticipant->config_store()->set_int32(config_key("SEND_BUFFER_SIZE").c_str(), sbs);
+}
+
+ACE_INT32
+OpenDDS::DCPS::TcpInst::send_buffer_size() const
+{
+  return TheServiceParticipant->config_store()->get_int32(config_key("SEND_BUFFER_SIZE").c_str(), 0);
+}
+
+void
+OpenDDS::DCPS::TcpInst::rcv_buffer_size(ACE_INT32 rbs)
+{
+  TheServiceParticipant->config_store()->set_int32(config_key("RCV_BUFFER_SIZE").c_str(), rbs);
+}
+
+ACE_INT32
+OpenDDS::DCPS::TcpInst::rcv_buffer_size() const
+{
+  return TheServiceParticipant->config_store()->get_int32(config_key("RCV_BUFFER_SIZE").c_str(), 0);
 }
 
 void

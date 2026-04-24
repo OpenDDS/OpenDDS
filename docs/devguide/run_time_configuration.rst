@@ -2502,6 +2502,20 @@ Configuring subscribers and publishers should be identical, but different addres
     Enable or disable the `Nagle's algorithm <https://en.wikipedia.org/wiki/Nagle%27s_algorithm>`__.
     Enabling the Nagle's algorithm may increase throughput at the expense of increased latency.
 
+  .. prop:: send_buffer_size=<n>
+    :default: ``0`` (use platform default)
+
+    Total send buffer size in bytes for TCP payload.
+    Set this to a positive value to explicitly configure ``SO_SNDBUF``.
+    Leave it at ``0`` to use the platform's default TCP buffer sizing behavior.
+
+  .. prop:: rcv_buffer_size=<n>
+    :default: ``0`` (use platform default)
+
+    Total receive buffer size in bytes for TCP payload.
+    Set this to a positive value to explicitly configure ``SO_RCVBUF``.
+    Leave it at ``0`` to use the platform's default TCP buffer sizing behavior.
+
   .. prop:: local_address=<host>:<port>
     :default: :prop:`[common]DCPSDefaultAddress`
 
