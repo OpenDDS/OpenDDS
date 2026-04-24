@@ -656,6 +656,10 @@ void RegisterHandler::execute(ReactorWrapper& reactor_wrapper)
 
 void RemoveHandler::execute(ReactorWrapper& reactor_wrapper)
 {
+  if (io_handle_ == ACE_INVALID_HANDLE) {
+    return;
+  }
+
   if (reactor_wrapper.remove_handler(io_handle_, mask_) != 0) {
     if (log_level >= LogLevel::Error) {
       ACE_ERROR((LM_ERROR,

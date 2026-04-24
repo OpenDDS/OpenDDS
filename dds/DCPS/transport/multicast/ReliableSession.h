@@ -17,6 +17,7 @@
 
 #include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/ReactorEvent.h"
 #include "dds/DCPS/RcEventHandler.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -62,6 +63,7 @@ public:
 
 private:
   typedef PmfEvent<ReliableSession> ReliableSessionEvent;
+  RcHandle<ReactorEvent> nak_process_event_;
   SporadicEvent_rch nak_watchdog_;
   TimeDuration nak_delay();
   void process_naks();

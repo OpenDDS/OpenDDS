@@ -71,6 +71,7 @@ BestEffortSession::start(bool active, bool /*acked*/)
 
   if (this->started_) return true;  // already started
 
+  reset_stopped();
   this->active_ = active;
   set_acked();
 

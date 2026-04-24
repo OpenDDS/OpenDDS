@@ -38,6 +38,8 @@
 #include <ace/Configuration_Import_Export.h>
 #include <ace/Malloc_Allocator.h>
 #include <ace/OS_NS_ctype.h>
+
+#include <limits>
 #include <ace/OS_NS_sys_utsname.h>
 #include <ace/OS_NS_unistd.h>
 #include <ace/Reactor.h>
@@ -457,7 +459,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       dp_factory_servant_ = make_rch<DomainParticipantFactoryImpl>();
 
-      event_dispatcher_ = make_rch<ServiceEventDispatcher>(1u);
+      event_dispatcher_ = make_rch<ServiceEventDispatcher>(event_dispatcher_thread_count());
 
       reactor_task_->open_reactor_task(&thread_status_manager_, "Service_Participant");
       job_queue_ = make_rch<JobQueue>(event_dispatcher_);
@@ -1754,6 +1756,38 @@ Service_Participant::liveliness_factor() const
 }
 
 void
+Service_Participant::event_dispatcher_thread_count(size_t value)
+{
+  const size_t actual = value < COMMON_DCPS_EVENT_DISPATCHER_THREADS_default
+    ? COMMON_DCPS_EVENT_DISPATCHER_THREADS_default
+    : value;
+  config_store_->set_uint32(COMMON_DCPS_EVENT_DISPATCHER_THREADS,
+                            static_cast<DDS::UInt32>(actual));
+}
+
+size_t
+Service_Participant::event_dispatcher_thread_count() const
+{
+  const size_t value =
+    config_store_->get_uint32(COMMON_DCPS_EVENT_DISPATCHER_THREADS,
+                              static_cast<DDS::UInt32>(COMMON_DCPS_EVENT_DISPATCHER_THREADS_default));
+  if (value < COMMON_DCPS_EVENT_DISPATCHER_THREADS_default) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING,
+                 "(%P|%t) WARNING: Service_Participant::event_dispatcher_thread_count: "
+                 "configured value %B is invalid, using %B\n",
+                 value,
+                 COMMON_DCPS_EVENT_DISPATCHER_THREADS_default));
+    }
+    config_store_->set_uint32(COMMON_DCPS_EVENT_DISPATCHER_THREADS,
+                              static_cast<DDS::UInt32>(COMMON_DCPS_EVENT_DISPATCHER_THREADS_default));
+    return COMMON_DCPS_EVENT_DISPATCHER_THREADS_default;
+  }
+
+  return value;
+}
+
+void
 Service_Participant::register_discovery_type(const char* section_name,
                                              Discovery::Config* cfg)
 {
@@ -2417,6 +2451,21 @@ Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_
         Transport_debug_level = static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str()));
       } else if (p.key() == COMMON_DCPS_THREAD_STATUS_INTERVAL) {
         service_participant_.thread_status_manager_.thread_status_interval(TimeDuration(ACE_OS::atoi(p.value().c_str())));
+      } else if (p.key() == COMMON_DCPS_EVENT_DISPATCHER_THREADS) {
+        DDS::Int64 value = 0;
+        if (!convertToInteger(p.value(), value)
+            || value < static_cast<DDS::Int64>(COMMON_DCPS_EVENT_DISPATCHER_THREADS_default)
+            || value > static_cast<DDS::Int64>(std::numeric_limits<DDS::UInt32>::max())) {
+          if (log_level >= LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING,
+                       ACE_TEXT("(%P|%t) WARNING: ConfigReaderListener::on_data_available: ")
+                       ACE_TEXT("configured value %C for %C is invalid, using %B\n"),
+                       p.value().c_str(),
+                       COMMON_DCPS_EVENT_DISPATCHER_THREADS,
+                       COMMON_DCPS_EVENT_DISPATCHER_THREADS_default));
+          }
+          service_participant_.event_dispatcher_thread_count(COMMON_DCPS_EVENT_DISPATCHER_THREADS_default);
+        }
 #if OPENDDS_CONFIG_SECURITY
       } else if (p.key() == COMMON_DCPS_SECURITY_DEBUG_LEVEL) {
         security_debug.set_debug_level(static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str())));

@@ -2718,6 +2718,11 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
+  DCPS::ConfigListener::job_queue(DCPS::JobQueue_rch());
+  DCPS::InternalDataReaderListener<DCPS::NetworkInterfaceAddress>::job_queue(DCPS::JobQueue_rch());
+  if (network_interface_updates_event_) {
+    network_interface_updates_event_->disable();
+  }
   TheServiceParticipant->network_interface_address_topic()->disconnect(network_interface_address_reader_);
 
 #if OPENDDS_CONFIG_SECURITY
@@ -3726,7 +3731,7 @@ void Spdp::SpdpTransport::handle_network_interface_updates()
   }
 }
 
-void Spdp::SpdpTransport::on_data_available(DCPS::ConfigReader_rch)
+void Spdp::SpdpTransport::on_data_available(DCPS::ConfigReader_rch reader)
 {
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
@@ -3744,8 +3749,11 @@ void Spdp::SpdpTransport::on_data_available(DCPS::ConfigReader_rch)
 
   DCPS::InternalDataReader<DCPS::ConfigPair>::SampleSequence samples;
   DCPS::InternalSampleInfoSequence infos;
-  config_reader_->take(samples, infos, DDS::LENGTH_UNLIMITED,
-                       DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+  if (!reader) {
+    return;
+  }
+  reader->take(samples, infos, DDS::LENGTH_UNLIMITED,
+               DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
   for (size_t idx = 0; idx != samples.size(); ++idx) {
     const DCPS::ConfigPair& sample = samples[idx];
     if (sample.key() == DCPS::COMMON_DCPS_THREAD_STATUS_INTERVAL) {

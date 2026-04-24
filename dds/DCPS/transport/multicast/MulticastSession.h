@@ -16,6 +16,7 @@
 #include "ace/Message_Block.h"
 #include "ace/Synch_Traits.h"
 
+#include "dds/DCPS/AtomicBool.h"
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/EventDispatcher.h"
 #include "dds/DCPS/transport/framework/TransportHeader.h"
@@ -92,6 +93,16 @@ protected:
 
   virtual void syn_hook(const SequenceNumber& /*seq*/) {}
 
+  bool is_stopped() const
+  {
+    return stopped_;
+  }
+
+  void reset_stopped()
+  {
+    stopped_ = false;
+  }
+
   ACE_Thread_Mutex start_lock_;
   typedef ACE_Reverse_Lock<ACE_Thread_Mutex> Reverse_Lock_t;
   Reverse_Lock_t reverse_start_lock_;
@@ -121,6 +132,7 @@ private:
 
 
   ACE_Thread_Mutex ack_lock_;
+  AtomicBool stopped_;
 
   typedef PmfEvent<MulticastSession> MulticastSessionEvent;
   SporadicEvent_rch syn_watchdog_;

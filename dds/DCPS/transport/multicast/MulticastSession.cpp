@@ -38,6 +38,7 @@ MulticastSession::MulticastSession(RcHandle<EventDispatcher> event_dispatcher,
   , active_(true)
   , reassembly_(link->config()->fragment_reassembly_timeout())
   , acked_(false)
+  , stopped_(false)
   , syn_watchdog_(make_rch<SporadicEvent>(event_dispatcher,
                                           make_rch<MulticastSessionEvent>(rchandle_from(this),
                                                                           &MulticastSession::send_all_syn)))
@@ -67,6 +68,9 @@ MulticastSession::set_acked()
 void
 MulticastSession::start_syn()
 {
+  if (is_stopped()) {
+    return;
+  }
   syn_watchdog_->cancel();
   syn_delay_ = initial_syn_delay_;
   syn_watchdog_->schedule(TimeDuration(0));
@@ -75,6 +79,9 @@ MulticastSession::start_syn()
 void
 MulticastSession::send_control(char submessage_id, Message_Block_Ptr data)
 {
+  if (is_stopped()) {
+    return;
+  }
   DataSampleHeader header;
   Message_Block_Ptr control(this->link_->create_control(submessage_id, header, OPENDDS_MOVE_NS::move(data)));
   if (!control) {
@@ -100,6 +107,10 @@ bool
 MulticastSession::control_received(char submessage_id,
                                    const Message_Block_Ptr& control)
 {
+  if (is_stopped()) {
+    return true;
+  }
+
   switch (submessage_id) {
   case MULTICAST_SYN:
     syn_received(control);
@@ -119,7 +130,7 @@ MulticastSession::control_received(char submessage_id,
 void
 MulticastSession::syn_received(const Message_Block_Ptr& control)
 {
-  if (this->active_) return; // pub send syn, then doesn't receive them.
+  if (is_stopped() || this->active_) return; // pub send syn, then doesn't receive them.
 
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
@@ -189,6 +200,10 @@ MulticastSession::syn_received(const Message_Block_Ptr& control)
 void
 MulticastSession::send_all_syn()
 {
+  if (is_stopped()) {
+    return;
+  }
+
   ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
   for (PendingRemoteMap::const_iterator pos1 = pending_remote_map_.begin(), limit1 = pending_remote_map_.end();
        pos1 != limit1; ++pos1) {
@@ -201,7 +216,9 @@ MulticastSession::send_all_syn()
 
   // Exponential back-off.
   syn_delay_ *= 2;
-  syn_watchdog_->schedule(syn_delay_);
+  if (!is_stopped()) {
+    syn_watchdog_->schedule(syn_delay_);
+  }
 }
 
 void
@@ -237,7 +254,7 @@ MulticastSession::send_syn(const GUID_t& local_writer,
 void
 MulticastSession::synack_received(const Message_Block_Ptr& control)
 {
-  if (!this->active_) return; // sub send synack, then doesn't receive them.
+  if (is_stopped() || !this->active_) return; // sub send synack, then doesn't receive them.
 
   // Already received ack.
   //if (this->acked()) return;
@@ -317,6 +334,7 @@ MulticastSession::send_synack(const GUID_t& local_reader,
 void
 MulticastSession::stop()
 {
+  stopped_ = true;
   this->syn_watchdog_->cancel();
 }
 
@@ -332,6 +350,10 @@ MulticastSession::reassemble(ReceivedDataSample& data,
 void
 MulticastSession::add_remote(const GUID_t& local)
 {
+  if (is_stopped()) {
+    return;
+  }
+
   const GuidConverter conv(local);
   if (conv.isWriter()) {
     // Active peers schedule a watchdog timer to initiate a 2-way
@@ -347,6 +369,10 @@ void
 MulticastSession::add_remote(const GUID_t& local,
                              const GUID_t& remote)
 {
+  if (is_stopped()) {
+    return;
+  }
+
   const GuidConverter conv(local);
 
   {

@@ -24,8 +24,9 @@ ReactorEvent::ReactorEvent(ACE_Reactor* reactor, EventBase_rch event)
 
 void ReactorEvent::handle_event()
 {
-  if (reactor_) {
-    reactor_->notify(this);
+  ACE_Reactor* reactor = reactor_.load();
+  if (reactor) {
+    reactor->notify(this);
   }
 }
 
@@ -33,6 +34,11 @@ int ReactorEvent::handle_exception(ACE_HANDLE)
 {
   event_->handle_event();
   return 0;
+}
+
+void ReactorEvent::disable()
+{
+  reactor_ = 0;
 }
 
 } // DCPS
