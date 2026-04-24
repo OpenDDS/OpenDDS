@@ -442,7 +442,7 @@ OpenDDS::DCPS::TcpConnection::set_sock_options(const TcpInst_rch& tcp_config)
   // Leave buffer sizes unchanged unless explicitly configured so the
   // platform's default TCP tuning can apply.
 #if !defined (ACE_LACKS_SOCKET_BUFSIZ)
-  const int snd_size = tcp_config->send_buffer_size();
+  int snd_size = tcp_config->send_buffer_size();
   if (snd_size > 0 &&
       this->peer().set_option(SOL_SOCKET,
                               SO_SNDBUF,
@@ -455,7 +455,7 @@ OpenDDS::DCPS::TcpConnection::set_sock_options(const TcpInst_rch& tcp_config)
     return;
   }
 
-  const int rcv_size = tcp_config->rcv_buffer_size();
+  int rcv_size = tcp_config->rcv_buffer_size();
   if (rcv_size > 0 &&
       this->peer().set_option(SOL_SOCKET,
                               SO_RCVBUF,
