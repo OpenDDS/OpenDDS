@@ -76,8 +76,8 @@ public:
 
   bool is_denied(const StringSet& partitions) const;
 
-  void update_cert_partitions_cache(const std::string& key, const StringSet& partitions);
-  void lookup_cert_partitions_cache(StringSet& partitions, const std::string& key) const;
+  void update_cert_partitions_cache(const std::string& key, const StringSet& partitions, const OpenDDS::DCPS::GUID_t& guid);
+  void lookup_cert_partitions_cache(StringSet& partitions, const std::string& key, const OpenDDS::DCPS::GUID_t& guid) const;
 
 private:
   void remove_from_cache(const OpenDDS::DCPS::GUID_t& guid)

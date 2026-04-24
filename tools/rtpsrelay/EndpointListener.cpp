@@ -32,7 +32,7 @@ GuidPartitionTable::Result EndpointListener::update_partitions_info(OpenDDS::DCP
   // Cache all partitions corresponding to this participant for async discovery
   StringSet all_partitions;
   guid_partition_table_.lookup(all_partitions, part_guid);
-  guid_partition_table_.update_cert_partitions_cache(cert_id, all_partitions);
+  guid_partition_table_.update_cert_partitions_cache(cert_id, all_partitions, part_guid);
   return r;
 }
 

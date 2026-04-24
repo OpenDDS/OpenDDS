@@ -368,7 +368,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
         const auto pos = proxy.find(src_guid);
         if (pos != proxy.end()) {
           const auto key = pos->second.identity_info.cert_id();
-          guid_partition_table_.lookup_cert_partitions_cache(to_partitions, key);
+          guid_partition_table_.lookup_cert_partitions_cache(to_partitions, key, src_guid);
         }
         if (!to_partitions.empty()) {
           async_discovery = true;
