@@ -76,6 +76,9 @@ public:
 
   bool is_denied(const StringSet& partitions) const;
 
+  void update_cert_partitions_cache(const std::string& key, const StringSet& partitions, const OpenDDS::DCPS::GUID_t& guid);
+  void lookup_cert_partitions_cache(StringSet& partitions, const std::string& key, const OpenDDS::DCPS::GUID_t& guid) const;
+
 private:
   void remove_from_cache(const OpenDDS::DCPS::GUID_t& guid)
   {
@@ -211,6 +214,10 @@ private:
   mutable ACE_Thread_Mutex mutex_;
   mutable ACE_Thread_Mutex write_mutex_;
   mutable ACE_Thread_Mutex denied_partitions_mutex_;
+
+  using CertToPartitions = std::unordered_map<std::string, StringSet>;
+  CertToPartitions cert_to_partitions_;
+  mutable ACE_Thread_Mutex cert_to_partitions_mutex_;
 };
 
 }

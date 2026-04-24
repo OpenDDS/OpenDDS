@@ -12,6 +12,8 @@
 
 #include <ace/INET_Addr.h>
 
+#include <regex>
+
 namespace RtpsRelay {
 
 struct PortSet {
@@ -28,6 +30,69 @@ struct InetAddrHash {
 
 using IpToPorts = std::unordered_map<ACE_INET_Addr, PortSet, InetAddrHash>;
 
+class IdentityInfo {
+public:
+  std::string cert_sn() const
+  {
+    return cert_sn_;
+  }
+
+  void cert_sn(const std::string& cert_sn)
+  {
+    cert_sn_ = cert_sn;
+  }
+
+  void ca_sn(const std::string& ca_sn)
+  {
+    ca_sn_ = ca_sn;
+  }
+
+  std::string ca_sn() const
+  {
+    return ca_sn_;
+  }
+
+  // Extract a component from dds.cert.sn using the user-provided pattern, e.g., "CN=([\d]+)-.*".
+  void match_cert_id(const std::string& pattern)
+  {
+    if (pattern.empty()) {
+      return;
+    }
+
+    try {
+      std::regex re(pattern);
+      std::smatch match;
+      if (std::regex_search(cert_sn_, match, re) && match.size() > 1) {
+        // Take the first group match
+        cert_id_ = match.str(1);
+      } else {
+        ACE_DEBUG((LM_INFO, "(%P|%t) INFO: IndentityInfo::match_cert_id: pattern '%C' did not match dds.cert.sn '%C'\n",
+          pattern.c_str(), cert_sn_.c_str()));
+      }
+    } catch (const std::regex_error& e) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: IdentityInfo::match_cert_id: exception caught for pattern '%C' dds.cert.sn '%C': %C\n",
+        pattern.c_str(), cert_sn_.c_str(), e.what()));
+    }
+    return;
+  }
+
+  // Use as key into the partitions cache for asynchronous discovery if it is non-empty
+  std::string cert_id() const
+  {
+    return cert_id_;
+  }
+
+private:
+  // IdentityToken's dds.cert.sn
+  std::string cert_sn_;
+
+  // IdentityToken's dds.ca.sn
+  std::string ca_sn_;
+
+  // Lookup key for the cached partitions corresponding to this cert_sn
+  std::string cert_id_;
+};
+
 struct AddrSetStats {
   bool allow_rtps = false;
   bool allow_stun_responses = true;
@@ -38,7 +103,16 @@ struct AddrSetStats {
   OpenDDS::DCPS::MonotonicTimePoint session_start;
   OpenDDS::DCPS::MonotonicTimePoint deactivation;
   RelayStatisticsReporter& relay_stats_reporter;
-  std::string common_name;
+  IdentityInfo identity_info;
+
+  // Set of participants that this participant has initiated async discovery with.
+  // Used to clean up the pending recipients sets of those participants.
+  GuidSet initiated_async_discovery_with;
+
+  // Set of participants that have initiated async discovery with this participant, and
+  // are waiting for messages from it.
+  GuidSet pending_recipients;
+
   size_t& total_ips;
   size_t& total_ports;
 
@@ -214,12 +288,12 @@ public:
       gas_.record_activity(remote_address, now, src_guid, from_application_participant, allow_stun_responses, handler);
     }
 
-    bool ignore_rtps(bool from_application_participant,
-                     const OpenDDS::DCPS::GUID_t& guid,
-                     const OpenDDS::DCPS::MonotonicTimePoint& now,
-                     bool& admitted)
+    bool defer_client(bool from_application_participant,
+                      const OpenDDS::DCPS::GUID_t& guid,
+                      const OpenDDS::DCPS::MonotonicTimePoint& now,
+                      bool& admitted)
     {
-      return gas_.ignore_rtps(from_application_participant, guid, now, admitted);
+      return gas_.defer_client(from_application_participant, guid, now, admitted);
     }
 
     OpenDDS::DCPS::TimeDuration get_session_time(const OpenDDS::DCPS::GUID_t& guid,
@@ -286,6 +360,15 @@ public:
       gas_.deny(guid);
     }
 
+    std::string cert_id(const OpenDDS::DCPS::GUID_t& guid)
+    {
+      const auto it = find(guid);
+      if (it != end()) {
+        return it->second.identity_info.cert_id();
+      }
+      return {};
+    }
+
   private:
     GuidAddrSet& gas_;
 
@@ -329,10 +412,10 @@ private:
     return admit;
   }
 
-  bool ignore_rtps(bool from_application_participant,
-                   const OpenDDS::DCPS::GUID_t& guid,
-                   const OpenDDS::DCPS::MonotonicTimePoint& now,
-                   bool& admitted);
+  bool defer_client(bool from_application_participant,
+                    const OpenDDS::DCPS::GUID_t& guid,
+                    const OpenDDS::DCPS::MonotonicTimePoint& now,
+                    bool& admitted);
 
   void remove(const OpenDDS::DCPS::GUID_t& guid,
               GuidAddrSetMap::iterator it,

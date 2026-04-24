@@ -36,6 +36,8 @@
 #include <ace/OS_NS_stdlib.h>
 #include <ace/OS_NS_unistd.h>
 
+#include <sstream>
+
 #if OPENDDS_CONFIG_SECURITY
 const char auth_ca_file[] = "file:../../../security/certs/identity/identity_ca_cert.pem";
 const char perm_ca_file[] = "file:../../../security/certs/permissions/permissions_ca_cert.pem";
@@ -51,7 +53,8 @@ const char USER_DATA[] = "The Publisher";
 const char OTHER_USER_DATA[] = "The Subscriber";
 
 void writer_test(DistributedConditionSet_rch dcs,
-                 const DDS::DataWriter_var& dw)
+                 const DDS::DataWriter_var& dw,
+                 bool second_pub)
 {
   // Write samples
   Messenger::MessageDataWriter_var message_dw = Messenger::MessageDataWriter::_narrow(dw.in());
@@ -61,7 +64,7 @@ void writer_test(DistributedConditionSet_rch dcs,
   message.from         = "Comic Book Guy";
   message.subject      = "Review";
   message.text         = "Worst. Movie. Ever.";
-  message.count        = 0;
+  message.count        = !second_pub ? 0 : 2;
 
   {
     const DDS::ReturnCode_t error = message_dw->write(message, DDS::HANDLE_NIL);
@@ -81,7 +84,7 @@ void writer_test(DistributedConditionSet_rch dcs,
     }
   }
 
-  message.count        = 1;
+  ++message.count;
   {
     const DDS::ReturnCode_t error = message_dw->write(message, DDS::HANDLE_NIL);
     if (error != DDS::RETCODE_OK) {
@@ -90,7 +93,7 @@ void writer_test(DistributedConditionSet_rch dcs,
                  ACE_TEXT(" ERROR: write returned %C!\n"), OpenDDS::DCPS::retcode_to_string(error)));
     }
   }
-  dcs->wait_for("Publisher", "Subscriber", "count_1");
+  dcs->wait_for("Publisher", "Subscriber", "count_" + OpenDDS::DCPS::to_dds_string(message.count));
 }
 
 void stress_test(const DDS::DataWriter_var& dw,
@@ -286,6 +289,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT(" ERROR: create_participant failed!\n")),
                          1);
       }
+      const OpenDDS::DCPS::MonotonicTimePoint create_dp_timepoint = OpenDDS::DCPS::MonotonicTimePoint::now();
 
       OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
         dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in());
@@ -341,7 +345,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                          1);
       }
 
-      DataWriterListenerImpl* const listener_servant = new DataWriterListenerImpl(dcs);
+      DataWriterListenerImpl* const listener_servant = new DataWriterListenerImpl(dcs, create_dp_timepoint);
       DDS::DataWriterListener_var listener(listener_servant);
 
       DDS::DataWriterQos qos;
@@ -374,7 +378,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       } else if (args.drain_test) {
         drain_test(dcs, participant);
       } else {
-        writer_test(dcs, dw);
+        writer_test(dcs, dw, args.second_pub);
 
 #if OPENDDS_HAS_JSON_VALUE_WRITER
         ACE_DEBUG((LM_DEBUG, "Publisher Guid: %C\n", OpenDDS::DCPS::LogGuid(guid).c_str()));

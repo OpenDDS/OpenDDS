@@ -198,6 +198,27 @@ inline GuidSet relay_guids_to_set(const RtpsRelay::GuidSequence& seq)
   return set;
 }
 
+inline std::string concat_strings(const StringSet& strs, const std::string& delimit = ",")
+{
+  const size_t delimit_size = delimit.size();
+  size_t total_size = 0;
+  for (const auto& s : strs) {
+    if (total_size != 0) {
+      total_size += delimit_size;
+    }
+    total_size += s.size();
+  }
+  std::string ret;
+  ret.reserve(total_size);
+  for (const auto& s : strs) {
+    if (!ret.empty()) {
+      ret += delimit;
+    }
+    ret += s;
+  }
+  return ret;
+}
+
 }
 
 #endif // RTPSRELAY_UTILITY_H_

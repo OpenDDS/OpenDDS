@@ -273,6 +273,10 @@ int run(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Security documents provided but security is not enabled\n"));
     return EXIT_FAILURE;
   }
+  if (!secure && !config.certificate_id_pattern().empty()) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Certificate pattern provided but RtpsRelay security is not enabled\n"));
+    return EXIT_FAILURE;
+  }
 
   const DDS::Duration_t one_minute = { 60, 0 };
 

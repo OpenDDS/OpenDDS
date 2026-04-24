@@ -12,10 +12,9 @@ PublicationListener::PublicationListener(const Config& config,
                                          OpenDDS::DCPS::DomainParticipantImpl* participant,
                                          GuidPartitionTable& guid_partition_table,
                                          RelayStatisticsReporter& stats_reporter)
-  : config_(config)
-  , guid_addr_set_(guid_addr_set)
+  : EndpointListener(guid_addr_set, guid_partition_table)
+  , config_(config)
   , participant_(participant)
-  , guid_partition_table_(guid_partition_table)
   , stats_reporter_(stats_reporter)
   , count_(0)
 {}
@@ -57,8 +56,7 @@ void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
         const auto& info = infos[idx];
         if (info.valid_data) {
           const auto repoid = participant_->get_repoid(info.instance_handle);
-          const auto r = guid_partition_table_.insert(repoid, data.partition.name);
-
+          const auto r = update_partitions_info(repoid, data.partition.name);
           if (r == GuidPartitionTable::ADDED) {
             if (config_.log_discovery()) {
               GuidAddrSet::Proxy proxy(*guid_addr_set_);

@@ -156,7 +156,8 @@ void record_activity(GuidAddrSet::Proxy& proxy,
                     const GuidSet& to_guids,
                     bool send_to_application_participant,
                     const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
-                    const OpenDDS::DCPS::MonotonicTimePoint& now);
+                    const OpenDDS::DCPS::MonotonicTimePoint& now,
+                    bool async_discovery = false);
 
   size_t send(const ACE_INET_Addr& addr,
               OpenDDS::STUN::Message message,

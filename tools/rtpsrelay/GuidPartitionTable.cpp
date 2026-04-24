@@ -221,4 +221,48 @@ void GuidPartitionTable::lookup(StringSet& partitions, const OpenDDS::DCPS::GUID
     return false;
   }
 
+void
+GuidPartitionTable::update_cert_partitions_cache(const std::string& key, const StringSet& partitions, const OpenDDS::DCPS::GUID_t& guid)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, cert_to_partitions_mutex_);
+  if (!key.empty() && !partitions.empty()) {
+    cert_to_partitions_[key] = partitions;
+    if (config_.log_async_discovery()) {
+      const std::string parts_str = concat_strings(partitions);
+      ACE_DEBUG((LM_INFO,
+                 "(%P|%t) INFO: GuidPartitionTable::update_cert_partitions_cache: "
+                 "For %C key='%C' partitions=[%C] count=%B cache size=%B\n",
+                 guid_to_string(guid).c_str(), key.c_str(), parts_str.c_str(),
+                 partitions.size(), cert_to_partitions_.size()));
+    }
+  }
+}
+
+void
+GuidPartitionTable::lookup_cert_partitions_cache(StringSet& partitions, const std::string& key, const OpenDDS::DCPS::GUID_t& guid) const
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, cert_to_partitions_mutex_);
+  if (!key.empty()) {
+    const auto it = cert_to_partitions_.find(key);
+    if (it != cert_to_partitions_.end()) {
+      partitions = it->second;
+      if (config_.log_async_discovery()) {
+        const std::string parts_str = concat_strings(partitions);
+        ACE_DEBUG((LM_INFO,
+                   "(%P|%t) INFO: GuidPartitionTable::lookup_cert_partitions_cache: "
+                   "For %C key='%C' Found partitions=[%C] count=%B cache size=%B\n",
+                   guid_to_string(guid).c_str(), key.c_str(), parts_str.c_str(),
+                   partitions.size(), cert_to_partitions_.size()));
+      }
+    } else {
+      if (config_.log_async_discovery()) {
+        ACE_DEBUG((LM_INFO,
+                   "(%P|%t) INFO: GuidPartitionTable::lookup_cert_partitions_cache: "
+                   "For %C key='%C' Not found -- cache size=%B\n",
+                   guid_to_string(guid).c_str(), key.c_str(), cert_to_partitions_.size()));
+      }
+    }
+  }
+}
+
 }
