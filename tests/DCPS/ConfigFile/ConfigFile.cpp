@@ -78,6 +78,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     TEST_CHECK(tcp_inst->datalink_control_chunks() == 16);
     TEST_CHECK(tcp_inst->local_address() == "localhost:");
     TEST_CHECK(tcp_inst->enable_nagle_algorithm() == true);
+    TEST_CHECK(tcp_inst->send_buffer_size() == 131072);
+    TEST_CHECK(tcp_inst->rcv_buffer_size() == 262144);
     TEST_CHECK(tcp_inst->conn_retry_initial_delay() == 1000);
     TEST_CHECK(tcp_inst->conn_retry_backoff_multiplier() == 4);
     TEST_CHECK(tcp_inst->conn_retry_attempts() == 4);
