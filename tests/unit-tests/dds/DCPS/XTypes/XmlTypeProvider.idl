@@ -1,0 +1,46 @@
+module XmlTypeProviderTest {
+
+  @appendable
+  struct Inner {
+    int32 value;
+  };
+
+  @appendable
+  enum Kind {
+    KIND_A,
+    KIND_B,
+    KIND_C
+  };
+
+  @topic
+  @mutable
+  struct Sample {
+    @id(10)
+    @key
+    uint32 id;
+
+    @id(11)
+    @must_understand
+    sequence<string<8>, 4> names;
+
+    @id(12)
+    Inner inner_value;
+
+    @id(13)
+    Kind kind_value;
+
+    @id(14)
+    uint16 values[3];
+  };
+
+  @topic
+  @appendable
+  union Choice switch (Kind) {
+  case KIND_A:
+    int32 a;
+  case KIND_B:
+    string<8> b;
+  default:
+    Inner other;
+  };
+};

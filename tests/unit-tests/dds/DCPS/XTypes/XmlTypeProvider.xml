@@ -1,0 +1,39 @@
+<dds>
+  <types>
+    <module name="XmlTypeProviderTest">
+      <struct name="Inner" extensibility="appendable">
+        <member name="value" type="int32"/>
+      </struct>
+
+      <enum name="Kind" bitBound="32" extensibility="appendable">
+        <enumerator name="KIND_A" value="0"/>
+        <enumerator name="KIND_B" value="1"/>
+        <enumerator name="KIND_C" value="2"/>
+      </enum>
+
+      <struct name="Sample" extensibility="mutable">
+        <member name="id" type="uint32" id="10" key="true"/>
+        <member name="names" type="string" id="11" stringMaxLength="8" sequenceMaxLength="4" mustUnderstand="true"/>
+        <member name="inner_value" type="nonBasic" nonBasicTypeName="Inner" id="12"/>
+        <member name="kind_value" type="nonBasic" nonBasicTypeName="Kind" id="13"/>
+        <member name="values" type="uint16" id="14" arrayDimensions="3"/>
+      </struct>
+
+      <union name="Choice" extensibility="appendable">
+        <discriminator type="nonBasic" nonBasicTypeName="Kind"/>
+        <case>
+          <caseDiscriminator value="KIND_A"/>
+          <member name="a" type="int32"/>
+        </case>
+        <case>
+          <caseDiscriminator value="KIND_B"/>
+          <member name="b" type="string" stringMaxLength="8"/>
+        </case>
+        <case>
+          <caseDiscriminator value="default"/>
+          <member name="other" type="nonBasic" nonBasicTypeName="Inner"/>
+        </case>
+      </union>
+    </module>
+  </types>
+</dds>

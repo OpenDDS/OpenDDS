@@ -1,0 +1,3 @@
+feature(xerces3): xerces {
+  macros += OPENDDS_XERCES3
+}

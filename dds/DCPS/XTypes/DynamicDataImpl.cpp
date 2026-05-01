@@ -802,6 +802,7 @@ bool DynamicDataImpl::is_valid_discriminator_type(TypeKind tk)
   case TK_INT64:
   case TK_UINT64:
   case TK_ENUM:
+  case TK_BITMASK:
     return true;
   default:
     return false;
@@ -1276,6 +1277,8 @@ bool DynamicDataImpl::read_disc_from_single_map(CORBA::Long& disc_val,
   TypeKind treat_as_tk = disc_tk;
   if (disc_tk == TK_ENUM && enum_bound(disc_type, treat_as_tk) != DDS::RETCODE_OK) {
     return false;
+  } else if (disc_tk == TK_BITMASK && bitmask_bound(disc_type, treat_as_tk) != DDS::RETCODE_OK) {
+    return false;
   }
 
   switch (treat_as_tk) {
@@ -1352,6 +1355,8 @@ bool DynamicDataImpl::read_disc_from_backing_store(CORBA::Long& disc_val,
   const TypeKind disc_tk = disc_type->get_kind();
   TypeKind treat_as_tk = disc_tk;
   if (disc_tk == TK_ENUM && enum_bound(disc_type, treat_as_tk) != DDS::RETCODE_OK) {
+    return false;
+  } else if (disc_tk == TK_BITMASK && bitmask_bound(disc_type, treat_as_tk) != DDS::RETCODE_OK) {
     return false;
   }
 
@@ -1849,6 +1854,24 @@ bool DynamicDataImpl::insert_discriminator(ACE_CDR::Long value)
     return insert_single(DISCRIMINATOR_ID, static_cast<ACE_CDR::LongLong>(value));
   case TK_UINT64:
     return insert_single(DISCRIMINATOR_ID, static_cast<ACE_CDR::ULongLong>(value));
+  case TK_BITMASK: {
+    DDS::TypeKind bound_kind = TK_NONE;
+    if (bitmask_bound(discType, bound_kind) != DDS::RETCODE_OK) {
+      return false;
+    }
+    switch (bound_kind) {
+    case TK_UINT8:
+      return insert_single(DISCRIMINATOR_ID, ACE_OutputCDR::from_uint8(static_cast<ACE_CDR::UInt8>(value)));
+    case TK_UINT16:
+      return insert_single(DISCRIMINATOR_ID, static_cast<ACE_CDR::UShort>(value));
+    case TK_UINT32:
+      return insert_single(DISCRIMINATOR_ID, static_cast<ACE_CDR::ULong>(value));
+    case TK_UINT64:
+      return insert_single(DISCRIMINATOR_ID, static_cast<ACE_CDR::ULongLong>(value));
+    default:
+      return false;
+    }
+  }
   default:
     return false;
   }
@@ -4528,6 +4551,9 @@ bool DynamicDataImpl::set_default_discriminator_value(CORBA::Long& value,
   case TK_ENUM: {
     return set_default_enum_value(disc_type, value);
   }
+  case TK_BITMASK:
+    value = 0;
+    return true;
   }
   return false;
 }
@@ -4862,6 +4888,8 @@ bool get_discriminator_value(CORBA::Long& disc_val, DDS::DynamicData_ptr union_d
   const DDS::TypeKind disc_tk = disc_type->get_kind();
   DDS::TypeKind treat_as = disc_tk;
   if (disc_tk == TK_ENUM && enum_bound(disc_type, treat_as) != DDS::RETCODE_OK) {
+    return false;
+  } else if (disc_tk == TK_BITMASK && bitmask_bound(disc_type, treat_as) != DDS::RETCODE_OK) {
     return false;
   }
 
@@ -5572,6 +5600,8 @@ bool serialize_dynamic_discriminator(Serializer& ser, DDS::DynamicData_ptr union
   DDS::TypeKind treat_disc_as = disc_tk;
 
   if (disc_tk == TK_ENUM && enum_bound(disc_type, treat_disc_as) != DDS::RETCODE_OK) {
+    return false;
+  } else if (disc_tk == TK_BITMASK && bitmask_bound(disc_type, treat_disc_as) != DDS::RETCODE_OK) {
     return false;
   }
 

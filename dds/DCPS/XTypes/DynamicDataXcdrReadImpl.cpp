@@ -2164,11 +2164,9 @@ bool DynamicDataXcdrReadImpl::check_xcdr1_mutable(DDS::DynamicType_ptr dt)
   return check_xcdr1_mutable_i(dt, dtns);
 }
 
-CORBA::Boolean DynamicDataXcdrReadImpl::equals(DDS::DynamicData_ptr)
+CORBA::Boolean DynamicDataXcdrReadImpl::equals(DDS::DynamicData_ptr other)
 {
-  // FUTURE: Implement this.
-  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataXcdrReadImpl::equals: Not implemented\n"));
-  return false;
+  return DynamicDataBase::equals(other);
 }
 
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDescriptor* member_desc, MemberId id)

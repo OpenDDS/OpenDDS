@@ -276,7 +276,7 @@ my @specs =
     'qt:s', 'Qt5 (use QTDIR or system pkg)',
     'qt-include:s', 'Qt include dir (use QT5_INCDIR, QTDIR/include,' .
       $argIndent . 'or system package)',
-    'xerces3:s', 'Xerces-C++ 3 for QoS XML handling, DDS Security',
+    'xerces3:s', 'Xerces-C++ 3 for QoS XML handling, DDS Security, DDS-XML type loading',
     'openssl:s', 'OpenSSL for DDS Security',
     'cmake:s', 'Path to CMake for compiling GoogleTest' .
       $argIndent . '(Check PATH and normal locations)',

@@ -442,10 +442,9 @@ DDS::DynamicType_ptr DynamicDataBase::type()
   return DDS::DynamicType::_duplicate(type_);
 }
 
-DDS::Boolean DynamicDataBase::equals(DDS::DynamicData_ptr /*other*/)
+DDS::Boolean DynamicDataBase::equals(DDS::DynamicData_ptr other)
 {
-  unsupported_method("DynamicDataBase::equals", true);
-  return false;
+  return dynamic_data_equal(interface_from_this(), other);
 }
 
 DDS::DynamicData_ptr DynamicDataBase::loan_value(DDS::MemberId /*id*/)
