@@ -225,8 +225,13 @@ void
 GuidPartitionTable::update_cert_partitions_cache(const std::string& key, const StringSet& partitions, const OpenDDS::DCPS::GUID_t& guid)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, cert_to_partitions_mutex_);
-  if (!key.empty() && !partitions.empty()) {
-    cert_to_partitions_[key] = partitions;
+  if (!key.empty()) {
+    if (partitions.empty()) {
+      cert_to_partitions_.erase(key);
+    } else {
+      cert_to_partitions_[key] = partitions;
+    }
+
     if (config_.log_async_discovery()) {
       const std::string parts_str = concat_strings(partitions);
       ACE_DEBUG((LM_INFO,

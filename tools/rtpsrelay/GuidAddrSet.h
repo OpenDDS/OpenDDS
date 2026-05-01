@@ -314,6 +314,11 @@ public:
       gas_.remove(guid, it, now, reporter);
     }
 
+    void cleanup_peers_pending_recipients(const GuidAddrSetMap::iterator& it)
+    {
+      gas_.cleanup_peers_pending_recipients(it);
+    }
+
     void reject_address(const ACE_INET_Addr& addr,
                         const OpenDDS::DCPS::MonotonicTimePoint& now)
     {
@@ -421,6 +426,8 @@ private:
               GuidAddrSetMap::iterator it,
               const OpenDDS::DCPS::MonotonicTimePoint& now,
               RelayParticipantStatusReporter* reporter);
+
+  void cleanup_peers_pending_recipients(const GuidAddrSetMap::iterator& it);
 
   void reject_address(const ACE_INET_Addr& addr,
                       const OpenDDS::DCPS::MonotonicTimePoint& now);

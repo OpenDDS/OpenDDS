@@ -49,13 +49,12 @@ my $relay_opts = "-Id relay" .
                  " -DCPSSecurity 1";
 
 # Use the same relay for both publisher and subscriber
-my $pub_ini = " pub_rtps.ini";
-my $sub_ini = " pub_rtps.ini";
+my $common_ini = " pub_rtps.ini";
 
 $test->process("relay", "$ENV{DDS_ROOT}/bin/RtpsRelay", $relay_opts);
-$test->process("publisher", "publisher", "-ORBDebugLevel 1 -DCPSConfigFile". $pub_ini . " -DCPSSecurity 1");
-$test->process("publisher2", "publisher", "-ORBDebugLevel 1 -DCPSConfigFile". $pub_ini . " -DCPSSecurity 1 -r");
-$test->process("subscriber", "subscriber", "-ORBDebugLevel 1 -DCPSConfigFile" . $sub_ini . " -DCPSSecurity 1 -r");
+$test->process("publisher", "publisher", "-ORBDebugLevel 1 -DCPSConfigFile". $common_ini . " -DCPSSecurity 1");
+$test->process("publisher2", "publisher", "-ORBDebugLevel 1 -DCPSConfigFile". $common_ini . " -DCPSSecurity 1 -r");
+$test->process("subscriber", "subscriber", "-ORBDebugLevel 1 -DCPSConfigFile" . $common_ini . " -DCPSSecurity 1 -r");
 
 # First, connect the first publisher with the subscriber
 $test->start_process("relay");

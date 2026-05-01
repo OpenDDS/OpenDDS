@@ -75,6 +75,8 @@ void RelayParticipantStatusReporter::remove_participant(GuidAddrSet::Proxy& prox
                idx, total));
   }
 
+  // TODO(sonndinh): This will call set_alive if this object is passed as the third argument.
+  // set_alive() needs mutex_ which will cause deadlock. Revisit this!
   proxy.remove(repoid, monotonic_now, nullptr);
 
   guids_.erase(pos);

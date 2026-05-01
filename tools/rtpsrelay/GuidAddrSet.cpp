@@ -479,6 +479,7 @@ void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid,
     --mark_count_;
   }
 
+  cleanup_peers_pending_recipients(it);
   guid_addr_set_map_.erase(it);
   relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
   check_participants_limit();
@@ -497,6 +498,19 @@ void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid,
 
   if (reporter) {
     reporter->set_alive(guid, false);
+  }
+}
+
+void GuidAddrSet::cleanup_peers_pending_recipients(const GuidAddrSetMap::iterator& it)
+{
+  // Remove a guid from the pending recipients list of each peer it has initiated async discovery with.
+  const auto& src_guid = it->first;
+  const auto& initiated_async_disc_with = it->second.initiated_async_discovery_with;
+  for (const auto& other_part : initiated_async_disc_with) {
+    auto other_it = guid_addr_set_map_.find(other_part);
+    if (other_it != guid_addr_set_map_.end()) {
+      other_it->second.pending_recipients.erase(src_guid);
+    }
   }
 }
 

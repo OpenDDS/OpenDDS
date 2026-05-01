@@ -13,17 +13,9 @@ GuidPartitionTable::Result EndpointListener::update_partitions_info(OpenDDS::DCP
   std::string cert_id;
   {
     GuidAddrSet::Proxy proxy(*guid_addr_set_);
-    auto iter = proxy.find(part_guid);
+    const auto iter = proxy.find(part_guid);
     if (iter != proxy.end()) {
-      const auto &initiated_async_disc_with = iter->second.initiated_async_discovery_with;
-      for (const auto &other_part : initiated_async_disc_with) {
-        auto other_iter = proxy.find(other_part);
-        if (other_iter != proxy.end()) {
-          // TODO(sonndinh): Probably also need to clean up when part_guid goes away to avoid leak when
-          // part_guid goes away before PublicationListener/SubscriptionListener is called back?
-          other_iter->second.pending_recipients.erase(part_guid);
-        }
-      }
+      proxy.cleanup_peers_pending_recipients(iter);
       iter->second.initiated_async_discovery_with.clear();
       cert_id = iter->second.identity_info.cert_id();
     }
