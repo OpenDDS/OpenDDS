@@ -1470,9 +1470,11 @@ private:
 
   void report(const std::string& error, const std::string& type_name) const
   {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: OpenDDS::XTypes::load_xml_type(%C, %C): %C\n"),
-      file_.c_str(), type_name.c_str(), error.c_str()));
+    if (DCPS::log_level >= DCPS::LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: OpenDDS::XTypes::load_xml_type(%C, %C): %C\n"),
+        file_.c_str(), type_name.c_str(), error.c_str()));
+    }
   }
 
   std::string file_;

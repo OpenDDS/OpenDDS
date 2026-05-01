@@ -2,6 +2,7 @@
 
 #include <XmlTypeProviderTypeSupportImpl.h>
 
+#include <dds/DCPS/debug.h>
 #include <dds/DCPS/XTypes/DynamicTypeImpl.h>
 #include <dds/DCPS/XTypes/XmlTypeProvider.h>
 
@@ -127,6 +128,9 @@ TEST(dds_DCPS_XTypes_XmlTypeProvider, UnionIntrospectionAndTypeObject)
 
 TEST(dds_DCPS_XTypes_XmlTypeProvider, RejectsMissingType)
 {
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
+
   DDS::DynamicType_var type;
   EXPECT_EQ(DDS::RETCODE_BAD_PARAMETER,
             OpenDDS::XTypes::load_xml_type(type, XML_TYPE_FILE, "XmlTypeProviderTest::Missing"));
