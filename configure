@@ -2851,9 +2851,8 @@ if ($cloned_build) {
   unless ($opts{'static'}) {
     push_libpath(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'lib');
     push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
-
-    add_dependency_paths();
   }
+  add_dependency_paths();
 
   configure_build(\%targetEnv);
 
@@ -2877,9 +2876,8 @@ else { # does not require cloned builds
   unless ($opts{'static'}) {
     push_libpath(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'lib');
     push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
-
-    add_dependency_paths();
   }
+  add_dependency_paths();
 
   if ($host_tools_only) {
     write_host_workspace(\%targetEnv);
