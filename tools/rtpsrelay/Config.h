@@ -602,6 +602,10 @@ private:
   OpenDDS::DCPS::TimeDuration run_time_;
   bool synchronous_output_ = false;
   size_t handler_threads_ = 1;
+
+  // User-provided pattern, e.g., "CN=([\d]+)-.*", to extract a component from dds.cert.sn
+  // that will be used as the key into the partition cache for asynchronous discovery.
+  // Currently, the first submatch is used.
   std::string certificate_id_pattern_;
   // end of variables without ConfigStore support
 };

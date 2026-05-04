@@ -42,38 +42,36 @@ public:
     cert_sn_ = cert_sn;
   }
 
-  void ca_sn(const std::string& ca_sn)
-  {
-    ca_sn_ = ca_sn;
-  }
-
   std::string ca_sn() const
   {
     return ca_sn_;
   }
 
-  // Extract a component from dds.cert.sn using the user-provided pattern, e.g., "CN=([\d]+)-.*".
-  void match_cert_id(const std::string& pattern)
+  void ca_sn(const std::string& ca_sn)
+  {
+    ca_sn_ = ca_sn;
+  }
+
+
+  void match_cert_id(const std::regex& re, const std::string& pattern)
   {
     if (pattern.empty()) {
       return;
     }
 
     try {
-      std::regex re(pattern);
       std::smatch match;
       if (std::regex_search(cert_sn_, match, re) && match.size() > 1) {
         // Take the first group match
         cert_id_ = match.str(1);
       } else {
-        ACE_DEBUG((LM_INFO, "(%P|%t) INFO: IndentityInfo::match_cert_id: pattern '%C' did not match dds.cert.sn '%C'\n",
+        ACE_DEBUG((LM_INFO, "(%P|%t) INFO: IdentityInfo::match_cert_id: pattern '%C' did not match dds.cert.sn '%C'\n",
           pattern.c_str(), cert_sn_.c_str()));
       }
     } catch (const std::regex_error& e) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: IdentityInfo::match_cert_id: exception caught for pattern '%C' dds.cert.sn '%C': %C\n",
         pattern.c_str(), cert_sn_.c_str(), e.what()));
     }
-    return;
   }
 
   // Use as key into the partitions cache for asynchronous discovery if it is non-empty
@@ -242,6 +240,12 @@ public:
     , relay_thread_monitor_(relay_thread_monitor)
   {
     TheServiceParticipant->config_topic()->connect(config_reader_);
+
+    // Constructed if async discovery is enabled, i.e., the certificate Id pattern is non-empty.
+    const auto pattern = config.certificate_id_pattern();
+    if (!pattern.empty()) {
+      cert_id_regex_ = std::regex(pattern);
+    }
   }
 
   ~GuidAddrSet();
@@ -303,15 +307,14 @@ public:
     }
 
     void remove(const OpenDDS::DCPS::GUID_t& guid,
-                const OpenDDS::DCPS::MonotonicTimePoint& now,
-                RelayParticipantStatusReporter* reporter)
+                const OpenDDS::DCPS::MonotonicTimePoint& now)
     {
       const auto it = find(guid);
       if (it == end()) {
         return;
       }
 
-      gas_.remove(guid, it, now, reporter);
+      gas_.remove(guid, it, now, nullptr);
     }
 
     void cleanup_peers_pending_recipients(const GuidAddrSetMap::iterator& it)
@@ -382,6 +385,11 @@ public:
     Proxy& operator=(const Proxy&) = delete;
     Proxy& operator=(Proxy&&) = delete;
   };
+
+  const std::regex& cert_id_regex() const
+  {
+    return cert_id_regex_;
+  }
 
 private:
   CreatedAddrSetStats find_or_create(const OpenDDS::DCPS::GUID_t& guid,
@@ -515,6 +523,8 @@ private:
   size_t mark_budget_ = 0;
   size_t mark_count_ = 0;
   OpenDDS::DCPS::SporadicEvent_rch drain_task_;
+
+  std::regex cert_id_regex_;
 };
 
 }

@@ -353,7 +353,9 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     if (do_normal_processing(proxy, remote_address, src_guid, to, admitted, send_to_application_participant, msg, now, sent)) {
       StringSet to_partitions;
       guid_partition_table_.lookup(to_partitions, src_guid);
-      // TODO(sonndinh): Impact to denied partitions?
+      // Denial decision is based only on the "ground truth" routing table and
+      // not the "heuristic" partition cache (looked up below) that may contain
+      // stale partitions for this guid and may cause it to be denied incorrectly.
       if (guid_partition_table_.is_denied(to_partitions)) {
         proxy.deny(src_guid);
       }
@@ -930,7 +932,7 @@ void SpdpHandler::cache_message(GuidAddrSet::Proxy& proxy,
     if (pos != proxy.end()) {
       if (!pos->second.seen_spdp_message) {
         pos->second.identity_info = extract_identity(*msg, src_guid);
-        pos->second.identity_info.match_cert_id(config_.certificate_id_pattern());
+        pos->second.identity_info.match_cert_id(guid_addr_set_.cert_id_regex(), config_.certificate_id_pattern());
         if (config_.log_activity()) {
           ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SpdpHandler::cache_message %C got first SPDP %C into session dds.cert.sn '%C' dds.ca.sn '%C'\n",
                      guid_to_string(src_guid).c_str(),

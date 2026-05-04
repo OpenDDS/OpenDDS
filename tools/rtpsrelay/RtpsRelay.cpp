@@ -635,8 +635,16 @@ int run(int argc, ACE_TCHAR* argv[])
   const auto reactor_thr_name = std::string("RtpsRelay ReactorTask (") + (config.handler_threads() == 1 ? "single-threaded)" : ("thread pool of " + std::to_string(config.handler_threads()) + ")"));
   reactor_task->init_reactor_task(&TheServiceParticipant->get_thread_status_manager(), reactor_thr_name, reactor);
 
-  const auto guid_addr_set = make_rch<GuidAddrSet>(config, reactor_task, rtps_discovery,
-                                                   ref(relay_participant_status_reporter), ref(relay_statistics_reporter), ref(*relay_thread_monitor));
+  RcHandle<GuidAddrSet> guid_addr_set;
+  try {
+    guid_addr_set = make_rch<GuidAddrSet>(config, reactor_task, rtps_discovery, ref(relay_participant_status_reporter),
+                                          ref(relay_statistics_reporter), ref(*relay_thread_monitor));
+  } catch (const std::regex_error& e) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: exception std::regex_error for pattern '%C': %C\n",
+      config.certificate_id_pattern().c_str(), e.what()));
+    return EXIT_FAILURE;
+  }
+
   GuidPartitionTable guid_partition_table(config, reactor_task, spdp_horizontal_addr, *guid_addr_set, relay_partitions_writer, relay_statistics_reporter);
   RelayPartitionTable relay_partition_table(relay_statistics_reporter);
   relay_statistics_reporter.report();
