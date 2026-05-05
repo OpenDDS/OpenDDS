@@ -8,7 +8,7 @@ using namespace OpenDDS::DCPS;
 
 namespace {
 
-Message_Block_Ptr serialized_sample(const std::string& payload, size_t& header_len)
+void serialized_sample(const std::string& payload, size_t& header_len, Message_Block_Ptr& mb)
 {
   DataSampleHeader header;
   header.message_id_ = SAMPLE_DATA;
@@ -16,12 +16,10 @@ Message_Block_Ptr serialized_sample(const std::string& payload, size_t& header_l
   header.message_length_ = static_cast<ACE_UINT32>(payload.size());
   header.sequence_ = SequenceNumber(7);
 
-  Message_Block_Ptr mb(new ACE_Message_Block(
-    DataSampleHeader::get_max_serialized_size() + payload.size()));
+  mb.reset(new ACE_Message_Block(DataSampleHeader::get_max_serialized_size() + payload.size()));
   EXPECT_TRUE(*mb << header);
   header_len = mb->length();
   EXPECT_EQ(0, mb->copy(payload.data(), payload.size()));
-  return mb;
 }
 
 std::string message_block_data(const ACE_Message_Block* mb)
@@ -66,7 +64,8 @@ TEST(dds_DCPS_DataSampleHeader, split_header_and_payload_in_same_message_block)
 {
   const std::string payload = "abcdefghijklmnopqrstuvwxyz";
   size_t header_len = 0;
-  Message_Block_Ptr orig = serialized_sample(payload, header_len);
+  Message_Block_Ptr orig;
+  serialized_sample(payload, header_len, orig);
 
   Message_Block_Ptr head;
   Message_Block_Ptr tail;
