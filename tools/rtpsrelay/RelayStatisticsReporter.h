@@ -219,6 +219,14 @@ public:
     report(guard, now);
   }
 
+  void ghost_entry_skipped_count(const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    ++log_relay_statistics_.ghost_entry_skipped_count();
+    ++publish_relay_statistics_.ghost_entry_skipped_count();
+    report(guard, now);
+  }
+
   void remote_map_size(uint32_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);

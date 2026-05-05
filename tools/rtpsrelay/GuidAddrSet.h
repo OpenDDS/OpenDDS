@@ -286,6 +286,24 @@ public:
       gas_.deny(guid);
     }
 
+    // Read-only evaluation of allow_stun_responses for the admission-control
+    // skip path.  Reflects current drain state and denied-partition flag
+    // without modifying any drain counters.
+    bool compute_allow_stun_responses(GuidAddrSetMap::iterator pos,
+                                      bool from_application_participant)
+    {
+      return gas_.compute_allow_stun_responses(pos->second, from_application_participant);
+    }
+
+    // Increment the ghost entry skipped counter.  Called when an RTPS message
+    // from an unadmitted participant is dropped early (before record_activity)
+    // to prevent ghost entries in guid_addr_set_map_.  Kept separate from
+    // admission_deferral_count so the two paths can be monitored independently.
+    void admission_skipped(const OpenDDS::DCPS::MonotonicTimePoint& now)
+    {
+      gas_.relay_stats_reporter_.ghost_entry_skipped_count(now);
+    }
+
   private:
     GuidAddrSet& gas_;
 
@@ -306,6 +324,15 @@ private:
                   bool from_application_participant,
                   bool* allow_stun_responses,
                   const RelayHandler& handler);
+
+  void apply_drain_state(AddrSetStats& addr_set_stats, bool from_application_participant);
+
+  // Read-only equivalent of the allow_stun_responses evaluation in
+  // apply_drain_state.  Used by the admission-control skip path so it
+  // can report the correct value without touching drain counters
+  // (mark_count_ / mark_budget_), keeping the two features independent.
+  bool compute_allow_stun_responses(const AddrSetStats& addr_set_stats,
+                                    bool from_application_participant) const;
 
   void schedule_rejected_address_expiration();
   void process_rejected_address_expiration(const OpenDDS::DCPS::MonotonicTimePoint& now);
