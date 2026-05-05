@@ -77,9 +77,11 @@ public:
   bool is_denied(const StringSet& partitions) const;
 
   void update_cert_partitions_cache(const std::string& key, const StringSet& partitions, const OpenDDS::DCPS::GUID_t& guid);
-  void lookup_cert_partitions_cache(StringSet& partitions, const std::string& key, const OpenDDS::DCPS::GUID_t& guid) const;
+  void lookup_cert_partitions_cache(StringSet& partitions, const std::string& key, const OpenDDS::DCPS::GUID_t& guid);
 
 private:
+  void cleanup_async_disc_cache(const OpenDDS::DCPS::MonotonicTimePoint& now);
+
   void remove_from_cache(const OpenDDS::DCPS::GUID_t& guid)
   {
     // Invalidate the cache.
@@ -178,6 +180,8 @@ private:
     }
   }
 
+  void remove_from_partition_expiration_map(const OpenDDS::DCPS::MonotonicTimePoint& last_access, const std::string& key);
+
   const Config& config_;
   OpenDDS::DCPS::ReactorTask_rch reactor_task_;
   const std::string address_;
@@ -215,8 +219,14 @@ private:
   mutable ACE_Thread_Mutex write_mutex_;
   mutable ACE_Thread_Mutex denied_partitions_mutex_;
 
-  using CertToPartitions = std::unordered_map<std::string, StringSet>;
+  // Store the last access timestamp together with the partitions
+  using CertToPartitions = std::unordered_map<std::string, std::pair<StringSet, OpenDDS::DCPS::MonotonicTimePoint>>;
   CertToPartitions cert_to_partitions_;
+
+  using PartitionCacheExpirationMap = std::map<OpenDDS::DCPS::MonotonicTimePoint, StringSet>;
+  PartitionCacheExpirationMap partition_expiration_map_;
+  OpenDDS::DCPS::SporadicEvent_rch async_disc_cache_cleanup_task_;
+
   mutable ACE_Thread_Mutex cert_to_partitions_mutex_;
 };
 

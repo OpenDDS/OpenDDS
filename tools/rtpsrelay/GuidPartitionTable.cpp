@@ -224,48 +224,109 @@ void GuidPartitionTable::lookup(StringSet& partitions, const OpenDDS::DCPS::GUID
 void
 GuidPartitionTable::update_cert_partitions_cache(const std::string& key, const StringSet& partitions, const OpenDDS::DCPS::GUID_t& guid)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, cert_to_partitions_mutex_);
-  if (!key.empty()) {
-    if (partitions.empty()) {
-      cert_to_partitions_.erase(key);
-    } else {
-      cert_to_partitions_[key] = partitions;
-    }
+  if (key.empty()) {
+    return;
+  }
 
-    if (config_.log_async_discovery()) {
-      const std::string parts_str = concat_strings(partitions);
-      ACE_DEBUG((LM_INFO,
-                 "(%P|%t) INFO: GuidPartitionTable::update_cert_partitions_cache: "
-                 "For %C key='%C' partitions=[%C] count=%B cache size=%B\n",
-                 guid_to_string(guid).c_str(), key.c_str(), parts_str.c_str(),
-                 partitions.size(), cert_to_partitions_.size()));
+  ACE_GUARD(ACE_Thread_Mutex, g, cert_to_partitions_mutex_);
+  // Remove old entry
+  const auto it = cert_to_partitions_.find(key);
+  if (it != cert_to_partitions_.end()) {
+    remove_from_partition_expiration_map(it->second.second, key);
+    cert_to_partitions_.erase(it);
+  }
+
+  // Add new entry
+  if (!partitions.empty()) {
+    const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
+    cert_to_partitions_[key] = std::make_pair(partitions, now);
+    partition_expiration_map_[now].insert(key);
+
+    if (!async_disc_cache_cleanup_task_) {
+      const auto base = OpenDDS::DCPS::make_rch<GuidPartitionTableEvent>(rchandle_from(this), &GuidPartitionTable::cleanup_async_disc_cache);
+      async_disc_cache_cleanup_task_ = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::SporadicEvent>(TheServiceParticipant->event_dispatcher(), base);
     }
+    async_disc_cache_cleanup_task_->schedule(config_.async_discovery_cache_timeout());
+  }
+
+  if (config_.log_async_discovery()) {
+    const std::string parts_str = concat_strings(partitions);
+    ACE_DEBUG((LM_INFO,
+               "(%P|%t) INFO: GuidPartitionTable::update_cert_partitions_cache: "
+               "For %C key='%C' partitions=[%C] count=%B cache size=%B\n",
+               guid_to_string(guid).c_str(), key.c_str(), parts_str.c_str(),
+               partitions.size(), cert_to_partitions_.size()));
   }
 }
 
 void
-GuidPartitionTable::lookup_cert_partitions_cache(StringSet& partitions, const std::string& key, const OpenDDS::DCPS::GUID_t& guid) const
+GuidPartitionTable::lookup_cert_partitions_cache(StringSet& partitions, const std::string& key, const OpenDDS::DCPS::GUID_t& guid)
+{
+  if (key.empty()) {
+    return;
+  }
+
+  ACE_GUARD(ACE_Thread_Mutex, g, cert_to_partitions_mutex_);
+  const auto it = cert_to_partitions_.find(key);
+  bool found = false;
+  if (it != cert_to_partitions_.end()) {
+    found = true;
+    partitions = it->second.first;
+
+    // Update the cache
+    remove_from_partition_expiration_map(it->second.second, key);
+    const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
+    it->second.second = now;
+    partition_expiration_map_[now].insert(key);
+  }
+
+  if (config_.log_async_discovery()) {
+    if (found) {
+      const std::string parts_str = concat_strings(partitions);
+      ACE_DEBUG((LM_INFO,
+                 "(%P|%t) INFO: GuidPartitionTable::lookup_cert_partitions_cache: "
+                 "For %C key='%C' Found partitions=[%C] count=%B cache size=%B\n",
+                 guid_to_string(guid).c_str(), key.c_str(), parts_str.c_str(),
+                 partitions.size(), cert_to_partitions_.size()));
+    } else {
+      ACE_DEBUG((LM_INFO,
+                 "(%P|%t) INFO: GuidPartitionTable::lookup_cert_partitions_cache: "
+                 "For %C key='%C' Not found -- cache size=%B\n",
+                 guid_to_string(guid).c_str(), key.c_str(), cert_to_partitions_.size()));
+    }
+  }
+}
+
+void GuidPartitionTable::cleanup_async_disc_cache(const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, cert_to_partitions_mutex_);
-  if (!key.empty()) {
-    const auto it = cert_to_partitions_.find(key);
-    if (it != cert_to_partitions_.end()) {
-      partitions = it->second;
-      if (config_.log_async_discovery()) {
-        const std::string parts_str = concat_strings(partitions);
-        ACE_DEBUG((LM_INFO,
-                   "(%P|%t) INFO: GuidPartitionTable::lookup_cert_partitions_cache: "
-                   "For %C key='%C' Found partitions=[%C] count=%B cache size=%B\n",
-                   guid_to_string(guid).c_str(), key.c_str(), parts_str.c_str(),
-                   partitions.size(), cert_to_partitions_.size()));
-      }
-    } else {
-      if (config_.log_async_discovery()) {
-        ACE_DEBUG((LM_INFO,
-                   "(%P|%t) INFO: GuidPartitionTable::lookup_cert_partitions_cache: "
-                   "For %C key='%C' Not found -- cache size=%B\n",
-                   guid_to_string(guid).c_str(), key.c_str(), cert_to_partitions_.size()));
-      }
+
+  const auto cutoff_time = now - config_.async_discovery_cache_timeout();
+  const auto upper_bound = partition_expiration_map_.upper_bound(cutoff_time);
+  for (auto it = partition_expiration_map_.begin(); it != upper_bound;) {
+    const auto& keys = it->second;
+    for (const auto& key : keys) {
+      cert_to_partitions_.erase(key);
+    }
+    it = partition_expiration_map_.erase(it);
+  }
+
+  if (!partition_expiration_map_.empty()) {
+    const auto next_fire_in = partition_expiration_map_.begin()->first + config_.async_discovery_cache_timeout() - now;
+    async_disc_cache_cleanup_task_->schedule(next_fire_in);
+  }
+}
+
+void
+GuidPartitionTable::remove_from_partition_expiration_map(const OpenDDS::DCPS::MonotonicTimePoint& last_access,
+                                                         const std::string& key)
+{
+  // Helper function, the caller should hold lock already.
+  const auto it = partition_expiration_map_.find(last_access);
+  if (it != partition_expiration_map_.end()) {
+    it->second.erase(key);
+    if (it->second.empty()) {
+      partition_expiration_map_.erase(it);
     }
   }
 }

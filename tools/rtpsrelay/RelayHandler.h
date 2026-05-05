@@ -99,7 +99,7 @@ public:
                   Port port,
                   const ACE_INET_Addr& horizontal_address,
                   ACE_Reactor* reactor,
-                  const GuidPartitionTable& guid_partition_table,
+                  GuidPartitionTable& guid_partition_table,
                   const RelayPartitionTable& relay_partition_table,
                   GuidAddrSet& guid_addr_set,
                   const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
@@ -166,7 +166,7 @@ void record_activity(GuidAddrSet::Proxy& proxy,
   void populate_address_set(AddressSet& address_set,
                             const StringSet& to_partitions);
 
-  const GuidPartitionTable& guid_partition_table_;
+  GuidPartitionTable& guid_partition_table_;
   const RelayPartitionTable& relay_partition_table_;
   GuidAddrSet& guid_addr_set_;
   HorizontalHandler* horizontal_handler_;
@@ -221,7 +221,7 @@ public:
               const std::string& name,
               const ACE_INET_Addr& address,
               ACE_Reactor* reactor,
-              const GuidPartitionTable& guid_partition_table,
+              GuidPartitionTable& guid_partition_table,
               const RelayPartitionTable& relay_partition_table,
               GuidAddrSet& guid_addr_set,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
@@ -258,7 +258,7 @@ public:
               const std::string& name,
               const ACE_INET_Addr& horizontal_address,
               ACE_Reactor* reactor,
-              const GuidPartitionTable& guid_partition_table,
+              GuidPartitionTable& guid_partition_table,
               const RelayPartitionTable& relay_partition_table,
               GuidAddrSet& guid_addr_set,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
@@ -284,7 +284,7 @@ public:
               const std::string& name,
               const ACE_INET_Addr& horizontal_address,
               ACE_Reactor* reactor,
-              const GuidPartitionTable& guid_partition_table,
+              GuidPartitionTable& guid_partition_table,
               const RelayPartitionTable& relay_partition_table,
               GuidAddrSet& guid_addr_set,
               const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
