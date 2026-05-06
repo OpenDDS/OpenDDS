@@ -1300,6 +1300,7 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
   while (recoveryFailedTime > MonotonicTimePoint::now()) {
     typedef OPENDDS_VECTOR(Discovery::RepoKey) RepoKeyList;
     RepoKeyList candidates;
+    bool missing_key = false;
 
     {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->maps_lock_);
@@ -1316,6 +1317,7 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
       const RepoKeyDiscoveryMap::const_iterator initialLocation = this->discoveryMap_.find(key);
 
       if (initialLocation == this->discoveryMap_.end()) {
+        missing_key = true;
         if (!reported_missing) {
           ACE_DEBUG((LM_WARNING,
                      ACE_TEXT("(%P|%t) WARNING: Service_Participant::repository_lost: ")
@@ -1412,6 +1414,24 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
                    candidate->c_str(),
                    key.c_str()));
       }
+    }
+
+    if (missing_key && recoveryFailedTime > MonotonicTimePoint::now()) {
+      if (DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) Service_Participant::repository_lost: ")
+                   ACE_TEXT("waiting %d seconds to traverse the ")
+                   ACE_TEXT("repository list another time ")
+                   ACE_TEXT("for lost key %C.\n"),
+                   backoff,
+                   key.c_str()));
+      }
+
+      // Wait to traverse the list and try again.
+      ACE_OS::sleep(static_cast<unsigned int>(backoff));
+
+      // Exponentially backoff delay.
+      backoff *= this->federation_backoff_multiplier();
     }
   }
 
