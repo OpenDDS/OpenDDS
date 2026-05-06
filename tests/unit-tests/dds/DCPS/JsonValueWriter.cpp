@@ -29,6 +29,26 @@ public:
   size_t elements_;
 };
 
+struct ToJsonFail {};
+
+bool vwrite(ValueWriter&, const ToJsonFail&)
+{
+  return false;
+}
+
+struct ToJsonSuccess {};
+
+bool vwrite(ValueWriter& value_writer, const ToJsonSuccess&)
+{
+  return value_writer.begin_struct(FINAL) && value_writer.end_struct();
+}
+
+TEST(dds_DCPS_JsonValueWriter, to_json)
+{
+  EXPECT_STREQ("{}", to_json(ToJsonSuccess()).c_str());
+  EXPECT_TRUE(to_json(ToJsonFail()).empty());
+}
+
 TEST(dds_DCPS_JsonValueWriter, begin_struct)
 {
   Buffer buffer;

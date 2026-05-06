@@ -73,7 +73,12 @@ public:
 
   IdlToken()
   : kind_(Error)
-  {}
+  {
+    numeric_value_.signed_ = false;
+    numeric_value_.integer_value_ = 0;
+    numeric_value_.exponent_signed_ = false;
+    numeric_value_.exponent_value_ = 0;
+  }
 
   static IdlToken make_error()
   {

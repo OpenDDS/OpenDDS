@@ -155,7 +155,7 @@ bool MemberPathParser::get_next_subpath()
   size_t got = 0; // Char count to use for the result
   char c = '\0';
   bool scan = true;
-  for (; i < left && scan; ++i) {
+  while (i < left && scan) {
     c = path[i];
     switch (c) {
     case '.':
@@ -168,14 +168,16 @@ bool MemberPathParser::get_next_subpath()
         error = true;
         return false;
       }
-      --i; // Don't consume, leave for next iteration
-      // fallthrough
+      scan = false; // Don't consume, leave for next iteration
+      break;
     case ']':
       scan = false;
+      ++i;
       break;
 
     default:
       ++got;
+      ++i;
     }
   }
 
