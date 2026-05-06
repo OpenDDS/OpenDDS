@@ -496,12 +496,12 @@ TEST(AnonSequence, Trim)
     ShortSeqUnbound ssu;
     ssu.resize(3);
     for (size_t i = 0; i < 3; ++i) {
-      ssu[i] = i;
+      ssu[i] = static_cast<int16_t>(i);
     }
     ShortSeqBound2 ssb;
-    ssu.resize(3);
+    ssb.resize(3);
     for (size_t i = 0; i < 3; ++i) {
-      ssu[i] = i;
+      ssb[i] = static_cast<int16_t>(i);
     }
     sent.AnonShortSeqUnboundUnbound().resize(3);
     for (size_t i = 0; i < 3; ++i) {
@@ -548,14 +548,14 @@ TEST(AnonSequence, Trim)
       }
     }
     ShortSeqUnbound ssu_2;
-    ssu.resize(3);
-    for (size_t i = 0; i < 2; ++i) {
-      ssu[i] = i;
+    ssu_2.resize(3);
+    for (size_t i = 0; i < 3; ++i) {
+      ssu_2[i] = static_cast<int16_t>(i);
     }
     ShortSeqBound ssb_2;
-    ssu.resize(2);
+    ssb_2.resize(2);
     for (size_t i = 0; i < 2; ++i) {
-      ssu[i] = i;
+      ssb_2[i] = static_cast<int16_t>(i);
     }
     expected.AnonShortSeqUnboundUnbound().resize(3);
     for (size_t i = 0; i < 3; ++i) {
@@ -635,12 +635,12 @@ TEST(AnonSequence, USE_DEFAULT)
     ShortSeqUnbound ssu;
     ssu.resize(3);
     for (size_t i = 0; i < 3; ++i) {
-      ssu[i] = i;
+      ssu[i] = static_cast<int16_t>(i);
     }
     ShortSeqBound2 ssb;
-    ssu.resize(3);
+    ssb.resize(3);
     for (size_t i = 0; i < 3; ++i) {
-      ssu[i] = i;
+      ssb[i] = static_cast<int16_t>(i);
     }
     sent.AnonShortSeqUnboundUnbound().resize(3);
     for (size_t i = 0; i < 3; ++i) {
@@ -661,7 +661,6 @@ TEST(AnonSequence, USE_DEFAULT)
 
     TryCon::AnonSeqStructDefault expected;
     expected.AnonShortSeqUnboundUnbound().resize(3);
-    expected.AnonSeqShortSeqBoundUnbound().resize(3);
 
     TryCon::AnonSeqStructDefault actual;
 

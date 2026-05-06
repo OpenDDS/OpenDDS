@@ -418,10 +418,8 @@ namespace {
           Value right = children_[1]->eval(data);
           return left % right;
         }
-        break;
       }
-      OPENDDS_ASSERT(0);
-      return Value(0);
+      throw std::runtime_error("Unknown function operator");
     }
 
   private:
@@ -447,7 +445,7 @@ namespace {
       } else if (op->TypeMatches<OR>()) {
         op_ = LG_OR;
       } else {
-        OPENDDS_ASSERT(0);
+        throw std::runtime_error("Unknown logical operator");
       }
     }
 
@@ -521,8 +519,7 @@ FilterEvaluator::walkAst(const FilterEvaluator::AstNodeWrapper& node)
     }
   }
 
-  OPENDDS_ASSERT(0);
-  return 0;
+  throw std::runtime_error("Unexpected filter AST node");
 }
 
 FilterEvaluator::Operand*
@@ -557,8 +554,7 @@ FilterEvaluator::walkOperand(const FilterEvaluator::AstNodeWrapper& node)
       return call;
     }
   }
-  OPENDDS_ASSERT(0);
-  return 0;
+  throw std::runtime_error("Unexpected filter operand node");
 }
 
 bool
