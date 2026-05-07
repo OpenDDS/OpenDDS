@@ -289,21 +289,12 @@ public:
 
     void admission_deferral_count(const OpenDDS::DCPS::MonotonicTimePoint& now)
     {
-      gas_.admission_deferral_count(now);
+      gas_.relay_stats_reporter_.admission_deferral_count(now);
     }
 
     void apply_drain_state(AddrSetStats& addr_set_stats, bool from_application_participant)
     {
       gas_.apply_drain_state(addr_set_stats, from_application_participant);
-    }
-
-    // Increment the ghost entry skipped counter.  Called when an RTPS message
-    // from an unadmitted participant is dropped early (before record_activity)
-    // to prevent ghost entries in guid_addr_set_map_.  Kept separate from
-    // admission_deferral_count so the two paths can be monitored independently.
-    void admission_skipped(const OpenDDS::DCPS::MonotonicTimePoint& now)
-    {
-      gas_.relay_stats_reporter_.ghost_entry_skipped_count(now);
     }
 
   private:
@@ -388,11 +379,6 @@ private:
   void populate_relay_status(RelayStatus& relay_status);
 
   void deny(const OpenDDS::DCPS::GUID_t& guid);
-
-  void admission_deferral_count(const OpenDDS::DCPS::MonotonicTimePoint& now)
-  {
-    relay_stats_reporter_.admission_deferral_count(now);
-  }
 
   void apply_drain_state(AddrSetStats& addr_set_stats, bool from_application_participant);
 

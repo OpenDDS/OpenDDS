@@ -122,7 +122,7 @@ void RelayStatisticsReporter::log_report(const OpenDDS::DCPS::MonotonicTimePoint
   log_relay_statistics_.new_address_count(0);
   log_relay_statistics_.expired_address_count(0);
   log_relay_statistics_.admission_deferral_count(0);
-  log_relay_statistics_.ghost_entry_skipped_count(0);
+  log_relay_statistics_.unadmitted_entry_count(0);
   log_relay_statistics_.max_ips_per_client(0);
   log_relay_statistics_.transitions_to_admitting(0);
   log_relay_statistics_.transitions_to_nonadmitting(0);
@@ -176,7 +176,7 @@ void RelayStatisticsReporter::publish_report(ACE_Guard<ACE_Thread_Mutex>& guard,
   publish_relay_statistics_.new_address_count(0);
   publish_relay_statistics_.expired_address_count(0);
   publish_relay_statistics_.admission_deferral_count(0);
-  publish_relay_statistics_.ghost_entry_skipped_count(0);
+  publish_relay_statistics_.unadmitted_entry_count(0);
   publish_relay_statistics_.max_ips_per_client(0);
   publish_relay_statistics_.transitions_to_admitting(0);
   publish_relay_statistics_.transitions_to_nonadmitting(0);

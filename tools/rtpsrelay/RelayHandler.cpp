@@ -336,7 +336,6 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
 
     bool already_checked_admit = false;
     if (!record_activity(proxy, addr_port, now, src_guid, from_application_participant, already_checked_admit)) {
-      proxy.admission_skipped(now);
       stats_reporter_.ignored_message(msg_len, now, type);
       return 0;
     }

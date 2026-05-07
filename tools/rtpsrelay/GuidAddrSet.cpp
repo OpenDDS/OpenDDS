@@ -446,6 +446,9 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
   if (!already_checked_admit && !admitting()) {
     // Too many new clients to admit another.
     relay_stats_reporter_.admission_deferral_count(now);
+
+    // Increase the cumulative count of unadmitted entries
+    relay_stats_reporter_.unadmitted_entry_count(now);
     return true;
   }
 

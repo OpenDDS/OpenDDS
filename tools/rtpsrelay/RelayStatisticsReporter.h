@@ -219,11 +219,11 @@ public:
     report(guard, now);
   }
 
-  void ghost_entry_skipped_count(const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void unadmitted_entry_count(const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    ++log_relay_statistics_.ghost_entry_skipped_count();
-    ++publish_relay_statistics_.ghost_entry_skipped_count();
+    ++log_relay_statistics_.unadmitted_entry_count();
+    ++publish_relay_statistics_.unadmitted_entry_count();
     report(guard, now);
   }
 
