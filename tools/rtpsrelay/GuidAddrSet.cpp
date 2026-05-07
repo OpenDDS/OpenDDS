@@ -413,6 +413,7 @@ void GuidAddrSet::maintain_admission_queue(const OpenDDS::DCPS::MonotonicTimePoi
 bool GuidAddrSet::ignore_rtps(bool from_application_participant,
                               const OpenDDS::DCPS::GUID_t& guid,
                               const OpenDDS::DCPS::MonotonicTimePoint& now,
+                              bool already_checked_admit,
                               bool& admitted)
 {
   const auto pos = guid_addr_set_map_.find(guid);
@@ -442,7 +443,7 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
     return true;
   }
 
-  if (!admitting()) {
+  if (!already_checked_admit && !admitting()) {
     // Too many new clients to admit another.
     relay_stats_reporter_.admission_deferral_count(now);
     return true;
