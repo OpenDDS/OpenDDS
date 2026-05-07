@@ -490,7 +490,7 @@ TEST(AnonSequence, Trim)
     sent.AnonShortArraySeqBound().resize(3);
     for (size_t i = 0; i < 3; ++i) {
       for (size_t j = 0; j < 2; j++) {
-        sent.AnonShortArraySeqBound()[i][j] = static_cast<uint16_t>(j);
+        sent.AnonShortArraySeqBound()[i][j] = static_cast<int16_t>(j);
       }
     }
     ShortSeqUnbound ssu;
@@ -531,7 +531,7 @@ TEST(AnonSequence, Trim)
     }
     expected.AnonUnsignedShortSeqBound().resize(2);
     for (size_t i = 0; i < 2; ++i) {
-      expected.AnonUnsignedShortSeqBound()[i] = i;
+      expected.AnonUnsignedShortSeqBound()[i] = static_cast<uint16_t>(i);
     }
     expected.AnonStringSeqBound().resize(2);
     for (size_t i = 0; i < 2; ++i) {
@@ -544,7 +544,7 @@ TEST(AnonSequence, Trim)
     expected.AnonShortArraySeqBound().resize(2);
     for (size_t i = 0; i < 2; ++i) {
       for (size_t j = 0; j < 2; j++) {
-        expected.AnonShortArraySeqBound()[i][j] = j;
+        expected.AnonShortArraySeqBound()[i][j] = static_cast<int16_t>(j);
       }
     }
     ShortSeqUnbound ssu_2;
@@ -616,7 +616,7 @@ TEST(AnonSequence, USE_DEFAULT)
     }
     sent.AnonUnsignedShortSeqBound().resize(3);
     for (size_t i = 0; i < 3; ++i) {
-      sent.AnonUnsignedShortSeqBound()[i] = i;
+      sent.AnonUnsignedShortSeqBound()[i] = static_cast<uint16_t>(i);
     }
     sent.AnonStringSeqBound().resize(3);
     for (size_t i = 0; i < 3; ++i) {
@@ -629,7 +629,7 @@ TEST(AnonSequence, USE_DEFAULT)
     sent.AnonShortArraySeqBound().resize(3);
     for (size_t i = 0; i < 3; ++i) {
       for (size_t j = 0; j < 2; j++) {
-        sent.AnonShortArraySeqBound()[i][j] = j;
+        sent.AnonShortArraySeqBound()[i][j] = static_cast<int16_t>(j);
       }
     }
     ShortSeqUnbound ssu;

@@ -575,9 +575,19 @@ FilterEvaluator::hasFilter() const
   return filter_root_ != 0;
 }
 
+#ifdef _MSC_VER
+#pragma warning(push)
+// MSVC 2022 reports C4702 here in optimized unity builds.
+#pragma warning(disable : 4702)
+#endif
+
 Value::Value(bool b, bool conversion_preferred)
   : type_(VAL_BOOL), b_(b), conversion_preferred_(conversion_preferred)
 {}
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 Value::Value(int i, bool conversion_preferred)
   : type_(VAL_INT), i_(i), conversion_preferred_(conversion_preferred)
