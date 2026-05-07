@@ -249,26 +249,6 @@ GuidAddrSet::apply_drain_state(AddrSetStats& addr_set_stats, bool from_applicati
   }
 }
 
-bool
-GuidAddrSet::compute_allow_stun_responses(const AddrSetStats& addr_set_stats,
-                                          bool from_application_participant) const
-{
-  switch (drain_state_) {
-  case DrainState::DS_NORMAL:
-    // Mirrors apply_drain_state DS_NORMAL: an entry is un-marked when it is
-    // not in a denied partition, so the effective value is true in that case.
-    return addr_set_stats.allow_stun_responses || !addr_set_stats.in_denied_partition;
-  case DrainState::DS_DRAINING:
-    // Mirrors apply_drain_state DS_DRAINING: the entry would be marked false
-    // when there is budget available, without consuming mark_budget_.
-    if (!from_application_participant && addr_set_stats.allow_stun_responses && mark_budget_) {
-      return false;
-    }
-    break;
-  }
-  return addr_set_stats.allow_stun_responses;
-}
-
 void GuidAddrSet::schedule_rejected_address_expiration()
 {
   if (rejected_address_expiration_queue_.empty()) {

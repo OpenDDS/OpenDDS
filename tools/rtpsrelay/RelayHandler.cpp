@@ -444,14 +444,14 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
         (src_guid == config_.application_participant_guid());
 
       bool allow_stun_responses = true;
-      const bool recorded = record_activity(proxy, addr_port, now, src_guid, from_application_participant, &allow_stun_responses);
+      const bool proceed = record_activity(proxy, addr_port, now, src_guid, from_application_participant, &allow_stun_responses);
 
       if (allow_stun_responses && response_needed) {
         send(remote_address, std::move(response), now);
         ++messages_sent;
       }
 
-      if (!recorded) {
+      if (!proceed) {
         return messages_sent;
       }
 
@@ -477,20 +477,26 @@ VerticalHandler::record_activity(GuidAddrSet::Proxy& proxy,
                                  bool from_application_participant,
                                  bool* allow_stun_responses)
 {
+  // A GuidAddrSet entry for src_guid is created even if it is not admitted.
+  // To avoid the same entry getting refreshed by subsequent messages from the same src_guid,
+  // this returns early if it keeps getting deferred.
+  // TODO: admitting() is supposed to be called once. It's currently called in ignore_rtps as well.
   if (!from_application_participant && !proxy.admitting()) {
     const auto pos = proxy.find(src_guid);
     if (pos != proxy.end() && !pos->second.allow_rtps) {
+      proxy.apply_drain_state(pos->second, from_application_participant);
+      if (allow_stun_responses) {
+        *allow_stun_responses = pos->second.allow_stun_responses;
+      }
       if (config_.log_activity()) {
-        ACE_DEBUG((LM_INFO, "(%P|%t) INFO: VerticalHandler::process_message %C skipped unadmitted participant %C from %C - relay not admitting\n",
+        ACE_DEBUG((LM_INFO, "(%P|%t) INFO: VerticalHandler::record_activity %C skipped unadmitted participant %C from %C - relay not admitting\n",
                    name_.c_str(), guid_to_string(src_guid).c_str(),
                    OpenDDS::DCPS::LogAddr(remote_address.addr).c_str()));
-      }
-      if (allow_stun_responses) {
-        *allow_stun_responses = proxy.compute_allow_stun_responses(pos, from_application_participant);
       }
       return false;
     }
   }
+
   proxy.record_activity(remote_address, now, src_guid, from_application_participant, allow_stun_responses, *this);
   return true;
 }
