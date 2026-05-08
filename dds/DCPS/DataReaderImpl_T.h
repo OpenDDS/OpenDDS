@@ -2125,6 +2125,13 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
 
   instance_ptr->last_sequence_ = header.sequence_;
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+  const bool coherent_change = ptr->coherent_change_;
+#endif
+
+  // After this point ptr is visible to take/read paths that can remove and
+  // release it while status notifications temporarily release sample_lock_.
+  ptr->inc_ref();
   instance_ptr->rcvd_strategy_->add(ptr);
 
   if (! is_dispose_msg  && ! is_unregister_msg
@@ -2159,11 +2166,13 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
     }
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-  if (! ptr->coherent_change_) {
+  if (!coherent_change) {
 #endif
     RcHandle<OpenDDS::DCPS::SubscriberImpl> sub = get_subscriber_servant();
-    if (!sub || get_deleted())
+    if (!sub || get_deleted()) {
+      ptr->dec_ref();
       return;
+    }
 
     sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, true);
 
@@ -2202,6 +2211,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   }
 #endif
+  ptr->dec_ref();
 }
 
 /// Release sample_lock_ during status notifications in store_instance_data()
