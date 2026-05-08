@@ -28,6 +28,13 @@ namespace DCPS {
 namespace {
   const Encoding::Kind reliable_session_encoding_kind = Encoding::KIND_UNALIGNED_CDR;
   const Encoding encoding_unaligned_native(reliable_session_encoding_kind);
+
+  bool nak_max_reached(size_t request_index, size_t nak_delay_interval, size_t nak_max)
+  {
+    const size_t completed_intervals = request_index / nak_delay_interval;
+    return completed_intervals > nak_max ||
+      (completed_intervals == nak_max && request_index % nak_delay_interval != 0);
+  }
 }
 
 ReliableSession::ReliableSession(RcHandle<EventDispatcher> event_dispatcher,
@@ -352,8 +359,10 @@ ReliableSession::send_naks()
     //  if nak_delay_intervals=4, nak_max=3, any sequence between 5 - 1, 10 - 6, 15 - 11
     //  are skipped for naking due to nak_delay_intervals and 20 - 16 are skipped for
     //  naking due to nak_max.
+    const size_t nak_delay_interval = nak_delay_intervals_ == static_cast<size_t>(-1)
+      ? nak_delay_intervals_ : nak_delay_intervals_ + 1;
     for (size_t i = 1; i < sz; ++i) {
-      if ((i * 1.0) / (nak_delay_intervals_ + 1) > nak_max_) {
+      if (nak_max_reached(i, nak_delay_interval, nak_max_)) {
         if (first != SequenceNumber()) {
           first = this->nak_requests_.begin()->second;
         }
@@ -363,14 +372,14 @@ ReliableSession::send_naks()
         break;
       }
 
-      if (i % (nak_delay_intervals_ + 1) == 1) {
+      if (i % nak_delay_interval == 1) {
         second = itr->second;
       }
       if (second != SequenceNumber()) {
         first = itr->second;
       }
 
-      if (i % (nak_delay_intervals_ + 1) == 0) {
+      if (i % nak_delay_interval == 0) {
         first = itr->second;
 
         if (first != SequenceNumber() && second != SequenceNumber()) {

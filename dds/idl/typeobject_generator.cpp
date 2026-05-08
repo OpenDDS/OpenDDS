@@ -21,6 +21,16 @@ using namespace AstTypeClassification;
 
 namespace {
 
+template <typename To, typename From>
+To* ast_cast(From* from)
+{
+  To* const to = dynamic_cast<To*>(from);
+  if (!to) {
+    be_util::misc_error_and_abort("Unexpected AST type", from);
+  }
+  return to;
+}
+
 OpenDDS::XTypes::TypeFlag
 extensibility_to_type_flag(ExtensibilityKind exten)
 {
@@ -761,13 +771,13 @@ typeobject_generator::consider(Element& v, AST_Type* type, const std::string& an
   switch (type->node_type()) {
   case AST_ConcreteType::NT_union_fwd:
     {
-      AST_UnionFwd* const n = dynamic_cast<AST_UnionFwd*>(type);
+      AST_UnionFwd* const n = ast_cast<AST_UnionFwd>(type);
       type = n->full_definition();
       break;
     }
   case AST_ConcreteType::NT_struct_fwd:
     {
-      AST_StructureFwd* const n = dynamic_cast<AST_StructureFwd*>(type);
+      AST_StructureFwd* const n = ast_cast<AST_StructureFwd>(type);
       type = n->full_definition();
       break;
     }
@@ -789,13 +799,13 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
   switch (type->node_type()) {
   case AST_ConcreteType::NT_union_fwd:
     {
-      AST_UnionFwd* const n = dynamic_cast<AST_UnionFwd*>(type);
+      AST_UnionFwd* const n = ast_cast<AST_UnionFwd>(type);
       type = n->full_definition();
       break;
     }
   case AST_ConcreteType::NT_struct_fwd:
     {
-      AST_StructureFwd* const n = dynamic_cast<AST_StructureFwd*>(type);
+      AST_StructureFwd* const n = ast_cast<AST_StructureFwd>(type);
       type = n->full_definition();
       break;
     }
@@ -812,12 +822,11 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
   v.on_stack = true;
 
   using OpenDDS::XTypes::MemberId;
-  AST_Structure* const stru = dynamic_cast<AST_Structure*>(type);
   switch (type->node_type()) {
 
   case AST_ConcreteType::NT_union:
     {
-      AST_Union* const n = dynamic_cast<AST_Union*>(type);
+      AST_Union* const n = ast_cast<AST_Union>(type);
       v.name = canonical_name(n->name());
 
       AST_Type* discriminator = n->disc_type();
@@ -829,8 +838,8 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
       MemberId member_id = 0;
 
       for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
-        AST_UnionBranch* ub = dynamic_cast<AST_UnionBranch*>(*i);
-        const MemberId id = be_global->compute_id(stru, ub, auto_id, member_id);
+        AST_UnionBranch* ub = ast_cast<AST_UnionBranch>(*i);
+        const MemberId id = be_global->compute_id(n, ub, auto_id, member_id);
         consider(v, ub->field_type(), v.name + "." + OpenDDS::DCPS::to_dds_string(id));
       }
 
@@ -839,7 +848,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
 
   case AST_ConcreteType::NT_struct:
     {
-      AST_Structure* const n = dynamic_cast<AST_Structure*>(type);
+      AST_Structure* const n = ast_cast<AST_Structure>(type);
       v.name = canonical_name(n->name());
 
       // TODO: Struct inheritance.
@@ -850,7 +859,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
 
       for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
         AST_Field* field = *i;
-        const MemberId id = be_global->compute_id(stru, field, auto_id, member_id);
+        const MemberId id = be_global->compute_id(n, field, auto_id, member_id);
         consider(v, field->field_type(), v.name + "." + OpenDDS::DCPS::to_dds_string(id));
       }
 
@@ -859,14 +868,14 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
 
   case AST_ConcreteType::NT_array:
     {
-      AST_Array* const n = dynamic_cast<AST_Array*>(type);
+      AST_Array* const n = ast_cast<AST_Array>(type);
       v.name = anonymous_name + ".a";
       consider(v, n->base_type(), v.name);
       break;
     }
   case AST_ConcreteType::NT_map:
     {
-      AST_Map* const n = dynamic_cast<AST_Map*>(type);
+      AST_Map* const n = ast_cast<AST_Map>(type);
       v.name = anonymous_name + ".m";
       consider(v, n->key_type(), v.name);
       consider(v, n->value_type(), v.name);
@@ -874,7 +883,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
     }
   case AST_ConcreteType::NT_sequence:
     {
-      AST_Sequence* const n = dynamic_cast<AST_Sequence*>(type);
+      AST_Sequence* const n = ast_cast<AST_Sequence>(type);
       v.name = anonymous_name + ".s";
       consider(v, n->base_type(), v.name);
       break;
@@ -882,7 +891,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
 
   case AST_ConcreteType::NT_typedef:
     {
-      AST_Typedef* const n = dynamic_cast<AST_Typedef*>(type);
+      AST_Typedef* const n = ast_cast<AST_Typedef>(type);
       v.name = canonical_name(n->name());
       // TODO: What is the member name for an anonymous type in a typedef?
       // 7.3.4.9.2
@@ -892,7 +901,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
 
   case AST_ConcreteType::NT_enum:
     {
-      AST_Enum* const n = dynamic_cast<AST_Enum*>(type);
+      AST_Enum* const n = ast_cast<AST_Enum>(type);
       v.name = canonical_name(n->name());
       break;
     }
@@ -1064,9 +1073,8 @@ void typeobject_generator::set_builtin_member_annotations(AST_Decl* member,
   OPENDDS_OPTIONAL_NS::optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>& annotations)
 {
   // Support only @hashid annotation for member at this time.
-  const HashidAnnotation* hashid_ann = dynamic_cast<const HashidAnnotation*>(be_global->builtin_annotations_["::@hashid"]);
   std::string hash_name;
-  if (hashid_ann->node_value_exists(member, hash_name)) {
+  if (be_global->hashid(member, hash_name)) {
     OPENDDS_OPTIONAL_NS::optional<std::string> hash_id(hash_name);
     if (!annotations) {
       OpenDDS::XTypes::AppliedBuiltinMemberAnnotations value;
@@ -1079,7 +1087,7 @@ void typeobject_generator::set_builtin_member_annotations(AST_Decl* member,
 void
 typeobject_generator::generate_struct_type_identifier(AST_Type* type)
 {
-  AST_Structure* const n = dynamic_cast<AST_Structure*>(type);
+  AST_Structure* const n = ast_cast<AST_Structure>(type);
   const Fields fields(n);
 
   const ExtensibilityKind exten = be_global->extensibility(n);
@@ -1114,38 +1122,39 @@ typeobject_generator::generate_struct_type_identifier(AST_Type* type)
     AST_Field* field = *i;
     const TryConstructFailAction trycon = be_global->try_construct(field);
 
-    OpenDDS::XTypes::MinimalStructMember minimal_member;
-    minimal_member.common.member_id = be_global->get_id(field);
-    minimal_member.common.member_flags = try_construct_to_member_flag(trycon);
+    OpenDDS::XTypes::StructMemberFlag member_flags = try_construct_to_member_flag(trycon);
 
     if (be_global->is_optional(field)) {
-      minimal_member.common.member_flags |= OpenDDS::XTypes::IS_OPTIONAL;
+      member_flags |= OpenDDS::XTypes::IS_OPTIONAL;
     }
 
     if (be_global->is_must_understand(field)) {
-      minimal_member.common.member_flags |= OpenDDS::XTypes::IS_MUST_UNDERSTAND;
+      member_flags |= OpenDDS::XTypes::IS_MUST_UNDERSTAND;
     }
 
     if (be_global->is_key(field)) {
-      minimal_member.common.member_flags |= OpenDDS::XTypes::IS_KEY;
+      member_flags |= OpenDDS::XTypes::IS_KEY;
     }
 
     if (be_global->is_external(field)) {
-      minimal_member.common.member_flags |= OpenDDS::XTypes::IS_EXTERNAL;
+      member_flags |= OpenDDS::XTypes::IS_EXTERNAL;
     }
 
-    minimal_member.common.member_type_id = get_minimal_type_identifier(field->field_type());
+    const OpenDDS::XTypes::MemberId member_id = be_global->get_id(field);
     const std::string name = canonical_name(field->local_name());
-    OpenDDS::XTypes::hash_member_name(minimal_member.detail.name_hash, name);
+    const OpenDDS::XTypes::MinimalStructMember minimal_member(
+      OpenDDS::XTypes::CommonStructMember(member_id, member_flags,
+                                          get_minimal_type_identifier(field->field_type())),
+      OpenDDS::XTypes::MinimalMemberDetail(name));
     minimal_to.minimal.struct_type.member_seq.append(minimal_member);
 
-    OpenDDS::XTypes::CompleteStructMember complete_member;
-    complete_member.common.member_id = minimal_member.common.member_id;
-    complete_member.common.member_flags = minimal_member.common.member_flags;
-    complete_member.common.member_type_id = get_complete_type_identifier(field->field_type());
-
-    complete_member.detail.name = name;
-    set_builtin_member_annotations(field, complete_member.detail.ann_builtin);
+    OpenDDS::XTypes::CompleteMemberDetail complete_detail;
+    complete_detail.name = name;
+    set_builtin_member_annotations(field, complete_detail.ann_builtin);
+    const OpenDDS::XTypes::CompleteStructMember complete_member(
+      OpenDDS::XTypes::CommonStructMember(member_id, member_flags,
+                                          get_complete_type_identifier(field->field_type())),
+      complete_detail);
 
     complete_to.complete.struct_type.member_seq.append(complete_member);
   }
@@ -1161,7 +1170,7 @@ typeobject_generator::generate_struct_type_identifier(AST_Type* type)
 void
 typeobject_generator::generate_union_type_identifier(AST_Type* type)
 {
-  AST_Union* const n = dynamic_cast<AST_Union*>(type);
+  AST_Union* const n = ast_cast<AST_Union>(type);
 
   AST_Type* const discriminator = n->disc_type();
   AST_Type* const discriminatorActual = resolveActualType(discriminator);
@@ -1187,11 +1196,12 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
   }
 
   const TryConstructFailAction trycon = be_global->union_discriminator_try_construct(n);
-  minimal_to.minimal.union_type.discriminator.common.member_flags = try_construct_to_member_flag(trycon);
+  OpenDDS::XTypes::UnionDiscriminatorFlag discriminator_flags = try_construct_to_member_flag(trycon);
   if (be_global->union_discriminator_is_key(n)) {
-    minimal_to.minimal.union_type.discriminator.common.member_flags |= OpenDDS::XTypes::IS_KEY;
+    discriminator_flags |= OpenDDS::XTypes::IS_KEY;
   }
-  minimal_to.minimal.union_type.discriminator.common.type_id = get_minimal_type_identifier(discriminator);
+  minimal_to.minimal.union_type.discriminator.common =
+    OpenDDS::XTypes::CommonDiscriminatorMember(discriminator_flags, get_minimal_type_identifier(discriminator));
 
   complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
   complete_to.complete.kind = OpenDDS::XTypes::TK_UNION;
@@ -1199,12 +1209,11 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
 
   complete_to.complete.union_type.header.detail.type_name = canonical_name(type->name());
 
-  complete_to.complete.union_type.discriminator.common.member_flags =
-    minimal_to.minimal.union_type.discriminator.common.member_flags;
-  complete_to.complete.union_type.discriminator.common.type_id = get_complete_type_identifier(discriminator);
+  complete_to.complete.union_type.discriminator.common =
+    OpenDDS::XTypes::CommonDiscriminatorMember(discriminator_flags, get_complete_type_identifier(discriminator));
 
   for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
-    AST_UnionBranch* branch = dynamic_cast<AST_UnionBranch*>(*i);
+    AST_UnionBranch* branch = ast_cast<AST_UnionBranch>(*i);
     const TryConstructFailAction try_con = be_global->try_construct(branch);
 
     bool is_default = false;
@@ -1216,20 +1225,17 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
       }
     }
 
-    OpenDDS::XTypes::MinimalUnionMember minimal_member;
-    minimal_member.common.member_id = be_global->get_id(branch);
-    minimal_member.common.member_flags = try_construct_to_member_flag(try_con);
+    OpenDDS::XTypes::UnionMemberFlag member_flags = try_construct_to_member_flag(try_con);
 
     if (is_default) {
-      minimal_member.common.member_flags |= OpenDDS::XTypes::IS_DEFAULT;
+      member_flags |= OpenDDS::XTypes::IS_DEFAULT;
     }
 
     if (be_global->is_external(branch)) {
-      minimal_member.common.member_flags |= OpenDDS::XTypes::IS_EXTERNAL;
+      member_flags |= OpenDDS::XTypes::IS_EXTERNAL;
     }
 
-    minimal_member.common.type_id = get_minimal_type_identifier(branch->field_type());
-
+    OpenDDS::XTypes::UnionCaseLabelSeq label_seq;
     for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
       AST_UnionLabel* label = branch->label(j);
       if (label->label_kind() != AST_UnionLabel::UL_default) {
@@ -1239,26 +1245,31 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
           if (iter == enumValues->second.end()) {
             be_util::misc_error_and_abort("Unknown union label value", branch);
           }
-          minimal_member.common.label_seq.append(iter->second);
+          label_seq.append(iter->second);
         } else {
-          minimal_member.common.label_seq.append(to_long(*label->label_val()->ev()));
+          label_seq.append(to_long(*label->label_val()->ev()));
         }
       }
     }
-    minimal_member.common.label_seq.sort();
+    label_seq.sort();
 
+    const OpenDDS::XTypes::MemberId member_id = be_global->get_id(branch);
     const std::string name = canonical_name(branch->local_name());
-    OpenDDS::XTypes::hash_member_name(minimal_member.detail.name_hash, name);
+    const OpenDDS::XTypes::MinimalUnionMember minimal_member(
+      OpenDDS::XTypes::CommonUnionMember(member_id, member_flags,
+                                         get_minimal_type_identifier(branch->field_type()),
+                                         label_seq),
+      OpenDDS::XTypes::MinimalMemberDetail(name));
     minimal_to.minimal.union_type.member_seq.append(minimal_member);
 
-    OpenDDS::XTypes::CompleteUnionMember complete_member;
-    complete_member.common.member_id = minimal_member.common.member_id;
-    complete_member.common.member_flags = minimal_member.common.member_flags;
-    complete_member.common.type_id = get_complete_type_identifier(branch->field_type());
-    complete_member.common.label_seq = minimal_member.common.label_seq;
-
-    complete_member.detail.name = name;
-    set_builtin_member_annotations(branch, complete_member.detail.ann_builtin);
+    OpenDDS::XTypes::CompleteMemberDetail complete_detail;
+    complete_detail.name = name;
+    set_builtin_member_annotations(branch, complete_detail.ann_builtin);
+    const OpenDDS::XTypes::CompleteUnionMember complete_member(
+      OpenDDS::XTypes::CommonUnionMember(member_id, member_flags,
+                                         get_complete_type_identifier(branch->field_type()),
+                                         label_seq),
+      complete_detail);
 
     complete_to.complete.union_type.member_seq.append(complete_member);
   }
@@ -1274,7 +1285,7 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
 void
 typeobject_generator::generate_enum_type_identifier(AST_Type* type)
 {
-  AST_Enum* const n = dynamic_cast<AST_Enum*>(type);
+  AST_Enum* const n = ast_cast<AST_Enum>(type);
   std::vector<AST_EnumVal*> contents;
   scope2vector(contents, n, AST_Decl::NT_enum_val);
   bool has_extensibility_annotation = false;
@@ -1295,6 +1306,7 @@ typeobject_generator::generate_enum_type_identifier(AST_Type* type)
   OpenDDS::XTypes::TypeObject minimal_to, complete_to;
   minimal_to.kind = OpenDDS::XTypes::EK_MINIMAL;
   minimal_to.minimal.kind = OpenDDS::XTypes::TK_ENUM;
+  minimal_to.minimal.enumerated_type.enum_flags = 0;
   if (has_extensibility_annotation || !be_global->default_enum_extensibility_zero()) {
     minimal_to.minimal.enumerated_type.enum_flags = extensibility_to_type_flag(ek);
   }
@@ -1303,6 +1315,7 @@ typeobject_generator::generate_enum_type_identifier(AST_Type* type)
 
   complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
   complete_to.complete.kind = OpenDDS::XTypes::TK_ENUM;
+  complete_to.complete.enumerated_type.enum_flags = 0;
   if (has_extensibility_annotation || !be_global->default_enum_extensibility_zero()) {
     complete_to.complete.enumerated_type.enum_flags = extensibility_to_type_flag(ek);
   }
@@ -1315,20 +1328,23 @@ typeobject_generator::generate_enum_type_identifier(AST_Type* type)
   for (size_t i = 0; i != contents.size(); ++i) {
     const std::string name = canonical_name(contents[i]->local_name());
 
-    OpenDDS::XTypes::MinimalEnumeratedLiteral minimal_lit;
-    if (!be_global->value(contents[i], minimal_lit.common.value)) {
-      minimal_lit.common.value = last_value + 1;
+    ACE_CDR::Long value = 0;
+    if (!be_global->value(contents[i], value)) {
+      value = last_value + 1;
     }
-    cached[name] = last_value = minimal_lit.common.value;
+    cached[name] = last_value = value;
 
-    minimal_lit.common.flags = (i == default_literal_idx ? OpenDDS::XTypes::IS_DEFAULT : 0);
+    const OpenDDS::XTypes::EnumeratedLiteralFlag literal_flags =
+      (i == default_literal_idx ? OpenDDS::XTypes::IS_DEFAULT : 0);
 
-    OpenDDS::XTypes::hash_member_name(minimal_lit.detail.name_hash, name);
+    const OpenDDS::XTypes::CommonEnumeratedLiteral common_literal(value, literal_flags);
+    const OpenDDS::XTypes::MinimalEnumeratedLiteral minimal_lit(
+      common_literal, OpenDDS::XTypes::MinimalMemberDetail(name));
     minimal_to.minimal.enumerated_type.literal_seq.append(minimal_lit);
 
-    OpenDDS::XTypes::CompleteEnumeratedLiteral complete_lit;
-    complete_lit.common = minimal_lit.common;
-    complete_lit.detail.name = name;
+    OpenDDS::XTypes::CompleteMemberDetail complete_detail;
+    complete_detail.name = name;
+    const OpenDDS::XTypes::CompleteEnumeratedLiteral complete_lit(common_literal, complete_detail);
 
     complete_to.complete.enumerated_type.literal_seq.append(complete_lit);
   }
@@ -1341,7 +1357,7 @@ typeobject_generator::generate_enum_type_identifier(AST_Type* type)
 void
 typeobject_generator::generate_array_type_identifier(AST_Type* type, bool force_type_object)
 {
-  AST_Array* const n = dynamic_cast<AST_Array*>(type);
+  AST_Array* const n = ast_cast<AST_Array>(type);
 
   const TryConstructFailAction trycon = be_global->try_construct(n->base_type());
   OpenDDS::XTypes::CollectionElementFlag cef = try_construct_to_member_flag(trycon);
@@ -1410,6 +1426,7 @@ typeobject_generator::generate_array_type_identifier(AST_Type* type, bool force_
     OpenDDS::XTypes::TypeObject minimal_to, complete_to;
     minimal_to.kind = OpenDDS::XTypes::EK_MINIMAL;
     minimal_to.minimal.kind = OpenDDS::XTypes::TK_ARRAY;
+    minimal_to.minimal.array_type.collection_flag = 0;
     for (ACE_CDR::ULong dim = 0; dim != n->n_dims(); ++dim) {
       minimal_to.minimal.array_type.header.common.bound_seq.append(n->dims()[dim]->ev()->u.ulval);
     }
@@ -1418,6 +1435,7 @@ typeobject_generator::generate_array_type_identifier(AST_Type* type, bool force_
 
     complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
     complete_to.complete.kind = OpenDDS::XTypes::TK_ARRAY;
+    complete_to.complete.array_type.collection_flag = 0;
     complete_to.complete.array_type.header.common.bound_seq = minimal_to.minimal.array_type.header.common.bound_seq;
     complete_to.complete.array_type.header.detail.type_name = canonical_name(type->name());
 
@@ -1432,7 +1450,7 @@ void
 typeobject_generator::generate_map_type_identifier(AST_Type* type, bool force_type_object)
 {
   using namespace OpenDDS::XTypes;
-  AST_Map* const n = dynamic_cast<AST_Map*>(type);
+  AST_Map* const n = ast_cast<AST_Map>(type);
   const ACE_CDR::ULong bound = n->unbounded() ? INVALID_LBOUND : n->max_size()->ev()->u.ulval;
 
   const TryConstructFailAction trykey = be_global->try_construct(n->key_type());
@@ -1481,6 +1499,7 @@ typeobject_generator::generate_map_type_identifier(AST_Type* type, bool force_ty
     TypeObject minimal_to;
     minimal_to.kind = EK_MINIMAL;
     minimal_to.minimal.kind = TK_MAP;
+    minimal_to.minimal.map_type.collection_flag = 0;
     minimal_to.minimal.map_type.header.common.bound = bound;
     minimal_to.minimal.map_type.key.common.element_flags = cef_key;
     minimal_to.minimal.map_type.key.common.type = minimal_key_ti;
@@ -1490,6 +1509,7 @@ typeobject_generator::generate_map_type_identifier(AST_Type* type, bool force_ty
     TypeObject complete_to;
     complete_to.kind = EK_COMPLETE;
     complete_to.complete.kind = TK_MAP;
+    complete_to.complete.map_type.collection_flag = 0;
     complete_to.complete.map_type.header.common = minimal_to.minimal.map_type.header.common;
     complete_to.complete.map_type.key.common.element_flags = cef_key;
     complete_to.complete.map_type.key.common.type = get_complete_type_identifier(n->key_type());
@@ -1503,7 +1523,7 @@ typeobject_generator::generate_map_type_identifier(AST_Type* type, bool force_ty
 void
 typeobject_generator::generate_sequence_type_identifier(AST_Type* type, bool force_type_object)
 {
-  AST_Sequence* const n = dynamic_cast<AST_Sequence*>(type);
+  AST_Sequence* const n = ast_cast<AST_Sequence>(type);
 
   ACE_CDR::ULong bound = 0;
   if (!n->unbounded()) {
@@ -1566,12 +1586,14 @@ typeobject_generator::generate_sequence_type_identifier(AST_Type* type, bool for
     OpenDDS::XTypes::TypeObject minimal_to, complete_to;
     minimal_to.kind = OpenDDS::XTypes::EK_MINIMAL;
     minimal_to.minimal.kind = OpenDDS::XTypes::TK_SEQUENCE;
+    minimal_to.minimal.sequence_type.collection_flag = 0;
     minimal_to.minimal.sequence_type.header.common.bound = bound;
     minimal_to.minimal.sequence_type.element.common.element_flags = cef;
     minimal_to.minimal.sequence_type.element.common.type = minimal_elem_ti;
 
     complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
     complete_to.complete.kind = OpenDDS::XTypes::TK_SEQUENCE;
+    complete_to.complete.sequence_type.collection_flag = 0;
     complete_to.complete.sequence_type.header.common.bound = bound;
     complete_to.complete.sequence_type.element.common.element_flags = cef;
     complete_to.complete.sequence_type.element.common.type = complete_elem_ti;
@@ -1583,16 +1605,20 @@ typeobject_generator::generate_sequence_type_identifier(AST_Type* type, bool for
 void
 typeobject_generator::generate_alias_type_identifier(AST_Type* type)
 {
-  AST_Typedef* const n = dynamic_cast<AST_Typedef*>(type);
+  AST_Typedef* const n = ast_cast<AST_Typedef>(type);
 
   OpenDDS::XTypes::TypeObject minimal_to, complete_to;
   minimal_to.kind = OpenDDS::XTypes::EK_MINIMAL;
   minimal_to.minimal.kind = OpenDDS::XTypes::TK_ALIAS;
+  minimal_to.minimal.alias_type.alias_flags = 0;
+  minimal_to.minimal.alias_type.body.common.related_flags = 0;
   minimal_to.minimal.alias_type.body.common.related_type = get_minimal_type_identifier(n->base_type());
 
   complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
   complete_to.complete.kind = OpenDDS::XTypes::TK_ALIAS;
+  complete_to.complete.alias_type.alias_flags = 0;
   complete_to.complete.alias_type.header.detail.type_name = canonical_name(type->name());
+  complete_to.complete.alias_type.body.common.related_flags = 0;
   complete_to.complete.alias_type.body.common.related_type = get_complete_type_identifier(n->base_type());
 
   update_maps(type, minimal_to, complete_to);
@@ -1601,7 +1627,7 @@ typeobject_generator::generate_alias_type_identifier(AST_Type* type)
 void
 typeobject_generator::generate_primitive_type_identifier(AST_Type* type)
 {
-  AST_PredefinedType* const n = dynamic_cast<AST_PredefinedType*>(type);
+  AST_PredefinedType* const n = ast_cast<AST_PredefinedType>(type);
   switch (n->pt()) {
   case AST_PredefinedType::PT_long:
     fully_desc_type_identifier_map_[type] = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_INT32);
@@ -1686,7 +1712,7 @@ typeobject_generator::generate_type_identifier(AST_Type* type, bool force_type_o
 
   case AST_ConcreteType::NT_string:
     {
-      AST_String* const n = dynamic_cast<AST_String*>(type);
+      AST_String* const n = ast_cast<AST_String>(type);
       ACE_CDR::ULong bound = n->max_size()->ev()->u.ulval;
       if (bound < 256) {
         OpenDDS::XTypes::TypeIdentifier ti(OpenDDS::XTypes::TI_STRING8_SMALL);
@@ -1702,7 +1728,7 @@ typeobject_generator::generate_type_identifier(AST_Type* type, bool force_type_o
 
   case AST_ConcreteType::NT_wstring:
     {
-      AST_String* const n = dynamic_cast<AST_String*>(type);
+      AST_String* const n = ast_cast<AST_String>(type);
       ACE_CDR::ULong bound = n->max_size()->ev()->u.ulval;
       if (bound < 256) {
         OpenDDS::XTypes::TypeIdentifier ti(OpenDDS::XTypes::TI_STRING16_SMALL);
@@ -1807,12 +1833,12 @@ typeobject_generator::get_minimal_type_identifier(AST_Type* type)
   switch(type->node_type()) {
   case AST_Decl::NT_union_fwd:
     {
-      AST_UnionFwd* const td = dynamic_cast<AST_UnionFwd*>(type);
+      AST_UnionFwd* const td = ast_cast<AST_UnionFwd>(type);
       return get_minimal_type_identifier(td->full_definition());
     }
   case AST_Decl::NT_struct_fwd:
     {
-      AST_StructureFwd* const td = dynamic_cast<AST_StructureFwd*>(type);
+      AST_StructureFwd* const td = ast_cast<AST_StructureFwd>(type);
       return get_minimal_type_identifier(td->full_definition());
     }
   default:
@@ -1834,12 +1860,12 @@ typeobject_generator::get_complete_type_identifier(AST_Type* type)
   switch(type->node_type()) {
   case AST_Decl::NT_union_fwd:
     {
-      AST_UnionFwd* const td = dynamic_cast<AST_UnionFwd*>(type);
+      AST_UnionFwd* const td = ast_cast<AST_UnionFwd>(type);
       return get_complete_type_identifier(td->full_definition());
     }
   case AST_Decl::NT_struct_fwd:
     {
-      AST_StructureFwd* const td = dynamic_cast<AST_StructureFwd*>(type);
+      AST_StructureFwd* const td = ast_cast<AST_StructureFwd>(type);
       return get_complete_type_identifier(td->full_definition());
     }
   default:

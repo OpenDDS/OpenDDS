@@ -169,17 +169,21 @@ template <typename T>
 struct TypeSupportInitializer {
   TypeSupportInitializer()
     : ts_(new T)
+    , registered_(ts_->register_type(0, "") == DDS::RETCODE_OK)
   {
-    ts_->register_type(0, "");
+    OPENDDS_ASSERT(registered_);
   }
 
   ~TypeSupportInitializer()
   {
-    T* const t = dynamic_cast<T*>(ts_.in());
-    ts_->unregister_type(0, t ? t->name() : 0);
+    if (registered_) {
+      T* const t = dynamic_cast<T*>(ts_.in());
+      ts_->unregister_type(0, t ? t->name() : 0);
+    }
   }
 
   typename T::_var_type ts_;
+  const bool registered_;
 };
 
 } // namespace DCPS

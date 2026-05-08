@@ -528,9 +528,9 @@ TEST(AnonSequence, Trim)
       ssu[i] = i;
     }
     ShortSeqBound2 ssb;
-    ssu.length(3);
+    ssb.length(3);
     for (ACE_INT16 i = 0; i < 3; ++i) {
-      ssu[i] = i;
+      ssb[i] = i;
     }
     sent.AnonShortSeqUnboundUnbound.length(3);
     for (ACE_INT16 i = 0; i < 3; ++i) {
@@ -579,14 +579,14 @@ TEST(AnonSequence, Trim)
       }
     }
     ShortSeqUnbound ssu_2;
-    ssu.length(3);
-    for (ACE_INT16 i = 0; i < 2; ++i) {
-      ssu[i] = i;
+    ssu_2.length(3);
+    for (ACE_INT16 i = 0; i < 3; ++i) {
+      ssu_2[i] = i;
     }
     ShortSeqBound ssb_2;
-    ssu.length(2);
+    ssb_2.length(2);
     for (ACE_INT16 i = 0; i < 2; ++i) {
-      ssu[i] = i;
+      ssb_2[i] = i;
     }
     expected.AnonShortSeqUnboundUnbound.length(3);
     for (ACE_INT16 i = 0; i < 3; ++i) {
@@ -673,9 +673,9 @@ TEST(AnonSequence, USE_DEFAULT)
       ssu[i] = i;
     }
     ShortSeqBound2 ssb;
-    ssu.length(3);
+    ssb.length(3);
     for (ACE_INT16 i = 0; i < 3; ++i) {
-      ssu[i] = i;
+      ssb[i] = i;
     }
     sent.AnonShortSeqUnboundUnbound.length(3);
     for (ACE_INT16 i = 0; i < 3; ++i) {
@@ -696,7 +696,6 @@ TEST(AnonSequence, USE_DEFAULT)
 
     TryCon::AnonSeqStructDefault expected;
     expected.AnonShortSeqUnboundUnbound.length(3);
-    expected.AnonSeqShortSeqBoundUnbound.length(3);
 
     TryCon::AnonSeqStructDefault actual;
 
