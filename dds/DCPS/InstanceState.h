@@ -209,11 +209,6 @@ private:
   bool release_pending_;
 
   /**
-   * Keep track of a scheduled release timer.
-   */
-  long release_timer_id_;
-
-  /**
    * Reference to our containing reader.  This is used to call back
    * and notify the reader that liveliness has been lost on this
    * instance.  It is also queried to determine if the DataReader is
