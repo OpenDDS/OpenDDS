@@ -2324,6 +2324,11 @@ DomainParticipantImpl::LivelinessTimer::~LivelinessTimer()
 void
 DomainParticipantImpl::LivelinessTimer::add_adjust(OpenDDS::DCPS::DataWriterImpl* writer)
 {
+  const TimeDuration writer_interval = writer->liveliness_check_interval(kind_);
+  if (writer_interval.is_max()) {
+    return;
+  }
+
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
   const MonotonicTimePoint now = MonotonicTimePoint::now();
@@ -2332,7 +2337,7 @@ DomainParticipantImpl::LivelinessTimer::add_adjust(OpenDDS::DCPS::DataWriterImpl
   const TimeDuration remaining = interval_ - (now - last_liveliness_check_);
 
   // Adopt a smaller interval.
-  interval_ = std::min(interval_, writer->liveliness_check_interval(kind_));
+  interval_ = std::min(interval_, writer_interval);
 
   // Reschedule or schedule a timer if necessary.
   if (scheduled_ && interval_ < remaining) {
