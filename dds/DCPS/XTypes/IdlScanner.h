@@ -73,7 +73,9 @@ public:
 
   IdlToken()
   : kind_(Error)
-  {}
+  {
+    numeric_value_ = Numeric();
+  }
 
   static IdlToken make_error()
   {
