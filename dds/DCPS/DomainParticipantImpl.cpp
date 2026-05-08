@@ -2324,7 +2324,7 @@ DomainParticipantImpl::LivelinessTimer::~LivelinessTimer()
 void
 DomainParticipantImpl::LivelinessTimer::add_adjust(OpenDDS::DCPS::DataWriterImpl* writer)
 {
-  TimeDuration writer_interval = writer->liveliness_check_interval(kind_);
+  const TimeDuration writer_interval = writer->liveliness_check_interval(kind_);
   if (writer_interval.is_max()) {
     return;
   }
