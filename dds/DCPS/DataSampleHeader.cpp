@@ -418,8 +418,13 @@ DataSampleHeader::split(const ACE_Message_Block& orig, size_t size,
   for (; payload->length() == 0; payload = payload->cont()) {
     prev = payload;
   }
-  prev->cont(0);
-  Message_Block_Ptr payload_head(payload);
+  Message_Block_Ptr payload_head;
+  if (prev) {
+    prev->cont(0);
+    payload_head.reset(payload);
+  } else {
+    payload_head.reset(payload->duplicate());
+  }
 
   if (size < hdr_len) { // need to fragment the content_filter_entries_
     head.reset(alloc_msgblock(*dup, this_max_serialized_size, true));
