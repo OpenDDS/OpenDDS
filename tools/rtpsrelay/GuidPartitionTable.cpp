@@ -253,9 +253,9 @@ GuidPartitionTable::update_cert_partitions_cache(const std::string& key, const S
     const std::string parts_str = concat_strings(partitions);
     ACE_DEBUG((LM_INFO,
                "(%P|%t) INFO: GuidPartitionTable::update_cert_partitions_cache: "
-               "For %C key='%C' partitions=[%C] count=%B cache size=%B\n",
-               guid_to_string(guid).c_str(), key.c_str(), parts_str.c_str(),
-               partitions.size(), cert_to_partitions_.size()));
+               "For %C key='%C' partitions=[%C] count=%B cache size=%B expiration map size=%B\n",
+               guid_to_string(guid).c_str(), key.c_str(), parts_str.c_str(), partitions.size(),
+               cert_to_partitions_.size(), partition_expiration_map_.size()));
   }
 }
 
@@ -285,14 +285,14 @@ GuidPartitionTable::lookup_cert_partitions_cache(StringSet& partitions, const st
       const std::string parts_str = concat_strings(partitions);
       ACE_DEBUG((LM_INFO,
                  "(%P|%t) INFO: GuidPartitionTable::lookup_cert_partitions_cache: "
-                 "For %C key='%C' Found partitions=[%C] count=%B cache size=%B\n",
-                 guid_to_string(guid).c_str(), key.c_str(), parts_str.c_str(),
-                 partitions.size(), cert_to_partitions_.size()));
+                 "For %C key='%C' Found partitions=[%C] count=%B cache size=%B expiration map size=%B\n",
+                 guid_to_string(guid).c_str(), key.c_str(), parts_str.c_str(), partitions.size(),
+                 cert_to_partitions_.size(), partition_expiration_map_.size()));
     } else {
       ACE_DEBUG((LM_INFO,
                  "(%P|%t) INFO: GuidPartitionTable::lookup_cert_partitions_cache: "
-                 "For %C key='%C' Not found -- cache size=%B\n",
-                 guid_to_string(guid).c_str(), key.c_str(), cert_to_partitions_.size()));
+                 "For %C key='%C' Not found -- cache size=%B expiration map size=%B\n",
+                 guid_to_string(guid).c_str(), key.c_str(), cert_to_partitions_.size(), partition_expiration_map_.size()));
     }
   }
 }
@@ -301,14 +301,29 @@ void GuidPartitionTable::cleanup_async_disc_cache(const OpenDDS::DCPS::Monotonic
 {
   ACE_GUARD(ACE_Thread_Mutex, g, cert_to_partitions_mutex_);
 
+  StringSet removed_keys;
   const auto cutoff_time = now - config_.async_discovery_cache_timeout();
   const auto upper_bound = partition_expiration_map_.upper_bound(cutoff_time);
   for (auto it = partition_expiration_map_.begin(); it != upper_bound;) {
     const auto& keys = it->second;
+    if (config_.log_async_discovery()) {
+      removed_keys.insert(keys.begin(), keys.end());
+    }
     for (const auto& key : keys) {
       cert_to_partitions_.erase(key);
     }
     it = partition_expiration_map_.erase(it);
+  }
+
+  relay_stats_reporter_.async_discovery_cache_size(cert_to_partitions_.size(), now);
+  relay_stats_reporter_.async_discovery_expiration_map_size(partition_expiration_map_.size(), now);
+
+  if (config_.log_async_discovery()) {
+    const auto keys_str = concat_strings(removed_keys);
+    ACE_DEBUG((LM_INFO,
+               "(%P|%t) INFO: GuidPartitionTable::cleanup_async_disc_cache: "
+               "Removed cached partitions for keys [%C] -- cache size=%B expiration map size=%B\n",
+               keys_str.c_str(), cert_to_partitions_.size(), partition_expiration_map_.size()));
   }
 
   if (!partition_expiration_map_.empty()) {

@@ -201,6 +201,8 @@ module RtpsRelay {
     unsigned long admission_queue_size;
     unsigned long transitions_to_admitting;
     unsigned long transitions_to_nonadmitting;
+    unsigned long async_discovery_cache_size;
+    unsigned long async_discovery_expiration_map_size;
     unsigned long virtual_memory_kb;
     ClientPartitionStatistics client_partitions;
     RelayPartitionStatistics relay_partitions;

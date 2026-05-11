@@ -388,6 +388,24 @@ public:
     report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
   }
 
+  void async_discovery_cache_size(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.async_discovery_cache_size() = count32;
+    publish_relay_statistics_.async_discovery_cache_size() = count32;
+    report(guard, now);
+  }
+
+  void async_discovery_expiration_map_size(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const auto count32 = static_cast<uint32_t>(count);
+    log_relay_statistics_.async_discovery_expiration_map_size() = count32;
+    publish_relay_statistics_.async_discovery_expiration_map_size() = count32;
+    report(guard, now);
+  }
+
   void report()
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
