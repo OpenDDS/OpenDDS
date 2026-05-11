@@ -132,12 +132,12 @@ void ReadAction::do_read()
   if (started_ && !stopped_) {
     DDS::ConditionSeq active;
     const DDS::Duration_t duration = read_period_.to_dds_duration();
-    DDS::WaitSet_var ws_copy= ws_;
+    DDS::WaitSet_var ws_copy = ws_;
     DDS::ReturnCode_t ret;
 
     {
       reverse_guard rg(lock);
-      ret = ws_->wait(active, duration);
+      ret = ws_copy->wait(active, duration);
     }
 
     if (stopped_) {
