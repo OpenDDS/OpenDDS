@@ -114,6 +114,12 @@ bool Config::from_arg(ACE_Arg_Shifter_T<char>& args)
   } else if ((arg = args.get_the_parameter("-AsyncDiscoveryCacheTimeout"))) {
     async_discovery_cache_timeout(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
     args.consume_arg();
+  } else if ((arg = args.get_the_parameter("-SynchronizeAsyncDiscoveryCache"))) {
+    synchronize_async_discovery_cache(ACE_OS::atoi(arg));
+    args.consume_arg();
+  } else if ((arg = args.get_the_parameter("-AsyncDiscoveryRemoteCacheTimeout"))) {
+    async_discovery_remote_cache_timeout(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
+    args.consume_arg();
   } else {
     return false;
   }
@@ -228,6 +234,12 @@ void Config::set_defaults()
   cached_log_async_discovery_.default_if_empty([&](bool default_val) {
     TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_ASYNC_DISCOVERY, default_val);
   });
+  cached_synchronize_async_discovery_cache_.default_if_empty([&](bool default_val) {
+    TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_SYNCHRONIZE_ASYNC_DISCOVERY_CACHE, default_val);
+  });
+  cached_async_discovery_remote_cache_timeout_.default_if_empty([&](const TimeDuration& default_val) {
+    TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_ASYNC_DISCOVERY_REMOTE_CACHE_TIMEOUT, default_val.to_dds_duration());
+  });
 }
 
 void Config::on_data_available(InternalDataReader_rch reader)
@@ -292,6 +304,10 @@ void Config::on_data_available(InternalDataReader_rch reader)
         cached_async_discovery_cache_timeout_.set(pair.value());
       } else if (pair.key() == RTPS_RELAY_LOG_ASYNC_DISCOVERY) {
         cached_log_async_discovery_.set(pair.value());
+      } else if (pair.key() == RTPS_RELAY_SYNCHRONIZE_ASYNC_DISCOVERY_CACHE) {
+        cached_synchronize_async_discovery_cache_.set(pair.value());
+      } else if (pair.key() == RTPS_RELAY_ASYNC_DISCOVERY_REMOTE_CACHE_TIMEOUT) {
+        cached_async_discovery_remote_cache_timeout_.set(pair.value());
       }
     }
   }

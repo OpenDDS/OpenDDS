@@ -11,6 +11,9 @@ GuidPartitionTable::~GuidPartitionTable()
   if (denied_partitions_cleanup_task_) {
     denied_partitions_cleanup_task_->cancel();
   }
+  if (async_disc_cache_cleanup_task_) {
+    async_disc_cache_cleanup_task_->cancel();
+  }
 }
 
 GuidPartitionTable::Result GuidPartitionTable::insert(const OpenDDS::DCPS::GUID_t& guid,
@@ -228,34 +231,56 @@ GuidPartitionTable::update_cert_partitions_cache(const std::string& key, const S
     return;
   }
 
-  ACE_GUARD(ACE_Thread_Mutex, g, cert_to_partitions_mutex_);
-  // Remove old entry
-  const auto it = cert_to_partitions_.find(key);
-  if (it != cert_to_partitions_.end()) {
-    remove_from_partition_expiration_map(it->second.second, key);
-    cert_to_partitions_.erase(it);
-  }
+  StringSet prev_partitions;
 
-  // Add new entry
-  if (!partitions.empty()) {
-    const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
-    cert_to_partitions_[key] = std::make_pair(partitions, now);
-    partition_expiration_map_[now].insert(key);
-
-    if (!async_disc_cache_cleanup_task_) {
-      const auto base = OpenDDS::DCPS::make_rch<GuidPartitionTableEvent>(rchandle_from(this), &GuidPartitionTable::cleanup_async_disc_cache);
-      async_disc_cache_cleanup_task_ = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::SporadicEvent>(TheServiceParticipant->event_dispatcher(), base);
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, cert_to_partitions_mutex_);
+    // Remove old entry
+    const auto it = cert_to_partitions_.find(key);
+    if (it != cert_to_partitions_.end()) {
+      if (config_.synchronize_async_discovery_cache()) {
+        prev_partitions = it->second.first;
+      }
+      remove_from_partition_expiration_map(it->second.second, key);
+      cert_to_partitions_.erase(it);
     }
-    async_disc_cache_cleanup_task_->schedule(config_.async_discovery_cache_timeout());
+
+    // Add new entry
+    if (!partitions.empty()) {
+      const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
+      cert_to_partitions_[key] = std::make_pair(partitions, now);
+      partition_expiration_map_[now].insert(key);
+
+      if (!async_disc_cache_cleanup_task_) {
+        const auto base = OpenDDS::DCPS::make_rch<GuidPartitionTableEvent>(rchandle_from(this), &GuidPartitionTable::cleanup_async_disc_cache);
+        async_disc_cache_cleanup_task_ = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::SporadicEvent>(TheServiceParticipant->event_dispatcher(), base);
+      }
+      async_disc_cache_cleanup_task_->schedule(config_.async_discovery_cache_timeout());
+    }
+
+    if (config_.log_async_discovery()) {
+      const std::string parts_str = concat_strings(partitions);
+      ACE_DEBUG((LM_INFO,
+                 "(%P|%t) INFO: GuidPartitionTable::update_cert_partitions_cache: "
+                 "For %C key='%C' partitions=[%C] count=%B cache size=%B expiration map size=%B\n",
+                 guid_to_string(guid).c_str(), key.c_str(), parts_str.c_str(), partitions.size(),
+                 cert_to_partitions_.size(), partition_expiration_map_.size()));
+    }
   }
 
-  if (config_.log_async_discovery()) {
-    const std::string parts_str = concat_strings(partitions);
-    ACE_DEBUG((LM_INFO,
-               "(%P|%t) INFO: GuidPartitionTable::update_cert_partitions_cache: "
-               "For %C key='%C' partitions=[%C] count=%B cache size=%B expiration map size=%B\n",
-               guid_to_string(guid).c_str(), key.c_str(), parts_str.c_str(), partitions.size(),
-               cert_to_partitions_.size(), partition_expiration_map_.size()));
+  if (config_.synchronize_async_discovery_cache()) {
+    if (prev_partitions != partitions) {
+      AsyncDiscoveryCacheUpdate update;
+      update.relay_id(config_.relay_id());
+      update.entries().emplace_back(key, StringSequence(partitions.begin(), partitions.end()));
+      update.add_or_remove(Action::ACTION_ADD);
+      const auto rc = async_disc_cache_writer_->write(update, DDS::HANDLE_NIL);
+      if (rc != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR,
+          "(%P|%t) ERROR: GuidPartitionTable::update_cert_partitions_cache: failed to write Async Discovery Cache Update: %C\n",
+          OpenDDS::DCPS::retcode_to_string(rc)));
+      }
+    }
   }
 }
 

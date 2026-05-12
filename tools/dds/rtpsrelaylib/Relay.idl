@@ -188,6 +188,7 @@ module RtpsRelay {
     unsigned long relay_participant_status_sub_count;
     unsigned long relay_address_sub_count;
     unsigned long relay_status_sub_count;
+    unsigned long async_discovery_cache_update_sub_count;
     unsigned long relay_partitions_pub_count;
     unsigned long relay_address_pub_count;
     unsigned long admission_deferral_count;
@@ -222,7 +223,7 @@ module RtpsRelay {
 
   enum Action {
     ACTION_ADD,
-    ACTION_REMOVE // Not implemented yet
+    ACTION_REMOVE
   };
 
   const string RELAY_DENIED_PARTITIONS_TOPIC_NAME = "Relay Denied Partitions";
@@ -231,6 +232,23 @@ module RtpsRelay {
   @autoid(HASH)
   struct RelayDeniedPartitions {
     StringSequence partitions;
+    Action add_or_remove; // Not implemented remove yet
+  };
+
+  struct AsyncDiscoveryCacheEntry {
+    string key;
+    StringSequence partitions;
+  };
+
+  typedef sequence<AsyncDiscoveryCacheEntry> AsyncDiscoveryCacheEntrySeq;
+
+  const string RELAY_ASYNC_DISCOVERY_CACHE_UPDATE_TOPIC_NAME = "Relay Async Discovery Cache Update";
+  @topic
+  @mutable
+  @autoid(HASH)
+  struct AsyncDiscoveryCacheUpdate {
+    @key string relay_id;
+    AsyncDiscoveryCacheEntrySeq entries;
     Action add_or_remove;
   };
 };

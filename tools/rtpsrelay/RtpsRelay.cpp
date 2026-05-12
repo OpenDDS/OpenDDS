@@ -645,7 +645,41 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  GuidPartitionTable guid_partition_table(config, reactor_task, spdp_horizontal_addr, *guid_addr_set, relay_partitions_writer, relay_statistics_reporter);
+  AsyncDiscoveryCacheUpdateTypeSupport_var async_disc_cache_update_ts = new AsyncDiscoveryCacheUpdateTypeSupportImpl;
+  if (async_disc_cache_update_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to register AsyncDiscoveryCacheUpdate type\n"));
+    return EXIT_FAILURE;
+  }
+  CORBA::String_var async_disc_cache_update_type_name = async_disc_cache_update_ts->get_type_name();
+
+  DDS::Topic_var async_disc_cache_update_topic =
+    relay_participant->create_topic(RELAY_ASYNC_DISCOVERY_CACHE_UPDATE_TOPIC_NAME.c_str(),
+                                    async_disc_cache_update_type_name,
+                                    TOPIC_QOS_DEFAULT, nullptr,
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+  if (!async_disc_cache_update_topic) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Relay Async Discovery Cache Update topic\n"));
+    return EXIT_FAILURE;
+  }
+
+  DDS::DataWriterListener_var async_disc_cache_writer_listener =
+    new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::async_discovery_cache_update_sub_count);
+  DDS::DataWriter_var async_disc_cache_writer_var =
+    relay_publisher->create_datawriter(async_disc_cache_update_topic, writer_qos, async_disc_cache_writer_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  if (!async_disc_cache_writer_var) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Async Discovery Cache Update data writer\n"));
+    return EXIT_FAILURE;
+  }
+
+  AsyncDiscoveryCacheUpdateDataWriter_var async_disc_cache_writer = AsyncDiscoveryCacheUpdateDataWriter::_narrow(async_disc_cache_writer_var);
+  if (!async_disc_cache_writer) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to narrow Async Discovery Cache Update data writer\n"));
+    return EXIT_FAILURE;
+  }
+
+  GuidPartitionTable guid_partition_table(config, reactor_task, spdp_horizontal_addr, *guid_addr_set,
+    relay_partitions_writer, relay_statistics_reporter, async_disc_cache_writer);
   RelayPartitionTable relay_partition_table(relay_statistics_reporter);
   relay_statistics_reporter.report();
 

@@ -195,6 +195,14 @@ public:
     report(guard, now);
   }
 
+  void async_discovery_cache_update_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.async_discovery_cache_update_sub_count() = count;
+    publish_relay_statistics_.async_discovery_cache_update_sub_count() = count;
+    report(guard, now);
+  }
+
   void relay_partitions_pub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);

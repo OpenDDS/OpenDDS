@@ -32,13 +32,15 @@ public:
                      const ACE_INET_Addr& address,
                      GuidAddrSet& guid_addr_set,
                      RelayPartitionsDataWriter_var relay_partitions_writer,
-                     RelayStatisticsReporter& relay_stats_reporter)
+                     RelayStatisticsReporter& relay_stats_reporter,
+                     AsyncDiscoveryCacheUpdateDataWriter_var async_disc_cache_writer)
     : config_(config)
     , reactor_task_(reactor_task)
     , address_(OpenDDS::DCPS::LogAddr(address).c_str())
     , guid_addr_set_(guid_addr_set)
     , relay_stats_reporter_(relay_stats_reporter)
     , relay_partitions_writer_(relay_partitions_writer)
+    , async_disc_cache_writer_(async_disc_cache_writer)
   {}
 
   ~GuidPartitionTable();
@@ -135,7 +137,7 @@ private:
   {
     for (const auto& relay_partition : relay_partitions) {
       if (relay_partitions_writer_->write(relay_partition, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to write Relay Partitions\n"));
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: GuidPartitionTable::write_relay_partitions: failed to write Relay Partitions\n"));
       }
     }
   }
@@ -188,6 +190,7 @@ private:
   GuidAddrSet& guid_addr_set_;
   RelayStatisticsReporter& relay_stats_reporter_;
   RelayPartitionsDataWriter_var relay_partitions_writer_;
+  AsyncDiscoveryCacheUpdateDataWriter_var async_disc_cache_writer_;
 
   using Slots = std::vector<StringSet>;
   Slots slots_;
