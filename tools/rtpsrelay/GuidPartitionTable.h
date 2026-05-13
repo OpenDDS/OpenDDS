@@ -81,9 +81,10 @@ public:
   void update_cert_partitions_cache(const std::string& key, const StringSet& partitions, const OpenDDS::DCPS::GUID_t& guid);
   void lookup_cert_partitions_cache(StringSet& partitions, const std::string& key, const OpenDDS::DCPS::GUID_t& guid);
 
-private:
-  void cleanup_async_disc_cache(const OpenDDS::DCPS::MonotonicTimePoint& now);
+  void update_remote_cert_partitions_cache(const AsyncDiscoveryCacheEntrySeq& entries,
+    const std::string& from_relay, const OpenDDS::DCPS::MonotonicTimePoint& now);
 
+private:
   void remove_from_cache(const OpenDDS::DCPS::GUID_t& guid)
   {
     // Invalidate the cache.
@@ -182,7 +183,13 @@ private:
     }
   }
 
+  void update_remote_cert_partitions_cache_i(const std::string& key, const StringSet& partitions,
+                                             const std::string& from_relay,
+                                             const OpenDDS::DCPS::MonotonicTimePoint& now);
   void remove_from_partition_expiration_map(const OpenDDS::DCPS::MonotonicTimePoint& last_access, const std::string& key);
+  void remove_from_remote_partition_expiration_map(const OpenDDS::DCPS::MonotonicTimePoint& last_access, const std::string& key);
+  void cleanup_async_disc_cache(const OpenDDS::DCPS::MonotonicTimePoint& now);
+  void cleanup_remote_async_disc_cache(const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   const Config& config_;
   OpenDDS::DCPS::ReactorTask_rch reactor_task_;
@@ -222,7 +229,21 @@ private:
   mutable ACE_Thread_Mutex write_mutex_;
   mutable ACE_Thread_Mutex denied_partitions_mutex_;
 
-  // Store the last access timestamp together with the partitions
+  struct AsyncDiscoveryCache {
+    using CertToPartitions = std::unordered_map<std::string, std::pair<StringSet, OpenDDS::DCPS::MonotonicTimePoint>>;
+    using PartitionCacheExpirationMap = std::map<OpenDDS::DCPS::MonotonicTimePoint, StringSet>;
+
+    CertToPartitions cert_to_partitions_;
+    PartitionCacheExpirationMap expiration_map_;
+    OpenDDS::DCPS::SporadicEvent_rch cleanup_task_;
+    mutable ACE_Thread_Mutex mutex_;
+  };
+
+  AsyncDiscoveryCache local_async_disc_cache_;
+  AsyncDiscoveryCache remote_async_disc_cache_;
+
+  // Async discovery cache for partitions of local participants.
+  // Last access timestamps are stored for pruning stale entries.
   using CertToPartitions = std::unordered_map<std::string, std::pair<StringSet, OpenDDS::DCPS::MonotonicTimePoint>>;
   CertToPartitions cert_to_partitions_;
 
@@ -231,6 +252,13 @@ private:
   OpenDDS::DCPS::SporadicEvent_rch async_disc_cache_cleanup_task_;
 
   mutable ACE_Thread_Mutex cert_to_partitions_mutex_;
+
+  // Async discovery cache for partitions of remote participants (i.e., from peer relay instances).
+  CertToPartitions remote_cert_to_partitions_;
+  PartitionCacheExpirationMap remote_partition_expiration_map_;
+  OpenDDS::DCPS::SporadicEvent_rch remote_async_disc_cache_cleanup_task_;
+
+  mutable ACE_Thread_Mutex remote_cert_to_partitions_mutex_;
 };
 
 }

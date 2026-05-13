@@ -20,6 +20,7 @@
 #include "StatisticsWriterListener.h"
 #include "SubscriptionListener.h"
 #include "RelayDeniedPartitionsListener.h"
+#include "AsyncDiscoveryCacheUpdateListener.h"
 
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/DomainParticipantImpl.h>
@@ -796,6 +797,15 @@ int run(int argc, ACE_TCHAR* argv[])
 
   if (!relay_denied_partitions_reader_var) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Relay Denied Partitions data reader\n"));
+    return EXIT_FAILURE;
+  }
+
+  DDS::DataReaderListener_var async_disc_cache_update_listener = new AsyncDiscoveryCacheUpdateListener(guid_partition_table, config);
+  DDS::DataReader_var async_disc_cache_reader_var =
+    relay_subscriber->create_datareader(async_disc_cache_update_topic, reader_qos,
+                                        async_disc_cache_update_listener, DDS::DATA_AVAILABLE_STATUS);
+  if (!async_disc_cache_reader_var) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Async Discovery Cache Update data reader\n"));
     return EXIT_FAILURE;
   }
 

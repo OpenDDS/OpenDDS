@@ -31,12 +31,12 @@ void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
 
   DDS::PublicationBuiltinTopicDataSeq datas;
   DDS::SampleInfoSeq infos;
-  DDS::ReturnCode_t ret = dr->take(datas,
-                                   infos,
-                                   DDS::LENGTH_UNLIMITED,
-                                   DDS::NOT_READ_SAMPLE_STATE,
-                                   DDS::ANY_VIEW_STATE,
-                                   DDS::ANY_INSTANCE_STATE);
+  const DDS::ReturnCode_t ret = dr->take(datas,
+                                         infos,
+                                         DDS::LENGTH_UNLIMITED,
+                                         DDS::NOT_READ_SAMPLE_STATE,
+                                         DDS::ANY_VIEW_STATE,
+                                         DDS::ANY_INSTANCE_STATE);
   if (ret == DDS::RETCODE_NO_DATA) {
     return;
   }
