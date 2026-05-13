@@ -33,6 +33,7 @@ protected:
   uint64_t new_key_probability_;
   DDS::InstanceHandle_t instance_;
   OpenDDS::DCPS::EventBase_rch event_;
+  long timer_id_;
   std::mt19937_64 mt_;
   size_t filter_class_start_value_;
   size_t filter_class_stop_value_;

@@ -79,6 +79,7 @@ TransportInst::dump_to_str(DDS::DomainId_t) const
   ret += formatNameForDump("max_samples_per_packet")  + to_dds_string(unsigned(max_samples_per_packet())) + '\n';
   ret += formatNameForDump("optimum_packet_size")     + to_dds_string(unsigned(optimum_packet_size())) + '\n';
   ret += formatNameForDump("thread_per_connection")   + (thread_per_connection() ? "true" : "false") + '\n';
+  ret += formatNameForDump("event_dispatcher_threads") + to_dds_string(unsigned(event_dispatcher_threads())) + '\n';
   ret += formatNameForDump("datalink_release_delay")  + to_dds_string(datalink_release_delay()) + '\n';
   ret += formatNameForDump("datalink_control_chunks") + to_dds_string(unsigned(datalink_control_chunks())) + '\n';
   ret += formatNameForDump("fragment_reassembly_timeout") + fragment_reassembly_timeout().str() + '\n';
@@ -149,6 +150,20 @@ bool
 TransportInst::thread_per_connection() const
 {
   return TheServiceParticipant->config_store()->get_boolean(config_key("THREAD_PER_CONNECTION").c_str(), false);
+}
+
+void
+TransportInst::event_dispatcher_threads(size_t edt)
+{
+  TheServiceParticipant->config_store()->set_uint32(config_key("EVENT_DISPATCHER_THREADS").c_str(),
+                                                    static_cast<DDS::UInt32>(edt));
+}
+
+size_t
+TransportInst::event_dispatcher_threads() const
+{
+  return TheServiceParticipant->config_store()->get_uint32(config_key("EVENT_DISPATCHER_THREADS").c_str(),
+                                                           static_cast<DDS::UInt32>(DEFAULT_EVENT_DISPATCHER_THREADS));
 }
 
 void

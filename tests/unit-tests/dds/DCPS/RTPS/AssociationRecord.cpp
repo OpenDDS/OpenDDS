@@ -182,7 +182,7 @@ TEST(dds_DCPS_RTPS_AssociationRecord, WriterAssociationRecord_ctor)
 
   EXPECT_EQ(uut.writer_id(), writer_id);
   EXPECT_EQ(uut.reader_id(), reader_association.readerId);
-  EXPECT_EQ(uut.callbacks_, callbacks);
+  EXPECT_EQ(uut.callbacks_.lock(), callbacks);
   EXPECT_EQ(uut.writer_id_, writer_id);
   // IDL defined type.
   //EXPECT_EQ(uut.reader_association_, reader_association);
@@ -239,7 +239,7 @@ TEST(dds_DCPS_RTPS_AssociationRecord, ReaderAssociationRecord_ctor)
 
   EXPECT_EQ(uut.reader_id(), reader_id);
   EXPECT_EQ(uut.writer_id(), writer_association.writerId);
-  EXPECT_EQ(uut.callbacks_, callbacks);
+  EXPECT_EQ(uut.callbacks_.lock(), callbacks);
   EXPECT_EQ(uut.reader_id_, reader_id);
   // IDL defined type.
   //EXPECT_EQ(uut.writer_association_, writer_association);

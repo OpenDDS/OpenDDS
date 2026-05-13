@@ -428,22 +428,35 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
 
 void RtpsUdpDataLink::on_data_available(RcHandle<InternalDataReader<NetworkInterfaceAddress> >)
 {
+  const RtpsUdpTransport_rch tport = transport();
+  if (!tport || tport->is_shut_down()) {
+    return;
+  }
+
   event_dispatcher_->dispatch(network_interface_updates_event_);
 }
 
 void RtpsUdpDataLink::handle_network_interface_updates()
 {
+  const RtpsUdpTransport_rch tport = transport();
+  if (!tport || tport->is_shut_down()) {
+    return;
+  }
+
+  const RcHandle<InternalDataReader<NetworkInterfaceAddress> > reader = network_interface_address_reader_;
+  if (!reader) {
+    return;
+  }
+
   InternalDataReader<NetworkInterfaceAddress>::SampleSequence samples;
   InternalSampleInfoSequence infos;
 
-  network_interface_address_reader_->take(samples, infos, DDS::LENGTH_UNLIMITED, DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+  reader->take(samples, infos, DDS::LENGTH_UNLIMITED, DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
 
   RtpsUdpInst_rch cfg = config();
   if (!cfg || !cfg->use_multicast()) {
     return;
   }
-
-  RtpsUdpTransport_rch tport = transport();
 
   multicast_manager_.process(samples,
                              infos,
@@ -1004,6 +1017,10 @@ RtpsUdpDataLink::release_reservations_i(const GUID_t& remote_id,
 void
 RtpsUdpDataLink::stop_i()
 {
+  InternalDataReaderListener<NetworkInterfaceAddress>::job_queue(JobQueue_rch());
+  if (network_interface_updates_event_) {
+    network_interface_updates_event_->disable();
+  }
   TheServiceParticipant->network_interface_address_topic()->disconnect(network_interface_address_reader_);
 
   heartbeat_->disable();

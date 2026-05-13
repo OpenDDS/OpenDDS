@@ -2,7 +2,8 @@
  * \file
  * Implements the "Safe Bool" idiom, which is a safer alternative to operator
  * bool. Based on:
- *   https://www.artima.com/articles/the-safe-bool-idiom
+ *   https://www.artima.com/articles/the-safe-bool-idiom, and
+ *   https://en.wikibooks.org/wiki/More_C++_Idioms/Safe_bool
  * TLDR: We may want to be able to use `operator bool()` to check an object's
  * abstract truthfulness using `if (object) {...}`, but that opens up implicit
  * casting and comparisons that come with the bool type that are almost
@@ -45,7 +46,7 @@ protected:
 };
 
 template <typename DerivedNonVirtual = void>
-class SafeBool_T : public SafeBoolBase {
+class SafeBool_T : private SafeBoolBase {
 public:
   operator BoolType() const
   {
@@ -58,7 +59,7 @@ protected:
 };
 
 template<>
-class SafeBool_T<void> : public SafeBoolBase {
+class SafeBool_T<void> : private SafeBoolBase {
 public:
   operator BoolType() const
   {

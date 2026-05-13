@@ -15,7 +15,6 @@
 #include "ace/Truncate.h"
 
 #include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/ReactorEvent.h"
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/TimeTypes.h"
 
@@ -29,6 +28,13 @@ namespace DCPS {
 namespace {
   const Encoding::Kind reliable_session_encoding_kind = Encoding::KIND_UNALIGNED_CDR;
   const Encoding encoding_unaligned_native(reliable_session_encoding_kind);
+
+  bool nak_max_reached(size_t request_index, size_t nak_delay_interval, size_t nak_max)
+  {
+    const size_t completed_intervals = request_index / nak_delay_interval;
+    return completed_intervals > nak_max ||
+      (completed_intervals == nak_max && request_index % nak_delay_interval != 0);
+  }
 }
 
 ReliableSession::ReliableSession(RcHandle<EventDispatcher> event_dispatcher,
@@ -36,10 +42,11 @@ ReliableSession::ReliableSession(RcHandle<EventDispatcher> event_dispatcher,
                                  MulticastDataLink* link,
                                  MulticastPeer remote_peer)
   : MulticastSession(event_dispatcher, link, remote_peer)
+  , nak_process_event_(make_rch<ReactorEvent>(reactor,
+                                              make_rch<ReliableSessionEvent>(rchandle_from(this),
+                                                                             &ReliableSession::process_naks)))
   , nak_watchdog_(make_rch<SporadicEvent>(event_dispatcher,
-                                          make_rch<ReactorEvent>(reactor,
-                                                                 make_rch<ReliableSessionEvent>(rchandle_from(this),
-                                                                                                &ReliableSession::process_naks))))
+                                          nak_process_event_))
   , nak_timeout_(link->config()->nak_timeout())
   , nak_delay_intervals_(link->config()->nak_delay_intervals())
   , nak_max_(link->config()->nak_max())
@@ -49,6 +56,7 @@ ReliableSession::ReliableSession(RcHandle<EventDispatcher> event_dispatcher,
 ReliableSession::~ReliableSession()
 {
   nak_watchdog_->cancel();
+  nak_process_event_->disable();
 }
 
 bool
@@ -351,8 +359,10 @@ ReliableSession::send_naks()
     //  if nak_delay_intervals=4, nak_max=3, any sequence between 5 - 1, 10 - 6, 15 - 11
     //  are skipped for naking due to nak_delay_intervals and 20 - 16 are skipped for
     //  naking due to nak_max.
+    const size_t nak_delay_interval = nak_delay_intervals_ == static_cast<size_t>(-1)
+      ? nak_delay_intervals_ : nak_delay_intervals_ + 1;
     for (size_t i = 1; i < sz; ++i) {
-      if ((i * 1.0) / (nak_delay_intervals_ + 1) > nak_max_) {
+      if (nak_max_reached(i, nak_delay_interval, nak_max_)) {
         if (first != SequenceNumber()) {
           first = this->nak_requests_.begin()->second;
         }
@@ -362,14 +372,14 @@ ReliableSession::send_naks()
         break;
       }
 
-      if (i % (nak_delay_intervals_ + 1) == 1) {
+      if (i % nak_delay_interval == 1) {
         second = itr->second;
       }
       if (second != SequenceNumber()) {
         first = itr->second;
       }
 
-      if (i % (nak_delay_intervals_ + 1) == 0) {
+      if (i % nak_delay_interval == 0) {
         first = itr->second;
 
         if (first != SequenceNumber() && second != SequenceNumber()) {
@@ -656,6 +666,7 @@ ReliableSession::start(bool active, bool acked)
     return true;  // already started
   }
 
+  reset_stopped();
   this->active_  = active;
   {
     //can't call accept_datalink while holding lock due to possible reactor deadlock with passive_connection
@@ -680,6 +691,7 @@ void
 ReliableSession::stop()
 {
   MulticastSession::stop();
+  nak_process_event_->disable();
   this->nak_watchdog_->cancel();
 }
 
@@ -698,6 +710,10 @@ ReliableSession::nak_delay()
 void
 ReliableSession::process_naks()
 {
+  if (is_stopped()) {
+    return;
+  }
+
   // Expire outstanding repair requests that have not yet been
   // fulfilled; this prevents NAK implosions due to remote
   // peers becoming unresponsive:
@@ -707,7 +723,9 @@ ReliableSession::process_naks()
   // to remote peers from which we are missing data:
   send_naks();
 
-  nak_watchdog_->schedule(nak_delay());
+  if (!is_stopped()) {
+    nak_watchdog_->schedule(nak_delay());
+  }
 }
 
 } // namespace DCPS

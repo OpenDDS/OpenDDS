@@ -14,6 +14,7 @@ SetCftParametersAction::SetCftParametersAction(OpenDDS::DCPS::EventDispatcher_rc
 , param_count_(0)
 , random_order_(false)
 , instance_(0)
+, timer_id_(-1)
 , set_call_count_(0)
 {
 }
@@ -124,7 +125,10 @@ void SetCftParametersAction::test_start()
   if (!started_) {
     started_ = true;
     last_scheduled_time_ = OpenDDS::DCPS::MonotonicTimePoint::now();
-    event_dispatcher_->dispatch(event_);
+    timer_id_ = event_dispatcher_->schedule(event_);
+    if (timer_id_ < 0) {
+      std::cerr << "Failed to schedule event in SetCftParametersAction::test_start" << std::endl;
+    }
   }
 }
 
@@ -133,7 +137,7 @@ void SetCftParametersAction::test_stop()
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
     stopped_ = true;
-    event_dispatcher_->cancel(event_);
+    event_dispatcher_->cancel(timer_id_);
   }
 }
 
@@ -158,7 +162,10 @@ void SetCftParametersAction::do_set_expression_parameters()
 #endif
     }
     last_scheduled_time_ += set_period_;
-    event_dispatcher_->schedule(event_, last_scheduled_time_);
+    timer_id_ = event_dispatcher_->schedule(event_, last_scheduled_time_);
+    if (timer_id_ < 0) {
+      std::cerr << "Failed to schedule event in SetCftParametersAction::do_set_expression_parameters" << std::endl;
+    }
   }
 }
 

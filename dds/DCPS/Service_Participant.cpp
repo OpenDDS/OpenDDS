@@ -38,6 +38,8 @@
 #include <ace/Configuration_Import_Export.h>
 #include <ace/Malloc_Allocator.h>
 #include <ace/OS_NS_ctype.h>
+
+#include <limits>
 #include <ace/OS_NS_sys_utsname.h>
 #include <ace/OS_NS_unistd.h>
 #include <ace/Reactor.h>
@@ -457,7 +459,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       dp_factory_servant_ = make_rch<DomainParticipantFactoryImpl>();
 
-      event_dispatcher_ = make_rch<ServiceEventDispatcher>(1u);
+      event_dispatcher_ = make_rch<ServiceEventDispatcher>(event_dispatcher_thread_count());
 
       reactor_task_->open_reactor_task(&thread_status_manager_, "Service_Participant");
       job_queue_ = make_rch<JobQueue>(event_dispatcher_);
@@ -1266,28 +1268,25 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
 void
 Service_Participant::repository_lost(Discovery::RepoKey key)
 {
-  if (this->discoveryMap_.empty()) {
-    ACE_DEBUG((LM_WARNING,
-               ACE_TEXT("(%P|%t) WARNING: Service_Participant::repository_lost: ")
-               ACE_TEXT("no repositories are available to replace %C.\n"),
-               key.c_str()));
-    return;
-  }
+  bool reported_missing = false;
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->maps_lock_);
+    if (this->discoveryMap_.empty()) {
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: Service_Participant::repository_lost: ")
+                 ACE_TEXT("no repositories are available to replace %C.\n"),
+                 key.c_str()));
+      return;
+    }
 
-  // Find the lost repository.
-  RepoKeyDiscoveryMap::iterator initialLocation = this->discoveryMap_.find(key);
-  RepoKeyDiscoveryMap::iterator current         = initialLocation;
-
-  if (current == this->discoveryMap_.end()) {
-    ACE_DEBUG((LM_WARNING,
-               ACE_TEXT("(%P|%t) WARNING: Service_Participant::repository_lost: ")
-               ACE_TEXT("lost repository %C was not present, ")
-               ACE_TEXT("finding another anyway.\n"),
-               key.c_str()));
-
-  } else {
-    // Start with the repository *after* the lost one.
-    ++current;
+    if (this->discoveryMap_.find(key) == this->discoveryMap_.end()) {
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: Service_Participant::repository_lost: ")
+                 ACE_TEXT("lost repository %C was not present, ")
+                 ACE_TEXT("finding another anyway.\n"),
+                 key.c_str()));
+      reported_missing = true;
+    }
   }
 
   // Calculate the bounding end time for attempts.
@@ -1299,16 +1298,125 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
 
   // Keep trying until the total recovery time specified is exceeded.
   while (recoveryFailedTime > MonotonicTimePoint::now()) {
+    typedef OPENDDS_VECTOR(Discovery::RepoKey) RepoKeyList;
+    RepoKeyList candidates;
+    bool missing_key = false;
 
-    // Wrap to the beginning at the end of the list.
-    if (current == this->discoveryMap_.end()) {
-      // Continue to traverse the list.
-      current = this->discoveryMap_.begin();
+    {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->maps_lock_);
+
+      if (this->discoveryMap_.empty()) {
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) WARNING: Service_Participant::repository_lost: ")
+                   ACE_TEXT("no repositories are available to replace %C.\n"),
+                   key.c_str()));
+        return;
+      }
+
+      // Find the lost repository.
+      const RepoKeyDiscoveryMap::const_iterator initialLocation = this->discoveryMap_.find(key);
+
+      if (initialLocation == this->discoveryMap_.end()) {
+        missing_key = true;
+        if (!reported_missing) {
+          ACE_DEBUG((LM_WARNING,
+                     ACE_TEXT("(%P|%t) WARNING: Service_Participant::repository_lost: ")
+                     ACE_TEXT("lost repository %C was not present, ")
+                     ACE_TEXT("finding another anyway.\n"),
+                     key.c_str()));
+          reported_missing = true;
+        }
+
+        for (RepoKeyDiscoveryMap::const_iterator current = this->discoveryMap_.begin();
+             current != this->discoveryMap_.end(); ++current) {
+          candidates.push_back(current->first);
+        }
+
+      } else {
+        // Start with the repository *after* the lost one.
+        RepoKeyDiscoveryMap::const_iterator current = initialLocation;
+        ++current;
+
+        for (; current != this->discoveryMap_.end(); ++current) {
+          candidates.push_back(current->first);
+        }
+
+        for (current = this->discoveryMap_.begin(); current != initialLocation; ++current) {
+          candidates.push_back(current->first);
+        }
+
+        candidates.push_back(initialLocation->first);
+      }
     }
 
-    // Handle reaching the lost repository by waiting before trying
-    // again.
-    if (current == initialLocation) {
+    for (RepoKeyList::const_iterator candidate = candidates.begin();
+         candidate != candidates.end(); ++candidate) {
+      if (recoveryFailedTime <= MonotonicTimePoint::now()) {
+        break;
+      }
+
+      // Handle reaching the lost repository by waiting before trying
+      // again.
+      if (*candidate == key) {
+        if (DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) Service_Participant::repository_lost: ")
+                     ACE_TEXT("waiting %d seconds to traverse the ")
+                     ACE_TEXT("repository list another time ")
+                     ACE_TEXT("for lost key %C.\n"),
+                     backoff,
+                     key.c_str()));
+        }
+
+        // Wait to traverse the list and try again.
+        ACE_OS::sleep(static_cast<unsigned int>(backoff));
+
+        // Exponentially backoff delay.
+        backoff *= this->federation_backoff_multiplier();
+
+        // Don't increment current to allow us to reattach to the
+        // original repository if it is restarted.
+      }
+
+      Discovery_rch discovery;
+      {
+        ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->maps_lock_);
+        RepoKeyDiscoveryMap::const_iterator current = this->discoveryMap_.find(*candidate);
+        if (current != this->discoveryMap_.end()) {
+          discovery = current->second;
+        }
+      }
+
+      // Check the availability of the current repository.
+      if (discovery && discovery->active()) {
+
+        if (DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) Service_Participant::repository_lost: ")
+                     ACE_TEXT("replacing repository %C with %C.\n"),
+                     key.c_str(),
+                     candidate->c_str()));
+        }
+
+        // If we reach here, the validate_connection() call succeeded
+        // and the repository is reachable.
+        this->remap_domains(key, *candidate);
+
+        // Now we are done.  This is the only non-failure exit from
+        // this method.
+        return;
+
+      } else {
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) WARNING: Service_Participant::repository_lost: ")
+                   ACE_TEXT("repository %C was not available to replace %C, ")
+                   ACE_TEXT("looking for another.\n"),
+                   candidate->c_str(),
+                   key.c_str()));
+      }
+    }
+
+    if (missing_key && recoveryFailedTime > MonotonicTimePoint::now()) {
       if (DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) Service_Participant::repository_lost: ")
@@ -1324,50 +1432,6 @@ Service_Participant::repository_lost(Discovery::RepoKey key)
 
       // Exponentially backoff delay.
       backoff *= this->federation_backoff_multiplier();
-
-      // Don't increment current to allow us to reattach to the
-      // original repository if it is restarted.
-    }
-
-    // Check the availability of the current repository.
-    if (current != this->discoveryMap_.end() && current->second->active()) {
-
-      if (DCPS_debug_level > 0) {
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) Service_Participant::repository_lost: ")
-                   ACE_TEXT("replacing repository %C with %C.\n"),
-                   key.c_str(),
-                   current->first.c_str()));
-      }
-
-      // If we reach here, the validate_connection() call succeeded
-      // and the repository is reachable.
-      this->remap_domains(key, current->first);
-
-      // Now we are done.  This is the only non-failure exit from
-      // this method.
-      return;
-
-    } else {
-      if (current != this->discoveryMap_.end()) {
-        ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) WARNING: Service_Participant::repository_lost: ")
-                   ACE_TEXT("repository %C was not available to replace %C, ")
-                   ACE_TEXT("looking for another.\n"),
-                   current->first.c_str(),
-                   key.c_str()));
-      } else {
-        ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) WARNING: Service_Participant::repository_lost: ")
-                   ACE_TEXT("no repositories are currently available to replace %C, ")
-                   ACE_TEXT("looking for another.\n"),
-                   key.c_str()));
-      }
-    }
-
-    // Move to the next candidate repository.
-    if (current != this->discoveryMap_.end()) {
-      ++current;
     }
   }
 
@@ -1751,6 +1815,38 @@ Service_Participant::liveliness_factor() const
 {
   return config_store_->get_int32(COMMON_DCPS_LIVELINESS_FACTOR,
                                   COMMON_DCPS_LIVELINESS_FACTOR_default);
+}
+
+void
+Service_Participant::event_dispatcher_thread_count(size_t value)
+{
+  const size_t actual = value < COMMON_DCPS_EVENT_DISPATCHER_THREADS_default
+    ? COMMON_DCPS_EVENT_DISPATCHER_THREADS_default
+    : value;
+  config_store_->set_uint32(COMMON_DCPS_EVENT_DISPATCHER_THREADS,
+                            static_cast<DDS::UInt32>(actual));
+}
+
+size_t
+Service_Participant::event_dispatcher_thread_count() const
+{
+  const size_t value =
+    config_store_->get_uint32(COMMON_DCPS_EVENT_DISPATCHER_THREADS,
+                              static_cast<DDS::UInt32>(COMMON_DCPS_EVENT_DISPATCHER_THREADS_default));
+  if (value < COMMON_DCPS_EVENT_DISPATCHER_THREADS_default) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING,
+                 "(%P|%t) WARNING: Service_Participant::event_dispatcher_thread_count: "
+                 "configured value %B is invalid, using %B\n",
+                 value,
+                 COMMON_DCPS_EVENT_DISPATCHER_THREADS_default));
+    }
+    config_store_->set_uint32(COMMON_DCPS_EVENT_DISPATCHER_THREADS,
+                              static_cast<DDS::UInt32>(COMMON_DCPS_EVENT_DISPATCHER_THREADS_default));
+    return COMMON_DCPS_EVENT_DISPATCHER_THREADS_default;
+  }
+
+  return value;
 }
 
 void
@@ -2417,6 +2513,21 @@ Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_
         Transport_debug_level = static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str()));
       } else if (p.key() == COMMON_DCPS_THREAD_STATUS_INTERVAL) {
         service_participant_.thread_status_manager_.thread_status_interval(TimeDuration(ACE_OS::atoi(p.value().c_str())));
+      } else if (p.key() == COMMON_DCPS_EVENT_DISPATCHER_THREADS) {
+        DDS::Int64 value = 0;
+        if (!convertToInteger(p.value(), value)
+            || value < static_cast<DDS::Int64>(COMMON_DCPS_EVENT_DISPATCHER_THREADS_default)
+            || value > static_cast<DDS::Int64>(std::numeric_limits<DDS::UInt32>::max())) {
+          if (log_level >= LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING,
+                       ACE_TEXT("(%P|%t) WARNING: ConfigReaderListener::on_data_available: ")
+                       ACE_TEXT("configured value %C for %C is invalid, using %B\n"),
+                       p.value().c_str(),
+                       COMMON_DCPS_EVENT_DISPATCHER_THREADS,
+                       COMMON_DCPS_EVENT_DISPATCHER_THREADS_default));
+          }
+          service_participant_.event_dispatcher_thread_count(COMMON_DCPS_EVENT_DISPATCHER_THREADS_default);
+        }
 #if OPENDDS_CONFIG_SECURITY
       } else if (p.key() == COMMON_DCPS_SECURITY_DEBUG_LEVEL) {
         security_debug.set_debug_level(static_cast<unsigned int>(ACE_OS::atoi(p.value().c_str())));

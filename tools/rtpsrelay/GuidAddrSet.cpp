@@ -222,6 +222,16 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
     schedule_expiration();
   }
 
+  apply_drain_state(addr_set_stats, from_application_participant);
+
+  if (allow_stun_responses) {
+    *allow_stun_responses = addr_set_stats.allow_stun_responses;
+  }
+}
+
+void
+GuidAddrSet::apply_drain_state(AddrSetStats& addr_set_stats, bool from_application_participant)
+{
   switch (drain_state_) {
   case DrainState::DS_NORMAL:
     if (!addr_set_stats.allow_stun_responses && !addr_set_stats.in_denied_partition) {
@@ -236,10 +246,6 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
       ++mark_count_;
     }
     break;
-  }
-
-  if (allow_stun_responses) {
-    *allow_stun_responses = addr_set_stats.allow_stun_responses;
   }
 }
 
@@ -407,6 +413,7 @@ void GuidAddrSet::maintain_admission_queue(const OpenDDS::DCPS::MonotonicTimePoi
 bool GuidAddrSet::defer_client(bool from_application_participant,
                                const OpenDDS::DCPS::GUID_t& guid,
                                const OpenDDS::DCPS::MonotonicTimePoint& now,
+                               bool already_checked_admit,
                                bool& admitted)
 {
   const auto pos = guid_addr_set_map_.find(guid);
@@ -436,9 +443,12 @@ bool GuidAddrSet::defer_client(bool from_application_participant,
     return true;
   }
 
-  if (!admitting()) {
+  if (!already_checked_admit && !admitting()) {
     // Too many new clients to admit another.
     relay_stats_reporter_.admission_deferral_count(now);
+
+    // Increase the cumulative count of unadmitted entries
+    relay_stats_reporter_.unadmitted_entry_count(now);
     return true;
   }
 

@@ -33,11 +33,33 @@ namespace DCPS {
 TransportImpl::TransportImpl(TransportInst_rch config,
                              DDS::DomainId_t domain)
   : config_(config)
-  , event_dispatcher_(make_rch<ServiceEventDispatcher>(1u))
+  , owns_event_dispatcher_(false)
   , is_shut_down_(false)
   , domain_(domain)
 {
   DBG_ENTRY_LVL("TransportImpl", "TransportImpl", 6);
+
+  const size_t event_dispatcher_threads = config->event_dispatcher_threads();
+  if (event_dispatcher_threads == 0) {
+    event_dispatcher_ = TheServiceParticipant->event_dispatcher();
+    if (!event_dispatcher_) {
+      const size_t global_thread_count = TheServiceParticipant->event_dispatcher_thread_count();
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING,
+                   "(%P|%t) WARNING: TransportImpl::TransportImpl: "
+                   "global event dispatcher requested by transport %C before it was initialized; "
+                   "creating a private dispatcher with %B thread(s)\n",
+                   config->name().c_str(),
+                   global_thread_count));
+      }
+      event_dispatcher_ = make_rch<ServiceEventDispatcher>(global_thread_count);
+      owns_event_dispatcher_ = true;
+    }
+  } else {
+    event_dispatcher_ = make_rch<ServiceEventDispatcher>(event_dispatcher_threads);
+    owns_event_dispatcher_ = true;
+  }
+
   if (TheServiceParticipant->monitor_factory_) {
     monitor_.reset(TheServiceParticipant->monitor_factory_->create_transport_monitor(this));
   }
@@ -61,7 +83,9 @@ TransportImpl::shutdown()
 
   is_shut_down_ = true;
 
-  event_dispatcher_->shutdown(false);
+  if (owns_event_dispatcher_ && event_dispatcher_) {
+    event_dispatcher_->shutdown(false);
+  }
 
   if (!this->reactor_task_.is_nil()) {
     this->reactor_task_->stop();

@@ -437,7 +437,9 @@ std::string to_json(const T& sample)
   rapidjson::StringBuffer buffer;
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
   JsonValueWriter<rapidjson::Writer<rapidjson::StringBuffer> > jvw(writer);
-  vwrite(jvw, sample);
+  if (!vwrite(jvw, sample)) {
+    return std::string();
+  }
   writer.Flush();
   return buffer.GetString();
 }
@@ -456,26 +458,33 @@ std::string to_json(const DDS::TopicDescription_ptr topic,
   rapidjson::StringBuffer buffer;
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
   JsonValueWriter<rapidjson::Writer<rapidjson::StringBuffer> > jvw(writer);
-  jvw.begin_struct();
-  jvw.begin_struct_member("topic");
-  jvw.begin_struct();
-  jvw.begin_struct_member("name");
+  if (!jvw.begin_struct() ||
+      !jvw.begin_struct_member("topic") ||
+      !jvw.begin_struct() ||
+      !jvw.begin_struct_member("name")) {
+    return std::string();
+  }
   CORBA::String_var topic_name = topic->get_name();
-  static_cast<ValueWriter&>(jvw).write_string(topic_name);
-  jvw.end_struct_member();
-  jvw.begin_struct_member("type_name");
+  ValueWriter& vw = jvw;
+  if (!vw.write_string(topic_name) ||
+      !jvw.end_struct_member() ||
+      !jvw.begin_struct_member("type_name")) {
+    return std::string();
+  }
   CORBA::String_var type_name = topic->get_type_name();
-  static_cast<ValueWriter&>(jvw).write_string(type_name);
-  jvw.end_struct_member();
-  jvw.end_struct();
-  jvw.end_struct_member();
-  jvw.begin_struct_member("sample");
-  vwrite(jvw, sample);
-  jvw.end_struct_member();
-  jvw.begin_struct_member("sample_info");
-  vwrite(jvw, sample_info);
-  jvw.end_struct_member();
-  jvw.end_struct();
+  if (!vw.write_string(type_name) ||
+      !jvw.end_struct_member() ||
+      !jvw.end_struct() ||
+      !jvw.end_struct_member() ||
+      !jvw.begin_struct_member("sample") ||
+      !vwrite(jvw, sample) ||
+      !jvw.end_struct_member() ||
+      !jvw.begin_struct_member("sample_info") ||
+      !vwrite(jvw, sample_info) ||
+      !jvw.end_struct_member() ||
+      !jvw.end_struct()) {
+    return std::string();
+  }
   writer.Flush();
   return buffer.GetString();
 }

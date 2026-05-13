@@ -94,38 +94,38 @@ MulticastTransport::start_session(const MulticastDataLink_rch& link,
   MulticastInst_rch cfg = config();
 
   if (link.is_nil()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastTransport[%C]::start_session: ")
-                      ACE_TEXT("link is nil\n"),
-                      cfg ? cfg->name().c_str() : ""),
-                     MulticastSession_rch());
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("MulticastTransport[%C]::start_session: ")
+               ACE_TEXT("link is nil\n"),
+               cfg ? cfg->name().c_str() : ""));
+    return MulticastSession_rch();
   }
 
   MulticastSession_rch session(link->find_or_create_session(remote_peer));
 
   if (session.is_nil()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastTransport[%C]::start_session: ")
-                      ACE_TEXT("failed to create session for remote peer: %#08x%08x!\n"),
-                      cfg ? cfg->name().c_str() : "",
-                      (unsigned int)(remote_peer >> 32),
-                      (unsigned int) remote_peer),
-                     MulticastSession_rch());
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("MulticastTransport[%C]::start_session: ")
+               ACE_TEXT("failed to create session for remote peer: %#08x%08x!\n"),
+               cfg ? cfg->name().c_str() : "",
+               (unsigned int)(remote_peer >> 32),
+               (unsigned int) remote_peer));
+    return MulticastSession_rch();
   }
 
   const bool acked = this->connections_.count(std::make_pair(remote_peer, link->local_peer()));
 
   if (!session->start(active, acked)) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastTransport[%C]::start_session: ")
-                      ACE_TEXT("failed to start session for remote peer: %#08x%08x!\n"),
-                      cfg ? cfg->name().c_str() : "",
-                      (unsigned int)(remote_peer >> 32),
-                      (unsigned int) remote_peer),
-                     MulticastSession_rch());
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("MulticastTransport[%C]::start_session: ")
+               ACE_TEXT("failed to start session for remote peer: %#08x%08x!\n"),
+               cfg ? cfg->name().c_str() : "",
+               (unsigned int)(remote_peer >> 32),
+               (unsigned int) remote_peer));
+    return MulticastSession_rch();
   }
 
   return session;

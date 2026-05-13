@@ -227,6 +227,14 @@ public:
     report(guard, now);
   }
 
+  void unadmitted_entry_count(const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    ++log_relay_statistics_.unadmitted_entry_count();
+    ++publish_relay_statistics_.unadmitted_entry_count();
+    report(guard, now);
+  }
+
   void remote_map_size(uint32_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);

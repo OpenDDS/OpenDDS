@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_REACTOR_EVENT_H
 
 #include "EventDispatcher.h"
+#include "Atomic.h"
 #include "RcEventHandler.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -36,11 +37,13 @@ public:
    */
   void handle_event();
 
+  void disable();
+
 private:
 
   int handle_exception(ACE_HANDLE fd);
 
-  ACE_Reactor* reactor_;
+  Atomic<ACE_Reactor*> reactor_;
   RcHandle<EventBase> event_;
 };
 

@@ -295,9 +295,10 @@ public:
     bool defer_client(bool from_application_participant,
                       const OpenDDS::DCPS::GUID_t& guid,
                       const OpenDDS::DCPS::MonotonicTimePoint& now,
+                      bool already_checked_admit,
                       bool& admitted)
     {
-      return gas_.defer_client(from_application_participant, guid, now, admitted);
+      return gas_.defer_client(from_application_participant, guid, now, already_checked_admit, admitted);
     }
 
     OpenDDS::DCPS::TimeDuration get_session_time(const OpenDDS::DCPS::GUID_t& guid,
@@ -368,6 +369,16 @@ public:
       gas_.deny(guid);
     }
 
+    void admission_deferral_count(const OpenDDS::DCPS::MonotonicTimePoint& now)
+    {
+      gas_.relay_stats_reporter_.admission_deferral_count(now);
+    }
+
+    void apply_drain_state(AddrSetStats& addr_set_stats, bool from_application_participant)
+    {
+      gas_.apply_drain_state(addr_set_stats, from_application_participant);
+    }
+
     std::string cert_id(const OpenDDS::DCPS::GUID_t& guid)
     {
       const auto it = find(guid);
@@ -428,6 +439,7 @@ private:
   bool defer_client(bool from_application_participant,
                     const OpenDDS::DCPS::GUID_t& guid,
                     const OpenDDS::DCPS::MonotonicTimePoint& now,
+                    bool already_checked_admit,
                     bool& admitted);
 
   void remove(const OpenDDS::DCPS::GUID_t& guid,
@@ -465,6 +477,8 @@ private:
   void populate_relay_status(RelayStatus& relay_status);
 
   void deny(const OpenDDS::DCPS::GUID_t& guid);
+
+  void apply_drain_state(AddrSetStats& addr_set_stats, bool from_application_participant);
 
   struct AdmissionControlInfo {
     AdmissionControlInfo(const OpenDDS::DCPS::GuidPrefix_t& prefix, const OpenDDS::DCPS::MonotonicTimePoint& admitted)

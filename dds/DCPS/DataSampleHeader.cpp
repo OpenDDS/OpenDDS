@@ -287,20 +287,40 @@ operator<<(ACE_Message_Block& buffer, const DataSampleHeader& value)
   writer << value.submessage_id_;
 
   // Write the flags as a single byte.
-  ACE_CDR::Octet flags = (value.byte_order_           << BYTE_ORDER_FLAG)
-                         | (value.coherent_change_    << COHERENT_CHANGE_FLAG)
-                         | (value.historic_sample_    << HISTORIC_SAMPLE_FLAG)
-                         | (value.lifespan_duration_  << LIFESPAN_DURATION_FLAG)
-                         | (value.group_coherent_     << GROUP_COHERENT_FLAG)
-                         | (value.content_filter_     << CONTENT_FILTER_FLAG)
-                         | (value.sequence_repair_    << SEQUENCE_REPAIR_FLAG)
-                         | (value.more_fragments_     << MORE_FRAGMENTS_FLAG)
-                         ;
+  ACE_CDR::Octet flags = 0;
+  if (value.byte_order_) {
+    flags |= DataSampleHeader::mask_flag(BYTE_ORDER_FLAG);
+  }
+  if (value.coherent_change_) {
+    flags |= DataSampleHeader::mask_flag(COHERENT_CHANGE_FLAG);
+  }
+  if (value.historic_sample_) {
+    flags |= DataSampleHeader::mask_flag(HISTORIC_SAMPLE_FLAG);
+  }
+  if (value.lifespan_duration_) {
+    flags |= DataSampleHeader::mask_flag(LIFESPAN_DURATION_FLAG);
+  }
+  if (value.group_coherent_) {
+    flags |= DataSampleHeader::mask_flag(GROUP_COHERENT_FLAG);
+  }
+  if (value.content_filter_) {
+    flags |= DataSampleHeader::mask_flag(CONTENT_FILTER_FLAG);
+  }
+  if (value.sequence_repair_) {
+    flags |= DataSampleHeader::mask_flag(SEQUENCE_REPAIR_FLAG);
+  }
+  if (value.more_fragments_) {
+    flags |= DataSampleHeader::mask_flag(MORE_FRAGMENTS_FLAG);
+  }
   writer << ACE_OutputCDR::from_octet(flags);
 
-  flags = (value.cdr_encapsulation_ << CDR_ENCAP_FLAG)
-        | (value.key_fields_only_   << KEY_ONLY_FLAG)
-        ;
+  flags = 0;
+  if (value.cdr_encapsulation_) {
+    flags |= DataSampleHeader::mask_flag(CDR_ENCAP_FLAG);
+  }
+  if (value.key_fields_only_) {
+    flags |= DataSampleHeader::mask_flag(KEY_ONLY_FLAG);
+  }
   writer << ACE_OutputCDR::from_octet(flags);
 
   writer << value.message_length_;
@@ -398,8 +418,13 @@ DataSampleHeader::split(const ACE_Message_Block& orig, size_t size,
   for (; payload->length() == 0; payload = payload->cont()) {
     prev = payload;
   }
-  prev->cont(0);
-  Message_Block_Ptr payload_head(payload);
+  Message_Block_Ptr payload_head;
+  if (prev) {
+    prev->cont(0);
+    payload_head.reset(payload);
+  } else {
+    payload_head.reset(payload->duplicate());
+  }
 
   if (size < hdr_len) { // need to fragment the content_filter_entries_
     head.reset(alloc_msgblock(*dup, this_max_serialized_size, true));

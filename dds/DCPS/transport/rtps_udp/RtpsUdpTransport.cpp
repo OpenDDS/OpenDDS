@@ -755,6 +755,7 @@ RtpsUdpTransport::shutdown_i()
   relay_stun_event_->cancel();
 #endif
 
+  ConfigListener::job_queue(JobQueue_rch());
   if (config_reader_) {
     TheServiceParticipant->config_topic()->disconnect(config_reader_);
     config_reader_.reset();
@@ -776,8 +777,12 @@ RtpsUdpTransport::release_datalink(DataLink* /*link*/)
 }
 
 void
-RtpsUdpTransport::on_data_available(ConfigReader_rch)
+RtpsUdpTransport::on_data_available(ConfigReader_rch reader)
 {
+  if (is_shut_down()) {
+    return;
+  }
+
   const RtpsUdpInst_rch cfg = config();
   OPENDDS_ASSERT(cfg);
   const String& config_prefix = cfg->config_prefix();
@@ -785,8 +790,11 @@ RtpsUdpTransport::on_data_available(ConfigReader_rch)
 
   DCPS::InternalDataReader<ConfigPair>::SampleSequence samples;
   DCPS::InternalSampleInfoSequence infos;
-  config_reader_->take(samples, infos, DDS::LENGTH_UNLIMITED,
-                       DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+  if (!reader) {
+    return;
+  }
+  reader->take(samples, infos, DDS::LENGTH_UNLIMITED,
+               DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
   for (size_t idx = 0; idx != samples.size(); ++idx) {
     const ConfigPair& sample = samples[idx];
 

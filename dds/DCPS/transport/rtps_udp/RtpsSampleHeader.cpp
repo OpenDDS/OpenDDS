@@ -60,6 +60,12 @@ operator==(const StatusInfo_t& lhs, const StatusInfo_t& rhs)
 }
 namespace DCPS {
 
+bool
+RtpsSampleHeader::has_valid_cursor(const ACE_Message_Block& mb)
+{
+  return mb.rd_ptr() && mb.wr_ptr() && mb.rd_ptr() <= mb.wr_ptr();
+}
+
 void
 RtpsSampleHeader::init(ACE_Message_Block& mb)
 {
@@ -67,16 +73,32 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
 
   // valid_ is false here, it will only be set to true if there is a Submessage
 
-  // Manually grab the first two bytes for the SubmessageKind and the byte order
-  if (mb.length() == 0) {
+  // Do not trust length() when rd_ptr() has already been advanced out of range.
+  ACE_Message_Block* mb_ptr = &mb;
+  while (mb_ptr) {
+    if (!has_valid_cursor(*mb_ptr)) {
+      return;
+    }
+    mb_ptr = mb_ptr->cont();
+  }
+
+  const size_t starting_length = mb.total_length();
+
+  if (starting_length < SMHDR_SZ) {
     return;
   }
 
-  const SubmessageKind kind = static_cast<SubmessageKind>(*mb.rd_ptr());
+  const size_t contiguous_length = static_cast<size_t>(mb.wr_ptr() - mb.rd_ptr());
 
+  // Manually grab the first two bytes for the SubmessageKind and the byte order.
+
+  // The first byte is SubmessageKind
+  const SubmessageKind kind =
+    static_cast<SubmessageKind>(static_cast<ACE_CDR::Octet>(*mb.rd_ptr()));
+
+  // The second byte is flags
   ACE_CDR::Octet flags = 0;
-
-  if (mb.length() > 1) {
+  if (contiguous_length > 1) {
     flags = static_cast<ACE_CDR::Octet>(mb.rd_ptr()[1]);
   } else if (mb.cont() && mb.cont()->length() > 0) {
     flags = static_cast<ACE_CDR::Octet>(mb.cont()->rd_ptr()[0]);
@@ -84,7 +106,6 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
     return;
   }
 
-  const size_t starting_length = mb.total_length();
   Serializer ser(&mb, Encoding::KIND_XCDR1,
     (flags & FLAG_E) ? ENDIAN_LITTLE : ENDIAN_BIG);
 
@@ -148,6 +169,11 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
 #undef CASE_SMKIND
 
   if (valid_) {
+    const size_t available_size = message_length_ ? message_length_ : starting_length;
+    if (available_size < SMHDR_SZ) {
+      valid_ = false;
+      return;
+    }
 
     frag_ = (kind == DATA_FRAG);
     data_ = (kind == DATA);
@@ -155,13 +181,13 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
     // serialized_size_ is # of bytes of submessage we have read from "mb"
     serialized_size_ = starting_length - mb.total_length();
 
-    const ACE_CDR::UShort remaining = static_cast<ACE_CDR::UShort>(message_length_ - SMHDR_SZ);
+    const size_t remaining = available_size - SMHDR_SZ;
 
     if (octetsToNextHeader == 0 && kind != PAD && kind != INFO_TS) {
       // see RTPS v2.1 section 9.4.5.1.3
       // In this case the current Submessage extends to the end of Message,
       // so we will use the message_length_ that was set in pdu_remaining().
-      octetsToNextHeader = remaining;
+      octetsToNextHeader = static_cast<ACE_CDR::UShort>(remaining);
 
     } else if (octetsToNextHeader > remaining) {
       valid_ = false;

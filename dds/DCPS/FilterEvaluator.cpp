@@ -418,10 +418,8 @@ namespace {
           Value right = children_[1]->eval(data);
           return left % right;
         }
-        break;
       }
-      OPENDDS_ASSERT(0);
-      return Value(0);
+      throw std::runtime_error("Unknown function operator");
     }
 
   private:
@@ -447,7 +445,7 @@ namespace {
       } else if (op->TypeMatches<OR>()) {
         op_ = LG_OR;
       } else {
-        OPENDDS_ASSERT(0);
+        throw std::runtime_error("Unknown logical operator");
       }
     }
 
@@ -521,8 +519,7 @@ FilterEvaluator::walkAst(const FilterEvaluator::AstNodeWrapper& node)
     }
   }
 
-  OPENDDS_ASSERT(0);
-  return 0;
+  throw std::runtime_error("Unexpected filter AST node");
 }
 
 FilterEvaluator::Operand*
@@ -557,8 +554,7 @@ FilterEvaluator::walkOperand(const FilterEvaluator::AstNodeWrapper& node)
       return call;
     }
   }
-  OPENDDS_ASSERT(0);
-  return 0;
+  throw std::runtime_error("Unexpected filter operand node");
 }
 
 bool
@@ -579,9 +575,19 @@ FilterEvaluator::hasFilter() const
   return filter_root_ != 0;
 }
 
+#ifdef _MSC_VER
+#pragma warning(push)
+// MSVC 2022 reports C4702 here in optimized unity builds.
+#pragma warning(disable : 4702)
+#endif
+
 Value::Value(bool b, bool conversion_preferred)
   : type_(VAL_BOOL), b_(b), conversion_preferred_(conversion_preferred)
 {}
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 Value::Value(int i, bool conversion_preferred)
   : type_(VAL_INT), i_(i), conversion_preferred_(conversion_preferred)

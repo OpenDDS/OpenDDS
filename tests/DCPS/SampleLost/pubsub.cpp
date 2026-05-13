@@ -174,5 +174,5 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
   dpf->delete_participant(sub_participant);
   TheServiceParticipant->shutdown();
 
-  return 0;
+  return retval;
 }

@@ -16,7 +16,12 @@ namespace {
 
 class TestEventBase : public OpenDDS::DCPS::EventBase {
 public:
-  TestEventBase() : cv_(mutex_), call_count_(0) {}
+  TestEventBase()
+    : cv_(mutex_)
+    , call_count_(0)
+    , error_count_(0)
+    , cancel_count_(0)
+  {}
 
   size_t increment_call_count()
   {
@@ -32,6 +37,34 @@ public:
     return call_count_;
   }
 
+  size_t increment_error_count()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    ++error_count_;
+    cv_.notify_all();
+    return error_count_;
+  }
+
+  size_t error_count()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return error_count_;
+  }
+
+  size_t increment_cancel_count()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    ++cancel_count_;
+    cv_.notify_all();
+    return cancel_count_;
+  }
+
+  size_t cancel_count()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return cancel_count_;
+  }
+
   void wait(size_t target)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -45,11 +78,14 @@ private:
   OpenDDS::DCPS::ConditionVariable<ACE_Thread_Mutex> cv_;
   OpenDDS::DCPS::ThreadStatusManager tsm_;
   size_t call_count_;
+  size_t error_count_;
+  size_t cancel_count_;
 };
 
 struct SimpleTestEvent : public TestEventBase {
   SimpleTestEvent() {}
   void handle_event() { increment_call_count(); }
+  void handle_cancel() { increment_cancel_count(); }
 };
 
 struct RecursiveTestEventOne : public TestEventBase {
@@ -87,6 +123,36 @@ struct RecursiveTestEventTwo : public TestEventBase {
   OpenDDS::DCPS::Atomic<size_t> dispatch_scale_;
 };
 
+struct ThrowingCancelTestEvent : public TestEventBase {
+  void handle_event() { increment_call_count(); }
+  void handle_cancel()
+  {
+    increment_cancel_count();
+    throw 1;
+  }
+};
+
+struct ReentrantCancelTestEvent : public TestEventBase {
+  ReentrantCancelTestEvent(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher,
+                           OpenDDS::DCPS::RcHandle<TestEventBase> follow_up)
+    : dispatcher_(dispatcher)
+    , follow_up_(follow_up)
+  {}
+
+  void handle_event() { increment_call_count(); }
+  void handle_cancel()
+  {
+    increment_cancel_count();
+    OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = dispatcher_.lock();
+    if (dispatcher) {
+      dispatcher->dispatch(follow_up_);
+    }
+  }
+
+  OpenDDS::DCPS::WeakRcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher_;
+  OpenDDS::DCPS::RcHandle<TestEventBase> follow_up_;
+};
+
 } // (anonymous) namespace
 
 TEST(dds_DCPS_ServiceEventDispatcher, DefaultConstructor)
@@ -109,6 +175,18 @@ TEST(dds_DCPS_ServiceEventDispatcher, ArgConstructorOrderBeta)
 {
   OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher_two = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(2);
   OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher_four = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(4);
+}
+
+TEST(dds_DCPS_ServiceEventDispatcher, ZeroThreadConstructorFallsBackToOne)
+{
+  OpenDDS::DCPS::RcHandle<SimpleTestEvent> test_event = OpenDDS::DCPS::make_rch<SimpleTestEvent>();
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(0);
+
+  EXPECT_TRUE(dispatcher->dispatch(test_event));
+  test_event->wait(1u);
+  dispatcher->shutdown();
+
+  EXPECT_EQ(test_event->call_count(), 1u);
 }
 
 TEST(dds_DCPS_ServiceEventDispatcher, SimpleDispatchAlpha)
@@ -250,6 +328,16 @@ TEST(dds_DCPS_ServiceEventDispatcher, TestShutdown)
   EXPECT_EQ(0u, dispatcher->cancel(1));
 
   EXPECT_EQ(test_event->call_count(), 1u);
+}
+
+TEST(dds_DCPS_ServiceEventDispatcher, NullEventsIgnored)
+{
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>();
+
+  EXPECT_FALSE(dispatcher->dispatch(OpenDDS::DCPS::EventBase_rch()));
+  EXPECT_EQ(-1, dispatcher->schedule(OpenDDS::DCPS::EventBase_rch(), OpenDDS::DCPS::MonotonicTimePoint::now()));
+
+  dispatcher->shutdown();
 }
 
 TEST(dds_DCPS_ServiceEventDispatcher, TimedDispatch)
@@ -412,4 +500,61 @@ TEST(dds_DCPS_ServiceEventDispatcher, CancelDispatchSingleThreaded)
 
   EXPECT_GE(after2, now + OpenDDS::DCPS::TimeDuration::from_double(0.07));
   EXPECT_EQ(test_event->call_count(), 2u);
+}
+
+TEST(dds_DCPS_ServiceEventDispatcher, CancelInvokesHandleCancelOutsideDispatcherLock)
+{
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(1);
+  OpenDDS::DCPS::RcHandle<SimpleTestEvent> follow_up = OpenDDS::DCPS::make_rch<SimpleTestEvent>();
+  OpenDDS::DCPS::RcHandle<ReentrantCancelTestEvent> test_event =
+    OpenDDS::DCPS::make_rch<ReentrantCancelTestEvent>(dispatcher, follow_up);
+
+  const long id = dispatcher->schedule(test_event, OpenDDS::DCPS::MonotonicTimePoint::now() +
+    OpenDDS::DCPS::TimeDuration::from_double(1.0));
+
+  EXPECT_EQ(dispatcher->cancel(id), 1u);
+  follow_up->wait(1u);
+  dispatcher->shutdown();
+
+  EXPECT_EQ(test_event->cancel_count(), 1u);
+  EXPECT_EQ(follow_up->call_count(), 1u);
+}
+
+TEST(dds_DCPS_ServiceEventDispatcher, CancelSuppressesHandleCancelException)
+{
+  OpenDDS::DCPS::RcHandle<ThrowingCancelTestEvent> test_event = OpenDDS::DCPS::make_rch<ThrowingCancelTestEvent>();
+  OpenDDS::DCPS::RcHandle<SimpleTestEvent> follow_up = OpenDDS::DCPS::make_rch<SimpleTestEvent>();
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(1);
+
+  const long id = dispatcher->schedule(test_event, OpenDDS::DCPS::MonotonicTimePoint::now() +
+    OpenDDS::DCPS::TimeDuration::from_double(1.0));
+
+  EXPECT_NO_THROW({
+    EXPECT_EQ(dispatcher->cancel(id), 1u);
+  });
+  EXPECT_TRUE(dispatcher->dispatch(follow_up));
+  follow_up->wait(1u);
+  dispatcher->shutdown();
+
+  EXPECT_EQ(test_event->cancel_count(), 1u);
+  EXPECT_EQ(follow_up->call_count(), 1u);
+}
+
+TEST(dds_DCPS_ServiceEventDispatcher, ImmediateShutdownCancelsPendingEvents)
+{
+  OpenDDS::DCPS::RcHandle<SimpleTestEvent> scheduled_one = OpenDDS::DCPS::make_rch<SimpleTestEvent>();
+  OpenDDS::DCPS::RcHandle<SimpleTestEvent> scheduled_two = OpenDDS::DCPS::make_rch<SimpleTestEvent>();
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(1);
+
+  EXPECT_NE(-1, dispatcher->schedule(scheduled_one, OpenDDS::DCPS::MonotonicTimePoint::now() +
+    OpenDDS::DCPS::TimeDuration::from_double(1.0)));
+  EXPECT_NE(-1, dispatcher->schedule(scheduled_two, OpenDDS::DCPS::MonotonicTimePoint::now() +
+    OpenDDS::DCPS::TimeDuration::from_double(1.0)));
+
+  dispatcher->shutdown(true);
+
+  EXPECT_EQ(scheduled_one->call_count(), 0u);
+  EXPECT_EQ(scheduled_one->cancel_count(), 1u);
+  EXPECT_EQ(scheduled_two->call_count(), 0u);
+  EXPECT_EQ(scheduled_two->cancel_count(), 1u);
 }

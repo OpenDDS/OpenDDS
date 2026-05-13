@@ -431,12 +431,6 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 void
 OpenDDS::DCPS::TcpConnection::set_sock_options(const TcpInst_rch& tcp_config)
 {
-#if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
-  int snd_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
-  int rcv_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
-  //ACE_SOCK_Stream sock = ACE_static_cast(ACE_SOCK_Stream, this->peer() );
-#  if !defined (ACE_LACKS_SOCKET_BUFSIZ)
-
   // A little screwy double negative logic: disabling nagle involves
   // enabling TCP_NODELAY
   int opt = (tcp_config->enable_nagle_algorithm() == false);
@@ -445,7 +439,12 @@ OpenDDS::DCPS::TcpConnection::set_sock_options(const TcpInst_rch& tcp_config)
     ACE_ERROR((LM_ERROR, "Failed to set TCP_NODELAY\n"));
   }
 
-  if (this->peer().set_option(SOL_SOCKET,
+  // Leave buffer sizes unchanged unless explicitly configured so the
+  // platform's default TCP tuning can apply.
+#if !defined (ACE_LACKS_SOCKET_BUFSIZ)
+  int snd_size = tcp_config->send_buffer_size();
+  if (snd_size > 0 &&
+      this->peer().set_option(SOL_SOCKET,
                               SO_SNDBUF,
                               (void *) &snd_size,
                               sizeof(snd_size)) == -1
@@ -456,7 +455,9 @@ OpenDDS::DCPS::TcpConnection::set_sock_options(const TcpInst_rch& tcp_config)
     return;
   }
 
-  if (this->peer().set_option(SOL_SOCKET,
+  int rcv_size = tcp_config->rcv_buffer_size();
+  if (rcv_size > 0 &&
+      this->peer().set_option(SOL_SOCKET,
                               SO_RCVBUF,
                               (void *) &rcv_size,
                               sizeof(int)) == -1
@@ -466,16 +467,7 @@ OpenDDS::DCPS::TcpConnection::set_sock_options(const TcpInst_rch& tcp_config)
                rcv_size));
     return;
   }
-
-#  else
-  ACE_UNUSED_ARG(tcp_config);
-  ACE_UNUSED_ARG(snd_size);
-  ACE_UNUSED_ARG(rcv_size);
-#  endif /* !ACE_LACKS_SOCKET_BUFSIZ */
-
-#else
-  ACE_UNUSED_ARG(tcp_config);
-#endif /* !ACE_DEFAULT_MAX_SOCKET_BUFSIZ */
+#endif /* !ACE_LACKS_SOCKET_BUFSIZ */
 }
 
 int
