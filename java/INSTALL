@@ -8,16 +8,16 @@ general overview of OpenDDS.
 ======================================================================
 * Prerequisites
 
-  - JDK (Java Development Kit) for Java SE 5 and up
+  - JDK (Java Development Kit)
 
     If you are using a 64-bit JDK, make sure all the native libraries are also
     built for 64-bit.  Similarly, a 32-bit JDK must be matched with 32-bit
     native libraries.
 
-    If using a recent JDK version (9 and higher) that includes the JPMS
-    (Java Platform Module System), disable the MPC feature java_pre_jpms.
-    The OpenDDS configure script will attempt to detect the Java version and
-    set the MPC feature automatically.
+    If using a JDK version that includes the JPMS (Java Platform Module
+    System), the OpenDDS configure script will attempt to detect the Java
+    version and set the java_pre_jpms MPC feature to the required value
+    automatically.
 
   - C++ Compiler
 
@@ -25,47 +25,32 @@ general overview of OpenDDS.
     your chosen platform, namely:
     Windows  => Microsoft Visual C++ <http://msdn.microsoft.com/en-us/visualc>
     Linux    => GNU Compiler Collection (GCC) <http://gcc.gnu.org>
-    Mac OS   => AppleClang included with Xcode
+    macOS    => AppleClang included with Xcode
 
     Other combinations are possible (gcc on Windows, for example) but
     these have not been tested and will not be covered by this document.
 
-    On Linux and Mac OS, GNU Make is also required.  It will almost
+    On Linux and macOS, GNU Make is also required.  It will almost
     certainly be installed by default on Linux (if not use your
     platform's package management system).
 
-    On Mac OS El Capitan, Yosemite, Mavericks onward, the required build tools
-    can be installed by typing the following command from termial.
+    On macOS, the required build tools can be installed by typing the following
+    command from a terminal.
 
        xcode-select --install
 
-  - Perl v5.8 or later
+  - Perl
 
-    On Unix platforms, perl will be pre-installed or easily installed by the
+    On Unix platforms, Perl will be pre-installed or easily installed by the
     platform's package management system.
-    On Windows install ActiveState's ActivePerl.  Download it for free from
-    <http://www.activestate.com/downloads> -> scroll down to "ActivePerl" and
-    click "Get Current Release" -> select the "Download" link.
+    On Windows, Strawberry Perl is recommended.
 
   - The ACE ORB (TAO), which includes ACE and MPC as subprojects
 
-    OpenDDS requires the use of TAO.  Three "branches" of TAO are supported:
-
-    - OCI TAO 2.2a <http://download.ociweb.com/TAO-2.2a>
-    - DOC Group    <http://download.dre.vanderbilt.edu>
-
-    Note: TAO can be automatically downloaded by the configure script, so
-    downloading it separately is not strictly necessary.
-
-    From each branch only the current patch release (OCI) or beta/micro release
-    (DOC) is supported.  The "current" releases are the latest public releases
-    of TAO at the time of the OpenDDS release.  These are listed in the "TAO"
-    section of the OpenDDS README.md file (in the parent directory).
-
-    For responsive support from OCI it is recommended that the latest version
-    of the OCI release of TAO used for OpenDDS development and testing be used.
-
-    The detailed instructions below are written assuming OCI TAO 2.2a is used.
+    OpenDDS requires the use of TAO.  TAO can be automatically downloaded by
+    the configure script, so downloading it separately is not strictly
+    necessary.  See the OpenDDS Developer's Guide and the README.md file in the
+    parent directory for supported ACE/TAO versions.
 
 ======================================================================
 * Building OpenDDS, including dependencies and Java bindings
@@ -82,14 +67,15 @@ general overview of OpenDDS.
      Unix    => Start with the .tar.gz archives of OpenDDS
      Windows => Start with the .zip archives of OpenDDS
 
-     Extract to the location of your chosing.  On Windows it is simpler to
+     Extract to the location of your choosing.  On Windows it is simpler to
      use paths with no spaces (true on Unix too but spaces are rarely seen).
      The top level of the OpenDDS distribution is a directory that contains
      the subdirectory named dds.
 
   3. Configure and build OpenDDS
 
-     Build as in $DDS_ROOT/install, but add --java option
+     Build as described in the OpenDDS build instructions, but add the --java
+     option.
 
      Unix    => cd $DDS_ROOT
                 ./configure --java

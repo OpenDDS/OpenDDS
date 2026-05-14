@@ -12,7 +12,7 @@ Build Directions
 
    * Visual Studio
    * Perl
-   * Optional Java SDK 1.5 or greater for Java JNI binding support
+   * Optional JDK for Java JNI binding support
 
    See :ref:`deps` for a complete list of dependencies and :ghfile:`README.md#supported-platforms` for supported platforms.
 

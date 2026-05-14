@@ -10,8 +10,8 @@ are installed and configured):
 
 1) Run Make Project Creator to generate build files:
 
-Windows, VC 7.1:   perl %ACE_ROOT%\bin\mwc.pl -type vc71 StockQuoter.mwc
-Unix, GNU Make:    $ACE_ROOT/bin/mwc.pl -type gnuace StockQuoter.mwc
+Windows, Visual Studio:   perl %ACE_ROOT%\bin\mwc.pl -type vs2022 StockQuoter.mwc
+Unix, GNU Make:           $ACE_ROOT/bin/mwc.pl -type gnuace StockQuoter.mwc
 
 2)  Build the application
 

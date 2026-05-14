@@ -167,6 +167,6 @@ to pass the option to `opendds_idl` depends on the build system being used:
 - When using MPC, add `dcps_ts_flags += --no-dcps-data-type-warnings` to the
   MPC project.
 - When using CMake, add `--no-dcps-data-type-warnings` to the
-  `OPENDDS_IDL_OPTIONS` parameter for `OPENDDS_TARGET_SOURCES`. See
-  [`docs/cmake.md`](cmake.md) for more information about using OpenDDS with
-  CMake.
+  `OPENDDS_IDL_OPTIONS` parameter for `opendds_target_sources`. See
+  [`docs/devguide/building/cmake.rst`](devguide/building/cmake.rst) for more
+  information about using OpenDDS with CMake.
