@@ -112,8 +112,10 @@ On Windows we recommend the use of [Strawberry Perl](https://strawberryperl.com)
 
 This release of OpenDDS has been tested under the following platforms and
 toolchains.
-OpenDDS is also used on additional platforms and compilers; contact the project
-for details about specific configurations.
+OpenDDS is also used on additional platforms and compilers; For general inquiries,
+GitHub Discussions (for questions) and Issues (for actual issues) are the best place
+to start. For specific platform and configuration support needs, see the Support section
+above for contact information.
 
 Linux family:
 * Ubuntu 22.04 LTS and 24.04 LTS (x86\_64)
@@ -143,8 +145,8 @@ Download VxWorks RPM packages for ACE, TAO, and OpenDDS [here](https://objectcom
 This release of OpenDDS has been tested using the following compiler families:
 
 * Microsoft Visual C++ from Visual Studio 2022
-* GCC 4.6, 11, 12, 13, and 14
-* Clang 16, 18, and 20
+* GCC 4.6, 11, 12, 13, and 14, 16
+* Clang 16, 18, and 20, 22
 * Apple Clang from Xcode on macOS 14
 
 ## Building and Installing

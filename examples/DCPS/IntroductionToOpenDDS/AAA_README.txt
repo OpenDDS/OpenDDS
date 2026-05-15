@@ -5,17 +5,6 @@
 //
 // *******************************************************************
 
-Instructions for Building the Example (assuming ACE, TAO, DDS, and MPC
-are installed and configured):
-
-1) Run Make Project Creator to generate build files:
-
-Windows, Visual Studio:   perl %ACE_ROOT%\bin\mwc.pl -type vs2022 StockQuoter.mwc
-Unix, GNU Make:           $ACE_ROOT/bin/mwc.pl -type gnuace StockQuoter.mwc
-
-2)  Build the application
-
-
 Instructions for running the example:
 
 For TCP pub/sub:

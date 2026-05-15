@@ -41,7 +41,7 @@ general overview of OpenDDS.
 
   - Perl
 
-    On Unix platforms, Perl will be pre-installed or easily installed by the
+    On Unix platforms, perl will be pre-installed or easily installed by the
     platform's package management system.
     On Windows, Strawberry Perl is recommended.
 
