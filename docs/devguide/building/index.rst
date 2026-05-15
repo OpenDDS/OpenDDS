@@ -145,8 +145,6 @@ It requires :ref:`deps-xerces` and :ref:`deps-openssl`.
     Microsoft vcpkg is a "C++ Library Manager for Windows, Linux, and macOS" which helps developers build/install dependencies.
     Although it is cross-platform, this guide only discusses vcpkg on Windows.
 
-    Use a Visual Studio version supported by this OpenDDS release.
-
     * If OpenDDS tests will be built, install CMake or put the one that comes with Visual Studio on the ``PATH`` (see ``Common7\IDE\CommonExtensions\Microsoft\CMake``).
 
     * If you need to obtain and install vcpkg, navigate to `https://github.com/Microsoft/vcpkg <https://github.com/Microsoft/vcpkg>`__ and follow the instructions to obtain vcpkg by cloning the repository and bootstrapping it.
