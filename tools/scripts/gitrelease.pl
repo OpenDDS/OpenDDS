@@ -43,7 +43,7 @@ my $default_download_url = "$oci_download/OpenDDS";
 my $ace_tao_filename = "ACE+TAO-2.2a_with_latest_patches_NO_makefiles.tar.gz";
 my $ace_tao_url = "$oci_download/TAO-2.2a/$ace_tao_filename";
 my $ace_root = "ACE_wrappers";
-my $git_name_prefix = "DDS-";
+my $git_name_prefix = "v";
 my $default_post_release_metadata = "dev";
 my $workspace_info_filename = "info.json";
 my $default_sftp_base_dir = "";
@@ -1183,7 +1183,10 @@ sub parse_release_tag {
   my $tag = shift();
 
   my $parsed;
-  if ($tag =~ /^DDS-(.*)$/) {
+  if ($tag =~ /^v(.*)$/) {
+    $parsed = parse_version($1) if $1;
+    $parsed->{tag_name} = $tag if $parsed;
+  } elsif ($tag =~ /^DDS-(.*)$/) {
     $parsed = parse_version($1) if $1;
     $parsed->{tag_name} = $tag if $parsed;
   }

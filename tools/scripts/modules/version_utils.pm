@@ -29,11 +29,7 @@ sub parse_version {
     $result{series_string} = "$result{major}.$result{minor}";
     $result{release_string} = "$result{series_string}.$result{micro}";
     $result{string} = "$result{release_string}$metadata_maybe";
-    if ($result{micro} eq "0") {
-      $result{tag_string} = $result{series_string};
-    } else {
-      $result{tag_string} = $result{release_string};
-    }
+    $result{tag_string} = $result{release_string};
 
     # For Version Comparison
     my @metadata_fields = split(/\./, $result{metadata});
