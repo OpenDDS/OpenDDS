@@ -111,11 +111,11 @@ bool Config::from_arg(ACE_Arg_Shifter_T<char>& args)
   } else if ((arg = args.get_the_parameter("-LogAsyncDiscovery"))) {
     log_async_discovery(ACE_OS::atoi(arg));
     args.consume_arg();
-  } else if ((arg = args.get_the_parameter("-AsyncDiscoveryCacheTimeout"))) {
-    async_discovery_cache_timeout(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-    args.consume_arg();
   } else if ((arg = args.get_the_parameter("-SynchronizeAsyncDiscoveryCache"))) {
     synchronize_async_discovery_cache(ACE_OS::atoi(arg));
+    args.consume_arg();
+  } else if ((arg = args.get_the_parameter("-AsyncDiscoveryCacheTimeout"))) {
+    async_discovery_cache_timeout(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
     args.consume_arg();
   } else if ((arg = args.get_the_parameter("-AsyncDiscoveryRemoteCacheTimeout"))) {
     async_discovery_remote_cache_timeout(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
