@@ -189,6 +189,7 @@ module RtpsRelay {
     unsigned long relay_address_sub_count;
     unsigned long relay_status_sub_count;
     unsigned long async_discovery_cache_update_sub_count;
+    unsigned long async_discovery_cache_prune_sub_count;
     unsigned long relay_partitions_pub_count;
     unsigned long relay_address_pub_count;
     unsigned long admission_deferral_count;
@@ -203,8 +204,8 @@ module RtpsRelay {
     unsigned long admission_queue_size;
     unsigned long transitions_to_admitting;
     unsigned long transitions_to_nonadmitting;
-    unsigned long async_discovery_cache_size;
-    unsigned long async_discovery_expiration_map_size;
+    unsigned long async_discovery_local_cache_size;
+    unsigned long async_discovery_local_expiration_map_size;
     unsigned long async_discovery_remote_cache_size;
     unsigned long async_discovery_remote_expiration_map_size;
     unsigned long virtual_memory_kb;

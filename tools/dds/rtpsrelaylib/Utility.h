@@ -198,7 +198,8 @@ inline GuidSet relay_guids_to_set(const RtpsRelay::GuidSequence& seq)
   return set;
 }
 
-inline std::string concat_strings(const StringSet& strs, const std::string& delimit = ",")
+template <typename StringCollection>
+inline std::string concat_strings(const StringCollection& strs, const std::string& delimit = ",")
 {
   const size_t delimit_size = delimit.size();
   size_t total_size = 0;

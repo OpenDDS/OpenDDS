@@ -11,8 +11,11 @@ GuidPartitionTable::~GuidPartitionTable()
   if (denied_partitions_cleanup_task_) {
     denied_partitions_cleanup_task_->cancel();
   }
-  if (async_disc_cache_cleanup_task_) {
-    async_disc_cache_cleanup_task_->cancel();
+  if (local_async_disc_cache_cleanup_task_) {
+    local_async_disc_cache_cleanup_task_->cancel();
+  }
+  if (remote_async_disc_cache_cleanup_task_) {
+    remote_async_disc_cache_cleanup_task_->cancel();
   }
 }
 
@@ -241,12 +244,12 @@ GuidPartitionTable::update_cert_partitions_cache(const std::string& key, const S
   }
   const auto sizes = local_async_disc_cache_.update(key, partitions, OpenDDS::DCPS::MonotonicTimePoint::now(), out_arg);
 
-  if (!async_disc_cache_cleanup_task_) {
-    const auto base = OpenDDS::DCPS::make_rch<GuidPartitionTableEvent>(rchandle_from(this), &GuidPartitionTable::cleanup_async_disc_cache);
-    async_disc_cache_cleanup_task_ = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::SporadicEvent>(TheServiceParticipant->event_dispatcher(), base);
+  if (!local_async_disc_cache_cleanup_task_) {
+    const auto base = OpenDDS::DCPS::make_rch<GuidPartitionTableEvent>(rchandle_from(this), &GuidPartitionTable::cleanup_local_async_disc_cache);
+    local_async_disc_cache_cleanup_task_ = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::SporadicEvent>(TheServiceParticipant->event_dispatcher(), base);
   }
   if (sizes.first) {
-    async_disc_cache_cleanup_task_->schedule(config_.async_discovery_cache_timeout());
+    local_async_disc_cache_cleanup_task_->schedule(config_.async_discovery_cache_timeout());
   }
 
   if (config_.log_async_discovery()) {
@@ -263,7 +266,7 @@ GuidPartitionTable::update_cert_partitions_cache(const std::string& key, const S
       AsyncDiscoveryCacheUpdate update;
       update.relay_id(config_.relay_id());
       update.entries().emplace_back(key, StringSequence(partitions.begin(), partitions.end()));
-      const auto rc = async_disc_cache_writer_->write(update, DDS::HANDLE_NIL);
+      const auto rc = async_disc_cache_update_writer_->write(update, DDS::HANDLE_NIL);
       if (rc != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
           "(%P|%t) ERROR: GuidPartitionTable::update_cert_partitions_cache: failed to write Async Discovery Cache Update: %C\n",
@@ -299,49 +302,48 @@ GuidPartitionTable::lookup_cert_partitions_cache(StringSet& partitions, const st
   }
 }
 
-void GuidPartitionTable::cleanup_async_disc_cache(const OpenDDS::DCPS::MonotonicTimePoint& now)
+void GuidPartitionTable::cleanup_local_async_disc_cache(const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
   StringSet expired_keys;
-  const auto sizes = local_async_disc_cache_.remove_expired(now, expired_keys);
+  const auto sizes = local_async_disc_cache_.remove_expired(now, config_.async_discovery_cache_timeout(),
+    expired_keys, config_.log_async_discovery() || config_.synchronize_async_discovery_cache());
 
-  relay_stats_reporter_.async_discovery_cache_size(sizes.first, now);
-  relay_stats_reporter_.async_discovery_expiration_map_size(sizes.second, now);
+  relay_stats_reporter_.async_discovery_local_cache_size(sizes.first, now);
+  relay_stats_reporter_.async_discovery_local_expiration_map_size(sizes.second, now);
+
+  if (sizes.first) {
+    const auto next_fire_in = local_async_disc_cache_.earliest_last_access() + config_.async_discovery_cache_timeout() - now;
+    local_async_disc_cache_cleanup_task_->schedule(next_fire_in);
+  }
 
   if (config_.log_async_discovery()) {
     const auto keys_str = concat_strings(expired_keys);
     ACE_DEBUG((LM_INFO,
-               "(%P|%t) INFO: GuidPartitionTable::cleanup_async_disc_cache: "
+               "(%P|%t) INFO: GuidPartitionTable::cleanup_local_async_disc_cache: "
                "Removed keys=[%C] -- cache size=%B expiration map size=%B\n",
                keys_str.c_str(), sizes.first, sizes.second));
   }
 
-  // TODO: Publish AsyncDiscoveryCachePrune so other relay instances get the updates.
-
-  if (sizes.first) {
-    const auto next_fire_in = local_async_disc_cache_.earliest_last_access() + config_.async_discovery_cache_timeout() - now;
-    async_disc_cache_cleanup_task_->schedule(next_fire_in);
+  if (config_.synchronize_async_discovery_cache()) {
+    if (!expired_keys.empty()) {
+      AsyncDiscoveryCachePrune prune;
+      prune.relay_id(config_.relay_id());
+      prune.keys().insert(prune.keys().end(), expired_keys.begin(), expired_keys.end());
+      const auto rc = async_disc_cache_prune_writer_->write(prune, DDS::HANDLE_NIL);
+      if (rc != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) ERROR: GuidPartitionTable::cleanup_local_async_disc_cache: failed to write Async Discovery Cache Prune: %C\n",
+                   OpenDDS::DCPS::retcode_to_string(rc)));
+      }
+    }
   }
 }
 
 void
-GuidPartitionTable::update_remote_cert_partitions_cache(const AsyncDiscoveryCacheEntrySeq& entries,
+GuidPartitionTable::update_remote_async_disc_cache(const AsyncDiscoveryCacheEntrySeq& entries,
                                                        const std::string& from_relay,
                                                        const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
-  if (!config_.synchronize_async_discovery_cache()) {
-    if (config_.log_async_discovery()) {
-      StringSet keys;
-      for (const auto& entry : entries) {
-        keys.insert(entry.key());
-      }
-      const std::string keys_str = concat_strings(keys);
-      ACE_DEBUG((LM_NOTICE, "(%P|%t) NOTICE: GuidPartitionTable::update_remote_cert_partitions_cache: "
-                 "Received remote cache update for keys=[%C] from relay '%C' while synchronization is disabled!\n",
-                 keys_str.c_str(), from_relay.c_str()));
-    }
-    return;
-  }
-
   const auto sizes = remote_async_disc_cache_.update(entries, now);
 
   if (!remote_async_disc_cache_cleanup_task_) {
@@ -359,13 +361,13 @@ GuidPartitionTable::update_remote_cert_partitions_cache(const AsyncDiscoveryCach
     }
     const std::string keys_str = concat_strings(keys);
     ACE_DEBUG((LM_INFO,
-               "(%P|%t) INFO: GuidPartitionTable::update_remote_cert_partitions_cache: "
+               "(%P|%t) INFO: GuidPartitionTable::update_remote_async_disc_cache: "
                "Update remote cache for keys=[%C] from relay '%C' -- remote cache size=%B remote expiration map size=%B\n",
                keys_str.c_str(), from_relay.c_str(), sizes.first, sizes.second));
   }
 }
 
-void GuidPartitionTable::remove_from_async_disc_cache(const AsyncDiscoveryCacheEntrySeq& entries, const std::string& from_relay)
+void GuidPartitionTable::remove_from_local_async_disc_cache(const AsyncDiscoveryCacheEntrySeq& entries, const std::string& from_relay)
 {
   StringSet removed_keys;
   const auto sizes = local_async_disc_cache_.remove(entries, removed_keys);
@@ -373,7 +375,7 @@ void GuidPartitionTable::remove_from_async_disc_cache(const AsyncDiscoveryCacheE
   if (config_.log_async_discovery() && !removed_keys.empty()) {
     const std::string keys_str = concat_strings(removed_keys);
     ACE_DEBUG((LM_INFO,
-               "(%P|%t) INFO: GuidPartitionTable::remove_from_async_disc_cache: "
+               "(%P|%t) INFO: GuidPartitionTable::remove_from_local_async_disc_cache: "
                "Removed local cache keys=[%C], now local on relay '%C' -- cache size=%B expiration map size=%B\n",
                keys_str.c_str(), from_relay.c_str(), sizes.first, sizes.second));
   }
@@ -383,14 +385,30 @@ void GuidPartitionTable::handle_async_disc_cache_update(const AsyncDiscoveryCach
                                                         const std::string& from_relay,
                                                         const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
-  remove_from_async_disc_cache(entries, from_relay);
-  update_remote_cert_partitions_cache(entries, from_relay, now);
+  if (!config_.synchronize_async_discovery_cache()) {
+    if (config_.log_async_discovery()) {
+      StringSequence keys;
+      keys.reserve(entries.size());
+      for (const auto& entry : entries) {
+        keys.push_back(entry.key());
+      }
+      const std::string keys_str = concat_strings(keys);
+      ACE_DEBUG((LM_NOTICE, "(%P|%t) NOTICE: GuidPartitionTable::handle_async_disc_cache_update: "
+                 "Received remote cache update for keys=[%C] from relay '%C' while synchronization is disabled!\n",
+                 keys_str.c_str(), from_relay.c_str()));
+    }
+    return;
+  }
+
+  remove_from_local_async_disc_cache(entries, from_relay);
+  update_remote_async_disc_cache(entries, from_relay, now);
 }
 
 void GuidPartitionTable::cleanup_remote_async_disc_cache(const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
   StringSet expired_keys;
-  const auto sizes = remote_async_disc_cache_.remove_expired(now, expired_keys);
+  const auto sizes = remote_async_disc_cache_.remove_expired(now, config_.async_discovery_remote_cache_timeout(),
+    expired_keys, config_.log_async_discovery());
 
   relay_stats_reporter_.async_discovery_remote_cache_size(sizes.first, now);
   relay_stats_reporter_.async_discovery_remote_expiration_map_size(sizes.second, now);
@@ -412,12 +430,26 @@ void GuidPartitionTable::cleanup_remote_async_disc_cache(const OpenDDS::DCPS::Mo
 void
 GuidPartitionTable::handle_async_disc_cache_prune(const StringSequence& keys, const std::string& from_relay)
 {
-  // TODO: may also store the source relay in the cache to make sure we only remove entries
-  // from the relay that sends the prune message.
+  if (!config_.synchronize_async_discovery_cache()) {
+    if (config_.log_async_discovery()) {
+      const std::string keys_str = concat_strings(keys);
+      ACE_DEBUG((LM_NOTICE, "(%P|%t) NOTICE: GuidPartitionTable::handle_async_disc_cache_prune: "
+                 "Received remote cache prune for keys=[%C] from relay '%C' while synchronization is disabled!\n",
+                 keys_str.c_str(), from_relay.c_str()));
+    }
+    return;
+  }
+
+  // Suppose there are two remote relays R1 and R2, and a user A expires on R1 and connects to R2 in a short
+  // period of time. Depending on the receive order of the prune message from R1 and the update message from R2,
+  // this relay may end up with no cache entry for A -- when the prune message arrives after the update message.
+  // To address this, we can keep the relay Id together with the cache entry and only remove the entry when the
+  // prune message comes from the same relay. For simplicity, we currently do not track the relay Id and accept
+  // the possibility of remote cache inconsistency.
   StringSet removed_keys;
   const auto sizes = remote_async_disc_cache_.remove(keys, removed_keys);
 
-  if (config_.log_async_discovery() && !removed_keys.empty()) {
+  if (config_.log_async_discovery()) {
     const std::string keys_str = concat_strings(removed_keys);
     ACE_DEBUG((LM_INFO,
                "(%P|%t) INFO: GuidPartitionTable::handle_async_disc_cache_prune: "

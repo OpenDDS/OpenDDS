@@ -203,6 +203,14 @@ public:
     report(guard, now);
   }
 
+  void async_discovery_cache_prune_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.async_discovery_cache_prune_sub_count() = count;
+    publish_relay_statistics_.async_discovery_cache_prune_sub_count() = count;
+    report(guard, now);
+  }
+
   void relay_partitions_pub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -404,21 +412,21 @@ public:
     report(guard, OpenDDS::DCPS::MonotonicTimePoint::now());
   }
 
-  void async_discovery_cache_size(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void async_discovery_local_cache_size(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     const auto count32 = static_cast<uint32_t>(count);
-    log_relay_statistics_.async_discovery_cache_size() = count32;
-    publish_relay_statistics_.async_discovery_cache_size() = count32;
+    log_relay_statistics_.async_discovery_local_cache_size() = count32;
+    publish_relay_statistics_.async_discovery_local_cache_size() = count32;
     report(guard, now);
   }
 
-  void async_discovery_expiration_map_size(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  void async_discovery_local_expiration_map_size(size_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     const auto count32 = static_cast<uint32_t>(count);
-    log_relay_statistics_.async_discovery_expiration_map_size() = count32;
-    publish_relay_statistics_.async_discovery_expiration_map_size() = count32;
+    log_relay_statistics_.async_discovery_local_expiration_map_size() = count32;
+    publish_relay_statistics_.async_discovery_local_expiration_map_size() = count32;
     report(guard, now);
   }
 

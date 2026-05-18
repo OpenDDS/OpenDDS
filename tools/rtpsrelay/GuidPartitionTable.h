@@ -33,16 +33,16 @@ public:
                      GuidAddrSet& guid_addr_set,
                      RelayPartitionsDataWriter_var relay_partitions_writer,
                      RelayStatisticsReporter& relay_stats_reporter,
-                     AsyncDiscoveryCacheUpdateDataWriter_var async_disc_cache_writer)
+                     AsyncDiscoveryCacheUpdateDataWriter_var async_disc_cache_update_writer,
+                     AsyncDiscoveryCachePruneDataWriter_var async_disc_cache_prune_writer)
     : config_(config)
     , reactor_task_(reactor_task)
     , address_(OpenDDS::DCPS::LogAddr(address).c_str())
     , guid_addr_set_(guid_addr_set)
     , relay_stats_reporter_(relay_stats_reporter)
     , relay_partitions_writer_(relay_partitions_writer)
-    , async_disc_cache_writer_(async_disc_cache_writer)
-    , local_async_disc_cache_(config, true)
-    , remote_async_disc_cache_(config, false)
+    , async_disc_cache_update_writer_(async_disc_cache_update_writer)
+    , async_disc_cache_prune_writer_(async_disc_cache_prune_writer)
   {}
 
   ~GuidPartitionTable();
@@ -188,12 +188,12 @@ private:
     }
   }
 
-  void remove_from_async_disc_cache(const AsyncDiscoveryCacheEntrySeq& entries, const std::string& from_relay);
+  void remove_from_local_async_disc_cache(const AsyncDiscoveryCacheEntrySeq& entries, const std::string& from_relay);
 
-  void update_remote_cert_partitions_cache(const AsyncDiscoveryCacheEntrySeq& entries,
+  void update_remote_async_disc_cache(const AsyncDiscoveryCacheEntrySeq& entries,
     const std::string& from_relay, const OpenDDS::DCPS::MonotonicTimePoint& now);
 
-  void cleanup_async_disc_cache(const OpenDDS::DCPS::MonotonicTimePoint& now);
+  void cleanup_local_async_disc_cache(const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   void cleanup_remote_async_disc_cache(const OpenDDS::DCPS::MonotonicTimePoint& now);
 
@@ -203,7 +203,8 @@ private:
   GuidAddrSet& guid_addr_set_;
   RelayStatisticsReporter& relay_stats_reporter_;
   RelayPartitionsDataWriter_var relay_partitions_writer_;
-  AsyncDiscoveryCacheUpdateDataWriter_var async_disc_cache_writer_;
+  AsyncDiscoveryCacheUpdateDataWriter_var async_disc_cache_update_writer_;
+  AsyncDiscoveryCachePruneDataWriter_var async_disc_cache_prune_writer_;
 
   using Slots = std::vector<StringSet>;
   Slots slots_;
@@ -239,11 +240,6 @@ private:
   public:
     using CertToPartitions = std::unordered_map<std::string, std::pair<StringSet, OpenDDS::DCPS::MonotonicTimePoint>>;
     using PartitionCacheExpirationMap = std::map<OpenDDS::DCPS::MonotonicTimePoint, StringSet>;
-
-    AsyncDiscoveryCache(const Config& config, bool local)
-      : config_(config)
-      , local_(local)
-    {}
 
     bool lookup(StringSet& partitions, const std::string& key)
     {
@@ -314,14 +310,15 @@ private:
     }
 
     std::pair<size_t, size_t>
-    remove_expired(const OpenDDS::DCPS::MonotonicTimePoint& now, StringSet& expired_keys)
+    remove_expired(const OpenDDS::DCPS::MonotonicTimePoint& now, const OpenDDS::DCPS::TimeDuration& timeout,
+      StringSet& expired_keys, bool record_expired_keys)
     {
       ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, std::make_pair(0, 0));
-      const auto cutoff_time = now - (local_ ? config_.async_discovery_cache_timeout() : config_.async_discovery_remote_cache_timeout());
+      const auto cutoff_time = now - timeout;
       const auto upper_bound = expiration_map_.upper_bound(cutoff_time);
       for (auto it = expiration_map_.begin(); it != upper_bound;) {
         const auto& keys = it->second;
-        if (config_.log_async_discovery()) {
+        if (record_expired_keys) {
           expired_keys.insert(keys.begin(), keys.end());
         }
         for (const auto& key : keys) {
@@ -387,8 +384,6 @@ private:
       }
     }
 
-    const Config& config_;
-    bool local_;
     CertToPartitions cert_to_partitions_;
     PartitionCacheExpirationMap expiration_map_;
     mutable ACE_Thread_Mutex mutex_;
@@ -396,7 +391,7 @@ private:
 
   // Async discovery cache for partitions of local participants.
   AsyncDiscoveryCache local_async_disc_cache_;
-  OpenDDS::DCPS::SporadicEvent_rch async_disc_cache_cleanup_task_;
+  OpenDDS::DCPS::SporadicEvent_rch local_async_disc_cache_cleanup_task_;
 
   // Async discovery cache for partitions of remote participants (i.e., from peer relay instances).
   AsyncDiscoveryCache remote_async_disc_cache_;

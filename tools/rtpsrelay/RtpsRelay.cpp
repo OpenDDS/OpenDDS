@@ -21,6 +21,7 @@
 #include "SubscriptionListener.h"
 #include "RelayDeniedPartitionsListener.h"
 #include "AsyncDiscoveryCacheUpdateListener.h"
+#include "AsyncDiscoveryCachePruneListener.h"
 
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/DomainParticipantImpl.h>
@@ -647,41 +648,81 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  AsyncDiscoveryCacheUpdateTypeSupport_var async_disc_cache_update_ts = new AsyncDiscoveryCacheUpdateTypeSupportImpl;
-  if (async_disc_cache_update_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to register AsyncDiscoveryCacheUpdate type\n"));
-    return EXIT_FAILURE;
-  }
-  CORBA::String_var async_disc_cache_update_type_name = async_disc_cache_update_ts->get_type_name();
+  DDS::Topic_var async_disc_cache_update_topic;
+  DDS::Topic_var async_disc_cache_prune_topic;
+  AsyncDiscoveryCacheUpdateDataWriter_var async_disc_cache_update_writer;
+  AsyncDiscoveryCachePruneDataWriter_var async_disc_cache_prune_writer;
 
-  DDS::Topic_var async_disc_cache_update_topic =
-    relay_participant->create_topic(RELAY_ASYNC_DISCOVERY_CACHE_UPDATE_TOPIC_NAME.c_str(),
-                                    async_disc_cache_update_type_name,
-                                    TOPIC_QOS_DEFAULT, nullptr,
-                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  if (config.synchronize_async_discovery_cache()) {
+    AsyncDiscoveryCacheUpdateTypeSupport_var async_disc_cache_update_ts = new AsyncDiscoveryCacheUpdateTypeSupportImpl;
+    if (async_disc_cache_update_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to register AsyncDiscoveryCacheUpdate type\n"));
+      return EXIT_FAILURE;
+    }
+    CORBA::String_var async_disc_cache_update_type_name = async_disc_cache_update_ts->get_type_name();
 
-  if (!async_disc_cache_update_topic) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Relay Async Discovery Cache Update topic\n"));
-    return EXIT_FAILURE;
-  }
+    async_disc_cache_update_topic =
+      relay_participant->create_topic(RELAY_ASYNC_DISCOVERY_CACHE_UPDATE_TOPIC_NAME.c_str(),
+                                      async_disc_cache_update_type_name,
+                                      TOPIC_QOS_DEFAULT, nullptr,
+                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-  DDS::DataWriterListener_var async_disc_cache_writer_listener =
-    new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::async_discovery_cache_update_sub_count);
-  DDS::DataWriter_var async_disc_cache_writer_var =
-    relay_publisher->create_datawriter(async_disc_cache_update_topic, writer_qos, async_disc_cache_writer_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  if (!async_disc_cache_writer_var) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Async Discovery Cache Update data writer\n"));
-    return EXIT_FAILURE;
-  }
+    if (!async_disc_cache_update_topic) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Relay Async Discovery Cache Update topic\n"));
+      return EXIT_FAILURE;
+    }
 
-  AsyncDiscoveryCacheUpdateDataWriter_var async_disc_cache_writer = AsyncDiscoveryCacheUpdateDataWriter::_narrow(async_disc_cache_writer_var);
-  if (!async_disc_cache_writer) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to narrow Async Discovery Cache Update data writer\n"));
-    return EXIT_FAILURE;
+    DDS::DataWriterListener_var cache_update_writer_listener =
+      new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::async_discovery_cache_update_sub_count);
+    DDS::DataWriter_var async_disc_cache_update_writer_var =
+      relay_publisher->create_datawriter(async_disc_cache_update_topic, writer_qos, cache_update_writer_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (!async_disc_cache_update_writer_var) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Async Discovery Cache Update data writer\n"));
+      return EXIT_FAILURE;
+    }
+
+    async_disc_cache_update_writer = AsyncDiscoveryCacheUpdateDataWriter::_narrow(async_disc_cache_update_writer_var);
+    if (!async_disc_cache_update_writer) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to narrow Async Discovery Cache Update data writer\n"));
+      return EXIT_FAILURE;
+    }
+
+    AsyncDiscoveryCachePruneTypeSupport_var async_disc_cache_prune_ts = new AsyncDiscoveryCachePruneTypeSupportImpl;
+    if (async_disc_cache_prune_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to register AsyncDiscoveryCachePrune type\n"));
+      return EXIT_FAILURE;
+    }
+    CORBA::String_var async_disc_cache_prune_type_name = async_disc_cache_prune_ts->get_type_name();
+
+    async_disc_cache_prune_topic =
+      relay_participant->create_topic(RELAY_ASYNC_DISCOVERY_CACHE_PRUNE_TOPIC_NAME.c_str(),
+                                      async_disc_cache_prune_type_name,
+                                      TOPIC_QOS_DEFAULT, nullptr,
+                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    if (!async_disc_cache_prune_topic) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Relay Async Discovery Cache Prune topic\n"));
+      return EXIT_FAILURE;
+    }
+
+    DDS::DataWriterListener_var cache_prune_writer_listener =
+      new StatisticsWriterListener(relay_statistics_reporter, &RelayStatisticsReporter::async_discovery_cache_prune_sub_count);
+    DDS::DataWriter_var async_disc_cache_prune_writer_var =
+      relay_publisher->create_datawriter(async_disc_cache_prune_topic, writer_qos, cache_prune_writer_listener, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    if (!async_disc_cache_prune_writer_var) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Async Discovery Cache Prune data writer\n"));
+      return EXIT_FAILURE;
+    }
+
+    async_disc_cache_prune_writer = AsyncDiscoveryCachePruneDataWriter::_narrow(async_disc_cache_prune_writer_var);
+    if (!async_disc_cache_prune_writer) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to narrow Async Discovery Cache Prune data writer\n"));
+      return EXIT_FAILURE;
+    }
   }
 
   GuidPartitionTable guid_partition_table(config, reactor_task, spdp_horizontal_addr, *guid_addr_set,
-    relay_partitions_writer, relay_statistics_reporter, async_disc_cache_writer);
+    relay_partitions_writer, relay_statistics_reporter, async_disc_cache_update_writer, async_disc_cache_prune_writer);
   RelayPartitionTable relay_partition_table(relay_statistics_reporter);
   relay_statistics_reporter.report();
 
@@ -801,13 +842,27 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  DDS::DataReaderListener_var async_disc_cache_update_listener = new AsyncDiscoveryCacheUpdateListener(guid_partition_table, config);
-  DDS::DataReader_var async_disc_cache_reader_var =
-    relay_subscriber->create_datareader(async_disc_cache_update_topic, reader_qos,
-                                        async_disc_cache_update_listener, DDS::DATA_AVAILABLE_STATUS);
-  if (!async_disc_cache_reader_var) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Async Discovery Cache Update data reader\n"));
-    return EXIT_FAILURE;
+  DDS::DataReader_var async_disc_cache_update_reader_var;
+  DDS::DataReader_var async_disc_cache_prune_reader_var;
+
+  if (config.synchronize_async_discovery_cache()) {
+    DDS::DataReaderListener_var async_disc_cache_update_listener = new AsyncDiscoveryCacheUpdateListener(guid_partition_table, config);
+    async_disc_cache_update_reader_var =
+      relay_subscriber->create_datareader(async_disc_cache_update_topic, reader_qos,
+                                          async_disc_cache_update_listener, DDS::DATA_AVAILABLE_STATUS);
+    if (!async_disc_cache_update_reader_var) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Async Discovery Cache Update data reader\n"));
+      return EXIT_FAILURE;
+    }
+
+    DDS::DataReaderListener_var async_disc_cache_prune_listener = new AsyncDiscoveryCachePruneListener(guid_partition_table, config);
+    async_disc_cache_prune_reader_var =
+      relay_subscriber->create_datareader(async_disc_cache_prune_topic, reader_qos,
+                                          async_disc_cache_prune_listener, DDS::DATA_AVAILABLE_STATUS);
+    if (!async_disc_cache_prune_reader_var) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: failed to create Async Discovery Cache Prune data reader\n"));
+      return EXIT_FAILURE;
+    }
   }
 
   if (spdp_horizontal_handler.open(spdp_horizontal_addr) == -1 ||
