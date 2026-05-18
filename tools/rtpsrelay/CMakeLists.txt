@@ -11,6 +11,7 @@ include(opendds_build_helpers)
 
 add_executable(RtpsRelay
   AsyncDiscoveryCacheUpdateListener.cpp
+  AsyncDiscoveryCachePruneListener.cpp
   Config.cpp
   EndpointListener.cpp
   GuidAddrSet.cpp

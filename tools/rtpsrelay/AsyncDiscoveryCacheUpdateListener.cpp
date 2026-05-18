@@ -22,7 +22,8 @@ void AsyncDiscoveryCacheUpdateListener::on_data_available(DDS::DataReader_ptr re
     return;
   }
   if (rc != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: AsyncDiscoveryCacheUpdateListener::on_data_available: failed to take samples: %C\n", OpenDDS::DCPS::retcode_to_string(rc)));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: AsyncDiscoveryCacheUpdateListener::on_data_available: failed to take samples: %C\n",
+      OpenDDS::DCPS::retcode_to_string(rc)));
     return;
   }
 
@@ -37,12 +38,12 @@ void AsyncDiscoveryCacheUpdateListener::on_data_available(DDS::DataReader_ptr re
         if (data.relay_id() == config_.relay_id()) {
           continue;
         }
-        guid_partition_table_.update_remote_cert_partitions_cache(data.entries(), data.relay_id(), now);
+        guid_partition_table_.handle_async_disc_cache_update(data.entries(), data.relay_id(), now);
       }
       break;
     case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
     case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
-      // TODO: remove cache entries from the remote relay instances?
+      // TODO: remove cache entries for the relay that is no longer alive?
       break;
     }
   }

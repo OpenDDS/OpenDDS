@@ -278,6 +278,7 @@ int run(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Certificate pattern provided but RtpsRelay security is not enabled\n"));
     return EXIT_FAILURE;
   }
+  // TODO: check if synchronize async discovery cache is enabled when async discovery is disabled
 
   const DDS::Duration_t one_minute = { 60, 0 };
 
