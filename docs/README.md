@@ -1,7 +1,7 @@
 # OpenDDS Documentation
 
 The [Sphinx](https://www.sphinx-doc.org/en/master/)-based documentation is
-hosted on [Read the Docs](readthedocs.org) located
+hosted on [Read the Docs](https://readthedocs.org) located
 [here](https://opendds.readthedocs.io). It can also be built
 locally. Instructions for this are in [`internal/docs.rst`](internal/docs.rst)
 or [on Read the Docs (master branch)](https://opendds.readthedocs.io/en/master/internal/docs.html).

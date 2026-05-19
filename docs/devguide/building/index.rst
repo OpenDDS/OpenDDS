@@ -134,7 +134,7 @@ It requires :ref:`deps-xerces` and :ref:`deps-openssl`.
 
     Download source and build according to instructions.
 
-  If the libraries didn't get installed to ``/usr``, then the installation prefixes will have to be passed using ``--xerces`` and ``--openssl``.
+  If the libraries didn't get installed to ``/usr``, then the installation prefixes will have to be passed using ``--xerces3`` and ``--openssl``.
 
 .. tab:: Windows
 
@@ -144,8 +144,6 @@ It requires :ref:`deps-xerces` and :ref:`deps-openssl`.
 
     Microsoft vcpkg is a "C++ Library Manager for Windows, Linux, and macOS" which helps developers build/install dependencies.
     Although it is cross-platform, this guide only discusses vcpkg on Windows.
-
-    As of this writing, vcpkg is only supported on Visual Studio 2015 Update 3 and later versions; if using an earlier version of Visual Studio, skip down to the manual setup instructions later in this section.
 
     * If OpenDDS tests will be built, install CMake or put the one that comes with Visual Studio on the ``PATH`` (see ``Common7\IDE\CommonExtensions\Microsoft\CMake``).
 
@@ -222,11 +220,11 @@ It requires :ref:`deps-xerces` and :ref:`deps-openssl`.
            cd build
 
     #. Run cmake with the appropriate generator.
-       In this case Visual Studio 2017 with 64-bit is being used so:
+       In this case Visual Studio 2022 with 64-bit is being used so:
 
        .. code-block:: batch
 
-           cmake -G "Visual Studio 15 2017 Win64" ..
+           cmake -G "Visual Studio 17 2022" -A x64 ..
 
     #. Run cmake again with the build switch and install target (this should be done in an administrator command-prompt to install in the default location as mentioned above).
 
@@ -751,7 +749,7 @@ It assumes the NDK has been downloaded and the location is in an environment var
     -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=android-29 \
     --toolchain $NDK/build/cmake/android.toolchain.cmake \
     -DOPENDDS_HOST_TOOLS=$(realpath build-host)
-  cmake --build build-target-- -j 4
+  cmake --build build-target -- -j 4
 
 Installation
 ============

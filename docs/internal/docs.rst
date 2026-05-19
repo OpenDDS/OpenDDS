@@ -61,13 +61,15 @@ If it was built successfully, then the PDF file will be at ``docs/_build/latex/o
 Strict Checks
 =============
 
-``docs/build.py strict`` will promote Sphinx warnings to errors and check to see if links resolve to a valid web page.
+``docs/build.py strict`` will promote Sphinx warnings to errors.
+``docs/build.py linkcheck`` will check to see if links resolve to a valid web page.
+Both can be run with ``docs/build.py strict linkcheck``.
 
 .. note::
 
   The documentation includes dynamic links to files in the GitHub repo created by :rst:role:`ghfile`.
   These links will be invalid until the git commit they were built under is pushed to a Github fork of OpenDDS.
-  This also means running will cause those links to marked as broken.
+  This also means running ``docs/build.py linkcheck`` can cause those links to be marked as broken.
   A workaround for this is to pass ``-c master`` or another commit, branch, or tag that is desired.
 
 Building Manually

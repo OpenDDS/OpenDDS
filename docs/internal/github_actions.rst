@@ -16,9 +16,9 @@ Legend for GitHub Actions Build Names
 Operating System
 ================
 
-* u20/u22 - Ubuntu 20.04/22.04
-* w19/w22 - Windows Server 2019/Windows Server 2022
-* m13/m14 - macOS 13/14
+* u22/u24 - Ubuntu 22.04/24.04
+* w22/w25 - Windows Server 2022/Windows Server 2025
+* m14 - macOS 14
 
 .. seealso::
 
@@ -31,8 +31,7 @@ Build Configuration
 * re - Release build.  If not specified, Debug is implied.
 * clangX/gccY - compiler used to build OpenDDS.
   If not specified, the default system compiler is used.
-  Windows Server 2019 uses Visual Studio 2019
-  Windows Server 2022 uses Visual Studio 2022
+  Windows Server 2022 and 2025 use Visual Studio 2022
 
 Build Type
 ==========

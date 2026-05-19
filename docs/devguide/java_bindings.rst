@@ -199,9 +199,9 @@ These instructions assume you have completed the installation steps in the :ghfi
 
        %ACE_ROOT%\bin\mwc.pl -type [CompilerType]
 
-     CompilerType can be any supported MPC type (such as "vs2019")
+     CompilerType can be any supported MPC type (such as "vs2019" or "vs2022")
 
-     Make sure this is running ActiveState Perl or Strawberry Perl.
+     Make sure this is running in an environment with Perl available.
 
 #. Compile the generated C++ and Java code
 
@@ -216,7 +216,7 @@ These instructions assume you have completed the installation steps in the :ghfi
      Build the generated ``.sln`` (Solution) file using your preferred method.
      This can be either the Visual Studio IDE or one of the command-line tools.
      If you use the IDE, start it from a command prompt using ``devenv`` so that it inherits the environment variables.
-     Command-line tools for building include ms ``build`` and invoking the IDE (``devenv``) with the appropriate arguments.
+     Command-line tools for building include ``msbuild`` and invoking the IDE (``devenv``) with the appropriate arguments.
 
    When this completes successfully you have a native library and a Java ``.jar`` file.
    The native library names are ``Foo.dll`` (Release) or ``Food.dll`` (Debug) on Windows and ``libFoo.so`` on Linux.
@@ -644,4 +644,3 @@ OpenDDS provides partial support for `JMS version 1.1 <https://docs.oracle.com/j
 Enterprise Java applications can make use of the complete OpenDDS middleware just like standard Java and C++ applications.
 
 See the ``INSTALL`` file in the :ghfile:`java/jms/` directory for information on getting started with the OpenDDS JMS support, including the prerequisites and dependencies.
-

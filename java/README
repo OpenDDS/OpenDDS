@@ -11,9 +11,9 @@ encountered while developing with the Java bindings.
 ======================================================================
 * See also
 
-  - OpenDDS website <http://www.opendds.org>
+  - OpenDDS website <https://www.opendds.org>
   - OpenDDS Developer's Guide
-      <http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf>
+      <https://opendds.readthedocs.io/en/latest-release/>
   - OMG DDS Portal <http://portals.omg.org/dds>
   - OMG DDS specifications
       <http://www.omg.org/technology/documents/dds_spec_catalog.htm>
@@ -117,18 +117,18 @@ defined.
 5. Run MPC to generate platform-specific build files.
    Unix    => $ACE_ROOT/bin/mwc.pl -type gnuace
    Windows => %ACE_ROOT%\bin\mwc.pl -type [CompilerType]
-                         ** CompilerType options are: vc71, vc8, vc9, and nmake
-                            Make sure this is running ActiveState Perl.
+                         ** CompilerType can be any supported MPC type, such
+                            as vs2019 or vs2022.
 
 6. Compile the generated C++ and Java code
    Unix    => make (GNU make)
    Windows => Build the generated .sln (Solution) file using your preferred
      method.  This can be either the Visual Studio IDE or one of the
      command-line tools.  If it's the IDE, start it from a command prompt
-     using "devenv" or "vcexpress" (express edition) so that it inherits the
-     environment variables.  Command-line tools for building include "vcbuild"
-     and invoking the IDE (devenv or vcexpress) with the appropriate arguments.
-   When this completes sucesfully you'll have a native library and a Java jar.
+     using "devenv" so that it inherits the environment variables.
+     Command-line tools for building include "msbuild" and invoking the IDE
+     (devenv) with the appropriate arguments.
+   When this completes successfully you'll have a native library and a Java jar.
    The native library names are as follows:
    Unix => libFoo.so           Windows => Foo.dll (Release) or Food.dll (Debug)
    You can change the locations of these libraries (including the .jar file)

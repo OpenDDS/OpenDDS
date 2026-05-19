@@ -108,11 +108,12 @@ on if `--debug` option has been pass to configure.
 #### Windows Example
 
 ```
-configure --qt=C:\Qt\5.11.1\msvc2017_64
+configure --qt=C:\path\to\Qt5
 ```
 
-This is for a prebuilt 64-bit Qt 5.11.1 for Visual Studio 2017 using the
-official Qt Windows installer and the default location.
+This is for a prebuilt 64-bit Qt 5 installation.
+Use the root directory that contains Qt's `bin`, `include`, and `lib`
+directories.
 
 ## Without the Configure Script
 
