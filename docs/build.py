@@ -30,12 +30,24 @@ python = 'python3'
 
 def log(*args, **kwargs):
     error = kwargs.pop('error', False)
-    f = sys.stderr if error else sys.stdout
+    warning = kwargs.pop('warning', False)
+    f = sys.stderr if error or warning else sys.stdout
     prefix = f'{AnsiColors.Purple}build.py:{AnsiColors.End} '
     if error:
         prefix += f'{AnsiColors.Red}ERROR:{AnsiColors.End} '
+    elif warning:
+        prefix += f'{AnsiColors.Yellow}WARNING:{AnsiColors.End} '
     print(prefix, end='', file=f)
     print(*args, **kwargs, file=f, flush=True)
+
+
+def linkcheck_info_matches(info_by_uri, uri, info):
+    for uri_regex, info_regex_list in info_by_uri.items():
+        if re.fullmatch(uri_regex, uri):
+            for info_regex in info_regex_list:
+                if re.fullmatch(info_regex, info):
+                    return True
+    return False
 
 
 class DocEnv:
@@ -98,9 +110,11 @@ class DocEnv:
         try:
             self.run('sphinx-build', *args, add_env=add_env)
         except CalledProcessError as e:
-            log('sphinx-build failed', error=True)
             if exit_on_fail:
+                log('sphinx-build failed', error=True)
                 sys.exit(1)
+            else:
+                log('sphinx-build reported problems', warning=True)
 
     def do(self, actions, because_of=None, open_result=False):
         for action in actions:
@@ -157,6 +171,28 @@ class DocEnv:
                 r'.*Read timed out.*',
             ],
         }
+        # This is regex of URL to a list of regex of messages that should be
+        # treated as warnings. These links are still checked, but known
+        # temporary outages won't fail the entire linkcheck job.
+        warn_info = {
+            r'https://scan\.coverity\.com(?:/.*)?': [
+                r'.*Read timed out.*',
+                r'.*ConnectTimeout.*',
+                r'.*ConnectionError.*',
+                r'.*Connection reset by peer.*',
+                r'.*Max retries exceeded.*',
+                r'.*Name or service not known.*',
+                r'.*Temporary failure in name resolution.*',
+                r'.*Remote end closed connection.*',
+                r'.*502 Server Error.*',
+                r'.*503 Server Error.*',
+                r'.*504 Server Error.*',
+                r'.*404 Client Error.*',
+                r'.*Bad Gateway.*',
+                r'.*Service Unavailable.*',
+                r'.*Gateway Timeout.*',
+            ],
+        }
         linkcheck_json = self.build_path / 'linkcheck/output.json'
         failed = False
         with linkcheck_json.open() as f:
@@ -180,16 +216,20 @@ class DocEnv:
                         else:
                             continue
                     case _:
-                        ignore = False
-                        for uri_regex, info_regex_list in ignore_info.items():
-                            if re.fullmatch(uri_regex, uri):
-                                for info_regex in info_regex_list:
-                                    if re.fullmatch(info_regex, info):
-                                        ignore = True
-                                        break
-                            if ignore:
-                                break
-                        if ignore:
+                        if linkcheck_info_matches(warn_info, uri, info):
+                            part1 = f'{uri} is '
+                            part2 = status
+                            if info:
+                                part2 += ': ' + info
+                            log(f'{filename}:{lineno}',
+                                f'{part1}{AnsiColors.Yellow}{part2}{AnsiColors.End}',
+                                warning=True)
+                            anno = create_gha_annotation('warning', f'{part1}{part2}',
+                                title='linkcheck', file=filename, line=lineno, for_link_check=True)
+                            if anno:
+                                print(anno)
+                            continue
+                        if linkcheck_info_matches(ignore_info, uri, info):
                             continue
 
                 failed = True
