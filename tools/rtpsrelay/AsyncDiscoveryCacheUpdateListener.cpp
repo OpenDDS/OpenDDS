@@ -43,7 +43,6 @@ void AsyncDiscoveryCacheUpdateListener::on_data_available(DDS::DataReader_ptr re
       break;
     case DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE:
     case DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE:
-      // TODO: remove cache entries for the relay that is no longer alive?
       break;
     }
   }

@@ -365,20 +365,21 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
         proxy.deny(src_guid);
       }
 
-      // Initiate async discovery if applies, that is, the relay has not learned about any partitions
-      // for this client from endpoint discovery, but has cached partitions for the same client (based
-      // on an identifier extracted from its certificate SN, even though its GUID has changed).
+      // Initiate async discovery if applies, i.e., the relay has not learned about any partitions
+      // for this client from endpoint discovery, but has cached partitions for it.
       // The cached partitions are used to forward the client's messages until the relay has learned
       // about any of the client's partitions through endpoint discovery.
       bool async_discovery = false;
-      if (to_partitions.empty()) {
-        const auto pos = proxy.find(src_guid);
-        if (pos != proxy.end()) {
-          const auto key = pos->second.identity_info.cert_id();
-          guid_partition_table_.lookup_cert_partitions_cache(to_partitions, key, src_guid);
-        }
-        if (!to_partitions.empty()) {
-          async_discovery = true;
+      if (config_.async_discovery_enabled()) {
+        if (to_partitions.empty()) {
+          const auto pos = proxy.find(src_guid);
+          if (pos != proxy.end()) {
+            const auto key = pos->second.identity_info.cert_id();
+            guid_partition_table_.lookup_cert_partitions_cache(to_partitions, key, src_guid);
+          }
+          if (!to_partitions.empty()) {
+            async_discovery = true;
+          }
         }
       }
       sent += send(proxy, src_guid, to_partitions, to, send_to_application_participant, msg, now, async_discovery);
@@ -686,7 +687,6 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
   CORBA::ULong sent = 0;
   for (const auto& addr : address_set) {
     if (addr != horizontal_address_) {
-      // TODO(sonndinh): Handle cross-VM case
       horizontal_handler_->enqueue_or_send_message(addr, to_partitions, to_guids, msg, now);
       ++sent;
     } else {
@@ -694,9 +694,9 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
       GuidSet guids;
       guid_partition_table_.lookup(guids, to_partitions, to_guids);
 
-      // Also send to the pending recicipents that have initiated async discovery with this source.
+      // Also send to the pending recipients that have initiated async discovery with this source.
+      const auto iter = proxy.find(src_guid);
       if (!async_discovery) {
-        const auto iter = proxy.find(src_guid);
         if (iter != proxy.end()) {
           const auto& pending_recipients = iter->second.pending_recipients;
           guids.insert(pending_recipients.begin(), pending_recipients.end());
@@ -715,7 +715,7 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
                                    ++sent;
           });
           if (async_discovery) {
-            // Add the source GUID to the pending reciprocal list of each target so that
+            // Add the source GUID to the pending recipients list of each target so that
             // subsequent messages from the target can be forwarded to the source, thus
             // allowing them to discover each other.
             p->second.pending_recipients.insert(src_guid);
@@ -724,7 +724,6 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
       }
       if (async_discovery) {
         guids.erase(src_guid);
-        const auto iter = proxy.find(src_guid);
         if (iter != proxy.end()) {
           iter->second.initiated_async_discovery_with.insert(guids.begin(), guids.end());
         }

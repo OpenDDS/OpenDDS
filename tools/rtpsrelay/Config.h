@@ -497,6 +497,11 @@ public:
     return certificate_id_pattern_;
   }
 
+  bool async_discovery_enabled() const
+  {
+    return !certificate_id_pattern_.empty();
+  }
+
   void async_discovery_cache_timeout(const OpenDDS::DCPS::TimeDuration& value)
   {
     TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_ASYNC_DISCOVERY_CACHE_TIMEOUT, value.to_dds_duration());

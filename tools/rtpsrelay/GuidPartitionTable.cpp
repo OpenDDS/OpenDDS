@@ -230,7 +230,7 @@ void GuidPartitionTable::lookup(StringSet& partitions, const OpenDDS::DCPS::GUID
 void
 GuidPartitionTable::update_cert_partitions_cache(const std::string& key, const StringSet& partitions, const OpenDDS::DCPS::GUID_t& guid)
 {
-  if (key.empty()) {
+  if (key.empty() || !config_.async_discovery_enabled()) {
     return;
   }
 
@@ -279,7 +279,7 @@ GuidPartitionTable::update_cert_partitions_cache(const std::string& key, const S
 void
 GuidPartitionTable::lookup_cert_partitions_cache(StringSet& partitions, const std::string& key, const OpenDDS::DCPS::GUID_t& guid)
 {
-  if (key.empty()) {
+  if (key.empty() || !config_.async_discovery_enabled()) {
     return;
   }
 
