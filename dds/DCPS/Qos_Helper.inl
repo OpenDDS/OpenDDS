@@ -56,7 +56,7 @@ bool
 operator==(const DDS::DurabilityQosPolicy& qos1,
            const DDS::DurabilityQosPolicy& qos2)
 {
-  return qos1.kind == qos2.kind;
+  return std::memcmp(&qos1.kind, &qos2.kind, sizeof qos1.kind) == 0;
 }
 
 ACE_INLINE
@@ -78,7 +78,7 @@ bool operator==(const DDS::PresentationQosPolicy& qos1,
                 const DDS::PresentationQosPolicy& qos2)
 {
   return
-    qos1.access_scope == qos2.access_scope
+    std::memcmp(&qos1.access_scope, &qos2.access_scope, sizeof qos1.access_scope) == 0
     && qos1.coherent_access == qos2.coherent_access
     && qos1.ordered_access == qos2.ordered_access;
 }
@@ -116,7 +116,7 @@ bool operator==(const DDS::LivelinessQosPolicy& qos1,
                 const DDS::LivelinessQosPolicy& qos2)
 {
   return
-    qos1.kind == qos2.kind
+    std::memcmp(&qos1.kind, &qos2.kind, sizeof qos1.kind) == 0
     && qos1.lease_duration == qos2.lease_duration;
 }
 
