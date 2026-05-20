@@ -2845,6 +2845,67 @@ TEST(dds_DCPS_XTypes_TypeAssignability, AliasTypeTest_NotAssignable)
   expect_false_alias_to_alias();
 }
 
+TEST(dds_DCPS_XTypes_TypeAssignability, AliasTypeTest_NestedAliasChainAssignable)
+{
+  TypeAssignability test(make_rch<TypeLookupService>());
+  EquivalenceHash hash;
+  get_equivalence_hash(hash);
+  const TypeIdentifier alias_b_id = make(EK_MINIMAL, hash);
+
+  MinimalAliasType alias_a;
+  MinimalAliasType alias_b;
+  alias_a.body.common.related_type = alias_b_id;
+  alias_b.body.common.related_type = TypeIdentifier(TK_INT32);
+  test.insert_entry(alias_b_id, TypeObject(MinimalTypeObject(alias_b)));
+
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(alias_a)), TypeIdentifier(TK_INT32)));
+  EXPECT_TRUE(test.assignable(TypeIdentifier(TK_INT32), TypeObject(MinimalTypeObject(alias_a))));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(alias_a)),
+                              TypeObject(MinimalTypeObject(alias_b))));
+}
+
+TEST(dds_DCPS_XTypes_TypeAssignability, AliasTypeTest_CyclicAliasesNotAssignable)
+{
+  TypeAssignability test(make_rch<TypeLookupService>());
+
+  EquivalenceHash hash;
+  get_equivalence_hash(hash);
+  const TypeIdentifier self_alias_id = make(EK_MINIMAL, hash);
+
+  MinimalAliasType self_alias;
+  self_alias.body.common.related_type = self_alias_id;
+  test.insert_entry(self_alias_id, TypeObject(MinimalTypeObject(self_alias)));
+
+  MinimalSequenceType sequence_type;
+  sequence_type.header.common.bound = 10;
+  sequence_type.element.common.type = TypeIdentifier(TK_INT32);
+
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(self_alias)), TypeIdentifier(TK_INT32)));
+  EXPECT_FALSE(test.assignable(TypeIdentifier(TK_INT32), TypeObject(MinimalTypeObject(self_alias))));
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(self_alias)),
+                               TypeObject(MinimalTypeObject(sequence_type))));
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(self_alias)),
+                               TypeObject(MinimalTypeObject(self_alias))));
+
+  EquivalenceHash hash_a;
+  EquivalenceHash hash_b;
+  get_equivalence_hash(hash_a);
+  get_equivalence_hash(hash_b);
+  const TypeIdentifier alias_a_id = make(EK_MINIMAL, hash_a);
+  const TypeIdentifier alias_b_id = make(EK_MINIMAL, hash_b);
+
+  MinimalAliasType alias_a;
+  MinimalAliasType alias_b;
+  alias_a.body.common.related_type = alias_b_id;
+  alias_b.body.common.related_type = alias_a_id;
+  test.insert_entry(alias_a_id, TypeObject(MinimalTypeObject(alias_a)));
+  test.insert_entry(alias_b_id, TypeObject(MinimalTypeObject(alias_b)));
+
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(alias_a)), TypeIdentifier(TK_INT32)));
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(alias_a)),
+                               TypeObject(MinimalTypeObject(alias_b))));
+}
+
 TEST(dds_DCPS_XTypes_TypeAssignability, StructTypeTest_Assignable)
 {
   TypeAssignability test(make_rch<TypeLookupService>());

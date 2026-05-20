@@ -13,6 +13,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
+namespace {
+  const size_t MAX_ALIAS_CHAIN_LENGTH = 64;
+}
+
 /**
  * @brief Both input type objects must be minimal
  */
@@ -95,6 +99,10 @@ bool TypeAssignability::assignable(const TypeObject& ta,
 bool TypeAssignability::assignable(const TypeIdentifier& ta,
                                    const TypeIdentifier& tb) const
 {
+  if (ta == TypeIdentifier::None || tb == TypeIdentifier::None) {
+    return false;
+  }
+
   if (ta == tb) {
     return true;
   }
@@ -210,7 +218,7 @@ bool TypeAssignability::assignable_alias(const MinimalTypeObject& ta,
                                          const MinimalTypeObject& tb) const
 {
   if (TK_ALIAS == ta.kind && TK_ALIAS != tb.kind) {
-    const TypeIdentifier& tia = ta.alias_type.body.common.related_type;
+    const TypeIdentifier& tia = get_base_type(ta);
     switch (tia.kind()) {
     case TK_BOOLEAN:
     case TK_BYTE:
@@ -256,7 +264,7 @@ bool TypeAssignability::assignable_alias(const MinimalTypeObject& ta,
       return false; // Future extensions
     }
   } else if (TK_ALIAS != ta.kind && TK_ALIAS == tb.kind) {
-    const TypeIdentifier& tib = tb.alias_type.body.common.related_type;
+    const TypeIdentifier& tib = get_base_type(tb);
     switch (ta.kind) {
     case TK_ANNOTATION:
       return assignable_annotation(ta, tib);
@@ -280,8 +288,8 @@ bool TypeAssignability::assignable_alias(const MinimalTypeObject& ta,
       return false; // Future extensions
     }
   } else if (TK_ALIAS == ta.kind && TK_ALIAS == tb.kind) {
-    const TypeIdentifier& tia = ta.alias_type.body.common.related_type;
-    const TypeIdentifier& tib = tb.alias_type.body.common.related_type;
+    const TypeIdentifier& tia = get_base_type(ta);
+    const TypeIdentifier& tib = get_base_type(tb);
     return assignable(tia, tib);
   }
 
@@ -1970,23 +1978,35 @@ bool TypeAssignability::hold_key(const TypeIdentifier& ti, MinimalTypeObject& to
 
 /**
  * @brief The input must be of type TK_ALIAS
- * Return the non-alias base type identifier of the input
+ * Return the non-alias base type identifier of the input, or
+ * TypeIdentifier::None if the alias chain is cyclic or too deep.
  */
 const TypeIdentifier& TypeAssignability::get_base_type(const MinimalTypeObject& type) const
 {
-  const TypeIdentifier& base = type.alias_type.body.common.related_type;
-  switch (base.kind()) {
-  case EK_COMPLETE:
-  case EK_MINIMAL: {
-    const MinimalTypeObject& type_obj = lookup_minimal(base);
-    if (TK_ALIAS == type_obj.kind) {
-      return get_base_type(type_obj);
+  TypeIdentifierSet visited;
+  const MinimalTypeObject* current = &type;
+
+  for (size_t i = 0; i < MAX_ALIAS_CHAIN_LENGTH; ++i) {
+    const TypeIdentifier& base = current->alias_type.body.common.related_type;
+    switch (base.kind()) {
+    case EK_COMPLETE:
+    case EK_MINIMAL: {
+      if (!visited.insert(base).second) {
+        return TypeIdentifier::None;
+      }
+      const MinimalTypeObject& type_obj = lookup_minimal(base);
+      if (TK_ALIAS == type_obj.kind) {
+        current = &type_obj;
+        continue;
+      }
+      return base;
     }
-    return base;
+    default:
+      return base;
+    }
   }
-  default:
-    return base;
-  }
+
+  return TypeIdentifier::None;
 }
 
 /**
