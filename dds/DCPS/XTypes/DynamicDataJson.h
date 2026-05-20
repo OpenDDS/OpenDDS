@@ -31,7 +31,7 @@ enum DynamicDataJsonDiscriminatorFormat {
    */
   DYNAMIC_DATA_JSON_DISCRIMINATOR_AUTO,
 
-  /// Include/require the OpenDDS-style "$discriminator" JSON member.
+  /// Include/require the DDS-JSON "$discriminator" union member.
   DYNAMIC_DATA_JSON_DISCRIMINATOR_FIELD,
 
   /// Use the dds-xtypes interop active-member-only union representation.

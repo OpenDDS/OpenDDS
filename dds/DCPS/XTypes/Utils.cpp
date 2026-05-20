@@ -1090,9 +1090,7 @@ bool dynamic_data_equal(DDS::DynamicData_ptr lhs, DDS::DynamicData_ptr rhs)
   DDS::DynamicType_var rhs_type = rhs->type();
   DDS::DynamicType_var lhs_base = safe_base_type(lhs_type);
   DDS::DynamicType_var rhs_base = safe_base_type(rhs_type);
-  if (!lhs_base || !rhs_base ||
-      lhs_base->get_kind() != rhs_base->get_kind() ||
-      !lhs_base->equals(rhs_base)) {
+  if (!lhs_base || !rhs_base || !lhs_base->equals(rhs_base)) {
     return false;
   }
   return data_equal_i(lhs, rhs, MEMBER_ID_INVALID, MEMBER_ID_INVALID, lhs_base);
