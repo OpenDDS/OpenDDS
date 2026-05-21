@@ -1,5 +1,59 @@
 # OpenDDS Releases
 
+## Version 3.34.0 of OpenDDS
+
+Released 2026-05-21
+
+Download [this release on GitHub](https://github.com/OpenDDS/OpenDDS/releases/tag/v3.34.0).
+
+Read [the documentation for this release on Read the Docs](https://opendds.readthedocs.io/en/v3.34.0).
+
+### Additions
+
+- RtpsRelay
+  - Additional parameters can be changed at runtime. See [RtpsRelayControl](https://opendds.readthedocs.io/en/v3.34.0/devguide/internet_enabled_rtps.html#internet-enabled-rtps-rtps-relay-control) for details. ([PR #5130](https://github.com/OpenDDS/OpenDDS/pull/5130), [PR #5111](https://github.com/OpenDDS/OpenDDS/pull/5111))
+  - A list of partitions can be specified to be denied by the RtpsRelay instance using the new RelayDeniedPartitions topic. ([PR #5135](https://github.com/OpenDDS/OpenDDS/pull/5135))
+    - A new option `-DeniedPartitionsTimeout` is added to specify the denial duration.
+- Added a '--profiling' flag to the configure script to enable common flags used during profiling (gcc / clang) ([PR #5169](https://github.com/OpenDDS/OpenDDS/pull/5169))
+  - This enables some optimization ('-O3') but also includes debuging info ('-ggdb') and protects frame pointers ('-fno-omit-frame-pointer')
+    in order to help in generating clean stack traces for profilers and other utilities which examine the call stack.
+- Added callbacks for when an OpenDDS thread starts and finishes to control thread behavior. ([PR #5171](https://github.com/OpenDDS/OpenDDS/pull/5171))
+  - For example on Linux, using  to set which CPU core the thread runs on.
+  - See `set_thread_status_listener` in [`dds/DCPS/Service_Participant.h`](https://github.com/OpenDDS/OpenDDS/blob/v3.34.0/dds/DCPS/Service_Participant.h) and `ThreadStatusListener` in [`dds/DCPS/ThreadStatusManager.h`](https://github.com/OpenDDS/OpenDDS/blob/v3.34.0/dds/DCPS/ThreadStatusManager.h) for details.
+- As an optimization, all IDL mappings will now try to avoid zero-initializing memory of sequences of primitive types (ints, floats, etc) while deserializing a sample. ([PR #5173](https://github.com/OpenDDS/OpenDDS/pull/5173))
+  - IDL-to-C++11 will require additional opt-in using [@OpenDDS::no_init_before_deserialize](https://opendds.readthedocs.io/en/v3.34.0/devguide/opendds_idl.html#opendds-idl-opendds-no-init-before-deserialize).
+- Added `DCPSEventDispatcherThreads` and transport `event_dispatcher_threads` runtime-configuration options to control `EventDispatcher` thread counts. ([PR #5208](https://github.com/OpenDDS/OpenDDS/pull/5208))
+  Setting transport `event_dispatcher_threads=0` reuses the global dispatcher instead of creating a transport-local dispatcher.
+- Added [`[transport] send_buffer_size (tcp)`](https://opendds.readthedocs.io/en/v3.34.0/devguide/run_time_configuration.html#cfg-prop-transport-tcp-send_buffer_size) and ([PR #5215](https://github.com/OpenDDS/OpenDDS/pull/5215))
+  [`[transport] rcv_buffer_size (tcp)`](https://opendds.readthedocs.io/en/v3.34.0/devguide/run_time_configuration.html#cfg-prop-transport-tcp-rcv_buffer_size). By default, the TCP transport
+  now leaves socket buffer sizing to the platform unless these are set to
+  positive values.
+
+### Platform Support and Dependencies
+
+- ACE/TAO
+  - Updated ACE 6/TAO 2 from 6.5.23 to [6.5.24](https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_24).
+  - Updated ACE 8/TAO 4 from 8.0.5 to [8.0.6](https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-8_0_6).
+- CMake
+  - When building OpenDDS with CMake, the default ACE_TAO version is now ACE 8 / TAO 4. ([PR #5093](https://github.com/OpenDDS/OpenDDS/pull/5093), [PR #5029](https://github.com/OpenDDS/OpenDDS/pull/5029))
+  - Replace CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE with CMAKE_VS_PLATFORM_NAME to fit cross-compile scenario on Windows. ([PR #5157](https://github.com/OpenDDS/OpenDDS/pull/5157))
+
+### Removals
+
+- RtpsRelay
+  - RtpsRelay option `-LogParticipantStatistics` is removed as it is unused ([PR #5109](https://github.com/OpenDDS/OpenDDS/pull/5109))
+
+### Fixes
+
+- Increase netlink receive buffer size. ([PR #5142](https://github.com/OpenDDS/OpenDDS/pull/5142))
+  - Recommended netlink receive [buffer size](https://www.kernel.org/doc/html/latest/userspace-api/netlink/intro.html#buffer-sizing) is 32kB.
+    Buffer size smaller than 8kB may lead to unexpected truncation of received data.
+- As a network performance improvement: Free up Reactor threads for network reads by moving the majority of maintenance and response tasks and jobs off Reactor threads and onto matching EventDispatcher threads. ([PR #5160](https://github.com/OpenDDS/OpenDDS/pull/5160))
+- `ThreadStatusManager` now contains multiple slots for storing thread statuses, each has its own lock. ([PR #5172](https://github.com/OpenDDS/OpenDDS/pull/5172))
+  Only threads assigned to the same slot contend with each other for the slot's lock.
+- Fixed a null pointer dereference which could occur when deserializing `DynamicData` samples from a participant being removed. ([PR #5176](https://github.com/OpenDDS/OpenDDS/pull/5176))
+- Fix issues related to transport instance lookup and shared local addresses between transport instances which were sometimes causing incorrect locator values to be used in participant and endpoint announcements and causing connectivity issues. These issues primarily impact configurations which make use of discovery and transport configuration templates. ([PR #5189](https://github.com/OpenDDS/OpenDDS/pull/5189))
+
 ## Version 3.33.0 of OpenDDS
 
 Released 2025-08-01
