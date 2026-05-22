@@ -61,15 +61,15 @@ public:
 
   // Local setup:
 
-  void enable_transport(bool reliable, bool durable, DomainParticipantImpl* dpi);
+  void enable_transport(bool reliable, bool durable, const GUID_t& dpi);
   void enable_transport_using_config(bool reliable, bool durable,
                                      const TransportConfig_rch& tc,
-                                     DomainParticipantImpl* dpi);
+                                     const GUID_t& dpi);
 
   bool swap_bytes() const { return swap_bytes_; }
   bool cdr_encapsulation() const { return cdr_encapsulation_; }
   const TransportLocatorSeq& connection_info() const { return conn_info_; }
-  void populate_connection_info(DomainParticipantImpl* dpi);
+  void populate_connection_info(const GUID_t& dpi);
   bool is_reliable() const { return reliable_; }
 
   // Managing associations to remote peers:
@@ -222,7 +222,7 @@ private:
       , scheduled_(false)
       , blob_index_(0)
       , client_(tc_rch)
-      , timeout_task_(make_rch<PendingAssocSporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &PendingAssoc::timeout))
+      , timeout_task_(make_rch<SporadicEvent>(TheServiceParticipant->event_dispatcher(), make_rch<PendingAssocEvent>(rchandle_from(this), &PendingAssoc::timeout)))
     {}
 
     ~PendingAssoc()
@@ -249,9 +249,9 @@ private:
     }
 
   private:
-    typedef PmfSporadicTask<PendingAssoc> PendingAssocSporadicTask;
-    RcHandle<PendingAssocSporadicTask> timeout_task_;
-    void timeout(const MonotonicTimePoint& now);
+    typedef PmfEvent<PendingAssoc> PendingAssocEvent;
+    SporadicEvent_rch timeout_task_;
+    void timeout();
   };
 
   typedef RcHandle<PendingAssoc> PendingAssoc_rch;

@@ -41,7 +41,7 @@ public:
   {
     TransportClient::set_guid(config.getSubRdrId(index));
 
-    enable_transport(config.readersReliable(), false, 0); //(reliable, durable)
+    enable_transport(config.readersReliable(), false, get_guid()); // (reliable, durable, guid)
 
     if (index == 1) {
       writeSubReady();

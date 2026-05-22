@@ -191,6 +191,7 @@ module RtpsRelay {
     unsigned long relay_partitions_pub_count;
     unsigned long relay_address_pub_count;
     unsigned long admission_deferral_count;
+    unsigned long unadmitted_entry_count;
     unsigned long remote_map_size;
     unsigned long max_ips_per_client;
     unsigned long total_client_ips;

@@ -6,8 +6,8 @@
  * etc.) should have class.
  *
  * To add a new annotation, implement a subclass of Annotation, implementing at
- * least definition() and name(), then add a register_one call for the class to
- * Annotations::register_all() in annotations.cpp.
+ * least definition() and a static name() method, then add a register_one call
+ * for the class to Annotations::register_all() in annotations.cpp.
  *
  * OpenDDS-specific annotations should go in the OpenDDS C++ namespace and the
  * OpenDDS IDL module. Only standardized annotations should be outside those
@@ -35,7 +35,7 @@ class AST_Decl;
 class AST_Union;
 class AST_Annotation_Decl;
 class AST_Annotation_Appl;
-class Annotation;
+class AnnotationBaseDoNotUse;
 
 class Annotations {
 public:
@@ -43,40 +43,65 @@ public:
   ~Annotations();
 
   void register_all();
-  Annotation* operator[](const std::string& annotation) const;
+  AnnotationBaseDoNotUse* operator[](const std::string& annotation) const;
 
   template<typename T>
   void register_one()
   {
     T* annotation = new T;
-    map_[annotation->fullname()] = annotation;
+    map_[T::static_fullname()] = annotation;
     annotation->cache();
   }
 
+  template<typename T>
+  T* get() const
+  {
+    MapType::const_iterator it = map_.find(T::static_fullname());
+    return it != map_.end() ? static_cast<T*>(it->second) : 0;
+  }
+
 private:
-  typedef std::map<std::string, Annotation*> MapType;
+  typedef std::map<std::string, AnnotationBaseDoNotUse*> MapType;
   MapType map_;
 };
 
 /**
- * Wrapper Base Class for Annotations
+ * Non-template base class for polymorphism, shouldn't be used directly.
  */
-class Annotation {
+class AnnotationBaseDoNotUse {
 public:
-  Annotation();
-  virtual ~Annotation();
+  AnnotationBaseDoNotUse();
+  virtual ~AnnotationBaseDoNotUse();
 
   virtual std::string definition() const = 0;
-  virtual std::string name() const = 0;
-  virtual std::string module() const;
-  virtual std::string fullname() const;
+  virtual std::string fullname() const = 0;
 
   AST_Annotation_Decl* declaration() const;
   AST_Annotation_Appl* find_on(AST_Decl* node) const;
   void cache();
 
-private:
+protected:
   AST_Annotation_Decl* declaration_;
+};
+
+/// Templated base with static methods
+template <typename Derived>
+class Annotation : public AnnotationBaseDoNotUse {
+public:
+  static const char* module() { return ""; }
+
+  static std::string static_fullname()
+  {
+    std::string modules("::");
+    const std::string module_names = Derived::module();
+    if (!module_names.empty()) {
+      modules += module_names + "::";
+    }
+    return modules + "@" + Derived::name();
+  }
+
+  /// Virtual override that calls static version
+  std::string fullname() const { return static_fullname(); }
 };
 
 AST_Expression::AST_ExprValue* get_annotation_member_ev(AST_Annotation_Appl* appl,
@@ -108,11 +133,41 @@ public:
   const T absent_value;
 };
 
+// Dispatch helpers for value_from_appl - use overloading to select correct getter
+namespace annotation_detail {
+  inline bool call_value_getter(AST_Annotation_Appl* appl, bool*)
+  {
+    return get_bool_annotation_member_value(appl, "value");
+  }
+
+  inline ACE_UINT32 call_value_getter(AST_Annotation_Appl* appl, ACE_UINT32*)
+  {
+    return get_u32_annotation_member_value(appl, "value");
+  }
+
+  inline ACE_INT32 call_value_getter(AST_Annotation_Appl* appl, ACE_INT32*)
+  {
+    return get_i32_annotation_member_value(appl, "value");
+  }
+
+  inline std::string call_value_getter(AST_Annotation_Appl* appl, std::string*)
+  {
+    return get_str_annotation_member_value(appl, "value");
+  }
+
+  // Fallback for types without specific handling (e.g., custom value types)
+  template<typename T>
+  T call_value_getter(AST_Annotation_Appl*, T*)
+  {
+    return T();
+  }
+}
+
 /**
  * Annotation with a Single Member Named "value"
  */
-template <typename T>
-class AnnotationWithValue : public Annotation {
+template <typename T, typename Derived>
+class AnnotationWithValue : public Annotation<Derived> {
 public:
   /**
    * If node has the annotation, this sets value to the annotation value and
@@ -120,7 +175,7 @@ public:
    */
   virtual bool node_value_exists(AST_Decl* node, T& value) const
   {
-    AST_Annotation_Appl* appl = find_on(node);
+    AST_Annotation_Appl* appl = this->find_on(node);
     if (!appl) { return false; }
 
     value = value_from_appl(appl);
@@ -131,26 +186,14 @@ protected:
   /* NOTE: Derived classes should either override value_from_appl.  A
      default implementation is provided so template functions can be
      defined. */
-  virtual T value_from_appl(AST_Annotation_Appl*) const
+  virtual T value_from_appl(AST_Annotation_Appl* appl) const
   {
-    return T();
+    return annotation_detail::call_value_getter(appl, static_cast<T*>(0));
   }
 };
 
-template<>
-bool AnnotationWithValue<bool>::value_from_appl(AST_Annotation_Appl* appl) const;
-
-template<>
-unsigned AnnotationWithValue<ACE_UINT32>::value_from_appl(AST_Annotation_Appl* appl) const;
-
-template<>
-int AnnotationWithValue<ACE_INT32>::value_from_appl(AST_Annotation_Appl* appl) const;
-
-template<>
-std::string AnnotationWithValue<std::string>::value_from_appl(AST_Annotation_Appl* appl) const;
-
-template <typename T>
-class AnnotationWithEnumValue : public AnnotationWithValue<T> {
+template <typename T, typename Derived>
+class AnnotationWithEnumValue : public AnnotationWithValue<T, Derived> {
 protected:
   T value_from_appl(AST_Annotation_Appl* appl) const
   {
@@ -160,14 +203,14 @@ protected:
 
 // @key ======================================================================
 
-class KeyAnnotation : public AnnotationWithValue<bool>, public AbsentValue<bool> {
+class KeyAnnotation : public AnnotationWithValue<bool, KeyAnnotation>, public AbsentValue<bool> {
 public:
   KeyAnnotation()
     : AbsentValue<bool>(false)
   {}
 
+  static const char* name() { return "key"; }
   std::string definition() const;
-  std::string name() const;
 
   bool union_value(AST_Union* node) const;
 };
@@ -184,12 +227,12 @@ struct TopicValue {
   {}
 };
 
-class TopicAnnotation : public AnnotationWithValue<TopicValue> {
+class TopicAnnotation : public AnnotationWithValue<TopicValue, TopicAnnotation> {
 public:
   TopicAnnotation();
 
+  static const char* name() { return "topic"; }
   std::string definition() const;
-  std::string name() const;
 
 private:
   TopicValue value_from_appl(AST_Annotation_Appl* appl) const;
@@ -197,26 +240,26 @@ private:
 
 // @nested ===================================================================
 
-class NestedAnnotation : public AnnotationWithValue<bool> {
+class NestedAnnotation : public AnnotationWithValue<bool, NestedAnnotation> {
 public:
+  static const char* name() { return "nested"; }
   std::string definition() const;
-  std::string name() const;
 };
 
 // @default_nested ===========================================================
 
-class DefaultNestedAnnotation : public AnnotationWithValue<bool> {
+class DefaultNestedAnnotation : public AnnotationWithValue<bool, DefaultNestedAnnotation> {
 public:
+  static const char* name() { return "default_nested"; }
   std::string definition() const;
-  std::string name() const;
 };
 
 // @id =======================================================================
 
-class IdAnnotation : public AnnotationWithValue<ACE_UINT32> {
+class IdAnnotation : public AnnotationWithValue<ACE_UINT32, IdAnnotation> {
 public:
+  static const char* name() { return "id"; }
   std::string definition() const;
-  std::string name() const;
 };
 
 // @autoid ===================================================================
@@ -226,58 +269,62 @@ enum AutoidKind {
   autoidkind_hash
 };
 
-class AutoidAnnotation : public AnnotationWithEnumValue<AutoidKind>, public AbsentValue<AutoidKind> {
+class AutoidAnnotation :
+  public AnnotationWithEnumValue<AutoidKind, AutoidAnnotation>, public AbsentValue<AutoidKind> {
 public:
   AutoidAnnotation()
     : AbsentValue<AutoidKind>(autoidkind_sequential)
   {}
 
+  static const char* name() { return "autoid"; }
   std::string definition() const;
-  std::string name() const;
 };
 
 // @hashid ===================================================================
 
-class HashidAnnotation : public AnnotationWithValue<std::string> {
+class HashidAnnotation : public AnnotationWithValue<std::string, HashidAnnotation> {
 public:
+  static const char* name() { return "hashid"; }
   std::string definition() const;
-  std::string name() const;
 };
 
 // @optional ===================================================================
 
-class OptionalAnnotation : public AnnotationWithValue<bool>, public AbsentValue<bool> {
+class OptionalAnnotation :
+  public AnnotationWithValue<bool, OptionalAnnotation>, public AbsentValue<bool> {
 public:
   OptionalAnnotation()
     : AbsentValue<bool>(false)
   {}
 
+  static const char* name() { return "optional"; }
   std::string definition() const;
-  std::string name() const;
 };
 
 // @must_understand ============================================================
 
-class MustUnderstandAnnotation : public AnnotationWithValue<bool>, public AbsentValue<bool> {
+class MustUnderstandAnnotation :
+  public AnnotationWithValue<bool, MustUnderstandAnnotation>, public AbsentValue<bool> {
 public:
   MustUnderstandAnnotation()
     : AbsentValue<bool>(false)
   {}
 
+  static const char* name() { return "must_understand"; }
   std::string definition() const;
-  std::string name() const;
 };
 
 // @external ===================================================================
 
-class ExternalAnnotation : public AnnotationWithValue<bool>, public AbsentValue<bool> {
+class ExternalAnnotation :
+  public AnnotationWithValue<bool, ExternalAnnotation>, public AbsentValue<bool> {
 public:
   ExternalAnnotation()
     : AbsentValue<bool>(false)
   {}
 
+  static const char* name() { return "external"; }
   std::string definition() const;
-  std::string name() const;
 };
 
 // @extensibility ============================================================
@@ -288,34 +335,35 @@ enum ExtensibilityKind {
   extensibilitykind_mutable
 };
 
-class ExtensibilityAnnotation : public AnnotationWithEnumValue<ExtensibilityKind> {
+class ExtensibilityAnnotation :
+  public AnnotationWithEnumValue<ExtensibilityKind, ExtensibilityAnnotation> {
 public:
+  static const char* name() { return "extensibility"; }
   std::string definition() const;
-  std::string name() const;
 };
 
 // @final ====================================================================
 
-class FinalAnnotation : public Annotation {
+class FinalAnnotation : public Annotation<FinalAnnotation> {
 public:
+  static const char* name() { return "final"; }
   std::string definition() const;
-  std::string name() const;
 };
 
 // @appendable ===============================================================
 
-class AppendableAnnotation : public Annotation {
+class AppendableAnnotation : public Annotation<AppendableAnnotation> {
 public:
+  static const char* name() { return "appendable"; }
   std::string definition() const;
-  std::string name() const;
 };
 
 // @mutable ==================================================================
 
-class MutableAnnotation : public Annotation {
+class MutableAnnotation : public Annotation<MutableAnnotation> {
 public:
+  static const char* name() { return "mutable"; }
   std::string definition() const;
-  std::string name() const;
 };
 
 // @try_construct ============================================================
@@ -327,15 +375,15 @@ enum TryConstructFailAction {
 };
 
 class TryConstructAnnotation
-  : public AnnotationWithEnumValue<TryConstructFailAction>
+  : public AnnotationWithEnumValue<TryConstructFailAction, TryConstructAnnotation>
   , public AbsentValue<TryConstructFailAction> {
 public:
   TryConstructAnnotation()
     : AbsentValue<TryConstructFailAction>(tryconstructfailaction_discard)
   {}
 
+  static const char* name() { return "try_construct"; }
   std::string definition() const;
-  std::string name() const;
 
   TryConstructFailAction sequence_element_value(AST_Sequence* node) const;
   TryConstructFailAction array_element_value(AST_Array* node) const;
@@ -347,11 +395,12 @@ public:
 
 // @value ====================================================================
 
-struct ValueAnnotation : AnnotationWithValue<ACE_INT32> {
+class ValueAnnotation : public AnnotationWithValue<ACE_INT32, ValueAnnotation> {
+public:
   // @value(long) is supported for enumerators
   // more general @value support as described in IDL4.2 is not yet supported
+  static const char* name() { return "value"; }
   std::string definition() const;
-  std::string name() const;
 };
 
 // OpenDDS Specific Annotations
@@ -423,16 +472,39 @@ namespace OpenDDS {
    * Replacement for @::data_representation which requires bitmask.
    */
   class DataRepresentationAnnotation :
-    public AnnotationWithValue<DataRepresentation> {
+    public AnnotationWithValue<DataRepresentation, DataRepresentationAnnotation> {
   public:
+    static const char* name() { return "data_representation"; }
+    static const char* module() { return "OpenDDS"; }
     std::string definition() const;
-    std::string name() const;
-    std::string module() const;
 
     bool node_value_exists(AST_Decl* node, DataRepresentation& value) const;
 
   protected:
     DataRepresentation value_from_appl(AST_Annotation_Appl* appl) const;
+  };
+
+  // @OpenDDS::no_init_before_deserialize ========================================
+
+  /**
+   * Indicate to the mapping and type support generators that this type should
+   * not be initialized before deserialization to optimize reading samples.
+   * This only works for primitive type sequences.
+   */
+  class NoInitBeforeDeserializeAnnotation :
+    public AnnotationWithValue<bool, NoInitBeforeDeserializeAnnotation> {
+  public:
+    static const char* name() { return "no_init_before_deserialize"; }
+    static const char* module() { return "OpenDDS"; }
+
+    std::string definition() const
+    {
+      return
+        "module OpenDDS {\n"
+        "  @annotation no_init_before_deserialize {\n"
+        "  };\n"
+        "};\n";
+    }
   };
 
   namespace internal {
@@ -443,7 +515,11 @@ namespace OpenDDS {
      * get_dynamic_data_adapter for these types will be generated, but will
      * return nullptr.
      */
-    struct NoDynamicDataAdapterAnnotation : public Annotation {
+    class NoDynamicDataAdapterAnnotation : public Annotation<NoDynamicDataAdapterAnnotation> {
+    public:
+      static const char* name() { return "no_dynamic_data_adapter"; }
+      static const char* module() { return "OpenDDS::internal"; }
+
       std::string definition() const
       {
         return
@@ -454,24 +530,18 @@ namespace OpenDDS {
           "  };\n"
           "};\n";
       }
-
-      std::string name() const
-      {
-        return "no_dynamic_data_adapter";
-      }
-
-      std::string module() const
-      {
-        return "::OpenDDS::internal::";
-      }
     };
 
     /**
      * Types with this annotation have a special serialization case in
      * marshal_generator.
      */
-    class SpecialSerializationAnnotation : public AnnotationWithValue<std::string> {
+    class SpecialSerializationAnnotation :
+      public AnnotationWithValue<std::string, SpecialSerializationAnnotation> {
     public:
+      static const char* name() { return "special_serialization"; }
+      static const char* module() { return "OpenDDS::internal"; }
+
       std::string definition() const
       {
         return
@@ -482,16 +552,6 @@ namespace OpenDDS {
           "    };\n"
           "  };\n"
           "};\n";
-      }
-
-      std::string name() const
-      {
-        return "special_serialization";
-      }
-
-      std::string module() const
-      {
-        return "::OpenDDS::internal::";
       }
 
     protected:

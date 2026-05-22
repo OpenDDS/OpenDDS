@@ -35,6 +35,7 @@ protected:
   WorkerDataReaderListener* dr_listener_;
   OpenDDS::DCPS::TimeDuration read_period_;
   OpenDDS::DCPS::EventBase_rch event_;
+  long timer_id_;
   bool in_do_read_;
 };
 

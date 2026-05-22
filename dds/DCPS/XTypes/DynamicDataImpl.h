@@ -12,6 +12,7 @@
 #  include <dds/DCPS/FilterEvaluator.h>
 #  include <dds/DCPS/Sample.h>
 #  include <dds/DCPS/ValueWriter.h>
+#  include <ace/Recursive_Thread_Mutex.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -678,6 +679,8 @@ private:
   bool has_discriminator_value(const_single_iterator& single_it, const_complex_iterator& complex_it) const;
   bool get_discriminator_value(CORBA::Long& value, const const_single_iterator& single_it,
     const const_complex_iterator& complex_it, const DDS::DynamicType_var& disc_type);
+
+  mutable ACE_Recursive_Thread_Mutex lock_;
 };
 
 } // namespace XTypes

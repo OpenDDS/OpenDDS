@@ -255,7 +255,7 @@ ShmemTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags fl
 {
   ShmemInst_rch cfg = config();
   if (cfg) {
-    cfg->populate_locator(info, flags, domain_);
+    cfg->populate_locator(info, flags, domain_, GUID_UNKNOWN);
     return true;
   }
   return false;

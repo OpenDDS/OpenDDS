@@ -380,7 +380,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_DEBUG((LM_DEBUG, "Publisher Guid: %C\n", OpenDDS::DCPS::LogGuid(guid).c_str()));
         OpenDDS::DCPS::TransportStatisticsSequence stats;
         disc->append_transport_statistics(42, guid, stats);
-        transport_inst->append_transport_statistics(stats, 42, dp_impl);
+        transport_inst->append_transport_statistics(stats, 42, guid);
 
         for (unsigned int i = 0; i != stats.length(); ++i) {
           ACE_DEBUG((LM_DEBUG, "Publisher Transport Statistics: %C\n", OpenDDS::DCPS::to_json(stats[i]).c_str()));

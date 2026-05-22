@@ -32,10 +32,8 @@ namespace {
   OpenDDS::STUN::Message make_bad_request_error_response(const OpenDDS::STUN::Message& a_message,
                                                          const std::string& a_reason)
   {
-    OpenDDS::STUN::Message response;
-    response.class_ = OpenDDS::STUN::ERROR_RESPONSE;
-    response.method = a_message.method;
-    std::memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
+    OpenDDS::STUN::Message response(OpenDDS::STUN::ERROR_RESPONSE, a_message.method());
+    response.transaction_id(a_message.transaction_id());
     response.append_attribute(OpenDDS::STUN::make_error_code(OpenDDS::STUN::BAD_REQUEST, a_reason));
     response.append_attribute(OpenDDS::STUN::make_fingerprint());
     return response;
@@ -44,10 +42,8 @@ namespace {
   OpenDDS::STUN::Message make_unknown_attributes_error_response(const OpenDDS::STUN::Message& a_message,
                                                                 const std::vector<OpenDDS::STUN::AttributeType>& a_unknown_attributes)
   {
-    OpenDDS::STUN::Message response;
-    response.class_ = OpenDDS::STUN::ERROR_RESPONSE;
-    response.method = a_message.method;
-    std::memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
+    OpenDDS::STUN::Message response(OpenDDS::STUN::ERROR_RESPONSE, a_message.method());
+    response.transaction_id(a_message.transaction_id());
     response.append_attribute(OpenDDS::STUN::make_error_code(OpenDDS::STUN::UNKNOWN_ATTRIBUTE, "Unknown Attributes"));
     response.append_attribute(OpenDDS::STUN::make_unknown_attributes(a_unknown_attributes));
     response.append_attribute(OpenDDS::STUN::make_fingerprint());
@@ -337,12 +333,17 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
 
     GuidAddrSet::Proxy proxy(guid_addr_set_);
     OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, READ_MASK | SIGNAL_MASK, handle_as_int);
-    record_activity(proxy, addr_port, now, src_guid, from_application_participant);
+
+    bool already_checked_admit = false;
+    if (!record_activity(proxy, addr_port, now, src_guid, from_application_participant, already_checked_admit)) {
+      stats_reporter_.ignored_message(msg_len, now, type);
+      return 0;
+    }
 
     cache_message(proxy, src_guid, to, msg, now);
 
     bool admitted = false;
-    if (proxy.ignore_rtps(from_application_participant, src_guid, now, admitted)) {
+    if (proxy.ignore_rtps(from_application_participant, src_guid, now, already_checked_admit, admitted)) {
       stats_reporter_.ignored_message(msg_len, now, type);
       return 0;
     }
@@ -369,7 +370,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
 
     OpenDDS::DCPS::Serializer serializer(msg.get(), OpenDDS::STUN::encoding);
     OpenDDS::STUN::Message message;
-    message.block = msg.get();
+    message.block(msg.get());
     if (!(serializer >> message)) {
       HANDLER_WARNING((LM_WARNING, "(%P|%t) WARNING: VerticalHandler::process_message %C Could not deserialize STUN message from %C\n",
         name_.c_str(), OpenDDS::DCPS::LogAddr(remote_address).c_str()));
@@ -402,18 +403,19 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     OpenDDS::STUN::Message response;
     bool response_needed = false;
 
-    switch (message.method) {
+    switch (message.method()) {
     case OpenDDS::STUN::BINDING:
       {
-        if (message.class_ == OpenDDS::STUN::REQUEST) {
-          response.class_ = OpenDDS::STUN::SUCCESS_RESPONSE;
-          response.method = OpenDDS::STUN::BINDING;
-          std::memcpy(response.transaction_id.data, message.transaction_id.data, sizeof(message.transaction_id.data));
+        const OpenDDS::STUN::Class msg_class = message.get_class();
+        if (msg_class == OpenDDS::STUN::REQUEST) {
+          response.set_class(OpenDDS::STUN::SUCCESS_RESPONSE);
+          response.method(OpenDDS::STUN::BINDING);
+          response.transaction_id(message.transaction_id());
           response.append_attribute(OpenDDS::STUN::make_mapped_address(remote_address));
           response.append_attribute(OpenDDS::STUN::make_xor_mapped_address(remote_address));
           response.append_attribute(OpenDDS::STUN::make_fingerprint());
           response_needed = true;
-        } else if (message.class_ == OpenDDS::STUN::INDICATION) {
+        } else if (msg_class == OpenDDS::STUN::INDICATION) {
           // Do nothing.
         } else {
           HANDLER_WARNING((LM_WARNING, "(%P|%t) WARNING: VerticalHandler::process_message %C Unknown STUN message class from %C\n",
@@ -440,17 +442,23 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       const bool from_application_participant =
         (remote_address == application_participant_addr_) &&
         (src_guid == config_.application_participant_guid());
-      bool allow_stun_responses = true;
 
-      record_activity(proxy, addr_port, now, src_guid, from_application_participant, &allow_stun_responses);
+      bool already_checked_admit = false;
+      bool allow_stun_responses = true;
+      const bool proceed = record_activity(proxy, addr_port, now, src_guid, from_application_participant,
+        already_checked_admit, &allow_stun_responses);
 
       if (allow_stun_responses && response_needed) {
         send(remote_address, std::move(response), now);
         ++messages_sent;
       }
 
+      if (!proceed) {
+        return messages_sent;
+      }
+
       bool admitted = false;
-      proxy.ignore_rtps(from_application_participant, src_guid, now, admitted);
+      proxy.ignore_rtps(from_application_participant, src_guid, now, already_checked_admit, admitted);
       if (admitted && spdp_handler_) {
         messages_sent += spdp_handler_->send_to_application_participant(proxy, src_guid, now);
       }
@@ -463,15 +471,45 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
   }
 }
 
-void
+bool
 VerticalHandler::record_activity(GuidAddrSet::Proxy& proxy,
                                  const AddrPort& remote_address,
                                  const OpenDDS::DCPS::MonotonicTimePoint& now,
                                  const OpenDDS::DCPS::GUID_t& src_guid,
                                  bool from_application_participant,
+                                 bool& already_checked_admit,
                                  bool* allow_stun_responses)
 {
+  // A GuidAddrSet entry for src_guid is always created even if it isn't admitted initially.
+  // To avoid the same entry getting refreshed by subsequent messages from the same src_guid,
+  // returns early if it keeps getting deferred.
+  already_checked_admit = false;
+  if (!from_application_participant) {
+    const auto pos = proxy.find(src_guid);
+    if (pos != proxy.end()) {
+      if (!pos->second.allow_rtps) {
+        const auto admitting = proxy.admitting();
+        // Don't call admitting again in ignore_rtps if it is admitted here.
+        already_checked_admit = true;
+        if (!admitting) {
+          proxy.admission_deferral_count(now);
+          proxy.apply_drain_state(pos->second, from_application_participant);
+          if (allow_stun_responses) {
+            *allow_stun_responses = pos->second.allow_stun_responses;
+          }
+          if (config_.log_activity()) {
+            ACE_DEBUG((LM_INFO, "(%P|%t) INFO: VerticalHandler::record_activity %C skipped unadmitted participant %C from %C - relay not admitting\n",
+                       name_.c_str(), guid_to_string(src_guid).c_str(),
+                       OpenDDS::DCPS::LogAddr(remote_address.addr).c_str()));
+          }
+          return false;
+        }
+      }
+    }
+  }
+
   proxy.record_activity(remote_address, now, src_guid, from_application_participant, allow_stun_responses, *this);
+  return true;
 }
 
 bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser,
@@ -667,7 +705,7 @@ size_t VerticalHandler::send(const ACE_INET_Addr& addr,
   const size_t length = HEADER_SIZE + message.length();
   Message_Block_Shared_Ptr block(new ACE_Message_Block(length));
   Serializer serializer(block.get(), encoding);
-  message.block = block.get();
+  message.block(block.get());
   serializer << message;
   RelayHandler::enqueue_message(addr, block, now, type);
   return length;

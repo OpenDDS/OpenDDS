@@ -124,8 +124,7 @@ namespace DCPS {
   }
 
   template <typename T>
-  class WeakRcHandle
-  {
+  class WeakRcHandle : public SafeBool_T<WeakRcHandle<T> > {
   public:
     WeakRcHandle()
       : weak_object_(0)
@@ -208,9 +207,9 @@ namespace DCPS {
       return weak_object_ < rhs.weak_object_;
     }
 
-    operator bool() const
+    bool boolean_test() const
     {
-      return weak_object_;
+      return weak_object_ != 0;
     }
 
     void reset()

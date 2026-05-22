@@ -308,14 +308,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   while (!receive(participant_guid, multicast_socket)) {}
 
-  // Send an SPDP message from writer1.
-  send(writer1_socket, writer1_guid, writer1_sequence, multicast_address.to_addr(), participant_data(domain, writer1_guid.guidPrefix, DDS::DomainParticipantQos(), writer1_addr));
+  const OpenDDS::DCPS::MonotonicTimePoint deadline = OpenDDS::DCPS::MonotonicTimePoint::now() + OpenDDS::DCPS::TimeDuration(1, 0);
 
-  // Send an SPDP message from writer2.
-  send(writer2_socket, writer2_guid, writer2_sequence, multicast_address.to_addr(), participant_data(domain, writer2_guid.guidPrefix, DDS::DomainParticipantQos(), writer2_addr));
+  while (OpenDDS::DCPS::MonotonicTimePoint::now() < deadline) {
+    // Send an SPDP message from writer1.
+    send(writer1_socket, writer1_guid, writer1_sequence, multicast_address.to_addr(), participant_data(domain, writer1_guid.guidPrefix, DDS::DomainParticipantQos(), writer1_addr));
 
-  // Sleep to let SPDP process.
-  ACE_OS::sleep(1);
+    // Send an SPDP message from writer2.
+    send(writer2_socket, writer2_guid, writer2_sequence, multicast_address.to_addr(), participant_data(domain, writer2_guid.guidPrefix, DDS::DomainParticipantQos(), writer2_addr));
+
+    // Sleep for 50 ms
+    ACE_OS::sleep(ACE_Time_Value(0, 50000));
+  }
 
   int status = EXIT_SUCCESS;
 

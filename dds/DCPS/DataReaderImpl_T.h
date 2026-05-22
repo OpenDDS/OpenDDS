@@ -122,7 +122,7 @@ namespace OpenDDS {
     typedef OpenDDS::DCPS::Cached_Allocator_With_Overflow<MessageTypeMemoryBlock, ACE_Thread_Mutex>  DataAllocator;
 
     DataReaderImpl_T()
-      : filter_delayed_sample_task_(make_rch<DRISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &DataReaderImpl_T::filter_delayed))
+      : filter_delayed_sample_task_(make_rch<SporadicEvent>(TheServiceParticipant->event_dispatcher(), make_rch<DRIEvent>(rchandle_from(this), &DataReaderImpl_T::filter_delayed)))
       , marshal_skip_serialize_(false)
     {
       initialize_lookup_maps();
@@ -712,6 +712,7 @@ namespace OpenDDS {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_, false);
 
     TopicDescriptionPtr<TopicImpl> topic(topic_servant_);
+    if (!topic) return false;
     TypeSupport* const ts = topic->get_type_support();
     TypeSupportImpl* const type_support = dynamic_cast<TypeSupportImpl*>(ts);
     const bool filter_has_non_key_fields = type_support ? evaluator.has_non_key_fields(*type_support) : true;
@@ -2124,6 +2125,13 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
 
   instance_ptr->last_sequence_ = header.sequence_;
 
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+  const bool coherent_change = ptr->coherent_change_;
+#endif
+
+  // After this point ptr is visible to take/read paths that can remove and
+  // release it while status notifications temporarily release sample_lock_.
+  ptr->inc_ref();
   instance_ptr->rcvd_strategy_->add(ptr);
 
   if (! is_dispose_msg  && ! is_unregister_msg
@@ -2158,11 +2166,13 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
     }
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-  if (! ptr->coherent_change_) {
+  if (!coherent_change) {
 #endif
     RcHandle<OpenDDS::DCPS::SubscriberImpl> sub = get_subscriber_servant();
-    if (!sub || get_deleted())
+    if (!sub || get_deleted()) {
+      ptr->dec_ref();
       return;
+    }
 
     sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, true);
 
@@ -2201,6 +2211,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   }
 #endif
+  ptr->dec_ref();
 }
 
 /// Release sample_lock_ during status notifications in store_instance_data()
@@ -2467,9 +2478,9 @@ unique_ptr<DataAllocator> data_allocator_;
 InstanceMap instance_map_;
 ReverseInstanceMap reverse_instance_map_;
 
-typedef DCPS::PmfSporadicTask<DataReaderImpl_T> DRISporadicTask;
+typedef DCPS::PmfNowEvent<DataReaderImpl_T> DRIEvent;
 
-RcHandle<DRISporadicTask> filter_delayed_sample_task_;
+SporadicEvent_rch filter_delayed_sample_task_;
 #ifdef OPENDDS_HAS_STD_SHARED_PTR
 typedef std::shared_ptr<const OpenDDS::DCPS::DataSampleHeader> DataSampleHeader_ptr;
 #else

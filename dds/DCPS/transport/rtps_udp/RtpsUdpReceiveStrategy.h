@@ -141,6 +141,7 @@ private:
   SequenceNumber last_received_;
 
   const ReceivedDataSample* recvd_sample_;
+  mutable ACE_Recursive_Thread_Mutex readers_mutex_;
   RepoIdSet readers_withheld_, readers_selected_;
 
   ACE_UINT16 fragment_size_;

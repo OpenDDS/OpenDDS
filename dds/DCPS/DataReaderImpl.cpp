@@ -78,7 +78,7 @@ DataReaderImpl::DataReaderImpl()
   , reactor_(0)
   , last_deadline_missed_total_count_(0)
   , deadline_queue_enabled_(false)
-  , deadline_task_(make_rch<DRISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &DataReaderImpl::deadline_task))
+  , deadline_task_(make_rch<SporadicEvent>(TheServiceParticipant->event_dispatcher(), make_rch<DRIEvent>(rchandle_from(this), &DataReaderImpl::deadline_task)))
   , is_bit_(false)
   , always_get_history_(false)
   , statistics_enabled_(false)
@@ -1189,7 +1189,7 @@ DataReaderImpl::enable()
   if (topic_servant_ && !transport_disabled_) {
     try {
       this->enable_transport(this->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS,
-                             this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS, participant.get());
+                             this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS, participant->get_id());
     } catch (const Transport::Exception&) {
       ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable, ")
@@ -1646,22 +1646,33 @@ DataReaderImpl::check_transport_qos(const TransportInst& ti)
   return true;
 }
 
-void DataReaderImpl::notify_read_conditions()
-{
-  //sample lock is already held
-  ReadConditionSet local_read_conditions = read_conditions_;
-  ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+namespace {
 
-  for (ReadConditionSet::iterator it = local_read_conditions.begin(),
-      end = local_read_conditions.end(); it != end; ++it) {
-    ConditionImpl* ci = dynamic_cast<ConditionImpl*>(it->in());
+class SignalAll: public EventBase {
+public:
+  explicit SignalAll(const DDS::ReadCondition_var& rc) : rc_(rc) {}
+  void handle_event() {
+    ConditionImpl* ci = dynamic_cast<ConditionImpl*>(rc_.in());
     if (ci) {
       ci->signal_all();
     } else {
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::notify_read_conditions: ")
+        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl.cpp SignalAll::handle_event: ")
         ACE_TEXT("Failed to obtain ConditionImpl - can't notify.\n")));
     }
+  }
+private:
+  DDS::ReadCondition_var rc_;
+};
+
+}
+
+void DataReaderImpl::notify_read_conditions()
+{
+  //sample lock is already held
+  for (ReadConditionSet::iterator it = read_conditions_.begin(),
+      end = read_conditions_.end(); it != end; ++it) {
+    TheServiceParticipant->event_dispatcher()->dispatch(make_rch<SignalAll>(*it));
   }
 }
 
@@ -3246,7 +3257,7 @@ DDS::Security::ParticipantCryptoHandle DataReaderImpl::get_crypto_handle() const
 void DataReaderImpl::transport_discovery_change()
 {
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
-  populate_connection_info(participant.get());
+  populate_connection_info(participant->get_id());
   const TransportLocatorSeq& trans_conf_info = connection_info();
   const GUID_t dp_id_copy = dp_id_;
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);

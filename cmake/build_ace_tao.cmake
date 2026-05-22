@@ -141,7 +141,7 @@ elseif(_OPENDDS_MPC_TYPE MATCHES "^vs" OR _OPENDDS_MPC_TYPE MATCHES "^vc")
 
   list(APPEND _build_cmd
     MSBuild "${sln}" "-maxcpucount"
-    "-property:Configuration=$<CONFIG>,Platform=${CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE}"
+    "-property:Configuration=$<CONFIG>,Platform=${CMAKE_VS_PLATFORM_NAME}"
     "$<IF:$<BOOL:${_opendds_std}>,-property:LanguageStandard=stdcpp${_opendds_std},>"
   )
 

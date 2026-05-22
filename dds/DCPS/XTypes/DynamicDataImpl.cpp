@@ -11,6 +11,7 @@
 #  include "DynamicTypeMemberImpl.h"
 #  include "Utils.h"
 
+#  include <ace/Guard_T.h>
 #  include <dds/DCPS/DisjointSequence.h>
 #  include <dds/DCPS/DCPS_Utils.h>
 
@@ -36,7 +37,7 @@ DynamicDataImpl::DynamicDataImpl(DDS::DynamicType_ptr type,
 
 DynamicDataImpl::DynamicDataImpl(const DynamicDataImpl& other)
   : CORBA::Object()
-  , DynamicData()
+  , DDS::DynamicData()
   , CORBA::LocalObject()
   , DCPS::RcObject()
   , DynamicDataBase(other.type_)
@@ -52,6 +53,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_descriptor(MemberId, DDS::MemberDescripto
 
 DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, MEMBER_ID_INVALID);
   const TypeKind tk = type_->get_kind();
   switch (tk) {
   case TK_BOOLEAN:
@@ -151,6 +153,7 @@ DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
 
 void DynamicDataImpl::erase_member(DDS::MemberId id)
 {
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
   if (container_.single_map_.erase(id) == 0) {
     if (container_.sequence_map_.erase(id) == 0) {
       container_.complex_map_.erase(id);
@@ -160,6 +163,7 @@ void DynamicDataImpl::erase_member(DDS::MemberId id)
 
 CORBA::ULong DynamicDataImpl::get_string_item_count() const
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, 0);
   CORBA::ULong bs_item_count = 0;
   if (backing_store_) {
     bs_item_count = backing_store_->get_item_count();
@@ -178,6 +182,7 @@ CORBA::ULong DynamicDataImpl::get_string_item_count() const
 
 CORBA::ULong DynamicDataImpl::get_sequence_item_count() const
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, 0);
   CORBA::ULong bs_item_count = 0;
   if (backing_store_) {
     bs_item_count = backing_store_->get_item_count();
@@ -212,6 +217,7 @@ CORBA::ULong DynamicDataImpl::get_sequence_item_count() const
 
 bool DynamicDataImpl::has_member(DDS::MemberId id) const
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   if (container_.single_map_.find(id) != container_.single_map_.end() ||
       container_.sequence_map_.find(id) != container_.sequence_map_.end() ||
       container_.complex_map_.find(id) != container_.complex_map_.end()) {
@@ -224,6 +230,7 @@ bool DynamicDataImpl::has_member(DDS::MemberId id) const
 
 ACE_CDR::ULong DynamicDataImpl::get_item_count()
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, 0);
   const TypeKind tk = type_->get_kind();
   switch (tk) {
   case TK_BOOLEAN:
@@ -313,6 +320,7 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
 
 DDS::ReturnCode_t DynamicDataImpl::clear_all_values()
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   const TypeKind tk = type_->get_kind();
   if (is_primitive(tk) || tk == TK_ENUM) {
     return clear_value_i(MEMBER_ID_INVALID, type_);
@@ -347,16 +355,19 @@ DDS::ReturnCode_t DynamicDataImpl::clear_all_values()
 
 void DynamicDataImpl::clear_container()
 {
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
   container_.clear();
 }
 
 DDS::ReturnCode_t DynamicDataImpl::clear_nonkey_values()
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return DDS::RETCODE_UNSUPPORTED;
 }
 
 DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   const TypeKind this_tk = type_->get_kind();
   if (is_primitive(this_tk) || this_tk == TK_ENUM) {
     if (id != MEMBER_ID_INVALID) {
@@ -674,11 +685,13 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value_i(DDS::MemberId id, const DDS::Dy
 
 DDS::DynamicData_ptr DynamicDataImpl::clone()
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, 0);
   return new DynamicDataImpl(*this);
 }
 
 bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_int8& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   // The same member might be already written to complex_map_.
   // Make sure there is only one entry for each member.
   if (container_.complex_map_.erase(id) == 0) {
@@ -689,6 +702,7 @@ bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_
 
 bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_uint8& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   if (container_.complex_map_.erase(id) == 0) {
     container_.single_map_.erase(id);
   }
@@ -697,6 +711,7 @@ bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_
 
 bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_char& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   if (container_.complex_map_.erase(id) == 0) {
     container_.single_map_.erase(id);
   }
@@ -705,6 +720,7 @@ bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_
 
 bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_octet& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   if (container_.complex_map_.erase(id) == 0) {
     container_.single_map_.erase(id);
   }
@@ -713,6 +729,7 @@ bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_
 
 bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_boolean& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   if (container_.complex_map_.erase(id) == 0) {
     container_.single_map_.erase(id);
   }
@@ -722,6 +739,7 @@ bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_
 #ifdef DDS_HAS_WCHAR
 bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_wchar& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   if (container_.complex_map_.erase(id) == 0) {
     container_.single_map_.erase(id);
   }
@@ -732,6 +750,7 @@ bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_
 template<typename SingleType>
 bool DynamicDataImpl::insert_single(DDS::MemberId id, const SingleType& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   if (container_.complex_map_.erase(id) == 0) {
     container_.single_map_.erase(id);
   }
@@ -740,6 +759,7 @@ bool DynamicDataImpl::insert_single(DDS::MemberId id, const SingleType& value)
 
 bool DynamicDataImpl::insert_complex(DDS::MemberId id, const DDS::DynamicData_var& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   if (container_.single_map_.erase(id) == 0) {
     if (container_.sequence_map_.erase(id) == 0) {
       container_.complex_map_.erase(id);
@@ -1435,6 +1455,7 @@ bool DynamicDataImpl::read_disc_from_backing_store(CORBA::Long& disc_val,
 // Read a discriminator value from a DynamicData that represents it.
 bool DynamicDataImpl::read_discriminator(CORBA::Long& disc_val)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   if (!is_valid_discriminator_type(type_->get_kind())) {
     return false;
   }
@@ -1760,6 +1781,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_value_to_union(DDS::MemberId id, const Me
 
 bool DynamicDataImpl::insert_valid_discriminator(DDS::MemberDescriptor* memberSelected)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   if (memberSelected->is_default_label()) {
     DCPS::DisjointSequence::OrderedRanges<ACE_CDR::Long> used;
     const ACE_CDR::ULong members = type_->get_member_count();
@@ -1789,6 +1811,7 @@ bool DynamicDataImpl::insert_valid_discriminator(DDS::MemberDescriptor* memberSe
 
 bool DynamicDataImpl::insert_discriminator(ACE_CDR::Long value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   DDS::DynamicTypeMember_var member;
   if (type_->get_member(member, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
     return false;
@@ -1956,56 +1979,67 @@ DDS::ReturnCode_t DynamicDataImpl::set_single_value(DDS::MemberId id, const Valu
 
 DDS::ReturnCode_t DynamicDataImpl::set_int32_value(DDS::MemberId id, CORBA::Long value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_single_value<TK_INT32>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_uint32_value(DDS::MemberId id, CORBA::ULong value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_single_value<TK_UINT32>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_int8_value(DDS::MemberId id, CORBA::Int8 value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_single_value<TK_INT8>(id, ACE_OutputCDR::from_int8(value));
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_uint8_value(DDS::MemberId id, CORBA::UInt8 value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_single_value<TK_UINT8>(id, ACE_OutputCDR::from_uint8(value));
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_int16_value(DDS::MemberId id, CORBA::Short value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_single_value<TK_INT16>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_uint16_value(DDS::MemberId id, CORBA::UShort value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_single_value<TK_UINT16>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_int64_value(DDS::MemberId id, CORBA::LongLong value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_single_value<TK_INT64>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_uint64_value(DDS::MemberId id, CORBA::ULongLong value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_single_value<TK_UINT64>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_float32_value(DDS::MemberId id, CORBA::Float value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_single_value<TK_FLOAT32>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_float64_value(DDS::MemberId id, CORBA::Double value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_single_value<TK_FLOAT64>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_float128_value(DDS::MemberId id, CORBA::LongDouble value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_single_value<TK_FLOAT128>(id, value);
 }
 
@@ -2040,12 +2074,14 @@ DDS::ReturnCode_t DynamicDataImpl::set_char_common(DDS::MemberId id, const FromC
 
 DDS::ReturnCode_t DynamicDataImpl::set_char8_value(DDS::MemberId id, CORBA::Char value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_char_common<TK_CHAR8, TK_STRING8>(id, ACE_OutputCDR::from_char(value));
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_char16_value(DDS::MemberId id, CORBA::WChar value)
 {
 #ifdef DDS_HAS_WCHAR
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_char_common<TK_CHAR16, TK_STRING16>(id, ACE_OutputCDR::from_wchar(value));
 #else
   return DDS::RETCODE_UNSUPPORTED;
@@ -2054,11 +2090,13 @@ DDS::ReturnCode_t DynamicDataImpl::set_char16_value(DDS::MemberId id, CORBA::WCh
 
 DDS::ReturnCode_t DynamicDataImpl::set_byte_value(DDS::MemberId id, CORBA::Octet value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_single_value<TK_BYTE>(id, ACE_OutputCDR::from_octet(value));
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_boolean_value(DDS::MemberId id, CORBA::Boolean value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   const TypeKind tk = type_->get_kind();
 
   switch (tk) {
@@ -2094,6 +2132,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_boolean_value(DDS::MemberId id, CORBA::Bo
 
 DDS::ReturnCode_t DynamicDataImpl::set_string_value(DDS::MemberId id, const char* value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   if (!value) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_string_value: Input string is null!\n"));
@@ -2120,6 +2159,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_string_value(DDS::MemberId id, const char
 DDS::ReturnCode_t DynamicDataImpl::set_wstring_value(DDS::MemberId id, const CORBA::WChar* value)
 {
 #ifdef DDS_HAS_WCHAR
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   if (!value) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_wstring_value: Input wstring is null!\n"));
@@ -2134,6 +2174,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_wstring_value(DDS::MemberId id, const COR
 
 bool DynamicDataImpl::serialized_size(const DCPS::Encoding& enc, size_t& size, DCPS::Sample::Extent ext) const
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   DynamicDataImpl* non_const_this = const_cast<DynamicDataImpl*>(this);
   if (ext == DCPS::Sample::Full) {
     return DCPS::serialized_size(enc, size, non_const_this);
@@ -2146,6 +2187,7 @@ bool DynamicDataImpl::serialized_size(const DCPS::Encoding& enc, size_t& size, D
 
 bool DynamicDataImpl::serialize(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   DynamicDataImpl* non_const_this = const_cast<DynamicDataImpl*>(this);
   if (ext == DCPS::Sample::Full) {
     return ser << non_const_this;
@@ -2158,6 +2200,7 @@ bool DynamicDataImpl::serialize(DCPS::Serializer& ser, DCPS::Sample::Extent ext)
 
 DDS::ReturnCode_t DynamicDataImpl::set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_var value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   DDS::DynamicTypeMember_var member;
   if (type_->get_member(member, id) != DDS::RETCODE_OK) {
     return DDS::RETCODE_ERROR;
@@ -2178,6 +2221,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_complex_to_struct(DDS::MemberId id, DDS::
 
 DDS::ReturnCode_t DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::DynamicData_var value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   DDS::DynamicType_var member_type;
   DDS::MemberDescriptor_var md;
   if (!get_union_member_type(id, member_type, md)) {
@@ -2226,6 +2270,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::D
 
 DDS::ReturnCode_t DynamicDataImpl::set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_var value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   if (!check_out_of_bound_write(id)) {
     return DDS::RETCODE_BAD_PARAMETER;
   }
@@ -2242,6 +2287,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_complex_to_collection(DDS::MemberId id, D
 
 DDS::ReturnCode_t DynamicDataImpl::set_complex_value(DDS::MemberId id, DDS::DynamicData_ptr value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   DDS::DynamicData_var value_var = DDS::DynamicData::_duplicate(value);
   const TypeKind tk = type_->get_kind();
 
@@ -2265,6 +2311,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_complex_value(DDS::MemberId id, DDS::Dyna
 template<typename SequenceType>
 bool DynamicDataImpl::insert_sequence(DDS::MemberId id, const SequenceType& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   if (container_.complex_map_.erase(id) == 0) {
     container_.sequence_map_.erase(id);
   }
@@ -2380,6 +2427,7 @@ bool DynamicDataImpl::set_values_to_collection(DDS::MemberId id, const SequenceT
 template<TypeKind ElementTypeKind, typename SequenceType>
 DDS::ReturnCode_t DynamicDataImpl::set_sequence_values(DDS::MemberId id, const SequenceType& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   if (!is_type_supported(ElementTypeKind, "set_sequence_values")) {
     return DDS::RETCODE_ERROR;
   }
@@ -2415,61 +2463,73 @@ DDS::ReturnCode_t DynamicDataImpl::set_sequence_values(DDS::MemberId id, const S
 
 DDS::ReturnCode_t DynamicDataImpl::set_int32_values(DDS::MemberId id, const DDS::Int32Seq& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_sequence_values<TK_INT32>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_uint32_values(DDS::MemberId id, const DDS::UInt32Seq& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_sequence_values<TK_UINT32>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_int8_values(DDS::MemberId id, const DDS::Int8Seq& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_sequence_values<TK_INT8>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_uint8_values(DDS::MemberId id, const DDS::UInt8Seq& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_sequence_values<TK_UINT8>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_int16_values(DDS::MemberId id, const DDS::Int16Seq& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_sequence_values<TK_INT16>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_uint16_values(DDS::MemberId id, const DDS::UInt16Seq& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_sequence_values<TK_UINT16>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_int64_values(DDS::MemberId id, const DDS::Int64Seq& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_sequence_values<TK_INT64>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_uint64_values(DDS::MemberId id, const DDS::UInt64Seq& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_sequence_values<TK_UINT64>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_float32_values(DDS::MemberId id, const DDS::Float32Seq& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_sequence_values<TK_FLOAT32>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_float64_values(DDS::MemberId id, const DDS::Float64Seq& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_sequence_values<TK_FLOAT64>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_float128_values(DDS::MemberId id, const DDS::Float128Seq& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_sequence_values<TK_FLOAT128>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_char8_values(DDS::MemberId id, const DDS::CharSeq& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_sequence_values<TK_CHAR8>(id, value);
 }
 
@@ -2484,16 +2544,19 @@ DDS::ReturnCode_t DynamicDataImpl::set_char16_values(DDS::MemberId id, const DDS
 
 DDS::ReturnCode_t DynamicDataImpl::set_byte_values(DDS::MemberId id, const DDS::ByteSeq& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_sequence_values<TK_BYTE>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_boolean_values(DDS::MemberId id, const DDS::BooleanSeq& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_sequence_values<TK_BOOLEAN>(id, value);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_string_values(DDS::MemberId id, const DDS::StringSeq& value)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return set_sequence_values<TK_STRING8>(id, value);
 }
 
@@ -2585,6 +2648,7 @@ bool DynamicDataImpl::read_basic_value(ACE_OutputCDR::from_boolean& value)
 
 bool DynamicDataImpl::read_basic_value(char*& value) const
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   const bool is_empty = container_.single_map_.empty() && container_.complex_map_.empty();
   if (!is_empty) {
     CORBA::ULong largest_index;
@@ -2609,6 +2673,7 @@ bool DynamicDataImpl::read_basic_value(char*& value) const
 #ifdef DDS_HAS_WCHAR
 bool DynamicDataImpl::read_basic_value(CORBA::WChar*& value) const
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   const bool is_empty = container_.single_map_.empty() && container_.complex_map_.empty();
   if (!is_empty) {
     CORBA::ULong largest_index;
@@ -2634,6 +2699,7 @@ bool DynamicDataImpl::read_basic_value(CORBA::WChar*& value) const
 template<typename ValueType>
 bool DynamicDataImpl::read_basic_in_single_map(ValueType& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   const_single_iterator single_it = container_.single_map_.find(id);
   if (single_it != container_.single_map_.end()) {
     value = single_it->second.get<ValueType>();
@@ -2645,6 +2711,7 @@ bool DynamicDataImpl::read_basic_in_single_map(ValueType& value, DDS::MemberId i
 template<>
 bool DynamicDataImpl::read_basic_in_single_map(char*& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   const_single_iterator single_it = container_.single_map_.find(id);
   if (single_it != container_.single_map_.end()) {
     value = single_it->second.get_string();
@@ -2656,6 +2723,7 @@ bool DynamicDataImpl::read_basic_in_single_map(char*& value, DDS::MemberId id)
 template<>
 bool DynamicDataImpl::read_basic_in_single_map(CORBA::WChar*& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   const_single_iterator single_it = container_.single_map_.find(id);
   if (single_it != container_.single_map_.end()) {
     value = single_it->second.get_wstring();
@@ -2667,6 +2735,7 @@ bool DynamicDataImpl::read_basic_in_single_map(CORBA::WChar*& value, DDS::Member
 template<typename ValueType>
 bool DynamicDataImpl::read_basic_in_complex_map(ValueType& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   const_complex_iterator complex_it = container_.complex_map_.find(id);
   if (complex_it != container_.complex_map_.end()) {
     DynamicDataImpl* nested_dd = dynamic_cast<DynamicDataImpl*>(complex_it->second.in());
@@ -2683,6 +2752,7 @@ void DynamicDataImpl::set_backing_store(DDS::DynamicData_ptr backing_store)
 bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_int8& value,
                                                    DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   return backing_store_ && backing_store_->get_int8_value(value.val_, id) == DDS::RETCODE_OK
     && insert_single(id, value);
 }
@@ -2690,60 +2760,70 @@ bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_int8& val
 bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_uint8& value,
                                                    DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   return backing_store_ && backing_store_->get_uint8_value(value.val_, id) == DDS::RETCODE_OK
     && insert_single(id, value);
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(CORBA::Short& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   return backing_store_ && backing_store_->get_int16_value(value, id) == DDS::RETCODE_OK
     && insert_single(id, value);
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(CORBA::UShort& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   return backing_store_ && backing_store_->get_uint16_value(value, id) == DDS::RETCODE_OK
     && insert_single(id, value);
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(CORBA::Long& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   return backing_store_ && backing_store_->get_int32_value(value, id) == DDS::RETCODE_OK
     && insert_single(id, value);
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(CORBA::ULong& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   return backing_store_ && backing_store_->get_uint32_value(value, id) == DDS::RETCODE_OK
     && insert_single(id, value);
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(CORBA::LongLong& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   return backing_store_ && backing_store_->get_int64_value(value, id) == DDS::RETCODE_OK
     && insert_single(id, value);
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(CORBA::ULongLong& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   return backing_store_ && backing_store_->get_uint64_value(value, id) == DDS::RETCODE_OK
     && insert_single(id, value);
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(CORBA::Float& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   return backing_store_ && backing_store_->get_float32_value(value, id) == DDS::RETCODE_OK
     && insert_single(id, value);
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(CORBA::Double& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   return backing_store_ && backing_store_->get_float64_value(value, id) == DDS::RETCODE_OK
     && insert_single(id, value);
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(CORBA::LongDouble& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   return backing_store_ && backing_store_->get_float128_value(value, id) == DDS::RETCODE_OK
     && insert_single(id, value);
 }
@@ -2751,18 +2831,21 @@ bool DynamicDataImpl::get_value_from_backing_store(CORBA::LongDouble& value, DDS
 bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_octet& value,
                                                    DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   return backing_store_ && backing_store_->get_byte_value(value.val_, id) == DDS::RETCODE_OK
     && insert_single(id, value);
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(char*& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   return backing_store_ && backing_store_->get_string_value(value, id) == DDS::RETCODE_OK
     && insert_single(id, value);
 }
 
 bool DynamicDataImpl::get_value_from_backing_store(CORBA::WChar*& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   return backing_store_ && backing_store_->get_wstring_value(value, id) == DDS::RETCODE_OK
     && insert_single(id, value);
 }
@@ -2770,6 +2853,7 @@ bool DynamicDataImpl::get_value_from_backing_store(CORBA::WChar*& value, DDS::Me
 bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_char& value,
                                                    DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   return backing_store_ && backing_store_->get_char8_value(value.val_, id) == DDS::RETCODE_OK
     && insert_single(id, value);
 }
@@ -2777,6 +2861,7 @@ bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_char& val
 bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_wchar& value,
                                                    DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   return backing_store_ && backing_store_->get_char16_value(value.val_, id) == DDS::RETCODE_OK
     && insert_single(id, value);
 }
@@ -2784,6 +2869,7 @@ bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_wchar& va
 bool DynamicDataImpl::get_value_from_backing_store(ACE_OutputCDR::from_boolean& value,
                                                    DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   return backing_store_ && backing_store_->get_boolean_value(value.val_, id) == DDS::RETCODE_OK
     && insert_single(id, value);
 }
@@ -2799,6 +2885,7 @@ bool DynamicDataImpl::read_basic_member(ValueType& value, DDS::MemberId id)
 template<typename ValueType>
 DDS::ReturnCode_t DynamicDataImpl::get_value_from_self(ValueType& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   // Primitive or enum value can be read using MEMBER_ID_INVALID.
   if (!is_primitive(type_->get_kind())) {
     return DDS::RETCODE_ERROR;
@@ -2833,6 +2920,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_value_from_self(CORBA::WChar*&, DDS::Memb
 template<TypeKind ValueTypeKind, typename ValueType>
 DDS::ReturnCode_t DynamicDataImpl::get_value_from_enum(ValueType& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   TypeKind treat_as_tk;
   const DDS::ReturnCode_t rc = enum_bound(type_, treat_as_tk);
   if (rc != DDS::RETCODE_OK || treat_as_tk != ValueTypeKind) {
@@ -2870,6 +2958,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_value_from_enum<TK_STRING16>(CORBA::WChar
 template<TypeKind ValueTypeKind, typename ValueType>
 DDS::ReturnCode_t DynamicDataImpl::get_value_from_bitmask(ValueType& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   // Allow bitmask to be read as an unsigned integer.
   TypeKind treat_as_tk;
   const DDS::ReturnCode_t rc = bitmask_bound(type_, treat_as_tk);
@@ -2903,6 +2992,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_value_from_bitmask<TK_STRING16>(CORBA::WC
 template<TypeKind ValueTypeKind, typename ValueType>
 DDS::ReturnCode_t DynamicDataImpl::get_value_from_struct(ValueType& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   DDS::MemberDescriptor_var md;
   DDS::DynamicType_var member_type;
   DDS::ReturnCode_t rc = check_member(
@@ -2930,6 +3020,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_value_from_struct(ValueType& value, DDS::
 template<TypeKind ValueTypeKind, typename ValueType>
 DDS::ReturnCode_t DynamicDataImpl::get_value_from_union(ValueType& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   DDS::MemberDescriptor_var md;
   DDS::DynamicType_var member_type;
   DDS::ReturnCode_t rc = check_member(
@@ -3013,6 +3104,7 @@ bool DynamicDataImpl::check_out_of_bound_read(DDS::MemberId id)
 template<TypeKind ValueTypeKind, typename ValueType>
 DDS::ReturnCode_t DynamicDataImpl::get_value_from_collection(ValueType& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   if (!check_out_of_bound_read(id)) {
     return DDS::RETCODE_BAD_PARAMETER;
   }
@@ -3050,6 +3142,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_value_from_collection(ValueType& value, D
 template<TypeKind ValueTypeKind, typename ValueType>
 DDS::ReturnCode_t DynamicDataImpl::get_single_value(ValueType& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   if (!is_type_supported(ValueTypeKind, "get_single_value")) {
     return DDS::RETCODE_ERROR;
   }
@@ -3081,6 +3174,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_single_value(ValueType& value, DDS::Membe
 
 DDS::ReturnCode_t DynamicDataImpl::get_int8_value(CORBA::Int8& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_OutputCDR::from_int8 from_int8(value);
   const DDS::ReturnCode_t rc = get_single_value<TK_INT8>(from_int8, id);
   value = from_int8.val_;
@@ -3089,6 +3183,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_int8_value(CORBA::Int8& value, DDS::Membe
 
 DDS::ReturnCode_t DynamicDataImpl::get_uint8_value(CORBA::UInt8& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_OutputCDR::from_uint8 from_uint8(value);
   const DDS::ReturnCode_t rc = get_single_value<TK_UINT8>(from_uint8, id);
   value = from_uint8.val_;
@@ -3097,46 +3192,55 @@ DDS::ReturnCode_t DynamicDataImpl::get_uint8_value(CORBA::UInt8& value, DDS::Mem
 
 DDS::ReturnCode_t DynamicDataImpl::get_int16_value(CORBA::Short& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return get_single_value<TK_INT16>(value, id);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_uint16_value(CORBA::UShort& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return get_single_value<TK_UINT16>(value, id);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_int32_value(CORBA::Long& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return get_single_value<TK_INT32>(value, id);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_uint32_value(CORBA::ULong& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return get_single_value<TK_UINT32>(value, id);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_int64_value_impl(CORBA::LongLong& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return get_single_value<TK_INT64>(value, id);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_uint64_value_impl(CORBA::ULongLong& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return get_single_value<TK_UINT64>(value, id);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_float32_value(CORBA::Float& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return get_single_value<TK_FLOAT32>(value, id);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_float64_value(CORBA::Double& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return get_single_value<TK_FLOAT64>(value, id);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_float128_value(CORBA::LongDouble& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return get_single_value<TK_FLOAT128>(value, id);
 }
 
@@ -3183,11 +3287,13 @@ DDS::ReturnCode_t DynamicDataImpl::get_char_common(CharT& value, DDS::MemberId i
 
 DDS::ReturnCode_t DynamicDataImpl::get_char8_value(CORBA::Char& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   return get_char_common<TK_CHAR8, TK_STRING8, ACE_OutputCDR::from_char>(value, id);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_char16_value(CORBA::WChar& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
 #ifdef DDS_HAS_WCHAR
   return get_char_common<TK_CHAR16, TK_STRING16, ACE_OutputCDR::from_wchar>(value, id);
 #else
@@ -3197,6 +3303,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_char16_value(CORBA::WChar& value, DDS::Me
 
 DDS::ReturnCode_t DynamicDataImpl::get_byte_value(CORBA::Octet& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_OutputCDR::from_octet from_octet(value);
   const DDS::ReturnCode_t rc = get_single_value<TK_BYTE>(from_octet, id);
   value = from_octet.val_;
@@ -3227,6 +3334,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_boolean_from_bitmask<CORBA::UInt8>(CORBA:
 
 DDS::ReturnCode_t DynamicDataImpl::get_boolean_value(CORBA::Boolean& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   const TypeKind tk = type_->get_kind();
   switch (tk) {
   case TK_BOOLEAN: {
@@ -3281,6 +3389,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_boolean_value(CORBA::Boolean& value, DDS:
 
 DDS::ReturnCode_t DynamicDataImpl::get_string_value(char*& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   if (enum_string_helper(value, id)) {
     return DDS::RETCODE_OK;
   }
@@ -3294,6 +3403,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_string_value(char*& value, DDS::MemberId 
 
 DDS::ReturnCode_t DynamicDataImpl::get_wstring_value(CORBA::WChar*& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
 #ifdef DDS_HAS_WCHAR
   CORBA::wstring_free(value);
   value = 0;
@@ -3615,6 +3725,7 @@ bool DynamicDataImpl::move_sequence_to_complex(const const_sequence_iterator& it
 bool DynamicDataImpl::get_complex_from_container(DDS::DynamicData_var& value, DDS::MemberId id,
                                                  FoundStatus& found_status)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
   const_complex_iterator complex_it = container_.complex_map_.find(id);
   if (complex_it != container_.complex_map_.end()) {
     value = complex_it->second;
@@ -3680,6 +3791,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_member_backing_store(DynamicDataImpl* mem
 DDS::ReturnCode_t DynamicDataImpl::get_complex_from_aggregated(DDS::DynamicData_var& dd_var,
                                                                DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   // Whether the member is found in the container.
   FoundStatus found_status = NOT_FOUND;
   if (!get_complex_from_container(dd_var, id, found_status)) {
@@ -3714,6 +3826,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_complex_from_aggregated(DDS::DynamicData_
 
 DDS::ReturnCode_t DynamicDataImpl::get_complex_from_struct(DDS::DynamicData_ptr& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   DDS::MemberDescriptor_var md;
   if (get_descriptor(md, id) != DDS::RETCODE_OK) {
     return DDS::RETCODE_BAD_PARAMETER;
@@ -3732,6 +3845,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_complex_from_struct(DDS::DynamicData_ptr&
 
 DDS::ReturnCode_t DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   DDS::MemberDescriptor_var md;
   if (get_descriptor(md, id) != DDS::RETCODE_OK) {
     return DDS::RETCODE_BAD_PARAMETER;
@@ -3784,6 +3898,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& 
 
 DDS::ReturnCode_t DynamicDataImpl::get_complex_from_collection(DDS::DynamicData_ptr& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   if (!check_out_of_bound_read(id)) {
     return DDS::RETCODE_BAD_PARAMETER;
   }
@@ -3831,6 +3946,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_complex_from_collection(DDS::DynamicData_
 
 DDS::ReturnCode_t DynamicDataImpl::get_complex_value(DDS::DynamicData_ptr& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   const TypeKind tk = type_->get_kind();
   switch (tk) {
   case TK_STRUCTURE:
@@ -3852,6 +3968,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_complex_value(DDS::DynamicData_ptr& value
 
 DDS::ReturnCode_t DynamicDataImpl::get_int32_values(DDS::Int32Seq& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_UNUSED_ARG(value);
   ACE_UNUSED_ARG(id);
   return DDS::RETCODE_UNSUPPORTED;
@@ -3859,6 +3976,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_int32_values(DDS::Int32Seq& value, DDS::M
 
 DDS::ReturnCode_t DynamicDataImpl::get_uint32_values(DDS::UInt32Seq& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_UNUSED_ARG(value);
   ACE_UNUSED_ARG(id);
   return DDS::RETCODE_UNSUPPORTED;
@@ -3866,6 +3984,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_uint32_values(DDS::UInt32Seq& value, DDS:
 
 DDS::ReturnCode_t DynamicDataImpl::get_int8_values(DDS::Int8Seq& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_UNUSED_ARG(value);
   ACE_UNUSED_ARG(id);
   return DDS::RETCODE_UNSUPPORTED;
@@ -3873,6 +3992,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_int8_values(DDS::Int8Seq& value, DDS::Mem
 
 DDS::ReturnCode_t DynamicDataImpl::get_uint8_values(DDS::UInt8Seq& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_UNUSED_ARG(value);
   ACE_UNUSED_ARG(id);
   return DDS::RETCODE_UNSUPPORTED;
@@ -3880,6 +4000,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_uint8_values(DDS::UInt8Seq& value, DDS::M
 
 DDS::ReturnCode_t DynamicDataImpl::get_int16_values(DDS::Int16Seq& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_UNUSED_ARG(value);
   ACE_UNUSED_ARG(id);
   return DDS::RETCODE_UNSUPPORTED;
@@ -3887,6 +4008,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_int16_values(DDS::Int16Seq& value, DDS::M
 
 DDS::ReturnCode_t DynamicDataImpl::get_uint16_values(DDS::UInt16Seq& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_UNUSED_ARG(value);
   ACE_UNUSED_ARG(id);
   return DDS::RETCODE_UNSUPPORTED;
@@ -3894,6 +4016,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_uint16_values(DDS::UInt16Seq& value, DDS:
 
 DDS::ReturnCode_t DynamicDataImpl::get_int64_values(DDS::Int64Seq& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_UNUSED_ARG(value);
   ACE_UNUSED_ARG(id);
   return DDS::RETCODE_UNSUPPORTED;
@@ -3901,6 +4024,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_int64_values(DDS::Int64Seq& value, DDS::M
 
 DDS::ReturnCode_t DynamicDataImpl::get_uint64_values(DDS::UInt64Seq& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_UNUSED_ARG(value);
   ACE_UNUSED_ARG(id);
   return DDS::RETCODE_UNSUPPORTED;
@@ -3908,6 +4032,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_uint64_values(DDS::UInt64Seq& value, DDS:
 
 DDS::ReturnCode_t DynamicDataImpl::get_float32_values(DDS::Float32Seq& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_UNUSED_ARG(value);
   ACE_UNUSED_ARG(id);
   return DDS::RETCODE_UNSUPPORTED;
@@ -3915,6 +4040,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_float32_values(DDS::Float32Seq& value, DD
 
 DDS::ReturnCode_t DynamicDataImpl::get_float64_values(DDS::Float64Seq& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_UNUSED_ARG(value);
   ACE_UNUSED_ARG(id);
   return DDS::RETCODE_UNSUPPORTED;
@@ -3922,6 +4048,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_float64_values(DDS::Float64Seq& value, DD
 
 DDS::ReturnCode_t DynamicDataImpl::get_float128_values(DDS::Float128Seq& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_UNUSED_ARG(value);
   ACE_UNUSED_ARG(id);
   return DDS::RETCODE_UNSUPPORTED;
@@ -3929,6 +4056,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_float128_values(DDS::Float128Seq& value, 
 
 DDS::ReturnCode_t DynamicDataImpl::get_char8_values(DDS::CharSeq& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_UNUSED_ARG(value);
   ACE_UNUSED_ARG(id);
   return DDS::RETCODE_UNSUPPORTED;
@@ -3936,6 +4064,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_char8_values(DDS::CharSeq& value, DDS::Me
 
 DDS::ReturnCode_t DynamicDataImpl::get_char16_values(DDS::WcharSeq& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_UNUSED_ARG(value);
   ACE_UNUSED_ARG(id);
   return DDS::RETCODE_UNSUPPORTED;
@@ -3943,6 +4072,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_char16_values(DDS::WcharSeq& value, DDS::
 
 DDS::ReturnCode_t DynamicDataImpl::get_byte_values(DDS::ByteSeq& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_UNUSED_ARG(value);
   ACE_UNUSED_ARG(id);
   return DDS::RETCODE_UNSUPPORTED;
@@ -3950,6 +4080,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_byte_values(DDS::ByteSeq& value, DDS::Mem
 
 DDS::ReturnCode_t DynamicDataImpl::get_boolean_values(DDS::BooleanSeq& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_UNUSED_ARG(value);
   ACE_UNUSED_ARG(id);
   return DDS::RETCODE_UNSUPPORTED;
@@ -3957,6 +4088,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_boolean_values(DDS::BooleanSeq& value, DD
 
 DDS::ReturnCode_t DynamicDataImpl::get_string_values(DDS::StringSeq& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_UNUSED_ARG(value);
   ACE_UNUSED_ARG(id);
   return DDS::RETCODE_UNSUPPORTED;
@@ -3964,6 +4096,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_string_values(DDS::StringSeq& value, DDS:
 
 DDS::ReturnCode_t DynamicDataImpl::get_wstring_values(DDS::WstringSeq& value, DDS::MemberId id)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   ACE_UNUSED_ARG(value);
   ACE_UNUSED_ARG(id);
   return DDS::RETCODE_UNSUPPORTED;

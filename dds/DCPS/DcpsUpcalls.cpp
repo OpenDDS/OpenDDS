@@ -27,11 +27,11 @@ DcpsUpcalls::DcpsUpcalls(
 int DcpsUpcalls::svc()
 {
   ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-  const bool update_thread_status = thread_status_manager.update_thread_status();
+  const TimeDuration thread_status_interval = thread_status_manager.thread_status_interval();
 
   ThreadStatusManager::Start s(thread_status_manager, "DcpsUpcalls");
 
-  MonotonicTimePoint expire = MonotonicTimePoint::now() + thread_status_manager.thread_status_interval();
+  MonotonicTimePoint expire = MonotonicTimePoint::now() + thread_status_interval;
 
   DataReaderCallbacks_rch drr = drr_.lock();
   if (!drr) {
@@ -44,7 +44,7 @@ int DcpsUpcalls::svc()
     reader_done_ = true;
     cnd_.notify_one();
     while (!writer_done_) {
-      if (update_thread_status) {
+      if (thread_status_interval) {
         switch (cnd_.wait_until(expire, thread_status_manager)) {
         case CvStatus_NoTimeout:
           break;

@@ -146,7 +146,7 @@ void EndpointManager::receive(const ACE_INET_Addr& a_local_address,
                               const ACE_INET_Addr& a_remote_address,
                               const STUN::Message& a_message)
 {
-  switch (a_message.class_) {
+  switch (a_message.get_class()) {
   case STUN::REQUEST:
     request(a_local_address, a_remote_address, a_message);
     return;
@@ -164,7 +164,7 @@ void EndpointManager::receive(const ACE_INET_Addr& a_local_address,
     return;
   }
 
-  ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::receive: WARNING Unknown STUN message class %d\n"), a_message.class_));
+  ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::receive: WARNING Unknown STUN message class %d\n"), a_message.get_class()));
 }
 
 void EndpointManager::change_username()
@@ -307,9 +307,7 @@ void EndpointManager::server_reflexive_task(const MonotonicTimePoint& a_now)
   }
 
   if (next_stun_server_address_ != ACE_INET_Addr()) {
-    binding_request_ = STUN::Message();
-    binding_request_.class_ = requesting_ ? STUN::REQUEST : STUN::INDICATION;
-    binding_request_.method = STUN::BINDING;
+    binding_request_ = STUN::Message(requesting_ ? STUN::REQUEST : STUN::INDICATION, STUN::BINDING);
     binding_request_.generate_transaction_id();
     binding_request_.append_attribute(STUN::make_fingerprint());
 
@@ -349,7 +347,7 @@ void EndpointManager::server_reflexive_task(const MonotonicTimePoint& a_now)
 
 bool EndpointManager::success_response(const STUN::Message& a_message)
 {
-  if (a_message.transaction_id != binding_request_.transaction_id) {
+  if (a_message.transaction_id() != binding_request_.transaction_id()) {
     return false;
   }
 
@@ -380,7 +378,7 @@ bool EndpointManager::success_response(const STUN::Message& a_message)
 
 bool EndpointManager::error_response(const STUN::Message& a_message)
 {
-  if (a_message.transaction_id != binding_request_.transaction_id) {
+  if (a_message.transaction_id() != binding_request_.transaction_id()) {
     return false;
   }
 
@@ -428,14 +426,12 @@ ChecklistPtr EndpointManager::create_checklist(const AgentInfo& remote_agent_inf
 STUN::Message EndpointManager::make_unknown_attributes_error_response(const STUN::Message& a_message,
                                                                       const std::vector<STUN::AttributeType>& a_unknown_attributes)
 {
-  STUN::Message response;
-  response.class_ = STUN::ERROR_RESPONSE;
-  response.method = a_message.method;
-  memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
+  STUN::Message response(STUN::ERROR_RESPONSE, a_message.method());
+  response.transaction_id(a_message.transaction_id());
   response.append_attribute(STUN::make_error_code(STUN::UNKNOWN_ATTRIBUTE, "Unknown Attributes"));
   response.append_attribute(STUN::make_unknown_attributes(a_unknown_attributes));
   response.append_attribute(STUN::make_message_integrity());
-  response.password = agent_info_.password;
+  response.password(agent_info_.password);
   response.append_attribute(STUN::make_fingerprint());
   return response;
 }
@@ -443,26 +439,22 @@ STUN::Message EndpointManager::make_unknown_attributes_error_response(const STUN
 STUN::Message EndpointManager::make_bad_request_error_response(const STUN::Message& a_message,
                                                                const std::string& a_reason)
 {
-  STUN::Message response;
-  response.class_ = STUN::ERROR_RESPONSE;
-  response.method = a_message.method;
-  memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
+  STUN::Message response(STUN::ERROR_RESPONSE, a_message.method());
+  response.transaction_id(a_message.transaction_id());
   response.append_attribute(STUN::make_error_code(STUN::BAD_REQUEST, a_reason));
   response.append_attribute(STUN::make_message_integrity());
-  response.password = agent_info_.password;
+  response.password(agent_info_.password);
   response.append_attribute(STUN::make_fingerprint());
   return response;
 }
 
 STUN::Message EndpointManager::make_unauthorized_error_response(const STUN::Message& a_message)
 {
-  STUN::Message response;
-  response.class_ = STUN::ERROR_RESPONSE;
-  response.method = a_message.method;
-  memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
+  STUN::Message response(STUN::ERROR_RESPONSE, a_message.method());
+  response.transaction_id(a_message.transaction_id());
   response.append_attribute(STUN::make_error_code(STUN::UNAUTHORIZED, "Unauthorized"));
   response.append_attribute(STUN::make_message_integrity());
-  response.password = agent_info_.password;
+  response.password(agent_info_.password);
   response.append_attribute(STUN::make_fingerprint());
   return response;
 }
@@ -555,17 +547,15 @@ void EndpointManager::request(const ACE_INET_Addr& a_local_address,
     return;
   }
 
-  switch (a_message.method) {
+  switch (a_message.method()) {
   case STUN::BINDING: {
     // 7.3
-    STUN::Message response;
-    response.class_ = STUN::SUCCESS_RESPONSE;
-    response.method = STUN::BINDING;
-    memcpy(response.transaction_id.data, a_message.transaction_id.data, sizeof(a_message.transaction_id.data));
+    STUN::Message response(STUN::SUCCESS_RESPONSE, STUN::BINDING);
+    response.transaction_id(a_message.transaction_id());
     response.append_attribute(STUN::make_mapped_address(a_remote_address));
     response.append_attribute(STUN::make_xor_mapped_address(a_remote_address));
     response.append_attribute(STUN::make_message_integrity());
-    response.password = agent_info_.password;
+    response.password(agent_info_.password);
     response.append_attribute(STUN::make_fingerprint());
     send(a_remote_address, response);
 
@@ -645,7 +635,7 @@ void EndpointManager::indication(const ACE_INET_Addr& /*a_local_address*/,
     return;
   }
 
-  switch (a_message.method) {
+  switch (a_message.method()) {
   case STUN::BINDING: {
     // Section 11
     UsernameToChecklistType::const_iterator pos = username_to_checklist_.find(remote_username);
@@ -668,13 +658,13 @@ void EndpointManager::success_response(const ACE_INET_Addr& a_local_address,
                                        const ACE_INET_Addr& a_remote_address,
                                        const STUN::Message& a_message)
 {
-  switch (a_message.method) {
+  switch (a_message.method()) {
   case STUN::BINDING: {
     if (success_response(a_message)) {
       return;
     }
 
-    TransactionIdToChecklistType::const_iterator pos = transaction_id_to_checklist_.find(a_message.transaction_id);
+    TransactionIdToChecklistType::const_iterator pos = transaction_id_to_checklist_.find(a_message.transaction_id());
 
     if (pos == transaction_id_to_checklist_.end()) {
       // Probably a check that got cancelled.
@@ -698,13 +688,13 @@ void EndpointManager::error_response(const ACE_INET_Addr& a_local_address,
                                      const ACE_INET_Addr& a_remote_address,
                                      const STUN::Message& a_message)
 {
-  switch (a_message.method) {
+  switch (a_message.method()) {
   case STUN::BINDING: {
     if (error_response(a_message)) {
       return;
     }
 
-    TransactionIdToChecklistType::const_iterator pos = transaction_id_to_checklist_.find(a_message.transaction_id);
+    TransactionIdToChecklistType::const_iterator pos = transaction_id_to_checklist_.find(a_message.transaction_id());
 
     if (pos == transaction_id_to_checklist_.end()) {
       // Probably a check that got cancelled.

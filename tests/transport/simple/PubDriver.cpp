@@ -235,7 +235,7 @@ PubDriver::run()
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Initialize our SimplePublisher object.\n"));
 
-  this->writer_.enable_transport(false /*reliable*/, false /*durable*/, 0);
+  this->writer_.enable_transport(false /*reliable*/, false /*durable*/, pub_id_);
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   Create the 'subscriptions'.\n"));
 

@@ -12,10 +12,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-BestEffortSession::BestEffortSession(RcHandle<ReactorTask> reactor_task,
+BestEffortSession::BestEffortSession(RcHandle<EventDispatcher> event_dispatcher,
                                      MulticastDataLink* link,
                                      MulticastPeer remote_peer)
-  : MulticastSession(reactor_task, link, remote_peer)
+  : MulticastSession(event_dispatcher, link, remote_peer)
   , expected_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
 {}
 
@@ -71,6 +71,7 @@ BestEffortSession::start(bool active, bool /*acked*/)
 
   if (this->started_) return true;  // already started
 
+  reset_stopped();
   this->active_ = active;
   set_acked();
 

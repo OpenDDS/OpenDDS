@@ -94,7 +94,7 @@ StaticEndpointManager::StaticEndpointManager(const GUID_t& participant_id,
 #ifdef DDS_HAS_MINIMUM_BIT
   ACE_UNUSED_ARG(participant);
 #endif
-  type_lookup_init(TheServiceParticipant->reactor_task());
+  type_lookup_init();
 }
 
 StaticEndpointManager::~StaticEndpointManager()
@@ -610,12 +610,11 @@ StaticEndpointManager::sub_bit()
 }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-void StaticEndpointManager::type_lookup_init(ReactorTask_rch reactor_task)
+void StaticEndpointManager::type_lookup_init()
 {
   if (!type_lookup_reply_deadline_processor_) {
     type_lookup_reply_deadline_processor_ =
-      DCPS::make_rch<StaticEndpointManagerSporadic>(TheServiceParticipant->time_source(), reactor_task,
-                                                    rchandle_from(this), &StaticEndpointManager::remove_expired_endpoints);
+      make_rch<SporadicEvent>(TheServiceParticipant->event_dispatcher(), make_rch<StaticEndpointManagerEvent>(rchandle_from(this), &StaticEndpointManager::remove_expired_endpoints));
   }
 }
 
@@ -2225,9 +2224,14 @@ StaticDiscovery::parse_endpoints()
       config = TheTransportRegistry->global_config();
     }
 
+    const EntityId_t entity_id = EndpointRegistry::build_id(entity,
+      (type == Reader) ? ENTITYKIND_USER_READER_WITH_KEY : ENTITYKIND_USER_WRITER_WITH_KEY);
+
+    const GUID_t id = EndpointRegistry::build_id(domain, participant, entity_id);
+
     TransportLocatorSeq trans_info;
     try {
-      config->populate_locators(trans_info, domain);
+      config->populate_locators(trans_info, domain, id);
     }
     catch (const CORBA::Exception& ex) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -2243,11 +2247,6 @@ StaticDiscovery::parse_endpoints()
                           endpoint_name.c_str()),
                           -1);
     }
-
-    EntityId_t entity_id = EndpointRegistry::build_id(entity,
-      (type == Reader) ? ENTITYKIND_USER_READER_WITH_KEY : ENTITYKIND_USER_WRITER_WITH_KEY);
-
-    GUID_t id = EndpointRegistry::build_id(domain, participant, entity_id);
 
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: StaticDiscovery::parse_endpoints adding entity with id %C\n"), LogGuid(id).c_str()));

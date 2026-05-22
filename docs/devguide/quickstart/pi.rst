@@ -23,7 +23,7 @@ Perform these all these steps on the host computer:
    * GNU Make
    * Perl
    * CMake if building with DDS Security
-   * Optional Java SDK 1.5 or later for Java binding support
+   * Optional JDK for Java binding support
 
 #. Download and extract the latest tar.gz file from the `download site <https://github.com/OpenDDS/OpenDDS/releases/latest/>`__
 
@@ -34,13 +34,13 @@ Perform these all these steps on the host computer:
 
 #. Enter the ``OpenDDS-<version>`` directory
 
-#. Run the following as a single command.
+#. Run ``configure``.
 
    .. code-block:: bash
 
-      ./configure --target=linux-cross --target-compiler=/opt/cross-pi-gcc/bin/arm-none-linux-gnueabihf-g++ (additional options)
+      ./configure --target=linux-cross --target-compiler=/opt/cross-pi-gcc/bin/arm-none-linux-gnueabihf-g++
 
-   Additional options:
+   Add the following options as needed:
 
    * If using DDS Security:
 
@@ -84,7 +84,7 @@ The following steps copy the OpenDDS runtime libraries, support scripts, and tes
 
 #. .. code-block:: bash
 
-      scp OpenDDS.tar.gz USER@ADDRESS:
+      scp OpenDDS-<version>.tar.gz USER@ADDRESS:
 
    where ``USER`` and ``ADDRESS`` are the username and IP address of your Raspberry Pi.
    It will ask you for the password for the user on the Pi.
@@ -97,7 +97,7 @@ The following steps copy the OpenDDS runtime libraries, support scripts, and tes
 
 #. .. code-block:: bash
 
-      tar xzf OpenDDSOpenDDS-<version>.tar.gz
+      tar xzf OpenDDS-<version>.tar.gz
 
 *************************
 Run the Messenger Example
@@ -196,7 +196,7 @@ Xerces-C++
       set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
       set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
       set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
-      set(THREADS_PTHREAD_ARG 2)</pre></li>
+      set(THREADS_PTHREAD_ARG 2)
 
 #. In ``$BUILD_ROOT``, download and extract the `Xerces-C++ source archive <https://xerces.apache.org/xerces-c/download.cgi>`__, and change to that extracted directory.
    See :ref:`deps-xerces` for any version requirements for Xerces.

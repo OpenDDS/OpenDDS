@@ -50,6 +50,14 @@ public:
   void enable_nagle_algorithm(bool ena);
   bool enable_nagle_algorithm() const;
 
+  ConfigValue<TcpInst, ACE_INT32> send_buffer_size_;
+  void send_buffer_size(ACE_INT32 sbs);
+  ACE_INT32 send_buffer_size() const;
+
+  ConfigValue<TcpInst, ACE_INT32> rcv_buffer_size_;
+  void rcv_buffer_size(ACE_INT32 rbs);
+  ACE_INT32 rcv_buffer_size() const;
+
   /// The initial retry delay in milliseconds.
   /// The first connection retry will be when the loss of connection
   /// is detected.  The second try will be after this delay.
@@ -144,7 +152,8 @@ public:
 
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info,
                                   ConnectionInfoFlags flags,
-                                  DDS::DomainId_t domain) const;
+                                  DDS::DomainId_t domain,
+                                  const GUID_t& participant) const;
 
 private:
   friend class TcpType;

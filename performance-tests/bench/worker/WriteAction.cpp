@@ -15,6 +15,7 @@ WriteAction::WriteAction(OpenDDS::DCPS::EventDispatcher_rch event_dispatcher)
 , new_key_count_(0)
 , new_key_probability_(0)
 , instance_(0)
+, timer_id_(-1)
 , filter_class_start_value_(0)
 , filter_class_stop_value_(0)
 , filter_class_increment_(0)
@@ -171,7 +172,10 @@ void WriteAction::test_start()
     started_ = true;
 
     last_scheduled_time_ = OpenDDS::DCPS::MonotonicTimePoint::now();
-    event_dispatcher_->dispatch(event_);
+    timer_id_ = event_dispatcher_->schedule(event_);
+    if (timer_id_ < 0) {
+      std::cerr << "Failed to schedule event in WriteAction::test_start" << std::endl;
+    }
   }
 }
 
@@ -180,7 +184,7 @@ void WriteAction::test_stop()
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
     stopped_ = true;
-    event_dispatcher_->cancel(event_);
+    event_dispatcher_->cancel(timer_id_);
     data_dw_->wait_for_acknowledgments(final_wait_for_ack_);
     data_dw_->unregister_instance(data_, instance_);
     data_dw_->wait_for_acknowledgments(final_wait_for_ack_);
@@ -215,7 +219,10 @@ void WriteAction::do_write()
       }
       last_scheduled_time_ += write_period_;
 
-      event_dispatcher_->schedule(event_, last_scheduled_time_);
+      timer_id_ = event_dispatcher_->schedule(event_, last_scheduled_time_);
+      if (timer_id_ < 0) {
+        std::cerr << "Failed to schedule event in WriteAction::do_write" << std::endl;
+      }
     }
   }
 }

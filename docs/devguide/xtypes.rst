@@ -22,11 +22,11 @@ An assumption built into this model is that all applications agree on data type 
 This assumption is not practical as systems must be able to evolve while remaining compatible and interoperable.
 
 The :ref:`spec-xtypes` specification loosens the requirement on applications to have a common notion of data types.
-Using XTypes, the application developer adds IDL annotations that indicate where the types may vary between publisher and subscriber and how those variations are handled by the middleware.
+Using XTypes, the application developer adds :ref:`IDL annotations <xtypes--idl-annotations>` that indicate where the types may vary between publisher and subscriber and how those variations are handled by the middleware.
 
 OpenDDS implements the XTypes specification at the Basic Conformance level, with a partial implementation of the Dynamic Language Binding.
 Some features described by the specification are not yet implemented in OpenDDS - those are noted in :ref:`xtypes--unimplemented-features`.
-This includes :ref:`IDL annotations <xtypes--annotations>` that are not yet implemented.
+This includes :ref:`IDL annotations <xtypes--unimplemented-annotations>` that are not yet implemented.
 See :ref:`xtypes--differences-from-the-specification` for situations where the implementation of XTypes in OpenDDS departs from or infers something about the specification.
 Specification issues have been raised for these situations.
 
@@ -501,6 +501,8 @@ This means they can be changed and remote readers and writers will still match, 
 ***************
 IDL Annotations
 ***************
+
+See :ref:`here <opendds_idl--annotations>` for information about annotations in general.
 
 ..
     Sect<16.6>
@@ -1551,7 +1553,7 @@ Type System
 
 * Struct inheritance
 
-.. _xtypes--annotations:
+.. _xtypes--unimplemented-annotations:
 
 Annotations
 ===========

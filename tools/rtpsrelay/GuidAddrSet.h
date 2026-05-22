@@ -6,6 +6,7 @@
 
 #include <dds/rtpsrelaylib/Utility.h>
 
+#include <dds/DCPS/SporadicEvent.h>
 #include <dds/DCPS/TimeTypes.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 
@@ -216,9 +217,10 @@ public:
     bool ignore_rtps(bool from_application_participant,
                      const OpenDDS::DCPS::GUID_t& guid,
                      const OpenDDS::DCPS::MonotonicTimePoint& now,
+                     bool already_checked_admit,
                      bool& admitted)
     {
-      return gas_.ignore_rtps(from_application_participant, guid, now, admitted);
+      return gas_.ignore_rtps(from_application_participant, guid, now, already_checked_admit, admitted);
     }
 
     OpenDDS::DCPS::TimeDuration get_session_time(const OpenDDS::DCPS::GUID_t& guid,
@@ -285,6 +287,16 @@ public:
       gas_.deny(guid);
     }
 
+    void admission_deferral_count(const OpenDDS::DCPS::MonotonicTimePoint& now)
+    {
+      gas_.relay_stats_reporter_.admission_deferral_count(now);
+    }
+
+    void apply_drain_state(AddrSetStats& addr_set_stats, bool from_application_participant)
+    {
+      gas_.apply_drain_state(addr_set_stats, from_application_participant);
+    }
+
   private:
     GuidAddrSet& gas_;
 
@@ -331,6 +343,7 @@ private:
   bool ignore_rtps(bool from_application_participant,
                    const OpenDDS::DCPS::GUID_t& guid,
                    const OpenDDS::DCPS::MonotonicTimePoint& now,
+                   bool already_checked_admit,
                    bool& admitted);
 
   void remove(const OpenDDS::DCPS::GUID_t& guid,
@@ -366,6 +379,8 @@ private:
   void populate_relay_status(RelayStatus& relay_status);
 
   void deny(const OpenDDS::DCPS::GUID_t& guid);
+
+  void apply_drain_state(AddrSetStats& addr_set_stats, bool from_application_participant);
 
   struct AdmissionControlInfo {
     AdmissionControlInfo(const OpenDDS::DCPS::GuidPrefix_t& prefix, const OpenDDS::DCPS::MonotonicTimePoint& admitted)
@@ -411,11 +426,10 @@ private:
   bool participant_admission_limit_reached_ = false;
   mutable bool last_admit_ = true;
 
-  using GuidAddrSetSporadicTask = OpenDDS::DCPS::PmfSporadicTask<GuidAddrSet>;
-  using GuidAddrSetSporadicTask_rch = OpenDDS::DCPS::RcHandle<GuidAddrSetSporadicTask>;
-  GuidAddrSetSporadicTask_rch rejected_address_expiration_task_;
-  GuidAddrSetSporadicTask_rch deactivation_task_;
-  GuidAddrSetSporadicTask_rch expiration_task_;
+  using GuidAddrSetEvent = OpenDDS::DCPS::PmfNowEvent<GuidAddrSet>;
+  OpenDDS::DCPS::SporadicEvent_rch rejected_address_expiration_task_;
+  OpenDDS::DCPS::SporadicEvent_rch deactivation_task_;
+  OpenDDS::DCPS::SporadicEvent_rch expiration_task_;
 
   AdmitState admit_state_ = AdmitState::AS_NORMAL;
   DDS::Time_t admit_state_change_ = {0, 0};
@@ -424,7 +438,7 @@ private:
   OpenDDS::DCPS::TimeDuration drain_interval_;
   size_t mark_budget_ = 0;
   size_t mark_count_ = 0;
-  GuidAddrSetSporadicTask_rch drain_task_;
+  OpenDDS::DCPS::SporadicEvent_rch drain_task_;
 };
 
 }

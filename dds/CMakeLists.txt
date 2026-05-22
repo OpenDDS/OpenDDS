@@ -73,6 +73,7 @@ add_library(OpenDDS_Dcps
   DCPS/Qos_Helper.cpp
   DCPS/QueryConditionImpl.cpp
   DCPS/RawDataSample.cpp
+  DCPS/ReactorEvent.cpp
   DCPS/ReactorTask.cpp
   DCPS/ReadConditionImpl.cpp
   DCPS/ReceivedDataElementList.cpp
@@ -85,6 +86,7 @@ add_library(OpenDDS_Dcps
   DCPS/RepoIdBuilder.cpp
   DCPS/RepoIdConverter.cpp
   DCPS/RepoIdGenerator.cpp
+  DCPS/ResizeSeqNoInit.cpp
   DCPS/SafetyProfilePool.cpp
   DCPS/SafetyProfileSequences.cpp
   DCPS/SafetyProfileStreams.cpp
@@ -326,6 +328,7 @@ target_sources(OpenDDS_Dcps
     DCPS/RcEventHandler.h
     DCPS/RcHandle_T.h
     DCPS/RcObject.h
+    DCPS/ReactorEvent.h
     DCPS/ReactorTask.h
     DCPS/ReactorTask.inl
     DCPS/ReactorTask_rch.h
@@ -342,6 +345,7 @@ target_sources(OpenDDS_Dcps
     DCPS/RepoIdBuilder.inl
     DCPS/RepoIdConverter.h
     DCPS/RepoIdGenerator.h
+    DCPS/ResizeSeqNoInit.h
     DCPS/RestoreOutputStreamState.h
     DCPS/SafeBool_T.h
     DCPS/SafetyProfilePool.h

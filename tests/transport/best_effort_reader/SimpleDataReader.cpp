@@ -25,7 +25,7 @@ SimpleDataReader::SimpleDataReader(const AppConfig& ac, const int readerIndex, A
 {
   TransportClient::set_guid(AppConfig::readerId[index]);
 
-  enable_transport((index == 2), false, 0); //(reliable, durable)
+  enable_transport((index == 2), false, get_guid()); // (reliable, durable, guid)
 
   for (int i = index; i < 3; ++i) {
     ad.remote_id_ = AppConfig::writerId[i];

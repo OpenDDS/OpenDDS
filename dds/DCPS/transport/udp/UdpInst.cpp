@@ -50,7 +50,8 @@ UdpInst::dump_to_str(DDS::DomainId_t domain) const
 size_t
 UdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info,
                           ConnectionInfoFlags,
-                          DDS::DomainId_t) const
+                          DDS::DomainId_t,
+                          const GUID_t& /*participant*/) const
 {
   const std::string locator_addr = get_locator_address();
   if (!locator_addr.empty()) {

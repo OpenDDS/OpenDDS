@@ -53,7 +53,8 @@ ShmemInst::dump_to_str(DDS::DomainId_t domain) const
 size_t
 ShmemInst::populate_locator(OpenDDS::DCPS::TransportLocator& info,
                             ConnectionInfoFlags,
-                            DDS::DomainId_t) const
+                            DDS::DomainId_t,
+                            const GUID_t& /*participant*/) const
 {
   info.transport_type = "shmem";
 

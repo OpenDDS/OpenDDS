@@ -2,8 +2,8 @@ Starting with release 1.2, OpenDDS provides Java bindings.  Java applications
 can make use of the complete OpenDDS middleware just like C++ applications.
 
 See the README.md file in the $DDS_ROOT directory (one level above here) for a
-general overview of OpenDDS.  Also see the release notes, DDS_release_notes.txt
-in the $DDS_ROOT directory and the FAQ at <http://www.opendds.org/faq.html>.
+general overview of OpenDDS.  Also see NEWS.md in the $DDS_ROOT directory and
+the FAQ at <https://www.opendds.org/faq.html>.
 
 
 ======================================================================
@@ -25,9 +25,8 @@ in the $DDS_ROOT directory and the FAQ at <http://www.opendds.org/faq.html>.
   - Why does my program fail when attaching both a Publisher and a
     Subscriber to the same TransportImpl instance?
 
-    This problem is not specific to Java applications.  See the known issues
-    in the section "--- more notes and limitations ---" of the release notes,
-    $DDS_ROOT/DDS_release_notes.txt
+    This problem is not specific to Java applications.  See the release notes
+    in $DDS_ROOT/NEWS.md for current known issues.
 
   - Why do my DataReaderListener and DataWriterListener implementations
     fail with the following log message?
@@ -55,15 +54,6 @@ in the $DDS_ROOT directory and the FAQ at <http://www.opendds.org/faq.html>.
     by definition.  The only other option would be to compile a new JVM
     executable already linked to these libraries.  OpenDDS doesn't currently
     have a provision for this.
-
-  - With Visual Studio 2003 or 2005 (Visual C++ 7.1 or 8), why does compiling
-    Java files fail with messages about missing source or class files?
-
-    A bug in Visual Studio causes directories to be created with all-lowercase
-    names when they should be mixed-case.  This bug is fixed in Visual Studio
-    2008 (Visual C++ 9).  See the comment in $DDS_ROOT/java/dds/dcps_java.mpc
-    for one possible work-around.  Another workaround is to rename the
-    directories after they are created.
 
   - I'm seeing a null pointer exception or a JVM crash in an OpenDDS native
     method.  What should I check first?

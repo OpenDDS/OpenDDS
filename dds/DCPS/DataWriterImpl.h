@@ -19,7 +19,7 @@
 #include "PoolAllocator.h"
 #include "RcEventHandler.h"
 #include "Sample.h"
-#include "SporadicTask.h"
+#include "SporadicEvent.h"
 #include "TimeTypes.h"
 #include "Time_Helper.h"
 #include "TopicImpl.h"
@@ -831,11 +831,11 @@ private:
   // and unregister_instances during deletion of datawriter from application
   ACE_Thread_Mutex sync_unreg_rem_assocs_lock_;
 
-  typedef PmfSporadicTask<DataWriterImpl> DWISporadicTask;
+  typedef PmfNowEvent<DataWriterImpl> DWIEvent;
 
-  RcHandle<DWISporadicTask> liveliness_send_task_;
+  SporadicEvent_rch liveliness_send_task_;
   virtual void liveliness_send_task(const MonotonicTimePoint& now);
-  RcHandle<DWISporadicTask> liveliness_lost_task_;
+  SporadicEvent_rch liveliness_lost_task_;
   virtual void liveliness_lost_task(const MonotonicTimePoint& now);
   /// The time interval for sending liveliness message.
   TimeDuration liveliness_send_interval_;

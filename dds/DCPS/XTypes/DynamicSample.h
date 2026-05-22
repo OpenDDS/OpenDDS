@@ -62,7 +62,7 @@ public:
 
   DCPS::Sample_rch copy(DCPS::Sample::Mutability mutability, DCPS::Sample::Extent extent) const
   {
-    DDS::DynamicData_var dd = data_->clone();
+    DDS::DynamicData_var dd = data_ ? data_->clone() : 0;
     return DCPS::make_rch<DynamicSample>(dd, mutability, extent);
   }
 

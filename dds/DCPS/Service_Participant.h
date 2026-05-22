@@ -99,6 +99,9 @@ const Discovery::RepoKey COMMON_DCPS_DEFAULT_DISCOVERY_default = Discovery::DEFA
 # endif
 #endif
 
+const char COMMON_DCPS_EVENT_DISPATCHER_THREADS[] = "COMMON_DCPS_EVENT_DISPATCHER_THREADS";
+const size_t COMMON_DCPS_EVENT_DISPATCHER_THREADS_default = 1u;
+
 const char COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG[] = "COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG";
 const String COMMON_DCPS_GLOBAL_TRANSPORT_CONFIG_default = "";
 
@@ -185,6 +188,7 @@ const size_t COMMON_POOL_SIZE_default = 1024 * 1024 * 16;
 class DataDurabilityCache;
 #endif
 class ThreadStatusManager;
+class ThreadStatusListener;
 
 const char DEFAULT_ORB_NAME[] = "OpenDDS_DCPS";
 
@@ -229,6 +233,8 @@ public:
   ReactorTask_rch reactor_task();
 
   JobQueue_rch job_queue() const;
+
+  EventDispatcher_rch event_dispatcher() const;
 
   void set_shutdown_listener(RcHandle<ShutdownListener> listener);
 
@@ -337,6 +343,13 @@ public:
   /// @return % of lease period before sending a liveliness
   ///         message.
   int liveliness_factor() const;
+
+  /// Accessors for the global service event dispatcher thread count.
+  /// The minimum valid value is 1.
+  //@{
+  void event_dispatcher_thread_count(size_t value);
+  size_t event_dispatcher_thread_count() const;
+  //@}
 
   ///
   void add_discovery(Discovery_rch discovery);
@@ -607,6 +620,9 @@ public:
     return config_store_;
   }
 
+  /// Set listener for thread start and finish, see ThreadStatusManager.h
+  void set_thread_status_listener(ThreadStatusListener* listener);
+
 private:
 
   /// Initialize default qos.
@@ -664,8 +680,9 @@ private:
   ACE_ARGV ORB_argv_;
 #endif
 
+  EventDispatcher_rch event_dispatcher_;
   const TimeSource time_source_;
-  ReactorTask reactor_task_;
+  ReactorTask_rch reactor_task_;
   JobQueue_rch job_queue_;
 
   RcHandle<DomainParticipantFactoryImpl> dp_factory_servant_;

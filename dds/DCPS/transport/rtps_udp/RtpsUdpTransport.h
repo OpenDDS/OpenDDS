@@ -12,9 +12,8 @@
 
 #include <dds/DCPS/ConnectionRecords.h>
 #include <dds/DCPS/FibonacciSequence.h>
-#include <dds/DCPS/PeriodicTask.h>
 #include <dds/DCPS/PoolAllocator.h>
-#include <dds/DCPS/SporadicTask.h>
+#include <dds/DCPS/SporadicEvent.h>
 #include <dds/DCPS/Statistics.h>
 
 #include <dds/DCPS/RTPS/ICE/Ice.h>
@@ -218,25 +217,63 @@ public:
   }
 
 #if OPENDDS_CONFIG_SECURITY
-  void reset_relay_stun_task_falloff()
+  void reset_relay_stun_event_falloff()
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    relay_stun_task_falloff_.set(heartbeat_period_);
+    relay_stun_event_falloff_.set(heartbeat_period_);
   }
 
-  TimeDuration advance_relay_stun_task_falloff()
+  TimeDuration advance_relay_stun_event_falloff()
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    relay_stun_task_falloff_.advance(ICE::Configuration::instance()->server_reflexive_address_period());
-    return relay_stun_task_falloff_.get();
+    relay_stun_event_falloff_.advance(ICE::Configuration::instance()->server_reflexive_address_period());
+    return relay_stun_event_falloff_.get();
   }
 
-  void set_relay_stun_task_falloff()
+  void set_relay_stun_event_falloff()
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    relay_stun_task_falloff_.set(ICE::Configuration::instance()->server_reflexive_address_period());
+    relay_stun_event_falloff_.set(ICE::Configuration::instance()->server_reflexive_address_period());
   }
 #endif
+
+  void actual_local_address(const NetworkAddress& address)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    actual_local_address_ = address;
+  }
+
+  NetworkAddress actual_local_address() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return actual_local_address_;
+  }
+
+#ifdef ACE_HAS_IPV6
+  void ipv6_actual_local_address(const NetworkAddress& address)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    ipv6_actual_local_address_ = address;
+  }
+
+  NetworkAddress ipv6_actual_local_address() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return ipv6_actual_local_address_;
+  }
+#endif
+
+  void set_local_prefix(const GuidPrefix_t& local_prefix)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    assign(local_prefix_, local_prefix);
+  }
+
+  void get_local_prefix(GuidPrefix_t& local_prefix) const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    assign(local_prefix, local_prefix_);
+  }
 
 private:
   mutable ACE_Thread_Mutex mutex_;
@@ -251,7 +288,12 @@ private:
   NetworkAddress stun_server_address_;
   MessageDropper message_dropper_;
   InternalTransportStatistics transport_statistics_;
-  FibonacciSequence<TimeDuration> relay_stun_task_falloff_;
+  FibonacciSequence<TimeDuration> relay_stun_event_falloff_;
+  NetworkAddress actual_local_address_;
+#ifdef ACE_HAS_IPV6
+  NetworkAddress ipv6_actual_local_address_;
+#endif
+  GuidPrefix_t local_prefix_;
 };
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl, public ConfigListener {
@@ -267,7 +309,7 @@ public:
 #if OPENDDS_CONFIG_SECURITY
   ICE::ServerReflexiveStateMachine& relay_srsm() { return relay_srsm_; }
   void process_relay_sra(ICE::ServerReflexiveStateMachine::StateChange);
-  void disable_relay_stun_task();
+  void disable_relay_stun_event();
 #endif
 
   virtual void update_locators(const GUID_t& /*remote*/,
@@ -283,6 +325,9 @@ public:
   const RtpsUdpCore& core() const { return core_; }
 
 private:
+#if OPENDDS_CONFIG_SECURITY
+  void process_relay_sra_i(ICE::ServerReflexiveStateMachine::StateChange);
+#endif
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
                                                const TransportClient_rch& client);
@@ -361,7 +406,6 @@ private:
   ThreadLockType links_lock_;
 
   RcHandle<BitSubscriber> bit_sub_;
-  GuidPrefix_t local_prefix_;
 
   /// RTPS uses only one link per transport.
   /// This link can be safely reused by any clients that belong to the same
@@ -383,6 +427,7 @@ private:
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 
 #ifndef DDS_HAS_MINIMUM_BIT
+  mutable ACE_Thread_Mutex deferred_connection_records_mutex_;
   ConnectionRecords deferred_connection_records_;
 #endif
 
@@ -405,9 +450,8 @@ private:
   };
   RcHandle<IceEndpoint> ice_endpoint_;
 
-  typedef PmfSporadicTask<RtpsUdpTransport> Sporadic;
-  void relay_stun_task(const MonotonicTimePoint& now);
-  RcHandle<Sporadic> relay_stun_task_;
+  void relay_stun_event();
+  DCPS::SporadicEvent_rch relay_stun_event_;
   ICE::ServerReflexiveStateMachine relay_srsm_;
 
   void start_ice();
@@ -425,18 +469,18 @@ private:
   RtpsUdpCore core_;
 
   StatisticsDataWriter_rch stats_writer_;
-  typedef PmfPeriodicTask<const RtpsUdpTransport> PeriodicTask;
-  RcHandle<PeriodicTask> stats_task_;
-  TimeDuration stats_task_period_;
+  typedef PmfEvent<RtpsUdpTransport> RtpsUdpTransportEvent;
+  DCPS::PeriodicEvent_rch stats_event_;
+  TimeDuration stats_event_period_;
   mutable ACE_Thread_Mutex stats_mutex_;
 
-  void setup_stats_task(const TimeDuration& period);
+  void setup_stats_event(const TimeDuration& period);
 
   static StatisticSeq stats_template();
   const StatisticSeq stats_template_;
 
   void fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const;
-  void write_stats(const MonotonicTimePoint&) const;
+  void write_stats();
 };
 
 } // namespace DCPS

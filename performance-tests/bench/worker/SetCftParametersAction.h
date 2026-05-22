@@ -35,6 +35,7 @@ protected:
   DDS::InstanceHandle_t instance_;
   OpenDDS::DCPS::MonotonicTimePoint last_scheduled_time_;
   OpenDDS::DCPS::EventBase_rch event_;
+  long timer_id_;
   std::mt19937_64 mt_;
   size_t set_call_count_;
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC

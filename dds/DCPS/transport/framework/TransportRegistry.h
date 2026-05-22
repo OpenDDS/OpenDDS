@@ -111,7 +111,7 @@ public:
   bool released() const;
 
   void remove_participant(DDS::DomainId_t domain,
-                          DomainParticipantImpl* participant);
+                          const GUID_t& participant);
 
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;

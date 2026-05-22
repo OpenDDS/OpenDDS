@@ -59,7 +59,8 @@ ReactorTask::ReactorTask(bool useAsyncSend)
   , use_async_send_(useAsyncSend)
 #endif
   , timer_queue_(0)
-  , reactor_state_(RS_NONE)
+  , reactor_notified_(false)
+  , processing_(false)
   , thread_status_manager_(0)
   , thread_status_timer_(ReactorWrapper::InvalidTimerId)
 {
@@ -176,6 +177,11 @@ int ReactorTask::open_reactor_task(ThreadStatusManager* thread_status_manager,
 
 int ReactorTask::svc()
 {
+  // Every activated ACE task thread ends with close(), which drops a
+  // self-reference. Take that reference here for both single-threaded and
+  // multi-threaded reactor execution.
+  _add_ref();
+
   if (n_threads_ > 1) {
     return run_reactor_i();
   }
@@ -184,12 +190,6 @@ int ReactorTask::svc()
 
   {
     GuardType guard(lock_);
-
-    // First off - We need to obtain our own reference to ourselves such
-    // that we don't get deleted while still running in our own thread.
-    // In essence, our current thread "owns" a copy of our reference.
-    // It's all done with the magic of intrusive reference counting!
-    _add_ref();
 
     // Ignore all signals to avoid
     //     ERROR: <something descriptive> Interrupted system call
@@ -212,15 +212,15 @@ int ReactorTask::svc()
     condition_.notify_all();
   }
 
-  if (thread_status_manager_->update_thread_status()) {
+  thread_status_period_ = thread_status_manager_->thread_status_interval();
+  if (thread_status_period_) {
     tsm_updater_handler_ = make_rch<ThreadStatusManager::Updater>();
-    thread_status_period_ = thread_status_manager_->thread_status_interval();
     thread_status_timer_ = reactor_wrapper_.schedule(*tsm_updater_handler_, thread_status_manager_,
                                                      thread_status_period_, thread_status_period_);
 
     if (thread_status_timer_ == ReactorWrapper::InvalidTimerId) {
       if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: ReactorTask::svc: failed to "
+        ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: ReactorTask::svc: failed to "
                               "schedule timer for ThreadStatusManager::Updater\n"));
       }
     }
@@ -277,11 +277,12 @@ int ReactorTask::run_reactor_i()
   const bool has_run_time = !run_time_.is_zero();
   const MonotonicTimePoint end_time = MonotonicTimePoint::now() + run_time_;
 
-  if (thread_status_manager_->update_thread_status()) {
+  const TimeDuration thread_status_interval = thread_status_manager_->thread_status_interval();
+  if (thread_status_interval) {
     ThreadStatusManager::Start thread_status_monitoring_active(*thread_status_manager_, name_);
 
     while (!has_run_time || MonotonicTimePoint::now() < end_time) {
-      ACE_Time_Value t = thread_status_manager_->thread_status_interval().value();
+      ACE_Time_Value t = thread_status_interval.value();
       ThreadStatusManager::Sleeper s(thread_status_manager_);
       if (reactor_->run_reactor_event_loop(t, 0) != 0) {
         break;
@@ -402,7 +403,7 @@ ReactorTask::CommandPtr ReactorTask::execute_or_enqueue(CommandPtr command)
 
   // If state is set to processing, the contents of command_queue_ have been swapped out
   // so immediate execution may run jobs out of the expected order.
-  const bool is_not_processing = reactor_state_ != RS_PROCESSING;
+  const bool is_not_processing = !processing_;
 
   // If the command_queue_ is not empty, allowing execution will potentially run unexpected code
   // which is problematic since we may be holding locks used by the unexpected code.
@@ -420,9 +421,9 @@ ReactorTask::CommandPtr ReactorTask::execute_or_enqueue(CommandPtr command)
 
   // But depending on whether we're running it immediately or not, we either process or notify
   if (immediate) {
-    process_command_queue_i(guard, local_reactor);
-  } else if (reactor_state_ == RS_NONE) {
-    reactor_state_ = RS_NOTIFIED;
+    process_command_queue_i();
+  } else if (!reactor_notified_) {
+    reactor_notified_ = true;
     guard.release();
     local_reactor->notify(this);
   }
@@ -432,7 +433,7 @@ ReactorTask::CommandPtr ReactorTask::execute_or_enqueue(CommandPtr command)
 void ReactorTask::wait_until_empty()
 {
   GuardType guard(lock_);
-  while (reactor_state_ != RS_NONE || !command_queue_.empty()) {
+  while (reactor_notified_ || processing_) {
     condition_.wait(*thread_status_manager_);
   }
 }
@@ -442,30 +443,28 @@ int ReactorTask::handle_exception(ACE_HANDLE /*fd*/)
   ThreadStatusManager::Event ev(*thread_status_manager_);
 
   GuardType guard(lock_);
-  process_command_queue_i(guard, reactor_);
+  process_command_queue_i();
   return 0;
 }
 
-void ReactorTask::process_command_queue_i(ACE_Guard<ACE_Thread_Mutex>& guard,
-                                          ACE_Reactor* reactor)
+void ReactorTask::process_command_queue_i()
 {
   Queue cq;
   ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
 
-  reactor_state_ = RS_PROCESSING;
+  processing_ = true;
   if (!command_queue_.empty()) {
     cq.swap(command_queue_);
+    // The current notification is being processed, reset to allow a new notification
+    reactor_notified_ = false;
     ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex> > rev_guard(rev_lock);
     for (Queue::const_iterator pos = cq.begin(), limit = cq.end(); pos != limit; ++pos) {
       (*pos)->execute(reactor_wrapper_);
     }
   }
-  if (!command_queue_.empty()) {
-    reactor_state_ = RS_NOTIFIED;
-    guard.release();
-    reactor->notify(this);
-  } else {
-    reactor_state_ = RS_NONE;
+
+  processing_ = false;
+  if (!reactor_notified_) {
     condition_.notify_all();
   }
 }
@@ -657,6 +656,10 @@ void RegisterHandler::execute(ReactorWrapper& reactor_wrapper)
 
 void RemoveHandler::execute(ReactorWrapper& reactor_wrapper)
 {
+  if (io_handle_ == ACE_INVALID_HANDLE) {
+    return;
+  }
+
   if (reactor_wrapper.remove_handler(io_handle_, mask_) != 0) {
     if (log_level >= LogLevel::Error) {
       ACE_ERROR((LM_ERROR,

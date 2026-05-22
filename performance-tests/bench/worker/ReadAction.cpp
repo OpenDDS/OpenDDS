@@ -14,6 +14,7 @@ ReadAction::ReadAction(OpenDDS::DCPS::EventDispatcher_rch event_dispatcher)
 , stop_condition_(new DDS::GuardCondition())
 , dr_listener_(0)
 , read_period_(1, 0)
+, timer_id_(-1)
 , in_do_read_(false)
 {
 }
@@ -80,7 +81,10 @@ void ReadAction::test_start()
     ws_ = new DDS::WaitSet();
     ws_->attach_condition(stop_condition_);
     ws_->attach_condition(read_condition_);
-    event_dispatcher_->dispatch(event_);
+    timer_id_ = event_dispatcher_->schedule(event_);
+    if (timer_id_ < 0) {
+      std::cerr << "Failed to schedule event in ReadAction::test_start" << std::endl;
+    }
   }
 }
 
@@ -93,7 +97,7 @@ void ReadAction::action_stop()
   std::unique_lock<std::mutex> lock(mutex_);
   if (started_ && !stopped_) {
     stopped_ = true;
-    event_dispatcher_->cancel(event_);
+    event_dispatcher_->cancel(timer_id_);
     stop_condition_->set_trigger_value(true);
     while (in_do_read_) {
       cv_.wait(lock);
@@ -128,12 +132,12 @@ void ReadAction::do_read()
   if (started_ && !stopped_) {
     DDS::ConditionSeq active;
     const DDS::Duration_t duration = read_period_.to_dds_duration();
-    DDS::WaitSet_var ws_copy= ws_;
+    DDS::WaitSet_var ws_copy = ws_;
     DDS::ReturnCode_t ret;
 
     {
       reverse_guard rg(lock);
-      ret = ws_->wait(active, duration);
+      ret = ws_copy->wait(active, duration);
     }
 
     if (stopped_) {
@@ -156,7 +160,10 @@ void ReadAction::do_read()
     }
 
     if (!stopped_) {
-      event_dispatcher_->dispatch(event_);
+      timer_id_ = event_dispatcher_->schedule(event_);
+      if (timer_id_ < 0) {
+        std::cerr << "Failed to schedule event in ReadAction::do_read" << std::endl;
+      }
     }
   }
 }

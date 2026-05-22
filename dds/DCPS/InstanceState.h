@@ -11,7 +11,7 @@
 #include "Definitions.h"
 #include "GuidUtils.h"
 #include "PoolAllocator.h"
-#include "SporadicTask.h"
+#include "SporadicEvent.h"
 #include "TimeTypes.h"
 #include "dcps_export.h"
 
@@ -209,11 +209,6 @@ private:
   bool release_pending_;
 
   /**
-   * Keep track of a scheduled release timer.
-   */
-  long release_timer_id_;
-
-  /**
    * Reference to our containing reader.  This is used to call back
    * and notify the reader that liveliness has been lost on this
    * instance.  It is also queried to determine if the DataReader is
@@ -229,9 +224,9 @@ private:
   /// the owner is updated.
   bool registered_;
 
-  RcHandle<SporadicTask> release_task_;
+  SporadicEvent_rch release_task_;
 
-  void do_release(const MonotonicTimePoint& now);
+  void do_release();
 };
 
 } // namespace DCPS

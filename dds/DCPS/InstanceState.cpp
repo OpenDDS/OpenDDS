@@ -35,7 +35,6 @@ InstanceState::InstanceState(const DataReaderImpl_rch& reader,
   , no_writers_generation_count_(0)
   , empty_(true)
   , release_pending_(false)
-  , release_timer_id_(-1)
   , reader_(reader)
   , handle_(handle)
   , owner_(GUID_UNKNOWN)
@@ -43,7 +42,7 @@ InstanceState::InstanceState(const DataReaderImpl_rch& reader,
   , exclusive_(reader->qos_.ownership.kind == DDS::EXCLUSIVE_OWNERSHIP_QOS)
 #endif
   , registered_(false)
-  , release_task_(make_rch<PmfSporadicTask<InstanceState> >(TheServiceParticipant->time_source(), TheServiceParticipant->reactor_task(), rchandle_from(this), &InstanceState::do_release))
+  , release_task_(make_rch<SporadicEvent>(TheServiceParticipant->event_dispatcher(), make_rch<PmfEvent<InstanceState> >(rchandle_from(this), &InstanceState::do_release)))
 {}
 
 InstanceState::~InstanceState()
@@ -100,7 +99,7 @@ void InstanceState::sample_info(DDS::SampleInfo& si, const ReceivedDataElement* 
 
 // cannot ACE_INLINE because of #include loop
 
-void InstanceState::do_release(const MonotonicTimePoint&)
+void InstanceState::do_release()
 {
   if (DCPS_debug_level) {
     ACE_DEBUG((LM_NOTICE,

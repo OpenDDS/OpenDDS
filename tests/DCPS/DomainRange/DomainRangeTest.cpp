@@ -61,7 +61,9 @@ public:
     }
 
     // Block until Subscriber is available
-    Utils::wait_match(writer_, static_cast<unsigned int>(total_readers_));
+    Utils::wait_match(writer_, static_cast<unsigned int>(total_readers_), Utils::EQ);
+
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) WriterTask::svc - fully matched for writer_id: %C\n", writer_id_.c_str()));
 
     // Write samples
     Messenger::Message message;
@@ -84,11 +86,6 @@ public:
       }
     }
 
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter %C is waiting for acknowledgments\n", writer_id_.c_str()));
-    DDS::Duration_t timeout = { 30, 0 };
-    message_writer->wait_for_acknowledgments(timeout);
-    // With static discovery, it's not an error for wait_for_acks to fail
-    // since the peer process may have terminated before sending acks.
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter %C is done\n", writer_id_.c_str()));
 
     return 0;
@@ -97,7 +94,7 @@ public:
 private:
   OPENDDS_STRING writer_id_;
   DDS::DataWriter_var writer_;
-  int total_readers_;
+  const int total_readers_;
 };
 
 ACE_Thread_Mutex readers_done_lock;
@@ -324,24 +321,33 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Spawning writer task %C\n", writer_id.c_str()));
-      WriterTask task(writer_id, writer, TOTAL_READERS);
-      task.activate(DEFAULT_FLAGS, TOTAL_WRITERS);
-      task.wait();
+      {
+        WriterTask task(writer_id, writer, TOTAL_READERS);
+        task.activate(DEFAULT_FLAGS, TOTAL_WRITERS);
+        task.wait();
+      }
+
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Writer task %C complete\n", writer_id.c_str()));
 
       ACE_Guard<ACE_Thread_Mutex> g(readers_done_lock);
-      while (readers_done != TOTAL_READERS)
+      while (readers_done != TOTAL_READERS) {
         readers_done_cond.wait();
-
-      DDS::Duration_t timeout = { 3, 0 };
-      if (writer->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
-        ACE_DEBUG((LM_INFO, "Writer: wait_for_acknowledgments timed out\n"));
       }
+
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) All readers have received all samples\n"));
 
       // Clean-up!
       for (int x = 0; x < TOTAL_READERS; ++x) {
         participants[x]->delete_contained_entities();
         dpf->delete_participant(participants[x]);
       }
+
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Waiting for readers to disassociate\n"));
+
+      // Block until Subscribers go away
+      Utils::wait_match(writer, 0, Utils::EQ);
+
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) All readers gone. Final cleanup.\n"));
 
       pub_participant->delete_contained_entities();
       dpf->delete_participant(pub_participant);

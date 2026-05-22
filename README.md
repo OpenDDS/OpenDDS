@@ -26,7 +26,6 @@ details.
 * [Dependencies](#dependencies)
   * [ACE/TAO](#acetao)
   * [Perl](#perl)
-  * [Optional Dependencies](#optional-dependencies)
 * [Supported Platforms](#supported-platforms)
   * [Operating Systems](#operating-systems)
   * [Compilers](#compilers)
@@ -113,26 +112,29 @@ On Windows we recommend the use of [Strawberry Perl](https://strawberryperl.com)
 
 ### Operating Systems
 
-This release of OpenDDS has been tested under the following platforms:
+This release of OpenDDS has been tested under the following platforms and
+toolchains.
+OpenDDS is also used on additional platforms and compilers; For general inquiries,
+GitHub Discussions (for questions) and Issues (for actual issues) are the best place
+to start. For specific platform and configuration support needs, see the Support section
+above for contact information.
 
 Linux family:
-* Red Hat EL and CentOS 6.6, 6.8, 6.9 (x86\_64)
-* Red Hat EL and CentOS 7.2, 7.3, 7.4 (x86\_64)
-* Fedora 24 and 31 (x86\_64)
-* Debian 9.4 (i686)
-* Ubuntu 22.04 LTS (x86\_64)
-* openSUSE 42.1 (x86\_64)
+* Ubuntu 22.04 LTS and 24.04 LTS (x86\_64)
+* Ubuntu 14.04 (limited GCC 4.6 compatibility build)
 
 Windows family:
-* Windows 7 (32-bit, 64-bit)
-* Windows Server 2012 R2 (64-bit)
-* Windows 10 (64-bit)
+* Windows Server 2022 and 2025 (64-bit)
+
+macOS family:
+* macOS 14
 
 Embedded/Mobile/IoT:
 * LynxOS-178 (OpenDDS Safety Profile)
 * VxWorks 6.9, 7, 21.03 (see below)
 * [Linux on Raspberry Pi](https://opendds.readthedocs.io/en/latest-release/devguide/quickstart/pi.html)
-* [Android 9.0 "Pie" (API Level 28) NDK r18b](https://opendds.readthedocs.io/en/latest-release/devguide/building/android.html)
+* [Android](https://opendds.readthedocs.io/en/latest-release/devguide/building/android.html)
+  using NDK r18b, r21e, r23c, r27c, and r28c
 
 We have built OpenDDS for VxWorks 6.9, 7, and 21.03 and have run basic
 system and performance tests (but not the entire regression test suite).
@@ -142,22 +144,12 @@ Download VxWorks RPM packages for ACE, TAO, and OpenDDS [here](https://objectcom
 
 ### Compilers
 
-This release of OpenDDS has been tested using the following compilers:
+This release of OpenDDS has been tested using the following compiler families:
 
-* Microsoft Visual C++ 10 with SP1 (Visual Studio 2010)
-* Microsoft Visual C++ 11 (Visual Studio 2012) - Update 4
-* Microsoft Visual C++ 12 (Visual Studio 2013) - Update 5
-* Microsoft Visual C++ 14 (Visual Studio 2015) - Update 3
-* Microsoft Visual C++ 14.1 (Visual Studio 2017) cl 19.16.27048
-* Microsoft Visual C++ 14.2 (Visual Studio 2019) cl 19.29.30146
-* gcc 4.4.7, 4.8.5
-* gcc 6.2.1, 6.3.0
-* gcc 7.2.0, 7.3.0, 7.5.0
-* gcc 8.2.0, 8.2.1
-* gcc 9.3.1
-* gcc 12.2.0
-* Ubuntu clang 14.0.6
-* Ubuntu clang 15.0.0
+* Microsoft Visual C++ from Visual Studio 2022
+* GCC 4.6, 11, 12, 13, and 14, 16
+* Clang 16, 18, and 20, 22
+* Apple Clang from Xcode on macOS 14
 
 ## Building and Installing
 

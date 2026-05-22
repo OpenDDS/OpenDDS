@@ -15,7 +15,7 @@ TEST(dds_DCPS_RcObject, ctors_weak)
 {
   RcHandle<Counted> h1 = make_rch<Counted>();
   WeakRcHandle<Counted> w1(h1);
-  EXPECT_EQ(h1, w1);
+  EXPECT_EQ(w1.lock(), h1);
 
   WeakRcHandle<Counted> w2;
   EXPECT_FALSE(w2);
@@ -30,7 +30,7 @@ TEST(dds_DCPS_RcObject, assign_weak)
   WeakRcHandle<Counted> w1, w2, w3;
 
   w1 = h1;
-  EXPECT_EQ(h1, w1);
+  EXPECT_EQ(w1.lock(), h1);
 
   w2 = w1;
   EXPECT_TRUE(w2);

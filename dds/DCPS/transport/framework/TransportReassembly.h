@@ -105,9 +105,9 @@ public:
                         CORBA::Long bitmap[], CORBA::ULong length,
                         CORBA::ULong& numBits) const;
 
-  size_t fragments_size() const { return fragments_.size(); }
-  size_t queue_size() const { return expiration_queue_.size(); }
-  size_t completed_size() const { return completed_.size(); }
+  size_t fragments_size() const;
+  size_t queue_size() const;
+  size_t completed_size() const;
   size_t total_frags() const;
 
 private:
@@ -121,6 +121,16 @@ private:
   struct FragSample {
     FragSample(const FragmentRange& fragRange,
               const ReceivedDataSample& data);
+
+#ifdef ACE_HAS_CPP11
+    FragSample(const FragmentRange& fragRange,
+              ReceivedDataSample&& data);
+    FragSample(const FragSample&) = default;
+    FragSample(FragSample&&) = default;
+
+    FragSample& operator=(const FragSample&) = default;
+    FragSample& operator=(FragSample&&) = default;
+#endif
 
     FragmentRange frag_range_;
     ReceivedDataSample rec_ds_;
@@ -138,6 +148,11 @@ private:
     FragInfo(const FragInfo& val);
 
     FragInfo& operator=(const FragInfo& rhs);
+
+#ifdef ACE_HAS_CPP11
+    FragInfo(FragInfo&& other) = default;
+    FragInfo& operator=(FragInfo&& rhs) = default;
+#endif
 
     bool insert(const FragmentRange& fragRange, ReceivedDataSample& data);
 

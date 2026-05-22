@@ -32,11 +32,25 @@ public:
     return call_count_;
   }
 
+  void reset()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    call_count_ = 0;
+  }
+
   void wait(size_t target)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     while (call_count_ < target) {
       cv_.wait(tsm_);
+    }
+  }
+
+  void wait_until(const OpenDDS::DCPS::MonotonicTimePoint& deadline)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    while (OpenDDS::DCPS::MonotonicTimePoint::now() < deadline) {
+      cv_.wait_until(deadline, tsm_);
     }
   }
 
@@ -69,7 +83,7 @@ TEST(dds_DCPS_PeriodicEvent, Nominal)
 
   EXPECT_EQ(periodic->enabled(), false);
 
-  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 200000));
+  EXPECT_TRUE(periodic->enable(OpenDDS::DCPS::TimeDuration(0, 200000)));
 
   EXPECT_EQ(periodic->enabled(), true);
 
@@ -85,7 +99,7 @@ TEST(dds_DCPS_PeriodicEvent, Nominal)
 
   EXPECT_EQ(periodic->enabled(), false);
 
-  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 200000), false, true);
+  EXPECT_TRUE(periodic->enable(OpenDDS::DCPS::TimeDuration(0, 200000), false, true));
 
   EXPECT_EQ(periodic->enabled(), true);
 
@@ -105,22 +119,64 @@ TEST(dds_DCPS_PeriodicEvent, NoDoubleExec)
   OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>();
   OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::PeriodicEvent> periodic = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::PeriodicEvent>(dispatcher, test_event);
 
-  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, false);
-  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, false);
-  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, true);
+  EXPECT_TRUE(periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, false));
+  EXPECT_FALSE(periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, false));
+  EXPECT_FALSE(periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, true));
 
   test_event->wait(1);
   EXPECT_EQ(test_event->call_count(), 1u);
 
   periodic->disable();
 
-  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, true);
-  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, true);
-  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, false);
+  EXPECT_TRUE(periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, true));
+  EXPECT_FALSE(periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, true));
+  EXPECT_FALSE(periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, false));
 
   test_event->wait(2);
   EXPECT_EQ(test_event->call_count(), 2u);
 
   periodic->disable();
   dispatcher->shutdown(true);
+}
+
+TEST(dds_DCPS_PeriodicEvent, ImmediateDispatch)
+{
+  OpenDDS::DCPS::RcHandle<SimpleTestEvent> test_event = OpenDDS::DCPS::make_rch<SimpleTestEvent>();
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>();
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::PeriodicEvent> periodic = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::PeriodicEvent>(dispatcher, test_event);
+
+  // Should dispatch at most 4 calls in 1.8s
+  const OpenDDS::DCPS::TimeDuration span = OpenDDS::DCPS::TimeDuration(1, 800000);
+  const OpenDDS::DCPS::TimeDuration period = OpenDDS::DCPS::TimeDuration(0, 500000);
+  OpenDDS::DCPS::MonotonicTimePoint deadline = OpenDDS::DCPS::MonotonicTimePoint::now() + span;
+
+  // Immediate dispatch but not strict timing
+  EXPECT_TRUE(periodic->enable(period, true, false));
+  test_event->wait_until(deadline);
+  periodic->disable();
+  EXPECT_LE(test_event->call_count(), 4u);
+
+  test_event->reset();
+  deadline = OpenDDS::DCPS::MonotonicTimePoint::now() + span;
+
+  // Immediate dispatch and strict timing
+  EXPECT_TRUE(periodic->enable(period, true, true));
+  test_event->wait_until(deadline);
+  periodic->disable();
+  EXPECT_LE(test_event->call_count(), 4u);
+}
+
+TEST(dds_DCPS_PeriodicEvent, EnableAfterShutdown)
+{
+  OpenDDS::DCPS::RcHandle<SimpleTestEvent> test_event = OpenDDS::DCPS::make_rch<SimpleTestEvent>();
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>();
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::PeriodicEvent> periodic = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::PeriodicEvent>(dispatcher, test_event);
+
+  const OpenDDS::DCPS::TimeDuration period = OpenDDS::DCPS::TimeDuration(0, 500000);
+  dispatcher->shutdown(true);
+
+  EXPECT_FALSE(periodic->enable(period, true));
+  EXPECT_FALSE(periodic->enabled());
+  EXPECT_FALSE(periodic->enable(period, false));
+  EXPECT_FALSE(periodic->enabled());
 }

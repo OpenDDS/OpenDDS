@@ -26,7 +26,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-const size_t MAX_NETLINK_MESSAGE_SIZE = 4096;
+const size_t MAX_NETLINK_MESSAGE_SIZE = 32*1024;
 
 LinuxNetworkConfigMonitor::LinuxNetworkConfigMonitor(ReactorTask_rch reactor_task)
   : reactor_task_(reactor_task)
@@ -204,7 +204,7 @@ void LinuxNetworkConfigMonitor::read_messages()
       if (socket_.get_handle() == -1) {
         return;
       }
-      buffer_length = socket_.recv(buffer, 4096, 0);
+      buffer_length = socket_.recv(buffer, sizeof buffer, 0);
     }
     if (buffer_length < 0) {
       if (errno == EAGAIN || errno == EWOULDBLOCK) {

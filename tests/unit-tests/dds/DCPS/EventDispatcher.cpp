@@ -90,11 +90,23 @@ struct BrokenTestEvent : public TestEventBase {
   void handle_cancel() { increment_cancel_count(); }
 };
 
+struct BrokenErrorHandlerTestEvent : public TestEventBase {
+  BrokenErrorHandlerTestEvent() {}
+  void handle_event() { throw 1; }
+  void handle_error()
+  {
+    increment_error_count();
+    throw 2;
+  }
+  void handle_cancel() { increment_cancel_count(); }
+};
+
 struct TestEventDispatcher : public OpenDDS::DCPS::EventDispatcher {
   void shutdown(bool) {}
   bool dispatch(OpenDDS::DCPS::EventBase_rch) { return false; }
   long schedule(OpenDDS::DCPS::EventBase_rch, const OpenDDS::DCPS::MonotonicTimePoint&) { return -1; }
   size_t cancel(long) { return 0; }
+  size_t queue_size() const { return 0; }
 };
 
 } // (anonymous) namespace
@@ -138,6 +150,18 @@ TEST(dds_DCPS_EventDispatcher, EventBaseHandleException)
   EXPECT_EQ(test_event->call_count(), 0u);
   EXPECT_EQ(test_event->error_count(), 3u);
   EXPECT_EQ(test_event->cancel_count(), 3u);
+}
+
+TEST(dds_DCPS_EventDispatcher, EventBaseSuppressesErrorHandlerException)
+{
+  OpenDDS::DCPS::RcHandle<BrokenErrorHandlerTestEvent> test_event = OpenDDS::DCPS::make_rch<BrokenErrorHandlerTestEvent>();
+
+  test_event->_add_ref();
+  EXPECT_NO_THROW((*test_event)());
+
+  EXPECT_EQ(test_event->call_count(), 0u);
+  EXPECT_EQ(test_event->error_count(), 1u);
+  EXPECT_EQ(test_event->cancel_count(), 0u);
 }
 
 TEST(dds_DCPS_EventDispatcher, TestEventDispatcher)

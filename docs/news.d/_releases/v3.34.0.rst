@@ -1,0 +1,74 @@
+Released 2026-05-21
+
+Download :ghrelease:`this release on GitHub <v3.34.0>`.
+
+Read `the documentation for this release on Read the Docs <https://opendds.readthedocs.io/en/v3.34.0>`__.
+
+Additions
+=========
+
+- RtpsRelay
+
+  - Additional parameters can be changed at runtime. See :ref:`RtpsRelayControl <internet_enabled_rtps--rtps_relay_control>` for details. (:ghpr:`5130`, :ghpr:`5111`)
+  - A list of partitions can be specified to be denied by the RtpsRelay instance using the new RelayDeniedPartitions topic. (:ghpr:`5135`)
+
+    - A new option ``-DeniedPartitionsTimeout`` is added to specify the denial duration.
+
+- Added a '--profiling' flag to the configure script to enable common flags used during profiling (gcc / clang) (:ghpr:`5169`)
+
+  - This enables some optimization ('-O3') but also includes debuging info ('-ggdb') and protects frame pointers ('-fno-omit-frame-pointer')
+    in order to help in generating clean stack traces for profilers and other utilities which examine the call stack.
+
+- Added callbacks for when an OpenDDS thread starts and finishes to control thread behavior. (:ghpr:`5171`)
+
+  - For example on Linux, using :manpage:`pthread_setaffinity_np` to set which CPU core the thread runs on.
+  - See ``set_thread_status_listener`` in :ghfile:`dds/DCPS/Service_Participant.h` and ``ThreadStatusListener`` in :ghfile:`dds/DCPS/ThreadStatusManager.h` for details.
+
+- As an optimization, all IDL mappings will now try to avoid zero-initializing memory of sequences of primitive types (ints, floats, etc) while deserializing a sample. (:ghpr:`5173`)
+
+  - IDL-to-C++11 will require additional opt-in using :ref:`opendds_idl-opendds-no_init_before_deserialize`.
+
+- Added ``DCPSEventDispatcherThreads`` and transport ``event_dispatcher_threads`` runtime-configuration options to control ``EventDispatcher`` thread counts. (:ghpr:`5208`)
+  Setting transport ``event_dispatcher_threads=0`` reuses the global dispatcher instead of creating a transport-local dispatcher.
+
+- Added :cfg:prop:`[transport@tcp]send_buffer_size` and (:ghpr:`5215`)
+  :cfg:prop:`[transport@tcp]rcv_buffer_size`. By default, the TCP transport
+  now leaves socket buffer sizing to the platform unless these are set to
+  positive values.
+
+Platform Support and Dependencies
+=================================
+
+- ACE/TAO
+
+  - Updated ACE 6/TAO 2 from 6.5.23 to `6.5.24 <https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_24>`__.
+  - Updated ACE 8/TAO 4 from 8.0.5 to `8.0.6 <https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-8_0_6>`__.
+
+- CMake
+
+  - When building OpenDDS with CMake, the default ACE_TAO version is now ACE 8 / TAO 4. (:ghpr:`5093`, :ghpr:`5029`)
+
+  - Replace CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE with CMAKE_VS_PLATFORM_NAME to fit cross-compile scenario on Windows. (:ghpr:`5157`)
+
+Removals
+========
+
+- RtpsRelay
+
+  - RtpsRelay option ``-LogParticipantStatistics`` is removed as it is unused (:ghpr:`5109`)
+
+Fixes
+=====
+
+- Increase netlink receive buffer size. (:ghpr:`5142`)
+
+  - Recommended netlink receive `buffer size <https://www.kernel.org/doc/html/latest/userspace-api/netlink/intro.html#buffer-sizing>`__ is 32kB.
+    Buffer size smaller than 8kB may lead to unexpected truncation of received data.
+
+- As a network performance improvement: Free up Reactor threads for network reads by moving the majority of maintenance and response tasks and jobs off Reactor threads and onto matching EventDispatcher threads. (:ghpr:`5160`)
+
+- ``ThreadStatusManager`` now contains multiple slots for storing thread statuses, each has its own lock. (:ghpr:`5172`)
+  Only threads assigned to the same slot contend with each other for the slot's lock.
+- Fixed a null pointer dereference which could occur when deserializing ``DynamicData`` samples from a participant being removed. (:ghpr:`5176`)
+- Fix issues related to transport instance lookup and shared local addresses between transport instances which were sometimes causing incorrect locator values to be used in participant and endpoint announcements and causing connectivity issues. These issues primarily impact configurations which make use of discovery and transport configuration templates. (:ghpr:`5189`)
+

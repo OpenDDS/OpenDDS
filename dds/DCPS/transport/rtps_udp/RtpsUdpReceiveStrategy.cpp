@@ -154,8 +154,16 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
     while (bytes_remaining_unsigned > 0) {
       data_sample_header_.pdu_remaining(bytes_remaining_unsigned);
       data_sample_header_ = *cur_rb;
-      bytes_remaining_unsigned -= static_cast<ACE_UINT32>(data_sample_header_.get_serialized_size());
       if (!check_header(data_sample_header_)) {
+        return 0;
+      }
+      const ACE_UINT32 serialized_size = static_cast<ACE_UINT32>(data_sample_header_.get_serialized_size());
+      if (!RtpsSampleHeader::has_valid_cursor(*cur_rb) || serialized_size > bytes_remaining_unsigned) {
+        return 0;
+      }
+      bytes_remaining_unsigned -= serialized_size;
+      const ACE_UINT32 message_length = data_sample_header_.message_length();
+      if (message_length > bytes_remaining_unsigned) {
         return 0;
       }
       ReceivedDataSample rds = data_sample_header_.message_length() ? ReceivedDataSample(*cur_rb) : ReceivedDataSample();
@@ -175,8 +183,8 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
           deliver_sample(rds, remote_address);
         }
       }
-      cur_rb->rd_ptr(data_sample_header_.message_length());
-      bytes_remaining_unsigned -= static_cast<ACE_UINT32>(data_sample_header_.message_length());
+      cur_rb->rd_ptr(message_length);
+      bytes_remaining_unsigned -= message_length;
 
       // For the reassembly algorithm, the 'last_fragment_' header bit only
       // applies to the first DataSampleHeader in the TransportHeader
@@ -280,7 +288,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
 
   DCPS::Serializer serializer(head, STUN::encoding);
   STUN::Message message;
-  message.block = head;
+  message.block(head);
   if (serializer >> message) {
     tport.core().recv(ra, MCK_STUN, ret);
 
@@ -527,6 +535,8 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
 #if OPENDDS_CONFIG_SECURITY
   const SubmessageKind kind = rsh.submessage_._d();
 
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(readers_mutex_);
+
   if (secure_prefix_.smHeader.submessageId == SEC_PREFIX && kind != SEC_POSTFIX) {
     // secure envelope in progress, defer processing
     secure_submessages_.push_back(rsh.submessage_);
@@ -583,8 +593,11 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     getDirectedWriteReaders(directedWriteReaders, data);
 
     recvd_sample_ = &sample;
+
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(readers_mutex_);
     readers_selected_.clear();
     readers_withheld_.clear();
+
     // If this sample should be withheld from some readers in order to maintain
     // in-order delivery, link_->received() will add it to readers_withheld_ otherwise
     // it will be added to readers_selected_
@@ -730,13 +743,16 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
    */
 
 #if OPENDDS_CONFIG_SECURITY
-  case SEC_PREFIX:
+  case SEC_PREFIX: {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(readers_mutex_);
     secure_prefix_ = submessage.security_sm();
     break;
-
-  case SEC_POSTFIX:
+  }
+  case SEC_POSTFIX: {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(readers_mutex_);
     deliver_from_secure(submessage, remote_addr);
     break;
+  }
 #endif
 
   default:
@@ -1034,17 +1050,20 @@ RtpsUdpReceiveStrategy::check_header(const RtpsTransportHeader& header)
 bool
 RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
 {
+  if (!header.valid()) {
+    return false;
+  }
 
 #if OPENDDS_CONFIG_SECURITY
   if (secure_prefix_.smHeader.submessageId) {
-    return header.valid();
+    return true;
   }
 #endif
 
   receiver_.submsg(header.submessage_);
 
   // save fragmentation details for use in reassemble()
-  if (header.valid() && header.submessage_._d() == RTPS::DATA_FRAG) {
+  if (header.submessage_._d() == RTPS::DATA_FRAG) {
     const RTPS::DataFragSubmessage& rtps = header.submessage_.data_frag_sm();
     frags_.first = rtps.fragmentStartingNum.value;
     frags_.second = RtpsSampleHeader::last_fragment(rtps);
@@ -1052,7 +1071,7 @@ RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
     total_frags_ = RtpsSampleHeader::total_fragments(rtps);
   }
 
-  return header.valid();
+  return true;
 }
 
 void
@@ -1070,6 +1089,7 @@ RtpsUdpReceiveStrategy::end_transport_header_processing()
 const ReceivedDataSample*
 RtpsUdpReceiveStrategy::withhold_data_from(const GUID_t& sub_id)
 {
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(readers_mutex_);
   readers_withheld_.insert(sub_id);
   return recvd_sample_;
 }
@@ -1077,6 +1097,7 @@ RtpsUdpReceiveStrategy::withhold_data_from(const GUID_t& sub_id)
 void
 RtpsUdpReceiveStrategy::do_not_withhold_data_from(const GUID_t& sub_id)
 {
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(readers_mutex_);
   readers_selected_.insert(sub_id);
 }
 
@@ -1429,14 +1450,17 @@ StatisticSeq RtpsUdpReceiveStrategy::stats_template()
 void RtpsUdpReceiveStrategy::fill_stats(StatisticSeq& stats, DDS::UInt32& idx) const
 {
   TransportReceiveStrategy::fill_stats(stats, idx);
-  stats[idx++].value = readers_withheld_.size();
-  stats[idx++].value = readers_selected_.size();
+  {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(readers_mutex_);
+    stats[idx++].value = readers_withheld_.size();
+    stats[idx++].value = readers_selected_.size();
   stats[idx++].value =
 #if OPENDDS_CONFIG_SECURITY
     secure_submessages_.size();
 #else
     0;
 #endif
+  }
   stats[idx++].value = reassembly_.fragments_size();
   stats[idx++].value = reassembly_.total_frags();
   stats[idx++].value = reassembly_.queue_size();

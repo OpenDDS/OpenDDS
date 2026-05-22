@@ -92,6 +92,7 @@ namespace {
       OpenDDS::DCPS::InternalSampleInfoSequence infos;
       reader->read(samples, infos, DDS::LENGTH_UNLIMITED,
                    DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
       for (size_t idx = 0; idx != samples.size(); ++idx) {
         const auto& info = infos[idx];
         const auto& pair = samples[idx];
@@ -104,6 +105,7 @@ namespace {
       writer_->write(config_, DDS::HANDLE_NIL);
     }
 
+    mutable ACE_Thread_Mutex mutex_;
     RelayConfigDataWriter_var writer_;
     RelayConfig config_;
   };
@@ -905,7 +907,7 @@ int run(int argc, ACE_TCHAR* argv[])
   }
   ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Meta Discovery listening on %C\n", OpenDDS::DCPS::LogAddr(meta_discovery_addr).c_str()));
 
-  const auto run_thread_mon = TheServiceParticipant->get_thread_status_manager().update_thread_status();
+  const auto run_thread_mon = TheServiceParticipant->get_thread_status_manager().thread_status_interval();
   if (run_thread_mon && relay_thread_monitor->start() != EXIT_SUCCESS) {
     ACE_ERROR((LM_ERROR, "(%P:%t) ERROR: Failed to start Relay Thread Monitor\n"));
     return EXIT_FAILURE;

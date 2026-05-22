@@ -122,15 +122,16 @@ public:
         GuardType guard(this->lock_);
 
         if (this->queue_.is_empty() && !shutdown_initiated_) {
-          if (thread_status_manager.update_thread_status()) {
-            MonotonicTimePoint expire = MonotonicTimePoint::now() + thread_status_manager.thread_status_interval();
+          const TimeDuration thread_status_interval = thread_status_manager.thread_status_interval();
+          if (thread_status_interval) {
+            MonotonicTimePoint expire = MonotonicTimePoint::now() + thread_status_interval;
 
             do {
               work_available_.wait_until(expire, thread_status_manager);
 
               MonotonicTimePoint now = MonotonicTimePoint::now();
               if (now > expire) {
-                expire = now + thread_status_manager.thread_status_interval();
+                expire = now + thread_status_interval;
               }
             } while (this->queue_.is_empty() && !shutdown_initiated_);
           } else {
