@@ -36,6 +36,7 @@
 
 #include <dds/DCPS/security/framework/Properties.h>
 #include <dds/DCPS/security/framework/SecurityRegistry.h>
+#include <dds/DCPS/security/SSL/Certificate.h>
 
 #include <ace/Arg_Shifter.h>
 #include <ace/Argv_Type_Converter.h>
@@ -553,6 +554,15 @@ int run(int argc, ACE_TCHAR* argv[])
     append(application_properties, DDS::Security::Properties::AuthPrivateKey, identity_key_file);
     append(application_properties, DDS::Security::Properties::AccessGovernance, governance_file);
     append(application_properties, DDS::Security::Properties::AccessPermissions, permissions_file);
+
+    OpenDDS::Security::SSL::Certificate ca_cert(identity_ca_file);
+    std::string ca_subject_name;
+    if (ca_cert.subject_name_to_str(ca_subject_name) == 0 && !ca_subject_name.empty()) {
+      config.expected_ca_subject_name(ca_subject_name);
+      ACE_DEBUG((LM_INFO, "(%P|%t) INFO: RtpsRelay CA subject name: %C\n", ca_subject_name.c_str()));
+    } else {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Failed to extract RtpsRelay CA subject name\n"));
+    }
   }
 
   DDS::DomainParticipant_var application_participant = factory->create_participant(config.application_domain(), participant_qos, nullptr,

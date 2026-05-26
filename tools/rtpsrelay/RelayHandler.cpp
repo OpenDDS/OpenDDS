@@ -374,8 +374,14 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
         if (to_partitions.empty()) {
           const auto pos = proxy.find(src_guid);
           if (pos != proxy.end()) {
-            const auto key = pos->second.identity_info.cert_id();
-            guid_partition_table_.lookup_cert_partitions_cache(to_partitions, key, src_guid);
+            const auto ca_sn = pos->second.identity_info.ca_sn();
+            if (!config_.expected_ca_subject_name().empty() && config_.expected_ca_subject_name() == ca_sn) {
+              const auto key = pos->second.identity_info.cert_id();
+              guid_partition_table_.lookup_cert_partitions_cache(to_partitions, key, src_guid);
+            } else if (config_.log_async_discovery()) {
+              HANDLER_WARNING((LM_WARNING, "(%P|%t) WARNING: VerticalHandler::process_message %C Expected CA subject name '%C', but got '%C' from GUID %C\n",
+                name_.c_str(), config_.expected_ca_subject_name().c_str(), ca_sn.c_str(), OpenDDS::DCPS::LogGuid(src_guid).c_str()));
+            }
           }
           if (!to_partitions.empty()) {
             async_discovery = true;

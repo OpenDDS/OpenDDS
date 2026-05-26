@@ -546,6 +546,15 @@ public:
     return cached_async_discovery_remote_cache_timeout_.get();
   }
 
+  void expected_ca_subject_name(const std::string& value)
+  {
+    expected_ca_subject_name_ = value;
+  }
+  const std::string& expected_ca_subject_name() const
+  {
+    return expected_ca_subject_name_;
+  }
+
   static bool to_time_duration(const std::string& value, OpenDDS::DCPS::TimeDuration& out);
 
 private:
@@ -657,6 +666,7 @@ private:
   // that will be used as the key into the partition cache for asynchronous discovery.
   // Currently, the first submatch is used.
   std::string certificate_id_pattern_;
+  std::string expected_ca_subject_name_;
   // end of variables without ConfigStore support
 };
 
