@@ -35,7 +35,7 @@ enum DynamicDataJsonDiscriminatorFormat {
   DYNAMIC_DATA_JSON_DISCRIMINATOR_FIELD,
 
   /// Use the dds-xtypes interop active-member-only union representation.
-  DYNAMIC_DATA_JSON_DISCRIMINATOR_ACTIVE_MEMBER
+  DYNAMIC_DATA_JSON_DISCRIMINATOR_ACTIVE_MEMBER,
 };
 
 struct OpenDDS_Dcps_Export DynamicDataJsonOptions {

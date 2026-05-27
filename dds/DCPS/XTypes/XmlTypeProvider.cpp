@@ -34,7 +34,7 @@
 #include <limits>
 #include <map>
 #include <set>
-#include <sstream>
+#include <string>
 #include <vector>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -97,9 +97,7 @@ std::string required_attr(const XERCES_CPP_NAMESPACE::DOMElement* element, const
                           const std::string& element_name, std::string& error)
 {
   if (!has_attr(element, name)) {
-    std::ostringstream os;
-    os << "missing required attribute '" << name << "' on <" << element_name << ">";
-    error = os.str();
+    error = "missing required attribute '" + std::string(name) + "' on <" + element_name + ">";
     return std::string();
   }
   return attr(element, name);
@@ -406,9 +404,7 @@ public:
 
     const std::string requested = strip_leading_colons(type_name);
     if (types_.find(requested) == types_.end()) {
-      std::ostringstream os;
-      os << "type '" << requested << "' was not found";
-      report(os.str(), requested);
+      report("type '" + requested + "' was not found", requested);
       return DDS::RETCODE_BAD_PARAMETER;
     }
     root_type_name_ = requested.c_str();
@@ -527,10 +523,8 @@ private:
     try {
       parser.parse(file_.c_str());
     } catch (const XERCES_CPP_NAMESPACE::SAXParseException& ex) {
-      std::ostringstream os;
-      os << "XML parse error at line " << ex.getLineNumber() << ", column "
-         << ex.getColumnNumber() << ": " << to_string(ex.getMessage());
-      error = os.str();
+      error = "XML parse error at line " + std::to_string(ex.getLineNumber()) +
+        ", column " + std::to_string(ex.getColumnNumber()) + ": " + to_string(ex.getMessage());
       return false;
     } catch (const XERCES_CPP_NAMESPACE::SAXException& ex) {
       error = "XML parse error: " + to_string(ex.getMessage());
@@ -541,9 +535,7 @@ private:
     }
 
     if (parser.getErrorCount()) {
-      std::ostringstream os;
-      os << "XML parser reported " << parser.getErrorCount() << " error(s)";
-      error = os.str();
+      error = "XML parser reported " + std::to_string(parser.getErrorCount()) + " error(s)";
       return false;
     }
 
@@ -567,9 +559,7 @@ private:
             return false;
           }
         } else {
-          std::ostringstream os;
-          os << "unsupported <dds> child <" << name << ">";
-          error = os.str();
+          error = "unsupported <dds> child <" + name + ">";
           return false;
         }
       }
@@ -578,9 +568,7 @@ private:
         return false;
       }
     } else {
-      std::ostringstream os;
-      os << "expected <dds> or <types> document root, found <" << root_name << ">";
-      error = os.str();
+      error = "expected <dds> or <types> document root, found <" + root_name + ">";
       return false;
     }
 
@@ -630,9 +618,7 @@ private:
           return false;
         }
       } else {
-        std::ostringstream os;
-        os << "unsupported type element <" << name << "> in scope '" << scope << "'";
-        error = os.str();
+        error = "unsupported type element <" + name + "> in scope '" + scope + "'";
         return false;
       }
     }

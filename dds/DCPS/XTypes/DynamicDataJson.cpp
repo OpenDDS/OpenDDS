@@ -22,7 +22,6 @@
 #include <ace/OS_NS_string.h>
 
 #include <cerrno>
-#include <cfloat>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
@@ -65,9 +64,7 @@ std::string path_member(const std::string& path, const char* name)
 
 std::string path_index(const std::string& path, DDS::UInt32 index)
 {
-  std::ostringstream os;
-  os << path << '[' << index << ']';
-  return os.str();
+  return path + '[' + std::to_string(index) + ']';
 }
 
 bool get_type_descriptor(DDS::TypeDescriptor_var& descriptor, DDS::DynamicType_ptr type)
@@ -337,19 +334,6 @@ void float128_big_endian_bytes(const ACE_CDR::LongDouble& value, char bytes[16])
   }
 #endif
 
-#if ACE_SIZEOF_LONG_DOUBLE == 16 && LDBL_MANT_DIG == 64
-  // On x86 extended-precision long double, the 16-byte object contains six
-  // padding bytes.  Ignore their indeterminate values for JSON and equality.
-#  if defined(ACE_BIG_ENDIAN)
-  for (size_t i = 10; i != 16; ++i) {
-    bytes[i] = 0;
-  }
-#  else
-  for (size_t i = 0; i != 6; ++i) {
-    bytes[i] = 0;
-  }
-#  endif
-#endif
 }
 
 bool parse_hex_float128(const char* text, ACE_CDR::LongDouble& value)
@@ -513,6 +497,9 @@ bool json_to_discriminator(
     } else if (!json_to_uint64(value, v)) {
       return false;
     }
+    if (v > static_cast<DDS::UInt64>(std::numeric_limits<DDS::Int32>::max())) {
+      return false;
+    }
     output = static_cast<DDS::Int32>(v);
     return true;
   }
@@ -538,6 +525,10 @@ bool json_to_discriminator(
   case TK_INT64: {
     DDS::Int64 v = 0;
     if (json_to_int64(value, v)) {
+      if (v < std::numeric_limits<DDS::Int32>::min() ||
+          v > std::numeric_limits<DDS::Int32>::max()) {
+        return false;
+      }
       output = static_cast<DDS::Int32>(v);
       return true;
     }
@@ -564,6 +555,10 @@ bool json_to_discriminator(
 
   DDS::Int64 fallback = 0;
   if (json_to_int64(value, fallback)) {
+    if (fallback < std::numeric_limits<DDS::Int32>::min() ||
+        fallback > std::numeric_limits<DDS::Int32>::max()) {
+      return false;
+    }
     output = static_cast<DDS::Int32>(fallback);
     return true;
   }
@@ -787,9 +782,8 @@ DDS::ReturnCode_t populate_union_with_discriminator(
     branch = value.FindMember(selected_md->name());
   }
   if (branch == value.MemberEnd()) {
-    std::ostringstream key;
-    key << discriminator_value;
-    branch = value.FindMember(key.str().c_str());
+    const std::string key = std::to_string(discriminator_value);
+    branch = value.FindMember(key.c_str());
   }
   if (branch == value.MemberEnd()) {
     JsonValue::ConstMemberIterator single = value.MemberEnd();
@@ -924,6 +918,10 @@ DDS::ReturnCode_t populate_value(
     return populate_structure(data, base, value, options, path);
   case TK_UNION:
     return populate_union(data, base, value, options, path);
+  case TK_MAP:
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: dynamic_data_json: map type %C at %C is not supported\n",
+      type_name(base).c_str(), path.c_str()));
+    return DDS::RETCODE_UNSUPPORTED;
   case TK_ARRAY:
   case TK_SEQUENCE:
     return populate_collection(data, base, value, options, path);
@@ -1206,6 +1204,10 @@ bool write_value(
       return write_union_value(writer, data, base, options);
     }
     return write_collection_value(writer, data, base, options);
+  case TK_MAP:
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: dynamic_data_json: map type %C is not supported\n",
+      type_name(base).c_str()));
+    return false;
   default:
     return write_scalar_value(writer, data, id, base);
   }
@@ -1230,9 +1232,7 @@ DDS::ReturnCode_t dynamic_data_from_json(
   JsonDocument document;
   document.Parse(json);
   if (document.HasParseError()) {
-    std::ostringstream os;
-    os << "failed to parse JSON at offset " << document.GetErrorOffset();
-    report_error(os.str());
+    report_error("failed to parse JSON at offset " + std::to_string(document.GetErrorOffset()));
     return DDS::RETCODE_BAD_PARAMETER;
   }
 
@@ -1240,9 +1240,7 @@ DDS::ReturnCode_t dynamic_data_from_json(
   DDS::DynamicType_var base = get_base_type(type);
   DDS::ReturnCode_t rc = populate_value(data, base, document, options, "$");
   if (rc != DDS::RETCODE_OK) {
-    std::ostringstream os;
-    os << "failed to populate DynamicData for " << type_name(base);
-    report_error(os.str());
+    report_error("failed to populate DynamicData for " + type_name(base));
   }
   return rc;
 }

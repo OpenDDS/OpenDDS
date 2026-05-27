@@ -17,7 +17,6 @@
 #  include <ace/OS_NS_string.h>
 
 #  include <algorithm>
-#  include <cfloat>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
@@ -529,19 +528,6 @@ namespace {
     }
 #endif
 
-#if ACE_SIZEOF_LONG_DOUBLE == 16 && LDBL_MANT_DIG == 64
-    // On x86 extended-precision long double, the 16-byte object contains six
-    // padding bytes. Ignore their indeterminate values for equality.
-#  if defined(ACE_BIG_ENDIAN)
-    for (size_t i = 10; i != 16; ++i) {
-      bytes[i] = 0;
-    }
-#  else
-    for (size_t i = 0; i != 6; ++i) {
-      bytes[i] = 0;
-    }
-#  endif
-#endif
   }
 
   bool get_type_descriptor(DDS::TypeDescriptor_var& descriptor, DDS::DynamicType_ptr type)
@@ -757,6 +743,8 @@ namespace {
       }
       return data_equal_i(lhs, rhs, lhs_branch, rhs_branch, md->type());
     }
+    case TK_MAP:
+      return false;
     case TK_ARRAY:
     case TK_SEQUENCE: {
       DDS::TypeDescriptor_var td;
