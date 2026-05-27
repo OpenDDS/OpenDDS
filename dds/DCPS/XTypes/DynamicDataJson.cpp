@@ -49,7 +49,7 @@ void report_error(const std::string& message)
 }
 
 template <typename T>
-std::string value_to_string(const T& value)
+std::string dynamic_data_json_value_to_string(const T& value)
 {
   std::ostringstream out;
   out << value;
@@ -72,7 +72,7 @@ std::string path_member(const std::string& path, const char* name)
 
 std::string path_index(const std::string& path, DDS::UInt32 index)
 {
-  return path + '[' + value_to_string(index) + ']';
+  return path + '[' + dynamic_data_json_value_to_string(index) + ']';
 }
 
 bool get_type_descriptor(DDS::TypeDescriptor_var& descriptor, DDS::DynamicType_ptr type)
@@ -790,7 +790,7 @@ DDS::ReturnCode_t populate_union_with_discriminator(
     branch = value.FindMember(selected_md->name());
   }
   if (branch == value.MemberEnd()) {
-    const std::string key = value_to_string(discriminator_value);
+    const std::string key = dynamic_data_json_value_to_string(discriminator_value);
     branch = value.FindMember(key.c_str());
   }
   if (branch == value.MemberEnd()) {
@@ -1240,7 +1240,7 @@ DDS::ReturnCode_t dynamic_data_from_json(
   JsonDocument document;
   document.Parse(json);
   if (document.HasParseError()) {
-    report_error("failed to parse JSON at offset " + value_to_string(document.GetErrorOffset()));
+    report_error("failed to parse JSON at offset " + dynamic_data_json_value_to_string(document.GetErrorOffset()));
     return DDS::RETCODE_BAD_PARAMETER;
   }
 
