@@ -55,6 +55,14 @@ std::string to_string(const XMLCh* in)
   return result;
 }
 
+template <typename T>
+std::string value_to_string(const T& value)
+{
+  std::ostringstream out;
+  out << value;
+  return out.str();
+}
+
 class XmlString {
 public:
   explicit XmlString(const char* in)
@@ -524,8 +532,8 @@ private:
     try {
       parser.parse(file_.c_str());
     } catch (const XERCES_CPP_NAMESPACE::SAXParseException& ex) {
-      error = "XML parse error at line " + std::to_string(ex.getLineNumber()) +
-        ", column " + std::to_string(ex.getColumnNumber()) + ": " + to_string(ex.getMessage());
+      error = "XML parse error at line " + value_to_string(ex.getLineNumber()) +
+        ", column " + value_to_string(ex.getColumnNumber()) + ": " + to_string(ex.getMessage());
       return false;
     } catch (const XERCES_CPP_NAMESPACE::SAXException& ex) {
       error = "XML parse error: " + to_string(ex.getMessage());
@@ -536,7 +544,7 @@ private:
     }
 
     if (parser.getErrorCount()) {
-      error = "XML parser reported " + std::to_string(parser.getErrorCount()) + " error(s)";
+      error = "XML parser reported " + value_to_string(parser.getErrorCount()) + " error(s)";
       return false;
     }
 
