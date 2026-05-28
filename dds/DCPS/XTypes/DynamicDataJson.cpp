@@ -507,10 +507,14 @@ bool json_to_discriminator(
     } else if (!json_to_uint64(value, v)) {
       return false;
     }
-    if (v > static_cast<DDS::UInt64>(std::numeric_limits<DDS::Int32>::max())) {
+    // Union case labels are stored as ACE_CDR::Long (32-bit signed).  Accept
+    // the full unsigned 32-bit range: values in [2^31, 2^32-1] are valid and
+    // stored as negative case labels via two's complement.  Values above
+    // UINT32_MAX cannot be represented and are rejected.
+    if (v > static_cast<DDS::UInt64>(std::numeric_limits<DDS::UInt32>::max())) {
       return false;
     }
-    output = static_cast<DDS::Int32>(v);
+    output = static_cast<DDS::Int32>(static_cast<DDS::UInt32>(v));
     return true;
   }
   case TK_CHAR8:

@@ -227,6 +227,32 @@ TEST(dds_DCPS_XTypes_DynamicDataJson, BitmaskUnionDiscriminatorJson)
   EXPECT_TRUE(OpenDDS::XTypes::dynamic_data_equal(data, copy));
 }
 
+TEST(dds_DCPS_XTypes_DynamicDataJson, BitmaskDiscriminatorHighBit)
+{
+  // HighBitUnion has a bitBound=32 bitmask discriminator with BIT_31 at
+  // position 31.  Its case label value is (uint32)1<<31 = 0x80000000,
+  // stored as the signed Int32 -2147483648 in the TypeObject.
+  // The old range check (> INT32_MAX) incorrectly rejected this discriminator
+  // value when supplied as a numeric JSON integer or as the flag name.
+  DDS::DynamicType_var type = load_type("XmlTypeProviderTest::HighBitUnion");
+  DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(type);
+  ASSERT_TRUE(data);
+
+  // Via named flag — exercises bitmask_text_to_value + fixed range check.
+  ASSERT_EQ(DDS::RETCODE_OK,
+            OpenDDS::XTypes::dynamic_data_from_json(data, "{\"$discriminator\":\"BIT_31\",\"b\":7}"));
+  DDS::MemberDescriptor_var b = member_descriptor(type, "b");
+  DDS::Int32 b_val = 0;
+  ASSERT_EQ(DDS::RETCODE_OK, data->get_int32_value(b_val, b->id()));
+  EXPECT_EQ(7, b_val);
+
+  // Via integer value 2147483648 (= 0x80000000, above INT32_MAX).
+  DDS::DynamicData_var data2 = DDS::DynamicDataFactory::get_instance()->create_data(type);
+  ASSERT_EQ(DDS::RETCODE_OK,
+            OpenDDS::XTypes::dynamic_data_from_json(data2, "{\"$discriminator\":2147483648,\"b\":7}"));
+  EXPECT_TRUE(OpenDDS::XTypes::dynamic_data_equal(data, data2));
+}
+
 TEST(dds_DCPS_XTypes_DynamicDataJson, EqualsSerializedBackingStore)
 {
   DDS::DynamicType_var type = load_type("XmlTypeProviderTest::Sample");

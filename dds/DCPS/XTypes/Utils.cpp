@@ -576,13 +576,13 @@ namespace {
       CORBA::Boolean left = false, right = false;
       left_rc = lhs->get_boolean_value(left, lhs_id);
       right_rc = rhs->get_boolean_value(right, rhs_id);
-      return left_rc == right_rc && (left_rc != DDS::RETCODE_OK || left == right);
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK && left == right;
     }
     case TK_BYTE: {
       CORBA::Octet left = 0, right = 0;
       left_rc = lhs->get_byte_value(left, lhs_id);
       right_rc = rhs->get_byte_value(right, rhs_id);
-      return left_rc == right_rc && (left_rc != DDS::RETCODE_OK || left == right);
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK && left == right;
     }
     case TK_UINT8:
     case TK_UINT16:
@@ -591,7 +591,7 @@ namespace {
       DDS::UInt64 left = 0, right = 0;
       left_rc = get_uint_value(left, lhs, lhs_id, base->get_kind());
       right_rc = get_uint_value(right, rhs, rhs_id, base->get_kind());
-      return left_rc == right_rc && (left_rc != DDS::RETCODE_OK || left == right);
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK && left == right;
     }
     case TK_INT8:
     case TK_INT16:
@@ -600,70 +600,71 @@ namespace {
       DDS::Int64 left = 0, right = 0;
       left_rc = get_int_value(left, lhs, lhs_id, base->get_kind());
       right_rc = get_int_value(right, rhs, rhs_id, base->get_kind());
-      return left_rc == right_rc && (left_rc != DDS::RETCODE_OK || left == right);
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK && left == right;
     }
     case TK_FLOAT32: {
       CORBA::Float left = 0, right = 0;
       left_rc = lhs->get_float32_value(left, lhs_id);
       right_rc = rhs->get_float32_value(right, rhs_id);
-      return left_rc == right_rc && (left_rc != DDS::RETCODE_OK || left == right);
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK && left == right;
     }
     case TK_FLOAT64: {
       CORBA::Double left = 0, right = 0;
       left_rc = lhs->get_float64_value(left, lhs_id);
       right_rc = rhs->get_float64_value(right, rhs_id);
-      return left_rc == right_rc && (left_rc != DDS::RETCODE_OK || left == right);
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK && left == right;
     }
     case TK_FLOAT128: {
       ACE_CDR::LongDouble left = ACE_CDR_LONG_DOUBLE_INITIALIZER;
       ACE_CDR::LongDouble right = ACE_CDR_LONG_DOUBLE_INITIALIZER;
       left_rc = lhs->get_float128_value(left, lhs_id);
       right_rc = rhs->get_float128_value(right, rhs_id);
+      if (left_rc != DDS::RETCODE_OK || right_rc != DDS::RETCODE_OK) {
+        return false;
+      }
       char left_bytes[16];
       char right_bytes[16];
       float128_big_endian_bytes(left, left_bytes);
       float128_big_endian_bytes(right, right_bytes);
-      return left_rc == right_rc &&
-        (left_rc != DDS::RETCODE_OK ||
-         ACE_OS::memcmp(left_bytes, right_bytes, 16) == 0);
+      return ACE_OS::memcmp(left_bytes, right_bytes, 16) == 0;
     }
     case TK_CHAR8: {
       CORBA::Char left = 0, right = 0;
       left_rc = lhs->get_char8_value(left, lhs_id);
       right_rc = rhs->get_char8_value(right, rhs_id);
-      return left_rc == right_rc && (left_rc != DDS::RETCODE_OK || left == right);
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK && left == right;
     }
     case TK_CHAR16: {
       CORBA::WChar left = 0, right = 0;
       left_rc = lhs->get_char16_value(left, lhs_id);
       right_rc = rhs->get_char16_value(right, rhs_id);
-      return left_rc == right_rc && (left_rc != DDS::RETCODE_OK || left == right);
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK && left == right;
     }
     case TK_STRING8: {
       CORBA::String_var left, right;
       left_rc = lhs->get_string_value(left, lhs_id);
       right_rc = rhs->get_string_value(right, rhs_id);
-      return left_rc == right_rc &&
-        (left_rc != DDS::RETCODE_OK || std::strcmp(left.in(), right.in()) == 0);
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK &&
+        std::strcmp(left.in(), right.in()) == 0;
     }
     case TK_STRING16: {
       CORBA::WString_var left, right;
       left_rc = lhs->get_wstring_value(left, lhs_id);
       right_rc = rhs->get_wstring_value(right, rhs_id);
-      return left_rc == right_rc &&
-        (left_rc != DDS::RETCODE_OK || ACE_OS::strcmp(left.in(), right.in()) == 0);
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK &&
+        ACE_OS::strcmp(left.in(), right.in()) == 0;
     }
     case TK_ENUM: {
       DDS::Int32 left = 0, right = 0;
       left_rc = get_enum_value(left, base, lhs, lhs_id);
       right_rc = get_enum_value(right, base, rhs, rhs_id);
-      return left_rc == right_rc && (left_rc != DDS::RETCODE_OK || left == right);
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK && left == right;
     }
     case TK_BITMASK: {
       DDS::UInt64 left = 0, right = 0;
       left_rc = get_bitmask_value(left, base, lhs, lhs_id);
       right_rc = get_bitmask_value(right, base, rhs, rhs_id);
-      return left_rc == right_rc && (left_rc != DDS::RETCODE_OK || left == right);
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK && left == right;
     }
     default:
       return false;
@@ -692,7 +693,7 @@ namespace {
         return false;
       }
       if (lhs_rc != DDS::RETCODE_OK) {
-        return true;
+        return false;
       }
       return data_equal_i(lhs_nested, rhs_nested, MEMBER_ID_INVALID, MEMBER_ID_INVALID, base);
     }
@@ -708,8 +709,7 @@ namespace {
         if (member->get_descriptor(md) != DDS::RETCODE_OK) {
           return false;
         }
-        const bool member_equal = data_equal_i(lhs, rhs, md->id(), md->id(), md->type());
-        if (!member_equal) {
+        if (!data_equal_i(lhs, rhs, md->id(), md->id(), md->type())) {
           return false;
         }
       }
@@ -754,14 +754,18 @@ namespace {
       if (!element_type) {
         return false;
       }
-      DDS::UInt32 lhs_count = lhs->get_item_count();
-      DDS::UInt32 rhs_count = rhs->get_item_count();
+      DDS::UInt32 count;
       if (kind == TK_ARRAY) {
-        lhs_count = rhs_count = bound_total(td);
-      } else if (lhs_count != rhs_count) {
-        return false;
+        count = bound_total(td);
+      } else {
+        const DDS::UInt32 lhs_count = lhs->get_item_count();
+        const DDS::UInt32 rhs_count = rhs->get_item_count();
+        if (lhs_count != rhs_count) {
+          return false;
+        }
+        count = lhs_count;
       }
-      for (DDS::UInt32 i = 0; i != lhs_count; ++i) {
+      for (DDS::UInt32 i = 0; i != count; ++i) {
         if (!data_equal_i(lhs, rhs, i, i, element_type)) {
           return false;
         }
