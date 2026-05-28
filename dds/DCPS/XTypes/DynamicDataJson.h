@@ -42,8 +42,24 @@ struct OpenDDS_Dcps_Export DynamicDataJsonOptions {
   DynamicDataJsonOptions();
 
   DynamicDataJsonDiscriminatorFormat discriminator_format;
+
+  /**
+   * When true, JSON members that do not correspond to any field in the type
+   * are silently ignored rather than treated as an error.
+   */
   bool allow_unknown_members;
 };
+
+/**
+ * Notes on JSON representation:
+ *
+ * Bitmask values may be supplied as an unsigned integer or as a
+ * pipe-separated list of flag names, e.g. "FLAG_A|FLAG_B".
+ *
+ * float128 values may be supplied as a 32-character hex string
+ * (e.g. "0x3fff0000000000000000000000000000") or as a JSON number
+ * (converted via double, losing precision for values outside double range).
+ */
 
 OpenDDS_Dcps_Export DDS::ReturnCode_t dynamic_data_from_json(
   DDS::DynamicData_ptr data,

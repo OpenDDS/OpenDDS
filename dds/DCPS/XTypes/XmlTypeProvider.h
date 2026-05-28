@@ -24,6 +24,19 @@ namespace XTypes {
 
 #if defined OPENDDS_XERCES3 && !defined OPENDDS_SAFETY_PROFILE
 
+/**
+ * Load a DynamicType from an XML type definition file.
+ *
+ * The XML format follows the OMG DDS-XTypes specification (Annex A).
+ * Supported type elements: struct, union, enum, bitmask, module.
+ * Struct and union elements accept an optional nested="true" attribute
+ * corresponding to the @nested IDL annotation (DDS-XTypes 7.3.2.5).
+ * Types without the nested attribute are treated as non-nested (publishable
+ * as DDS topics), matching the IDL default.
+ *
+ * Returns RETCODE_OK on success, RETCODE_BAD_PARAMETER if the requested
+ * type is not found in the file, or RETCODE_ERROR on parse failure.
+ */
 OpenDDS_Dcps_Export DDS::ReturnCode_t load_xml_type(
   DDS::DynamicType_var& type,
   const ACE_TString& xml_file,

@@ -158,6 +158,75 @@ TEST(dds_DCPS_XTypes_DynamicDataJson, EqualityDetectsDifference)
   EXPECT_FALSE(rhs->equals(lhs));
 }
 
+TEST(dds_DCPS_XTypes_DynamicDataJson, UnionEqualityDetectsDifference)
+{
+  DDS::DynamicData_var lhs = create_data("XmlTypeProviderTest::Choice");
+  DDS::DynamicData_var rhs = create_data("XmlTypeProviderTest::Choice");
+  ASSERT_EQ(DDS::RETCODE_OK,
+            OpenDDS::XTypes::dynamic_data_from_json(lhs, "{\"b\":\"hello\"}"));
+  ASSERT_EQ(DDS::RETCODE_OK,
+            OpenDDS::XTypes::dynamic_data_from_json(rhs, "{\"a\":9}"));
+  EXPECT_FALSE(OpenDDS::XTypes::dynamic_data_equal(lhs, rhs));
+  EXPECT_FALSE(lhs->equals(rhs));
+
+  DDS::DynamicData_var same = create_data("XmlTypeProviderTest::Choice");
+  ASSERT_EQ(DDS::RETCODE_OK,
+            OpenDDS::XTypes::dynamic_data_from_json(same, "{\"b\":\"hello\"}"));
+  EXPECT_TRUE(OpenDDS::XTypes::dynamic_data_equal(lhs, same));
+  EXPECT_TRUE(lhs->equals(same));
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataJson, ArrayEqualityDetectsDifference)
+{
+  DDS::DynamicData_var lhs = create_data("XmlTypeProviderTest::Sample");
+  DDS::DynamicData_var rhs = create_data("XmlTypeProviderTest::Sample");
+  ASSERT_EQ(DDS::RETCODE_OK,
+            OpenDDS::XTypes::dynamic_data_from_json(lhs, "{\"values\":[1,2,3]}"));
+  ASSERT_EQ(DDS::RETCODE_OK,
+            OpenDDS::XTypes::dynamic_data_from_json(rhs, "{\"values\":[1,2,4]}"));
+  EXPECT_FALSE(OpenDDS::XTypes::dynamic_data_equal(lhs, rhs));
+  EXPECT_FALSE(lhs->equals(rhs));
+
+  DDS::DynamicData_var same = create_data("XmlTypeProviderTest::Sample");
+  ASSERT_EQ(DDS::RETCODE_OK,
+            OpenDDS::XTypes::dynamic_data_from_json(same, "{\"values\":[1,2,3]}"));
+  EXPECT_TRUE(OpenDDS::XTypes::dynamic_data_equal(lhs, same));
+  EXPECT_TRUE(lhs->equals(same));
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataJson, BitmaskUnionDiscriminatorJson)
+{
+  DDS::DynamicType_var type = load_type("XmlTypeProviderTest::Flagged");
+  DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(type);
+  ASSERT_TRUE(data);
+
+  // Discriminator via named bitmask flag, member value by name.
+  ASSERT_EQ(DDS::RETCODE_OK,
+            OpenDDS::XTypes::dynamic_data_from_json(data, "{\"$discriminator\":\"FLAG_A\",\"x\":99}"));
+  DDS::MemberDescriptor_var x = member_descriptor(type, "x");
+  DDS::Int32 x_val = 0;
+  ASSERT_EQ(DDS::RETCODE_OK, data->get_int32_value(x_val, x->id()));
+  EXPECT_EQ(99, x_val);
+
+  // Discriminator value for FLAG_A is 1 (bit position 0); Flags has bitBound=16 (TK_UINT16).
+  DDS::UInt64 disc = 0;
+  ASSERT_EQ(DDS::RETCODE_OK,
+            OpenDDS::XTypes::get_uint_value(disc, data, OpenDDS::XTypes::DISCRIMINATOR_ID,
+                                            OpenDDS::XTypes::TK_UINT16));
+  EXPECT_EQ(1u, disc);
+
+  // Round-trip via active-member format.
+  OpenDDS::XTypes::DynamicDataJsonOptions opts;
+  opts.discriminator_format = OpenDDS::XTypes::DYNAMIC_DATA_JSON_DISCRIMINATOR_ACTIVE_MEMBER;
+  std::string serialized;
+  ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_to_json(serialized, data, opts));
+
+  DDS::DynamicData_var copy = DDS::DynamicDataFactory::get_instance()->create_data(type);
+  ASSERT_EQ(DDS::RETCODE_OK,
+            OpenDDS::XTypes::dynamic_data_from_json(copy, serialized.c_str(), opts));
+  EXPECT_TRUE(OpenDDS::XTypes::dynamic_data_equal(data, copy));
+}
+
 TEST(dds_DCPS_XTypes_DynamicDataJson, EqualsSerializedBackingStore)
 {
   DDS::DynamicType_var type = load_type("XmlTypeProviderTest::Sample");

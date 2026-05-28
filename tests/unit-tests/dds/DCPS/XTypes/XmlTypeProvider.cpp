@@ -137,4 +137,83 @@ TEST(dds_DCPS_XTypes_XmlTypeProvider, RejectsMissingType)
   EXPECT_FALSE(type);
 }
 
+TEST(dds_DCPS_XTypes_XmlTypeProvider, NestedAttribute)
+{
+  // Inner has nested="true"; IS_NESTED should be set on it.
+  DDS::DynamicType_var inner = load_type("XmlTypeProviderTest::Inner");
+  ASSERT_TRUE(inner);
+  DDS::TypeDescriptor_var inner_td;
+  ASSERT_EQ(DDS::RETCODE_OK, inner->get_descriptor(inner_td));
+  EXPECT_TRUE(inner_td->is_nested());
+
+  // Sample has no nested attribute; IS_NESTED should not be set.
+  DDS::DynamicType_var sample = load_type("XmlTypeProviderTest::Sample");
+  ASSERT_TRUE(sample);
+  DDS::TypeDescriptor_var sample_td;
+  ASSERT_EQ(DDS::RETCODE_OK, sample->get_descriptor(sample_td));
+  EXPECT_FALSE(sample_td->is_nested());
+
+  // Inner loaded as root should produce the same TypeIdentifier as Inner
+  // encountered as a dependency of Sample.  Both get IS_NESTED from the XML
+  // attribute, not from load context.  We verify this by checking that Inner's
+  // complete TypeIdentifier (from its own load) appears in Sample's complete
+  // type map (which was built from a separate load that encountered Inner as a
+  // dependency).  If IS_NESTED differed between load contexts the TypeIdentifiers
+  // would not match and the map lookup would fail.
+  OpenDDS::XTypes::DynamicTypeImpl* inner_impl =
+    dynamic_cast<OpenDDS::XTypes::DynamicTypeImpl*>(inner.in());
+  ASSERT_TRUE(inner_impl);
+  OpenDDS::XTypes::DynamicTypeImpl* sample_impl =
+    dynamic_cast<OpenDDS::XTypes::DynamicTypeImpl*>(sample.in());
+  ASSERT_TRUE(sample_impl);
+
+  const OpenDDS::XTypes::TypeIdentifier& inner_ti =
+    inner_impl->get_complete_type_identifier();
+  const OpenDDS::XTypes::TypeMap& sample_map =
+    sample_impl->get_complete_type_map();
+  EXPECT_NE(sample_map.end(), sample_map.find(inner_ti));
+}
+
+TEST(dds_DCPS_XTypes_XmlTypeProvider, RejectsNonExistentFile)
+{
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
+
+  DDS::DynamicType_var type;
+  EXPECT_EQ(DDS::RETCODE_ERROR,
+            OpenDDS::XTypes::load_xml_type(type, ACE_TEXT("nonexistent_file.xml"), "SomeType"));
+  EXPECT_FALSE(type);
+}
+
+TEST(dds_DCPS_XTypes_XmlTypeProvider, BitmaskUnionIntrospection)
+{
+  DDS::DynamicType_var type = load_type("XmlTypeProviderTest::Flagged");
+  ASSERT_TRUE(type);
+  EXPECT_EQ(OpenDDS::XTypes::TK_UNION, type->get_kind());
+  EXPECT_EQ(3u, type->get_member_count()); // discriminator + 2 cases
+
+  DDS::MemberDescriptor_var x = member_descriptor(type, "x");
+  ASSERT_EQ(1u, x->label().length());
+  EXPECT_EQ(1, x->label()[0]); // FLAG_A = 1 << 0 = 1
+
+  DDS::MemberDescriptor_var y = member_descriptor(type, "y");
+  ASSERT_EQ(1u, y->label().length());
+  EXPECT_EQ(2, y->label()[0]); // FLAG_B = 1 << 1 = 2
+
+  // HighBitUnion exercises the boundary of the old bitmask label_values bug
+  // (positions >= 31 stored the raw position number instead of 1 << position).
+  DDS::DynamicType_var hb = load_type("XmlTypeProviderTest::HighBitUnion");
+  ASSERT_TRUE(hb);
+
+  DDS::MemberDescriptor_var a = member_descriptor(hb, "a");
+  ASSERT_EQ(1u, a->label().length());
+  EXPECT_EQ(static_cast<CORBA::Long>(1u << 30), a->label()[0]); // BIT_30 = 1 << 30
+
+  DDS::MemberDescriptor_var b = member_descriptor(hb, "b");
+  ASSERT_EQ(1u, b->label().length());
+  // BIT_31 = (uint32)1 << 31 = 0x80000000; as signed Long = -2147483648.
+  // Old code (value < 31 guard) stored 31 here instead.
+  EXPECT_EQ(static_cast<CORBA::Long>(ACE_CDR::ULong(1) << 31), b->label()[0]);
+}
+
 #endif

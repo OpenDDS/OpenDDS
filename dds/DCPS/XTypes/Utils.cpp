@@ -537,8 +537,7 @@ namespace {
 
   DDS::DynamicType_var safe_base_type(DDS::DynamicType_ptr type)
   {
-    DDS::TypeDescriptor_var descriptor;
-    if (!get_type_descriptor(descriptor, type)) {
+    if (!type) {
       return DDS::DynamicType::_nil();
     }
     return get_base_type(type);

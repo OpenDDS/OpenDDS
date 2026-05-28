@@ -787,6 +787,11 @@ DDS::ReturnCode_t populate_union_with_discriminator(
     return rc;
   }
 
+  // Locate the branch value using a three-tier fallback:
+  // 1. Standard DDS-JSON: member name matches the selected branch name.
+  // 2. Variant format: member name is the discriminator integer value as a string.
+  // 3. Permissive format: the object has exactly one non-discriminator member; use it.
+  // If none match, the union has no active branch (only the discriminator is set).
   JsonValue::ConstMemberIterator branch = value.MemberEnd();
   if (found) {
     branch = value.FindMember(selected_md->name());

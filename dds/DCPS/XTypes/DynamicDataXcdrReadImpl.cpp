@@ -2164,11 +2164,6 @@ bool DynamicDataXcdrReadImpl::check_xcdr1_mutable(DDS::DynamicType_ptr dt)
   return check_xcdr1_mutable_i(dt, dtns);
 }
 
-CORBA::Boolean DynamicDataXcdrReadImpl::equals(DDS::DynamicData_ptr other)
-{
-  return DynamicDataBase::equals(other);
-}
-
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDescriptor* member_desc, MemberId id)
 {
   const DDS::ExtensibilityKind ek = type_desc_->extensibility_kind();

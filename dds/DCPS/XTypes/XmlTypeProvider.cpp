@@ -239,6 +239,12 @@ bool ensure_xerces(std::string& error)
   }
 }
 
+// The TypeLookupService below must be process-wide (not per-call) because
+// type_identifier_to_dynamic caches DynamicType objects in its gt_map_ by
+// TypeIdentifier, and those cached objects are the reference-counting backbone
+// of the returned DynamicType tree.  If the TLS were destroyed before all
+// DynamicType consumers were done, cascading _var destructions inside gt_map_
+// teardown can free member types that are still reachable from parent types.
 TypeLookupService& xml_type_lookup_service()
 {
   static TypeLookupService service;
@@ -315,6 +321,11 @@ struct StructModel {
   OPENDDS_VECTOR(MemberModel) members;
   std::string extensibility;
   std::string autoid;
+  bool nested;
+
+  StructModel()
+    : nested(false)
+  {}
 };
 
 struct UnionCaseModel {
@@ -334,9 +345,11 @@ struct UnionModel {
   OPENDDS_VECTOR(UnionCaseModel) cases;
   std::string extensibility;
   std::string autoid;
+  bool nested;
 
   UnionModel()
     : discriminator_key(false)
+    , nested(false)
   {}
 };
 
@@ -416,8 +429,6 @@ public:
       report("type '" + requested + "' was not found", requested);
       return DDS::RETCODE_BAD_PARAMETER;
     }
-    root_type_name_ = requested.c_str();
-
     TypeIdentifier root_ti;
     if (!build_type(requested, root_ti, error)) {
       report(error, requested);
@@ -466,6 +477,43 @@ private:
   typedef OPENDDS_MAP(OPENDDS_STRING, TypeIdentifier) TypeIdentifierByName;
   typedef OPENDDS_SET(OPENDDS_STRING) NameSet;
 
+  // Returns true if every EK_COMPLETE TypeIdentifier directly referenced by
+  // 'to' already has a minimal counterpart in 'minimal_map'.  Used to avoid
+  // calling complete_to_minimal_type_object when dependencies aren't ready
+  // yet (which would log a spurious error from get_minimal_type_identifier).
+  static bool minimal_deps_ready(const TypeObject& to, const TypeMap& minimal_map)
+  {
+    auto ready = [&](const TypeIdentifier& ti) {
+      return ti.kind() != EK_COMPLETE || minimal_map.count(ti) != 0;
+    };
+    const CompleteTypeObject& cto = to.complete;
+    switch (cto.kind) {
+    case TK_STRUCTURE:
+      if (!ready(cto.struct_type.header.base_type)) return false;
+      for (ACE_CDR::ULong i = 0; i != cto.struct_type.member_seq.length(); ++i) {
+        if (!ready(cto.struct_type.member_seq[i].common.member_type_id)) return false;
+      }
+      return true;
+    case TK_UNION:
+      if (!ready(cto.union_type.discriminator.common.type_id)) return false;
+      for (ACE_CDR::ULong i = 0; i != cto.union_type.member_seq.length(); ++i) {
+        if (!ready(cto.union_type.member_seq[i].common.type_id)) return false;
+      }
+      return true;
+    case TK_ALIAS:
+      return ready(cto.alias_type.body.common.related_type);
+    case TK_SEQUENCE:
+      return ready(cto.sequence_type.element.common.type);
+    case TK_ARRAY:
+      return ready(cto.array_type.element.common.type);
+    case TK_MAP:
+      return ready(cto.map_type.key.common.type) &&
+             ready(cto.map_type.element.common.type);
+    default:  // enum, bitmask, annotation: no EK_COMPLETE dependencies
+      return true;
+    }
+  }
+
   bool build_minimal_type_map(const TypeIdentifier& root_ti, TypeIdentifier& root_minimal_ti, std::string& error)
   {
     TypeLookupService converter;
@@ -484,6 +532,11 @@ private:
         if (complete == complete_type_map_.end()) {
           error = "internal error: complete TypeObject missing while building minimal TypeObjects";
           return false;
+        }
+
+        if (!minimal_deps_ready(complete->second, minimal_type_map_)) {
+          ++pos;
+          continue;
         }
 
         TypeObject minimal;
@@ -509,6 +562,13 @@ private:
       }
 
       if (!progress) {
+        for (TypeIdentifierByName::const_iterator it = complete_ti_by_name_.begin();
+             it != complete_ti_by_name_.end(); ++it) {
+          if (pending.count(it->second)) {
+            error = "failed to build minimal TypeObject for '" + std::string(it->first.c_str()) + "'";
+            return false;
+          }
+        }
         error = "failed to build minimal TypeObjects for one or more XML type dependencies";
         return false;
       }
@@ -660,6 +720,11 @@ private:
     }
     model.struct_model.extensibility = has_attr(element, "extensibility") ? attr(element, "extensibility") : "";
     model.struct_model.autoid = has_attr(element, "autoid") ? attr(element, "autoid") : "";
+    if (has_attr(element, "nested") &&
+        !parse_bool(attr(element, "nested"), model.struct_model.nested)) {
+      error = "invalid nested value on struct '" + model.fq_name + "'";
+      return false;
+    }
 
     for (XERCES_CPP_NAMESPACE::DOMNode* child = element->getFirstChild(); child; child = child->getNextSibling()) {
       if (child->getNodeType() != XERCES_CPP_NAMESPACE::DOMNode::ELEMENT_NODE) {
@@ -693,6 +758,11 @@ private:
     }
     model.union_model.extensibility = has_attr(element, "extensibility") ? attr(element, "extensibility") : "";
     model.union_model.autoid = has_attr(element, "autoid") ? attr(element, "autoid") : "";
+    if (has_attr(element, "nested") &&
+        !parse_bool(attr(element, "nested"), model.union_model.nested)) {
+      error = "invalid nested value on union '" + model.fq_name + "'";
+      return false;
+    }
 
     bool have_discriminator = false;
     for (XERCES_CPP_NAMESPACE::DOMNode* child = element->getFirstChild(); child; child = child->getNextSibling()) {
@@ -898,8 +968,10 @@ private:
         return false;
       }
       flag.position = static_cast<ACE_CDR::UShort>(value);
-      model.bitmask_model.label_values[flag.name.c_str()] =
-        value < 31 ? static_cast<ACE_CDR::Long>(1u << value) : static_cast<ACE_CDR::Long>(value);
+      if (value < 32) {
+        model.bitmask_model.label_values[flag.name.c_str()] =
+          static_cast<ACE_CDR::Long>(ACE_CDR::ULong(1) << value);
+      }
       model.bitmask_model.flags.push_back(flag);
     }
 
@@ -1083,7 +1155,7 @@ private:
       error = "struct '" + model.fq_name + "': " + error;
       return false;
     }
-    if (model.fq_name != root_type_name_.c_str()) {
+    if (model.struct_model.nested) {
       st.struct_flags = static_cast<StructTypeFlag>(st.struct_flags | IS_NESTED);
     }
     if (!model.struct_model.autoid.empty()) {
@@ -1128,7 +1200,7 @@ private:
       error = "union '" + model.fq_name + "': " + error;
       return false;
     }
-    if (model.fq_name != root_type_name_.c_str()) {
+    if (model.union_model.nested) {
       ut.union_flags = static_cast<UnionTypeFlag>(ut.union_flags | IS_NESTED);
     }
     if (!model.union_model.autoid.empty()) {
@@ -1478,7 +1550,6 @@ private:
   NameSet building_;
   TypeMap complete_type_map_;
   TypeMap minimal_type_map_;
-  OPENDDS_STRING root_type_name_;
 };
 
 } // namespace

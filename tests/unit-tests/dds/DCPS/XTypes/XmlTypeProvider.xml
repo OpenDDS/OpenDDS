@@ -1,7 +1,7 @@
 <dds>
   <types>
     <module name="XmlTypeProviderTest">
-      <struct name="Inner" extensibility="appendable">
+      <struct name="Inner" extensibility="appendable" nested="true">
         <member name="value" type="int32"/>
       </struct>
 
@@ -32,6 +32,43 @@
         <case>
           <caseDiscriminator value="default"/>
           <member name="other" type="nonBasic" nonBasicTypeName="Inner"/>
+        </case>
+      </union>
+
+      <bitmask name="Flags" bitBound="16">
+        <flag name="FLAG_A" value="0"/>
+        <flag name="FLAG_B" value="1"/>
+      </bitmask>
+
+      <!-- Flagged uses named flag values as case discriminators to exercise
+           bitmask label_values lookup in case_label(). -->
+      <union name="Flagged" extensibility="appendable">
+        <discriminator type="nonBasic" nonBasicTypeName="Flags"/>
+        <case>
+          <caseDiscriminator value="FLAG_A"/>
+          <member name="x" type="int32"/>
+        </case>
+        <case>
+          <caseDiscriminator value="FLAG_B"/>
+          <member name="y" type="string"/>
+        </case>
+      </union>
+
+      <!-- HighBits exercises bit positions 30 and 31, the boundary of the
+           old bug (value < 31 stored raw position instead of 1 << position). -->
+      <bitmask name="HighBits" bitBound="32">
+        <flag name="BIT_30" value="30"/>
+        <flag name="BIT_31" value="31"/>
+      </bitmask>
+      <union name="HighBitUnion" extensibility="appendable">
+        <discriminator type="nonBasic" nonBasicTypeName="HighBits"/>
+        <case>
+          <caseDiscriminator value="BIT_30"/>
+          <member name="a" type="int32"/>
+        </case>
+        <case>
+          <caseDiscriminator value="BIT_31"/>
+          <member name="b" type="int32"/>
         </case>
       </union>
     </module>

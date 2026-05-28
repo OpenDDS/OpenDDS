@@ -338,8 +338,6 @@ public:
 
   bool check_xcdr1_mutable(DDS::DynamicType_ptr dt);
 
-  CORBA::Boolean equals(DDS::DynamicData_ptr other);
-
   bool serialized_size(const DCPS::Encoding&, size_t&, DCPS::Sample::Extent) const
   {
     // Not supported.
