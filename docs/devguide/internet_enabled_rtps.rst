@@ -424,15 +424,8 @@ The command-line options specific to ``RtpsRelayControl`` are:
 
   This option may be specified multiple times.
   The argument is ``NAME=value`` designating a configuration parameter to change in the ``RtpsRelay``.
-  ``RtpsRelayControl`` will send thoes changes to the ``RtpsRelay`` via its ``Relay Config Control`` topic and
+  ``RtpsRelayControl`` will send those changes to the ``RtpsRelay`` via its ``Relay Config Control`` topic and
   run until the desired changes are acknowledged by the ``RtpsRelay`` via its ``Relay Config Status`` topic.
-
-.. option:: -Deny <string>
-
-  This option may be specified multiple times.
-  The argument is a client partition name with which the associated client participants will be denied access to the ``RtpsRelay``.
-  When ``-RelayId`` is not specified, the denied partitions will be applied to all discovered ``RtpsRelay`` instances.
-  Otherwise, the denied partitions are sent to the specified ``RtpsRelay`` instance.
 
 .. option:: -ShowAll
 
@@ -446,6 +439,17 @@ The command-line options specific to ``RtpsRelayControl`` are:
   If specified, the ``RtpsRelayControl`` process will keep running until terminated by the user.
   This is also the behavior when there is no specified ``-RelayId``.
   The default (when run with ``-RelayId``) is to exit the process when requested settings are complete.
+
+.. option:: -Deny <string>
+
+  This option may be specified multiple times.
+  The argument is a client partition name with which the associated client participants will be denied access to the ``RtpsRelay``.
+  ``RtpsRelayControl`` sends the denied partitions to the ``RtpsRelay`` instances via the ``Relay Denied Partitions`` topic.
+
+.. option:: -DenyReadersCount <integer>
+
+  Specifies the number of readers to wait for before sending the denied partitions specified by the ``-Deny`` option.
+  The default is 1.
 
 Parameters that may be dynamically configured in the ``RtpsRelay`` include:
 

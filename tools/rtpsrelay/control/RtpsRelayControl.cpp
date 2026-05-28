@@ -152,6 +152,7 @@ int run(int argc, ACE_TCHAR* argv[])
   DDS::DomainId_t domain{0};
   RelayConfig config;
   std::unordered_set<std::string> denied_partitions;
+  int denied_partitions_readers_count{1};
 
   ACE_Argv_Type_Converter atc{argc, argv};
   ACE_Arg_Shifter_T<char> args{atc.get_argc(), atc.get_ASCII_argv()};
@@ -175,6 +176,8 @@ int run(int argc, ACE_TCHAR* argv[])
       }
     } else if ((arg = args.get_the_parameter("-Deny"))) {
       denied_partitions.insert(arg);
+    } else if ((arg = args.get_the_parameter("-DenyReadersCount"))) {
+      denied_partitions_readers_count = std::atoi(arg);
     } else if (args.cur_arg_strncasecmp("-ShowAll") == 0) {
       show_all = true;
     } else if (args.cur_arg_strncasecmp("-KeepRunning") == 0) {
@@ -203,66 +206,6 @@ int run(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  RelayConfigTypeSupport_var relay_config_ts{new RelayConfigTypeSupportImpl};
-  if (relay_config_ts->register_type(participant, "") != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: failed to register RelayConfig type\n"));
-    return EXIT_FAILURE;
-  }
-  CORBA::String_var relay_config_type_name{relay_config_ts->get_type_name()};
-
-  DDS::PublisherQos publisher_qos;
-  participant->get_default_publisher_qos(publisher_qos);
-  publisher_qos.partition.name.length(1);
-  publisher_qos.partition.name[0] = config.relay_id().empty() ? "*" : config.relay_id().c_str();
-  DDS::SubscriberQos subscriber_qos;
-  participant->get_default_subscriber_qos(subscriber_qos);
-  subscriber_qos.partition.name = publisher_qos.partition.name;
-
-  DDS::Publisher_var publisher;
-  if (!config.config().empty() || !denied_partitions.empty()) {
-    publisher = participant->create_publisher(publisher_qos, nullptr, 0);
-    if (!publisher) {
-      ACE_ERROR((LM_ERROR, "ERROR: failed to create publisher\n"));
-      return EXIT_FAILURE;
-    }
-  }
-
-  DDS::WaitSet_var waiter = new DDS::WaitSet;
-
-  bool write_pending{false};
-  RelayConfigDataWriter_var relay_config_data_writer;
-  if (!config.config().empty()) {
-    if (config.relay_id().empty()) {
-      ACE_ERROR((LM_ERROR, "ERROR: Attempting to change configuration without a -RelayId\n"));
-      return EXIT_FAILURE;
-    }
-
-    DDS::Topic_var relay_config_control_topic{
-      participant->create_topic(RELAY_CONFIG_CONTROL_TOPIC_NAME.c_str(), relay_config_type_name,
-                                TOPIC_QOS_DEFAULT, nullptr, 0)};
-    if (!relay_config_control_topic) {
-      ACE_ERROR((LM_ERROR, "ERROR: failed to create %C\n", RELAY_CONFIG_CONTROL_TOPIC_NAME.c_str()));
-      return EXIT_FAILURE;
-    }
-
-    DDS::DataWriter_var dw{publisher->create_datawriter(relay_config_control_topic, DATAWRITER_QOS_DEFAULT, nullptr, 0)};
-    if (!dw) {
-      ACE_ERROR((LM_ERROR, "ERROR: failed to create %C data writer\n", RELAY_CONFIG_CONTROL_TOPIC_NAME.c_str()));
-      return EXIT_FAILURE;
-    }
-    relay_config_data_writer = RelayConfigDataWriter::_narrow(dw);
-    if (!relay_config_data_writer) {
-      ACE_ERROR((LM_ERROR, "ERROR: failed to narrow %C data writer\n", RELAY_CONFIG_CONTROL_TOPIC_NAME.c_str()));
-      return EXIT_FAILURE;
-    }
-
-    DDS::StatusCondition_var cond = relay_config_data_writer->get_statuscondition();
-    cond->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
-    waiter->attach_condition(cond);
-    write_pending = true;
-  }
-
-  RelayDeniedPartitionsDataWriter_var relay_denied_partitions_data_writer;
   if (!denied_partitions.empty()) {
     RelayDeniedPartitionsTypeSupport_var relay_denied_partitions_ts{new RelayDeniedPartitionsTypeSupportImpl};
     if (relay_denied_partitions_ts->register_type(participant, "") != DDS::RETCODE_OK) {
@@ -279,16 +222,22 @@ int run(int argc, ACE_TCHAR* argv[])
       return EXIT_FAILURE;
     }
 
+    DDS::Publisher_var denied_partitions_pub{participant->create_publisher(PUBLISHER_QOS_DEFAULT, nullptr, 0)};
+    if (!denied_partitions_pub) {
+      ACE_ERROR((LM_ERROR, "ERROR: failed to create publisher for %C\n", RELAY_DENIED_PARTITIONS_TOPIC_NAME.c_str()));
+      return EXIT_FAILURE;
+    }
+
     DDS::DataWriterQos denied_partitions_qos;
-    publisher->get_default_datawriter_qos(denied_partitions_qos);
+    denied_partitions_pub->get_default_datawriter_qos(denied_partitions_qos);
     denied_partitions_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 
-    DDS::DataWriter_var dw{publisher->create_datawriter(relay_denied_partitions_topic, denied_partitions_qos, nullptr, 0)};
+    DDS::DataWriter_var dw{denied_partitions_pub->create_datawriter(relay_denied_partitions_topic, denied_partitions_qos, nullptr, 0)};
     if (!dw) {
       ACE_ERROR((LM_ERROR, "ERROR: failed to create %C data writer\n", RELAY_DENIED_PARTITIONS_TOPIC_NAME.c_str()));
       return EXIT_FAILURE;
     }
-    relay_denied_partitions_data_writer = RelayDeniedPartitionsDataWriter::_narrow(dw);
+    RelayDeniedPartitionsDataWriter_var relay_denied_partitions_data_writer{RelayDeniedPartitionsDataWriter::_narrow(dw)};
     if (!relay_denied_partitions_data_writer) {
       ACE_ERROR((LM_ERROR, "ERROR: failed to narrow %C data writer\n", RELAY_DENIED_PARTITIONS_TOPIC_NAME.c_str()));
       return EXIT_FAILURE;
@@ -317,7 +266,7 @@ int run(int argc, ACE_TCHAR* argv[])
         return EXIT_FAILURE;
       }
 
-      if (pms.current_count) {
+      if (pms.current_count >= denied_partitions_readers_count) {
         if (relay_denied_partitions_data_writer->write(rdp, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
           ACE_ERROR((LM_ERROR, "ERROR: write denied partitions failed\n"));
           return EXIT_FAILURE;
@@ -326,11 +275,68 @@ int run(int argc, ACE_TCHAR* argv[])
           ACE_ERROR((LM_ERROR, "ERROR: wait_for_acknowledgments failed\n"));
           return EXIT_FAILURE;
         }
+        std::cerr << "Sent denied partitions to " << pms.current_count << " readers" << std::endl;
         break;
       }
     }
 
     denied_partitions_waiter->detach_condition(status_cond);
+  }
+
+  RelayConfigTypeSupport_var relay_config_ts{new RelayConfigTypeSupportImpl};
+  if (relay_config_ts->register_type(participant, "") != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: failed to register RelayConfig type\n"));
+    return EXIT_FAILURE;
+  }
+  CORBA::String_var relay_config_type_name{relay_config_ts->get_type_name()};
+
+  DDS::PublisherQos publisher_qos;
+  participant->get_default_publisher_qos(publisher_qos);
+  publisher_qos.partition.name.length(1);
+  publisher_qos.partition.name[0] = config.relay_id().empty() ? "*" : config.relay_id().c_str();
+  DDS::SubscriberQos subscriber_qos;
+  participant->get_default_subscriber_qos(subscriber_qos);
+  subscriber_qos.partition.name = publisher_qos.partition.name;
+
+  DDS::WaitSet_var waiter = new DDS::WaitSet;
+
+  bool write_pending{false};
+  RelayConfigDataWriter_var relay_config_data_writer;
+  if (!config.config().empty()) {
+    if (config.relay_id().empty()) {
+      ACE_ERROR((LM_ERROR, "ERROR: Attempting to change configuration without a -RelayId\n"));
+      return EXIT_FAILURE;
+    }
+
+    DDS::Publisher_var publisher{participant->create_publisher(publisher_qos, nullptr, 0)};
+    if (!publisher) {
+      ACE_ERROR((LM_ERROR, "ERROR: failed to create publisher for %C\n", RELAY_CONFIG_CONTROL_TOPIC_NAME.c_str()));
+      return EXIT_FAILURE;
+    }
+
+    DDS::Topic_var relay_config_control_topic{
+      participant->create_topic(RELAY_CONFIG_CONTROL_TOPIC_NAME.c_str(), relay_config_type_name,
+                                TOPIC_QOS_DEFAULT, nullptr, 0)};
+    if (!relay_config_control_topic) {
+      ACE_ERROR((LM_ERROR, "ERROR: failed to create %C\n", RELAY_CONFIG_CONTROL_TOPIC_NAME.c_str()));
+      return EXIT_FAILURE;
+    }
+
+    DDS::DataWriter_var dw{publisher->create_datawriter(relay_config_control_topic, DATAWRITER_QOS_DEFAULT, nullptr, 0)};
+    if (!dw) {
+      ACE_ERROR((LM_ERROR, "ERROR: failed to create %C data writer\n", RELAY_CONFIG_CONTROL_TOPIC_NAME.c_str()));
+      return EXIT_FAILURE;
+    }
+    relay_config_data_writer = RelayConfigDataWriter::_narrow(dw);
+    if (!relay_config_data_writer) {
+      ACE_ERROR((LM_ERROR, "ERROR: failed to narrow %C data writer\n", RELAY_CONFIG_CONTROL_TOPIC_NAME.c_str()));
+      return EXIT_FAILURE;
+    }
+
+    DDS::StatusCondition_var cond = relay_config_data_writer->get_statuscondition();
+    cond->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
+    waiter->attach_condition(cond);
+    write_pending = true;
   }
 
   DDS::Subscriber_var subscriber{participant->create_subscriber(subscriber_qos, nullptr, 0)};
