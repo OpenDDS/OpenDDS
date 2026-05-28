@@ -447,7 +447,9 @@ bool bitmask_text_to_value(DDS::DynamicType_ptr bitmask_type, const char* text, 
   const char* token_begin = text;
   while (token_begin && *token_begin) {
     const char* token_end = std::strchr(token_begin, '|');
-    const std::string flag(token_begin, token_end ? token_end - token_begin : std::strlen(token_begin));
+    const size_t flag_length =
+      token_end ? static_cast<size_t>(token_end - token_begin) : std::strlen(token_begin);
+    const std::string flag(token_begin, flag_length);
     if (!flag.empty()) {
       DDS::MemberDescriptor_var md;
       if (get_member_descriptor_by_name(md, bitmask_type, flag.c_str()) != DDS::RETCODE_OK) {
@@ -1133,7 +1135,7 @@ bool write_union_value(
   }
   DDS::DynamicType_var discriminator_type = get_base_type(td->discriminator_type());
   const bool write_discriminator =
-    options.discriminator_format == DYNAMIC_DATA_JSON_DISCRIMINATOR_FIELD;
+    options.discriminator_format != DYNAMIC_DATA_JSON_DISCRIMINATOR_ACTIVE_MEMBER;
   if (write_discriminator) {
     writer.Key(DISCRIMINATOR_JSON_NAME);
     if (!write_scalar_value(writer, data, DISCRIMINATOR_ID, discriminator_type)) {

@@ -106,6 +106,16 @@ TEST(dds_DCPS_XTypes_DynamicDataJson, UnionActiveMemberJson)
   ASSERT_EQ(DDS::RETCODE_OK,
             OpenDDS::XTypes::get_enum_value(discriminator, data, OpenDDS::XTypes::DISCRIMINATOR_ID));
   EXPECT_EQ(1, discriminator);
+
+  std::string serialized;
+  ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_to_json(serialized, data));
+  EXPECT_NE(std::string::npos, serialized.find("\"$discriminator\""));
+
+  OpenDDS::XTypes::DynamicDataJsonOptions options;
+  options.discriminator_format = OpenDDS::XTypes::DYNAMIC_DATA_JSON_DISCRIMINATOR_ACTIVE_MEMBER;
+  serialized.clear();
+  ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_to_json(serialized, data, options));
+  EXPECT_EQ(std::string::npos, serialized.find("\"$discriminator\""));
 }
 
 TEST(dds_DCPS_XTypes_DynamicDataJson, UnionDiscriminatorJson)

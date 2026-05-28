@@ -27,7 +27,7 @@ namespace XTypes {
 enum DynamicDataJsonDiscriminatorFormat {
   /**
    * Input accepts either {"$discriminator": ..., "member": ...} or
-   * {"member": ...}.  Output uses the active-member-only representation.
+   * {"member": ...}.  Output includes the "$discriminator" union member.
    */
   DYNAMIC_DATA_JSON_DISCRIMINATOR_AUTO,
 
