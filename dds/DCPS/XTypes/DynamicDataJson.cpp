@@ -782,7 +782,6 @@ DDS::ReturnCode_t populate_union_with_discriminator(
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: dynamic_data_json: invalid discriminator at %C\n", path.c_str()));
     return DDS::RETCODE_BAD_PARAMETER;
   }
-
   bool found = false;
   DDS::MemberDescriptor_var selected_md;
   DDS::ReturnCode_t rc = get_selected_union_branch(

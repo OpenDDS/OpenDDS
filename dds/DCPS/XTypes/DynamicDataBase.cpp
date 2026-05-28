@@ -308,7 +308,46 @@ DDS::ReturnCode_t DynamicDataBase::get_selected_union_branch(
   DDS::Int64 i64_disc;
   DDS::ReturnCode_t rc = get_int64_value(i64_disc, DISCRIMINATOR_ID);
   if (rc != DDS::RETCODE_OK) {
-    return rc;
+    // get_int64_value fails for unsigned discriminator types (bitmask, uint8/16/32)
+    // because the underlying storage type doesn't widen to int64.  Read via the
+    // matching unsigned getter and narrow to the int32 range used by case labels.
+    DDS::DynamicType_var disc_type = get_base_type(type_desc_->discriminator_type());
+    TypeKind treat_as = disc_type ? disc_type->get_kind() : TK_NONE;
+    if (treat_as == TK_BITMASK) {
+      bitmask_bound(disc_type, treat_as);
+    }
+    DDS::UInt64 u64 = 0;
+    switch (treat_as) {
+    case TK_UINT8: {
+      CORBA::UInt8 v = 0;
+      rc = get_uint8_value(v, DISCRIMINATOR_ID);
+      u64 = v;
+      break;
+    }
+    case TK_UINT16: {
+      CORBA::UShort v = 0;
+      rc = get_uint16_value(v, DISCRIMINATOR_ID);
+      u64 = v;
+      break;
+    }
+    case TK_UINT32: {
+      CORBA::ULong v = 0;
+      rc = get_uint32_value(v, DISCRIMINATOR_ID);
+      u64 = v;
+      break;
+    }
+    case TK_UINT64: {
+      rc = get_uint64_value(u64, DISCRIMINATOR_ID);
+      break;
+    }
+    default:
+      return rc;
+    }
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    // Cast through UInt32 to get the two's complement Int32 matching the case labels.
+    i64_disc = static_cast<DDS::Int64>(static_cast<DDS::Int32>(static_cast<DDS::UInt32>(u64)));
   }
   if (i64_disc < ACE_INT32_MIN || i64_disc > ACE_INT32_MAX) {
     if (log_level >= LogLevel::Notice) {

@@ -477,38 +477,48 @@ private:
   typedef OPENDDS_MAP(OPENDDS_STRING, TypeIdentifier) TypeIdentifierByName;
   typedef OPENDDS_SET(OPENDDS_STRING) NameSet;
 
-  // Returns true if every EK_COMPLETE TypeIdentifier directly referenced by
-  // 'to' already has a minimal counterpart in 'minimal_map'.  Used to avoid
-  // calling complete_to_minimal_type_object when dependencies aren't ready
-  // yet (which would log a spurious error from get_minimal_type_identifier).
-  static bool minimal_deps_ready(const TypeObject& to, const TypeMap& minimal_map)
+  // An EK_COMPLETE TypeIdentifier is ready for minimal conversion when it has
+  // already been erased from 'pending' (i.e. successfully converted in a
+  // previous iteration).  Non-EK_COMPLETE identifiers (primitives, strings,
+  // plain sequences/arrays) are always ready because the converter handles
+  // them without needing an entry in the pending set.
+  static bool complete_ti_ready(const TypeIdentifier& ti,
+                                const OPENDDS_SET(TypeIdentifier)& pending)
   {
-    auto ready = [&](const TypeIdentifier& ti) {
-      return ti.kind() != EK_COMPLETE || minimal_map.count(ti) != 0;
-    };
+    return ti.kind() != EK_COMPLETE || !pending.count(ti);
+  }
+
+  // Returns true if every EK_COMPLETE TypeIdentifier directly referenced by
+  // 'to' has already been converted (i.e. is absent from 'pending').  Used
+  // to avoid calling complete_to_minimal_type_object when dependencies are
+  // not yet ready, which would log a spurious error from
+  // get_minimal_type_identifier.
+  static bool minimal_deps_ready(const TypeObject& to,
+                                 const OPENDDS_SET(TypeIdentifier)& pending)
+  {
     const CompleteTypeObject& cto = to.complete;
     switch (cto.kind) {
     case TK_STRUCTURE:
-      if (!ready(cto.struct_type.header.base_type)) return false;
+      if (!complete_ti_ready(cto.struct_type.header.base_type, pending)) return false;
       for (ACE_CDR::ULong i = 0; i != cto.struct_type.member_seq.length(); ++i) {
-        if (!ready(cto.struct_type.member_seq[i].common.member_type_id)) return false;
+        if (!complete_ti_ready(cto.struct_type.member_seq[i].common.member_type_id, pending)) return false;
       }
       return true;
     case TK_UNION:
-      if (!ready(cto.union_type.discriminator.common.type_id)) return false;
+      if (!complete_ti_ready(cto.union_type.discriminator.common.type_id, pending)) return false;
       for (ACE_CDR::ULong i = 0; i != cto.union_type.member_seq.length(); ++i) {
-        if (!ready(cto.union_type.member_seq[i].common.type_id)) return false;
+        if (!complete_ti_ready(cto.union_type.member_seq[i].common.type_id, pending)) return false;
       }
       return true;
     case TK_ALIAS:
-      return ready(cto.alias_type.body.common.related_type);
+      return complete_ti_ready(cto.alias_type.body.common.related_type, pending);
     case TK_SEQUENCE:
-      return ready(cto.sequence_type.element.common.type);
+      return complete_ti_ready(cto.sequence_type.element.common.type, pending);
     case TK_ARRAY:
-      return ready(cto.array_type.element.common.type);
+      return complete_ti_ready(cto.array_type.element.common.type, pending);
     case TK_MAP:
-      return ready(cto.map_type.key.common.type) &&
-             ready(cto.map_type.element.common.type);
+      return complete_ti_ready(cto.map_type.key.common.type, pending) &&
+             complete_ti_ready(cto.map_type.element.common.type, pending);
     default:  // enum, bitmask, annotation: no EK_COMPLETE dependencies
       return true;
     }
@@ -534,7 +544,7 @@ private:
           return false;
         }
 
-        if (!minimal_deps_ready(complete->second, minimal_type_map_)) {
+        if (!minimal_deps_ready(complete->second, pending)) {
           ++pos;
           continue;
         }
