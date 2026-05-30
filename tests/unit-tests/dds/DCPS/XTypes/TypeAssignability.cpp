@@ -362,6 +362,27 @@ TEST(dds_DCPS_XTypes_TypeAssignability, StringTypesTest_Assignable)
   }
 }
 
+TEST(dds_DCPS_XTypes_TypeAssignability, StringTypesTest_Bounds)
+{
+  TypeAssignability test(make_rch<TypeLookupService>());
+  const TypeIdentifier string8_10 = makeString(false, StringSTypeDefn(10));
+  const TypeIdentifier string8_20 = makeString(false, StringSTypeDefn(20));
+  const TypeIdentifier string8_unbounded = makeString(false, StringLTypeDefn(0));
+  const TypeIdentifier string16_10 = makeString(true, StringSTypeDefn(10));
+  const TypeIdentifier string16_20 = makeString(true, StringSTypeDefn(20));
+
+  EXPECT_TRUE(test.assignable(string8_10, string8_20));
+  EXPECT_TRUE(test.assignable(string16_10, string16_20));
+
+  test.set_ignore_string_bounds(false);
+  EXPECT_FALSE(test.assignable(string8_10, string8_20));
+  EXPECT_TRUE(test.assignable(string8_20, string8_10));
+  EXPECT_FALSE(test.assignable(string8_10, string8_unbounded));
+  EXPECT_TRUE(test.assignable(string8_unbounded, string8_20));
+  EXPECT_FALSE(test.assignable(string16_10, string16_20));
+  EXPECT_TRUE(test.assignable(string16_20, string16_10));
+}
+
 void string_expect_false(const TypeAssignability& test, const TypeIdentifier& tia)
 {
   {
@@ -1066,6 +1087,39 @@ TEST(dds_DCPS_XTypes_TypeAssignability, SequenceTypeTest_Assignable)
   test.insert_entry(seq_b.element.common.type, TypeObject(MinimalTypeObject(bitmask_b)));
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_a)),
                               TypeObject(MinimalTypeObject(seq_b))));
+}
+
+TEST(dds_DCPS_XTypes_TypeAssignability, SequenceTypeTest_Bounds)
+{
+  TypeAssignability test(make_rch<TypeLookupService>());
+
+  MinimalSequenceType seq_10, seq_20;
+  seq_10.header.common.bound = 10;
+  seq_20.header.common.bound = 20;
+  seq_10.element.common.type = TypeIdentifier(TK_INT32);
+  seq_20.element.common.type = TypeIdentifier(TK_INT32);
+
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_10)),
+                              TypeObject(MinimalTypeObject(seq_20))));
+
+  test.set_ignore_sequence_bounds(false);
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_10)),
+                               TypeObject(MinimalTypeObject(seq_20))));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_20)),
+                              TypeObject(MinimalTypeObject(seq_10))));
+
+  const TypeIdentifier plain_10 = makePlainSequence(TypeIdentifier(TK_INT32), SBound(10));
+  const TypeIdentifier plain_20 = makePlainSequence(TypeIdentifier(TK_INT32), SBound(20));
+  const TypeIdentifier plain_unbounded = makePlainSequence(TypeIdentifier(TK_INT32), LBound(0));
+
+  EXPECT_FALSE(test.assignable(plain_10, plain_20));
+  EXPECT_TRUE(test.assignable(plain_20, plain_10));
+  EXPECT_FALSE(test.assignable(plain_10, plain_unbounded));
+  EXPECT_TRUE(test.assignable(plain_unbounded, plain_20));
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(seq_10)), plain_20));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(seq_20)), plain_10));
+  EXPECT_FALSE(test.assignable(plain_10, TypeObject(MinimalTypeObject(seq_20))));
+  EXPECT_TRUE(test.assignable(plain_20, TypeObject(MinimalTypeObject(seq_10))));
 }
 
 TEST(dds_DCPS_XTypes_TypeAssignability, SequenceTypeTest_NotAssignable)
@@ -3656,6 +3710,34 @@ void expect_false_final()
   a.member_seq.append(ma1).append(ma2);
   b.member_seq.append(mb1).append(mb2);
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
+}
+
+TEST(dds_DCPS_XTypes_TypeAssignability, StructTypeTest_PreventTypeWidening)
+{
+  TypeAssignability test(make_rch<TypeLookupService>());
+
+  MinimalStructType a, b;
+  a.struct_flags = IS_APPENDABLE;
+  b.struct_flags = IS_APPENDABLE;
+  a.member_seq.append(MinimalStructMember(CommonStructMember(1, StructMemberFlag(),
+                                                             TypeIdentifier(TK_INT32)),
+                                          MinimalMemberDetail("m1")));
+  a.member_seq.append(MinimalStructMember(CommonStructMember(2, StructMemberFlag(),
+                                                             TypeIdentifier(TK_INT32)),
+                                          MinimalMemberDetail("m2")));
+  b.member_seq.append(MinimalStructMember(CommonStructMember(1, StructMemberFlag(),
+                                                             TypeIdentifier(TK_INT32)),
+                                          MinimalMemberDetail("m1")));
+
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
+  test.set_prevent_type_widening(true);
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(b)), TypeObject(MinimalTypeObject(a))));
+
+  a.struct_flags = IS_MUTABLE;
+  b.struct_flags = IS_MUTABLE;
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a)), TypeObject(MinimalTypeObject(b))));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(b)), TypeObject(MinimalTypeObject(a))));
 }
 
 TEST(dds_DCPS_XTypes_TypeAssignability, StructTypeTest_NotAssignable)

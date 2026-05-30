@@ -3,7 +3,10 @@
 #include <XmlTypeProviderTypeSupportImpl.h>
 
 #include <dds/DCPS/debug.h>
+#include <dds/DCPS/XTypes/DynamicTypeSupport.h>
 #include <dds/DCPS/XTypes/DynamicTypeImpl.h>
+#include <dds/DCPS/XTypes/TypeAssignability.h>
+#include <dds/DCPS/XTypes/TypeLookupService.h>
 #include <dds/DCPS/XTypes/XmlTypeProvider.h>
 
 #include "gtest/gtest.h"
@@ -67,6 +70,28 @@ void expect_complete_type_object(DDS::DynamicType_ptr type)
   const OpenDDS::XTypes::TypeMap::const_iterator actual = actual_map.find(expected_ti);
   ASSERT_NE(actual_map.end(), actual);
   EXPECT_TRUE(expected->second == actual->second);
+}
+
+OpenDDS::XTypes::TypeInformation type_information(
+  DDS::DynamicType_ptr type,
+  const OpenDDS::XTypes::TypeLookupService_rch& tls)
+{
+  DDS::DynamicTypeSupport_var ts = new DDS::DynamicTypeSupport(type);
+  ts->add_types(tls);
+
+  OpenDDS::DCPS::TypeInformation dcps_type_info;
+  ts->to_type_info(dcps_type_info);
+  return dcps_type_info.xtypes_type_info_;
+}
+
+OpenDDS::XTypes::TypeConsistencyAttributes strict_type_consistency()
+{
+  OpenDDS::XTypes::TypeConsistencyAttributes attrs;
+  attrs.ignore_sequence_bounds = false;
+  attrs.ignore_string_bounds = false;
+  attrs.ignore_member_names = true;
+  attrs.prevent_type_widening = true;
+  return attrs;
 }
 
 } // namespace
@@ -241,6 +266,29 @@ TEST(dds_DCPS_XTypes_XmlTypeProvider, RejectsWideBitmaskUnionLabel)
             OpenDDS::XTypes::load_xml_type(
               type, INVALID_XML_TYPE_FILE, "XmlTypeProviderInvalid::WideFlagUnion"));
   EXPECT_FALSE(type);
+}
+
+TEST(dds_DCPS_XTypes_XmlTypeProvider, TypeAssignabilityPolicy)
+{
+  const OpenDDS::XTypes::TypeLookupService_rch tls =
+    OpenDDS::DCPS::make_rch<OpenDDS::XTypes::TypeLookupService>();
+  const OpenDDS::XTypes::TypeConsistencyAttributes attrs = strict_type_consistency();
+  OpenDDS::XTypes::TypeAssignability assignability(tls, attrs);
+
+  DDS::DynamicType_var seq10 = load_type("XmlTypeProviderTest::Seq10");
+  DDS::DynamicType_var seq20 = load_type("XmlTypeProviderTest::Seq20");
+  EXPECT_FALSE(assignability.assignable(type_information(seq10, tls),
+                                        type_information(seq20, tls)));
+
+  DDS::DynamicType_var string10 = load_type("XmlTypeProviderTest::String10");
+  DDS::DynamicType_var string20 = load_type("XmlTypeProviderTest::String20");
+  EXPECT_FALSE(assignability.assignable(type_information(string10, tls),
+                                        type_information(string20, tls)));
+
+  DDS::DynamicType_var one_member = load_type("XmlTypeProviderTest::OneMember");
+  DDS::DynamicType_var two_members = load_type("XmlTypeProviderTest::TwoMembers");
+  EXPECT_FALSE(assignability.assignable(type_information(two_members, tls),
+                                        type_information(one_member, tls)));
 }
 
 #endif
