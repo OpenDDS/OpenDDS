@@ -645,3 +645,151 @@ TEST(dds_DCPS_Serializer, read_parameter_id_xcdr2)
   EXPECT_FALSE(must_understand);
   ASSERT_TRUE(ser.skip(size));
 }
+
+namespace {
+  bool read_parameter_id_xcdr2(const unsigned char* xcdr, size_t size)
+  {
+    const Encoding enc(Encoding::KIND_XCDR2, ENDIAN_BIG);
+    ACE_Message_Block mb(size);
+    mb.copy((const char *)xcdr, size);
+    Serializer ser(&mb, enc);
+    unsigned id;
+    size_t member_size;
+    bool must_understand;
+    return ser.read_parameter_id(id, member_size, must_understand);
+  }
+
+  void test_read_parameter_id_xcdr2_ok(const unsigned char* xcdr, size_t size)
+  {
+    ASSERT_TRUE(read_parameter_id_xcdr2(xcdr, size));
+  }
+
+  void test_read_parameter_id_xcdr2_malformed(const unsigned char* xcdr, size_t size)
+  {
+    ASSERT_FALSE(read_parameter_id_xcdr2(xcdr, size));
+  }
+}
+
+TEST(dds_DCPS_Serializer, read_parameter_id_xcdr2_ok)
+{
+  // well-formed emheader and nextint for LC=5,6,7 cases
+  {
+    unsigned char xcdr[] = {
+      0x50, 0x00, 0x00, 0x01,
+      0x00, 0x00, 0x00, 0x04
+    };
+    test_read_parameter_id_xcdr2_ok(xcdr, sizeof(xcdr));
+
+    // Splitted message into multiple blocks should also work
+    const Encoding enc(Encoding::KIND_XCDR2, ENDIAN_BIG);
+    const size_t total_size = sizeof(xcdr);
+    ACE_Message_Block mb(total_size - 3);
+    mb.copy((const char *)xcdr, total_size - 3);
+    ACE_Message_Block mb2(3);
+    mb2.copy((const char *)xcdr + total_size - 3, 3);
+    mb.cont(&mb2);
+    Serializer ser(&mb, enc);
+    unsigned id;
+    size_t member_size;
+    bool must_understand;
+    ASSERT_TRUE(ser.read_parameter_id(id, member_size, must_understand));
+  }
+  {
+    unsigned char xcdr[] = {
+      0x60, 0x00, 0x00, 0x01,
+      0x00, 0x00, 0x00, 0x04
+    };
+    test_read_parameter_id_xcdr2_ok(xcdr, sizeof(xcdr));
+  }
+  {
+    unsigned char xcdr[] = {
+      0x70, 0x00, 0x00, 0x01,
+      0x00, 0x00, 0x00, 0x04
+    };
+    test_read_parameter_id_xcdr2_ok(xcdr, sizeof(xcdr));
+  }
+}
+
+TEST(dds_DCPS_Serializer, read_parameter_id_xcdr2_malformed_emheader)
+{
+  {
+    // Emheader is absent
+    unsigned char xcdr[] = {};
+    test_read_parameter_id_xcdr2_malformed(xcdr, sizeof(xcdr));
+  }
+  {
+    // Emheader is truncated
+    unsigned char xcdr[] = {
+      0x40, 0x00, 0x00
+    };
+    test_read_parameter_id_xcdr2_malformed(xcdr, sizeof(xcdr));
+  }
+}
+
+TEST(dds_DCPS_Serializer, read_parameter_id_xcdr2_missing_nextint)
+{
+  {
+    // LC=4
+    unsigned char xcdr[] = {
+      0x40, 0x00, 0x00, 0x01,
+    };
+    test_read_parameter_id_xcdr2_malformed(xcdr, sizeof(xcdr));
+  }
+  {
+    // LC=5
+    unsigned char xcdr[] = {
+      0x50, 0x00, 0x00, 0x01,
+    };
+    test_read_parameter_id_xcdr2_malformed(xcdr, sizeof(xcdr));
+  }
+  {
+    // LC=6
+    unsigned char xcdr[] = {
+      0x60, 0x00, 0x00, 0x01,
+    };
+    test_read_parameter_id_xcdr2_malformed(xcdr, sizeof(xcdr));
+  }
+  {
+    // LC=7
+    unsigned char xcdr[] = {
+      0x70, 0x00, 0x00, 0x01,
+    };
+    test_read_parameter_id_xcdr2_malformed(xcdr, sizeof(xcdr));
+  }
+}
+
+TEST(dds_DCPS_Serializer, read_parameter_id_xcdr2_truncated_nextint)
+{
+  {
+    // LC=4
+    unsigned char xcdr[] = {
+      0x40, 0x00, 0x00, 0x01,
+      0x00, 0x00, 0x03
+    };
+    test_read_parameter_id_xcdr2_malformed(xcdr, sizeof(xcdr));
+  }
+  {
+    // LC=5
+    unsigned char xcdr[] = {
+      0x50, 0x00, 0x00, 0x01,
+      0x01
+    };
+    test_read_parameter_id_xcdr2_malformed(xcdr, sizeof(xcdr));
+  }
+  {
+    // LC=6
+    unsigned char xcdr[] = {
+      0x60, 0x00, 0x00, 0x01,
+      0x00, 0x02
+    };
+    test_read_parameter_id_xcdr2_malformed(xcdr, sizeof(xcdr));
+  }
+  {
+    // LC=7
+    unsigned char xcdr[] = {
+      0x70, 0x00, 0x00, 0x01,
+      0x00, 0x00, 0x03
+    };
+    test_read_parameter_id_xcdr2_malformed(xcdr, sizeof(xcdr));
+  }
+}
