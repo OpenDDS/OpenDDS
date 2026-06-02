@@ -351,6 +351,8 @@ public:
   }
 
 private:
+  DDS::ReturnCode_t get_map_key_i(DDS::DynamicData_ptr& key, DDS::MemberId id);
+  DDS::ReturnCode_t get_map_value_i(DDS::DynamicData_ptr& value, DDS::MemberId id);
 
   class ScopedChainManager {
   public:
@@ -458,6 +460,7 @@ private:
   /// Skip to an element with a given ID in a map. The key associated with that
   /// element is also skipped.
   bool skip_to_map_element(MemberId id);
+  bool skip_to_map_entry(MemberId id, bool skip_key);
 
   /// Read a sequence with element type @a elem_tk and store the result in @a value,
   /// which is a sequence of primitives or strings or wstrings. Sequence of enums or

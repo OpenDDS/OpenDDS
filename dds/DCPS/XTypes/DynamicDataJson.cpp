@@ -9,6 +9,7 @@
 
 #include "DynamicDataJson.h"
 
+#include "DynamicDataBase.h"
 #include "DynamicDataFactory.h"
 #include "DynamicTypeImpl.h"
 #include "TypeObject.h"
@@ -37,6 +38,8 @@ namespace XTypes {
 namespace {
 
 const char DISCRIMINATOR_JSON_NAME[] = "$discriminator";
+const char MAP_KEY_JSON_NAME[] = "key";
+const char MAP_VALUE_JSON_NAME[] = "value";
 
 typedef rapidjson::Value JsonValue;
 typedef rapidjson::Document JsonDocument;
@@ -919,6 +922,75 @@ DDS::ReturnCode_t populate_collection(
   return DDS::RETCODE_OK;
 }
 
+DDS::ReturnCode_t populate_map(
+  DDS::DynamicData_ptr data,
+  DDS::DynamicType_ptr type,
+  const JsonValue& value,
+  const DynamicDataJsonOptions& options,
+  const std::string& path)
+{
+  if (!value.IsArray()) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
+  DDS::TypeDescriptor_var td;
+  if (!get_type_descriptor(td, type)) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+  if (td->bound().length() && td->bound()[0] && value.Size() > td->bound()[0]) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
+  DDS::DynamicType_var key_type = get_base_type(td->key_element_type());
+  DDS::DynamicType_var element_type = get_base_type(td->element_type());
+  if (!key_type || !element_type) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
+  DynamicDataBase* map_data = dynamic_cast<DynamicDataBase*>(data);
+  if (!map_data) {
+    return DDS::RETCODE_UNSUPPORTED;
+  }
+
+  for (rapidjson::SizeType i = 0; i != value.Size(); ++i) {
+    const JsonValue& entry = value[i];
+    if (!entry.IsObject()) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
+    JsonValue::ConstMemberIterator key = entry.FindMember(MAP_KEY_JSON_NAME);
+    JsonValue::ConstMemberIterator elem = entry.FindMember(MAP_VALUE_JSON_NAME);
+    if (key == entry.MemberEnd() || elem == entry.MemberEnd()) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: dynamic_data_json: map entry at %C requires key and value\n",
+        path_index(path, i).c_str()));
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
+
+    DDS::DynamicData_var key_data =
+      DDS::DynamicDataFactory::get_instance()->create_data(key_type);
+    DDS::DynamicData_var value_data =
+      DDS::DynamicDataFactory::get_instance()->create_data(element_type);
+    if (!key_data || !value_data) {
+      return DDS::RETCODE_ERROR;
+    }
+
+    DDS::ReturnCode_t rc = populate_value(key_data, key_type, key->value, options,
+      path_member(path_index(path, i), MAP_KEY_JSON_NAME));
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    rc = populate_value(value_data, element_type, elem->value, options,
+      path_member(path_index(path, i), MAP_VALUE_JSON_NAME));
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    rc = map_data->set_map_entry(i, key_data, value_data);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+  }
+  return DDS::RETCODE_OK;
+}
+
 DDS::ReturnCode_t populate_value(
   DDS::DynamicData_ptr data,
   DDS::DynamicType_ptr type,
@@ -937,9 +1009,7 @@ DDS::ReturnCode_t populate_value(
   case TK_UNION:
     return populate_union(data, base, value, options, path);
   case TK_MAP:
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: dynamic_data_json: map type %C at %C is not supported\n",
-      type_name(base).c_str(), path.c_str()));
-    return DDS::RETCODE_UNSUPPORTED;
+    return populate_map(data, base, value, options, path);
   case TK_ARRAY:
   case TK_SEQUENCE:
     return populate_collection(data, base, value, options, path);
@@ -1195,6 +1265,50 @@ bool write_collection_value(
   return true;
 }
 
+bool write_map_value(
+  JsonWriter& writer,
+  DDS::DynamicData_ptr data,
+  DDS::DynamicType_ptr type,
+  const DynamicDataJsonOptions& options)
+{
+  DDS::TypeDescriptor_var td;
+  if (!get_type_descriptor(td, type)) {
+    return false;
+  }
+  DDS::DynamicType_var key_type = get_base_type(td->key_element_type());
+  DDS::DynamicType_var element_type = get_base_type(td->element_type());
+  DynamicDataBase* map_data = dynamic_cast<DynamicDataBase*>(data);
+  if (!key_type || !element_type || !map_data) {
+    return false;
+  }
+
+  writer.StartArray();
+  const DDS::UInt32 count = data->get_item_count();
+  for (DDS::UInt32 i = 0; i != count; ++i) {
+    const DDS::MemberId id = data->get_member_id_at_index(i);
+    DDS::DynamicData_var key;
+    DDS::DynamicData_var value;
+    if (id == MEMBER_ID_INVALID ||
+        map_data->get_map_key(key, id) != DDS::RETCODE_OK ||
+        map_data->get_map_value(value, id) != DDS::RETCODE_OK) {
+      return false;
+    }
+
+    writer.StartObject();
+    writer.Key(MAP_KEY_JSON_NAME);
+    if (!write_value(writer, key, MEMBER_ID_INVALID, key_type, options)) {
+      return false;
+    }
+    writer.Key(MAP_VALUE_JSON_NAME);
+    if (!write_value(writer, value, MEMBER_ID_INVALID, element_type, options)) {
+      return false;
+    }
+    writer.EndObject();
+  }
+  writer.EndArray();
+  return true;
+}
+
 bool write_value(
   JsonWriter& writer,
   DDS::DynamicData_ptr data,
@@ -1223,9 +1337,7 @@ bool write_value(
     }
     return write_collection_value(writer, data, base, options);
   case TK_MAP:
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: dynamic_data_json: map type %C is not supported\n",
-      type_name(base).c_str()));
-    return false;
+    return write_map_value(writer, data, base, options);
   default:
     return write_scalar_value(writer, data, id, base);
   }

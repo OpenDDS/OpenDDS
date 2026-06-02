@@ -1151,6 +1151,11 @@ bool DynamicDataXcdrReadImpl::skip_to_array_element(MemberId id, DDS::DynamicTyp
 
 bool DynamicDataXcdrReadImpl::skip_to_map_element(MemberId id)
 {
+  return skip_to_map_entry(id, true);
+}
+
+bool DynamicDataXcdrReadImpl::skip_to_map_entry(MemberId id, bool skip_key)
+{
   const DDS::DynamicType_var key_type = get_base_type(type_desc_->key_element_type());
   const DDS::DynamicType_var elem_type = get_base_type(type_desc_->element_type());
   ACE_CDR::ULong key_size, elem_size;
@@ -1168,7 +1173,7 @@ bool DynamicDataXcdrReadImpl::skip_to_map_element(MemberId id)
         return false;
       }
     }
-    return strm_.skip(1, static_cast<int>(key_size));
+    return !skip_key || strm_.skip(1, static_cast<int>(key_size));
   } else {
     size_t dheader;
     ACE_CDR::ULong index;
@@ -1182,7 +1187,7 @@ bool DynamicDataXcdrReadImpl::skip_to_map_element(MemberId id)
         return false;
       }
     }
-    return (strm_.rpos() < end_of_map) && skip_member(key_type);
+    return (strm_.rpos() < end_of_map) && (!skip_key || skip_member(key_type));
   }
 }
 
@@ -1699,6 +1704,34 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
     break;
   }
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
+}
+
+DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_map_key_i(DDS::DynamicData_ptr& key, DDS::MemberId id)
+{
+  if (type_->get_kind() != TK_MAP) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+  ScopedChainManager scoped_chain(*this);
+  if (!skip_to_map_entry(id, false)) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+  CORBA::release(key);
+  key = new DynamicDataXcdrReadImpl(strm_, type_desc_->key_element_type(), nested(extent_));
+  return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_map_value_i(DDS::DynamicData_ptr& value, DDS::MemberId id)
+{
+  if (type_->get_kind() != TK_MAP) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+  ScopedChainManager scoped_chain(*this);
+  if (!skip_to_map_entry(id, true)) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+  CORBA::release(value);
+  value = new DynamicDataXcdrReadImpl(strm_, type_desc_->element_type(), nested(extent_));
+  return DDS::RETCODE_OK;
 }
 
 template<typename SequenceType>
