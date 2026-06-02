@@ -57,12 +57,14 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl()
   , reset_align_state_(false)
   , strm_(0, encoding_)
   , item_count_(ITEM_COUNT_INVALID)
+  , item_count_limit_(ACE_UINT32_MAX)
 {}
 
 DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
                                                  const DCPS::Encoding& encoding,
                                                  DDS::DynamicType_ptr type,
-                                                 DCPS::Sample::Extent ext)
+                                                 DCPS::Sample::Extent ext,
+                                                 ACE_CDR::ULong item_count_limit)
   : DynamicDataBase(type)
   , chain_(chain->duplicate())
   , encoding_(encoding)
@@ -70,6 +72,7 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
   , reset_align_state_(false)
   , strm_(chain_, encoding_)
   , item_count_(ITEM_COUNT_INVALID)
+  , item_count_limit_(item_count_limit)
 {
   if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
       encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
@@ -78,7 +81,8 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
 }
 
 DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type,
-                                                 DCPS::Sample::Extent ext)
+                                                 DCPS::Sample::Extent ext,
+                                                 ACE_CDR::ULong item_count_limit)
   : DynamicDataBase(type)
   , chain_(ser.current()->duplicate())
   , encoding_(ser.encoding())
@@ -87,6 +91,7 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::Dyn
   , align_state_(ser.rdstate())
   , strm_(chain_, encoding_)
   , item_count_(ITEM_COUNT_INVALID)
+  , item_count_limit_(item_count_limit)
 {
   if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
       encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
@@ -154,6 +159,7 @@ void DynamicDataXcdrReadImpl::copy(const DynamicDataXcdrReadImpl& other)
   strm_ = other.strm_;
   type_ = other.type_;
   item_count_ = other.item_count_;
+  item_count_limit_ = other.item_count_limit_;
 }
 
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::set_descriptor(MemberId, DDS::MemberDescriptor*)
@@ -781,6 +787,9 @@ DDS::UInt32 DynamicDataXcdrReadImpl::get_item_count()
     return 0;
   }
 
+  if (item_count_limit_ != ACE_UINT32_MAX && item_count_ > item_count_limit_) {
+    item_count_ = item_count_limit_;
+  }
   return item_count_;
 }
 
@@ -904,7 +913,10 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_value_from_struct(MemberType& val
   if (rc != DDS::RETCODE_OK) {
     return rc;
   }
-  return read_value(value, MemberTypeKind) ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
+  if (!read_value(value, MemberTypeKind)) {
+    return DDS::RETCODE_ERROR;
+  }
+  return apply_value_try_construct(value, md);
 }
 
 DDS::MemberDescriptor* DynamicDataXcdrReadImpl::get_union_selected_member()
@@ -1035,15 +1047,20 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_value_from_union(
 
   const DDS::ExtensibilityKind ek = type_desc_->extensibility_kind();
   DDS::DynamicType_var member_type;
+  DDS::MemberDescriptor_var md;
   if (id == DISCRIMINATOR_ID) {
     if (ek == DDS::APPENDABLE || ek == DDS::MUTABLE) {
       if (!strm_.skip_delimiter()) {
         return DDS::RETCODE_ERROR;
       }
     }
+    DDS::DynamicTypeMember_var disc_dtm;
+    if (type_->get_member(disc_dtm, DISCRIMINATOR_ID) == DDS::RETCODE_OK) {
+      disc_dtm->get_descriptor(md);
+    }
     member_type = get_base_type(type_desc_->discriminator_type());
   } else {
-    DDS::MemberDescriptor_var md = get_from_union_common_checks(id, "get_value_from_union");
+    md = get_from_union_common_checks(id, "get_value_from_union");
     if (!md) {
       return DDS::RETCODE_ERROR;
     }
@@ -1079,7 +1096,10 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_value_from_union(
   }
 
   if (member_tk == MemberTypeKind) {
-    return read_value(value, MemberTypeKind) ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
+    if (!read_value(value, MemberTypeKind)) {
+      return DDS::RETCODE_ERROR;
+    }
+    return apply_value_try_construct(value, md);
   }
 
   DDS::TypeDescriptor_var td;
@@ -1088,8 +1108,10 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_value_from_union(
     return rc;
   }
   const LBound bit_bound = td->bound()[0];
-  return bit_bound >= lower && bit_bound <= upper &&
-    read_value(value, MemberTypeKind) ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
+  if (bit_bound < lower || bit_bound > upper || !read_value(value, MemberTypeKind)) {
+    return DDS::RETCODE_ERROR;
+  }
+  return apply_value_try_construct(value, md);
 }
 
 bool DynamicDataXcdrReadImpl::skip_to_sequence_element(MemberId id, DDS::DynamicType_ptr coll_type)
@@ -1672,8 +1694,13 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
         if (!member_type) {
           good = false;
         } else {
+          ACE_CDR::ULong item_count_limit;
+          if (try_construct_item_count_limit(item_count_limit, md) != DDS::RETCODE_OK) {
+            good = false;
+            break;
+          }
           CORBA::release(value);
-          value = new DynamicDataXcdrReadImpl(strm_, member_type, nested(extent_));
+          value = new DynamicDataXcdrReadImpl(strm_, member_type, nested(extent_), item_count_limit);
         }
       } else {
         good = false;
@@ -1735,8 +1762,13 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
       if (!member_type) {
         good = false;
       } else {
+        ACE_CDR::ULong item_count_limit;
+        if (try_construct_item_count_limit(item_count_limit, md) != DDS::RETCODE_OK) {
+          good = false;
+          break;
+        }
         CORBA::release(value);
-        value = new DynamicDataXcdrReadImpl(strm_, member_type, nested(extent_));
+        value = new DynamicDataXcdrReadImpl(strm_, member_type, nested(extent_), item_count_limit);
       }
       break;
     }
@@ -1855,6 +1887,213 @@ bool DynamicDataXcdrReadImpl::read_values(SequenceType& value, TypeKind elem_tk)
   return false;
 }
 
+template<typename ValueType>
+DDS::ReturnCode_t DynamicDataXcdrReadImpl::apply_value_try_construct(ValueType&, DDS::MemberDescriptor*) const
+{
+  return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t DynamicDataXcdrReadImpl::apply_value_try_construct(
+  CORBA::Long& value, DDS::MemberDescriptor* md) const
+{
+  if (!md) {
+    return DDS::RETCODE_OK;
+  }
+  const DDS::DynamicType_var member_type = get_base_type(md->type());
+  if (!member_type || member_type->get_kind() != TK_ENUM) {
+    return DDS::RETCODE_OK;
+  }
+
+  DDS::String8_var name;
+  if (get_enumerator_name(name, value, member_type) == DDS::RETCODE_OK) {
+    return DDS::RETCODE_OK;
+  }
+
+  if (md->try_construct_kind() != DDS::USE_DEFAULT) {
+    return DDS::RETCODE_ERROR;
+  }
+
+  const ACE_CDR::ULong count = member_type->get_member_count();
+  DDS::MemberDescriptor_var first_md;
+  for (ACE_CDR::ULong i = 0; i < count; ++i) {
+    DDS::DynamicTypeMember_var dtm;
+    if (member_type->get_member_by_index(dtm, i) != DDS::RETCODE_OK) {
+      return DDS::RETCODE_ERROR;
+    }
+    DDS::MemberDescriptor_var literal_md;
+    if (dtm->get_descriptor(literal_md) != DDS::RETCODE_OK) {
+      return DDS::RETCODE_ERROR;
+    }
+    if (i == 0) {
+      first_md = literal_md;
+    }
+    if (literal_md->is_default_label()) {
+      value = static_cast<CORBA::Long>(literal_md->id());
+      return DDS::RETCODE_OK;
+    }
+  }
+
+  if (!first_md) {
+    return DDS::RETCODE_ERROR;
+  }
+  value = static_cast<CORBA::Long>(first_md->id());
+  return DDS::RETCODE_OK;
+}
+
+template<>
+DDS::ReturnCode_t DynamicDataXcdrReadImpl::apply_value_try_construct(char*& value, DDS::MemberDescriptor* md) const
+{
+  return apply_string_try_construct(value, md);
+}
+
+#ifdef DDS_HAS_WCHAR
+template<>
+DDS::ReturnCode_t DynamicDataXcdrReadImpl::apply_value_try_construct(
+  CORBA::WChar*& value, DDS::MemberDescriptor* md) const
+{
+  return apply_wstring_try_construct(value, md);
+}
+#endif
+
+template<typename SequenceType>
+DDS::ReturnCode_t DynamicDataXcdrReadImpl::apply_sequence_try_construct(
+  SequenceType& value, DDS::MemberDescriptor* md) const
+{
+  if (!md) {
+    return DDS::RETCODE_OK;
+  }
+  const DDS::DynamicType_var member_type = get_base_type(md->type());
+  if (!member_type || member_type->get_kind() != TK_SEQUENCE) {
+    return DDS::RETCODE_OK;
+  }
+  DDS::TypeDescriptor_var td;
+  if (member_type->get_descriptor(td) != DDS::RETCODE_OK) {
+    return DDS::RETCODE_ERROR;
+  }
+  const CORBA::ULong bound = bound_total(td);
+  if (bound == 0 || value.length() <= bound) {
+    return DDS::RETCODE_OK;
+  }
+
+  switch (md->try_construct_kind()) {
+  case DDS::TRIM:
+    value.length(bound);
+    return DDS::RETCODE_OK;
+  case DDS::USE_DEFAULT:
+    value.length(0);
+    return DDS::RETCODE_OK;
+  case DDS::DISCARD:
+    break;
+  }
+  return DDS::RETCODE_ERROR;
+}
+
+DDS::ReturnCode_t DynamicDataXcdrReadImpl::apply_string_try_construct(
+  char*& value, DDS::MemberDescriptor* md) const
+{
+  if (!md || !value) {
+    return DDS::RETCODE_OK;
+  }
+  const DDS::DynamicType_var member_type = get_base_type(md->type());
+  if (!member_type || member_type->get_kind() != TK_STRING8) {
+    return DDS::RETCODE_OK;
+  }
+  DDS::TypeDescriptor_var td;
+  if (member_type->get_descriptor(td) != DDS::RETCODE_OK) {
+    return DDS::RETCODE_ERROR;
+  }
+  const CORBA::ULong bound = bound_total(td);
+  if (bound == 0 || ACE_OS::strlen(value) <= bound) {
+    return DDS::RETCODE_OK;
+  }
+
+  switch (md->try_construct_kind()) {
+  case DDS::TRIM:
+    value[bound] = '\0';
+    return DDS::RETCODE_OK;
+  case DDS::USE_DEFAULT:
+    CORBA::string_free(value);
+    value = CORBA::string_dup("");
+    return DDS::RETCODE_OK;
+  case DDS::DISCARD:
+    break;
+  }
+  return DDS::RETCODE_ERROR;
+}
+
+#ifdef DDS_HAS_WCHAR
+DDS::ReturnCode_t DynamicDataXcdrReadImpl::apply_wstring_try_construct(
+  CORBA::WChar*& value, DDS::MemberDescriptor* md) const
+{
+  if (!md || !value) {
+    return DDS::RETCODE_OK;
+  }
+  const DDS::DynamicType_var member_type = get_base_type(md->type());
+  if (!member_type || member_type->get_kind() != TK_STRING16) {
+    return DDS::RETCODE_OK;
+  }
+  DDS::TypeDescriptor_var td;
+  if (member_type->get_descriptor(td) != DDS::RETCODE_OK) {
+    return DDS::RETCODE_ERROR;
+  }
+  const CORBA::ULong bound = bound_total(td);
+  if (bound == 0 || ACE_OS::strlen(value) <= bound) {
+    return DDS::RETCODE_OK;
+  }
+
+  switch (md->try_construct_kind()) {
+  case DDS::TRIM:
+    value[bound] = 0;
+    return DDS::RETCODE_OK;
+  case DDS::USE_DEFAULT:
+    CORBA::wstring_free(value);
+    value = CORBA::wstring_dup(L"");
+    return DDS::RETCODE_OK;
+  case DDS::DISCARD:
+    break;
+  }
+  return DDS::RETCODE_ERROR;
+}
+#endif
+
+DDS::ReturnCode_t DynamicDataXcdrReadImpl::try_construct_item_count_limit(
+  ACE_CDR::ULong& limit, DDS::MemberDescriptor* md)
+{
+  limit = ACE_UINT32_MAX;
+  if (!md) {
+    return DDS::RETCODE_OK;
+  }
+  const DDS::DynamicType_var member_type = get_base_type(md->type());
+  if (!member_type || member_type->get_kind() != TK_SEQUENCE) {
+    return DDS::RETCODE_OK;
+  }
+  DDS::TypeDescriptor_var td;
+  if (member_type->get_descriptor(td) != DDS::RETCODE_OK) {
+    return DDS::RETCODE_ERROR;
+  }
+  const ACE_CDR::ULong bound = bound_total(td);
+  if (bound == 0) {
+    return DDS::RETCODE_OK;
+  }
+
+  DynamicDataXcdrReadImpl member_data(strm_, member_type, nested(extent_));
+  if (member_data.get_item_count() <= bound) {
+    return DDS::RETCODE_OK;
+  }
+
+  switch (md->try_construct_kind()) {
+  case DDS::TRIM:
+    limit = bound;
+    return DDS::RETCODE_OK;
+  case DDS::USE_DEFAULT:
+    limit = 0;
+    return DDS::RETCODE_OK;
+  case DDS::DISCARD:
+    break;
+  }
+  return DDS::RETCODE_ERROR;
+}
+
 template<TypeKind ElementTypeKind, typename SequenceType>
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_values_from_struct(SequenceType& value, MemberId id,
   TypeKind enum_or_bitmask, LBound lower, LBound upper)
@@ -1874,7 +2113,10 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_values_from_struct(SequenceType& 
     if (rc != DDS::RETCODE_OK) {
       return rc;
     }
-    return read_values(value, ElementTypeKind) ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
+    if (!read_values(value, ElementTypeKind)) {
+      return DDS::RETCODE_ERROR;
+    }
+    return apply_sequence_try_construct(value, md);
   }
 
   if (get_from_struct_common_checks(md, id, enum_or_bitmask, true)) {
@@ -1897,7 +2139,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_values_from_struct(SequenceType& 
           return rc;
         }
         if (read_values(value, enum_or_bitmask)) {
-          return DDS::RETCODE_OK;
+          return apply_sequence_try_construct(value, md);
         }
       }
     }
@@ -1976,14 +2218,15 @@ bool DynamicDataXcdrReadImpl::get_values_from_union(SequenceType& value, MemberI
   }
 
   if (elem_tk == ElementTypeKind) {
-    return read_values(value, ElementTypeKind);
+    return read_values(value, ElementTypeKind) && apply_sequence_try_construct(value, md) == DDS::RETCODE_OK;
   }
 
   if (elem_type->get_descriptor(td) != DDS::RETCODE_OK) {
     return false;
   }
   const LBound bit_bound = td->bound()[0];
-  return bit_bound >= lower && bit_bound <= upper && read_values(value, enum_or_bitmask);
+  return bit_bound >= lower && bit_bound <= upper && read_values(value, enum_or_bitmask)
+    && apply_sequence_try_construct(value, md) == DDS::RETCODE_OK;
 }
 
 template<TypeKind ElementTypeKind, typename SequenceType>
@@ -2817,6 +3060,11 @@ bool DynamicDataXcdrReadImpl::read_discriminator(const DDS::DynamicType_ptr disc
     }
   case TK_ENUM:
     {
+      DDS::MemberDescriptor_var disc_md;
+      DDS::DynamicTypeMember_var disc_dtm;
+      if (type_->get_member(disc_dtm, DISCRIMINATOR_ID) == DDS::RETCODE_OK) {
+        disc_dtm->get_descriptor(disc_md);
+      }
       DDS::TypeDescriptor_var disc_td;
       if (disc_type->get_descriptor(disc_td) != DDS::RETCODE_OK) {
         return false;
@@ -2831,9 +3079,9 @@ bool DynamicDataXcdrReadImpl::read_discriminator(const DDS::DynamicType_ptr disc
         if (!(strm_ >> value)) { return false; }
         label = static_cast<ACE_CDR::Long>(value);
       } else {
-        return strm_ >> label;
+        if (!(strm_ >> label)) { return false; }
       }
-      return true;
+      return apply_value_try_construct(label, disc_md) == DDS::RETCODE_OK;
     }
   default:
     if (DCPS::DCPS_debug_level >= 1) {
