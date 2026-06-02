@@ -651,7 +651,10 @@ namespace {
   {
     const Encoding enc(Encoding::KIND_XCDR2, ENDIAN_BIG);
     ACE_Message_Block mb(size);
-    mb.copy((const char *)xcdr, size);
+    if (xcdr && mb.copy(reinterpret_cast<const char *>(xcdr), size) != 0) {
+      ACE_ERROR((LM_ERROR, "read_parameter_id_xcdr2: failed to copy data to message block!\n"));
+      return false;
+    }
     Serializer ser(&mb, enc);
     unsigned id;
     size_t member_size;
@@ -714,8 +717,7 @@ TEST(dds_DCPS_Serializer, read_parameter_id_xcdr2_malformed_emheader)
 {
   {
     // Emheader is absent
-    unsigned char xcdr[] = {};
-    test_read_parameter_id_xcdr2_malformed(xcdr, sizeof(xcdr));
+    test_read_parameter_id_xcdr2_malformed(0, 0);
   }
   {
     // Emheader is truncated
