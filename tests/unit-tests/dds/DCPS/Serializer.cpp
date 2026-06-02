@@ -591,7 +591,7 @@ TEST(dds_DCPS_Serializer, read_parameter_id_xcdr2)
 
   const Encoding enc(Encoding::KIND_XCDR2, ENDIAN_BIG);
   ACE_Message_Block mb(sizeof(xcdr));
-  mb.copy((const char*)xcdr, sizeof(xcdr));
+  mb.copy(reinterpret_cast<const char*>(xcdr), sizeof(xcdr));
   Serializer ser(&mb, enc);
   unsigned id;
   size_t size;
@@ -651,7 +651,7 @@ namespace {
   {
     const Encoding enc(Encoding::KIND_XCDR2, ENDIAN_BIG);
     ACE_Message_Block mb(size);
-    if (xcdr && mb.copy(reinterpret_cast<const char *>(xcdr), size) != 0) {
+    if (xcdr && mb.copy(reinterpret_cast<const char*>(xcdr), size) != 0) {
       ACE_ERROR((LM_ERROR, "read_parameter_id_xcdr2: failed to copy data to message block!\n"));
       return false;
     }
@@ -687,9 +687,9 @@ TEST(dds_DCPS_Serializer, read_parameter_id_xcdr2_ok)
     const Encoding enc(Encoding::KIND_XCDR2, ENDIAN_BIG);
     const size_t total_size = sizeof(xcdr);
     ACE_Message_Block mb(total_size - 3);
-    mb.copy((const char *)xcdr, total_size - 3);
+    mb.copy(reinterpret_cast<const char*>(xcdr), total_size - 3);
     ACE_Message_Block mb2(3);
-    mb2.copy((const char *)xcdr + total_size - 3, 3);
+    mb2.copy(reinterpret_cast<const char*>(xcdr) + total_size - 3, 3);
     mb.cont(&mb2);
     Serializer ser(&mb, enc);
     unsigned id;
