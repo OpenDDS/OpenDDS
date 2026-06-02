@@ -393,11 +393,12 @@ The command-line options for the RtpsRelay:
 .. option:: -CertificateIdPattern <regex>
 
   This requires security to be enabled.
-  Specify a regex pattern used to match client participant's certificate subject name to enable the asynchronous discovery feature.
-  For matched client, the first group match will be used as the key to cache the client's partitions.
-  The cached partitions will be used to forward the client's messages immediately in subsequent sessions before the client
+  Specify a regex pattern used to match a client participant's certificate subject name to enable the asynchronous discovery feature.
+  For a matched client, the first group match will be used as the key to cache the client's partitions.
+  The cached partitions will be used to forward the matching client's messages immediately in subsequent sessions before the client
   completes discovery with the relay. Effectively, this allows the client to initiate discovery with other clients in parallel
   with its discovery with the relay.
+  The default is the empty string which disables the asynchronous discovery feature.
 
 .. option:: -SynchronizeAsyncDiscoveryCache 0|1
 
@@ -405,7 +406,7 @@ The command-line options for the RtpsRelay:
 
   Specify whether to synchronize the local asynchronous discovery cache with other relay instances and enable
   processing of cache updates from them.
-  This requires a valid regex pattern is specified for :option:`-CertificateIdPattern`.
+  This requires a non-empty and valid regex pattern to be specified for :option:`-CertificateIdPattern`.
   The default is 0 (disabled).
 
 .. option:: -AsyncDiscoveryCacheTimeout <seconds>

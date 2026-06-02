@@ -39,7 +39,6 @@ my $relay_opts = "-Id relay" .
                  " -VerticalAddress 4444" .
                  " -HorizontalAddress 127.0.0.1:11444" .
                  " -UserData thisrelay" .
-                 " -MetaDiscoveryAddress 127.0.0.1:0" .
                  " -IdentityCA ../../../security/certs/identity/identity_ca_cert.pem" .
                  " -PermissionsCA ../../../security/certs/permissions/permissions_ca_cert.pem" .
                  " -IdentityCertificate ../../../security/certs/identity/test_participant_01_cert.pem" .

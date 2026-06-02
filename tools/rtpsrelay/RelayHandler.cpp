@@ -365,7 +365,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
         proxy.deny(src_guid);
       }
 
-      // Initiate async discovery if applies, i.e., the relay has not learned about any partitions
+      // Initiate async discovery if applicable, i.e., the relay has not learned about any partitions
       // for this client from endpoint discovery, but has cached partitions for it.
       // The cached partitions are used to forward the client's messages until the relay has learned
       // about any of the client's partitions through endpoint discovery.

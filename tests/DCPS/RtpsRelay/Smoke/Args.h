@@ -29,8 +29,8 @@ struct Args {
   bool terminate_on_data = false;
   bool drain_test = false;
 
-  // For publisher, it means this is the second publisher instance.
-  // For subscriber, it means the subscriber should read from both publisher instances before exits.
+  // For a publisher, 'second_pub' means this is the second publisher instance.
+  // For a subscriber, 'second_pub' means the subscriber should read from both publisher instances before exiting.
   bool second_pub = false;
 
   int parse(int argc, ACE_TCHAR* argv[]);

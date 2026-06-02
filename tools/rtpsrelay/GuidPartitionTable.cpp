@@ -234,7 +234,7 @@ GuidPartitionTable::update_cert_partitions_cache(const std::string& key, const S
     return;
   }
 
-  // The corresponding participant becomes local, remove its from the remote cache if exists.
+  // The corresponding participant becomes local, remove it from the remote cache if it exists.
   remote_async_disc_cache_.remove(key);
 
   StringSet prev_partitions;
