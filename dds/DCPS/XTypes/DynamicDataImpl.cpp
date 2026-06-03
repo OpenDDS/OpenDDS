@@ -5360,9 +5360,6 @@ void serialized_size_primitive_elements(const Encoding& encoding, size_t& size,
   }
 }
 
-bool serialized_size_i(const Encoding& encoding, size_t& size,
-                       DDS::DynamicData_ptr data, Sample::Extent ext);
-
 bool serialized_size_dynamic_value(const Encoding& encoding, size_t& size,
                                    DDS::DynamicData_ptr data, DDS::TypeKind tk,
                                    Sample::Extent ext)
@@ -6100,8 +6097,6 @@ bool serialize_dynamic_element(Serializer& ser, DDS::DynamicData_ptr col_data,
   }
   return false;
 }
-
-bool serialize(Serializer& ser, DDS::DynamicData_ptr data, Sample::Extent ext);
 
 bool serialize_dynamic_value(Serializer& ser, DDS::DynamicData_ptr data,
                              DDS::TypeKind tk, Sample::Extent ext)
