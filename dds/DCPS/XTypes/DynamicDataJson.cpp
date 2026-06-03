@@ -1382,13 +1382,13 @@ DDS::ReturnCode_t dynamic_data_from_json(
 
 DDS::ReturnCode_t dynamic_data_from_json_file(
   DDS::DynamicData_ptr data,
-  const ACE_TString& json_file,
+  const std::string& json_file,
   const DynamicDataJsonOptions& options)
 {
-  std::ifstream input(ACE_TEXT_ALWAYS_CHAR(json_file.c_str()));
+  std::ifstream input(json_file.c_str());
   if (!input) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: dynamic_data_json: failed to open %C\n",
-      ACE_TEXT_ALWAYS_CHAR(json_file.c_str())));
+      json_file.c_str()));
     return DDS::RETCODE_ERROR;
   }
 

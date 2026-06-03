@@ -9,8 +9,6 @@
 #include <dds/DCPS/dcps_export.h>
 #include <dds/DdsDynamicDataC.h>
 
-#include <ace/SString.h>
-
 #include <string>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -68,7 +66,7 @@ OpenDDS_Dcps_Export DDS::ReturnCode_t dynamic_data_from_json(
 
 OpenDDS_Dcps_Export DDS::ReturnCode_t dynamic_data_from_json_file(
   DDS::DynamicData_ptr data,
-  const ACE_TString& json_file,
+  const std::string& json_file,
   const DynamicDataJsonOptions& options = DynamicDataJsonOptions());
 
 OpenDDS_Dcps_Export DDS::ReturnCode_t dynamic_data_to_json(
