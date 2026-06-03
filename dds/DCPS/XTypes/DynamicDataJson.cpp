@@ -782,6 +782,10 @@ DDS::ReturnCode_t populate_union_with_discriminator(
     return DDS::RETCODE_BAD_PARAMETER;
   }
   DDS::DynamicType_var discriminator_type = get_base_type(td->discriminator_type());
+  // Union case labels are stored as DDS::UnionCaseLabelSeq elements, which
+  // are 32-bit signed values. json_to_discriminator() validates and normalizes
+  // the JSON value for branch selection even when the discriminator type is
+  // 64-bit.
   DDS::Int32 discriminator_value = 0;
   if (!json_to_discriminator(discriminator_type, discriminator->value, discriminator_value)) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: dynamic_data_json: invalid discriminator at %C\n", path.c_str()));
