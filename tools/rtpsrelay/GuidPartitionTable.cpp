@@ -311,17 +311,18 @@ void GuidPartitionTable::cleanup_local_async_disc_cache(const OpenDDS::DCPS::Mon
   relay_stats_reporter_.async_discovery_local_cache_size(sizes.first, now);
   relay_stats_reporter_.async_discovery_local_expiration_map_size(sizes.second, now);
 
-  if (sizes.first) {
-    const auto next_fire_in = local_async_disc_cache_.earliest_last_access() + config_.async_discovery_cache_timeout() - now;
-    local_async_disc_cache_cleanup_task_->schedule(next_fire_in);
-  }
-
   if (config_.log_async_discovery()) {
     const auto keys_str = concat_strings(expired_keys);
     ACE_DEBUG((LM_INFO,
                "(%P|%t) INFO: GuidPartitionTable::cleanup_local_async_disc_cache: "
                "Removed keys=[%C] -- cache size=%B expiration map size=%B\n",
                keys_str.c_str(), sizes.first, sizes.second));
+  }
+
+  const auto earliest_last_access = local_async_disc_cache_.earliest_last_access();
+  if (earliest_last_access != OpenDDS::DCPS::MonotonicTimePoint::max_value) {
+    const auto next_fire_in = earliest_last_access + config_.async_discovery_cache_timeout() - now;
+    local_async_disc_cache_cleanup_task_->schedule(next_fire_in);
   }
 
   if (config_.synchronize_async_discovery_cache()) {
@@ -421,8 +422,9 @@ void GuidPartitionTable::cleanup_remote_async_disc_cache(const OpenDDS::DCPS::Mo
                keys_str.c_str(), sizes.first, sizes.second));
   }
 
-  if (sizes.first) {
-    const auto next_fire_in = remote_async_disc_cache_.earliest_last_access() + config_.async_discovery_remote_cache_timeout() - now;
+  const auto earliest_last_access = remote_async_disc_cache_.earliest_last_access();
+  if (earliest_last_access != OpenDDS::DCPS::MonotonicTimePoint::max_value) {
+    const auto next_fire_in = earliest_last_access + config_.async_discovery_remote_cache_timeout() - now;
     remote_async_disc_cache_cleanup_task_->schedule(next_fire_in);
   }
 }

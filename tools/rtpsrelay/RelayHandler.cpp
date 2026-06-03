@@ -375,7 +375,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
           const auto pos = proxy.find(src_guid);
           if (pos != proxy.end()) {
             const auto ca_sn = pos->second.identity_info.ca_sn();
-            if (!config_.expected_ca_subject_name().empty() && config_.expected_ca_subject_name() == ca_sn) {
+            if (config_.expected_ca_subject_name() == ca_sn) {
               const auto key = pos->second.identity_info.cert_id();
               guid_partition_table_.lookup_cert_partitions_cache(to_partitions, key, src_guid);
             } else if (config_.log_async_discovery()) {
@@ -709,6 +709,7 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
         }
       }
 
+      GuidSet async_disc_targets;
       for (const auto& guid : guids) {
         if (guid == src_guid) {
           continue;
@@ -725,13 +726,13 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
             // subsequent messages from the target can be forwarded to the source, thus
             // allowing them to discover each other.
             p->second.pending_recipients.insert(src_guid);
+            async_disc_targets.insert(guid);
           }
         }
       }
       if (async_discovery) {
-        guids.erase(src_guid);
         if (iter != proxy.end()) {
-          iter->second.initiated_async_discovery_with.insert(guids.begin(), guids.end());
+          iter->second.initiated_async_discovery_with.insert(async_disc_targets.begin(), async_disc_targets.end());
         }
       }
     }
