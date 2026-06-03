@@ -9,6 +9,7 @@
 #include <dds/DCPS/XTypes/Utils.h>
 #include <dds/DCPS/XTypes/XmlTypeProvider.h>
 #include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/debug.h>
 
 #include "gtest/gtest.h"
 
@@ -268,6 +269,9 @@ TEST(dds_DCPS_XTypes_DynamicDataJson, MapJsonRejectsBound)
 {
   DDS::DynamicData_var data = create_data("XmlTypeProviderTest::MapSample");
   ASSERT_TRUE(data);
+
+  OpenDDS::DCPS::LogRestore log_restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
 
   const char* const json =
     "{"

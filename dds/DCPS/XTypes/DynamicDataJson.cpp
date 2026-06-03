@@ -48,7 +48,9 @@ typedef rapidjson::Writer<JsonStringBuffer> JsonWriter;
 
 void report_error(const std::string& message)
 {
-  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: dynamic_data_json: %C\n", message.c_str()));
+  if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: dynamic_data_json: %C\n", message.c_str()));
+  }
 }
 
 template <typename T>
