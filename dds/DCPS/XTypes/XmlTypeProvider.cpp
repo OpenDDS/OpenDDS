@@ -30,6 +30,7 @@
 #include <xercesc/util/XMLString.hpp>
 
 #include <cerrno>
+#include <algorithm>
 #include <cstdlib>
 #include <limits>
 #include <map>
@@ -267,7 +268,8 @@ enum TypeModelKind {
 enum TypeSpecKind {
   SPEC_PRIMITIVE,
   SPEC_STRING,
-  SPEC_NAMED
+  SPEC_NAMED,
+  SPEC_MAP
 };
 
 struct TypeSpec {
@@ -281,6 +283,9 @@ struct TypeSpec {
   LBound sequence_bound;
   bool has_array;
   OPENDDS_VECTOR(LBound) array_dimensions;
+  TypeSpec* map_key;
+  TypeSpec* map_value;
+  LBound map_bound;
 
   TypeSpec()
     : kind(SPEC_PRIMITIVE)
@@ -290,7 +295,59 @@ struct TypeSpec {
     , has_sequence(false)
     , sequence_bound(0)
     , has_array(false)
+    , map_key(0)
+    , map_value(0)
+    , map_bound(0)
   {}
+
+  TypeSpec(const TypeSpec& other)
+    : kind(other.kind)
+    , primitive_kind(other.primitive_kind)
+    , wide_string(other.wide_string)
+    , string_bound(other.string_bound)
+    , named_type(other.named_type)
+    , scope(other.scope)
+    , has_sequence(other.has_sequence)
+    , sequence_bound(other.sequence_bound)
+    , has_array(other.has_array)
+    , array_dimensions(other.array_dimensions)
+    , map_key(other.map_key ? new TypeSpec(*other.map_key) : 0)
+    , map_value(other.map_value ? new TypeSpec(*other.map_value) : 0)
+    , map_bound(other.map_bound)
+  {}
+
+  ~TypeSpec()
+  {
+    delete map_key;
+    delete map_value;
+  }
+
+  TypeSpec& operator=(const TypeSpec& other)
+  {
+    if (this != &other) {
+      TypeSpec copy(other);
+      swap(copy);
+    }
+    return *this;
+  }
+
+  void swap(TypeSpec& other)
+  {
+    using std::swap;
+    swap(kind, other.kind);
+    swap(primitive_kind, other.primitive_kind);
+    swap(wide_string, other.wide_string);
+    swap(string_bound, other.string_bound);
+    named_type.swap(other.named_type);
+    scope.swap(other.scope);
+    swap(has_sequence, other.has_sequence);
+    swap(sequence_bound, other.sequence_bound);
+    swap(has_array, other.has_array);
+    array_dimensions.swap(other.array_dimensions);
+    swap(map_key, other.map_key);
+    swap(map_value, other.map_value);
+    swap(map_bound, other.map_bound);
+  }
 };
 
 struct MemberModel {
@@ -1064,6 +1121,48 @@ private:
       }
     } else if (primitive_kind(type, spec.primitive_kind)) {
       spec.kind = SPEC_PRIMITIVE;
+    } else if (type == "map") {
+      spec.kind = SPEC_MAP;
+      if (has_attr(element, "mapMaxLength")) {
+        if (!parse_bound(attr(element, "mapMaxLength"), spec.map_bound)) {
+          error = "invalid mapMaxLength on " + local_name(element);
+          return false;
+        }
+      }
+      for (XERCES_CPP_NAMESPACE::DOMNode* child = element->getFirstChild(); child;
+           child = child->getNextSibling()) {
+        if (child->getNodeType() != XERCES_CPP_NAMESPACE::DOMNode::ELEMENT_NODE) {
+          continue;
+        }
+        XERCES_CPP_NAMESPACE::DOMElement* child_element = static_cast<XERCES_CPP_NAMESPACE::DOMElement*>(child);
+        const std::string child_name = local_name(child_element);
+        TypeSpec** child_spec = 0;
+        if (child_name == "key") {
+          child_spec = &spec.map_key;
+        } else if (child_name == "value") {
+          child_spec = &spec.map_value;
+        } else {
+          error = "unsupported <map> child <" + child_name + "> on " + local_name(element);
+          return false;
+        }
+        if (*child_spec) {
+          error = "duplicate <" + child_name + "> child on map " + local_name(element);
+          return false;
+        }
+        *child_spec = new TypeSpec;
+        if (!parse_type_spec(child_element, scope, **child_spec, error)) {
+          error = "map " + child_name + ": " + error;
+          return false;
+        }
+      }
+      if (!spec.map_key || !spec.map_value) {
+        error = "map on " + local_name(element) + " requires one <key> and one <value>";
+        return false;
+      }
+      if (has_attr(element, "sequenceMaxLength") || has_attr(element, "arrayDimensions")) {
+        error = "combining map with sequenceMaxLength or arrayDimensions is not supported";
+        return false;
+      }
     } else {
       error = "unsupported XML type reference '" + type + "'";
       return false;
@@ -1461,6 +1560,23 @@ private:
                           PlainArrayLElemDefn(header, bounds, element));
   }
 
+  TypeIdentifier map_type_identifier(const TypeIdentifier& element,
+                                     const TypeIdentifier& key,
+                                     LBound bound) const
+  {
+    const PlainCollectionHeader header(
+      is_fully_descriptive(element) && is_fully_descriptive(key) ? EK_BOTH : EK_COMPLETE,
+      TRY_CONSTRUCT1);
+    const CollectionElementFlag key_flags = 0;
+    if (bound <= std::numeric_limits<SBound>::max()) {
+      return TypeIdentifier(TI_PLAIN_MAP_SMALL,
+                            PlainMapSTypeDefn(header, static_cast<SBound>(bound),
+                                              element, key_flags, key));
+    }
+    return TypeIdentifier(TI_PLAIN_MAP_LARGE,
+                          PlainMapLTypeDefn(header, bound, element, key_flags, key));
+  }
+
   bool type_identifier(const TypeSpec& spec, TypeIdentifier& ti, std::string& error)
   {
     switch (spec.kind) {
@@ -1479,6 +1595,20 @@ private:
       if (!build_type(resolved, ti, error)) {
         return false;
       }
+      break;
+    }
+    case SPEC_MAP: {
+      TypeIdentifier key_ti;
+      if (!type_identifier(*spec.map_key, key_ti, error)) {
+        error = "map key: " + error;
+        return false;
+      }
+      TypeIdentifier element_ti;
+      if (!type_identifier(*spec.map_value, element_ti, error)) {
+        error = "map value: " + error;
+        return false;
+      }
+      ti = map_type_identifier(element_ti, key_ti, spec.map_bound);
       break;
     }
     }

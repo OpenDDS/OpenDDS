@@ -742,8 +742,42 @@ namespace {
       }
       return data_equal_i(lhs, rhs, lhs_branch, rhs_branch, md->type());
     }
-    case TK_MAP:
-      return false;
+    case TK_MAP: {
+      DDS::TypeDescriptor_var td;
+      if (!get_type_descriptor(td, base)) {
+        return false;
+      }
+      DDS::DynamicType_var key_type = safe_base_type(td->key_element_type());
+      DDS::DynamicType_var element_type = safe_base_type(td->element_type());
+      DynamicDataBase* lhs_map = dynamic_cast<DynamicDataBase*>(lhs);
+      DynamicDataBase* rhs_map = dynamic_cast<DynamicDataBase*>(rhs);
+      if (!key_type || !element_type || !lhs_map || !rhs_map) {
+        return false;
+      }
+      const DDS::UInt32 lhs_count = lhs->get_item_count();
+      const DDS::UInt32 rhs_count = rhs->get_item_count();
+      if (lhs_count != rhs_count) {
+        return false;
+      }
+      for (DDS::UInt32 i = 0; i != lhs_count; ++i) {
+        const DDS::MemberId lhs_entry = lhs->get_member_id_at_index(i);
+        const DDS::MemberId rhs_entry = rhs->get_member_id_at_index(i);
+        DDS::DynamicData_var lhs_key;
+        DDS::DynamicData_var rhs_key;
+        DDS::DynamicData_var lhs_value;
+        DDS::DynamicData_var rhs_value;
+        if (lhs_entry == MEMBER_ID_INVALID || rhs_entry == MEMBER_ID_INVALID ||
+            lhs_map->get_map_key(lhs_key, lhs_entry) != DDS::RETCODE_OK ||
+            rhs_map->get_map_key(rhs_key, rhs_entry) != DDS::RETCODE_OK ||
+            lhs_map->get_map_value(lhs_value, lhs_entry) != DDS::RETCODE_OK ||
+            rhs_map->get_map_value(rhs_value, rhs_entry) != DDS::RETCODE_OK ||
+            !data_equal_i(lhs_key, rhs_key, MEMBER_ID_INVALID, MEMBER_ID_INVALID, key_type) ||
+            !data_equal_i(lhs_value, rhs_value, MEMBER_ID_INVALID, MEMBER_ID_INVALID, element_type)) {
+          return false;
+        }
+      }
+      return true;
+    }
     case TK_ARRAY:
     case TK_SEQUENCE: {
       DDS::TypeDescriptor_var td;

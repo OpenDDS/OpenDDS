@@ -19,6 +19,17 @@
         <member name="values" type="uint16" id="14" arrayDimensions="3"/>
       </struct>
 
+      <struct name="MapSample" extensibility="appendable">
+        <member name="lookup" type="map" id="20" mapMaxLength="4">
+          <key type="uint32"/>
+          <value type="uint32"/>
+        </member>
+        <member name="inner_lookup" type="map" id="21" mapMaxLength="2">
+          <key type="uint32"/>
+          <value type="nonBasic" nonBasicTypeName="Inner"/>
+        </member>
+      </struct>
+
       <union name="Choice" extensibility="appendable">
         <discriminator type="nonBasic" nonBasicTypeName="Kind"/>
         <case>

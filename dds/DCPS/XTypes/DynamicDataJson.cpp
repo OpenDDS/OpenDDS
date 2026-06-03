@@ -1337,6 +1337,9 @@ bool write_value(
     }
     return write_collection_value(writer, data, base, options);
   case TK_MAP:
+    if (id != MEMBER_ID_INVALID) {
+      return write_complex_value(writer, data, id, base, options);
+    }
     return write_map_value(writer, data, base, options);
   default:
     return write_scalar_value(writer, data, id, base);
