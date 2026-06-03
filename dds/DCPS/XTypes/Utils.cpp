@@ -1091,8 +1091,10 @@ namespace {
     }
 
     if (a_rc != DDS::RETCODE_OK || b_rc != DDS::RETCODE_OK) {
-      const CORBA::String_var b_type_name = b_data->type()->get_name();
-      const CORBA::String_var a_type_name = a_data->type()->get_name();
+      DDS::DynamicType_var b_type = b_data->type();
+      DDS::DynamicType_var a_type = a_data->type();
+      const CORBA::String_var b_type_name = b_type->get_name();
+      const CORBA::String_var a_type_name = a_type->get_name();
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: member_compare(DynamicData): "
           "Could not compare member type %C id %u from %C (%C) to %C (%C)\n",

@@ -2409,8 +2409,10 @@ DDS::ReturnCode_t DynamicDataImpl::set_map_entry(
 
   DDS::DynamicType_var key_type = get_base_type(type_desc_->key_element_type());
   DDS::DynamicType_var value_type = get_base_type(type_desc_->element_type());
-  DDS::DynamicType_var actual_key_type = get_base_type(key->type());
-  DDS::DynamicType_var actual_value_type = get_base_type(value->type());
+  DDS::DynamicType_var raw_actual_key_type = key->type();
+  DDS::DynamicType_var raw_actual_value_type = value->type();
+  DDS::DynamicType_var actual_key_type = get_base_type(raw_actual_key_type);
+  DDS::DynamicType_var actual_value_type = get_base_type(raw_actual_value_type);
   if (!key_type || !value_type || !key_type->equals(actual_key_type) ||
       !value_type->equals(actual_value_type)) {
     return DDS::RETCODE_BAD_PARAMETER;

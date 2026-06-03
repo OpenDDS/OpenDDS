@@ -249,8 +249,9 @@ TEST(dds_DCPS_XTypes_DynamicDataJson, MapJsonRoundTrip)
   OpenDDS::XTypes::DynamicDataBase* inner_lookup_base = dynamic_data_base(inner_lookup_data);
   ASSERT_TRUE(inner_lookup_base);
   ASSERT_EQ(DDS::RETCODE_OK, inner_lookup_base->get_map_value(value, 0));
+  DDS::DynamicType_var value_type = dynamic_data_base(value)->type();
   DDS::MemberDescriptor_var inner_value =
-    member_descriptor(dynamic_data_base(value)->type(), "value");
+    member_descriptor(value_type, "value");
   DDS::Int32 inner = 0;
   ASSERT_EQ(DDS::RETCODE_OK, value->get_int32_value(inner, inner_value->id()));
   EXPECT_EQ(420, inner);
