@@ -679,6 +679,10 @@ public:
   template <typename T>
   bool peek_helper(ACE_Message_Block* const block, size_t bytes, T& t)
   {
+    if (!block) {
+      return false;
+    }
+
     bool result = false;
     char* const rd_ptr = block->rd_ptr();
     const size_t length = block->length();
