@@ -3060,11 +3060,6 @@ bool DynamicDataXcdrReadImpl::read_discriminator(const DDS::DynamicType_ptr disc
     }
   case TK_ENUM:
     {
-      DDS::MemberDescriptor_var disc_md;
-      DDS::DynamicTypeMember_var disc_dtm;
-      if (type_->get_member(disc_dtm, DISCRIMINATOR_ID) == DDS::RETCODE_OK) {
-        disc_dtm->get_descriptor(disc_md);
-      }
       DDS::TypeDescriptor_var disc_td;
       if (disc_type->get_descriptor(disc_td) != DDS::RETCODE_OK) {
         return false;
@@ -3081,7 +3076,7 @@ bool DynamicDataXcdrReadImpl::read_discriminator(const DDS::DynamicType_ptr disc
       } else {
         if (!(strm_ >> label)) { return false; }
       }
-      return apply_value_try_construct(label, disc_md) == DDS::RETCODE_OK;
+      return true;
     }
   default:
     if (DCPS::DCPS_debug_level >= 1) {
