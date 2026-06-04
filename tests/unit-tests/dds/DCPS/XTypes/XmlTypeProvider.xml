@@ -43,6 +43,9 @@
           <value type="uint32"/>
         </member>
       </struct>
+      <struct name="Float128Sample" extensibility="final">
+        <member name="x1" type="float128"/>
+      </struct>
 
       <struct name="MapSample" extensibility="appendable">
         <member name="lookup" type="map" id="20" mapMaxLength="4">

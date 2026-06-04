@@ -145,6 +145,26 @@ TEST(dds_DCPS_XTypes_DynamicDataJson, StructPopulateAndRoundTrip)
   EXPECT_TRUE(copy->equals(data));
 }
 
+TEST(dds_DCPS_XTypes_DynamicDataJson, Float128HexRoundTrip)
+{
+  DDS::DynamicData_var data = create_data("XmlTypeProviderTest::Float128Sample");
+  ASSERT_TRUE(data);
+
+  const char* const json = "{\"x1\":\"0x0000000000000000000000003f800000\"}";
+  ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_from_json(data, json));
+
+  std::string round_trip;
+  ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_to_json(round_trip, data));
+  EXPECT_EQ(json, round_trip);
+
+  DDS::DynamicData_var copy = create_data("XmlTypeProviderTest::Float128Sample");
+  ASSERT_TRUE(copy);
+  ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_from_json(copy, json));
+  EXPECT_TRUE(OpenDDS::XTypes::dynamic_data_equal(data, copy));
+  EXPECT_TRUE(data->equals(copy));
+  EXPECT_TRUE(copy->equals(data));
+}
+
 TEST(dds_DCPS_XTypes_DynamicDataJson, UnionActiveMemberJson)
 {
   DDS::DynamicType_var type = load_type("XmlTypeProviderTest::Choice");

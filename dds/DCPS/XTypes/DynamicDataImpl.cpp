@@ -18,6 +18,8 @@
 #  include <dds/DdsDynamicDataSeqTypeSupportImpl.h>
 #  include <dds/DdsDcpsCoreTypeSupportImpl.h>
 
+#  include <cfloat>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -26,6 +28,22 @@ namespace XTypes {
 using DCPS::LogLevel;
 using DCPS::log_level;
 using DCPS::retcode_to_string;
+
+namespace {
+
+void canonicalize_float128_padding(CORBA::LongDouble& value)
+{
+#if ACE_SIZEOF_LONG_DOUBLE == 16 && LDBL_MANT_DIG == 64 && !defined(ACE_BIG_ENDIAN)
+  char* const bytes = reinterpret_cast<char*>(&value);
+  for (size_t i = 10; i != 16; ++i) {
+    bytes[i] = 0;
+  }
+#else
+  ACE_UNUSED_ARG(value);
+#endif
+}
+
+}
 
 DynamicDataImpl::DynamicDataImpl(DDS::DynamicType_ptr type,
                                  DDS::DynamicData_ptr backing_store)
@@ -956,7 +974,9 @@ DynamicDataImpl::SingleValue::SingleValue(CORBA::Double float64)
 
 DynamicDataImpl::SingleValue::SingleValue(CORBA::LongDouble float128)
   : kind_(TK_FLOAT128), active_(0), float128_(float128)
-{}
+{
+  canonicalize_float128_padding(float128_);
+}
 
 DynamicDataImpl::SingleValue::SingleValue(ACE_OutputCDR::from_char value)
   : kind_(TK_CHAR8), active_(new(char8_) ACE_OutputCDR::from_char(value.val_))
