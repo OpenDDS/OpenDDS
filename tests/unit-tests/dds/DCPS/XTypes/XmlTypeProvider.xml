@@ -59,6 +59,10 @@
         <member name="x1" type="int32" sequenceMaxLength="10"/>
       </struct>
 
+      <struct name="Seq10Trim" extensibility="final">
+        <member name="x1" type="int32" sequenceMaxLength="10" tryConstruct="trim"/>
+      </struct>
+
       <struct name="Seq20" extensibility="final">
         <member name="x1" type="int32" sequenceMaxLength="20"/>
       </struct>
