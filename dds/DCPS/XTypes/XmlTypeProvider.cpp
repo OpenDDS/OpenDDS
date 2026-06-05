@@ -15,6 +15,7 @@
 
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/debug.h>
+#include <dds/DCPS/unique_ptr.h>
 
 #include <ace/OS_NS_stdlib.h>
 #include <ace/OS_NS_strings.h>
@@ -214,30 +215,52 @@ bool parse_dimensions(const std::string& value, OPENDDS_VECTOR(LBound)& out)
   return !out.empty();
 }
 
+class XercesInitializer {
+public:
+  XercesInitializer()
+    : initialized_(false)
+    , failed_(false)
+  {}
+
+  ~XercesInitializer()
+  {
+    if (initialized_) {
+      XERCES_CPP_NAMESPACE::XMLPlatformUtils::Terminate();
+    }
+  }
+
+  bool ensure(std::string& error)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    if (initialized_) {
+      return true;
+    }
+    if (failed_) {
+      error = "Xerces-C initialization previously failed";
+      return false;
+    }
+
+    try {
+      XERCES_CPP_NAMESPACE::XMLPlatformUtils::Initialize();
+      initialized_ = true;
+      return true;
+    } catch (const XERCES_CPP_NAMESPACE::XMLException& ex) {
+      failed_ = true;
+      error = "Xerces-C initialization failed: " + to_string(ex.getMessage());
+      return false;
+    }
+  }
+
+private:
+  ACE_Thread_Mutex mutex_;
+  bool initialized_;
+  bool failed_;
+};
+
 bool ensure_xerces(std::string& error)
 {
-  static ACE_Thread_Mutex mutex;
-  static bool initialized = false;
-  static bool failed = false;
-
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex);
-  if (initialized) {
-    return true;
-  }
-  if (failed) {
-    error = "Xerces-C initialization previously failed";
-    return false;
-  }
-
-  try {
-    XERCES_CPP_NAMESPACE::XMLPlatformUtils::Initialize();
-    initialized = true;
-    return true;
-  } catch (const XERCES_CPP_NAMESPACE::XMLException& ex) {
-    failed = true;
-    error = "Xerces-C initialization failed: " + to_string(ex.getMessage());
-    return false;
-  }
+  static XercesInitializer initializer;
+  return initializer.ensure(error);
 }
 
 // The TypeLookupService below must be process-wide (not per-call) because
@@ -283,8 +306,8 @@ struct TypeSpec {
   LBound sequence_bound;
   bool has_array;
   OPENDDS_VECTOR(LBound) array_dimensions;
-  TypeSpec* map_key;
-  TypeSpec* map_value;
+  DCPS::unique_ptr<TypeSpec> map_key;
+  DCPS::unique_ptr<TypeSpec> map_value;
   LBound map_bound;
 
   TypeSpec()
@@ -295,8 +318,6 @@ struct TypeSpec {
     , has_sequence(false)
     , sequence_bound(0)
     , has_array(false)
-    , map_key(0)
-    , map_value(0)
     , map_bound(0)
   {}
 
@@ -315,12 +336,6 @@ struct TypeSpec {
     , map_value(other.map_value ? new TypeSpec(*other.map_value) : 0)
     , map_bound(other.map_bound)
   {}
-
-  ~TypeSpec()
-  {
-    delete map_key;
-    delete map_value;
-  }
 
   TypeSpec& operator=(const TypeSpec& other)
   {
@@ -344,8 +359,8 @@ struct TypeSpec {
     swap(sequence_bound, other.sequence_bound);
     swap(has_array, other.has_array);
     array_dimensions.swap(other.array_dimensions);
-    swap(map_key, other.map_key);
-    swap(map_value, other.map_value);
+    map_key.swap(other.map_key);
+    map_value.swap(other.map_value);
     swap(map_bound, other.map_bound);
   }
 };
@@ -1136,7 +1151,7 @@ private:
         }
         XERCES_CPP_NAMESPACE::DOMElement* child_element = static_cast<XERCES_CPP_NAMESPACE::DOMElement*>(child);
         const std::string child_name = local_name(child_element);
-        TypeSpec** child_spec = 0;
+        DCPS::unique_ptr<TypeSpec>* child_spec = 0;
         if (child_name == "key") {
           child_spec = &spec.map_key;
         } else if (child_name == "value") {
@@ -1145,11 +1160,11 @@ private:
           error = "unsupported <map> child <" + child_name + "> on " + local_name(element);
           return false;
         }
-        if (*child_spec) {
+        if (child_spec->get()) {
           error = "duplicate <" + child_name + "> child on map " + local_name(element);
           return false;
         }
-        *child_spec = new TypeSpec;
+        child_spec->reset(new TypeSpec);
         if (!parse_type_spec(child_element, scope, **child_spec, error)) {
           error = "map " + child_name + ": " + error;
           return false;
