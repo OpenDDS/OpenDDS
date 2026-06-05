@@ -157,7 +157,7 @@ ValidationResult validate_dynamic_data(DDS::DynamicData_ptr data, DDS::DynamicTy
     if (base->get_descriptor(td) != DDS::RETCODE_OK) {
       return INVALID;
     }
-    if (validate_scalar(data, DISCRIMINATOR_ID, td->discriminator_type()) != VALID) {
+    if (validate_scalar(data, DISCRIMINATOR_ID, td->discriminator_type()) == INVALID) {
       return INVALID;
     }
     if (data->get_item_count() <= 1) {

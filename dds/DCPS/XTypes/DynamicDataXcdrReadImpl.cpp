@@ -1970,7 +1970,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::apply_sequence_try_construct(
   if (member_type->get_descriptor(td) != DDS::RETCODE_OK) {
     return DDS::RETCODE_ERROR;
   }
-  const CORBA::ULong bound = bound_total(td);
+  const CORBA::ULong bound = td->bound().length() ? bound_total(td) : 0;
   if (bound == 0 || value.length() <= bound) {
     return DDS::RETCODE_OK;
   }
@@ -2002,7 +2002,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::apply_string_try_construct(
   if (member_type->get_descriptor(td) != DDS::RETCODE_OK) {
     return DDS::RETCODE_ERROR;
   }
-  const CORBA::ULong bound = bound_total(td);
+  const CORBA::ULong bound = td->bound().length() ? bound_total(td) : 0;
   if (bound == 0 || ACE_OS::strlen(value) <= bound) {
     return DDS::RETCODE_OK;
   }
@@ -2036,7 +2036,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::apply_wstring_try_construct(
   if (member_type->get_descriptor(td) != DDS::RETCODE_OK) {
     return DDS::RETCODE_ERROR;
   }
-  const CORBA::ULong bound = bound_total(td);
+  const CORBA::ULong bound = td->bound().length() ? bound_total(td) : 0;
   if (bound == 0 || ACE_OS::strlen(value) <= bound) {
     return DDS::RETCODE_OK;
   }
@@ -2071,7 +2071,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::try_construct_item_count_limit(
   if (member_type->get_descriptor(td) != DDS::RETCODE_OK) {
     return DDS::RETCODE_ERROR;
   }
-  const ACE_CDR::ULong bound = bound_total(td);
+  const ACE_CDR::ULong bound = td->bound().length() ? bound_total(td) : 0;
   if (bound == 0) {
     return DDS::RETCODE_OK;
   }
