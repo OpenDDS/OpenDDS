@@ -32,6 +32,32 @@ namespace {
     return ti.kind() == TI_PLAIN_SEQUENCE_SMALL ?
       ti.seq_sdefn().bound : ti.seq_ldefn().bound;
   }
+
+  bool has_default_label(const MinimalUnionMemberSeq& members)
+  {
+    for (unsigned i = 0; i < members.length(); ++i) {
+      if ((members[i].common.member_flags & IS_DEFAULT) == IS_DEFAULT) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool has_explicit_label(const MinimalUnionMemberSeq& members, ACE_CDR::Long label)
+  {
+    for (unsigned i = 0; i < members.length(); ++i) {
+      if ((members[i].common.member_flags & IS_DEFAULT) == IS_DEFAULT) {
+        continue;
+      }
+      const UnionCaseLabelSeq& labels = members[i].common.label_seq;
+      for (unsigned j = 0; j < labels.length(); ++j) {
+        if (labels[j] == label) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
 }
 
 /**
@@ -752,6 +778,10 @@ bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
     if (labels_set_a.size() > 0) {
       return false;
     }
+    if (has_default_label(ta.union_type.member_seq) !=
+        has_default_label(tb.union_type.member_seq)) {
+      return false;
+    }
   } else { // Must have at least one common label other than the default
     // This implementation assumes that the default member has IS_DEFAULT
     // flag turned on, but the label "default" does not map into a numeric
@@ -839,6 +869,12 @@ bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
       for (unsigned k = 0; k < label_seq_b.length(); ++k) {
         for (unsigned t = 0; t < label_seq_a.length(); ++t) {
           if (label_seq_b.members[k] == label_seq_a.members[t]) {
+            if (name_hash_equal(ta.union_type.member_seq[j].detail.name_hash,
+                                tb.union_type.member_seq[i].detail.name_hash) &&
+                ta.union_type.member_seq[j].common.member_id !=
+                tb.union_type.member_seq[i].common.member_id) {
+              return false;
+            }
             const TypeIdentifier& ti_a = ta.union_type.member_seq[j].common.type_id;
             const TypeIdentifier& ti_b = tb.union_type.member_seq[i].common.type_id;
             if (!assignable(ti_a, ti_b)) {
@@ -853,29 +889,52 @@ bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
     }
   }
 
-  // If any non-default labels of T1 that select the default member of T2,
+  // If any non-default labels of T1 select the default member of T2,
   // the type of the member in T1 is assignable from the type of the default
-  // member in T2
+  // member in T2.
   for (unsigned i = 0; i < tb.union_type.member_seq.length(); ++i) {
     const UnionMemberFlag& mem_flags_b = tb.union_type.member_seq[i].common.member_flags;
     if ((mem_flags_b & IS_DEFAULT) == IS_DEFAULT) {
-      const UnionCaseLabelSeq& label_seq_b = tb.union_type.member_seq[i].common.label_seq;
       for (unsigned j = 0; j < ta.union_type.member_seq.length(); ++j) {
+        const UnionMemberFlag& mem_flags_a = ta.union_type.member_seq[j].common.member_flags;
+        if ((mem_flags_a & IS_DEFAULT) == IS_DEFAULT) {
+          continue;
+        }
         const UnionCaseLabelSeq& label_seq_a = ta.union_type.member_seq[j].common.label_seq;
-        bool matched = false;
         for (unsigned k = 0; k < label_seq_a.length(); ++k) {
-          for (unsigned t = 0; t < label_seq_b.length(); ++t) {
-            if (label_seq_a[k] == label_seq_b[t]) {
-              const TypeIdentifier& ti_a = ta.union_type.member_seq[j].common.type_id;
-              const TypeIdentifier& ti_b = tb.union_type.member_seq[i].common.type_id;
-              if (!assignable(ti_a, ti_b)) {
-                return false;
-              }
-              matched = true;
-              break;
+          if (!has_explicit_label(tb.union_type.member_seq, label_seq_a[k])) {
+            const TypeIdentifier& ti_a = ta.union_type.member_seq[j].common.type_id;
+            const TypeIdentifier& ti_b = tb.union_type.member_seq[i].common.type_id;
+            if (!assignable(ti_a, ti_b)) {
+              return false;
             }
           }
-          if (matched) break;
+        }
+      }
+      break;
+    }
+  }
+
+  // If any non-default labels of T2 select the default member of T1,
+  // the type of T1's default member is assignable from the type of the
+  // member in T2.
+  for (unsigned i = 0; i < ta.union_type.member_seq.length(); ++i) {
+    const UnionMemberFlag& mem_flags_a = ta.union_type.member_seq[i].common.member_flags;
+    if ((mem_flags_a & IS_DEFAULT) == IS_DEFAULT) {
+      for (unsigned j = 0; j < tb.union_type.member_seq.length(); ++j) {
+        const UnionMemberFlag& mem_flags_b = tb.union_type.member_seq[j].common.member_flags;
+        if ((mem_flags_b & IS_DEFAULT) == IS_DEFAULT) {
+          continue;
+        }
+        const UnionCaseLabelSeq& label_seq_b = tb.union_type.member_seq[j].common.label_seq;
+        for (unsigned k = 0; k < label_seq_b.length(); ++k) {
+          if (!has_explicit_label(ta.union_type.member_seq, label_seq_b[k])) {
+            const TypeIdentifier& ti_a = ta.union_type.member_seq[i].common.type_id;
+            const TypeIdentifier& ti_b = tb.union_type.member_seq[j].common.type_id;
+            if (!assignable(ti_a, ti_b)) {
+              return false;
+            }
+          }
         }
       }
       break;

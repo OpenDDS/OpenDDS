@@ -3078,6 +3078,45 @@ bool DynamicDataXcdrReadImpl::read_discriminator(const DDS::DynamicType_ptr disc
       }
       return true;
     }
+  case TK_BITMASK:
+    {
+      TypeKind bound_kind = TK_NONE;
+      if (bitmask_bound(disc_type, bound_kind) != DDS::RETCODE_OK) {
+        return false;
+      }
+      switch (bound_kind) {
+      case TK_UINT8:
+        {
+          ACE_CDR::UInt8 value;
+          if (!(strm_ >> ACE_InputCDR::to_uint8(value))) { return false; }
+          label = static_cast<ACE_CDR::Long>(value);
+          return true;
+        }
+      case TK_UINT16:
+        {
+          ACE_CDR::UShort value;
+          if (!(strm_ >> value)) { return false; }
+          label = static_cast<ACE_CDR::Long>(value);
+          return true;
+        }
+      case TK_UINT32:
+        {
+          ACE_CDR::ULong value;
+          if (!(strm_ >> value)) { return false; }
+          label = static_cast<ACE_CDR::Long>(value);
+          return true;
+        }
+      case TK_UINT64:
+        {
+          ACE_CDR::ULongLong value;
+          if (!(strm_ >> value)) { return false; }
+          label = static_cast<ACE_CDR::Long>(value);
+          return true;
+        }
+      default:
+        return false;
+      }
+    }
   default:
     if (DCPS::DCPS_debug_level >= 1) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::read_discriminator - Union has")
