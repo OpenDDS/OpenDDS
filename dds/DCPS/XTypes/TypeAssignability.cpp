@@ -415,7 +415,7 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
 
   // If T1 is appendable, then members with the same member_index have the
   // same member ID, the same setting for the 'optional' attribute and the
-  // T1 member type is assignable from the T2 member type.
+  // T1 member type is strongly assignable from the T2 member type.
   // If T1 is final, then they meet the same condition as for T1 being
   // appendable and in addition T1 and T2 have the same set of member IDs.
   if (IS_FINAL == a_exten &&
@@ -430,8 +430,8 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
           tb.struct_type.member_seq[i].common.member_id ||
           (ta.struct_type.member_seq[i].common.member_flags & IS_OPTIONAL) !=
           (tb.struct_type.member_seq[i].common.member_flags & IS_OPTIONAL) ||
-          !assignable(ta.struct_type.member_seq[i].common.member_type_id,
-                      tb.struct_type.member_seq[i].common.member_type_id)) {
+          !strongly_assignable(ta.struct_type.member_seq[i].common.member_type_id,
+                               tb.struct_type.member_seq[i].common.member_type_id)) {
         return false;
       }
     }
@@ -576,68 +576,46 @@ bool TypeAssignability::assignable_struct(const MinimalTypeObject& ta,
     }
   }
 
-  // For any string key member m2 in T2, the m1 member of T1 with the
-  // same member ID verifies m1.type.length >= m2.type.length
-  for (size_t i = 0; i < matched_members.size(); ++i) {
-    const CommonStructMember& member = matched_members[i].second->common;
-    MemberFlag flags = member.member_flags;
-    LBound bound_a, bound_b;
-    if ((flags & IS_KEY) == IS_KEY && get_string_bound(bound_b, member)) {
-      if (!get_string_bound(bound_a, matched_members[i].first->common)) {
-        return false;
-      }
-      if (bound_a < bound_b) {
-        return false;
+  if (!type_consistency_.ignore_string_bounds) {
+    // For any string key member m2 in T2, the m1 member of T1 with the
+    // same member ID verifies m1.type.length >= m2.type.length
+    for (size_t i = 0; i < matched_members.size(); ++i) {
+      const CommonStructMember& member = matched_members[i].second->common;
+      MemberFlag flags = member.member_flags;
+      LBound bound_a, bound_b;
+      if ((flags & IS_KEY) == IS_KEY && get_string_bound(bound_b, member)) {
+        if (!get_string_bound(bound_a, matched_members[i].first->common)) {
+          return false;
+        }
+        if (bound_a < bound_b) {
+          return false;
+        }
       }
     }
   }
 
-  // For any enumerated key member m2 in T2, the m1 member of T1 with
-  // the same member ID verifies that all literals in m2.type appear as
-  // literals in m1.type
-  for (size_t i = 0; i < matched_members.size(); ++i) {
-    const CommonStructMember& member = matched_members[i].second->common;
-    MemberFlag flags = member.member_flags;
-    if ((flags & IS_KEY) == IS_KEY &&
-        EK_MINIMAL == member.member_type_id.kind()) {
-      const MinimalTypeObject& tob = lookup_minimal(member.member_type_id);
-      if (TK_ENUM == tob.kind) {
-        if (!struct_rule_enum_key(tob, matched_members[i].first->common)) {
-          return false;
-        }
-      } else if (TK_ALIAS == tob.kind) {
-        const TypeIdentifier& base_b = get_base_type(tob);
-        if (EK_MINIMAL == base_b.kind()) {
-          const MinimalTypeObject& base_obj_b = lookup_minimal(base_b);
-          if (TK_ENUM == base_obj_b.kind &&
-              !struct_rule_enum_key(base_obj_b, matched_members[i].first->common)) {
+  if (!type_consistency_.ignore_sequence_bounds) {
+    // For any sequence or map key member m2 in T2, the m1 member of T1
+    // with the same member ID verifies m1.type.length >= m2.type.length
+    for (size_t i = 0; i < matched_members.size(); ++i) {
+      const CommonStructMember& member = matched_members[i].second->common;
+      MemberFlag flags = member.member_flags;
+      LBound bound_a, bound_b;
+      if ((flags & IS_KEY) == IS_KEY) {
+        if (get_sequence_bound(bound_b, member)) {
+          if (!get_sequence_bound(bound_a, matched_members[i].first->common)) {
             return false;
           }
-        }
-      }
-    }
-  }
-
-  // For any sequence or map key member m2 in T2, the m1 member of T1
-  // with the same member ID verifies m1.type.length >= m2.type.length
-  for (size_t i = 0; i < matched_members.size(); ++i) {
-    const CommonStructMember& member = matched_members[i].second->common;
-    MemberFlag flags = member.member_flags;
-    LBound bound_a, bound_b;
-    if ((flags & IS_KEY) == IS_KEY) {
-      if (get_sequence_bound(bound_b, member)) {
-        if (!get_sequence_bound(bound_a, matched_members[i].first->common)) {
-          return false;
-        }
-        if (bound_a < bound_b) {
-          return false;
-        }
-      } else if (get_map_bound(bound_b, member)) {
-        if (!get_map_bound(bound_a, matched_members[i].first->common)) {
-          return false;
-        }
-        if (bound_a < bound_b) {
-          return false;
+          if (bound_a < bound_b) {
+            return false;
+          }
+        } else if (get_map_bound(bound_b, member)) {
+          if (!get_map_bound(bound_a, matched_members[i].first->common)) {
+            return false;
+          }
+          if (bound_a < bound_b) {
+            return false;
+          }
         }
       }
     }

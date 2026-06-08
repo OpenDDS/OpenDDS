@@ -3471,6 +3471,7 @@ void expect_false_keys_must_in_both()
 void expect_false_string_keys()
 {
   TypeAssignability test(make_rch<TypeLookupService>());
+  test.set_ignore_string_bounds(false);
   MinimalStructType a, b;
 
   MinimalStructMember ma1(CommonStructMember(1, StructMemberFlag(),
@@ -3501,7 +3502,7 @@ void expect_false_enum_keys()
   literal_seq_b.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(1, EnumeratedLiteralFlag()),
                                                 MinimalMemberDetail("LITERAL1")));
   literal_seq_b.append(MinimalEnumeratedLiteral(CommonEnumeratedLiteral(3, EnumeratedLiteralFlag()),
-                                                MinimalMemberDetail("LITERAL3")));
+                                                MinimalMemberDetail("LITERAL4")));
   MinimalEnumeratedType enum_a(IS_APPENDABLE, MinimalEnumeratedHeader(CommonEnumeratedHeader(3)), literal_seq_a);
   MinimalEnumeratedType enum_b(IS_APPENDABLE, MinimalEnumeratedHeader(CommonEnumeratedHeader(3)), literal_seq_b);
   EquivalenceHash hash;
@@ -3521,6 +3522,7 @@ void expect_false_enum_keys()
 void expect_false_sequence_keys()
 {
   TypeAssignability test(make_rch<TypeLookupService>());
+  test.set_ignore_sequence_bounds(false);
   MinimalStructType a, b;
 
   // Sequence key members
@@ -3563,6 +3565,7 @@ void expect_false_sequence_keys()
 void expect_false_map_keys()
 {
   TypeAssignability test(make_rch<TypeLookupService>());
+  test.set_ignore_sequence_bounds(false);
   MinimalStructType a, b;
 
   // Map key members
