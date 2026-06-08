@@ -2859,6 +2859,95 @@ bool DynamicDataImpl::read_basic_in_complex_map(ValueType& value, DDS::MemberId 
   return false;
 }
 
+namespace {
+  DDS::ReturnCode_t read_dynamic_value(DDS::DynamicData_ptr data, ACE_OutputCDR::from_boolean& value)
+  {
+    return data->get_boolean_value(value.val_, MEMBER_ID_INVALID);
+  }
+
+  DDS::ReturnCode_t read_dynamic_value(DDS::DynamicData_ptr data, ACE_OutputCDR::from_octet& value)
+  {
+    return data->get_byte_value(value.val_, MEMBER_ID_INVALID);
+  }
+
+  DDS::ReturnCode_t read_dynamic_value(DDS::DynamicData_ptr data, ACE_OutputCDR::from_char& value)
+  {
+    return data->get_char8_value(value.val_, MEMBER_ID_INVALID);
+  }
+
+#ifdef DDS_HAS_WCHAR
+  DDS::ReturnCode_t read_dynamic_value(DDS::DynamicData_ptr data, ACE_OutputCDR::from_wchar& value)
+  {
+    return data->get_char16_value(value.val_, MEMBER_ID_INVALID);
+  }
+#endif
+
+  DDS::ReturnCode_t read_dynamic_value(DDS::DynamicData_ptr data, ACE_OutputCDR::from_int8& value)
+  {
+    return data->get_int8_value(value.val_, MEMBER_ID_INVALID);
+  }
+
+  DDS::ReturnCode_t read_dynamic_value(DDS::DynamicData_ptr data, ACE_OutputCDR::from_uint8& value)
+  {
+    return data->get_uint8_value(value.val_, MEMBER_ID_INVALID);
+  }
+
+  DDS::ReturnCode_t read_dynamic_value(DDS::DynamicData_ptr data, CORBA::Short& value)
+  {
+    return data->get_int16_value(value, MEMBER_ID_INVALID);
+  }
+
+  DDS::ReturnCode_t read_dynamic_value(DDS::DynamicData_ptr data, CORBA::UShort& value)
+  {
+    return data->get_uint16_value(value, MEMBER_ID_INVALID);
+  }
+
+  DDS::ReturnCode_t read_dynamic_value(DDS::DynamicData_ptr data, CORBA::Long& value)
+  {
+    return data->get_int32_value(value, MEMBER_ID_INVALID);
+  }
+
+  DDS::ReturnCode_t read_dynamic_value(DDS::DynamicData_ptr data, CORBA::ULong& value)
+  {
+    return data->get_uint32_value(value, MEMBER_ID_INVALID);
+  }
+
+  DDS::ReturnCode_t read_dynamic_value(DDS::DynamicData_ptr data, CORBA::LongLong& value)
+  {
+    return data->get_int64_value(value, MEMBER_ID_INVALID);
+  }
+
+  DDS::ReturnCode_t read_dynamic_value(DDS::DynamicData_ptr data, CORBA::ULongLong& value)
+  {
+    return data->get_uint64_value(value, MEMBER_ID_INVALID);
+  }
+
+  DDS::ReturnCode_t read_dynamic_value(DDS::DynamicData_ptr data, CORBA::Float& value)
+  {
+    return data->get_float32_value(value, MEMBER_ID_INVALID);
+  }
+
+  DDS::ReturnCode_t read_dynamic_value(DDS::DynamicData_ptr data, CORBA::Double& value)
+  {
+    return data->get_float64_value(value, MEMBER_ID_INVALID);
+  }
+
+  DDS::ReturnCode_t read_dynamic_value(DDS::DynamicData_ptr data, CORBA::LongDouble& value)
+  {
+    return data->get_float128_value(value, MEMBER_ID_INVALID);
+  }
+
+  DDS::ReturnCode_t read_dynamic_value(DDS::DynamicData_ptr data, char*& value)
+  {
+    return data->get_string_value(value, MEMBER_ID_INVALID);
+  }
+
+  DDS::ReturnCode_t read_dynamic_value(DDS::DynamicData_ptr data, CORBA::WChar*& value)
+  {
+    return data->get_wstring_value(value, MEMBER_ID_INVALID);
+  }
+}
+
 void DynamicDataImpl::set_backing_store(DDS::DynamicData_ptr backing_store)
 {
   backing_store_ = backing_store;
@@ -3245,6 +3334,14 @@ DDS::ReturnCode_t DynamicDataImpl::get_value_from_collection(ValueType& value, D
     return DDS::RETCODE_ERROR;
   }
 
+  if (type_->get_kind() == TK_MAP) {
+    DDS::DynamicData_var map_value;
+    if (get_map_value(map_value, id) != DDS::RETCODE_OK) {
+      return DDS::RETCODE_ERROR;
+    }
+    return read_dynamic_value(map_value, value);
+  }
+
   // For sequence or string, as long as there is no out-of-range access,
   // it'll read successfully from the container or the backing store.
   if (!read_basic_member(value, id)) {
@@ -3276,6 +3373,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_single_value(ValueType& value, DDS::Membe
     return get_value_from_union<ValueTypeKind>(value, id);
   case TK_SEQUENCE:
   case TK_ARRAY:
+  case TK_MAP:
     return get_value_from_collection<ValueTypeKind>(value, id);
   default:
     if (log_level >= LogLevel::Notice) {
@@ -3390,6 +3488,12 @@ DDS::ReturnCode_t DynamicDataImpl::get_char_common(CharT& value, DDS::MemberId i
     value = from_char.val_;
     return rc;
   }
+  case TK_MAP: {
+    FromCharT from_char(value);
+    const DDS::ReturnCode_t rc = get_value_from_collection<CharKind>(from_char, id);
+    value = from_char.val_;
+    return rc;
+  }
   default:
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_char_common:"
@@ -3487,6 +3591,12 @@ DDS::ReturnCode_t DynamicDataImpl::get_boolean_value(CORBA::Boolean& value, DDS:
   }
   case TK_SEQUENCE:
   case TK_ARRAY: {
+    ACE_OutputCDR::from_boolean from_bool(value);
+    const DDS::ReturnCode_t rc = get_value_from_collection<TK_BOOLEAN>(from_bool, id);
+    value = from_bool.val_;
+    return rc;
+  }
+  case TK_MAP: {
     ACE_OutputCDR::from_boolean from_bool(value);
     const DDS::ReturnCode_t rc = get_value_from_collection<TK_BOOLEAN>(from_bool, id);
     value = from_bool.val_;

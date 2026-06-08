@@ -17,6 +17,7 @@
 #  include <ace/OS_NS_string.h>
 
 #  include <algorithm>
+#  include <limits>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
@@ -759,24 +760,45 @@ namespace {
       if (lhs_count != rhs_count) {
         return false;
       }
+      typedef OPENDDS_VECTOR(DDS::MemberId) MemberIdVec;
+      MemberIdVec rhs_unmatched;
+      rhs_unmatched.reserve(rhs_count);
+      for (DDS::UInt32 i = 0; i != rhs_count; ++i) {
+        const DDS::MemberId rhs_entry = rhs->get_member_id_at_index(i);
+        if (rhs_entry == MEMBER_ID_INVALID) {
+          return false;
+        }
+        rhs_unmatched.push_back(rhs_entry);
+      }
+
       for (DDS::UInt32 i = 0; i != lhs_count; ++i) {
         const DDS::MemberId lhs_entry = lhs->get_member_id_at_index(i);
-        const DDS::MemberId rhs_entry = rhs->get_member_id_at_index(i);
         DDS::DynamicData_var lhs_key;
-        DDS::DynamicData_var rhs_key;
         DDS::DynamicData_var lhs_value;
-        DDS::DynamicData_var rhs_value;
-        if (lhs_entry == MEMBER_ID_INVALID || rhs_entry == MEMBER_ID_INVALID ||
+        if (lhs_entry == MEMBER_ID_INVALID ||
             lhs_map->get_map_key(lhs_key, lhs_entry) != DDS::RETCODE_OK ||
-            rhs_map->get_map_key(rhs_key, rhs_entry) != DDS::RETCODE_OK ||
-            lhs_map->get_map_value(lhs_value, lhs_entry) != DDS::RETCODE_OK ||
-            rhs_map->get_map_value(rhs_value, rhs_entry) != DDS::RETCODE_OK ||
-            !data_equal_i(lhs_key, rhs_key, MEMBER_ID_INVALID, MEMBER_ID_INVALID, key_type) ||
-            !data_equal_i(lhs_value, rhs_value, MEMBER_ID_INVALID, MEMBER_ID_INVALID, element_type)) {
+            lhs_map->get_map_value(lhs_value, lhs_entry) != DDS::RETCODE_OK) {
+          return false;
+        }
+
+        bool matched = false;
+        for (MemberIdVec::iterator it = rhs_unmatched.begin(); it != rhs_unmatched.end(); ++it) {
+          DDS::DynamicData_var rhs_key;
+          DDS::DynamicData_var rhs_value;
+          if (rhs_map->get_map_key(rhs_key, *it) == DDS::RETCODE_OK &&
+              rhs_map->get_map_value(rhs_value, *it) == DDS::RETCODE_OK &&
+              data_equal_i(lhs_key, rhs_key, MEMBER_ID_INVALID, MEMBER_ID_INVALID, key_type) &&
+              data_equal_i(lhs_value, rhs_value, MEMBER_ID_INVALID, MEMBER_ID_INVALID, element_type)) {
+            rhs_unmatched.erase(it);
+            matched = true;
+            break;
+          }
+        }
+        if (!matched) {
           return false;
         }
       }
-      return true;
+      return rhs_unmatched.empty();
     }
     case TK_ARRAY:
     case TK_SEQUENCE: {
@@ -1266,10 +1288,19 @@ DDS::ReturnCode_t set_uint_value(
 {
   switch (kind) {
   case TK_UINT8:
+    if (value > std::numeric_limits<DDS::UInt8>::max()) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
     return dest->set_uint8_value(id, static_cast<DDS::UInt8>(value));
   case TK_UINT16:
+    if (value > std::numeric_limits<DDS::UInt16>::max()) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
     return dest->set_uint16_value(id, static_cast<DDS::UInt16>(value));
   case TK_UINT32:
+    if (value > std::numeric_limits<DDS::UInt32>::max()) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
     return dest->set_uint32_value(id, static_cast<DDS::UInt32>(value));
   case TK_UINT64:
     return dest->set_uint64_value(id, value);
@@ -1321,10 +1352,22 @@ DDS::ReturnCode_t set_int_value(
 {
   switch (kind) {
   case TK_INT8:
+    if (value < std::numeric_limits<DDS::Int8>::min() ||
+        value > std::numeric_limits<DDS::Int8>::max()) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
     return dest->set_int8_value(id, static_cast<DDS::Int8>(value));
   case TK_INT16:
+    if (value < std::numeric_limits<DDS::Int16>::min() ||
+        value > std::numeric_limits<DDS::Int16>::max()) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
     return dest->set_int16_value(id, static_cast<DDS::Int16>(value));
   case TK_INT32:
+    if (value < std::numeric_limits<DDS::Int32>::min() ||
+        value > std::numeric_limits<DDS::Int32>::max()) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
     return dest->set_int32_value(id, static_cast<DDS::Int32>(value));
   case TK_INT64:
     return dest->set_int64_value(id, value);

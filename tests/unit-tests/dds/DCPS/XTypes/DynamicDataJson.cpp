@@ -288,6 +288,68 @@ TEST(dds_DCPS_XTypes_DynamicDataJson, MapJsonRejectsBound)
             OpenDDS::XTypes::dynamic_data_from_json(data, json));
 }
 
+TEST(dds_DCPS_XTypes_DynamicDataJson, MapEqualsIgnoresEntryOrder)
+{
+  DDS::DynamicData_var lhs = create_data("XmlTypeProviderTest::MapSample");
+  DDS::DynamicData_var rhs = create_data("XmlTypeProviderTest::MapSample");
+  ASSERT_TRUE(lhs);
+  ASSERT_TRUE(rhs);
+
+  ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_from_json(lhs,
+    "{\"lookup\":[{\"key\":7,\"value\":70},{\"key\":9,\"value\":90}]}"));
+  ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_from_json(rhs,
+    "{\"lookup\":[{\"key\":9,\"value\":90},{\"key\":7,\"value\":70}]}"));
+
+  EXPECT_TRUE(OpenDDS::XTypes::dynamic_data_equal(lhs, rhs));
+  EXPECT_TRUE(lhs->equals(rhs));
+  EXPECT_TRUE(rhs->equals(lhs));
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataJson, MapGetMemberIdByNameUsesKey)
+{
+  DDS::DynamicType_var type = load_type("XmlTypeProviderTest::MapSample");
+  DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(type);
+  ASSERT_TRUE(data);
+
+  ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_from_json(data,
+    "{\"lookup\":[{\"key\":7,\"value\":70},{\"key\":9,\"value\":90}]}"));
+
+  DDS::MemberDescriptor_var lookup = member_descriptor(type, "lookup");
+  DDS::DynamicData_var lookup_data;
+  ASSERT_EQ(DDS::RETCODE_OK, data->get_complex_value(lookup_data, lookup->id()));
+
+  const DDS::MemberId id = lookup_data->get_member_id_by_name("7");
+  ASSERT_NE(OpenDDS::XTypes::MEMBER_ID_INVALID, id);
+  DDS::UInt32 value = 0;
+  ASSERT_EQ(DDS::RETCODE_OK, lookup_data->get_uint32_value(value, id));
+  EXPECT_EQ(70u, value);
+  EXPECT_EQ(OpenDDS::XTypes::MEMBER_ID_INVALID, lookup_data->get_member_id_by_name("8"));
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataJson, RejectsNumericRangeOverflow)
+{
+  OpenDDS::DCPS::LogRestore log_restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
+
+  static const char* const BAD_JSON[] = {
+    "{\"byte_value\":256}",
+    "{\"int8_value\":128}",
+    "{\"int8_value\":-129}",
+    "{\"uint8_value\":256}",
+    "{\"int16_value\":32768}",
+    "{\"int16_value\":-32769}",
+    "{\"uint16_value\":65536}",
+    "{\"kind_value\":2147483648}"
+  };
+
+  for (size_t i = 0; i != sizeof(BAD_JSON) / sizeof(BAD_JSON[0]); ++i) {
+    DDS::DynamicData_var data = create_data("XmlTypeProviderTest::Numeric");
+    ASSERT_TRUE(data);
+    EXPECT_EQ(DDS::RETCODE_BAD_PARAMETER,
+              OpenDDS::XTypes::dynamic_data_from_json(data, BAD_JSON[i])) << BAD_JSON[i];
+  }
+}
+
 TEST(dds_DCPS_XTypes_DynamicDataJson, MapSerializedBackingStore)
 {
   DDS::DynamicType_var type = load_type("XmlTypeProviderTest::MapSample");

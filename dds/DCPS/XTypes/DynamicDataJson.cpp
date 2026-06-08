@@ -626,7 +626,7 @@ DDS::ReturnCode_t populate_member(
     return data->set_boolean_value(id, value.GetBool());
   case TK_BYTE: {
     DDS::UInt64 v = 0;
-    if (!json_to_uint64(value, v)) {
+    if (!json_to_uint64(value, v) || v > std::numeric_limits<CORBA::Octet>::max()) {
       return DDS::RETCODE_BAD_PARAMETER;
     }
     return data->set_byte_value(id, static_cast<CORBA::Octet>(v));
@@ -702,7 +702,9 @@ DDS::ReturnCode_t populate_member(
       return set_enum_value(base, data, id, value.GetString());
     } else {
       DDS::Int64 v = 0;
-      if (!json_to_int64(value, v)) {
+      if (!json_to_int64(value, v) ||
+          v < std::numeric_limits<DDS::Int32>::min() ||
+          v > std::numeric_limits<DDS::Int32>::max()) {
         return DDS::RETCODE_BAD_PARAMETER;
       }
       return set_enum_value(base, data, id, static_cast<DDS::Int32>(v));

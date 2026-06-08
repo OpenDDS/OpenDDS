@@ -15,6 +15,8 @@
 #  include <dds/DCPS/ValueHelper.h>
 #  include <dds/DCPS/DCPS_Utils.h>
 
+#  include <sstream>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -42,6 +44,120 @@ namespace {
         "Failed to get type descriptor for %C\n", name.in()));
     }
     return td;
+  }
+
+  bool map_key_to_string(DCPS::String& value, DDS::DynamicData_ptr key, DDS::DynamicType_ptr key_type)
+  {
+    DDS::DynamicType_var base = get_base_type(key_type);
+    if (!key || !base) {
+      return false;
+    }
+
+    std::ostringstream oss;
+    const DDS::MemberId id = MEMBER_ID_INVALID;
+    switch (base->get_kind()) {
+    case TK_BOOLEAN: {
+      CORBA::Boolean v = false;
+      if (key->get_boolean_value(v, id) != DDS::RETCODE_OK) {
+        return false;
+      }
+      value = v ? "true" : "false";
+      return true;
+    }
+    case TK_BYTE: {
+      CORBA::Octet v = 0;
+      if (key->get_byte_value(v, id) != DDS::RETCODE_OK) {
+        return false;
+      }
+      oss << static_cast<unsigned int>(v);
+      break;
+    }
+    case TK_INT8: {
+      DDS::Int8 v = 0;
+      if (key->get_int8_value(v, id) != DDS::RETCODE_OK) {
+        return false;
+      }
+      oss << static_cast<int>(v);
+      break;
+    }
+    case TK_UINT8: {
+      DDS::UInt8 v = 0;
+      if (key->get_uint8_value(v, id) != DDS::RETCODE_OK) {
+        return false;
+      }
+      oss << static_cast<unsigned int>(v);
+      break;
+    }
+    case TK_INT16: {
+      DDS::Int16 v = 0;
+      if (key->get_int16_value(v, id) != DDS::RETCODE_OK) {
+        return false;
+      }
+      oss << v;
+      break;
+    }
+    case TK_UINT16: {
+      DDS::UInt16 v = 0;
+      if (key->get_uint16_value(v, id) != DDS::RETCODE_OK) {
+        return false;
+      }
+      oss << v;
+      break;
+    }
+    case TK_INT32: {
+      DDS::Int32 v = 0;
+      if (key->get_int32_value(v, id) != DDS::RETCODE_OK) {
+        return false;
+      }
+      oss << v;
+      break;
+    }
+    case TK_UINT32: {
+      DDS::UInt32 v = 0;
+      if (key->get_uint32_value(v, id) != DDS::RETCODE_OK) {
+        return false;
+      }
+      oss << v;
+      break;
+    }
+    case TK_INT64: {
+      DDS::Int64 v = 0;
+      if (key->get_int64_value(v, id) != DDS::RETCODE_OK) {
+        return false;
+      }
+      oss << v;
+      break;
+    }
+    case TK_UINT64: {
+      DDS::UInt64 v = 0;
+      if (key->get_uint64_value(v, id) != DDS::RETCODE_OK) {
+        return false;
+      }
+      oss << v;
+      break;
+    }
+    case TK_CHAR8: {
+      CORBA::Char v = 0;
+      if (key->get_char8_value(v, id) != DDS::RETCODE_OK) {
+        return false;
+      }
+      value.assign(&v, 1);
+      return true;
+    }
+    case TK_STRING8: {
+      CORBA::String_var v;
+      if (key->get_string_value(v, id) != DDS::RETCODE_OK) {
+        return false;
+      }
+      value = v.in();
+      return true;
+    }
+    default:
+      return false;
+    }
+
+    value = oss.str().c_str();
+    return true;
   }
 }
 
@@ -79,6 +195,10 @@ DDS::ReturnCode_t DynamicDataBase::set_descriptor(
 
 DDS::MemberId DynamicDataBase::get_member_id_by_name(const char* name)
 {
+  if (!name) {
+    return MEMBER_ID_INVALID;
+  }
+
   const TypeKind tk = type_->get_kind();
   switch (tk) {
   case TK_BOOLEAN:
@@ -104,11 +224,24 @@ DDS::MemberId DynamicDataBase::get_member_id_by_name(const char* name)
   case TK_ARRAY:
     // Elements of string, sequence, array must be accessed by index.
     return MEMBER_ID_INVALID;
-  case TK_MAP:
-    // Values in map can be accessed by strings which is converted from map keys.
-    // But need to find out how this conversion works. In the meantime, only allow
-    // accessing map using index.
+  case TK_MAP: {
+    DDS::DynamicType_var key_type = get_base_type(type_desc_->key_element_type());
+    if (!key_type) {
+      return MEMBER_ID_INVALID;
+    }
+
+    const DDS::UInt32 count = get_item_count();
+    for (DDS::UInt32 i = 0; i != count; ++i) {
+      const DDS::MemberId id = get_member_id_at_index(i);
+      DDS::DynamicData_var key;
+      DCPS::String key_name;
+      if (id != MEMBER_ID_INVALID && get_map_key(key, id) == DDS::RETCODE_OK &&
+          map_key_to_string(key_name, key, key_type) && key_name == name) {
+        return id;
+      }
+    }
     return MEMBER_ID_INVALID;
+  }
   case TK_BITMASK:
   case TK_STRUCTURE:
   case TK_UNION: {

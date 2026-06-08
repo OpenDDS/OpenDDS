@@ -19,6 +19,15 @@
         <member name="values" type="uint16" id="14" arrayDimensions="3"/>
       </struct>
 
+      <struct name="Numeric" extensibility="appendable">
+        <member name="byte_value" type="byte"/>
+        <member name="int8_value" type="int8"/>
+        <member name="uint8_value" type="uint8"/>
+        <member name="int16_value" type="int16"/>
+        <member name="uint16_value" type="uint16"/>
+        <member name="kind_value" type="nonBasic" nonBasicTypeName="Kind"/>
+      </struct>
+
       <struct name="MapSample" extensibility="appendable">
         <member name="lookup" type="map" id="20" mapMaxLength="4">
           <key type="uint32"/>
