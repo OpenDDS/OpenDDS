@@ -1002,8 +1002,8 @@ bool TypeAssignability::assignable_sequence(const MinimalTypeObject& ta,
                         tb.sequence_type.header.common.bound)) {
     return false;
   }
-  return assignable(ta.sequence_type.element.common.type,
-                    tb.sequence_type.element.common.type);
+  return strongly_assignable(ta.sequence_type.element.common.type,
+                             tb.sequence_type.element.common.type);
 }
 
 /**
@@ -1018,15 +1018,15 @@ bool TypeAssignability::assignable_sequence(const MinimalTypeObject& ta,
         !bound_assignable(ta.sequence_type.header.common.bound, tb.seq_sdefn().bound)) {
       return false;
     }
-    return assignable(ta.sequence_type.element.common.type,
-                      *tb.seq_sdefn().element_identifier);
+    return strongly_assignable(ta.sequence_type.element.common.type,
+                               *tb.seq_sdefn().element_identifier);
   } else if (TI_PLAIN_SEQUENCE_LARGE == tb.kind()) {
     if (!type_consistency_.ignore_sequence_bounds &&
         !bound_assignable(ta.sequence_type.header.common.bound, tb.seq_ldefn().bound)) {
       return false;
     }
-    return assignable(ta.sequence_type.element.common.type,
-                      *tb.seq_ldefn().element_identifier);
+    return strongly_assignable(ta.sequence_type.element.common.type,
+                               *tb.seq_ldefn().element_identifier);
   } else if (EK_MINIMAL == tb.kind()) {
     const MinimalTypeObject& tob = lookup_minimal(tb);
     if (TK_SEQUENCE == tob.kind) {
@@ -1066,8 +1066,8 @@ bool TypeAssignability::assignable_array(const MinimalTypeObject& ta,
       return false;
     }
   }
-  return assignable(ta.array_type.element.common.type,
-                    tb.array_type.element.common.type);
+  return strongly_assignable(ta.array_type.element.common.type,
+                             tb.array_type.element.common.type);
 }
 
 /**
@@ -1090,8 +1090,8 @@ bool TypeAssignability::assignable_array(const MinimalTypeObject& ta,
       }
     }
 
-    return assignable(ta.array_type.element.common.type,
-                      *tb.array_sdefn().element_identifier);
+    return strongly_assignable(ta.array_type.element.common.type,
+                               *tb.array_sdefn().element_identifier);
   } else if (TI_PLAIN_ARRAY_LARGE == tb.kind()) {
     const LBoundSeq& bounds_b = tb.array_ldefn().array_bound_seq;
     if (bounds_a.members.size() != bounds_b.members.size()) {
@@ -1103,8 +1103,8 @@ bool TypeAssignability::assignable_array(const MinimalTypeObject& ta,
         return false;
       }
     }
-    return assignable(ta.array_type.element.common.type,
-                      *tb.array_ldefn().element_identifier);
+    return strongly_assignable(ta.array_type.element.common.type,
+                               *tb.array_ldefn().element_identifier);
   } else if (EK_MINIMAL == tb.kind()) {
     const MinimalTypeObject& tob = lookup_minimal(tb);
     if (TK_ARRAY == tob.kind) {
@@ -1446,11 +1446,11 @@ bool TypeAssignability::assignable_plain_sequence(const TypeIdentifier& ta,
       return false;
     }
     if (TI_PLAIN_SEQUENCE_SMALL == ta.kind()) {
-      return assignable(*ta.seq_sdefn().element_identifier,
-                        *tb.seq_sdefn().element_identifier);
+      return strongly_assignable(*ta.seq_sdefn().element_identifier,
+                                 *tb.seq_sdefn().element_identifier);
     } else { // TI_PLAIN_SEQUENCE_LARGE
-      return assignable(*ta.seq_ldefn().element_identifier,
-                        *tb.seq_sdefn().element_identifier);
+      return strongly_assignable(*ta.seq_ldefn().element_identifier,
+                                 *tb.seq_sdefn().element_identifier);
     }
   } else if (TI_PLAIN_SEQUENCE_LARGE == tb.kind()) {
     if (!type_consistency_.ignore_sequence_bounds &&
@@ -1458,11 +1458,11 @@ bool TypeAssignability::assignable_plain_sequence(const TypeIdentifier& ta,
       return false;
     }
     if (TI_PLAIN_SEQUENCE_SMALL == ta.kind()) {
-      return assignable(*ta.seq_sdefn().element_identifier,
-                        *tb.seq_ldefn().element_identifier);
+      return strongly_assignable(*ta.seq_sdefn().element_identifier,
+                                 *tb.seq_ldefn().element_identifier);
     } else { // TI_PLAIN_SEQUENCE_LARGE
-      return assignable(*ta.seq_ldefn().element_identifier,
-                        *tb.seq_ldefn().element_identifier);
+      return strongly_assignable(*ta.seq_ldefn().element_identifier,
+                                 *tb.seq_ldefn().element_identifier);
     }
   } else if (EK_MINIMAL == tb.kind()) {
     const MinimalTypeObject& tob = lookup_minimal(tb);
@@ -1496,11 +1496,11 @@ bool TypeAssignability::assignable_plain_sequence(const TypeIdentifier& ta,
       return false;
     }
     if (TI_PLAIN_SEQUENCE_SMALL == ta.kind()) {
-      return assignable(*ta.seq_sdefn().element_identifier,
-                        tb.sequence_type.element.common.type);
+      return strongly_assignable(*ta.seq_sdefn().element_identifier,
+                                 tb.sequence_type.element.common.type);
     } else { // TI_PLAIN_SEQUENCE_LARGE
-      return assignable(*ta.seq_ldefn().element_identifier,
-                        tb.sequence_type.element.common.type);
+      return strongly_assignable(*ta.seq_ldefn().element_identifier,
+                                 tb.sequence_type.element.common.type);
     }
   }
 
@@ -1528,8 +1528,8 @@ bool TypeAssignability::assignable_plain_array(const TypeIdentifier& ta,
         }
       }
 
-      return assignable(*ta.array_sdefn().element_identifier,
-                        *tb.array_sdefn().element_identifier);
+      return strongly_assignable(*ta.array_sdefn().element_identifier,
+                                 *tb.array_sdefn().element_identifier);
     } else { // TI_PLAIN_ARRAY_LARGE
       const Sequence<LBound>& bounds_a = ta.array_ldefn().array_bound_seq;
       if (bounds_a.members.size() != bounds_b.members.size()) {
@@ -1542,8 +1542,8 @@ bool TypeAssignability::assignable_plain_array(const TypeIdentifier& ta,
         }
       }
 
-      return assignable(*ta.array_ldefn().element_identifier,
-                        *tb.array_sdefn().element_identifier);
+      return strongly_assignable(*ta.array_ldefn().element_identifier,
+                                 *tb.array_sdefn().element_identifier);
     }
   } else if (TI_PLAIN_ARRAY_LARGE == tb.kind()) {
     const Sequence<LBound>& bounds_b = tb.array_ldefn().array_bound_seq;
@@ -1559,8 +1559,8 @@ bool TypeAssignability::assignable_plain_array(const TypeIdentifier& ta,
         }
       }
 
-      return assignable(*ta.array_sdefn().element_identifier,
-                        *tb.array_ldefn().element_identifier);
+      return strongly_assignable(*ta.array_sdefn().element_identifier,
+                                 *tb.array_ldefn().element_identifier);
     } else { // TI_PLAIN_ARRAY_LARGE
       const Sequence<LBound>& bounds_a = ta.array_ldefn().array_bound_seq;
       if (bounds_a.members.size() != bounds_b.members.size()) {
@@ -1573,8 +1573,8 @@ bool TypeAssignability::assignable_plain_array(const TypeIdentifier& ta,
         }
       }
 
-      return assignable(*ta.array_ldefn().element_identifier,
-                        *tb.array_ldefn().element_identifier);
+      return strongly_assignable(*ta.array_ldefn().element_identifier,
+                                 *tb.array_ldefn().element_identifier);
     }
   } else if (EK_MINIMAL == tb.kind()) {
     const MinimalTypeObject& tob = lookup_minimal(tb);
@@ -1614,8 +1614,8 @@ bool TypeAssignability::assignable_plain_array(const TypeIdentifier& ta,
         }
       }
 
-      return assignable(*ta.array_sdefn().element_identifier,
-                        tb.array_type.element.common.type);
+      return strongly_assignable(*ta.array_sdefn().element_identifier,
+                                 tb.array_type.element.common.type);
     } else { // TI_PLAIN_ARRAY_LARGE
       const Sequence<LBound>& bounds_a = ta.array_ldefn().array_bound_seq;
       if (bounds_a.members.size() != bounds_b.members.size()) {
@@ -1628,8 +1628,8 @@ bool TypeAssignability::assignable_plain_array(const TypeIdentifier& ta,
         }
       }
 
-      return assignable(*ta.array_ldefn().element_identifier,
-                        tb.array_type.element.common.type);
+      return strongly_assignable(*ta.array_ldefn().element_identifier,
+                                 tb.array_type.element.common.type);
     }
   }
 

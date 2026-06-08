@@ -626,9 +626,12 @@ bool DynamicDataXcdrReadImpl::get_union_item_count()
   }
 
 #if OPENDDS_CONFIG_IDL_MAP
-  DDS::MemberDescriptor_var selected_md = get_union_selected_member(label, true);
+  DDS::MemberDescriptor_var selected_md = get_union_selected_member(label, false);
   if (!selected_md && apply_union_discriminator_try_construct(label)) {
     selected_md = get_union_selected_member(label, false);
+  }
+  if (!selected_md) {
+    selected_md = get_union_selected_member(label, true);
   }
   item_count_ = selected_md ? 2 : 1;
   return true;
@@ -907,9 +910,12 @@ DDS::MemberDescriptor* DynamicDataXcdrReadImpl::get_union_selected_member()
     return 0;
   }
 
-  DDS::MemberDescriptor_var selected_md = get_union_selected_member(label, true);
+  DDS::MemberDescriptor_var selected_md = get_union_selected_member(label, false);
   if (!selected_md && apply_union_discriminator_try_construct(label)) {
     selected_md = get_union_selected_member(label, false);
+  }
+  if (!selected_md) {
+    selected_md = get_union_selected_member(label, true);
   }
   return selected_md._retn();
 }
@@ -3160,9 +3166,12 @@ bool DynamicDataXcdrReadImpl::skip_all()
       }
 
 #if OPENDDS_CONFIG_IDL_MAP
-      DDS::MemberDescriptor_var selected_md = get_union_selected_member(label, true);
+      DDS::MemberDescriptor_var selected_md = get_union_selected_member(label, false);
       if (!selected_md && apply_union_discriminator_try_construct(label)) {
         selected_md = get_union_selected_member(label, false);
+      }
+      if (!selected_md) {
+        selected_md = get_union_selected_member(label, true);
       }
       if (selected_md) {
         const DDS::DynamicType_ptr selected_dt = selected_md->type();
