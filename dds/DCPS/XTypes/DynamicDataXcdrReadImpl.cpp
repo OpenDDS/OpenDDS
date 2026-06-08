@@ -626,38 +626,11 @@ bool DynamicDataXcdrReadImpl::get_union_item_count()
   }
 
 #if OPENDDS_CONFIG_IDL_MAP
-  DDS::DynamicTypeMembersById members;
-  rc = type_->get_all_members(members);
-  if (rc != DDS::RETCODE_OK) {
-    if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count:"
-                 " get_all_members returned %C\n", retcode_to_string(rc)));
-    }
-    return false;
+  DDS::MemberDescriptor_var selected_md = get_union_selected_member(label, true);
+  if (!selected_md && apply_union_discriminator_try_construct(label)) {
+    selected_md = get_union_selected_member(label, false);
   }
-  for (DDS::DynamicTypeMembersById::const_iterator it = members.begin(); it != members.end(); ++it) {
-    DDS::MemberDescriptor_var md;
-    rc = it->second->get_descriptor(md);
-    if (rc != DDS::RETCODE_OK) {
-      if (log_level >= LogLevel::Warning) {
-        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count:"
-                   " get_descriptor returned %C\n", retcode_to_string(rc)));
-      }
-      return false;
-    }
-    if (md->is_default_label()) {
-      item_count_ = 2;
-      return true;
-    }
-    const DDS::UnionCaseLabelSeq& labels = md->label();
-    for (ACE_CDR::ULong i = 0; i < labels.length(); ++i) {
-      if (label == labels[i]) {
-        item_count_ = 2;
-        return true;
-      }
-    }
-  }
-  item_count_ = 1;
+  item_count_ = selected_md ? 2 : 1;
   return true;
 #else
   return false;
@@ -934,6 +907,15 @@ DDS::MemberDescriptor* DynamicDataXcdrReadImpl::get_union_selected_member()
     return 0;
   }
 
+  DDS::MemberDescriptor_var selected_md = get_union_selected_member(label, true);
+  if (!selected_md && apply_union_discriminator_try_construct(label)) {
+    selected_md = get_union_selected_member(label, false);
+  }
+  return selected_md._retn();
+}
+
+DDS::MemberDescriptor* DynamicDataXcdrReadImpl::get_union_selected_member(ACE_CDR::Long label, bool allow_default)
+{
 #if OPENDDS_CONFIG_IDL_MAP
   DDS::DynamicTypeMembersById members;
   if (type_->get_all_members(members) != DDS::RETCODE_OK) {
@@ -960,7 +942,7 @@ DDS::MemberDescriptor* DynamicDataXcdrReadImpl::get_union_selected_member()
     }
   }
 
-  if (has_default) {
+  if (has_default && allow_default) {
     return default_member._retn();
   }
 #endif
@@ -3126,6 +3108,20 @@ bool DynamicDataXcdrReadImpl::read_discriminator(const DDS::DynamicType_ptr disc
   }
 }
 
+bool DynamicDataXcdrReadImpl::apply_union_discriminator_try_construct(ACE_CDR::Long& label)
+{
+  DDS::DynamicTypeMember_var disc_dtm;
+  if (type_->get_member(disc_dtm, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DDS::MemberDescriptor_var disc_md;
+  if (disc_dtm->get_descriptor(disc_md) != DDS::RETCODE_OK) {
+    return false;
+  }
+
+  return apply_value_try_construct(label, disc_md) == DDS::RETCODE_OK;
+}
+
 bool DynamicDataXcdrReadImpl::skip_all()
 {
   const TypeKind tk = type_->get_kind();
@@ -3164,36 +3160,13 @@ bool DynamicDataXcdrReadImpl::skip_all()
       }
 
 #if OPENDDS_CONFIG_IDL_MAP
-      DDS::DynamicTypeMembersById members;
-      if (type_->get_all_members(members) != DDS::RETCODE_OK) {
-        return false;
+      DDS::MemberDescriptor_var selected_md = get_union_selected_member(label, true);
+      if (!selected_md && apply_union_discriminator_try_construct(label)) {
+        selected_md = get_union_selected_member(label, false);
       }
-
-      bool has_default = false;
-      DDS::MemberDescriptor_var default_member;
-      for (DDS::DynamicTypeMembersById::const_iterator it = members.begin(); it != members.end(); ++it) {
-        DDS::MemberDescriptor_var md;
-        if (it->second->get_descriptor(md) != DDS::RETCODE_OK) {
-          return false;
-        }
-        const DDS::UnionCaseLabelSeq& labels = md->label();
-        for (ACE_CDR::ULong i = 0; i < labels.length(); ++i) {
-          if (label == labels[i]) {
-            const DDS::DynamicType_ptr selected_member = md->type();
-            bool good = selected_member && skip_member(selected_member);
-            return good;
-          }
-        }
-
-        if (md->is_default_label()) {
-          has_default = true;
-          default_member = md;
-        }
-      }
-
-      if (has_default) {
-        const DDS::DynamicType_ptr default_dt = default_member->type();
-        bool good = default_dt && skip_member(default_dt);
+      if (selected_md) {
+        const DDS::DynamicType_ptr selected_dt = selected_md->type();
+        bool good = selected_dt && skip_member(selected_dt);
         return good;
       }
       if (DCPS::DCPS_debug_level >= 1) {

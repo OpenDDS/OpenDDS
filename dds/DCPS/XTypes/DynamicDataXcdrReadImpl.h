@@ -455,6 +455,7 @@ private:
 
   /// Return the member descriptor for the selected member from a union data or null.
   DDS::MemberDescriptor* get_union_selected_member();
+  DDS::MemberDescriptor* get_union_selected_member(ACE_CDR::Long label, bool allow_default);
 
   DDS::MemberDescriptor* get_from_union_common_checks(MemberId id, const char* func_name);
 
@@ -526,6 +527,7 @@ private:
   bool skip(const char* func_name, const char* description, size_t n, int size = 1);
 
   bool read_discriminator(const DDS::DynamicType_ptr disc_type, DDS::ExtensibilityKind union_ek, ACE_CDR::Long& label);
+  bool apply_union_discriminator_try_construct(ACE_CDR::Long& label);
 
   /// Skip a member of a final or appendable struct at the given index.
   ///
