@@ -81,9 +81,7 @@ public:
     if (nbytes > chunk_size_)
       return 0;
 
-    // addr() call is really not absolutely necessary because of the way
-    // ACE_Cached_Mem_Pool_Node's internal structure arranged.
-    void* rtn = free_list_.remove()->addr();
+    void* rtn = free_list_.remove();
 
     if (0 == rtn) {
       rtn = ACE_Allocator::instance()->malloc(chunk_size_);
