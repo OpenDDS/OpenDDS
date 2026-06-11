@@ -263,12 +263,8 @@ bool ensure_xerces(std::string& error)
   return initializer.ensure(error);
 }
 
-// The TypeLookupService below must be process-wide (not per-call) because
-// type_identifier_to_dynamic caches DynamicType objects in its gt_map_ by
-// TypeIdentifier, and those cached objects are the reference-counting backbone
-// of the returned DynamicType tree.  If the TLS were destroyed before all
-// DynamicType consumers were done, cascading _var destructions inside gt_map_
-// teardown can free member types that are still reachable from parent types.
+// The TypeLookupService below is process-wide so XML-loaded types can reuse
+// the TypeObject dependency cache across calls.
 TypeLookupService& xml_type_lookup_service()
 {
   static TypeLookupService service;
@@ -522,10 +518,12 @@ public:
     DDS::DynamicType_var loaded;
     {
       ACE_Guard<ACE_Thread_Mutex> guard(xml_type_lookup_service_mutex());
+      const DCPS::GUID_t xml_type_guid = DCPS::GUID_t();
       TypeLookupService& tls = xml_type_lookup_service();
       tls.add(minimal_type_map_.begin(), minimal_type_map_.end());
       tls.add(complete_type_map_.begin(), complete_type_map_.end());
-      loaded = tls.complete_to_dynamic(root->second.complete, DCPS::GUID_t());
+      loaded = tls.complete_to_dynamic(root->second.complete, xml_type_guid);
+      tls.release_guid_from_dynamic_map(xml_type_guid);
     }
     if (!loaded) {
       report("CompleteTypeObject to DynamicType conversion failed", requested);

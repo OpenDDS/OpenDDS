@@ -1182,10 +1182,23 @@ bool TypeLookupService::extensibility(TypeFlag extensibility_mask, const TypeIde
 void TypeLookupService::remove_guid_from_dynamic_map(const DCPS::GUID_t& guid)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  remove_guid_from_dynamic_map_i(guid, true);
+}
+
+void TypeLookupService::release_guid_from_dynamic_map(const DCPS::GUID_t& guid)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  remove_guid_from_dynamic_map_i(guid, false);
+}
+
+void TypeLookupService::remove_guid_from_dynamic_map_i(const DCPS::GUID_t& guid, bool clear)
+{
   const GuidTypeMap::iterator g_found = gt_map_.find(guid);
   if (g_found != gt_map_.end()) {
-    for (DynamicTypeMap::const_iterator pos2 = g_found->second.begin(), limit2 = g_found->second.end(); pos2 != limit2; ++pos2) {
-      pos2->second->clear();
+    if (clear) {
+      for (DynamicTypeMap::const_iterator pos2 = g_found->second.begin(), limit2 = g_found->second.end(); pos2 != limit2; ++pos2) {
+        pos2->second->clear();
+      }
     }
     gt_map_.erase(g_found);
     if (DCPS::DCPS_debug_level >= 4) {

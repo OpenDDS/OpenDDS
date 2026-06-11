@@ -1232,15 +1232,17 @@ bool DynamicDataXcdrReadImpl::skip_to_map_entry(MemberId id, bool skip_key, size
 bool DynamicDataXcdrReadImpl::encoded_member_size(DDS::DynamicType_ptr type, size_t max_size, size_t& size)
 {
   size = 0;
-  if (!max_size) {
+  if (!max_size || max_size > strm_.length()) {
     return false;
   }
   DynamicDataXcdrReadImpl probe(strm_, type, nested(extent_), max_size);
   const size_t start = probe.strm_.rpos();
-  if (!probe.skip_member(type)) {
+  const bool skipped = probe.skip_member(type);
+  const size_t consumed = skipped ? probe.strm_.rpos() - start : 0;
+  probe.release_chains();
+  if (!skipped) {
     return false;
   }
-  const size_t consumed = probe.strm_.rpos() - start;
   if (!consumed || consumed > max_size) {
     return false;
   }
