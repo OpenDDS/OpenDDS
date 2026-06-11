@@ -205,7 +205,8 @@ public:
                                const StringSet& to_partitions,
                                const GuidSet& to_guids,
                                const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
-                               const OpenDDS::DCPS::MonotonicTimePoint& now);
+                               const OpenDDS::DCPS::MonotonicTimePoint& now,
+                               bool async_discovery);
 
 private:
   const GuidPartitionTable& guid_partition_table_;

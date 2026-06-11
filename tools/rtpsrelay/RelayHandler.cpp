@@ -690,11 +690,34 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
   populate_address_set(address_set, to_partitions);
   const auto type = MessageType::Rtps;
 
+  // Also forward to the peer relays from which some participants had initiated async discovery with this source.
+  // These addresses may have been included already, but this ensures they are always included.
+  if (!async_discovery) {
+    const auto& horizontal_name = horizontal_handler_->name();
+    const auto iter = proxy.find(src_guid);
+    if (iter != proxy.end()) {
+      if (horizontal_name == HSPDP) {
+        address_set.insert(iter->second.pending_spdp_peer_relays.begin(), iter->second.pending_spdp_peer_relays.end());
+      } else if (horizontal_name == HSEDP) {
+        address_set.insert(iter->second.pending_sedp_peer_relays.begin(), iter->second.pending_sedp_peer_relays.end());
+      } else if (horizontal_name == HDATA) {
+        address_set.insert(iter->second.pending_data_peer_relays.begin(), iter->second.pending_data_peer_relays.end());
+      }
+    }
+  }
+
   CORBA::ULong sent = 0;
   for (const auto& addr : address_set) {
     if (addr != horizontal_address_) {
-      horizontal_handler_->enqueue_or_send_message(addr, to_partitions, to_guids, msg, now);
+      horizontal_handler_->enqueue_or_send_message(addr, to_partitions, to_guids, msg, now, async_discovery);
       ++sent;
+
+      // In case we are using async discovery cache to forward the source message,
+      // mark it as a pending recipient so that messages from peer relays with
+      // matching partitions can be forwarded to it.
+      if (async_discovery) {
+        guid_partition_table_.update_cross_relay_pending_recipients(src_guid, to_partitions);
+      }
     } else {
       // Local recipients.
       GuidSet guids;
@@ -783,7 +806,8 @@ void HorizontalHandler::enqueue_or_send_message(const ACE_INET_Addr& addr,
                                                 const StringSet& to_partitions,
                                                 const GuidSet& to_guids,
                                                 const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
-                                                const OpenDDS::DCPS::MonotonicTimePoint& now)
+                                                const OpenDDS::DCPS::MonotonicTimePoint& now,
+                                                bool async_discovery)
 {
   using namespace OpenDDS::DCPS;
 
@@ -798,11 +822,13 @@ void HorizontalHandler::enqueue_or_send_message(const ACE_INET_Addr& addr,
   for (const auto& g : to_guids) {
     tg.push_back(rtps_guid_to_relay_guid(g));
   }
+  relay_header.use_async_discovery(async_discovery);
 
   const size_t size = serialized_size(encoding, relay_header);
   const size_t total_size = size + msg->length();
   if (total_size > TransportSendStrategy::UDP_MAX_MESSAGE_SIZE) {
-    HANDLER_ERROR((LM_ERROR, "(%P|%t) ERROR: HorizontalHandler::enqueue_message %C header and message too large (%B > %B)\n", name_.c_str(), total_size, static_cast<size_t>(TransportSendStrategy::UDP_MAX_MESSAGE_SIZE)));
+    HANDLER_ERROR((LM_ERROR, "(%P|%t) ERROR: HorizontalHandler::enqueue_message %C header and message too large (%B > %B)\n",
+      name_.c_str(), total_size, static_cast<size_t>(TransportSendStrategy::UDP_MAX_MESSAGE_SIZE)));
     return;
   }
 
@@ -813,7 +839,7 @@ void HorizontalHandler::enqueue_or_send_message(const ACE_INET_Addr& addr,
   RelayHandler::enqueue_message(addr, header_block, now, MessageType::Rtps);
 }
 
-CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr&,
+CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr& remote,
                                                 const OpenDDS::DCPS::MonotonicTimePoint& now,
                                                 const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                                 MessageType& type)
@@ -838,6 +864,28 @@ CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr&,
 
   guid_partition_table_.lookup(guids, relay_header.to_partitions(), to_guids);
   GuidAddrSet::Proxy proxy(vertical_handler_->guid_addr_set());
+
+  if (relay_header.use_async_discovery()) {
+    // If the remote participant used async discovery to route its message, store the remote relay
+    // to ensure returning messages from any of the target GUIDs will be forwarded to it.
+    for (const auto& guid : guids) {
+      const auto p = proxy.find(guid);
+      if (p != proxy.end()) {
+        if (name() == HSPDP) {
+          p->second.pending_spdp_peer_relays.insert(remote);
+        } else if (name() == HSEDP) {
+          p->second.pending_sedp_peer_relays.insert(remote);
+        } else if (name() == HDATA) {
+          p->second.pending_data_peer_relays.insert(remote);
+        }
+      }
+    }
+  } else {
+    GuidSet pending_guids;
+    guid_partition_table_.lookup_cross_relay_pending_recipients(pending_guids, relay_header.to_partitions());
+    guids.insert(pending_guids.begin(), pending_guids.end());
+  }
+
   OpenDDS::DCPS::ThreadStatusManager::Event evLocked(TheServiceParticipant->get_thread_status_manager(),
     READ_MASK | DONT_CALL, handle_to_int(get_handle()));
 

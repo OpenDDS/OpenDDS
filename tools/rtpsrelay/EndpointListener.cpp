@@ -8,7 +8,7 @@ GuidPartitionTable::Result EndpointListener::update_partitions_info(OpenDDS::DCP
 
   // If this is an endpoint from a participant that has initiated async discovery,
   // the participant needs to be removed from the pending recipients sets of all
-  // participants it has initiated async discovery with.
+  // local participants it has initiated async discovery with.
   const auto part_guid = OpenDDS::DCPS::make_part_guid(repoid);
   std::string cert_id;
   {
@@ -20,6 +20,8 @@ GuidPartitionTable::Result EndpointListener::update_partitions_info(OpenDDS::DCP
       cert_id = iter->second.identity_info.cert_id();
     }
   }
+
+  guid_partition_table_.remove_cross_relay_pending_recipients(part_guid);
 
   // Cache all partitions corresponding to this participant for async discovery
   StringSet all_partitions;

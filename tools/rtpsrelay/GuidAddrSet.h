@@ -111,6 +111,13 @@ struct AddrSetStats {
   // are waiting for messages from it.
   GuidSet pending_recipients;
 
+  // Horizontal addresses of remote relays from which some participants have initiated async discovery
+  // with this participant. Store them so that messages from this participant can be forwarded to them
+  // and eventually to the remote participants.
+  AddressSet pending_spdp_peer_relays;
+  AddressSet pending_sedp_peer_relays;
+  AddressSet pending_data_peer_relays;
+
   size_t& total_ips;
   size_t& total_ports;
 

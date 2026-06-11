@@ -16,6 +16,7 @@
 
 namespace RtpsRelay {
 
+using AddressSet = std::set<ACE_INET_Addr>;
 using StringSet = std::set<std::string>;
 
 inline std::string guid_to_string(const OpenDDS::DCPS::GUID_t& a_guid)

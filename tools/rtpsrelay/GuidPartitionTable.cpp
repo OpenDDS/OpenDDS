@@ -602,4 +602,42 @@ void GuidPartitionTable::AsyncDiscoveryCache::remove_from_expiration_map(const O
   }
 }
 
+void GuidPartitionTable::update_cross_relay_pending_recipients(const OpenDDS::DCPS::GUID_t& src_guid, const StringSet& to_partitions)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, cross_relay_pending_recipients_mutex_);
+  for (const auto& part : to_partitions) {
+    cross_relay_pending_recipients_[part].insert(src_guid);
+  }
+}
+
+void GuidPartitionTable::lookup_cross_relay_pending_recipients(GuidSet& pending_guids, const StringSequence& partitions) const
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, cross_relay_pending_recipients_mutex_);
+  for (const auto& part : partitions) {
+    const auto it = cross_relay_pending_recipients_.find(part);
+    if (it != cross_relay_pending_recipients_.end()) {
+      pending_guids.insert(it->second.begin(), it->second.end());
+    }
+  }
+}
+
+void GuidPartitionTable::remove_cross_relay_pending_recipients(const OpenDDS::DCPS::GUID_t& guid)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, cross_relay_pending_recipients_mutex_);
+  const auto it = initiated_async_discovery_with_.find(guid);
+  if (it != initiated_async_discovery_with_.end()) {
+    for (const auto& part : it->second) {
+      const auto it2 = cross_relay_pending_recipients_.find(part);
+      if (it2 != cross_relay_pending_recipients_.end()) {
+        it2->second.erase(guid);
+      }
+      if (it2 != cross_relay_pending_recipients_.end() && it2->second.empty()) {
+        cross_relay_pending_recipients_.erase(it2);
+      }
+    }
+  }
+
+  initiated_async_discovery_with_.erase(guid);
+}
+
 }

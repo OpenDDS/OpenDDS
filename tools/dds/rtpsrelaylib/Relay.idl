@@ -96,6 +96,7 @@ module RtpsRelay {
   struct RelayHeader {
     StringSequence to_partitions;
     GuidSequence to_guids;
+    boolean use_async_discovery;
   };
 
   struct Duration_t {

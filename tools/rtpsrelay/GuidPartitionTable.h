@@ -89,6 +89,12 @@ public:
 
   void handle_async_disc_cache_prune(const StringSequence& keys, const std::string& from_relay);
 
+  void update_cross_relay_pending_recipients(const OpenDDS::DCPS::GUID_t& src_guid, const StringSet& to_partitions);
+
+  void lookup_cross_relay_pending_recipients(GuidSet& pending_guids, const StringSequence& partitions) const;
+
+  void remove_cross_relay_pending_recipients(const OpenDDS::DCPS::GUID_t& guid);
+
 private:
   void remove_from_cache(const OpenDDS::DCPS::GUID_t& guid)
   {
@@ -279,6 +285,17 @@ private:
   // Async discovery cache for partitions of remote participants (i.e., from peer relay instances).
   AsyncDiscoveryCache remote_async_disc_cache_;
   OpenDDS::DCPS::SporadicEvent_rch remote_async_disc_cache_cleanup_task_;
+
+  // For each partition, store the local participants whose messages had been forwarded to
+  // peer relays using async discovery. This is so that they can be included when messages
+  // from the peer relays for matching partitions are received and forwarded.
+  // TODO: Clean up when the participant is removed from GuidAddrSet
+  using CrossRelayPendingRecipients = std::unordered_map<std::string, GuidSet>;
+  CrossRelayPendingRecipients cross_relay_pending_recipients_;
+
+  using CrossRelayInitiatedAsyncDiscovery = std::unordered_map<OpenDDS::DCPS::GUID_t, StringSet, GuidHash>;
+  CrossRelayInitiatedAsyncDiscovery initiated_async_discovery_with_;
+  mutable ACE_Thread_Mutex cross_relay_pending_recipients_mutex_;
 };
 
 }
