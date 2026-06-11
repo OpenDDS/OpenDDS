@@ -152,6 +152,58 @@ namespace {
       value = v.in();
       return true;
     }
+    case TK_ENUM: {
+      DDS::Int32 v = 0;
+      if (get_enum_value(v, base, key, id) != DDS::RETCODE_OK) {
+        return false;
+      }
+      DDS::String8_var name;
+      if (get_enumerator_name(name, v, base) == DDS::RETCODE_OK && name.in()) {
+        value = name.in();
+        return true;
+      }
+      oss << v;
+      break;
+    }
+    case TK_BITMASK: {
+      DDS::UInt64 v = 0;
+      if (get_bitmask_value(v, base, key, id) != DDS::RETCODE_OK) {
+        return false;
+      }
+      if (!v) {
+        value = "0";
+        return true;
+      }
+
+      DDS::UInt64 remaining = v;
+      bool first = true;
+      DCPS::String flags;
+      for (DDS::UInt32 i = 0; i != base->get_member_count(); ++i) {
+        DDS::DynamicTypeMember_var member;
+        if (base->get_member_by_index(member, i) != DDS::RETCODE_OK) {
+          return false;
+        }
+        DDS::MemberDescriptor_var md;
+        if (member->get_descriptor(md) != DDS::RETCODE_OK) {
+          return false;
+        }
+        const DDS::MemberId bit = md->id();
+        if (bit < 64 && (v & (DDS::UInt64(1) << bit))) {
+          if (!first) {
+            flags += "|";
+          }
+          flags += md->name();
+          remaining &= ~(DDS::UInt64(1) << bit);
+          first = false;
+        }
+      }
+      if (!remaining && !first) {
+        value = flags;
+        return true;
+      }
+      oss << v;
+      break;
+    }
     default:
       return false;
     }
@@ -225,6 +277,9 @@ DDS::MemberId DynamicDataBase::get_member_id_by_name(const char* name)
     // Elements of string, sequence, array must be accessed by index.
     return MEMBER_ID_INVALID;
   case TK_MAP: {
+    if (!type_desc_) {
+      return MEMBER_ID_INVALID;
+    }
     DDS::DynamicType_var key_type = get_base_type(type_desc_->key_element_type());
     if (!key_type) {
       return MEMBER_ID_INVALID;

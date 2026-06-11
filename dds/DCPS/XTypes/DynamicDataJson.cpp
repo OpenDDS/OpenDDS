@@ -584,6 +584,43 @@ bool json_to_discriminator(
   return false;
 }
 
+bool discriminator_variant_key(
+  DDS::DynamicType_ptr discriminator_type,
+  const JsonValue& value,
+  DDS::Int32 discriminator_value,
+  std::string& key)
+{
+  DDS::DynamicType_var type = get_base_type(discriminator_type);
+  if (!type) {
+    return false;
+  }
+
+  switch (type->get_kind()) {
+  case TK_UINT8:
+  case TK_UINT16:
+  case TK_UINT32:
+  case TK_UINT64: {
+    DDS::UInt64 v = 0;
+    if (!json_to_uint64(value, v)) {
+      return false;
+    }
+    key = dynamic_data_json_value_to_string(v);
+    return true;
+  }
+  case TK_BITMASK: {
+    DDS::UInt64 v = 0;
+    if (!json_to_bitmask_value(type, value, v)) {
+      return false;
+    }
+    key = dynamic_data_json_value_to_string(v);
+    return true;
+  }
+  default:
+    key = dynamic_data_json_value_to_string(discriminator_value);
+    return true;
+  }
+}
+
 DDS::ReturnCode_t populate_value(
   DDS::DynamicData_ptr data,
   DDS::DynamicType_ptr type,
@@ -807,12 +844,21 @@ DDS::ReturnCode_t populate_union_with_discriminator(
   // 3. Permissive format: the object has exactly one non-discriminator member; use it.
   // If none match, the union has no active branch (only the discriminator is set).
   JsonValue::ConstMemberIterator branch = value.MemberEnd();
+  DDS::MemberDescriptor_var branch_md;
   if (found) {
     branch = value.FindMember(selected_md->name());
+    if (branch != value.MemberEnd()) {
+      branch_md = selected_md;
+    }
   }
   if (branch == value.MemberEnd()) {
-    const std::string key = dynamic_data_json_value_to_string(discriminator_value);
-    branch = value.FindMember(key.c_str());
+    std::string key;
+    if (discriminator_variant_key(discriminator_type, discriminator->value, discriminator_value, key)) {
+      branch = value.FindMember(key.c_str());
+      if (found && branch != value.MemberEnd()) {
+        branch_md = selected_md;
+      }
+    }
   }
   if (branch == value.MemberEnd()) {
     JsonValue::ConstMemberIterator single = value.MemberEnd();
@@ -826,14 +872,20 @@ DDS::ReturnCode_t populate_union_with_discriminator(
       discriminator->value, options, path_member(path, DISCRIMINATOR_JSON_NAME));
   }
 
-  if (!found) {
-    rc = get_member_descriptor_by_name(selected_md, type, branch->name.GetString());
+  if (!branch_md) {
+    rc = get_member_descriptor_by_name(branch_md, type, branch->name.GetString());
     if (rc != DDS::RETCODE_OK) {
       return rc;
     }
   }
-  rc = populate_member(data, selected_md->id(), selected_md->type(), branch->value,
-    options, path_member(path, selected_md->name()));
+  if (!found || selected_md->id() != branch_md->id()) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: dynamic_data_json: union member %C is not selected by discriminator at %C\n",
+      branch_md->name(), path.c_str()));
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
+  rc = populate_member(data, branch_md->id(), branch_md->type(), branch->value,
+    options, path_member(path, branch_md->name()));
   if (rc != DDS::RETCODE_OK) {
     return rc;
   }

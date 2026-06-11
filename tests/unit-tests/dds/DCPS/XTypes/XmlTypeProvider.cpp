@@ -11,6 +11,7 @@
 namespace {
 
 const ACE_TCHAR* const XML_TYPE_FILE = ACE_TEXT("dds/DCPS/XTypes/XmlTypeProvider.xml");
+const ACE_TCHAR* const INVALID_XML_TYPE_FILE = ACE_TEXT("dds/DCPS/XTypes/XmlTypeProviderInvalid.xml");
 
 DDS::DynamicType_var load_type(const char* name)
 {
@@ -214,6 +215,18 @@ TEST(dds_DCPS_XTypes_XmlTypeProvider, BitmaskUnionIntrospection)
   // BIT_31 = (uint32)1 << 31 = 0x80000000; as signed Long = -2147483648.
   // Old code (value < 31 guard) stored 31 here instead.
   EXPECT_EQ(static_cast<CORBA::Long>(ACE_CDR::ULong(1) << 31), b->label()[0]);
+}
+
+TEST(dds_DCPS_XTypes_XmlTypeProvider, RejectsWideBitmaskUnionLabel)
+{
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
+
+  DDS::DynamicType_var type;
+  EXPECT_EQ(DDS::RETCODE_ERROR,
+            OpenDDS::XTypes::load_xml_type(
+              type, INVALID_XML_TYPE_FILE, "XmlTypeProviderInvalid::WideFlagUnion"));
+  EXPECT_FALSE(type);
 }
 
 #endif

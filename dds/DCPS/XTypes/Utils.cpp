@@ -645,15 +645,23 @@ namespace {
       CORBA::String_var left, right;
       left_rc = lhs->get_string_value(left, lhs_id);
       right_rc = rhs->get_string_value(right, rhs_id);
-      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK &&
-        std::strcmp(left.in(), right.in()) == 0;
+      if (left_rc != DDS::RETCODE_OK || right_rc != DDS::RETCODE_OK) {
+        return false;
+      }
+      const char* const left_str = left.in();
+      const char* const right_str = right.in();
+      return left_str && right_str ? std::strcmp(left_str, right_str) == 0 : left_str == right_str;
     }
     case TK_STRING16: {
       CORBA::WString_var left, right;
       left_rc = lhs->get_wstring_value(left, lhs_id);
       right_rc = rhs->get_wstring_value(right, rhs_id);
-      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK &&
-        ACE_OS::strcmp(left.in(), right.in()) == 0;
+      if (left_rc != DDS::RETCODE_OK || right_rc != DDS::RETCODE_OK) {
+        return false;
+      }
+      const CORBA::WChar* const left_str = left.in();
+      const CORBA::WChar* const right_str = right.in();
+      return left_str && right_str ? ACE_OS::strcmp(left_str, right_str) == 0 : left_str == right_str;
     }
     case TK_ENUM: {
       DDS::Int32 left = 0, right = 0;

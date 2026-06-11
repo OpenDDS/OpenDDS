@@ -235,7 +235,11 @@ CORBA::ULong DynamicDataImpl::get_map_item_count() const
   if (backing_store_) {
     bs_item_count = backing_store_->get_item_count();
   }
-  return std::max(bs_item_count, static_cast<CORBA::ULong>(container_.map_map_.size()));
+  CORBA::ULong container_item_count = 0;
+  if (!container_.map_map_.empty()) {
+    container_item_count = container_.map_map_.rbegin()->first + 1;
+  }
+  return std::max(bs_item_count, container_item_count);
 }
 
 bool DynamicDataImpl::has_member(DDS::MemberId id) const
@@ -468,25 +472,28 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
     if (id >= size) {
       return DDS::RETCODE_BAD_PARAMETER;
     }
-    erase_member(id);
-    for (CORBA::ULong i = id_to_index(id) + 1; i < size; ++i) {
+    OPENDDS_MAP(DDS::MemberId, MapEntry) replacement;
+    DynamicDataBase* base = dynamic_cast<DynamicDataBase*>(backing_store_.in());
+    for (CORBA::ULong i = 0; i < size; ++i) {
       const DDS::MemberId curr_id = index_to_id(i);
-      const DDS::MemberId prev_id = index_to_id(i - 1);
+      if (curr_id == id) {
+        continue;
+      }
+      const DDS::MemberId new_id = index_to_id(i < id_to_index(id) ? i : i - 1);
       const_map_iterator map_it = container_.map_map_.find(curr_id);
       if (map_it != container_.map_map_.end()) {
-        container_.map_map_.insert(std::make_pair(prev_id, map_it->second));
-        container_.map_map_.erase(curr_id);
-      } else if (backing_store_) {
+        replacement.insert(std::make_pair(new_id, map_it->second));
+      } else if (base) {
         DDS::DynamicData_var key;
         DDS::DynamicData_var value;
-        DynamicDataBase* base = dynamic_cast<DynamicDataBase*>(backing_store_.in());
-        if (!base || base->get_map_key(key, curr_id) != DDS::RETCODE_OK ||
+        if (base->get_map_key(key, curr_id) != DDS::RETCODE_OK ||
             base->get_map_value(value, curr_id) != DDS::RETCODE_OK) {
           return DDS::RETCODE_ERROR;
         }
-        container_.map_map_.insert(std::make_pair(prev_id, MapEntry(key, value)));
+        replacement.insert(std::make_pair(new_id, MapEntry(key, value)));
       }
     }
+    container_.map_map_.swap(replacement);
     set_backing_store(0);
     break;
   }

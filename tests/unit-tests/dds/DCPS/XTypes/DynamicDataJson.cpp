@@ -11,6 +11,8 @@
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/debug.h>
 
+#include <ace/Log_Msg.h>
+
 #include "gtest/gtest.h"
 
 namespace {
@@ -49,6 +51,37 @@ OpenDDS::XTypes::DynamicDataBase* dynamic_data_base(DDS::DynamicData_ptr data)
     dynamic_cast<OpenDDS::XTypes::DynamicDataBase*>(data);
   EXPECT_TRUE(base);
   return base;
+}
+
+DDS::ReturnCode_t set_uint32_map_entry(
+  OpenDDS::XTypes::DynamicDataBase* map_data,
+  DDS::MemberId id,
+  DDS::UInt32 key_value,
+  DDS::UInt32 element_value)
+{
+  DDS::DynamicType_var map_type = map_data->type();
+  DDS::TypeDescriptor_var td;
+  DDS::ReturnCode_t ret = map_type->get_descriptor(td);
+  if (ret != DDS::RETCODE_OK) {
+    return ret;
+  }
+
+  DDS::DynamicData_var key =
+    DDS::DynamicDataFactory::get_instance()->create_data(td->key_element_type());
+  DDS::DynamicData_var value =
+    DDS::DynamicDataFactory::get_instance()->create_data(td->element_type());
+  if (!key || !value) {
+    return DDS::RETCODE_ERROR;
+  }
+  ret = key->set_uint32_value(OpenDDS::XTypes::MEMBER_ID_INVALID, key_value);
+  if (ret != DDS::RETCODE_OK) {
+    return ret;
+  }
+  ret = value->set_uint32_value(OpenDDS::XTypes::MEMBER_ID_INVALID, element_value);
+  if (ret != DDS::RETCODE_OK) {
+    return ret;
+  }
+  return map_data->set_map_entry(id, key, value);
 }
 
 } // namespace
@@ -153,6 +186,25 @@ TEST(dds_DCPS_XTypes_DynamicDataJson, UnionDiscriminatorJson)
   EXPECT_TRUE(OpenDDS::XTypes::dynamic_data_equal(data, copy));
   EXPECT_TRUE(data->equals(copy));
   EXPECT_TRUE(copy->equals(data));
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataJson, UnionDiscriminatorRejectsMismatchedBranch)
+{
+  DDS::DynamicType_var type = load_type("XmlTypeProviderTest::Choice");
+  DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(type);
+  ASSERT_TRUE(data);
+
+  OpenDDS::DCPS::LogRestore log_restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
+  const u_long priority_mask = ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS);
+  ACE_LOG_MSG->priority_mask(0, ACE_Log_Msg::PROCESS);
+  EXPECT_EQ(DDS::RETCODE_PRECONDITION_NOT_MET,
+            OpenDDS::XTypes::dynamic_data_from_json(data, "{\"$discriminator\":\"KIND_A\",\"b\":\"hello\"}"));
+  ACE_LOG_MSG->priority_mask(priority_mask, ACE_Log_Msg::PROCESS);
+
+  DDS::MemberDescriptor_var b = member_descriptor(type, "b");
+  CORBA::String_var value;
+  EXPECT_NE(DDS::RETCODE_OK, data->get_string_value(value, b->id()));
 }
 
 TEST(dds_DCPS_XTypes_DynamicDataJson, EqualityDetectsDifference)
@@ -324,6 +376,37 @@ TEST(dds_DCPS_XTypes_DynamicDataJson, MapGetMemberIdByNameUsesKey)
   ASSERT_EQ(DDS::RETCODE_OK, lookup_data->get_uint32_value(value, id));
   EXPECT_EQ(70u, value);
   EXPECT_EQ(OpenDDS::XTypes::MEMBER_ID_INVALID, lookup_data->get_member_id_by_name("8"));
+
+  OpenDDS::DCPS::LogRestore log_restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
+
+  const u_long priority_mask = ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS);
+  ACE_LOG_MSG->priority_mask(0, ACE_Log_Msg::PROCESS);
+  DDS::DynamicType_var named_type = load_type("XmlTypeProviderTest::NamedKeyMapSample");
+  ACE_LOG_MSG->priority_mask(priority_mask, ACE_Log_Msg::PROCESS);
+  DDS::DynamicData_var named_data = DDS::DynamicDataFactory::get_instance()->create_data(named_type);
+  ASSERT_TRUE(named_data);
+  ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_from_json(named_data,
+    "{"
+    "\"kind_lookup\":[{\"key\":\"KIND_B\",\"value\":20}],"
+    "\"flag_lookup\":[{\"key\":\"FLAG_A|FLAG_B\",\"value\":30}]"
+    "}"));
+
+  DDS::MemberDescriptor_var kind_lookup = member_descriptor(named_type, "kind_lookup");
+  DDS::DynamicData_var kind_lookup_data;
+  ASSERT_EQ(DDS::RETCODE_OK, named_data->get_complex_value(kind_lookup_data, kind_lookup->id()));
+  const DDS::MemberId enum_id = kind_lookup_data->get_member_id_by_name("KIND_B");
+  ASSERT_NE(OpenDDS::XTypes::MEMBER_ID_INVALID, enum_id);
+  ASSERT_EQ(DDS::RETCODE_OK, kind_lookup_data->get_uint32_value(value, enum_id));
+  EXPECT_EQ(20u, value);
+
+  DDS::MemberDescriptor_var flag_lookup = member_descriptor(named_type, "flag_lookup");
+  DDS::DynamicData_var flag_lookup_data;
+  ASSERT_EQ(DDS::RETCODE_OK, named_data->get_complex_value(flag_lookup_data, flag_lookup->id()));
+  const DDS::MemberId bitmask_id = flag_lookup_data->get_member_id_by_name("FLAG_A|FLAG_B");
+  ASSERT_NE(OpenDDS::XTypes::MEMBER_ID_INVALID, bitmask_id);
+  ASSERT_EQ(DDS::RETCODE_OK, flag_lookup_data->get_uint32_value(value, bitmask_id));
+  EXPECT_EQ(30u, value);
 }
 
 TEST(dds_DCPS_XTypes_DynamicDataJson, RejectsNumericRangeOverflow)
@@ -402,6 +485,95 @@ TEST(dds_DCPS_XTypes_DynamicDataJson, MapSerializedBackingStore)
   EXPECT_TRUE(lookup_data->equals(expected_lookup));
 }
 
+TEST(dds_DCPS_XTypes_DynamicDataJson, MapBackingStoreAppendIsVisible)
+{
+  DDS::DynamicType_var type = load_type("XmlTypeProviderTest::MapSample");
+  DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(type);
+  ASSERT_TRUE(data);
+
+  ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_from_json(data,
+    "{\"lookup\":[{\"key\":7,\"value\":70},{\"key\":9,\"value\":90}]}"));
+
+  ACE_Message_Block buffer(4096);
+  const OpenDDS::DCPS::Encoding encoding(
+    OpenDDS::DCPS::Encoding::KIND_XCDR2, OpenDDS::DCPS::ENDIAN_BIG);
+  OpenDDS::DCPS::Serializer serializer(&buffer, encoding);
+  ASSERT_TRUE(serializer << data.in());
+
+  DDS::DynamicData_var backing =
+    new OpenDDS::XTypes::DynamicDataXcdrReadImpl(&buffer, encoding, type);
+  DDS::MemberDescriptor_var lookup = member_descriptor(type, "lookup");
+  DDS::DynamicData_var backing_lookup;
+  ASSERT_EQ(DDS::RETCODE_OK, backing->get_complex_value(backing_lookup, lookup->id()));
+  OpenDDS::XTypes::DynamicDataBase* backing_lookup_base = dynamic_data_base(backing_lookup);
+  ASSERT_TRUE(backing_lookup_base);
+
+  DDS::DynamicData_var overlay =
+    new OpenDDS::XTypes::DynamicDataImpl(backing_lookup_base->type(), backing_lookup);
+  OpenDDS::XTypes::DynamicDataBase* overlay_base = dynamic_data_base(overlay);
+  ASSERT_TRUE(overlay_base);
+  ASSERT_EQ(DDS::RETCODE_OK, set_uint32_map_entry(overlay_base, 2, 11, 110));
+
+  EXPECT_EQ(3u, overlay->get_item_count());
+  std::string json;
+  ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_to_json(json, overlay));
+  EXPECT_NE(std::string::npos, json.find("\"key\":11"));
+  EXPECT_NE(std::string::npos, json.find("\"value\":110"));
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataJson, MapBackingStoreClearPreservesRemainingEntries)
+{
+  DDS::DynamicType_var type = load_type("XmlTypeProviderTest::MapSample");
+  DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(type);
+  ASSERT_TRUE(data);
+
+  ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_from_json(data,
+    "{\"lookup\":[{\"key\":7,\"value\":70},{\"key\":9,\"value\":90},{\"key\":11,\"value\":110}]}"));
+
+  ACE_Message_Block buffer(4096);
+  const OpenDDS::DCPS::Encoding encoding(
+    OpenDDS::DCPS::Encoding::KIND_XCDR2, OpenDDS::DCPS::ENDIAN_BIG);
+  OpenDDS::DCPS::Serializer serializer(&buffer, encoding);
+  ASSERT_TRUE(serializer << data.in());
+
+  DDS::DynamicData_var backing =
+    new OpenDDS::XTypes::DynamicDataXcdrReadImpl(&buffer, encoding, type);
+  DDS::MemberDescriptor_var lookup = member_descriptor(type, "lookup");
+  DDS::DynamicData_var backing_lookup;
+  ASSERT_EQ(DDS::RETCODE_OK, backing->get_complex_value(backing_lookup, lookup->id()));
+  OpenDDS::XTypes::DynamicDataBase* backing_lookup_base = dynamic_data_base(backing_lookup);
+  ASSERT_TRUE(backing_lookup_base);
+
+  DDS::DynamicData_var overlay =
+    new OpenDDS::XTypes::DynamicDataImpl(backing_lookup_base->type(), backing_lookup);
+  ASSERT_EQ(DDS::RETCODE_OK, overlay->clear_value(1));
+  EXPECT_EQ(2u, overlay->get_item_count());
+
+  OpenDDS::XTypes::DynamicDataBase* overlay_base = dynamic_data_base(overlay);
+  ASSERT_TRUE(overlay_base);
+  DDS::DynamicData_var key;
+  DDS::DynamicData_var value;
+  ASSERT_EQ(DDS::RETCODE_OK, overlay_base->get_map_key(key, 0));
+  ASSERT_EQ(DDS::RETCODE_OK, overlay_base->get_map_value(value, 0));
+  DDS::UInt32 key_value = 0;
+  DDS::UInt32 element_value = 0;
+  ASSERT_EQ(DDS::RETCODE_OK,
+            key->get_uint32_value(key_value, OpenDDS::XTypes::MEMBER_ID_INVALID));
+  ASSERT_EQ(DDS::RETCODE_OK,
+            value->get_uint32_value(element_value, OpenDDS::XTypes::MEMBER_ID_INVALID));
+  EXPECT_EQ(7u, key_value);
+  EXPECT_EQ(70u, element_value);
+
+  ASSERT_EQ(DDS::RETCODE_OK, overlay_base->get_map_key(key, 1));
+  ASSERT_EQ(DDS::RETCODE_OK, overlay_base->get_map_value(value, 1));
+  ASSERT_EQ(DDS::RETCODE_OK,
+            key->get_uint32_value(key_value, OpenDDS::XTypes::MEMBER_ID_INVALID));
+  ASSERT_EQ(DDS::RETCODE_OK,
+            value->get_uint32_value(element_value, OpenDDS::XTypes::MEMBER_ID_INVALID));
+  EXPECT_EQ(11u, key_value);
+  EXPECT_EQ(110u, element_value);
+}
+
 TEST(dds_DCPS_XTypes_DynamicDataJson, BitmaskUnionDiscriminatorJson)
 {
   DDS::DynamicType_var type = load_type("XmlTypeProviderTest::Flagged");
@@ -459,6 +631,14 @@ TEST(dds_DCPS_XTypes_DynamicDataJson, BitmaskDiscriminatorHighBit)
   ASSERT_EQ(DDS::RETCODE_OK,
             OpenDDS::XTypes::dynamic_data_from_json(data2, "{\"$discriminator\":2147483648,\"b\":7}"));
   EXPECT_TRUE(OpenDDS::XTypes::dynamic_data_equal(data, data2));
+
+  // Variant format uses the discriminator value as a member name. For
+  // unsigned discriminators, keep the unsigned spelling instead of the
+  // normalized signed UnionCaseLabel value.
+  DDS::DynamicData_var data3 = DDS::DynamicDataFactory::get_instance()->create_data(type);
+  ASSERT_EQ(DDS::RETCODE_OK,
+            OpenDDS::XTypes::dynamic_data_from_json(data3, "{\"$discriminator\":2147483648,\"2147483648\":7}"));
+  EXPECT_TRUE(OpenDDS::XTypes::dynamic_data_equal(data, data3));
 }
 
 TEST(dds_DCPS_XTypes_DynamicDataJson, EqualsSerializedBackingStore)

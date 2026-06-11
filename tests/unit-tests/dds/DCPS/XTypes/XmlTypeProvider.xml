@@ -28,6 +28,22 @@
         <member name="kind_value" type="nonBasic" nonBasicTypeName="Kind"/>
       </struct>
 
+      <bitmask name="Flags" bitBound="16">
+        <flag name="FLAG_A" value="0"/>
+        <flag name="FLAG_B" value="1"/>
+      </bitmask>
+
+      <struct name="NamedKeyMapSample" extensibility="appendable">
+        <member name="kind_lookup" type="map" id="30" mapMaxLength="3">
+          <key type="nonBasic" nonBasicTypeName="Kind"/>
+          <value type="uint32"/>
+        </member>
+        <member name="flag_lookup" type="map" id="31" mapMaxLength="3">
+          <key type="nonBasic" nonBasicTypeName="Flags"/>
+          <value type="uint32"/>
+        </member>
+      </struct>
+
       <struct name="MapSample" extensibility="appendable">
         <member name="lookup" type="map" id="20" mapMaxLength="4">
           <key type="uint32"/>
@@ -54,11 +70,6 @@
           <member name="other" type="nonBasic" nonBasicTypeName="Inner"/>
         </case>
       </union>
-
-      <bitmask name="Flags" bitBound="16">
-        <flag name="FLAG_A" value="0"/>
-        <flag name="FLAG_B" value="1"/>
-      </bitmask>
 
       <!-- Flagged uses named flag values as case discriminators to exercise
            bitmask label_values lookup in case_label(). -->

@@ -1,0 +1,17 @@
+<dds>
+  <types>
+    <module name="XmlTypeProviderInvalid">
+      <bitmask name="WideFlags" bitBound="64">
+        <flag name="HIGH" value="40"/>
+      </bitmask>
+
+      <union name="WideFlagUnion">
+        <discriminator type="nonBasic" nonBasicTypeName="WideFlags"/>
+        <case>
+          <caseDiscriminator value="HIGH"/>
+          <member name="value" type="int32"/>
+        </case>
+      </union>
+    </module>
+  </types>
+</dds>

@@ -1682,6 +1682,16 @@ private:
             label = pos->second;
             return true;
           }
+          for (size_t i = 0; i != type->second.bitmask_model.flags.size(); ++i) {
+            const BitmaskFlagModel& flag = type->second.bitmask_model.flags[i];
+            if (flag.name == value.c_str() && flag.position >= 32) {
+              std::ostringstream out;
+              out << "bitmask flag '" << value << "' at position " << flag.position
+                  << " cannot be represented as a union case label";
+              error = out.str();
+              return false;
+            }
+          }
         }
       }
     }
