@@ -92,6 +92,28 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::Dyn
       encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
     throw std::runtime_error("DynamicDataXcdrReadImpl only supports XCDR1 and XCDR2");
   }
+  if (!chain_) {
+    throw std::runtime_error("DynamicDataXcdrReadImpl could not create bounded message block");
+  }
+
+  strm_.rdstate(align_state_);
+}
+
+DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type,
+                                                 DCPS::Sample::Extent ext, size_t limit)
+  : DynamicDataBase(type)
+  , chain_(ser.trim(limit))
+  , encoding_(ser.encoding())
+  , extent_(ext)
+  , reset_align_state_(true)
+  , align_state_(ser.rdstate())
+  , strm_(chain_, encoding_)
+  , item_count_(ITEM_COUNT_INVALID)
+{
+  if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
+      encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
+    throw std::runtime_error("DynamicDataXcdrReadImpl only supports XCDR1 and XCDR2");
+  }
 
   strm_.rdstate(align_state_);
 }
@@ -1154,8 +1176,12 @@ bool DynamicDataXcdrReadImpl::skip_to_map_element(MemberId id)
   return skip_to_map_entry(id, true);
 }
 
-bool DynamicDataXcdrReadImpl::skip_to_map_entry(MemberId id, bool skip_key)
+bool DynamicDataXcdrReadImpl::skip_to_map_entry(MemberId id, bool skip_key, size_t* remaining)
 {
+  if (remaining) {
+    *remaining = 0;
+  }
+
   const DDS::DynamicType_var key_type = get_base_type(type_desc_->key_element_type());
   const DDS::DynamicType_var elem_type = get_base_type(type_desc_->element_type());
   ACE_CDR::ULong key_size, elem_size;
@@ -1187,8 +1213,39 @@ bool DynamicDataXcdrReadImpl::skip_to_map_entry(MemberId id, bool skip_key)
         return false;
       }
     }
-    return (strm_.rpos() < end_of_map) && (!skip_key || skip_member(key_type));
+    if (strm_.rpos() >= end_of_map) {
+      return false;
+    }
+    if (skip_key && !skip_member(key_type)) {
+      return false;
+    }
+    if (strm_.rpos() >= end_of_map) {
+      return false;
+    }
+    if (remaining) {
+      *remaining = end_of_map - strm_.rpos();
+    }
+    return true;
   }
+}
+
+bool DynamicDataXcdrReadImpl::encoded_member_size(DDS::DynamicType_ptr type, size_t max_size, size_t& size)
+{
+  size = 0;
+  if (!max_size) {
+    return false;
+  }
+  DynamicDataXcdrReadImpl probe(strm_, type, nested(extent_), max_size);
+  const size_t start = probe.strm_.rpos();
+  if (!probe.skip_member(type)) {
+    return false;
+  }
+  const size_t consumed = probe.strm_.rpos() - start;
+  if (!consumed || consumed > max_size) {
+    return false;
+  }
+  size = consumed;
+  return true;
 }
 
 template<TypeKind ElementTypeKind, typename ElementType>
@@ -1712,11 +1769,18 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_map_key_i(DDS::DynamicData_ptr& k
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
   ScopedChainManager scoped_chain(*this);
-  if (!skip_to_map_entry(id, false)) {
+  size_t remaining = 0;
+  if (!skip_to_map_entry(id, false, &remaining)) {
     return DDS::RETCODE_BAD_PARAMETER;
   }
+  size_t encoded_size = 0;
+  if (remaining && !encoded_member_size(type_desc_->key_element_type(), remaining, encoded_size)) {
+    return DDS::RETCODE_ERROR;
+  }
   CORBA::release(key);
-  key = new DynamicDataXcdrReadImpl(strm_, type_desc_->key_element_type(), nested(extent_));
+  key = encoded_size ?
+    new DynamicDataXcdrReadImpl(strm_, type_desc_->key_element_type(), nested(extent_), encoded_size) :
+    new DynamicDataXcdrReadImpl(strm_, type_desc_->key_element_type(), nested(extent_));
   return DDS::RETCODE_OK;
 }
 
@@ -1726,11 +1790,18 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_map_value_i(DDS::DynamicData_ptr&
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
   ScopedChainManager scoped_chain(*this);
-  if (!skip_to_map_entry(id, true)) {
+  size_t remaining = 0;
+  if (!skip_to_map_entry(id, true, &remaining)) {
     return DDS::RETCODE_BAD_PARAMETER;
   }
+  size_t encoded_size = 0;
+  if (remaining && !encoded_member_size(type_desc_->element_type(), remaining, encoded_size)) {
+    return DDS::RETCODE_ERROR;
+  }
   CORBA::release(value);
-  value = new DynamicDataXcdrReadImpl(strm_, type_desc_->element_type(), nested(extent_));
+  value = encoded_size ?
+    new DynamicDataXcdrReadImpl(strm_, type_desc_->element_type(), nested(extent_), encoded_size) :
+    new DynamicDataXcdrReadImpl(strm_, type_desc_->element_type(), nested(extent_));
   return DDS::RETCODE_OK;
 }
 

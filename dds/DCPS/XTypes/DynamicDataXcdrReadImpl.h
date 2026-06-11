@@ -351,6 +351,11 @@ public:
   }
 
 private:
+  /// Like the Serializer constructor, but limits the duplicated chain to
+  /// @a limit bytes from the serializer's current read position.
+  DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type,
+                          DCPS::Sample::Extent ext, size_t limit);
+
   DDS::ReturnCode_t get_map_key_i(DDS::DynamicData_ptr& key, DDS::MemberId id);
   DDS::ReturnCode_t get_map_value_i(DDS::DynamicData_ptr& value, DDS::MemberId id);
 
@@ -460,7 +465,8 @@ private:
   /// Skip to an element with a given ID in a map. The key associated with that
   /// element is also skipped.
   bool skip_to_map_element(MemberId id);
-  bool skip_to_map_entry(MemberId id, bool skip_key);
+  bool skip_to_map_entry(MemberId id, bool skip_key, size_t* remaining = 0);
+  bool encoded_member_size(DDS::DynamicType_ptr type, size_t max_size, size_t& size);
 
   /// Read a sequence with element type @a elem_tk and store the result in @a value,
   /// which is a sequence of primitives or strings or wstrings. Sequence of enums or
