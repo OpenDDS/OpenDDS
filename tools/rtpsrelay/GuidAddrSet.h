@@ -114,9 +114,10 @@ struct AddrSetStats {
   // Horizontal addresses of remote relays from which some participants have initiated async discovery
   // with this participant. Store them so that messages from this participant can be forwarded to them
   // and eventually to the remote participants.
-  AddressSet pending_spdp_peer_relays;
-  AddressSet pending_sedp_peer_relays;
-  AddressSet pending_data_peer_relays;
+  using PendingPeerRelays = std::map<ACE_INET_Addr, OpenDDS::DCPS::MonotonicTimePoint>;
+  PendingPeerRelays pending_spdp_peer_relays;
+  PendingPeerRelays pending_sedp_peer_relays;
+  PendingPeerRelays pending_data_peer_relays;
 
   size_t& total_ips;
   size_t& total_ports;
@@ -171,6 +172,29 @@ struct AddrSetStats {
   OpenDDS::DCPS::TimeDuration get_session_time(const OpenDDS::DCPS::MonotonicTimePoint& now) const
   {
     return now - session_start;
+  }
+
+  void maintain_pending_peer_relays(const std::string name, const OpenDDS::DCPS::MonotonicTimePoint& expire)
+  {
+    PendingPeerRelays* peer_relays = nullptr;
+    if (name == HSPDP) {
+      peer_relays = &pending_spdp_peer_relays;
+    } else if (name == HSEDP) {
+      peer_relays = &pending_sedp_peer_relays;
+    } else if (name == HDATA) {
+      peer_relays = &pending_data_peer_relays;
+    }
+
+    if (peer_relays) {
+      // Prune stale entries
+      for (auto it = peer_relays->begin(); it != peer_relays->end();) {
+        if (it->second < expire) {
+          it = peer_relays->erase(it);
+        } else {
+          ++it;
+        }
+      }
+    }
   }
 };
 
@@ -395,6 +419,21 @@ public:
       return {};
     }
 
+    void update_cross_relay_pending_recipients(const OpenDDS::DCPS::GUID_t& src_guid, const StringSet& to_partitions)
+    {
+      gas_.update_cross_relay_pending_recipients(src_guid, to_partitions);
+    }
+
+    void lookup_cross_relay_pending_recipients(GuidSet& pending_guids, const StringSequence& partitions) const
+    {
+      gas_.lookup_cross_relay_pending_recipients(pending_guids, partitions);
+    }
+
+    void remove_cross_relay_pending_recipients(const OpenDDS::DCPS::GUID_t& guid)
+    {
+      gas_.remove_cross_relay_pending_recipients(guid);
+    }
+
   private:
     GuidAddrSet& gas_;
 
@@ -487,6 +526,12 @@ private:
 
   void apply_drain_state(AddrSetStats& addr_set_stats, bool from_application_participant);
 
+  void update_cross_relay_pending_recipients(const OpenDDS::DCPS::GUID_t& src_guid, const StringSet& to_partitions);
+
+  void lookup_cross_relay_pending_recipients(GuidSet& pending_guids, const StringSequence& partitions) const;
+
+  void remove_cross_relay_pending_recipients(const OpenDDS::DCPS::GUID_t& guid);
+
   struct AdmissionControlInfo {
     AdmissionControlInfo(const OpenDDS::DCPS::GuidPrefix_t& prefix, const OpenDDS::DCPS::MonotonicTimePoint& admitted)
      : admitted_(admitted)
@@ -546,6 +591,15 @@ private:
   OpenDDS::DCPS::SporadicEvent_rch drain_task_;
 
   std::regex cert_id_regex_;
+
+  // For each partition, store the local participants whose messages had been forwarded to
+  // peer relays using async discovery. This is so that they can be included when messages
+  // from the peer relays for matching partitions are received and forwarded.
+  using CrossRelayPendingRecipients = std::unordered_map<std::string, GuidSet>;
+  CrossRelayPendingRecipients cross_relay_pending_recipients_;
+
+  using CrossRelayInitiatedAsyncDiscovery = std::unordered_map<OpenDDS::DCPS::GUID_t, StringSet, GuidHash>;
+  CrossRelayInitiatedAsyncDiscovery initiated_async_discovery_with_;
 };
 
 }

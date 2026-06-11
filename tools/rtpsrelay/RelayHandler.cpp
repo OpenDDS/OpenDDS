@@ -693,15 +693,25 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
   // Also forward to the peer relays from which some participants had initiated async discovery with this source.
   // These addresses may have been included already, but this ensures they are always included.
   if (!async_discovery) {
+    const auto cutoff_time = OpenDDS::DCPS::MonotonicTimePoint::now() - config_.async_discovery_cross_relay_timeout();
     const auto& horizontal_name = horizontal_handler_->name();
+    AddrSetStats::PendingPeerRelays* peer_relays = nullptr;
+
     const auto iter = proxy.find(src_guid);
     if (iter != proxy.end()) {
+      // Prune stale entries before adding to the set
+      iter->second.maintain_pending_peer_relays(horizontal_name, cutoff_time);
       if (horizontal_name == HSPDP) {
-        address_set.insert(iter->second.pending_spdp_peer_relays.begin(), iter->second.pending_spdp_peer_relays.end());
+        peer_relays = &iter->second.pending_spdp_peer_relays;
       } else if (horizontal_name == HSEDP) {
-        address_set.insert(iter->second.pending_sedp_peer_relays.begin(), iter->second.pending_sedp_peer_relays.end());
+        peer_relays = &iter->second.pending_sedp_peer_relays;
       } else if (horizontal_name == HDATA) {
-        address_set.insert(iter->second.pending_data_peer_relays.begin(), iter->second.pending_data_peer_relays.end());
+        peer_relays = &iter->second.pending_data_peer_relays;
+      }
+    }
+    if (peer_relays) {
+      for (auto it = peer_relays->begin(); it != peer_relays->end(); ++it) {
+        address_set.insert(it->first);
       }
     }
   }
@@ -716,7 +726,7 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
       // mark it as a pending recipient so that messages from peer relays with
       // matching partitions can be forwarded to it.
       if (async_discovery) {
-        guid_partition_table_.update_cross_relay_pending_recipients(src_guid, to_partitions);
+        proxy.update_cross_relay_pending_recipients(src_guid, to_partitions);
       }
     } else {
       // Local recipients.
@@ -866,23 +876,25 @@ CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr& remote,
   GuidAddrSet::Proxy proxy(vertical_handler_->guid_addr_set());
 
   if (relay_header.use_async_discovery()) {
+    const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
+
     // If the remote participant used async discovery to route its message, store the remote relay
     // to ensure returning messages from any of the target GUIDs will be forwarded to it.
     for (const auto& guid : guids) {
       const auto p = proxy.find(guid);
       if (p != proxy.end()) {
         if (name() == HSPDP) {
-          p->second.pending_spdp_peer_relays.insert(remote);
+          p->second.pending_spdp_peer_relays[remote] = now;
         } else if (name() == HSEDP) {
-          p->second.pending_sedp_peer_relays.insert(remote);
+          p->second.pending_sedp_peer_relays[remote] = now;
         } else if (name() == HDATA) {
-          p->second.pending_data_peer_relays.insert(remote);
+          p->second.pending_data_peer_relays[remote] = now;
         }
       }
     }
   } else {
     GuidSet pending_guids;
-    guid_partition_table_.lookup_cross_relay_pending_recipients(pending_guids, relay_header.to_partitions());
+    proxy.lookup_cross_relay_pending_recipients(pending_guids, relay_header.to_partitions());
     guids.insert(pending_guids.begin(), pending_guids.end());
   }
 

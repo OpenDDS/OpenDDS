@@ -491,6 +491,7 @@ void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid,
 
   cleanup_peers_pending_recipients(it);
   guid_addr_set_map_.erase(it);
+  remove_cross_relay_pending_recipients(guid);
   relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
   check_participants_limit();
 
@@ -648,6 +649,42 @@ void GuidAddrSet::ConfigReaderListener::on_data_available(InternalDataReader_rch
       }
     }
   }
+}
+
+void GuidAddrSet::update_cross_relay_pending_recipients(const OpenDDS::DCPS::GUID_t& src_guid, const StringSet& to_partitions)
+{
+  for (const auto& part : to_partitions) {
+    cross_relay_pending_recipients_[part].insert(src_guid);
+  }
+  initiated_async_discovery_with_[src_guid].insert(to_partitions.begin(), to_partitions.end());
+}
+
+void GuidAddrSet::lookup_cross_relay_pending_recipients(GuidSet& pending_guids, const StringSequence& partitions) const
+{
+  for (const auto& part : partitions) {
+    const auto it = cross_relay_pending_recipients_.find(part);
+    if (it != cross_relay_pending_recipients_.end()) {
+      pending_guids.insert(it->second.begin(), it->second.end());
+    }
+  }
+}
+
+void GuidAddrSet::remove_cross_relay_pending_recipients(const OpenDDS::DCPS::GUID_t& guid)
+{
+  const auto it = initiated_async_discovery_with_.find(guid);
+  if (it != initiated_async_discovery_with_.end()) {
+    for (const auto& part : it->second) {
+      const auto it2 = cross_relay_pending_recipients_.find(part);
+      if (it2 != cross_relay_pending_recipients_.end()) {
+        it2->second.erase(guid);
+      }
+      if (it2 != cross_relay_pending_recipients_.end() && it2->second.empty()) {
+        cross_relay_pending_recipients_.erase(it2);
+      }
+    }
+  }
+
+  initiated_async_discovery_with_.erase(guid);
 }
 
 }

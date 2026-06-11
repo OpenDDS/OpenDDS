@@ -118,6 +118,9 @@ const DDS::Duration_t RTPS_RELAY_ASYNC_DISCOVERY_CACHE_TIMEOUT_default = {3600*2
 const char RTPS_RELAY_ASYNC_DISCOVERY_REMOTE_CACHE_TIMEOUT[] = "RTPS_RELAY_ASYNC_DISCOVERY_REMOTE_CACHE_TIMEOUT";
 const DDS::Duration_t RTPS_RELAY_ASYNC_DISCOVERY_REMOTE_CACHE_TIMEOUT_default = {3600*24*30, 0}; // 30 days
 
+const char RTPS_RELAY_ASYNC_DISCOVERY_CROSS_RELAY_TIMEOUT[] = "RTPS_RELAY_ASYNC_DISCOVERY_CROSS_RELAY_TIMEOUT";
+const DDS::Duration_t RTPS_RELAY_ASYNC_DISCOVERY_CROSS_RELAY_TIMEOUT_default = {5, 0};
+
 /// Configuration values for the RtpsRelay
 ///
 /// Each value uses one of these implementation strategies:
@@ -555,6 +558,17 @@ public:
     return expected_ca_subject_name_;
   }
 
+  void async_discovery_cross_relay_timeout(const OpenDDS::DCPS::TimeDuration& value)
+  {
+    TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_ASYNC_DISCOVERY_CROSS_RELAY_TIMEOUT, value.to_dds_duration());
+    cached_async_discovery_cross_relay_timeout_.set(value);
+  }
+
+  OpenDDS::DCPS::TimeDuration async_discovery_cross_relay_timeout() const
+  {
+    return cached_async_discovery_cross_relay_timeout_.get();
+  }
+
   static bool to_time_duration(const std::string& value, OpenDDS::DCPS::TimeDuration& out);
 
 private:
@@ -646,6 +660,7 @@ private:
   CachedValue<bool, OpenDDS::DCPS::ConfigStoreImpl::convert_value> cached_log_async_discovery_{RTPS_RELAY_LOG_ASYNC_DISCOVERY_default};
   CachedValue<bool, OpenDDS::DCPS::ConfigStoreImpl::convert_value> cached_synchronize_async_discovery_cache_{RTPS_RELAY_SYNCHRONIZE_ASYNC_DISCOVERY_CACHE_default};
   CachedValue<OpenDDS::DCPS::TimeDuration, to_time_duration> cached_async_discovery_remote_cache_timeout_{OpenDDS::DCPS::TimeDuration{RTPS_RELAY_ASYNC_DISCOVERY_REMOTE_CACHE_TIMEOUT_default}};
+  CachedValue<OpenDDS::DCPS::TimeDuration, to_time_duration> cached_async_discovery_cross_relay_timeout_{OpenDDS::DCPS::TimeDuration{RTPS_RELAY_ASYNC_DISCOVERY_CROSS_RELAY_TIMEOUT_default}};
 
   // start of variables without ConfigStore support
   std::string relay_id_;
