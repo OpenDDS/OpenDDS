@@ -149,7 +149,8 @@ namespace {
       if (key->get_string_value(v, id) != DDS::RETCODE_OK) {
         return false;
       }
-      value = v.in();
+      const char* s = v.in();
+      value = s ? s : "";
       return true;
     }
     case TK_ENUM: {
