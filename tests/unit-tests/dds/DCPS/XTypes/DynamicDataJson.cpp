@@ -15,9 +15,20 @@
 
 #include "gtest/gtest.h"
 
+#include <vector>
+
 namespace {
 
 const ACE_TCHAR* const XML_TYPE_FILE = ACE_TEXT("dds/DCPS/XTypes/XmlTypeProvider.xml");
+
+std::vector<DDS::DynamicType_var>& loaded_types()
+{
+  // Keep XML-loaded type graphs alive for the test process. Some graphs contain
+  // internal DynamicType references and these tests don't cover teardown.
+  static std::vector<DDS::DynamicType_var>* const types =
+    new std::vector<DDS::DynamicType_var>;
+  return *types;
+}
 
 DDS::DynamicType_var load_type(const char* name)
 {
@@ -25,6 +36,9 @@ DDS::DynamicType_var load_type(const char* name)
   EXPECT_EQ(DDS::RETCODE_OK,
             OpenDDS::XTypes::load_xml_type(type, XML_TYPE_FILE, name));
   EXPECT_TRUE(type);
+  if (type) {
+    loaded_types().push_back(DDS::DynamicType::_duplicate(type));
+  }
   return type;
 }
 
