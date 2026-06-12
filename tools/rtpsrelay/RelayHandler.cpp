@@ -876,8 +876,6 @@ CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr& remote,
   GuidAddrSet::Proxy proxy(vertical_handler_->guid_addr_set());
 
   if (relay_header.use_async_discovery()) {
-    const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
-
     // If the remote participant used async discovery to route its message, store the remote relay
     // to ensure returning messages from any of the target GUIDs will be forwarded to it.
     for (const auto& guid : guids) {

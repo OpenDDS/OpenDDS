@@ -242,7 +242,11 @@ GuidPartitionTable::update_cert_partitions_cache(const std::string& key, const S
   if (config_.synchronize_async_discovery_cache()) {
     out_arg = &prev_partitions;
   }
-  const auto sizes = local_async_disc_cache_.update(key, partitions, OpenDDS::DCPS::MonotonicTimePoint::now(), out_arg);
+  const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
+  const auto sizes = local_async_disc_cache_.update(key, partitions, now, out_arg);
+
+  relay_stats_reporter_.async_discovery_local_cache_size(sizes.first, now);
+  relay_stats_reporter_.async_discovery_local_expiration_map_size(sizes.second, now);
 
   if (!local_async_disc_cache_cleanup_task_) {
     const auto base = OpenDDS::DCPS::make_rch<GuidPartitionTableEvent>(rchandle_from(this), &GuidPartitionTable::cleanup_local_async_disc_cache);
@@ -347,6 +351,9 @@ GuidPartitionTable::update_remote_async_disc_cache(const AsyncDiscoveryCacheEntr
 {
   const auto sizes = remote_async_disc_cache_.update(entries, now);
 
+  relay_stats_reporter_.async_discovery_remote_cache_size(sizes.first, now);
+  relay_stats_reporter_.async_discovery_remote_expiration_map_size(sizes.second, now);
+
   if (!remote_async_disc_cache_cleanup_task_) {
     const auto base = OpenDDS::DCPS::make_rch<GuidPartitionTableEvent>(rchandle_from(this), &GuidPartitionTable::cleanup_remote_async_disc_cache);
     remote_async_disc_cache_cleanup_task_ = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::SporadicEvent>(TheServiceParticipant->event_dispatcher(), base);
@@ -368,10 +375,15 @@ GuidPartitionTable::update_remote_async_disc_cache(const AsyncDiscoveryCacheEntr
   }
 }
 
-void GuidPartitionTable::remove_from_local_async_disc_cache(const AsyncDiscoveryCacheEntrySeq& entries, const std::string& from_relay)
+void GuidPartitionTable::remove_from_local_async_disc_cache(const AsyncDiscoveryCacheEntrySeq& entries,
+                                                            const std::string& from_relay,
+                                                            const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
   StringSet removed_keys;
   const auto sizes = local_async_disc_cache_.remove(entries, removed_keys);
+
+  relay_stats_reporter_.async_discovery_local_cache_size(sizes.first, now);
+  relay_stats_reporter_.async_discovery_local_expiration_map_size(sizes.second, now);
 
   if (config_.log_async_discovery() && !removed_keys.empty()) {
     const std::string keys_str = concat_strings(removed_keys);
@@ -401,7 +413,7 @@ void GuidPartitionTable::handle_async_disc_cache_update(const AsyncDiscoveryCach
     return;
   }
 
-  remove_from_local_async_disc_cache(entries, from_relay);
+  remove_from_local_async_disc_cache(entries, from_relay, now);
   update_remote_async_disc_cache(entries, from_relay, now);
 }
 
@@ -450,6 +462,10 @@ GuidPartitionTable::handle_async_disc_cache_prune(const StringSequence& keys, co
   // the possibility of remote cache inconsistency.
   StringSet removed_keys;
   const auto sizes = remote_async_disc_cache_.remove(keys, removed_keys);
+
+  const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
+  relay_stats_reporter_.async_discovery_remote_cache_size(sizes.first, now);
+  relay_stats_reporter_.async_discovery_remote_expiration_map_size(sizes.second, now);
 
   if (config_.log_async_discovery()) {
     const std::string keys_str = concat_strings(removed_keys);

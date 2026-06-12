@@ -188,7 +188,8 @@ private:
     }
   }
 
-  void remove_from_local_async_disc_cache(const AsyncDiscoveryCacheEntrySeq& entries, const std::string& from_relay);
+  void remove_from_local_async_disc_cache(const AsyncDiscoveryCacheEntrySeq& entries,
+    const std::string& from_relay, const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   void update_remote_async_disc_cache(const AsyncDiscoveryCacheEntrySeq& entries,
     const std::string& from_relay, const OpenDDS::DCPS::MonotonicTimePoint& now);
