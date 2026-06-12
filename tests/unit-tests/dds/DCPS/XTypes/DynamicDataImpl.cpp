@@ -9,12 +9,63 @@
 #include <dds/DCPS/XTypes/DynamicDataFactory.h>
 #include <dds/DCPS/XTypes/DynamicDataImpl.h>
 #include <dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h>
+#include <dds/DCPS/XTypes/Utils.h>
 
 using namespace OpenDDS;
 using namespace DynamicDataImpl;
 
 const DCPS::Encoding xcdr2(DCPS::Encoding::KIND_XCDR2, DCPS::ENDIAN_BIG);
 const DCPS::Encoding xcdr1(DCPS::Encoding::KIND_XCDR1, DCPS::ENDIAN_BIG);
+
+template <typename XTag>
+DDS::DynamicType_var get_dynamic_type()
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<XTag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<XTag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_NE(type_map.end(), it);
+  if (it == type_map.end()) {
+    return DDS::DynamicType::_nil();
+  }
+
+  static XTypes::TypeLookupService tls;
+  static bool initialized = false;
+  if (!initialized) {
+    const XTypes::TypeMap& minimal_type_map = DCPS::getMinimalTypeMap<XTag>();
+    tls.add(minimal_type_map.begin(), minimal_type_map.end());
+    tls.add(type_map.begin(), type_map.end());
+    initialized = true;
+  }
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+  return dt;
+}
+
+DDS::ReturnCode_t set_inner_value(
+  DDS::DynamicData_ptr data, DDS::DynamicType_ptr type, DDS::MemberId id, CORBA::Long value)
+{
+  DDS::DynamicTypeMember_var member;
+  DDS::ReturnCode_t ret = type->get_member(member, id);
+  if (ret != DDS::RETCODE_OK) {
+    return ret;
+  }
+
+  DDS::MemberDescriptor_var md;
+  ret = member->get_descriptor(md);
+  if (ret != DDS::RETCODE_OK) {
+    return ret;
+  }
+
+  DDS::DynamicData_var nested = DDS::DynamicDataFactory::get_instance()->create_data(md->type());
+  if (!nested) {
+    return DDS::RETCODE_ERROR;
+  }
+  ret = nested->set_int32_value(0, value);
+  if (ret != DDS::RETCODE_OK) {
+    return ret;
+  }
+  return data->set_complex_value(id, nested);
+}
 
 template<typename StructType>
 void set_single_value_struct(StructType& a)
@@ -4347,5 +4398,84 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, String_As_Enum)
   DDS::Int32 eval;
   EXPECT_EQ(DDS::RETCODE_OK, data.get_int32_value(eval, MID_my_enum));
   EXPECT_EQ(static_cast<int>(E_UINT64), eval);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, EqualsStruct)
+{
+  DDS::DynamicType_var dt =
+    get_dynamic_type<DCPS::DynamicDataImpl_FinalSingleValueStruct_xtag>();
+  ASSERT_TRUE(dt);
+
+  DDS::DynamicData_var lhs = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+  DDS::DynamicData_var rhs = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+  ASSERT_TRUE(lhs);
+  ASSERT_TRUE(rhs);
+
+  EXPECT_TRUE(lhs->equals(rhs));
+  EXPECT_TRUE(rhs->equals(lhs));
+  EXPECT_TRUE(XTypes::dynamic_data_equal(lhs, rhs));
+
+  EXPECT_EQ(DDS::RETCODE_OK, lhs->set_int32_value(1, 10));
+  EXPECT_EQ(DDS::RETCODE_OK, rhs->set_int32_value(1, 10));
+  EXPECT_EQ(DDS::RETCODE_OK, set_inner_value(lhs, dt, 16, 12));
+  EXPECT_EQ(DDS::RETCODE_OK, set_inner_value(rhs, dt, 16, 12));
+  EXPECT_TRUE(lhs->equals(rhs));
+  EXPECT_TRUE(rhs->equals(lhs));
+
+  EXPECT_EQ(DDS::RETCODE_OK, rhs->set_int32_value(1, 11));
+  EXPECT_FALSE(lhs->equals(rhs));
+  EXPECT_FALSE(rhs->equals(lhs));
+  EXPECT_FALSE(XTypes::dynamic_data_equal(lhs, rhs));
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, EqualsUnion)
+{
+  DDS::DynamicType_var dt =
+    get_dynamic_type<DCPS::DynamicDataImpl_FinalSingleValueUnion_xtag>();
+  ASSERT_TRUE(dt);
+
+  DDS::DynamicData_var lhs = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+  DDS::DynamicData_var rhs = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+  ASSERT_TRUE(lhs);
+  ASSERT_TRUE(rhs);
+
+  EXPECT_TRUE(lhs->equals(rhs));
+  EXPECT_EQ(DDS::RETCODE_OK, lhs->set_int32_value(1, 10));
+  EXPECT_EQ(DDS::RETCODE_OK, rhs->set_int32_value(1, 10));
+  EXPECT_TRUE(lhs->equals(rhs));
+
+  EXPECT_EQ(DDS::RETCODE_OK, rhs->set_int16_value(5, 10));
+  EXPECT_FALSE(lhs->equals(rhs));
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, EqualsSerializedBackingStore)
+{
+  DDS::DynamicType_var dt =
+    get_dynamic_type<DCPS::DynamicDataImpl_FinalNestedStructOuter_xtag>();
+  ASSERT_TRUE(dt);
+
+  DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+  ASSERT_TRUE(data);
+  EXPECT_EQ(DDS::RETCODE_OK, data->set_int32_value(0, 10));
+  EXPECT_EQ(DDS::RETCODE_OK, set_inner_value(data, dt, 1, 12));
+  EXPECT_EQ(DDS::RETCODE_OK, data->set_int16_value(2, 11));
+
+  ACE_Message_Block buffer(4096);
+  DCPS::Serializer serializer(&buffer, xcdr2);
+  ASSERT_TRUE(serializer << data.in());
+
+  DDS::DynamicData_var backing =
+    new XTypes::DynamicDataXcdrReadImpl(&buffer, xcdr2, dt);
+  DDS::DynamicData_var wrapped =
+    new XTypes::DynamicDataImpl(dt, backing);
+
+  EXPECT_TRUE(data->equals(backing));
+  EXPECT_TRUE(backing->equals(data));
+  EXPECT_TRUE(data->equals(wrapped));
+  EXPECT_TRUE(wrapped->equals(data));
+
+  EXPECT_EQ(DDS::RETCODE_OK, wrapped->set_int32_value(0, 13));
+  EXPECT_FALSE(data->equals(wrapped));
+  EXPECT_FALSE(wrapped->equals(data));
 }
 #endif // OPENDDS_SAFETY_PROFILE

@@ -38,6 +38,17 @@
 /XTypesUtilsTypeSupportImpl.h
 /XTypesUtilsTypeSupportS.cpp
 /XTypesUtilsTypeSupportS.h
+/XmlTypeProviderC.cpp
+/XmlTypeProviderC.h
+/XmlTypeProviderC.inl
+/XmlTypeProviderS.h
+/XmlTypeProviderTypeSupport.idl
+/XmlTypeProviderTypeSupportC.cpp
+/XmlTypeProviderTypeSupportC.h
+/XmlTypeProviderTypeSupportC.inl
+/XmlTypeProviderTypeSupportImpl.cpp
+/XmlTypeProviderTypeSupportImpl.h
+/XmlTypeProviderTypeSupportS.h
 /key_annotationC.cpp
 /key_annotationC.h
 /key_annotationC.inl

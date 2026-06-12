@@ -14,7 +14,10 @@
 #  include <dds/DCPS/DCPS_Utils.h>
 #  include <dds/DCPS/SafetyProfileStreams.h>
 
+#  include <ace/OS_NS_string.h>
+
 #  include <algorithm>
+#  include <limits>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
@@ -506,6 +509,338 @@ namespace {
     }
   }
 
+  const char* float128_bytes(const ACE_CDR::LongDouble& value)
+  {
+#if ACE_SIZEOF_LONG_DOUBLE == 16
+    return reinterpret_cast<const char*>(&value);
+#else
+    return value.ld;
+#endif
+  }
+
+  void float128_big_endian_bytes(const ACE_CDR::LongDouble& value, char bytes[16])
+  {
+    const char* const src = float128_bytes(value);
+#if defined(ACE_BIG_ENDIAN)
+    ACE_OS::memcpy(bytes, src, 16);
+#else
+    for (size_t i = 0; i != 16; ++i) {
+      bytes[i] = src[15 - i];
+    }
+#endif
+
+  }
+
+  bool get_type_descriptor(DDS::TypeDescriptor_var& descriptor, DDS::DynamicType_ptr type)
+  {
+    return type && type->get_descriptor(descriptor) == DDS::RETCODE_OK && descriptor;
+  }
+
+  DDS::DynamicType_var safe_base_type(DDS::DynamicType_ptr type)
+  {
+    if (!type) {
+      return DDS::DynamicType::_nil();
+    }
+    return get_base_type(type);
+  }
+
+  DDS::ReturnCode_t get_member_descriptor_by_id(
+    DDS::MemberDescriptor_var& descriptor,
+    DDS::DynamicType_ptr type,
+    DDS::MemberId id)
+  {
+    descriptor = 0;
+    DDS::DynamicTypeMember_var member;
+    DDS::ReturnCode_t rc = type->get_member(member, id);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    return member->get_descriptor(descriptor);
+  }
+
+  bool scalar_equal(
+    DDS::DynamicData_ptr lhs,
+    DDS::DynamicData_ptr rhs,
+    DDS::MemberId lhs_id,
+    DDS::MemberId rhs_id,
+    DDS::DynamicType_ptr type)
+  {
+    DDS::DynamicType_var base = safe_base_type(type);
+    if (!base) {
+      return false;
+    }
+
+    DDS::ReturnCode_t left_rc = DDS::RETCODE_ERROR;
+    DDS::ReturnCode_t right_rc = DDS::RETCODE_ERROR;
+    switch (base->get_kind()) {
+    case TK_BOOLEAN: {
+      CORBA::Boolean left = false, right = false;
+      left_rc = lhs->get_boolean_value(left, lhs_id);
+      right_rc = rhs->get_boolean_value(right, rhs_id);
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK && left == right;
+    }
+    case TK_BYTE: {
+      CORBA::Octet left = 0, right = 0;
+      left_rc = lhs->get_byte_value(left, lhs_id);
+      right_rc = rhs->get_byte_value(right, rhs_id);
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK && left == right;
+    }
+    case TK_UINT8:
+    case TK_UINT16:
+    case TK_UINT32:
+    case TK_UINT64: {
+      DDS::UInt64 left = 0, right = 0;
+      left_rc = get_uint_value(left, lhs, lhs_id, base->get_kind());
+      right_rc = get_uint_value(right, rhs, rhs_id, base->get_kind());
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK && left == right;
+    }
+    case TK_INT8:
+    case TK_INT16:
+    case TK_INT32:
+    case TK_INT64: {
+      DDS::Int64 left = 0, right = 0;
+      left_rc = get_int_value(left, lhs, lhs_id, base->get_kind());
+      right_rc = get_int_value(right, rhs, rhs_id, base->get_kind());
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK && left == right;
+    }
+    case TK_FLOAT32: {
+      CORBA::Float left = 0, right = 0;
+      left_rc = lhs->get_float32_value(left, lhs_id);
+      right_rc = rhs->get_float32_value(right, rhs_id);
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK && left == right;
+    }
+    case TK_FLOAT64: {
+      CORBA::Double left = 0, right = 0;
+      left_rc = lhs->get_float64_value(left, lhs_id);
+      right_rc = rhs->get_float64_value(right, rhs_id);
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK && left == right;
+    }
+    case TK_FLOAT128: {
+      ACE_CDR::LongDouble left = ACE_CDR_LONG_DOUBLE_INITIALIZER;
+      ACE_CDR::LongDouble right = ACE_CDR_LONG_DOUBLE_INITIALIZER;
+      left_rc = lhs->get_float128_value(left, lhs_id);
+      right_rc = rhs->get_float128_value(right, rhs_id);
+      if (left_rc != DDS::RETCODE_OK || right_rc != DDS::RETCODE_OK) {
+        return false;
+      }
+      char left_bytes[16];
+      char right_bytes[16];
+      float128_big_endian_bytes(left, left_bytes);
+      float128_big_endian_bytes(right, right_bytes);
+      return ACE_OS::memcmp(left_bytes, right_bytes, 16) == 0;
+    }
+    case TK_CHAR8: {
+      CORBA::Char left = 0, right = 0;
+      left_rc = lhs->get_char8_value(left, lhs_id);
+      right_rc = rhs->get_char8_value(right, rhs_id);
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK && left == right;
+    }
+    case TK_CHAR16: {
+      CORBA::WChar left = 0, right = 0;
+      left_rc = lhs->get_char16_value(left, lhs_id);
+      right_rc = rhs->get_char16_value(right, rhs_id);
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK && left == right;
+    }
+    case TK_STRING8: {
+      CORBA::String_var left, right;
+      left_rc = lhs->get_string_value(left, lhs_id);
+      right_rc = rhs->get_string_value(right, rhs_id);
+      if (left_rc != DDS::RETCODE_OK || right_rc != DDS::RETCODE_OK) {
+        return false;
+      }
+      const char* const left_str = left.in();
+      const char* const right_str = right.in();
+      return left_str && right_str ? std::strcmp(left_str, right_str) == 0 : left_str == right_str;
+    }
+    case TK_STRING16: {
+      CORBA::WString_var left, right;
+      left_rc = lhs->get_wstring_value(left, lhs_id);
+      right_rc = rhs->get_wstring_value(right, rhs_id);
+      if (left_rc != DDS::RETCODE_OK || right_rc != DDS::RETCODE_OK) {
+        return false;
+      }
+      const CORBA::WChar* const left_str = left.in();
+      const CORBA::WChar* const right_str = right.in();
+      return left_str && right_str ? ACE_OS::strcmp(left_str, right_str) == 0 : left_str == right_str;
+    }
+    case TK_ENUM: {
+      DDS::Int32 left = 0, right = 0;
+      left_rc = get_enum_value(left, base, lhs, lhs_id);
+      right_rc = get_enum_value(right, base, rhs, rhs_id);
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK && left == right;
+    }
+    case TK_BITMASK: {
+      DDS::UInt64 left = 0, right = 0;
+      left_rc = get_bitmask_value(left, base, lhs, lhs_id);
+      right_rc = get_bitmask_value(right, base, rhs, rhs_id);
+      return left_rc == DDS::RETCODE_OK && right_rc == DDS::RETCODE_OK && left == right;
+    }
+    default:
+      return false;
+    }
+  }
+
+  bool data_equal_i(
+    DDS::DynamicData_ptr lhs,
+    DDS::DynamicData_ptr rhs,
+    DDS::MemberId lhs_id,
+    DDS::MemberId rhs_id,
+    DDS::DynamicType_ptr type)
+  {
+    DDS::DynamicType_var base = safe_base_type(type);
+    if (!lhs || !rhs || !base) {
+      return false;
+    }
+
+    const DDS::TypeKind kind = base->get_kind();
+    if (is_complex(kind) && lhs_id != MEMBER_ID_INVALID) {
+      DDS::DynamicData_var lhs_nested;
+      DDS::DynamicData_var rhs_nested;
+      DDS::ReturnCode_t lhs_rc = lhs->get_complex_value(lhs_nested, lhs_id);
+      DDS::ReturnCode_t rhs_rc = rhs->get_complex_value(rhs_nested, rhs_id);
+      if (lhs_rc != rhs_rc) {
+        return false;
+      }
+      if (lhs_rc != DDS::RETCODE_OK) {
+        return false;
+      }
+      return data_equal_i(lhs_nested, rhs_nested, MEMBER_ID_INVALID, MEMBER_ID_INVALID, base);
+    }
+
+    switch (kind) {
+    case TK_STRUCTURE:
+      for (DDS::UInt32 i = 0; i != base->get_member_count(); ++i) {
+        DDS::DynamicTypeMember_var member;
+        if (base->get_member_by_index(member, i) != DDS::RETCODE_OK) {
+          return false;
+        }
+        DDS::MemberDescriptor_var md;
+        if (member->get_descriptor(md) != DDS::RETCODE_OK) {
+          return false;
+        }
+        if (!data_equal_i(lhs, rhs, md->id(), md->id(), md->type())) {
+          return false;
+        }
+      }
+      return true;
+    case TK_UNION: {
+      DDS::TypeDescriptor_var td;
+      if (!get_type_descriptor(td, base)) {
+        return false;
+      }
+      DDS::DynamicType_var discriminator_type = safe_base_type(td->discriminator_type());
+      if (!scalar_equal(lhs, rhs, DISCRIMINATOR_ID, DISCRIMINATOR_ID, discriminator_type)) {
+        return false;
+      }
+      const DDS::UInt32 lhs_count = lhs->get_item_count();
+      const DDS::UInt32 rhs_count = rhs->get_item_count();
+      if (lhs_count != rhs_count) {
+        return false;
+      }
+      if (lhs_count <= 1) {
+        return true;
+      }
+      const DDS::MemberId lhs_branch = lhs->get_member_id_at_index(1);
+      const DDS::MemberId rhs_branch = rhs->get_member_id_at_index(1);
+      if (lhs_branch != rhs_branch) {
+        return false;
+      }
+      DDS::MemberDescriptor_var md;
+      if (get_member_descriptor_by_id(md, base, lhs_branch) != DDS::RETCODE_OK) {
+        return false;
+      }
+      return data_equal_i(lhs, rhs, lhs_branch, rhs_branch, md->type());
+    }
+    case TK_MAP: {
+      DDS::TypeDescriptor_var td;
+      if (!get_type_descriptor(td, base)) {
+        return false;
+      }
+      DDS::DynamicType_var key_type = safe_base_type(td->key_element_type());
+      DDS::DynamicType_var element_type = safe_base_type(td->element_type());
+      DynamicDataBase* lhs_map = dynamic_cast<DynamicDataBase*>(lhs);
+      DynamicDataBase* rhs_map = dynamic_cast<DynamicDataBase*>(rhs);
+      if (!key_type || !element_type || !lhs_map || !rhs_map) {
+        return false;
+      }
+      const DDS::UInt32 lhs_count = lhs->get_item_count();
+      const DDS::UInt32 rhs_count = rhs->get_item_count();
+      if (lhs_count != rhs_count) {
+        return false;
+      }
+      typedef OPENDDS_VECTOR(DDS::MemberId) MemberIdVec;
+      MemberIdVec rhs_unmatched;
+      rhs_unmatched.reserve(rhs_count);
+      for (DDS::UInt32 i = 0; i != rhs_count; ++i) {
+        const DDS::MemberId rhs_entry = rhs->get_member_id_at_index(i);
+        if (rhs_entry == MEMBER_ID_INVALID) {
+          return false;
+        }
+        rhs_unmatched.push_back(rhs_entry);
+      }
+
+      for (DDS::UInt32 i = 0; i != lhs_count; ++i) {
+        const DDS::MemberId lhs_entry = lhs->get_member_id_at_index(i);
+        DDS::DynamicData_var lhs_key;
+        DDS::DynamicData_var lhs_value;
+        if (lhs_entry == MEMBER_ID_INVALID ||
+            lhs_map->get_map_key(lhs_key, lhs_entry) != DDS::RETCODE_OK ||
+            lhs_map->get_map_value(lhs_value, lhs_entry) != DDS::RETCODE_OK) {
+          return false;
+        }
+
+        bool matched = false;
+        for (MemberIdVec::iterator it = rhs_unmatched.begin(); it != rhs_unmatched.end(); ++it) {
+          DDS::DynamicData_var rhs_key;
+          DDS::DynamicData_var rhs_value;
+          if (rhs_map->get_map_key(rhs_key, *it) == DDS::RETCODE_OK &&
+              rhs_map->get_map_value(rhs_value, *it) == DDS::RETCODE_OK &&
+              data_equal_i(lhs_key, rhs_key, MEMBER_ID_INVALID, MEMBER_ID_INVALID, key_type) &&
+              data_equal_i(lhs_value, rhs_value, MEMBER_ID_INVALID, MEMBER_ID_INVALID, element_type)) {
+            rhs_unmatched.erase(it);
+            matched = true;
+            break;
+          }
+        }
+        if (!matched) {
+          return false;
+        }
+      }
+      return rhs_unmatched.empty();
+    }
+    case TK_ARRAY:
+    case TK_SEQUENCE: {
+      DDS::TypeDescriptor_var td;
+      if (!get_type_descriptor(td, base)) {
+        return false;
+      }
+      DDS::DynamicType_var element_type = safe_base_type(td->element_type());
+      if (!element_type) {
+        return false;
+      }
+      DDS::UInt32 count;
+      if (kind == TK_ARRAY) {
+        count = bound_total(td);
+      } else {
+        const DDS::UInt32 lhs_count = lhs->get_item_count();
+        const DDS::UInt32 rhs_count = rhs->get_item_count();
+        if (lhs_count != rhs_count) {
+          return false;
+        }
+        count = lhs_count;
+      }
+      for (DDS::UInt32 i = 0; i != count; ++i) {
+        if (!data_equal_i(lhs, rhs, i, i, element_type)) {
+          return false;
+        }
+      }
+      return true;
+    }
+    default:
+      return scalar_equal(lhs, rhs, lhs_id, rhs_id, base);
+    }
+  }
+
   DDS::ReturnCode_t member_compare(int& result,
     DDS::DynamicData_ptr a_data, DDS::MemberId a_id,
     DDS::DynamicData_ptr b_data, DDS::MemberId b_id)
@@ -786,8 +1121,10 @@ namespace {
     }
 
     if (a_rc != DDS::RETCODE_OK || b_rc != DDS::RETCODE_OK) {
-      const CORBA::String_var b_type_name = b_data->type()->get_name();
-      const CORBA::String_var a_type_name = a_data->type()->get_name();
+      DDS::DynamicType_var b_data_type = b_data->type();
+      DDS::DynamicType_var a_data_type = a_data->type();
+      const CORBA::String_var b_type_name = b_data_type->get_name();
+      const CORBA::String_var a_type_name = a_data_type->get_name();
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: member_compare(DynamicData): "
           "Could not compare member type %C id %u from %C (%C) to %C (%C)\n",
@@ -799,6 +1136,21 @@ namespace {
 
     return DDS::RETCODE_OK;
   }
+}
+
+bool dynamic_data_equal(DDS::DynamicData_ptr lhs, DDS::DynamicData_ptr rhs)
+{
+  if (!lhs || !rhs) {
+    return lhs == rhs;
+  }
+  DDS::DynamicType_var lhs_type = lhs->type();
+  DDS::DynamicType_var rhs_type = rhs->type();
+  DDS::DynamicType_var lhs_base = safe_base_type(lhs_type);
+  DDS::DynamicType_var rhs_base = safe_base_type(rhs_type);
+  if (!lhs_base || !rhs_base || !lhs_base->equals(rhs_base)) {
+    return false;
+  }
+  return data_equal_i(lhs, rhs, MEMBER_ID_INVALID, MEMBER_ID_INVALID, lhs_base);
 }
 
 DDS::ReturnCode_t less_than(
@@ -944,10 +1296,19 @@ DDS::ReturnCode_t set_uint_value(
 {
   switch (kind) {
   case TK_UINT8:
+    if (value > std::numeric_limits<DDS::UInt8>::max()) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
     return dest->set_uint8_value(id, static_cast<DDS::UInt8>(value));
   case TK_UINT16:
+    if (value > std::numeric_limits<DDS::UInt16>::max()) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
     return dest->set_uint16_value(id, static_cast<DDS::UInt16>(value));
   case TK_UINT32:
+    if (value > std::numeric_limits<DDS::UInt32>::max()) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
     return dest->set_uint32_value(id, static_cast<DDS::UInt32>(value));
   case TK_UINT64:
     return dest->set_uint64_value(id, value);
@@ -999,10 +1360,22 @@ DDS::ReturnCode_t set_int_value(
 {
   switch (kind) {
   case TK_INT8:
+    if (value < std::numeric_limits<DDS::Int8>::min() ||
+        value > std::numeric_limits<DDS::Int8>::max()) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
     return dest->set_int8_value(id, static_cast<DDS::Int8>(value));
   case TK_INT16:
+    if (value < std::numeric_limits<DDS::Int16>::min() ||
+        value > std::numeric_limits<DDS::Int16>::max()) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
     return dest->set_int16_value(id, static_cast<DDS::Int16>(value));
   case TK_INT32:
+    if (value < std::numeric_limits<DDS::Int32>::min() ||
+        value > std::numeric_limits<DDS::Int32>::max()) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
     return dest->set_int32_value(id, static_cast<DDS::Int32>(value));
   case TK_INT64:
     return dest->set_int64_value(id, value);

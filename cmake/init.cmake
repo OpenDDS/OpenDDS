@@ -537,7 +537,7 @@ else()
   _opendds_feature(STATIC ON MPC DOC "(Not for CMake-built OpenDDS)")
 endif()
 _opendds_feature(XERCES3 "${OPENDDS_SECURITY}" MPC TYPE PATH
-  DOC "Build with Xerces XML parser, needed for security and QoS XML Handler")
+  DOC "Build with Xerces XML parser, needed for security, QoS XML Handler, and DDS-XML type loading")
 _opendds_feature(IPV6 OFF MPC DOC "Build with IPv6 support")
 if(OPENDDS_CXX_STD_YEAR LESS 2011)
   set(_opendds_cxx11_default OFF)

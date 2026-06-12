@@ -408,6 +408,7 @@ target_sources(OpenDDS_Dcps
     DCPS/XTypes/DynamicDataBase.h
     DCPS/XTypes/DynamicDataFactory.h
     DCPS/XTypes/DynamicDataImpl.h
+    DCPS/XTypes/DynamicDataJson.h
     DCPS/XTypes/DynamicDataReaderImpl.h
     DCPS/XTypes/DynamicDataWriterImpl.h
     DCPS/XTypes/DynamicDataXcdrReadImpl.h
@@ -426,6 +427,7 @@ target_sources(OpenDDS_Dcps
     DCPS/XTypes/TypeObjectC.h
     DCPS/XTypes/TypeObjectTypeSupportImpl.h
     DCPS/XTypes/Utils.h
+    DCPS/XTypes/XmlTypeProvider.h
     DCPS/Xcdr2ValueWriter.h
     DCPS/ZeroCopyAllocator_T.cpp
     DCPS/ZeroCopyAllocator_T.h
@@ -579,7 +581,12 @@ target_include_directories(OpenDDS_Dcps
     "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 if(OPENDDS_RAPIDJSON)
+  target_sources(OpenDDS_Dcps PRIVATE DCPS/XTypes/DynamicDataJson.cpp)
   target_include_directories(OpenDDS_Dcps PUBLIC "$<BUILD_INTERFACE:${OPENDDS_RAPIDJSON}/include>")
+endif()
+if(OPENDDS_XERCES3)
+  target_sources(OpenDDS_Dcps PRIVATE DCPS/XTypes/XmlTypeProvider.cpp)
+  target_link_libraries(OpenDDS_Dcps PUBLIC XercesC::XercesC)
 endif()
 target_link_libraries(OpenDDS_Dcps PUBLIC ${dcps_lib_deps})
 

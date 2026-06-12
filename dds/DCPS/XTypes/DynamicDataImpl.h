@@ -128,6 +128,9 @@ public:
                                       DDS::MemberId id);
   DDS::ReturnCode_t set_complex_value(DDS::MemberId id,
                                       DDS::DynamicData_ptr value);
+  DDS::ReturnCode_t set_map_entry(DDS::MemberId id,
+                                  DDS::DynamicData_ptr key,
+                                  DDS::DynamicData_ptr value);
 
   DDS::ReturnCode_t get_int32_values(DDS::Int32Seq& value,
                                      DDS::MemberId id);
@@ -218,8 +221,12 @@ public:
   bool serialize(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
 
 private:
+  DDS::ReturnCode_t get_map_key_i(DDS::DynamicData_ptr& key, DDS::MemberId id);
+  DDS::ReturnCode_t get_map_value_i(DDS::DynamicData_ptr& value, DDS::MemberId id);
+
   CORBA::ULong get_string_item_count() const;
   CORBA::ULong get_sequence_item_count() const;
+  CORBA::ULong get_map_item_count() const;
   bool has_member(DDS::MemberId id) const;
   void erase_member(DDS::MemberId id);
 
@@ -585,6 +592,16 @@ private:
   typedef OPENDDS_MAP(DDS::MemberId, SequenceValue)::const_iterator const_sequence_iterator;
   typedef OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var)::const_iterator const_complex_iterator;
 
+  struct MapEntry {
+    MapEntry();
+    MapEntry(DDS::DynamicData_ptr key, DDS::DynamicData_ptr value);
+
+    DDS::DynamicData_var key_;
+    DDS::DynamicData_var value_;
+  };
+
+  typedef OPENDDS_MAP(DDS::MemberId, MapEntry)::const_iterator const_map_iterator;
+
   // Container for all data written to this DynamicData object.
   // At anytime, there can be at most 1 entry for any given MemberId in all maps.
   // That is, each member is stored in at most 1 map.
@@ -599,6 +616,7 @@ private:
       : single_map_(other.single_map_)
       , sequence_map_(other.sequence_map_)
       , complex_map_(other.complex_map_)
+      , map_map_(other.map_map_)
       , type_(data->type_)
       , type_desc_(data->type_desc_)
       , data_(data)
@@ -626,6 +644,7 @@ private:
     OPENDDS_MAP(DDS::MemberId, SingleValue) single_map_;
     OPENDDS_MAP(DDS::MemberId, SequenceValue) sequence_map_;
     OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var) complex_map_;
+    OPENDDS_MAP(DDS::MemberId, MapEntry) map_map_;
 
     const DDS::DynamicType_var& type_;
     const DDS::TypeDescriptor_var& type_desc_;

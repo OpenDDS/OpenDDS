@@ -13,14 +13,21 @@ include("${CMAKE_CURRENT_LIST_DIR}/init.cmake")
 
 _opendds_group(OpenDDS DEFAULT_REQUIRED OpenDDS::Dcps OpenDDS::opendds_idl)
 
+set(_opendds_dcps_deps
+  ACE::ACE
+  # TODO: These are omitted with safety profile
+  TAO::TAO
+  TAO::Valuetype
+  TAO::PortableServer
+  TAO::BiDirGIOP
+)
+if(OPENDDS_XERCES3)
+  list(APPEND _opendds_dcps_deps XercesC::XercesC)
+endif()
+
 _opendds_group_lib(Dcps
   DEPENDS
-    ACE::ACE
-    # TODO: These are omitted with safety profile
-    TAO::TAO
-    TAO::Valuetype
-    TAO::PortableServer
-    TAO::BiDirGIOP
+    ${_opendds_dcps_deps}
 )
 _opendds_group_lib(FACE DEPENDS OpenDDS::Dcps)
 _opendds_group_lib(Federator DEPENDS OpenDDS::InfoRepoLib)
@@ -86,6 +93,9 @@ if(OPENDDS_RAPIDJSON)
   endif()
   list(APPEND OPENDDS_DCPS_INCLUDE_DIRS "${OPENDDS_RAPIDJSON}/include")
   list(APPEND OPENDDS_DCPS_COMPILE_DEFINITIONS OPENDDS_RAPIDJSON)
+endif()
+if(OPENDDS_XERCES3)
+  list(APPEND OPENDDS_DCPS_COMPILE_DEFINITIONS OPENDDS_XERCES3)
 endif()
 list(REMOVE_DUPLICATES OPENDDS_DCPS_INCLUDE_DIRS)
 

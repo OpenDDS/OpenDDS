@@ -1,0 +1,107 @@
+<dds>
+  <types>
+    <module name="XmlTypeProviderTest">
+      <struct name="Inner" extensibility="appendable" nested="true">
+        <member name="value" type="int32"/>
+      </struct>
+
+      <enum name="Kind" bitBound="32" extensibility="appendable">
+        <enumerator name="KIND_A" value="0"/>
+        <enumerator name="KIND_B" value="1"/>
+        <enumerator name="KIND_C" value="2"/>
+      </enum>
+
+      <struct name="Sample" extensibility="mutable">
+        <member name="id" type="uint32" id="10" key="true"/>
+        <member name="names" type="string" id="11" stringMaxLength="8" sequenceMaxLength="4" mustUnderstand="true"/>
+        <member name="inner_value" type="nonBasic" nonBasicTypeName="Inner" id="12"/>
+        <member name="kind_value" type="nonBasic" nonBasicTypeName="Kind" id="13"/>
+        <member name="values" type="uint16" id="14" arrayDimensions="3"/>
+      </struct>
+
+      <struct name="Numeric" extensibility="appendable">
+        <member name="byte_value" type="byte"/>
+        <member name="int8_value" type="int8"/>
+        <member name="uint8_value" type="uint8"/>
+        <member name="int16_value" type="int16"/>
+        <member name="uint16_value" type="uint16"/>
+        <member name="kind_value" type="nonBasic" nonBasicTypeName="Kind"/>
+      </struct>
+
+      <bitmask name="Flags" bitBound="16">
+        <flag name="FLAG_A" value="0"/>
+        <flag name="FLAG_B" value="1"/>
+      </bitmask>
+
+      <struct name="NamedKeyMapSample" extensibility="appendable">
+        <member name="kind_lookup" type="map" id="30" mapMaxLength="3">
+          <key type="nonBasic" nonBasicTypeName="Kind"/>
+          <value type="uint32"/>
+        </member>
+        <member name="flag_lookup" type="map" id="31" mapMaxLength="3">
+          <key type="nonBasic" nonBasicTypeName="Flags"/>
+          <value type="uint32"/>
+        </member>
+      </struct>
+
+      <struct name="MapSample" extensibility="appendable">
+        <member name="lookup" type="map" id="20" mapMaxLength="4">
+          <key type="uint32"/>
+          <value type="uint32"/>
+        </member>
+        <member name="inner_lookup" type="map" id="21" mapMaxLength="2">
+          <key type="uint32"/>
+          <value type="nonBasic" nonBasicTypeName="Inner"/>
+        </member>
+      </struct>
+
+      <union name="Choice" extensibility="appendable">
+        <discriminator type="nonBasic" nonBasicTypeName="Kind"/>
+        <case>
+          <caseDiscriminator value="KIND_A"/>
+          <member name="a" type="int32"/>
+        </case>
+        <case>
+          <caseDiscriminator value="KIND_B"/>
+          <member name="b" type="string" stringMaxLength="8"/>
+        </case>
+        <case>
+          <caseDiscriminator value="default"/>
+          <member name="other" type="nonBasic" nonBasicTypeName="Inner"/>
+        </case>
+      </union>
+
+      <!-- Flagged uses named flag values as case discriminators to exercise
+           bitmask label_values lookup in case_label(). -->
+      <union name="Flagged" extensibility="appendable">
+        <discriminator type="nonBasic" nonBasicTypeName="Flags"/>
+        <case>
+          <caseDiscriminator value="FLAG_A"/>
+          <member name="x" type="int32"/>
+        </case>
+        <case>
+          <caseDiscriminator value="FLAG_B"/>
+          <member name="y" type="string"/>
+        </case>
+      </union>
+
+      <!-- HighBits exercises bit positions 30 and 31, the boundary of the
+           old bug (value < 31 stored raw position instead of 1 << position). -->
+      <bitmask name="HighBits" bitBound="32">
+        <flag name="BIT_30" value="30"/>
+        <flag name="BIT_31" value="31"/>
+      </bitmask>
+      <union name="HighBitUnion" extensibility="appendable">
+        <discriminator type="nonBasic" nonBasicTypeName="HighBits"/>
+        <case>
+          <caseDiscriminator value="BIT_30"/>
+          <member name="a" type="int32"/>
+        </case>
+        <case>
+          <caseDiscriminator value="BIT_31"/>
+          <member name="b" type="int32"/>
+        </case>
+      </union>
+    </module>
+  </types>
+</dds>

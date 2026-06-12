@@ -92,6 +92,28 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::Dyn
       encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
     throw std::runtime_error("DynamicDataXcdrReadImpl only supports XCDR1 and XCDR2");
   }
+  if (!chain_) {
+    throw std::runtime_error("DynamicDataXcdrReadImpl could not create bounded message block");
+  }
+
+  strm_.rdstate(align_state_);
+}
+
+DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type,
+                                                 DCPS::Sample::Extent ext, size_t limit)
+  : DynamicDataBase(type)
+  , chain_(ser.trim(limit))
+  , encoding_(ser.encoding())
+  , extent_(ext)
+  , reset_align_state_(true)
+  , align_state_(ser.rdstate())
+  , strm_(chain_, encoding_)
+  , item_count_(ITEM_COUNT_INVALID)
+{
+  if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
+      encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
+    throw std::runtime_error("DynamicDataXcdrReadImpl only supports XCDR1 and XCDR2");
+  }
 
   strm_.rdstate(align_state_);
 }
@@ -1151,6 +1173,15 @@ bool DynamicDataXcdrReadImpl::skip_to_array_element(MemberId id, DDS::DynamicTyp
 
 bool DynamicDataXcdrReadImpl::skip_to_map_element(MemberId id)
 {
+  return skip_to_map_entry(id, true);
+}
+
+bool DynamicDataXcdrReadImpl::skip_to_map_entry(MemberId id, bool skip_key, size_t* remaining)
+{
+  if (remaining) {
+    *remaining = 0;
+  }
+
   const DDS::DynamicType_var key_type = get_base_type(type_desc_->key_element_type());
   const DDS::DynamicType_var elem_type = get_base_type(type_desc_->element_type());
   ACE_CDR::ULong key_size, elem_size;
@@ -1168,7 +1199,7 @@ bool DynamicDataXcdrReadImpl::skip_to_map_element(MemberId id)
         return false;
       }
     }
-    return strm_.skip(1, static_cast<int>(key_size));
+    return !skip_key || strm_.skip(1, static_cast<int>(key_size));
   } else {
     size_t dheader;
     ACE_CDR::ULong index;
@@ -1182,8 +1213,41 @@ bool DynamicDataXcdrReadImpl::skip_to_map_element(MemberId id)
         return false;
       }
     }
-    return (strm_.rpos() < end_of_map) && skip_member(key_type);
+    if (strm_.rpos() >= end_of_map) {
+      return false;
+    }
+    if (skip_key && !skip_member(key_type)) {
+      return false;
+    }
+    if (strm_.rpos() >= end_of_map) {
+      return false;
+    }
+    if (remaining) {
+      *remaining = end_of_map - strm_.rpos();
+    }
+    return true;
   }
+}
+
+bool DynamicDataXcdrReadImpl::encoded_member_size(DDS::DynamicType_ptr type, size_t max_size, size_t& size)
+{
+  size = 0;
+  if (!max_size || max_size > strm_.length()) {
+    return false;
+  }
+  DynamicDataXcdrReadImpl probe(strm_, type, nested(extent_), max_size);
+  const size_t start = probe.strm_.rpos();
+  const bool skipped = probe.skip_member(type);
+  const size_t consumed = skipped ? probe.strm_.rpos() - start : 0;
+  probe.release_chains();
+  if (!skipped) {
+    return false;
+  }
+  if (!consumed || consumed > max_size) {
+    return false;
+  }
+  size = consumed;
+  return true;
 }
 
 template<TypeKind ElementTypeKind, typename ElementType>
@@ -1701,6 +1765,48 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
+DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_map_key_i(DDS::DynamicData_ptr& key, DDS::MemberId id)
+{
+  if (type_->get_kind() != TK_MAP) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+  ScopedChainManager scoped_chain(*this);
+  size_t remaining = 0;
+  if (!skip_to_map_entry(id, false, &remaining)) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+  size_t encoded_size = 0;
+  if (remaining && !encoded_member_size(type_desc_->key_element_type(), remaining, encoded_size)) {
+    return DDS::RETCODE_ERROR;
+  }
+  CORBA::release(key);
+  key = encoded_size ?
+    new DynamicDataXcdrReadImpl(strm_, type_desc_->key_element_type(), nested(extent_), encoded_size) :
+    new DynamicDataXcdrReadImpl(strm_, type_desc_->key_element_type(), nested(extent_));
+  return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_map_value_i(DDS::DynamicData_ptr& value, DDS::MemberId id)
+{
+  if (type_->get_kind() != TK_MAP) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+  ScopedChainManager scoped_chain(*this);
+  size_t remaining = 0;
+  if (!skip_to_map_entry(id, true, &remaining)) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+  size_t encoded_size = 0;
+  if (remaining && !encoded_member_size(type_desc_->element_type(), remaining, encoded_size)) {
+    return DDS::RETCODE_ERROR;
+  }
+  CORBA::release(value);
+  value = encoded_size ?
+    new DynamicDataXcdrReadImpl(strm_, type_desc_->element_type(), nested(extent_), encoded_size) :
+    new DynamicDataXcdrReadImpl(strm_, type_desc_->element_type(), nested(extent_));
+  return DDS::RETCODE_OK;
+}
+
 template<typename SequenceType>
 bool DynamicDataXcdrReadImpl::read_values(SequenceType& value, TypeKind elem_tk)
 {
@@ -2162,13 +2268,6 @@ bool DynamicDataXcdrReadImpl::check_xcdr1_mutable(DDS::DynamicType_ptr dt)
 {
   DynamicTypeNameSet dtns;
   return check_xcdr1_mutable_i(dt, dtns);
-}
-
-CORBA::Boolean DynamicDataXcdrReadImpl::equals(DDS::DynamicData_ptr)
-{
-  // FUTURE: Implement this.
-  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataXcdrReadImpl::equals: Not implemented\n"));
-  return false;
 }
 
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDescriptor* member_desc, MemberId id)

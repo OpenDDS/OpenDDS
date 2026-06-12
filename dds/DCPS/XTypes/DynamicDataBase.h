@@ -36,6 +36,21 @@ public:
   DDS::ReturnCode_t return_loaned_value(DDS::DynamicData_ptr other);
   DDS::DynamicData_ptr clone();
 
+  DDS::ReturnCode_t get_map_key(DDS::DynamicData_ptr& key, DDS::MemberId id)
+  {
+    return !type_ || type_->get_kind() != TK_MAP ? DDS::RETCODE_PRECONDITION_NOT_MET : get_map_key_i(key, id);
+  }
+
+  DDS::ReturnCode_t get_map_value(DDS::DynamicData_ptr& value, DDS::MemberId id)
+  {
+    return !type_ || type_->get_kind() != TK_MAP ? DDS::RETCODE_PRECONDITION_NOT_MET : get_map_value_i(value, id);
+  }
+
+  virtual DDS::ReturnCode_t set_map_entry(DDS::MemberId, DDS::DynamicData_ptr, DDS::DynamicData_ptr)
+  {
+    return DDS::RETCODE_UNSUPPORTED;
+  }
+
   DDS::ReturnCode_t get_int64_value(DDS::Int64& value, DDS::MemberId id);
   virtual DDS::ReturnCode_t get_int64_value_impl(DDS::Int64& value, DDS::MemberId id) = 0;
   DDS::ReturnCode_t get_uint64_value(DDS::UInt64& value, DDS::MemberId id);
@@ -49,6 +64,16 @@ public:
   virtual bool serialize(DCPS::Serializer& ser, DCPS::Sample::Extent extent) const = 0;
 
 protected:
+  virtual DDS::ReturnCode_t get_map_key_i(DDS::DynamicData_ptr&, DDS::MemberId)
+  {
+    return DDS::RETCODE_UNSUPPORTED;
+  }
+
+  virtual DDS::ReturnCode_t get_map_value_i(DDS::DynamicData_ptr&, DDS::MemberId)
+  {
+    return DDS::RETCODE_UNSUPPORTED;
+  }
+
   /// Verify that a given type is primitive or string or wstring.
   bool is_type_supported(TypeKind tk, const char* func_name);
 

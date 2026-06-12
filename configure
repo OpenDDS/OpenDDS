@@ -276,7 +276,7 @@ my @specs =
     'qt:s', 'Qt5 (use QTDIR or system pkg)',
     'qt-include:s', 'Qt include dir (use QT5_INCDIR, QTDIR/include,' .
       $argIndent . 'or system package)',
-    'xerces3:s', 'Xerces-C++ 3 for QoS XML handling, DDS Security',
+    'xerces3:s', 'Xerces-C++ 3 for QoS XML handling, DDS Security, DDS-XML type loading',
     'openssl:s', 'OpenSSL for DDS Security',
     'cmake:s', 'Path to CMake for compiling GoogleTest' .
       $argIndent . '(Check PATH and normal locations)',
@@ -2008,7 +2008,7 @@ for my $key (keys %optdep) {
 }
 
 if ($is_windows && !$opts{'optimize'}) { # look for nonstandard vcpkg layout
-  for my $key ('xerces3', 'openssl') {
+  for my $key ('openssl') {
     my $env = $optdep{$key}->{env};
     if ($opts{$key} && $targetEnv{$env}) {
       if (-d $targetEnv{$env} . '/debug/lib') {
@@ -2019,6 +2019,11 @@ if ($is_windows && !$opts{'optimize'}) { # look for nonstandard vcpkg layout
         $opts{$key . '-debugbin'} = 1;
       }
     }
+  }
+  if ($opts{'xerces3'} && $targetEnv{'XERCESCROOT'} &&
+      -d $targetEnv{'XERCESCROOT'} . '/debug/lib') {
+    print "Using debug/lib subdir for xerces3 debug builds\n" if $opts{'verbose'};
+    $opts{'xerces3-debugbin'} = 1;
   }
 }
 
@@ -2774,11 +2779,16 @@ sub add_dependency_paths {
   for my $key ('openssl', 'xerces3') {
     if ($opts{$key}) {
       next if $opts{$key} eq '/usr' || $opts{$key} eq 'skip_version_check';
-      my $suffix = $slash . 'bin';
-      if ($opts{$key . '-debugbin'}) {
-        $suffix = $slash . 'debug' . $suffix;
+      my @suffixes = ($slash . 'bin');
+      if ($is_windows) {
+        push(@suffixes, $slash . 'debug' . $slash . 'bin');
+      } elsif ($opts{$key . '-debugbin'}) {
+        @suffixes = ($slash . 'debug' . $slash . 'bin');
       }
-      $dirs{$targetEnv{$optdep{$key}->{env}} . $suffix} = 1;
+      for my $suffix (@suffixes) {
+        my $dir = $targetEnv{$optdep{$key}->{env}} . $suffix;
+        $dirs{$dir} = 1 if $opts{'dry-run'} || -d $dir;
+      }
     }
   }
   for my $d (keys %dirs) {
@@ -2851,9 +2861,8 @@ if ($cloned_build) {
   unless ($opts{'static'}) {
     push_libpath(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'lib');
     push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
-
-    add_dependency_paths();
   }
+  add_dependency_paths();
 
   configure_build(\%targetEnv);
 
@@ -2877,9 +2886,8 @@ else { # does not require cloned builds
   unless ($opts{'static'}) {
     push_libpath(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'lib');
     push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
-
-    add_dependency_paths();
   }
+  add_dependency_paths();
 
   if ($host_tools_only) {
     write_host_workspace(\%targetEnv);
