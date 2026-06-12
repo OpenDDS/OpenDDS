@@ -174,7 +174,7 @@ struct AddrSetStats {
     return now - session_start;
   }
 
-  void maintain_pending_peer_relays(const std::string name, const OpenDDS::DCPS::MonotonicTimePoint& expire)
+  void maintain_pending_peer_relays(const std::string& name, const OpenDDS::DCPS::MonotonicTimePoint& expire)
   {
     PendingPeerRelays* peer_relays = nullptr;
     if (name == HSPDP) {
