@@ -105,7 +105,7 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::Dyn
 }
 
 DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type,
-                                                 DCPS::Sample::Extent ext, size_t limit)
+                                                 DCPS::Sample::Extent ext, ByteLimitTag, size_t limit)
   : DynamicDataBase(type)
   , chain_(ser.trim(limit))
   , encoding_(ser.encoding())
@@ -114,6 +114,7 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::Dyn
   , align_state_(ser.rdstate())
   , strm_(chain_, encoding_)
   , item_count_(ITEM_COUNT_INVALID)
+  , item_count_limit_(ACE_UINT32_MAX)
 {
   if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
       encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
@@ -1801,7 +1802,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_map_key_i(DDS::DynamicData_ptr& k
   }
   CORBA::release(key);
   key = encoded_size ?
-    new DynamicDataXcdrReadImpl(strm_, type_desc_->key_element_type(), nested(extent_), encoded_size) :
+    new DynamicDataXcdrReadImpl(strm_, type_desc_->key_element_type(), nested(extent_), ByteLimitTag(), encoded_size) :
     new DynamicDataXcdrReadImpl(strm_, type_desc_->key_element_type(), nested(extent_));
   return DDS::RETCODE_OK;
 }
@@ -1822,7 +1823,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_map_value_i(DDS::DynamicData_ptr&
   }
   CORBA::release(value);
   value = encoded_size ?
-    new DynamicDataXcdrReadImpl(strm_, type_desc_->element_type(), nested(extent_), encoded_size) :
+    new DynamicDataXcdrReadImpl(strm_, type_desc_->element_type(), nested(extent_), ByteLimitTag(), encoded_size) :
     new DynamicDataXcdrReadImpl(strm_, type_desc_->element_type(), nested(extent_));
   return DDS::RETCODE_OK;
 }

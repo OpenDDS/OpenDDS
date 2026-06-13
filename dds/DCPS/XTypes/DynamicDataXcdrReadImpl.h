@@ -353,10 +353,12 @@ public:
   }
 
 private:
+  struct ByteLimitTag {};
+
   /// Like the Serializer constructor, but limits the duplicated chain to
   /// @a limit bytes from the serializer's current read position.
   DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type,
-                          DCPS::Sample::Extent ext, size_t limit);
+                          DCPS::Sample::Extent ext, ByteLimitTag, size_t limit);
 
   DDS::ReturnCode_t get_map_key_i(DDS::DynamicData_ptr& key, DDS::MemberId id);
   DDS::ReturnCode_t get_map_value_i(DDS::DynamicData_ptr& value, DDS::MemberId id);
