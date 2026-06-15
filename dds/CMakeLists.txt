@@ -584,10 +584,6 @@ if(OPENDDS_RAPIDJSON)
   target_sources(OpenDDS_Dcps PRIVATE DCPS/XTypes/DynamicDataJson.cpp)
   target_include_directories(OpenDDS_Dcps PUBLIC "$<BUILD_INTERFACE:${OPENDDS_RAPIDJSON}/include>")
 endif()
-if(OPENDDS_XERCES3)
-  target_sources(OpenDDS_Dcps PRIVATE DCPS/XTypes/XmlTypeProvider.cpp)
-  target_link_libraries(OpenDDS_Dcps PUBLIC XercesC::XercesC)
-endif()
 target_link_libraries(OpenDDS_Dcps PUBLIC ${dcps_lib_deps})
 
 set(opendds_target_sources_args

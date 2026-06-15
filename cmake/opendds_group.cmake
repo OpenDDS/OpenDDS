@@ -21,9 +21,6 @@ set(_opendds_dcps_deps
   TAO::PortableServer
   TAO::BiDirGIOP
 )
-if(OPENDDS_XERCES3)
-  list(APPEND _opendds_dcps_deps XercesC::XercesC)
-endif()
 
 _opendds_group_lib(Dcps
   DEPENDS
@@ -93,9 +90,6 @@ if(OPENDDS_RAPIDJSON)
   endif()
   list(APPEND OPENDDS_DCPS_INCLUDE_DIRS "${OPENDDS_RAPIDJSON}/include")
   list(APPEND OPENDDS_DCPS_COMPILE_DEFINITIONS OPENDDS_RAPIDJSON)
-endif()
-if(OPENDDS_XERCES3)
-  list(APPEND OPENDDS_DCPS_COMPILE_DEFINITIONS OPENDDS_XERCES3)
 endif()
 list(REMOVE_DUPLICATES OPENDDS_DCPS_INCLUDE_DIRS)
 
