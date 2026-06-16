@@ -6,7 +6,7 @@
 #ifndef OPENDDS_DCPS_XTYPES_XML_TYPE_PROVIDER_H
 #define OPENDDS_DCPS_XTYPES_XML_TYPE_PROVIDER_H
 
-#include <dds/DCPS/XTypes/XmlTypeProvider_export.h>
+#include "XmlTypeProvider_export.h"
 #include <dds/DdsDynamicDataC.h>
 
 #include <ace/SString.h>

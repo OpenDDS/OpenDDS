@@ -3,6 +3,10 @@ project(OpenDDS_XTypes_Xml): dcpslib, optional_xerces, install, dds_versioning_i
   dynamicflags = OPENDDS_XTYPES_XML_BUILD_DLL
   requires += no_opendds_safety_profile
   requires += xerces3
+  includes += ../..
+
+  IDL_Files {
+  }
 
   Source_Files {
     XmlTypeProvider.cpp
