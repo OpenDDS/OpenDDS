@@ -65,6 +65,13 @@ _opendds_group_lib(Tcp DEPENDS OpenDDS::Dcps)
 _opendds_group_lib(Udp DEPENDS OpenDDS::Dcps)
 _opendds_group_lib(QOS_XML_XSC_Handler DEPENDS OpenDDS::Dcps ACE::XML_Utils)
 _opendds_group_lib(RtpsRelayLib DEPENDS OpenDDS::Dcps)
+if(OPENDDS_XERCES3 AND NOT OPENDDS_SAFETY_PROFILE)
+  _opendds_group_lib(XTypes_Xml
+    DEPENDS
+      OpenDDS::Dcps
+      XercesC::XercesC)
+  list(APPEND OPENDDS_XTYPES_XML_COMPILE_DEFINITIONS OPENDDS_XERCES3)
+endif()
 
 _opendds_group_exe(opendds_idl HOST_TOOL)
 foreach(_exe DCPSInfoRepo RtpsRelay RtpsRelayControl dcpsinfo_dump inspect repoctl)

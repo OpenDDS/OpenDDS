@@ -6,7 +6,7 @@
 #ifndef OPENDDS_DCPS_XTYPES_XML_TYPE_PROVIDER_H
 #define OPENDDS_DCPS_XTYPES_XML_TYPE_PROVIDER_H
 
-#include <dds/DCPS/dcps_export.h>
+#include <dds/DCPS/XTypes/XmlTypeProvider_export.h>
 #include <dds/DdsDynamicDataC.h>
 
 #include <ace/SString.h>
@@ -37,7 +37,7 @@ namespace XTypes {
  * Returns RETCODE_OK on success, RETCODE_BAD_PARAMETER if the requested
  * type is not found in the file, or RETCODE_ERROR on parse failure.
  */
-OpenDDS_Dcps_Export DDS::ReturnCode_t load_xml_type(
+OpenDDS_XTypes_Xml_Export DDS::ReturnCode_t load_xml_type(
   DDS::DynamicType_var& type,
   const ACE_TString& xml_file,
   const std::string& fully_qualified_type_name);

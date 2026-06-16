@@ -131,6 +131,9 @@ if(NOT CMAKE_CROSSCOMPILING OR OPENDDS_JUST_BUILD_HOST_TOOLS)
 endif()
 
 add_subdirectory(dds) # OpenDDS_Dcps
+if(OPENDDS_XERCES3 AND NOT OPENDDS_SAFETY_PROFILE)
+  add_subdirectory(dds/DCPS/XTypes) # OpenDDS_XTypes_Xml
+endif()
 add_subdirectory(dds/DCPS/transport/multicast)
 add_subdirectory(dds/DCPS/RTPS)
 add_subdirectory(dds/DCPS/transport/rtps_udp)

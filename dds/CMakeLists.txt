@@ -427,7 +427,6 @@ target_sources(OpenDDS_Dcps
     DCPS/XTypes/TypeObjectC.h
     DCPS/XTypes/TypeObjectTypeSupportImpl.h
     DCPS/XTypes/Utils.h
-    DCPS/XTypes/XmlTypeProvider.h
     DCPS/Xcdr2ValueWriter.h
     DCPS/ZeroCopyAllocator_T.cpp
     DCPS/ZeroCopyAllocator_T.h
