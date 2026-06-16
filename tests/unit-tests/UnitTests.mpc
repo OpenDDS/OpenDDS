@@ -1,5 +1,6 @@
 project(UnitTests): opendds_unit_test, googlemock, msvc_bigobj, dcpsexe, dcps_transports_for_test, \
-    optional_opendds_face, opendds_optional_security, optional_rapidjson, optional_xerces, optional_rtps_relay_lib {
+    optional_opendds_face, opendds_optional_security, optional_rapidjson, optional_xerces, \
+    opendds_optional_xtypes_xml, optional_rtps_relay_lib {
 
   dcps_ts_flags += -Gxtypes-complete
   idlflags += -SS -I dds/DCPS -I dds/DCPS/XTypes -I ../DCPS/Compiler/key_annotation
