@@ -1,0 +1,6 @@
+.. news-prs: 5243
+
+.. news-start-section: Fixes
+- Fixed dynamic loading of the optional XML type provider on macOS by moving it into a separate ``OpenDDS_XTypes_Xml`` library.
+
+.. news-end-section
