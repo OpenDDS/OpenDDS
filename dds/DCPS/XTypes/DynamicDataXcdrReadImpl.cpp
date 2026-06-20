@@ -3176,8 +3176,7 @@ bool DynamicDataXcdrReadImpl::skip_all()
       }
       if (selected_md) {
         const DDS::DynamicType_ptr selected_dt = selected_md->type();
-        bool good = selected_dt && skip_member(selected_dt);
-        return good;
+        return selected_dt && skip_member(selected_dt);
       }
       if (DCPS::DCPS_debug_level >= 1) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::skip_all - Skip a union with no")
