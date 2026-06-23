@@ -96,6 +96,7 @@ module RtpsRelay {
   struct RelayHeader {
     StringSequence to_partitions;
     GuidSequence to_guids;
+    boolean use_async_discovery;
   };
 
   struct Duration_t {
@@ -188,6 +189,8 @@ module RtpsRelay {
     unsigned long relay_participant_status_sub_count;
     unsigned long relay_address_sub_count;
     unsigned long relay_status_sub_count;
+    unsigned long async_discovery_cache_update_sub_count;
+    unsigned long async_discovery_cache_prune_sub_count;
     unsigned long relay_partitions_pub_count;
     unsigned long relay_address_pub_count;
     unsigned long admission_deferral_count;
@@ -202,6 +205,10 @@ module RtpsRelay {
     unsigned long admission_queue_size;
     unsigned long transitions_to_admitting;
     unsigned long transitions_to_nonadmitting;
+    unsigned long async_discovery_local_cache_size;
+    unsigned long async_discovery_local_expiration_map_size;
+    unsigned long async_discovery_remote_cache_size;
+    unsigned long async_discovery_remote_expiration_map_size;
     unsigned long virtual_memory_kb;
     ClientPartitionStatistics client_partitions;
     RelayPartitionStatistics relay_partitions;
@@ -231,6 +238,31 @@ module RtpsRelay {
   struct RelayDeniedPartitions {
     StringSequence partitions;
     Action add_or_remove;
+  };
+
+  struct AsyncDiscoveryCacheEntry {
+    string key;
+    StringSequence partitions;
+  };
+
+  typedef sequence<AsyncDiscoveryCacheEntry> AsyncDiscoveryCacheEntrySeq;
+
+  const string RELAY_ASYNC_DISCOVERY_CACHE_UPDATE_TOPIC_NAME = "Relay Async Discovery Cache Update";
+  @topic
+  @mutable
+  @autoid(HASH)
+  struct AsyncDiscoveryCacheUpdate {
+    @key string relay_id;
+    AsyncDiscoveryCacheEntrySeq entries;
+  };
+
+  const string RELAY_ASYNC_DISCOVERY_CACHE_PRUNE_TOPIC_NAME = "Relay Async Discovery Cache Prune";
+  @topic
+  @mutable
+  @autoid(HASH)
+  struct AsyncDiscoveryCachePrune {
+    @key string relay_id;
+    StringSequence keys;
   };
 };
 

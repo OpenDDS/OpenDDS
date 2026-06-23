@@ -410,11 +410,11 @@ void GuidAddrSet::maintain_admission_queue(const OpenDDS::DCPS::MonotonicTimePoi
   relay_stats_reporter_.admission_queue_size(admission_control_queue_.size(), now);
 }
 
-bool GuidAddrSet::ignore_rtps(bool from_application_participant,
-                              const OpenDDS::DCPS::GUID_t& guid,
-                              const OpenDDS::DCPS::MonotonicTimePoint& now,
-                              bool already_checked_admit,
-                              bool& admitted)
+bool GuidAddrSet::defer_client(bool from_application_participant,
+                               const OpenDDS::DCPS::GUID_t& guid,
+                               const OpenDDS::DCPS::MonotonicTimePoint& now,
+                               bool already_checked_admit,
+                               bool& admitted)
 {
   const auto pos = guid_addr_set_map_.find(guid);
   if (pos == guid_addr_set_map_.end()) {
@@ -430,7 +430,7 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
     pos->second.allow_rtps = true;
 
     if (config_.log_activity()) {
-      ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::ignore_rtps %C was admitted %C into session\n",
+      ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::defer_client: %C was admitted %C into session\n",
                  guid_to_string(guid).c_str(),
                  pos->second.get_session_time(now).sec_str().c_str()));
     }
@@ -461,7 +461,7 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
   admitted = true;
 
   if (config_.log_activity()) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::ignore_rtps %C was admitted %C into session\n",
+    ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::defer_client: %C was admitted %C into session\n",
                guid_to_string(guid).c_str(),
                pos->second.get_session_time(now).sec_str().c_str()));
   }
@@ -489,7 +489,9 @@ void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid,
     --mark_count_;
   }
 
+  cleanup_peers_pending_recipients(it);
   guid_addr_set_map_.erase(it);
+  remove_cross_relay_pending_recipients(guid);
   relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
   check_participants_limit();
 
@@ -507,6 +509,19 @@ void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid,
 
   if (reporter) {
     reporter->set_alive(guid, false);
+  }
+}
+
+void GuidAddrSet::cleanup_peers_pending_recipients(const GuidAddrSetMap::iterator& it)
+{
+  // Remove a guid from the pending recipients list of each peer it has initiated async discovery with.
+  const auto& src_guid = it->first;
+  const auto& initiated_async_disc_with = it->second.initiated_async_discovery_with;
+  for (const auto& other_part : initiated_async_disc_with) {
+    auto other_it = guid_addr_set_map_.find(other_part);
+    if (other_it != guid_addr_set_map_.end()) {
+      other_it->second.pending_recipients.erase(src_guid);
+    }
   }
 }
 
@@ -634,6 +649,42 @@ void GuidAddrSet::ConfigReaderListener::on_data_available(InternalDataReader_rch
       }
     }
   }
+}
+
+void GuidAddrSet::update_cross_relay_pending_recipients(const OpenDDS::DCPS::GUID_t& src_guid, const StringSet& to_partitions)
+{
+  for (const auto& part : to_partitions) {
+    cross_relay_pending_recipients_[part].insert(src_guid);
+  }
+  initiated_async_discovery_with_[src_guid].insert(to_partitions.begin(), to_partitions.end());
+}
+
+void GuidAddrSet::lookup_cross_relay_pending_recipients(GuidSet& pending_guids, const StringSequence& partitions) const
+{
+  for (const auto& part : partitions) {
+    const auto it = cross_relay_pending_recipients_.find(part);
+    if (it != cross_relay_pending_recipients_.end()) {
+      pending_guids.insert(it->second.begin(), it->second.end());
+    }
+  }
+}
+
+void GuidAddrSet::remove_cross_relay_pending_recipients(const OpenDDS::DCPS::GUID_t& guid)
+{
+  const auto it = initiated_async_discovery_with_.find(guid);
+  if (it != initiated_async_discovery_with_.end()) {
+    for (const auto& part : it->second) {
+      const auto it2 = cross_relay_pending_recipients_.find(part);
+      if (it2 != cross_relay_pending_recipients_.end()) {
+        it2->second.erase(guid);
+      }
+      if (it2 != cross_relay_pending_recipients_.end() && it2->second.empty()) {
+        cross_relay_pending_recipients_.erase(it2);
+      }
+    }
+  }
+
+  initiated_async_discovery_with_.erase(guid);
 }
 
 }

@@ -390,6 +390,48 @@ The command-line options for the RtpsRelay:
   Expected amount of time a denied partition will remain in the denied partitions list before being cleaned up.
   The default is 900 seconds.
 
+.. option:: -CertificateIdPattern <regex>
+
+  This requires security to be enabled.
+  Specify a regex pattern used to match a client participant's certificate subject name to enable the asynchronous discovery feature.
+  For a matched client, the first group match will be used as the key to cache the client's partitions.
+  The cached partitions will be used to forward the matching client's messages immediately in subsequent sessions before the client
+  completes discovery with the relay. Effectively, this allows the client to initiate discovery with other clients in parallel
+  with its discovery with the relay.
+  The default is the empty string which disables the asynchronous discovery feature.
+
+.. option:: -SynchronizeAsyncDiscoveryCache 0|1
+
+  :ref:`Config store key <config-store-keys>`: ``RTPS_RELAY_SYNCHRONIZE_ASYNC_DISCOVERY_CACHE``
+
+  Specify whether to synchronize the local asynchronous discovery cache with other relay instances and enable
+  processing of cache updates from them.
+  This requires a non-empty and valid regex pattern to be specified for :option:`-CertificateIdPattern`.
+  The default is 0 (disabled).
+
+.. option:: -AsyncDiscoveryCacheTimeout <seconds>
+
+  :ref:`Config store key <config-store-keys>`: ``RTPS_RELAY_ASYNC_DISCOVERY_CACHE_TIMEOUT``
+
+  Specify the duration for an inactive cache entry to be removed from the asynchronous discovery cache for local client participants.
+  The default is 7 days.
+
+.. option:: -AsyncDiscoveryRemoteCacheTimeout <seconds>
+
+  :ref:`Config store key <config-store-keys>`: ``RTPS_RELAY_ASYNC_DISCOVERY_REMOTE_CACHE_TIMEOUT``
+
+  Specify the duration for an inactive cache entry to be removed from the asynchronous discovery cache for remote client participants,
+  i.e., those that connect to other relay instances.
+  The default is 30 days.
+
+.. option:: -LogAsyncDiscovery 0|1
+
+  :ref:`Config store key <config-store-keys>`: ``RTPS_RELAY_LOG_ASYNC_DISCOVERY``
+
+  Specify whether to log the activities related to the asynchronous discovery feature,
+  e.g., cache hits/misses, cache updates and prunes.
+  The default is 0 (disabled).
+
 .. _internet_enabled_rtps--rtps_relay_control:
 
 RtpsRelayControl

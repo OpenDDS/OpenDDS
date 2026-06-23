@@ -16,6 +16,7 @@
 
 namespace RtpsRelay {
 
+using AddressSet = std::set<ACE_INET_Addr>;
 using StringSet = std::set<std::string>;
 
 inline std::string guid_to_string(const OpenDDS::DCPS::GUID_t& a_guid)
@@ -196,6 +197,28 @@ inline GuidSet relay_guids_to_set(const RtpsRelay::GuidSequence& seq)
     set.insert(relay_guid_to_rtps_guid(guid));
   }
   return set;
+}
+
+template <typename StringCollection>
+inline std::string concat_strings(const StringCollection& strs, const std::string& delimit = ",")
+{
+  const size_t delimit_size = delimit.size();
+  size_t total_size = 0;
+  for (const auto& s : strs) {
+    if (total_size != 0) {
+      total_size += delimit_size;
+    }
+    total_size += s.size();
+  }
+  std::string ret;
+  ret.reserve(total_size);
+  for (const auto& s : strs) {
+    if (!ret.empty()) {
+      ret += delimit;
+    }
+    ret += s;
+  }
+  return ret;
 }
 
 }

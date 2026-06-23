@@ -75,7 +75,7 @@ void RelayParticipantStatusReporter::remove_participant(GuidAddrSet::Proxy& prox
                idx, total));
   }
 
-  proxy.remove(repoid, monotonic_now, nullptr);
+  proxy.remove(repoid, monotonic_now);
 
   guids_.erase(pos);
 
