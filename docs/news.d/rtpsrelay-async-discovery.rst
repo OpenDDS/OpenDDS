@@ -2,8 +2,8 @@
 .. news-start-section: Additions
 .. news-start-section: RtpsRelay
 - When security is enabled, the RtpsRelay can cache the partitions of a client participant in a session and
-use the cached partitions to forward the client's messages immediately in subsequent sessions before the client
-completes endpoint discovery with the relay. New options introduced for this feature include:
+  use the cached partitions to forward the client's messages immediately in subsequent sessions before the client
+  completes endpoint discovery with the relay. New options introduced for this feature include:
 
   - ``-CertificateIdPattern`` specifies a regex pattern used to match client's certificate subject name. Only clients that
     match the pattern will have their partitions cached.
