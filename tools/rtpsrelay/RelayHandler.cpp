@@ -331,64 +331,74 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       (remote_address == application_participant_addr_) &&
       (src_guid == config_.application_participant_guid());
 
-    GuidAddrSet::Proxy proxy(guid_addr_set_);
-    OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, READ_MASK | SIGNAL_MASK, handle_as_int);
-
-    bool already_checked_admit = false;
-    if (!record_activity(proxy, addr_port, now, src_guid, from_application_participant, already_checked_admit)) {
-      stats_reporter_.ignored_message(msg_len, now, type);
-      return 0;
-    }
-
-    cache_message(proxy, src_guid, to, msg, now);
-
-    bool admitted = false;
-    if (proxy.defer_client(from_application_participant, src_guid, now, already_checked_admit, admitted)) {
-      stats_reporter_.ignored_message(msg_len, now, type);
-      return 0;
-    }
-
     CORBA::ULong sent = 0;
-
-    if (admitted && spdp_handler_) {
-      sent += spdp_handler_->send_to_application_participant(proxy, src_guid, now);
-    }
-
     bool send_to_application_participant = false;
-    if (do_normal_processing(proxy, remote_address, src_guid, to, admitted, send_to_application_participant, msg, now, sent)) {
-      StringSet to_partitions;
-      guid_partition_table_.lookup(to_partitions, src_guid);
-      // Denial decision is based only on the "ground truth" routing table and
-      // not the "heuristic" partition cache (looked up below) that may contain
-      // stale partitions for this guid and may cause it to be denied incorrectly.
-      if (guid_partition_table_.is_denied(to_partitions)) {
-        proxy.deny(src_guid);
+    AddressSet horizontal_addrs;
+    LocalClientAddresses local_clients;
+    StringSet to_partitions;
+    bool async_discovery = false;
+    bool from_client = false;
+
+    {
+      GuidAddrSet::Proxy proxy(guid_addr_set_);
+      OpenDDS::DCPS::ThreadStatusManager::Event evLocked(statusManager, READ_MASK | SIGNAL_MASK, handle_as_int);
+
+      bool already_checked_admit = false;
+      if (!record_activity(proxy, addr_port, now, src_guid, from_application_participant, already_checked_admit)) {
+        stats_reporter_.ignored_message(msg_len, now, type);
+        return 0;
       }
 
-      // Initiate async discovery if applicable, i.e., the relay has not learned about any partitions
-      // for this client from endpoint discovery, but has cached partitions for it.
-      // The cached partitions are used to forward the client's messages until the relay has learned
-      // about any of the client's partitions through endpoint discovery.
-      bool async_discovery = false;
-      if (config_.async_discovery_enabled()) {
-        if (to_partitions.empty()) {
-          const auto pos = proxy.find(src_guid);
-          if (pos != proxy.end()) {
-            const auto ca_sn = pos->second.identity_info.ca_sn();
-            if (config_.expected_ca_subject_name() == ca_sn) {
-              const auto key = pos->second.identity_info.cert_id();
-              guid_partition_table_.lookup_cert_partitions_cache(to_partitions, key, src_guid);
-            } else if (config_.log_async_discovery()) {
-              HANDLER_WARNING((LM_WARNING, "(%P|%t) WARNING: VerticalHandler::process_message %C Expected CA subject name '%C', but got '%C' from GUID %C\n",
-                name_.c_str(), config_.expected_ca_subject_name().c_str(), ca_sn.c_str(), OpenDDS::DCPS::LogGuid(src_guid).c_str()));
+      cache_message(proxy, src_guid, to, msg, now);
+
+      bool admitted = false;
+      if (proxy.defer_client(from_application_participant, src_guid, now, already_checked_admit, admitted)) {
+        stats_reporter_.ignored_message(msg_len, now, type);
+        return 0;
+      }
+
+      if (admitted && spdp_handler_) {
+        sent += spdp_handler_->send_to_application_participant(proxy, src_guid, now);
+      }
+
+      from_client = do_normal_processing(proxy, remote_address, src_guid, to, admitted, send_to_application_participant, msg, now, sent);
+      if (from_client) {
+        guid_partition_table_.lookup(to_partitions, src_guid);
+        // Denial decision is based only on the "ground truth" routing table and
+        // not the "heuristic" partition cache (looked up below) that may contain
+        // stale partitions for this guid and may cause it to be denied incorrectly.
+        if (guid_partition_table_.is_denied(to_partitions)) {
+          proxy.deny(src_guid);
+        }
+
+        // Initiate async discovery if applicable, i.e., the relay has not learned about any partitions
+        // for this client from endpoint discovery, but has cached partitions for it.
+        // The cached partitions are used to forward the client's messages until the relay has learned
+        // about any of the client's partitions through endpoint discovery.
+        if (config_.async_discovery_enabled()) {
+          if (to_partitions.empty()) {
+            const auto pos = proxy.find(src_guid);
+            if (pos != proxy.end()) {
+              const auto ca_sn = pos->second.identity_info.ca_sn();
+              if (config_.expected_ca_subject_name() == ca_sn) {
+                const auto key = pos->second.identity_info.cert_id();
+                guid_partition_table_.lookup_cert_partitions_cache(to_partitions, key, src_guid);
+              } else if (config_.log_async_discovery()) {
+                HANDLER_WARNING((LM_WARNING, "(%P|%t) WARNING: VerticalHandler::process_message %C Expected CA subject name '%C', but got '%C' from GUID %C\n",
+                  name_.c_str(), config_.expected_ca_subject_name().c_str(), ca_sn.c_str(), OpenDDS::DCPS::LogGuid(src_guid).c_str()));
+              }
+            }
+            if (!to_partitions.empty()) {
+              async_discovery = true;
             }
           }
-          if (!to_partitions.empty()) {
-            async_discovery = true;
-          }
         }
+        prepare_send(proxy, src_guid, to_partitions, to, now, async_discovery, horizontal_addrs, local_clients);
       }
-      sent += send(proxy, src_guid, to_partitions, to, send_to_application_participant, msg, now, async_discovery);
+    }
+
+    if (from_client) {
+      sent += send(horizontal_addrs, local_clients, to_partitions, to, send_to_application_participant, msg, now, async_discovery);
     }
     return sent;
   } else {
@@ -416,7 +426,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     if (!message.has_fingerprint()) {
       HANDLER_WARNING((LM_WARNING, "(%P|%t) WARNING: VerticalHandler::process_message %C No FINGERPRINT attribute from %C\n",
         name_.c_str(), OpenDDS::DCPS::LogAddr(remote_address).c_str()));
-      send(remote_address, make_bad_request_error_response(message, "Bad Request: FINGERPRINT must be pesent"), now);
+      send(remote_address, make_bad_request_error_response(message, "Bad Request: FINGERPRINT must be present"), now);
       return 1;
     }
 
@@ -677,23 +687,22 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
   return true;
 }
 
-CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
+void VerticalHandler::prepare_send(GuidAddrSet::Proxy& proxy,
                                    const OpenDDS::DCPS::GUID_t& src_guid,
                                    const StringSet& to_partitions,
                                    const GuidSet& to_guids,
-                                   bool send_to_application_participant,
-                                   const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                    const OpenDDS::DCPS::MonotonicTimePoint& now,
-                                   bool async_discovery)
+                                   bool async_discovery,
+                                   AddressSet& horizontal_addrs,
+                                   LocalClientAddresses& local_clients)
 {
   AddressSet address_set;
   populate_address_set(address_set, to_partitions);
-  const auto type = MessageType::Rtps;
 
   // Also forward to the peer relays from which some participants had initiated async discovery with this source.
   // These addresses may have been included already, but this ensures they are always included.
   if (!async_discovery) {
-    const auto cutoff_time = OpenDDS::DCPS::MonotonicTimePoint::now() - config_.async_discovery_cross_relay_timeout();
+    const auto cutoff_time = now - config_.async_discovery_cross_relay_timeout();
     const auto& horizontal_name = horizontal_handler_->name();
     AddrSetStats::PendingPeerRelays* peer_relays = nullptr;
 
@@ -716,11 +725,9 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
     }
   }
 
-  CORBA::ULong sent = 0;
   for (const auto& addr : address_set) {
     if (addr != horizontal_address_) {
-      horizontal_handler_->enqueue_or_send_message(addr, to_partitions, to_guids, msg, now, async_discovery);
-      ++sent;
+      horizontal_addrs.insert(addr);
 
       // In case we are using async discovery cache to forward the source message,
       // mark it as a pending recipient so that messages from peer relays with
@@ -749,11 +756,15 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
         }
         auto p = proxy.find(guid);
         if (p != proxy.end()) {
-          p->second.foreach_addr(port(),
-                                 [&](const ACE_INET_Addr& address) {
-                                   venqueue_message(address, msg, now, type);
-                                   ++sent;
-          });
+          for (const auto& ip : p->second.ip_to_ports) {
+            const auto port_map = ip.second.select(port());
+            if (port_map) {
+              for (const auto& p : *port_map) {
+                local_clients[ip.first].insert(p.first);
+              }
+            }
+          }
+
           if (async_discovery) {
             // Add the source GUID to the pending recipients list of each target so that
             // subsequent messages from the target can be forwarded to the source, thus
@@ -770,12 +781,37 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
       }
     }
   }
+}
+
+CORBA::ULong VerticalHandler::send(const AddressSet& horizontal_addrs,
+                                   const LocalClientAddresses& local_clients,
+                                   const StringSet& to_partitions,
+                                   const GuidSet& to_guids,
+                                   bool send_to_application_participant,
+                                   const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
+                                   const OpenDDS::DCPS::MonotonicTimePoint& now,
+                                   bool async_discovery)
+{
+  const auto type = MessageType::Rtps;
+  CORBA::ULong sent = 0;
+  for (const auto& addr : horizontal_addrs) {
+    horizontal_handler_->enqueue_or_send_message(addr, to_partitions, to_guids, msg, now, async_discovery);
+    ++sent;
+  }
+
+  for (const auto& ip : local_clients) {
+    ACE_INET_Addr addr = ip.first;
+    for (const auto& p : ip.second) {
+      addr.set_port_number(p);
+      venqueue_message(addr, msg, now, type);
+      ++sent;
+    }
+  }
 
   if (send_to_application_participant) {
     venqueue_message(application_participant_addr_, msg, now, type);
     ++sent;
   }
-
   return sent;
 }
 
@@ -1118,7 +1154,8 @@ CORBA::ULong SpdpHandler::send_to_application_participant(GuidAddrSet::Proxy& pr
     return 0;
   }
 
-  const auto ret = send(proxy, guid, StringSet(), GuidSet(), true, pos->second.spdp_message, now);
+  const auto ret = send(AddressSet(), LocalClientAddresses(), StringSet(), GuidSet(),
+    true, pos->second.spdp_message, now);
   pos->second.spdp_message = OpenDDS::DCPS::Lockable_Message_Block_Ptr{};
   return ret;
 }
