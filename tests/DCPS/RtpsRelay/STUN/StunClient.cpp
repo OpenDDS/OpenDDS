@@ -254,7 +254,7 @@ bool test_no_fingerprint(int& status,
     retval = false;
   }
 
-  if (response.get_error_reason() != "Bad Request: FINGERPRINT must be pesent") {
+  if (response.get_error_reason() != "Bad Request: FINGERPRINT must be present") {
     std::cerr << "ERROR: Response has incorrect error reason" << std::endl;
     status = EXIT_FAILURE;
     retval = false;
