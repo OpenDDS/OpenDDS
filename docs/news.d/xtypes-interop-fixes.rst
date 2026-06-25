@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5238
 
 .. news-start-section: Fixes
 - DDS XTypes Interoperability: Implemented fixes and completeness updates to align the XTypes implementation with the OMG DDS-XTypes 1.3 specification:
