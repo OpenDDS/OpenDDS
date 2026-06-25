@@ -23,7 +23,6 @@
 #include <ace/OS_NS_string.h>
 
 #include <cerrno>
-#include <cfloat>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
@@ -325,18 +324,6 @@ char* float128_bytes(ACE_CDR::LongDouble& value)
   return reinterpret_cast<char*>(&value);
 #else
   return value.ld;
-#endif
-}
-
-void canonicalize_float128_padding(ACE_CDR::LongDouble& value)
-{
-#if ACE_SIZEOF_LONG_DOUBLE == 16 && LDBL_MANT_DIG == 64 && !defined(ACE_BIG_ENDIAN)
-  char* const bytes = float128_bytes(value);
-  for (size_t i = 10; i != 16; ++i) {
-    bytes[i] = 0;
-  }
-#else
-  ACE_UNUSED_ARG(value);
 #endif
 }
 

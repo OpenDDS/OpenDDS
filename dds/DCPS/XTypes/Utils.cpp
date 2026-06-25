@@ -497,6 +497,18 @@ bool is_key(DDS::DynamicType_ptr type, const char* field)
   return false;
 }
 
+void canonicalize_float128_padding(ACE_CDR::LongDouble& value)
+{
+#if ACE_SIZEOF_LONG_DOUBLE == 16 && LDBL_MANT_DIG == 64 && !defined(ACE_BIG_ENDIAN)
+  char* const bytes = reinterpret_cast<char*>(&value);
+  for (size_t i = 10; i != 16; ++i) {
+    bytes[i] = 0;
+  }
+#else
+  ACE_UNUSED_ARG(value);
+#endif
+}
+
 namespace {
   template <typename T>
   void cmp(int& result, T a, T b)
@@ -522,12 +534,7 @@ namespace {
   void float128_big_endian_bytes(const ACE_CDR::LongDouble& value, char bytes[16])
   {
     ACE_CDR::LongDouble canonical = value;
-#if ACE_SIZEOF_LONG_DOUBLE == 16 && LDBL_MANT_DIG == 64 && !defined(ACE_BIG_ENDIAN)
-    char* const canonical_bytes = reinterpret_cast<char*>(&canonical);
-    for (size_t i = 10; i != 16; ++i) {
-      canonical_bytes[i] = 0;
-    }
-#endif
+    canonicalize_float128_padding(canonical);
     const char* const src = float128_bytes(canonical);
 #if defined(ACE_BIG_ENDIAN)
     ACE_OS::memcpy(bytes, src, 16);
