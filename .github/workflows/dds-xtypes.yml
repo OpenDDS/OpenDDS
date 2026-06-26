@@ -1,4 +1,4 @@
-name: "omg-dds/dds-rtps"
+name: "omg-dds/dds-xtypes"
 
 on:
   workflow_dispatch:
@@ -17,11 +17,12 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
-    - name: checkout dds-rtps
+    - name: checkout dds-xtypes
       uses: actions/checkout@v7
       with:
-        repository: omg-dds/dds-rtps
-        path: dds-rtps
+        repository: omg-dds/dds-xtypes
+        ref: feature/xml-driver-enhanced
+        path: dds-xtypes
     - name: checkout ACE_TAO
       uses: actions/checkout@v7
       with:
@@ -44,33 +45,42 @@ jobs:
       with:
         repository: DOCGroup/MPC
         path: OpenDDS/ACE_TAO/ACE/MPC
+    - name: install dependencies
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libxerces-c-dev zip
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --optimize --no-debug --static --no-inline
+        ./configure --optimize --no-debug --static --no-inline --xerces3
         tools/scripts/show_build_config.pl
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS
       shell: bash
       run: |
         cd OpenDDS
-        make -j4 OpenDDS_Rtps_Udp
-    - name: build shape_main
+        make -j4 OpenDDS_Rtps_Udp OpenDDS_XTypes_Xml
+    - name: build test_main
       shell: bash
       run: |
         . OpenDDS/setenv.sh
-        cd dds-rtps/srcCxx/opendds-cmake
-        cmake -S . -B build
+        cd dds-xtypes/src/cxx/opendds-cmake
+        cmake -S . -B build -DOpenDDS_DIR="$GITHUB_WORKSPACE/OpenDDS/cmake"
         cmake --build build -- -j4
-    - name: rename shape_main artifact
+    - name: package test_main artifact
       shell: bash
       run: |
         OPENDDS_VERSION=$(sed -n 's/^#define OPENDDS_VERSION "\(.*\)"/\1/p' OpenDDS/dds/Version.h)
         echo "OPENDDS_VERSION=$OPENDDS_VERSION" >> $GITHUB_ENV
-        cp dds-rtps/srcCxx/opendds-cmake/build/shape_main \
-          dds-rtps/srcCxx/opendds-cmake/build/opendds-${OPENDDS_VERSION}_shape_main_linux
-    - name: upload shape_main artifact
+        EXECUTABLE=opendds-${OPENDDS_VERSION}_test_main_linux
+        ARTIFACT=${EXECUTABLE}.zip
+        cp dds-xtypes/src/cxx/opendds-cmake/build/shape_main \
+          dds-xtypes/src/cxx/opendds-cmake/build/${EXECUTABLE}
+        (cd dds-xtypes/src/cxx/opendds-cmake/build && zip "$GITHUB_WORKSPACE/$ARTIFACT" "$EXECUTABLE")
+        echo "ARTIFACT=$ARTIFACT" >> $GITHUB_ENV
+    - name: upload test_main artifact
       uses: actions/upload-artifact@v7
       with:
-        name: opendds-${{ env.OPENDDS_VERSION }}_shape_main_linux
-        path: dds-rtps/srcCxx/opendds-cmake/build/opendds-${{ env.OPENDDS_VERSION }}_shape_main_linux
+        name: ${{ env.ARTIFACT }}
+        path: ${{ env.ARTIFACT }}
