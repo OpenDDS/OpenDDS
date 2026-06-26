@@ -237,7 +237,10 @@ bool TypeLookupService::get_minimal_type_identifier(const TypeIdentifier& ct, Ty
       complete_elem_ti = *ct.map_ldefn().element_identifier;
       break;
     }
-    get_minimal_type_identifier(complete_elem_ti, minimal_elem_ti);
+    if (!get_minimal_type_identifier(complete_elem_ti, minimal_elem_ti)) {
+      mt = TypeIdentifier(TK_NONE);
+      return false;
+    }
 
     switch (mt.kind()) {
     case TI_PLAIN_SEQUENCE_SMALL:
@@ -256,7 +259,10 @@ bool TypeLookupService::get_minimal_type_identifier(const TypeIdentifier& ct, Ty
       {
         mt.map_sdefn().element_identifier = minimal_elem_ti;
         TypeIdentifier minimal_key_ti;
-        get_minimal_type_identifier(*ct.map_sdefn().key_identifier, minimal_key_ti);
+        if (!get_minimal_type_identifier(*ct.map_sdefn().key_identifier, minimal_key_ti)) {
+          mt = TypeIdentifier(TK_NONE);
+          return false;
+        }
         mt.map_sdefn().key_identifier = minimal_key_ti;
         break;
       }
@@ -264,7 +270,10 @@ bool TypeLookupService::get_minimal_type_identifier(const TypeIdentifier& ct, Ty
       {
         mt.map_ldefn().element_identifier = minimal_elem_ti;
         TypeIdentifier minimal_key_ti;
-        get_minimal_type_identifier(*ct.map_ldefn().key_identifier, minimal_key_ti);
+        if (!get_minimal_type_identifier(*ct.map_ldefn().key_identifier, minimal_key_ti)) {
+          mt = TypeIdentifier(TK_NONE);
+          return false;
+        }
         mt.map_ldefn().key_identifier = minimal_key_ti;
         break;
       }
@@ -808,6 +817,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
     td->discriminator_type(disc_type);
     DDS::MemberDescriptor_var disc_md = new MemberDescriptorImpl();
     disc_md->name("discriminator");
+    handle_tryconstruct_flags(disc_md, cto.union_type.discriminator.common.member_flags);
     disc_md->is_key(cto.union_type.discriminator.common.member_flags & IS_KEY);
     disc_md->type(disc_type);
     disc_md->id(DISCRIMINATOR_ID);

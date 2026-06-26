@@ -15,6 +15,7 @@
 
 #include "gtest/gtest.h"
 
+#include <cfloat>
 #include <vector>
 
 namespace {
@@ -140,6 +141,31 @@ TEST(dds_DCPS_XTypes_DynamicDataJson, StructPopulateAndRoundTrip)
   DDS::DynamicData_var copy = DDS::DynamicDataFactory::get_instance()->create_data(type);
   ASSERT_EQ(DDS::RETCODE_OK,
             OpenDDS::XTypes::dynamic_data_from_json(copy, round_trip.c_str()));
+  EXPECT_TRUE(OpenDDS::XTypes::dynamic_data_equal(data, copy));
+  EXPECT_TRUE(data->equals(copy));
+  EXPECT_TRUE(copy->equals(data));
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataJson, Float128HexRoundTrip)
+{
+  DDS::DynamicData_var data = create_data("XmlTypeProviderTest::Float128Sample");
+  ASSERT_TRUE(data);
+
+  const char* const json =
+#if ACE_SIZEOF_LONG_DOUBLE == 16 && LDBL_MANT_DIG == 64 && !defined(ACE_BIG_ENDIAN)
+    "{\"x1\":\"0x0000000000003fff8000000000000000\"}";
+#else
+    "{\"x1\":\"0x0000000000000000000000003f800000\"}";
+#endif
+  ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_from_json(data, json));
+
+  std::string round_trip;
+  ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_to_json(round_trip, data));
+  EXPECT_EQ(json, round_trip);
+
+  DDS::DynamicData_var copy = create_data("XmlTypeProviderTest::Float128Sample");
+  ASSERT_TRUE(copy);
+  ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_from_json(copy, json));
   EXPECT_TRUE(OpenDDS::XTypes::dynamic_data_equal(data, copy));
   EXPECT_TRUE(data->equals(copy));
   EXPECT_TRUE(copy->equals(data));
@@ -686,6 +712,43 @@ TEST(dds_DCPS_XTypes_DynamicDataJson, EqualsSerializedBackingStore)
   EXPECT_TRUE(backing->equals(data));
   EXPECT_TRUE(data->equals(wrapped));
   EXPECT_TRUE(wrapped->equals(data));
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataJson, TryConstructTrimSerializedBackingStore)
+{
+  DDS::DynamicType_var writer_type = load_type("XmlTypeProviderTest::Seq20");
+  DDS::DynamicData_var writer_data =
+    DDS::DynamicDataFactory::get_instance()->create_data(writer_type);
+  ASSERT_TRUE(writer_data);
+  ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_from_json(writer_data,
+    "{\"x1\":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]}"));
+
+  DDS::DynamicType_var reader_type = load_type("XmlTypeProviderTest::Seq10Trim");
+  DDS::MemberDescriptor_var x1 = member_descriptor(reader_type, "x1");
+  ASSERT_EQ(DDS::TRIM, x1->try_construct_kind());
+
+  ACE_Message_Block buffer(4096);
+  const OpenDDS::DCPS::Encoding encoding(
+    OpenDDS::DCPS::Encoding::KIND_XCDR2, OpenDDS::DCPS::ENDIAN_BIG);
+  OpenDDS::DCPS::Serializer serializer(&buffer, encoding);
+  ASSERT_TRUE(serializer << writer_data.in());
+
+  DDS::DynamicData_var backing =
+    new OpenDDS::XTypes::DynamicDataXcdrReadImpl(&buffer, encoding, reader_type);
+  DDS::DynamicData_var wrapped =
+    new OpenDDS::XTypes::DynamicDataImpl(reader_type, backing);
+
+  std::string actual;
+  ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_to_json(actual, wrapped));
+  EXPECT_EQ("{\"x1\":[1,2,3,4,5,6,7,8,9,10]}", actual);
+
+  DDS::DynamicData_var expected =
+    DDS::DynamicDataFactory::get_instance()->create_data(reader_type);
+  ASSERT_TRUE(expected);
+  ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_from_json(expected,
+    "{\"x1\":[1,2,3,4,5,6,7,8,9,10]}"));
+  EXPECT_TRUE(OpenDDS::XTypes::dynamic_data_equal(wrapped, expected));
+  EXPECT_TRUE(wrapped->equals(expected));
 }
 
 #endif

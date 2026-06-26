@@ -522,6 +522,7 @@ public:
       TypeLookupService& tls = xml_type_lookup_service();
       tls.add(minimal_type_map_.begin(), minimal_type_map_.end());
       tls.add(complete_type_map_.begin(), complete_type_map_.end());
+      tls.update_type_identifier_map(complete_to_minimal_ti_pairs_);
       loaded = tls.complete_to_dynamic(root->second.complete, xml_type_guid);
       tls.release_guid_from_dynamic_map(xml_type_guid);
     }
@@ -632,6 +633,9 @@ private:
         pair.length(1);
         pair[0] = TypeIdentifierPair(complete->first, minimal_ti);
         converter.update_type_identifier_map(pair);
+        const ACE_CDR::ULong length = complete_to_minimal_ti_pairs_.length();
+        complete_to_minimal_ti_pairs_.length(length + 1);
+        complete_to_minimal_ti_pairs_[length] = pair[0];
 
         if (complete->first == root_ti) {
           root_minimal_ti = minimal_ti;
@@ -1713,6 +1717,7 @@ private:
   NameSet building_;
   TypeMap complete_type_map_;
   TypeMap minimal_type_map_;
+  TypeIdentifierPairSeq complete_to_minimal_ti_pairs_;
 };
 
 } // namespace

@@ -43,6 +43,9 @@
           <value type="uint32"/>
         </member>
       </struct>
+      <struct name="Float128Sample" extensibility="final">
+        <member name="x1" type="float128"/>
+      </struct>
 
       <struct name="MapSample" extensibility="appendable">
         <member name="lookup" type="map" id="20" mapMaxLength="4">
@@ -53,6 +56,35 @@
           <key type="uint32"/>
           <value type="nonBasic" nonBasicTypeName="Inner"/>
         </member>
+      </struct>
+
+      <struct name="Seq10" extensibility="final">
+        <member name="x1" type="int32" sequenceMaxLength="10"/>
+      </struct>
+
+      <struct name="Seq10Trim" extensibility="final">
+        <member name="x1" type="int32" sequenceMaxLength="10" tryConstruct="trim"/>
+      </struct>
+
+      <struct name="Seq20" extensibility="final">
+        <member name="x1" type="int32" sequenceMaxLength="20"/>
+      </struct>
+
+      <struct name="String10" extensibility="final">
+        <member name="x1" type="string" stringMaxLength="10"/>
+      </struct>
+
+      <struct name="String20" extensibility="final">
+        <member name="x1" type="string" stringMaxLength="20"/>
+      </struct>
+
+      <struct name="OneMember" extensibility="appendable">
+        <member name="x1" type="int32"/>
+      </struct>
+
+      <struct name="TwoMembers" extensibility="appendable">
+        <member name="x1" type="int32"/>
+        <member name="x2" type="int32"/>
       </struct>
 
       <union name="Choice" extensibility="appendable">

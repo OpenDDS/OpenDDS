@@ -29,7 +29,7 @@ struct TypeConsistencyAttributes {
   bool prevent_type_widening;
   bool ignore_sequence_bounds;
   bool ignore_string_bounds;
-  bool ignore_member_names; // Only this affects assignability currently
+  bool ignore_member_names;
 };
 
 class OpenDDS_Dcps_Export TypeAssignability {
@@ -54,29 +54,26 @@ public:
   bool assignable(const TypeObject& ta, const TypeIdentifier& tb) const;
   bool assignable(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
   bool assignable(const TypeIdentifier& ta, const TypeObject& tb) const;
+  bool assignable(const TypeInformation& ta, const TypeInformation& tb) const;
 
   // The following set_* functions, if called prior to the assignable
   // functions, can change the behavior of type assignability
 
-  // No affect on assignability currently
   void set_prevent_type_widening(bool value)
   {
     type_consistency_.prevent_type_widening = value;
   }
 
-  // No affect on assignability currently
   void set_ignore_sequence_bounds(bool value)
   {
     type_consistency_.ignore_sequence_bounds = value;
   }
 
-  // No affect on assignability currently
   void set_ignore_string_bounds(bool value)
   {
     type_consistency_.ignore_string_bounds = value;
   }
 
-  // Currently, only this affects assignability's behavior
   void set_ignore_member_names(bool value)
   {
     type_consistency_.ignore_member_names = value;
@@ -121,6 +118,7 @@ private:
   bool assignable_plain_map(const TypeIdentifier& ta, const MinimalTypeObject& tb) const;
 
   // General helpers
+  bool use_complete_type_objects() const;
   bool strongly_assignable(const TypeIdentifier& ta, const TypeIdentifier& tb) const;
   bool is_delimited(const TypeIdentifier& ti) const;
   bool is_delimited(const MinimalTypeObject& tobj) const;
@@ -146,9 +144,6 @@ private:
 
   XTypes::TypeLookupService_rch tl_service_;
 
-  // For now, type assignability applies only ignore_member_names.
-  // In the future, it needs to consider other attibutes as well:
-  // prevent_type_widening, ignore_sequence_bounds, ignore_string_bounds.
   TypeConsistencyAttributes type_consistency_;
 };
 

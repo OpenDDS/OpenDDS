@@ -11,6 +11,8 @@
 #include "Service_Participant.h"
 #include "XTypes/TypeLookupService.h"
 
+#include <set>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -64,6 +66,63 @@ namespace {
                  "TypeIdentifier \"%C\" of topic type \"%C\" not found in local type map.\n",
                  method_name, str.c_str(), name));
     }
+  }
+
+  void add_complete_to_minimal_type_identifier_map(
+    const XTypes::TypeLookupService_rch& tls,
+    const XTypes::TypeMap& complete_type_map)
+  {
+    if (complete_type_map.empty()) {
+      return;
+    }
+
+    XTypes::TypeLookupService converter;
+    converter.add(complete_type_map.begin(), complete_type_map.end());
+
+    std::set<XTypes::TypeIdentifier> pending;
+    for (XTypes::TypeMap::const_iterator pos = complete_type_map.begin();
+         pos != complete_type_map.end(); ++pos) {
+      pending.insert(pos->first);
+    }
+
+    XTypes::TypeIdentifierPairSeq pairs;
+    while (!pending.empty()) {
+      bool progress = false;
+
+      for (std::set<XTypes::TypeIdentifier>::iterator pos = pending.begin();
+           pos != pending.end(); ) {
+        const XTypes::TypeMap::const_iterator complete = complete_type_map.find(*pos);
+        if (complete == complete_type_map.end()) {
+          pending.erase(pos++);
+          continue;
+        }
+
+        XTypes::TypeObject minimal;
+        if (!converter.complete_to_minimal_type_object(complete->second, minimal)) {
+          ++pos;
+          continue;
+        }
+
+        const XTypes::TypeIdentifier minimal_ti = XTypes::makeTypeIdentifier(minimal);
+        XTypes::TypeIdentifierPairSeq pair;
+        pair.length(1);
+        pair[0] = XTypes::TypeIdentifierPair(complete->first, minimal_ti);
+        converter.update_type_identifier_map(pair);
+
+        const CORBA::ULong length = pairs.length();
+        pairs.length(length + 1);
+        pairs[length] = pair[0];
+
+        pending.erase(pos++);
+        progress = true;
+      }
+
+      if (!progress) {
+        return;
+      }
+    }
+
+    tls->update_type_identifier_map(pairs);
   }
 }
 
@@ -128,6 +187,7 @@ void TypeSupportImpl::add_types(const XTypes::TypeLookupService_rch& tls) const
   tls->add(minTypeMap.begin(), minTypeMap.end());
   const TypeMap& comTypeMap = getCompleteTypeMap();
   tls->add(comTypeMap.begin(), comTypeMap.end());
+  add_complete_to_minimal_type_identifier_map(tls, comTypeMap);
 
   if (TheServiceParticipant->type_object_encoding() != Service_Participant::Encoding_Normal) {
     // In this mode we need to be able to recognize TypeIdentifiers received over the network

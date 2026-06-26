@@ -327,18 +327,11 @@ char* float128_bytes(ACE_CDR::LongDouble& value)
 #endif
 }
 
-const char* float128_bytes(const ACE_CDR::LongDouble& value)
-{
-#if ACE_SIZEOF_LONG_DOUBLE == 16
-  return reinterpret_cast<const char*>(&value);
-#else
-  return value.ld;
-#endif
-}
-
 void float128_big_endian_bytes(const ACE_CDR::LongDouble& value, char bytes[16])
 {
-  const char* const src = float128_bytes(value);
+  ACE_CDR::LongDouble canonical = value;
+  canonicalize_float128_padding(canonical);
+  const char* const src = float128_bytes(canonical);
 #if defined(ACE_BIG_ENDIAN)
   ACE_OS::memcpy(bytes, src, 16);
 #else

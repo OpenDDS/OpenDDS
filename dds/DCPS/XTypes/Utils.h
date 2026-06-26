@@ -33,6 +33,7 @@ OpenDDS_Dcps_Export DDS::ReturnCode_t extensibility(
 OpenDDS_Dcps_Export DDS::ReturnCode_t max_extensibility(
   DDS::DynamicType_ptr type, DCPS::Extensibility& ext);
 OpenDDS_Dcps_Export DCPS::Extensibility dds_to_opendds_ext(DDS::ExtensibilityKind ext);
+OpenDDS_Dcps_Export void canonicalize_float128_padding(ACE_CDR::LongDouble& value);
 
 /**
  * Iterate over parts of a member name path that can be the name of a

@@ -956,7 +956,9 @@ DynamicDataImpl::SingleValue::SingleValue(CORBA::Double float64)
 
 DynamicDataImpl::SingleValue::SingleValue(CORBA::LongDouble float128)
   : kind_(TK_FLOAT128), active_(0), float128_(float128)
-{}
+{
+  canonicalize_float128_padding(float128_);
+}
 
 DynamicDataImpl::SingleValue::SingleValue(ACE_OutputCDR::from_char value)
   : kind_(TK_CHAR8), active_(new(char8_) ACE_OutputCDR::from_char(value.val_))
