@@ -49,7 +49,7 @@ jobs:
       shell: bash
       run: |
         sudo apt-get update
-        sudo apt-get install -y libxerces-c-dev zip
+        sudo apt-get install -y libxerces-c-dev
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -68,19 +68,17 @@ jobs:
         cd dds-xtypes/src/cxx/opendds-cmake
         cmake -S . -B build -DOpenDDS_DIR="$GITHUB_WORKSPACE/OpenDDS/cmake"
         cmake --build build -- -j4
-    - name: package test_main artifact
+    - name: rename test_main artifact
       shell: bash
       run: |
         OPENDDS_VERSION=$(sed -n 's/^#define OPENDDS_VERSION "\(.*\)"/\1/p' OpenDDS/dds/Version.h)
         echo "OPENDDS_VERSION=$OPENDDS_VERSION" >> $GITHUB_ENV
         EXECUTABLE=opendds-${OPENDDS_VERSION}_test_main_linux
-        ARTIFACT=${EXECUTABLE}.zip
         cp dds-xtypes/src/cxx/opendds-cmake/build/shape_main \
           dds-xtypes/src/cxx/opendds-cmake/build/${EXECUTABLE}
-        (cd dds-xtypes/src/cxx/opendds-cmake/build && zip "$GITHUB_WORKSPACE/$ARTIFACT" "$EXECUTABLE")
-        echo "ARTIFACT=$ARTIFACT" >> $GITHUB_ENV
+        echo "EXECUTABLE=$EXECUTABLE" >> $GITHUB_ENV
     - name: upload test_main artifact
       uses: actions/upload-artifact@v7
       with:
-        name: ${{ env.ARTIFACT }}
-        path: ${{ env.ARTIFACT }}
+        name: ${{ env.EXECUTABLE }}
+        path: dds-xtypes/src/cxx/opendds-cmake/build/${{ env.EXECUTABLE }}
