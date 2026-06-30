@@ -134,6 +134,31 @@ namespace {
     const char* const value = prop.value.in();
     return std::strcmp(value, "0") && ACE_OS::strcasecmp(value, "false");
   }
+
+#if OPENDDS_CONFIG_SECURITY
+  // Helper function to cleanup allocated security handles when authentication fails
+  // or completes elsewhere. Called when: participant is removed, crypto fails,
+  // or another thread already completed the match.
+  inline void cleanup_security_handles(
+      DDS::Security::Authentication_var auth,
+      DDS::Security::AccessControl_var access,
+      DDS::Security::CryptoKeyFactory_var key_factory,
+      DDS::Security::SharedSecretHandle_var shared_secret_handle,
+      DDS::Security::PermissionsHandle permissions_handle,
+      DDS::Security::ParticipantCryptoHandle dp_crypto_handle,
+      DDS::Security::SecurityException& se)
+  {
+    if (shared_secret_handle.in() != 0) {
+      auth->return_sharedsecret_handle(shared_secret_handle.in(), se);
+    }
+    if (permissions_handle != DDS::HANDLE_NIL) {
+      access->return_permissions_handle(permissions_handle, se);
+    }
+    if (dp_crypto_handle != DDS::HANDLE_NIL) {
+      key_factory->unregister_participant(dp_crypto_handle, se);
+    }
+  }
+#endif
 }
 
 void Spdp::init(DDS::DomainId_t /*domain*/,
@@ -2108,102 +2133,178 @@ Spdp::match_authenticated(const DCPS::GUID_t& guid, DiscoveredParticipantIter& i
     return true;
   }
 
-  iter->second.shared_secret_handle_ = auth->get_shared_secret(iter->second.handshake_handle_, se);
-  if (iter->second.shared_secret_handle_ == 0) {
-    if (DCPS::security_debug.auth_warn) {
-      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-        ACE_TEXT("Spdp::match_authenticated() - ")
-        ACE_TEXT("Unable to get shared secret handle. Security Exception[%d.%d]: %C\n"),
-        se.code, se.minor_code, se.message.in()));
-    }
-    return false;
-  }
+  const DDS::Security::HandshakeHandle handshake_handle = iter->second.handshake_handle_;
+  const DDS::Security::IdentityHandle remote_identity_handle = iter->second.identity_handle_;
+  const DDS::Security::PermissionsToken permissions_token = iter->second.permissions_token_;
+  const DDS::Security::ParticipantBuiltinTopicDataSecure pdata_secure = iter->second.pdata_.ddsParticipantDataSecure;
+  const DDS::Security::IdentityHandle local_identity_handle = identity_handle_;
+  const DDS::Security::ParticipantCryptoHandle local_crypto_handle = crypto_handle_;
+  const CORBA::Long domain = domain_;
+  const bool is_access_protected = participant_sec_attr_.is_access_protected;
 
-  if (!auth->get_authenticated_peer_credential_token(
-      iter->second.authenticated_peer_credential_token_, iter->second.handshake_handle_, se)) {
-    if (DCPS::security_debug.auth_warn) {
-      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-        ACE_TEXT("Spdp::match_authenticated() - ")
-        ACE_TEXT("Unable to get authenticated peer credential token. ")
-        ACE_TEXT("Security Exception[%d.%d]: %C\n"),
-        se.code, se.minor_code, se.message.in()));
-    }
-    return false;
-  }
+  bool crypto_ok = true;
+  DDS::Security::SharedSecretHandle_var shared_secret_handle;
+  DDS::Security::AuthenticatedPeerCredentialToken authenticated_peer_credential_token;
+  DDS::Security::PermissionsHandle permissions_handle = DDS::HANDLE_NIL;
+  DDS::Security::ParticipantCryptoHandle dp_crypto_handle = DDS::HANDLE_NIL;
+  DDS::Security::ParticipantCryptoHandle dp_crypto_handle_owned = DDS::HANDLE_NIL;
+  DDS::Security::ParticipantCryptoTokenSeq crypto_tokens;
 
-  iter->second.permissions_handle_ = access->validate_remote_permissions(
-    auth, identity_handle_, iter->second.identity_handle_,
-    iter->second.permissions_token_, iter->second.authenticated_peer_credential_token_, se);
-  handle_registry->insert_remote_participant_permissions_handle(guid, iter->second.permissions_handle_);
+  {
+    ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+    ACE_GUARD_RETURN(ACE_Reverse_Lock<ACE_Thread_Mutex>, rev_guard, rev_lock, false);
 
-  if (participant_sec_attr_.is_access_protected &&
-      iter->second.permissions_handle_ == DDS::HANDLE_NIL) {
-    if (DCPS::security_debug.auth_warn) {
-      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-        ACE_TEXT("Spdp::match_authenticated() - ")
-        ACE_TEXT("Unable to validate remote participant with access control plugin. ")
-        ACE_TEXT("Security Exception[%d.%d]: %C\n"),
-        se.code, se.minor_code, se.message.in()));
-    }
-    return false;
-  }
-
-  if (participant_sec_attr_.is_access_protected) {
-    if (!access->check_remote_participant(iter->second.permissions_handle_, domain_,
-        iter->second.pdata_.ddsParticipantDataSecure, se)) {
+    shared_secret_handle = auth->get_shared_secret(handshake_handle, se);
+    if (shared_secret_handle == 0) {
       if (DCPS::security_debug.auth_warn) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
           ACE_TEXT("Spdp::match_authenticated() - ")
-          ACE_TEXT("Remote participant check failed. Security Exception[%d.%d]: %C\n"),
-            se.code, se.minor_code, se.message.in()));
+          ACE_TEXT("Unable to get shared secret handle. Security Exception[%d.%d]: %C\n"),
+          se.code, se.minor_code, se.message.in()));
       }
-      return false;
+      crypto_ok = false;
     }
+
+    if (crypto_ok) {
+      if (!auth->get_authenticated_peer_credential_token(
+          authenticated_peer_credential_token, handshake_handle, se)) {
+        if (DCPS::security_debug.auth_warn) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+            ACE_TEXT("Spdp::match_authenticated() - ")
+            ACE_TEXT("Unable to get authenticated peer credential token. ")
+            ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+            se.code, se.minor_code, se.message.in()));
+        }
+        crypto_ok = false;
+      }
+    }
+
+    if (crypto_ok) {
+      permissions_handle = access->validate_remote_permissions(
+        auth, local_identity_handle, remote_identity_handle,
+        permissions_token, authenticated_peer_credential_token, se);
+
+      if (is_access_protected && permissions_handle == DDS::HANDLE_NIL) {
+        if (DCPS::security_debug.auth_warn) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+            ACE_TEXT("Spdp::match_authenticated() - ")
+            ACE_TEXT("Unable to validate remote participant with access control plugin. ")
+            ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+            se.code, se.minor_code, se.message.in()));
+        }
+        crypto_ok = false;
+      }
+    }
+
+    if (crypto_ok && is_access_protected) {
+      if (!access->check_remote_participant(permissions_handle, domain,
+          pdata_secure, se)) {
+        if (DCPS::security_debug.auth_warn) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+            ACE_TEXT("Spdp::match_authenticated() - ")
+            ACE_TEXT("Remote participant check failed. Security Exception[%d.%d]: %C\n"),
+              se.code, se.minor_code, se.message.in()));
+        }
+        crypto_ok = false;
+      }
+    }
+
+    if (crypto_ok) {
+      dp_crypto_handle =
+        handle_registry->get_remote_participant_crypto_handle(guid);
+
+      if (dp_crypto_handle == DDS::HANDLE_NIL) {
+        dp_crypto_handle = key_factory->register_matched_remote_participant(
+          local_crypto_handle, remote_identity_handle, permissions_handle,
+          shared_secret_handle, se);
+        if (dp_crypto_handle == DDS::HANDLE_NIL) {
+          if (DCPS::security_debug.auth_warn) {
+            ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+              ACE_TEXT("Spdp::match_authenticated() - Unable to register remote ")
+              ACE_TEXT("participant with crypto key factory plugin. ")
+              ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+              se.code, se.minor_code, se.message.in()));
+          }
+          crypto_ok = false;
+        } else {
+          // We freshly allocated this handle — we own cleanup responsibility.
+          dp_crypto_handle_owned = dp_crypto_handle;
+        }
+      }
+    }
+
+    if (crypto_ok && local_crypto_handle != DDS::HANDLE_NIL) {
+      if (!key_exchange->create_local_participant_crypto_tokens(
+          crypto_tokens, local_crypto_handle, dp_crypto_handle, se)) {
+        if (DCPS::security_debug.auth_warn) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_debug} ")
+            ACE_TEXT("Spdp::match_authenticated() - ")
+            ACE_TEXT("Unable to create local participant crypto ")
+            ACE_TEXT("tokens with crypto key exchange plugin. ")
+            ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+            se.code, se.minor_code, se.message.in()));
+        }
+        crypto_ok = false;
+      }
+    }
+
+  }
+
+  iter = participants_.find(guid);
+
+  if (iter == participants_.end()) {
+    // Participant was purged while lock was released — explicit handle cleanup.
+    if (DCPS::security_debug.auth_warn) {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+        ACE_TEXT("Spdp::match_authenticated() - ")
+        ACE_TEXT("participant %C removed during crypto, cleaning up handles\n"),
+        DCPS::LogGuid(guid).c_str()));
+    }
+    // Pass dp_crypto_handle_owned (not dp_crypto_handle): only unregister if we freshly
+    // allocated the handle. A pre-existing handle retrieved from the registry belongs to
+    // the thread that inserted it; unregistering it would destroy live crypto state.
+    cleanup_security_handles(auth, access, key_factory, shared_secret_handle, permissions_handle, dp_crypto_handle_owned, se);
+    return false;
+  }
+
+  if (!crypto_ok) {
+    cleanup_security_handles(auth, access, key_factory, shared_secret_handle, permissions_handle, dp_crypto_handle_owned, se);
+    return false;
+  }
+
+  // Double-execution guard: another thread may have completed first-auth while lock was released.
+  // shared_secret_handle_ is only written in Phase 3 under lock_, so this check is race-free.
+  if (iter->second.shared_secret_handle_ != 0) {
+    if (DCPS::security_debug.auth_debug) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} ")
+        ACE_TEXT("Spdp::match_authenticated() - ")
+        ACE_TEXT("peer %C already matched by another thread, discarding duplicate crypto\n"),
+        DCPS::LogGuid(guid).c_str()));
+    }
+    // Use dp_crypto_handle_owned: if we retrieved a pre-existing handle (get_remote_participant_crypto_handle
+    // returned non-NIL), dp_crypto_handle_owned is NIL and cleanup correctly skips unregister_participant.
+    cleanup_security_handles(auth, access, key_factory, shared_secret_handle, permissions_handle, dp_crypto_handle_owned, se);
+    return true;
+  }
+
+  // Write results back to participant
+  iter->second.shared_secret_handle_ = shared_secret_handle;
+  iter->second.authenticated_peer_credential_token_ = authenticated_peer_credential_token;
+  iter->second.permissions_handle_ = permissions_handle;
+  iter->second.crypto_tokens_ = crypto_tokens;
+
+  handle_registry->insert_remote_participant_permissions_handle(guid, permissions_handle);
+
+  if (dp_crypto_handle != DDS::HANDLE_NIL) {
+    handle_registry->insert_remote_participant_crypto_handle(guid, dp_crypto_handle);
   }
 
   if (DCPS::security_debug.auth_debug) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::match_authenticated - ")
-               ACE_TEXT("auth and access control complete for peer %C\n"),
-               DCPS::LogGuid(guid).c_str()));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::match_authenticated - auth and access control complete for peer %C\n"), DCPS::LogGuid(guid).c_str()));
   }
 
   if (DCPS::transport_debug.log_progress) {
     log_progress("authentication", guid_, guid, iter->second.discovered_at_.to_idl_struct());
-  }
-
-  DDS::Security::ParticipantCryptoHandle dp_crypto_handle =
-    sedp_->get_handle_registry()->get_remote_participant_crypto_handle(iter->first);
-
-  if (dp_crypto_handle == DDS::HANDLE_NIL) {
-    dp_crypto_handle = key_factory->register_matched_remote_participant(
-      crypto_handle_, iter->second.identity_handle_, iter->second.permissions_handle_,
-      iter->second.shared_secret_handle_, se);
-    sedp_->get_handle_registry()->insert_remote_participant_crypto_handle(iter->first, dp_crypto_handle);
-    if (dp_crypto_handle == DDS::HANDLE_NIL) {
-      if (DCPS::security_debug.auth_warn) {
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-          ACE_TEXT("Spdp::match_authenticated() - Unable to register remote ")
-          ACE_TEXT("participant with crypto key factory plugin. ")
-          ACE_TEXT("Security Exception[%d.%d]: %C\n"),
-          se.code, se.minor_code, se.message.in()));
-      }
-      return false;
-    }
-  }
-
-  if (crypto_handle_ != DDS::HANDLE_NIL) {
-    if (!key_exchange->create_local_participant_crypto_tokens(
-        iter->second.crypto_tokens_, crypto_handle_, dp_crypto_handle, se)) {
-      if (DCPS::security_debug.auth_warn) {
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_debug} ")
-          ACE_TEXT("Spdp::match_authenticated() - ")
-          ACE_TEXT("Unable to create local participant crypto ")
-          ACE_TEXT("tokens with crypto key exchange plugin. ")
-          ACE_TEXT("Security Exception[%d.%d]: %C\n"),
-          se.code, se.minor_code, se.message.in()));
-      }
-      return false;
-    }
   }
 
   sedp_->generate_remote_matched_crypto_handles(iter->second);
