@@ -28,7 +28,7 @@ void generate_transaction_id(OpenDDS::STUN::Message& message)
 {
   OpenDDS::STUN::TransactionId id;
   for (size_t idx = 0; idx != 12; ++idx) {
-    id.data[idx] = rand();
+    id.data[idx] = static_cast<ACE_UINT8>(rand());
   }
   message.transaction_id(id);
 }
@@ -254,7 +254,7 @@ bool test_no_fingerprint(int& status,
     retval = false;
   }
 
-  if (response.get_error_reason() != "Bad Request: FINGERPRINT must be pesent") {
+  if (response.get_error_reason() != "Bad Request: FINGERPRINT must be present") {
     std::cerr << "ERROR: Response has incorrect error reason" << std::endl;
     status = EXIT_FAILURE;
     retval = false;
@@ -318,7 +318,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   if (!server.empty()) {
     const ACE_INET_Addr server_addr_base(server.c_str());
-    for (int i = 0; i < server_port_count; ++i) {
+    for (ACE_UINT16 i = 0; i < static_cast<ACE_UINT16>(server_port_count); ++i) {
       ACE_INET_Addr server_addr(server_addr_base);
       server_addr.set_port_number(server_addr.get_port_number() + i);
       const std::string name = "pinging server at " + OpenDDS::DCPS::LogAddr(server_addr).str();
