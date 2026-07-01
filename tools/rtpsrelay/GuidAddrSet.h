@@ -12,6 +12,8 @@
 
 #include <ace/INET_Addr.h>
 
+#include <regex>
+
 namespace RtpsRelay {
 
 struct PortSet {
@@ -28,6 +30,67 @@ struct InetAddrHash {
 
 using IpToPorts = std::unordered_map<ACE_INET_Addr, PortSet, InetAddrHash>;
 
+class IdentityInfo {
+public:
+  std::string cert_sn() const
+  {
+    return cert_sn_;
+  }
+
+  void cert_sn(const std::string& cert_sn)
+  {
+    cert_sn_ = cert_sn;
+  }
+
+  std::string ca_sn() const
+  {
+    return ca_sn_;
+  }
+
+  void ca_sn(const std::string& ca_sn)
+  {
+    ca_sn_ = ca_sn;
+  }
+
+
+  void match_cert_id(const std::regex& re, const std::string& pattern)
+  {
+    if (pattern.empty()) {
+      return;
+    }
+
+    try {
+      std::smatch match;
+      if (std::regex_search(cert_sn_, match, re) && match.size() > 1) {
+        // Take the first group match
+        cert_id_ = match.str(1);
+      } else {
+        ACE_DEBUG((LM_INFO, "(%P|%t) INFO: IdentityInfo::match_cert_id: pattern '%C' did not match dds.cert.sn '%C'\n",
+          pattern.c_str(), cert_sn_.c_str()));
+      }
+    } catch (const std::regex_error& e) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: IdentityInfo::match_cert_id: exception caught for pattern '%C' dds.cert.sn '%C': %C\n",
+        pattern.c_str(), cert_sn_.c_str(), e.what()));
+    }
+  }
+
+  // Use as key into the partitions cache for asynchronous discovery if it is non-empty
+  std::string cert_id() const
+  {
+    return cert_id_;
+  }
+
+private:
+  // IdentityToken's dds.cert.sn
+  std::string cert_sn_;
+
+  // IdentityToken's dds.ca.sn
+  std::string ca_sn_;
+
+  // Lookup key for the cached partitions corresponding to this cert_sn
+  std::string cert_id_;
+};
+
 struct AddrSetStats {
   bool allow_rtps = false;
   bool allow_stun_responses = true;
@@ -38,7 +101,24 @@ struct AddrSetStats {
   OpenDDS::DCPS::MonotonicTimePoint session_start;
   OpenDDS::DCPS::MonotonicTimePoint deactivation;
   RelayStatisticsReporter& relay_stats_reporter;
-  std::string common_name;
+  IdentityInfo identity_info;
+
+  // Set of participants that this participant has initiated async discovery with.
+  // Used to clean up the pending recipients sets of those participants.
+  GuidSet initiated_async_discovery_with;
+
+  // Set of participants that have initiated async discovery with this participant, and
+  // are waiting for messages from it.
+  GuidSet pending_recipients;
+
+  // Horizontal addresses of remote relays from which some participants have initiated async discovery
+  // with this participant. Store them so that messages from this participant can be forwarded to them
+  // and eventually to the remote participants.
+  using PendingPeerRelays = std::map<ACE_INET_Addr, OpenDDS::DCPS::MonotonicTimePoint>;
+  PendingPeerRelays pending_spdp_peer_relays;
+  PendingPeerRelays pending_sedp_peer_relays;
+  PendingPeerRelays pending_data_peer_relays;
+
   size_t& total_ips;
   size_t& total_ports;
 
@@ -92,6 +172,29 @@ struct AddrSetStats {
   OpenDDS::DCPS::TimeDuration get_session_time(const OpenDDS::DCPS::MonotonicTimePoint& now) const
   {
     return now - session_start;
+  }
+
+  void maintain_pending_peer_relays(const std::string& name, const OpenDDS::DCPS::MonotonicTimePoint& expire)
+  {
+    PendingPeerRelays* peer_relays = nullptr;
+    if (name == HSPDP) {
+      peer_relays = &pending_spdp_peer_relays;
+    } else if (name == HSEDP) {
+      peer_relays = &pending_sedp_peer_relays;
+    } else if (name == HDATA) {
+      peer_relays = &pending_data_peer_relays;
+    }
+
+    if (peer_relays) {
+      // Prune stale entries
+      for (auto it = peer_relays->begin(); it != peer_relays->end();) {
+        if (it->second < expire) {
+          it = peer_relays->erase(it);
+        } else {
+          ++it;
+        }
+      }
+    }
   }
 };
 
@@ -168,6 +271,12 @@ public:
     , relay_thread_monitor_(relay_thread_monitor)
   {
     TheServiceParticipant->config_topic()->connect(config_reader_);
+
+    // Constructed if async discovery is enabled, i.e., the certificate Id pattern is non-empty.
+    const auto pattern = config.certificate_id_pattern();
+    if (!pattern.empty()) {
+      cert_id_regex_ = std::regex(pattern);
+    }
   }
 
   ~GuidAddrSet();
@@ -214,13 +323,13 @@ public:
       gas_.record_activity(remote_address, now, src_guid, from_application_participant, allow_stun_responses, handler);
     }
 
-    bool ignore_rtps(bool from_application_participant,
-                     const OpenDDS::DCPS::GUID_t& guid,
-                     const OpenDDS::DCPS::MonotonicTimePoint& now,
-                     bool already_checked_admit,
-                     bool& admitted)
+    bool defer_client(bool from_application_participant,
+                      const OpenDDS::DCPS::GUID_t& guid,
+                      const OpenDDS::DCPS::MonotonicTimePoint& now,
+                      bool already_checked_admit,
+                      bool& admitted)
     {
-      return gas_.ignore_rtps(from_application_participant, guid, now, already_checked_admit, admitted);
+      return gas_.defer_client(from_application_participant, guid, now, already_checked_admit, admitted);
     }
 
     OpenDDS::DCPS::TimeDuration get_session_time(const OpenDDS::DCPS::GUID_t& guid,
@@ -230,15 +339,19 @@ public:
     }
 
     void remove(const OpenDDS::DCPS::GUID_t& guid,
-                const OpenDDS::DCPS::MonotonicTimePoint& now,
-                RelayParticipantStatusReporter* reporter)
+                const OpenDDS::DCPS::MonotonicTimePoint& now)
     {
       const auto it = find(guid);
       if (it == end()) {
         return;
       }
 
-      gas_.remove(guid, it, now, reporter);
+      gas_.remove(guid, it, now, nullptr);
+    }
+
+    void cleanup_peers_pending_recipients(const GuidAddrSetMap::iterator& it)
+    {
+      gas_.cleanup_peers_pending_recipients(it);
     }
 
     void reject_address(const ACE_INET_Addr& addr,
@@ -302,6 +415,30 @@ public:
       gas_.apply_drain_state(addr_set_stats, from_application_participant);
     }
 
+    std::string cert_id(const OpenDDS::DCPS::GUID_t& guid)
+    {
+      const auto it = find(guid);
+      if (it != end()) {
+        return it->second.identity_info.cert_id();
+      }
+      return {};
+    }
+
+    void update_cross_relay_pending_recipients(const OpenDDS::DCPS::GUID_t& src_guid, const StringSet& to_partitions)
+    {
+      gas_.update_cross_relay_pending_recipients(src_guid, to_partitions);
+    }
+
+    void lookup_cross_relay_pending_recipients(GuidSet& pending_guids, const StringSequence& partitions) const
+    {
+      gas_.lookup_cross_relay_pending_recipients(pending_guids, partitions);
+    }
+
+    void remove_cross_relay_pending_recipients(const OpenDDS::DCPS::GUID_t& guid)
+    {
+      gas_.remove_cross_relay_pending_recipients(guid);
+    }
+
   private:
     GuidAddrSet& gas_;
 
@@ -310,6 +447,11 @@ public:
     Proxy& operator=(const Proxy&) = delete;
     Proxy& operator=(Proxy&&) = delete;
   };
+
+  const std::regex& cert_id_regex() const
+  {
+    return cert_id_regex_;
+  }
 
 private:
   CreatedAddrSetStats find_or_create(const OpenDDS::DCPS::GUID_t& guid,
@@ -346,16 +488,18 @@ private:
     return admit;
   }
 
-  bool ignore_rtps(bool from_application_participant,
-                   const OpenDDS::DCPS::GUID_t& guid,
-                   const OpenDDS::DCPS::MonotonicTimePoint& now,
-                   bool already_checked_admit,
-                   bool& admitted);
+  bool defer_client(bool from_application_participant,
+                    const OpenDDS::DCPS::GUID_t& guid,
+                    const OpenDDS::DCPS::MonotonicTimePoint& now,
+                    bool already_checked_admit,
+                    bool& admitted);
 
   void remove(const OpenDDS::DCPS::GUID_t& guid,
               GuidAddrSetMap::iterator it,
               const OpenDDS::DCPS::MonotonicTimePoint& now,
               RelayParticipantStatusReporter* reporter);
+
+  void cleanup_peers_pending_recipients(const GuidAddrSetMap::iterator& it);
 
   void reject_address(const ACE_INET_Addr& addr,
                       const OpenDDS::DCPS::MonotonicTimePoint& now);
@@ -387,6 +531,12 @@ private:
   void deny(const OpenDDS::DCPS::GUID_t& guid);
 
   void apply_drain_state(AddrSetStats& addr_set_stats, bool from_application_participant);
+
+  void update_cross_relay_pending_recipients(const OpenDDS::DCPS::GUID_t& src_guid, const StringSet& to_partitions);
+
+  void lookup_cross_relay_pending_recipients(GuidSet& pending_guids, const StringSequence& partitions) const;
+
+  void remove_cross_relay_pending_recipients(const OpenDDS::DCPS::GUID_t& guid);
 
   struct AdmissionControlInfo {
     AdmissionControlInfo(const OpenDDS::DCPS::GuidPrefix_t& prefix, const OpenDDS::DCPS::MonotonicTimePoint& admitted)
@@ -445,6 +595,17 @@ private:
   size_t mark_budget_ = 0;
   size_t mark_count_ = 0;
   OpenDDS::DCPS::SporadicEvent_rch drain_task_;
+
+  std::regex cert_id_regex_;
+
+  // For each partition, store the local participants whose messages had been forwarded to
+  // peer relays using async discovery. This is so that they can be included when messages
+  // from the peer relays for matching partitions are received and forwarded.
+  using CrossRelayPendingRecipients = std::unordered_map<std::string, GuidSet>;
+  CrossRelayPendingRecipients cross_relay_pending_recipients_;
+
+  using CrossRelayInitiatedAsyncDiscovery = std::unordered_map<OpenDDS::DCPS::GUID_t, StringSet, GuidHash>;
+  CrossRelayInitiatedAsyncDiscovery initiated_async_discovery_with_;
 };
 
 }

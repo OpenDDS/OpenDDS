@@ -94,9 +94,7 @@ public:
     if (nbytes > sizeof(T))
       return 0;
 
-    // addr() call is really not absolutely necessary because of the way
-    // ACE_Cached_Mem_Pool_Node's internal structure arranged.
-    void* const rtn = this->free_list_.remove()->addr();
+    void* const rtn = this->free_list_.remove();
     if (0 == rtn) {
       heap_allocated_ += sizeof(T);
       return ACE_Allocator::instance()->malloc(sizeof(T));

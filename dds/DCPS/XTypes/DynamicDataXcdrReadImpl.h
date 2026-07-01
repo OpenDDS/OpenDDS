@@ -30,14 +30,16 @@ public:
   DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
                           const DCPS::Encoding& encoding,
                           DDS::DynamicType_ptr type,
-                          DCPS::Sample::Extent ext = DCPS::Sample::Full);
+                          DCPS::Sample::Extent ext = DCPS::Sample::Full,
+                          ACE_CDR::ULong item_count_limit = ACE_UINT32_MAX);
 
   /// Use this when you want to pass the alignment state of a given Serializer object over.
   /// A typical use case would be when a part of the data has already been consumed from
   /// @a ser and you want to give the remaining to DynamicData.
   /// The provided type is expected to be the type of the binary data.
   DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type,
-                          DCPS::Sample::Extent ext = DCPS::Sample::Full);
+                          DCPS::Sample::Extent ext = DCPS::Sample::Full,
+                          ACE_CDR::ULong item_count_limit = ACE_UINT32_MAX);
 
   DynamicDataXcdrReadImpl(const DynamicDataXcdrReadImpl& other);
   DynamicDataXcdrReadImpl& operator=(const DynamicDataXcdrReadImpl& other);
@@ -351,10 +353,12 @@ public:
   }
 
 private:
+  struct ByteLimitTag {};
+
   /// Like the Serializer constructor, but limits the duplicated chain to
   /// @a limit bytes from the serializer's current read position.
   DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type,
-                          DCPS::Sample::Extent ext, size_t limit);
+                          DCPS::Sample::Extent ext, ByteLimitTag, size_t limit);
 
   DDS::ReturnCode_t get_map_key_i(DDS::DynamicData_ptr& key, DDS::MemberId id);
   DDS::ReturnCode_t get_map_value_i(DDS::DynamicData_ptr& value, DDS::MemberId id);
@@ -453,6 +457,7 @@ private:
 
   /// Return the member descriptor for the selected member from a union data or null.
   DDS::MemberDescriptor* get_union_selected_member();
+  DDS::MemberDescriptor* get_union_selected_member(ACE_CDR::Long label, bool allow_default);
 
   DDS::MemberDescriptor* get_from_union_common_checks(MemberId id, const char* func_name);
 
@@ -474,6 +479,19 @@ private:
   /// In that case, @a elem_tk is set to TK_ENUM or TK_BITMASK.
   template<typename SequenceType>
   bool read_values(SequenceType& value, TypeKind elem_tk);
+
+  template<typename ValueType>
+  DDS::ReturnCode_t apply_value_try_construct(ValueType& value, DDS::MemberDescriptor* md) const;
+
+  DDS::ReturnCode_t apply_value_try_construct(CORBA::Long& value, DDS::MemberDescriptor* md) const;
+
+  template<typename SequenceType>
+  DDS::ReturnCode_t apply_sequence_try_construct(SequenceType& value, DDS::MemberDescriptor* md) const;
+
+  DDS::ReturnCode_t apply_string_try_construct(char*& value, DDS::MemberDescriptor* md) const;
+#ifdef DDS_HAS_WCHAR
+  DDS::ReturnCode_t apply_wstring_try_construct(CORBA::WChar*& value, DDS::MemberDescriptor* md) const;
+#endif
 
   ///@{
   /** Templates for reading a sequence of primitives, strings or wstrings
@@ -511,6 +529,7 @@ private:
   bool skip(const char* func_name, const char* description, size_t n, int size = 1);
 
   bool read_discriminator(const DDS::DynamicType_ptr disc_type, DDS::ExtensibilityKind union_ek, ACE_CDR::Long& label);
+  bool apply_union_discriminator_try_construct(ACE_CDR::Long& label);
 
   /// Skip a member of a final or appendable struct at the given index.
   ///
@@ -542,6 +561,8 @@ private:
   bool get_primitive_size(DDS::DynamicType_ptr dt, ACE_CDR::ULong& size) const;
 
   bool has_optional_member(bool& has_optional) const;
+
+  DDS::ReturnCode_t try_construct_item_count_limit(ACE_CDR::ULong& limit, DDS::MemberDescriptor* md);
 
   /// A set of strings used to prevent infinite recursion when checking for XCDR1 Mutable
   typedef OPENDDS_SET(DCPS::String) DynamicTypeNameSet;
@@ -579,6 +600,7 @@ private:
 
   /// Cache the number of items (i.e., members or elements) in the data it holds.
   ACE_CDR::ULong item_count_;
+  ACE_CDR::ULong item_count_limit_;
 };
 
 OpenDDS_Dcps_Export bool print_dynamic_data(DDS::DynamicData_ptr dd,

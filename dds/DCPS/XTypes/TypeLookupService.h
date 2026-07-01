@@ -43,6 +43,7 @@ public:
   /// For converting between complete to minimal TypeObject of remote types
   ///@{
   void update_type_identifier_map(const TypeIdentifierPairSeq& tid_pairs);
+  bool get_minimal_type_identifier(const TypeIdentifier& complete_ti, TypeIdentifier& minimal_ti) const;
   bool complete_to_minimal_type_object(const TypeObject& cto, TypeObject& mto) const;
   ///@}
 
@@ -95,8 +96,6 @@ private:
   /// Mapping from complete to minimal TypeIdentifiers of dependencies of remote types.
   typedef OPENDDS_MAP(TypeIdentifier, TypeIdentifier) TypeIdentifierMap;
   TypeIdentifierMap complete_to_minimal_ti_map_;
-
-  bool get_minimal_type_identifier(const TypeIdentifier& ct, TypeIdentifier& mt) const;
 
   // Initialize received TypeObjects to defaults.
   bool set_type_object_defaults(TypeObject& to);

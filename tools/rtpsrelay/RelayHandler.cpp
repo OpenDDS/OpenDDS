@@ -257,7 +257,7 @@ VerticalHandler::VerticalHandler(const Config& config,
                                  Port port,
                                  const ACE_INET_Addr& horizontal_address,
                                  ACE_Reactor* reactor,
-                                 const GuidPartitionTable& guid_partition_table,
+                                 GuidPartitionTable& guid_partition_table,
                                  const RelayPartitionTable& relay_partition_table,
                                  GuidAddrSet& guid_addr_set,
                                  const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
@@ -343,7 +343,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     cache_message(proxy, src_guid, to, msg, now);
 
     bool admitted = false;
-    if (proxy.ignore_rtps(from_application_participant, src_guid, now, already_checked_admit, admitted)) {
+    if (proxy.defer_client(from_application_participant, src_guid, now, already_checked_admit, admitted)) {
       stats_reporter_.ignored_message(msg_len, now, type);
       return 0;
     }
@@ -358,10 +358,37 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
     if (do_normal_processing(proxy, remote_address, src_guid, to, admitted, send_to_application_participant, msg, now, sent)) {
       StringSet to_partitions;
       guid_partition_table_.lookup(to_partitions, src_guid);
+      // Denial decision is based only on the "ground truth" routing table and
+      // not the "heuristic" partition cache (looked up below) that may contain
+      // stale partitions for this guid and may cause it to be denied incorrectly.
       if (guid_partition_table_.is_denied(to_partitions)) {
         proxy.deny(src_guid);
       }
-      sent += send(proxy, src_guid, to_partitions, to, send_to_application_participant, msg, now);
+
+      // Initiate async discovery if applicable, i.e., the relay has not learned about any partitions
+      // for this client from endpoint discovery, but has cached partitions for it.
+      // The cached partitions are used to forward the client's messages until the relay has learned
+      // about any of the client's partitions through endpoint discovery.
+      bool async_discovery = false;
+      if (config_.async_discovery_enabled()) {
+        if (to_partitions.empty()) {
+          const auto pos = proxy.find(src_guid);
+          if (pos != proxy.end()) {
+            const auto ca_sn = pos->second.identity_info.ca_sn();
+            if (config_.expected_ca_subject_name() == ca_sn) {
+              const auto key = pos->second.identity_info.cert_id();
+              guid_partition_table_.lookup_cert_partitions_cache(to_partitions, key, src_guid);
+            } else if (config_.log_async_discovery()) {
+              HANDLER_WARNING((LM_WARNING, "(%P|%t) WARNING: VerticalHandler::process_message %C Expected CA subject name '%C', but got '%C' from GUID %C\n",
+                name_.c_str(), config_.expected_ca_subject_name().c_str(), ca_sn.c_str(), OpenDDS::DCPS::LogGuid(src_guid).c_str()));
+            }
+          }
+          if (!to_partitions.empty()) {
+            async_discovery = true;
+          }
+        }
+      }
+      sent += send(proxy, src_guid, to_partitions, to, send_to_application_participant, msg, now, async_discovery);
     }
     return sent;
   } else {
@@ -458,7 +485,7 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
       }
 
       bool admitted = false;
-      proxy.ignore_rtps(from_application_participant, src_guid, now, already_checked_admit, admitted);
+      proxy.defer_client(from_application_participant, src_guid, now, already_checked_admit, admitted);
       if (admitted && spdp_handler_) {
         messages_sent += spdp_handler_->send_to_application_participant(proxy, src_guid, now);
       }
@@ -519,8 +546,6 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
                                     bool check_submessages,
                                     const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
-  ACE_UNUSED_ARG(msg);
-
   if (!message_parser.parseHeader()) {
     HANDLER_ERROR((LM_ERROR, "(%P|%t) ERROR: VerticalHandler::parse_message %C failed to deserialize RTPS header\n", name_.c_str()));
     return false;
@@ -619,13 +644,15 @@ bool VerticalHandler::parse_message(OpenDDS::RTPS::MessageParser& message_parser
           OpenDDS::DCPS::EntityId_t writerId;
           if (!(message_parser >> readerId) ||
               !(message_parser >> writerId)) {
-            HANDLER_ERROR((LM_ERROR, "(%P|%t) ERROR: VerticalHandler::parse_message %C could not parse submessage from %C\n", name_.c_str(), guid_to_string(src_guid).c_str()));
+            HANDLER_ERROR((LM_ERROR, "(%P|%t) ERROR: VerticalHandler::parse_message %C could not parse submessage from %C\n",
+              name_.c_str(), guid_to_string(src_guid).c_str()));
             return false;
           }
           if (rtps_discovery_->get_crypto_handle(config_.application_domain(), config_.application_participant_guid()) != DDS::HANDLE_NIL &&
               !(OpenDDS::DCPS::RtpsUdpDataLink::separate_message(writerId) ||
                 writerId == OpenDDS::DCPS::ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER)) {
-            HANDLER_WARNING((LM_WARNING, "(%P|%t) WARNING: VerticalHandler::parse_message %C submessage from %C with id %d could not be verified writerId=%02X%02X%02X%02X\n", name_.c_str(), guid_to_string(src_guid).c_str(), submessage_header.submessageId, writerId.entityKey[0], writerId.entityKey[1], writerId.entityKey[2], writerId.entityKind));
+            HANDLER_WARNING((LM_WARNING, "(%P|%t) WARNING: VerticalHandler::parse_message %C submessage from %C with id %d could not be verified writerId=%02X%02X%02X%02X\n",
+              name_.c_str(), guid_to_string(src_guid).c_str(), submessage_header.submessageId, writerId.entityKey[0], writerId.entityKey[1], writerId.entityKey[2], writerId.entityKind));
             return false;
           }
         }
@@ -656,21 +683,66 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
                                    const GuidSet& to_guids,
                                    bool send_to_application_participant,
                                    const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
-                                   const OpenDDS::DCPS::MonotonicTimePoint& now)
+                                   const OpenDDS::DCPS::MonotonicTimePoint& now,
+                                   bool async_discovery)
 {
   AddressSet address_set;
   populate_address_set(address_set, to_partitions);
   const auto type = MessageType::Rtps;
 
+  // Also forward to the peer relays from which some participants had initiated async discovery with this source.
+  // These addresses may have been included already, but this ensures they are always included.
+  if (!async_discovery) {
+    const auto cutoff_time = OpenDDS::DCPS::MonotonicTimePoint::now() - config_.async_discovery_cross_relay_timeout();
+    const auto& horizontal_name = horizontal_handler_->name();
+    AddrSetStats::PendingPeerRelays* peer_relays = nullptr;
+
+    const auto iter = proxy.find(src_guid);
+    if (iter != proxy.end()) {
+      // Prune stale entries before adding to the set
+      iter->second.maintain_pending_peer_relays(horizontal_name, cutoff_time);
+      if (horizontal_name == HSPDP) {
+        peer_relays = &iter->second.pending_spdp_peer_relays;
+      } else if (horizontal_name == HSEDP) {
+        peer_relays = &iter->second.pending_sedp_peer_relays;
+      } else if (horizontal_name == HDATA) {
+        peer_relays = &iter->second.pending_data_peer_relays;
+      }
+    }
+    if (peer_relays) {
+      for (auto it = peer_relays->begin(); it != peer_relays->end(); ++it) {
+        address_set.insert(it->first);
+      }
+    }
+  }
+
   CORBA::ULong sent = 0;
   for (const auto& addr : address_set) {
     if (addr != horizontal_address_) {
-      horizontal_handler_->enqueue_or_send_message(addr, to_partitions, to_guids, msg, now);
+      horizontal_handler_->enqueue_or_send_message(addr, to_partitions, to_guids, msg, now, async_discovery);
       ++sent;
+
+      // In case we are using async discovery cache to forward the source message,
+      // mark it as a pending recipient so that messages from peer relays with
+      // matching partitions can be forwarded to it.
+      if (async_discovery) {
+        proxy.update_cross_relay_pending_recipients(src_guid, to_partitions);
+      }
     } else {
       // Local recipients.
       GuidSet guids;
       guid_partition_table_.lookup(guids, to_partitions, to_guids);
+
+      // Also send to the pending recipients that have initiated async discovery with this source.
+      const auto iter = proxy.find(src_guid);
+      if (!async_discovery) {
+        if (iter != proxy.end()) {
+          const auto& pending_recipients = iter->second.pending_recipients;
+          guids.insert(pending_recipients.begin(), pending_recipients.end());
+        }
+      }
+
+      GuidSet async_disc_targets;
       for (const auto& guid : guids) {
         if (guid == src_guid) {
           continue;
@@ -682,6 +754,18 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
                                    venqueue_message(address, msg, now, type);
                                    ++sent;
           });
+          if (async_discovery) {
+            // Add the source GUID to the pending recipients list of each target so that
+            // subsequent messages from the target can be forwarded to the source, thus
+            // allowing them to discover each other.
+            p->second.pending_recipients.insert(src_guid);
+            async_disc_targets.insert(guid);
+          }
+        }
+      }
+      if (async_discovery) {
+        if (iter != proxy.end()) {
+          iter->second.initiated_async_discovery_with.insert(async_disc_targets.begin(), async_disc_targets.end());
         }
       }
     }
@@ -732,7 +816,8 @@ void HorizontalHandler::enqueue_or_send_message(const ACE_INET_Addr& addr,
                                                 const StringSet& to_partitions,
                                                 const GuidSet& to_guids,
                                                 const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
-                                                const OpenDDS::DCPS::MonotonicTimePoint& now)
+                                                const OpenDDS::DCPS::MonotonicTimePoint& now,
+                                                bool async_discovery)
 {
   using namespace OpenDDS::DCPS;
 
@@ -747,11 +832,13 @@ void HorizontalHandler::enqueue_or_send_message(const ACE_INET_Addr& addr,
   for (const auto& g : to_guids) {
     tg.push_back(rtps_guid_to_relay_guid(g));
   }
+  relay_header.use_async_discovery(async_discovery);
 
   const size_t size = serialized_size(encoding, relay_header);
   const size_t total_size = size + msg->length();
   if (total_size > TransportSendStrategy::UDP_MAX_MESSAGE_SIZE) {
-    HANDLER_ERROR((LM_ERROR, "(%P|%t) ERROR: HorizontalHandler::enqueue_message %C header and message too large (%B > %B)\n", name_.c_str(), total_size, static_cast<size_t>(TransportSendStrategy::UDP_MAX_MESSAGE_SIZE)));
+    HANDLER_ERROR((LM_ERROR, "(%P|%t) ERROR: HorizontalHandler::enqueue_message %C header and message too large (%B > %B)\n",
+      name_.c_str(), total_size, static_cast<size_t>(TransportSendStrategy::UDP_MAX_MESSAGE_SIZE)));
     return;
   }
 
@@ -762,7 +849,7 @@ void HorizontalHandler::enqueue_or_send_message(const ACE_INET_Addr& addr,
   RelayHandler::enqueue_message(addr, header_block, now, MessageType::Rtps);
 }
 
-CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr&,
+CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr& remote,
                                                 const OpenDDS::DCPS::MonotonicTimePoint& now,
                                                 const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                                 MessageType& type)
@@ -787,6 +874,28 @@ CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr&,
 
   guid_partition_table_.lookup(guids, relay_header.to_partitions(), to_guids);
   GuidAddrSet::Proxy proxy(vertical_handler_->guid_addr_set());
+
+  if (relay_header.use_async_discovery()) {
+    // If the remote participant used async discovery to route its message, store the remote relay
+    // to ensure returning messages from any of the target GUIDs will be forwarded to it.
+    for (const auto& guid : guids) {
+      const auto p = proxy.find(guid);
+      if (p != proxy.end()) {
+        if (name() == HSPDP) {
+          p->second.pending_spdp_peer_relays[remote] = now;
+        } else if (name() == HSEDP) {
+          p->second.pending_sedp_peer_relays[remote] = now;
+        } else if (name() == HDATA) {
+          p->second.pending_data_peer_relays[remote] = now;
+        }
+      }
+    }
+  } else {
+    GuidSet pending_guids;
+    proxy.lookup_cross_relay_pending_recipients(pending_guids, relay_header.to_partitions());
+    guids.insert(pending_guids.begin(), pending_guids.end());
+  }
+
   OpenDDS::DCPS::ThreadStatusManager::Event evLocked(TheServiceParticipant->get_thread_status_manager(),
     READ_MASK | DONT_CALL, handle_to_int(get_handle()));
 
@@ -809,7 +918,7 @@ SpdpHandler::SpdpHandler(const Config& config,
                          const std::string& name,
                          const ACE_INET_Addr& address,
                          ACE_Reactor* reactor,
-                         const GuidPartitionTable& guid_partition_table,
+                         GuidPartitionTable& guid_partition_table,
                          const RelayPartitionTable& relay_partition_table,
                          GuidAddrSet& guid_addr_set,
                          const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
@@ -821,14 +930,17 @@ SpdpHandler::SpdpHandler(const Config& config,
 {}
 
 namespace {
-  std::string extract_common_name(const ACE_Message_Block& msg,
-                                  const OpenDDS::DCPS::GUID_t& src_guid)
+  IdentityInfo extract_identity(const ACE_Message_Block& msg,
+                                const OpenDDS::DCPS::GUID_t& src_guid)
   {
+    IdentityInfo identity{};
     OpenDDS::RTPS::MessageParser message_parser(msg);
     if (!message_parser.parseHeader()) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_common_name() could not parse header\n"));
-      return "";
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_identity: could not parse header\n"));
+      return identity;
     }
+
+    bool get_cert_sn = false, get_ca_sn = false;
 
     while (message_parser.parseSubmessageHeader()) {
       const auto submessage_header = message_parser.submessageHeader();
@@ -844,8 +956,8 @@ namespace {
             !(message_parser >> readerId) ||
             !(message_parser >> writerId) ||
             !(message_parser >> writerSequenceNumber)) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_common_name() could not parse submessage\n"));
-          return "";
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_identity: could not parse submessage\n"));
+          return identity;
         }
 
         if (writerId != OpenDDS::DCPS::ENTITYID_SPDP_BUILTIN_PARTICIPANT_WRITER) {
@@ -855,14 +967,14 @@ namespace {
         }
 
         if (!message_parser.serializer().skip(octetsToInlineQos - 16)) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_common_name() could not parse submessage\n"));
-          return "";
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_identity: could not parse submessage\n"));
+          return identity;
         }
 
         OpenDDS::RTPS::ParameterList inlineQos;
         if ((submessage_header.flags & OpenDDS::RTPS::FLAG_Q) && !(message_parser >> inlineQos)) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_common_name() could not parse submessage\n"));
-          return "";
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_identity: could not parse submessage\n"));
+          return identity;
         }
 
         if (submessage_header.flags & OpenDDS::RTPS::FLAG_D) {
@@ -871,14 +983,14 @@ namespace {
           OpenDDS::DCPS::Encoding enc;
           if (!(message_parser >> encap) || !to_encoding(enc, encap, OpenDDS::DCPS::MUTABLE)
                                          || enc.kind() != OpenDDS::DCPS::Encoding::KIND_XCDR1) {
-            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_common_name() - failed to deserialize encapsulation header for SPDP from %C\n",
+            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_identity: failed to deserialize encapsulation header for SPDP from %C\n",
                        OpenDDS::DCPS::LogGuid(src_guid).c_str()));
-            return "";
+            return identity;
           }
           message_parser.serializer().encoding(enc);
           if (!(message_parser >> plist)) {
-            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_common_name() - failed to deserialize data payload for SPDP\n"));
-            return "";
+            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: extract_identity: failed to deserialize data payload for SPDP\n"));
+            return identity;
           }
 
           for (CORBA::ULong i = 0; i != plist.length(); ++i) {
@@ -889,7 +1001,14 @@ namespace {
                 for (CORBA::ULong j = 0; j != idt.properties.length(); ++j) {
                   const DDS::Property_t& prop = idt.properties[j];
                   if (std::strcmp(OpenDDS::Security::dds_cert_sn, prop.name.in()) == 0) {
-                    return std::string(prop.value.in());
+                    identity.cert_sn(prop.value.in());
+                    get_cert_sn = true;
+                  } else if (std::strcmp(OpenDDS::Security::dds_ca_sn, prop.name.in()) == 0) {
+                    identity.ca_sn(prop.value.in());
+                    get_ca_sn = true;
+                  }
+                  if (get_cert_sn && get_ca_sn) {
+                    return identity;
                   }
                 }
               }
@@ -902,7 +1021,7 @@ namespace {
       message_parser.skipSubmessageContent();
     }
 
-    return "";
+    return identity;
   }
 }
 
@@ -912,16 +1031,19 @@ void SpdpHandler::cache_message(GuidAddrSet::Proxy& proxy,
                                 const OpenDDS::DCPS::Lockable_Message_Block_Ptr& msg,
                                 const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
-  if (to.empty()) {
+  const bool undirected_spdp = to.empty();
+  if (undirected_spdp) {
     const auto pos = proxy.find(src_guid);
     if (pos != proxy.end()) {
       if (!pos->second.seen_spdp_message) {
-        pos->second.common_name = extract_common_name(*msg, src_guid);
+        pos->second.identity_info = extract_identity(*msg, src_guid);
+        pos->second.identity_info.match_cert_id(guid_addr_set_.cert_id_regex(), config_.certificate_id_pattern());
         if (config_.log_activity()) {
-          ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SpdpHandler::cache_message %C got first SPDP %C into session dds.cert.sn %C\n",
+          ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SpdpHandler::cache_message %C got first SPDP %C into session dds.cert.sn '%C' dds.ca.sn '%C'\n",
                      guid_to_string(src_guid).c_str(),
                      pos->second.get_session_time(now).sec_str().c_str(),
-                     pos->second.common_name.c_str()));
+                     pos->second.identity_info.cert_sn().c_str(),
+                     pos->second.identity_info.ca_sn().c_str()));
         }
         pos->second.spdp_message = msg;
         pos->second.seen_spdp_message = true;
@@ -1005,7 +1127,7 @@ SedpHandler::SedpHandler(const Config& config,
                          const std::string& name,
                          const ACE_INET_Addr& address,
                          ACE_Reactor* reactor,
-                         const GuidPartitionTable& guid_partition_table,
+                         GuidPartitionTable& guid_partition_table,
                          const RelayPartitionTable& relay_partition_table,
                          GuidAddrSet& guid_addr_set,
                          const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,
@@ -1071,7 +1193,7 @@ DataHandler::DataHandler(const Config& config,
                          const std::string& name,
                          const ACE_INET_Addr& address,
                          ACE_Reactor* reactor,
-                         const GuidPartitionTable& guid_partition_table,
+                         GuidPartitionTable& guid_partition_table,
                          const RelayPartitionTable& relay_partition_table,
                          GuidAddrSet& guid_addr_set,
                          const OpenDDS::RTPS::RtpsDiscovery_rch& rtps_discovery,

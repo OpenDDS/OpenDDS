@@ -1272,7 +1272,7 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
       XTypes::TypeAssignability ta(type_lookup_service_, type_consistency);
 
       if (drQos->type_consistency.kind == DDS::ALLOW_TYPE_COERCION) {
-        consistent = ta.assignable(reader_type_id, writer_type_id);
+        consistent = ta.assignable(*reader_type_info, *writer_type_info);
       } else {
         // The two types must be equivalent for DISALLOW_TYPE_COERCION
         consistent = reader_type_id == writer_type_id;

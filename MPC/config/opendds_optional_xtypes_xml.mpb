@@ -1,0 +1,3 @@
+feature(xerces3, no_opendds_safety_profile) {
+  libs += OpenDDS_XTypes_Xml
+}

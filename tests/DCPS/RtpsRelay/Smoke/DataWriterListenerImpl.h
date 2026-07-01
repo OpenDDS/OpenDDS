@@ -10,6 +10,7 @@
 
 #include <dds/DCPS/LocalObject.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/TimeTypes.h>
 
 #include <dds/DdsDcpsPublicationC.h>
 
@@ -20,8 +21,9 @@
 class DataWriterListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataWriterListener> {
 public:
-  DataWriterListenerImpl(DistributedConditionSet_rch dcs)
+  DataWriterListenerImpl(DistributedConditionSet_rch dcs, const OpenDDS::DCPS::MonotonicTimePoint& dp_timepoint)
     : dcs_(dcs)
+    , dp_created_at_(dp_timepoint)
   {}
 
   virtual ~DataWriterListenerImpl() {}
@@ -41,6 +43,9 @@ public:
   void on_publication_matched(DDS::DataWriter_ptr,
                               const DDS::PublicationMatchedStatus& status)
   {
+    ACE_DEBUG((LM_INFO,
+      "(%P|%t) INFO: DataWriterListenerImpl::on_publication_matched: matched after %C\n",
+      (OpenDDS::DCPS::MonotonicTimePoint::now() - dp_created_at_).sec_str().c_str()));
     dcs_->post("Publisher", OpenDDS::DCPS::String("on_publication_matched")
                + "_" + OpenDDS::DCPS::to_dds_string(status.total_count)
                + "_" + OpenDDS::DCPS::to_dds_string(status.total_count_change)
@@ -50,6 +55,7 @@ public:
 
 private:
   DistributedConditionSet_rch dcs_;
+  const OpenDDS::DCPS::MonotonicTimePoint dp_created_at_;
 };
 
 #endif /* DATAWRITER_LISTENER_IMPL  */

@@ -51,6 +51,31 @@ namespace {
 
 const OpenDDS::DCPS::MonotonicTime_t MTZERO = { 0, 0 };
 
+bool has_complete_equivalence(const OpenDDS::XTypes::TypeIdentifier& ti)
+{
+  using namespace OpenDDS::XTypes;
+  switch (ti.kind()) {
+  case EK_COMPLETE:
+    return true;
+  case TI_STRONGLY_CONNECTED_COMPONENT:
+    return ti.sc_component_id().sc_component_id.kind == EK_COMPLETE;
+  case TI_PLAIN_SEQUENCE_SMALL:
+    return ti.seq_sdefn().header.equiv_kind == EK_COMPLETE;
+  case TI_PLAIN_SEQUENCE_LARGE:
+    return ti.seq_ldefn().header.equiv_kind == EK_COMPLETE;
+  case TI_PLAIN_ARRAY_SMALL:
+    return ti.array_sdefn().header.equiv_kind == EK_COMPLETE;
+  case TI_PLAIN_ARRAY_LARGE:
+    return ti.array_ldefn().header.equiv_kind == EK_COMPLETE;
+  case TI_PLAIN_MAP_SMALL:
+    return ti.map_sdefn().header.equiv_kind == EK_COMPLETE;
+  case TI_PLAIN_MAP_LARGE:
+    return ti.map_ldefn().header.equiv_kind == EK_COMPLETE;
+  default:
+    return false;
+  }
+}
+
 bool checkAndAssignQos(DDS::PublicationBuiltinTopicData& dest,
                        const DDS::PublicationBuiltinTopicData& src)
 {
@@ -3879,6 +3904,17 @@ bool Sedp::TypeLookupRequestReader::process_get_types_request(
     result.types);
   if (result.types.length() > 0) {
     result.complete_to_minimal.length(0);
+    for (CORBA::ULong i = 0; i != result.types.length(); ++i) {
+      const XTypes::TypeIdentifier& complete_ti = result.types[i].type_identifier;
+      XTypes::TypeIdentifier minimal_ti;
+      if (has_complete_equivalence(complete_ti) &&
+          sedp_.type_lookup_service_->get_minimal_type_identifier(complete_ti, minimal_ti)) {
+        const CORBA::ULong length = result.complete_to_minimal.length();
+        result.complete_to_minimal.length(length + 1);
+        result.complete_to_minimal[length] =
+          XTypes::TypeIdentifierPair(complete_ti, minimal_ti);
+      }
+    }
 
     XTypes::TypeLookup_getTypes_Result typeResult;
     typeResult.result(result);
@@ -7626,7 +7662,7 @@ void Sedp::match_continue(UsedEndpoints& ue,
       XTypes::TypeAssignability ta(type_lookup_service_, type_consistency);
 
       if (drQos->type_consistency.kind == DDS::ALLOW_TYPE_COERCION) {
-        consistent = ta.assignable(reader_type_id, writer_type_id);
+        consistent = ta.assignable(*reader_type_info, *writer_type_info);
       } else {
         // The two types must be equivalent for DISALLOW_TYPE_COERCION
         consistent = reader_type_id == writer_type_id;

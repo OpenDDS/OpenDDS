@@ -1,5 +1,6 @@
 project(UnitTests): opendds_unit_test, googlemock, msvc_bigobj, dcpsexe, dcps_transports_for_test, \
-    optional_opendds_face, opendds_optional_security, optional_rapidjson, optional_xerces, optional_rtps_relay_lib {
+    optional_opendds_face, opendds_optional_security, optional_rapidjson, optional_xerces, \
+    opendds_optional_xtypes_xml, optional_rtps_relay_lib {
 
   dcps_ts_flags += -Gxtypes-complete
   idlflags += -SS -I dds/DCPS -I dds/DCPS/XTypes -I ../DCPS/Compiler/key_annotation
@@ -51,5 +52,7 @@ project(UnitTests): opendds_unit_test, googlemock, msvc_bigobj, dcpsexe, dcps_tr
     // override default of Template_Files for *_T.cpp
     dds/DCPS/RcHandle_T.cpp
     dds/DCPS/SafeBool_T.cpp
+    dds/DCPS/Cached_Allocator_With_Overflow_T.cpp
+    dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.cpp
   }
 }

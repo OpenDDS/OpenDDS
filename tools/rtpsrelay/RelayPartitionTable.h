@@ -12,7 +12,6 @@
 
 namespace RtpsRelay {
 
-using AddressSet = std::set<ACE_INET_Addr>;
 using SlotKey = std::pair<std::string, size_t>;
 
 struct SlotKeyHash {

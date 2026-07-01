@@ -1,0 +1,84 @@
+name: "omg-dds/dds-xtypes"
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  Linux:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v7
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: checkout dds-xtypes
+      uses: actions/checkout@v7
+      with:
+        repository: omg-dds/dds-xtypes
+        ref: feature/xml-driver-enhanced
+        path: dds-xtypes
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v7
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: Latest_Micro
+        path: OpenDDS/ACE_TAO
+    - name: get ACE_TAO commit
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        export ACE_COMMIT=$(git rev-parse HEAD)
+        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
+    - name: get compiler version
+      shell: bash
+      run: |
+        export COMPILER_VERSION=$(g++ --version 2>&1 | head -n 1)
+        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: checkout MPC
+      uses: actions/checkout@v7
+      with:
+        repository: DOCGroup/MPC
+        path: OpenDDS/ACE_TAO/ACE/MPC
+    - name: install dependencies
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libxerces-c-dev
+    - name: configure OpenDDS
+      run: |
+        cd OpenDDS
+        ./configure --optimize --no-debug --static --no-inline --xerces3
+        tools/scripts/show_build_config.pl
+    - uses: ammaraskar/gcc-problem-matcher@0.3.0
+    - name: build OpenDDS
+      shell: bash
+      run: |
+        cd OpenDDS
+        make -j4 OpenDDS_Rtps_Udp OpenDDS_XTypes_Xml
+    - name: build test_main
+      shell: bash
+      run: |
+        . OpenDDS/setenv.sh
+        cd dds-xtypes/src/cxx/opendds-cmake
+        cmake -S . -B build -DOpenDDS_DIR="$GITHUB_WORKSPACE/OpenDDS/cmake"
+        cmake --build build -- -j4
+    - name: rename test_main artifact
+      shell: bash
+      run: |
+        OPENDDS_VERSION=$(sed -n 's/^#define OPENDDS_VERSION "\(.*\)"/\1/p' OpenDDS/dds/Version.h)
+        echo "OPENDDS_VERSION=$OPENDDS_VERSION" >> $GITHUB_ENV
+        EXECUTABLE=opendds-${OPENDDS_VERSION}_test_main_linux
+        cp dds-xtypes/src/cxx/opendds-cmake/build/shape_main \
+          dds-xtypes/src/cxx/opendds-cmake/build/${EXECUTABLE}
+        echo "EXECUTABLE=$EXECUTABLE" >> $GITHUB_ENV
+    - name: upload test_main artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ env.EXECUTABLE }}
+        path: dds-xtypes/src/cxx/opendds-cmake/build/${{ env.EXECUTABLE }}

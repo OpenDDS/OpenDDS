@@ -238,7 +238,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       stress_test(reader, participant, type_name, sub);
       status = EXIT_SUCCESS;
     } else {
-      dcs->wait_for("Subscriber", "Subscriber", "count_1");
+      if (!args.second_pub) {
+        dcs->wait_for("Subscriber", "Subscriber", "count_1");
+      } else {
+        dcs->wait_for("Subscriber", "Subscriber", "count_3");
+      }
       status = listener_servant->is_valid() ? EXIT_SUCCESS : EXIT_FAILURE;
 
 #if OPENDDS_HAS_JSON_VALUE_WRITER
