@@ -759,8 +759,8 @@ void VerticalHandler::prepare_send(GuidAddrSet::Proxy& proxy,
           for (const auto& ip : p->second.ip_to_ports) {
             const auto port_map = ip.second.select(port());
             if (port_map) {
-              for (const auto& p : *port_map) {
-                local_clients[ip.first].insert(p.first);
+              for (const auto& port : *port_map) {
+                local_clients[ip.first].insert(port.first);
               }
             }
           }
