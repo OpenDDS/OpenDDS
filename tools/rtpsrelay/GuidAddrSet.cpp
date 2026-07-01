@@ -410,6 +410,16 @@ void GuidAddrSet::maintain_admission_queue(const OpenDDS::DCPS::MonotonicTimePoi
   relay_stats_reporter_.admission_queue_size(admission_control_queue_.size(), now);
 }
 
+void GuidAddrSet::freeup_admission_queue(const OpenDDS::DCPS::GuidPrefix_t& prefix)
+{
+  for (auto it = admission_control_queue_.begin(); it != admission_control_queue_.end(); ++it) {
+    if (std::memcmp(it->prefix_, prefix, sizeof(OpenDDS::DCPS::GuidPrefix_t)) == 0) {
+      admission_control_queue_.erase(it);
+      break;
+    }
+  }
+}
+
 bool GuidAddrSet::defer_client(bool from_application_participant,
                                const OpenDDS::DCPS::GUID_t& guid,
                                const OpenDDS::DCPS::MonotonicTimePoint& now,

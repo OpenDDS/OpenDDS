@@ -92,6 +92,10 @@ void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
                      idx, infos.length()));
         }
         guid_partition_table_.remove(repoid);
+        {
+          GuidAddrSet::Proxy proxy(*guid_addr_set_);
+          proxy.freeup_admission_queue(repoid.guidPrefix);
+        }
         stats_reporter_.local_writers(--count_, OpenDDS::DCPS::MonotonicTimePoint::now());
       }
       break;
