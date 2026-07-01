@@ -257,6 +257,11 @@ public:
       gas_.maintain_admission_queue(now);
     }
 
+    void freeup_admission_queue(const OpenDDS::DCPS::GuidPrefix_t& prefix)
+    {
+      gas_.freeup_admission_queue(prefix);
+    }
+
     bool admitting() const
     {
       return gas_.admitting();
@@ -326,6 +331,7 @@ private:
   void process_expiration(const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   void maintain_admission_queue(const OpenDDS::DCPS::MonotonicTimePoint& now);
+  void freeup_admission_queue(const OpenDDS::DCPS::GuidPrefix_t& prefix);
 
   bool admitting() const
   {
