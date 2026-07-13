@@ -418,6 +418,7 @@ void GuidAddrSet::freeup_admission_queue(const OpenDDS::DCPS::GuidPrefix_t& pref
       break;
     }
   }
+  relay_stats_reporter_.admission_queue_size(admission_control_queue_.size(), OpenDDS::DCPS::MonotonicTimePoint::now());
 }
 
 bool GuidAddrSet::defer_client(bool from_application_participant,
