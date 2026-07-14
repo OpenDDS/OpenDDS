@@ -548,6 +548,14 @@ For example:
 
       ``$file`` uses a transport configuration that includes all transport instances defined in the configuration file.
 
+  .. prop:: DCPSGlobalSecurityConfig=<name>
+    :default: The built-in security plugin configuration.
+
+    Selects a :sec:`security` section as the process-wide security plugin
+    configuration. OpenDDS Security must be enabled at build time and with
+    :prop:`DCPSSecurity`. All Domain Participants created by the process use
+    this configuration.
+
   .. prop:: DCPSInfoRepo=<objref>
     :default: ``file://repo.ior``
 
@@ -2444,6 +2452,91 @@ This is the global transport configuration used when the user does not define on
 The second implicit transport configuration is defined whenever an OpenDDS configuration file is used.
 It is given the same name as the file being read and includes all the transport instances defined in that file, in the alphabetical order of their names.
 The user can most easily utilize this configuration by using the :val:`DCPSGlobalTransportConfig=$file` option in the same file.
+
+.. _run_time_configuration--security-plugin-options:
+
+External Security Plugins
+=========================
+
+OpenDDS Security plugins can be supplied by dynamic libraries implementing
+the C++ interfaces from ``DdsSecurityCore.idl``. The loader class is an
+``ACE_Service_Object`` whose ``init`` method registers a
+``SecurityPluginInst`` with ``TheSecurityRegistry``. The plugin name in the
+two sections below must match the name passed to ``register_plugin``.
+The configuration file is trusted input: it selects native code that is loaded
+into the process. Plugin and loader names must be C identifiers. Library values
+may contain letters, digits, ``_``, ``-``, ``.``, ``+``, directory separators,
+and a Windows drive separator after the leading drive letter, but no whitespace
+or service-directive metacharacters.
+
+.. sec:: security_plugin/<plugin_name>
+
+  .. prop:: Library=<library>
+    :required:
+
+    Dynamic library name or path, without the platform-specific prefix or
+    suffix when using the platform loader search path.
+
+  .. prop:: Loader=<class_name>
+    :required:
+
+    Name of the ``ACE_Service_Object`` loader class. The library must export
+    its ACE factory using ``ACE_FACTORY_DEFINE``.
+
+.. sec:: security/<config_name>
+
+  Configuration names are case-sensitive, including the value supplied to
+  :prop:`DCPSGlobalSecurityConfig`.
+
+  .. prop:: AuthConfig=<plugin_name>
+    :default: ``BuiltIn``
+
+    Plugin providing the Authentication interface.
+
+  .. prop:: AccessCtrlConfig=<plugin_name>
+    :default: ``BuiltIn``
+
+    Plugin providing the AccessControl interface.
+
+  .. prop:: CryptoConfig=<plugin_name>
+    :default: ``BuiltIn``
+
+    Plugin providing the CryptoKeyFactory, CryptoKeyExchange, and
+    CryptoTransform interfaces.
+
+  .. prop:: UtilityConfig=<plugin_name>
+    :default: ``BuiltIn``
+
+    Plugin providing OpenDDS's security Utility interface.
+
+  Other entries in this section are exposed as properties on the resulting
+  ``SecurityConfig``. OpenDDS's configuration store canonicalizes their names:
+  names are upper-case and punctuation is converted to underscores. Therefore,
+  these entries are not suitable for plugin properties whose API requires an
+  exact, punctuation-sensitive name such as ``dds.sec.*``; set those properties
+  in the participant QoS instead.
+
+For example, an external authentication implementation can be combined with
+the built-in access-control and cryptography implementations:
+
+.. code-block:: ini
+
+    [common]
+    DCPSSecurity=1
+    DCPSGlobalSecurityConfig=pqsec
+
+    [security_plugin/PQSec]
+    Library=OpenDDS_PQSec
+    Loader=PQSecPluginLoader
+
+    [security/pqsec]
+    AuthConfig=PQSec
+    AccessCtrlConfig=BuiltIn
+    CryptoConfig=BuiltIn
+    UtilityConfig=BuiltIn
+
+Static builds can use the same ``[security]`` section, but the application
+must explicitly link and initialize each selected plugin.
 
 .. _run_time_configuration--transport-instance-options:
 
