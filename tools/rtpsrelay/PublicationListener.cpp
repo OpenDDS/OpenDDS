@@ -92,7 +92,7 @@ void PublicationListener::on_data_available(DDS::DataReader_ptr reader)
                      idx, infos.length()));
         }
         guid_partition_table_.remove(repoid);
-        {
+        if (config_.early_admission_queue_freeup()) {
           GuidAddrSet::Proxy proxy(*guid_addr_set_);
           proxy.freeup_admission_queue(repoid.guidPrefix);
         }

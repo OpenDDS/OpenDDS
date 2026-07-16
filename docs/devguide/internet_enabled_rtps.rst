@@ -432,6 +432,16 @@ The command-line options for the RtpsRelay:
   e.g., cache hits/misses, cache updates and prunes.
   The default is 0 (disabled).
 
+.. option:: -EarlyAdmissionQueueFreeup 0|1
+
+  :ref:`Config store key <config-store-keys>`: ``RTPS_RELAY_EARLY_ADMISSION_QUEUE_FREEUP``
+
+  Specify whether to remove an entry from the admission control queue when the relay detects that a reader or writer
+  from the corresponding client participant is no longer alive. This is taken as a rough indicator that the client
+  participant is disconnecting from the relay, and its entry in the admission queue can be removed to allow other
+  participants to be admitted.
+  The default is 0 (disabled).
+
 .. _internet_enabled_rtps--rtps_relay_control:
 
 RtpsRelayControl
