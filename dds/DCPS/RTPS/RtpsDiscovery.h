@@ -182,6 +182,9 @@ public:
   void use_xtypes(RtpsDiscoveryConfig::UseXTypes val) { return config_->use_xtypes(val); }
   bool use_xtypes_complete() const { return config_->use_xtypes_complete(); }
 
+  bool use_rtps_duration_fraction() const { return config_->use_rtps_duration_fraction(); }
+  void use_rtps_duration_fraction(bool value) { config_->use_rtps_duration_fraction(value); }
+
   RtpsDiscoveryConfig_rch config() const { return config_; }
 
 #if OPENDDS_CONFIG_SECURITY

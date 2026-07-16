@@ -1505,6 +1505,21 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
       This requires that :option:`opendds_idl -Gxtypes-complete` was used when compiling the IDL.
       ``2`` can also be used for backwards compatibility.
 
+  .. prop:: UseRtpsDurationFraction=<boolean>
+    :default: ``0`` (disabled)
+
+    Controls the RTPS wire representation of ``DDS::Duration_t`` values embedded in endpoint QoS policies.
+    When disabled, OpenDDS writes its historical seconds-and-nanoseconds representation. When enabled,
+    OpenDDS writes the RTPS 2.4 and later seconds-and-fractional-seconds representation, where the fraction
+    is in units of 2^-32 seconds. The setting is sampled when each DomainParticipant is created.
+
+    OpenDDS participants advertise the selected representation in participant discovery, allowing mixed-mode
+    OpenDDS deployments to decode each peer correctly. For other vendors, or when participant metadata is not
+    available, incoming durations are interpreted using the local setting.
+
+    OpenDDS releases that predate this option do not recognize the participant flag and will interpret incoming
+    fractional values as nanoseconds. Enable this option only when that compatibility tradeoff is acceptable.
+
   .. prop:: TypeLookupServiceReplyTimeout=<msec>
     :default: ``5000`` milliseconds (5 seconds).
 

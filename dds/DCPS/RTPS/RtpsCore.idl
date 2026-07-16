@@ -327,6 +327,8 @@ module OpenDDS {
     const OpenDDSParticipantFlagsBits_t PFLAGS_DIRECTED_HEARTBEAT = 0x2;
     // Causes reliable RTPS Readers to use the heartbeat count as the acknack count.
     const OpenDDSParticipantFlagsBits_t PFLAGS_REFLECT_HEARTBEAT_COUNT = 0x4;
+    // Embedded DDS::Duration_t values in endpoint QoS use RTPS fractional seconds.
+    const OpenDDSParticipantFlagsBits_t PFLAGS_RTPS_DURATION_FRACTION = 0x8;
     const OpenDDSParticipantFlagsBits_t PFLAGS_THIS_VERSION = PFLAGS_DIRECTED_HEARTBEAT | PFLAGS_NO_ASSOCIATED_WRITERS;
 
     struct OpenDDSParticipantFlags_t {

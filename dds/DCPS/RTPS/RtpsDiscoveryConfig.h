@@ -237,6 +237,9 @@ public:
   CORBA::ULong participant_flags() const;
   void participant_flags(CORBA::ULong participant_flags);
 
+  bool use_rtps_duration_fraction() const;
+  void use_rtps_duration_fraction(bool value);
+
   bool sedp_responsive_mode() const;
   void sedp_responsive_mode(bool sedp_responsive_mode);
 

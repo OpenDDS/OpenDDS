@@ -1101,8 +1101,14 @@ RtpsDiscoveryConfig::sedp_fragment_reassembly_timeout(const DCPS::TimeDuration& 
 CORBA::ULong
 RtpsDiscoveryConfig::participant_flags() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("PARTICIPANT_FLAGS").c_str(),
-                                                           PFLAGS_THIS_VERSION);
+  CORBA::ULong flags = TheServiceParticipant->config_store()->get_uint32(
+    config_key("PARTICIPANT_FLAGS").c_str(), PFLAGS_THIS_VERSION);
+  if (use_rtps_duration_fraction()) {
+    flags |= PFLAGS_RTPS_DURATION_FRACTION;
+  } else {
+    flags &= ~PFLAGS_RTPS_DURATION_FRACTION;
+  }
+  return flags;
 }
 
 void
@@ -1110,6 +1116,20 @@ RtpsDiscoveryConfig::participant_flags(CORBA::ULong participant_flags)
 {
   TheServiceParticipant->config_store()->set_uint32(config_key("PARTICIPANT_FLAGS").c_str(),
                                                     participant_flags);
+}
+
+bool
+RtpsDiscoveryConfig::use_rtps_duration_fraction() const
+{
+  return TheServiceParticipant->config_store()->get_boolean(
+    config_key("USE_RTPS_DURATION_FRACTION").c_str(), false);
+}
+
+void
+RtpsDiscoveryConfig::use_rtps_duration_fraction(bool value)
+{
+  TheServiceParticipant->config_store()->set_boolean(
+    config_key("USE_RTPS_DURATION_FRACTION").c_str(), value);
 }
 
 bool

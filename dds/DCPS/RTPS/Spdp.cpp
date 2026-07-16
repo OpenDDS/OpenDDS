@@ -3973,6 +3973,19 @@ ACE_CDR::ULong Spdp::get_participant_flags(const DCPS::GUID_t& guid) const
     ? iter->second.pdata_.participantProxy.opendds_participant_flags.bits : PFLAGS_EMPTY;
 }
 
+bool Spdp::participant_uses_rtps_duration_fraction(const DCPS::GUID_t& guid) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_,
+                   (participant_flags_ & PFLAGS_RTPS_DURATION_FRACTION) != 0);
+  const DiscoveredParticipantMap::const_iterator iter =
+    participants_.find(make_part_guid(guid));
+  if (iter != participants_.end() && is_opendds(iter->second.pdata_.participantProxy)) {
+    return (iter->second.pdata_.participantProxy.opendds_participant_flags.bits &
+            PFLAGS_RTPS_DURATION_FRACTION) != 0;
+  }
+  return (participant_flags_ & PFLAGS_RTPS_DURATION_FRACTION) != 0;
+}
+
 void
 Spdp::remove_lease_expiration_i(DiscoveredParticipantIter iter)
 {

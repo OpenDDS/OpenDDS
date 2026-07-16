@@ -123,6 +123,7 @@ public:
   bool associated() const;
   bool has_discovered_participant(const DCPS::GUID_t& guid) const;
   ACE_CDR::ULong get_participant_flags(const DCPS::GUID_t& guid) const;
+  bool participant_uses_rtps_duration_fraction(const DCPS::GUID_t& guid) const;
 
 #if OPENDDS_CONFIG_SECURITY
   Security::SecurityConfig_rch get_security_config() const { return security_config_; }
