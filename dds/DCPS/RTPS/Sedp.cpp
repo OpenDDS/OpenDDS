@@ -338,6 +338,7 @@ Sedp::Sedp(const GUID_t& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
   , lock_(lock)
   , participant_id_(participant_id)
   , participant_flags_(owner.config()->participant_flags())
+  , local_duration_encoding_(duration_encoding((participant_flags_ & PFLAGS_RTPS_DURATION_FRACTION) != 0))
   , publication_counter_(0)
   , subscription_counter_(0)
   , topic_counter_(0)
@@ -4429,9 +4430,12 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
   DCPS::Extensibility extensibility)
 {
   const DCPS::MessageId id = static_cast<DCPS::MessageId>(sample.header_.message_id_);
+  VendorId_t remote_vendor_id;
+  bool remote_uses_rtps_duration_fraction = false;
+  sedp_.spdp_.get_vendor_id_and_duration_encoding(
+    sample.header_.publication_id_, remote_vendor_id, remote_uses_rtps_duration_fraction);
   const ParameterListConverter::RtpsDurationEncoding remote_duration_encoding =
-    duration_encoding(sedp_.spdp_.participant_uses_rtps_duration_fraction(
-      sample.header_.publication_id_));
+    duration_encoding(remote_uses_rtps_duration_fraction);
 
   if (entity_id == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER) {
     ParameterList data;
@@ -4445,7 +4449,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
 
     DiscoveredPublication wdata;
     if (!ParameterListConverter::from_param_list(
-          data, sedp_.spdp_.get_vendor_id(sample.header_.publication_id_),
+          data, remote_vendor_id,
           wdata.writer_data_, sedp_.use_xtypes_, wdata.type_info_,
           remote_duration_encoding)) {
       if (log_level >= LogLevel::Warning) {
@@ -4494,7 +4498,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     ParameterListConverter::DiscoveredPublication_SecurityWrapper wdata_secure = ParameterListConverter::DiscoveredPublication_SecurityWrapper();
 
     if (!ParameterListConverter::from_param_list(
-          data, sedp_.spdp_.get_vendor_id(sample.header_.publication_id_),
+          data, remote_vendor_id,
           wdata_secure, sedp_.use_xtypes_, wdata_secure.type_info,
           remote_duration_encoding)) {
       if (log_level >= LogLevel::Warning) {
@@ -4540,7 +4544,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
 
     DiscoveredSubscription rdata;
     if (!ParameterListConverter::from_param_list(
-          data, sedp_.spdp_.get_vendor_id(sample.header_.publication_id_),
+          data, remote_vendor_id,
           rdata.reader_data_, sedp_.use_xtypes_, rdata.type_info_,
           remote_duration_encoding)) {
       if (log_level >= LogLevel::Warning) {
@@ -4591,7 +4595,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
 
     ParameterListConverter::DiscoveredSubscription_SecurityWrapper rdata_secure;
     if (!ParameterListConverter::from_param_list(
-          data, sedp_.spdp_.get_vendor_id(sample.header_.publication_id_),
+          data, remote_vendor_id,
           rdata_secure, sedp_.use_xtypes_, rdata_secure.type_info,
           remote_duration_encoding)) {
       if (log_level >= LogLevel::Warning) {
@@ -5081,8 +5085,6 @@ Sedp::write_publication_data_unsecure(UsedEndpoints& ue,
 
   bool useFlexibleTypes = false;
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  const ParameterListConverter::RtpsDurationEncoding local_duration_encoding =
-    duration_encoding((participant_flags_ & PFLAGS_RTPS_DURATION_FRACTION) != 0);
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
     DCPS::DiscoveredWriterData dwd;
@@ -5096,13 +5098,13 @@ Sedp::write_publication_data_unsecure(UsedEndpoints& ue,
       }
       const DCPS::TypeInformation typeinfo(*lp.typeInfoFor(reader, &useFlexibleTypes));
       if (!ParameterListConverter::to_param_list(
-            dwd, plist, true, typeinfo, local_duration_encoding)) {
+            dwd, plist, true, typeinfo, local_duration_encoding_)) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::write_publication_data_unsecure: "
                    "Failed to convert DiscoveredWriterData to ParameterList (Flags_FlexibleTypeSupport)\n"));
         result = DDS::RETCODE_ERROR;
       }
     } else if (!ParameterListConverter::to_param_list(
-          dwd, plist, use_xtypes_, lp.type_info_, local_duration_encoding)) {
+          dwd, plist, use_xtypes_, lp.type_info_, local_duration_encoding_)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data_unsecure: ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -5154,8 +5156,6 @@ Sedp::write_publication_data_secure(UsedEndpoints& ue,
 
   bool useFlexibleTypes = false;
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  const ParameterListConverter::RtpsDurationEncoding local_duration_encoding =
-    duration_encoding((participant_flags_ & PFLAGS_RTPS_DURATION_FRACTION) != 0);
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
 
@@ -5173,13 +5173,13 @@ Sedp::write_publication_data_secure(UsedEndpoints& ue,
       }
       const DCPS::TypeInformation typeinfo(*lp.typeInfoFor(reader, &useFlexibleTypes));
       if (!ParameterListConverter::to_param_list(
-            dwd, plist, true, typeinfo, local_duration_encoding)) {
+            dwd, plist, true, typeinfo, local_duration_encoding_)) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::write_publication_data_secure: "
                              "Failed to convert DiscoveredWriterData to ParameterList (Flags_FlexibleTypeSupport)\n"));
         result = DDS::RETCODE_ERROR;
       }
     } else if (!ParameterListConverter::to_param_list(
-          dwd, plist, use_xtypes_, lp.type_info_, local_duration_encoding)) {
+          dwd, plist, use_xtypes_, lp.type_info_, local_duration_encoding_)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data_secure: ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -5277,8 +5277,6 @@ Sedp::write_subscription_data_unsecure(UsedEndpoints& ue,
 
   bool useFlexibleTypes = false;
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  const ParameterListConverter::RtpsDurationEncoding local_duration_encoding =
-    duration_encoding((participant_flags_ & PFLAGS_RTPS_DURATION_FRACTION) != 0);
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
     DCPS::DiscoveredReaderData drd;
@@ -5292,13 +5290,13 @@ Sedp::write_subscription_data_unsecure(UsedEndpoints& ue,
       }
       const DCPS::TypeInformation typeinfo(*ls.typeInfoFor(reader, &useFlexibleTypes));
       if (!ParameterListConverter::to_param_list(
-            drd, plist, true, typeinfo, local_duration_encoding)) {
+            drd, plist, true, typeinfo, local_duration_encoding_)) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::write_subscription_data_unsecure: "
                    "Failed to convert DiscoveredReaderData to ParameterList (Flags_FlexibleTypeSupport)\n"));
         result = DDS::RETCODE_ERROR;
       }
     } else if (!ParameterListConverter::to_param_list(
-          drd, plist, use_xtypes_, ls.type_info_, local_duration_encoding)) {
+          drd, plist, use_xtypes_, ls.type_info_, local_duration_encoding_)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data_unsecure: ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")
@@ -5350,8 +5348,6 @@ Sedp::write_subscription_data_secure(UsedEndpoints& ue,
 
   bool useFlexibleTypes = false;
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
-  const ParameterListConverter::RtpsDurationEncoding local_duration_encoding =
-    duration_encoding((participant_flags_ & PFLAGS_RTPS_DURATION_FRACTION) != 0);
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
 
@@ -5369,13 +5365,13 @@ Sedp::write_subscription_data_secure(UsedEndpoints& ue,
       }
       const DCPS::TypeInformation typeinfo(*ls.typeInfoFor(reader, &useFlexibleTypes));
       if (!ParameterListConverter::to_param_list(
-            drd, plist, true, typeinfo, local_duration_encoding)) {
+            drd, plist, true, typeinfo, local_duration_encoding_)) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Sedp::write_subscription_data_secure: "
                    "Failed to convert DiscoveredReaderData to ParameterList (Flags_FlexibleTypeSupport)\n"));
         result = DDS::RETCODE_ERROR;
       }
     } else if (!ParameterListConverter::to_param_list(
-          drd, plist, use_xtypes_, ls.type_info_, local_duration_encoding)) {
+          drd, plist, use_xtypes_, ls.type_info_, local_duration_encoding_)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data_secure: ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")

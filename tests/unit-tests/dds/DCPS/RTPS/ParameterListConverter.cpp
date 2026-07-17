@@ -2014,6 +2014,27 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, writer_lifespan_duration_encoding_mod
             get(fractional_param_list, PID_LIFESPAN).lifespan().duration.nanosec);
 }
 
+TEST(dds_DCPS_RTPS_ParameterListConverter, writer_lifespan_duration_out_of_range_nanosec)
+{ // Duration_t is only spec-valid for nanosec < 1e9, but not every QoS
+  // policy's Qos_Helper::valid() enforces that. An out-of-range nanosec must
+  // be normalized (excess carried into sec) before the fraction math runs,
+  // rather than overflowing ACE_UINT32 and silently wrapping to a garbage or
+  // zero wire value.
+  DiscoveredWriterData writer_data = Factory::default_writer_data();
+  writer_data.ddsPublicationData.lifespan.duration.sec = 1;
+  writer_data.ddsPublicationData.lifespan.duration.nanosec = 1500000000; // 1.5s, out of spec
+
+  ParameterList param_list;
+  OpenDDS::DCPS::TypeInformation type_info;
+  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS));
+  ASSERT_TRUE(is_present(param_list, PID_LIFESPAN));
+  // Normalized to {sec=2, nanosec=500000000} before fraction conversion:
+  // (500000000 << 32) / 1e9 = 0x80000000.
+  EXPECT_EQ(2, get(param_list, PID_LIFESPAN).lifespan().duration.sec);
+  EXPECT_EQ(0x80000000u, get(param_list, PID_LIFESPAN).lifespan().duration.nanosec);
+}
+
 TEST(dds_DCPS_RTPS_ParameterListConverter, writer_reliability_legacy_infinite)
 {
   DiscoveredWriterData writer_data = Factory::default_writer_data();
@@ -2802,9 +2823,9 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_latency_budget)
                             RDE_FRACTIONAL_SECONDS, map));
   EXPECT_TRUE(is_present(param_list, PID_LATENCY_BUDGET));
   Parameter param = get(param_list, PID_LATENCY_BUDGET);
-  EXPECT_TRUE(param.deadline().period.sec == 5);
+  EXPECT_TRUE(param.latency_budget().duration.sec == 5);
   // 25000ns -> wire fraction (25000 << 32) / 1e9 = 107374 (RTPS 2.5 Sec 9.3.2).
-  EXPECT_TRUE(param.deadline().period.nanosec == 107374);
+  EXPECT_TRUE(param.latency_budget().duration.nanosec == 107374);
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_latency_budget)

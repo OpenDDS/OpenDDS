@@ -1520,6 +1520,10 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     OpenDDS releases that predate this option do not recognize the participant flag and will interpret incoming
     fractional values as nanoseconds. Enable this option only when that compatibility tradeoff is acceptable.
 
+    This is the only supported way to control the corresponding participant flag bit
+    (``PFLAGS_RTPS_DURATION_FRACTION``). Setting that bit directly through a ``PARTICIPANT_FLAGS`` override
+    has no effect: the bit is always derived from ``UseRtpsDurationFraction`` when the participant flags are read.
+
   .. prop:: TypeLookupServiceReplyTimeout=<msec>
     :default: ``5000`` milliseconds (5 seconds).
 

@@ -299,20 +299,37 @@ namespace {
   // use. Nanoseconds mode deliberately preserves the historical OpenDDS wire
   // representation. Keeping the conversion here avoids changing every other,
   // non-RTPS-wire use of DDS::Duration_t CDR streaming.
+  //
+  // Maintenance note: there is no compile-time link between a PID and this
+  // conversion. If a PID whose Parameter case embeds a DDS::Duration_t is
+  // ever added to the switch statements below (or to a security wrapper),
+  // the corresponding encode_duration()/decode_duration() call MUST be added
+  // at that PID's case too, or fractional-seconds mode will silently
+  // corrupt just that one field on the wire again. The 7 PIDs currently
+  // covered are listed above; grep this file for "encode_duration(" and
+  // "decode_duration(" to see every existing call site.
   void encode_duration(DDS::Duration_t& dur,
                        ParameterListConverter::RtpsDurationEncoding encoding)
   {
     if (encoding == ParameterListConverter::RDE_NANOSECONDS) {
       return;
     }
-    if (dur.sec == DDS::DURATION_INFINITE_SEC &&
-        dur.nanosec == DDS::DURATION_INFINITE_NSEC) {
+    if (DCPS::is_infinite(dur)) {
       // RTPS::DURATION_INFINITE wire sentinel is {0x7fffffff, 0xffffffff} --
       // not what the fraction math below would produce from 0x7fffffff.
       // DDS::TIME_INVALID_NSEC is the same 0xffffffff value used by the wire
       // fraction sentinel.
       dur.nanosec = DDS::TIME_INVALID_NSEC;
       return;
+    }
+    // Duration_t is only spec-valid for nanosec < 1e9, but not every QoS
+    // policy's Qos_Helper::valid() enforces that upper bound. Normalize any
+    // excess into sec first so an out-of-range nanosec can't overflow the
+    // ACE_UINT32 fraction math below and silently wrap to a garbage or zero
+    // wire value.
+    if (dur.nanosec >= 1000000000u) {
+      dur.sec += static_cast<CORBA::Long>(dur.nanosec / 1000000000u);
+      dur.nanosec %= 1000000000u;
     }
     dur.nanosec = DCPS::nanoseconds_to_uint32_fractional_seconds(dur.nanosec);
   }

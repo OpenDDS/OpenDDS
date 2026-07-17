@@ -13,10 +13,8 @@
 #include "LocalEntities.h"
 #include "MessageTypes.h"
 #include "MessageUtils.h"
+#include "ParameterListConverter.h"
 #include "TypeLookupTypeSupportImpl.h"
-#if OPENDDS_CONFIG_SECURITY
-#  include "ParameterListConverter.h"
-#endif
 #include "RtpsRpcTypeSupportImpl.h"
 #include "RtpsCoreTypeSupportImpl.h"
 #if OPENDDS_CONFIG_SECURITY
@@ -1509,6 +1507,7 @@ protected:
   ACE_Thread_Mutex& lock_;
   const GUID_t participant_id_;
   const CORBA::ULong participant_flags_;
+  const ParameterListConverter::RtpsDurationEncoding local_duration_encoding_;
   RepoIdSet ignored_guids_;
   unsigned int publication_counter_, subscription_counter_, topic_counter_;
   LocalPublicationMap local_publications_;
