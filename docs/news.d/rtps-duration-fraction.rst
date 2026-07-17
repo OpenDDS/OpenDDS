@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5256
 
 .. news-start-section: Additions
 - Added the ``[rtps_discovery]UseRtpsDurationFraction`` compatibility option. It enables the RTPS
