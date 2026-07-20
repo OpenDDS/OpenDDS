@@ -1,0 +1,99 @@
+name: OpenDDS Performance Dashboard
+
+on:
+  push:
+    branches: [master]
+  schedule:
+    - cron: '17 6 * * 0'
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: Benchmark suite
+        required: true
+        default: validation
+        type: choice
+        options: [validation, core, full]
+      manual_budget_override:
+        description: Permit this run above the automatic budget cap
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: submit-opendds-performance
+  cancel-in-progress: false
+
+jobs:
+  submit:
+    # Forks are manual-only unless PERFORMANCE_AUTOMATIC_RUNS is explicitly enabled.
+    if: >-
+      vars.PERFORMANCE_AWS_ROLE_ARN != '' &&
+      (github.event_name == 'workflow_dispatch' || vars.PERFORMANCE_AUTOMATIC_RUNS == 'true')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Select suite
+        id: suite
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REQUESTED_SUITE: ${{ inputs.suite }}
+          MANUAL_OVERRIDE: ${{ inputs.manual_budget_override }}
+        run: |
+          if [[ "$EVENT_NAME" == schedule ]]; then
+            suite=full
+          elif [[ "$EVENT_NAME" == workflow_dispatch ]]; then
+            suite="$REQUESTED_SUITE"
+          else
+            suite=core
+          fi
+          case "$suite" in
+            validation) topology='{"legCount":3,"coresPerLeg":2}'; estimated=2 ;;
+            core) topology='{"legCount":12,"coresPerLeg":4}'; estimated=8 ;;
+            full) topology='{"legCount":30,"coresPerLeg":4}'; estimated=60 ;;
+            *) exit 2 ;;
+          esac
+          echo "suite=$suite" >> "$GITHUB_OUTPUT"
+          echo "topology=$topology" >> "$GITHUB_OUTPUT"
+          echo "estimated=$estimated" >> "$GITHUB_OUTPUT"
+          echo "override=${MANUAL_OVERRIDE:-false}" >> "$GITHUB_OUTPUT"
+      - name: Resolve nightly configuration revision
+        id: nightly
+        env:
+          NIGHTLY_REPOSITORY_URL: ${{ vars.PERFORMANCE_NIGHTLY_REPOSITORY_URL || 'https://github.com/OpenDDS/nightly.git' }}
+          NIGHTLY_REF: ${{ vars.PERFORMANCE_NIGHTLY_REF || 'refs/heads/master' }}
+        run: echo "sha=$(git ls-remote "$NIGHTLY_REPOSITORY_URL" "$NIGHTLY_REF" | cut -f1)" >> "$GITHUB_OUTPUT"
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.PERFORMANCE_AWS_ROLE_ARN }}
+          aws-region: ${{ vars.PERFORMANCE_AWS_REGION }}
+      - name: Submit benchmark workflow
+        env:
+          STATE_MACHINE_ARN: ${{ vars.PERFORMANCE_STATE_MACHINE_ARN }}
+          COMMIT_SHA: ${{ github.sha }}
+          CONFIG_COMMIT: ${{ steps.nightly.outputs.sha }}
+          SUITE: ${{ steps.suite.outputs.suite }}
+          TOPOLOGY: ${{ steps.suite.outputs.topology }}
+          ESTIMATED_COST: ${{ steps.suite.outputs.estimated }}
+          MANUAL_OVERRIDE: ${{ steps.suite.outputs.override }}
+          INSTANCE_TYPE: ${{ vars.PERFORMANCE_INSTANCE_TYPE }}
+          AMI_ID: ${{ vars.PERFORMANCE_AMI_ID }}
+          AVAILABILITY_ZONE: ${{ vars.PERFORMANCE_AVAILABILITY_ZONE }}
+        run: |
+          input=$(jq -n \
+            --arg commitSha "$COMMIT_SHA" \
+            --arg configCommit "$CONFIG_COMMIT" \
+            --arg suite "$SUITE" \
+            --argjson topology "$TOPOLOGY" \
+            --argjson estimatedCostUsd "$ESTIMATED_COST" \
+            --argjson manualOverride "$MANUAL_OVERRIDE" \
+            --arg instanceType "$INSTANCE_TYPE" \
+            --arg amiId "$AMI_ID" \
+            --arg availabilityZone "$AVAILABILITY_ZONE" \
+            '{commitSha,configCommit,suite,topology,estimatedCostUsd,manualOverride,instanceType,amiId,availabilityZone}')
+          aws stepfunctions start-execution \
+            --state-machine-arn "$STATE_MACHINE_ARN" \
+            --name "${COMMIT_SHA:0:12}-${SUITE}-${GITHUB_RUN_ID}" \
+            --input "$input"
