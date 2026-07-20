@@ -41,6 +41,9 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           REQUESTED_SUITE: ${{ inputs.suite }}
           MANUAL_OVERRIDE: ${{ inputs.manual_budget_override }}
+          VALIDATION_INSTANCE_TYPE: ${{ vars.PERFORMANCE_VALIDATION_INSTANCE_TYPE }}
+          CORE_INSTANCE_TYPE: ${{ vars.PERFORMANCE_CORE_INSTANCE_TYPE }}
+          FULL_INSTANCE_TYPE: ${{ vars.PERFORMANCE_FULL_INSTANCE_TYPE }}
         run: |
           if [[ "$EVENT_NAME" == schedule ]]; then
             suite=full
@@ -50,14 +53,16 @@ jobs:
             suite=core
           fi
           case "$suite" in
-            validation) topology='{"legCount":3,"coresPerLeg":2}'; estimated=2 ;;
-            core) topology='{"legCount":12,"coresPerLeg":4}'; estimated=8 ;;
-            full) topology='{"legCount":30,"coresPerLeg":4}'; estimated=60 ;;
+            validation) topology='{"legCount":3,"coresPerLeg":2}'; estimated=2; instance_type="$VALIDATION_INSTANCE_TYPE" ;;
+            core) topology='{"legCount":12,"coresPerLeg":4}'; estimated=8; instance_type="$CORE_INSTANCE_TYPE" ;;
+            full) topology='{"legCount":30,"coresPerLeg":4}'; estimated=60; instance_type="$FULL_INSTANCE_TYPE" ;;
             *) exit 2 ;;
           esac
+          [[ -n "$instance_type" ]] || { echo "No instance type configured for $suite" >&2; exit 2; }
           echo "suite=$suite" >> "$GITHUB_OUTPUT"
           echo "topology=$topology" >> "$GITHUB_OUTPUT"
           echo "estimated=$estimated" >> "$GITHUB_OUTPUT"
+          echo "instance_type=$instance_type" >> "$GITHUB_OUTPUT"
           echo "override=${MANUAL_OVERRIDE:-false}" >> "$GITHUB_OUTPUT"
       - name: Resolve nightly configuration revision
         id: nightly
@@ -78,7 +83,7 @@ jobs:
           TOPOLOGY: ${{ steps.suite.outputs.topology }}
           ESTIMATED_COST: ${{ steps.suite.outputs.estimated }}
           MANUAL_OVERRIDE: ${{ steps.suite.outputs.override }}
-          INSTANCE_TYPE: ${{ vars.PERFORMANCE_INSTANCE_TYPE }}
+          INSTANCE_TYPE: ${{ steps.suite.outputs.instance_type }}
           AMI_ID: ${{ vars.PERFORMANCE_AMI_ID }}
           AVAILABILITY_ZONE: ${{ vars.PERFORMANCE_AVAILABILITY_ZONE }}
         run: |
