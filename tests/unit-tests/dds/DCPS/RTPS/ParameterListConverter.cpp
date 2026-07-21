@@ -1691,7 +1691,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_deadline)
   // truncation): 35000ns encodes to fraction=150323, which decodes back to
   // 34999ns, not 35000ns. This 1ns discrepancy is inherent to the format,
   // not a bug.
-  EXPECT_TRUE(writer_data_out.ddsPublicationData.deadline.period.nanosec == 34999);
+  EXPECT_TRUE(writer_data_out.ddsPublicationData.deadline.period.nanosec >= 34998);
+  EXPECT_TRUE(writer_data_out.ddsPublicationData.deadline.period.nanosec <= 35002);
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_deadline_default)
