@@ -97,7 +97,17 @@ jobs:
             --arg instanceType "$INSTANCE_TYPE" \
             --arg amiId "$AMI_ID" \
             --arg availabilityZone "$AVAILABILITY_ZONE" \
-            '{commitSha,configCommit,suite,topology,estimatedCostUsd,manualOverride,instanceType,amiId,availabilityZone}')
+            '{
+              commitSha: $commitSha,
+              configCommit: $configCommit,
+              suite: $suite,
+              topology: $topology,
+              estimatedCostUsd: $estimatedCostUsd,
+              manualOverride: $manualOverride,
+              instanceType: $instanceType,
+              amiId: $amiId,
+              availabilityZone: $availabilityZone
+            }')
           aws stepfunctions start-execution \
             --state-machine-arn "$STATE_MACHINE_ARN" \
             --name "${COMMIT_SHA:0:12}-${SUITE}-${GITHUB_RUN_ID}" \
