@@ -3988,7 +3988,7 @@ bool Spdp::participant_uses_rtps_duration_fraction(const DCPS::GUID_t& guid) con
 {
   // participant_flags_ is const (set once at construction), so reading it
   // here does not depend on lock_ -- lock_ only guards participants_, which
-  // participant_uses_rtps_duration_fraction_i() consults below.
+  // participant_uses_rtps_duration_fraction_i() consults.
   const bool local_default = (participant_flags_ & PFLAGS_RTPS_DURATION_FRACTION) != 0;
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, local_default);
   return participant_uses_rtps_duration_fraction_i(guid);
