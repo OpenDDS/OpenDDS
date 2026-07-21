@@ -1962,7 +1962,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_lifespan_default)
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, encode_decode_writer_reliability_infinite)
-{ // DURATION_INFINITE must round-trip through the wire fraction conversion
+{
+  // DURATION_INFINITE must round-trip through the wire fraction conversion
   // as the RTPS::DURATION_INFINITE sentinel {seconds=0x7fffffff,
   // fraction=0xffffffff} (MessageTypes.h), not through the ordinary
   // nanoseconds<->fraction math, which would not reproduce
