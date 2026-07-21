@@ -2016,7 +2016,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, writer_lifespan_duration_encoding_mod
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, writer_lifespan_duration_out_of_range_nanosec)
-{ // Duration_t is only spec-valid for nanosec < 1e9, but not every QoS
+{
+  // Duration_t is only spec-valid for nanosec < 1e9, but not every QoS
   // policy's Qos_Helper::valid() enforces that. An out-of-range nanosec must
   // be normalized (excess carried into sec) before the fraction math runs,
   // rather than overflowing ACE_UINT32 and silently wrapping to a garbage or
@@ -2059,7 +2060,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, writer_reliability_legacy_infinite)
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_user_data)
-{ // Should encode writer user data
+{
+  // Should encode writer user data
   const char* ud = "USERDATA TEST";
   CORBA::ULong ud_len = (CORBA::ULong)strlen(ud) + 1;
   DiscoveredWriterData writer_data = Factory::writer_data(
@@ -2929,7 +2931,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_reliability)
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_time_based_filter)
-{ // Should encode reader time based filter using the RTPS wire fraction unit,
+{
+  // Should encode reader time based filter using the RTPS wire fraction unit,
   // not raw nanoseconds (RTPS 2.5 Sec 9.3.2).
   DiscoveredReaderData reader_data = Factory::default_reader_data();
   reader_data.ddsSubscriptionData.time_based_filter.minimum_separation.sec = 3;
@@ -2948,7 +2951,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_time_based_filter)
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_time_based_filter)
-{ // Should decode reader time based filter back from the RTPS wire fraction
+{
+  // Should decode reader time based filter back from the RTPS wire fraction
   // unit to nanoseconds.
   DiscoveredReaderData reader_data = Factory::default_reader_data();
   reader_data.ddsSubscriptionData.time_based_filter.minimum_separation.sec = 3;
