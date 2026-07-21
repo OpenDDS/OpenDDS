@@ -67,9 +67,16 @@ jobs:
       - name: Resolve nightly configuration revision
         id: nightly
         env:
+          PINNED_NIGHTLY_COMMIT: ${{ vars.PERFORMANCE_NIGHTLY_COMMIT }}
           NIGHTLY_REPOSITORY_URL: ${{ vars.PERFORMANCE_NIGHTLY_REPOSITORY_URL || 'https://github.com/OpenDDS/nightly.git' }}
           NIGHTLY_REF: ${{ vars.PERFORMANCE_NIGHTLY_REF || 'refs/heads/master' }}
-        run: echo "sha=$(git ls-remote "$NIGHTLY_REPOSITORY_URL" "$NIGHTLY_REF" | cut -f1)" >> "$GITHUB_OUTPUT"
+        run: |
+          sha="$PINNED_NIGHTLY_COMMIT"
+          if [[ -z "$sha" ]]; then
+            sha="$(git ls-remote "$NIGHTLY_REPOSITORY_URL" "$NIGHTLY_REF" | cut -f1)"
+          fi
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo 'Could not resolve a valid nightly commit' >&2; exit 2; }
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.PERFORMANCE_AWS_ROLE_ARN }}
