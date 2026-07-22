@@ -1610,9 +1610,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_durability_service)
     writer_data_out.ddsPublicationData.durability_service;
   EXPECT_TRUE(ds_in.service_cleanup_delay.sec ==
               ds_out.service_cleanup_delay.sec);
-  // See decode_writer_deadline: fraction round-trip is lossy by 1ns for this
-  // magnitude (2000ns -> fraction=8589 -> 1999ns).
-  EXPECT_TRUE(ds_out.service_cleanup_delay.nanosec == 1999);
+  EXPECT_TRUE(ds_in.service_cleanup_delay.nanosec ==
+              ds_out.service_cleanup_delay.nanosec);
   EXPECT_TRUE(ds_in.history_kind == ds_out.history_kind);
   EXPECT_TRUE(ds_in.history_depth == ds_out.history_depth);
   EXPECT_TRUE(ds_in.max_samples == ds_out.max_samples);
@@ -1686,13 +1685,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_deadline)
                               type_info.xtypes_type_info_, RDE_FRACTIONAL_SECONDS));
   EXPECT_TRUE(writer_data.ddsPublicationData.deadline.period.sec ==
               writer_data_out.ddsPublicationData.deadline.period.sec);
-  // Round-tripping through the wire's 1/2^32-sec fraction unit is not
-  // perfectly bijective at nanosecond granularity (double integer
-  // truncation): 35000ns encodes to fraction=150323, which decodes back to
-  // 34999ns, not 35000ns. This 1ns discrepancy is inherent to the format,
-  // not a bug.
-  EXPECT_TRUE(writer_data_out.ddsPublicationData.deadline.period.nanosec >= 34998);
-  EXPECT_TRUE(writer_data_out.ddsPublicationData.deadline.period.nanosec <= 35002);
+  EXPECT_TRUE(writer_data.ddsPublicationData.deadline.period.nanosec ==
+              writer_data_out.ddsPublicationData.deadline.period.nanosec);
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_deadline_default)
@@ -1808,9 +1802,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_liveliness)
               writer_data_out.ddsPublicationData.liveliness.kind);
   EXPECT_TRUE(writer_data.ddsPublicationData.liveliness.lease_duration.sec ==
               writer_data_out.ddsPublicationData.liveliness.lease_duration.sec);
-  // See decode_writer_deadline: fraction round-trip is lossy by 1ns for this
-  // magnitude (15000ns -> fraction=64424 -> 14999ns).
-  EXPECT_TRUE(writer_data_out.ddsPublicationData.liveliness.lease_duration.nanosec == 14999);
+  EXPECT_TRUE(writer_data.ddsPublicationData.liveliness.lease_duration.nanosec ==
+              writer_data_out.ddsPublicationData.liveliness.lease_duration.nanosec);
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_liveliness_default)
@@ -1876,9 +1869,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_reliability)
               writer_data_out.ddsPublicationData.reliability.kind);
   EXPECT_TRUE(writer_data.ddsPublicationData.reliability.max_blocking_time.sec ==
               writer_data_out.ddsPublicationData.reliability.max_blocking_time.sec);
-  // See decode_writer_deadline: fraction round-trip is lossy by 1ns for this
-  // magnitude (100ns -> fraction=429 -> 99ns).
-  EXPECT_TRUE(writer_data_out.ddsPublicationData.reliability.max_blocking_time.nanosec == 99);
+  EXPECT_TRUE(writer_data.ddsPublicationData.reliability.max_blocking_time.nanosec ==
+              writer_data_out.ddsPublicationData.reliability.max_blocking_time.nanosec);
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_reliability_default)
@@ -1940,9 +1932,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_lifespan)
                               type_info.xtypes_type_info_, RDE_FRACTIONAL_SECONDS));
   EXPECT_TRUE(writer_data.ddsPublicationData.lifespan.duration.sec ==
               writer_data_out.ddsPublicationData.lifespan.duration.sec);
-  // See decode_writer_deadline: fraction round-trip is lossy by 1ns for this
-  // magnitude (90000ns -> fraction=386547 -> 89999ns).
-  EXPECT_TRUE(writer_data_out.ddsPublicationData.lifespan.duration.nanosec == 89999);
+  EXPECT_TRUE(writer_data.ddsPublicationData.lifespan.duration.nanosec ==
+              writer_data_out.ddsPublicationData.lifespan.duration.nanosec);
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_lifespan_default)
@@ -2810,9 +2801,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_deadline)
                               type_info.xtypes_type_info_, RDE_FRACTIONAL_SECONDS));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.deadline.period.sec ==
               reader_data_out.ddsSubscriptionData.deadline.period.sec);
-  // See decode_writer_deadline: fraction round-trip is lossy by 1ns for this
-  // magnitude (35000ns -> fraction=150323 -> 34999ns).
-  EXPECT_TRUE(reader_data_out.ddsSubscriptionData.deadline.period.nanosec == 34999);
+  EXPECT_TRUE(reader_data.ddsSubscriptionData.deadline.period.nanosec ==
+              reader_data_out.ddsSubscriptionData.deadline.period.nanosec);
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_latency_budget)
@@ -2884,9 +2874,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_liveliness)
               reader_data_out.ddsSubscriptionData.liveliness.kind);
   EXPECT_TRUE(reader_data.ddsSubscriptionData.liveliness.lease_duration.sec ==
               reader_data_out.ddsSubscriptionData.liveliness.lease_duration.sec);
-  // See decode_writer_deadline: fraction round-trip is lossy by 1ns for this
-  // magnitude (15000ns -> fraction=64424 -> 14999ns).
-  EXPECT_TRUE(reader_data_out.ddsSubscriptionData.liveliness.lease_duration.nanosec == 14999);
+  EXPECT_TRUE(reader_data.ddsSubscriptionData.liveliness.lease_duration.nanosec ==
+              reader_data_out.ddsSubscriptionData.liveliness.lease_duration.nanosec);
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_reliability)
@@ -2926,9 +2915,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_reliability)
               reader_data_out.ddsSubscriptionData.reliability.kind);
   EXPECT_TRUE(reader_data.ddsSubscriptionData.reliability.max_blocking_time.sec ==
               reader_data_out.ddsSubscriptionData.reliability.max_blocking_time.sec);
-  // See decode_writer_deadline: fraction round-trip is lossy by 1ns for this
-  // magnitude (100ns -> fraction=429 -> 99ns).
-  EXPECT_TRUE(reader_data_out.ddsSubscriptionData.reliability.max_blocking_time.nanosec == 99);
+  EXPECT_TRUE(reader_data.ddsSubscriptionData.reliability.max_blocking_time.nanosec ==
+              reader_data_out.ddsSubscriptionData.reliability.max_blocking_time.nanosec);
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_time_based_filter)
@@ -2969,9 +2957,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_time_based_filter)
                               type_info.xtypes_type_info_, RDE_FRACTIONAL_SECONDS));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.time_based_filter.minimum_separation.sec ==
               reader_data_out.ddsSubscriptionData.time_based_filter.minimum_separation.sec);
-  // See decode_writer_deadline: fraction round-trip is lossy by 1ns for this
-  // magnitude (40000ns -> fraction=171798 -> 39999ns).
-  EXPECT_TRUE(reader_data_out.ddsSubscriptionData.time_based_filter.minimum_separation.nanosec == 39999);
+  EXPECT_TRUE(reader_data.ddsSubscriptionData.time_based_filter.minimum_separation.nanosec ==
+              reader_data_out.ddsSubscriptionData.time_based_filter.minimum_separation.nanosec);
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_user_data)
