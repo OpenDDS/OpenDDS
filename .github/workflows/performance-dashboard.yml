@@ -18,6 +18,11 @@ on:
         required: true
         default: false
         type: boolean
+      build_only:
+        description: Build or verify the release bundle without starting AWS performance tests
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -28,11 +33,82 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  build-release:
+    # Build only when this repository is configured to submit performance runs.
+    if: >-
+      vars.PERFORMANCE_AWS_ROLE_ARN != '' &&
+      vars.PERFORMANCE_ARTIFACT_BUCKET != '' &&
+      (github.event_name == 'workflow_dispatch' || vars.PERFORMANCE_AUTOMATIC_RUNS == 'true')
+    runs-on: ubuntu-latest
+    container: amazonlinux:2023
+    env:
+      ARTIFACT_BUCKET: ${{ vars.PERFORMANCE_ARTIFACT_BUCKET }}
+      BUNDLE_VERSION: ${{ vars.PERFORMANCE_BUNDLE_VERSION || 'al2023-xerces-3.2.5-v5' }}
+      OPENDDS_COMMIT: ${{ github.sha }}
+    steps:
+      - name: Install build prerequisites
+        run: >-
+          dnf install -y awscli-2 cmake diffutils findutils gcc gcc-c++ git gzip
+          make openssl-devel patch perl tar which
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.PERFORMANCE_AWS_ROLE_ARN }}
+          aws-region: ${{ vars.PERFORMANCE_AWS_REGION }}
+      - name: Check release bundle
+        id: bundle
+        run: |
+          key="builds/$BUNDLE_VERSION/$OPENDDS_COMMIT/bench.tar.gz"
+          if aws s3api head-object --bucket "$ARTIFACT_BUCKET" --key "$key" >/dev/null 2>&1; then
+            echo "Release bundle already exists: s3://$ARTIFACT_BUCKET/$key"
+            echo 'exists=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'exists=false' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Build Xerces-C++
+        if: steps.bundle.outputs.exists != 'true'
+        run: |
+          git clone --depth 1 --branch v3.2.5 --single-branch https://github.com/apache/xerces-c.git /tmp/xerces-c
+          cmake -S /tmp/xerces-c -B /tmp/xerces-build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/tmp/xerces-install \
+            -DCMAKE_INSTALL_LIBDIR=lib
+          cmake --build /tmp/xerces-build -j"$(nproc)"
+          cmake --install /tmp/xerces-build
+      - name: Build OpenDDS Bench release bundle
+        if: steps.bundle.outputs.exists != 'true'
+        run: |
+          ./configure --optimize --no-debug --tests --rapidjson --security --xerces3=/tmp/xerces-install
+          make -j"$(nproc)" \
+            Bench_Worker Bench_node_controller Bench_test_controller \
+            Bench_report_parser Bench_dashboard_summarizer \
+            DCPSInfoRepo_Main RtpsRelay
+          export DDS_ROOT="$GITHUB_WORKSPACE"
+          (cd performance-tests/bench && perl install_bench.pl --dest /tmp/bundle)
+          cp -L /tmp/xerces-install/lib/libxerces-c*.so* /tmp/bundle/lib/
+          ldd /tmp/xerces-install/lib/libxerces-c.so | awk '/libicu/{print $3}' | xargs -r cp -L -t /tmp/bundle/lib/
+          find . -type f -perm -111 \( -name DCPSInfoRepo -o -name RtpsRelay \) -exec cp {} /tmp/bundle/bin/ \;
+          find . \( -type f -o -type l \) -name '*.so*' -exec cp -L {} /tmp/bundle/lib/ \;
+          for executable in node_controller test_controller worker dashboard_summarizer DCPSInfoRepo RtpsRelay; do
+            LD_LIBRARY_PATH=/tmp/bundle/lib ldd "/tmp/bundle/bin/$executable" | tee -a /tmp/ldd.log
+          done
+          ! grep -q 'not found' /tmp/ldd.log
+          tar -C /tmp -czf /tmp/bench.tar.gz bundle
+      - name: Upload release bundle
+        if: steps.bundle.outputs.exists != 'true'
+        run: |
+          aws s3 cp /tmp/bench.tar.gz \
+            "s3://$ARTIFACT_BUCKET/builds/$BUNDLE_VERSION/$OPENDDS_COMMIT/bench.tar.gz"
+
   submit:
     # Forks are manual-only unless PERFORMANCE_AUTOMATIC_RUNS is explicitly enabled.
     if: >-
       vars.PERFORMANCE_AWS_ROLE_ARN != '' &&
+      inputs.build_only != true &&
       (github.event_name == 'workflow_dispatch' || vars.PERFORMANCE_AUTOMATIC_RUNS == 'true')
+    needs: build-release
     runs-on: ubuntu-latest
     steps:
       - name: Select suite
@@ -53,7 +129,7 @@ jobs:
             suite=core
           fi
           case "$suite" in
-            validation) topology='{"legCount":3,"coresPerLeg":2}'; estimated=2; instance_type="$VALIDATION_INSTANCE_TYPE" ;;
+            validation) topology='{"legCount":3,"coresPerLeg":1}'; estimated=1; instance_type="$VALIDATION_INSTANCE_TYPE" ;;
             core) topology='{"legCount":12,"coresPerLeg":4}'; estimated=8; instance_type="$CORE_INSTANCE_TYPE" ;;
             full) topology='{"legCount":30,"coresPerLeg":4}'; estimated=60; instance_type="$FULL_INSTANCE_TYPE" ;;
             *) exit 2 ;;
