@@ -20,5 +20,7 @@ target_link_libraries(${PROJECT_NAME}
   OpenDDS_TestUtils
 )
 
+add_subdirectory(classic)
+
 configure_file(run_test.pl . COPYONLY)
 opendds_add_test(COMMAND perl run_test.pl)

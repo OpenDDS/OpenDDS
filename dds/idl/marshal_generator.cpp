@@ -932,10 +932,13 @@ namespace {
     } else if (cls & CL_STRING) {
       be_global->impl_ << indent <<
         "primitive_serialized_size_ulong(encoding, size);\n";
+      const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+      const string get_size = use_cxx11 ? accessor + ".size()"
+        : "ACE_OS::strlen(" + accessor + ".in())";
       const string strlen_suffix = (cls & CL_WIDE)
         ? " * char16_cdr_size;\n" : " + 1;\n";
       be_global->impl_ << indent <<
-        "size += " << accessor << ".size()" << strlen_suffix;
+        "size += " << get_size << strlen_suffix;
     } else {
       RefWrapper elem_wrapper(type, cxx_elem, accessor);
       elem_wrapper.nested_key_only_ = nested_key_only;
@@ -968,6 +971,20 @@ namespace {
       be_global->impl_ <<
         streamAndCheck("<< " + member_wrapper.ref(), streamIndent);
     }
+  }
+
+  std::string generate_input_for_map(Classification member_cls, AST_Type* member_type,
+                                     const std::string& accessor, bool use_cxx11)
+  {
+    if (member_cls & CL_STRING) {
+      if (member_cls & CL_BOUNDED) {
+        const string args = accessor + (use_cxx11 ? ", " : ".out(), ")
+          + bounded_arg(member_type);
+        return getWrapper(args, member_type, WD_INPUT);
+      }
+      return accessor + (use_cxx11 ? "" : ".out()");
+    }
+    return accessor;
   }
 
   void gen_map_i(UTL_ScopedName* tdname, AST_Map* map, bool nested_key_only, const FieldInfo* anonymous = 0)
@@ -1010,11 +1027,11 @@ namespace {
       val_cxx_elem = scoped(val->name());
     }
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    if ((key_cls & CL_STRING) && use_cxx11) {
-      key_cxx_elem = (key_cls & CL_WIDE) ? "std::wstring" : "std::string";
+    if (key_cls & CL_STRING) {
+      key_cxx_elem = string_type(key_cls);
     }
-    if ((val_cls & CL_STRING) && use_cxx11) {
-      val_cxx_elem = (val_cls & CL_WIDE) ? "std::wstring" : "std::string";
+    if (val_cls & CL_STRING) {
+      val_cxx_elem = string_type(val_cls);
     }
 
     RefWrapper(base_wrapper).done().generate_tag();
@@ -1140,14 +1157,16 @@ namespace {
       }
 
       static const size_t loopIndent = 4;
+      const std::string key_input = generate_input_for_map(key_cls, key, "key", use_cxx11);
+      const std::string val_input = generate_input_for_map(val_cls, val, "val", use_cxx11);
       be_global->impl_ <<
         "  " << wrapper.value_access() << ".clear();\n" <<
         (may_skip ? "  bool skip = false;\n" : "") <<
         "  for (DDS::UInt32 read = 0; read < size;) {\n"
         "    " << key_cxx_elem << " key;\n" <<
-        streamAndCheck(">> key", loopIndent) <<
+        streamAndCheck(">> " + key_input, loopIndent) <<
         "    " << val_cxx_elem << " val;\n" <<
-        streamAndCheck(">> val", loopIndent, valFailureHandler) <<
+        streamAndCheck(">> " + val_input, loopIndent, valFailureHandler) <<
         (may_skip ?
         "    if (!skip) {\n  "
         : "") <<
