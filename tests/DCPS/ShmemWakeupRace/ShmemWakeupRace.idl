@@ -1,0 +1,19 @@
+/*
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+module ShmemWakeupRace {
+
+  const long DOMAIN = 113;
+
+  @topic
+  struct Sample {
+    long sample_id;
+  };
+
+  const string PING_TOPIC_NAME = "ShmemWakeupRacePing";
+  const string PONG_TOPIC_NAME = "ShmemWakeupRacePong";
+};
