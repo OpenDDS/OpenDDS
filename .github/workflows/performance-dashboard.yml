@@ -12,7 +12,7 @@ on:
         required: true
         default: validation
         type: choice
-        options: [validation, core, full]
+        options: [validation, standard, core, full]
       manual_budget_override:
         description: Permit this run above the automatic budget cap
         required: true
@@ -124,6 +124,7 @@ jobs:
           MANUAL_OVERRIDE: ${{ inputs.manual_budget_override }}
           REPEAT_RUN: ${{ inputs.repeat_run }}
           VALIDATION_INSTANCE_TYPE: ${{ vars.PERFORMANCE_VALIDATION_INSTANCE_TYPE }}
+          STANDARD_INSTANCE_TYPE: ${{ vars.PERFORMANCE_STANDARD_INSTANCE_TYPE }}
           CORE_INSTANCE_TYPE: ${{ vars.PERFORMANCE_CORE_INSTANCE_TYPE }}
           FULL_INSTANCE_TYPE: ${{ vars.PERFORMANCE_FULL_INSTANCE_TYPE }}
         run: |
@@ -136,6 +137,7 @@ jobs:
           fi
           case "$suite" in
             validation) topology='{"legCount":3,"coresPerLeg":1}'; estimated=1; instance_type="$VALIDATION_INSTANCE_TYPE" ;;
+            standard) topology='{"legCount":6,"coresPerLeg":2}'; estimated=2; instance_type="$STANDARD_INSTANCE_TYPE" ;;
             core) topology='{"legCount":12,"coresPerLeg":4}'; estimated=8; instance_type="$CORE_INSTANCE_TYPE" ;;
             full) topology='{"legCount":30,"coresPerLeg":4}'; estimated=60; instance_type="$FULL_INSTANCE_TYPE" ;;
             *) exit 2 ;;
