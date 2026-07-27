@@ -23,6 +23,11 @@ on:
         required: true
         default: false
         type: boolean
+      repeat_run:
+        description: Run again even when this exact revision and suite already completed
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -117,6 +122,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           REQUESTED_SUITE: ${{ inputs.suite }}
           MANUAL_OVERRIDE: ${{ inputs.manual_budget_override }}
+          REPEAT_RUN: ${{ inputs.repeat_run }}
           VALIDATION_INSTANCE_TYPE: ${{ vars.PERFORMANCE_VALIDATION_INSTANCE_TYPE }}
           CORE_INSTANCE_TYPE: ${{ vars.PERFORMANCE_CORE_INSTANCE_TYPE }}
           FULL_INSTANCE_TYPE: ${{ vars.PERFORMANCE_FULL_INSTANCE_TYPE }}
@@ -140,6 +146,11 @@ jobs:
           echo "estimated=$estimated" >> "$GITHUB_OUTPUT"
           echo "instance_type=$instance_type" >> "$GITHUB_OUTPUT"
           echo "override=${MANUAL_OVERRIDE:-false}" >> "$GITHUB_OUTPUT"
+          if [[ "${REPEAT_RUN:-false}" == true ]]; then
+            echo "repeat_nonce=$GITHUB_RUN_ID" >> "$GITHUB_OUTPUT"
+          else
+            echo "repeat_nonce=" >> "$GITHUB_OUTPUT"
+          fi
       - name: Resolve nightly configuration revision
         id: nightly
         env:
@@ -169,6 +180,7 @@ jobs:
           INSTANCE_TYPE: ${{ steps.suite.outputs.instance_type }}
           AMI_ID: ${{ vars.PERFORMANCE_AMI_ID }}
           AVAILABILITY_ZONE: ${{ vars.PERFORMANCE_AVAILABILITY_ZONE }}
+          REPEAT_NONCE: ${{ steps.suite.outputs.repeat_nonce }}
         run: |
           input=$(jq -n \
             --arg commitSha "$COMMIT_SHA" \
@@ -180,6 +192,7 @@ jobs:
             --arg instanceType "$INSTANCE_TYPE" \
             --arg amiId "$AMI_ID" \
             --arg availabilityZone "$AVAILABILITY_ZONE" \
+            --arg repeatNonce "$REPEAT_NONCE" \
             '{
               commitSha: $commitSha,
               configCommit: $configCommit,
@@ -189,7 +202,8 @@ jobs:
               manualOverride: $manualOverride,
               instanceType: $instanceType,
               amiId: $amiId,
-              availabilityZone: $availabilityZone
+              availabilityZone: $availabilityZone,
+              repeatNonce: $repeatNonce
             }')
           aws stepfunctions start-execution \
             --state-machine-arn "$STATE_MACHINE_ARN" \
