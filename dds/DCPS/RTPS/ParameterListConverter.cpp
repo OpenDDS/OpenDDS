@@ -328,7 +328,17 @@ namespace {
     // ACE_UINT32 fraction math below and silently wrap to a garbage or zero
     // wire value.
     if (dur.nanosec >= 1000000000u) {
-      dur.sec += static_cast<CORBA::Long>(dur.nanosec / 1000000000u);
+      const CORBA::Long carry =
+        static_cast<CORBA::Long>(dur.nanosec / 1000000000u);
+      if (dur.sec > DDS::DURATION_INFINITE_SEC - carry) {
+        // The normalized duration can't be represented by Duration_t.
+        // Saturate to the RTPS infinite-duration sentinel instead of
+        // overflowing the signed seconds field.
+        dur.sec = DDS::DURATION_INFINITE_SEC;
+        dur.nanosec = DDS::TIME_INVALID_NSEC;
+        return;
+      }
+      dur.sec += carry;
       dur.nanosec %= 1000000000u;
     }
     dur.nanosec = DCPS::nanoseconds_to_uint32_fractional_seconds(dur.nanosec);

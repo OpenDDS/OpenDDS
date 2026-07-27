@@ -2029,6 +2029,23 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, writer_lifespan_duration_out_of_range
   EXPECT_EQ(0x80000000u, get(param_list, PID_LIFESPAN).lifespan().duration.nanosec);
 }
 
+TEST(dds_DCPS_RTPS_ParameterListConverter, writer_lifespan_duration_normalization_overflow)
+{
+  DiscoveredWriterData writer_data = Factory::default_writer_data();
+  writer_data.ddsPublicationData.lifespan.duration.sec = DDS::DURATION_INFINITE_SEC;
+  writer_data.ddsPublicationData.lifespan.duration.nanosec = 1000000000u;
+
+  ParameterList param_list;
+  OpenDDS::DCPS::TypeInformation type_info;
+  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS));
+  ASSERT_TRUE(is_present(param_list, PID_LIFESPAN));
+  EXPECT_EQ(DDS::DURATION_INFINITE_SEC,
+            get(param_list, PID_LIFESPAN).lifespan().duration.sec);
+  EXPECT_EQ(DDS::TIME_INVALID_NSEC,
+            get(param_list, PID_LIFESPAN).lifespan().duration.nanosec);
+}
+
 TEST(dds_DCPS_RTPS_ParameterListConverter, writer_reliability_legacy_infinite)
 {
   DiscoveredWriterData writer_data = Factory::default_writer_data();
