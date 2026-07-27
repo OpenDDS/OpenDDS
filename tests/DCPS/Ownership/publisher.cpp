@@ -13,6 +13,8 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
 
+#include <tests/Utils/DistributedConditionSet.h>
+
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/udp/Udp.h>
@@ -36,13 +38,14 @@ ACE_CString ownership_dw_id = "OwnershipDataWriter";
 bool delay_reset = false;
 ACE_CString topic_name = "Movie Discussion List";
 int expected_readers = 2;
+bool wait_for_subscriber = false;
 
 namespace {
 
 int
 parse_args(int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("s:i:r:d:y:l:cn:m:"));
+  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("s:i:r:d:y:l:cn:m:w"));
 
   int c;
   while ((c = get_opts()) != -1) {
@@ -76,13 +79,17 @@ parse_args(int argc, ACE_TCHAR *argv[])
     case 'm':
       expected_readers = ACE_OS::atoi(get_opts.opt_arg());
       break;
+    case 'w':
+      wait_for_subscriber = true;
+      break;
     case '?':
     default:
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("usage: %C -s <ownership_strength> ")
                         ACE_TEXT("-i <ownership_dw_id> -r <reset_ownership_strength> ")
                         ACE_TEXT("-d <deadline> -y <delay> -l <liveliness> ")
-                        ACE_TEXT("-n <topic_name> -m <expected_readers>\n"),
+                        ACE_TEXT("-n <topic_name> -m <expected_readers> ")
+                        ACE_TEXT("-w\n"),
                         argv[0]),
                         -1);
     }
@@ -194,6 +201,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" ERROR: create_datawriter failed!\n")),
                        -1);
+    }
+
+    if (wait_for_subscriber) {
+      DistributedConditionSet_rch dcs =
+        OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+      dcs->wait_for(ownership_dw_id.c_str(), "subscriber", "ready");
     }
 
     // Start writing threads
