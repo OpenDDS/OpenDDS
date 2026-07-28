@@ -85,7 +85,9 @@ jobs:
         repository: DOCGroup/ACE_TAO
         path: OpenDDS/build/ACE_TAO
     - name: Install xerces and Qt5
-      run: sudo apt-get -y install libxerces-c-dev qtbase5-dev
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install libxerces-c-dev qtbase5-dev
     - uses: lukka/get-cmake@latest
       with:
         cmakeVersion: "3.23"
