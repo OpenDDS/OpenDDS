@@ -6,6 +6,7 @@
  */
 
 #include "ShmemWakeupRaceTypeSupportImpl.h"
+#include "MatchBarrier.h"
 
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
@@ -66,7 +67,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         if (CORBA::is_nil(sample_reader.in()) || CORBA::is_nil(sample_writer.in())) {
           std::cerr << "Pong: create_datareader or create_datawriter failed" << std::endl;
           status = 1;
+        } else if (!ShmemWakeupRace::wait_for_match(writer.in()) ||
+                   !ShmemWakeupRace::wait_for_match(reader.in())) {
+          std::cerr << "Pong: waiting for endpoint matches failed" << std::endl;
+          status = 1;
         } else {
+          std::cout << "Pong: matched ping reader and writer" << std::endl;
+          ShmemWakeupRace::settle_after_matches();
           DDS::ReadCondition_var read_condition = reader->create_readcondition(
             DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
           DDS::WaitSet_var wait_set = new DDS::WaitSet;

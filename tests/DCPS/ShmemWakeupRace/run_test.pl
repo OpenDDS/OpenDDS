@@ -12,31 +12,35 @@ use strict;
 use warnings;
 
 my $trials = 1;
+my $transport = 'shmem';
 for my $arg (@ARGV) {
   if ($arg =~ /^trials=(\d+)$/ && $1 > 0) {
     $trials = $1;
+  } elsif ($arg =~ /^transport=(shmem|rtps_udp)$/) {
+    $transport = $1;
   } else {
-    die "Usage: $0 [trials=<positive integer>]\n";
+    die "Usage: $0 [trials=<positive integer>] [transport=shmem|rtps_udp]\n";
   }
 }
 
+my $config = $transport eq 'shmem' ? 'shmem_rtps.ini' : 'rtps_udp.ini';
 my $failed = 0;
 for my $trial (1 .. $trials) {
-  print "ShmemWakeupRace trial $trial of $trials\n";
+  print "ShmemWakeupRace transport=$transport trial $trial of $trials\n";
 
   my $test = new PerlDDS::TestFramework();
   $test->process('subscriber', 'subscriber',
-                 '-DCPSConfigFile shmem_rtps.ini -DCPSDebugLevel 0 -DCPSTransportDebugLevel 0');
+                 "-DCPSConfigFile $config -DCPSDebugLevel 0 -DCPSTransportDebugLevel 0");
   $test->process('publisher', 'publisher',
-                 '-DCPSConfigFile shmem_rtps.ini -DCPSDebugLevel 0 -DCPSTransportDebugLevel 0');
+                 "-DCPSConfigFile $config -DCPSDebugLevel 0 -DCPSTransportDebugLevel 0");
 
   $test->start_process('subscriber');
   $test->start_process('publisher');
 
-  if ($test->finish(15)) {
+  if ($test->finish(20)) {
     ++$failed;
   }
 }
 
-print "ShmemWakeupRace failed trials: $failed/$trials\n";
+print "ShmemWakeupRace transport=$transport failed trials: $failed/$trials\n";
 exit($failed ? 1 : 0);

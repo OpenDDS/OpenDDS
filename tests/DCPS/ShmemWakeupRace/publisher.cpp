@@ -6,6 +6,7 @@
  */
 
 #include "ShmemWakeupRaceTypeSupportImpl.h"
+#include "MatchBarrier.h"
 
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
@@ -17,40 +18,6 @@
 #endif
 
 #include <iostream>
-
-namespace {
-
-bool wait_for_match(DDS::DataWriter_ptr writer)
-{
-  DDS::PublicationMatchedStatus match_status;
-  if (writer->get_publication_matched_status(match_status) != DDS::RETCODE_OK) {
-    return false;
-  }
-  if (match_status.current_count >= 1) {
-    return true;
-  }
-
-  DDS::StatusCondition_var status_condition = writer->get_statuscondition();
-  if (status_condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS) != DDS::RETCODE_OK) {
-    return false;
-  }
-  DDS::WaitSet_var wait_set = new DDS::WaitSet;
-  if (wait_set->attach_condition(status_condition.in()) != DDS::RETCODE_OK) {
-    return false;
-  }
-
-  DDS::ConditionSeq conditions;
-  const DDS::Duration_t timeout = { 5, 0 };
-  const DDS::ReturnCode_t wait_result = wait_set->wait(conditions, timeout);
-  const DDS::ReturnCode_t detach_result = wait_set->detach_condition(status_condition.in());
-  if (wait_result != DDS::RETCODE_OK || detach_result != DDS::RETCODE_OK ||
-      writer->get_publication_matched_status(match_status) != DDS::RETCODE_OK) {
-    return false;
-  }
-  return match_status.current_count >= 1;
-}
-
-}
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
@@ -100,11 +67,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         if (CORBA::is_nil(sample_writer.in()) || CORBA::is_nil(sample_reader.in())) {
           std::cerr << "Ping: create_datawriter or create_datareader failed" << std::endl;
           status = 1;
-        } else if (!wait_for_match(writer.in())) {
-          std::cerr << "Ping: waiting for pong match failed" << std::endl;
+        } else if (!ShmemWakeupRace::wait_for_match(writer.in()) ||
+                   !ShmemWakeupRace::wait_for_match(reader.in())) {
+          std::cerr << "Ping: waiting for endpoint matches failed" << std::endl;
           status = 1;
         } else {
-          std::cout << "Ping: matched pong reader" << std::endl;
+          std::cout << "Ping: matched pong reader and writer" << std::endl;
+          ShmemWakeupRace::settle_after_matches();
           DDS::ReadCondition_var read_condition = reader->create_readcondition(
             DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
           DDS::WaitSet_var wait_set = new DDS::WaitSet;

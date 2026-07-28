@@ -3,22 +3,32 @@ SHM Wakeup Race MWE
 ######################
 
 This is a two-process minimum working example for an OpenDDS shared-memory
-transport wakeup race. It uses only public DDS APIs, RTPS discovery, and a
-best-effort writer and reader.
+transport wakeup race. It uses only public DDS APIs, RTPS discovery, and
+best-effort writers and readers. An RTPS/UDP control uses the same executable,
+discovery configuration, QoS, and timing.
 
 The ping process creates a writer for the ping topic and a reader for the pong
-topic. The pong process creates a reader for ping and a writer for pong. Ping
-waits until its writer observes one matched reader, writes exactly one sample,
-and waits a bounded time for its echo. A missing request or reply makes the
-test fail.
+topic. The pong process creates a reader for ping and a writer for pong. Both
+processes wait for their writer and reader matches, followed by a fixed settle
+interval. Ping then writes exactly one sample and waits a bounded time for its
+echo. A missing request or reply makes the test fail.
 
 Run one trial with::
 
-  perl run_test.pl
+  perl run_test.pl transport=shmem
 
 Run multiple fresh process pairs to measure the failure rate with::
 
-  perl run_test.pl trials=20
+  perl run_test.pl transport=shmem trials=20
+
+Run the transport control with::
+
+  perl run_test.pl transport=rtps_udp trials=20
+
+A healthy control reports ``failed trials: 0/N`` and exits with status zero.
+The SHM defect is reproduced when one or more fresh process pairs time out
+after both directions report matched endpoints. The launcher reports the
+number of failed trials and exits nonzero in that case.
 
 The test deliberately sends no second application sample. In the investigated
 failure mode, a later SHM notification can make an earlier stranded sample
@@ -32,4 +42,6 @@ evidence that the transport is fixed.
 Best-effort QoS does not guarantee delivery, so this test alone does not claim
 an OMG DDS reliability-contract violation. It demonstrates an association-
 adjacent missing request or reply in a same-host SHM ping/pong exchange after
-the request writer has observed a match and accepted its write.
+both directions have observed endpoint matches and the request writer has
+accepted its write. The RTPS/UDP control distinguishes this from a generic
+startup or bidirectional-association failure.
