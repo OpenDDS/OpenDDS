@@ -28,6 +28,11 @@ on:
         required: true
         default: false
         type: boolean
+      static_multicast_registration:
+        description: Pre-register OpenDDS multicast groups with the AWS Transit Gateway
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -187,6 +192,7 @@ jobs:
           AMI_ID: ${{ vars.PERFORMANCE_AMI_ID }}
           AVAILABILITY_ZONE: ${{ vars.PERFORMANCE_AVAILABILITY_ZONE }}
           REPEAT_NONCE: ${{ steps.suite.outputs.repeat_nonce }}
+          STATIC_MULTICAST_REGISTRATION: ${{ inputs.static_multicast_registration || false }}
         run: |
           input=$(jq -n \
             --arg commitSha "$COMMIT_SHA" \
@@ -199,6 +205,7 @@ jobs:
             --arg amiId "$AMI_ID" \
             --arg availabilityZone "$AVAILABILITY_ZONE" \
             --arg repeatNonce "$REPEAT_NONCE" \
+            --argjson staticMulticastRegistration "$STATIC_MULTICAST_REGISTRATION" \
             '{
               commitSha: $commitSha,
               configCommit: $configCommit,
@@ -209,7 +216,8 @@ jobs:
               instanceType: $instanceType,
               amiId: $amiId,
               availabilityZone: $availabilityZone,
-              repeatNonce: $repeatNonce
+              repeatNonce: $repeatNonce,
+              staticMulticastRegistration: $staticMulticastRegistration
             }')
           aws stepfunctions start-execution \
             --state-machine-arn "$STATE_MACHINE_ARN" \
