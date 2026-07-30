@@ -133,7 +133,10 @@ jobs:
           elif [[ "$EVENT_NAME" == workflow_dispatch ]]; then
             suite="$REQUESTED_SUITE"
           else
-            suite=core
+            # Keep automatic merged-commit runs within the commonly available
+            # 32-vCPU On-Demand Standard quota. Core and full remain available
+            # for manual dispatch after the target account's quota is raised.
+            suite=standard
           fi
           case "$suite" in
             validation) topology='{"legCount":3,"coresPerLeg":1}'; estimated=1; instance_type="$VALIDATION_INSTANCE_TYPE" ;;
