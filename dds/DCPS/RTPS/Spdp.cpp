@@ -3973,6 +3973,27 @@ ACE_CDR::ULong Spdp::get_participant_flags(const DCPS::GUID_t& guid) const
     ? iter->second.pdata_.participantProxy.opendds_participant_flags.bits : PFLAGS_EMPTY;
 }
 
+bool Spdp::participant_uses_rtps_duration_fraction_i(const DCPS::GUID_t& guid) const
+{
+  const DiscoveredParticipantMap::const_iterator iter =
+    participants_.find(make_part_guid(guid));
+  if (iter != participants_.end() && is_opendds(iter->second.pdata_.participantProxy)) {
+    return (iter->second.pdata_.participantProxy.opendds_participant_flags.bits &
+            PFLAGS_RTPS_DURATION_FRACTION) != 0;
+  }
+  return (participant_flags_ & PFLAGS_RTPS_DURATION_FRACTION) != 0;
+}
+
+bool Spdp::participant_uses_rtps_duration_fraction(const DCPS::GUID_t& guid) const
+{
+  // participant_flags_ is const (set once at construction), so reading it
+  // here does not depend on lock_ -- lock_ only guards participants_, which
+  // participant_uses_rtps_duration_fraction_i() consults.
+  const bool local_default = (participant_flags_ & PFLAGS_RTPS_DURATION_FRACTION) != 0;
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, local_default);
+  return participant_uses_rtps_duration_fraction_i(guid);
+}
+
 void
 Spdp::remove_lease_expiration_i(DiscoveredParticipantIter iter)
 {
@@ -4796,6 +4817,15 @@ VendorId_t Spdp::get_vendor_id_i(const GUID_t& guid) const
     return iter->second.pdata_.participantProxy.vendorId;
   }
   return unknown_vendor;
+}
+
+void Spdp::get_vendor_id_and_duration_encoding(const GUID_t& guid,
+                                                VendorId_t& vendor_id,
+                                                bool& uses_rtps_duration_fraction) const
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  vendor_id = get_vendor_id_i(guid);
+  uses_rtps_duration_fraction = participant_uses_rtps_duration_fraction_i(guid);
 }
 
 OPENDDS_SET(DDS::UInt32) Spdp::get_ignored_user_tags() const
