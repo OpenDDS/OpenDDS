@@ -112,6 +112,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   known_stat_names["cpu_percent"] = "Cpu Utilization";
   known_stat_names["mem_percent"] = "Memory Utilization";
   known_stat_names["virtual_mem_percent"] = "Virtual Memory Utilization";
+  known_stat_names["network_receive_dropped"] = "Network Receive Drops";
+  known_stat_names["network_transmit_dropped"] = "Network Transmit Drops";
+  known_stat_names["network_receive_errors"] = "Network Receive Errors";
+  known_stat_names["network_transmit_errors"] = "Network Transmit Errors";
   known_stat_names["discovery_delta"] = "Discovery Time Delta";
   known_stat_names["latency"] = "Latency";
   known_stat_names["round_trip_latency"] = "Round Trip Latency";

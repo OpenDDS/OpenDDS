@@ -31,6 +31,7 @@ int SummaryRawFormatter::format(const Bench::TestController::Report& report, std
   output_stream << std::endl;
   output_stream << "Total Errors: " << untagged_error_counts.total_ << std::endl;
   output_stream << "Discovery Errors: " << untagged_error_counts.discovery_ << std::endl;
+  output_stream << "Host Network Errors: " << untagged_error_counts.host_network_ << std::endl;
 
   for (auto stat_it = stats.begin(); stat_it != stats.end(); ++stat_it) {
     auto stat_pos = untagged_stat_vecs.find(*stat_it);
