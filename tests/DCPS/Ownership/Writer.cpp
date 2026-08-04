@@ -23,9 +23,11 @@ extern ACE_Time_Value dds_delay;
 extern ACE_Time_Value reset_delay;
 extern int ownership_strength;
 
-Writer::Writer(DDS::DataWriter_ptr writer, const char* ownership_dw_id)
+Writer::Writer(DDS::DataWriter_ptr writer, const char* ownership_dw_id,
+               int expected_readers)
   : writer_(DDS::DataWriter::_duplicate(writer)),
     ownership_dw_id_(ownership_dw_id),
+    expected_readers_(expected_readers),
     finished_instances_(0),
     timeout_writes_(0)
 {
@@ -82,7 +84,7 @@ Writer::svc()
         ACE_OS::exit(-1);
       }
 
-    } while (matches.current_count < 2);
+    } while (matches.current_count < expected_readers_);
 
     ws->detach_condition(condition);
 

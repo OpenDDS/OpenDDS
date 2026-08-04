@@ -655,6 +655,17 @@ void RtpsDiscoveryConfig::ipv6_spdp_multicast_address(const DCPS::NetworkAddress
                                              DCPS::ConfigStoreImpl::Kind_IPV6);
 }
 
+DCPS::NetworkAddress
+RtpsDiscoveryConfig::ipv6_sedp_multicast_address(DDS::DomainId_t domain) const
+{
+  ACE_UNUSED_ARG(domain);
+  return TheServiceParticipant->config_store()->get(
+    config_key("IPV6_SEDP_MULTICAST_ADDRESS").c_str(),
+    ipv6_default_multicast_group(),
+    DCPS::ConfigStoreImpl::Format_Optional_Port,
+    DCPS::ConfigStoreImpl::Kind_IPV6);
+}
+
 void RtpsDiscoveryConfig::ipv6_sedp_multicast_address(const DCPS::NetworkAddress& addr)
 {
   TheServiceParticipant->config_store()->set(config_key("IPV6_SEDP_MULTICAST_ADDRESS").c_str(),
@@ -684,7 +695,7 @@ RtpsDiscoveryConfig::spdp_send_addrs() const
   return TheServiceParticipant->config_store()->get(config_key("SPDP_SEND_ADDRS").c_str(),
                                                     DCPS::NetworkAddressSet(),
                                                     DCPS::ConfigStoreImpl::Format_Required_Port,
-                                                    DCPS::ConfigStoreImpl::Kind_IPV4);
+                                                    DCPS::ConfigStoreImpl::Kind_ANY);
 }
 
 void
@@ -693,7 +704,7 @@ RtpsDiscoveryConfig::spdp_send_addrs(const DCPS::NetworkAddressSet& addrs)
   TheServiceParticipant->config_store()->set(config_key("SPDP_SEND_ADDRS").c_str(),
                                              addrs,
                                              DCPS::ConfigStoreImpl::Format_Required_Port,
-                                             DCPS::ConfigStoreImpl::Kind_IPV4);
+                                             DCPS::ConfigStoreImpl::Kind_ANY);
 }
 
 DCPS::TimeDuration

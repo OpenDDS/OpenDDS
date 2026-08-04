@@ -153,6 +153,61 @@ This causes the different configuration mechanisms to be processed in the follow
 Users can store configuration data for their applications in the configuration store.
 Users taking advantage of this capability should use the section names of ``APP`` and ``USER`` which are reserved for this purpose.
 
+.. _config-network-addresses:
+
+Network Addresses, Hostnames, and IPv6
+======================================
+
+OpenDDS network address properties accept numeric IP addresses or hostnames.
+Using a numeric address avoids dependence on hostname and DNS configuration.
+When a port is included with a numeric IPv6 address, enclose the address in
+brackets, for example ``[2001:db8::10]:7400``.
+
+Some transports need to advertise an address that peers can use to reach the
+local process.
+An explicitly configured transport ``local_address`` determines this address.
+For IPv4, :prop:`[common]DCPSDefaultAddress` can provide a process-wide default
+when a transport-specific address is not set.
+Otherwise, TCP and UDP can bind a wildcard address and use a hostname selected
+from the system's network interfaces as the advertised address.
+
+OpenDDS prefers a non-loopback fully qualified domain name (FQDN) that resolves
+back to one of the host's network interfaces.
+If it can not find one, it falls back in order to a resolvable short hostname,
+a numeric non-loopback address, or a loopback hostname.
+The warning that begins ``Could not find FQDN`` identifies the selected
+fallback.
+The fallback may be sufficient for same-host testing but may not be reachable
+by peers on other hosts.
+
+FQDN resolution depends on operating-system configuration:
+
+* On Linux and other Unix-like systems, ensure that the hostname resolves to a
+  local non-loopback address using DNS or the system hosts file.
+* On Windows, ensure that the computer has an appropriate primary or
+  connection-specific DNS suffix and that the resulting full computer name
+  resolves to a local address.
+  The full computer name and DNS suffixes are shown by ``ipconfig /all``.
+
+If changing system hostname or DNS configuration is undesirable, set
+:prop:`[common]DCPSDefaultAddress` to an externally reachable IPv4 address or
+set the applicable transport's ``local_address`` explicitly.
+Transport-specific settings are preferable when different transports should
+use different interfaces.
+
+IPv6 support is enabled at build time with the OpenDDS ``configure`` script's
+``--ipv6`` option, which builds ACE/TAO and OpenDDS with ``ACE_HAS_IPV6``.
+An IPv6-enabled build also supports IPv4; it is not an IPv6-only build.
+Properties whose names begin with ``Ipv6`` or ``ipv6_`` configure IPv6
+addresses separately from their IPv4 counterparts.
+In particular, :prop:`[common]DCPSDefaultAddress` is IPv4-only and is not the
+default for IPv6 local-address properties.
+
+RTPS discovery and the :ref:`rtps-udp-transport` use separate IPv4 and IPv6
+sockets in an IPv6-enabled build.
+Configuring one family's addresses does not currently disable the other
+family.
+
 .. _config-environment-variables:
 
 Configuration with Environment Variables
@@ -444,7 +499,6 @@ For example:
     - :prop:`[transport@udp]local_address`
     - :prop:`[transport@multicast]local_address`
     - :prop:`[transport@rtps_udp]local_address`
-    - :prop:`[transport@rtps_udp]ipv6_local_address`
     - :prop:`[transport@rtps_udp]multicast_interface`
     - :prop:`[rtps_discovery]SedpLocalAddress`
     - :prop:`[rtps_discovery]SpdpLocalAddress`
@@ -1268,7 +1322,7 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     If ``<port>`` is ``0`` or not specified, it is calculated as described in :ref:`config-ports-used-by-sedp-unicast`.
 
   .. prop:: Ipv6SedpLocalAddress=<host>:[<port>]
-    :default: :prop:`[common]DCPSDefaultAddress`
+    :default: ``[::]:``
 
     IPv6 variant of :prop:`SedpLocalAddress`.
 
@@ -1281,7 +1335,7 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
   .. prop:: Ipv6SpdpMulticastAddress=<host>[:<port>]
     :default: :prop:`Ipv6DefaultMulticastGroup`
 
-    IPv6 variant of :prop:`Ipv6SpdpMulticastAddress`.
+    IPv6 variant of :prop:`SpdpMulticastAddress`.
 
   .. prop:: SpdpLocalAddress=<host>[:<port>]
     :default: :prop:`[common]DCPSDefaultAddress`
@@ -1290,7 +1344,7 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     If ``<port>`` is ``0`` or not specified, it is calculated as described in :ref:`config-ports-used-by-spdp-unicast`.
 
   .. prop:: Ipv6SpdpLocalAddress=<host>[:<port>]
-    :default: :prop:`[common]DCPSDefaultAddress`
+    :default: ``[::]``
 
     IPv6 variant of :prop:`SpdpLocalAddress`.
 
@@ -1299,6 +1353,10 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     Sets the address advertised by :ref:`SEDP <sedp>`.
     Typically used when the participant is behind a firewall or NAT.
     In order to leave the port unspecified, it can be omitted from the setting but the trailing ``:`` must be present.
+
+  .. prop:: Ipv6SedpAdvertisedLocalAddress=<host>:[<port>]
+
+    IPv6 variant of :prop:`SedpAdvertisedLocalAddress`.
 
   .. prop:: SedpSendDelay=<msec>
     :default: ``10``
@@ -1318,7 +1376,8 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
   .. prop:: SpdpSendAddrs=<host>:<port>[,<host>:<port>]...
 
     A list (comma or whitespace separated) of ``<host>:<port>`` pairs used as destinations for :ref:`SPDP <spdp>` messages.
-    This can be a combination of Unicast and Multicast addresses.
+    This can be a combination of IPv4 and IPv6 Unicast and Multicast addresses.
+    IPv6 addresses must use brackets, for example ``[::1]:7400``.
 
   .. prop:: MaxSpdpSequenceMsgResetChecks=<n>
     :default: ``3``
@@ -2823,7 +2882,7 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
     If ``<port>`` is ``0`` or not specified, it is calculated as described in :ref:`config-ports-used-by-rtps-udp-unicast`.
 
   .. prop:: ipv6_local_address=<host>:[<port>]
-    :default: :prop:`[common]DCPSDefaultAddress`
+    :default: ``[::]:``
 
     Bind the socket to the given address and port.
     ``<port>`` can be omitted but the trailing ``:`` is required.

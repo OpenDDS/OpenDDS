@@ -13,6 +13,8 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
 
+#include <tests/Utils/DistributedConditionSet.h>
+
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/udp/Udp.h>
@@ -34,13 +36,16 @@ int ownership_strength = 0;
 int reset_ownership_strength = -1;
 ACE_CString ownership_dw_id = "OwnershipDataWriter";
 bool delay_reset = false;
+ACE_CString topic_name = "Movie Discussion List";
+int expected_readers = 2;
+bool wait_for_subscriber = false;
 
 namespace {
 
 int
 parse_args(int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("s:i:r:d:y:l:c"));
+  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("s:i:r:d:y:l:cn:m:w"));
 
   int c;
   while ((c = get_opts()) != -1) {
@@ -68,12 +73,23 @@ parse_args(int argc, ACE_TCHAR *argv[])
     case 'c':
       delay_reset = true;
       break;
+    case 'n':
+      topic_name = ACE_TEXT_ALWAYS_CHAR(get_opts.opt_arg());
+      break;
+    case 'm':
+      expected_readers = ACE_OS::atoi(get_opts.opt_arg());
+      break;
+    case 'w':
+      wait_for_subscriber = true;
+      break;
     case '?':
     default:
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("usage: %C -s <ownership_strength> ")
                         ACE_TEXT("-i <ownership_dw_id> -r <reset_ownership_strength> ")
-                        ACE_TEXT("-d <deadline> -y <delay> -l <liveliness>\n"),
+                        ACE_TEXT("-d <deadline> -y <delay> -l <liveliness> ")
+                        ACE_TEXT("-n <topic_name> -m <expected_readers> ")
+                        ACE_TEXT("-w\n"),
                         argv[0]),
                         -1);
     }
@@ -137,7 +153,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     // Create Topic
     DDS::Topic_var topic =
-      participant->create_topic("Movie Discussion List",
+      participant->create_topic(topic_name.c_str(),
                                 CORBA::String_var(mts->get_type_name()),
                                 TOPIC_QOS_DEFAULT,
                                 DDS::TopicListener::_nil(),
@@ -187,8 +203,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        -1);
     }
 
+    if (wait_for_subscriber) {
+      DistributedConditionSet_rch dcs =
+        OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+      dcs->wait_for(ownership_dw_id.c_str(), "subscriber", "ready");
+    }
+
     // Start writing threads
-    Writer* writer = new Writer(dw.in(), ownership_dw_id.c_str());
+    Writer* writer = new Writer(dw.in(), ownership_dw_id.c_str(), expected_readers);
     writer->start();
 
     while (!writer->is_finished()) {

@@ -479,6 +479,12 @@ Sedp::init(const GUID_t& guid,
                        disco.config()->sedp_multicast_address(domainId),
                        ConfigStoreImpl::Format_Optional_Port,
                        ConfigStoreImpl::Kind_IPV4);
+#ifdef ACE_HAS_IPV6
+    config_store_->set(transport_inst_->config_key("IPV6_MULTICAST_GROUP_ADDRESS").c_str(),
+                       disco.config()->ipv6_sedp_multicast_address(domainId),
+                       ConfigStoreImpl::Format_Optional_Port,
+                       ConfigStoreImpl::Kind_IPV6);
+#endif
 
     config_store_->set_uint32(transport_inst_->config_key("TTL").c_str(), disco.ttl());
     config_store_->set(transport_inst_->config_key("MULTICAST_INTERFACE").c_str(), disco.multicast_interface());

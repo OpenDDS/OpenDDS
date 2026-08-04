@@ -16,6 +16,8 @@
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/WaitSet.h>
 
+#include <tests/Utils/DistributedConditionSet.h>
+
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/udp/Udp.h>
@@ -122,6 +124,20 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT(" ERROR: create_topic() failed!\n")), -1);
       }
 
+      DDS::Topic_var topic2;
+      if (testcase == shared_type) {
+        topic2 = participant->create_topic("Movie_Discussion_List_2",
+                                           CORBA::String_var(ts->get_type_name()),
+                                           TOPIC_QOS_DEFAULT,
+                                           DDS::TopicListener::_nil(),
+                                           OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+        if (CORBA::is_nil(topic2.in())) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("%N:%l main()")
+                            ACE_TEXT(" ERROR: create_topic() failed!\n")), -1);
+        }
+      }
+
       // Create Subscriber
       DDS::Subscriber_var sub =
         participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
@@ -135,8 +151,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       // Create DataReader
-      DataReaderListenerImpl* listener_svt1 = new DataReaderListenerImpl("DataReader1");
-      DataReaderListenerImpl* listener_svt2 = new DataReaderListenerImpl("DataReader2");
+      DataReaderListenerImpl* listener_svt1 =
+        new DataReaderListenerImpl("DataReader1", testcase == shared_type ? 10 : -1);
+      DataReaderListenerImpl* listener_svt2 =
+        new DataReaderListenerImpl("DataReader2", testcase == shared_type ? 10 : -1);
 
       DDS::DataReaderListener_var listener1(listener_svt1);
       DDS::DataReaderListener_var listener2(listener_svt2);
@@ -162,7 +180,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       DDS::DataReader_var reader2 =
-        sub->create_datareader(topic.in(),
+        sub->create_datareader(testcase == shared_type ? topic2.in() : topic.in(),
                                dr_qos,
                                listener2.in(),
                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -189,6 +207,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DDS::ConditionSeq conditions;
       DDS::SubscriptionMatchedStatus matches1 = { 0, 0, 0, 0, 0 };
       DDS::SubscriptionMatchedStatus matches2 = { 0, 0, 0, 0, 0 };
+      bool readers_ready = testcase != shared_type;
+      DistributedConditionSet_rch dcs;
+      if (!readers_ready) {
+        dcs = OpenDDS::DCPS::make_rch<FileBasedDistributedConditionSet>();
+      }
       while (true) {
         if (reader1->get_subscription_matched_status(matches1) != DDS::RETCODE_OK) {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -202,8 +225,21 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                             ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -1);
         }
 
-        if ((matches1.current_count == 0 && matches1.total_count > 0) ||
-            (matches2.current_count == 0 && matches2.total_count > 0)) {
+        if (!readers_ready &&
+            matches1.current_count > 0 &&
+            matches2.current_count > 0) {
+          dcs->post("subscriber", "ready");
+          readers_ready = true;
+        }
+
+        const bool reader1_done =
+          matches1.current_count == 0 && matches1.total_count > 0;
+        const bool reader2_done =
+          matches2.current_count == 0 && matches2.total_count > 0;
+        const bool readers_done = testcase == shared_type
+          ? reader1_done && reader2_done
+          : reader1_done || reader2_done;
+        if (readers_done) {
           break;
         }
         DDS::ReturnCode_t wait_status = ws->wait(conditions, timeout);

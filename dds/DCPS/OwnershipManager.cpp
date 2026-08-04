@@ -36,15 +36,15 @@ OwnershipManager::OwnershipManager()
 
 OwnershipManager::~OwnershipManager()
 {
-  // The type->instance should be empty if unregister instance are performed
+  // The topic->instance map should be empty if unregister instance is performed
   // by all readers, but in case the instance not unregistered for some reason,
   // an error will be logged.
-  if (!type_instance_map_.empty()) {
+  if (!topic_instance_map_.empty()) {
     // There is no way to pass the instance map to concrete datareader
     // to delete, so it will be leaked.
     ACE_DEBUG((LM_WARNING,
                ACE_TEXT("(%P|%t) OwnershipManager::~OwnershipManager ")
-               ACE_TEXT("- non-empty type_instance_map_\n")));
+               ACE_TEXT("- non-empty topic_instance_map_\n")));
   }
 }
 
@@ -61,11 +61,11 @@ OwnershipManager::instance_lock_release()
 }
 
 RcHandle<RcObject>
-OwnershipManager::get_instance_map(const char* type_name,
+OwnershipManager::get_instance_map(const char* topic_name,
                                    DataReaderImpl* reader)
 {
   InstanceMap* instance = 0;
-  if (0 != find(type_instance_map_, type_name, instance)) {
+  if (0 != find(topic_instance_map_, topic_name, instance)) {
     return RcHandle<RcObject>();
   }
 
@@ -74,7 +74,7 @@ OwnershipManager::get_instance_map(const char* type_name,
 }
 
 void
-OwnershipManager::set_instance_map(const char* type_name,
+OwnershipManager::set_instance_map(const char* topic_name,
                                    const RcHandle<RcObject>& instance_map,
                                    DataReaderImpl* reader)
 {
@@ -84,21 +84,21 @@ OwnershipManager::set_instance_map(const char* type_name,
                instance_map.in(), reader));
   }
 
-  if (0 != OpenDDS::DCPS::bind(type_instance_map_, type_name,
+  if (0 != OpenDDS::DCPS::bind(topic_instance_map_, topic_name,
                                InstanceMap(instance_map, reader))) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: OwnershipManager::set_instance_map "
-               "failed to bind instance for type \"%C\"\n", type_name));
+               "failed to bind instance for topic \"%C\"\n", topic_name));
   }
 }
 
 void
-OwnershipManager::unregister_reader(const char* type_name,
+OwnershipManager::unregister_reader(const char* topic_name,
                                     DataReaderImpl* reader)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, instance_lock_);
 
   InstanceMap* instance = 0;
-  if (0 != find(type_instance_map_, type_name, instance)) {
+  if (0 != find(topic_instance_map_, topic_name, instance)) {
     return;
   }
 
@@ -111,7 +111,7 @@ OwnershipManager::unregister_reader(const char* type_name,
                  ACE_TEXT(" instance map %@ is deleted by reader %@\n"),
                  instance->map_.in(), reader));
     }
-    unbind(type_instance_map_, type_name);
+    unbind(topic_instance_map_, topic_name);
   }
 }
 

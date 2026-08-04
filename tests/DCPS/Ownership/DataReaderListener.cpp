@@ -20,9 +20,11 @@
 extern int testcase;
 const int num_messages_per_writer = 20;
 
-DataReaderListenerImpl::DataReaderListenerImpl(const char* reader_id)
+DataReaderListenerImpl::DataReaderListenerImpl(const char* reader_id,
+                                               long expected_strength)
   : num_reads_(0),
     reader_id_(reader_id),
+    expected_strength_(expected_strength),
     verify_result_(true),
     result_verify_complete_(false)
 {
@@ -240,6 +242,14 @@ DataReaderListenerImpl::verify(const Messenger::Message& msg)
 
   }
   break;
+  case shared_type:
+    if (msg.strength != expected_strength_) {
+      ACE_ERROR((LM_ERROR,
+        "(%P|%t) ERROR: strength %d does not match expected strength %d\n",
+        msg.strength, expected_strength_));
+      return false;
+    }
+    break;
   default:
   ACE_OS::exit(1);
   break;
@@ -275,6 +285,11 @@ DataReaderListenerImpl::verify_result()
   {
   }
   break;
+  case shared_type:
+    verify_result_ &= num_reads_ > 0
+      && current_strength_[0] == expected_strength_
+      && current_strength_[1] == expected_strength_;
+    break;
   default:
   ACE_OS::exit(1);
   break;

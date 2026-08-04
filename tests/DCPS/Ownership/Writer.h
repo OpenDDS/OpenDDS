@@ -14,7 +14,8 @@
 class Writer : public ACE_Task_Base {
 public:
 
-  Writer(DDS::DataWriter_ptr writer, const char* ownership_dw_id);
+  Writer(DDS::DataWriter_ptr writer, const char* ownership_dw_id,
+         int expected_readers = 2);
 
   void start();
 
@@ -32,6 +33,7 @@ public:
 private:
   DDS::DataWriter_var writer_;
   ACE_CString ownership_dw_id_;
+  const int expected_readers_;
   OpenDDS::DCPS::Atomic<int> finished_instances_;
   OpenDDS::DCPS::Atomic<int> timeout_writes_;
 };

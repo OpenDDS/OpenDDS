@@ -1250,7 +1250,7 @@ protected:
     if (owner_manager) {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
 
-      SharedInstanceMap_rch inst = dynamic_rchandle_cast<SharedInstanceMap>(owner_manager->get_instance_map(topic_servant_->type_name(), this));
+      SharedInstanceMap_rch inst = dynamic_rchandle_cast<SharedInstanceMap>(owner_manager->get_instance_map(topic_servant_->topic_name(), this));
       if (inst != 0) {
         const typename ReverseInstanceMap::iterator pos = reverse_instance_map_.find(handle);
         if (pos != reverse_instance_map_.end()) {
@@ -1825,7 +1825,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
         }
 
         inst = dynamic_rchandle_cast<SharedInstanceMap>(
-          owner_manager->get_instance_map(topic_servant_->type_name(), this));
+          owner_manager->get_instance_map(topic_servant_->topic_name(), this));
         if (inst != 0) {
           typename InstanceMap::const_iterator const iter = inst->find(*instance_data);
           if (iter != inst->end ()) {
@@ -1870,7 +1870,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
         if (!inst) {
           inst = make_rch<SharedInstanceMap>();
           owner_manager->set_instance_map(
-            topic_servant_->type_name(),
+            topic_servant_->topic_name(),
             inst,
             this);
         }

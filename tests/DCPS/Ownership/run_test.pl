@@ -46,6 +46,9 @@ elsif ($ARGV[0] eq 'update_strength') {
     $pub1_reset_strength = "-r 15";
     $testcase = 3;
 }
+elsif ($ARGV[0] eq 'shared_type') {
+    $testcase = 4;
+}
 elsif ($ARGV[0] eq 'rtps') {
     $is_rtps_disc = 1;
 }
@@ -77,8 +80,14 @@ my $test = new PerlDDS::TestFramework();
 $test->setup_discovery("$debug_opts -ORBLogFile DCPSInfoRepo.log");
 
 $test->process('subscriber', 'subscriber', " $sub_opts -ORBLogFile sub.log $sub_deadline $sub_liveliness -t $testcase");
-$test->process('publisher1', 'publisher', "$pub_opts -ORBLogFile pub1.log -s 10 -i datawriter1 $pub1_reset_strength $pub1_deadline $pub1_liveliness");
-$test->process('publisher2', 'publisher', "$pub_opts -ORBLogFile pub2.log -s 12 -i datawriter2 $pub2_deadline $pub2_liveliness");
+if ($testcase == 4) {
+  $test->process('publisher1', 'publisher', "$pub_opts -ORBLogFile pub1.log -s 10 -i datawriter1 -m 1 -y 0 -w");
+  $test->process('publisher2', 'publisher', "$pub_opts -ORBLogFile pub2.log -s 10 -i datawriter2 -m 1 -y 0 -w -n Movie_Discussion_List_2");
+}
+else {
+  $test->process('publisher1', 'publisher', "$pub_opts -ORBLogFile pub1.log -s 10 -i datawriter1 $pub1_reset_strength $pub1_deadline $pub1_liveliness");
+  $test->process('publisher2', 'publisher', "$pub_opts -ORBLogFile pub2.log -s 12 -i datawriter2 $pub2_deadline $pub2_liveliness");
+}
 
 $test->start_process('publisher1');
 $test->start_process('subscriber');

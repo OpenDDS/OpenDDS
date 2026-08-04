@@ -470,6 +470,7 @@ bool TypeLookupService::complete_to_minimal_union(const CompleteUnionType& ct,
                                                   MinimalUnionType& mt) const
 {
   mt.union_flags = ct.union_flags;
+  mt.header = MinimalUnionHeader();
   mt.discriminator.common.member_flags = ct.discriminator.common.member_flags;
   if (!get_minimal_type_identifier(ct.discriminator.common.type_id,
                                    mt.discriminator.common.type_id)) {

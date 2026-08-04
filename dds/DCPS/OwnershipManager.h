@@ -32,7 +32,7 @@ class OpenDDS_Dcps_Export OwnershipManager {
 public:
   typedef OPENDDS_SET(DataReaderImpl*) ReaderSet;
 
-  // TypeInstanceMap is only used for EXCLUSIVE ownership.
+  // TopicInstanceMap is only used for EXCLUSIVE ownership.
   struct InstanceMap {
     InstanceMap()  {}
     InstanceMap(const RcHandle<RcObject>& map, DataReaderImpl* reader)
@@ -45,7 +45,7 @@ public:
     ReaderSet readers_;
   };
 
-  typedef OPENDDS_MAP(OPENDDS_STRING, InstanceMap) TypeInstanceMap;
+  typedef OPENDDS_MAP(OPENDDS_STRING, InstanceMap) TopicInstanceMap;
 
   struct WriterInfo {
     WriterInfo(const GUID_t& pub_id,
@@ -86,27 +86,27 @@ public:
   int instance_lock_release();
 
   /**
-  * The instance map per type is created by the concrete datareader
-  * when first sample with the type is received.
+  * The instance map per topic is created by the concrete datareader
+  * when the first sample for the topic is received.
   */
-  void set_instance_map(const char* type_name,
+  void set_instance_map(const char* topic_name,
                         const RcHandle<RcObject>& instance_map,
                         DataReaderImpl* reader);
 
   /**
-  * Accesor of the instance map for provided type. It is called once
+  * Accessor of the instance map for the provided topic. It is called once
   * for each new instance in a datareader.
   */
-  RcHandle<RcObject> get_instance_map(const char* type_name, DataReaderImpl* reader);
+  RcHandle<RcObject> get_instance_map(const char* topic_name, DataReaderImpl* reader);
 
   /**
   * The readers that access the instance map are keep tracked as ref
   * counting to the instance map. The readers need unregister itself
   * with the instance map upon unregistering instance.The instance map
   * is deleted upon the last reader unregistering an instance of the
-  * type.
+  * topic.
   */
-  void unregister_reader(const char* type_name,
+  void unregister_reader(const char* topic_name,
                          DataReaderImpl* reader);
 
   /**
@@ -171,7 +171,7 @@ private:
                            const GUID_t& owner);
 
   ACE_Thread_Mutex instance_lock_;
-  TypeInstanceMap type_instance_map_;
+  TopicInstanceMap topic_instance_map_;
   InstanceOwnershipWriterInfos instance_ownership_infos_;
 
 };

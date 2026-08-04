@@ -164,8 +164,8 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
     for (OpenDDS::DCPS::HostnameInfoVector::iterator it = itBegin; it != itEnd; ++it) {
       if (!addr_array[it->index_].is_loopback()) {
         ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: get_fully_qualified_hostname: Could not find FQDN. Using "
-                   "\"%C\" as fully qualified hostname, please "
-                   "correct system configuration.\n", it->hostname_.c_str()));
+                   "\"%C\" as fully qualified hostname. Configure DCPSDefaultAddress "
+                   "or the transport's local address to override this selection.\n", it->hostname_.c_str()));
         selected_address = addr_array[it->index_];
         fullname = it->hostname_;
         if (addr) {
@@ -182,8 +182,8 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
         char addr_str[MAXHOSTNAMELEN+1] = "";
         addr_array[i].get_host_addr(addr_str, MAXHOSTNAMELEN);
         ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: get_fully_qualified_hostname: Could not find FQDN. Using "
-                   "\"%C\" as fully qualified hostname, please "
-                   "correct system configuration.\n", addr_str));
+                   "\"%C\" as fully qualified hostname. Configure DCPSDefaultAddress "
+                   "or the transport's local address to override this selection.\n", addr_str));
         selected_address = addr_array[i];
         fullname = addr_str;
         if (addr) {
@@ -196,8 +196,8 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
     // As a last resort, return the first loopback address from the non-FQDNs list if not empty.
     if (itBegin != itEnd) {
       ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: get_fully_qualified_hostname: Could not find FQDN. Using "
-                 "\"%C\" as fully qualified hostname, please "
-                 "correct system configuration.\n", itBegin->hostname_.c_str()));
+                 "\"%C\" as fully qualified hostname. Configure DCPSDefaultAddress "
+                 "or the transport's local address to override this selection.\n", itBegin->hostname_.c_str()));
       selected_address = addr_array[itBegin->index_];
       fullname = itBegin->hostname_;
       if (addr) {

@@ -20,13 +20,14 @@ enum TESTCASE {
   strength,
   liveliness_change,
   miss_deadline,
-  update_strength
+  update_strength,
+  shared_type
 };
 
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  DataReaderListenerImpl(const char* reader_id);
+  DataReaderListenerImpl(const char* reader_id, long expected_strength = -1);
 
   virtual ~DataReaderListenerImpl();
 
@@ -71,6 +72,7 @@ private:
   DDS::DataReader_var  reader_;
   long                 num_reads_;
   const char*          reader_id_;
+  const long           expected_strength_;
 
   bool  verify_result_;
   bool  result_verify_complete_;

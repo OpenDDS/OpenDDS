@@ -1,0 +1,6 @@
+.. news-prs: 5260
+
+.. news-start-section: Fixes
+- Fixed exclusive ownership conflicts between topics that use the same data type and instance key by scoping shared instance handles by topic.
+
+.. news-end-section

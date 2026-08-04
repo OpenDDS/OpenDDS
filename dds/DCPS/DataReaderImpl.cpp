@@ -160,7 +160,7 @@ DataReaderImpl::cleanup()
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   OwnershipManagerPtr owner_manager = this->ownership_manager();
   if (owner_manager) {
-    owner_manager->unregister_reader(topic_servant_->type_name(), this);
+    owner_manager->unregister_reader(topic_servant_->topic_name(), this);
   }
 #endif
 
