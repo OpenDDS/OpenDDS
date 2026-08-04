@@ -38,6 +38,7 @@
 #include <tests/Utils/StatusMatching.h>
 #include <Common.h>
 #include "ProcessStatsCollector.h"
+#include "HostNetworkStatsCollector.h"
 #include "PropertyStatBlock.h"
 
 using namespace Bench::NodeController;
@@ -347,6 +348,7 @@ public:
   bool run_spawned_processes(ReportDataWriter_var report_writer_impl)
   {
     ACE_Reactor::instance()->schedule_timer(this, nullptr, ACE_Time_Value(timeout_));
+    const HostNetworkStatsCollector host_network_stats;
     // Spawn Processes
     {
       std::lock_guard<std::mutex> guard(mutex_);
@@ -490,6 +492,14 @@ public:
       cpu_block->finalize();
       mem_block->finalize();
       virtual_mem_block->finalize();
+
+      const HostNetworkStatsCollector::CounterMap network_deltas = host_network_stats.deltas();
+      for (HostNetworkStatsCollector::CounterMap::const_iterator pos = network_deltas.begin();
+           pos != network_deltas.end(); ++pos) {
+        Bench::PropertyStatBlock block(report.properties, pos->first, 1);
+        block.update(static_cast<double>(pos->second));
+        block.finalize();
+      }
     } catch (const std::exception& e) {
       std::cerr << Bench::iso8601() << ": Exception caught trying to finalize statistic blocks: " << e.what() << std::endl;
       return false;

@@ -12,9 +12,10 @@ typedef std::map<std::string, SimpleStatBlock> SimpleStatBlockMap;
 struct SharedSummaryReportVisitor : public ReportVisitor
 {
   struct ErrorCounts {
-    ErrorCounts() : total_(0), discovery_(0) {}
+    ErrorCounts() : total_(0), discovery_(0), host_network_(0) {}
     uint64_t total_;
     uint64_t discovery_;
+    uint64_t host_network_;
   };
 
   std::unordered_set<std::string> stats_;

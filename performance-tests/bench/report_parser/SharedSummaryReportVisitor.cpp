@@ -8,6 +8,25 @@ SharedSummaryReportVisitor::SharedSummaryReportVisitor()
 
 void SharedSummaryReportVisitor::on_node_controller_report(const ReportVisitorContext& context)
 {
+  static const char* const host_network_stats[] = {
+    "network_receive_dropped",
+    "network_transmit_dropped",
+    "network_receive_errors",
+    "network_transmit_errors"
+  };
+  bool host_network_error = false;
+  for (size_t i = 0; i < sizeof host_network_stats / sizeof host_network_stats[0]; ++i) {
+    ConstPropertyStatBlock counter(context.nc_report_->properties, host_network_stats[i]);
+    if (counter && counter.to_simple_stat_block().max_ > 0.0) {
+      host_network_error = true;
+      break;
+    }
+  }
+  if (host_network_error) {
+    ++untagged_error_counts_.total_;
+    ++untagged_error_counts_.host_network_;
+  }
+
   for (auto it = stats_.begin(); it != stats_.end(); ++it) {
     ConstPropertyStatBlock cpsb(context.nc_report_->properties, *it);
     if (cpsb) {
