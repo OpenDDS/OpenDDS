@@ -128,9 +128,17 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
   {
     if (core_.use_ice()) {
       ReactorTask_rch ri = reactor_task();
-      ri->execute_or_enqueue(make_rch<RemoveHandler>(unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
+      if (unicast_socket_.get_handle() != ACE_INVALID_HANDLE) {
+        ri->execute_or_enqueue(make_rch<RemoveHandler>(
+          unicast_socket_.get_handle(),
+          static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
+      }
 #ifdef ACE_HAS_IPV6
-      ri->execute_or_enqueue(make_rch<RemoveHandler>(ipv6_unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
+      if (ipv6_unicast_socket_.get_handle() != ACE_INVALID_HANDLE) {
+        ri->execute_or_enqueue(make_rch<RemoveHandler>(
+          ipv6_unicast_socket_.get_handle(),
+          static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
+      }
 #endif
     }
   }
@@ -356,8 +364,15 @@ RtpsUdpTransport::get_connection_addrs(const TransportBLOB& remote,
     ACE_INET_Addr addr;
     // If conversion was successful
     if (locator_to_address(addr, locators[i], false) == 0) {
+      const RtpsUdpInst_rch cfg = config();
+      if (!cfg || (addr.get_type() == AF_INET && !use_ipv4(cfg->address_family()))
+#ifdef ACE_HAS_IPV6
+          || (addr.get_type() == AF_INET6 && !use_ipv6(cfg->address_family()))
+#endif
+          ) {
+        continue;
+      }
       if (addr.is_multicast()) {
-        RtpsUdpInst_rch cfg = config();
         if (cfg && cfg->use_multicast() && mc_addrs) {
           mc_addrs->insert(NetworkAddress(addr));
         }
@@ -658,28 +673,41 @@ RtpsUdpTransport::configure_i(const RtpsUdpInst_rch& config)
     return false;
   }
 
+  if (TheServiceParticipant->config_store()->has(
+        config->config_key("ADDRESS_FAMILY").c_str())) {
+    const String value = TheServiceParticipant->config_store()->get(
+      config->config_key("ADDRESS_FAMILY").c_str(), "");
+    if (!config->address_family(value.c_str())) {
+      return false;
+    }
+  }
+
   // Open the socket here so that any addresses/ports left
   // unspecified in the RtpsUdpInst are known by the time we get to
   // connection_info_i().  Opening the sockets here also allows us to
   // detect and report errors during DataReader/Writer setup instead
   // of during association.
 
-  ACE_INET_Addr actual4;
-  if (!open_socket(config, unicast_socket_, PF_INET, actual4)) {
-    return false;
+  if (use_ipv4(config->address_family())) {
+    ACE_INET_Addr actual4;
+    if (!open_socket(config, unicast_socket_, PF_INET, actual4)) {
+      return false;
+    }
+    core_.actual_local_address(NetworkAddress(actual4));
   }
-  core_.actual_local_address(NetworkAddress(actual4));
 
 #ifdef ACE_HAS_IPV6
-  ACE_INET_Addr actual6;
-  if (!open_socket(config, ipv6_unicast_socket_, PF_INET6, actual6)) {
-    return false;
+  if (use_ipv6(config->address_family())) {
+    ACE_INET_Addr actual6;
+    if (!open_socket(config, ipv6_unicast_socket_, PF_INET6, actual6)) {
+      return false;
+    }
+    NetworkAddress temp(actual6);
+    if (actual6.is_ipv4_mapped_ipv6() && temp.is_any()) {
+      temp = NetworkAddress(actual6.get_port_number(), "::");
+    }
+    core_.ipv6_actual_local_address(temp);
   }
-  NetworkAddress temp(actual6);
-  if (actual6.is_ipv4_mapped_ipv6() && temp.is_any()) {
-    temp = NetworkAddress(actual6.get_port_number(), "::");
-  }
-  core_.ipv6_actual_local_address(temp);
 #endif
 
   create_reactor_task(false, "RtpsUdpTransport" + config->name());
@@ -1051,9 +1079,17 @@ RtpsUdpTransport::start_ice()
 
   if (!link_) {
     ReactorTask_rch ri = reactor_task();
-    ri->execute_or_enqueue(make_rch<RegisterHandler>(unicast_socket_.get_handle(), ice_endpoint_.get(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
+    if (unicast_socket_.get_handle() != ACE_INVALID_HANDLE) {
+      ri->execute_or_enqueue(make_rch<RegisterHandler>(
+        unicast_socket_.get_handle(), ice_endpoint_.get(),
+        static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
+    }
 #ifdef ACE_HAS_IPV6
-    ri->execute_or_enqueue(make_rch<RegisterHandler>(ipv6_unicast_socket_.get_handle(), ice_endpoint_.get(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
+    if (ipv6_unicast_socket_.get_handle() != ACE_INVALID_HANDLE) {
+      ri->execute_or_enqueue(make_rch<RegisterHandler>(
+        ipv6_unicast_socket_.get_handle(), ice_endpoint_.get(),
+        static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
+    }
 #endif
   }
 }
@@ -1069,9 +1105,17 @@ RtpsUdpTransport::stop_ice()
 
   if (!link_) {
     ReactorTask_rch ri = reactor_task();
-    ri->execute_or_enqueue(make_rch<RemoveHandler>(unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
+    if (unicast_socket_.get_handle() != ACE_INVALID_HANDLE) {
+      ri->execute_or_enqueue(make_rch<RemoveHandler>(
+        unicast_socket_.get_handle(),
+        static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
+    }
 #ifdef ACE_HAS_IPV6
-    ri->execute_or_enqueue(make_rch<RemoveHandler>(ipv6_unicast_socket_.get_handle(), static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
+    if (ipv6_unicast_socket_.get_handle() != ACE_INVALID_HANDLE) {
+      ri->execute_or_enqueue(make_rch<RemoveHandler>(
+        ipv6_unicast_socket_.get_handle(),
+        static_cast<ACE_Reactor_Mask>(ACE_Event_Handler::READ_MASK)));
+    }
 #endif
   }
 

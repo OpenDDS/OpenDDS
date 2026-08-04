@@ -9,6 +9,8 @@
 
 #include <dds/OpenDDSConfigWrapper.h>
 
+#include <cstring>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -24,6 +26,61 @@ String
 RtpsDiscoveryConfig::config_key(const String& key) const
 {
   return DCPS::ConfigPair::canonicalize(config_prefix_ + "_" + key);
+}
+
+DCPS::AddressFamily
+RtpsDiscoveryConfig::address_family() const
+{
+#ifdef ACE_HAS_IPV6
+  const String value = TheServiceParticipant->config_store()->get(
+    config_key("ADDRESS_FAMILY").c_str(), "dual");
+#else
+  const String value = TheServiceParticipant->config_store()->get(
+    config_key("ADDRESS_FAMILY").c_str(), "ipv4");
+#endif
+  if (value == "ipv6") {
+    return DCPS::ADDRESS_FAMILY_IPV6;
+  }
+  if (value == "dual") {
+    return DCPS::ADDRESS_FAMILY_DUAL;
+  }
+  return DCPS::ADDRESS_FAMILY_IPV4;
+}
+
+bool
+RtpsDiscoveryConfig::address_family(DCPS::AddressFamily value)
+{
+#ifndef ACE_HAS_IPV6
+  if (value == DCPS::ADDRESS_FAMILY_IPV6) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RtpsDiscoveryConfig::address_family: "
+                 "IPv6 support is not available in this build\n"));
+    }
+    return false;
+  }
+#endif
+  TheServiceParticipant->config_store()->set(
+    config_key("ADDRESS_FAMILY").c_str(), DCPS::address_family_name(value));
+  return true;
+}
+
+bool
+RtpsDiscoveryConfig::address_family(const char* value)
+{
+  if (std::strcmp(value, "ipv4") == 0) {
+    return address_family(DCPS::ADDRESS_FAMILY_IPV4);
+  }
+  if (std::strcmp(value, "ipv6") == 0) {
+    return address_family(DCPS::ADDRESS_FAMILY_IPV6);
+  }
+  if (std::strcmp(value, "dual") == 0) {
+    return address_family(DCPS::ADDRESS_FAMILY_DUAL);
+  }
+  if (log_level >= LogLevel::Warning) {
+    ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RtpsDiscoveryConfig::address_family: "
+               "invalid AddressFamily configuration: %C\n", value));
+  }
+  return false;
 }
 
 DCPS::TimeDuration
@@ -759,7 +816,7 @@ RtpsDiscoveryConfig::spdp_rtps_relay_address() const
   return TheServiceParticipant->config_store()->get(config_key("SPDP_RTPS_RELAY_ADDRESS").c_str(),
                                                     DCPS::NetworkAddress::default_IPV4,
                                                     DCPS::ConfigStoreImpl::Format_Required_Port,
-                                                    DCPS::ConfigStoreImpl::Kind_IPV4);
+                                                    DCPS::ConfigStoreImpl::Kind_ANY);
 }
 
 void
@@ -768,7 +825,7 @@ RtpsDiscoveryConfig::spdp_rtps_relay_address(const DCPS::NetworkAddress& address
   TheServiceParticipant->config_store()->set(config_key("SPDP_RTPS_RELAY_ADDRESS").c_str(),
                                              address,
                                              DCPS::ConfigStoreImpl::Format_Required_Port,
-                                             DCPS::ConfigStoreImpl::Kind_IPV4);
+                                             DCPS::ConfigStoreImpl::Kind_ANY);
 }
 
 DCPS::TimeDuration
@@ -793,7 +850,7 @@ RtpsDiscoveryConfig::sedp_rtps_relay_address() const
   return TheServiceParticipant->config_store()->get(config_key("SEDP_RTPS_RELAY_ADDRESS").c_str(),
                                                     DCPS::NetworkAddress::default_IPV4,
                                                     DCPS::ConfigStoreImpl::Format_Required_Port,
-                                                    DCPS::ConfigStoreImpl::Kind_IPV4);
+                                                    DCPS::ConfigStoreImpl::Kind_ANY);
 }
 
 void
@@ -802,7 +859,7 @@ RtpsDiscoveryConfig::sedp_rtps_relay_address(const DCPS::NetworkAddress& address
   TheServiceParticipant->config_store()->set(config_key("SEDP_RTPS_RELAY_ADDRESS").c_str(),
                                              address,
                                              DCPS::ConfigStoreImpl::Format_Required_Port,
-                                             DCPS::ConfigStoreImpl::Kind_IPV4);
+                                             DCPS::ConfigStoreImpl::Kind_ANY);
 }
 
 bool
@@ -839,7 +896,7 @@ RtpsDiscoveryConfig::spdp_stun_server_address() const
   return TheServiceParticipant->config_store()->get(config_key("SPDP_STUN_SERVER_ADDRESS").c_str(),
                                                     DCPS::NetworkAddress::default_IPV4,
                                                     DCPS::ConfigStoreImpl::Format_Required_Port,
-                                                    DCPS::ConfigStoreImpl::Kind_IPV4);
+                                                    DCPS::ConfigStoreImpl::Kind_ANY);
 }
 
 void
@@ -848,7 +905,7 @@ RtpsDiscoveryConfig::spdp_stun_server_address(const DCPS::NetworkAddress& addres
   TheServiceParticipant->config_store()->set(config_key("SPDP_STUN_SERVER_ADDRESS").c_str(),
                                              address,
                                              DCPS::ConfigStoreImpl::Format_Required_Port,
-                                             DCPS::ConfigStoreImpl::Kind_IPV4);
+                                             DCPS::ConfigStoreImpl::Kind_ANY);
 }
 
 DCPS::NetworkAddress
@@ -857,7 +914,7 @@ RtpsDiscoveryConfig::sedp_stun_server_address() const
   return TheServiceParticipant->config_store()->get(config_key("SEDP_STUN_SERVER_ADDRESS").c_str(),
                                                     DCPS::NetworkAddress::default_IPV4,
                                                     DCPS::ConfigStoreImpl::Format_Required_Port,
-                                                    DCPS::ConfigStoreImpl::Kind_IPV4);
+                                                    DCPS::ConfigStoreImpl::Kind_ANY);
 }
 
 void
@@ -866,7 +923,7 @@ RtpsDiscoveryConfig::sedp_stun_server_address(const DCPS::NetworkAddress& addres
   TheServiceParticipant->config_store()->set(config_key("SEDP_STUN_SERVER_ADDRESS").c_str(),
                                              address,
                                              DCPS::ConfigStoreImpl::Format_Required_Port,
-                                             DCPS::ConfigStoreImpl::Kind_IPV4);
+                                             DCPS::ConfigStoreImpl::Kind_ANY);
 }
 
 #if OPENDDS_CONFIG_SECURITY
