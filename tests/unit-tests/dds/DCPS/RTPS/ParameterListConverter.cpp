@@ -1573,12 +1573,14 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_durability_service)
   ParameterList param_list;
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
-  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
+  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
   EXPECT_TRUE(is_present(param_list, PID_DURABILITY_SERVICE));
   Parameter param = get(param_list, PID_DURABILITY_SERVICE);
   DurabilityServiceQosPolicy dsqp = param.durability_service();
   EXPECT_TRUE(dsqp.service_cleanup_delay.sec == 4);
-  EXPECT_TRUE(dsqp.service_cleanup_delay.nanosec == 2000);
+  // 2000ns -> wire fraction (2000 << 32) / 1e9 = 8589 (RTPS 2.5 Sec 9.3.2).
+  EXPECT_TRUE(dsqp.service_cleanup_delay.nanosec == 8589);
 
   EXPECT_TRUE(dsqp.history_kind == KEEP_LAST_HISTORY_QOS);
   EXPECT_TRUE(dsqp.history_depth == 172);
@@ -1597,9 +1599,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_durability_service)
   ParameterList param_list;
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
-  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
+  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true,
+                              type_info.xtypes_type_info_, RDE_FRACTIONAL_SECONDS));
   DurabilityServiceQosPolicy& ds_in =
     writer_data.ddsPublicationData.durability_service;
   DurabilityServiceQosPolicy& ds_out =
@@ -1654,11 +1658,15 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_deadline)
   ParameterList param_list;
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
-  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
+  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
   EXPECT_TRUE(is_present(param_list, PID_DEADLINE));
   Parameter param = get(param_list, PID_DEADLINE);
   EXPECT_TRUE(param.deadline().period.sec == 127);
-  EXPECT_TRUE(param.deadline().period.nanosec == 35000);
+  // RTPS 2.5 Sec 9.3.2: wire Duration_t is {seconds, fraction}, fraction in
+  // units of 1/2^32 sec -- not raw nanoseconds. 35000ns -> fraction
+  // (35000 << 32) / 1e9 = 150323.
+  EXPECT_TRUE(param.deadline().period.nanosec == 150323);
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_deadline)
@@ -1670,9 +1678,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_deadline)
   ParameterList param_list;
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
-  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
+  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true,
+                              type_info.xtypes_type_info_, RDE_FRACTIONAL_SECONDS));
   EXPECT_TRUE(writer_data.ddsPublicationData.deadline.period.sec ==
               writer_data_out.ddsPublicationData.deadline.period.sec);
   EXPECT_TRUE(writer_data.ddsPublicationData.deadline.period.nanosec ==
@@ -1708,11 +1718,13 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_latency_budget)
   ParameterList param_list;
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
-  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
+  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
   EXPECT_TRUE(is_present(param_list, PID_LATENCY_BUDGET));
   Parameter param = get(param_list, PID_LATENCY_BUDGET);
   EXPECT_TRUE(param.latency_budget().duration.sec == 5);
-  EXPECT_TRUE(param.latency_budget().duration.nanosec == 25000);
+  // 25000ns -> wire fraction (25000 << 32) / 1e9 = 107374 (RTPS 2.5 Sec 9.3.2).
+  EXPECT_TRUE(param.latency_budget().duration.nanosec == 107374);
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_latency_budget)
@@ -1724,9 +1736,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_latency_budget)
   ParameterList param_list;
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
-  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
+  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true,
+                              type_info.xtypes_type_info_, RDE_FRACTIONAL_SECONDS));
   EXPECT_TRUE(writer_data.ddsPublicationData.latency_budget.duration.sec ==
               writer_data_out.ddsPublicationData.latency_budget.duration.sec);
 }
@@ -1760,12 +1774,14 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_liveliness)
   ParameterList param_list;
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
-  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
+  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
   EXPECT_TRUE(is_present(param_list, PID_LIVELINESS));
   Parameter param = get(param_list, PID_LIVELINESS);
   EXPECT_TRUE(param.liveliness().kind == MANUAL_BY_PARTICIPANT_LIVELINESS_QOS);
   EXPECT_TRUE(param.liveliness().lease_duration.sec == 17);
-  EXPECT_TRUE(param.liveliness().lease_duration.nanosec == 15000);
+  // 15000ns -> wire fraction (15000 << 32) / 1e9 = 64424 (RTPS 2.5 Sec 9.3.2).
+  EXPECT_TRUE(param.liveliness().lease_duration.nanosec == 64424);
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_liveliness)
@@ -1777,9 +1793,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_liveliness)
   ParameterList param_list;
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
-  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
+  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true,
+                              type_info.xtypes_type_info_, RDE_FRACTIONAL_SECONDS));
   EXPECT_TRUE(writer_data.ddsPublicationData.liveliness.kind ==
               writer_data_out.ddsPublicationData.liveliness.kind);
   EXPECT_TRUE(writer_data.ddsPublicationData.liveliness.lease_duration.sec ==
@@ -1822,12 +1840,14 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_reliability)
   ParameterList param_list;
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
-  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
+  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
   EXPECT_TRUE(is_present(param_list, PID_RELIABILITY));
   Parameter param = get(param_list, PID_RELIABILITY);
   EXPECT_TRUE(param.reliability().kind.value == RELIABLE);
   EXPECT_TRUE(param.reliability().max_blocking_time.sec == 8);
-  EXPECT_TRUE(param.reliability().max_blocking_time.nanosec == 100);
+  // 100ns -> wire fraction (100 << 32) / 1e9 = 429 (RTPS 2.5 Sec 9.3.2).
+  EXPECT_TRUE(param.reliability().max_blocking_time.nanosec == 429);
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_reliability)
@@ -1840,9 +1860,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_reliability)
   ParameterList param_list;
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
-  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
+  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true,
+                              type_info.xtypes_type_info_, RDE_FRACTIONAL_SECONDS));
   EXPECT_TRUE(writer_data.ddsPublicationData.reliability.kind ==
               writer_data_out.ddsPublicationData.reliability.kind);
   EXPECT_TRUE(writer_data.ddsPublicationData.reliability.max_blocking_time.sec ==
@@ -1883,11 +1905,13 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_lifespan)
   ParameterList param_list;
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
-  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
+  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
   EXPECT_TRUE(is_present(param_list, PID_LIFESPAN));
   Parameter param = get(param_list, PID_LIFESPAN);
   EXPECT_TRUE(param.lifespan().duration.sec == 12);
-  EXPECT_TRUE(param.lifespan().duration.nanosec == 90000);
+  // 90000ns -> wire fraction (90000 << 32) / 1e9 = 386547 (RTPS 2.5 Sec 9.3.2).
+  EXPECT_TRUE(param.lifespan().duration.nanosec == 386547);
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_lifespan)
@@ -1901,9 +1925,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_writer_lifespan)
   ParameterList param_list;
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
-  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info, map));
+  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
   DiscoveredWriterData writer_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true, type_info.xtypes_type_info_));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true,
+                              type_info.xtypes_type_info_, RDE_FRACTIONAL_SECONDS));
   EXPECT_TRUE(writer_data.ddsPublicationData.lifespan.duration.sec ==
               writer_data_out.ddsPublicationData.lifespan.duration.sec);
   EXPECT_TRUE(writer_data.ddsPublicationData.lifespan.duration.nanosec ==
@@ -1927,8 +1953,124 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, set_writer_lifespan_default)
               writer_data_out.ddsPublicationData.lifespan.duration.nanosec);
 }
 
+TEST(dds_DCPS_RTPS_ParameterListConverter, encode_decode_writer_reliability_infinite)
+{
+  // DURATION_INFINITE must round-trip through the wire fraction conversion
+  // as the RTPS::DURATION_INFINITE sentinel {seconds=0x7fffffff,
+  // fraction=0xffffffff} (MessageTypes.h), not through the ordinary
+  // nanoseconds<->fraction math, which would not reproduce
+  // DDS::DURATION_INFINITE_NSEC (0x7fffffff) on decode.
+  DiscoveredWriterData writer_data = Factory::default_writer_data();
+  writer_data.ddsPublicationData.reliability.max_blocking_time.sec = DDS::DURATION_INFINITE_SEC;
+  writer_data.ddsPublicationData.reliability.max_blocking_time.nanosec = DDS::DURATION_INFINITE_NSEC;
+
+  ParameterList param_list;
+  OpenDDS::DCPS::TypeInformation type_info;
+  bool map = false;
+  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
+  EXPECT_TRUE(is_present(param_list, PID_RELIABILITY));
+  Parameter param = get(param_list, PID_RELIABILITY);
+  EXPECT_TRUE(param.reliability().max_blocking_time.sec == DDS::DURATION_INFINITE_SEC);
+  EXPECT_TRUE(param.reliability().max_blocking_time.nanosec == 0xffffffff);
+
+  DiscoveredWriterData writer_data_out;
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out, true,
+                              type_info.xtypes_type_info_, RDE_FRACTIONAL_SECONDS));
+  EXPECT_TRUE(writer_data_out.ddsPublicationData.reliability.max_blocking_time.sec == DDS::DURATION_INFINITE_SEC);
+  EXPECT_TRUE(writer_data_out.ddsPublicationData.reliability.max_blocking_time.nanosec == DDS::DURATION_INFINITE_NSEC);
+}
+
+TEST(dds_DCPS_RTPS_ParameterListConverter, writer_lifespan_duration_encoding_modes)
+{
+  DiscoveredWriterData writer_data = Factory::default_writer_data();
+  writer_data.ddsPublicationData.lifespan.duration.sec = 3;
+  writer_data.ddsPublicationData.lifespan.duration.nanosec = 250000000;
+
+  ParameterList param_list;
+  OpenDDS::DCPS::TypeInformation type_info;
+  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info));
+  ASSERT_TRUE(is_present(param_list, PID_LIFESPAN));
+  EXPECT_EQ(250000000u, get(param_list, PID_LIFESPAN).lifespan().duration.nanosec);
+
+  DiscoveredWriterData writer_data_out;
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out,
+                              true, type_info.xtypes_type_info_));
+  EXPECT_EQ(250000000u,
+            writer_data_out.ddsPublicationData.lifespan.duration.nanosec);
+
+  ParameterList fractional_param_list;
+  EXPECT_TRUE(to_param_list(writer_data, fractional_param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS));
+  ASSERT_TRUE(is_present(fractional_param_list, PID_LIFESPAN));
+  EXPECT_EQ(0x40000000u,
+            get(fractional_param_list, PID_LIFESPAN).lifespan().duration.nanosec);
+}
+
+TEST(dds_DCPS_RTPS_ParameterListConverter, writer_lifespan_duration_out_of_range_nanosec)
+{
+  // Duration_t is only spec-valid for nanosec < 1e9, but not every QoS
+  // policy's Qos_Helper::valid() enforces that. An out-of-range nanosec must
+  // be normalized (excess carried into sec) before the fraction math runs,
+  // rather than overflowing ACE_UINT32 and silently wrapping to a garbage or
+  // zero wire value.
+  DiscoveredWriterData writer_data = Factory::default_writer_data();
+  writer_data.ddsPublicationData.lifespan.duration.sec = 1;
+  writer_data.ddsPublicationData.lifespan.duration.nanosec = 1500000000; // 1.5s, out of spec
+
+  ParameterList param_list;
+  OpenDDS::DCPS::TypeInformation type_info;
+  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS));
+  ASSERT_TRUE(is_present(param_list, PID_LIFESPAN));
+  // Normalized to {sec=2, nanosec=500000000} before fraction conversion:
+  // (500000000 << 32) / 1e9 = 0x80000000.
+  EXPECT_EQ(2, get(param_list, PID_LIFESPAN).lifespan().duration.sec);
+  EXPECT_EQ(0x80000000u, get(param_list, PID_LIFESPAN).lifespan().duration.nanosec);
+}
+
+TEST(dds_DCPS_RTPS_ParameterListConverter, writer_lifespan_duration_normalization_overflow)
+{
+  DiscoveredWriterData writer_data = Factory::default_writer_data();
+  writer_data.ddsPublicationData.lifespan.duration.sec = DDS::DURATION_INFINITE_SEC;
+  writer_data.ddsPublicationData.lifespan.duration.nanosec = 1000000000u;
+
+  ParameterList param_list;
+  OpenDDS::DCPS::TypeInformation type_info;
+  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS));
+  ASSERT_TRUE(is_present(param_list, PID_LIFESPAN));
+  EXPECT_EQ(DDS::DURATION_INFINITE_SEC,
+            get(param_list, PID_LIFESPAN).lifespan().duration.sec);
+  EXPECT_EQ(DDS::TIME_INVALID_NSEC,
+            get(param_list, PID_LIFESPAN).lifespan().duration.nanosec);
+}
+
+TEST(dds_DCPS_RTPS_ParameterListConverter, writer_reliability_legacy_infinite)
+{
+  DiscoveredWriterData writer_data = Factory::default_writer_data();
+  writer_data.ddsPublicationData.reliability.max_blocking_time.sec =
+    DDS::DURATION_INFINITE_SEC;
+  writer_data.ddsPublicationData.reliability.max_blocking_time.nanosec =
+    DDS::DURATION_INFINITE_NSEC;
+
+  ParameterList param_list;
+  OpenDDS::DCPS::TypeInformation type_info;
+  EXPECT_TRUE(to_param_list(writer_data, param_list, true, type_info));
+  ASSERT_TRUE(is_present(param_list, PID_RELIABILITY));
+  EXPECT_EQ(static_cast<CORBA::ULong>(DDS::DURATION_INFINITE_NSEC),
+            get(param_list, PID_RELIABILITY).reliability().max_blocking_time.nanosec);
+
+  DiscoveredWriterData writer_data_out;
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, writer_data_out,
+                              true, type_info.xtypes_type_info_));
+  EXPECT_EQ(static_cast<CORBA::ULong>(DDS::DURATION_INFINITE_NSEC),
+            writer_data_out.ddsPublicationData.reliability.max_blocking_time.nanosec);
+}
+
 TEST(dds_DCPS_RTPS_ParameterListConverter, encode_writer_user_data)
-{ // Should encode writer user data
+{
+  // Should encode writer user data
   const char* ud = "USERDATA TEST";
   CORBA::ULong ud_len = (CORBA::ULong)strlen(ud) + 1;
   DiscoveredWriterData writer_data = Factory::writer_data(
@@ -2652,11 +2794,13 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_deadline)
   ParameterList param_list;
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
-  EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
+  EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
   EXPECT_TRUE(is_present(param_list, PID_DEADLINE));
   Parameter param = get(param_list, PID_DEADLINE);
   EXPECT_TRUE(param.deadline().period.sec == 127);
-  EXPECT_TRUE(param.deadline().period.nanosec == 35000);
+  // 35000ns -> wire fraction (35000 << 32) / 1e9 = 150323 (RTPS 2.5 Sec 9.3.2).
+  EXPECT_TRUE(param.deadline().period.nanosec == 150323);
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_deadline)
@@ -2667,9 +2811,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_deadline)
   ParameterList param_list;
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
-  EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
+  EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true,
+                              type_info.xtypes_type_info_, RDE_FRACTIONAL_SECONDS));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.deadline.period.sec ==
               reader_data_out.ddsSubscriptionData.deadline.period.sec);
   EXPECT_TRUE(reader_data.ddsSubscriptionData.deadline.period.nanosec ==
@@ -2684,11 +2830,13 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_latency_budget)
   ParameterList param_list;
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
-  EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
+  EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
   EXPECT_TRUE(is_present(param_list, PID_LATENCY_BUDGET));
   Parameter param = get(param_list, PID_LATENCY_BUDGET);
-  EXPECT_TRUE(param.deadline().period.sec == 5);
-  EXPECT_TRUE(param.deadline().period.nanosec == 25000);
+  EXPECT_TRUE(param.latency_budget().duration.sec == 5);
+  // 25000ns -> wire fraction (25000 << 32) / 1e9 = 107374 (RTPS 2.5 Sec 9.3.2).
+  EXPECT_TRUE(param.latency_budget().duration.nanosec == 107374);
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_latency_budget)
@@ -2699,9 +2847,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_latency_budget)
   ParameterList param_list;
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
-  EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
+  EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true,
+                              type_info.xtypes_type_info_, RDE_FRACTIONAL_SECONDS));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.latency_budget.duration.sec ==
               reader_data_out.ddsSubscriptionData.latency_budget.duration.sec);
 }
@@ -2714,12 +2864,14 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_liveliness)
   ParameterList param_list;
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
-  EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
+  EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
   EXPECT_TRUE(is_present(param_list, PID_LIVELINESS));
   Parameter param = get(param_list, PID_LIVELINESS);
   EXPECT_TRUE(param.liveliness().kind == MANUAL_BY_PARTICIPANT_LIVELINESS_QOS);
   EXPECT_TRUE(param.liveliness().lease_duration.sec == 17);
-  EXPECT_TRUE(param.liveliness().lease_duration.nanosec == 15000);
+  // 15000ns -> wire fraction (15000 << 32) / 1e9 = 64424 (RTPS 2.5 Sec 9.3.2).
+  EXPECT_TRUE(param.liveliness().lease_duration.nanosec == 64424);
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_liveliness)
@@ -2730,9 +2882,11 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_liveliness)
   ParameterList param_list;
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
-  EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
+  EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true,
+                              type_info.xtypes_type_info_, RDE_FRACTIONAL_SECONDS));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.liveliness.kind ==
               reader_data_out.ddsSubscriptionData.liveliness.kind);
   EXPECT_TRUE(reader_data.ddsSubscriptionData.liveliness.lease_duration.sec ==
@@ -2750,12 +2904,14 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_reliability)
   ParameterList param_list;
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
-  EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
+  EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
   EXPECT_TRUE(is_present(param_list, PID_RELIABILITY));
   Parameter param = get(param_list, PID_RELIABILITY);
   EXPECT_TRUE(param.reliability().kind.value == RELIABLE);
   EXPECT_TRUE(param.reliability().max_blocking_time.sec == 8);
-  EXPECT_TRUE(param.reliability().max_blocking_time.nanosec == 100);
+  // 100ns -> wire fraction (100 << 32) / 1e9 = 429 (RTPS 2.5 Sec 9.3.2).
+  EXPECT_TRUE(param.reliability().max_blocking_time.nanosec == 429);
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_reliability)
@@ -2767,15 +2923,59 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_reliability)
   ParameterList param_list;
   OpenDDS::DCPS::TypeInformation type_info;
   bool map = false;
-  EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info, map));
+  EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
   DiscoveredReaderData reader_data_out;
-  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true, type_info.xtypes_type_info_));
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true,
+                              type_info.xtypes_type_info_, RDE_FRACTIONAL_SECONDS));
   EXPECT_TRUE(reader_data.ddsSubscriptionData.reliability.kind ==
               reader_data_out.ddsSubscriptionData.reliability.kind);
   EXPECT_TRUE(reader_data.ddsSubscriptionData.reliability.max_blocking_time.sec ==
               reader_data_out.ddsSubscriptionData.reliability.max_blocking_time.sec);
   EXPECT_TRUE(reader_data.ddsSubscriptionData.reliability.max_blocking_time.nanosec ==
               reader_data_out.ddsSubscriptionData.reliability.max_blocking_time.nanosec);
+}
+
+TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_time_based_filter)
+{
+  // Should encode reader time based filter using the RTPS wire fraction unit,
+  // not raw nanoseconds (RTPS 2.5 Sec 9.3.2).
+  DiscoveredReaderData reader_data = Factory::default_reader_data();
+  reader_data.ddsSubscriptionData.time_based_filter.minimum_separation.sec = 3;
+  reader_data.ddsSubscriptionData.time_based_filter.minimum_separation.nanosec = 40000;
+
+  ParameterList param_list;
+  OpenDDS::DCPS::TypeInformation type_info;
+  bool map = false;
+  EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
+  EXPECT_TRUE(is_present(param_list, PID_TIME_BASED_FILTER));
+  Parameter param = get(param_list, PID_TIME_BASED_FILTER);
+  EXPECT_TRUE(param.time_based_filter().minimum_separation.sec == 3);
+  // 40000ns -> wire fraction (40000 << 32) / 1e9 = 171798.
+  EXPECT_TRUE(param.time_based_filter().minimum_separation.nanosec == 171798);
+}
+
+TEST(dds_DCPS_RTPS_ParameterListConverter, decode_reader_time_based_filter)
+{
+  // Should decode reader time based filter back from the RTPS wire fraction
+  // unit to nanoseconds.
+  DiscoveredReaderData reader_data = Factory::default_reader_data();
+  reader_data.ddsSubscriptionData.time_based_filter.minimum_separation.sec = 3;
+  reader_data.ddsSubscriptionData.time_based_filter.minimum_separation.nanosec = 40000;
+
+  ParameterList param_list;
+  OpenDDS::DCPS::TypeInformation type_info;
+  bool map = false;
+  EXPECT_TRUE(to_param_list(reader_data, param_list, true, type_info,
+                            RDE_FRACTIONAL_SECONDS, map));
+  DiscoveredReaderData reader_data_out;
+  EXPECT_TRUE(from_param_list(param_list, VENDORID_OPENDDS, reader_data_out, true,
+                              type_info.xtypes_type_info_, RDE_FRACTIONAL_SECONDS));
+  EXPECT_TRUE(reader_data.ddsSubscriptionData.time_based_filter.minimum_separation.sec ==
+              reader_data_out.ddsSubscriptionData.time_based_filter.minimum_separation.sec);
+  EXPECT_TRUE(reader_data.ddsSubscriptionData.time_based_filter.minimum_separation.nanosec ==
+              reader_data_out.ddsSubscriptionData.time_based_filter.minimum_separation.nanosec);
 }
 
 TEST(dds_DCPS_RTPS_ParameterListConverter, encode_reader_user_data)

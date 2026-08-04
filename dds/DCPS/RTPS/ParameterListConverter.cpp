@@ -15,6 +15,7 @@
 #include <dds/DCPS/NetworkResource.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/Time_Helper.h>
 
 #include <dds/OpenDDSConfigWrapper.h>
 
@@ -274,6 +275,89 @@ namespace {
         dur.nanosec == DDS::TIME_INVALID_NSEC) {
       dur.nanosec = DDS::DURATION_INFINITE_NSEC;
     }
+  }
+
+  // Spec-compliance note:
+  // DDS::Duration_t{sec, nanosec} is the plain DDS-IDL representation. The RTPS
+  // Parameter union (dds/DCPS/RTPS/RtpsCore.idl) reuses the DDS QoS policy
+  // structs directly for PID_DEADLINE, PID_LATENCY_BUDGET, PID_LIVELINESS,
+  // PID_RELIABILITY, PID_LIFESPAN, PID_TIME_BASED_FILTER, and
+  // PID_DURABILITY_SERVICE, whose embedded Duration_t gets serialized on the
+  // wire via the generic DDS::Duration_t CDR streaming operator -- which
+  // writes `sec` then `nanosec` verbatim. RTPS 2.5 Sec 9.3.2 defines the wire
+  // Duration_t as {seconds, fraction}, where fraction is in units of 1/2^32
+  // second, NOT raw nanoseconds (see OpenDDS::RTPS::Duration_t and
+  // RTPS::DURATION_INFINITE in MessageTypes.h, which get this right).
+  // Without this conversion, `nanosec` bits are written directly into the
+  // wire's `fraction` field and vice versa, silently corrupting any
+  // non-whole-second duration for both this process and any spec-compliant
+  // peer -- e.g. a 250ms LIFESPAN is announced with fraction=250000000
+  // instead of the spec-correct fraction=~1073741824 (250000000 * 2^32 / 1e9).
+  //
+  // Apply these immediately before encoding a Duration_t-bearing Parameter
+  // and immediately after decoding one when fractional-seconds mode is in
+  // use. Nanoseconds mode deliberately preserves the historical OpenDDS wire
+  // representation. Keeping the conversion here avoids changing every other,
+  // non-RTPS-wire use of DDS::Duration_t CDR streaming.
+  //
+  // Maintenance note: there is no compile-time link between a PID and this
+  // conversion. If a PID whose Parameter case embeds a DDS::Duration_t is
+  // ever added to the switch statements below (or to a security wrapper),
+  // the corresponding encode_duration()/decode_duration() call MUST be added
+  // at that PID's case too, or fractional-seconds mode will silently
+  // corrupt just that one field on the wire again. The 7 PIDs currently
+  // covered are listed above; grep this file for "encode_duration(" and
+  // "decode_duration(" to see every existing call site.
+  void encode_duration(DDS::Duration_t& dur,
+                       ParameterListConverter::RtpsDurationEncoding encoding)
+  {
+    if (encoding == ParameterListConverter::RDE_NANOSECONDS) {
+      return;
+    }
+    if (DCPS::is_infinite(dur)) {
+      // RTPS::DURATION_INFINITE wire sentinel is {0x7fffffff, 0xffffffff} --
+      // not what the fraction math below would produce from 0x7fffffff.
+      // DDS::TIME_INVALID_NSEC is the same 0xffffffff value used by the wire
+      // fraction sentinel.
+      dur.nanosec = DDS::TIME_INVALID_NSEC;
+      return;
+    }
+    // Duration_t is only spec-valid for nanosec < 1e9, but not every QoS
+    // policy's Qos_Helper::valid() enforces that upper bound. Normalize any
+    // excess into sec first so an out-of-range nanosec can't overflow the
+    // ACE_UINT32 fraction math below and silently wrap to a garbage or zero
+    // wire value.
+    if (dur.nanosec >= 1000000000u) {
+      const CORBA::Long carry =
+        static_cast<CORBA::Long>(dur.nanosec / 1000000000u);
+      if (dur.sec > DDS::DURATION_INFINITE_SEC - carry) {
+        // The normalized duration can't be represented by Duration_t.
+        // Saturate to the RTPS infinite-duration sentinel instead of
+        // overflowing the signed seconds field.
+        dur.sec = DDS::DURATION_INFINITE_SEC;
+        dur.nanosec = DDS::TIME_INVALID_NSEC;
+        return;
+      }
+      dur.sec += carry;
+      dur.nanosec %= 1000000000u;
+    }
+    dur.nanosec = DCPS::nanoseconds_to_uint32_fractional_seconds(dur.nanosec);
+  }
+
+  void decode_duration(DDS::Duration_t& dur,
+                       ParameterListConverter::RtpsDurationEncoding encoding)
+  {
+    if (encoding == ParameterListConverter::RDE_NANOSECONDS) {
+      return;
+    }
+    if (dur.sec == DDS::DURATION_INFINITE_SEC &&
+        dur.nanosec == DDS::TIME_INVALID_NSEC) {
+      // Wire RTPS::DURATION_INFINITE sentinel -- normalize() below also
+      // handles this value, called after this function at every use site.
+      dur.nanosec = DDS::DURATION_INFINITE_NSEC;
+      return;
+    }
+    dur.nanosec = DCPS::uint32_fractional_seconds_to_nanoseconds(dur.nanosec);
   }
 
 #if OPENDDS_CONFIG_SECURITY
@@ -812,6 +896,17 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
                    const DCPS::TypeInformation& type_info,
                    bool map)
 {
+  return to_param_list(writer_data, param_list, use_xtypes, type_info,
+                       RDE_NANOSECONDS, map);
+}
+
+bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
+                   ParameterList& param_list,
+                   bool use_xtypes,
+                   const DCPS::TypeInformation& type_info,
+                   RtpsDurationEncoding duration_encoding,
+                   bool map)
+{
   // Ignore builtin topic key
 
   {
@@ -840,25 +935,33 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
 
   if (not_default(writer_data.ddsPublicationData.durability_service)) {
     Parameter param;
-    param.durability_service(writer_data.ddsPublicationData.durability_service);
+    DDS::DurabilityServiceQosPolicy durability_service = writer_data.ddsPublicationData.durability_service;
+    encode_duration(durability_service.service_cleanup_delay, duration_encoding);
+    param.durability_service(durability_service);
     DCPS::push_back(param_list, param);
   }
 
   if (not_default(writer_data.ddsPublicationData.deadline)) {
     Parameter param;
-    param.deadline(writer_data.ddsPublicationData.deadline);
+    DDS::DeadlineQosPolicy deadline = writer_data.ddsPublicationData.deadline;
+    encode_duration(deadline.period, duration_encoding);
+    param.deadline(deadline);
     DCPS::push_back(param_list, param);
   }
 
   if (not_default(writer_data.ddsPublicationData.latency_budget)) {
     Parameter param;
-    param.latency_budget(writer_data.ddsPublicationData.latency_budget);
+    DDS::LatencyBudgetQosPolicy latency_budget = writer_data.ddsPublicationData.latency_budget;
+    encode_duration(latency_budget.duration, duration_encoding);
+    param.latency_budget(latency_budget);
     DCPS::push_back(param_list, param);
   }
 
   if (not_default(writer_data.ddsPublicationData.liveliness)) {
     Parameter param;
-    param.liveliness(writer_data.ddsPublicationData.liveliness);
+    DDS::LivelinessQosPolicy liveliness = writer_data.ddsPublicationData.liveliness;
+    encode_duration(liveliness.lease_duration, duration_encoding);
+    param.liveliness(liveliness);
     DCPS::push_back(param_list, param);
   }
 
@@ -868,6 +971,7 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     Parameter param;
     ReliabilityQosPolicyRtps reliability;
     reliability.max_blocking_time = writer_data.ddsPublicationData.reliability.max_blocking_time;
+    encode_duration(reliability.max_blocking_time, duration_encoding);
 
     if (writer_data.ddsPublicationData.reliability.kind == DDS::BEST_EFFORT_RELIABILITY_QOS) {
       reliability.kind.value = RTPS::BEST_EFFORT;
@@ -881,7 +985,9 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
 
   if (not_default(writer_data.ddsPublicationData.lifespan)) {
     Parameter param;
-    param.lifespan(writer_data.ddsPublicationData.lifespan);
+    DDS::LifespanQosPolicy lifespan = writer_data.ddsPublicationData.lifespan;
+    encode_duration(lifespan.duration, duration_encoding);
+    param.lifespan(lifespan);
     DCPS::push_back(param_list, param);
   }
 
@@ -974,6 +1080,17 @@ bool from_param_list(const ParameterList& param_list,
                      bool use_xtypes,
                      XTypes::TypeInformation& type_info)
 {
+  return from_param_list(param_list, vendor_id, writer_data, use_xtypes,
+                         type_info, RDE_NANOSECONDS);
+}
+
+bool from_param_list(const ParameterList& param_list,
+                     const VendorId_t& vendor_id,
+                     DCPS::DiscoveredWriterData& writer_data,
+                     bool use_xtypes,
+                     XTypes::TypeInformation& type_info,
+                     RtpsDurationEncoding duration_encoding)
+{
   // Collect the rtps_udp locators before appending them to allLocators
   DCPS::LocatorSeq rtps_udp_locators;
 
@@ -1033,26 +1150,37 @@ bool from_param_list(const ParameterList& param_list,
       case PID_DURABILITY_SERVICE:
         writer_data.ddsPublicationData.durability_service =
           param.durability_service();
+        decode_duration(
+          writer_data.ddsPublicationData.durability_service.service_cleanup_delay,
+          duration_encoding);
         // Interoperability note: calling normalize() shouldn't be required
         normalize(writer_data.ddsPublicationData.durability_service.service_cleanup_delay);
         break;
       case PID_DEADLINE:
         writer_data.ddsPublicationData.deadline = param.deadline();
+        decode_duration(writer_data.ddsPublicationData.deadline.period, duration_encoding);
         // Interoperability note: calling normalize() shouldn't be required
         normalize(writer_data.ddsPublicationData.deadline.period);
         break;
       case PID_LATENCY_BUDGET:
         writer_data.ddsPublicationData.latency_budget = param.latency_budget();
+        decode_duration(writer_data.ddsPublicationData.latency_budget.duration,
+                        duration_encoding);
         // Interoperability note: calling normalize() shouldn't be required
         normalize(writer_data.ddsPublicationData.latency_budget.duration);
         break;
       case PID_LIVELINESS:
         writer_data.ddsPublicationData.liveliness = param.liveliness();
+        decode_duration(writer_data.ddsPublicationData.liveliness.lease_duration,
+                        duration_encoding);
         // Interoperability note: calling normalize() shouldn't be required
         normalize(writer_data.ddsPublicationData.liveliness.lease_duration);
         break;
       case PID_RELIABILITY:
         writer_data.ddsPublicationData.reliability.max_blocking_time = param.reliability().max_blocking_time;
+        decode_duration(
+          writer_data.ddsPublicationData.reliability.max_blocking_time,
+          duration_encoding);
         // Interoperability note:
         // Spec creators for RTPS have reliability indexed at 1
         {
@@ -1066,6 +1194,7 @@ bool from_param_list(const ParameterList& param_list,
         break;
       case PID_LIFESPAN:
         writer_data.ddsPublicationData.lifespan = param.lifespan();
+        decode_duration(writer_data.ddsPublicationData.lifespan.duration, duration_encoding);
         // Interoperability note: calling normalize() shouldn't be required
         normalize(writer_data.ddsPublicationData.lifespan.duration);
         break;
@@ -1147,6 +1276,17 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
                    const DCPS::TypeInformation& type_info,
                    bool map)
 {
+  return to_param_list(reader_data, param_list, use_xtypes, type_info,
+                       RDE_NANOSECONDS, map);
+}
+
+bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
+                   ParameterList& param_list,
+                   bool use_xtypes,
+                   const DCPS::TypeInformation& type_info,
+                   RtpsDurationEncoding duration_encoding,
+                   bool map)
+{
   // Ignore builtin topic key
   {
     Parameter param;
@@ -1174,19 +1314,25 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
 
   if (not_default(reader_data.ddsSubscriptionData.deadline)) {
     Parameter param;
-    param.deadline(reader_data.ddsSubscriptionData.deadline);
+    DDS::DeadlineQosPolicy deadline = reader_data.ddsSubscriptionData.deadline;
+    encode_duration(deadline.period, duration_encoding);
+    param.deadline(deadline);
     DCPS::push_back(param_list, param);
   }
 
   if (not_default(reader_data.ddsSubscriptionData.latency_budget)) {
     Parameter param;
-    param.latency_budget(reader_data.ddsSubscriptionData.latency_budget);
+    DDS::LatencyBudgetQosPolicy latency_budget = reader_data.ddsSubscriptionData.latency_budget;
+    encode_duration(latency_budget.duration, duration_encoding);
+    param.latency_budget(latency_budget);
     DCPS::push_back(param_list, param);
   }
 
   if (not_default(reader_data.ddsSubscriptionData.liveliness)) {
     Parameter param;
-    param.liveliness(reader_data.ddsSubscriptionData.liveliness);
+    DDS::LivelinessQosPolicy liveliness = reader_data.ddsSubscriptionData.liveliness;
+    encode_duration(liveliness.lease_duration, duration_encoding);
+    param.liveliness(liveliness);
     DCPS::push_back(param_list, param);
   }
 
@@ -1197,6 +1343,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     Parameter param;
     ReliabilityQosPolicyRtps reliability;
     reliability.max_blocking_time = reader_data.ddsSubscriptionData.reliability.max_blocking_time;
+    encode_duration(reliability.max_blocking_time, duration_encoding);
 
     if (reader_data.ddsSubscriptionData.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
       reliability.kind.value = RTPS::RELIABLE;
@@ -1228,7 +1375,9 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
 
   if (not_default(reader_data.ddsSubscriptionData.time_based_filter)) {
     Parameter param;
-    param.time_based_filter(reader_data.ddsSubscriptionData.time_based_filter);
+    DDS::TimeBasedFilterQosPolicy time_based_filter = reader_data.ddsSubscriptionData.time_based_filter;
+    encode_duration(time_based_filter.minimum_separation, duration_encoding);
+    param.time_based_filter(time_based_filter);
     DCPS::push_back(param_list, param);
   }
 
@@ -1321,6 +1470,17 @@ bool from_param_list(const ParameterList& param_list,
                      bool use_xtypes,
                      XTypes::TypeInformation& type_info)
 {
+  return from_param_list(param_list, vendor_id, reader_data, use_xtypes,
+                         type_info, RDE_NANOSECONDS);
+}
+
+bool from_param_list(const ParameterList& param_list,
+                     const VendorId_t& vendor_id,
+                     DCPS::DiscoveredReaderData& reader_data,
+                     bool use_xtypes,
+                     XTypes::TypeInformation& type_info,
+                     RtpsDurationEncoding duration_encoding)
+{
   // Collect the rtps_udp locators before appending them to allLocators
 
   DCPS::LocatorSeq rtps_udp_locators;
@@ -1379,21 +1539,29 @@ bool from_param_list(const ParameterList& param_list,
         break;
       case PID_DEADLINE:
         reader_data.ddsSubscriptionData.deadline = param.deadline();
+        decode_duration(reader_data.ddsSubscriptionData.deadline.period, duration_encoding);
         // Interoperability note: calling normalize() shouldn't be required
         normalize(reader_data.ddsSubscriptionData.deadline.period);
         break;
       case PID_LATENCY_BUDGET:
         reader_data.ddsSubscriptionData.latency_budget = param.latency_budget();
+        decode_duration(reader_data.ddsSubscriptionData.latency_budget.duration,
+                        duration_encoding);
         // Interoperability note: calling normalize() shouldn't be required
         normalize(reader_data.ddsSubscriptionData.latency_budget.duration);
         break;
       case PID_LIVELINESS:
         reader_data.ddsSubscriptionData.liveliness = param.liveliness();
+        decode_duration(reader_data.ddsSubscriptionData.liveliness.lease_duration,
+                        duration_encoding);
         // Interoperability note: calling normalize() shouldn't be required
         normalize(reader_data.ddsSubscriptionData.liveliness.lease_duration);
         break;
       case PID_RELIABILITY:
         reader_data.ddsSubscriptionData.reliability.max_blocking_time = param.reliability().max_blocking_time;
+        decode_duration(
+          reader_data.ddsSubscriptionData.reliability.max_blocking_time,
+          duration_encoding);
         // Interoperability note:
         // Spec creators for RTPS have reliability indexed at 1
         {
@@ -1417,6 +1585,9 @@ bool from_param_list(const ParameterList& param_list,
         break;
       case PID_TIME_BASED_FILTER:
         reader_data.ddsSubscriptionData.time_based_filter = param.time_based_filter();
+        decode_duration(
+          reader_data.ddsSubscriptionData.time_based_filter.minimum_separation,
+          duration_encoding);
         // Interoperability note: calling normalize() shouldn't be required
         normalize(reader_data.ddsSubscriptionData.time_based_filter.minimum_separation);
         break;
@@ -1557,7 +1728,19 @@ bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
                    const DCPS::TypeInformation& type_info,
                    bool map)
 {
-  return to_param_list(wrapper.data, param_list, use_xtypes, type_info, map)
+  return to_param_list(wrapper, param_list, use_xtypes, type_info,
+                       RDE_NANOSECONDS, map);
+}
+
+bool to_param_list(const DiscoveredPublication_SecurityWrapper& wrapper,
+                   ParameterList& param_list,
+                   bool use_xtypes,
+                   const DCPS::TypeInformation& type_info,
+                   RtpsDurationEncoding duration_encoding,
+                   bool map)
+{
+  return to_param_list(wrapper.data, param_list, use_xtypes, type_info,
+                       duration_encoding, map)
     && to_param_list(wrapper.security_info, param_list)
     && to_param_list(wrapper.data_tags, param_list);
 }
@@ -1568,7 +1751,19 @@ bool from_param_list(const ParameterList& param_list,
                      bool use_xtypes,
                      XTypes::TypeInformation& type_info)
 {
-  return from_param_list(param_list, vendor_id, wrapper.data, use_xtypes, type_info) &&
+  return from_param_list(param_list, vendor_id, wrapper, use_xtypes,
+                         type_info, RDE_NANOSECONDS);
+}
+
+bool from_param_list(const ParameterList& param_list,
+                     const VendorId_t& vendor_id,
+                     DiscoveredPublication_SecurityWrapper& wrapper,
+                     bool use_xtypes,
+                     XTypes::TypeInformation& type_info,
+                     RtpsDurationEncoding duration_encoding)
+{
+  return from_param_list(param_list, vendor_id, wrapper.data, use_xtypes,
+                         type_info, duration_encoding) &&
     from_param_list(param_list, wrapper.security_info) &&
     from_param_list(param_list, wrapper.data_tags);
 }
@@ -1579,7 +1774,19 @@ bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
                    const DCPS::TypeInformation& type_info,
                    bool map)
 {
-  return to_param_list(wrapper.data, param_list, use_xtypes, type_info, map)
+  return to_param_list(wrapper, param_list, use_xtypes, type_info,
+                       RDE_NANOSECONDS, map);
+}
+
+bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
+                   ParameterList& param_list,
+                   bool use_xtypes,
+                   const DCPS::TypeInformation& type_info,
+                   RtpsDurationEncoding duration_encoding,
+                   bool map)
+{
+  return to_param_list(wrapper.data, param_list, use_xtypes, type_info,
+                       duration_encoding, map)
     && to_param_list(wrapper.security_info, param_list)
     && to_param_list(wrapper.data_tags, param_list);
 }
@@ -1590,7 +1797,19 @@ bool from_param_list(const ParameterList& param_list,
                      bool use_xtypes,
                      XTypes::TypeInformation& type_info)
 {
-  bool result = from_param_list(param_list, vendor_id, wrapper.data, use_xtypes, type_info) &&
+  return from_param_list(param_list, vendor_id, wrapper, use_xtypes,
+                         type_info, RDE_NANOSECONDS);
+}
+
+bool from_param_list(const ParameterList& param_list,
+                     const VendorId_t& vendor_id,
+                     DiscoveredSubscription_SecurityWrapper& wrapper,
+                     bool use_xtypes,
+                     XTypes::TypeInformation& type_info,
+                     RtpsDurationEncoding duration_encoding)
+{
+  bool result = from_param_list(param_list, vendor_id, wrapper.data, use_xtypes,
+                                type_info, duration_encoding) &&
     from_param_list(param_list, wrapper.security_info) &&
     from_param_list(param_list, wrapper.data_tags);
 

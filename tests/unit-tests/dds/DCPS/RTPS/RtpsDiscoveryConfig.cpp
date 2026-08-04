@@ -33,6 +33,22 @@ namespace {
 #endif
 }
 
+TEST(dds_DCPS_RTPS_RtpsDiscoveryConfig, use_rtps_duration_fraction)
+{
+  AddressTest t;
+
+  EXPECT_FALSE(t.rtps.use_rtps_duration_fraction());
+  EXPECT_EQ(0u, t.rtps.participant_flags() & PFLAGS_RTPS_DURATION_FRACTION);
+
+  t.rtps.use_rtps_duration_fraction(true);
+  EXPECT_TRUE(t.rtps.use_rtps_duration_fraction());
+  EXPECT_NE(0u, t.rtps.participant_flags() & PFLAGS_RTPS_DURATION_FRACTION);
+
+  t.rtps.use_rtps_duration_fraction(false);
+  t.rtps.participant_flags(PFLAGS_THIS_VERSION | PFLAGS_RTPS_DURATION_FRACTION);
+  EXPECT_EQ(0u, t.rtps.participant_flags() & PFLAGS_RTPS_DURATION_FRACTION);
+}
+
 TEST(dds_DCPS_RTPS_RtpsDiscoveryConfig, spdp_unicast_address)
 {
   const char* const default_addr = "0.0.0.0";

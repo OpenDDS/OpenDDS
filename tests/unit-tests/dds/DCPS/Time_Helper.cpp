@@ -10,6 +10,7 @@
 #include "ace/Time_Value.h"
 
 #include "dds/DCPS/Qos_Helper.h"
+#include "dds/DCPS/Time_Helper.h"
 #include "dds/DCPS/TimeTypes.h"
 
 #include <iostream>
@@ -101,6 +102,36 @@ TEST(dds_DCPS_Time_Helper, make_duration)
   const DDS::Duration_t d = make_duration_t(1, 2);
   EXPECT_EQ(d.sec, 1);
   EXPECT_EQ(d.nanosec, 2u);
+}
+
+TEST(dds_DCPS_Time_Helper, uint32_fractional_seconds_to_nanoseconds_rounds)
+{
+  EXPECT_EQ(0u, uint32_fractional_seconds_to_nanoseconds(0));
+  EXPECT_EQ(0u, uint32_fractional_seconds_to_nanoseconds(2));
+  EXPECT_EQ(1u, uint32_fractional_seconds_to_nanoseconds(3));
+}
+
+TEST(dds_DCPS_Time_Helper, nanoseconds_fractional_seconds_round_trip)
+{
+  const ACE_UINT32 nanoseconds[] = {
+    0, 1, 100, 2000, 15000, 35000, 999999999
+  };
+  for (size_t i = 0; i < sizeof nanoseconds / sizeof nanoseconds[0]; ++i) {
+    const ACE_UINT32 fraction =
+      nanoseconds_to_uint32_fractional_seconds(nanoseconds[i]);
+    EXPECT_EQ(nanoseconds[i],
+              uint32_fractional_seconds_to_nanoseconds(fraction));
+  }
+}
+
+TEST(dds_DCPS_Time_Helper, uint32_fractional_seconds_to_nanoseconds_upper_bound)
+{
+  EXPECT_EQ(999999999u,
+            uint32_fractional_seconds_to_nanoseconds(0xfffffffdu));
+  EXPECT_EQ(999999999u,
+            uint32_fractional_seconds_to_nanoseconds(0xfffffffeu));
+  EXPECT_EQ(999999999u,
+            uint32_fractional_seconds_to_nanoseconds(0xffffffffu));
 }
 
 TEST(dds_DCPS_Time_Helper, duration_to_dds_string)
