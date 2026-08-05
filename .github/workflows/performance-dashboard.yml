@@ -185,6 +185,7 @@ jobs:
           STATE_MACHINE_ARN: ${{ vars.PERFORMANCE_STATE_MACHINE_ARN }}
           COMMIT_SHA: ${{ github.sha }}
           CONFIG_COMMIT: ${{ steps.nightly.outputs.sha }}
+          ENVIRONMENT_NAME: ${{ vars.PERFORMANCE_ENVIRONMENT_NAME }}
           SUITE: ${{ steps.suite.outputs.suite }}
           TOPOLOGY: ${{ steps.suite.outputs.topology }}
           ESTIMATED_COST: ${{ steps.suite.outputs.estimated }}
@@ -195,9 +196,11 @@ jobs:
           REPEAT_NONCE: ${{ steps.suite.outputs.repeat_nonce }}
           DYNAMIC_MULTICAST_REGISTRATION: ${{ inputs.dynamic_multicast_registration || false }}
         run: |
+          [[ "$ENVIRONMENT_NAME" =~ ^[a-z][a-z0-9-]{0,31}$ ]] || { echo 'PERFORMANCE_ENVIRONMENT_NAME is missing or invalid' >&2; exit 2; }
           input=$(jq -n \
             --arg commitSha "$COMMIT_SHA" \
             --arg configCommit "$CONFIG_COMMIT" \
+            --arg environmentName "$ENVIRONMENT_NAME" \
             --arg suite "$SUITE" \
             --argjson topology "$TOPOLOGY" \
             --argjson estimatedCostUsd "$ESTIMATED_COST" \
@@ -210,6 +213,7 @@ jobs:
             '{
               commitSha: $commitSha,
               configCommit: $configCommit,
+              environmentName: $environmentName,
               suite: $suite,
               topology: $topology,
               estimatedCostUsd: $estimatedCostUsd,
