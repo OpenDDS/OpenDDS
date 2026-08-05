@@ -25,7 +25,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::DomainParticipantFactory_var domain_participant_factory =
     TheParticipantFactoryWithArgs(argc, argv);
   DDS::DomainParticipant_var participant =
-    domain_participant_factory->create_participant(ShmemWakeupRace::DOMAIN,
+    domain_participant_factory->create_participant(ShmemWakeupRace::DOMAIN_ID,
                                                    PARTICIPANT_QOS_DEFAULT,
                                                    0,
                                                    0);
@@ -90,8 +90,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
               std::cout << "Ping: wrote sample 1" << std::endl;
               DDS::ConditionSeq conditions;
               const DDS::Duration_t timeout = { 5, 0 };
-              if (wait_set->wait(conditions, timeout) != DDS::RETCODE_OK) {
+              const DDS::ReturnCode_t wait_result = wait_set->wait(conditions, timeout);
+              if (wait_result == DDS::RETCODE_TIMEOUT) {
                 std::cerr << "Ping: timed out waiting for pong" << std::endl;
+                status = 1;
+              } else if (wait_result != DDS::RETCODE_OK) {
+                std::cerr << "Ping: waiting for pong failed with return code "
+                          << static_cast<int>(wait_result) << std::endl;
                 status = 1;
               } else {
                 ShmemWakeupRace::SampleSeq samples;
@@ -123,7 +128,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                 }
               }
             }
-            wait_set->detach_condition(read_condition.in());
+            if (wait_set->detach_condition(read_condition.in()) != DDS::RETCODE_OK) {
+              std::cerr << "Ping: detach_condition failed" << std::endl;
+              status = 1;
+            }
+          }
+          if (reader->delete_readcondition(read_condition.in()) != DDS::RETCODE_OK) {
+            std::cerr << "Ping: delete_readcondition failed" << std::endl;
+            status = 1;
           }
         }
       }

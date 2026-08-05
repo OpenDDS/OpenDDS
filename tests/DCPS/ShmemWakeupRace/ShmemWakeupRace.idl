@@ -7,7 +7,7 @@
 
 module ShmemWakeupRace {
 
-  const long DOMAIN = 113;
+  const long DOMAIN_ID = 228;
 
   @topic
   struct Sample {
