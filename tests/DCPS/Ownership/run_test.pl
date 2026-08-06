@@ -81,8 +81,8 @@ $test->setup_discovery("$debug_opts -ORBLogFile DCPSInfoRepo.log");
 
 $test->process('subscriber', 'subscriber', " $sub_opts -ORBLogFile sub.log $sub_deadline $sub_liveliness -t $testcase");
 if ($testcase == 4) {
-  $test->process('publisher1', 'publisher', "$pub_opts -ORBLogFile pub1.log -s 10 -i datawriter1 -m 1 -y 0");
-  $test->process('publisher2', 'publisher', "$pub_opts -ORBLogFile pub2.log -s 10 -i datawriter2 -m 1 -y 0 -n Movie_Discussion_List_2");
+  $test->process('publisher1', 'publisher', "$pub_opts -ORBLogFile pub1.log -s 10 -i datawriter1 -m 1 -y 0 -w");
+  $test->process('publisher2', 'publisher', "$pub_opts -ORBLogFile pub2.log -s 10 -i datawriter2 -m 1 -y 0 -w -n Movie_Discussion_List_2");
 }
 else {
   $test->process('publisher1', 'publisher', "$pub_opts -ORBLogFile pub1.log -s 10 -i datawriter1 $pub1_reset_strength $pub1_deadline $pub1_liveliness");

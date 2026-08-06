@@ -287,7 +287,16 @@ bool non_negative_duration(const DDS::Duration_t& t)
 ACE_INLINE OpenDDS_Dcps_Export
 ACE_UINT32 uint32_fractional_seconds_to_nanoseconds(ACE_UINT32 fraction)
 {
-  return static_cast<ACE_UINT32>((static_cast<ACE_UINT64>(fraction) * 1000000000) >> 32);
+  const ACE_UINT64 nanoseconds =
+    (static_cast<ACE_UINT64>(fraction) * 1000000000 +
+     (static_cast<ACE_UINT64>(1) << 31)) >> 32;
+
+  // The two largest fractions round to one second.  Since this helper only
+  // returns the subsecond field, keep the result normalized instead of
+  // returning 1000000000 and requiring a carry that it can't represent.
+  return nanoseconds < 1000000000
+    ? static_cast<ACE_UINT32>(nanoseconds)
+    : 999999999;
 }
 
 ACE_INLINE OpenDDS_Dcps_Export

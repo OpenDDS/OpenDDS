@@ -123,6 +123,7 @@ public:
   bool associated() const;
   bool has_discovered_participant(const DCPS::GUID_t& guid) const;
   ACE_CDR::ULong get_participant_flags(const DCPS::GUID_t& guid) const;
+  bool participant_uses_rtps_duration_fraction(const DCPS::GUID_t& guid) const;
 
 #if OPENDDS_CONFIG_SECURITY
   Security::SecurityConfig_rch get_security_config() const { return security_config_; }
@@ -215,6 +216,14 @@ public:
   VendorId_t get_vendor_id(const GUID_t& guid) const;
 
   VendorId_t get_vendor_id_i(const GUID_t& guid) const;
+
+  /**
+   * Combines get_vendor_id() and participant_uses_rtps_duration_fraction()
+   * into a single locked lookup, for callers that need both for the same guid.
+   */
+  void get_vendor_id_and_duration_encoding(const GUID_t& guid,
+                                            VendorId_t& vendor_id,
+                                            bool& uses_rtps_duration_fraction) const;
 
   OPENDDS_SET(DDS::UInt32) get_ignored_user_tags() const;
 
@@ -383,6 +392,9 @@ private:
             DCPS::GUID_t& guid,
             const DDS::DomainParticipantQos& qos,
             XTypes::TypeLookupService_rch tls);
+
+  // lock_ must be held before calling this.
+  bool participant_uses_rtps_duration_fraction_i(const DCPS::GUID_t& guid) const;
 
   mutable ACE_Thread_Mutex lock_;
   DCPS::RcHandle<DCPS::BitSubscriber> bit_subscriber_;

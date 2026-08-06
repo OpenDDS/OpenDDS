@@ -1101,8 +1101,15 @@ RtpsDiscoveryConfig::sedp_fragment_reassembly_timeout(const DCPS::TimeDuration& 
 CORBA::ULong
 RtpsDiscoveryConfig::participant_flags() const
 {
-  return TheServiceParticipant->config_store()->get_uint32(config_key("PARTICIPANT_FLAGS").c_str(),
-                                                           PFLAGS_THIS_VERSION);
+  const CORBA::ULong flags = TheServiceParticipant->config_store()->get_uint32(
+    config_key("PARTICIPANT_FLAGS").c_str(), PFLAGS_THIS_VERSION);
+  // PFLAGS_RTPS_DURATION_FRACTION is exclusively controlled by
+  // USE_RTPS_DURATION_FRACTION (see use_rtps_duration_fraction()) and always
+  // overrides whatever was stored for that bit via participant_flags(CORBA::ULong).
+  // This is unlike every other PARTICIPANT_FLAGS bit, which is raw, authoritative
+  // storage (see e.g. Spdp::init()'s handling of PFLAGS_REFLECT_HEARTBEAT_COUNT).
+  return use_rtps_duration_fraction()
+    ? (flags | PFLAGS_RTPS_DURATION_FRACTION) : (flags & ~PFLAGS_RTPS_DURATION_FRACTION);
 }
 
 void
@@ -1110,6 +1117,20 @@ RtpsDiscoveryConfig::participant_flags(CORBA::ULong participant_flags)
 {
   TheServiceParticipant->config_store()->set_uint32(config_key("PARTICIPANT_FLAGS").c_str(),
                                                     participant_flags);
+}
+
+bool
+RtpsDiscoveryConfig::use_rtps_duration_fraction() const
+{
+  return TheServiceParticipant->config_store()->get_boolean(
+    config_key("USE_RTPS_DURATION_FRACTION").c_str(), false);
+}
+
+void
+RtpsDiscoveryConfig::use_rtps_duration_fraction(bool value)
+{
+  TheServiceParticipant->config_store()->set_boolean(
+    config_key("USE_RTPS_DURATION_FRACTION").c_str(), value);
 }
 
 bool
