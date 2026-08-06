@@ -626,6 +626,10 @@ protected:
 
   void post_read_or_take();
 
+  /// Arrange for a finite-Lifespan sample to be removed from the reader cache.
+  /// sample_lock_ must be held.
+  void schedule_lifespan(const ReceivedDataElement* sample);
+
   // type specific DataReader's part of enable.
   virtual DDS::ReturnCode_t enable_specific() = 0;
 
@@ -841,6 +845,11 @@ private:
   bool deadline_queue_enabled_;
   typedef PmfNowEvent<DataReaderImpl> DRIEvent;
   SporadicEvent_rch deadline_task_;
+
+  MonotonicTimePoint next_lifespan_expiration_;
+  SporadicEvent_rch lifespan_task_;
+
+  void lifespan_task(const MonotonicTimePoint& now);
 
   void schedule_deadline(SubscriptionInstance_rch instance,
                          bool timer_called);

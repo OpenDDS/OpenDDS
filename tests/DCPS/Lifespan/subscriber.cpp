@@ -111,14 +111,33 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         cerr << "create_datareader failed." << endl;
         exit(1);
       }
-
-      ACE_OS::sleep (10);
-      if (listener_servant->num_reads () != 1)
+      // The first callback consumes the one valid historical sample.  The
+      // second corresponds to a post-association sample which the listener
+      // intentionally leaves in the reader cache.
+      for (int i = 0; i < 300 && listener_servant->num_reads() < 2; ++i) {
+        ACE_OS::sleep(ACE_Time_Value(0, 100000));
+      }
+      if (listener_servant->num_reads() != 2)
         {
           cerr << "ERROR: Incorrect number of samples received." << endl
                << "       Expired data was probably read." << endl;
           exit (1);
         }
+
+      // The writer Lifespan is 20 seconds.  After it expires, the unread
+      // sample must no longer be available from the reader cache.
+      ACE_OS::sleep(21);
+      Messenger::MessageDataReader_var message_dr =
+        Messenger::MessageDataReader::_narrow(dr.in());
+      Messenger::Message message;
+      DDS::SampleInfo sample_info;
+      const DDS::ReturnCode_t take_status =
+        message_dr->take_next_sample(message, sample_info);
+      if (take_status != DDS::RETCODE_NO_DATA) {
+        cerr << "ERROR: Lifespan-expired sample remained readable (status "
+             << take_status << ")." << endl;
+        exit(1);
+      }
 
       if (!CORBA::is_nil (participant.in ())) {
         participant->delete_contained_entities();

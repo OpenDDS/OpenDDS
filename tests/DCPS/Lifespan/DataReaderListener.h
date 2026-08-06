@@ -4,6 +4,7 @@
 #define DATAREADER_LISTENER_IMPL
 
 #include <dds/DdsDcpsSubscriptionExtC.h>
+#include <dds/DCPS/Atomic.h>
 #include <dds/DCPS/LocalObject.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -62,13 +63,13 @@ public:
     const ::OpenDDS::DCPS::BudgetExceededStatus& status);
 
   long num_reads() const {
-    return num_reads_;
+    return num_reads_.load();
   }
 
 private:
 
   DDS::DataReader_var reader_;
-  long                  num_reads_;
+  OpenDDS::DCPS::Atomic<long> num_reads_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

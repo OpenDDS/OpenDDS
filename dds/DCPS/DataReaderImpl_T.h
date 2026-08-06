@@ -2133,6 +2133,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
   // release it while status notifications temporarily release sample_lock_.
   ptr->inc_ref();
   instance_ptr->rcvd_strategy_->add(ptr);
+  schedule_lifespan(ptr);
 
   if (! is_dispose_msg  && ! is_unregister_msg
       && instance_ptr->rcvd_samples_.size() > get_depth())
