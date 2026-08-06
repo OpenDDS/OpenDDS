@@ -37,6 +37,7 @@ public:
       registered_data_(received_data),
       sample_state_(DDS::NOT_READ_SAMPLE_STATE),
       destination_timestamp_(SystemTimePoint::now().to_idl_struct()),
+      expiration_time_(MonotonicTimePoint::zero_value),
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
       coherent_change_(header.coherent_change_),
       group_coherent_(header.group_coherent_),
@@ -54,6 +55,17 @@ public:
   {
     source_timestamp_.sec = header.source_timestamp_sec_;
     source_timestamp_.nanosec = header.source_timestamp_nanosec_;
+
+    if (header.lifespan_duration_) {
+      const DDS::Duration_t lifespan = {
+        header.lifespan_duration_sec_,
+        header.lifespan_duration_nanosec_
+      };
+      const SystemTimePoint expiration =
+        SystemTimePoint(source_timestamp_) + TimeDuration(lifespan);
+      expiration_time_ = MonotonicTimePoint::now()
+        + (expiration - SystemTimePoint::now());
+    }
 
     /*
      * In some situations, we will not have data to give to the user and
@@ -100,6 +112,10 @@ public:
 
   /// Reception time stamp for this data sample
   DDS::Time_t destination_timestamp_;
+
+  /// Monotonic deadline after which this sample must not be delivered.
+  /// A zero value indicates an infinite Lifespan.
+  MonotonicTimePoint expiration_time_;
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   /// Sample belongs to an active coherent change set
@@ -213,6 +229,7 @@ public:
 
   bool has_zero_copies() const;
   bool matches(CORBA::ULong sample_states) const;
+  ReceivedDataElement* get_next(ReceivedDataElement* prev);
   ReceivedDataElement* get_next_match(CORBA::ULong sample_states, ReceivedDataElement* prev);
 
   void mark_read(ReceivedDataElement* item);
