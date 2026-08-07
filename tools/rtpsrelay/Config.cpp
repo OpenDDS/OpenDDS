@@ -123,6 +123,9 @@ bool Config::from_arg(ACE_Arg_Shifter_T<char>& args)
   } else if ((arg = args.get_the_parameter("-AsyncDiscoveryCrossRelayTimeout"))) {
     async_discovery_cross_relay_timeout(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
     args.consume_arg();
+  } else if ((arg = args.get_the_parameter("-EarlyAdmissionQueueFreeup"))) {
+    early_admission_queue_freeup(ACE_OS::atoi(arg));
+    args.consume_arg();
   } else {
     return false;
   }
@@ -246,6 +249,9 @@ void Config::set_defaults()
   cached_async_discovery_cross_relay_timeout_.default_if_empty([&](const TimeDuration& default_val) {
     TheServiceParticipant->config_store()->set_duration(RTPS_RELAY_ASYNC_DISCOVERY_CROSS_RELAY_TIMEOUT, default_val.to_dds_duration());
   });
+  cached_early_admission_queue_freeup_.default_if_empty([&](bool default_val) {
+    TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_EARLY_ADMISSION_QUEUE_FREEUP, default_val);
+  });
 }
 
 void Config::on_data_available(InternalDataReader_rch reader)
@@ -316,6 +322,8 @@ void Config::on_data_available(InternalDataReader_rch reader)
         cached_async_discovery_remote_cache_timeout_.set(pair.value());
       } else if (pair.key() == RTPS_RELAY_ASYNC_DISCOVERY_CROSS_RELAY_TIMEOUT) {
         cached_async_discovery_cross_relay_timeout_.set(pair.value());
+      } else if (pair.key() == RTPS_RELAY_EARLY_ADMISSION_QUEUE_FREEUP) {
+        cached_early_admission_queue_freeup_.set(pair.value());
       }
     }
   }
