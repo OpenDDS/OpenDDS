@@ -209,6 +209,7 @@ target_sources(OpenDDS_Dcps
     ../FACE/common.hpp
     ../FACE/types.hpp
     DCPS/AddressCache.h
+    DCPS/AddressFamily.h
     DCPS/AssociationData.h
     DCPS/AstNodeWrapper.h
     DCPS/Atomic.h

@@ -6,24 +6,24 @@ using namespace OpenDDS::RTPS;
 using namespace OpenDDS::DCPS;
 
 namespace {
-  struct RtpsUdpType {
+  struct RtpsUdpTestContext {
     RcHandle<ConfigStoreImpl> store;
     RcHandle<RtpsUdpInst> rtps_udp;
 
-    RtpsUdpType()
+    RtpsUdpTestContext()
     : store(make_rch<ConfigStoreImpl>(TheServiceParticipant->config_topic(), TheServiceParticipant->time_source()))
     , rtps_udp(make_rch<RtpsUdpInst>("RTPS_UDP_INST_UNIT_TEST", true))
     {
       store->unset_section(rtps_udp->config_prefix());
     }
 
-    ~RtpsUdpType()
+    ~RtpsUdpTestContext()
     {
       store->unset_section(rtps_udp->config_prefix());
     }
   };
 
-  struct AddressTest : public RtpsUdpType {
+  struct AddressTest : public RtpsUdpTestContext {
     NetworkAddress addr;
     bool fixed;
 
@@ -39,6 +39,56 @@ namespace {
   const NetworkAddress fake_ipv6_addr(1234, "::1:2:3:4");
 #endif
 }
+
+TEST(dds_DCPS_RTPS_RtpsUdpInst, address_family)
+{
+  RtpsUdpTestContext t;
+#ifdef ACE_HAS_IPV6
+  EXPECT_EQ(ADDRESS_FAMILY_DUAL, t.rtps_udp->address_family());
+#else
+  EXPECT_EQ(ADDRESS_FAMILY_IPV4, t.rtps_udp->address_family());
+#endif
+  EXPECT_TRUE(t.rtps_udp->address_family("ipv4"));
+  EXPECT_EQ(ADDRESS_FAMILY_IPV4, t.rtps_udp->address_family());
+#ifdef ACE_HAS_IPV6
+  EXPECT_TRUE(t.rtps_udp->address_family("ipv6"));
+  EXPECT_EQ(ADDRESS_FAMILY_IPV6, t.rtps_udp->address_family());
+#else
+  {
+    LogRestore lr;
+    log_level.set(LogLevel::None);
+    EXPECT_FALSE(t.rtps_udp->address_family("ipv6"));
+  }
+#endif
+  EXPECT_TRUE(t.rtps_udp->address_family("dual"));
+  EXPECT_EQ(ADDRESS_FAMILY_DUAL, t.rtps_udp->address_family());
+  EXPECT_FALSE(t.rtps_udp->address_family("invalid"));
+}
+
+#ifdef ACE_HAS_IPV6
+TEST(dds_DCPS_RTPS_RtpsUdpInst, address_family_locators)
+{
+  RtpsUdpTestContext t;
+  TransportLocator info;
+  LocatorSeq locators;
+  VendorId_t vendor;
+
+  ASSERT_TRUE(t.rtps_udp->address_family("ipv4"));
+  EXPECT_EQ(1u, t.rtps_udp->populate_locator(info, CONNINFO_MULTICAST, 0, GUID_UNKNOWN));
+  ASSERT_EQ(DDS::RETCODE_OK, blob_to_locators(info.data, locators, vendor));
+  ASSERT_EQ(1u, locators.length());
+  EXPECT_EQ(OpenDDS::RTPS::LOCATOR_KIND_UDPv4, locators[0].kind);
+
+  ASSERT_TRUE(t.rtps_udp->address_family("ipv6"));
+  EXPECT_EQ(1u, t.rtps_udp->populate_locator(info, CONNINFO_MULTICAST, 0, GUID_UNKNOWN));
+  ASSERT_EQ(DDS::RETCODE_OK, blob_to_locators(info.data, locators, vendor));
+  ASSERT_EQ(1u, locators.length());
+  EXPECT_EQ(OpenDDS::RTPS::LOCATOR_KIND_UDPv6, locators[0].kind);
+
+  ASSERT_TRUE(t.rtps_udp->address_family("dual"));
+  EXPECT_EQ(2u, t.rtps_udp->populate_locator(info, CONNINFO_MULTICAST, 0, GUID_UNKNOWN));
+}
+#endif
 
 TEST(dds_DCPS_RTPS_RtpsUdpInst, multicast_address)
 {

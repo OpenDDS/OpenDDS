@@ -472,6 +472,8 @@ Sedp::init(const GUID_t& guid,
                            disco.config()->recv_buffer_size());
   transport_inst_->receive_preallocated_message_blocks(disco.config()->sedp_receive_preallocated_message_blocks());
   transport_inst_->receive_preallocated_data_blocks(disco.config()->sedp_receive_preallocated_data_blocks());
+  config_store_->set(transport_inst_->config_key("ADDRESS_FAMILY").c_str(),
+                     DCPS::address_family_name(disco.config()->address_family()));
 
   set_port_mode(transport_inst_->config_key("PORT_MODE").c_str(), disco.config()->sedp_port_mode());
   config_store_->set_int32(transport_inst_->config_key("PB").c_str(), disco.config()->pb());
@@ -528,13 +530,13 @@ Sedp::init(const GUID_t& guid,
   config_store_->set(transport_inst_->config_key("DATA_RTPS_RELAY_ADDRESS").c_str(),
                      disco.config()->sedp_rtps_relay_address(),
                      ConfigStoreImpl::Format_Required_Port,
-                     ConfigStoreImpl::Kind_IPV4);
+                     ConfigStoreImpl::Kind_ANY);
   config_store_->set_boolean(transport_inst_->config_key("USE_RTPS_RELAY").c_str(), disco.config()->use_rtps_relay());
   config_store_->set_boolean(transport_inst_->config_key("RTPS_RELAY_ONLY").c_str(), disco.config()->rtps_relay_only());
   config_store_->set(transport_inst_->config_key("DATA_STUN_SERVER_ADDRESS").c_str(),
                      disco.config()->sedp_stun_server_address(),
                      ConfigStoreImpl::Format_Required_Port,
-                     ConfigStoreImpl::Kind_IPV4);
+                     ConfigStoreImpl::Kind_ANY);
 #if OPENDDS_CONFIG_SECURITY
   config_store_->set_boolean(transport_inst_->config_key("USE_ICE").c_str(), disco.config()->use_ice());
 #endif
@@ -6273,7 +6275,7 @@ Sedp::rtps_relay_address(const NetworkAddress& address)
   config_store_->set(transport_inst_->config_key("DATA_RTPS_RELAY_ADDRESS").c_str(),
                      address,
                      ConfigStoreImpl::Format_Required_Port,
-                     ConfigStoreImpl::Kind_IPV4);
+                     ConfigStoreImpl::Kind_ANY);
 }
 
 void
@@ -6282,7 +6284,7 @@ Sedp::stun_server_address(const NetworkAddress& address)
   config_store_->set(transport_inst_->config_key("DATA_STUN_SERVER_ADDRESS").c_str(),
                      address,
                      ConfigStoreImpl::Format_Required_Port,
-                     ConfigStoreImpl::Kind_IPV4);
+                     ConfigStoreImpl::Kind_ANY);
 }
 
 void
