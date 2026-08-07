@@ -221,3 +221,92 @@ TEST(dds_DCPS_EncapsulationHeader, to_encoding_INVALID)
   EXPECT_FALSE(to_encoding(enc, eh, FINAL));
   EXPECT_STREQ("Invalid", eh.to_string().c_str());
 }
+
+TEST(dds_DCPS_EncapsulationHeader, to_encoding_PL_CDR2_LE_APPENDABLE_mismatch)
+{
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
+  EncapsulationHeader eh;
+  eh.kind(EncapsulationHeader::KIND_PL_CDR2_LE);
+  Encoding enc;
+  EXPECT_FALSE(to_encoding(enc, eh, APPENDABLE));
+}
+
+TEST(dds_DCPS_EncapsulationHeader, to_encoding_PL_CDR2_BE_APPENDABLE_mismatch)
+{
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
+  EncapsulationHeader eh;
+  eh.kind(EncapsulationHeader::KIND_PL_CDR2_BE);
+  Encoding enc;
+  EXPECT_FALSE(to_encoding(enc, eh, APPENDABLE));
+}
+
+TEST(dds_DCPS_EncapsulationHeader, to_encoding_D_CDR2_LE_MUTABLE_mismatch)
+{
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
+  EncapsulationHeader eh;
+  eh.kind(EncapsulationHeader::KIND_D_CDR2_LE);
+  Encoding enc;
+  EXPECT_FALSE(to_encoding(enc, eh, MUTABLE));
+}
+
+TEST(dds_DCPS_EncapsulationHeader, to_encoding_CDR2_LE_APPENDABLE_mismatch)
+{
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
+  EncapsulationHeader eh;
+  eh.kind(EncapsulationHeader::KIND_CDR2_LE);
+  Encoding enc;
+  EXPECT_FALSE(to_encoding(enc, eh, APPENDABLE));
+}
+
+TEST(dds_DCPS_EncapsulationHeader, read_encapsulation_header_APPENDABLE_valid)
+{
+  ACE_Message_Block mb(4);
+  mb.wr_ptr()[0] = 0x00;
+  mb.wr_ptr()[1] = 0x09; // KIND_D_CDR2_LE
+  mb.wr_ptr()[2] = 0x00;
+  mb.wr_ptr()[3] = 0x00;
+  mb.wr_ptr(4);
+
+  Serializer ser(&mb, Encoding());
+  EncapsulationHeader encap;
+  EXPECT_EQ(EncapsulationReadStatus::Ok, read_encapsulation_header(ser, encap, APPENDABLE));
+  EXPECT_EQ(EncapsulationHeader::KIND_D_CDR2_LE, encap.kind());
+  EXPECT_EQ(Encoding::KIND_XCDR2, ser.encoding().kind());
+  EXPECT_EQ(ENDIAN_LITTLE, ser.encoding().endianness());
+}
+
+TEST(dds_DCPS_EncapsulationHeader, read_encapsulation_header_APPENDABLE_mismatch)
+{
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
+  ACE_Message_Block mb(4);
+  mb.wr_ptr()[0] = 0x00;
+  mb.wr_ptr()[1] = 0x0b; // KIND_PL_CDR2_LE (mismatch for APPENDABLE)
+  mb.wr_ptr()[2] = 0x00;
+  mb.wr_ptr()[3] = 0x00;
+  mb.wr_ptr(4);
+
+  Serializer ser(&mb, Encoding());
+  EncapsulationHeader encap;
+  EXPECT_EQ(EncapsulationReadStatus::ExtensibilityMismatch,
+            read_encapsulation_header(ser, encap, APPENDABLE));
+}
+
+TEST(dds_DCPS_EncapsulationHeader, read_encapsulation_header_short_read)
+{
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
+  ACE_Message_Block mb(2);
+  mb.wr_ptr()[0] = 0x00;
+  mb.wr_ptr()[1] = 0x09;
+  mb.wr_ptr(2); // Truncated: only 2 of the required 4 bytes are present.
+
+  Serializer ser(&mb, Encoding());
+  EncapsulationHeader encap;
+  EXPECT_EQ(EncapsulationReadStatus::HeaderError,
+            read_encapsulation_header(ser, encap, APPENDABLE));
+}
