@@ -11,8 +11,10 @@
 #include "Updater.h"
 #include "DCPSInfo_i.h"
 
-#include "tao/CDR.h"
-#include "dds/DCPS/debug.h"
+#include <dds/DCPS/debug.h>
+
+#include <tao/CDR.h>
+
 #include <vector>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
