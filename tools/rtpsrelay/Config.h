@@ -121,6 +121,9 @@ const DDS::Duration_t RTPS_RELAY_ASYNC_DISCOVERY_REMOTE_CACHE_TIMEOUT_default = 
 const char RTPS_RELAY_ASYNC_DISCOVERY_CROSS_RELAY_TIMEOUT[] = "RTPS_RELAY_ASYNC_DISCOVERY_CROSS_RELAY_TIMEOUT";
 const DDS::Duration_t RTPS_RELAY_ASYNC_DISCOVERY_CROSS_RELAY_TIMEOUT_default = {5, 0};
 
+const char RTPS_RELAY_EARLY_ADMISSION_QUEUE_FREEUP[] = "RTPS_RELAY_EARLY_ADMISSION_QUEUE_FREE_UP";
+const bool RTPS_RELAY_EARLY_ADMISSION_QUEUE_FREEUP_default = false;
+
 /// Configuration values for the RtpsRelay
 ///
 /// Each value uses one of these implementation strategies:
@@ -569,6 +572,17 @@ public:
     return cached_async_discovery_cross_relay_timeout_.get();
   }
 
+  void early_admission_queue_freeup(bool flag)
+  {
+    TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_EARLY_ADMISSION_QUEUE_FREEUP, flag);
+    cached_early_admission_queue_freeup_.set(flag);
+  }
+
+  bool early_admission_queue_freeup() const
+  {
+    return cached_early_admission_queue_freeup_.get();
+  }
+
   static bool to_time_duration(const std::string& value, OpenDDS::DCPS::TimeDuration& out);
 
 private:
@@ -661,6 +675,7 @@ private:
   CachedValue<bool, OpenDDS::DCPS::ConfigStoreImpl::convert_value> cached_synchronize_async_discovery_cache_{RTPS_RELAY_SYNCHRONIZE_ASYNC_DISCOVERY_CACHE_default};
   CachedValue<OpenDDS::DCPS::TimeDuration, to_time_duration> cached_async_discovery_remote_cache_timeout_{OpenDDS::DCPS::TimeDuration{RTPS_RELAY_ASYNC_DISCOVERY_REMOTE_CACHE_TIMEOUT_default}};
   CachedValue<OpenDDS::DCPS::TimeDuration, to_time_duration> cached_async_discovery_cross_relay_timeout_{OpenDDS::DCPS::TimeDuration{RTPS_RELAY_ASYNC_DISCOVERY_CROSS_RELAY_TIMEOUT_default}};
+  CachedValue<bool, OpenDDS::DCPS::ConfigStoreImpl::convert_value> cached_early_admission_queue_freeup_{RTPS_RELAY_EARLY_ADMISSION_QUEUE_FREEUP_default};
 
   // start of variables without ConfigStore support
   std::string relay_id_;
