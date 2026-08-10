@@ -19,7 +19,7 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: Install Perl Dependencies
-      uses: shogo82148/actions-setup-perl@v1.42.0
+      uses: shogo82148/actions-setup-perl@v1.43.1
       with:
         install-modules: |
           Pithub
