@@ -134,7 +134,7 @@ struct EncapsulationReadStatus {
     /// The 4-byte header itself could not be deserialized, e.g. a truncated buffer.
     HeaderError,
     /// The header was read, but its representation doesn't match expected_extensibility.
-    ExtensibilityMismatch
+    ExtensibilityMismatch,
   };
 };
 
