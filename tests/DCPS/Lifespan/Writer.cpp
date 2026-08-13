@@ -103,9 +103,9 @@ Writer::svc ()
     Messenger::MessageDataWriter::_narrow(writer_.in());
   Messenger::Message message;
   message.subject_id = 99;
-  message.from = CORBA::string_dup("Comic Book Guy");
-  message.subject = CORBA::string_dup("Review");
-  message.text = CORBA::string_dup("Cached until Lifespan expires.");
+  message.from = "Comic Book Guy";
+  message.subject = "Review";
+  message.text = "Cached until Lifespan expires.";
   message.count = ++count_;
   const DDS::InstanceHandle_t handle = message_dw->register_instance(message);
   if (message_dw->write(message, handle) != DDS::RETCODE_OK)
