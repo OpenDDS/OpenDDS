@@ -128,6 +128,35 @@ OpenDDS_Dcps_Export
 bool to_any_encoding(Encoding& encoding,
                      const EncapsulationHeader& header);
 
+struct EncapsulationReadStatus {
+  enum Value {
+    Ok,
+    /// The 4-byte header itself could not be deserialized, e.g. a truncated buffer.
+    HeaderError,
+    /// The header was read, but its representation doesn't match expected_extensibility.
+    ExtensibilityMismatch,
+  };
+};
+
+/**
+ * Read encapsulation header from Serializer, validate representation against
+ * expected extensibility, and set the stream's encoding. Leaves the stream's
+ * encoding unchanged unless EncapsulationReadStatus::Ok is returned.
+ */
+OpenDDS_Dcps_Export
+EncapsulationReadStatus::Value read_encapsulation_header(
+  Serializer& s,
+  EncapsulationHeader& header,
+  Extensibility expected_extensibility);
+
+/**
+ * Like the above, for callers that don't need the parsed header.
+ */
+OpenDDS_Dcps_Export
+EncapsulationReadStatus::Value read_encapsulation_header(
+  Serializer& s,
+  Extensibility expected_extensibility);
+
 } // namespace DCPS
 } // namespace OpenDDS
 

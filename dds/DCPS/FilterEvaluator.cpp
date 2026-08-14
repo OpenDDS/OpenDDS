@@ -140,23 +140,20 @@ FilterEvaluator::SerializedForEval::lookup(const char* field) const
   Message_Block_Ptr mb(serialized_->duplicate());
   Serializer ser(mb.get(), encoding_);
   if (encoding_.is_encapsulated()) {
-    EncapsulationHeader encap;
-    if (!(ser >> encap)) {
+    const EncapsulationReadStatus::Value read_status = read_encapsulation_header(ser, exten_);
+    if (read_status == EncapsulationReadStatus::HeaderError) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
         ACE_TEXT("FilterEvaluator::SerializedForEval::lookup: ")
         ACE_TEXT("deserialization of encapsulation header failed.\n")));
       throw std::runtime_error("FilterEvaluator::SerializedForEval::lookup:"
         "deserialization of encapsulation header failed.\n");
-    }
-    Encoding encoding;
-    if (!to_encoding(encoding, encap, exten_)) {
+    } else if (read_status == EncapsulationReadStatus::ExtensibilityMismatch) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
         ACE_TEXT("FilterEvaluator::SerializedForEval::lookup: ")
         ACE_TEXT("failed to convert encapsulation header to encoding.\n")));
       throw std::runtime_error("FilterEvaluator::SerializedForEval::lookup:"
         "failed to convert encapsulation header to encoding.\n");
     }
-    ser.encoding(encoding);
   }
   const Value v = meta_.getValue(ser, field, &type_support_);
   cache_.insert(std::make_pair(OPENDDS_STRING(field), v));
