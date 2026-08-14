@@ -1,4 +1,6 @@
 This test confirms that LIFESPAN support in OpenDDS functions
 according to the OMG DDS specification.  It does so by configuring a
-finite lifespan QoS policy value, and purposely writing data with a
-timestamp that forces the data to be considered expired.
+finite lifespan QoS policy value and purposely writing data with a
+timestamp that forces the data to be considered expired.  It also leaves
+a fresh sample unread until its lifespan expires, verifying that the
+sample is evicted from the reader cache.

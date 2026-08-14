@@ -21,7 +21,14 @@ DataReaderListenerImpl::~DataReaderListenerImpl ()
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
-  ++num_reads_;
+  const long callback = ++num_reads_;
+
+  // Take the unexpired historical sample as the legacy test has always done.
+  // Leave the post-association sample in the reader cache so the test can
+  // verify that Lifespan evicts it.
+  if (callback != 1) {
+    return;
+  }
 
   try {
     MessageDataReader_var message_dr = MessageDataReader::_narrow(reader);

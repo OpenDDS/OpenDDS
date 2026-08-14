@@ -79,6 +79,10 @@ DataReaderImpl::DataReaderImpl()
   , last_deadline_missed_total_count_(0)
   , deadline_queue_enabled_(false)
   , deadline_task_(make_rch<SporadicEvent>(TheServiceParticipant->event_dispatcher(), make_rch<DRIEvent>(rchandle_from(this), &DataReaderImpl::deadline_task)))
+  , next_lifespan_expiration_(MonotonicTimePoint::zero_value)
+  , lifespan_task_(make_rch<SporadicEvent>(TheServiceParticipant->event_dispatcher(),
+                                           make_rch<DRIEvent>(rchandle_from(this),
+                                                              &DataReaderImpl::lifespan_task)))
   , is_bit_(false)
   , always_get_history_(false)
   , statistics_enabled_(false)
@@ -136,6 +140,7 @@ DataReaderImpl::~DataReaderImpl()
   DBG_ENTRY_LVL("DataReaderImpl", "~DataReaderImpl", 6);
 
   deadline_task_->cancel();
+  lifespan_task_->cancel();
 
 #ifndef OPENDDS_SAFETY_PROFILE
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
@@ -1374,7 +1379,39 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     SubscriptionInstance_rch instance;
     if (!check_historic(sample)) break;
 
-    DataSampleHeader const & header = sample.header_;
+    const ReceivedDataSample* sample_for_processing = &sample;
+    ReceivedDataSample sample_with_lifespan;
+
+    // RTPS communicates Lifespan as writer QoS.  It is not required to be
+    // repeated as inline QoS on every DATA submessage, so attach the
+    // discovered writer's policy to the internal per-sample header.
+    if (!is_bit()
+        && sample.header_.message_id_ == SAMPLE_DATA
+        && !sample.header_.lifespan_duration_) {
+      WriterInfo_rch writer;
+      {
+        ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, writers_lock_);
+        const WriterMapType::const_iterator pos =
+          writers_.find(sample.header_.publication_id_);
+        if (pos != writers_.end()) {
+          writer = pos->second;
+        }
+      }
+      if (writer) {
+        const DDS::Duration_t lifespan =
+          writer->writer_qos_lifespan().duration;
+        if (!is_infinite(lifespan)) {
+          sample_with_lifespan = sample;
+          DataSampleHeader& header = sample_with_lifespan.header_;
+          header.lifespan_duration_ = true;
+          header.lifespan_duration_sec_ = lifespan.sec;
+          header.lifespan_duration_nanosec_ = lifespan.nanosec;
+          sample_for_processing = &sample_with_lifespan;
+        }
+      }
+    }
+
+    const DataSampleHeader& header = sample_for_processing->header_;
 
     this->writer_activity(header);
 
@@ -1397,7 +1434,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
     bool is_new_instance = false;
     bool filtered = false;
-    dds_demarshal(sample, publication_handle, instance, is_new_instance, filtered,
+    dds_demarshal(*sample_for_processing, publication_handle, instance, is_new_instance, filtered,
                   sample.header_.key_fields_only_ ? KEY_ONLY_MARSHALING : FULL_MARSHALING);
 
     // Per sample logging
@@ -2645,6 +2682,70 @@ void DataReaderImpl::post_read_or_take()
   if (subscriber) {
     subscriber->set_status_changed_flag(
       DDS::DATA_ON_READERS_STATUS, false);
+  }
+}
+
+void DataReaderImpl::schedule_lifespan(const ReceivedDataElement* sample)
+{
+  // sample_lock_ must be held.
+  const MonotonicTimePoint expiration = sample->expiration_time_;
+  if (expiration == MonotonicTimePoint::zero_value) {
+    return;
+  }
+
+  if (next_lifespan_expiration_ == MonotonicTimePoint::zero_value
+      || expiration < next_lifespan_expiration_) {
+    next_lifespan_expiration_ = expiration;
+    lifespan_task_->cancel();
+    const MonotonicTimePoint now = MonotonicTimePoint::now();
+    lifespan_task_->schedule(expiration > now
+      ? expiration - now : TimeDuration::zero_value);
+  }
+}
+
+void DataReaderImpl::lifespan_task(const MonotonicTimePoint& now)
+{
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+  next_lifespan_expiration_ = MonotonicTimePoint::zero_value;
+
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
+    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+         iter != instances_.end();) {
+      const SubscriptionInstance_rch instance = iter->second;
+      // Removing the last sample can release and erase this instance.
+      ++iter;
+      ReceivedDataElementList& samples = instance->rcvd_samples_;
+
+      for (ReceivedDataElement* item = samples.get_next(0); item;) {
+        ReceivedDataElement* const next = samples.get_next(item);
+        const MonotonicTimePoint expiration = item->expiration_time_;
+        if (expiration != MonotonicTimePoint::zero_value) {
+          if (expiration <= now) {
+            const bool instance_released = samples.remove(item);
+            item->dec_ref();
+            if (instance_released) {
+              break;
+            }
+          } else if (next_lifespan_expiration_ == MonotonicTimePoint::zero_value
+                     || expiration < next_lifespan_expiration_) {
+            next_lifespan_expiration_ = expiration;
+          }
+        }
+        item = next;
+      }
+    }
+  }
+
+  if (!have_sample_states(DDS::ANY_SAMPLE_STATE)) {
+    post_read_or_take();
+  }
+
+  if (next_lifespan_expiration_ != MonotonicTimePoint::zero_value) {
+    lifespan_task_->schedule(next_lifespan_expiration_ > now
+      ? next_lifespan_expiration_ - now : TimeDuration::zero_value);
   }
 }
 
