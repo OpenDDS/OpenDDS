@@ -215,6 +215,13 @@ OpenDDS::DCPS::ReceivedDataElementList::matches(CORBA::ULong sample_states) cons
 }
 
 OpenDDS::DCPS::ReceivedDataElement*
+OpenDDS::DCPS::ReceivedDataElementList::get_next(ReceivedDataElement* prev)
+{
+  OPENDDS_ASSERT(sanity_check(prev));
+  return prev ? prev->next_data_sample_ : head_;
+}
+
+OpenDDS::DCPS::ReceivedDataElement*
 OpenDDS::DCPS::ReceivedDataElementList::get_next_match(CORBA::ULong sample_states, ReceivedDataElement* prev)
 {
   OPENDDS_ASSERT(sanity_check(prev));
@@ -222,8 +229,11 @@ OpenDDS::DCPS::ReceivedDataElementList::get_next_match(CORBA::ULong sample_state
     return 0;
   }
   ReceivedDataElement* item = prev ? prev->next_data_sample_ : head_;
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
   for (; item != 0; item = item->next_data_sample_) {
     if ((item->sample_state_ & sample_states)
+      && (item->expiration_time_ == MonotonicTimePoint::zero_value
+        || item->expiration_time_ > now)
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
       && !item->coherent_change_
 #endif

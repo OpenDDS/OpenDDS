@@ -127,6 +127,12 @@ public:
     writer_qos_.ownership_strength.value = writer_qos_ownership_strength;
   }
 
+  DDS::LifespanQosPolicy writer_qos_lifespan() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return writer_qos_.lifespan;
+  }
+
   bool waiting_for_end_historic_samples() const
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);

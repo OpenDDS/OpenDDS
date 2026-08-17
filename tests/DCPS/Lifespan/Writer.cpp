@@ -97,6 +97,22 @@ Writer::svc ()
       ACE_OS::sleep(1);
     }
 
+  // Cache a fresh sample at the reader after association.  The listener
+  // deliberately leaves this sample unread so its Lifespan can expire.
+  Messenger::MessageDataWriter_var message_dw =
+    Messenger::MessageDataWriter::_narrow(writer_.in());
+  Messenger::Message message;
+  message.subject_id = 99;
+  message.from = "Comic Book Guy";
+  message.subject = "Review";
+  message.text = "Cached until Lifespan expires.";
+  message.count = ++count_;
+  const DDS::InstanceHandle_t handle = message_dw->register_instance(message);
+  if (message_dw->write(message, handle) != DDS::RETCODE_OK)
+    {
+      ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) ERROR: post-match write failed\n"), 1);
+    }
+
   this->start_ = true;
 
   // wait for datareader finish.

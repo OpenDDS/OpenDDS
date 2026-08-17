@@ -4322,15 +4322,14 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     Encoding encoding;
     DCPS::Message_Block_Ptr payload(sample.data(&mb_alloc_));
     Serializer ser(payload.get(), encoding);
-    DCPS::EncapsulationHeader encap;
-    if (!(ser >> encap)) {
+    const DCPS::EncapsulationReadStatus::Value read_status = read_encapsulation_header(ser, extensibility);
+    if (read_status == DCPS::EncapsulationReadStatus::HeaderError) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::Reader::data_received: "
                    "failed to deserialize encapsulation header\n"));
       }
       return;
-    }
-    if (!to_encoding(encoding, encap, extensibility)) {
+    } else if (read_status == DCPS::EncapsulationReadStatus::ExtensibilityMismatch) {
       if (log_level >= DCPS::LogLevel::Error) {
         ACE_ERROR((LM_ERROR,
                    "(%P|%t) ERROR: Sedp::Reader::data_received: "
@@ -4339,7 +4338,6 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
       }
       return;
     }
-    ser.encoding(encoding);
 
     data_received_i(sample, entity_id, ser, extensibility);
     break;

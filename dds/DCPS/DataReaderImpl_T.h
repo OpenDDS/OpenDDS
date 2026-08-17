@@ -930,8 +930,9 @@ namespace OpenDDS {
       static_cast<Endianness>(sample.header_.byte_order_));
 
     if (encapsulated) {
-      EncapsulationHeader encap;
-      if (!(ser >> encap)) {
+      const EncapsulationReadStatus::Value read_status =
+        read_encapsulation_header(ser, type_support_->base_extensibility());
+      if (read_status == EncapsulationReadStatus::HeaderError) {
         if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
             ACE_TEXT("%CDataReaderImpl::lookup_instance: ")
@@ -939,18 +940,18 @@ namespace OpenDDS {
             TraitsType::type_name()));
         }
         return;
-      }
-      Encoding encoding;
-      if (!to_encoding(encoding, encap, type_support_->base_extensibility())) {
+      } else if (read_status == EncapsulationReadStatus::ExtensibilityMismatch) {
         if (log_level >= LogLevel::Error) {
           ACE_ERROR((LM_ERROR,
                      "(%P|%t) ERROR: %CDataReaderImpl::lookup_instance: "
                      "to_encoding failed writer %C reader %C\n",
+                     TraitsType::type_name(),
                      LogGuid(sample.header_.publication_id_).c_str(),
                      LogGuid(subscription_id()).c_str()));
         }
         return;
       }
+      const Encoding& encoding = ser.encoding();
 
       if (decoding_modes_.find(encoding.kind()) == decoding_modes_.end()) {
         if (DCPS_debug_level >= 1) {
@@ -970,8 +971,6 @@ namespace OpenDDS {
           TraitsType::type_name(),
           Encoding::kind_to_string(encoding.kind()).c_str()));
       }
-
-      ser.encoding(encoding);
     }
 
     bool ser_ret = true;
@@ -1106,8 +1105,9 @@ protected:
       static_cast<Endianness>(sample.header_.byte_order_));
 
     if (encapsulated) {
-      EncapsulationHeader encap;
-      if (!(ser >> encap)) {
+      const EncapsulationReadStatus::Value read_status =
+        read_encapsulation_header(ser, type_support_->base_extensibility());
+      if (read_status == EncapsulationReadStatus::HeaderError) {
         if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR ")
             ACE_TEXT("%CDataReaderImpl::dds_demarshal: ")
@@ -1115,18 +1115,18 @@ protected:
             TraitsType::type_name()));
         }
         return;
-      }
-      Encoding encoding;
-      if (!to_encoding(encoding, encap, type_support_->base_extensibility())) {
+      } else if (read_status == EncapsulationReadStatus::ExtensibilityMismatch) {
         if (log_level >= LogLevel::Error) {
           ACE_ERROR((LM_ERROR,
                      "(%P|%t) ERROR: %CDataReaderImpl::dds_demarshal: "
                      "to_encoding failed writer %C reader %C\n",
+                     TraitsType::type_name(),
                      LogGuid(sample.header_.publication_id_).c_str(),
                      LogGuid(subscription_id()).c_str()));
         }
         return;
       }
+      const Encoding& encoding = ser.encoding();
 
       if (decoding_modes_.find(encoding.kind()) == decoding_modes_.end()) {
         if (DCPS_debug_level >= 1) {
@@ -1146,8 +1146,6 @@ protected:
           TraitsType::type_name(),
           Encoding::kind_to_string(encoding.kind()).c_str()));
       }
-
-      ser.encoding(encoding);
     }
 
     const bool key_only_marshaling =
@@ -2133,6 +2131,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
   // release it while status notifications temporarily release sample_lock_.
   ptr->inc_ref();
   instance_ptr->rcvd_strategy_->add(ptr);
+  schedule_lifespan(ptr);
 
   if (! is_dispose_msg  && ! is_unregister_msg
       && instance_ptr->rcvd_samples_.size() > get_depth())

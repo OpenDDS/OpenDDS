@@ -263,6 +263,30 @@ to_any_encoding(Encoding& encoding,
   return to_encoding_i(encoding, header, 0);
 }
 
+EncapsulationReadStatus::Value
+read_encapsulation_header(Serializer& s,
+                          EncapsulationHeader& header,
+                          Extensibility expected_extensibility)
+{
+  if (!(s >> header)) {
+    return EncapsulationReadStatus::HeaderError;
+  }
+  Encoding encoding;
+  if (!to_encoding(encoding, header, expected_extensibility)) {
+    return EncapsulationReadStatus::ExtensibilityMismatch;
+  }
+  s.encoding(encoding);
+  return EncapsulationReadStatus::Ok;
+}
+
+EncapsulationReadStatus::Value
+read_encapsulation_header(Serializer& s,
+                          Extensibility expected_extensibility)
+{
+  EncapsulationHeader header;
+  return read_encapsulation_header(s, header, expected_extensibility);
+}
+
 }
 }
 
