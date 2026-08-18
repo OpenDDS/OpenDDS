@@ -87,7 +87,8 @@ bool MulticastManager::join(const NetworkInterfaceAddress& nia,
 {
   bool joined = false;
 
-  if (joined_interfaces_.count(nia.name) == 0 && nia.is_ipv4()) {
+  if (multicast_group_address != NetworkAddress::default_IPV4 &&
+      joined_interfaces_.count(nia.name) == 0 && nia.is_ipv4()) {
     if (0 == multicast_socket.join(multicast_group_address.to_addr(), 1, nia.name.empty() ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nia.name.c_str()))) {
       joined_interfaces_.insert(nia.name);
       if (log_level >= LogLevel::Info) {
@@ -126,7 +127,8 @@ bool MulticastManager::join(const NetworkInterfaceAddress& nia,
   }
 
 #ifdef ACE_HAS_IPV6
-  if (ipv6_joined_interfaces_.count(nia.name) == 0 && nia.is_ipv6()) {
+  if (ipv6_multicast_group_address != NetworkAddress::default_IPV6 &&
+      ipv6_joined_interfaces_.count(nia.name) == 0 && nia.is_ipv6()) {
     // Windows 7 has an issue with different threads concurrently calling join for ipv6
     static ACE_Thread_Mutex ipv6_static_lock;
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g3, ipv6_static_lock, false);

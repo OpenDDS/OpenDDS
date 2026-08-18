@@ -64,6 +64,13 @@ RtpsDiscovery::Config::discovery_config()
     RtpsDiscovery_rch discovery = OpenDDS::DCPS::make_rch<RtpsDiscovery>(rtps_name);
     RtpsDiscoveryConfig_rch config = discovery->config();
 
+    const String address_family_key = config->config_key("ADDRESS_FAMILY");
+    if (config_store->has(address_family_key.c_str()) &&
+        !config->address_family(config_store->get(
+          address_family_key.c_str(), "").c_str())) {
+      return -1;
+    }
+
 #if OPENDDS_CONFIG_SECURITY
     if (config_store->has(config->config_key("IceTa").c_str())) {
       if (log_level >= DCPS::LogLevel::Warning) {

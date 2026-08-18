@@ -8,6 +8,7 @@
 
 #include "Spdp.h"
 
+#include <dds/DCPS/AddressFamily.h>
 #include <dds/DCPS/AtomicBool.h>
 #include <dds/DCPS/debug.h>
 
@@ -31,6 +32,10 @@ public:
   };
 
   RtpsDiscoveryConfig(const String& name);
+
+  DCPS::AddressFamily address_family() const;
+  bool address_family(DCPS::AddressFamily value);
+  bool address_family(const char* value);
 
   const String& config_prefix() const { return config_prefix_; }
   String config_key(const String& key) const;

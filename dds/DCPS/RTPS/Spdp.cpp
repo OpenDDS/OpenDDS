@@ -2296,12 +2296,11 @@ ParticipantData_t Spdp::build_local_pdata(
   // The OpenDDS publication/subscription data will have locators included.
   DCPS::LocatorSeq nonEmptyList(1);
   nonEmptyList.length(1);
-  nonEmptyList[0].kind = LOCATOR_KIND_UDPv4;
+  const bool ipv4 = DCPS::use_ipv4(config_->address_family());
+  nonEmptyList[0].kind = ipv4 ? LOCATOR_KIND_UDPv4 : LOCATOR_KIND_UDPv6;
   nonEmptyList[0].port = 12345;
-  std::memset(nonEmptyList[0].address, 0, 12);
-  nonEmptyList[0].address[12] = 127;
-  nonEmptyList[0].address[13] = 0;
-  nonEmptyList[0].address[14] = 0;
+  std::memset(nonEmptyList[0].address, 0, 16);
+  nonEmptyList[0].address[12] = ipv4 ? 127 : 0;
   nonEmptyList[0].address[15] = 1;
 
   const GuidPrefix_t& gp = guid_.guidPrefix;
@@ -2427,23 +2426,37 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
 
   multicast_interface_ = outer->disco_->multicast_interface();
 
-  if (!outer->config_->spdp_multicast_address(multicast_address_, outer->domain_)) {
-    throw std::runtime_error("failed to get valid multicast IPv4 address for SPDP");
+  const DCPS::AddressFamily address_family = outer->config_->address_family();
+  if (DCPS::use_ipv4(address_family)) {
+    if (!outer->config_->spdp_multicast_address(multicast_address_, outer->domain_)) {
+      throw std::runtime_error("failed to get valid multicast IPv4 address for SPDP");
+    }
+    send_addrs_.insert(multicast_address_);
   }
-  send_addrs_.insert(multicast_address_);
 #ifdef ACE_HAS_IPV6
-  if (!outer->config_->ipv6_spdp_multicast_address(multicast_ipv6_address_, outer->domain_)) {
-    throw std::runtime_error("failed to get valid multicast IPv4 address for SPDP");
+  if (DCPS::use_ipv6(address_family)) {
+    if (!outer->config_->ipv6_spdp_multicast_address(multicast_ipv6_address_, outer->domain_)) {
+      throw std::runtime_error("failed to get valid multicast IPv6 address for SPDP");
+    }
+    send_addrs_.insert(multicast_ipv6_address_);
   }
-  send_addrs_.insert(multicast_ipv6_address_);
 #endif
 
   const DCPS::NetworkAddressSet addrs = outer->config_->spdp_send_addrs();
-  send_addrs_.insert(addrs.begin(), addrs.end());
+  for (DCPS::NetworkAddressSet::const_iterator pos = addrs.begin(); pos != addrs.end(); ++pos) {
+    const int type = pos->to_addr().get_type();
+    if ((type == AF_INET && DCPS::use_ipv4(address_family))
+#ifdef ACE_HAS_IPV6
+        || (type == AF_INET6 && DCPS::use_ipv6(address_family))
+#endif
+        ) {
+      send_addrs_.insert(*pos);
+    }
+  }
 
   const DDS::UInt16 startingParticipantId = outer->ipv4_participant_port_id_;
   const DDS::UInt16 max_part_id = 119; // RTPS 2.5 9.6.2.3
-  while (!open_unicast_socket(outer->ipv4_participant_port_id_)) {
+  while (DCPS::use_ipv4(address_family) && !open_unicast_socket(outer->ipv4_participant_port_id_)) {
     if (outer->ipv4_participant_port_id_ == max_part_id && log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Spdp::SpdpTransport: "
         "participant id is going above max %u allowed by RTPS spec\n", max_part_id));
@@ -2459,8 +2472,10 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
   }
 
 #ifdef ACE_HAS_IPV6
-  outer->ipv6_participant_port_id_ = outer->ipv4_participant_port_id_;
-  while (!open_unicast_ipv6_socket(outer->ipv6_participant_port_id_)) {
+  outer->ipv6_participant_port_id_ = DCPS::use_ipv4(address_family) ?
+    outer->ipv4_participant_port_id_ : startingParticipantId;
+  while (DCPS::use_ipv6(address_family) &&
+         !open_unicast_ipv6_socket(outer->ipv6_participant_port_id_)) {
     ++outer->ipv6_participant_port_id_;
     if (outer->ipv4_participant_port_id_ == outer->ipv6_participant_port_id_) {
       throw std::runtime_error("could not find a free IPv6 unicast port for SPDP");
@@ -2469,13 +2484,19 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
 #endif
 
 #ifdef OPENDDS_SAFETY_PROFILE
-  if (outer->ipv4_participant_port_id_ > startingParticipantId && ACE_OS::getpid() == -1) {
+#ifdef ACE_HAS_IPV6
+  const DDS::UInt16 selected_participant_id = DCPS::use_ipv4(address_family) ?
+    outer->ipv4_participant_port_id_ : outer->ipv6_participant_port_id_;
+#else
+  const DDS::UInt16 selected_participant_id = outer->ipv4_participant_port_id_;
+#endif
+  if (selected_participant_id > startingParticipantId && ACE_OS::getpid() == -1) {
     // Since pids are not available, use the fact that we had to increment
     // participantId to modify the GUID's pid bytes.  This avoids GUID conflicts
     // between processes on the same host which start at the same time
     // (resulting in the same seed value for the random number generator).
-    hdr_.guidPrefix[8] = static_cast<CORBA::Octet>(outer->ipv4_participant_port_id_ >> 8);
-    hdr_.guidPrefix[9] = static_cast<CORBA::Octet>(outer->ipv4_participant_port_id_ & 0xFF);
+    hdr_.guidPrefix[8] = static_cast<CORBA::Octet>(selected_participant_id >> 8);
+    hdr_.guidPrefix[9] = static_cast<CORBA::Octet>(selected_participant_id & 0xFF);
     outer->guid_.guidPrefix[8] = hdr_.guidPrefix[8];
     outer->guid_.guidPrefix[9] = hdr_.guidPrefix[9];
   }
@@ -2648,9 +2669,13 @@ void Spdp::SpdpTransport::register_handlers(DCPS::ReactorWrapper& reactor_wrappe
     return;
   }
 
-  register_unicast_socket(reactor_wrapper, unicast_socket_, "IPV4");
+  if (unicast_socket_.get_handle() != ACE_INVALID_HANDLE) {
+    register_unicast_socket(reactor_wrapper, unicast_socket_, "IPV4");
+  }
 #ifdef ACE_HAS_IPV6
-  register_unicast_socket(reactor_wrapper, unicast_ipv6_socket_, "IPV6");
+  if (unicast_ipv6_socket_.get_handle() != ACE_INVALID_HANDLE) {
+    register_unicast_socket(reactor_wrapper, unicast_ipv6_socket_, "IPV6");
+  }
 #endif
 }
 
@@ -2763,11 +2788,19 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
   ACE_Reactor* reactor = reactor_task->get_reactor();
   const ACE_Reactor_Mask mask =
     ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL;
-  reactor->remove_handler(multicast_socket_.get_handle(), mask);
-  reactor->remove_handler(unicast_socket_.get_handle(), mask);
+  if (multicast_socket_.get_handle() != ACE_INVALID_HANDLE) {
+    reactor->remove_handler(multicast_socket_.get_handle(), mask);
+  }
+  if (unicast_socket_.get_handle() != ACE_INVALID_HANDLE) {
+    reactor->remove_handler(unicast_socket_.get_handle(), mask);
+  }
 #ifdef ACE_HAS_IPV6
-  reactor->remove_handler(multicast_ipv6_socket_.get_handle(), mask);
-  reactor->remove_handler(unicast_ipv6_socket_.get_handle(), mask);
+  if (multicast_ipv6_socket_.get_handle() != ACE_INVALID_HANDLE) {
+    reactor->remove_handler(multicast_ipv6_socket_.get_handle(), mask);
+  }
+  if (unicast_ipv6_socket_.get_handle() != ACE_INVALID_HANDLE) {
+    reactor->remove_handler(unicast_ipv6_socket_.get_handle(), mask);
+  }
 #endif
 
   if (config_reader_) {
@@ -3420,8 +3453,8 @@ Spdp::SpdpTransport::host_addresses() const
   ICE::AddressListType addresses;
   ACE_INET_Addr addr;
 
-  unicast_socket_.get_local_addr(addr);
-  if (addr != ACE_INET_Addr()) {
+  if (unicast_socket_.get_handle() != ACE_INVALID_HANDLE &&
+      unicast_socket_.get_local_addr(addr) == 0 && addr != ACE_INET_Addr()) {
     if (addr.is_any()) {
       ICE::AddressListType addrs;
       DCPS::get_interface_addrs(addrs);
@@ -3437,8 +3470,9 @@ Spdp::SpdpTransport::host_addresses() const
   }
 
 #ifdef ACE_HAS_IPV6
-  unicast_ipv6_socket_.get_local_addr(addr);
-  if (addr != ACE_INET_Addr()) {
+  if (unicast_ipv6_socket_.get_handle() != ACE_INVALID_HANDLE &&
+      unicast_ipv6_socket_.get_local_addr(addr) == 0 &&
+      addr != ACE_INET_Addr()) {
     if (addr.is_any()) {
       ICE::AddressListType addrs;
       DCPS::get_interface_addrs(addrs);
@@ -3720,10 +3754,12 @@ void Spdp::SpdpTransport::handle_network_interface_updates()
                                  multicast_interface_,
                                  reactor(),
                                  this,
-                                 multicast_address_,
+                                 DCPS::use_ipv4(outer->config_->address_family()) ?
+                                   multicast_address_ : DCPS::NetworkAddress::default_IPV4,
                                  multicast_socket_
 #ifdef ACE_HAS_IPV6
-                                 , multicast_ipv6_address_,
+                                 , DCPS::use_ipv6(outer->config_->address_family()) ?
+                                   multicast_ipv6_address_ : DCPS::NetworkAddress::default_IPV6,
                                  multicast_ipv6_socket_
 #endif
                                  )) {

@@ -13,6 +13,7 @@ find_package(OpenDDS REQUIRED NO_DEFAULTS TAO::tao_idl OpenDDS::opendds_idl ${dc
 include(opendds_build_helpers)
 
 add_library(OpenDDS_Dcps
+  DCPS/AddressFamily.cpp
   DCPS/BitPubListenerImpl.cpp
   DCPS/BuiltInTopicUtils.cpp
   DCPS/CoherentChangeControl.cpp
@@ -209,6 +210,7 @@ target_sources(OpenDDS_Dcps
     ../FACE/common.hpp
     ../FACE/types.hpp
     DCPS/AddressCache.h
+    DCPS/AddressFamily.h
     DCPS/AssociationData.h
     DCPS/AstNodeWrapper.h
     DCPS/Atomic.h

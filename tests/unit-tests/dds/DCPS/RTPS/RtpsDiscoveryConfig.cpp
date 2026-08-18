@@ -49,6 +49,31 @@ TEST(dds_DCPS_RTPS_RtpsDiscoveryConfig, use_rtps_duration_fraction)
   EXPECT_EQ(0u, t.rtps.participant_flags() & PFLAGS_RTPS_DURATION_FRACTION);
 }
 
+TEST(dds_DCPS_RTPS_RtpsDiscoveryConfig, address_family)
+{
+  AddressTest t;
+#ifdef ACE_HAS_IPV6
+  EXPECT_EQ(ADDRESS_FAMILY_DUAL, t.rtps.address_family());
+#else
+  EXPECT_EQ(ADDRESS_FAMILY_IPV4, t.rtps.address_family());
+#endif
+  EXPECT_TRUE(t.rtps.address_family("ipv4"));
+  EXPECT_EQ(ADDRESS_FAMILY_IPV4, t.rtps.address_family());
+#ifdef ACE_HAS_IPV6
+  EXPECT_TRUE(t.rtps.address_family("ipv6"));
+  EXPECT_EQ(ADDRESS_FAMILY_IPV6, t.rtps.address_family());
+#else
+  {
+    LogRestore lr;
+    log_level.set(LogLevel::None);
+    EXPECT_FALSE(t.rtps.address_family("ipv6"));
+  }
+#endif
+  EXPECT_TRUE(t.rtps.address_family("dual"));
+  EXPECT_EQ(ADDRESS_FAMILY_DUAL, t.rtps.address_family());
+  EXPECT_FALSE(t.rtps.address_family("invalid"));
+}
+
 TEST(dds_DCPS_RTPS_RtpsDiscoveryConfig, spdp_unicast_address)
 {
   const char* const default_addr = "0.0.0.0";

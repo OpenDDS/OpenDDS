@@ -1174,6 +1174,14 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
 
 .. sec:: rtps_discovery/<inst_name>
 
+  .. prop:: AddressFamily=ipv4|ipv6|dual
+    :default: ``dual`` when IPv6 support is built, otherwise ``ipv4``
+
+    Selects the network address families used by SPDP and SEDP.  ``ipv4`` and
+    ``ipv6`` restrict discovery sockets and advertised locators to that family.
+    ``dual`` enables every address family available in the build.  Selecting
+    ``ipv6`` in a build without IPv6 support is an error.
+
   .. prop:: ResendPeriod=<sec>
     :default: ``30``
 
@@ -2867,6 +2875,15 @@ Some implementation notes related to using the ``rtps_udp`` transport protocol a
 #. Transport auto-selection (negotiation) is partially supported with RTPS such that the ``rtps_udp`` transport goes through a handshaking phase only in reliable mode.
 
 .. sec:: transport@rtps_udp/<inst_name>
+
+  .. prop:: AddressFamily=ipv4|ipv6|dual
+    :default: ``dual`` when IPv6 support is built, otherwise ``ipv4``
+
+    Selects the network address families used by this transport instance.
+    ``ipv4`` and ``ipv6`` restrict sockets, multicast membership, and advertised
+    and accepted locators to that family.  ``dual`` enables every address family
+    available in the build.  Selecting ``ipv6`` in a build without IPv6 support
+    is an error.  This property is applied when the transport is initialized.
 
   .. prop:: use_multicast=<boolean>
     :default: ``1`` (enabled)
