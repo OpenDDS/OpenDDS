@@ -11,7 +11,9 @@
 #include "Updater.h"
 #include "DCPSInfo_i.h"
 
-#include "tao/CDR.h"
+#include <dds/DCPS/debug.h>
+
+#include <tao/CDR.h>
 
 #include <vector>
 
@@ -143,7 +145,14 @@ Manager::pushImage(const DImage& image)
 
     DDS::DomainParticipantQos* qos;
     ACE_NEW_NORETURN(qos, DDS::DomainParticipantQos);
-    in_cdr >> *qos;
+    if (!(in_cdr >> *qos)) {
+      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+          "(%P|%t) ERROR: UpdateManager::pushImage: failed to demarshal participant qos\n"));
+      }
+      delete qos;
+      continue;
+    }
     part_qos.push_back(qos);
 
     UParticipant* u_part;
@@ -173,7 +182,14 @@ Manager::pushImage(const DImage& image)
 
     DDS::TopicQos* qos;
     ACE_NEW_NORETURN(qos, DDS::TopicQos);
-    in_cdr >> *qos;
+    if (!(in_cdr >> *qos)) {
+      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+          "(%P|%t) ERROR: UpdateManager::pushImage: failed to demarshal topic qos\n"));
+      }
+      delete qos;
+      continue;
+    }
     topics_qos.push_back(qos);
 
     UTopic* u_topic;
@@ -323,7 +339,13 @@ Manager::add(const DTopic& topic)
                       , topic.topicQos.second.first);
 
   DDS::TopicQos qos;
-  in_cdr >> qos;
+  if (!(in_cdr >> qos)) {
+    if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+        "(%P|%t) ERROR: UpdateManager::add: failed to demarshal topic qos\n"));
+    }
+    return;
+  }
 
   // Pass topic info to infoRepo.
   info_->add_topic(topic.topicId, topic.domainId
@@ -343,7 +365,13 @@ Manager::add(const DParticipant& participant)
                       , participant.participantQos.second.first);
 
   DDS::DomainParticipantQos qos;
-  in_cdr >> qos;
+  if (!(in_cdr >> qos)) {
+    if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+        "(%P|%t) ERROR: UpdateManager::add: failed to demarshal participant qos\n"));
+    }
+    return;
+  }
 
   // Pass participant info to infoRepo.
   info_->add_domain_participant(participant.domainId
