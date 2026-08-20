@@ -4087,8 +4087,6 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
                            branches, discriminator, "", "", cxx.c_str());
 
     if (exten == extensibilitykind_mutable) {
-      // TODO: XTypes B will need to edit this code to add the pid for the end of mutable unions.
-      // Until this change is made, XCDR1 will NOT be functional
       be_global->impl_ <<
         "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
     }

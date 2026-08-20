@@ -2902,9 +2902,9 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToArrayDefaultXCDR1)
 
   XTypes::DynamicDataImpl data(dt);
   const unsigned char expected_cdr[] = {
-    0xc0, 0x00, 0x00, 0x08, 0, 0, 0, 0, 0, 0, 0, 0,
-    0xc0, 0x01, 0x00, 0x08, 0, 0, 0, 0, 0, 0, 0, 0,
-    0xc0, 0x02, 0x00, 0x02, 0, 0, 0, 0,
+    0x00, 0x00, 0x00, 0x08, 0, 0, 0, 0, 0, 0, 0, 0,
+    0x00, 0x01, 0x00, 0x08, 0, 0, 0, 0, 0, 0, 0, 0,
+    0x40, 0x02, 0x00, 0x02, 0, 0, 0, 0,
     0x3f, 0x02, 0x00, 0x00
   };
   assert_serialized_data(64, data, expected_cdr, xcdr1);
