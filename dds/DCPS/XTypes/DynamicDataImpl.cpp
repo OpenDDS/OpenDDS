@@ -4819,7 +4819,7 @@ bool DynamicDataImpl::set_default_discriminator_value(CORBA::Long& value,
 
 namespace DCPS {
 
-// XCDR2 serialization using the DynamicData API (intended to work with any implementation).
+// XCDR serialization using the DynamicData API (intended to work with any implementation).
 // The get functions must already handle try-construct behavior (in case of reading from
 // a XCDR backing store) or returning default value (in case the member data is missing
 // from the internal container). So it's guaranteed that some data for each valid
@@ -5918,7 +5918,7 @@ bool serialize_dynamic_struct(Serializer& ser, DDS::DynamicData_ptr data, Sample
       return false;
     }
   }
-  return true;
+  return extensibility != DDS::MUTABLE || ser.write_list_end_parameter_id();
 }
 
 bool serialize_dynamic_discriminator(Serializer& ser, DDS::DynamicData_ptr union_data,
@@ -6075,7 +6075,7 @@ bool serialize_dynamic_union(Serializer& ser, DDS::DynamicData_ptr data, Sample:
   }
 
   if (ext != Sample::Full) {
-    return true;
+    return extensibility != DDS::MUTABLE || ser.write_list_end_parameter_id();
   }
 
   // Selected branch
@@ -6084,7 +6084,8 @@ bool serialize_dynamic_union(Serializer& ser, DDS::DynamicData_ptr data, Sample:
   if (get_selected_union_branch(base_type, disc_val, has_branch, selected_md) != DDS::RETCODE_OK) {
     return false;
   }
-  return !has_branch || serialize_dynamic_member(ser, data, selected_md, extensibility, nested(ext));
+  return (!has_branch || serialize_dynamic_member(ser, data, selected_md, extensibility, nested(ext)))
+    && (extensibility != DDS::MUTABLE || ser.write_list_end_parameter_id());
 }
 
 bool serialize_dynamic_element(Serializer& ser, DDS::DynamicData_ptr col_data,

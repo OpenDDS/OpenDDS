@@ -2886,6 +2886,30 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToArrayDefault)
   verify_array_struct_default(dt, expected_cdr);
 }
 
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToArrayDefaultXCDR1)
+{
+  const XTypes::TypeIdentifier& ti =
+    DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableArrayStruct_xtag>();
+  const XTypes::TypeMap& type_map =
+    DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableArrayStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  ASSERT_NE(type_map.end(), it);
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  ASSERT_TRUE(dt);
+
+  XTypes::DynamicDataImpl data(dt);
+  const unsigned char expected_cdr[] = {
+    0xc0, 0x00, 0x00, 0x08, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xc0, 0x01, 0x00, 0x08, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xc0, 0x02, 0x00, 0x02, 0, 0, 0, 0,
+    0x3f, 0x02, 0x00, 0x00
+  };
+  assert_serialized_data(64, data, expected_cdr, xcdr1);
+}
+
 TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteStructWithNestedMembers)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableStruct_xtag>();

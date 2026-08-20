@@ -543,15 +543,16 @@ bool DynamicDataXcdrReadImpl::get_struct_item_count()
     }
   } else { // Mutable
     size_t dheader = 0;
-    if (!strm_.read_delimiter(dheader)) {
+    const bool xcdr1 = encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_1;
+    if (!xcdr1 && !strm_.read_delimiter(dheader)) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count: Read delimiter failed\n"));
       }
       return false;
     }
 
-    const size_t end_of_struct = strm_.rpos() + dheader;
-    while (strm_.rpos() < end_of_struct) {
+    const size_t end_of_struct = xcdr1 ? 0 : strm_.rpos() + dheader;
+    while (xcdr1 || strm_.rpos() < end_of_struct) {
       ACE_CDR::ULong member_id;
       size_t member_size;
       bool must_understand;
@@ -560,6 +561,9 @@ bool DynamicDataXcdrReadImpl::get_struct_item_count()
           ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count: read_parameter_id failed\n"));
         }
         return false;
+      }
+      if (xcdr1 && member_id == DCPS::Serializer::pid_list_end) {
+        break;
       }
       if (!strm_.skip(member_size)) {
         if (log_level >= LogLevel::Warning) {
@@ -2555,6 +2559,12 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDesc
       }
     }
 
+    if (ek == DDS::APPENDABLE &&
+        encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_1 &&
+        strm_.length() == 0) {
+      return DDS::RETCODE_NO_DATA;
+    }
+
     if (member_desc->is_optional()) {
       bool has_value = false;
       if (!(strm_ >> ACE_InputCDR::to_boolean(has_value))) {
@@ -2572,7 +2582,8 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDesc
     return DDS::RETCODE_OK;
   } else {
     size_t dheader = 0;
-    if (!strm_.read_delimiter(dheader)) {
+    const bool xcdr1 = encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_1;
+    if (!xcdr1 && !strm_.read_delimiter(dheader)) {
       if (DCPS::DCPS_debug_level >= 1) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::skip_to_struct_member -")
                    ACE_TEXT(" Failed to read DHEADER for member ID %d\n"), id));
@@ -2580,9 +2591,9 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDesc
       return DDS::RETCODE_ERROR;
     }
 
-    const size_t end_of_struct = strm_.rpos() + dheader;
+    const size_t end_of_struct = xcdr1 ? 0 : strm_.rpos() + dheader;
     while (true) {
-      if (strm_.rpos() >= end_of_struct) {
+      if (!xcdr1 && strm_.rpos() >= end_of_struct) {
         if (DCPS::DCPS_debug_level >= 1) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::skip_to_struct_member -")
                      ACE_TEXT(" Could not find a member with ID %d\n"), id));
@@ -2599,6 +2610,10 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDesc
                      ACE_TEXT(" Failed to read EMHEADER while finding member ID %d\n"), id));
         }
         return DDS::RETCODE_ERROR;
+      }
+
+      if (xcdr1 && member_id == DCPS::Serializer::pid_list_end) {
+        return DDS::RETCODE_NO_DATA;
       }
 
       if (member_id == id) {
@@ -3137,6 +3152,23 @@ bool DynamicDataXcdrReadImpl::skip_all()
   }
 
   const DDS::ExtensibilityKind extensibility = type_desc_->extensibility_kind();
+  if (strm_.encoding().kind() == DCPS::Encoding::KIND_XCDR1 &&
+      extensibility == DDS::MUTABLE) {
+    while (true) {
+      ACE_CDR::ULong member_id;
+      size_t member_size;
+      bool must_understand;
+      if (!strm_.read_parameter_id(member_id, member_size, must_understand)) {
+        return false;
+      }
+      if (member_id == DCPS::Serializer::pid_list_end) {
+        return true;
+      }
+      if (!strm_.skip(member_size)) {
+        return false;
+      }
+    }
+  }
   if (strm_.encoding().kind() == DCPS::Encoding::KIND_XCDR2 && (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE)) {
     size_t dheader;
     if (!strm_.read_delimiter(dheader)) {

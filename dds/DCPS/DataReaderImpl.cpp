@@ -3237,14 +3237,11 @@ DataReaderImpl::get_ice_endpoint()
 
 DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
 {
-  bool xcdr1_mutable = false;
   bool illegal_unaligned = false;
   for (CORBA::ULong i = 0; i < qos_.representation.value.length(); ++i) {
     Encoding::Kind encoding_kind;
     if (repr_to_encoding_kind(qos_.representation.value[i], encoding_kind)) {
-      if (encoding_kind == Encoding::KIND_XCDR1 && type_support_->max_extensibility() == MUTABLE) {
-        xcdr1_mutable = true;
-      } else if (encoding_kind == Encoding::KIND_UNALIGNED_CDR && cdr_encapsulation()) {
+      if (encoding_kind == Encoding::KIND_UNALIGNED_CDR && cdr_encapsulation()) {
         illegal_unaligned = true;
       } else {
         decoding_modes_.insert(encoding_kind);
@@ -3259,9 +3256,7 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
   if (decoding_modes_.empty()) {
     if (DCPS_debug_level) {
       DCPS::String error_message;
-      if (xcdr1_mutable) {
-        error_message = " Unsupported combination of XCDR1 and mutable";
-      } else if (illegal_unaligned) {
+      if (illegal_unaligned) {
         error_message = " Unaligned CDR is not allowed in rtps_udp transport";
       }
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "

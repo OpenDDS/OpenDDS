@@ -6,6 +6,7 @@
 
 #include <dds/DCPS/XTypes/TypeLookupService.h>
 #include <dds/DCPS/XTypes/DynamicTypeImpl.h>
+#include <dds/DCPS/XTypes/DynamicDataImpl.h>
 #include <dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h>
 
 #include <gtest/gtest.h>
@@ -927,6 +928,15 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Mutable_StructWithOptionalMembers)
   XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
 
   verify_index_mapping(&data);
+
+  const unsigned char xcdr1_struct[] = {
+    0xc0, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x03,
+    0x3f, 0x02, 0x00, 0x00
+  };
+  ACE_Message_Block xcdr1_msg(32);
+  xcdr1_msg.copy((const char*)xcdr1_struct, sizeof xcdr1_struct);
+  XTypes::DynamicDataXcdrReadImpl xcdr1_data(&xcdr1_msg, xcdr1, dt);
+  EXPECT_EQ(1u, xcdr1_data.get_item_count());
 }
 
 TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Mutable_ReadValueFromUnion)
@@ -1500,6 +1510,17 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Appendable_ReadValueFromStructXCDR
   XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
 
   verify_single_value_struct<AppendableSingleValueStruct>(&data);
+
+  // A shorter appendable type has no bytes for members appended by the local
+  // type.  DynamicDataImpl supplies the default value when its backing store
+  // reports that the trailing member is absent.
+  ACE_Message_Block short_msg(4);
+  short_msg.copy((const char*)single_value_struct, 4);
+  XTypes::DynamicDataXcdrReadImpl short_data(&short_msg, xcdr1, dt);
+  XTypes::DynamicDataImpl with_default(dt, &short_data);
+  CORBA::Long default_value = 1;
+  EXPECT_EQ(DDS::RETCODE_OK, with_default.get_int32_value(default_value, 1));
+  EXPECT_EQ(0, default_value);
 }
 
 TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Appendable_StructWithOptionalMembers)
