@@ -1315,8 +1315,18 @@ operator>>(Serializer& s, long double& x)
 ACE_INLINE bool
 operator>>(Serializer& s, ACE_InputCDR::to_boolean x)
 {
+  ACE_CDR::Octet tmp = 0;
   s.buffer_read(reinterpret_cast<char*>(&x.ref_), boolean_cdr_size, s.swap_bytes());
-  return s.good_bit();
+  if (!s.good_bit()) {
+    return false;
+  }
+  if (tmp & ~ACE_CDR::Octet(1)) {
+    x.ref_ = tmp != 0;
+    s.set_construction_status(Serializer::ElementConstructionFailure);
+    return false;
+  }
+  x.ref_ = tmp != 0;
+  return true;
 }
 
 ACE_INLINE bool
