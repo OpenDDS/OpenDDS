@@ -666,7 +666,7 @@ TEST(dds_DCPS_Serializer, parameter_id_xcdr1_flags)
     0x7f, 0x01, 0x00, 0x08, 0x00, 0x00, 0x00, 0x03, 0x00, 0x01, 0x00, 0x00
   };
   ASSERT_EQ(sizeof(expected), mb.length());
-  EXPECT_EQ(0, ACE_OS::memcmp(mb.rd_ptr(), expected, sizeof(expected)));
+  EXPECT_EQ(0, std::memcmp(mb.rd_ptr(), expected, sizeof(expected)));
 
   Serializer reader(&mb, enc);
   unsigned id;
