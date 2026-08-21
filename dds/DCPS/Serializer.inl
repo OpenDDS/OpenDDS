@@ -1316,7 +1316,7 @@ ACE_INLINE bool
 operator>>(Serializer& s, ACE_InputCDR::to_boolean x)
 {
   ACE_CDR::Octet tmp = 0;
-  s.buffer_read(reinterpret_cast<char*>(&x.ref_), boolean_cdr_size, s.swap_bytes());
+  s.buffer_read(reinterpret_cast<char*>(&tmp), boolean_cdr_size, s.swap_bytes());
   if (!s.good_bit()) {
     return false;
   }
