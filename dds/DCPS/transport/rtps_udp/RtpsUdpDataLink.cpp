@@ -320,7 +320,8 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
   }
 
   if (cfg->use_multicast()) {
-    if (!set_socket_multicast_ttl(unicast_socket_, cfg->ttl())) {
+    if (unicast_socket_.get_handle() != ACE_INVALID_HANDLE &&
+        !set_socket_multicast_ttl(unicast_socket_, cfg->ttl())) {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: ")
@@ -331,7 +332,8 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
       return false;
     }
 #ifdef ACE_HAS_IPV6
-    if (!set_socket_multicast_ttl(ipv6_unicast_socket_, cfg->ttl())) {
+    if (ipv6_unicast_socket_.get_handle() != ACE_INVALID_HANDLE &&
+        !set_socket_multicast_ttl(ipv6_unicast_socket_, cfg->ttl())) {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: ")
@@ -346,7 +348,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
 
   if (cfg->send_buffer_size() > 0) {
     int snd_size = cfg->send_buffer_size();
-    if (unicast_socket_.set_option(SOL_SOCKET,
+    if (unicast_socket_.get_handle() != ACE_INVALID_HANDLE && unicast_socket_.set_option(SOL_SOCKET,
                                 SO_SNDBUF,
                                 &snd_size,
                                 sizeof(snd_size)) < 0
@@ -360,7 +362,8 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
       return false;
     }
 #ifdef ACE_HAS_IPV6
-    if (ipv6_unicast_socket_.set_option(SOL_SOCKET,
+    if (ipv6_unicast_socket_.get_handle() != ACE_INVALID_HANDLE &&
+        ipv6_unicast_socket_.set_option(SOL_SOCKET,
                                         SO_SNDBUF,
                                         (void *) &snd_size,
                                         sizeof(snd_size)) < 0
@@ -378,7 +381,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
 
   if (cfg->rcv_buffer_size() > 0) {
     int rcv_size = cfg->rcv_buffer_size();
-    if (unicast_socket_.set_option(SOL_SOCKET,
+    if (unicast_socket_.get_handle() != ACE_INVALID_HANDLE && unicast_socket_.set_option(SOL_SOCKET,
                                 SO_RCVBUF,
                                 &rcv_size,
                                 sizeof(int)) < 0
@@ -392,7 +395,8 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
       return false;
     }
 #ifdef ACE_HAS_IPV6
-    if (ipv6_unicast_socket_.set_option(SOL_SOCKET,
+    if (ipv6_unicast_socket_.get_handle() != ACE_INVALID_HANDLE &&
+        ipv6_unicast_socket_.set_option(SOL_SOCKET,
                                         SO_RCVBUF,
                                         (void *) &rcv_size,
                                         sizeof(int)) < 0
@@ -463,10 +467,14 @@ void RtpsUdpDataLink::handle_network_interface_updates()
                              cfg->multicast_interface(),
                              get_reactor(),
                              receive_strategy().in(),
-                             cfg->multicast_group_address(tport->domain()),
+                             use_ipv4(cfg->address_family()) ?
+                               cfg->multicast_group_address(tport->domain()) :
+                               NetworkAddress::default_IPV4,
                              multicast_socket_
 #ifdef ACE_HAS_IPV6
-                             , cfg->ipv6_multicast_group_address(tport->domain()),
+                             , use_ipv6(cfg->address_family()) ?
+                               cfg->ipv6_multicast_group_address(tport->domain()) :
+                               NetworkAddress::default_IPV6,
                              ipv6_multicast_socket_
 #endif
                              );
