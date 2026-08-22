@@ -847,12 +847,6 @@ bool TypeAssignability::assignable_union(const MinimalTypeObject& ta,
       for (unsigned k = 0; k < label_seq_b.length(); ++k) {
         for (unsigned t = 0; t < label_seq_a.length(); ++t) {
           if (label_seq_b.members[k] == label_seq_a.members[t]) {
-            if (name_hash_equal(ta.union_type.member_seq[j].detail.name_hash,
-                                tb.union_type.member_seq[i].detail.name_hash) &&
-                ta.union_type.member_seq[j].common.member_id !=
-                tb.union_type.member_seq[i].common.member_id) {
-              return false;
-            }
             const TypeIdentifier& ti_a = ta.union_type.member_seq[j].common.type_id;
             const TypeIdentifier& ti_b = tb.union_type.member_seq[i].common.type_id;
             if (!assignable(ti_a, ti_b)) {
