@@ -1250,7 +1250,7 @@ bool DynamicDataXcdrReadImpl::encoded_member_size(DDS::DynamicType_ptr type, siz
   if (!max_size || max_size > strm_.length()) {
     return false;
   }
-  DynamicDataXcdrReadImpl probe(strm_, type, nested(extent_), max_size);
+  DynamicDataXcdrReadImpl probe(strm_, type, nested(extent_), ByteLimitTag(), max_size);
   const size_t start = probe.strm_.rpos();
   const bool skipped = probe.skip_member(type);
   const size_t consumed = skipped ? probe.strm_.rpos() - start : 0;
