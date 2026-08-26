@@ -167,6 +167,190 @@ TEST(dds_DCPS_Serializer, Serializer_swap_bytes_endianness)
   EXPECT_EQ(ser.endianness(), ENDIAN_NONNATIVE);
 }
 
+TEST(dds_DCPS_Serializer, Serializer_read_boolean_normalizes)
+{
+  Message_Block_Ptr mb(new ACE_Message_Block(4));
+  const Encoding enc;
+  Serializer writer(mb.get(), enc);
+  const ACE_CDR::Octet input[] = {0, 1, 2, 255};
+  ASSERT_TRUE(writer.write_octet_array(input, 4));
+
+  Serializer reader(mb.get(), enc);
+  const ACE_CDR::Octet expected[] = {0, 1, 1, 1};
+  for (size_t i = 0; i < 4; ++i) {
+    ACE_CDR::Boolean value = false;
+    ASSERT_TRUE(reader >> ACE_InputCDR::to_boolean(value));
+    ACE_CDR::Octet representation = 0;
+    std::memcpy(&representation, &value, boolean_cdr_size);
+    EXPECT_EQ(expected[i], representation);
+  }
+}
+
+TEST(dds_DCPS_Serializer, Serializer_read_boolean_array_normalizes)
+{
+  Message_Block_Ptr mb(new ACE_Message_Block(4));
+  const Encoding enc;
+  Serializer writer(mb.get(), enc);
+  const ACE_CDR::Octet input[] = {0, 1, 2, 255};
+  ASSERT_TRUE(writer.write_octet_array(input, 4));
+
+  Serializer reader(mb.get(), enc);
+  ACE_CDR::Boolean values[4] = {};
+  ASSERT_TRUE(reader.read_boolean_array(values, 4));
+
+  const ACE_CDR::Octet expected[] = {0, 1, 1, 1};
+  ACE_CDR::Octet representations[4] = {};
+  std::memcpy(representations, values, sizeof values);
+  for (size_t i = 0; i < 4; ++i) {
+    EXPECT_EQ(expected[i], representations[i]);
+  }
+}
+
+TEST(dds_DCPS_Serializer, Serializer_scoped_read_limit_nested)
+{
+  Message_Block_Ptr mb(new ACE_Message_Block(8));
+  const Encoding enc(Encoding::KIND_XCDR2, ENDIAN_BIG);
+  Serializer writer(mb.get(), enc);
+  const ACE_CDR::Octet input[] = {0, 1, 2, 3, 4, 5, 6, 7};
+  ASSERT_TRUE(writer.write_octet_array(input, 8));
+
+  Serializer reader(mb.get(), enc);
+  {
+    Serializer::ScopedReadLimit outer(reader, 6);
+    ASSERT_TRUE(outer.valid());
+    EXPECT_EQ(6u, reader.length());
+    ACE_CDR::Octet value[2];
+    ASSERT_TRUE(reader.read_octet_array(value, 2));
+    {
+      Serializer::ScopedReadLimit inner(reader, 2);
+      ASSERT_TRUE(inner.valid());
+      ASSERT_TRUE(reader.read_octet_array(value, 2));
+      EXPECT_EQ(0u, inner.remaining());
+    }
+    EXPECT_EQ(2u, outer.remaining());
+    ASSERT_TRUE(outer.skip_to_end());
+  }
+  EXPECT_EQ(2u, reader.length());
+  EXPECT_EQ(6u, reader.rpos());
+}
+
+TEST(dds_DCPS_Serializer, Serializer_scoped_read_limit_rejects_crossing)
+{
+  Message_Block_Ptr mb(new ACE_Message_Block(8));
+  const Encoding enc(Encoding::KIND_XCDR2, ENDIAN_BIG);
+  Serializer writer(mb.get(), enc);
+  const ACE_CDR::Octet input[] = {0, 1, 2, 3, 4, 5, 6, 7};
+  ASSERT_TRUE(writer.write_octet_array(input, 8));
+
+  Serializer reader(mb.get(), enc);
+  Serializer::ScopedReadLimit limit(reader, 3);
+  ASSERT_TRUE(limit.valid());
+  ACE_CDR::ULong value = 0;
+  EXPECT_FALSE(reader >> value);
+  EXPECT_FALSE(reader.good_bit());
+  EXPECT_EQ(0u, reader.rpos());
+}
+
+TEST(dds_DCPS_Serializer, Serializer_scoped_read_limit_skips_remainder)
+{
+  Message_Block_Ptr mb(new ACE_Message_Block(4));
+  const Encoding enc;
+  Serializer writer(mb.get(), enc);
+  const ACE_CDR::Octet input[] = {0, 1, 2, 3};
+  ASSERT_TRUE(writer.write_octet_array(input, 4));
+
+  Serializer reader(mb.get(), enc);
+  {
+    Serializer::ScopedReadLimit limit(reader, 3, true, true);
+    ASSERT_TRUE(limit.valid());
+    ACE_CDR::Octet value = 0;
+    ASSERT_TRUE(reader >> ACE_InputCDR::to_octet(value));
+    EXPECT_EQ(0, value);
+  }
+  EXPECT_EQ(3u, reader.rpos());
+  EXPECT_EQ(1u, reader.length());
+}
+
+TEST(dds_DCPS_Serializer, Serializer_check_size)
+{
+  Message_Block_Ptr mb(new ACE_Message_Block(12));
+  const Encoding enc(Encoding::KIND_XCDR2, ENDIAN_BIG);
+  Serializer writer(mb.get(), enc);
+  const ACE_CDR::Octet input[12] = {};
+  ASSERT_TRUE(writer.write_octet_array(input, 12));
+
+  Serializer reader(mb.get(), enc);
+  ACE_CDR::Octet value = 0;
+  ASSERT_TRUE(reader >> ACE_InputCDR::to_octet(value));
+  EXPECT_TRUE(reader.check_size(2, uint32_cdr_size, uint32_cdr_size));
+  EXPECT_FALSE(reader.check_size(3, uint32_cdr_size, uint32_cdr_size));
+  EXPECT_FALSE(reader.good_bit());
+}
+
+TEST(dds_DCPS_Serializer, Serializer_check_size_overflow)
+{
+  ACE_Message_Block mb(1);
+  const ACE_CDR::Octet value = 0;
+  ASSERT_EQ(0, mb.copy(reinterpret_cast<const char*>(&value), 1));
+  Serializer reader(&mb, Encoding());
+  EXPECT_FALSE(reader.check_size((std::numeric_limits<size_t>::max)(), 2));
+  EXPECT_FALSE(reader.good_bit());
+}
+
+TEST(dds_DCPS_Serializer, Serializer_read_limit_in_rdstate)
+{
+  Message_Block_Ptr mb(new ACE_Message_Block(8));
+  Serializer writer(mb.get(), Encoding());
+  const ACE_CDR::Octet input[8] = {};
+  ASSERT_TRUE(writer.write_octet_array(input, 8));
+
+  Serializer reader(mb.get(), Encoding());
+  const Serializer::RdState unrestricted = reader.rdstate();
+  ASSERT_TRUE(reader.set_read_limit(3));
+  const Serializer::RdState restricted = reader.rdstate();
+  EXPECT_EQ(3u, reader.length());
+
+  reader.rdstate(unrestricted);
+  EXPECT_EQ(8u, reader.length());
+  reader.rdstate(restricted);
+  EXPECT_EQ(3u, reader.length());
+}
+
+TEST(dds_DCPS_Serializer, Serializer_scoped_read_limit_rejects_skip)
+{
+  Message_Block_Ptr mb(new ACE_Message_Block(8));
+  const Encoding enc;
+  Serializer writer(mb.get(), enc);
+  const ACE_CDR::Octet input[] = {0, 1, 2, 3, 4, 5, 6, 7};
+  ASSERT_TRUE(writer.write_octet_array(input, 8));
+
+  Serializer reader(mb.get(), enc);
+  Serializer::ScopedReadLimit limit(reader, 3);
+  ASSERT_TRUE(limit.valid());
+  EXPECT_FALSE(reader.skip(4));
+  EXPECT_FALSE(reader.good_bit());
+  EXPECT_EQ(0u, reader.rpos());
+}
+
+TEST(dds_DCPS_Serializer, Serializer_scoped_read_limit_rejects_alignment)
+{
+  Message_Block_Ptr mb(new ACE_Message_Block(8));
+  const Encoding enc(Encoding::KIND_XCDR2, ENDIAN_BIG);
+  Serializer writer(mb.get(), enc);
+  const ACE_CDR::Octet input[] = {0, 1, 2, 3, 4, 5, 6, 7};
+  ASSERT_TRUE(writer.write_octet_array(input, 8));
+
+  Serializer reader(mb.get(), enc);
+  Serializer::ScopedReadLimit limit(reader, 3);
+  ASSERT_TRUE(limit.valid());
+  ACE_CDR::Octet octet = 0;
+  ASSERT_TRUE(reader >> ACE_InputCDR::to_octet(octet));
+  ACE_CDR::ULong value = 0;
+  EXPECT_FALSE(reader >> value);
+  EXPECT_FALSE(reader.good_bit());
+  EXPECT_EQ(1u, reader.rpos());
+}
+
 TEST(dds_DCPS_Serializer, Serializer_align_context_basic_reference)
 {
   ACE_Message_Block amb(64);
@@ -532,6 +716,22 @@ TEST(dds_DCPS_Serializer, Serializer_test_bad_wstring)
   ASSERT_EQ(0, str);
 }
 
+TEST(dds_DCPS_Serializer, Serializer_test_odd_wstring_bytecount)
+{
+  Message_Block_Ptr amb(new ACE_Message_Block(7));
+  const Encoding enc(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
+  Serializer ser_w(amb.get(), enc);
+  const ACE_CDR::Octet value[] = {0x41, 0, 0x42};
+  ASSERT_TRUE(ser_w << ACE_CDR::ULong(sizeof value));
+  ASSERT_TRUE(ser_w.write_octet_array(value, sizeof value));
+
+  Serializer ser(amb.get(), enc);
+  ACE_CDR::WChar* str = 0;
+  ASSERT_EQ(0u, ser.read_string(str));
+  ASSERT_FALSE(ser.good_bit());
+  ASSERT_EQ(0, str);
+}
+
 TEST(dds_DCPS_Serializer, Serializer_test_bad_string2)
 {
   static const ACE_CDR::Octet x[] = {1, 0, 0, 0, 1};
@@ -722,6 +922,38 @@ TEST(dds_DCPS_Serializer, parameter_id_xcdr1_serialized_size)
   serialized_size_list_end_parameter_id(enc, size, running_size,
                                         previous_header_extended);
   EXPECT_EQ(131124u, size);
+}
+
+TEST(dds_DCPS_Serializer, read_parameter_id_xcdr1_short_extended_header)
+{
+  const unsigned char xcdr[] = {
+    0x3f, 0x01, // PID_EXTENDED
+    0x00, 0x07  // Too short to contain the long ID and size
+  };
+  ACE_Message_Block mb(sizeof xcdr);
+  ASSERT_EQ(0, mb.copy(reinterpret_cast<const char*>(xcdr), sizeof xcdr));
+  const Encoding enc(Encoding::KIND_XCDR1, ENDIAN_BIG);
+  Serializer ser(&mb, enc);
+  unsigned id = 0;
+  size_t size = 0;
+  bool must_understand = false;
+  EXPECT_FALSE(ser.read_parameter_id(id, size, must_understand));
+  EXPECT_FALSE(ser.good_bit());
+}
+
+TEST(dds_DCPS_Serializer, read_delimiter_larger_than_input)
+{
+  const unsigned char xcdr[] = {
+    0x00, 0x00, 0x00, 0x05,
+    0x00, 0x00, 0x00, 0x00
+  };
+  ACE_Message_Block mb(sizeof xcdr);
+  ASSERT_EQ(0, mb.copy(reinterpret_cast<const char*>(xcdr), sizeof xcdr));
+  const Encoding enc(Encoding::KIND_XCDR2, ENDIAN_BIG);
+  Serializer ser(&mb, enc);
+  size_t size = 0;
+  EXPECT_FALSE(ser.read_delimiter(size));
+  EXPECT_FALSE(ser.good_bit());
 }
 
 namespace {

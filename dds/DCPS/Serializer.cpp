@@ -22,6 +22,7 @@
 #include <ace/Log_Msg.h>
 
 #include <cstdlib>
+#include <limits>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -128,6 +129,7 @@ Serializer::Serializer(ACE_Message_Block* chain, const Encoding& enc)
   , align_rshift_(0)
   , align_wshift_(0)
   , rpos_(0)
+  , read_limit_((std::numeric_limits<size_t>::max)())
   , wpos_(0)
 {
   encoding(enc);
@@ -142,6 +144,7 @@ Serializer::Serializer(ACE_Message_Block* chain, Encoding::Kind kind,
   , align_rshift_(0)
   , align_wshift_(0)
   , rpos_(0)
+  , read_limit_((std::numeric_limits<size_t>::max)())
   , wpos_(0)
 {
   encoding(Encoding(kind, endianness));
@@ -156,6 +159,7 @@ Serializer::Serializer(ACE_Message_Block* chain,
   , align_rshift_(0)
   , align_wshift_(0)
   , rpos_(0)
+  , read_limit_((std::numeric_limits<size_t>::max)())
   , wpos_(0)
 {
   encoding(Encoding(kind, swap_bytes));
@@ -164,6 +168,47 @@ Serializer::Serializer(ACE_Message_Block* chain,
 
 Serializer::~Serializer()
 {
+}
+
+Serializer::ScopedReadLimit::ScopedReadLimit(Serializer& ser, size_t size,
+                                             bool enabled, bool skip_remainder)
+  : ser_(ser)
+  , previous_limit_(ser.read_limit_)
+  , end_(ser.rpos_)
+  , enabled_(enabled)
+  , skip_remainder_(skip_remainder)
+  , valid_(false)
+{
+  if (!enabled_) {
+    valid_ = ser.good_bit_;
+    return;
+  }
+  const size_t max = (std::numeric_limits<size_t>::max)();
+  if (ser.good_bit_ && size <= ser.length() && size <= max - ser.rpos_) {
+    end_ = ser.rpos_ + size;
+    ser.read_limit_ = end_;
+    valid_ = true;
+  } else {
+    ser.good_bit_ = false;
+  }
+}
+
+Serializer::ScopedReadLimit::~ScopedReadLimit()
+{
+  if (enabled_ && skip_remainder_ && valid_ && ser_.good_bit_) {
+    skip_to_end();
+  }
+  ser_.read_limit_ = previous_limit_;
+}
+
+size_t Serializer::ScopedReadLimit::remaining() const
+{
+  return enabled_ && valid_ && ser_.rpos_ <= end_ ? end_ - ser_.rpos_ : 0;
+}
+
+bool Serializer::ScopedReadLimit::skip_to_end()
+{
+  return enabled_ && valid_ && ser_.good_bit_ && ser_.skip(remaining());
 }
 
 Serializer::ScopedAlignmentContext::ScopedAlignmentContext(Serializer& ser, size_t min_read)
@@ -405,6 +450,10 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
   //
   ACE_CDR::ULong length = 0;
   if (current_ && bytecount <= current_->total_length()) {
+    if (bytecount % char16_cdr_size) {
+      good_bit_ = false;
+      return 0;
+    }
     length = bytecount / char16_cdr_size;
     dest = str_alloc(length);
 
@@ -496,13 +545,17 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
 
     // If extended, get the "long" id and size
     if (short_id == pid_extended) {
+      if (short_size < 8u) {
+        good_bit_ = false;
+        return false;
+      }
       ACE_CDR::ULong emheader, long_size;
       if (!(*this >> emheader) || !(*this >> long_size)) {
         return false;
       }
       const unsigned short_size_left = short_size - 8u;
-      if (short_size_left) {
-        skip(short_size_left);
+      if (short_size_left && !skip(short_size_left)) {
+        return false;
       }
       id = emheader & MEMBER_ID_MASK;
       size = long_size;
@@ -536,13 +589,18 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
         size = next_int;
         break;
       case 5:
-        size = uint32_cdr_size + next_int;
-        break;
       case 6:
-        size = uint32_cdr_size + next_int * 4;
-        break;
       case 7:
-        size = uint32_cdr_size + next_int * 8;
+        {
+          const size_t multiplier = lc == 5 ? 1u : lc == 6 ? 4u : 8u;
+          const size_t next = next_int;
+          const size_t max = (std::numeric_limits<size_t>::max)();
+          if (next > (max - uint32_cdr_size) / multiplier) {
+            good_bit_ = false;
+            return false;
+          }
+          size = uint32_cdr_size + next * multiplier;
+        }
         break;
       }
     }

@@ -559,6 +559,10 @@ bool DynamicDataXcdrReadImpl::get_struct_item_count()
       }
       return false;
     }
+    DCPS::Serializer::ScopedReadLimit read_limit(strm_, dheader, true, true);
+    if (!read_limit.valid()) {
+      return false;
+    }
 
     const size_t end_of_struct = xcdr1 ? 0 : strm_.rpos() + dheader;
     while (xcdr1 || strm_.rpos() < end_of_struct) {
@@ -766,6 +770,10 @@ DDS::UInt32 DynamicDataXcdrReadImpl::get_item_count()
         if (log_level >= LogLevel::Warning) {
           ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count: read delimiter failed\n"));
         }
+        return 0;
+      }
+      DCPS::Serializer::ScopedReadLimit read_limit(strm_, dheader, true, true);
+      if (!read_limit.valid()) {
         return 0;
       }
       const size_t end_of_map = strm_.rpos() + dheader;
@@ -1110,6 +1118,9 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_value_from_union(
     if (!strm_.read_parameter_id(member_id, member_size, must_understand)) {
       return DDS::RETCODE_ERROR;
     }
+    if (!strm_.set_read_limit(member_size)) {
+      return DDS::RETCODE_ERROR;
+    }
   }
 
   if (member_tk == MemberTypeKind) {
@@ -1259,6 +1270,9 @@ bool DynamicDataXcdrReadImpl::skip_to_map_entry(MemberId id, bool skip_key, size
     size_t dheader;
     ACE_CDR::ULong index;
     if (!strm_.read_delimiter(dheader) || !get_index_from_id(id, index, ACE_UINT32_MAX)) {
+      return false;
+    }
+    if (!strm_.set_read_limit(dheader)) {
       return false;
     }
     const size_t end_of_map = strm_.rpos() + dheader;
@@ -1777,6 +1791,10 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
             good = false;
             break;
           }
+          if (!strm_.set_read_limit(size)) {
+            good = false;
+            break;
+          }
         }
         CORBA::release(value);
         value = new DynamicDataXcdrReadImpl(strm_, disc_type, nested(extent_));
@@ -1794,6 +1812,10 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
         size_t size;
         bool must_understand;
         if (!strm_.read_parameter_id(mem_id, size, must_understand)) {
+          good = false;
+          break;
+        }
+        if (!strm_.set_read_limit(size)) {
           good = false;
           break;
         }
@@ -2255,6 +2277,9 @@ bool DynamicDataXcdrReadImpl::get_values_from_union(SequenceType& value, MemberI
     if (!strm_.read_parameter_id(member_id, member_size, must_understand)) {
       return false;
     }
+    if (!strm_.set_read_limit(member_size)) {
+      return false;
+    }
   }
 
   if (elem_tk == ElementTypeKind) {
@@ -2561,6 +2586,9 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDesc
       }
       return DDS::RETCODE_ERROR;
     }
+    if (xcdr2_appendable && !strm_.set_read_limit(dheader)) {
+      return DDS::RETCODE_ERROR;
+    }
     const size_t end_of_struct = strm_.rpos() + dheader;
 
     for (ACE_CDR::ULong i = 0; i < member_desc->index(); ++i) {
@@ -2631,6 +2659,9 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDesc
       }
       return DDS::RETCODE_ERROR;
     }
+    if (!strm_.set_read_limit(dheader)) {
+      return DDS::RETCODE_ERROR;
+    }
 
     const size_t end_of_struct = xcdr1 ? 0 : strm_.rpos() + dheader;
     while (true) {
@@ -2658,6 +2689,9 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDesc
       }
 
       if (member_id == id) {
+        if (!strm_.set_read_limit(member_size)) {
+          return DDS::RETCODE_ERROR;
+        }
         return DDS::RETCODE_OK;
       }
 
@@ -3035,12 +3069,15 @@ void DynamicDataXcdrReadImpl::release_chains()
 
 bool DynamicDataXcdrReadImpl::read_discriminator(const DDS::DynamicType_ptr disc_type, DDS::ExtensibilityKind union_ek, ACE_CDR::Long& label)
 {
+  size_t member_size = 0;
   if (union_ek == DDS::MUTABLE) {
     unsigned id;
-    size_t size;
     bool must_understand;
-    if (!strm_.read_parameter_id(id, size, must_understand)) { return false; }
+    if (!strm_.read_parameter_id(id, member_size, must_understand)) { return false; }
   }
+  DCPS::Serializer::ScopedReadLimit member_limit(strm_, member_size,
+    union_ek == DDS::MUTABLE, true);
+  if (!member_limit.valid()) { return false; }
 
   const TypeKind disc_tk = disc_type->get_kind();
   switch (disc_tk) {
