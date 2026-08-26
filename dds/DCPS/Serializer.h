@@ -349,6 +349,16 @@ public:
   /// Number of bytes left to read in message block chain
   size_t length() const;
 
+  /**
+   * Verify that an array-like value fits in the remaining input before its
+   * destination container is allocated.  This accounts for the alignment of
+   * the first element and rejects size_t multiplication overflow.
+   */
+  bool check_size(size_t count, size_t element_size, size_t element_alignment = 1);
+
+  /// Permanently narrow the active read region starting at the current position.
+  bool set_read_limit(size_t size);
+
   typedef ACE_CDR::Char* (*StrAllocate)(ACE_CDR::ULong);
   typedef void (*StrFree)(ACE_CDR::Char*);
   typedef ACE_CDR::WChar* (*WStrAllocate)(ACE_CDR::ULong);
@@ -683,6 +693,33 @@ public:
     const size_t wblock_;
   };
 
+  /**
+   * Restrict reads to a nested region of the input stream.  The limit starts
+   * at the current read position and is restored when this object is
+   * destroyed.  Reads, skips, and alignment cannot cross the active limit.
+   */
+  class OpenDDS_Dcps_Export ScopedReadLimit {
+  public:
+    ScopedReadLimit(Serializer& ser, size_t size, bool enabled = true,
+                    bool skip_remainder = false);
+    ~ScopedReadLimit();
+
+    bool valid() const { return valid_; }
+    size_t remaining() const;
+    bool skip_to_end();
+
+  private:
+    ScopedReadLimit(const ScopedReadLimit&);
+    ScopedReadLimit& operator=(const ScopedReadLimit&);
+
+    Serializer& ser_;
+    const size_t previous_limit_;
+    size_t end_;
+    const bool enabled_;
+    const bool skip_remainder_;
+    bool valid_;
+  };
+
   template <typename T>
   bool peek_helper(ACE_Message_Block* const block, size_t bytes, T& t)
   {
@@ -727,10 +764,12 @@ public:
   // This is used by DynamicData and must have all reading-related members of
   // of Serializer for DynamicData to work correctly.
   struct RdState {
-    explicit RdState(unsigned char shift = 0, size_t pos = 0)
-      : align_rshift(shift), rpos(pos) {}
+    explicit RdState(unsigned char shift = 0, size_t pos = 0,
+                     size_t limit = (std::numeric_limits<size_t>::max)())
+      : align_rshift(shift), rpos(pos), read_limit(limit) {}
     unsigned char align_rshift;
     size_t rpos;
+    size_t read_limit;
   };
 
   RdState rdstate() const;
@@ -812,6 +851,9 @@ private:
 
   /// Logical reading position of the stream.
   size_t rpos_;
+
+  /// Absolute logical position beyond which reads are not permitted.
+  size_t read_limit_;
 
   /// Logical writing position of the stream.
   size_t wpos_;

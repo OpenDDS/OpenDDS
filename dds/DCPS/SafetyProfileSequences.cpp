@@ -55,7 +55,7 @@ bool operator>>(Serializer& strm, CORBASeq::BooleanSeq& seq)
   if (!(strm >> length)) {
     return false;
   }
-  if (length > strm.length()) {
+  if (!strm.check_size(length, boolean_cdr_size, boolean_cdr_size)) {
     if (DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Invalid sequence length (%u)\n"), length));
     }
@@ -107,7 +107,7 @@ bool operator>>(Serializer& strm, CORBASeq::CharSeq& seq)
   if (!(strm >> length)) {
     return false;
   }
-  if (length > strm.length()) {
+  if (!strm.check_size(length, char8_cdr_size, char8_cdr_size)) {
     if (DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Invalid sequence length (%u)\n"), length));
     }
@@ -160,7 +160,7 @@ bool operator>>(Serializer& strm, CORBASeq::DoubleSeq& seq)
   if (!(strm >> length)) {
     return false;
   }
-  if (length > strm.length()) {
+  if (!strm.check_size(length, float64_cdr_size, float64_cdr_size)) {
     if (DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Invalid sequence length (%u)\n"), length));
     }
@@ -212,7 +212,7 @@ bool operator>>(Serializer& strm, CORBASeq::FloatSeq& seq)
   if (!(strm >> length)) {
     return false;
   }
-  if (length > strm.length()) {
+  if (!strm.check_size(length, float32_cdr_size, float32_cdr_size)) {
     if (DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Invalid sequence length (%u)\n"), length));
     }
@@ -264,7 +264,7 @@ bool operator>>(Serializer& strm, CORBASeq::Int8Seq& seq)
   if (!(strm >> length)) {
     return false;
   }
-  if (length > strm.length()) {
+  if (!strm.check_size(length, int8_cdr_size, int8_cdr_size)) {
     if (DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Invalid sequence length (%u)\n"), length));
     }
@@ -317,7 +317,7 @@ bool operator>>(Serializer& strm, CORBASeq::LongDoubleSeq& seq)
   if (!(strm >> length)) {
     return false;
   }
-  if (length > strm.length()) {
+  if (!strm.check_size(length, float128_cdr_size, float128_cdr_size)) {
     if (DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Invalid sequence length (%u)\n"), length));
     }
@@ -370,7 +370,7 @@ bool operator>>(Serializer& strm, CORBASeq::LongLongSeq& seq)
   if (!(strm >> length)) {
     return false;
   }
-  if (length > strm.length()) {
+  if (!strm.check_size(length, int64_cdr_size, int64_cdr_size)) {
     if (DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Invalid sequence length (%u)\n"), length));
     }
@@ -422,7 +422,7 @@ bool operator>>(Serializer& strm, CORBASeq::LongSeq& seq)
   if (!(strm >> length)) {
     return false;
   }
-  if (length > strm.length()) {
+  if (!strm.check_size(length, int32_cdr_size, int32_cdr_size)) {
     if (DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Invalid sequence length (%u)\n"), length));
     }
@@ -474,7 +474,7 @@ bool operator>>(Serializer& strm, CORBASeq::OctetSeq& seq)
   if (!(strm >> length)) {
     return false;
   }
-  if (length > strm.length()) {
+  if (!strm.check_size(length, byte_cdr_size, byte_cdr_size)) {
     if (DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Invalid sequence length (%u)\n"), length));
     }
@@ -526,7 +526,7 @@ bool operator>>(Serializer& strm, CORBASeq::ShortSeq& seq)
   if (!(strm >> length)) {
     return false;
   }
-  if (length > strm.length()) {
+  if (!strm.check_size(length, int16_cdr_size, int16_cdr_size)) {
     if (DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Invalid sequence length (%u)\n"), length));
     }
@@ -600,12 +600,17 @@ bool operator>>(Serializer& strm, CORBASeq::StringSeq& seq)
       return false;
     }
   }
+  Serializer::ScopedReadLimit read_limit(strm, total_size,
+    encoding.xcdr_version() == Encoding::XCDR_VERSION_2, true);
+  if (!read_limit.valid()) {
+    return false;
+  }
   const size_t end_of_seq = strm.rpos() + total_size;
   CORBA::ULong length;
   if (!(strm >> length)) {
     return false;
   }
-  if (length > strm.length()) {
+  if (!strm.check_size(length, uint32_cdr_size, uint32_cdr_size)) {
     if (DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Invalid sequence length (%u)\n"), length));
     }
@@ -682,7 +687,7 @@ bool operator>>(Serializer& strm, CORBASeq::UInt8Seq& seq)
   if (!(strm >> length)) {
     return false;
   }
-  if (length > strm.length()) {
+  if (!strm.check_size(length, uint8_cdr_size, uint8_cdr_size)) {
     if (DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Invalid sequence length (%u)\n"), length));
     }
@@ -735,7 +740,7 @@ bool operator>>(Serializer& strm, CORBASeq::ULongLongSeq& seq)
   if (!(strm >> length)) {
     return false;
   }
-  if (length > strm.length()) {
+  if (!strm.check_size(length, uint64_cdr_size, uint64_cdr_size)) {
     if (DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Invalid sequence length (%u)\n"), length));
     }
@@ -787,7 +792,7 @@ bool operator>>(Serializer& strm, CORBASeq::ULongSeq& seq)
   if (!(strm >> length)) {
     return false;
   }
-  if (length > strm.length()) {
+  if (!strm.check_size(length, uint32_cdr_size, uint32_cdr_size)) {
     if (DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Invalid sequence length (%u)\n"), length));
     }
@@ -839,7 +844,7 @@ bool operator>>(Serializer& strm, CORBASeq::UShortSeq& seq)
   if (!(strm >> length)) {
     return false;
   }
-  if (length > strm.length()) {
+  if (!strm.check_size(length, uint16_cdr_size, uint16_cdr_size)) {
     if (DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Invalid sequence length (%u)\n"), length));
     }
