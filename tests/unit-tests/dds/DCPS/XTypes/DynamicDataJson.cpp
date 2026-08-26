@@ -473,7 +473,7 @@ TEST(dds_DCPS_XTypes_DynamicDataJson, RejectsNumericRangeOverflow)
   }
 }
 
-TEST(dds_DCPS_XTypes_DynamicDataJson, MapSerializedBackingStore)
+void test_map_serialized_backing_store(const OpenDDS::DCPS::Encoding& encoding)
 {
   DDS::DynamicType_var type = load_type("XmlTypeProviderTest::MapSample");
   DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(type);
@@ -492,8 +492,6 @@ TEST(dds_DCPS_XTypes_DynamicDataJson, MapSerializedBackingStore)
   ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_from_json(data, json));
 
   ACE_Message_Block buffer(4096);
-  const OpenDDS::DCPS::Encoding encoding(
-    OpenDDS::DCPS::Encoding::KIND_XCDR2, OpenDDS::DCPS::ENDIAN_BIG);
   OpenDDS::DCPS::Serializer serializer(&buffer, encoding);
   ASSERT_TRUE(serializer << data.in());
 
@@ -519,10 +517,42 @@ TEST(dds_DCPS_XTypes_DynamicDataJson, MapSerializedBackingStore)
             value->get_uint32_value(element_value, OpenDDS::XTypes::MEMBER_ID_INVALID));
   EXPECT_EQ(90u, element_value);
 
+  DDS::MemberDescriptor_var inner_lookup = member_descriptor(type, "inner_lookup");
+  DDS::DynamicData_var inner_lookup_data;
+  ASSERT_EQ(DDS::RETCODE_OK,
+            backing->get_complex_value(inner_lookup_data, inner_lookup->id()));
+  ASSERT_EQ(1u, inner_lookup_data->get_item_count());
+  OpenDDS::XTypes::DynamicDataBase* inner_lookup_base = dynamic_data_base(inner_lookup_data);
+  ASSERT_TRUE(inner_lookup_base);
+  ASSERT_EQ(DDS::RETCODE_OK, inner_lookup_base->get_map_key(key, 0));
+  ASSERT_EQ(DDS::RETCODE_OK, inner_lookup_base->get_map_value(value, 0));
+  ASSERT_EQ(DDS::RETCODE_OK,
+            key->get_uint32_value(key_value, OpenDDS::XTypes::MEMBER_ID_INVALID));
+  EXPECT_EQ(42u, key_value);
+  DDS::MemberDescriptor_var inner_value = member_descriptor(value->type(), "value");
+  DDS::Int32 inner_element_value = 0;
+  ASSERT_EQ(DDS::RETCODE_OK,
+            value->get_int32_value(inner_element_value, inner_value->id()));
+  EXPECT_EQ(420, inner_element_value);
+
   DDS::DynamicData_var expected_lookup;
   ASSERT_EQ(DDS::RETCODE_OK, data->get_complex_value(expected_lookup, lookup->id()));
   EXPECT_TRUE(expected_lookup->equals(lookup_data));
   EXPECT_TRUE(lookup_data->equals(expected_lookup));
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataJson, MapSerializedBackingStore)
+{
+  const OpenDDS::DCPS::Encoding encodings[] = {
+    OpenDDS::DCPS::Encoding(OpenDDS::DCPS::Encoding::KIND_XCDR1,
+                            OpenDDS::DCPS::ENDIAN_BIG),
+    OpenDDS::DCPS::Encoding(OpenDDS::DCPS::Encoding::KIND_XCDR2,
+                            OpenDDS::DCPS::ENDIAN_BIG)
+  };
+  for (size_t i = 0; i != sizeof(encodings) / sizeof(encodings[0]); ++i) {
+    SCOPED_TRACE(encodings[i].xcdr_version());
+    test_map_serialized_backing_store(encodings[i]);
+  }
 }
 
 TEST(dds_DCPS_XTypes_DynamicDataJson, MapBackingStoreAppendIsVisible)

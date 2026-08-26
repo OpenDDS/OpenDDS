@@ -338,8 +338,6 @@ public:
 
   DDS::DynamicType_ptr type();
 
-  bool check_xcdr1_mutable(DDS::DynamicType_ptr dt);
-
   bool serialized_size(const DCPS::Encoding&, size_t&, DCPS::Sample::Extent) const
   {
     // Not supported.
@@ -563,10 +561,6 @@ private:
   bool has_optional_member(bool& has_optional) const;
 
   DDS::ReturnCode_t try_construct_item_count_limit(ACE_CDR::ULong& limit, DDS::MemberDescriptor* md);
-
-  /// A set of strings used to prevent infinite recursion when checking for XCDR1 Mutable
-  typedef OPENDDS_SET(DCPS::String) DynamicTypeNameSet;
-  bool check_xcdr1_mutable_i(DDS::DynamicType_ptr dt, DynamicTypeNameSet& dtns);
 
   typedef OPENDDS_VECTOR(ACE_Message_Block*) IntermediateChains;
   const IntermediateChains& get_intermediate_chains() const { return chains_to_release; }

@@ -2000,8 +2000,13 @@ DDS::ReturnCode_t DynamicDataImpl::set_value_to_collection(DDS::MemberId id, con
   }
 
   // Check the compatibility of the element type.
-  const DDS::DynamicType_var elem_type = get_base_type(type_desc_->element_type());
-  const TypeKind elem_tk = elem_type->get_kind();
+  const TypeKind collection_tk = type_->get_kind();
+  DDS::DynamicType_var elem_type;
+  if (collection_tk != TK_STRING8 && collection_tk != TK_STRING16) {
+    elem_type = get_base_type(type_desc_->element_type());
+  }
+  const TypeKind elem_tk = collection_tk == TK_STRING8 ? TK_CHAR8 :
+    collection_tk == TK_STRING16 ? TK_CHAR16 : elem_type->get_kind();
   TypeKind treat_elem_as = elem_tk;
   if (elem_tk == TK_ENUM && enum_bound(elem_type, treat_elem_as) != DDS::RETCODE_OK) {
     return DDS::RETCODE_ERROR;
@@ -2231,6 +2236,19 @@ DDS::ReturnCode_t DynamicDataImpl::set_string_value(DDS::MemberId id, const char
     return DDS::RETCODE_BAD_PARAMETER;
   }
 
+  if (type_->get_kind() == TK_STRING8 && id == MEMBER_ID_INVALID) {
+    const size_t length = ACE_OS::strlen(value);
+    const LBound bound = type_desc_->bound()[0];
+    if (bound && length > bound) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
+    clear_all_values();
+    for (size_t i = 0; i < length; ++i) {
+      insert_single(static_cast<MemberId>(i), ACE_OutputCDR::from_char(value[i]));
+    }
+    return DDS::RETCODE_OK;
+  }
+
   DDS::DynamicType_var mtype;
   DDS::ReturnCode_t rc = get_member_type(mtype, type_, id);
   if (rc != DDS::RETCODE_OK) {
@@ -2256,6 +2274,18 @@ DDS::ReturnCode_t DynamicDataImpl::set_wstring_value(DDS::MemberId id, const COR
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_wstring_value: Input wstring is null!\n"));
     }
     return DDS::RETCODE_BAD_PARAMETER;
+  }
+  if (type_->get_kind() == TK_STRING16 && id == MEMBER_ID_INVALID) {
+    const size_t length = std::wcslen(value);
+    const LBound bound = type_desc_->bound()[0];
+    if (bound && length > bound) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
+    clear_all_values();
+    for (size_t i = 0; i < length; ++i) {
+      insert_single(static_cast<MemberId>(i), ACE_OutputCDR::from_wchar(value[i]));
+    }
+    return DDS::RETCODE_OK;
   }
   return set_single_value<TK_STRING16>(id, value);
 #else
@@ -3323,8 +3353,13 @@ DDS::ReturnCode_t DynamicDataImpl::get_value_from_collection(ValueType& value, D
   }
 
   // Check the element type
-  DDS::DynamicType_var elem_type = get_base_type(type_desc_->element_type());
-  const TypeKind elem_tk = elem_type->get_kind();
+  const TypeKind collection_tk = type_->get_kind();
+  DDS::DynamicType_var elem_type;
+  if (collection_tk != TK_STRING8 && collection_tk != TK_STRING16) {
+    elem_type = get_base_type(type_desc_->element_type());
+  }
+  const TypeKind elem_tk = collection_tk == TK_STRING8 ? TK_CHAR8 :
+    collection_tk == TK_STRING16 ? TK_CHAR16 : elem_type->get_kind();
   TypeKind treat_as_tk = elem_tk;
   switch (elem_tk) {
   case TK_ENUM:
@@ -3624,6 +3659,22 @@ DDS::ReturnCode_t DynamicDataImpl::get_boolean_value(CORBA::Boolean& value, DDS:
 DDS::ReturnCode_t DynamicDataImpl::get_string_value(char*& value, DDS::MemberId id)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
+  if (type_->get_kind() == TK_STRING8 && id == MEMBER_ID_INVALID) {
+    const CORBA::ULong length = get_item_count();
+    CORBA::String_var result = CORBA::string_alloc(length);
+    CORBA::Char* const buffer = result.inout();
+    for (CORBA::ULong i = 0; i < length; ++i) {
+      const DDS::ReturnCode_t rc = get_char8_value(buffer[i], i);
+      if (rc != DDS::RETCODE_OK) {
+        return rc;
+      }
+    }
+    buffer[length] = 0;
+    CORBA::string_free(value);
+    value = result._retn();
+    return DDS::RETCODE_OK;
+  }
+
   if (enum_string_helper(value, id)) {
     return DDS::RETCODE_OK;
   }
@@ -3639,6 +3690,21 @@ DDS::ReturnCode_t DynamicDataImpl::get_wstring_value(CORBA::WChar*& value, DDS::
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
 #ifdef DDS_HAS_WCHAR
+  if (type_->get_kind() == TK_STRING16 && id == MEMBER_ID_INVALID) {
+    const CORBA::ULong length = get_item_count();
+    CORBA::WString_var result = CORBA::wstring_alloc(length);
+    CORBA::WChar* const buffer = result.inout();
+    for (CORBA::ULong i = 0; i < length; ++i) {
+      const DDS::ReturnCode_t rc = get_char16_value(buffer[i], i);
+      if (rc != DDS::RETCODE_OK) {
+        return rc;
+      }
+    }
+    buffer[length] = 0;
+    CORBA::wstring_free(value);
+    value = result._retn();
+    return DDS::RETCODE_OK;
+  }
   CORBA::wstring_free(value);
   value = 0;
   return get_single_value<TK_STRING16>(value, id);
@@ -5554,7 +5620,8 @@ bool serialized_size_dynamic_collection(const Encoding& encoding, size_t& size,
     if (!map_data || key_tk == TK_NONE) {
       return false;
     }
-    if (!is_primitive(treat_key_as) || !is_primitive(treat_elem_as)) {
+    if ((!is_primitive(treat_key_as) || !is_primitive(treat_elem_as)) &&
+        encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
       serialized_size_delimiter(encoding, size);
     } else {
       primitive_serialized_size_ulong(encoding, size);
@@ -6203,7 +6270,8 @@ bool serialize_dynamic_element(Serializer& ser, DDS::DynamicData_ptr col_data,
   case TK_STRUCTURE:
   case TK_UNION:
   case TK_ARRAY:
-  case TK_SEQUENCE: {
+  case TK_SEQUENCE:
+  case TK_MAP: {
     DDS::DynamicData_var elem_data;
     rc = col_data->get_complex_value(elem_data, elem_id);
     return XTypes::check_rc_from_get(rc, elem_id, elem_tk, "serialize_dynamic_element")
@@ -6276,7 +6344,8 @@ bool serialize_dynamic_collection(Serializer& ser, DDS::DynamicData_ptr data, Sa
   const DDS::TypeKind tk = base_type->get_kind();
   const bool is_map = tk == TK_MAP;
   const bool primitive_map = is_map && is_primitive(treat_key_as) && is_primitive(treat_elem_as);
-  if ((is_map && !primitive_map) || (!is_map && !is_primitive(elem_tk))) {
+  if (((is_map && !primitive_map) || (!is_map && !is_primitive(elem_tk))) &&
+      encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
     if (!serialized_size_dynamic_collection(encoding, total_size, data, ext) ||
         !ser.write_delimiter(total_size)) {
       return false;
@@ -6284,7 +6353,9 @@ bool serialize_dynamic_collection(Serializer& ser, DDS::DynamicData_ptr data, Sa
   }
 
   const CORBA::ULong item_count = data->get_item_count();
-  if ((tk == TK_SEQUENCE || primitive_map) && !(ser << item_count)) {
+  if ((tk == TK_SEQUENCE || primitive_map ||
+       (is_map && encoding.xcdr_version() == Encoding::XCDR_VERSION_1)) &&
+      !(ser << item_count)) {
     return false;
   }
 

@@ -738,6 +738,18 @@ DDS::UInt32 DynamicDataXcdrReadImpl::get_item_count()
         break;
       }
 
+      ACE_CDR::ULong length = 0;
+      if (encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_1) {
+        if (!(strm_ >> length)) {
+          if (log_level >= LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count: read map length failed\n"));
+          }
+          return 0;
+        }
+        item_count_ = length;
+        break;
+      }
+
       size_t dheader;
       if (!strm_.read_delimiter(dheader)) {
         if (log_level >= LogLevel::Warning) {
@@ -747,7 +759,6 @@ DDS::UInt32 DynamicDataXcdrReadImpl::get_item_count()
       }
       const size_t end_of_map = strm_.rpos() + dheader;
 
-      ACE_CDR::ULong length = 0;
       while (strm_.rpos() < end_of_map) {
         if (!skip_member(key_type) || !skip_member(elem_type)) {
           if (log_level >= LogLevel::Warning) {
@@ -1215,6 +1226,20 @@ bool DynamicDataXcdrReadImpl::skip_to_map_entry(MemberId id, bool skip_key, size
       }
     }
     return !skip_key || strm_.skip(1, static_cast<int>(key_size));
+  } else if (encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_1) {
+    ACE_CDR::ULong length, index;
+    if (!(strm_ >> length) || !get_index_from_id(id, index, length)) {
+      return false;
+    }
+    for (ACE_CDR::ULong i = 0; i < index; ++i) {
+      if (!skip_member(key_type) || !skip_member(elem_type)) {
+        return false;
+      }
+    }
+    if (skip_key && !skip_member(key_type)) {
+      return false;
+    }
+    return true;
   } else {
     size_t dheader;
     ACE_CDR::ULong index;
@@ -1352,7 +1377,8 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_single_value(ValueType& value, Me
   // can be read as a whole as a unsigned integer.
   switch (treat_as) {
   case ValueTypeKind:
-    good = is_primitive(treat_as) && id == MEMBER_ID_INVALID && read_value(value, ValueTypeKind);
+    good = (is_primitive(treat_as) || treat_as == TK_STRING8 || treat_as == TK_STRING16) &&
+      id == MEMBER_ID_INVALID && read_value(value, ValueTypeKind);
     break;
   case TK_STRUCTURE:
     rc = get_value_from_struct<ValueTypeKind>(value, id);
@@ -1642,6 +1668,11 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_boolean_value(ACE_CDR::Boolean& v
 
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_string_value(ACE_CDR::Char*& value, MemberId id)
 {
+  if (type_->get_kind() == TK_STRING8 && id == MEMBER_ID_INVALID) {
+    CORBA::string_free(value);
+    value = 0;
+    return get_single_value<TK_STRING8>(value, id);
+  }
   if (enum_string_helper(value, id)) {
     return DDS::RETCODE_OK;
   }
@@ -2500,12 +2531,6 @@ DDS::DynamicType_ptr DynamicDataXcdrReadImpl::type()
   return DDS::DynamicType::_duplicate(type_);
 }
 
-bool DynamicDataXcdrReadImpl::check_xcdr1_mutable(DDS::DynamicType_ptr dt)
-{
-  DynamicTypeNameSet dtns;
-  return check_xcdr1_mutable_i(dt, dtns);
-}
-
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDescriptor* member_desc, MemberId id)
 {
   const DDS::ExtensibilityKind ek = type_desc_->extensibility_kind();
@@ -2933,11 +2958,22 @@ bool DynamicDataXcdrReadImpl::skip_collection_member(DDS::DynamicType_ptr coll_t
     } else if (kind == TK_ARRAY) {
       return skip_to_array_element(0, coll_type);
     } else if (kind == TK_MAP) {
-      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::skip_collection_member: "
-                   "DynamicData does not currently support XCDR1 maps\n"));
+      DDS::TypeDescriptor_var descriptor;
+      if (coll_type->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+        return false;
       }
-      return false;
+      const DDS::DynamicType_var key_type = get_base_type(descriptor->key_element_type());
+      const DDS::DynamicType_var elem_type = get_base_type(descriptor->element_type());
+      ACE_CDR::ULong length;
+      if (!(strm_ >> length)) {
+        return false;
+      }
+      for (ACE_CDR::ULong i = 0; i < length; ++i) {
+        if (!skip_member(key_type) || !skip_member(elem_type)) {
+          return false;
+        }
+      }
+      return true;
     }
   }
 
@@ -2947,6 +2983,7 @@ bool DynamicDataXcdrReadImpl::skip_collection_member(DDS::DynamicType_ptr coll_t
 bool DynamicDataXcdrReadImpl::skip_aggregated_member(DDS::DynamicType_ptr member_type)
 {
   DynamicDataXcdrReadImpl nested_data(strm_, member_type);
+  const size_t start = nested_data.strm_.rpos();
   if (!nested_data.skip_all()) {
     return false;
   }
@@ -2956,9 +2993,17 @@ bool DynamicDataXcdrReadImpl::skip_aggregated_member(DDS::DynamicType_ptr member
   const IntermediateChains& chains = nested_data.get_intermediate_chains();
   chains_to_release.insert(chains_to_release.end(), chains.begin(), chains.end());
 
+  const DCPS::Serializer::RdState curr_state = nested_data.strm_.rdstate();
+  if (!nested_data.strm_.current()) {
+    if (!strm_.skip(nested_data.strm_.rpos() - start)) {
+      return false;
+    }
+    strm_.rdstate(curr_state);
+    return true;
+  }
+
   ACE_Message_Block* const result_chain = nested_data.strm_.current()->duplicate();
   strm_ = DCPS::Serializer(result_chain, encoding_);
-  const DCPS::Serializer::RdState curr_state = nested_data.strm_.rdstate();
   strm_.rdstate(curr_state);
   chains_to_release.push_back(result_chain);
   return true;
@@ -3265,45 +3310,6 @@ bool DynamicDataXcdrReadImpl::get_primitive_size(DDS::DynamicType_ptr dt, ACE_CD
     break;
   default:
     return false;
-  }
-  return true;
-}
-
-bool DynamicDataXcdrReadImpl::check_xcdr1_mutable_i(DDS::DynamicType_ptr dt, DynamicTypeNameSet& dtns)
-{
-  DDS::TypeDescriptor_var descriptor;
-  if (dt->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
-  }
-
-  if (dtns.find(descriptor->name()) != dtns.end()) {
-    return true;
-  }
-  if (descriptor->extensibility_kind() == DDS::MUTABLE &&
-      encoding_.kind() == DCPS::Encoding::KIND_XCDR1) {
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::check_xcdr1_mutable: "
-                 "XCDR1 mutable is not currently supported in OpenDDS\n"));
-    }
-    return false;
-  }
-  dtns.insert(descriptor->name());
-  for (ACE_CDR::ULong i = 0; i < dt->get_member_count(); ++i) {
-    DDS::DynamicTypeMember_var dtm;
-    if (dt->get_member_by_index(dtm, i) != DDS::RETCODE_OK) {
-      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::check_xcdr1_mutable: "
-                  "Failed to get member from DynamicType\n"));
-      }
-      return false;
-    }
-    DDS::MemberDescriptor_var mem_desc;
-    if (dtm->get_descriptor(mem_desc) != DDS::RETCODE_OK) {
-      return false;
-    }
-    if (!check_xcdr1_mutable_i(mem_desc->type(), dtns)) {
-      return false;
-    }
   }
   return true;
 }

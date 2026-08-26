@@ -6,7 +6,11 @@
 
 #include <dds/DCPS/XTypes/TypeLookupService.h>
 #include <dds/DCPS/XTypes/DynamicTypeImpl.h>
+#include <dds/DCPS/XTypes/DynamicTypeMemberImpl.h>
+#include <dds/DCPS/XTypes/TypeDescriptorImpl.h>
+#include <dds/DCPS/XTypes/MemberDescriptorImpl.h>
 #include <dds/DCPS/XTypes/DynamicDataImpl.h>
+#include <dds/DCPS/XTypes/DynamicDataFactory.h>
 #include <dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h>
 
 #include <gtest/gtest.h>
@@ -342,7 +346,8 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   ret = data->get_complex_value(nested_dd, id);
   ASSERT_RC_OK(ret);
   ret = nested_dd->get_string_value(str, MEMBER_ID_INVALID);
-  EXPECT_RC_EQ(ret, DDS::RETCODE_ERROR);
+  ASSERT_RC_OK(ret);
+  EXPECT_STREQ(expected.str.in(), str);
 
 #ifdef DDS_HAS_WCHAR
   ACE_CDR::WChar* wstr = 0;
@@ -357,7 +362,9 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   ret = data->get_complex_value(nested_dd, id);
   ASSERT_RC_OK(ret);
   ret = nested_dd->get_wstring_value(wstr, MEMBER_ID_INVALID);
-  EXPECT_RC_EQ(ret, DDS::RETCODE_ERROR);
+  ASSERT_RC_OK(ret);
+  EXPECT_STREQ(expected.wstr.in(), wstr);
+  CORBA::wstring_free(wstr);
 #endif
 
   // Reading members out-of-order.
@@ -3381,5 +3388,233 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Enum_As_String)
   DDS::String8_var strVal;
   EXPECT_EQ(DDS::RETCODE_OK, data.get_string_value(strVal, MID_my_enum));
   EXPECT_STREQ("E_UINT64", strVal.in());
+}
+
+DDS::DynamicType_var simple_dynamic_type(XTypes::TypeKind kind, const char* name)
+{
+  DDS::TypeDescriptor_var descriptor = new XTypes::TypeDescriptorImpl;
+  descriptor->kind(kind);
+  descriptor->name(name);
+  if (kind == XTypes::TK_STRING8 || kind == XTypes::TK_STRING16) {
+    descriptor->bound().length(1);
+    descriptor->bound()[0] = 0;
+  }
+  DDS::DynamicType_var type = new XTypes::DynamicTypeImpl;
+  dynamic_cast<XTypes::DynamicTypeImpl*>(type.in())->set_descriptor(descriptor);
+  return type;
+}
+
+DDS::DynamicType_var collection_dynamic_type(XTypes::TypeKind kind, const char* name,
+                                              DDS::DynamicType_ptr element)
+{
+  DDS::TypeDescriptor_var descriptor = new XTypes::TypeDescriptorImpl;
+  descriptor->kind(kind);
+  descriptor->name(name);
+  descriptor->element_type(element);
+  descriptor->bound().length(1);
+  descriptor->bound()[0] = 4;
+  DDS::DynamicType_var type = new XTypes::DynamicTypeImpl;
+  dynamic_cast<XTypes::DynamicTypeImpl*>(type.in())->set_descriptor(descriptor);
+  return type;
+}
+
+DDS::DynamicType_var struct_dynamic_type(const char* name, DDS::DynamicType_ptr member_type)
+{
+  DDS::TypeDescriptor_var descriptor = new XTypes::TypeDescriptorImpl;
+  descriptor->kind(XTypes::TK_STRUCTURE);
+  descriptor->name(name);
+  descriptor->extensibility_kind(DDS::FINAL);
+  DDS::DynamicType_var type = new XTypes::DynamicTypeImpl;
+  XTypes::DynamicTypeImpl* const impl = dynamic_cast<XTypes::DynamicTypeImpl*>(type.in());
+  impl->set_descriptor(descriptor);
+
+  DDS::MemberDescriptor_var member_descriptor = new XTypes::MemberDescriptorImpl;
+  member_descriptor->name("value");
+  member_descriptor->id(0);
+  member_descriptor->index(0);
+  member_descriptor->type(member_type);
+  DDS::DynamicTypeMember_var member = new XTypes::DynamicTypeMemberImpl;
+  dynamic_cast<XTypes::DynamicTypeMemberImpl*>(member.in())->set_descriptor(member_descriptor);
+  impl->insert_dynamic_member(member);
+  return type;
+}
+
+DDS::DynamicType_var map_dynamic_type(const char* name, DDS::DynamicType_ptr key,
+                                      DDS::DynamicType_ptr value)
+{
+  DDS::TypeDescriptor_var descriptor = new XTypes::TypeDescriptorImpl;
+  descriptor->kind(XTypes::TK_MAP);
+  descriptor->name(name);
+  descriptor->key_element_type(key);
+  descriptor->element_type(value);
+  descriptor->bound().length(1);
+  descriptor->bound()[0] = 4;
+  DDS::DynamicType_var type = new XTypes::DynamicTypeImpl;
+  dynamic_cast<XTypes::DynamicTypeImpl*>(type.in())->set_descriptor(descriptor);
+  return type;
+}
+
+DDS::ReturnCode_t add_map_entry(DDS::DynamicData_ptr map, DDS::MemberId id,
+                                DDS::DynamicData_ptr key, DDS::DynamicData_ptr value)
+{
+  XTypes::DynamicDataBase* const base = dynamic_cast<XTypes::DynamicDataBase*>(map);
+  return base ? base->set_map_entry(id, key, value) : DDS::RETCODE_ERROR;
+}
+
+DDS::DynamicData_var map_item(DDS::DynamicType_ptr type)
+{
+  return DDS::DynamicDataFactory::get_instance()->create_data(type);
+}
+
+void verify_map_round_trip(DDS::DynamicData_ptr source, DDS::DynamicType_ptr type,
+                           const DCPS::Encoding& encoding)
+{
+  ACE_Message_Block msg(4096);
+  DCPS::Serializer serializer(&msg, encoding);
+  const size_t expected_size = DCPS::serialized_size(encoding, source);
+  ASSERT_TRUE(serializer << source);
+  EXPECT_EQ(expected_size, msg.length());
+
+  DDS::DynamicData_var result = new XTypes::DynamicDataXcdrReadImpl(&msg, encoding, type);
+  EXPECT_EQ(source->get_item_count(), result->get_item_count());
+  EXPECT_TRUE(source->equals(result));
+  EXPECT_TRUE(result->equals(source));
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, MapRoundTrip)
+{
+  DDS::DynamicType_var uint32_type = simple_dynamic_type(XTypes::TK_UINT32, "uint32");
+  DDS::DynamicType_var string_type = simple_dynamic_type(XTypes::TK_STRING8, "string");
+#ifdef DDS_HAS_WCHAR
+  DDS::DynamicType_var wstring_type = simple_dynamic_type(XTypes::TK_STRING16, "wstring");
+#endif
+  DDS::DynamicType_var int32_type = simple_dynamic_type(XTypes::TK_INT32, "int32");
+  DDS::DynamicType_var struct_type = struct_dynamic_type("MapValue", int32_type);
+  DDS::DynamicType_var sequence_type = collection_dynamic_type(XTypes::TK_SEQUENCE, "Int32Seq", int32_type);
+  ASSERT_TRUE(uint32_type);
+  ASSERT_TRUE(string_type);
+  ASSERT_TRUE(struct_type);
+  ASSERT_TRUE(sequence_type);
+
+  const DCPS::Encoding encodings[] = {xcdr1, xcdr2};
+  for (size_t enc = 0; enc != sizeof(encodings) / sizeof(encodings[0]); ++enc) {
+    SCOPED_TRACE(encodings[enc].xcdr_version());
+
+    {
+      DDS::DynamicType_var type = map_dynamic_type("UInt32Map", uint32_type, uint32_type);
+      ASSERT_TRUE(type);
+      DDS::TypeDescriptor_var td;
+      ASSERT_RC_OK(type->get_descriptor(td));
+      DDS::DynamicData_var map = new XTypes::DynamicDataImpl(type);
+      for (DDS::MemberId id = 0; id != 2; ++id) {
+        DDS::DynamicData_var key = map_item(td->key_element_type());
+        DDS::DynamicData_var value = map_item(td->element_type());
+        ASSERT_RC_OK(key->set_uint32_value(MEMBER_ID_INVALID, 7 + id * 2));
+        ASSERT_RC_OK(value->set_uint32_value(MEMBER_ID_INVALID, 70 + id * 20));
+        ASSERT_RC_OK(add_map_entry(map, id, key, value));
+      }
+      verify_map_round_trip(map, type, encodings[enc]);
+    }
+
+    {
+      DDS::DynamicType_var type = map_dynamic_type("StringMap", string_type, string_type);
+      ASSERT_TRUE(type);
+      DDS::TypeDescriptor_var td;
+      ASSERT_RC_OK(type->get_descriptor(td));
+      DDS::DynamicData_var map = new XTypes::DynamicDataImpl(type);
+      DDS::DynamicData_var key = map_item(td->key_element_type());
+      DDS::DynamicData_var value = map_item(td->element_type());
+      ASSERT_RC_OK(key->set_string_value(MEMBER_ID_INVALID, "alpha"));
+      ASSERT_RC_OK(value->set_string_value(MEMBER_ID_INVALID, "bravo"));
+      ASSERT_RC_OK(add_map_entry(map, 0, key, value));
+      verify_map_round_trip(map, type, encodings[enc]);
+    }
+
+#ifdef DDS_HAS_WCHAR
+    {
+      DDS::DynamicType_var type = map_dynamic_type("WStringMap", wstring_type, wstring_type);
+      DDS::TypeDescriptor_var td;
+      ASSERT_RC_OK(type->get_descriptor(td));
+      DDS::DynamicData_var map = new XTypes::DynamicDataImpl(type);
+      DDS::DynamicData_var key = map_item(td->key_element_type());
+      DDS::DynamicData_var value = map_item(td->element_type());
+      ASSERT_RC_OK(key->set_wstring_value(MEMBER_ID_INVALID, L"alpha"));
+      ASSERT_RC_OK(value->set_wstring_value(MEMBER_ID_INVALID, L"bravo"));
+      CORBA::WString_var probe;
+      ASSERT_RC_OK(key->get_wstring_value(probe, MEMBER_ID_INVALID));
+      ASSERT_STREQ(L"alpha", probe.in());
+      ASSERT_RC_OK(value->get_wstring_value(probe, MEMBER_ID_INVALID));
+      ASSERT_STREQ(L"bravo", probe.in());
+      ASSERT_RC_OK(add_map_entry(map, 0, key, value));
+      verify_map_round_trip(map, type, encodings[enc]);
+    }
+#endif
+
+    {
+      DDS::DynamicType_var type = map_dynamic_type("StructMap", uint32_type, struct_type);
+      ASSERT_TRUE(type);
+      DDS::TypeDescriptor_var td;
+      ASSERT_RC_OK(type->get_descriptor(td));
+      DDS::DynamicData_var map = new XTypes::DynamicDataImpl(type);
+      DDS::DynamicData_var key = map_item(td->key_element_type());
+      DDS::DynamicData_var value = map_item(td->element_type());
+      ASSERT_RC_OK(key->set_uint32_value(MEMBER_ID_INVALID, 3));
+      ASSERT_RC_OK(value->set_int32_value(0, 300));
+      ASSERT_RC_OK(add_map_entry(map, 0, key, value));
+      verify_map_round_trip(map, type, encodings[enc]);
+    }
+
+    {
+      DDS::DynamicType_var type = map_dynamic_type("SequenceMap", uint32_type, sequence_type);
+      ASSERT_TRUE(type);
+      DDS::TypeDescriptor_var td;
+      ASSERT_RC_OK(type->get_descriptor(td));
+      DDS::DynamicData_var map = new XTypes::DynamicDataImpl(type);
+      DDS::DynamicData_var key = map_item(td->key_element_type());
+      DDS::DynamicData_var value = map_item(td->element_type());
+      ASSERT_RC_OK(key->set_uint32_value(MEMBER_ID_INVALID, 4));
+      ASSERT_RC_OK(value->set_int32_value(0, 40));
+      ASSERT_RC_OK(value->set_int32_value(1, 41));
+      ASSERT_RC_OK(add_map_entry(map, 0, key, value));
+      verify_map_round_trip(map, type, encodings[enc]);
+    }
+
+    {
+      DDS::DynamicType_var inner_type = map_dynamic_type("InnerMap", uint32_type, uint32_type);
+      DDS::DynamicType_var type = map_dynamic_type("NestedMap", uint32_type, inner_type);
+      ASSERT_TRUE(type);
+      DDS::TypeDescriptor_var td;
+      ASSERT_RC_OK(type->get_descriptor(td));
+      DDS::DynamicData_var map = new XTypes::DynamicDataImpl(type);
+      DDS::DynamicData_var key = map_item(td->key_element_type());
+      DDS::DynamicData_var value = map_item(td->element_type());
+      DDS::TypeDescriptor_var inner_td;
+      ASSERT_RC_OK(td->element_type()->get_descriptor(inner_td));
+      DDS::DynamicData_var inner_key = map_item(inner_td->key_element_type());
+      DDS::DynamicData_var inner_value = map_item(inner_td->element_type());
+      ASSERT_RC_OK(key->set_uint32_value(MEMBER_ID_INVALID, 5));
+      ASSERT_RC_OK(inner_key->set_uint32_value(MEMBER_ID_INVALID, 50));
+      ASSERT_RC_OK(inner_value->set_uint32_value(MEMBER_ID_INVALID, 500));
+      ASSERT_RC_OK(add_map_entry(value, 0, inner_key, inner_value));
+      ASSERT_RC_OK(add_map_entry(map, 0, key, value));
+      verify_map_round_trip(map, type, encodings[enc]);
+    }
+
+    {
+      DDS::DynamicType_var map_type = map_dynamic_type("SequenceElementMap", uint32_type, uint32_type);
+      DDS::DynamicType_var type = collection_dynamic_type(XTypes::TK_SEQUENCE, "MapSequence", map_type);
+      DDS::DynamicData_var sequence = new XTypes::DynamicDataImpl(type);
+      DDS::DynamicData_var map = new XTypes::DynamicDataImpl(map_type);
+      DDS::TypeDescriptor_var map_td;
+      ASSERT_RC_OK(map_type->get_descriptor(map_td));
+      DDS::DynamicData_var key = map_item(map_td->key_element_type());
+      DDS::DynamicData_var value = map_item(map_td->element_type());
+      ASSERT_RC_OK(key->set_uint32_value(MEMBER_ID_INVALID, 6));
+      ASSERT_RC_OK(value->set_uint32_value(MEMBER_ID_INVALID, 600));
+      ASSERT_RC_OK(add_map_entry(map, 0, key, value));
+      ASSERT_RC_OK(sequence->set_complex_value(0, map));
+      verify_map_round_trip(sequence, type, encodings[enc]);
+    }
+  }
 }
 #endif // OPENDDS_SAFETY_PROFILE
