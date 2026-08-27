@@ -336,7 +336,7 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   ASSERT_RC_OK(ret);
   EXPECT_EQ(expected.nested_struct.l, l);
 
-  ACE_CDR::Char* str = 0;
+  CORBA::String_var str;
   id = data->get_member_id_at_index(17);
   EXPECT_EQ(id, ACE_CDR::ULong(17));
   ret = data->get_string_value(str, id);
@@ -753,12 +753,13 @@ void verify_bool_union(DDS::DynamicData_ptr data)
 
 void verify_string_union(DDS::DynamicData_ptr data)
 {
-  ACE_CDR::Char* str = 0;
+  CORBA::String_var str;
   DDS::ReturnCode_t ret = data->get_string_value(str, 16);
   ASSERT_RC_OK(ret);
   EXPECT_STREQ("abc", str);
 
-  ret = data->get_string_value(str, 10);
+  CORBA::String_var invalid_str;
+  ret = data->get_string_value(invalid_str, 10);
   EXPECT_RC_EQ(ret, DDS::RETCODE_ERROR);
 }
 

@@ -1140,7 +1140,8 @@ bool DynamicDataXcdrReadImpl::skip_to_sequence_element(MemberId id, DDS::Dynamic
       strm_.skip(index, static_cast<int>(size));
   } else {
     ACE_CDR::ULong length, index;
-    if (!strm_.skip_delimiter() || !(strm_ >> length)) {
+    if ((encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2 &&
+         !strm_.skip_delimiter()) || !(strm_ >> length)) {
       return false;
     }
     if (skip_all) {
@@ -1179,7 +1180,8 @@ bool DynamicDataXcdrReadImpl::skip_to_array_element(MemberId id, DDS::DynamicTyp
     ACE_CDR::ULong index;
     return get_index_from_id(id, index, length) && strm_.skip(index, static_cast<int>(size));
   } else {
-    if (!strm_.skip_delimiter()) {
+    if (encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2 &&
+        !strm_.skip_delimiter()) {
       return false;
     }
     ACE_CDR::ULong index;
