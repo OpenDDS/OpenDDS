@@ -66,7 +66,7 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
                                                  DCPS::Sample::Extent ext,
                                                  ACE_CDR::ULong item_count_limit)
   : DynamicDataBase(type)
-  , chain_(chain->duplicate())
+  , chain_(chain ? chain->duplicate() : 0)
   , encoding_(encoding)
   , extent_(ext)
   , reset_align_state_(false)
@@ -74,6 +74,9 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
   , item_count_(ITEM_COUNT_INVALID)
   , item_count_limit_(item_count_limit)
 {
+  if (!chain_) {
+    throw std::runtime_error("DynamicDataXcdrReadImpl requires a message block");
+  }
   if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
       encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
     throw std::runtime_error("DynamicDataXcdrReadImpl only supports XCDR1 and XCDR2");
@@ -84,7 +87,7 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::Dyn
                                                  DCPS::Sample::Extent ext,
                                                  ACE_CDR::ULong item_count_limit)
   : DynamicDataBase(type)
-  , chain_(ser.current()->duplicate())
+  , chain_(ser.current() ? ser.current()->duplicate() : 0)
   , encoding_(ser.encoding())
   , extent_(ext)
   , reset_align_state_(true)
@@ -243,7 +246,8 @@ DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong ind
   case TK_STRUCTURE:
     {
       const DDS::ExtensibilityKind ek = type_desc_->extensibility_kind();
-      if (ek == DDS::APPENDABLE || ek == DDS::MUTABLE) {
+      if (encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2 &&
+          (ek == DDS::APPENDABLE || ek == DDS::MUTABLE)) {
         if (!strm_.skip_delimiter()) {
           if (log_level >= LogLevel::Warning) {
             ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_member_id_at_index:"
@@ -522,7 +526,8 @@ bool DynamicDataXcdrReadImpl::get_struct_item_count()
   ACE_CDR::ULong actual_count = 0;
   const DDS::ExtensibilityKind ek = type_desc_->extensibility_kind();
   if (ek == DDS::FINAL || ek == DDS::APPENDABLE) {
-    if (ek == DDS::APPENDABLE) {
+    if (encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2 &&
+        ek == DDS::APPENDABLE) {
       if (!strm_.skip_delimiter()) {
         if (log_level >= LogLevel::Warning) {
           ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count: Skip delimiter failed\n"));
@@ -612,7 +617,8 @@ bool DynamicDataXcdrReadImpl::get_union_item_count()
   }
 
   const DDS::ExtensibilityKind ek = type_desc_->extensibility_kind();
-  if (ek == DDS::APPENDABLE || ek == DDS::MUTABLE) {
+  if (encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2 &&
+      (ek == DDS::APPENDABLE || ek == DDS::MUTABLE)) {
     if (!strm_.skip_delimiter()) {
       if (log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count: skip_delimiter failed\n"));
@@ -703,7 +709,8 @@ DDS::UInt32 DynamicDataXcdrReadImpl::get_item_count()
   case TK_SEQUENCE:
     {
       const DDS::DynamicType_var elem_type = get_base_type(type_desc_->element_type());
-      if (!is_primitive(elem_type->get_kind()) && !strm_.skip_delimiter()) {
+      if (encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2 &&
+          !is_primitive(elem_type->get_kind()) && !strm_.skip_delimiter()) {
         if (log_level >= LogLevel::Warning) {
           ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count: skip delimiter failed\n"));
         }
@@ -914,7 +921,8 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_value_from_struct(MemberType& val
 DDS::MemberDescriptor* DynamicDataXcdrReadImpl::get_union_selected_member()
 {
   const DDS::ExtensibilityKind ek = type_desc_->extensibility_kind();
-  if (ek == DDS::APPENDABLE || ek == DDS::MUTABLE) {
+  if (encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2 &&
+      (ek == DDS::APPENDABLE || ek == DDS::MUTABLE)) {
     if (!strm_.skip_delimiter()) {
       return 0;
     }
@@ -1053,7 +1061,8 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_value_from_union(
   DDS::DynamicType_var member_type;
   DDS::MemberDescriptor_var md;
   if (id == DISCRIMINATOR_ID) {
-    if (ek == DDS::APPENDABLE || ek == DDS::MUTABLE) {
+    if (encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2 &&
+        (ek == DDS::APPENDABLE || ek == DDS::MUTABLE)) {
       if (!strm_.skip_delimiter()) {
         return DDS::RETCODE_ERROR;
       }
@@ -1747,7 +1756,8 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
 
       const DDS::ExtensibilityKind ek = type_desc_->extensibility_kind();
       if (id == DISCRIMINATOR_ID) {
-        if (ek == DDS::APPENDABLE || ek == DDS::MUTABLE) {
+        if (encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2 &&
+            (ek == DDS::APPENDABLE || ek == DDS::MUTABLE)) {
           if (!strm_.skip_delimiter()) {
             good = false;
             break;
@@ -1894,7 +1904,8 @@ bool DynamicDataXcdrReadImpl::read_values(SequenceType& value, TypeKind elem_tk)
     break;
   case TK_ENUM:
   case TK_BITMASK:
-    if (strm_.skip_delimiter() && strm_ >> value) {
+    if ((encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_1 ||
+         strm_.skip_delimiter()) && strm_ >> value) {
       return true;
     }
     break;
