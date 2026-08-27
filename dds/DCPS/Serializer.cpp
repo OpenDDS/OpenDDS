@@ -506,7 +506,7 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
       }
       id = emheader & MEMBER_ID_MASK;
       size = long_size;
-      must_understand = emheader & emheader_must_understand;
+      must_understand = emheader & xcdr1_emheader_must_understand;
     } else {
       id = short_id;
       size = short_size;
@@ -520,7 +520,7 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
       return false;
     }
 
-    must_understand = emheader & emheader_must_understand;
+    must_understand = emheader & xcdr2_emheader_must_understand;
 
     // Get Size
     const unsigned short lc = (emheader >> 28) & 0x7;
@@ -583,7 +583,7 @@ bool Serializer::write_parameter_id(const unsigned id, const size_t size, const 
     // If PID is long, write the extended/long part.
     if (long_pid && (
           !(*this << static_cast<ACE_CDR::ULong>(id |
-            (must_understand ? emheader_must_understand : 0))) ||
+            (must_understand ? xcdr1_emheader_must_understand : 0))) ||
           !(*this << static_cast<ACE_CDR::ULong>(size)))) {
       return false;
     }
@@ -592,7 +592,8 @@ bool Serializer::write_parameter_id(const unsigned id, const size_t size, const 
   } else if (xcdr == Encoding::XCDR_VERSION_2) {
     // Compute Length Code, write EM Header and NEXTINT
     const ACE_CDR::ULong lc = (size == 1 ? 0 : size == 2 ? 1 : size == 4 ? 2 : size == 8 ? 3 : 4);
-    const ACE_CDR::ULong emheader = (lc << 28) | id | (must_understand ? emheader_must_understand : 0);
+    const ACE_CDR::ULong emheader =
+      (lc << 28) | id | (must_understand ? xcdr2_emheader_must_understand : 0);
     if (!(*this << emheader)) {
       return false;
     }

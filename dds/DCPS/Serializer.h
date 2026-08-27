@@ -292,8 +292,11 @@ public:
   static const ACE_CDR::UShort pid_must_understand = 0x4000;
   ///@}
 
-  // EMHEADER must understand flag
-  static const ACE_CDR::ULong emheader_must_understand = 1U << 31U;
+  // XCDR1 extended member header must understand flag
+  static const ACE_CDR::ULong xcdr1_emheader_must_understand = 1U << 30U;
+
+  // XCDR2 EMHEADER must understand flag
+  static const ACE_CDR::ULong xcdr2_emheader_must_understand = 1U << 31U;
 
   /// Maximum value for member id.
   static const ACE_CDR::ULong MEMBER_ID_MAX = 0x0FFFFFFF;
