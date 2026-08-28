@@ -945,6 +945,41 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Mutable_StructWithOptionalMembers)
   xcdr1_msg.copy((const char*)xcdr1_struct, sizeof xcdr1_struct);
   XTypes::DynamicDataXcdrReadImpl xcdr1_data(&xcdr1_msg, xcdr1, dt);
   EXPECT_EQ(1u, xcdr1_data.get_item_count());
+  EXPECT_EQ(0u, xcdr1_data.get_member_id_at_index(0));
+  EXPECT_EQ(MEMBER_ID_INVALID, xcdr1_data.get_member_id_at_index(1));
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, MutableUnionGeneratedSerialization)
+{
+  MutableSingleValueUnion input;
+  input.int_32(10);
+
+  const DCPS::Encoding encodings[] = {xcdr1, xcdr2};
+  for (size_t i = 0; i < sizeof encodings / sizeof encodings[0]; ++i) {
+    size_t size = 0;
+    DCPS::serialized_size(encodings[i], size, input);
+    ACE_Message_Block msg(size);
+    DCPS::Serializer writer(&msg, encodings[i]);
+    ASSERT_TRUE(writer << input);
+    ASSERT_EQ(size, msg.length());
+
+    if (encodings[i].xcdr_version() == DCPS::Encoding::XCDR_VERSION_1) {
+      ASSERT_GE(msg.length(), 4u);
+      const unsigned char* const sentinel =
+        reinterpret_cast<const unsigned char*>(msg.wr_ptr() - 4);
+      EXPECT_EQ(0x3f, sentinel[0]);
+      EXPECT_EQ(0x02, sentinel[1]);
+      EXPECT_EQ(0x00, sentinel[2]);
+      EXPECT_EQ(0x00, sentinel[3]);
+    }
+
+    MutableSingleValueUnion output;
+    DCPS::Serializer reader(&msg, encodings[i]);
+    ASSERT_TRUE(reader >> output);
+    EXPECT_EQ(0u, reader.length());
+    EXPECT_EQ(input._d(), output._d());
+    EXPECT_EQ(input.int_32(), output.int_32());
+  }
 }
 
 TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Mutable_ReadValueFromUnion)

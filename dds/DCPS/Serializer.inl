@@ -901,6 +901,18 @@ bool Serializer::write_list_end_parameter_id()
   return true;
 }
 
+ACE_INLINE
+bool Serializer::read_list_end_parameter_id()
+{
+  if (encoding().xcdr_version() == Encoding::XCDR_VERSION_1) {
+    unsigned id;
+    size_t size;
+    bool must_understand;
+    return read_parameter_id(id, size, must_understand) && id == pid_list_end && size == 0;
+  }
+  return true;
+}
+
 //
 // The following insertion operators are done in the style of the
 // ACE_CDR insertion operators instead of a stream abstraction.  This

@@ -631,6 +631,10 @@ public:
    */
   bool write_list_end_parameter_id();
 
+  /// Read and validate the XCDR1 parameter-list sentinel.  XCDR2 parameter
+  /// lists are delimited by a DHEADER, so this is a no-op for XCDR2.
+  bool read_list_end_parameter_id();
+
   /**
    * Skip a delimiter used for XCDR2 delimited data.
    *
