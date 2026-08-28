@@ -363,7 +363,20 @@ DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong ind
             }
             return MEMBER_ID_INVALID;
           }
-          if (!strm_.skip(member_size)) {
+          bool skip_ok = false;
+          if (encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_1) {
+            DDS::DynamicTypeMember_var dtm;
+            DDS::MemberDescriptor_var md;
+            if (type_->get_member(dtm, member_id) == DDS::RETCODE_OK &&
+                dtm->get_descriptor(md) == DDS::RETCODE_OK) {
+              skip_ok = skip_member(md->type());
+            } else {
+              skip_ok = strm_.skip(member_size);
+            }
+          } else {
+            skip_ok = strm_.skip(member_size);
+          }
+          if (!skip_ok) {
             if (log_level >= LogLevel::Warning) {
               ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_member_id_at_index:"
                          " skip member with Id %u failed\n", member_id));
@@ -570,7 +583,20 @@ bool DynamicDataXcdrReadImpl::get_struct_item_count()
       if (xcdr1 && member_id == DCPS::Serializer::pid_list_end) {
         break;
       }
-      if (!strm_.skip(member_size)) {
+      bool skip_ok = false;
+      if (xcdr1) {
+        DDS::DynamicTypeMember_var dtm;
+        DDS::MemberDescriptor_var md;
+        if (type_->get_member(dtm, member_id) == DDS::RETCODE_OK &&
+            dtm->get_descriptor(md) == DDS::RETCODE_OK) {
+          skip_ok = skip_member(md->type());
+        } else {
+          skip_ok = strm_.skip(member_size);
+        }
+      } else {
+        skip_ok = strm_.skip(member_size);
+      }
+      if (!skip_ok) {
         if (log_level >= LogLevel::Warning) {
           ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count:"
                      " Failed to skip %u bytes from the stream\n", member_size));
@@ -2658,7 +2684,20 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDesc
         return DDS::RETCODE_OK;
       }
 
-      if (!strm_.skip(member_size)) {
+      bool skip_ok = false;
+      if (xcdr1) {
+        DDS::DynamicTypeMember_var dtm;
+        DDS::MemberDescriptor_var md;
+        if (type_->get_member(dtm, member_id) == DDS::RETCODE_OK &&
+            dtm->get_descriptor(md) == DDS::RETCODE_OK) {
+          skip_ok = skip_member(md->type());
+        } else {
+          skip_ok = strm_.skip(member_size);
+        }
+      } else {
+        skip_ok = strm_.skip(member_size);
+      }
+      if (!skip_ok) {
         if (DCPS::DCPS_debug_level >= 1) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::skip_to_struct_member -")
                      ACE_TEXT(" Failed to skip a member with ID %d\n"), member_id));
@@ -3211,7 +3250,7 @@ bool DynamicDataXcdrReadImpl::skip_all()
 
   const DDS::ExtensibilityKind extensibility = type_desc_->extensibility_kind();
   if (strm_.encoding().kind() == DCPS::Encoding::KIND_XCDR1 &&
-      extensibility == DDS::MUTABLE) {
+      extensibility == DDS::MUTABLE && tk == TK_STRUCTURE) {
     while (true) {
       ACE_CDR::ULong member_id;
       size_t member_size;
@@ -3266,6 +3305,15 @@ bool DynamicDataXcdrReadImpl::skip_all()
       }
       if (selected_md) {
         const DDS::DynamicType_ptr selected_dt = selected_md->type();
+        if (extensibility == DDS::MUTABLE) {
+          ACE_CDR::ULong member_id;
+          size_t member_size;
+          bool must_understand;
+          if (!strm_.read_parameter_id(member_id, member_size, must_understand)) {
+            return false;
+          }
+          return member_id == selected_md->id() && strm_.skip(member_size);
+        }
         return selected_dt && skip_member(selected_dt);
       }
       if (DCPS::DCPS_debug_level >= 1) {
