@@ -292,8 +292,11 @@ public:
   static const ACE_CDR::UShort pid_must_understand = 0x4000;
   ///@}
 
-  // EMHEADER must understand flag
-  static const ACE_CDR::ULong emheader_must_understand = 1U << 31U;
+  // XCDR1 extended member header must understand flag
+  static const ACE_CDR::ULong xcdr1_emheader_must_understand = 1U << 30U;
+
+  // XCDR2 EMHEADER must understand flag
+  static const ACE_CDR::ULong xcdr2_emheader_must_understand = 1U << 31U;
 
   /// Maximum value for member id.
   static const ACE_CDR::ULong MEMBER_ID_MAX = 0x0FFFFFFF;
@@ -627,6 +630,10 @@ public:
    * Returns true if successful.
    */
   bool write_list_end_parameter_id();
+
+  /// Read and validate the XCDR1 parameter-list sentinel.  XCDR2 parameter
+  /// lists are delimited by a DHEADER, so this is a no-op for XCDR2.
+  bool read_list_end_parameter_id();
 
   /**
    * Skip a delimiter used for XCDR2 delimited data.

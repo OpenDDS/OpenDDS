@@ -1,0 +1,9 @@
+.. news-prs: 5284
+
+.. news-start-section: Additions
+- Added XCDR1 support to the :ref:`xtypes--dynamic-language-binding`, including appendable and mutable DynamicData types and XCDR1 parameter-list processing.
+  ``DynamicTypeSupport`` now advertises both XCDR1 and XCDR2 as supported data representations.
+  DynamicData maps are supported with XCDR1 and XCDR2, including maps with constructed values and maps nested in other collections.
+  See :ref:`xtypes--xcdr1-support` for details.
+
+.. news-end-section

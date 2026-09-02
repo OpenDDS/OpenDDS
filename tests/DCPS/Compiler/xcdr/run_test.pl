@@ -18,14 +18,8 @@ GetOptions(
 ) or die("Invalid options");
 
 my @args;
-my @exclude;
 if ($dynamic) {
-  # TODO: Remove this when dynamic XCDR1 is supported
-  push(@exclude, '*Xcdr1*');
   push(@args, '--dynamic');
-}
-if (scalar(@exclude)) {
-  push(@args, '--gtest_filter=-' . join(':', @exclude));
 }
 
 print(join(' ', @args), "\n");

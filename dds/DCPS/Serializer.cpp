@@ -494,24 +494,23 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
       return false;
     }
 
-    // TODO(iguessthislldo): handle PID flags
-    must_understand = false; // Placeholder
-
     // If extended, get the "long" id and size
     if (short_id == pid_extended) {
-      ACE_CDR::ULong long_id, long_size;
-      if (!(*this >> long_id) || !(*this >> long_size)) {
+      ACE_CDR::ULong emheader, long_size;
+      if (!(*this >> emheader) || !(*this >> long_size)) {
         return false;
       }
       const unsigned short_size_left = short_size - 8u;
       if (short_size_left) {
         skip(short_size_left);
       }
-      id = long_id;
+      id = emheader & MEMBER_ID_MASK;
       size = long_size;
+      must_understand = emheader & xcdr1_emheader_must_understand;
     } else {
       id = short_id;
       size = short_size;
+      must_understand = pid & pid_must_understand;
     }
 
     reset_alignment();
@@ -521,7 +520,7 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
       return false;
     }
 
-    must_understand = emheader & emheader_must_understand;
+    must_understand = emheader & xcdr2_emheader_must_understand;
 
     // Get Size
     const unsigned short lc = (emheader >> 28) & 0x7;
@@ -566,20 +565,12 @@ bool Serializer::write_parameter_id(const unsigned id, const size_t size, const 
     }
 
     // Determine if we need to use a short or long PID
-    const bool long_pid = id > (1 << 14) || size > (1 << 16);
+    const bool long_pid = id >= (1 << 14) || size >= (1 << 16);
 
-    // Write the short part of the PID
-    /*
-     * TODO(iguessthislldo): Control when to use "must understand" and "impl
-     * extension"?
-     *
-     * The XTypes CDR rules seem to imply they're alway here but that doesn't
-     * sound quite right.
-     *
-     * Also see TODOs above and the TODO below.
-     */
+    // Write the short part of the PID.  PID_EXTENDED is always marked as must
+    // understand so a reader that doesn't support extended PIDs rejects it.
     const ACE_CDR::UShort pid_id =
-      pid_impl_extension + pid_must_understand +
+      (long_pid || must_understand ? pid_must_understand : 0) +
       (long_pid ? pid_extended : static_cast<ACE_CDR::UShort>(id));
     if (!(*this << pid_id)) {
       return false;
@@ -591,7 +582,8 @@ bool Serializer::write_parameter_id(const unsigned id, const size_t size, const 
 
     // If PID is long, write the extended/long part.
     if (long_pid && (
-          !(*this << static_cast<ACE_CDR::ULong>(id)) ||
+          !(*this << static_cast<ACE_CDR::ULong>(id |
+            (must_understand ? xcdr1_emheader_must_understand : 0))) ||
           !(*this << static_cast<ACE_CDR::ULong>(size)))) {
       return false;
     }
@@ -600,7 +592,8 @@ bool Serializer::write_parameter_id(const unsigned id, const size_t size, const 
   } else if (xcdr == Encoding::XCDR_VERSION_2) {
     // Compute Length Code, write EM Header and NEXTINT
     const ACE_CDR::ULong lc = (size == 1 ? 0 : size == 2 ? 1 : size == 4 ? 2 : size == 8 ? 3 : 4);
-    const ACE_CDR::ULong emheader = (lc << 28) | id | (must_understand ? emheader_must_understand : 0);
+    const ACE_CDR::ULong emheader =
+      (lc << 28) | id | (must_understand ? xcdr2_emheader_must_understand : 0);
     if (!(*this << emheader)) {
       return false;
     }

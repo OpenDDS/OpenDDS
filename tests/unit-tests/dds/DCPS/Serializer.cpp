@@ -646,6 +646,54 @@ TEST(dds_DCPS_Serializer, read_parameter_id_xcdr2)
   ASSERT_TRUE(ser.skip(size));
 }
 
+TEST(dds_DCPS_Serializer, parameter_id_xcdr1_flags)
+{
+  const Encoding enc(Encoding::KIND_XCDR1, ENDIAN_BIG);
+  ACE_Message_Block mb(48);
+  Serializer writer(&mb, enc);
+
+  ASSERT_TRUE(writer.write_parameter_id(1, 4, false));
+  ASSERT_TRUE(writer.write_parameter_id(2, 4, true));
+  ASSERT_TRUE(writer.write_parameter_id(0x4000, 4, false));
+  ASSERT_TRUE(writer.write_parameter_id(0x4001, 4, true));
+  ASSERT_TRUE(writer.write_parameter_id(3, 0x10000, false));
+
+  const unsigned char expected[] = {
+    0x00, 0x01, 0x00, 0x04,
+    0x40, 0x02, 0x00, 0x04,
+    0x7f, 0x01, 0x00, 0x08, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x04,
+    0x7f, 0x01, 0x00, 0x08, 0x40, 0x00, 0x40, 0x01, 0x00, 0x00, 0x00, 0x04,
+    0x7f, 0x01, 0x00, 0x08, 0x00, 0x00, 0x00, 0x03, 0x00, 0x01, 0x00, 0x00
+  };
+  ASSERT_EQ(sizeof(expected), mb.length());
+  EXPECT_EQ(0, std::memcmp(mb.rd_ptr(), expected, sizeof(expected)));
+
+  Serializer reader(&mb, enc);
+  unsigned id;
+  size_t size;
+  bool must_understand;
+  ASSERT_TRUE(reader.read_parameter_id(id, size, must_understand));
+  EXPECT_EQ(1u, id);
+  EXPECT_EQ(4u, size);
+  EXPECT_FALSE(must_understand);
+  ASSERT_TRUE(reader.read_parameter_id(id, size, must_understand));
+  EXPECT_EQ(2u, id);
+  EXPECT_EQ(4u, size);
+  EXPECT_TRUE(must_understand);
+  ASSERT_TRUE(reader.read_parameter_id(id, size, must_understand));
+  EXPECT_EQ(0x4000u, id);
+  EXPECT_EQ(4u, size);
+  EXPECT_FALSE(must_understand);
+  ASSERT_TRUE(reader.read_parameter_id(id, size, must_understand));
+  EXPECT_EQ(0x4001u, id);
+  EXPECT_EQ(4u, size);
+  EXPECT_TRUE(must_understand);
+  ASSERT_TRUE(reader.read_parameter_id(id, size, must_understand));
+  EXPECT_EQ(3u, id);
+  EXPECT_EQ(0x10000u, size);
+  EXPECT_FALSE(must_understand);
+}
+
 namespace {
   bool read_parameter_id_xcdr2(const unsigned char* xcdr, size_t size)
   {

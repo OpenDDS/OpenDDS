@@ -280,7 +280,7 @@ OpenDDS supports the following building blocks, with notes/caveats listed below 
 
     * Map key types must be basic types, strings, enums, or aliases of any of these types.
     * Support might be incomplete in the classic IDL-to-C++ mapping compared to the IDL-to-C++11 mapping.
-    * Using maps in IDL-to-Java mapping and ``DynamicData`` is currently not supported.
+    * Using maps in the IDL-to-Java mapping is currently not supported.
 
   * The rest of the building block is not supported.
 
@@ -351,7 +351,6 @@ See :option:`opendds_idl --default-nested`, :option:`opendds_idl --default-exten
 XTypes :ref:`xtypes--data-representation` determines the format used by DataWriters to encode samples and the set of formats that can be used by a DataReader to decode samples.
 The set of formats for a DataReader must include the formats used by the DataWriters for interoperability.
 The two interoperable formats supported by OpenDDS are :ref:`xtypes--xcdr1` and :ref:`xtypes--xcdr2`.
-OpenDDS has limited support for XCDR1 (see :ref:`xtypes--xcdr1-support`).
 OpenDDS DataReaders default to XCDR1 and XCDR2 and OpenDDS DataWriters default to XCDR2.
 For interoperability, the data representation should be considered and adjusted appropriately.
 

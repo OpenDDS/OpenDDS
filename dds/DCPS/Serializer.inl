@@ -901,6 +901,18 @@ bool Serializer::write_list_end_parameter_id()
   return true;
 }
 
+ACE_INLINE
+bool Serializer::read_list_end_parameter_id()
+{
+  if (encoding().xcdr_version() == Encoding::XCDR_VERSION_1) {
+    unsigned id;
+    size_t size;
+    bool must_understand;
+    return read_parameter_id(id, size, must_understand) && id == pid_list_end && size == 0;
+  }
+  return true;
+}
+
 //
 // The following insertion operators are done in the style of the
 // ACE_CDR insertion operators instead of a stream abstraction.  This
@@ -1686,10 +1698,6 @@ void serialized_size_list_end_parameter_id(
   const Encoding& encoding, size_t& size, size_t& running_size)
 {
   if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1) {
-    /*
-     * TODO(iguessthislldo): See how DDSXTY14-23 is resolved.
-     * https://github.com/OpenDDS/OpenDDS/pull/1722#discussion_r447165924
-     */
     encoding.align(size, xcdr1_pid_alignment);
     size += uint16_cdr_size * 2;
 

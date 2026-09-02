@@ -1008,13 +1008,6 @@ DDS::DynamicData_ptr RecorderImpl::get_dynamic_data(const RawDataSample& sample)
   DDS::DynamicType_var dt = dt_found->second;
   XTypes::DynamicDataXcdrReadImpl* dd = new XTypes::DynamicDataXcdrReadImpl(sample.sample_.get(), enc, dt);
   DDS::DynamicData_var dd_var = dd;
-  if (!dd->check_xcdr1_mutable(dt)) {
-    if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: RecorderImpl::get_dynamic_data: "
-        "Encountered unsupported combination of XCDR1 encoding and mutable extensibility.\n"));
-    }
-    return 0;
-  }
   return dd_var._retn();
 }
 #endif
