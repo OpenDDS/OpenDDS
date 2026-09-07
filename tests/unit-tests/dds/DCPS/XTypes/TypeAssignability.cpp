@@ -3818,6 +3818,40 @@ TEST(dds_DCPS_XTypes_TypeAssignability, UnionTypeTest_Assignable)
   EXPECT_TRUE(test_imn.assignable(TypeObject(MinimalTypeObject(a_imn)),
                                   TypeObject(MinimalTypeObject(b_imn))));
 
+  // Members with matching names and labels but different IDs are assignable
+  // only when member names are ignored.
+  MinimalUnionType a_reordered, b_reordered;
+  a_reordered.union_flags = IS_APPENDABLE;
+  b_reordered.union_flags = IS_APPENDABLE;
+  a_reordered.discriminator.common.type_id = TypeIdentifier(TK_UINT32);
+  b_reordered.discriminator.common.type_id = TypeIdentifier(TK_UINT32);
+  MinimalUnionMember ma_reordered_1(
+    CommonUnionMember(1, UnionMemberFlag(), TypeIdentifier(TK_INT16),
+                      UnionCaseLabelSeq().append(1)),
+    MinimalMemberDetail("m1"));
+  MinimalUnionMember ma_reordered_2(
+    CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier(TK_INT32),
+                      UnionCaseLabelSeq().append(2)),
+    MinimalMemberDetail("m2"));
+  MinimalUnionMember mb_reordered_1(
+    CommonUnionMember(1, UnionMemberFlag(), TypeIdentifier(TK_INT32),
+                      UnionCaseLabelSeq().append(2)),
+    MinimalMemberDetail("m2"));
+  MinimalUnionMember mb_reordered_2(
+    CommonUnionMember(2, UnionMemberFlag(), TypeIdentifier(TK_INT16),
+                      UnionCaseLabelSeq().append(1)),
+    MinimalMemberDetail("m1"));
+  a_reordered.member_seq.append(ma_reordered_1).append(ma_reordered_2);
+  b_reordered.member_seq.append(mb_reordered_1).append(mb_reordered_2);
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(a_reordered)),
+                               TypeObject(MinimalTypeObject(b_reordered))));
+  EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(b_reordered)),
+                               TypeObject(MinimalTypeObject(a_reordered))));
+  EXPECT_TRUE(test_imn.assignable(TypeObject(MinimalTypeObject(a_reordered)),
+                                  TypeObject(MinimalTypeObject(b_reordered))));
+  EXPECT_TRUE(test_imn.assignable(TypeObject(MinimalTypeObject(b_reordered)),
+                                  TypeObject(MinimalTypeObject(a_reordered))));
+
   // Non-default labels in T2 that select some member in T1
   MinimalUnionType a2, b2;
   a2.union_flags = IS_MUTABLE;
