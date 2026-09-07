@@ -694,6 +694,36 @@ TEST(dds_DCPS_Serializer, parameter_id_xcdr1_flags)
   EXPECT_FALSE(must_understand);
 }
 
+TEST(dds_DCPS_Serializer, parameter_id_xcdr1_serialized_size)
+{
+  const Encoding enc(Encoding::KIND_XCDR1, ENDIAN_BIG);
+  size_t size = 0;
+  size_t running_size = 0;
+  bool previous_header_extended = false;
+
+  serialized_size_parameter_id(enc, size, running_size, 1,
+                               previous_header_extended);
+  primitive_serialized_size_ulong(enc, size);
+
+  serialized_size_parameter_id(enc, size, running_size, 0x4000,
+                               previous_header_extended);
+  primitive_serialized_size_ulong(enc, size);
+
+  serialized_size_parameter_id(enc, size, running_size, 3,
+                               previous_header_extended);
+  size += 0x10000;
+
+  // This member needs an extended header for both its ID and its size.  The
+  // header must be counted once, not once for each reason.
+  serialized_size_parameter_id(enc, size, running_size, 0x4001,
+                               previous_header_extended);
+  size += 0x10000;
+
+  serialized_size_list_end_parameter_id(enc, size, running_size,
+                                        previous_header_extended);
+  EXPECT_EQ(131124u, size);
+}
+
 namespace {
   bool read_parameter_id_xcdr2(const unsigned char* xcdr, size_t size)
   {

@@ -1990,7 +1990,9 @@ namespace {
                               const string& prefix, bool wrap_nested_key_only, Intro& intro,
                               const string & = "") // same sig as streamCommon
   {
-    return indent + "serialized_size_parameter_id(encoding, size, mutable_running_total);\n"
+    return indent + "serialized_size_parameter_id(encoding, size, mutable_running_total, "
+      + OpenDDS::DCPS::to_dds_string(be_global->get_id(dynamic_cast<AST_Field*>(node)))
+      + ", previous_header_extended);\n"
       + findSizeCommon(indent, node, name, type, prefix, wrap_nested_key_only, intro);
   }
 
@@ -3138,7 +3140,8 @@ namespace {
          * size is hijacked for field sizes because of alignment resets.
          */
         be_global->impl_ <<
-          "  size_t mutable_running_total = 0;\n";
+          "  size_t mutable_running_total = 0;\n"
+          "  bool previous_header_extended = false;\n";
       }
 
       marshal_generator::generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", not_final, false);
@@ -3159,7 +3162,9 @@ namespace {
         }
         if (is_mutable) {
           expr +=
-            "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
+            "  serialized_size_parameter_id(encoding, size, mutable_running_total, "
+            + OpenDDS::DCPS::to_dds_string(be_global->get_id(field))
+            + ", previous_header_extended);\n";
         }
         expr += generate_field_serialized_size(
           indent, field, "stru" + value_access, wrap_nested_key_only, intro);
@@ -3172,7 +3177,7 @@ namespace {
 
       if (is_mutable) {
         be_global->impl_ <<
-          "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
+          "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total, previous_header_extended);\n";
       }
     }
 
@@ -3857,13 +3862,15 @@ namespace {
 
       if (exten == extensibilitykind_mutable) {
         be_global->impl_ <<
-          "  size_t mutable_running_total = 0;\n";
+          "  size_t mutable_running_total = 0;\n"
+          "  bool previous_header_extended = false;\n";
       }
 
       if (has_key) {
         if (exten == extensibilitykind_mutable) {
           be_global->impl_ <<
-            "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
+            "  serialized_size_parameter_id(encoding, size, mutable_running_total, "
+            "XTypes::DISCRIMINATOR_SERIALIZED_ID, previous_header_extended);\n";
         }
 
         if (disc_cls & CL_ENUM) {
@@ -3878,7 +3885,7 @@ namespace {
 
       if (exten == extensibilitykind_mutable) {
         be_global->impl_ <<
-          "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
+          "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total, previous_header_extended);\n";
       }
     }
 
@@ -4094,7 +4101,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     if (exten == extensibilitykind_mutable) {
       be_global->impl_ <<
         "  size_t mutable_running_total = 0;\n"
-        "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
+        "  bool previous_header_extended = false;\n"
+        "  serialized_size_parameter_id(encoding, size, mutable_running_total, "
+        "XTypes::DISCRIMINATOR_SERIALIZED_ID, previous_header_extended);\n";
     }
 
     if (disc_cls & CL_ENUM) {
@@ -4111,7 +4120,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     if (exten == extensibilitykind_mutable) {
       be_global->impl_ <<
-        "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
+        "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total, previous_header_extended);\n";
     }
   }
   {

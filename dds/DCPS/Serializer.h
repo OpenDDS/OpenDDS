@@ -973,11 +973,13 @@ void serialized_size_delimiter(const Encoding& encoding, size_t& size);
 
 OpenDDS_Dcps_Export
 void serialized_size_parameter_id(
-  const Encoding& encoding, size_t& size, size_t& running_size);
+  const Encoding& encoding, size_t& size, size_t& running_size,
+  unsigned id, bool& previous_header_extended);
 
 OpenDDS_Dcps_Export
 void serialized_size_list_end_parameter_id(
-  const Encoding& encoding, size_t& size, size_t& running_size);
+  const Encoding& encoding, size_t& size, size_t& running_size,
+  bool previous_header_extended);
 
 } // namespace DCPS
 } // namespace OpenDDS

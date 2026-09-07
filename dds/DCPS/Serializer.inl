@@ -1671,13 +1671,17 @@ void serialized_size_delimiter(const Encoding& encoding, size_t& size)
 
 ACE_INLINE
 void serialized_size_parameter_id(
-  const Encoding& encoding, size_t& size, size_t& running_size)
+  const Encoding& encoding, size_t& size, size_t& running_size,
+  unsigned id, bool& previous_header_extended)
 {
   const Encoding::XcdrVersion xcdr = encoding.xcdr_version();
   if (xcdr == Encoding::XCDR_VERSION_1) {
+    if (running_size && size >= (1 << 16) && !previous_header_extended) {
+      running_size += uint32_cdr_size * 2;
+    }
     encoding.align(size, xcdr1_pid_alignment);
-    size += uint16_cdr_size * 2;
-    // TODO(iguessthislldo): Extended PID
+    previous_header_extended = id >= (1 << 14);
+    size += previous_header_extended ? uint32_cdr_size * 3 : uint16_cdr_size * 2;
 
     // Save and Zero Size to Reset the Alignment
     running_size += size;
@@ -1695,9 +1699,13 @@ void serialized_size_parameter_id(
 
 ACE_INLINE
 void serialized_size_list_end_parameter_id(
-  const Encoding& encoding, size_t& size, size_t& running_size)
+  const Encoding& encoding, size_t& size, size_t& running_size,
+  bool previous_header_extended)
 {
   if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1) {
+    if (running_size && size >= (1 << 16) && !previous_header_extended) {
+      running_size += uint32_cdr_size * 2;
+    }
     encoding.align(size, xcdr1_pid_alignment);
     size += uint16_cdr_size * 2;
 

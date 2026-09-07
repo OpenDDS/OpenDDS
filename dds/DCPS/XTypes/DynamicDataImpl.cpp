@@ -4910,7 +4910,8 @@ bool get_type_descriptor(const DDS::DynamicType_var& type, DDS::TypeDescriptor_v
 
 void serialized_size_dynamic_member_header(
   const Encoding& encoding, size_t& size, size_t& mutable_running_total,
-  DDS::ReturnCode_t rc, DDS::ExtensibilityKind extensibility, CORBA::Boolean optional)
+  DDS::ReturnCode_t rc, DDS::ExtensibilityKind extensibility, CORBA::Boolean optional,
+  DDS::MemberId member_id, bool& previous_header_extended)
 {
   if (optional && (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE)) {
     primitive_serialized_size_boolean(encoding, size);
@@ -4918,7 +4919,8 @@ void serialized_size_dynamic_member_header(
   }
   if (extensibility == DDS::MUTABLE) {
     if (!optional || rc == DDS::RETCODE_OK) {
-      serialized_size_parameter_id(encoding, size, mutable_running_total);
+      serialized_size_parameter_id(encoding, size, mutable_running_total,
+                                   member_id, previous_header_extended);
     }
   }
 }
@@ -4989,7 +4991,7 @@ void serialized_size_wstring_value(const Encoding& encoding, size_t& size, const
 
 bool serialized_size_dynamic_member(DDS::DynamicData_ptr data, const Encoding& encoding,
   size_t& size, const DDS::MemberDescriptor_var& md, DDS::ExtensibilityKind extensibility,
-  size_t& mutable_running_total, Sample::Extent ext)
+  size_t& mutable_running_total, bool& previous_header_extended, Sample::Extent ext)
 {
   using namespace OpenDDS::XTypes;
   const DDS::MemberId member_id = md->id();
@@ -5091,7 +5093,8 @@ bool serialized_size_dynamic_member(DDS::DynamicData_ptr data, const Encoding& e
       return false;
     }
     serialized_size_dynamic_member_header(encoding, size, mutable_running_total,
-                                          rc, extensibility, optional);
+                                          rc, extensibility, optional, member_id,
+                                          previous_header_extended);
     if (optional && rc == DDS::RETCODE_NO_DATA) {
       return true;
     }
@@ -5106,7 +5109,8 @@ bool serialized_size_dynamic_member(DDS::DynamicData_ptr data, const Encoding& e
       return false;
     }
     serialized_size_dynamic_member_header(encoding, size, mutable_running_total,
-                                          rc, extensibility, optional);
+                                          rc, extensibility, optional, member_id,
+                                          previous_header_extended);
     if (optional && rc == DDS::RETCODE_NO_DATA) {
       return true;
     }
@@ -5121,7 +5125,8 @@ bool serialized_size_dynamic_member(DDS::DynamicData_ptr data, const Encoding& e
       return false;
     }
     serialized_size_dynamic_member_header(encoding, size, mutable_running_total,
-                                          rc, extensibility, optional);
+                                          rc, extensibility, optional, member_id,
+                                          previous_header_extended);
     if (optional && rc == DDS::RETCODE_NO_DATA) {
       return true;
     }
@@ -5140,7 +5145,8 @@ bool serialized_size_dynamic_member(DDS::DynamicData_ptr data, const Encoding& e
       return false;
     }
     serialized_size_dynamic_member_header(encoding, size, mutable_running_total,
-                                          rc, extensibility, optional);
+                                          rc, extensibility, optional, member_id,
+                                          previous_header_extended);
     if (optional && rc == DDS::RETCODE_NO_DATA) {
       return true;
     }
@@ -5173,6 +5179,7 @@ bool serialized_size_dynamic_struct(const Encoding& encoding, size_t& size,
   }
 
   size_t mutable_running_total = 0;
+  bool previous_header_extended = false;
   const CORBA::ULong member_count = base_type->get_member_count();
   for (CORBA::ULong i = 0; i < member_count; ++i) {
     DDS::DynamicTypeMember_var dtm;
@@ -5189,7 +5196,8 @@ bool serialized_size_dynamic_struct(const Encoding& encoding, size_t& size,
     }
 
     if (!serialized_size_dynamic_member(struct_data, encoding, size, md, extensibility,
-                                        mutable_running_total, XTypes::nested(ext))) {
+                                        mutable_running_total, previous_header_extended,
+                                        XTypes::nested(ext))) {
       if (log_level >= LogLevel:: Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: serialized_size_dynamic_struct:"
                    " Failed to compute serialized size for member ID %u\n", md->id()));
@@ -5199,7 +5207,8 @@ bool serialized_size_dynamic_struct(const Encoding& encoding, size_t& size,
   }
 
   if (extensibility == DDS::MUTABLE) {
-    serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);
+    serialized_size_list_end_parameter_id(encoding, size, mutable_running_total,
+                                          previous_header_extended);
   }
   return true;
 }
@@ -5347,10 +5356,13 @@ bool serialized_size_enum(const Encoding& encoding, size_t& size,
 
 bool serialized_size_dynamic_discriminator(
   const Encoding& encoding, size_t& size, const DDS::DynamicType_var& disc_type,
-  DDS::ExtensibilityKind extensibility, size_t& mutable_running_total)
+  DDS::ExtensibilityKind extensibility, size_t& mutable_running_total,
+  bool& previous_header_extended)
 {
   if (extensibility == DDS::MUTABLE) {
-    serialized_size_parameter_id(encoding, size, mutable_running_total);
+    serialized_size_parameter_id(encoding, size, mutable_running_total,
+                                 XTypes::DISCRIMINATOR_SERIALIZED_ID,
+                                 previous_header_extended);
   }
   const DDS::TypeKind disc_tk = disc_type->get_kind();
   if (XTypes::is_primitive(disc_tk)) {
@@ -5383,9 +5395,11 @@ bool serialized_size_dynamic_union(const Encoding& encoding, size_t& size,
 
   // Discriminator
   size_t mutable_running_total = 0;
+  bool previous_header_extended = false;
   DDS::DynamicType_var disc_type = get_base_type(td->discriminator_type());
   if (!serialized_size_dynamic_discriminator(encoding, size, disc_type,
-                                             extensibility, mutable_running_total)) {
+                                             extensibility, mutable_running_total,
+                                             previous_header_extended)) {
     return false;
   }
 
@@ -5404,13 +5418,15 @@ bool serialized_size_dynamic_union(const Encoding& encoding, size_t& size,
 
     if (has_branch &&
         !serialized_size_dynamic_member(union_data, encoding, size, selected_md,
-                                        extensibility, mutable_running_total, nested(ext))) {
+                                        extensibility, mutable_running_total,
+                                        previous_header_extended, nested(ext))) {
       return false;
     }
   }
 
   if (extensibility == DDS::MUTABLE) {
-    serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);
+    serialized_size_list_end_parameter_id(encoding, size, mutable_running_total,
+                                          previous_header_extended);
   }
   return true;
 }

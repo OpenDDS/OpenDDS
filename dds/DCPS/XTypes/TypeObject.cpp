@@ -4993,15 +4993,19 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeInformation& stru)
 {
   size_t mutable_running_total = 0;
+  bool previous_header_extended = false;
   serialized_size_delimiter(encoding, size);
 
-  serialized_size_parameter_id(encoding, size, mutable_running_total);
+  serialized_size_parameter_id(encoding, size, mutable_running_total, 4097,
+                               previous_header_extended);
   serialized_size(encoding, size, stru.minimal);
 
-  serialized_size_parameter_id(encoding, size, mutable_running_total);
+  serialized_size_parameter_id(encoding, size, mutable_running_total, 4098,
+                               previous_header_extended);
   serialized_size(encoding, size, stru.complete);
 
-  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);
+  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total,
+                                        previous_header_extended);
 }
 
 bool operator<<(Serializer& strm, const XTypes::TypeInformation& stru)
