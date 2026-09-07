@@ -35,6 +35,15 @@ public:
                                        const RawDataSample& sample)
   {
     DDS::DynamicData_var dd = rec->get_dynamic_data(sample);
+    if (!dd) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TestRecorderListener::on_sample_data_received:"
+          " Failed to get DynamicData\n"));
+      }
+      ret_val_ = 1;
+      gc_->set_trigger_value(true);
+      return;
+    }
     String my_type;
     String indent;
     if (!OpenDDS::XTypes::print_dynamic_data(dd, my_type, indent)) {
@@ -42,6 +51,7 @@ public:
         ACE_ERROR((LM_ERROR, "(%P|%t) Error: TestRecorderListener::on_sample_data_received:"
           " Failed to read DynamicData\n"));
       }
+      ret_val_ = 1;
     }
 
     String struct_string_final =
@@ -268,10 +278,12 @@ public:
         my_type != struct_string_mutable &&
         my_type != nested_struct_string_mutable &&
         my_type != default_union_string_mutable &&
-        my_type != nested_union_string_mutable &&
-        log_level >= LogLevel::Error) {
-       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TestRecorderListener::on_sample_data_received:"
-         " Type did not match\n"));
+        my_type != nested_union_string_mutable) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TestRecorderListener::on_sample_data_received:"
+          " Type did not match\n"));
+      }
+      ret_val_ = 1;
     }
     std::cout << my_type << "\n";
     gc_->set_trigger_value(true);

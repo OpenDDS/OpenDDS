@@ -417,7 +417,7 @@ XML
 
 XCDR1
     This is the pre-XTypes standard CDR extended with XTypes features.
-    Support is limited to non-XTypes features, see :ref:`xtypes--xcdr1-support` for details.
+    See :ref:`xtypes--xcdr1-support` for details.
 
     The ``DataRepresentationId_t`` value is ``DDS::XCDR_DATA_REPRESENTATION``
 
@@ -596,8 +596,7 @@ Limitations: XML is not currently supported
 
 Applies To: topic types
 
-Limitations: XCDR1 doesn't support XTypes features
-See :ref:`xtypes--data-representation` for details
+See :ref:`xtypes--data-representation` for details.
 
 .. _xtypes--anno-opendds-data-representation-xcdr2:
 
@@ -1510,9 +1509,7 @@ The Dynamic Language Binding doesn't currently support:
 
 * :ref:`content_subscription_profile--multi-topic`
 
-* XCDRv1 Data Representation
-
-* Maps
+* Wrapping IDL-generated maps with ``DynamicDataAdapter``
 
 * Constructing types at runtime
 
@@ -1527,17 +1524,20 @@ Unimplemented Features
 
 OpenDDS implements the :ref:`XTypes specification <spec-xtypes>` at the Basic Conformance level, with a partial implementation of the Dynamic Language Binding (supported features of which are described in :ref:`xtypes--dynamic-language-binding-1`).
 Specific unimplemented features listed below.
-The two optional profiles, XTypes 1.1 Interoperability (XCDR1) and XML, are not implemented.
+The optional XML profile is not implemented.
 
 .. _xtypes--xcdr1-support:
 
 XCDR1 Support
 =============
 
-Pre-XTypes standard CDR is fully supported, but the XTypes-specific features are not fully supported and should be avoided.
-Types can be marked as final or appendable, but all types should be treated as if they were final.
-Nothing should be marked as mutable.
-Readers and writers of topic types that are mutable or contain nested types that are mutable will fail to initialize.
+OpenDDS supports the XTypes 1.1 Interoperability profile and its XCDR1 data representation.
+This includes final, appendable, and mutable extensibility for generated types and the :ref:`xtypes--dynamic-language-binding`.
+DynamicData maps, including maps with constructed values and maps nested in other collections, are supported in both XCDR1 and XCDR2.
+Consequently, a ``DynamicTypeSupport`` can use both XCDR1 and XCDR2, subject to its :ref:`qos-data-representation` policy.
+
+XCDR1 is useful when interoperating with implementations that do not support XCDR2.
+When interoperating with a pre-XTypes implementation, the additional restrictions in :ref:`xtypes--interoperability-with-non-xtypes-implementations` still apply; in particular, mutable types require XTypes-aware peers.
 
 .. _xtypes--type-system:
 

@@ -832,7 +832,10 @@ void generateCaseBody(
   const BE_GlobalData::LanguageMapping lmap = be_global->language_mapping();
   const bool use_cxx11 = lmap == BE_GlobalData::LANGMAP_CXX11;
   const std::string name = branch->local_name()->get_string();
-  if (namePrefix == std::string(">> ")) {
+  const bool mutable_union_read = namePrefix == std::string(">> mutable ");
+  if (namePrefix == std::string(">> ") || mutable_union_read) {
+    const char* const read_success = mutable_union_read
+      ? "strm.read_list_end_parameter_id()" : "true";
     std::string brType = dds_generator::field_type_name(branch, branch->field_type());
     std::string forany;
     AST_Type* br = resolveActualType(branch->field_type());
@@ -879,14 +882,14 @@ void generateCaseBody(
       "    if (strm >> " << rhs << ") {\n"
       "      uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp" + bound_string_suffix + ");\n") <<
       "      uni._d(disc);\n"
-      "      return true;\n"
+      "      return " << read_success << ";\n"
       "    }\n";
 
     if (be_global->try_construct(branch) == tryconstructfailaction_use_default) {
       be_global->impl_ <<
         type_to_default("        ", br, "uni." + name, branch->anonymous(), true) <<
         "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
-        "        return true;\n";
+        "        return " << read_success << ";\n";
     } else if ((be_global->try_construct(branch) == tryconstructfailaction_trim) && (br_cls & CL_BOUNDED) &&
                 (br_cls & (CL_STRING | CL_SEQUENCE | CL_MAP))) {
       if (is_bound_string) {
@@ -901,7 +904,7 @@ void generateCaseBody(
           "          s.resize(" << bounded_arg(br) << ");\n"
           "          uni." << name << "(s.c_str());\n"
           "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
-          "          return true;\n"
+          "          return " << read_success << ";\n"
           "        } else {\n"
           "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
           "          return false;\n"
@@ -914,7 +917,7 @@ void generateCaseBody(
           "        uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp);\n") <<
           "        uni._d(disc);\n"
           "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
-          "        return true;\n";
+          "        return " << read_success << ";\n";
       }
     } else {
       //discard/default
@@ -983,7 +986,8 @@ bool generateSwitchBody(AST_Union*, CommonFn commonFn,
   if (!has_default && needSyntheticDefault(discriminator, n_labels)) {
     be_global->impl_ <<
       "  default:\n" <<
-      ((namePrefix == std::string(">> ")) ? "    uni._d(disc);\n" : "") <<
+      ((namePrefix == std::string(">> ") || namePrefix == std::string(">> mutable "))
+       ? "    uni._d(disc);\n" : "") <<
       "    break;\n";
     return true;
   }

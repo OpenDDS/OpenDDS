@@ -1990,7 +1990,9 @@ namespace {
                               const string& prefix, bool wrap_nested_key_only, Intro& intro,
                               const string & = "") // same sig as streamCommon
   {
-    return indent + "serialized_size_parameter_id(encoding, size, mutable_running_total);\n"
+    return indent + "serialized_size_parameter_id(encoding, size, mutable_running_total, "
+      + OpenDDS::DCPS::to_dds_string(be_global->get_id(dynamic_cast<AST_Field*>(node)))
+      + ", previous_header_extended);\n"
       + findSizeCommon(indent, node, name, type, prefix, wrap_nested_key_only, intro);
   }
 
@@ -2082,6 +2084,14 @@ namespace {
       wrapper.done(&intro);
       return "(strm " + shift + " " + wrapper.ref() + ")";
     }
+  }
+
+  string streamMutableUnion(const std::string& indent, AST_Decl* field, const string& name,
+                            AST_Type* type, const string& prefix, bool wrap_nested_key_only,
+                            Intro& intro, const string& stru)
+  {
+    return streamCommon(indent, field, name, type, prefix, wrap_nested_key_only, intro, stru)
+      + " && strm.write_list_end_parameter_id()";
   }
 
   string initializeUnion(const std::string& indent, AST_Decl* field, const string& /*name*/,
@@ -3130,7 +3140,8 @@ namespace {
          * size is hijacked for field sizes because of alignment resets.
          */
         be_global->impl_ <<
-          "  size_t mutable_running_total = 0;\n";
+          "  size_t mutable_running_total = 0;\n"
+          "  bool previous_header_extended = false;\n";
       }
 
       marshal_generator::generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", not_final, false);
@@ -3151,7 +3162,9 @@ namespace {
         }
         if (is_mutable) {
           expr +=
-            "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
+            "  serialized_size_parameter_id(encoding, size, mutable_running_total, "
+            + OpenDDS::DCPS::to_dds_string(be_global->get_id(field))
+            + ", previous_header_extended);\n";
         }
         expr += generate_field_serialized_size(
           indent, field, "stru" + value_access, wrap_nested_key_only, intro);
@@ -3164,7 +3177,7 @@ namespace {
 
       if (is_mutable) {
         be_global->impl_ <<
-          "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
+          "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total, previous_header_extended);\n";
       }
     }
 
@@ -3847,11 +3860,17 @@ namespace {
 
       marshal_generator::generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", not_final, false);
 
+      if (exten == extensibilitykind_mutable) {
+        be_global->impl_ <<
+          "  size_t mutable_running_total = 0;\n"
+          "  bool previous_header_extended = false;\n";
+      }
+
       if (has_key) {
         if (exten == extensibilitykind_mutable) {
           be_global->impl_ <<
-            "  size_t mutable_running_total = 0;\n"
-            "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
+            "  serialized_size_parameter_id(encoding, size, mutable_running_total, "
+            "XTypes::DISCRIMINATOR_SERIALIZED_ID, previous_header_extended);\n";
         }
 
         if (disc_cls & CL_ENUM) {
@@ -3862,10 +3881,11 @@ namespace {
             "  primitive_serialized_size(encoding, size, " << key_only_wrap_out << ");\n";
         }
 
-        if (exten == extensibilitykind_mutable) {
-          be_global->impl_ <<
-            "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
-        }
+      }
+
+      if (exten == extensibilitykind_mutable) {
+        be_global->impl_ <<
+          "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total, previous_header_extended);\n";
       }
     }
 
@@ -3908,8 +3928,13 @@ namespace {
         be_global->impl_ << streamAndCheck("<< " + key_only_wrap_out);
       }
 
-      be_global->impl_
-        << "  return true;\n";
+      if (exten == extensibilitykind_mutable) {
+        be_global->impl_ <<
+          "  return strm.write_list_end_parameter_id();\n";
+      } else {
+        be_global->impl_ <<
+          "  return true;\n";
+      }
     }
 
     {
@@ -3951,8 +3976,13 @@ namespace {
           << "  uni.value._d(disc);\n";
       }
 
-      be_global->impl_
-        << "  return true;\n";
+      if (exten == extensibilitykind_mutable) {
+        be_global->impl_ <<
+          "  return strm.read_list_end_parameter_id();\n";
+      } else {
+        be_global->impl_ <<
+          "  return true;\n";
+      }
     }
   }
 }
@@ -4071,7 +4101,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     if (exten == extensibilitykind_mutable) {
       be_global->impl_ <<
         "  size_t mutable_running_total = 0;\n"
-        "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
+        "  bool previous_header_extended = false;\n"
+        "  serialized_size_parameter_id(encoding, size, mutable_running_total, "
+        "XTypes::DISCRIMINATOR_SERIALIZED_ID, previous_header_extended);\n";
     }
 
     if (disc_cls & CL_ENUM) {
@@ -4087,10 +4119,8 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
                            branches, discriminator, "", "", cxx.c_str());
 
     if (exten == extensibilitykind_mutable) {
-      // TODO: XTypes B will need to edit this code to add the pid for the end of mutable unions.
-      // Until this change is made, XCDR1 will NOT be functional
       be_global->impl_ <<
-        "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
+        "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total, previous_header_extended);\n";
     }
   }
   {
@@ -4130,12 +4160,18 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     be_global->impl_ <<
       streamAndCheck("<< " + wrap_out);
-    if (generateSwitchForUnion(node, "uni._d()", streamCommon, branches,
-                               discriminator, "return", "<< ", cxx.c_str(),
+    if (generateSwitchForUnion(node, "uni._d()",
+                               exten == extensibilitykind_mutable ? streamMutableUnion : streamCommon,
+                               branches, discriminator, "return", "<< ", cxx.c_str(),
                                false, true, true,
                                exten == extensibilitykind_mutable ? findSizeCommon : 0)) {
-      be_global->impl_ <<
-        "  return true;\n";
+      if (exten == extensibilitykind_mutable) {
+        be_global->impl_ <<
+          "  return strm.write_list_end_parameter_id();\n";
+      } else {
+        be_global->impl_ <<
+          "  return true;\n";
+      }
     }
   }
   {
@@ -4171,7 +4207,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
           "    if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
           "      return false;\n"
           "    }\n"
-          "    strm.skip(field_size);\n"
+          "    if (!strm.skip(field_size) || !strm.read_list_end_parameter_id()) {\n"
+          "      return false;\n"
+          "    }\n"
           "    strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
           "    return true;\n";
       } else {
@@ -4179,7 +4217,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
           "    if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
           "      return false;\n"
           "    }\n"
-          "    strm.skip(field_size);\n"
+          "    if (!strm.skip(field_size) || !strm.read_list_end_parameter_id()) {\n"
+          "      return false;\n"
+          "    }\n"
           "    strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
           "    return false;\n";
       }
@@ -4195,9 +4235,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "      return false;\n"
         "    }\n";
       if (generateSwitchForUnion(node, "disc", streamCommon, branches,
-                                 discriminator, prefix, ">> ", cxx.c_str())) {
+                                 discriminator, prefix, ">> mutable ", cxx.c_str())) {
         be_global->impl_ <<
-          "  return true;\n";
+          "  return strm.read_list_end_parameter_id();\n";
       }
     } else {
       be_global->impl_ <<

@@ -138,6 +138,7 @@ private:
       : extensibility(exten)
       , total_size(0)
       , mutable_running_total(0)
+      , previous_header_extended(false)
       , collection_kind(ck)
       , cache_pos(0)
     {}
@@ -150,6 +151,7 @@ private:
 
     // Only used for mutable members.
     size_t mutable_running_total;
+    bool previous_header_extended;
 
     // Help determine whether we encounter the outermost dimension of an array.
     CollectionKind collection_kind;

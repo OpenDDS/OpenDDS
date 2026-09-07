@@ -55,10 +55,8 @@ my @xcdrs = ("1", "2");
 foreach my $type (@types) {
   foreach my $extensibility (@extensibilities) {
     foreach my $xcdr (@xcdrs) {
-      if (!($xcdr eq "1" && $extensibility eq "mutable")) {
-        $total_tests++;
-        $failed_tests++ if (run_test($type, $extensibility, $xcdr));
-      }
+      $total_tests++;
+      $failed_tests++ if (run_test($type, $extensibility, $xcdr));
     }
   }
 }

@@ -138,6 +138,18 @@ TEST(dds_DCPS_XTypes_XmlTypeProvider, StructIntrospectionAndTypeObject)
   expect_complete_type_object<OpenDDS::DCPS::XmlTypeProviderTest_Sample_xtag>(type);
 }
 
+TEST(dds_DCPS_XTypes_XmlTypeProvider, DynamicTypeSupportDataRepresentations)
+{
+  DDS::DynamicType_var type = load_type("XmlTypeProviderTest::Sample");
+  ASSERT_TRUE(type);
+  DDS::DynamicTypeSupport_var ts = new DDS::DynamicTypeSupport(type);
+  DDS::DataRepresentationIdSeq representations;
+  ts->representations_allowed_by_type(representations);
+  ASSERT_EQ(2u, representations.length());
+  EXPECT_EQ(DDS::XCDR_DATA_REPRESENTATION, representations[0]);
+  EXPECT_EQ(DDS::XCDR2_DATA_REPRESENTATION, representations[1]);
+}
+
 TEST(dds_DCPS_XTypes_XmlTypeProvider, UnionIntrospectionAndTypeObject)
 {
   DDS::DynamicType_var type = load_type("XmlTypeProviderTest::Choice");

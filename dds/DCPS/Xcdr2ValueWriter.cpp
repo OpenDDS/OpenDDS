@@ -86,7 +86,9 @@ bool Xcdr2ValueWriter::end_ssize_complex()
   const Extensibility extensibility = state.extensibility;
 
   if (extensibility == MUTABLE) {
-    serialized_size_list_end_parameter_id(encoding_, state.total_size, state.mutable_running_total);
+    serialized_size_list_end_parameter_id(encoding_, state.total_size,
+                                          state.mutable_running_total,
+                                          state.previous_header_extended);
   }
 
   const size_t total_size = state.total_size;
@@ -128,7 +130,8 @@ bool Xcdr2ValueWriter::begin_ssize_aggregated_member(bool optional, bool present
     primitive_serialized_size_boolean(encoding_, total_size);
   }
   if (extensibility == MUTABLE && present) {
-    serialized_size_parameter_id(encoding_, total_size, mutable_running_total);
+    serialized_size_parameter_id(encoding_, total_size, mutable_running_total,
+                                 0, state.previous_header_extended);
   }
   return true;
 }

@@ -8,6 +8,10 @@
 #include <gtest/gtest.h>
 
 const OpenDDS::DCPS::Encoding test_encoding(OpenDDS::DCPS::Encoding::KIND_XCDR2);
+const OpenDDS::DCPS::Encoding marshalling_encodings[] = {
+  OpenDDS::DCPS::Encoding(OpenDDS::DCPS::Encoding::KIND_XCDR1),
+  OpenDDS::DCPS::Encoding(OpenDDS::DCPS::Encoding::KIND_XCDR2)
+};
 
 template<typename T>
 T TestMarshalling(OpenDDS::DCPS::Serializer strm, T original)
@@ -61,9 +65,6 @@ bool CheckData(Data test, Data expected)
 
 TEST(MapsTests, Marshalling)
 {
-  OpenDDS::DCPS::Message_Block_Ptr b(new ACE_Message_Block(100000));
-  OpenDDS::DCPS::Serializer strm(b.get(), test_encoding);
-
   Data expectedData;
   expectedData.intIntMap()[10] = 10;
   expectedData.stringStringMap()["Hello"] = "World";
@@ -83,9 +84,12 @@ TEST(MapsTests, Marshalling)
 
   expectedData.stringMapMap()["Hello World"] = testMap;
 
-  Data testData = TestMarshalling(strm, expectedData);
-
-  CheckData(testData, expectedData);
+  for (size_t i = 0; i < sizeof marshalling_encodings / sizeof marshalling_encodings[0]; ++i) {
+    OpenDDS::DCPS::Message_Block_Ptr b(new ACE_Message_Block(100000));
+    OpenDDS::DCPS::Serializer strm(b.get(), marshalling_encodings[i]);
+    const Data testData = TestMarshalling(strm, expectedData);
+    EXPECT_TRUE(CheckData(testData, expectedData));
+  }
 }
 
 TEST(MapsTests, SerializedSize)

@@ -2854,16 +2854,7 @@ DDS::ReturnCode_t DataWriterImpl::setup_serialization()
     // simply use qos_.representation.value[0].
     if (repr_to_encoding_kind(qos_.representation.value[0], encoding_kind)) {
       encoding_mode_ = EncodingMode(type_support_, encoding_kind, swap_bytes());
-      if (encoding_kind == Encoding::KIND_XCDR1 &&
-          type_support_->max_extensibility() == MUTABLE) {
-        if (log_level >= LogLevel::Notice) {
-          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DataWriterImpl::setup_serialization: "
-            "Encountered unsupported combination of XCDR1 encoding and mutable extensibility "
-            "for writer of type %C\n",
-            type_support_->name()));
-        }
-        return DDS::RETCODE_ERROR;
-      } else if (encoding_kind == Encoding::KIND_UNALIGNED_CDR) {
+      if (encoding_kind == Encoding::KIND_UNALIGNED_CDR) {
         if (log_level >= LogLevel::Notice) {
           ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DataWriterImpl::setup_serialization: "
             "Unaligned CDR is not supported by transport types that require encapsulation\n"));
