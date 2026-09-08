@@ -244,6 +244,19 @@ bool Serializer::ScopedReadLimit::finish()
   return result;
 }
 
+bool Serializer::ScopedReadLimit::reset(size_t size)
+{
+  if (finished_) {
+    return false;
+  }
+  ser_.read_limit_ = previous_limit_;
+  enabled_ = true;
+  end_ = ser_.rpos_;
+  valid_ = false;
+  install(size);
+  return valid_;
+}
+
 Serializer::ScopedAlignmentContext::ScopedAlignmentContext(Serializer& ser, size_t min_read)
   : ser_(ser)
   , max_align_(ser.encoding().max_align())
