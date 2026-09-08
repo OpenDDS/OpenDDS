@@ -4285,6 +4285,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "  bool must_understand = false;\n"
         "  if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
         "    return false;\n"
+        "  }\n"
+        "  if (member_id != XTypes::DISCRIMINATOR_SERIALIZED_ID) {\n"
+        "    return false;\n"
         "  }\n";
       TryConstructFailAction try_construct = be_global->union_discriminator_try_construct(node);
       be_global->impl_ <<
@@ -4304,6 +4307,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
           "    if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
           "      return false;\n"
           "    }\n"
+          "    if (must_understand) {\n"
+          "      return false;\n"
+          "    }\n"
           "    if (!strm.skip(field_size) || !strm.read_list_end_parameter_id()) {\n"
           "      return false;\n"
           "    }\n"
@@ -4312,6 +4318,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       } else {
         be_global->impl_ <<
           "    if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
+          "      return false;\n"
+          "    }\n"
+          "    if (must_understand) {\n"
           "      return false;\n"
           "    }\n"
           "    if (!strm.skip(field_size) || !strm.read_list_end_parameter_id()) {\n"

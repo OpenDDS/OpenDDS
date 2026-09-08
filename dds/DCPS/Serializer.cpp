@@ -178,6 +178,7 @@ Serializer::ScopedReadLimit::ScopedReadLimit(Serializer& ser, size_t size,
   , enabled_(enabled)
   , skip_remainder_(skip_remainder)
   , valid_(false)
+  , finished_(false)
 {
   if (!enabled_) {
     valid_ = ser.good_bit_;
@@ -195,7 +196,7 @@ Serializer::ScopedReadLimit::ScopedReadLimit(Serializer& ser, size_t size,
 
 Serializer::ScopedReadLimit::~ScopedReadLimit()
 {
-  if (enabled_ && skip_remainder_ && valid_ && ser_.good_bit_) {
+  if (!finished_ && enabled_ && skip_remainder_ && valid_ && ser_.good_bit_) {
     skip_to_end();
   }
   ser_.read_limit_ = previous_limit_;
@@ -209,6 +210,18 @@ size_t Serializer::ScopedReadLimit::remaining() const
 bool Serializer::ScopedReadLimit::skip_to_end()
 {
   return enabled_ && valid_ && ser_.good_bit_ && ser_.skip(remaining());
+}
+
+bool Serializer::ScopedReadLimit::finish()
+{
+  if (finished_) {
+    return valid_ && ser_.good_bit_;
+  }
+  const bool result = valid_ && ser_.good_bit_ &&
+    (!enabled_ || !skip_remainder_ || skip_to_end());
+  ser_.read_limit_ = previous_limit_;
+  finished_ = true;
+  return result;
 }
 
 Serializer::ScopedAlignmentContext::ScopedAlignmentContext(Serializer& ser, size_t min_read)

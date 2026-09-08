@@ -645,6 +645,26 @@ TEST(BasicTests, MutableXcdr12UnionLE)
   test_little_endian_union<MutableUnion, MutableXcdr2UnionExpectedLongLongBE>(UnionDisc::E_LONG_LONG_FIELD);
 }
 
+void expect_mutable_union_rejects_wrong_discriminator_id(const Encoding& encoding)
+{
+  ACE_Message_Block buffer(64);
+  Serializer writer(&buffer, encoding);
+  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
+    ASSERT_TRUE(writer.write_delimiter(8));
+  }
+  ASSERT_TRUE(writer.write_parameter_id(99, 4));
+  ASSERT_TRUE(writer << UnionDisc::E_SHORT_FIELD);
+  MutableUnion result;
+  Serializer reader(&buffer, encoding);
+  EXPECT_FALSE(reader >> result);
+}
+
+TEST(BasicTests, MutableUnionRejectsWrongDiscriminatorId)
+{
+  expect_mutable_union_rejects_wrong_discriminator_id(xcdr1);
+  expect_mutable_union_rejects_wrong_discriminator_id(xcdr2);
+}
+
 // ---------- FinalUnion
 struct FinalUnionExpectedShortBE {
   STREAM_DATA
