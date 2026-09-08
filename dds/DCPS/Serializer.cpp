@@ -560,6 +560,9 @@ ACE_Message_Block* Serializer::trim(size_t n) const
 
 bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_understand)
 {
+  id = 0;
+  size = 0;
+  must_understand = false;
   const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
   if (xcdr == Encoding::XCDR_VERSION_1) {
     // Get the "short" id and size
@@ -638,6 +641,13 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
       }
     }
     id = emheader & 0xfffffff;
+  }
+
+  // A member that claims more bytes than remain in the (possibly limited) input
+  // is malformed regardless of what the caller does with it next.
+  if (size > length()) {
+    good_bit_ = false;
+    return false;
   }
 
   return true;

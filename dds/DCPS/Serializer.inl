@@ -417,6 +417,8 @@ Serializer::check_size(size_t count, size_t element_size, size_t element_alignme
     return false;
   }
 
+  // Bytes of alignment padding align_r() would insert before the first element;
+  // this must use the same formula as align_r() to stay in sync with it.
   size_t padding = 0;
   if (alignment() && element_alignment > 1 && current_) {
     element_alignment = (std::min)(element_alignment, encoding().max_align());
