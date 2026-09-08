@@ -784,7 +784,9 @@ namespace {
             "  }\n";
           } else {
             be_global->impl_ <<
-              "  strm.read_" << getSerializerName(elem) << "_array(" << get_buffer << ", new_length);\n";
+              "  if (!strm.read_" << getSerializerName(elem) << "_array(" << get_buffer << ", new_length)) {\n"
+              "    return false;\n"
+              "  }\n";
           }
           be_global->impl_ <<
             "  if (new_length != length) {\n"
