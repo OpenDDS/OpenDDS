@@ -702,6 +702,17 @@ public:
   public:
     ScopedReadLimit(Serializer& ser, size_t size, bool enabled = true,
                     bool skip_remainder = false);
+
+    /**
+     * Read an XCDR2 delimiter (DHEADER) from @a ser and restrict subsequent
+     * reads to the region it describes.  Equivalent to reading the delimiter
+     * and then constructing with skip_remainder enabled: any bytes left in the
+     * region when this object is destroyed are skipped, leaving the stream
+     * positioned after the delimited object.  valid() is false if the delimiter
+     * could not be read or its size exceeds the remaining input.
+     */
+    explicit ScopedReadLimit(Serializer& ser);
+
     ~ScopedReadLimit();
 
     bool valid() const { return valid_; }
@@ -712,6 +723,10 @@ public:
   private:
     ScopedReadLimit(const ScopedReadLimit&);
     ScopedReadLimit& operator=(const ScopedReadLimit&);
+
+    /// Bound reads to @a size bytes starting at the current position, or clear
+    /// the stream's good bit if that does not fit in the remaining input.
+    void install(size_t size);
 
     Serializer& ser_;
     const size_t previous_limit_;
