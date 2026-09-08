@@ -184,13 +184,33 @@ Serializer::ScopedReadLimit::ScopedReadLimit(Serializer& ser, size_t size,
     valid_ = ser.good_bit_;
     return;
   }
+  install(size);
+}
+
+Serializer::ScopedReadLimit::ScopedReadLimit(Serializer& ser)
+  : ser_(ser)
+  , previous_limit_(ser.read_limit_)
+  , end_(ser.rpos_)
+  , enabled_(true)
+  , skip_remainder_(true)
+  , valid_(false)
+  , finished_(false)
+{
+  size_t size = 0;
+  if (ser.read_delimiter(size)) {
+    install(size);
+  }
+}
+
+void Serializer::ScopedReadLimit::install(size_t size)
+{
   const size_t max = (std::numeric_limits<size_t>::max)();
-  if (ser.good_bit_ && size <= ser.length() && size <= max - ser.rpos_) {
-    end_ = ser.rpos_ + size;
-    ser.read_limit_ = end_;
+  if (ser_.good_bit_ && size <= ser_.length() && size <= max - ser_.rpos_) {
+    end_ = ser_.rpos_ + size;
+    ser_.read_limit_ = end_;
     valid_ = true;
   } else {
-    ser.good_bit_ = false;
+    ser_.good_bit_ = false;
   }
 }
 

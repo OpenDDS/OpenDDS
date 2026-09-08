@@ -1218,15 +1218,8 @@ bool write_empty_xcdr2_nonfinal(DCPS::Serializer& strm)
 
 bool read_empty_xcdr2_nonfinal(DCPS::Serializer& strm)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  DCPS::Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
-  if (!read_limit.valid()) {
-    return false;
-  }
-  return strm.skip(total_size);
+  DCPS::Serializer::ScopedReadLimit read_limit(strm);
+  return read_limit.valid() && read_limit.skip_to_end();
 }
 
 const char* typekind_to_string(TypeKind tk)
@@ -1765,23 +1758,14 @@ bool operator<<(Serializer& strm, const XTypes::CompleteStructHeader& stru)
 
 bool operator>>(Serializer& strm, XTypes::CompleteStructHeader& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.base_type)
     && (strm >> stru.detail);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -1808,23 +1792,14 @@ bool operator<<(Serializer& strm, const XTypes::MinimalStructHeader& stru)
 
 bool operator>>(Serializer& strm, XTypes::MinimalStructHeader& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.base_type)
     && (strm >> stru.detail);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -2088,24 +2063,15 @@ bool operator<<(Serializer& strm, const XTypes::CompleteArrayType& stru)
 
 bool operator>>(Serializer& strm, XTypes::CompleteArrayType& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
-
-  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.collection_flag)
     && (strm >> stru.header)
     && (strm >> stru.element);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -2207,23 +2173,14 @@ bool operator<<(Serializer& strm, const XTypes::CompleteEnumeratedHeader& stru)
 
 bool operator>>(Serializer& strm, XTypes::CompleteEnumeratedHeader& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -2247,22 +2204,13 @@ bool operator<<(Serializer& strm, const XTypes::MinimalEnumeratedHeader& stru)
 
 bool operator>>(Serializer& strm, XTypes::MinimalEnumeratedHeader& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.common);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -2337,24 +2285,15 @@ bool operator<<(Serializer& strm, const XTypes::CompleteBitmaskType& stru)
 
 bool operator>>(Serializer& strm, XTypes::CompleteBitmaskType& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
-
-  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.bitmask_flags)
     && (strm >> stru.header)
     && (strm >> stru.flag_seq);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -2383,24 +2322,15 @@ bool operator<<(Serializer& strm, const XTypes::MinimalBitmaskType& stru)
 
 bool operator>>(Serializer& strm, XTypes::MinimalBitmaskType& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
-
-  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.bitmask_flags)
     && (strm >> stru.header)
     && (strm >> stru.flag_seq);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -2429,24 +2359,15 @@ bool operator<<(Serializer& strm, const XTypes::CompleteBitsetType& stru)
 
 bool operator>>(Serializer& strm, XTypes::CompleteBitsetType& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
-
-  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.bitset_flags)
     && (strm >> stru.header)
     && (strm >> stru.field_seq);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -2475,24 +2396,15 @@ bool operator<<(Serializer& strm, const XTypes::MinimalBitsetType& stru)
 
 bool operator>>(Serializer& strm, XTypes::MinimalBitsetType& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
-
-  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.bitset_flags)
     && (strm >> stru.header)
     && (strm >> stru.field_seq);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -2547,23 +2459,14 @@ bool operator<<(Serializer& strm, const NestedKeyOnly<const XTypes::TypeIdentifi
 
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierWithSize& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.type_id)
     && (strm >> stru.typeobject_serialized_size);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -2596,24 +2499,15 @@ bool operator<<(Serializer& strm, const XTypes::TypeIdentifierWithDependencies& 
 
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierWithDependencies& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
-
-  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.typeid_with_size)
     && (strm >> stru.dependent_typeid_count)
     && (strm >> stru.dependent_typeids);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -2640,22 +2534,13 @@ bool operator<<(Serializer& strm, const XTypes::AppliedAnnotation& stru)
 
 bool operator>>(Serializer& strm, XTypes::AppliedAnnotation& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
-
-  const size_t start_pos = strm.rpos();
   const bool ret = (strm >> stru.annotation_typeid)
     && (strm >> stru.param_seq);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -2680,22 +2565,13 @@ bool operator<<(Serializer& strm, const XTypes::AppliedBuiltinTypeAnnotations& s
 
 bool operator>>(Serializer& strm, XTypes::AppliedBuiltinTypeAnnotations& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.verbatim);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -2724,24 +2600,15 @@ bool operator<<(Serializer& strm, const XTypes::CompleteAliasBody& stru)
 
 bool operator>>(Serializer& strm, XTypes::CompleteAliasBody& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
-
-  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> stru.ann_builtin)
     && (strm >> stru.ann_custom);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -2766,22 +2633,13 @@ bool operator<<(Serializer& strm, const XTypes::CompleteAliasHeader& stru)
 
 bool operator>>(Serializer& strm, XTypes::CompleteAliasHeader& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.detail);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -2807,22 +2665,13 @@ bool operator<<(Serializer& strm, const XTypes::CompleteAnnotationHeader& stru)
 
 bool operator>>(Serializer& strm, XTypes::CompleteAnnotationHeader& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> Serializer::ToBoundedString<char>(stru.annotation_name, TYPE_NAME_MAX_LENGTH));
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -2852,24 +2701,15 @@ bool operator<<(Serializer& strm, const XTypes::CompleteAnnotationParameter& str
 
 bool operator>>(Serializer& strm, XTypes::CompleteAnnotationParameter& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
-
-  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> Serializer::ToBoundedString<char>(stru.name, MEMBER_NAME_MAX_LENGTH))
     && (strm >> stru.default_value);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -2896,23 +2736,14 @@ bool operator<<(Serializer& strm, const XTypes::CompleteArrayHeader& stru)
 
 bool operator>>(Serializer& strm, XTypes::CompleteArrayHeader& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -2939,23 +2770,14 @@ bool operator<<(Serializer& strm, const XTypes::CompleteBitfield& stru)
 
 bool operator>>(Serializer& strm, XTypes::CompleteBitfield& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -2982,23 +2804,14 @@ bool operator<<(Serializer& strm, const XTypes::CompleteBitflag& stru)
 
 bool operator>>(Serializer& strm, XTypes::CompleteBitflag& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -3023,22 +2836,13 @@ bool operator<<(Serializer& strm, const XTypes::CompleteBitsetHeader& stru)
 
 bool operator>>(Serializer& strm, XTypes::CompleteBitsetHeader& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.detail);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -3065,23 +2869,14 @@ bool operator<<(Serializer& strm, const XTypes::CompleteCollectionElement& stru)
 
 bool operator>>(Serializer& strm, XTypes::CompleteCollectionElement& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -3108,23 +2903,14 @@ bool operator<<(Serializer& strm, const XTypes::CompleteCollectionHeader& stru)
 
 bool operator>>(Serializer& strm, XTypes::CompleteCollectionHeader& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -3153,24 +2939,15 @@ bool operator<<(Serializer& strm, const XTypes::CompleteDiscriminatorMember& str
 
 bool operator>>(Serializer& strm, XTypes::CompleteDiscriminatorMember& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
-
-  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> stru.ann_builtin)
     && (strm >> stru.ann_custom);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -3197,23 +2974,14 @@ bool operator<<(Serializer& strm, const XTypes::CompleteEnumeratedLiteral& stru)
 
 bool operator>>(Serializer& strm, XTypes::CompleteEnumeratedLiteral& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -3240,23 +3008,13 @@ bool operator<<(Serializer& strm, const XTypes::CompleteStructMember& stru)
 
 bool operator>>(Serializer& strm, XTypes::CompleteStructMember& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
-
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
 
   return ret;
 }
@@ -3282,22 +3040,13 @@ bool operator<<(Serializer& strm, const XTypes::CompleteUnionHeader& stru)
 
 bool operator>>(Serializer& strm, XTypes::CompleteUnionHeader& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.detail);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -3324,23 +3073,14 @@ bool operator<<(Serializer& strm, const XTypes::CompleteUnionMember& stru)
 
 bool operator>>(Serializer& strm, XTypes::CompleteUnionMember& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -3365,22 +3105,13 @@ bool operator<<(Serializer& strm, const XTypes::MinimalAliasBody& stru)
 
 bool operator>>(Serializer& strm, XTypes::MinimalAliasBody& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.common);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -3446,24 +3177,15 @@ bool operator<<(Serializer& strm, const XTypes::MinimalAnnotationParameter& stru
 bool operator>>(Serializer& strm, XTypes::MinimalAnnotationParameter& stru)
 {
   XTypes::NameHash_forany stru_name_hash(const_cast<XTypes::NameHash_slice*>(stru.name_hash));
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
-
-  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
     && (strm >> stru_name_hash)
     && (strm >> stru.default_value);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -3488,22 +3210,13 @@ bool operator<<(Serializer& strm, const XTypes::MinimalArrayHeader& stru)
 
 bool operator>>(Serializer& strm, XTypes::MinimalArrayHeader& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.common);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -3533,23 +3246,14 @@ bool operator<<(Serializer& strm, const XTypes::MinimalBitfield& stru)
 bool operator>>(Serializer& strm, XTypes::MinimalBitfield& stru)
 {
   XTypes::NameHash_forany stru_name_hash(const_cast<XTypes::NameHash_slice*>(stru.name_hash));
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.common)
     && (strm >> stru_name_hash);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -3576,23 +3280,14 @@ bool operator<<(Serializer& strm, const XTypes::MinimalBitflag& stru)
 
 bool operator>>(Serializer& strm, XTypes::MinimalBitflag& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -3634,22 +3329,13 @@ bool operator<<(Serializer& strm, const XTypes::MinimalCollectionElement& stru)
 
 bool operator>>(Serializer& strm, XTypes::MinimalCollectionElement& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.common);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -3674,22 +3360,13 @@ bool operator<<(Serializer& strm, const XTypes::MinimalCollectionHeader& stru)
 
 bool operator>>(Serializer& strm, XTypes::MinimalCollectionHeader& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.common);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -3714,22 +3391,13 @@ bool operator<<(Serializer& strm, const XTypes::MinimalDiscriminatorMember& stru
 
 bool operator>>(Serializer& strm, XTypes::MinimalDiscriminatorMember& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.common);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -3756,23 +3424,14 @@ bool operator<<(Serializer& strm, const XTypes::MinimalEnumeratedLiteral& stru)
 
 bool operator>>(Serializer& strm, XTypes::MinimalEnumeratedLiteral& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -3799,23 +3458,14 @@ bool operator<<(Serializer& strm, const XTypes::MinimalStructMember& stru)
 
 bool operator>>(Serializer& strm, XTypes::MinimalStructMember& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -3840,22 +3490,13 @@ bool operator<<(Serializer& strm, const XTypes::MinimalUnionHeader& stru)
 
 bool operator>>(Serializer& strm, XTypes::MinimalUnionHeader& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.detail);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -3882,23 +3523,14 @@ bool operator<<(Serializer& strm, const XTypes::MinimalUnionMember& stru)
 
 bool operator>>(Serializer& strm, XTypes::MinimalUnionMember& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.common)
     && (strm >> stru.detail);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -4122,24 +3754,15 @@ bool operator<<(Serializer& strm, const XTypes::AppliedAnnotationParameter& stru
 
 bool operator>>(Serializer& strm, XTypes::AppliedAnnotationParameter& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
-
-  const size_t start_pos = strm.rpos();
 
   XTypes::NameHash_forany stru_paramname_hash(const_cast<XTypes::NameHash_slice*>(stru.paramname_hash));
   const bool ret = (strm >> stru_paramname_hash)
     && (strm >> stru.value);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -4181,25 +3804,16 @@ bool operator<<(Serializer& strm, const XTypes::AppliedBuiltinMemberAnnotations&
 
 bool operator>>(Serializer& strm, XTypes::AppliedBuiltinMemberAnnotations& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
-
-  const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.unit)
     && (strm >> stru.min)
     && (strm >> stru.max)
     && (strm >> stru.hash_id);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -4429,23 +4043,14 @@ bool operator<<(Serializer& strm, const XTypes::CommonEnumeratedLiteral& stru)
 
 bool operator>>(Serializer& strm, XTypes::CommonEnumeratedLiteral& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   const bool ret = (strm >> stru.value)
     && (strm >> stru.flags);
 
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
   return ret;
 }
 
@@ -4788,26 +4393,16 @@ bool operator<<(Serializer& strm, const XTypes::StronglyConnectedComponentId& st
 
 bool operator>>(Serializer& strm, XTypes::StronglyConnectedComponentId& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
-
-  const size_t start_pos = strm.rpos();
 
   // appendable, but no need to handle truncated streams since
   // this struct is defined in the spec with the following members:
   const bool ret = (strm >> stru.sc_component_id)
     && (strm >> stru.scc_length)
     && (strm >> stru.scc_index);
-
-  if (ret && strm.rpos() - start_pos < total_size) {
-    strm.skip(total_size - strm.rpos() + start_pos);
-  }
 
   return ret;
 }
@@ -5129,11 +4724,7 @@ bool operator<<(Serializer& ser, const XTypes::TypeObject& type_object)
 
 bool operator>>(Serializer& ser, XTypes::TypeObject& type_object)
 {
-  size_t total_size = 0;
-  if (!ser.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(ser, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(ser);
   if (!read_limit.valid()) {
     return false;
   }
@@ -5226,25 +4817,14 @@ bool operator<<(Serializer& strm, const XTypes::TypeInformation& stru)
 
 bool operator>>(Serializer& strm, XTypes::TypeInformation& stru)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  Serializer::ScopedReadLimit read_limit(strm);
   if (!read_limit.valid()) {
     return false;
   }
 
-  const size_t start_pos = strm.rpos();
-
   unsigned member_id = 0;
   size_t field_size = 0;
-  while (true) {
-
-    if (strm.rpos() - start_pos >= total_size) {
-      return true;
-    }
-
+  while (read_limit.remaining() != 0) {
     bool must_understand = false;
     if (!strm.read_parameter_id(member_id, field_size, must_understand)) {
       return false;
@@ -5278,7 +4858,7 @@ bool operator>>(Serializer& strm, XTypes::TypeInformation& stru)
       break;
     }
   }
-  return false;
+  return true;
 }
 
 
