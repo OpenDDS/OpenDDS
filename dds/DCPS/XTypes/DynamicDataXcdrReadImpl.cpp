@@ -1114,6 +1114,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_value_from_union(
     return DDS::RETCODE_ERROR;
   }
 
+  DCPS::Serializer::ScopedReadLimit member_limit(strm_, 0, false);
   if (ek == DDS::MUTABLE) {
     unsigned member_id;
     size_t member_size;
@@ -1124,7 +1125,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_value_from_union(
     if (id == DISCRIMINATOR_ID && member_id != DISCRIMINATOR_SERIALIZED_ID) {
       return DDS::RETCODE_ERROR;
     }
-    if (!strm_.set_read_limit(member_size)) {
+    if (!member_limit.reset(member_size)) {
       return DDS::RETCODE_ERROR;
     }
   }
@@ -1278,6 +1279,9 @@ bool DynamicDataXcdrReadImpl::skip_to_map_entry(MemberId id, bool skip_key, size
     if (!strm_.read_delimiter(dheader) || !get_index_from_id(id, index, ACE_UINT32_MAX)) {
       return false;
     }
+    // The limit deliberately outlives this call: the caller reads the located
+    // entry next and must stay within the map's delimited region.  It is reset
+    // when the next ScopedChainManager re-initializes strm_.
     if (!strm_.set_read_limit(dheader)) {
       return false;
     }
@@ -1789,6 +1793,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
         }
 
         const DDS::DynamicType_var disc_type = get_base_type(type_desc_->discriminator_type());
+        DCPS::Serializer::ScopedReadLimit disc_limit(strm_, 0, false);
         if (ek == DDS::MUTABLE) {
           unsigned disc_id;
           size_t size;
@@ -1798,11 +1803,13 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
             good = false;
             break;
           }
-          if (!strm_.set_read_limit(size)) {
+          if (!disc_limit.reset(size)) {
             good = false;
             break;
           }
         }
+        // The nested reader below snapshots the (possibly narrowed) read limit
+        // at construction; disc_limit keeps it in place until then.
         CORBA::release(value);
         value = new DynamicDataXcdrReadImpl(strm_, disc_type, nested(extent_));
         break;
@@ -1814,6 +1821,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
         break;
       }
 
+      DCPS::Serializer::ScopedReadLimit member_limit(strm_, 0, false);
       if (ek == DDS::MUTABLE) {
         unsigned mem_id;
         size_t size;
@@ -1822,7 +1830,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
           good = false;
           break;
         }
-        if (!strm_.set_read_limit(size)) {
+        if (!member_limit.reset(size)) {
           good = false;
           break;
         }
@@ -2277,6 +2285,7 @@ bool DynamicDataXcdrReadImpl::get_values_from_union(SequenceType& value, MemberI
     return false;
   }
 
+  DCPS::Serializer::ScopedReadLimit member_limit(strm_, 0, false);
   if (type_desc_->extensibility_kind() == DDS::MUTABLE) {
     unsigned member_id;
     size_t member_size;
@@ -2284,7 +2293,7 @@ bool DynamicDataXcdrReadImpl::get_values_from_union(SequenceType& value, MemberI
     if (!strm_.read_parameter_id(member_id, member_size, must_understand)) {
       return false;
     }
-    if (!strm_.set_read_limit(member_size)) {
+    if (!member_limit.reset(member_size)) {
       return false;
     }
   }
@@ -2581,6 +2590,10 @@ DDS::DynamicType_ptr DynamicDataXcdrReadImpl::type()
 
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDescriptor* member_desc, MemberId id)
 {
+  // On RETCODE_OK this deliberately leaves strm_ read-limited to the located
+  // member (and, for a delimited struct, to the struct's DHEADER region): the
+  // caller reads that member next and must not run past it.  The limit is reset
+  // when the next ScopedChainManager re-initializes strm_.
   const DDS::ExtensibilityKind ek = type_desc_->extensibility_kind();
   if (ek == DDS::FINAL || ek == DDS::APPENDABLE) {
     size_t dheader = 0;

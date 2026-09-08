@@ -735,6 +735,15 @@ public:
     bool skip_to_end();
     bool finish();
 
+    /**
+     * (Re)arm the limit to @a size bytes starting at the current position,
+     * discarding any narrowing this object had already applied.  Intended for
+     * "construct inert, then bound once the member size is known" flows: build
+     * with enabled == false, read the parameter-id/length, then call reset().
+     * Returns valid().
+     */
+    bool reset(size_t size);
+
   private:
     ScopedReadLimit(const ScopedReadLimit&);
     ScopedReadLimit& operator=(const ScopedReadLimit&);
@@ -746,7 +755,7 @@ public:
     Serializer& ser_;
     const size_t previous_limit_;
     size_t end_;
-    const bool enabled_;
+    bool enabled_;
     const bool skip_remainder_;
     bool valid_;
     bool finished_;
