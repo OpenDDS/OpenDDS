@@ -356,7 +356,14 @@ public:
    */
   bool check_size(size_t count, size_t element_size, size_t element_alignment = 1);
 
-  /// Permanently narrow the active read region starting at the current position.
+  /**
+   * Narrow the active read region to @a size bytes starting at the current
+   * position.  Unlike ScopedReadLimit this is not restored automatically: the
+   * limit stays in effect until it is widened by a later rdstate() restore or
+   * the Serializer is re-initialized.  Callers that narrow the limit for a
+   * self-contained read and then continue reading the enclosing object are
+   * responsible for saving and restoring rdstate() themselves.
+   */
   bool set_read_limit(size_t size);
 
   typedef ACE_CDR::Char* (*StrAllocate)(ACE_CDR::ULong);
@@ -697,6 +704,14 @@ public:
    * Restrict reads to a nested region of the input stream.  The limit starts
    * at the current read position and is restored when this object is
    * destroyed.  Reads, skips, and alignment cannot cross the active limit.
+   *
+   * With @c skip_remainder, any bytes left in the region are consumed when the
+   * object is destroyed (or by an explicit finish()), leaving the stream
+   * positioned just past the region; this is how appendable/mutable trailing
+   * data is tolerated.  With @c enabled false the object is an inert pass-
+   * through, for call sites that only sometimes have a delimited region.
+   * finish() applies the skip and restores the limit early, before the caller
+   * reads whatever follows the region (such as a parameter-list sentinel).
    */
   class OpenDDS_Dcps_Export ScopedReadLimit {
   public:
