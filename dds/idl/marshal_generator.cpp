@@ -262,9 +262,13 @@ namespace {
     }
   }
 
+  // Wire size of a primitive type as a *_cdr_size constant from Serializer.h.
+  // The caller must have already resolved typedefs and confirmed the type is a
+  // primitive (CL_PRIMITIVE); anything else is an internal error.
   string getPrimitiveCdrSize(AST_Type* type)
   {
-    switch (dynamic_cast<AST_PredefinedType*>(type)->pt()) {
+    AST_PredefinedType* const predef = dynamic_cast<AST_PredefinedType*>(type);
+    switch (predef ? predef->pt() : AST_PredefinedType::PT_void) {
     case AST_PredefinedType::PT_long: return "int32_cdr_size";
     case AST_PredefinedType::PT_ulong: return "uint32_cdr_size";
     case AST_PredefinedType::PT_short: return "int16_cdr_size";
@@ -282,7 +286,9 @@ namespace {
     case AST_PredefinedType::PT_wchar: return "char16_cdr_size";
     case AST_PredefinedType::PT_boolean: return "boolean_cdr_size";
     case AST_PredefinedType::PT_octet: return "byte_cdr_size";
-    default: return "1u";
+    default:
+      be_util::misc_error_and_abort("getPrimitiveCdrSize called with a non-primitive type", type);
+      return "1u";
     }
   }
 
