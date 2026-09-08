@@ -415,9 +415,11 @@ Serializer::read_string(ACE_CDR::Char*& dest,
   //
   // NOTE: Maintain the ACE implementation where the length check is
   //       done here before the allocation even though it will be
-  //       checked during the actual read as well.
+  //       checked during the actual read as well.  Bound by length()
+  //       (not total_length()) so an oversized length inside a
+  //       read-limited region is rejected before allocating.
   //
-  if (current_ && length <= current_->total_length()) {
+  if (current_ && length <= this->length()) {
 
     dest = str_alloc(length - 1);
 
@@ -495,7 +497,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
   //       checked during the actual read as well.
   //
   ACE_CDR::ULong length = 0;
-  if (current_ && bytecount <= current_->total_length()) {
+  if (current_ && bytecount <= this->length()) {
     if (bytecount % char16_cdr_size) {
       good_bit_ = false;
       return 0;
@@ -654,13 +656,6 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
       }
     }
     id = emheader & 0xfffffff;
-  }
-
-  // A member that claims more bytes than remain in the (possibly limited) input
-  // is malformed regardless of what the caller does with it next.
-  if (size > length()) {
-    good_bit_ = false;
-    return false;
   }
 
   return true;
