@@ -1,7 +1,6 @@
-// TODO: Add deserialization only tests that have unknown parameters with
-// must understand that cause an expected failure.
-// This should for generated deserialization code, but probably doesn't work with
-// DynamicData.
+// MutableUnknownMustUnderstandMemberRejected covers the generated-code case of
+// an unknown must_understand parameter causing an expected failure.
+// TODO: add the equivalent coverage for the DynamicData reader.
 
 #include "xcdrbasetypesTypeSupportImpl.h"
 #include "appendable_mixedTypeSupportImpl.h"
@@ -663,6 +662,66 @@ TEST(BasicTests, MutableUnionRejectsWrongDiscriminatorId)
 {
   expect_mutable_union_rejects_wrong_discriminator_id(xcdr1);
   expect_mutable_union_rejects_wrong_discriminator_id(xcdr2);
+}
+
+void expect_bounded_sequence_length_exceeds_payload_rejected(const Encoding& encoding)
+{
+  // values.length claims 5 elements but only 3 follow (issue #5289).  The wire
+  // form is the same for XCDR1 and XCDR2 (final struct, primitive sequence: no
+  // DHEADER in either).
+  const unsigned char cdr[] = {
+    0x00, 0x00, 0x00, 0x05, // length = 5
+    0x00, 0x00, 0x00, 0x3f, // 63
+    0x00, 0x00, 0x00, 0x40, // 64
+    0x00, 0x00, 0x00, 0x41  // 65
+  };
+  ACE_Message_Block mb(sizeof cdr);
+  ASSERT_EQ(0, mb.copy(reinterpret_cast<const char*>(cdr), sizeof cdr));
+  Serializer reader(&mb, encoding);
+  BoundedLongSeqStruct result;
+  EXPECT_FALSE(reader >> result);
+}
+
+TEST(BasicTests, BoundedSequenceLengthExceedsPayloadRejected)
+{
+  expect_bounded_sequence_length_exceeds_payload_rejected(xcdr1);
+  expect_bounded_sequence_length_exceeds_payload_rejected(xcdr2);
+}
+
+TEST(BasicTests, AppendableDheaderUnderReportRejected)
+{
+  // A truthful DHEADER that is then shrunk by one byte must be rejected rather
+  // than allowing fields to be read past it (issue #5287).
+  AppendableStruct value;
+  value.short_field(1);
+  value.long_field(2);
+  value.octet_field(3);
+  value.long_long_field(4);
+
+  ACE_Message_Block buffer(64);
+  Serializer writer(&buffer, xcdr2);
+  ASSERT_TRUE(writer << value);
+  ASSERT_GE(buffer.length(), size_t(4));
+  --buffer.rd_ptr()[3]; // low byte of the big-endian DHEADER
+
+  AppendableStruct result;
+  Serializer reader(&buffer, xcdr2);
+  EXPECT_FALSE(reader >> result);
+}
+
+TEST(BasicTests, MutableUnknownMustUnderstandMemberRejected)
+{
+  // An unrecognized member flagged must_understand must fail the read.  See the
+  // TODO at the top of this file.
+  ACE_Message_Block buffer(64);
+  Serializer writer(&buffer, xcdr2);
+  ASSERT_TRUE(writer.write_delimiter(uint32_cdr_size + uint32_cdr_size));
+  ASSERT_TRUE(writer.write_parameter_id(1000, uint32_cdr_size, true));
+  ASSERT_TRUE(writer << ACE_CDR::ULong(0));
+
+  MutableStruct result;
+  Serializer reader(&buffer, xcdr2);
+  EXPECT_FALSE(reader >> result);
 }
 
 // ---------- FinalUnion
