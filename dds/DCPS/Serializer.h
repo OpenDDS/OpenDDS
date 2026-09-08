@@ -707,6 +707,7 @@ public:
     bool valid() const { return valid_; }
     size_t remaining() const;
     bool skip_to_end();
+    bool finish();
 
   private:
     ScopedReadLimit(const ScopedReadLimit&);
@@ -718,6 +719,7 @@ public:
     const bool enabled_;
     const bool skip_remainder_;
     bool valid_;
+    bool finished_;
   };
 
   template <typename T>
