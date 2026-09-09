@@ -30,6 +30,7 @@ using namespace OpenDDS::DCPS;
 using namespace OpenDDS::XTypes;
 
 const Encoding xcdr1(Encoding::KIND_XCDR1, ENDIAN_BIG);
+const Encoding xcdr1_le(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
 const Encoding xcdr2(Encoding::KIND_XCDR2, ENDIAN_BIG);
 const Encoding xcdr2_le(Encoding::KIND_XCDR2, ENDIAN_LITTLE);
 
@@ -644,6 +645,72 @@ TEST(BasicTests, MutableXcdr12UnionLE)
   test_little_endian_union<MutableUnion, MutableXcdr2UnionExpectedLongLongBE>(UnionDisc::E_LONG_LONG_FIELD);
 }
 
+// XCDR1 mutable unions serialize as a PL_CDR parameter list: a 4-byte
+// {UShort id, UShort size} header (4-byte aligned) for the discriminator
+// (DISCRIMINATOR_SERIALIZED_ID == 0) and the selected branch, then the
+// PID_SENTINEL (0x3f02) terminator.  MutableUnion has no explicit @id, so its
+// branches take sequential ids short=0, long=1, octet=2, long_long=3.
+const unsigned char mutable_xcdr1_union_short_be[] = {
+  0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, // disc header + value (E_SHORT_FIELD)
+  0x00, 0x00, 0x00, 0x02, 0x7f, 0xff,             // short_field header + value
+  0x00, 0x00,                                     // pad to 4
+  0x3f, 0x02, 0x00, 0x00                          // sentinel
+};
+const unsigned char mutable_xcdr1_union_short_le[] = {
+  0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x02, 0x00, 0xff, 0x7f,
+  0x00, 0x00,
+  0x02, 0x3f, 0x00, 0x00
+};
+const unsigned char mutable_xcdr1_union_long_be[] = {
+  0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x01, // disc header + value (E_LONG_FIELD)
+  0x00, 0x01, 0x00, 0x04, 0x7f, 0xff, 0xff, 0xff, // long_field header + value
+  0x3f, 0x02, 0x00, 0x00
+};
+const unsigned char mutable_xcdr1_union_long_le[] = {
+  0x00, 0x00, 0x04, 0x00, 0x01, 0x00, 0x00, 0x00,
+  0x01, 0x00, 0x04, 0x00, 0xff, 0xff, 0xff, 0x7f,
+  0x02, 0x3f, 0x00, 0x00
+};
+const unsigned char mutable_xcdr1_union_octet_be[] = {
+  0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x02, // disc header + value (E_OCTET_FIELD)
+  0x00, 0x02, 0x00, 0x01, 0x01,                   // octet_field header + value
+  0x00, 0x00, 0x00,                               // pad to 4
+  0x3f, 0x02, 0x00, 0x00
+};
+const unsigned char mutable_xcdr1_union_octet_le[] = {
+  0x00, 0x00, 0x04, 0x00, 0x02, 0x00, 0x00, 0x00,
+  0x02, 0x00, 0x01, 0x00, 0x01,
+  0x00, 0x00, 0x00,
+  0x02, 0x3f, 0x00, 0x00
+};
+const unsigned char mutable_xcdr1_union_long_long_be[] = {
+  0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x03, // disc header + value (E_LONG_LONG_FIELD)
+  0x00, 0x03, 0x00, 0x08, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0x3f, 0x02, 0x00, 0x00
+};
+const unsigned char mutable_xcdr1_union_long_long_le[] = {
+  0x00, 0x00, 0x04, 0x00, 0x03, 0x00, 0x00, 0x00,
+  0x03, 0x00, 0x08, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f,
+  0x02, 0x3f, 0x00, 0x00
+};
+
+TEST(BasicTests, MutableXcdr1Union)
+{
+  baseline_checks_union<MutableUnion>(xcdr1, mutable_xcdr1_union_short_be, UnionDisc::E_SHORT_FIELD);
+  baseline_checks_union<MutableUnion>(xcdr1, mutable_xcdr1_union_long_be, UnionDisc::E_LONG_FIELD);
+  baseline_checks_union<MutableUnion>(xcdr1, mutable_xcdr1_union_octet_be, UnionDisc::E_OCTET_FIELD);
+  baseline_checks_union<MutableUnion>(xcdr1, mutable_xcdr1_union_long_long_be, UnionDisc::E_LONG_LONG_FIELD);
+}
+
+TEST(BasicTests, MutableXcdr1UnionLE)
+{
+  baseline_checks_union<MutableUnion>(xcdr1_le, mutable_xcdr1_union_short_le, UnionDisc::E_SHORT_FIELD);
+  baseline_checks_union<MutableUnion>(xcdr1_le, mutable_xcdr1_union_long_le, UnionDisc::E_LONG_FIELD);
+  baseline_checks_union<MutableUnion>(xcdr1_le, mutable_xcdr1_union_octet_le, UnionDisc::E_OCTET_FIELD);
+  baseline_checks_union<MutableUnion>(xcdr1_le, mutable_xcdr1_union_long_long_le, UnionDisc::E_LONG_LONG_FIELD);
+}
+
 void expect_mutable_union_rejects_wrong_discriminator_id(const Encoding& encoding)
 {
   ACE_Message_Block buffer(64);
@@ -662,6 +729,33 @@ TEST(BasicTests, MutableUnionRejectsWrongDiscriminatorId)
 {
   expect_mutable_union_rejects_wrong_discriminator_id(xcdr1);
   expect_mutable_union_rejects_wrong_discriminator_id(xcdr2);
+}
+
+// A mutable union carries exactly the discriminator and one selected branch;
+// the reader requires PID_SENTINEL immediately after the branch.  An extra
+// parameter in that position must fail the read even when it is not flagged
+// must_understand (and, all the more, when it is).
+void expect_mutable_xcdr1_union_trailing_parameter_rejected(bool must_understand)
+{
+  ACE_Message_Block buffer(64);
+  Serializer writer(&buffer, xcdr1);
+  ASSERT_TRUE(writer.write_parameter_id(DISCRIMINATOR_SERIALIZED_ID, uint32_cdr_size));
+  ASSERT_TRUE(writer << UnionDisc::E_SHORT_FIELD);
+  ASSERT_TRUE(writer.write_parameter_id(0, int16_cdr_size)); // short_field
+  ASSERT_TRUE(writer << ACE_CDR::Short(0x7fff));
+  ASSERT_TRUE(writer.write_parameter_id(0x63, uint32_cdr_size, must_understand));
+  ASSERT_TRUE(writer << ACE_CDR::ULong(0));
+  ASSERT_TRUE(writer.write_list_end_parameter_id());
+
+  MutableUnion result;
+  Serializer reader(&buffer, xcdr1);
+  EXPECT_FALSE(reader >> result);
+}
+
+TEST(BasicTests, MutableXcdr1UnionTrailingParameterRejected)
+{
+  expect_mutable_xcdr1_union_trailing_parameter_rejected(false);
+  expect_mutable_xcdr1_union_trailing_parameter_rejected(true);
 }
 
 void expect_bounded_sequence_length_exceeds_payload_rejected(const Encoding& encoding)
@@ -1387,6 +1481,113 @@ TEST(MutableTests, FromModifiedMutableUnionLE)
   test_little_endian_union<ModifiedMutableUnion, MutableUnion,
                            MutableUnionExpectedXcdr2LongBE>(UnionDisc::E_LONG_FIELD);
   // TODO (sonndinh): similarly, test try-construct of additional_field here
+}
+
+// ---------- MutableUnionWithExplicitIDs / ModifiedMutableUnion, XCDR1
+// Same PL_CDR layout as MutableUnion above, but the branch ids are the
+// explicit @id values: short=4, long=6, octet=8, long_long=10.  Both
+// MutableUnionWithExplicitIDs and ModifiedMutableUnion serialize these branches
+// identically, so the same expected bytes drive the schema-evolution round
+// trips (deserialization matches by discriminator label, not member id).
+const unsigned char mutable_xcdr1_union_eid_short_be[] = {
+  0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x04, 0x00, 0x02, 0x7f, 0xff,
+  0x00, 0x00,
+  0x3f, 0x02, 0x00, 0x00
+};
+const unsigned char mutable_xcdr1_union_eid_short_le[] = {
+  0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x04, 0x00, 0x02, 0x00, 0xff, 0x7f,
+  0x00, 0x00,
+  0x02, 0x3f, 0x00, 0x00
+};
+const unsigned char mutable_xcdr1_union_eid_long_be[] = {
+  0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x01,
+  0x00, 0x06, 0x00, 0x04, 0x7f, 0xff, 0xff, 0xff,
+  0x3f, 0x02, 0x00, 0x00
+};
+const unsigned char mutable_xcdr1_union_eid_long_le[] = {
+  0x00, 0x00, 0x04, 0x00, 0x01, 0x00, 0x00, 0x00,
+  0x06, 0x00, 0x04, 0x00, 0xff, 0xff, 0xff, 0x7f,
+  0x02, 0x3f, 0x00, 0x00
+};
+const unsigned char mutable_xcdr1_union_eid_octet_be[] = {
+  0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x02,
+  0x00, 0x08, 0x00, 0x01, 0x01,
+  0x00, 0x00, 0x00,
+  0x3f, 0x02, 0x00, 0x00
+};
+const unsigned char mutable_xcdr1_union_eid_octet_le[] = {
+  0x00, 0x00, 0x04, 0x00, 0x02, 0x00, 0x00, 0x00,
+  0x08, 0x00, 0x01, 0x00, 0x01,
+  0x00, 0x00, 0x00,
+  0x02, 0x3f, 0x00, 0x00
+};
+const unsigned char mutable_xcdr1_union_eid_long_long_be[] = {
+  0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x03,
+  0x00, 0x0a, 0x00, 0x08, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0x3f, 0x02, 0x00, 0x00
+};
+const unsigned char mutable_xcdr1_union_eid_long_long_le[] = {
+  0x00, 0x00, 0x04, 0x00, 0x03, 0x00, 0x00, 0x00,
+  0x0a, 0x00, 0x08, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f,
+  0x02, 0x3f, 0x00, 0x00
+};
+
+TEST(MutableTests, MutableXcdr1UnionWithExplicitIDs)
+{
+  baseline_checks_union<MutableUnionWithExplicitIDs>(
+    xcdr1, mutable_xcdr1_union_eid_short_be, UnionDisc::E_SHORT_FIELD);
+  baseline_checks_union<MutableUnionWithExplicitIDs>(
+    xcdr1, mutable_xcdr1_union_eid_long_be, UnionDisc::E_LONG_FIELD);
+  baseline_checks_union<MutableUnionWithExplicitIDs>(
+    xcdr1, mutable_xcdr1_union_eid_octet_be, UnionDisc::E_OCTET_FIELD);
+  baseline_checks_union<MutableUnionWithExplicitIDs>(
+    xcdr1, mutable_xcdr1_union_eid_long_long_be, UnionDisc::E_LONG_LONG_FIELD);
+}
+
+TEST(MutableTests, MutableXcdr1UnionWithExplicitIDsLE)
+{
+  baseline_checks_union<MutableUnionWithExplicitIDs>(
+    xcdr1_le, mutable_xcdr1_union_eid_short_le, UnionDisc::E_SHORT_FIELD);
+  baseline_checks_union<MutableUnionWithExplicitIDs>(
+    xcdr1_le, mutable_xcdr1_union_eid_long_le, UnionDisc::E_LONG_FIELD);
+  baseline_checks_union<MutableUnionWithExplicitIDs>(
+    xcdr1_le, mutable_xcdr1_union_eid_octet_le, UnionDisc::E_OCTET_FIELD);
+  baseline_checks_union<MutableUnionWithExplicitIDs>(
+    xcdr1_le, mutable_xcdr1_union_eid_long_long_le, UnionDisc::E_LONG_LONG_FIELD);
+}
+
+TEST(MutableTests, FromMutableUnionXcdr1)
+{
+  amalgam_serializer_test_union<MutableUnionWithExplicitIDs, ModifiedMutableUnion>(
+    xcdr1, mutable_xcdr1_union_eid_short_be, UnionDisc::E_SHORT_FIELD);
+  amalgam_serializer_test_union<MutableUnionWithExplicitIDs, ModifiedMutableUnion>(
+    xcdr1, mutable_xcdr1_union_eid_long_be, UnionDisc::E_LONG_FIELD);
+}
+
+TEST(MutableTests, FromMutableUnionXcdr1LE)
+{
+  amalgam_serializer_test_union<MutableUnionWithExplicitIDs, ModifiedMutableUnion>(
+    xcdr1_le, mutable_xcdr1_union_eid_short_le, UnionDisc::E_SHORT_FIELD);
+  amalgam_serializer_test_union<MutableUnionWithExplicitIDs, ModifiedMutableUnion>(
+    xcdr1_le, mutable_xcdr1_union_eid_long_le, UnionDisc::E_LONG_FIELD);
+}
+
+TEST(MutableTests, FromModifiedMutableUnionXcdr1)
+{
+  amalgam_serializer_test_union<ModifiedMutableUnion, MutableUnion>(
+    xcdr1, mutable_xcdr1_union_eid_short_be, UnionDisc::E_SHORT_FIELD);
+  amalgam_serializer_test_union<ModifiedMutableUnion, MutableUnion>(
+    xcdr1, mutable_xcdr1_union_eid_long_be, UnionDisc::E_LONG_FIELD);
+}
+
+TEST(MutableTests, FromModifiedMutableUnionXcdr1LE)
+{
+  amalgam_serializer_test_union<ModifiedMutableUnion, MutableUnion>(
+    xcdr1_le, mutable_xcdr1_union_eid_short_le, UnionDisc::E_SHORT_FIELD);
+  amalgam_serializer_test_union<ModifiedMutableUnion, MutableUnion>(
+    xcdr1_le, mutable_xcdr1_union_eid_long_le, UnionDisc::E_LONG_FIELD);
 }
 
 // ---------- ReorderedMutableStruct
