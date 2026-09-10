@@ -3,7 +3,7 @@
 // TODO: the DynamicData reader (DynamicDataXcdrReadImpl) seeks to members by ID
 // and never scans the wire in order, so it does not currently reject an unknown
 // member flagged must_understand.  Enforcing that requires a validation pass in
-// the reader, not just a test; tracked in the XCDR1 static-audit follow-up.
+// the reader, not just a test.
 
 #include "xcdrbasetypesTypeSupportImpl.h"
 #include "appendable_mixedTypeSupportImpl.h"
