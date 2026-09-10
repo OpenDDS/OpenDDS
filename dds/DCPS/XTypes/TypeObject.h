@@ -3508,13 +3508,18 @@ bool operator>>(Serializer& strm, XTypes::Sequence<T>& seq)
     return false;
   }
 
+  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  if (!read_limit.valid()) {
+    return false;
+  }
+
   const size_t end_of_seq = strm.rpos() + total_size;
   ACE_CDR::ULong length;
   if (!(strm >> length)) {
     return false;
   }
 
-  if (length > strm.length()) {
+  if (!strm.check_size(length, 1u)) {
     // if encoded incorrectly, the first 4 bytes of the elements were read
     // as if they were the length - this may end up being larger than the
     // number of bytes remaining in the Serializer
@@ -3550,13 +3555,18 @@ bool operator>>(Serializer& strm, NestedKeyOnly<XTypes::Sequence<T> >& seq)
     return false;
   }
 
+  Serializer::ScopedReadLimit read_limit(strm, total_size, true, true);
+  if (!read_limit.valid()) {
+    return false;
+  }
+
   const size_t end_of_seq = strm.rpos() + total_size;
   ACE_CDR::ULong length;
   if (!(strm >> length)) {
     return false;
   }
 
-  if (length > strm.length()) {
+  if (!strm.check_size(length, 1u)) {
     // if encoded incorrectly, the first 4 bytes of the elements were read
     // as if they were the length - this may end up being larger than the
     // number of bytes remaining in the Serializer

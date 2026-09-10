@@ -349,6 +349,23 @@ public:
   /// Number of bytes left to read in message block chain
   size_t length() const;
 
+  /**
+   * Verify that an array-like value fits in the remaining input before its
+   * destination container is allocated.  This accounts for the alignment of
+   * the first element and rejects size_t multiplication overflow.
+   */
+  bool check_size(size_t count, size_t element_size, size_t element_alignment = 1);
+
+  /**
+   * Narrow the active read region to @a size bytes starting at the current
+   * position.  Unlike ScopedReadLimit this is not restored automatically: the
+   * limit stays in effect until it is widened by a later rdstate() restore or
+   * the Serializer is re-initialized.  Callers that narrow the limit for a
+   * self-contained read and then continue reading the enclosing object are
+   * responsible for saving and restoring rdstate() themselves.
+   */
+  bool set_read_limit(size_t size);
+
   typedef ACE_CDR::Char* (*StrAllocate)(ACE_CDR::ULong);
   typedef void (*StrFree)(ACE_CDR::Char*);
   typedef ACE_CDR::WChar* (*WStrAllocate)(ACE_CDR::ULong);
@@ -683,6 +700,67 @@ public:
     const size_t wblock_;
   };
 
+  /**
+   * Restrict reads to a nested region of the input stream.  The limit starts
+   * at the current read position and is restored when this object is
+   * destroyed.  Reads, skips, and alignment cannot cross the active limit.
+   *
+   * With @c skip_remainder, any bytes left in the region are consumed when the
+   * object is destroyed (or by an explicit finish()), leaving the stream
+   * positioned just past the region; this is how appendable/mutable trailing
+   * data is tolerated.  With @c enabled false the object is an inert pass-
+   * through, for call sites that only sometimes have a delimited region.
+   * finish() applies the skip and restores the limit early, before the caller
+   * reads whatever follows the region (such as a parameter-list sentinel).
+   */
+  class OpenDDS_Dcps_Export ScopedReadLimit {
+  public:
+    ScopedReadLimit(Serializer& ser, size_t size, bool enabled = true,
+                    bool skip_remainder = false);
+
+    /**
+     * Read an XCDR2 delimiter (DHEADER) from @a ser and restrict subsequent
+     * reads to the region it describes.  Equivalent to reading the delimiter
+     * and then constructing with skip_remainder enabled: any bytes left in the
+     * region when this object is destroyed are skipped, leaving the stream
+     * positioned after the delimited object.  valid() is false if the delimiter
+     * could not be read or its size exceeds the remaining input.
+     */
+    explicit ScopedReadLimit(Serializer& ser);
+
+    ~ScopedReadLimit();
+
+    bool valid() const { return valid_; }
+    size_t remaining() const;
+    bool skip_to_end();
+    bool finish();
+
+    /**
+     * (Re)arm the limit to @a size bytes starting at the current position,
+     * discarding any narrowing this object had already applied.  Intended for
+     * "construct inert, then bound once the member size is known" flows: build
+     * with enabled == false, read the parameter-id/length, then call reset().
+     * Returns valid().
+     */
+    bool reset(size_t size);
+
+  private:
+    ScopedReadLimit(const ScopedReadLimit&);
+    ScopedReadLimit& operator=(const ScopedReadLimit&);
+
+    /// Bound reads to @a size bytes starting at the current position, or clear
+    /// the stream's good bit if that does not fit in the remaining input.
+    void install(size_t size);
+
+    Serializer& ser_;
+    const size_t previous_limit_;
+    size_t end_;
+    bool enabled_;
+    const bool skip_remainder_;
+    bool valid_;
+    bool finished_;
+  };
+
   template <typename T>
   bool peek_helper(ACE_Message_Block* const block, size_t bytes, T& t)
   {
@@ -727,10 +805,12 @@ public:
   // This is used by DynamicData and must have all reading-related members of
   // of Serializer for DynamicData to work correctly.
   struct RdState {
-    explicit RdState(unsigned char shift = 0, size_t pos = 0)
-      : align_rshift(shift), rpos(pos) {}
+    explicit RdState(unsigned char shift = 0, size_t pos = 0,
+                     size_t limit = (std::numeric_limits<size_t>::max)())
+      : align_rshift(shift), rpos(pos), read_limit(limit) {}
     unsigned char align_rshift;
     size_t rpos;
+    size_t read_limit;
   };
 
   RdState rdstate() const;
@@ -812,6 +892,9 @@ private:
 
   /// Logical reading position of the stream.
   size_t rpos_;
+
+  /// Absolute logical position beyond which reads are not permitted.
+  size_t read_limit_;
 
   /// Logical writing position of the stream.
   size_t wpos_;
