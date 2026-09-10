@@ -1404,6 +1404,62 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Mutable_SkipNestedMembers)
   EXPECT_EQ(expected.outer.s, s_val);
 }
 
+// A mutable struct carrying a member the reader does not know about must be
+// rejected when that member is flagged must-understand, and accepted (the
+// member skipped) when it is not.  XTypes 1.3 7.6.3.
+void run_unknown_member_test(const DCPS::Encoding& encoding, bool must_understand, bool expect_ok)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::MutableSingleValueStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::MutableSingleValueStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  ASSERT_TRUE(it != type_map.end());
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  // int_32 (id 1) followed by an unrecognized member with id 99.
+  ACE_Message_Block msg(64);
+  if (encoding.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1) {
+    const unsigned char em0 = must_understand ? 0xa0 : 0x20;
+    const unsigned char bytes[] = {
+      0x00, 0x00, 0x00, 0x10, // DHEADER
+      0x20, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x0a, // int_32 (id 1) = 10
+      em0, 0x00, 0x00, 0x63, 0x00, 0x00, 0x00, 0x00 // unrecognized member (id 99)
+    };
+    msg.copy(reinterpret_cast<const char*>(bytes), sizeof bytes);
+  } else {
+    const unsigned char id_hi = must_understand ? 0x40 : 0x00;
+    const unsigned char bytes[] = {
+      0x00, 0x01, 0x00, 0x04, 0x00, 0x00, 0x00, 0x0a, // int_32 (id 1) = 10
+      id_hi, 0x63, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, // unrecognized member (id 99)
+      0x3f, 0x02, 0x00, 0x00 // PID_SENTINEL
+    };
+    msg.copy(reinterpret_cast<const char*>(bytes), sizeof bytes);
+  }
+  XTypes::DynamicDataXcdrReadImpl data(&msg, encoding, dt);
+
+  ACE_CDR::Long value = 0;
+  const DDS::ReturnCode_t rc = data.get_int32_value(value, 1);
+  if (expect_ok) {
+    EXPECT_EQ(DDS::RETCODE_OK, rc);
+    EXPECT_EQ(10, value);
+  } else {
+    EXPECT_EQ(DDS::RETCODE_ERROR, rc);
+  }
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Mutable_RejectsUnknownMustUnderstandMember)
+{
+  run_unknown_member_test(xcdr2, true, false);
+  run_unknown_member_test(xcdr1, true, false);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Mutable_SkipsUnknownNonMustUnderstandMember)
+{
+  run_unknown_member_test(xcdr2, false, true);
+  run_unknown_member_test(xcdr1, false, true);
+}
+
 TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Mutable_ReadRecursiveStruct)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::Node_xtag>();

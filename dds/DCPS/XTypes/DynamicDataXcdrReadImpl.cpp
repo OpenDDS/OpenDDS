@@ -58,6 +58,7 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl()
   , strm_(0, encoding_)
   , item_count_(ITEM_COUNT_INVALID)
   , item_count_limit_(ACE_UINT32_MAX)
+  , understood_check_(-1)
 {}
 
 DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
@@ -73,6 +74,7 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
   , strm_(chain_, encoding_)
   , item_count_(ITEM_COUNT_INVALID)
   , item_count_limit_(item_count_limit)
+  , understood_check_(-1)
 {
   if (!chain_) {
     throw std::runtime_error("DynamicDataXcdrReadImpl requires a message block");
@@ -95,6 +97,7 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::Dyn
   , strm_(chain_, encoding_)
   , item_count_(ITEM_COUNT_INVALID)
   , item_count_limit_(item_count_limit)
+  , understood_check_(-1)
 {
   if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
       encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
@@ -118,6 +121,7 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::Dyn
   , strm_(chain_, encoding_)
   , item_count_(ITEM_COUNT_INVALID)
   , item_count_limit_(ACE_UINT32_MAX)
+  , understood_check_(-1)
 {
   if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
       encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
@@ -164,6 +168,7 @@ void DynamicDataXcdrReadImpl::copy(const DynamicDataXcdrReadImpl& other)
   type_ = other.type_;
   item_count_ = other.item_count_;
   item_count_limit_ = other.item_count_limit_;
+  understood_check_ = other.understood_check_;
 }
 
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::set_descriptor(MemberId, DDS::MemberDescriptor*)
@@ -206,6 +211,10 @@ DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong ind
   }
 
   ScopedChainManager chain_manager(*this);
+
+  if (understood_check_ == 0) {
+    return MEMBER_ID_INVALID;
+  }
 
   const TypeKind tk = type_->get_kind();
   switch (tk) {
@@ -474,8 +483,96 @@ DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong ind
   return MEMBER_ID_INVALID;
 }
 
+bool DynamicDataXcdrReadImpl::all_understood_members()
+{
+  // Only a mutable struct can carry a member the reader does not know about;
+  // final has no unknowns and appendable only appends non-must-understand
+  // members at the end.  Key-only samples carry only key members.
+  if (extent_ != DCPS::Sample::Full ||
+      type_->get_kind() != TK_STRUCTURE ||
+      type_desc_->extensibility_kind() != DDS::MUTABLE) {
+    return true;
+  }
+
+  DCPS::Message_Block_Ptr dup(chain_->duplicate());
+  DCPS::Serializer ser(dup.get(), encoding_);
+  if (reset_align_state_) {
+    ser.rdstate(align_state_);
+  }
+  return scan_mutable_struct(ser, type_);
+}
+
+bool DynamicDataXcdrReadImpl::scan_mutable_struct(DCPS::Serializer& ser, DDS::DynamicType_ptr t)
+{
+  const bool xcdr1 = encoding_.xcdr_version() == DCPS::Encoding::XCDR_VERSION_1;
+  size_t dheader = 0;
+  if (!xcdr1 && !ser.read_delimiter(dheader)) {
+    return false;
+  }
+  DCPS::Serializer::ScopedReadLimit limit(ser, dheader, !xcdr1, true);
+  if (!xcdr1 && !limit.valid()) {
+    return false;
+  }
+  const size_t end_of_struct = xcdr1 ? 0 : ser.rpos() + dheader;
+
+  while (xcdr1 || ser.rpos() < end_of_struct) {
+    ACE_CDR::ULong member_id;
+    size_t member_size;
+    bool must_understand;
+    if (!ser.read_parameter_id(member_id, member_size, must_understand)) {
+      return false;
+    }
+    if (xcdr1 && member_id == DCPS::Serializer::pid_list_end) {
+      return member_size == 0;
+    }
+
+    DDS::DynamicTypeMember_var dtm;
+    if (t->get_member(dtm, member_id) != DDS::RETCODE_OK) {
+      if (must_understand) {
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::scan_mutable_struct:"
+                     " rejecting sample: unknown must-understand member id %u\n", member_id));
+        }
+        return false;
+      }
+      if (!ser.skip(member_size)) {
+        return false;
+      }
+      continue;
+    }
+
+    // Recurse into a known member that is itself a mutable struct.
+    DDS::MemberDescriptor_var md;
+    if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+      return false;
+    }
+    const DDS::DynamicType_var mt = get_base_type(md->type());
+    bool nested_mutable_struct = false;
+    if (mt && mt->get_kind() == TK_STRUCTURE) {
+      DDS::TypeDescriptor_var mtd;
+      if (mt->get_descriptor(mtd) == DDS::RETCODE_OK &&
+          mtd->extensibility_kind() == DDS::MUTABLE) {
+        nested_mutable_struct = true;
+      }
+    }
+    if (nested_mutable_struct) {
+      DCPS::Serializer::ScopedReadLimit member_limit(ser, member_size, true, true);
+      if (!member_limit.valid() || !scan_mutable_struct(ser, mt)) {
+        return false;
+      }
+    } else if (!ser.skip(member_size)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool DynamicDataXcdrReadImpl::get_struct_item_count()
 {
+  if (understood_check_ == 0) {
+    return false;
+  }
+
   bool has_optional;
   if (!has_optional_member(has_optional)) {
     if (log_level >= LogLevel::Warning) {
@@ -2590,6 +2687,9 @@ DDS::DynamicType_ptr DynamicDataXcdrReadImpl::type()
 
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDescriptor* member_desc, MemberId id)
 {
+  if (understood_check_ == 0) {
+    return DDS::RETCODE_ERROR;
+  }
   // On RETCODE_OK this deliberately leaves strm_ read-limited to the located
   // member (and, for a delimited struct, to the struct's DHEADER region): the
   // caller reads that member next and must not run past it.  The limit is reset

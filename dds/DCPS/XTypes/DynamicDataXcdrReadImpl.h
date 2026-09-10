@@ -368,6 +368,9 @@ private:
       , dup_(dd_.chain_->duplicate())
     {
       dd_.setup_stream(dup_.get());
+      if (dd_.understood_check_ < 0) {
+        dd_.understood_check_ = dd_.all_understood_members() ? 1 : 0;
+      }
     }
 
     ~ScopedChainManager()
@@ -381,6 +384,16 @@ private:
   };
 
   void copy(const DynamicDataXcdrReadImpl& other);
+
+  /// XTypes 1.3 7.6.3: a sample carrying a member the reader does not recognize
+  /// must be rejected when that member is flagged must-understand.  This lazy
+  /// reader seeks members by ID and would otherwise skip such a member
+  /// silently, so a one-time in-order scan is done on first access.  Only
+  /// mutable structs (including mutable structs nested inside mutable structs)
+  /// are scanned; mutable unions and final/appendable nesting are not yet
+  /// covered.  Memoized in understood_check_.
+  bool all_understood_members();
+  bool scan_mutable_struct(DCPS::Serializer& ser, DDS::DynamicType_ptr t);
 
   bool get_struct_item_count();
   bool get_union_item_count();
@@ -595,6 +608,10 @@ private:
   /// Cache the number of items (i.e., members or elements) in the data it holds.
   ACE_CDR::ULong item_count_;
   ACE_CDR::ULong item_count_limit_;
+
+  /// Result of the one-time must-understand scan: -1 not yet run, 0 a violation
+  /// was found (reject the sample), 1 no unknown must-understand member.
+  signed char understood_check_;
 };
 
 OpenDDS_Dcps_Export bool print_dynamic_data(DDS::DynamicData_ptr dd,
