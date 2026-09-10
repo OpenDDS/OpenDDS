@@ -623,8 +623,11 @@ std::string metaclass_generator::gen_union_branch(const std::string&, AST_Decl* 
     ss << call_gen_skip_over(br_type, field_type_name(dynamic_cast<AST_Field*>(branch), br_type),
                              get_tag_name(scoped_helper(deepest_named_type(br_type)->name(), "::")));
   }
+  // A mutable union is a parameter list terminated by PID_SENTINEL in XCDR1;
+  // consume it so a caller skipping past this union stays aligned.  This is a
+  // no-op for XCDR2 and the unaligned encoding.
   ss <<
-    "    return true;\n";
+    "    return is_mutable ? strm.read_list_end_parameter_id() : true;\n";
   return ss.str();
 }
 

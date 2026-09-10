@@ -57,3 +57,21 @@ struct IdVsDeclOrder {
 struct BoundedLongSeqStruct {
   sequence<long, 5> values;
 };
+
+// A member ID >= 0x4000 forces the 12-byte "extended" XCDR1 parameter header
+// (PID_EXTENDED short header + 4-byte member ID + 4-byte size).
+@mutable
+struct ExtendedIdStruct {
+  @id(1) short before_field;
+  @id(16384) short ext_id_field;
+  @id(2) short after_field;
+};
+
+// A member whose serialized size is >= 65536 also forces the extended header,
+// independent of its member ID.
+@mutable
+struct LargeMemberStruct {
+  @id(1) short before_field;
+  @id(2) sequence<octet> big_field;
+  @id(3) short after_field;
+};

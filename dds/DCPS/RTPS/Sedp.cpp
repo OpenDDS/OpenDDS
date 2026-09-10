@@ -7677,23 +7677,6 @@ void Sedp::match_continue(UsedEndpoints& ue,
     const XTypes::TypeIdentifier& reader_type_id =
       reader_type_info->minimal.typeid_with_size.type_id;
     if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
-      if (!writer_local || !reader_local) {
-        DCPS::Encoding::Kind encoding_kind;
-        if (tempDwQos.representation.value.length() > 0 &&
-            DCPS::repr_to_encoding_kind(tempDwQos.representation.value[0], encoding_kind) &&
-            encoding_kind == DCPS::Encoding::KIND_XCDR1) {
-          const XTypes::TypeFlag extensibility_mask = XTypes::IS_APPENDABLE;
-          if (type_lookup_service_->extensibility(extensibility_mask, writer_type_id)) {
-            if (OpenDDS::DCPS::DCPS_debug_level) {
-              ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: "
-                "Sedp::match_continue: "
-                "Encountered unsupported combination of XCDR1 encoding and appendable "
-                "extensibility\n"));
-            }
-          }
-        }
-      }
-
       XTypes::TypeConsistencyAttributes type_consistency;
       type_consistency.ignore_sequence_bounds = drQos->type_consistency.ignore_sequence_bounds;
       type_consistency.ignore_string_bounds = drQos->type_consistency.ignore_string_bounds;

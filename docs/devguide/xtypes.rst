@@ -1539,6 +1539,15 @@ Consequently, a ``DynamicTypeSupport`` can use both XCDR1 and XCDR2, subject to 
 XCDR1 is useful when interoperating with implementations that do not support XCDR2.
 When interoperating with a pre-XTypes implementation, the additional restrictions in :ref:`xtypes--interoperability-with-non-xtypes-implementations` still apply; in particular, mutable types require XTypes-aware peers.
 
+The following limitations apply specifically to XCDR1:
+
+* Unlike XCDR2, XCDR1 does not prefix an ``appendable`` type with a delimiter header.
+  A reader still ignores members appended to the end of a *top-level* type, but a nested ``appendable`` member is not length-delimited, so evolving a nested ``appendable`` type (adding or removing trailing members) is only interoperable under XCDR2.
+  ``mutable`` types are self-delimiting under XCDR1 (a parameter list terminated by a sentinel) and are not subject to this restriction.
+* Key-only serialization (used for dispose and unregister samples, see :ref:`getting_started--keys`) of sequences whose elements are themselves sequences or constructed types is not supported under XCDR1.
+* ``MarshalTraits::serialized_size_bound()`` is not reported for ``appendable`` or ``mutable`` types under any XCDR encoding, even when every member is bounded.
+  This affects buffer preallocation only, not correctness.
+
 .. _xtypes--type-system:
 
 Type System
