@@ -1,0 +1,24 @@
+project(*Publisher) : dcpsexe, dcps_test, dcps_rtps_udp, dcps_shmem {
+  exename = publisher
+
+  TypeSupport_Files {
+    ShmemWakeupRace.idl
+  }
+
+  Source_Files {
+    publisher.cpp
+  }
+}
+
+project(*Subscriber) : dcpsexe, dcps_test, dcps_rtps_udp, dcps_shmem {
+  exename = subscriber
+  after += *Publisher
+
+  TypeSupport_Files {
+    ShmemWakeupRace.idl
+  }
+
+  Source_Files {
+    subscriber.cpp
+  }
+}
