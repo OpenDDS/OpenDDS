@@ -1584,6 +1584,14 @@ bool operator>>(Serializer& strm, XTypes::LBoundSeq& seq)
   if (!(strm >> length)) {
     return false;
   }
+  // Reject a wire-supplied length that can't possibly be backed by the
+  // remaining input before allocating a length-element buffer for it.
+  if (length > strm.length()) {
+    if (DCPS_debug_level >= 8) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Invalid sequence length (%u)\n"), length));
+    }
+    return false;
+  }
   seq.length(length);
   if (length == 0) {
     return true;
@@ -1620,6 +1628,14 @@ bool operator>>(Serializer& strm, XTypes::SBoundSeq& seq)
   if (!(strm >> length)) {
     return false;
   }
+  // Reject a wire-supplied length that can't possibly be backed by the
+  // remaining input before allocating a length-element buffer for it.
+  if (length > strm.length()) {
+    if (DCPS_debug_level >= 8) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Invalid sequence length (%u)\n"), length));
+    }
+    return false;
+  }
   seq.length(length);
   if (length == 0) {
     return true;
@@ -1654,6 +1670,14 @@ bool operator>>(Serializer& strm, XTypes::UnionCaseLabelSeq& seq)
 {
   ACE_CDR::ULong length;
   if (!(strm >> length)) {
+    return false;
+  }
+  // Reject a wire-supplied length that can't possibly be backed by the
+  // remaining input before allocating a length-element buffer for it.
+  if (length > strm.length()) {
+    if (DCPS_debug_level >= 8) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Invalid sequence length (%u)\n"), length));
+    }
     return false;
   }
   seq.length(length);
