@@ -91,4 +91,60 @@ module Bound {
     float float_field;
   };
 
+  // An appendable struct of bounded fields should be bounded -- appendable
+  // only adds a DHEADER (XCDR2), no per-member overhead.
+#pragma DCPS_DATA_TYPE "Bound::AppendableBoundedMessage"
+
+  @appendable
+  struct AppendableBoundedMessage {
+    long long_field;
+    short short_field;
+  };
+
+  // A mutable struct of bounded fields should also be bounded, accounting
+  // for each member's own parameter-list header (PID for XCDR1, EMHEADER for
+  // XCDR2) in addition to the DHEADER.
+#pragma DCPS_DATA_TYPE "Bound::MutableBoundedMessage"
+
+  @mutable
+  struct MutableBoundedMessage {
+    @id(0) long long_field;
+    @id(1) short short_field;
+  };
+
+  // A member id >= 0x4000 forces the 12-byte XCDR1 "extended" parameter
+  // header (XCDR2's EMHEADER has no id-based extension).
+#pragma DCPS_DATA_TYPE "Bound::MutableExtendedIdMessage"
+
+  @mutable
+  struct MutableExtendedIdMessage {
+    @id(20000) long long_field;
+  };
+
+  // A member whose own max size is >= 65536 bytes also forces the 12-byte
+  // XCDR1 extended header, independent of its id; XCDR2 instead needs the
+  // 4-byte NEXTINT since the size isn't 1, 2, 4, or 8 bytes.
+  typedef string<70000> Big70kString;
+
+#pragma DCPS_DATA_TYPE "Bound::MutableExtendedSizeMessage"
+
+  @mutable
+  struct MutableExtendedSizeMessage {
+    @id(0) Big70kString big_field;
+  };
+
+  // Mutable union -- the discriminator and each branch get their own
+  // parameter-list header; the bound is the largest branch.
+#pragma DCPS_DATA_TYPE "Bound::MutableBoundedUnionMessage"
+
+  @mutable
+  union MutableBoundedUnion switch (short) {
+  case 1: @id(0) long long_field;
+  default: @id(1) short short_field;
+  };
+
+  struct MutableBoundedUnionMessage {
+    MutableBoundedUnion union_field;
+  };
+
 };
