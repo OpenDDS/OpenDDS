@@ -125,7 +125,7 @@ TopicKeys::Iterator::Iterator(AST_Field* root, Iterator* parent)
 {
   AST_Type* type = root->field_type()->unaliased_type();
   root_type_ = TopicKeys::root_type(type);
-  if (root_type_ == PrimitiveType) {
+  if (root_type_ == PrimitiveType || root_type_ == SequenceType) {
     root_ = root;
   } else {
     root_ = type;
@@ -282,14 +282,14 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
       }
     }
 
-  } else if (root_type_ == SequenceType) {
-    throw Error(root_, "sequence types are not supported as keys");
-
   } else if (root_type_ == MapType) {
     throw Error(root_, "map types are not supported as keys");
 
-  // If we are a primitive type, use self
-  } else if (root_type_ == PrimitiveType) {
+  // If we are a primitive or sequence type, use self as a single opaque key
+  // leaf. Unlike an array, a sequence's length is only known at runtime, so
+  // it can't be expanded into a fixed number of leaf key paths the way an
+  // array is above.
+  } else if (root_type_ == PrimitiveType || root_type_ == SequenceType) {
     if (pos_ == 0) { // Only Allow One Iteration
       pos_ = 1;
       current_value_ = root_;
@@ -386,7 +386,7 @@ void TopicKeys::Iterator::path_i(std::stringstream& ss, bool canonical)
     for (; ri != rfinished; ++ri) {
       ss << '[' << *ri << ']';
     }
-  } else if (root_type_ != PrimitiveType) {
+  } else if (root_type_ != PrimitiveType && root_type_ != SequenceType) {
     throw Error(root_, error_msg);
   }
   if (child_ && recursive_) {

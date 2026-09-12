@@ -110,6 +110,12 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
       if (is_topic_type) {
         TopicKeys::Iterator finished = keys.end();
         for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
+          if (i.root_type() == TopicKeys::SequenceType) {
+            // The generated sequence type has no operator<, so a sequence
+            // key can't contribute to this convenience ordering; it's still
+            // fully part of the actual DDS instance key otherwise.
+            continue;
+          }
           string fname = i.path();
           if (use_cxx11) {
             fname = insert_cxx11_accessor_parens(fname, false);

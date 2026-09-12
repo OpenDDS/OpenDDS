@@ -326,16 +326,10 @@ void baseline_checks(const Encoding& encoding, const DataView& expected_cdr,
   EXPECT_PRED_FORMAT2(assert_SerializedSizeBound,
     MarshalTraits<Type>::serialized_size_bound(encoding), bound);
 
-  /*
-   * TODO(iguessthislldo): This is a workaround for not properly implementing
-   * serialized_size_bound for XCDR. See XTYPE-83.
-   */
-  const bool not_final = MarshalTraits<Type>::extensibility() != FINAL;
-  const bool xcdr = encoding.xcdr_version() != Encoding::XCDR_VERSION_NONE;
-  const SerializedSizeBound expected_key_only_bound = not_final && xcdr ?
-    SerializedSizeBound() : SerializedSizeBound(0);
+  // Every type exercised here (via COMMON_FIELDS et al.) is keyless, so its
+  // key-only wire form is always empty, regardless of extensibility.
   EXPECT_PRED_FORMAT2(assert_SerializedSizeBound,
-    MarshalTraits<Type>::key_only_serialized_size_bound(encoding), expected_key_only_bound);
+    MarshalTraits<Type>::key_only_serialized_size_bound(encoding), SerializedSizeBound(0));
 
   Type value;
   set_values(value);
@@ -446,7 +440,9 @@ const DataView appendable_xcdr1_struct_expected(final_xcdr1_struct_expected);
 
 TEST(BasicTests, AppendableXcdr1Struct)
 {
-  baseline_checks<AppendableStruct>(xcdr1, appendable_xcdr1_struct_expected);
+  // Appendable has no per-member overhead in XCDR1, so it's bounded exactly
+  // like FinalStruct.
+  baseline_checks<AppendableStruct>(xcdr1, appendable_xcdr1_struct_expected, final_xcdr1_struct_max_size);
 }
 
 const unsigned char mutable_xcdr1_struct_expected[] = {
@@ -470,7 +466,8 @@ const unsigned char mutable_xcdr1_struct_expected[] = {
 
 TEST(BasicTests, MutableXcdr1Struct)
 {
-  baseline_checks<MutableStruct>(xcdr1, mutable_xcdr1_struct_expected);
+  // All fields are fixed-size, so the actual size is the bound.
+  baseline_checks<MutableStruct>(xcdr1, mutable_xcdr1_struct_expected, sizeof(mutable_xcdr1_struct_expected));
 }
 
 // XCDR2 =====================================================================
@@ -526,7 +523,10 @@ const unsigned AppendableXcdr2StructExpectedBE::layout[] = {4,2,2,4,1,3,8};
 
 TEST(BasicTests, AppendableXcdr2Struct)
 {
-  baseline_checks<AppendableStruct>(xcdr2, AppendableXcdr2StructExpectedBE::expected);
+  // All fields are fixed-size, so the actual size (delimiter included) is
+  // the bound.
+  baseline_checks<AppendableStruct>(
+    xcdr2, AppendableXcdr2StructExpectedBE::expected, sizeof(AppendableXcdr2StructExpectedBE::expected));
 }
 
 TEST(BasicTests, AppendableXcdr2StructLE)
@@ -549,7 +549,10 @@ const unsigned MutableXcdr2StructExpectedBE::layout[] = {4,4,2,2,4,4,4,1,3,4,8};
 
 TEST(BasicTests, MutableXcdr2Struct)
 {
-  baseline_checks<MutableStruct>(xcdr2, MutableXcdr2StructExpectedBE::expected);
+  // All fields are fixed-size, so the actual size (delimiter included) is
+  // the bound.
+  baseline_checks<MutableStruct>(
+    xcdr2, MutableXcdr2StructExpectedBE::expected, sizeof(MutableXcdr2StructExpectedBE::expected));
 }
 
 TEST(BasicTests, MutableXcdr2StructLE)
@@ -1111,12 +1114,17 @@ const unsigned MutableStructExpectedXcdr2BE::layout[] = {4,4,2,2,4,4,4,1,3,4,8};
 
 TEST(MutableTests, BaselineXcdr1Test)
 {
-  baseline_checks<MutableStructWithExplicitIDs>(xcdr1, mutable_struct_expected_xcdr1);
+  // All fields are fixed-size, so the actual size is the bound.
+  baseline_checks<MutableStructWithExplicitIDs>(
+    xcdr1, mutable_struct_expected_xcdr1, sizeof(mutable_struct_expected_xcdr1));
 }
 
 TEST(MutableTests, BaselineXcdr2Test)
 {
-  baseline_checks<MutableStructWithExplicitIDs>(xcdr2, MutableStructExpectedXcdr2BE::expected);
+  // All fields are fixed-size, so the actual size (delimiter included) is
+  // the bound.
+  baseline_checks<MutableStructWithExplicitIDs>(
+    xcdr2, MutableStructExpectedXcdr2BE::expected, sizeof(MutableStructExpectedXcdr2BE::expected));
 }
 
 TEST(MutableTests, BaselineXcdr2TestLE)
@@ -2042,10 +2050,9 @@ void key_only_set_base_values(Type& value,
     value.long_value() = 0x7fffffff;
     value.long_array_value()[0] = 1;
     value.long_array_value()[1] = 2;
-    /* TODO(iguessthislldo): See IDL Def
-    value.long_seq_value.length(1);
-    value.long_seq_value[1] = 3;
-    */
+    value.long_seq_value().resize(2);
+    value.long_seq_value()[0] = 3;
+    value.long_seq_value()[1] = 4;
     value.string_value() = "STRINGY";
   }
   if (include_unkeyed) {
@@ -2162,22 +2169,18 @@ void key_only_complex_set_base_values(Type& value,
       value.unkeyed_struct_array_value()[0], nested_field_filter, false);
     key_only_set_base_values(
       value.unkeyed_struct_array_value()[1], nested_field_filter, false);
-    /* TODO(iguessthislldo): See IDL Def
-    value.unkeyed_struct_seq_value.length(1);
+    value.unkeyed_struct_seq_value().resize(1);
     key_only_set_base_values(
-      value.unkeyed_struct_seq_value[0], nested_field_filter, false);
-    */
+      value.unkeyed_struct_seq_value()[0], nested_field_filter, false);
     key_only_set_base_values(
       value.keyed_struct_value(), nested_field_filter, true);
     key_only_set_base_values(
       value.keyed_struct_array_value()[0], nested_field_filter, true);
     key_only_set_base_values(
       value.keyed_struct_array_value()[1], nested_field_filter, true);
-    /* TODO(iguessthislldo): See IDL Def
-    value.keyed_struct_seq_value.length(1);
+    value.keyed_struct_seq_value().resize(1);
     key_only_set_base_values(
-      value.keyed_struct_seq_value[0], nested_field_filter, true);
-    */
+      value.keyed_struct_seq_value()[0], nested_field_filter, true);
 
     key_only_union_set_base_values(
       value.unkeyed_union_value(), nested_field_filter, false);
@@ -2185,11 +2188,6 @@ void key_only_complex_set_base_values(Type& value,
       value.unkeyed_union_array_value()[0], nested_field_filter, false);
     key_only_union_set_base_values(
       value.unkeyed_union_array_value()[1], nested_field_filter, false);
-    /* TODO(iguessthislldo): See IDL Def
-    value.unkeyed_union_seq_value.length(1);
-    key_only_union_set_base_values(
-      value.unkeyed_union_seq_value[0], nested_field_filter, false);
-    */
 
     key_only_union_set_base_values(
       value.keyed_union_value(), nested_field_filter, true);
@@ -2197,14 +2195,18 @@ void key_only_complex_set_base_values(Type& value,
       value.keyed_union_array_value()[0], nested_field_filter, true);
     key_only_union_set_base_values(
       value.keyed_union_array_value()[1], nested_field_filter, true);
-    /* TODO(iguessthislldo): See IDL Def
-    value.keyed_union_seq_value.length(1);
+    value.keyed_union_seq_value().resize(1);
     key_only_union_set_base_values(
-      value.keyed_union_seq_value[0], nested_field_filter, true);
-    */
+      value.keyed_union_seq_value()[0], nested_field_filter, true);
   }
 
   if (include_unkeyed) {
+    // Unlike its siblings above, this field is not @key, so (unlike them) it
+    // is excluded from KeyOnly/NestedKeyOnly serialization of a struct that
+    // otherwise has explicit keys, same as extra_value below.
+    value.unkeyed_union_seq_value().resize(1);
+    key_only_union_set_base_values(
+      value.unkeyed_union_seq_value()[0], nested_field_filter, false);
     value.extra_value() = 0x2020;
   }
 }
@@ -2256,9 +2258,7 @@ void key_only_tests_struct_expect_values_equal(
   if ((field_filter != FieldFilter_KeyOnly) || keyed) {
     EXPECT_EQ(a.long_value(), b.long_value());
     expect_arrays_are_equal(a.long_array_value(), b.long_array_value());
-    /* TODO(iguessthislldo): See IDL Def
-    EXPECT_EQ(a.long_seq_value, b.long_seq_value);
-    */
+    EXPECT_TRUE(a.long_seq_value() == b.long_seq_value());
     EXPECT_EQ(a.string_value(), b.string_value());
   }
   if (field_filter == FieldFilter_All ||
@@ -2394,21 +2394,33 @@ void key_only_tests_complex_expect_values_equal(const TypeA& a, const TypeB& b,
       a.unkeyed_struct_array_value()[0], b.unkeyed_struct_array_value()[0], child, false);
     key_only_tests_struct_expect_values_equal(
       a.unkeyed_struct_array_value()[1], b.unkeyed_struct_array_value()[1], child, false);
-    /* expect_values_equal(a.unkeyed_struct_seq_value, b.unkeyed_struct_seq_value, child); */
+    ASSERT_EQ(a.unkeyed_struct_seq_value().size(), b.unkeyed_struct_seq_value().size());
+    for (size_t i = 0; i < a.unkeyed_struct_seq_value().size(); ++i) {
+      key_only_tests_struct_expect_values_equal(
+        a.unkeyed_struct_seq_value()[i], b.unkeyed_struct_seq_value()[i], child, false);
+    }
     key_only_tests_struct_expect_values_equal(
       a.keyed_struct_value(), b.keyed_struct_value(), child, true);
     key_only_tests_struct_expect_values_equal(
       a.keyed_struct_array_value()[0], b.keyed_struct_array_value()[0], child, true);
     key_only_tests_struct_expect_values_equal(
       a.keyed_struct_array_value()[1], b.keyed_struct_array_value()[1], child, true);
-    /* expect_values_equal(a.keyed_struct_seq_value, b.keyed_struct_seq_value, child); */
+    ASSERT_EQ(a.keyed_struct_seq_value().size(), b.keyed_struct_seq_value().size());
+    for (size_t i = 0; i < a.keyed_struct_seq_value().size(); ++i) {
+      key_only_tests_struct_expect_values_equal(
+        a.keyed_struct_seq_value()[i], b.keyed_struct_seq_value()[i], child, true);
+    }
     key_only_tests_union_expect_values_equal(
       a.keyed_union_value(), b.keyed_union_value(), child, true);
     key_only_tests_union_expect_values_equal(
       a.keyed_union_array_value()[0], b.keyed_union_array_value()[0], child, true);
     key_only_tests_union_expect_values_equal(
       a.keyed_union_array_value()[1], b.keyed_union_array_value()[1], child, true);
-    /* expect_values_equal(a.keyed_union_seq_value, b.keyed_union_seq_value, child); */
+    ASSERT_EQ(a.keyed_union_seq_value().size(), b.keyed_union_seq_value().size());
+    for (size_t i = 0; i < a.keyed_union_seq_value().size(); ++i) {
+      key_only_tests_union_expect_values_equal(
+        a.keyed_union_seq_value()[i], b.keyed_union_seq_value()[i], child, true);
+    }
   }
   if (include_unkeyed) {
     key_only_tests_union_expect_values_equal(
@@ -2417,7 +2429,11 @@ void key_only_tests_complex_expect_values_equal(const TypeA& a, const TypeB& b,
       a.unkeyed_union_array_value()[0], b.unkeyed_union_array_value()[0], child, false);
     key_only_tests_union_expect_values_equal(
       a.unkeyed_union_array_value()[1], b.unkeyed_union_array_value()[1], child, false);
-    /* expect_values_equal(a.unkeyed_union_seq_value, b.unkeyed_union_seq_value); */
+    ASSERT_EQ(a.unkeyed_union_seq_value().size(), b.unkeyed_union_seq_value().size());
+    for (size_t i = 0; i < a.unkeyed_union_seq_value().size(); ++i) {
+      key_only_tests_union_expect_values_equal(
+        a.unkeyed_union_seq_value()[i], b.unkeyed_union_seq_value()[i], child, false);
+    }
     EXPECT_EQ(a.extra_value(), b.extra_value());
   }
 }
@@ -2476,11 +2492,10 @@ const unsigned char key_only_keys_expected_base[] = {
   // long_array_value
   0x00, 0x00, 0x00, 0x01,
   0x00, 0x00, 0x00, 0x02,
-  /* TODO(iguessthislldo): See IDL Def
-  // long_array_value
-  0x00, 0x00, 0x00, 0x01,
+  // long_seq_value (no DHEADER: primitive element)
+  0x00, 0x00, 0x00, 0x02,
   0x00, 0x00, 0x00, 0x03,
-  */
+  0x00, 0x00, 0x00, 0x04,
   // string_value
   0x00, 0x00, 0x00, 0x08,
   'S', 'T', 'R', 'I', 'N', 'G', 'Y', '\0'
@@ -2580,7 +2595,13 @@ void build_expected_complex_struct(DataVec& expected, FieldFilter field_filter, 
       serialize_u32(all_contents, array_contents.size());
       DataView(array_contents).copy_to(all_contents);
     }
-    // TODO(iguessthislldo): unkeyed_struct_seq_value would go here
+    {
+      DataVec seq_contents;
+      serialize_u32(seq_contents, 1); // sequence length
+      build_expected_basic_struct(seq_contents, nested_field_filter, false);
+      serialize_u32(all_contents, seq_contents.size()); // DHEADER
+      DataView(seq_contents).copy_to(all_contents);
+    }
 
     build_expected_basic_struct(all_contents, nested_field_filter, true);
     {
@@ -2590,7 +2611,13 @@ void build_expected_complex_struct(DataVec& expected, FieldFilter field_filter, 
       serialize_u32(all_contents, array_contents.size());
       DataView(array_contents).copy_to(all_contents);
     }
-    // TODO(iguessthislldo): keyed_struct_seq_value would go here
+    {
+      DataVec seq_contents;
+      serialize_u32(seq_contents, 1); // sequence length
+      build_expected_basic_struct(seq_contents, nested_field_filter, true);
+      serialize_u32(all_contents, seq_contents.size()); // DHEADER
+      DataView(seq_contents).copy_to(all_contents);
+    }
 
     build_expected_union(all_contents, nested_field_filter, false);
     {
@@ -2600,7 +2627,16 @@ void build_expected_complex_struct(DataVec& expected, FieldFilter field_filter, 
       serialize_u32(all_contents, array_contents.size());
       DataView(array_contents).copy_to(all_contents);
     }
-    // TODO(iguessthislldo): unkeyed_union_seq_value would go here
+    if (include_unkeyed) {
+      // Unlike its siblings above, this field is not @key, so (unlike them)
+      // it is excluded from KeyOnly/NestedKeyOnly serialization of a struct
+      // that otherwise has explicit keys, same as extra_value below.
+      DataVec seq_contents;
+      serialize_u32(seq_contents, 1); // sequence length
+      build_expected_union(seq_contents, nested_field_filter, false);
+      serialize_u32(all_contents, seq_contents.size()); // DHEADER
+      DataView(seq_contents).copy_to(all_contents);
+    }
 
     build_expected_union(all_contents, nested_field_filter, true);
     {
@@ -2610,7 +2646,13 @@ void build_expected_complex_struct(DataVec& expected, FieldFilter field_filter, 
       serialize_u32(all_contents, array_contents.size());
       DataView(array_contents).copy_to(all_contents);
     }
-    // TODO(iguessthislldo): keyed_union_seq_value would go here
+    {
+      DataVec seq_contents;
+      serialize_u32(seq_contents, 1); // sequence length
+      build_expected_union(seq_contents, nested_field_filter, true);
+      serialize_u32(all_contents, seq_contents.size()); // DHEADER
+      DataView(seq_contents).copy_to(all_contents);
+    }
   }
 
   if (include_unkeyed) {

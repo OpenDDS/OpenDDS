@@ -151,9 +151,11 @@ Fields marked with ``@key(FALSE)`` are always excluded from being a key, such as
   There is an example of a keyed union topic type in the next section, but keep in mind a union being used as a key doesn't have to be a topic type.
 
 * Arrays of any of the previous data types.
-  ``@key`` can't be applied to sequences, even if the base type would be valid in an array.
-  Also ``@key``, when applied to arrays, it makes every element in the array part of the key.
+  ``@key``, when applied to arrays, it makes every element in the array part of the key.
   They can't be applied to individual array elements.
+
+* Sequences of any of the previous data types.
+  Unlike an array, a sequence doesn't have a fixed number of elements known at compile time, so ``@key`` treats the whole sequence as a single key value rather than one key per element.
 
 .. _getting_started--union-topic-types:
 

@@ -12,9 +12,7 @@
 struct BasicUnkeyedStruct {
   long long_value;
   long long_array_value[2];
-  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
   sequence<long> long_seq_value;
-  */
   string string_value;
   long extra_value;
 };
@@ -24,9 +22,7 @@ struct BasicUnkeyedStruct {
 struct BasicKeyedStruct {
   @key long long_value;
   @key long long_array_value[2];
-  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
   @key sequence<long> long_seq_value;
-  */
   @key string string_value;
   long extra_value;
 };
@@ -54,24 +50,16 @@ default:
 struct ComplexUnkeyedStruct {
   BasicUnkeyedStruct unkeyed_struct_value;
   BasicUnkeyedStruct unkeyed_struct_array_value[2];
-  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
   sequence<BasicUnkeyedStruct> unkeyed_struct_seq_value;
-  */
   BasicKeyedStruct keyed_struct_value;
   BasicKeyedStruct keyed_struct_array_value[2];
-  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
   sequence<BasicKeyedStruct> keyed_struct_seq_value;
-  */
   UnkeyedUnion unkeyed_union_value;
   UnkeyedUnion unkeyed_union_array_value[2];
-  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
-  sequence<UnkeyedUnion> unkeyed_union_seq_value
-  */
+  sequence<UnkeyedUnion> unkeyed_union_seq_value;
   KeyedUnion keyed_union_value;
   KeyedUnion keyed_union_array_value[2];
-  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
   sequence<KeyedUnion> keyed_union_seq_value;
-  */
   long extra_value;
 };
 
@@ -80,23 +68,15 @@ struct ComplexUnkeyedStruct {
 struct ComplexKeyedStruct {
   @key BasicUnkeyedStruct unkeyed_struct_value;
   @key BasicUnkeyedStruct unkeyed_struct_array_value[2];
-  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
   @key sequence<BasicUnkeyedStruct> unkeyed_struct_seq_value;
-  */
   @key BasicKeyedStruct keyed_struct_value;
   @key BasicKeyedStruct keyed_struct_array_value[2];
-  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
   @key sequence<BasicKeyedStruct> keyed_struct_seq_value;
-  */
   @key UnkeyedUnion unkeyed_union_value;
   @key UnkeyedUnion unkeyed_union_array_value[2];
-  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
-  sequence<UnkeyedUnion> unkeyed_union_seq_value
-  */
+  sequence<UnkeyedUnion> unkeyed_union_seq_value;
   @key KeyedUnion keyed_union_value;
   @key KeyedUnion keyed_union_array_value[2];
-  /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
   @key sequence<KeyedUnion> keyed_union_seq_value;
-  */
   long extra_value;
 };
