@@ -145,7 +145,7 @@ namespace {
     const Classification clsKey = classify(actualKey);
     const std::string key_tk = type_kind(map->key_type()),
       value_tk = type_kind(map->value_type()),
-      localKeyType = (clsKey & CL_STRING) ? "String" : scoped(map->key_type()->name()),
+      localKeyType = (clsKey & CL_STRING) ? string_type(clsKey) : scoped(map->key_type()->name()),
       keyName = "key" + OpenDDS::DCPS::to_dds_string(level);
     be_global->impl_ <<
       indent << "if (!value_reader.begin_map(" << key_tk << ", " << value_tk << ")) return false;\n" <<
