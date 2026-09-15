@@ -2778,6 +2778,116 @@ TEST(KeyTests, KeyOnly_ComplexKeyedStruct)
 }
 
 // ----------------------------------------------------------------------------
+// _OpenDDS_KeyLessThan (DDSTraits<T>::LessThanType) must be able to tell
+// apart samples that differ only in a sequence key: it's the actual
+// DataReader InstanceMap ordering, not just a convenience.
+
+template <typename T>
+bool distinct_by_key(const T& a, const T& b)
+{
+  const typename DDSTraits<T>::LessThanType less;
+  // If a and b are supposed to be different DDS instances, the comparator
+  // must order them one way or the other; false both ways means the map
+  // would treat them as the same instance.
+  return less(a, b) || less(b, a);
+}
+
+TEST(KeyLessThanTests, PrimitiveSequenceKeyDifferentValues)
+{
+  BasicKeyedStruct a;
+  a.long_seq_value().resize(1);
+  a.long_seq_value()[0] = 1;
+  BasicKeyedStruct b = a;
+  b.long_seq_value()[0] = 2;
+  EXPECT_TRUE(distinct_by_key(a, b));
+}
+
+TEST(KeyLessThanTests, PrimitiveSequenceKeyDifferentLengths)
+{
+  BasicKeyedStruct a;
+  a.long_seq_value().resize(1);
+  a.long_seq_value()[0] = 1;
+  BasicKeyedStruct b = a;
+  b.long_seq_value().resize(2);
+  b.long_seq_value()[1] = 2;
+  EXPECT_TRUE(distinct_by_key(a, b));
+}
+
+TEST(KeyLessThanTests, StructSequenceKeyDifferentElementKeys)
+{
+  BasicKeyedStruct elem;
+  elem.long_value() = 1;
+  ComplexKeyedStruct a;
+  a.keyed_struct_seq_value().resize(1);
+  a.keyed_struct_seq_value()[0] = elem;
+  ComplexKeyedStruct b = a;
+  b.keyed_struct_seq_value()[0].long_value() = 2;
+  EXPECT_TRUE(distinct_by_key(a, b));
+}
+
+TEST(KeyLessThanTests, StructSequenceKeyIgnoresNonKeyElementField)
+{
+  // extra_value isn't a key field of BasicKeyedStruct, so it must not
+  // affect the ordering of elements of a sequence key.
+  BasicKeyedStruct elem;
+  elem.long_value() = 1;
+  ComplexKeyedStruct a;
+  a.keyed_struct_seq_value().resize(1);
+  a.keyed_struct_seq_value()[0] = elem;
+  ComplexKeyedStruct b = a;
+  b.keyed_struct_seq_value()[0].extra_value() = 42;
+  EXPECT_FALSE(distinct_by_key(a, b));
+}
+
+TEST(KeyLessThanTests, ImpliedKeySequenceKeyDifferentElementFields)
+{
+  // unkeyed_struct_seq_value's element type has no explicit @key fields, so
+  // (like a directly-nested struct key field with no explicit keys of its
+  // own) all its fields are implied keys.
+  BasicUnkeyedStruct elem;
+  elem.extra_value() = 1;
+  ComplexKeyedStruct a;
+  a.unkeyed_struct_seq_value().resize(1);
+  a.unkeyed_struct_seq_value()[0] = elem;
+  ComplexKeyedStruct b = a;
+  b.unkeyed_struct_seq_value()[0].extra_value() = 2;
+  EXPECT_TRUE(distinct_by_key(a, b));
+}
+
+TEST(KeyLessThanTests, UnionSequenceKeyDifferentDiscriminators)
+{
+  KeyedUnion elem;
+  elem.short_value(1);
+  ComplexKeyedStruct a;
+  a.keyed_union_seq_value().resize(1);
+  a.keyed_union_seq_value()[0] = elem;
+  ComplexKeyedStruct b = a;
+  KeyedUnion elem2;
+  elem2._d(0x7400);
+  elem2.default_value(2);
+  b.keyed_union_seq_value()[0] = elem2;
+  EXPECT_TRUE(distinct_by_key(a, b));
+}
+
+TEST(KeyLessThanTests, NestedSequenceKeyDifferentInnerValues)
+{
+  // keyed_struct_seq_value's element type (BasicKeyedStruct) has its own
+  // sequence key field (long_seq_value); that has to keep contributing to
+  // the ordering, not be silently skipped just for being nested one level
+  // deeper inside another sequence key.
+  BasicKeyedStruct elem;
+  elem.long_value() = 1;
+  elem.long_seq_value().resize(1);
+  elem.long_seq_value()[0] = 1;
+  ComplexKeyedStruct a;
+  a.keyed_struct_seq_value().resize(1);
+  a.keyed_struct_seq_value()[0] = elem;
+  ComplexKeyedStruct b = a;
+  b.keyed_struct_seq_value()[0].long_seq_value()[0] = 2;
+  EXPECT_TRUE(distinct_by_key(a, b));
+}
+
+// ----------------------------------------------------------------------------
 
 template<>
 void expect_values_equal(const Optional::OptionalMembers& a, const Optional::OptionalMembers& b)

@@ -80,6 +80,7 @@ TopicKeys::Iterator::Iterator()
   , recursive_(false)
   , element_count_(0)
   , implied_keys_(false)
+  , force_implied_(false)
 {
 }
 
@@ -92,6 +93,7 @@ TopicKeys::Iterator::Iterator(TopicKeys& parent)
   , recursive_(parent.recursive())
   , element_count_(0)
   , implied_keys_(false)
+  , force_implied_(parent.implied())
 {
   root_ = parent.root();
   root_type_ = parent.root_type();
@@ -107,6 +109,7 @@ TopicKeys::Iterator::Iterator(AST_Type* root, Iterator* parent)
   , recursive_(parent->recursive_)
   , element_count_(0)
   , implied_keys_(false)
+  , force_implied_(false)
 {
   root_type_ = TopicKeys::root_type(root);
   root_ = root;
@@ -122,6 +125,7 @@ TopicKeys::Iterator::Iterator(AST_Field* root, Iterator* parent)
   , recursive_(parent->recursive_)
   , element_count_(0)
   , implied_keys_(false)
+  , force_implied_(false)
 {
   AST_Type* type = root->field_type()->unaliased_type();
   root_type_ = TopicKeys::root_type(type);
@@ -143,6 +147,7 @@ TopicKeys::Iterator::Iterator(const Iterator& other)
   , recursive_(false)
   , element_count_(0)
   , implied_keys_(false)
+  , force_implied_(false)
 {
   *this = other;
 }
@@ -165,6 +170,7 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator=(const TopicKeys::Iterator& o
   dimensions_ = other.dimensions_;
   child_ = other.child_ ? new Iterator(*other.child_) : 0;
   element_count_ = other.element_count_;
+  force_implied_ = other.force_implied_;
   return *this;
 }
 
@@ -202,7 +208,7 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
       // If a nested struct marked as a key has no keys, all the fields are
       // implied to be keys (expect those marked with @key(FALSE)).
       if (pos_ == 0) {
-        if (level_ > 0) {
+        if (level_ > 0 || force_implied_) {
           implied_keys_ = true;
           for (Fields::Iterator i = fields.begin(); i != fields_end && implied_keys_; ++i) {
             bool key_annotation_value;
@@ -276,7 +282,7 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
     if (pos_ == 0) { // Only Allow One Iteration
       pos_ = 1;
       AST_Union* union_node = dynamic_cast<AST_Union*>(root_);
-      if (level_ > 0 || be_global->union_discriminator_is_key(union_node)) {
+      if (level_ > 0 || force_implied_ || be_global->union_discriminator_is_key(union_node)) {
         current_value_ = root_;
         return *this;
       }
@@ -454,7 +460,8 @@ TopicKeys::TopicKeys()
     root_type_(InvalidType),
     counted_(false),
     count_(0),
-    recursive_(false)
+    recursive_(false),
+    implied_(false)
 {
 }
 
@@ -463,22 +470,24 @@ TopicKeys::TopicKeys(const TopicKeys& other)
   *this = other;
 }
 
-TopicKeys::TopicKeys(AST_Structure* root, bool recursive)
+TopicKeys::TopicKeys(AST_Structure* root, bool recursive, bool implied)
   : root_(root),
     root_type_(StructureType),
     counted_(false),
     count_(0),
-    recursive_(recursive)
+    recursive_(recursive),
+    implied_(implied)
 {
   root_ = root;
 }
 
-TopicKeys::TopicKeys(AST_Union* root)
+TopicKeys::TopicKeys(AST_Union* root, bool implied)
   : root_(root),
     root_type_(UnionType),
     counted_(false),
     count_(0),
-    recursive_(false)
+    recursive_(false),
+    implied_(implied)
 {
   root_ = root;
 }
@@ -494,6 +503,7 @@ TopicKeys& TopicKeys::operator=(const TopicKeys& other)
   counted_ = other.counted_;
   count_ = other.count_;
   recursive_ = other.recursive_;
+  implied_ = other.implied_;
   return *this;
 }
 
@@ -533,6 +543,11 @@ size_t TopicKeys::count()
 bool TopicKeys::recursive() const
 {
   return recursive_;
+}
+
+bool TopicKeys::implied() const
+{
+  return implied_;
 }
 
 TopicKeys::Iterator TopicKeys::Iterator::end_value()

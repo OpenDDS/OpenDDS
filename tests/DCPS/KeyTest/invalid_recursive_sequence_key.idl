@@ -1,0 +1,20 @@
+// A recursive type (reachable only through a sequence, since IDL doesn't
+// allow a struct/array to directly contain itself) can't be used as a key:
+// there's no way to generate a fixed amount of comparison code for an
+// unbounded type graph, even though any actual value is finitely deep.
+module XYZ {
+  struct Node;
+  typedef sequence<Node> Nodes;
+
+  @final
+  struct Node {
+    long value;
+    Nodes children;
+  };
+
+  @topic
+  @final
+  struct Tree {
+    @key Nodes roots;
+  };
+};

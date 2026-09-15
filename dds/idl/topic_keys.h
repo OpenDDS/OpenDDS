@@ -160,6 +160,12 @@ public:
     /// Used in struct field key iteration
     bool implied_keys_;
 
+    /// Treat the root as though it were reached through an @key field, even
+    /// though it's the root of its own TopicKeys, i.e., apply the "no
+    /// explicit keys means all fields/the discriminator are implied keys"
+    /// rule at the root instead of only below it. Set from TopicKeys::implied().
+    bool force_implied_;
+
     /**
      * Internal Recursive Impl. of path()
      */
@@ -172,9 +178,15 @@ public:
   TopicKeys(const TopicKeys& other);
   /**
    * If recursive is false, do a shallow iteration.
+   *
+   * If implied is true, treat the root as though it were itself reached
+   * through an @key field: if none of its fields (or, for a union root, its
+   * discriminator) are explicitly marked, they're all implied keys. Use
+   * this to get the key leaves of a type that's a key only because it's an
+   * element of a container that's a key, such as a sequence.
    */
-  TopicKeys(AST_Structure* root, bool recursive = true);
-  TopicKeys(AST_Union* root);
+  TopicKeys(AST_Structure* root, bool recursive = true, bool implied = false);
+  TopicKeys(AST_Union* root, bool implied = false);
   ~TopicKeys();
 
   TopicKeys& operator=(const TopicKeys& other);
@@ -190,6 +202,7 @@ public:
   size_t count();
 
   bool recursive() const;
+  bool implied() const;
 
 private:
   AST_Decl* root_;
@@ -203,6 +216,9 @@ private:
 
   /// Have iterators recurse into structures
   bool recursive_;
+
+  /// See the "implied" TopicKeys(AST_Structure*, ...) constructor parameter.
+  bool implied_;
 };
 
 #endif

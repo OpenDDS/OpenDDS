@@ -11,8 +11,132 @@
 
 #include "utl_identifier.h"
 
+#include <ast_array.h>
+#include <ast_sequence.h>
+#include <ast_structure.h>
+#include <ast_union.h>
+
+#include <sstream>
 #include <string>
 using std::string;
+using namespace AstTypeClassification;
+
+// Emit "if (E1 < E2) return true; if (E2 < E1) return false;" -- or,
+// recursing into content, a per-leaf/per-element breakdown -- comparing two
+// C++ access expressions of IDL type `type`. Used for content that's a key
+// only because it's inside something that is (initially, a sequence's own
+// elements; recursively, whatever nested structs, unions, arrays, or
+// further sequences those elements themselves contain), so unlike a
+// directly-@key-annotated field's single flat member access, this may
+// recurse arbitrarily deep.
+//
+// A map can't be given an ordering (the same reason a map can never be
+// marked @key directly -- see topic_keys.cpp), whether it's reached through
+// a struct field (where TopicKeys::Iterator itself already throws) or, as
+// below, directly as a sequence/array element type. And unlike a value,
+// which is always finitely deep, the *type* graph reached this way can be
+// cyclic (a struct that recursively contains a sequence of itself); expanding
+// that inline, the way this function does for everything else, would never
+// terminate. Both cases are rejected the same way: throw TopicKeys::Error
+// rather than silently comparing nothing, and gen_struct() below turns that
+// into a normal compile error instead of letting it escape uncaught.
+void
+compare_key_content(const string& e1, const string& e2, AST_Type* type, bool use_cxx11,
+  size_t depth = 0)
+{
+  type = resolveActualType(type);
+  static std::vector<AST_Type*> type_stack;
+  for (size_t i = 0; i < type_stack.size(); ++i) {
+    if (type == type_stack[i]) {
+      throw TopicKeys::Error(type,
+        "a recursive type can't be used as (or as part of) a sequence key element");
+    }
+  }
+  struct TypeStackGuard {
+    explicit TypeStackGuard(AST_Type* t) { type_stack.push_back(t); }
+    ~TypeStackGuard() { type_stack.pop_back(); }
+  } const guard(type);
+  switch (TopicKeys::root_type(type)) {
+  case TopicKeys::PrimitiveType:
+    if (!use_cxx11 && (classify(type) & CL_STRING)) {
+      // In the classic C++ mapping, a sequence's own string/wstring const
+      // element access (unlike a TAO::String_Manager struct field) returns
+      // a raw pointer with no content operator<, so `<` would compare
+      // addresses, not content.
+      be_global->header_ <<
+        "    if (ACE_OS::strcmp(" << e1 << ", " << e2 << ") < 0) return true;\n"
+        "    if (ACE_OS::strcmp(" << e2 << ", " << e1 << ") < 0) return false;\n";
+    } else {
+      be_global->header_ <<
+        "    if (" << e1 << " < " << e2 << ") return true;\n"
+        "    if (" << e2 << " < " << e1 << ") return false;\n";
+    }
+    break;
+  case TopicKeys::UnionType:
+    // A union's only key-relevant content is its discriminator, the same
+    // "implied key" rule a directly-nested union field gets.
+    compare_key_content(e1 + "._d()", e2 + "._d()",
+      dynamic_cast<AST_Union*>(type)->disc_type(), use_cxx11, depth);
+    break;
+  case TopicKeys::StructureType: {
+    // implied=true: no explicitly-@key fields means all fields are implied
+    // keys, the same as a nested struct key field with no explicit keys of
+    // its own (see TopicKeys's "implied" constructor parameter).
+    TopicKeys keys(dynamic_cast<AST_Structure*>(type), true, true);
+    const TopicKeys::Iterator finished = keys.end();
+    for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
+      string leaf = i.path();
+      if (use_cxx11) {
+        leaf = insert_cxx11_accessor_parens(leaf, false);
+      }
+      compare_key_content(e1 + "." + leaf, e2 + "." + leaf, i.get_ast_type(), use_cxx11, depth);
+    }
+    break;
+  }
+  case TopicKeys::SequenceType: {
+    const char* const size_call = use_cxx11 ? ".size()" : ".length()";
+    std::ostringstream oss;
+    oss << "opendds_i" << depth;
+    const string idx = oss.str();
+    be_global->header_ <<
+      "    if (" << e1 << size_call << " != " << e2 << size_call << ") {\n"
+      "      return " << e1 << size_call << " < " << e2 << size_call << ";\n"
+      "    }\n"
+      "    for (size_t " << idx << " = 0; " << idx << " < " << e1 << size_call <<
+        "; ++" << idx << ") {\n";
+    compare_key_content(e1 + "[" + idx + "]", e2 + "[" + idx + "]",
+      dynamic_cast<AST_Sequence*>(type)->base_type(), use_cxx11, depth + 1);
+    be_global->header_ << "    }\n";
+    break;
+  }
+  case TopicKeys::ArrayType: {
+    AST_Array* const array_node = dynamic_cast<AST_Array*>(type);
+    string index;
+    size_t d = depth;
+    for (unsigned long dim = 0; dim < array_node->n_dims(); ++dim, ++d) {
+      std::ostringstream oss;
+      oss << "opendds_i" << d;
+      const string idx = oss.str();
+      be_global->header_ <<
+        "    for (unsigned long " << idx << " = 0; " << idx << " < " <<
+          array_node->dims()[dim]->ev()->u.ulval << "; ++" << idx << ") {\n";
+      index += "[" + idx + "]";
+    }
+    compare_key_content(e1 + index, e2 + index, array_node->base_type(), use_cxx11, d);
+    for (unsigned long dim = 0; dim < array_node->n_dims(); ++dim) {
+      be_global->header_ << "    }\n";
+    }
+    break;
+  }
+  case TopicKeys::MapType:
+    throw TopicKeys::Error(type, "map types are not supported as keys");
+  default:
+    // e.g. InvalidType: not expected for a type that's actually reachable
+    // as (or as part of) a sequence key element, but reject it rather than
+    // silently comparing nothing if it somehow is.
+    throw TopicKeys::Error(type, "this type is not supported as a key");
+  }
+}
 
 struct KeyLessThanWrapper {
   size_t n_;
@@ -94,7 +218,7 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
     return true;
   }
 
-  {
+  try {
     KeyLessThanWrapper wrapper(name);
 
     if (key_count) {
@@ -110,15 +234,13 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
       if (is_topic_type) {
         TopicKeys::Iterator finished = keys.end();
         for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
-          if (i.root_type() == TopicKeys::SequenceType) {
-            // The generated sequence type has no operator<, so a sequence
-            // key can't contribute to this convenience ordering; it's still
-            // fully part of the actual DDS instance key otherwise.
-            continue;
-          }
           string fname = i.path();
           if (use_cxx11) {
             fname = insert_cxx11_accessor_parens(fname, false);
+          }
+          if (i.root_type() == TopicKeys::SequenceType) {
+            compare_key_content("v1." + fname, "v2." + fname, i.get_ast_type(), use_cxx11);
+            continue;
           }
           if (i.root_type() == TopicKeys::UnionType) {
             fname += "._d()";
@@ -138,6 +260,14 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
     } else {
       wrapper.has_no_keys_signature();
     }
+  } catch (TopicKeys::Error& error) {
+    // From compare_key_content(): an unsupported (e.g. map) or recursive
+    // type reachable through a sequence key's element type. The
+    // KeyLessThanWrapper destructor still runs while unwinding into this
+    // catch, so the header gets a truncated version of the struct; that's
+    // fine since compilation is failing either way.
+    idl_global->err()->misc_error(error.what(), error.node());
+    return false;
   }
 
   return true;

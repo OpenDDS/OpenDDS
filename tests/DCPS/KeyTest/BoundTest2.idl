@@ -147,4 +147,76 @@ module Bound {
     MutableBoundedUnion union_field;
   };
 
+  // The types below use @topic/@key annotations directly instead of the
+  // legacy DCPS_DATA_TYPE/DCPS_DATA_KEY pragmas above, since key-only
+  // bounds and the XCDR2 member-header cases below only apply to that path.
+
+  // A mutable key-only bound has to account for each key field's own
+  // parameter-list header too, not just concatenate the key fields' sizes.
+  @topic
+  @mutable
+  struct MutableKeyMessage {
+    @key long key_field;
+    long other_field;
+  };
+
+  // XCDR2's EMHEADER uses a compact 4-byte form only when a member's payload
+  // is exactly 1, 2, 4, or 8 bytes; a variable-size member's maximum payload
+  // can be one of those sizes while a smaller, still-valid payload isn't, so
+  // the bound has to assume the larger 8-byte NEXTINT form for any
+  // variable-size member, not just size the header off the maximum payload.
+  @topic
+  @mutable
+  struct VariableMutableMessage {
+    string<3> value;
+  };
+
+  @topic
+  @mutable
+  union VariableMutableUnion switch (short) {
+  case 1: string<3> value;
+  default: short short_field;
+  };
+
+  // A mutable union's KeyOnly/NestedKeyOnly serialization always ends with
+  // the XCDR1 list-end sentinel (see gen_union_key_serializers()), even
+  // when, as here, the key (the discriminator) is the union's only content.
+  @topic
+  @mutable
+  union MutableKeyUnion switch (@key short) {
+  case 0: long value;
+  };
+
+  // A struct that's itself only a key because it's an element of a
+  // sequence key (see NestedSeqKeyMessage below); its own sequence key
+  // field has to keep contributing to the ordering instead of being
+  // silently skipped just because it's nested one level deeper.
+  @topic
+  @final
+  struct NestedSeqKeyElement {
+    @key sequence<long, 2> value;
+  };
+
+  @topic
+  @final
+  struct NestedSeqKeyMessage {
+    @key sequence<NestedSeqKeyElement, 2> value;
+  };
+
+  // This file doesn't use -Lc++11, so this exercises the classic C++
+  // mapping's sequence<string>/sequence<wstring> element access.
+  @topic
+  @final
+  struct StringSeqKeyMessage {
+    @key sequence<string, 2> value;
+  };
+
+#ifndef OPENDDS_SAFETY_PROFILE
+  @topic
+  @final
+  struct WStringSeqKeyMessage {
+    @key sequence<wstring, 2> value;
+  };
+#endif
+
 };
