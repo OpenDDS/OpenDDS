@@ -275,9 +275,11 @@ void LinuxNetworkConfigMonitor::process_message(nlmsghdr* header)
           if (new_addr) {
             ACE_INET_Addr addr;
             addr.set_address(addr_str, address_length_int, 0);
-            NetworkInterfaceMap::const_iterator pos = network_interface_map_.find(ifa_index);
+            NetworkInterfaceMap::iterator pos = network_interface_map_.find(ifa_index);
             if (pos != network_interface_map_.end()) {
-              set(NetworkInterfaceAddress(pos->second.name, pos->second.can_multicast, NetworkAddress(addr)));
+              const NetworkAddress na(addr);
+              pos->second.addresses.insert(na);
+              set(NetworkInterfaceAddress(pos->second.name, pos->second.can_multicast, na));
             } else if (log_level >= LogLevel::Warning) {
               ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LinuxNetworkConfigMonitor::process_message: cannot find interface for address\n"));
             }
@@ -286,7 +288,9 @@ void LinuxNetworkConfigMonitor::process_message(nlmsghdr* header)
             if (pos != network_interface_map_.end()) {
               ACE_INET_Addr addr;
               addr.set_address(addr_str, address_length_int, 0);
-              remove_address(pos->second.name, NetworkAddress(addr));
+              const NetworkAddress na(addr);
+              pos->second.addresses.erase(na);
+              remove_address(pos->second.name, na);
             }
           }
         }
@@ -306,13 +310,36 @@ void LinuxNetworkConfigMonitor::process_message(nlmsghdr* header)
         }
       }
 
-      // Clean up the old if necessary.
+      const bool can_multicast = (msg->ifi_flags & (IFF_MULTICAST | IFF_LOOPBACK)) != 0;
+      // IFF_RUNNING (carrier) is what actually toggles on a link flap; IFF_UP alone can stay set.
+      const bool is_up = (msg->ifi_flags & (IFF_UP | IFF_RUNNING)) == (IFF_UP | IFF_RUNNING);
+
       NetworkInterfaceMap::iterator pos = network_interface_map_.find(msg->ifi_index);
-      if (pos != network_interface_map_.end()) {
+      if (pos == network_interface_map_.end()) {
+        network_interface_map_[msg->ifi_index] = NetworkInterface(name, can_multicast, is_up);
+      } else if (pos->second.name != name) {
+        // Renamed: start over as if it were a new interface.
         remove_interface(pos->second.name);
         network_interface_map_.erase(pos);
+        network_interface_map_[msg->ifi_index] = NetworkInterface(name, can_multicast, is_up);
+      } else {
+        NetworkInterface& iface = pos->second;
+        const bool went_down = iface.is_up && !is_up;
+        const bool came_up = !iface.is_up && is_up;
+        iface.can_multicast = can_multicast;
+        iface.is_up = is_up;
+
+        if (went_down) {
+          remove_interface(iface.name);
+        } else if (came_up) {
+          // Rejoin cached addresses; the kernel won't re-announce them via RTM_NEWADDR
+          // on a brief flap since they never actually left the interface.
+          for (NetworkAddressSet::const_iterator ai = iface.addresses.begin(),
+               alimit = iface.addresses.end(); ai != alimit; ++ai) {
+            set(NetworkInterfaceAddress(iface.name, iface.can_multicast, *ai));
+          }
+        }
       }
-      network_interface_map_[msg->ifi_index] = NetworkInterface(name, msg->ifi_flags & (IFF_MULTICAST | IFF_LOOPBACK));
     }
     break;
   case RTM_DELLINK:

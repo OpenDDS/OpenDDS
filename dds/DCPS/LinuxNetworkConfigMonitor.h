@@ -36,6 +36,9 @@ public:
   bool open();
   bool close();
 
+protected:
+  void process_message(nlmsghdr* header);
+
 private:
   class OpenHandler : public ReactorTask::Command {
   public:
@@ -90,24 +93,30 @@ private:
   ACE_HANDLE get_handle() const;
   int handle_input(ACE_HANDLE);
   void read_messages();
-  void process_message(nlmsghdr* header);
 
   ACE_SOCK_Netlink socket_;
   ACE_Thread_Mutex socket_mutex_;
   ReactorTask_rch reactor_task_;
 
+  typedef OPENDDS_SET(NetworkAddress) NetworkAddressSet;
+
   struct NetworkInterface {
     OPENDDS_STRING name;
     bool can_multicast;
+    bool is_up; // Administratively up and carrier present.
+    NetworkAddressSet addresses; // Last known addresses, for rejoining after a link flap.
 
     NetworkInterface()
       : can_multicast(false)
+      , is_up(false)
     {}
 
     NetworkInterface(const OPENDDS_STRING& a_name,
-                     bool a_can_multicast)
+                     bool a_can_multicast,
+                     bool a_is_up)
       : name(a_name)
       , can_multicast(a_can_multicast)
+      , is_up(a_is_up)
     {}
   };
 
