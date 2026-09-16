@@ -28,6 +28,8 @@
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 
+#include <limits>
+
 #include "OpenSSL_init.h"
 #include "OpenSSL_legacy.h" // Must come after all other OpenSSL includes
 
@@ -1877,6 +1879,12 @@ bool CryptoBuiltInImpl::decrypt(const KeyMaterial& master, Session& sess,
     return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::decrypt - EVP_DecryptInit_ex", ERR_peek_last_error());
   }
 
+  // n + KEY_LEN_BYTES must not wrap, and static_cast<int>(n) below must not go negative.
+  if (n > static_cast<unsigned int>(std::numeric_limits<int>::max()) - KEY_LEN_BYTES) {
+    return CommonUtilities::set_security_error(ex, -1, 0,
+      "CryptoBuiltInImpl::decrypt - ciphertext length out of range");
+  }
+
   out.length(n + KEY_LEN_BYTES);
   unsigned char* const out_buffer = out.get_buffer();
   int len;
@@ -1924,6 +1932,12 @@ bool CryptoBuiltInImpl::verify(const KeyMaterial& master, Session& sess,
   if (EVP_DecryptInit_ex(ctx, EVP_aes_256_gcm(), 0, sess_key.get_buffer(),
                          header.session_id) != 1) {
     return CommonUtilities::set_security_error(ex, -1, 0, "CryptoBuiltInImpl::verify - EVP_DecryptInit_ex", ERR_peek_last_error());
+  }
+
+  // Same precaution as decrypt(): static_cast<int>(n) must not go negative.
+  if (n > static_cast<unsigned int>(std::numeric_limits<int>::max())) {
+    return CommonUtilities::set_security_error(ex, -1, 0,
+      "CryptoBuiltInImpl::verify - input length out of range");
   }
 
   int len;
@@ -1995,9 +2009,11 @@ bool CryptoBuiltInImpl::decode_rtps_message(
       if (!(parser >> sizeOfEncrypted)) {
         return CommonUtilities::set_security_error(ex, -13, i, "Failed to deserialize CryptoContent length");
       }
-      const unsigned short sz =
-        static_cast<unsigned short>(DCPS::uint32_cdr_size);
-      if (sizeOfEncrypted + sz > parser.submessageHeader().submessageLength) {
+      // Comparing via subtraction, not addition: sizeOfEncrypted + sz used to wrap for
+      // sizeOfEncrypted >= 0xFFFFFFFC and pass the check.
+      const unsigned int sz = static_cast<unsigned int>(DCPS::uint32_cdr_size);
+      const unsigned int submessageLength = parser.submessageHeader().submessageLength;
+      if (submessageLength < sz || sizeOfEncrypted > submessageLength - sz) {
         return CommonUtilities::set_security_error(ex, -14, i, "CryptoContent length out of bounds");
       }
       encrypted = parser.current();
@@ -2170,6 +2186,11 @@ bool CryptoBuiltInImpl::decode_submessage(
             "Failed to deserialize content size(?)\n"));
           return false;
         }
+        // n came straight off the wire with no prior bounds check.
+        if (n > de_ser.length()) {
+          return CommonUtilities::set_security_error(ex, -2, 4,
+            "CryptoContent length out of bounds");
+        }
         return decrypt(keyseq[i], sessions_[sKey], mb_in.rd_ptr(), n, ch, cf,
                        plain_rtps_submessage, ex);
 
@@ -2295,6 +2316,9 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
         ACE_CDR::ULong n;
         if (!(de_ser >> n)) {
           return CommonUtilities::set_security_error(ex, -3, 5, "Failed to deserialize CryptoContent length");
+        }
+        if (n > de_ser.length()) {
+          return CommonUtilities::set_security_error(ex, -3, 8, "CryptoContent length out of bounds");
         }
         const char* const ciphertext = mb_in.rd_ptr();
         if (!de_ser.skip(n)) {
