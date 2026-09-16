@@ -1,0 +1,6 @@
+.. news-prs: 5292
+
+.. news-start-section: Fixes
+- Fixed a Linux network interface monitoring issue where a brief link down/up flap could permanently lose multicast connectivity because NetworkManager doesn't always re-announce the interface's address on such a flap.
+
+.. news-end-section
