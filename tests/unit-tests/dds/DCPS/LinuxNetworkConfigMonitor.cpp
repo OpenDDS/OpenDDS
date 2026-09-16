@@ -177,7 +177,7 @@ TEST(dds_DCPS_LinuxNetworkConfigMonitor, link_flap_rejoins_cached_address_withou
   InternalSampleInfoSequence infos;
   f.take(samples, infos);
   ASSERT_EQ(samples.size(), 1u);
-  EXPECT_EQ(infos[0].instance_state, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
+  EXPECT_EQ(infos[0].instance_state, DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
 
   // No RTM_NEWADDR here: the address should still be rejoined from cache.
   NetlinkMessage link_up_again = make_link_message(RTM_NEWLINK, 1, "eth0", UP_FLAGS);
@@ -231,7 +231,7 @@ TEST(dds_DCPS_LinuxNetworkConfigMonitor, admin_up_without_carrier_is_treated_as_
   InternalSampleInfoSequence infos;
   f.take(samples, infos);
   ASSERT_EQ(samples.size(), 1u);
-  EXPECT_EQ(infos[0].instance_state, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
+  EXPECT_EQ(infos[0].instance_state, DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
 }
 
 TEST(dds_DCPS_LinuxNetworkConfigMonitor, rename_unregisters_old_name_and_starts_fresh)
@@ -251,7 +251,7 @@ TEST(dds_DCPS_LinuxNetworkConfigMonitor, rename_unregisters_old_name_and_starts_
   f.take(samples, infos);
   ASSERT_EQ(samples.size(), 1u);
   EXPECT_EQ(samples[0].name, "eth0");
-  EXPECT_EQ(infos[0].instance_state, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
+  EXPECT_EQ(infos[0].instance_state, DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
 
   // The rename started a fresh, empty address cache under the new name, so a
   // flap on it must not rejoin the old interface's address.
@@ -280,7 +280,7 @@ TEST(dds_DCPS_LinuxNetworkConfigMonitor, dellink_unregisters_interface)
   InternalSampleInfoSequence infos;
   f.take(samples, infos);
   ASSERT_EQ(samples.size(), 1u);
-  EXPECT_EQ(infos[0].instance_state, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
+  EXPECT_EQ(infos[0].instance_state, DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
 }
 
 #endif // OPENDDS_LINUX_NETWORK_CONFIG_MONITOR

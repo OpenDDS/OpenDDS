@@ -131,7 +131,7 @@ TEST(dds_DCPS_NetworkConfigMonitor, remove_interface_unregisters_matching_addres
 
   f.ncm->remove_interface("eth0");
 
-  EXPECT_EQ(f.count_with_state(DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE), 2u);
+  EXPECT_EQ(f.count_with_state(DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE), 2u);
 }
 
 TEST(dds_DCPS_NetworkConfigMonitor, remove_address_unregisters_matching_address_only)
@@ -148,7 +148,7 @@ TEST(dds_DCPS_NetworkConfigMonitor, remove_address_unregisters_matching_address_
 
   f.ncm->remove_address("eth0", eth0_a.address);
 
-  EXPECT_EQ(f.count_with_state(DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE), 1u);
+  EXPECT_EQ(f.count_with_state(DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE), 1u);
 }
 
 TEST(dds_DCPS_NetworkConfigMonitor, clear_unregisters_all)
@@ -165,7 +165,7 @@ TEST(dds_DCPS_NetworkConfigMonitor, clear_unregisters_all)
 
   f.ncm->clear();
 
-  EXPECT_EQ(f.count_with_state(DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE), 2u);
+  EXPECT_EQ(f.count_with_state(DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE), 2u);
 }
 
 TEST(dds_DCPS_NetworkConfigMonitor, set_list_adds_changes_and_removes)
@@ -202,7 +202,7 @@ TEST(dds_DCPS_NetworkConfigMonitor, set_list_adds_changes_and_removes)
       EXPECT_EQ(samples[i], eth0_b);
       found_eth0_change = true;
     } else if (samples[i].name == "eth1") {
-      EXPECT_EQ(infos[i].instance_state, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE);
+      EXPECT_EQ(infos[i].instance_state, DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
       found_eth1_removal = true;
     }
   }
