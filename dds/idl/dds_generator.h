@@ -835,7 +835,7 @@ void generateCaseBody(
   const bool mutable_union_read = namePrefix == std::string(">> mutable ");
   if (namePrefix == std::string(">> ") || mutable_union_read) {
     const char* const read_success = mutable_union_read
-      ? "strm.read_list_end_parameter_id()" : "true";
+      ? "member_limit.finish() && strm.read_list_end_parameter_id()" : "true";
     std::string brType = dds_generator::field_type_name(branch, branch->field_type());
     std::string forany;
     AST_Type* br = resolveActualType(branch->field_type());

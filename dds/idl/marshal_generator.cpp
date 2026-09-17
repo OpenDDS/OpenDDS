@@ -262,6 +262,36 @@ namespace {
     }
   }
 
+  // Wire size of a primitive type as a *_cdr_size constant from Serializer.h.
+  // The caller must have already resolved typedefs and confirmed the type is a
+  // primitive (CL_PRIMITIVE); anything else is an internal error.
+  string getPrimitiveCdrSize(AST_Type* type)
+  {
+    AST_PredefinedType* const predef = dynamic_cast<AST_PredefinedType*>(type);
+    switch (predef ? predef->pt() : AST_PredefinedType::PT_void) {
+    case AST_PredefinedType::PT_long: return "int32_cdr_size";
+    case AST_PredefinedType::PT_ulong: return "uint32_cdr_size";
+    case AST_PredefinedType::PT_short: return "int16_cdr_size";
+    case AST_PredefinedType::PT_ushort: return "uint16_cdr_size";
+#if OPENDDS_HAS_EXPLICIT_INTS
+    case AST_PredefinedType::PT_int8: return "int8_cdr_size";
+    case AST_PredefinedType::PT_uint8: return "uint8_cdr_size";
+#endif
+    case AST_PredefinedType::PT_longlong: return "int64_cdr_size";
+    case AST_PredefinedType::PT_ulonglong: return "uint64_cdr_size";
+    case AST_PredefinedType::PT_float: return "float32_cdr_size";
+    case AST_PredefinedType::PT_double: return "float64_cdr_size";
+    case AST_PredefinedType::PT_longdouble: return "float128_cdr_size";
+    case AST_PredefinedType::PT_char: return "char8_cdr_size";
+    case AST_PredefinedType::PT_wchar: return "char16_cdr_size";
+    case AST_PredefinedType::PT_boolean: return "boolean_cdr_size";
+    case AST_PredefinedType::PT_octet: return "byte_cdr_size";
+    default:
+      be_util::misc_error_and_abort("getPrimitiveCdrSize called with a non-primitive type", type);
+      return "1u";
+    }
+  }
+
   string nameOfSeqHeader(AST_Type* elem)
   {
     string ser = getSerializerName(elem);
@@ -403,7 +433,7 @@ namespace {
         "  if (!(strm >> length)) {\n"
         "    return false;\n"
         "  }\n"
-        "  if (length > strm.length()) {\n"
+        "  if (!strm.check_size(length, 1u)) {\n"
         "    return false;\n"
         "  }\n"
         "  seq.length(length);\n"
@@ -698,7 +728,7 @@ namespace {
         marshal_generator::generate_dheader_code(
           "    if (!strm.read_delimiter(total_size)) {\n"
           "      return false;\n"
-          "    }\n", !primitive);
+          "    }\n", !primitive, true, "  ", true);
 
         if (!primitive) {
           be_global->impl_ << "  const size_t end_of_seq = strm.rpos() + total_size;\n";
@@ -706,9 +736,21 @@ namespace {
         be_global->impl_ <<
           "  CORBA::ULong length;\n"
           << streamAndCheck(">> length");
-        // The check here is to prevent very large sequences from being allocated.
+        // Validate a conservative lower bound before allocating the sequence.
+        // Primitive sequences use their exact fixed wire size.
+        std::string min_element_size = "1u";
+        std::string min_element_alignment = "1u";
+        if (elem_cls & CL_PRIMITIVE) {
+          min_element_size = min_element_alignment = getPrimitiveCdrSize(elem);
+        } else if (elem_cls & CL_ENUM) {
+          min_element_size = min_element_alignment = "int32_cdr_size";
+        } else if ((elem_cls & CL_STRING) || elem->node_type() == AST_Decl::NT_sequence ||
+                   elem->node_type() == AST_Decl::NT_map) {
+          min_element_size = min_element_alignment = "uint32_cdr_size";
+        }
         be_global->impl_ <<
-          "  if (length > strm.length()) {\n"
+          "  if (!strm.check_size(length, " << min_element_size << ", "
+          << min_element_alignment << ")) {\n"
           "    if (DCPS_debug_level >= 8) {\n"
           "      ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) Invalid sequence length (%u)\\n\"), length));\n"
           "    }\n"
@@ -748,7 +790,9 @@ namespace {
             "  }\n";
           } else {
             be_global->impl_ <<
-              "  strm.read_" << getSerializerName(elem) << "_array(" << get_buffer << ", new_length);\n";
+              "  if (!strm.read_" << getSerializerName(elem) << "_array(" << get_buffer << ", new_length)) {\n"
+              "    return false;\n"
+              "  }\n";
           }
           be_global->impl_ <<
             "  if (new_length != length) {\n"
@@ -1087,10 +1131,22 @@ namespace {
         "  DDS::UInt32 size = 0;\n" << // in bytes for DHeader, or in elements for Length
         streamAndCheck(">> size");
 
+      if (both_primitive) {
+        be_global->impl_ <<
+          "  if (!strm.check_size(size, " << getPrimitiveCdrSize(key) << " + "
+          << getPrimitiveCdrSize(val) << ")) {\n"
+          "    return false;\n"
+          "  }\n";
+      }
+
       if (!both_primitive) {
         be_global->impl_ <<
           "  const bool size_is_bytes = strm.encoding().xcdr_version() == Encoding::XCDR_VERSION_2;\n"
-          "  const std::size_t start = size_is_bytes ? strm.rpos() : 0u;\n";
+          "  const std::size_t start = size_is_bytes ? strm.rpos() : 0u;\n"
+          "  Serializer::ScopedReadLimit read_limit(strm, size, size_is_bytes, true);\n"
+          "  if (!read_limit.valid()) {\n"
+          "    return false;\n"
+          "  }\n";
       }
 
       const bool bounded = !map->unbounded(),
@@ -1342,7 +1398,7 @@ namespace {
       marshal_generator::generate_dheader_code(
         "    if (!strm.read_delimiter(total_size)) {\n"
         "      return false;\n"
-        "    }\n", !primitive);
+        "    }\n", !primitive, true, "  ", true);
 
       if (!primitive && (try_construct != tryconstructfailaction_use_default)) {
         be_global->impl_ << "  const size_t end_of_arr = strm.rpos() + total_size;\n";
@@ -2846,7 +2902,7 @@ namespace {
       marshal_generator::generate_dheader_code(
                                                "    if (!strm.read_delimiter(total_size)) {\n"
                                                "      return false;\n"
-                                               "    }\n", not_final);
+                                               "    }\n", not_final, true, "  ", true);
 
       if (not_final) {
         be_global->impl_ <<
@@ -2880,6 +2936,10 @@ namespace {
           "      }\n"
           "      if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1 && member_id == Serializer::pid_list_end) {\n"
           "        return true;\n"
+          "      }\n"
+          "      Serializer::ScopedReadLimit member_limit(strm, field_size, true, true);\n"
+          "      if (!member_limit.valid()) {\n"
+          "        return false;\n"
           "      }\n"
           "      const size_t end_of_field = strm.rpos() + field_size;\n"
           "      ACE_UNUSED_ARG(end_of_field);\n"
@@ -3275,7 +3335,8 @@ namespace {
 
 
 void marshal_generator::generate_dheader_code(const std::string& code, bool dheader_required,
-                                              bool is_ser_func, const char* indent)
+                                              bool is_ser_func, const char* indent,
+                                              bool read_limit)
 {
   // DHeader appears on aggregated types that are mutable or appendable in XCDR2
   // DHeader also appears on ALL sequences/arrays/maps of non-primitives in XCDR2
@@ -3289,6 +3350,14 @@ void marshal_generator::generate_dheader_code(const std::string& code, bool dhea
       indents << "if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
       << code <<
       indents << "}\n";
+    if (read_limit) {
+      be_global->impl_ <<
+        indents << "Serializer::ScopedReadLimit read_limit(strm, total_size,\n"
+        << indents << "  encoding.xcdr_version() == Encoding::XCDR_VERSION_2, true);\n"
+        << indents << "if (!read_limit.valid()) {\n"
+        << indents << "  return false;\n"
+        << indents << "}\n";
+    }
   }
 }
 
@@ -3480,6 +3549,14 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
     "      if (!strm.read_delimiter(total_size)) {\n"
     "        throw std::runtime_error(\"Unable to reader delimiter in getValue\");\n"
     "      }\n", not_final, true, "    ");
+  if (not_final) {
+    be_global->impl_ <<
+      "    Serializer::ScopedReadLimit read_limit(strm, total_size,\n"
+      "      encoding.xcdr_version() == Encoding::XCDR_VERSION_2, true);\n"
+      "    if (!read_limit.valid()) {\n"
+      "      throw std::runtime_error(\"Invalid delimiter size in getValue\");\n"
+      "    }\n";
+  }
   be_global->impl_ <<
     "    std::string base_field = field;\n"
     "    const size_t index = base_field.find('.');\n"
@@ -3511,6 +3588,10 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
       "            member_id == Serializer::pid_list_end) {\n"
       "          throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
       "valid for struct " << clazz << "\");\n"
+      "        }\n"
+      "        Serializer::ScopedReadLimit member_limit(strm, field_size, true, true);\n"
+      "        if (!member_limit.valid()) {\n"
+      "          throw std::runtime_error(\"Invalid member size in getValue\");\n"
       "        }\n"
       "        const size_t end_of_field = strm.rpos() + field_size;\n"
       "        ACE_UNUSED_ARG(end_of_field);\n"
@@ -3950,7 +4031,7 @@ namespace {
       marshal_generator::generate_dheader_code(
         "    if (!strm.read_delimiter(total_size)) {\n"
         "      return false;\n"
-        "    }\n", not_final);
+        "    }\n", not_final, true, "  ", true);
 
       if (has_key) {
         if (exten == extensibilitykind_mutable) {
@@ -3960,6 +4041,10 @@ namespace {
             "  size_t field_size;\n"
             "  bool must_understand = false;\n"
             "  if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
+            "    return false;\n"
+            "  }\n"
+            "  Serializer::ScopedReadLimit member_limit(strm, field_size, true, true);\n"
+            "  if (!member_limit.valid()) {\n"
             "    return false;\n"
             "  }\n";
         }
@@ -4186,7 +4271,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     marshal_generator::generate_dheader_code(
       "    if (!strm.read_delimiter(total_size)) {\n"
       "      return false;\n"
-      "    }\n", not_final);
+      "    }\n", not_final, true, "  ", true);
 
     if (exten == extensibilitykind_mutable) {
       // EMHEADER for discriminator
@@ -4196,15 +4281,29 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "  bool must_understand = false;\n"
         "  if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
         "    return false;\n"
+        "  }\n"
+        "  if (member_id != XTypes::DISCRIMINATOR_SERIALIZED_ID) {\n"
+        "    return false;\n"
         "  }\n";
       TryConstructFailAction try_construct = be_global->union_discriminator_try_construct(node);
       be_global->impl_ <<
         "  " << scoped(discriminator->name()) << " disc;\n"
-        "  if (!(strm >> disc)) {\n";
+        "  bool discriminator_ok = false;\n"
+        "  {\n"
+        "    Serializer::ScopedReadLimit member_limit(strm, field_size, true, true);\n"
+        "    if (!member_limit.valid()) {\n"
+        "      return false;\n"
+        "    }\n"
+        "    discriminator_ok = strm >> disc;\n"
+        "  }\n"
+        "  if (!discriminator_ok) {\n";
       if (try_construct == tryconstructfailaction_use_default) {
         be_global->impl_ <<
           "    set_default(uni);\n"
           "    if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
+          "      return false;\n"
+          "    }\n"
+          "    if (must_understand) {\n"
           "      return false;\n"
           "    }\n"
           "    if (!strm.skip(field_size) || !strm.read_list_end_parameter_id()) {\n"
@@ -4215,6 +4314,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       } else {
         be_global->impl_ <<
           "    if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
+          "      return false;\n"
+          "    }\n"
+          "    if (must_understand) {\n"
           "      return false;\n"
           "    }\n"
           "    if (!strm.skip(field_size) || !strm.read_list_end_parameter_id()) {\n"
@@ -4232,6 +4334,10 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
       const char prefix[] =
         "    if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
+        "      return false;\n"
+        "    }\n"
+        "    Serializer::ScopedReadLimit member_limit(strm, field_size, true, true);\n"
+        "    if (!member_limit.valid()) {\n"
         "      return false;\n"
         "    }\n";
       if (generateSwitchForUnion(node, "disc", streamCommon, branches,
