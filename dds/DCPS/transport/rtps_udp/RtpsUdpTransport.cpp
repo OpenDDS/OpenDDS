@@ -59,8 +59,6 @@ RtpsUdpTransport::RtpsUdpTransport(const RtpsUdpInst_rch& inst,
   : TransportImpl(inst, domain)
 #if OPENDDS_CONFIG_SECURITY
   , local_crypto_handle_(DDS::HANDLE_NIL)
-#endif
-#if OPENDDS_CONFIG_SECURITY
   , ice_endpoint_(make_rch<IceEndpoint>(ref(*this)))
   , ice_agent_(ICE::Agent::instance())
 #endif

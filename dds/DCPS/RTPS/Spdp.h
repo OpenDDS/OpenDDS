@@ -27,6 +27,7 @@
 #include <dds/DCPS/ReactorEvent.h>
 #include <dds/DCPS/SporadicEvent.h>
 #include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/ReactorTask_rch.h>
 
 #include <dds/DCPS/security/framework/SecurityConfig_rch.h>
 #if OPENDDS_CONFIG_SECURITY
@@ -65,7 +66,7 @@ class OpenDDS_Rtps_Export Spdp
 #endif
 {
 public:
-  typedef OPENDDS_MAP_CMP(GUID_t, DiscoveredParticipant,
+  typedef OPENDDS_MAP_CMP(GUID_t, DiscoveredParticipant_rch,
                           GUID_tKeyLessThan) DiscoveredParticipantMap;
   typedef DiscoveredParticipantMap::iterator DiscoveredParticipantIter;
   typedef DiscoveredParticipantMap::const_iterator DiscoveredParticipantConstIter;
@@ -396,10 +397,16 @@ private:
   // lock_ must be held before calling this.
   bool participant_uses_rtps_duration_fraction_i(const DCPS::GUID_t& guid) const;
 
+  // Protect data members other than participants_ map.
   mutable ACE_Thread_Mutex lock_;
   DCPS::RcHandle<DCPS::BitSubscriber> bit_subscriber_;
   DDS::DomainParticipantQos qos_;
   friend class Sedp;
+
+  // This serializes operations on the map.
+  // But each element of the map has its own lock.
+  // Lock order: lock_ then participants_map_lock_
+  ACE_Thread_Mutex participants_map_lock_;
   DiscoveredParticipantMap participants_;
   RtpsDiscovery* disco_;
   DCPS::RcHandle<RtpsDiscoveryConfig> config_;
@@ -452,7 +459,7 @@ private:
    */
   bool secure_part_user_data() const;
 
-  void update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter, bool new_participant);
+  void update_rtps_relay_application_participant_i(DiscoveredParticipant_rch dp, const GUID_t& discovered_guid, bool new_participant);
 
 #if OPENDDS_CONFIG_SECURITY
   DDS::ReturnCode_t send_handshake_message(const DCPS::GUID_t& guid,
@@ -511,8 +518,7 @@ private:
     void init_thread_status_event();
     void enable_thread_status_event(const DCPS::TimeDuration& interval);
 
-    void open(const DCPS::ReactorTask_rch& reactor_task,
-              const DCPS::JobQueue_rch& job_queue);
+    void open(const DCPS::JobQueue_rch& job_queue);
     void register_unicast_socket(DCPS::ReactorWrapper& reactor_wrapper,
                                  ACE_SOCK_Dgram& socket,
                                  const char* what);
@@ -550,6 +556,7 @@ private:
 #endif
 
     DCPS::WeakRcHandle<Spdp> outer_;
+    DCPS::ReactorTask_rch reactor_task_;
     Header hdr_;
     UserTagSubmessage user_tag_;
     DataSubmessage data_;
@@ -659,8 +666,9 @@ private:
 
   typedef OPENDDS_MULTIMAP(DCPS::MonotonicTimePoint, DCPS::GUID_t) TimeQueue;
 
-  void remove_lease_expiration_i(DiscoveredParticipantIter iter);
-  void update_lease_expiration_i(DiscoveredParticipantIter iter,
+  void remove_lease_expiration_i(DiscoveredParticipant_rch dp, const GUID_t& discovered_guid);
+  void update_lease_expiration_i(DiscoveredParticipant_rch dp,
+                                 const GUID_t& discovered_guid,
                                  const DCPS::MonotonicTimePoint& now);
   void process_lease_expirations(const DCPS::MonotonicTimePoint& now);
   TimeQueue lease_expirations_;

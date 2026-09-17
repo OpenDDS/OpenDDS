@@ -49,7 +49,7 @@ class OpenDDS_Dcps_Export TransportDebug {
 public:
   TransportDebug();
 
-  /// Log all RTPS messages sent or recieved.
+  /// Log all RTPS messages sent or received.
   bool log_messages;
   /// Log progress for RTPS entity discovery and association.
   bool log_progress;

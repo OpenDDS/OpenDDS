@@ -523,17 +523,18 @@ Sedp::init(const GUID_t& guid,
                      ConfigStoreImpl::Kind_IPV6);
 #endif
 
+  // (sonndinh): looks like sedp_frament_reassembly_timeout obsolete is unused
   if (!disco.config()->sedp_fragment_reassembly_timeout().is_zero()) {
     transport_inst_->fragment_reassembly_timeout(disco.config()->sedp_fragment_reassembly_timeout());
   }
 
-  config_store_->set(transport_inst_->config_key("DATA_RTPS_RELAY_ADDRESS").c_str(),
+  config_store_->set(transport_inst_->config_key("SEDP_RTPS_RELAY_ADDRESS").c_str(),
                      disco.config()->sedp_rtps_relay_address(),
                      ConfigStoreImpl::Format_Required_Port,
                      ConfigStoreImpl::Kind_ANY);
   config_store_->set_boolean(transport_inst_->config_key("USE_RTPS_RELAY").c_str(), disco.config()->use_rtps_relay());
   config_store_->set_boolean(transport_inst_->config_key("RTPS_RELAY_ONLY").c_str(), disco.config()->rtps_relay_only());
-  config_store_->set(transport_inst_->config_key("DATA_STUN_SERVER_ADDRESS").c_str(),
+  config_store_->set(transport_inst_->config_key("SEDP_STUN_SERVER_ADDRESS").c_str(),
                      disco.config()->sedp_stun_server_address(),
                      ConfigStoreImpl::Format_Required_Port,
                      ConfigStoreImpl::Kind_ANY);
@@ -1071,7 +1072,8 @@ populate_locators(DCPS::TransportLocatorSeq& remote_data,
 
 void
 create_association_data_proto(DCPS::AssociationData& proto,
-                              const ParticipantData_t& pdata) {
+                              const ParticipantData_t& pdata)
+{
   proto.publication_transport_priority_ = 0;
   proto.remote_reliable_ = true;
   proto.remote_durable_ = true;
@@ -1340,7 +1342,9 @@ Sedp::associate(DiscoveredParticipant& participant
 
   spdp_.total_builtin_pending_ += participant.builtin_pending_records_.size() - builtin_pending_start;
 
-  if (spdp_.shutting_down()) { return; }
+  if (spdp_.shutting_down()) {
+    return;
+  }
 
   associated_participants_.insert(participant.make_part_guid());
 
@@ -1368,6 +1372,7 @@ void Sedp::process_association_records_i(DiscoveredParticipant& participant)
 
       participant.builtin_associated_records_.push_back(record);
       participant.builtin_pending_records_.erase(pos++);
+      // NOTE(sonndinh): SPDP lock is held while this is running.
       ++spdp_.total_builtin_associated_;
       --spdp_.total_builtin_pending_;
 

@@ -802,6 +802,8 @@ Spdp::handle_participant_data(DCPS::MessageId id,
   }
 #endif
 
+  ACE_GUARD(ACE_Thread_Mutex, participants_map_g, participants_map_lock_);
+
   // Find the participant - iterator valid only as long as we hold the lock
   DiscoveredParticipantIter iter = participants_.find(guid);
 
@@ -860,12 +862,13 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     // add a new participant
 
 #if OPENDDS_CONFIG_SECURITY
-    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, auth_resend_period_)));
-    p.first->second.identity_token_ = pdata.ddsParticipantDataSecure.base.identity_token;
-    p.first->second.permissions_token_ = pdata.ddsParticipantDataSecure.base.permissions_token;
-    p.first->second.property_qos_ = pdata.ddsParticipantDataSecure.base.property;
-    p.first->second.security_info_ = pdata.ddsParticipantDataSecure.base.security_info;
-    p.first->second.extended_builtin_endpoints_ = pdata.ddsParticipantDataSecure.base.extended_builtin_endpoints;
+    std::pair<DiscoveredParticipantIter, bool> p =
+      participants_.insert(std::make_pair(guid, make_rch<DiscoveredParticipant>(pdata, seq, auth_resend_period_)));
+    p.first->second->identity_token_ = pdata.ddsParticipantDataSecure.base.identity_token;
+    p.first->second->permissions_token_ = pdata.ddsParticipantDataSecure.base.permissions_token;
+    p.first->second->property_qos_ = pdata.ddsParticipantDataSecure.base.property;
+    p.first->second->security_info_ = pdata.ddsParticipantDataSecure.base.security_info;
+    p.first->second->extended_builtin_endpoints_ = pdata.ddsParticipantDataSecure.base.extended_builtin_endpoints;
 
     DDS::Security::SecurityException sec_except = {"", 0, 0};
     const DDS::Security::ValidationResult_t validation_result = pre_check_auth(p.first, sec_except);
@@ -881,10 +884,21 @@ Spdp::handle_participant_data(DCPS::MessageId id,
                  n_participants_in_authentication_));
     }
 #else
-    std::pair<DiscoveredParticipantIter, bool> p = participants_.insert(std::make_pair(guid, DiscoveredParticipant(pdata, seq, TimeDuration())));
+    std::pair<DiscoveredParticipantIter, bool> p =
+      participants_.insert(std::make_pair(guid, make_rch<DiscoveredParticipant>(pdata, seq, TimeDuration())));
 #endif
-    iter = p.first;
-    iter->second.discovered_at_ = now;
+    // Get our own reference-counted handle in case the iterator is invalidated.
+    DiscoveredParticipant_rch dp = p.first->second;
+
+    // Release the lock on the participants map so other can access it while we complete the work with
+    // the newly inserted discovered participant.
+    participants_map_g.release();
+
+    // TODO(sonndinh): could Sedp grab the participant lock before we can finish the rest of the function?
+    // If it can, could the DiscoveredParticipant element be not fully initialized when Sedp uses it?
+    ACE_GUARD(ACE_Thread_Mutex, participant_g, p.first->second.lock_);
+
+    dp->discovered_at_ = now;
 
     if (tport_->directed_send_event_) {
       if (tport_->directed_guids_.empty()) {
@@ -893,8 +907,8 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       tport_->directed_guids_.push_back(guid);
     }
 
-    update_lease_expiration_i(iter, now);
-    update_rtps_relay_application_participant_i(iter, p.second);
+    update_lease_expiration_i(dp, guid, now);
+    update_rtps_relay_application_participant_i(dp, guid, p.second);
 
     if (!from_relay && from) {
       iter->second.last_recv_address_ = from;
@@ -916,6 +930,8 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
 #endif
 
+    // TODO(sonndinh): could we move the data accessed by this call to Sedp so that it doesn't have to hold
+    // Spdp's lock while doing the association?
     sedp_->associate(iter->second
 #if OPENDDS_CONFIG_SECURITY
                      , participant_sec_attr_
@@ -2245,7 +2261,8 @@ Spdp::init_bit(DCPS::RcHandle<DCPS::BitSubscriber> bit_subscriber)
     ipv6_participant_port_id_,
 #endif
     type_lookup_service_);
-  tport_->open(sedp_->reactor_task(), sedp_->job_queue());
+  // TODO(sonndinh): SpdpTransport has its own reactor task. Also its own job queue?
+  tport_->open(sedp_->job_queue());
 
 #if OPENDDS_CONFIG_SECURITY
   DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
@@ -2517,8 +2534,7 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
 }
 
 void
-Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
-                          const DCPS::JobQueue_rch& job_queue)
+Spdp::SpdpTransport::open(const DCPS::JobQueue_rch& job_queue)
 {
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
@@ -2533,8 +2549,9 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
   }
 #endif
 
-  reactor(reactor_task->get_reactor());
-  reactor_task->execute_or_enqueue(DCPS::make_rch<RegisterHandlers>(rchandle_from(this)));
+  reactor_task_ = DCPS::make_rch<DCPS::ReactorTask>();
+  reactor(reactor_task_->get_reactor());
+  reactor_task_->execute_or_enqueue(DCPS::make_rch<RegisterHandlers>(rchandle_from(this)));
 
 #if OPENDDS_CONFIG_SECURITY
   // Now that the endpoint is added, SEDP can write the SPDP info.
@@ -2551,7 +2568,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
   }
 
   network_interface_updates_event_ =
-    DCPS::make_rch<DCPS::ReactorEvent>(reactor_task->get_reactor(), DCPS::make_rch<DCPS::PmfEvent<SpdpTransport> >(rchandle_from(this), &SpdpTransport::handle_network_interface_updates));
+    DCPS::make_rch<DCPS::ReactorEvent>(reactor_task_->get_reactor(), DCPS::make_rch<DCPS::PmfEvent<SpdpTransport> >(rchandle_from(this), &SpdpTransport::handle_network_interface_updates));
 
   lease_expiration_event_ = DCPS::make_rch<DCPS::SporadicEvent>(outer->sedp_->event_dispatcher(), DCPS::make_rch<SpdpTransportEvent>(rchandle_from(this), &SpdpTransport::process_lease_expirations));
 
@@ -2919,9 +2936,9 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
 }
 
 void
-Spdp::update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter, bool new_participant)
+Spdp::update_rtps_relay_application_participant_i(DiscoveredParticipant_rch dp, const GUID_t& discovered_guid, bool new_participant)
 {
-  if (!iter->second.pdata_.participantProxy.opendds_rtps_relay_application_participant) {
+  if (!dp->pdata_.participantProxy.opendds_rtps_relay_application_participant) {
     return;
   }
 
@@ -2936,9 +2953,10 @@ Spdp::update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter
   if (DCPS::DCPS_debug_level) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Spdp::update_rtps_relay_application_participant - %C is an RtpsRelay application participant\n"),
-               DCPS::LogGuid(iter->first).c_str()));
+               DCPS::LogGuid(discovered_guid).c_str()));
   }
 
+  // TODO(sonndinh): Resume from here....
   for (DiscoveredParticipantIter pos = participants_.begin(), limit = participants_.end(); pos != limit;) {
     if (pos != iter && pos->second.pdata_.participantProxy.opendds_rtps_relay_application_participant) {
       if (DCPS::DCPS_debug_level) {
@@ -3217,6 +3235,8 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   }
 
   if (buff_.length() >= 4 && ACE_OS::memcmp(buff_.rd_ptr(), "RTPS", 4) == 0) {
+    // TODO(sonndinh): This is reconstructed conditionally on the transport_debug.log_messages flag,
+    // but never get used anywhere. Remove it?
     RTPS::Message message;
 
     DCPS::Serializer ser(&buff_, encoding_plain_native);
@@ -3414,6 +3434,9 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   ACE_NOTSUP_RETURN(0);
 #else
 
+  // TODO(sonndinh): If the received data already contains RTPS message, why do we
+  // still reading a STUN message here? Can both RTPS and STUN messages coexist in the
+  // same received data?
   DCPS::Serializer serializer(&buff_, STUN::encoding);
   STUN::Message message;
   message.block(&buff_);
@@ -4031,11 +4054,11 @@ bool Spdp::participant_uses_rtps_duration_fraction(const DCPS::GUID_t& guid) con
 }
 
 void
-Spdp::remove_lease_expiration_i(DiscoveredParticipantIter iter)
+Spdp::remove_lease_expiration_i(DiscoveredParticipant_rch dp, const GUID_t& discovered_guid)
 {
-  for (std::pair<TimeQueue::iterator, TimeQueue::iterator> x = lease_expirations_.equal_range(iter->second.lease_expiration_);
+  for (std::pair<TimeQueue::iterator, TimeQueue::iterator> x = lease_expirations_.equal_range(dp->lease_expiration_);
        x.first != x.second; ++x.first) {
-    if (x.first->second == iter->first) {
+    if (x.first->second == discovered_guid) {
       lease_expirations_.erase(x.first);
       break;
     }
@@ -4043,24 +4066,25 @@ Spdp::remove_lease_expiration_i(DiscoveredParticipantIter iter)
 }
 
 void
-Spdp::update_lease_expiration_i(DiscoveredParticipantIter iter,
+Spdp::update_lease_expiration_i(DiscoveredParticipant_rch dp,
+                                const GUID_t& discovered_guid,
                                 const DCPS::MonotonicTimePoint& now)
 {
-  remove_lease_expiration_i(iter);
+  remove_lease_expiration_i(dp, discovered_guid);
 
   // Compute new expiration.
   const DCPS::TimeDuration d =
-    rtps_duration_to_time_duration(iter->second.pdata_.leaseDuration,
-                                   iter->second.pdata_.participantProxy.protocolVersion,
-                                   iter->second.pdata_.participantProxy.vendorId);
+    rtps_duration_to_time_duration(dp->pdata_.leaseDuration,
+                                   dp->pdata_.participantProxy.protocolVersion,
+                                   dp->pdata_.participantProxy.vendorId);
 
-  iter->second.lease_expiration_ = now + d + lease_extension_;
+  dp->lease_expiration_ = now + d + lease_extension_;
 
   // Insert.
-  const bool cancel = !lease_expirations_.empty() && iter->second.lease_expiration_ < lease_expirations_.begin()->first;
-  const bool schedule = lease_expirations_.empty() || iter->second.lease_expiration_ < lease_expirations_.begin()->first;
+  const bool cancel = !lease_expirations_.empty() && dp->lease_expiration_ < lease_expirations_.begin()->first;
+  const bool schedule = lease_expirations_.empty() || dp->lease_expiration_ < lease_expirations_.begin()->first;
 
-  lease_expirations_.insert(std::make_pair(iter->second.lease_expiration_, iter->first));
+  lease_expirations_.insert(std::make_pair(dp->lease_expiration_, discovered_guid));
 
   if (cancel) {
     tport_->lease_expiration_event_->cancel();
