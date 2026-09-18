@@ -623,6 +623,22 @@ ConfigStoreImpl::get(const char* key,
   // Append everything after last comma
   retval.push_back(start);
 
+  // Trim leading/trailing whitespace from each element so that config
+  // values like "transports=net1, net2" work as expected (GitHub #1470).
+  for (StringList::iterator pos = retval.begin(), limit = retval.end();
+       pos != limit; ++pos) {
+    String& str = *pos;
+    String::size_type begin = 0;
+    while (begin < str.size() && ACE_OS::ace_isspace(str[begin])) {
+      ++begin;
+    }
+    String::size_type end = str.size();
+    while (end > begin && ACE_OS::ace_isspace(str[end - 1])) {
+      --end;
+    }
+    str = str.substr(begin, end - begin);
+  }
+
   return retval;
 }
 
