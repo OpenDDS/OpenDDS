@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5293
 
 .. news-start-section: Fixes
 - Fixed parsing of comma-separated ``StringList`` config values (e.g.
