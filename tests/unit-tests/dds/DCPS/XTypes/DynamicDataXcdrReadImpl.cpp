@@ -12,6 +12,7 @@
 #include <dds/DCPS/XTypes/DynamicDataImpl.h>
 #include <dds/DCPS/XTypes/DynamicDataFactory.h>
 #include <dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h>
+#include <dds/DCPS/XTypes/Utils.h>
 
 #include <gtest/gtest.h>
 
@@ -24,17 +25,18 @@ const DCPS::Encoding xcdr1(DCPS::Encoding::KIND_XCDR1, DCPS::ENDIAN_BIG);
 
 void set_float128_value(ACE_CDR::LongDouble& a)
 {
-#if defined(ACE_BIG_ENDIAN) && ACE_BIG_ENDIAN != 0
-  unsigned char value[] = { 0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
-#else
-  unsigned char value[] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0xff,0x3f };
-#endif
-
-#if ACE_SIZEOF_LONG_DOUBLE == 16
-  ACE_OS::memcpy((unsigned char*)&a, (unsigned char*)value, 16);
-#else
-  ACE_OS::memcpy((unsigned char*)a.ld, (unsigned char*)value, 16);
-#endif
+  // The hardcoded wire buffers throughout this file that populate a
+  // float_128 member (e.g. { 0x3f,0xff,0,...,0 } big-endian) are the true
+  // IEEE 754 binary128 ("float128") encoding of 1.0 -- sign 0, biased
+  // exponent 0x3fff, zero fraction. That is what a spec-correct wire
+  // round-trip decodes them as, so the "expected" native value here must
+  // simply be 1.0. The x87 80-bit-extended native representation leaves the
+  // unused padding bytes undefined (whatever the compiler happened to leave
+  // on the stack), so canonicalize them the same way a real wire round-trip
+  // does, or check_float128()'s raw memcmp would be comparing garbage bytes
+  // that have no bearing on the value.
+  ACE_CDR_LONG_DOUBLE_ASSIGNMENT(a, 1.0L);
+  XTypes::canonicalize_float128_padding(a);
 }
 
 void check_float128(const ACE_CDR::LongDouble& a, const ACE_CDR::LongDouble& b)
