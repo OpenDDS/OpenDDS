@@ -133,6 +133,8 @@ struct DiscoveredParticipant {
 #endif
   }
 
+  ACE_Thread_Mutex lock_;
+
   ParticipantData_t pdata_;
 
   struct LocationUpdate {
@@ -186,6 +188,8 @@ struct DiscoveredParticipant {
   CORBA::LongLong auth_req_sequence_number_;
   CORBA::LongLong handshake_sequence_number_;
 
+  // NOTE(sonndinh): these DDS::Security members are not accessed by Sedp (but it might
+  // still access them via calls to Spdp? Search for spdp_.participants_ from Sedp.cpp).
   DDS::Security::IdentityToken identity_token_;
   DDS::Security::PermissionsToken permissions_token_;
   DDS::Security::PropertyQosPolicy property_qos_;
@@ -223,6 +227,8 @@ struct DiscoveredParticipant {
     return DCPS::make_part_guid(prefix());
   }
 };
+
+typedef RcHandle<DiscoveredParticipant> DiscoveredParticipant_rch;
 
 struct DiscoveredSubscription : DCPS::PoolAllocationBase {
   DiscoveredSubscription()
