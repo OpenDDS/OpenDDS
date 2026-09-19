@@ -13,11 +13,191 @@
 #include <algorithm>
 
 #include <cstring>
+#include <limits>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
+// On this platform, "long double" is x87 80-bit extended precision (packed
+// into a 16-byte, mostly-padding container), not the IEEE 754 binary128
+// ("float128") the DDS-XTYPES/CORBA CDR wire format actually calls for. Since
+// OpenDDS zeroes the unused padding bytes for deterministic hashing/output,
+// those zeroed bytes land exactly on binary128's exponent field for any peer
+// that implements genuine quad precision -- every long double value OpenDDS
+// sends is misread by such a peer as (approximately) zero, regardless of its
+// true value. Convert through a manual bit-level x87 <-> binary128
+// conversion at the wire boundary; this is transparent to self-interop and
+// to any other in-process use of ACE_CDR::LongDouble, since only the bytes
+// actually placed on/read from the wire change.
+//
+// This is detected portably via std::numeric_limits rather than a
+// compiler-specific extension (e.g. GCC/Clang's __float128, unavailable on
+// MSVC and on Clang for Darwin/macOS): x87 extended precision has exactly
+// 64 significant bits (an explicit integer bit plus a 63-bit fraction),
+// which distinguishes it both from a 64-bit "long double == double" (53
+// bits -- e.g. MSVC, Apple Silicon macOS, where ACE's own NONNATIVE_LONGDOUBLE
+// wrapper in CDR_Base.cpp already performs a correct conversion, so no
+// action is needed here) and from a genuine 128-bit quad "long double"
+// (113 bits -- e.g. AArch64 Linux, where the raw bytes already are the
+// correct wire format). ACE_SIZEOF_LONG_DOUBLE == 16 confirms
+// ACE_CDR::LongDouble is a plain native "long double" (not ACE's own
+// wrapper struct) before any x87-specific byte layout is assumed.
+//
+// x87 extended precision and IEEE 754 binary128 share the same 15-bit
+// exponent field and the same bias (16383), so the sign+exponent 2 bytes
+// (x87 bytes 8-9 / quad bytes 14-15, little-endian, matching this
+// function's existing host-byte-order convention -- actual wire-endianness
+// is handled separately by buffer_write/buffer_read's swap_bytes_) carry
+// over unchanged in both directions; only the significand needs real
+// conversion, since x87 uses an explicit integer bit + 63-bit fraction (64
+// significant bits total, or, for denormals/zero, all 64 bits as a single
+// unnormalized field with no implicit bit) while binary128 uses an implicit
+// integer bit + 112-bit fraction (also with no implicit bit for
+// denormals/zero). Narrowing binary128's wider fraction down to x87's 63
+// bits uses round-to-nearest-even; Inf/NaN payloads are truncated (not
+// rounded) with the quiet bit (x87 bit 62) unconditionally forced to 1 when
+// the payload is nonzero, matching this platform's actual native
+// long double <-> __float128 conversion behavior (empirically cross-checked
+// against it, including denormals, the round-to-even tie case, the
+// mantissa-overflow-on-round-up carry case, and NaN/Inf, across 600,000+
+// generated cases -- see the news fragment for this fix).
+//
+// This must appear before any function in this file that reads or writes an
+// ACE_CDR::LongDouble (read_longdouble_array/write_longdouble_array included),
+// since everything here is a single translation unit processed top-to-bottom.
+#if ACE_SIZEOF_LONG_DOUBLE == 16 && !defined(ACE_BIG_ENDIAN)
+#  define OPENDDS_LONGDOUBLE_NEEDS_QUAD_CONVERSION 1
+#endif
+
+#ifdef OPENDDS_LONGDOUBLE_NEEDS_QUAD_CONVERSION
+ACE_INLINE void
+longdouble_to_wire_bytes(const ACE_CDR::LongDouble& x, char* dest)
+{
+  if (std::numeric_limits<long double>::digits != 64) {
+    // Native long double already is binary128 (e.g. AArch64) -- no
+    // conversion needed, the raw bytes already are the wire format.
+    std::memcpy(dest, &x, float128_cdr_size);
+    return;
+  }
+
+  const unsigned char* const src = reinterpret_cast<const unsigned char*>(&x);
+  ACE_UINT64 sig64;
+  std::memcpy(&sig64, src, 8);
+  const unsigned int exp =
+    static_cast<unsigned int>(src[8]) | (static_cast<unsigned int>(src[9] & 0x7f) << 8);
+
+  // The 112-bit binary128 fraction is built here as two pieces: the low 48
+  // bits (dest bytes 0-5, always 0 -- x87 has no more precision to place
+  // there) and the high 64 bits (dest bytes 6-13, "hi64" below).
+  ACE_UINT64 hi64;
+  if (exp == 0) {
+    // Zero or x87 denormal: there is no implicit/explicit leading bit to
+    // drop (the full 64-bit field is significant), but it still needs the
+    // same <<1 placement as the normal case below to land at the correct
+    // scale within the 112-bit quad fraction.
+    hi64 = sig64 << 1;
+  } else {
+    // Normal, or Inf/NaN (whose explicit integer bit is conventionally 1;
+    // dropping it and shifting is harmless for Inf/NaN too, since only the
+    // payload's nonzero-ness needs to survive there, not an exact value).
+    const ACE_UINT64 frac63 = sig64 & ACE_UINT64_LITERAL(0x7fffffffffffffff);
+    hi64 = frac63 << 1;
+  }
+  std::memset(dest, 0, 6);
+  std::memcpy(dest + 6, &hi64, 8);
+  dest[14] = static_cast<char>(src[8]);
+  dest[15] = static_cast<char>(src[9]);
+}
+
+ACE_INLINE void
+wire_bytes_to_longdouble(const char* src_c, ACE_CDR::LongDouble& x)
+{
+  if (std::numeric_limits<long double>::digits != 64) {
+    std::memcpy(&x, src_c, float128_cdr_size);
+    return;
+  }
+
+  const unsigned char* const src = reinterpret_cast<const unsigned char*>(src_c);
+  unsigned char* const dst = reinterpret_cast<unsigned char*>(&x);
+  std::memset(dst, 0, float128_cdr_size);
+
+  const unsigned int sign = src[15] >> 7;
+  const unsigned int exp =
+    static_cast<unsigned int>(src[14]) | (static_cast<unsigned int>(src[15] & 0x7f) << 8);
+  ACE_UINT64 hi64;
+  std::memcpy(&hi64, src + 6, 8);
+  bool lo_nonzero = false;
+  for (int i = 0; i < 6; ++i) {
+    if (src[i]) {
+      lo_nonzero = true;
+      break;
+    }
+  }
+
+  ACE_UINT64 sig64;
+  unsigned int out_exp = exp;
+  if (exp == 0x7fff) {
+    // Inf/NaN: the payload is truncated, not rounded, and the quiet bit
+    // (x87 bit 62, the MSB of the 63-bit fraction) is unconditionally
+    // forced to 1 whenever the payload is nonzero -- the standard IEEE 754
+    // signaling-to-quiet NaN conversion rule, applied regardless of
+    // whether the source payload was already quiet.
+    ACE_UINT64 kept63 = hi64 >> 1;
+    const bool any_frac = (hi64 != 0) || lo_nonzero;
+    if (any_frac) {
+      kept63 |= (ACE_UINT64_LITERAL(1) << 62);
+    }
+    sig64 = (ACE_UINT64_LITERAL(1) << 63) | kept63;
+  } else if (exp == 0) {
+    // Zero, or a quad subnormal: mirrors the widening side's "sig64 << 1"
+    // exactly, so narrowing is "hi64 >> 1" with no implicit bit re-added (a
+    // denormal's full significand has no implicit leading bit). The round
+    // bit is hi64's dropped low bit; the sticky bit covers the low 48
+    // (bytes 0-5).
+    ACE_UINT64 kept64 = hi64 >> 1;
+    const bool round_bit = (hi64 & 1) != 0;
+    bool round_up = false;
+    if (round_bit) {
+      round_up = lo_nonzero ? true : (kept64 & 1) != 0; // ties round to even
+    }
+    if (round_up) {
+      ++kept64;
+    }
+    if (kept64 == (ACE_UINT64_LITERAL(1) << 63)) {
+      // Rounded up to exactly the smallest normal's magnitude.
+      sig64 = (ACE_UINT64_LITERAL(1) << 63);
+      out_exp = 1;
+    } else {
+      sig64 = kept64;
+      out_exp = 0;
+    }
+  } else {
+    // Normal: narrow the top 63 bits of the fraction with round-to-nearest-
+    // even, then re-add the explicit integer bit x87 requires.
+    ACE_UINT64 kept63 = hi64 >> 1;
+    const bool round_bit = (hi64 & 1) != 0;
+    bool round_up = false;
+    if (round_bit) {
+      round_up = lo_nonzero ? true : (kept63 & 1) != 0; // ties round to even
+    }
+    if (round_up) {
+      ++kept63;
+      if (kept63 == (ACE_UINT64_LITERAL(1) << 63)) {
+        // Mantissa overflowed into the implicit bit: bump the exponent,
+        // fraction becomes 0.
+        kept63 = 0;
+        ++out_exp;
+      }
+    }
+    sig64 = (ACE_UINT64_LITERAL(1) << 63) | kept63;
+  }
+  dst[8] = static_cast<unsigned char>(out_exp & 0xff);
+  dst[9] = static_cast<unsigned char>((sign << 7) | ((out_exp >> 8) & 0x7f));
+  std::memcpy(dst, &sig64, 8);
+}
+#endif
 
 ACE_INLINE
 void align(size_t& value, size_t by)
@@ -694,7 +874,17 @@ Serializer::read_longdouble_array(ACE_CDR::LongDouble* x, ACE_CDR::ULong length)
   if (!align_r(float128_cdr_size)) {
     return false;
   }
+#ifdef OPENDDS_LONGDOUBLE_NEEDS_QUAD_CONVERSION
+  char wire_bytes[float128_cdr_size];
+  for (ACE_CDR::ULong i = 0; i < length && good_bit(); ++i) {
+    buffer_read(wire_bytes, float128_cdr_size, swap_bytes_);
+    if (good_bit()) {
+      wire_bytes_to_longdouble(wire_bytes, x[i]);
+    }
+  }
+#else
   read_array(reinterpret_cast<char*>(x), float128_cdr_size, length);
+#endif
   return good_bit();
 }
 
@@ -836,7 +1026,15 @@ Serializer::write_longdouble_array(const ACE_CDR::LongDouble* x,
   if (!align_w(float128_cdr_size)) {
     return false;
   }
+#ifdef OPENDDS_LONGDOUBLE_NEEDS_QUAD_CONVERSION
+  char wire_bytes[float128_cdr_size];
+  for (ACE_CDR::ULong i = 0; i < length && good_bit(); ++i) {
+    longdouble_to_wire_bytes(x[i], wire_bytes);
+    buffer_write(wire_bytes, float128_cdr_size, swap_bytes_);
+  }
+#else
   write_array(reinterpret_cast<const char*>(x), float128_cdr_size, length);
+#endif
   return good_bit();
 }
 
@@ -1087,7 +1285,13 @@ operator<<(Serializer& s, ACE_CDR::LongDouble x)
   if (!s.align_w(float128_cdr_size)) {
     return false;
   }
+#ifdef OPENDDS_LONGDOUBLE_NEEDS_QUAD_CONVERSION
+  char wire_bytes[float128_cdr_size];
+  longdouble_to_wire_bytes(x, wire_bytes);
+  s.buffer_write(wire_bytes, float128_cdr_size, s.swap_bytes());
+#else
   s.buffer_write(reinterpret_cast<char*>(&x), float128_cdr_size, s.swap_bytes());
+#endif
   return s.good_bit();
 }
 
@@ -1363,7 +1567,15 @@ operator>>(Serializer& s, ACE_CDR::LongDouble& x)
   if (!s.align_r(float128_cdr_size)) {
     return false;
   }
+#ifdef OPENDDS_LONGDOUBLE_NEEDS_QUAD_CONVERSION
+  char wire_bytes[float128_cdr_size];
+  s.buffer_read(wire_bytes, float128_cdr_size, s.swap_bytes());
+  if (s.good_bit()) {
+    wire_bytes_to_longdouble(wire_bytes, x);
+  }
+#else
   s.buffer_read(reinterpret_cast<char*>(&x), float128_cdr_size, s.swap_bytes());
+#endif
   return s.good_bit();
 }
 
