@@ -967,8 +967,8 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
                    DDS::RETCODE_OUT_OF_RESOURCES);
   DDS::MultiTopic_var mt = DDS::MultiTopic::_duplicate(a_multitopic);
   DDS::DomainParticipant_var dp = mt->get_participant();
-  DomainParticipantImpl* const dp_servant =
-    dynamic_cast<DomainParticipantImpl*>(dp.in());
+  const DomainParticipantImpl* const dp_servant =
+    dynamic_cast<const DomainParticipantImpl*>(dp.in());
   if (dp_servant != this) {
     if (DCPS_debug_level > 3) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
