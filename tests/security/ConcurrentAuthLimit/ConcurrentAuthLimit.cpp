@@ -308,14 +308,36 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   while (!receive(participant_guid, multicast_socket)) {}
 
-  const OpenDDS::DCPS::MonotonicTimePoint deadline = OpenDDS::DCPS::MonotonicTimePoint::now() + OpenDDS::DCPS::TimeDuration(1, 0);
+  const OpenDDS::DCPS::GUID_t writer1_participant_guid = make_part_guid(writer1_guid);
+  const OpenDDS::DCPS::GUID_t writer2_participant_guid = make_part_guid(writer2_guid);
 
-  while (OpenDDS::DCPS::MonotonicTimePoint::now() < deadline) {
+  // Announce writer1 until it is discovered. Writer2 must not announce until
+  // writer1 has claimed the single authentication slot: announcements from the
+  // two writers would otherwise race and either writer could be discovered
+  // first, making the assertions below meaningless.
+  const OpenDDS::DCPS::MonotonicTimePoint writer1_deadline =
+    OpenDDS::DCPS::MonotonicTimePoint::now() + OpenDDS::DCPS::TimeDuration(10, 0);
+  while (!disc->has_domain_participant(domain, participant_guid, writer1_participant_guid) &&
+         OpenDDS::DCPS::MonotonicTimePoint::now() < writer1_deadline) {
     // Send an SPDP message from writer1.
     send(writer1_socket, writer1_guid, writer1_sequence, multicast_address.to_addr(), participant_data(domain, writer1_guid.guidPrefix, DDS::DomainParticipantQos(), writer1_addr));
 
+    // Sleep for 50 ms
+    ACE_OS::sleep(ACE_Time_Value(0, 50000));
+  }
+
+  // Announce writer2 for 1 second. With the authentication limit in place its
+  // announcements must not lead to discovery; without the limit it should be
+  // discovered, in which case there is no need to keep announcing.
+  const OpenDDS::DCPS::MonotonicTimePoint writer2_deadline =
+    OpenDDS::DCPS::MonotonicTimePoint::now() + OpenDDS::DCPS::TimeDuration(1, 0);
+  while (OpenDDS::DCPS::MonotonicTimePoint::now() < writer2_deadline) {
     // Send an SPDP message from writer2.
     send(writer2_socket, writer2_guid, writer2_sequence, multicast_address.to_addr(), participant_data(domain, writer2_guid.guidPrefix, DDS::DomainParticipantQos(), writer2_addr));
+
+    if (no_limit && disc->has_domain_participant(domain, participant_guid, writer2_participant_guid)) {
+      break;
+    }
 
     // Sleep for 50 ms
     ACE_OS::sleep(ACE_Time_Value(0, 50000));
@@ -323,18 +345,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   int status = EXIT_SUCCESS;
 
-  if (!disc->has_domain_participant(domain, participant_guid, make_part_guid(writer1_guid))) {
+  if (!disc->has_domain_participant(domain, participant_guid, writer1_participant_guid)) {
     ACE_ERROR((LM_ERROR, "Participant has not discovered writer1\n"));
     status = EXIT_FAILURE;
   }
 
   if (no_limit) {
-    if (!disc->has_domain_participant(domain, participant_guid, make_part_guid(writer2_guid))) {
+    if (!disc->has_domain_participant(domain, participant_guid, writer2_participant_guid)) {
       ACE_ERROR((LM_ERROR, "Participant has not discovered writer2 when it should have\n"));
       status = EXIT_FAILURE;
     }
   } else {
-    if (disc->has_domain_participant(domain, participant_guid, make_part_guid(writer2_guid))) {
+    if (disc->has_domain_participant(domain, participant_guid, writer2_participant_guid)) {
       ACE_ERROR((LM_ERROR, "Participant has discovered writer2 when it should not have\n"));
       status = EXIT_FAILURE;
     }
