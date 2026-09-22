@@ -287,23 +287,27 @@ module DDS {
   const QosPolicyId_t DATA_REPRESENTATION_QOS_POLICY_ID = 23;
   const string DATA_REPRESENTATION_QOS_POLICY_NAME = "DataRepresentation";
 
-  /* TODO
+  /* TODO - implement @bit_bound(16)
   @bit_bound(16)
   enum TypeConsistencyKind {
     DISALLOW_TYPE_COERCION,
     ALLOW_TYPE_COERCION
   };
   */
+  // So, until we implement @bit_bound(16_):
   typedef short TypeConsistencyEnforcementQosPolicyKind_t;
-  const TypeConsistencyEnforcementQosPolicyKind_t DISALLOW_TYPE_COERCION = 1;
-  const TypeConsistencyEnforcementQosPolicyKind_t ALLOW_TYPE_COERCION = 2;
-  /*
+  // Above is a direct copy of the actual DDS-XTYPES spec IDL for TypeConsistencyKind.
+  // XTypes 1.3 7.3.1.2.1.5 ("Enumerated Literal Values") states that an enumerator's
+  // value defaults to 0 for the first literal and increments by 1 for each successive
+  // literal when no explicit values are given.
+  const TypeConsistencyEnforcementQosPolicyKind_t DISALLOW_TYPE_COERCION = 0;
+  const TypeConsistencyEnforcementQosPolicyKind_t ALLOW_TYPE_COERCION = 1;
+
   const QosPolicyId_t TYPE_CONSISTENCY_ENFORCEMENT_QOS_POLICY_ID = 24;
   const string TYPE_CONSISTENCY_ENFORCEMENT_QOS_POLICY_NAME = "TypeConsistencyEnforcement";
 
   // This is for when we support XCDR1.
   // @appendable
-  */
   struct TypeConsistencyEnforcementQosPolicy {
     TypeConsistencyEnforcementQosPolicyKind_t kind;
     boolean ignore_sequence_bounds;
