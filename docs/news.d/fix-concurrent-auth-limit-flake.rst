@@ -1,3 +1,5 @@
+.. news-prs: 5298
+
 .. news-start-section: Fixes
 - Fixed a race in the ``ConcurrentAuthLimit`` security test where SPDP
   announcements from its two fake writers were sent concurrently, so either
