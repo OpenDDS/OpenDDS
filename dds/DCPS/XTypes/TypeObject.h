@@ -299,7 +299,7 @@ namespace XTypes {
   typedef MemberFlag CollectionElementFlag;   // T1, T2, X
   typedef MemberFlag StructMemberFlag;        // T1, T2, O, M, K, X
   typedef MemberFlag UnionMemberFlag;         // T1, T2, D, X
-  typedef MemberFlag UnionDiscriminatorFlag;  // T1, T2, K
+  typedef MemberFlag UnionDiscriminatorFlag;  // T1, T2, M, K
   typedef MemberFlag EnumeratedLiteralFlag;   // D
   typedef MemberFlag AnnotationParameterFlag; // Unused. No flags apply
   typedef MemberFlag AliasMemberFlag;         // Unused. No flags apply
