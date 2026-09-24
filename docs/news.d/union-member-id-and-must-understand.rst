@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5300
 
 .. news-start-section: Fixes
 - Union ``MemberId`` numbering now reserves ID 0 for the discriminator and starts case members at 1, per XTypes 7.2.2.4.4.4.6.
