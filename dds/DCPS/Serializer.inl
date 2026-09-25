@@ -411,8 +411,12 @@ Serializer::length() const
 ACE_INLINE bool
 Serializer::check_size(size_t count, size_t element_size, size_t element_alignment)
 {
+  if (!count) {
+    return true;
+  }
+
   const size_t max = (std::numeric_limits<size_t>::max)();
-  if (count && element_size > max / count) {
+  if (element_size > max / count) {
     good_bit_ = false;
     return false;
   }
