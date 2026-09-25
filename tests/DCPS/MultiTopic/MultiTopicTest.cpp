@@ -655,6 +655,37 @@ int run_test(int argc, ACE_TCHAR* argv[])
   Subscriber_var sub = dp2->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
                                               DEFAULT_STATUS_MASK);
 
+  // Regression test for https://github.com/OpenDDS/OpenDDS/issues/2059:
+  // delete_multitopic must not delete a multitopic that belongs to a
+  // different participant, even when the names match.
+  {
+    // The multitopic's type is Resulting (the same type the real multitopic
+    // in this test produces); the constituent topic types are not needed here
+    // since create_multitopic does not require them to exist.
+    typedef ::OpenDDS::DCPS::DDSTraits<Resulting> OwnershipCheckTraits;
+    OwnershipCheckTraits::TypeSupportType::_var_type ts =
+      new OwnershipCheckTraits::TypeSupportImplType;
+    check_rc(ts->register_type(dp, ""), "register type for ownership check");
+    check_rc(ts->register_type(dp2, ""), "register type for ownership check");
+    CORBA::String_var type_name = ts->get_type_name();
+
+    const char* mt_name = "DeleteMultitopicOwnershipCheck";
+    const char* mt_expr = "SELECT * FROM Location";
+    MultiTopic_var mt1 = dp->create_multitopic(mt_name, type_name,
+                                              mt_expr, StringSeq());
+    MultiTopic_var mt2 = dp2->create_multitopic(mt_name, type_name,
+                                               mt_expr, StringSeq());
+    if (!mt1 || !mt2) {
+      throw std::runtime_error("failed to create multitoptics for ownership check");
+    }
+    if (dp->delete_multitopic(mt2) != RETCODE_PRECONDITION_NOT_MET) {
+      throw std::runtime_error("delete_multitopic deleted another participant's multitopic");
+    }
+    // This participant's own multitopic must be unaffected and still deletable.
+    check_rc(dp->delete_multitopic(mt1), "delete own multitopic after ownership check");
+    check_rc(dp2->delete_multitopic(mt2), "delete other participant's multitopic");
+  }
+
   TransportRegistry& treg = *TheTransportRegistry;
   if (!treg.get_config("t1").is_nil()) {
     treg.bind_config("t1", pub);
