@@ -57,7 +57,8 @@ void verify_some_union_member(const CommonUnionMember& common,
   NameHash name_hash;
   EXPECT_GT(common.member_flags | TRY_CONSTRUCT1, 0);
   if (common.type_id == alias_member) {
-    EXPECT_EQ(common.member_id, static_cast<ACE_CDR::ULong>(0));
+    // The discriminator is member id 0, so the first case starts at 1.
+    EXPECT_EQ(common.member_id, static_cast<ACE_CDR::ULong>(1));
     EXPECT_EQ(common.label_seq.length(), static_cast<ACE_CDR::ULong>(1));
     EXPECT_EQ(common.label_seq[0], static_cast<ACE_CDR::Long>(0));
     if (minimal_detail) {
@@ -67,7 +68,7 @@ void verify_some_union_member(const CommonUnionMember& common,
       EXPECT_EQ(complete_detail->name, "a_seq");
     }
   } else if (common.type_id == struct_member) {
-    EXPECT_EQ(common.member_id, static_cast<ACE_CDR::ULong>(1));
+    EXPECT_EQ(common.member_id, static_cast<ACE_CDR::ULong>(2));
     EXPECT_EQ(common.label_seq.length(), static_cast<ACE_CDR::ULong>(1));
     EXPECT_EQ(common.label_seq[0], static_cast<ACE_CDR::Long>(1));
     if (minimal_detail) {
@@ -77,7 +78,7 @@ void verify_some_union_member(const CommonUnionMember& common,
       EXPECT_EQ(complete_detail->name, "a_struct");
     }
   } else {
-    EXPECT_EQ(common.member_id, static_cast<ACE_CDR::ULong>(2));
+    EXPECT_EQ(common.member_id, static_cast<ACE_CDR::ULong>(3));
     EXPECT_GT(common.member_flags | IS_DEFAULT, 0);
     EXPECT_EQ(common.label_seq.length(), static_cast<ACE_CDR::ULong>(1));
     EXPECT_EQ(common.label_seq[0], static_cast<ACE_CDR::Long>(2));
