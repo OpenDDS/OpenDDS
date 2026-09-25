@@ -255,7 +255,7 @@ TEST_F(dds_DCPS_XTypes_Utils, member_path_resolve_string_path)
     EXPECT_EQ(path.level(), 3u);
     EXPECT_EQ(path.ids[0], 0u);
     EXPECT_EQ(path.ids[1], 1u);
-    EXPECT_EQ(path.ids[2], 0u);
+    EXPECT_EQ(path.ids[2], 1u);
   }
   {
     MemberPath path;
@@ -521,10 +521,10 @@ TEST_F(dds_DCPS_XTypes_Utils, less_than)
   ASSERT_RC_OK(a->get_complex_value(a_nested_union, id));
   DDS::DynamicData_var b_nested_union;
   ASSERT_RC_OK(b->get_complex_value(b_nested_union, id));
-  ASSERT_RC_OK(b_nested_union->set_char8_value(1, 'x'));
+  ASSERT_RC_OK(b_nested_union->set_char8_value(2, 'x'));
   ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
   ASSERT_TRUE(is_less_than);
-  ASSERT_RC_OK(a_nested_union->set_char8_value(1, 'x'));
+  ASSERT_RC_OK(a_nested_union->set_char8_value(2, 'x'));
   ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
   ASSERT_FALSE(is_less_than);
 

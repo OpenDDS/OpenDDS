@@ -135,6 +135,20 @@ TEST(dds_DCPS_XTypes_XmlTypeProvider, StructIntrospectionAndTypeObject)
   ASSERT_EQ(1u, values_type->bound().length());
   EXPECT_EQ(3u, values_type->bound()[0]);
 
+  DDS::DynamicTypeSupport_var ts = new DDS::DynamicTypeSupport(type);
+  const OpenDDS::XTypes::TypeIdentifier& complete_id =
+    ts->getCompleteTypeIdentifier();
+  const OpenDDS::XTypes::TypeMap& complete_map = ts->getCompleteTypeMap();
+  const OpenDDS::XTypes::TypeMap::const_iterator pos = complete_map.find(complete_id);
+  ASSERT_NE(complete_map.end(), pos);
+  ASSERT_EQ(OpenDDS::XTypes::EK_COMPLETE, pos->second.kind);
+  ASSERT_EQ(OpenDDS::XTypes::TK_STRUCTURE, pos->second.complete.kind);
+  ASSERT_EQ(5u, pos->second.complete.struct_type.member_seq.length());
+  const OpenDDS::XTypes::StructMemberFlag id_flags =
+    pos->second.complete.struct_type.member_seq[0].common.member_flags;
+  EXPECT_TRUE(id_flags & OpenDDS::XTypes::IS_KEY);
+  EXPECT_TRUE(id_flags & OpenDDS::XTypes::IS_MUST_UNDERSTAND);
+
   expect_complete_type_object<OpenDDS::DCPS::XmlTypeProviderTest_Sample_xtag>(type);
 }
 
@@ -174,6 +188,21 @@ TEST(dds_DCPS_XTypes_XmlTypeProvider, UnionIntrospectionAndTypeObject)
   EXPECT_TRUE(other->is_default_label());
   EXPECT_EQ(0u, other->label().length());
   EXPECT_EQ(OpenDDS::XTypes::TK_STRUCTURE, other->type()->get_kind());
+
+  DDS::DynamicTypeSupport_var ts = new DDS::DynamicTypeSupport(type);
+  const OpenDDS::XTypes::TypeIdentifier& complete_id =
+    ts->getCompleteTypeIdentifier();
+  const OpenDDS::XTypes::TypeMap& complete_map = ts->getCompleteTypeMap();
+  const OpenDDS::XTypes::TypeMap::const_iterator pos = complete_map.find(complete_id);
+  ASSERT_NE(complete_map.end(), pos);
+  ASSERT_EQ(OpenDDS::XTypes::EK_COMPLETE, pos->second.kind);
+  ASSERT_EQ(OpenDDS::XTypes::TK_UNION, pos->second.complete.kind);
+  EXPECT_TRUE(pos->second.complete.union_type.discriminator.common.member_flags &
+              OpenDDS::XTypes::IS_MUST_UNDERSTAND);
+  ASSERT_EQ(3u, pos->second.complete.union_type.member_seq.length());
+  EXPECT_EQ(1u, pos->second.complete.union_type.member_seq[0].common.member_id);
+  EXPECT_EQ(2u, pos->second.complete.union_type.member_seq[1].common.member_id);
+  EXPECT_EQ(3u, pos->second.complete.union_type.member_seq[2].common.member_id);
 
   expect_complete_type_object<OpenDDS::DCPS::XmlTypeProviderTest_Choice_xtag>(type);
 }
@@ -239,6 +268,18 @@ TEST(dds_DCPS_XTypes_XmlTypeProvider, RejectsNonExistentFile)
 
 TEST(dds_DCPS_XTypes_XmlTypeProvider, BitmaskUnionIntrospection)
 {
+  DDS::DynamicType_var flags = load_type("XmlTypeProviderTest::Flags");
+  ASSERT_TRUE(flags);
+  DDS::DynamicTypeSupport_var flags_ts = new DDS::DynamicTypeSupport(flags);
+  const OpenDDS::XTypes::TypeIdentifier& flags_id =
+    flags_ts->getCompleteTypeIdentifier();
+  const OpenDDS::XTypes::TypeMap& flags_map = flags_ts->getCompleteTypeMap();
+  const OpenDDS::XTypes::TypeMap::const_iterator flags_pos = flags_map.find(flags_id);
+  ASSERT_NE(flags_map.end(), flags_pos);
+  ASSERT_EQ(OpenDDS::XTypes::EK_COMPLETE, flags_pos->second.kind);
+  ASSERT_EQ(OpenDDS::XTypes::TK_BITMASK, flags_pos->second.complete.kind);
+  EXPECT_EQ(0u, flags_pos->second.complete.bitmask_type.bitmask_flags);
+
   DDS::DynamicType_var type = load_type("XmlTypeProviderTest::Flagged");
   ASSERT_TRUE(type);
   EXPECT_EQ(OpenDDS::XTypes::TK_UNION, type->get_kind());
