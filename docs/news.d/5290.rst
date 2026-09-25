@@ -10,7 +10,4 @@
 
   Forward compatibility is preserved for unknown bitmask bits and, when member names are ignored, for compatible unions whose members use different IDs.
 
-  *Backwards Compatibility Note*: Readers will now reject some malformed samples and RTPS parameter lists that earlier versions accepted and delivered.
-  Well-formed data produced by OpenDDS or another conformant implementation is unaffected.
-
 .. news-end-section

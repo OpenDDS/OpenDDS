@@ -737,20 +737,21 @@ namespace {
           "  CORBA::ULong length;\n"
           << streamAndCheck(">> length");
         // Validate a conservative lower bound before allocating the sequence.
-        // Primitive sequences use their exact fixed wire size.
+        // Primitive sequences use their exact fixed wire size. For every
+        // element kind handled below, CDR's own alignment rules make the
+        // minimum size and minimum alignment the same value
         std::string min_element_size = "1u";
-        std::string min_element_alignment = "1u";
         if (elem_cls & CL_PRIMITIVE) {
-          min_element_size = min_element_alignment = getPrimitiveCdrSize(elem);
+          min_element_size = getPrimitiveCdrSize(elem);
         } else if (elem_cls & CL_ENUM) {
-          min_element_size = min_element_alignment = "int32_cdr_size";
+          min_element_size = "int32_cdr_size";
         } else if ((elem_cls & CL_STRING) || elem->node_type() == AST_Decl::NT_sequence ||
                    elem->node_type() == AST_Decl::NT_map) {
-          min_element_size = min_element_alignment = "uint32_cdr_size";
+          min_element_size = "uint32_cdr_size";
         }
         be_global->impl_ <<
           "  if (!strm.check_size(length, " << min_element_size << ", "
-          << min_element_alignment << ")) {\n"
+          << min_element_size << ")) {\n"
           "    if (DCPS_debug_level >= 8) {\n"
           "      ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) Invalid sequence length (%u)\\n\"), length));\n"
           "    }\n"
