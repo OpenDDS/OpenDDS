@@ -2044,7 +2044,7 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Appendable_ReadSequenceFromStruct)
   DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
 
   unsigned char sequence_struct[] = {
-    0x00,0x00,0x00,0xe8, // dheader
+    0x00,0x00,0x00,0xea, // dheader (234 = the 234 content bytes that follow)
     0,0,0,12, 0,0,0,2, 0,0,0,1, 0,0,0,2, // +16=16 my_enums
     0,0,0,3, 0,0,0,3, 0,0,0,4, 0,0,0,5, // +16=32 int_32s
     0,0,0,2, 0,0,0,10, 0,0,0,11, // +12=44 uint_32s
@@ -2064,7 +2064,7 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Appendable_ReadSequenceFromStruct)
     (0),(0), 0,0,0,1, 1, // +(2)+5=185 bool_s
     (0),(0),(0), 0,0,0,12, 0,0,0,1, 0,0,0,4, 'a','b','c','\0', // +(3)+16=204 str_s
     0,0,0,26, 0,0,0,2, 0,0,0,6, 0,0x64,0,0x65,0,0x66,(0),(0),
-    0,0,0,6, 0,0x67,0,0x68,0,0x69 // +16+(2)+10=232 wstr_s
+    0,0,0,6, 0,0x67,0,0x68,0,0x69 // +18+(2)+10=234 wstr_s
   };
   ACE_Message_Block msg(1024);
   msg.copy((const char*)sequence_struct, sizeof(sequence_struct));
@@ -2925,7 +2925,7 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Final_ReadSequenceFromStruct)
     (0),(0), 0,0,0,1, 1, // +(2)+5=185 bool_s
     (0),(0),(0), 0,0,0,12, 0,0,0,1, 0,0,0,4, 'a','b','c','\0', // +(3)+16=204 str_s
     0,0,0,26, 0,0,0,2, 0,0,0,6, 0,0x64,0,0x65,0,0x66,(0),(0),
-    0,0,0,6, 0,0x67,0,0x68,0,0x69 // +16+(2)+10=232 wstr_s
+    0,0,0,6, 0,0x67,0,0x68,0,0x69 // +18+(2)+10=234 wstr_s
   };
   ACE_Message_Block msg(1024);
   msg.copy((const char*)sequence_struct, sizeof(sequence_struct));
@@ -3387,7 +3387,7 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Final_ImplicitNestedKeyOnly)
   EXPECT_TRUE(dt);
 
   const unsigned char expected_cdr[] = {
-    0x20,0x00,0x00,0x01, // Dheader of inner
+    0x00,0x00,0x00,0x04, // Dheader of inner (appendable): one long follows
     0x00,0x00,0xee,0xff //l
   };
   ACE_Message_Block msg(32);
