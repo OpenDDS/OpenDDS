@@ -5,7 +5,7 @@
 
   - Deserialized Boolean values are normalized, so a Boolean wire byte other than 0 or 1 no longer produces an invalid ``bool`` (:ghissue:`5281`).
   - Sequence and map element counts are validated against the remaining serialized size, accounting for element size and alignment, before any container is allocated (:ghissue:`5289`).
-  - XCDR2 ``DHEADER`` sizes, and XCDR1 and XCDR2 mutable member sizes, are enforced as hard read boundaries, so a delimited object or member that under-reports its size is rejected instead of over-reading into later data (:ghissue:`5287`).
+  - XCDR2 ``DHEADER`` sizes, and XCDR1 and XCDR2 mutable member sizes, are enforced as read boundaries, so a delimited object or member that under-reports its size is rejected instead of reading into later data (:ghissue:`5287`).
   - Malformed XCDR1 extended parameter headers, XCDR2 EMHEADER length codes, mutable-union discriminator IDs, and non-empty parameter-list-end sentinels are rejected.
 
   Forward compatibility is preserved for unknown bitmask bits and, when member names are ignored, for compatible unions whose members use different IDs.
