@@ -570,7 +570,7 @@ const unsigned char MutableXcdr2UnionExpectedShortBE::expected[] = {
   0x20, 0x00, 0x00, 0x00, // +4 EMHEADER1 = 8
   0x00, 0x00, 0x00, 0x00, // +4 value = 12
   // short_field
-  0x10, 0x00, 0x00, 0x00, // +4 EMHEADER1 = 16
+  0x10, 0x00, 0x00, 0x01, // +4 EMHEADER1 (member id 1: discriminator is 0) = 16
   0x7f, 0xff // +2 value = 18
 };
 const unsigned MutableXcdr2UnionExpectedShortBE::layout[] = {4,4,4,4,2};
@@ -586,7 +586,7 @@ const unsigned char MutableXcdr2UnionExpectedLongBE::expected[] = {
   0x20, 0x00, 0x00, 0x00, // +4 EMHEADER1 = 8
   0x00, 0x00, 0x00, 0x01, // +4 value = 12
   // long_field
-  0x20, 0x00, 0x00, 0x01,// +4 EMHEADER1 = 16
+  0x20, 0x00, 0x00, 0x02,// +4 EMHEADER1 (member id 2: discriminator is 0) = 16
   0x7f, 0xff, 0xff, 0xff // +4 value = 20
 };
 const unsigned MutableXcdr2UnionExpectedLongBE::layout[] = {4,4,4,4,4};
@@ -602,7 +602,7 @@ const unsigned char MutableXcdr2UnionExpectedOctetBE::expected[] = {
   0x20, 0x00, 0x00, 0x00, // +4 EMHEADER1 = 8
   0x00, 0x00, 0x00, 0x02, // +4 value = 12
   // octet_field
-  0x00, 0x00, 0x00, 0x02, // +4 EMHEADER1 = 16
+  0x00, 0x00, 0x00, 0x03, // +4 EMHEADER1 (member id 3: discriminator is 0) = 16
   0x01                    // +1 value = 17
 };
 const unsigned MutableXcdr2UnionExpectedOctetBE::layout[] = {4,4,4,4,1};
@@ -618,7 +618,7 @@ const unsigned char MutableXcdr2UnionExpectedLongLongBE::expected[] = {
   0x20, 0x00, 0x00, 0x00, // +4 EMHEADER1 = 8
   0x00, 0x00, 0x00, 0x03, // +4 value = 12
   // long_long_field
-  0x30, 0x00, 0x00, 0x03, // +4 EMHEADER1 = 16
+  0x30, 0x00, 0x00, 0x04, // +4 EMHEADER1 (member id 4: discriminator is 0) = 16
   0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff  // +8 value = 24
 };
 const unsigned MutableXcdr2UnionExpectedLongLongBE::layout[] = {4,4,4,4,8};
