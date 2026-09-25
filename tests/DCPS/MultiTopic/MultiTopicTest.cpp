@@ -659,7 +659,10 @@ int run_test(int argc, ACE_TCHAR* argv[])
   // delete_multitopic must not delete a multitopic that belongs to a
   // different participant, even when the names match.
   {
-    typedef ::OpenDDS::DCPS::DDSTraits<LocationInfo> OwnershipCheckTraits;
+    // The multitopic's type is Resulting (the same type the real multitopic
+    // in this test produces); the constituent topic types are not needed here
+    // since create_multitopic does not require them to exist.
+    typedef ::OpenDDS::DCPS::DDSTraits<Resulting> OwnershipCheckTraits;
     OwnershipCheckTraits::TypeSupportType::_var_type ts =
       new OwnershipCheckTraits::TypeSupportImplType;
     check_rc(ts->register_type(dp, ""), "register type for ownership check");
