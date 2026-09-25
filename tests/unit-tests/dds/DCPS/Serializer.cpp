@@ -287,6 +287,34 @@ TEST(dds_DCPS_Serializer, Serializer_check_size)
   EXPECT_FALSE(reader.good_bit());
 }
 
+TEST(dds_DCPS_Serializer, Serializer_check_size_zero_count_ignores_padding)
+{
+  // Regression test: an empty sequence (count == 0) needs no bytes and no
+  // alignment padding, even if the padding a *first* element would have
+  // needed exceeds what's left in the stream. Before this fix, check_size()
+  // computed alignment padding unconditionally -- based only on element_size/
+  // element_alignment and the current stream position, never on count -- and
+  // could reject a valid, empty sequence solely because of that hypothetical
+  // padding for an element that doesn't exist.
+  Message_Block_Ptr mb(new ACE_Message_Block(16));
+  const Encoding enc(Encoding::KIND_XCDR1, ENDIAN_BIG);
+  Serializer writer(mb.get(), enc);
+  const ACE_CDR::Octet input[16] = {};
+  ASSERT_TRUE(writer.write_octet_array(input, 16));
+
+  Serializer reader(mb.get(), enc);
+  // Land on a known-aligned position regardless of the buffer's actual
+  // address, then step 1 byte past it so an 8-byte-aligned element would
+  // need up to 7 bytes of padding.
+  ASSERT_TRUE(reader.align_r(8));
+  ACE_CDR::Octet value = 0;
+  ASSERT_TRUE(reader >> ACE_InputCDR::to_octet(value));
+  // Leave less in the stream than that hypothetical padding would need.
+  ASSERT_TRUE(reader.set_read_limit(1));
+  EXPECT_TRUE(reader.check_size(0, int64_cdr_size, int64_cdr_size));
+  EXPECT_TRUE(reader.good_bit());
+}
+
 TEST(dds_DCPS_Serializer, Serializer_check_size_overflow)
 {
   ACE_Message_Block mb(1);
