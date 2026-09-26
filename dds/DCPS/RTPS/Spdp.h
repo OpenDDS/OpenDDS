@@ -27,6 +27,7 @@
 #include <dds/DCPS/ReactorEvent.h>
 #include <dds/DCPS/SporadicEvent.h>
 #include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/ReactorTask_rch.h>
 
 #include <dds/DCPS/security/framework/SecurityConfig_rch.h>
 #if OPENDDS_CONFIG_SECURITY
@@ -65,7 +66,7 @@ class OpenDDS_Rtps_Export Spdp
 #endif
 {
 public:
-  typedef OPENDDS_MAP_CMP(GUID_t, DiscoveredParticipant,
+  typedef OPENDDS_MAP_CMP(GUID_t, DiscoveredParticipant_rch,
                           GUID_tKeyLessThan) DiscoveredParticipantMap;
   typedef DiscoveredParticipantMap::iterator DiscoveredParticipantIter;
   typedef DiscoveredParticipantMap::const_iterator DiscoveredParticipantConstIter;
@@ -131,7 +132,7 @@ public:
   DDS::Security::ParticipantCryptoHandle remote_crypto_handle(const DCPS::GUID_t& remote_participant) const;
 
   void handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg);
-  void send_handshake_request(const DCPS::GUID_t& guid, DiscoveredParticipant& dp);
+  void send_handshake_request(const DCPS::GUID_t& guid, const DiscoveredParticipant_rch& dp);
   void handle_handshake_message(const DDS::Security::ParticipantStatelessMessage& msg);
   bool handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg);
   DDS::OctetSeq local_participant_data_as_octets() const;
@@ -144,7 +145,7 @@ public:
                                const DCPS::NetworkAddress& from,
                                bool from_sedp);
 
-  bool validateSequenceNumber(const DCPS::MonotonicTimePoint& now, const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter);
+  bool validateSequenceNumber(const DCPS::MonotonicTimePoint& now, const DCPS::SequenceNumber& seq, const DiscoveredParticipant_rch& dp);
 
 #if OPENDDS_CONFIG_SECURITY
   void process_handshake_deadlines(const DCPS::MonotonicTimePoint& tv);
@@ -371,12 +372,12 @@ public:
 protected:
   Sedp& endpoint_manager() { return *sedp_; }
 
-  void purge_discovered_participant(const DiscoveredParticipantIter& iter);
+  void purge_discovered_participant(const DiscoveredParticipant_rch& dp);
 
 #ifndef DDS_HAS_MINIMUM_BIT
-  void enqueue_location_update_i(DiscoveredParticipantIter iter, DCPS::ParticipantLocation mask, const DCPS::NetworkAddress& from, const char* reason);
-  void process_location_updates_i(const DiscoveredParticipantIter& iter, const char* reason, bool force_publish = false);
-  void publish_location_update_i(const DiscoveredParticipantIter& iter);
+  void enqueue_location_update_i(const DiscoveredParticipant_rch& dp, DCPS::ParticipantLocation mask, const DCPS::NetworkAddress& from, const char* reason);
+  void process_location_updates_i(const DiscoveredParticipant_rch& dp, const char* reason, bool force_publish = false);
+  void publish_location_update_i(const DiscoveredParticipant_rch& dp);
 #endif
 
   bool announce_domain_participant_qos();
@@ -396,10 +397,16 @@ private:
   // lock_ must be held before calling this.
   bool participant_uses_rtps_duration_fraction_i(const DCPS::GUID_t& guid) const;
 
+  // Protect data members other than participants_ map.
   mutable ACE_Thread_Mutex lock_;
   DCPS::RcHandle<DCPS::BitSubscriber> bit_subscriber_;
   DDS::DomainParticipantQos qos_;
   friend class Sedp;
+
+  // This serializes operations on the map.
+  // But each element of the map has its own lock.
+  // Lock order: lock_ then participants_map_lock_
+  ACE_Thread_Mutex participants_lock_;
   DiscoveredParticipantMap participants_;
   RtpsDiscovery* disco_;
   DCPS::RcHandle<RtpsDiscoveryConfig> config_;
@@ -439,7 +446,7 @@ private:
 
   void data_received(const DataSubmessage& data, const ParameterList& plist, const DCPS::NetworkAddress& from);
 
-  void match_unauthenticated(const DiscoveredParticipantIter& dp_iter);
+  void match_unauthenticated(const DiscoveredParticipant_rch& dp);
 
   /// Get this participant's BIT data. user_data may be omitting depending on
   /// security settings.
@@ -456,13 +463,13 @@ private:
 
 #if OPENDDS_CONFIG_SECURITY
   DDS::ReturnCode_t send_handshake_message(const DCPS::GUID_t& guid,
-                                           DiscoveredParticipant& dp,
+                                           const DiscoveredParticipant_rch& dp,
                                            const DDS::Security::ParticipantStatelessMessage& msg);
   DCPS::MonotonicTimePoint schedule_handshake_resend(const DCPS::TimeDuration& time, const DCPS::GUID_t& guid);
-  bool match_authenticated(const DCPS::GUID_t& guid, DiscoveredParticipantIter& iter);
+  bool match_authenticated(const DCPS::GUID_t& guid, const DiscoveredParticipant_rch& dp);
   DDS::Security::ValidationResult_t pre_check_auth(const DiscoveredParticipantIter& iter,
                                                    DDS::Security::SecurityException& se);
-  void attempt_authentication(const DiscoveredParticipantIter& iter, bool from_discovery,
+  void attempt_authentication(const DiscoveredParticipant_rch& dp, bool from_discovery,
                               const DDS::Security::ValidationResult_t* validation = 0,
                               const DDS::Security::SecurityException* sec_except = 0);
   void update_agent_info(const DCPS::GUID_t& local_guid, const ICE::AgentInfo& agent_info);
@@ -511,8 +518,7 @@ private:
     void init_thread_status_event();
     void enable_thread_status_event(const DCPS::TimeDuration& interval);
 
-    void open(const DCPS::ReactorTask_rch& reactor_task,
-              const DCPS::JobQueue_rch& job_queue);
+    void open(const DCPS::JobQueue_rch& job_queue);
     void register_unicast_socket(DCPS::ReactorWrapper& reactor_wrapper,
                                  ACE_SOCK_Dgram& socket,
                                  const char* what);
@@ -550,6 +556,7 @@ private:
 #endif
 
     DCPS::WeakRcHandle<Spdp> outer_;
+    DCPS::ReactorTask_rch reactor_task_;
     Header hdr_;
     UserTagSubmessage user_tag_;
     DataSubmessage data_;
@@ -659,8 +666,8 @@ private:
 
   typedef OPENDDS_MULTIMAP(DCPS::MonotonicTimePoint, DCPS::GUID_t) TimeQueue;
 
-  void remove_lease_expiration_i(DiscoveredParticipantIter iter);
-  void update_lease_expiration_i(DiscoveredParticipantIter iter,
+  void remove_lease_expiration_i(const DiscoveredParticipant_rch& dp);
+  void update_lease_expiration_i(const DiscoveredParticipant_rch& dp,
                                  const DCPS::MonotonicTimePoint& now);
   void process_lease_expirations(const DCPS::MonotonicTimePoint& now);
   TimeQueue lease_expirations_;
@@ -691,14 +698,14 @@ private:
   void stop_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, DCPS::GUID_t remote, BuiltinEndpointSet_t avail,
                 DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail);
 
-  void purge_handshake_deadlines(DiscoveredParticipantIter iter);
+  void purge_handshake_deadlines(const DiscoveredParticipant_rch& dp);
   TimeQueue handshake_deadlines_;
 
-  void purge_handshake_resends(DiscoveredParticipantIter iter);
+  void purge_handshake_resends(const DiscoveredParticipant_rch& dp);
   TimeQueue handshake_resends_;
 
   size_t n_participants_in_authentication_;
-  void set_auth_state(DiscoveredParticipant& dp, AuthState state);
+  void set_auth_state(const DiscoveredParticipant_rch& dp, AuthState state);
 #endif
 
   static DCPS::StatisticSeq stats_template();
