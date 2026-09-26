@@ -1,0 +1,17 @@
+/GNUmakefile.ShmemWakeupRace_Publisher
+/GNUmakefile.ShmemWakeupRace_Subscriber
+/ShmemWakeupRaceC.cpp
+/ShmemWakeupRaceC.h
+/ShmemWakeupRaceC.inl
+/ShmemWakeupRaceS.cpp
+/ShmemWakeupRaceS.h
+/ShmemWakeupRaceTypeSupport.idl
+/ShmemWakeupRaceTypeSupportC.cpp
+/ShmemWakeupRaceTypeSupportC.h
+/ShmemWakeupRaceTypeSupportC.inl
+/ShmemWakeupRaceTypeSupportImpl.cpp
+/ShmemWakeupRaceTypeSupportImpl.h
+/ShmemWakeupRaceTypeSupportS.cpp
+/ShmemWakeupRaceTypeSupportS.h
+/publisher
+/subscriber
