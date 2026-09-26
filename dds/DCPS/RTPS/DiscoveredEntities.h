@@ -49,9 +49,10 @@ typedef Security::SPDPdiscoveredParticipantData ParticipantData_t;
 typedef SPDPdiscoveredParticipantData ParticipantData_t;
 #endif
 
-struct DiscoveredParticipant {
+struct DiscoveredParticipant : public DCPS::RcObject {
   DiscoveredParticipant()
-    : location_ih_(DDS::HANDLE_NIL)
+    : guid_(DCPS::GUID_UNKNOWN)
+    , location_ih_(DDS::HANDLE_NIL)
     , bit_ih_(DDS::HANDLE_NIL)
     , seq_reset_count_(0)
     , opendds_user_tag_(0)
@@ -84,6 +85,7 @@ struct DiscoveredParticipant {
                         const DCPS::SequenceNumber& seq,
                         const DCPS::TimeDuration& resend_period)
     : pdata_(p)
+    , guid_(DCPS::make_part_guid(p.participantProxy.guidPrefix))
     , location_ih_(DDS::HANDLE_NIL)
     , bit_ih_(DDS::HANDLE_NIL)
     , max_seq_(seq)
@@ -133,7 +135,10 @@ struct DiscoveredParticipant {
 #endif
   }
 
+  ACE_Thread_Mutex lock_;
+
   ParticipantData_t pdata_;
+  DCPS::GUID_t guid_;
 
   struct LocationUpdate {
     DCPS::ParticipantLocation mask_;
@@ -186,6 +191,8 @@ struct DiscoveredParticipant {
   CORBA::LongLong auth_req_sequence_number_;
   CORBA::LongLong handshake_sequence_number_;
 
+  // NOTE(sonndinh): these DDS::Security members are not accessed by Sedp (but it might
+  // still access them via calls to Spdp? Search for spdp_.participants_ from Sedp.cpp).
   DDS::Security::IdentityToken identity_token_;
   DDS::Security::PermissionsToken permissions_token_;
   DDS::Security::PropertyQosPolicy property_qos_;
@@ -223,6 +230,8 @@ struct DiscoveredParticipant {
     return DCPS::make_part_guid(prefix());
   }
 };
+
+typedef DCPS::RcHandle<DiscoveredParticipant> DiscoveredParticipant_rch;
 
 struct DiscoveredSubscription : DCPS::PoolAllocationBase {
   DiscoveredSubscription()

@@ -344,24 +344,24 @@ public:
 #endif
   DCPS::NetworkAddress multicast_group() const;
 
-  void associate(DiscoveredParticipant& participant
+  void associate(const DiscoveredParticipant_rch& participant
 #if OPENDDS_CONFIG_SECURITY
                  , const DDS::Security::ParticipantSecurityAttributes& participant_sec_attr
 #endif
                  );
-  void generate_remote_matched_crypto_handle(const BuiltinAssociationRecord& record);
-  bool ready(const DiscoveredParticipant& participant,
+  bool ready(const DiscoveredParticipant_rch& participant,
              const GUID_t& local_id,
              const GUID_t& remote_id,
              bool local_tokens_sent,
              const DCPS::SequenceNumber& local_sn) const;
-  void process_association_records_i(DiscoveredParticipant& participant);
-  void generate_remote_matched_crypto_handles(DiscoveredParticipant& participant);
+  void process_association_records_i(const DiscoveredParticipant_rch& participant);
 
 #if OPENDDS_CONFIG_SECURITY
-  void disassociate_volatile(DiscoveredParticipant& participant);
+  void disassociate_volatile(const DiscoveredParticipant_rch& participant);
   void cleanup_volatile_crypto(const DCPS::GUID_t& remote);
-  void associate_volatile(DiscoveredParticipant& participant);
+  void associate_volatile(const DiscoveredParticipant_rch& participant);
+  void generate_remote_matched_crypto_handles(const DiscoveredParticipant_rch& participant);
+  void generate_remote_matched_crypto_handle(const BuiltinAssociationRecord& record);
 
   void remove_remote_crypto_handle(const DCPS::GUID_t& participant, const EntityId_t& entity);
 
@@ -521,9 +521,9 @@ private:
                                   const GUID_t& remote,
                                   const DCPS::SequenceNumber& local_sn) const;
 #if OPENDDS_CONFIG_SECURITY
-  bool remote_is_authenticated_i(const GUID_t& local, const GUID_t& remote, const DiscoveredParticipant& participant) const;
+  bool remote_is_authenticated_i(const GUID_t& local, const GUID_t& remote, const DiscoveredParticipant_rch& participant) const;
   bool local_has_remote_participant_token_i(const GUID_t& local, const GUID_t& remote) const;
-  bool remote_has_local_participant_token_i(const GUID_t& local, const GUID_t& remote, const DiscoveredParticipant& participant) const;
+  bool remote_has_local_participant_token_i(const GUID_t& local, const GUID_t& remote, const DiscoveredParticipant_rch& participant) const;
   bool local_has_remote_endpoint_token_i(const GUID_t& local, const GUID_t& remote) const;
   bool remote_has_local_endpoint_token_i(const GUID_t& local, bool local_tokens_sent,
                                          const GUID_t& remote) const;
