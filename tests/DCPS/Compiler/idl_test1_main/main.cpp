@@ -27,7 +27,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   {
     Xyz::StructAUnion sau;
-    sau.sau_f1._d(Xyz::redx);
     sau.sau_f1.rsv("joe");
     const size_t expected_size =
       4 + // union discriminator

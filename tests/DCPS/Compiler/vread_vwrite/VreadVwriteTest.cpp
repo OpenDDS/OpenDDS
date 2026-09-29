@@ -176,7 +176,6 @@ void initialize_sample(Mod::Sample& sample)
   sample.ns[1][1] = "donatello";
   sample.ns[1][2] = "michelangelo";
   sample.ns[1][3] = "raphael";
-  sample.mu._d(Mod::three);
   sample.mu.d(5678);
   sample.ca[0] = 'f';
   sample.ca[1] = 'e';

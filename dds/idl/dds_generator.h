@@ -787,6 +787,26 @@ inline bool needSyntheticDefault(AST_Type* disc, size_t n_labels)
   }
 }
 
+/// Whether the generated union class has a _default() modifier (IDL-to-C++
+/// unions only have one if there's an implicit default member).
+inline bool unionHasDefaultModifier(AST_Union* u, const std::vector<AST_UnionBranch*>& branches,
+                                    AST_Type* discriminator)
+{
+  if (u->default_index() != -1) {
+    return false;
+  }
+  if (be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE) {
+    // tao_idl generates the class
+    AST_Union::DefaultValue dv;
+    return u->default_value(dv) != -1 && dv.computed_ != 0;
+  }
+  size_t n_labels = 0;
+  for (size_t i = 0; i < branches.size(); ++i) {
+    n_labels += branches[i]->label_list_length();
+  }
+  return needSyntheticDefault(discriminator, n_labels);
+}
+
 struct Intro {
   typedef std::set<std::string> LineSet;
   LineSet line_set;
@@ -954,7 +974,7 @@ void generateCaseBody(
 }
 
 inline
-bool generateSwitchBody(AST_Union*, CommonFn commonFn,
+bool generateSwitchBody(AST_Union* u, CommonFn commonFn,
                         const std::vector<AST_UnionBranch*>& branches,
                         AST_Type* discriminator, const char* statementPrefix,
                         const char* namePrefix = "", const char* uni = "",
@@ -985,9 +1005,17 @@ bool generateSwitchBody(AST_Union*, CommonFn commonFn,
   }
   if (!has_default && needSyntheticDefault(discriminator, n_labels)) {
     be_global->impl_ <<
-      "  default:\n" <<
-      ((namePrefix == std::string(">> ") || namePrefix == std::string(">> mutable "))
-       ? "    uni._d(disc);\n" : "") <<
+      "  default:\n";
+    if (namePrefix == std::string(">> ") || namePrefix == std::string(">> mutable ")) {
+      // _d() can't switch members, so release any active member first.
+      if (unionHasDefaultModifier(u, branches, discriminator)) {
+        be_global->impl_ <<
+          "    uni._default();\n";
+      }
+      be_global->impl_ <<
+        "    uni._d(disc);\n";
+    }
+    be_global->impl_ <<
       "    break;\n";
     return true;
   }

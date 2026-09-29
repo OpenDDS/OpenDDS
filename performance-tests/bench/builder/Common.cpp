@@ -140,6 +140,41 @@ const Property* ConstPropertyIndex::operator->() const
   return &((*seq_)[index_]);
 }
 
+namespace {
+
+// _d() alone would select a member without constructing its storage.
+void set_default_value(PropertyValue& value, PropertyValueKind kind)
+{
+  switch (kind) {
+  case PVK_TIME:
+    value.time_prop(ZERO);
+    break;
+  case PVK_TIME_SEQ:
+    value.time_seq_prop(TimeStampSeq());
+    break;
+  case PVK_STRING:
+    value.string_prop("");
+    break;
+  case PVK_STRING_SEQ:
+    value.string_seq_prop(StringSeq());
+    break;
+  case PVK_STRING_SEQ_SEQ:
+    value.string_seq_seq_prop(StringSeqSeq());
+    break;
+  case PVK_DOUBLE:
+    value.double_prop(0.0);
+    break;
+  case PVK_DOUBLE_SEQ:
+    value.double_seq_prop(DoubleSeq());
+    break;
+  case PVK_ULL:
+    value.ull_prop(0);
+    break;
+  }
+}
+
+}
+
 Builder::PropertyIndex
 get_or_create_property(
   Builder::PropertySeq& seq,
@@ -163,7 +198,7 @@ get_or_create_property(
   }
   seq.length(idx + 1);
   seq[idx].name = name.c_str();
-  seq[idx].value._d(kind);
+  set_default_value(seq[idx].value, kind);
   return PropertyIndex(seq, idx);
 }
 

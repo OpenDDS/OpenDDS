@@ -298,6 +298,30 @@ namespace {
     return "";
   }
 
+  std::string key_only_branch_helper(const std::string& indent, AST_Decl* branch,
+                                     const std::string&,
+                                     AST_Type* type,
+                                     const std::string&,
+                                     bool,
+                                     Intro&,
+                                     const std::string&)
+  {
+    return
+      "    " + dds_generator::field_type_name(dynamic_cast<AST_Field*>(branch), type) + " temp;\n" +
+      type_to_default(indent, type, "temp", type->anonymous(), false) +
+      "    value.value." + branch->local_name()->get_string() + "(temp);\n";
+  }
+
+  void gen_default_union(const std::string& value, AST_Union* u,
+                         const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator)
+  {
+    // _d() can't switch members, so release any active member first.
+    if (unionHasDefaultModifier(u, branches, discriminator)) {
+      be_global->impl_ <<
+        "  " << value << "._default();\n";
+    }
+  }
+
   bool gen_struct_i(AST_Structure* node, const std::string& type_name,
                     bool use_cxx11, ExtensibilityKind ek, FieldFilter field_filter)
   {
@@ -385,15 +409,19 @@ namespace {
     }
 
     if (filter_kind == FieldFilter_All) {
+      gen_default_union("value", u, branches, discriminator);
       generateSwitchForUnion(u, "d", branch_helper, branches,
                              discriminator, "", "", type_name.c_str(),
                              false, false);
       be_global->impl_ <<
         "  value._d(d);\n";
     } else if (has_disc) {
-      // Assigning the discriminator directly before a branch is set doesn't strictly
-      // conform to the IDL-to-C++ mapping. However, this case cares only about the
-      // discriminator, i.e. KeyOnly or NestedKeyOnly samples, so it's probably fine.
+      // Only the discriminator is read for KeyOnly or NestedKeyOnly samples, but
+      // the selected member still has to be activated before _d() is called.
+      gen_default_union("value.value", u, branches, discriminator);
+      generateSwitchForUnion(u, "d", key_only_branch_helper, branches,
+                             discriminator, "", "", type_name.c_str(),
+                             false, false);
       be_global->impl_ <<
         "  value.value._d(d);\n";
     }

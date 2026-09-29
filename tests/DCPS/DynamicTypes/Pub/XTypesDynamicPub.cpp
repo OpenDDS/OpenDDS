@@ -31,10 +31,8 @@ void my_struct_final_narrow_write(DataWriter_var dw)
   Dynamic::long_struct_final ls2;
   ls2.my_long = 2;
   Dynamic::inner_union_final iu;
-  iu._d(3);
   iu.b(true);
   Dynamic::inner_union_final iu2;
-  iu2._d(2);
   Dynamic::bool_seq bs;
   bs.length(2);
   bs[0] = true;
@@ -87,10 +85,8 @@ void my_struct_appendable_narrow_write(DataWriter_var dw)
   Dynamic::long_struct_appendable ls2;
   ls2.my_long = 2;
   Dynamic::inner_union_appendable iu;
-  iu._d(3);
   iu.b(true);
   Dynamic::inner_union_appendable iu2;
-  iu2._d(2);
   Dynamic::bool_seq bs;
   bs.length(2);
   bs[0] = true;
@@ -144,10 +140,8 @@ void my_struct_mutable_narrow_write(DataWriter_var dw)
   Dynamic::long_struct_mutable ls2;
   ls2.my_long = 2;
   Dynamic::inner_union_mutable iu;
-  iu._d(3);
   iu.b(true);
   Dynamic::inner_union_mutable iu2;
-  iu2._d(2);
   Dynamic::bool_seq bs;
   bs.length(2);
   bs[0] = true;
@@ -197,7 +191,6 @@ void outer_struct_final_narrow_write(DataWriter_var dw)
   Dynamic::outer_struct_final os;
   Dynamic::inner_struct_final is;
   Dynamic::inner_union_final foo;
-  foo._d(2);
   Dynamic::bool_seq bs;
   bs.length(2);
   bs[0] = false;
@@ -215,7 +208,6 @@ void outer_struct_appendable_narrow_write(DataWriter_var dw)
   Dynamic::outer_struct_appendable os;
   Dynamic::inner_struct_appendable is;
   Dynamic::inner_union_appendable foo;
-  foo._d(2);
   Dynamic::bool_seq bs;
   bs.length(2);
   bs[0] = false;
@@ -233,7 +225,6 @@ void outer_struct_mutable_narrow_write(DataWriter_var dw)
   Dynamic::outer_struct_mutable os;
   Dynamic::inner_struct_mutable is;
   Dynamic::inner_union_mutable foo;
-  foo._d(2);
   Dynamic::bool_seq bs;
   bs.length(2);
   bs[0] = false;
@@ -249,7 +240,6 @@ void outer_struct_mutable_narrow_write(DataWriter_var dw)
 void inner_union_final_narrow_write(DataWriter_var dw)
 {
   Dynamic::inner_union_final foo;
-  foo._d(3);
   foo.b(true);
   Dynamic::inner_union_finalDataWriter_var narrow_dw = Dynamic::inner_union_finalDataWriter::_narrow(dw);
   InstanceHandle_t handle = narrow_dw->register_instance(foo);
@@ -259,7 +249,6 @@ void inner_union_final_narrow_write(DataWriter_var dw)
 void inner_union_appendable_narrow_write(DataWriter_var dw)
 {
   Dynamic::inner_union_appendable foo;
-  foo._d(3);
   foo.b(true);
   Dynamic::inner_union_appendableDataWriter_var narrow_dw = Dynamic::inner_union_appendableDataWriter::_narrow(dw);
   InstanceHandle_t handle = narrow_dw->register_instance(foo);
@@ -269,7 +258,6 @@ void inner_union_appendable_narrow_write(DataWriter_var dw)
 void inner_union_mutable_narrow_write(DataWriter_var dw)
 {
   Dynamic::inner_union_mutable foo;
-  foo._d(3);
   foo.b(true);
   Dynamic::inner_union_mutableDataWriter_var narrow_dw = Dynamic::inner_union_mutableDataWriter::_narrow(dw);
   InstanceHandle_t handle = narrow_dw->register_instance(foo);
@@ -282,10 +270,8 @@ void outer_union_final_narrow_write(DataWriter_var dw)
   Dynamic::outer_union_final ou;
   Dynamic::inner_struct_final is;
   Dynamic::inner_union_final iu;
-  iu._d(1);
   iu.l(5);
   is.iu = iu;
-  ou._d(Dynamic::V1);
   ou.is(is);
   Dynamic::outer_union_finalDataWriter_var narrow_dw = Dynamic::outer_union_finalDataWriter::_narrow(dw);
   InstanceHandle_t handle = narrow_dw->register_instance(ou);
@@ -297,10 +283,8 @@ void outer_union_appendable_narrow_write(DataWriter_var dw)
   Dynamic::outer_union_appendable ou;
   Dynamic::inner_struct_appendable is;
   Dynamic::inner_union_appendable iu;
-  iu._d(1);
   iu.l(5);
   is.iu = iu;
-  ou._d(Dynamic::V1);
   ou.is(is);
   Dynamic::outer_union_appendableDataWriter_var narrow_dw = Dynamic::outer_union_appendableDataWriter::_narrow(dw);
   InstanceHandle_t handle = narrow_dw->register_instance(ou);
@@ -312,10 +296,8 @@ void outer_union_mutable_narrow_write(DataWriter_var dw)
   Dynamic::outer_union_mutable ou;
   Dynamic::inner_struct_mutable is;
   Dynamic::inner_union_mutable iu;
-  iu._d(1);
   iu.l(5);
   is.iu = iu;
-  ou._d(Dynamic::V1);
   ou.is(is);
   Dynamic::outer_union_mutableDataWriter_var narrow_dw = Dynamic::outer_union_mutableDataWriter::_narrow(dw);
   InstanceHandle_t handle = narrow_dw->register_instance(ou);
