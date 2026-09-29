@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5301
 
 .. news-start-section: Fixes
 - Fixed generated union deserialization, ``set_default``, and ``vread`` code that could set a union's discriminator to select a member that hadn't been constructed.
