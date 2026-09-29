@@ -15,7 +15,7 @@ if ($test->flag('no_limit')) {
     $ENV{'no_limit'} = 'true';
 }
 $test->start_process('ConcurrentAuthLimit');
-my $result = $test->finish(10);
+my $result = $test->finish(30);
 if ($result != 0) {
   print STDERR "ERROR: test returned $result\n";
   exit 1;

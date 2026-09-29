@@ -308,8 +308,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   while (!receive(participant_guid, multicast_socket)) {}
 
-  const OpenDDS::DCPS::MonotonicTimePoint deadline = OpenDDS::DCPS::MonotonicTimePoint::now() + OpenDDS::DCPS::TimeDuration(1, 0);
+  const OpenDDS::DCPS::GUID_t writer1_participant_guid = make_part_guid(writer1_guid);
+  const OpenDDS::DCPS::GUID_t writer2_participant_guid = make_part_guid(writer2_guid);
 
+  // Announce both writers concurrently. Either writer's announcement may be
+  // processed first and claim the single authentication slot; the assertions
+  // below only check how many writers were discovered, not which one, so the
+  // race doesn't matter. The sending period is generous to avoid confusing
+  // network latency with test logic.
+  const OpenDDS::DCPS::MonotonicTimePoint deadline =
+    OpenDDS::DCPS::MonotonicTimePoint::now() + OpenDDS::DCPS::TimeDuration(5, 0);
   while (OpenDDS::DCPS::MonotonicTimePoint::now() < deadline) {
     // Send an SPDP message from writer1.
     send(writer1_socket, writer1_guid, writer1_sequence, multicast_address.to_addr(), participant_data(domain, writer1_guid.guidPrefix, DDS::DomainParticipantQos(), writer1_addr));
@@ -323,21 +331,25 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   int status = EXIT_SUCCESS;
 
-  if (!disc->has_domain_participant(domain, participant_guid, make_part_guid(writer1_guid))) {
-    ACE_ERROR((LM_ERROR, "Participant has not discovered writer1\n"));
-    status = EXIT_FAILURE;
-  }
+  const bool writer1_discovered =
+    disc->has_domain_participant(domain, participant_guid, writer1_participant_guid);
+  const bool writer2_discovered =
+    disc->has_domain_participant(domain, participant_guid, writer2_participant_guid);
+  ACE_DEBUG((LM_DEBUG, "writer1 discovered: %d, writer2 discovered: %d\n",
+             writer1_discovered, writer2_discovered));
 
   if (no_limit) {
-    if (!disc->has_domain_participant(domain, participant_guid, make_part_guid(writer2_guid))) {
-      ACE_ERROR((LM_ERROR, "Participant has not discovered writer2 when it should have\n"));
+    if (!writer1_discovered || !writer2_discovered) {
+      ACE_ERROR((LM_ERROR, "Participant has not discovered both writers\n"));
       status = EXIT_FAILURE;
     }
-  } else {
-    if (disc->has_domain_participant(domain, participant_guid, make_part_guid(writer2_guid))) {
-      ACE_ERROR((LM_ERROR, "Participant has discovered writer2 when it should not have\n"));
-      status = EXIT_FAILURE;
-    }
+  } else if (writer1_discovered == writer2_discovered) {
+    // With max_participants_in_authentication set to 1, exactly one of the
+    // two writers must be discovered: whichever was processed first claims
+    // the single slot and the other's announcements are dropped.
+    ACE_ERROR((LM_ERROR, "Participant discovered %s writers, expected exactly one\n",
+               writer1_discovered ? "both" : "neither"));
+    status = EXIT_FAILURE;
   }
 
   participant->delete_contained_entities();
