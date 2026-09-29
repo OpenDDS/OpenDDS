@@ -966,6 +966,18 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_multitopic(
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, topics_protector_,
                    DDS::RETCODE_OUT_OF_RESOURCES);
   DDS::MultiTopic_var mt = DDS::MultiTopic::_duplicate(a_multitopic);
+  DDS::DomainParticipant_var dp = mt->get_participant();
+  const DomainParticipantImpl* const dp_servant =
+    dynamic_cast<const DomainParticipantImpl*>(dp.in());
+  if (dp_servant != this) {
+    if (DCPS_debug_level > 3) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("DomainParticipantImpl::delete_multitopic, ")
+                 ACE_TEXT("can't delete a multitopic because it belongs to ")
+                 ACE_TEXT("a different participant.\n")));
+    }
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
   CORBA::String_var mt_name = mt->get_name();
   TopicDescriptionMap::iterator iter = topic_descrs_.find(mt_name.in());
   if (iter == topic_descrs_.end()) {
