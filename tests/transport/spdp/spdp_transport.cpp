@@ -49,7 +49,7 @@ public:
 
   bool check_for_participant(bool expect_participant)
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, spdp_->lock_, true);
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, spdp_->participants_lock_, true);
     const bool error = spdp_->has_discovered_participant(guid_) != expect_participant;
     if (error) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("Error: %C\n"), expect_participant ?
@@ -61,10 +61,11 @@ public:
 
   void remove_participant()
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, spdp_->lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, spdp_->participants_lock_);
     Spdp::DiscoveredParticipantIter iter = spdp_->participants_.find(guid_);
     if (iter != spdp_->participants_.end()) {
-      spdp_->purge_discovered_participant(iter);
+      ACE_GUARD(ACE_Thread_Mutex, part_g, iter->second->lock_);
+      spdp_->purge_discovered_participant(iter->second);
       spdp_->participants_.erase(iter);
     }
   }
