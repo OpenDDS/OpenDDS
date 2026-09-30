@@ -4081,15 +4081,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     // the default branch or the implicit default member. Activate that member
     // first because _d() can't switch members.
     if (!found) {
-      AST_UnionBranch* default_branch = 0;
-      for (size_t i = 0; i < branches.size() && !default_branch; ++i) {
-        for (unsigned long j = 0; j < branches[i]->label_list_length(); ++j) {
-          if (branches[i]->label(j)->label_kind() == AST_UnionLabel::UL_default) {
-            default_branch = branches[i];
-            break;
-          }
-        }
-      }
+      AST_UnionBranch* const default_branch = findDefaultBranch(branches);
       if (default_branch) {
         gen_union_default(default_branch, varname);
       } else if (unionHasDefaultModifier(node, branches, discriminator)) {
@@ -4220,7 +4212,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       TryConstructFailAction try_construct = be_global->union_discriminator_try_construct(node);
       be_global->impl_ <<
         "  " << scoped(discriminator->name()) << " disc;\n"
-        "  if (!(strm >> disc)) {\n";
+        "  if (!(strm >> " << getWrapper("disc", discriminator, WD_INPUT) << ")) {\n";
       if (try_construct == tryconstructfailaction_use_default) {
         be_global->impl_ <<
           "    set_default(uni);\n"

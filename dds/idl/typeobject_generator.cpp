@@ -1216,18 +1216,9 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
     AST_UnionBranch* branch = ast_cast<AST_UnionBranch>(*i);
     const TryConstructFailAction try_con = be_global->try_construct(branch);
 
-    bool is_default = false;
-    for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
-      AST_UnionLabel* label = branch->label(j);
-      if (label->label_kind() == AST_UnionLabel::UL_default) {
-        is_default = true;
-        break;
-      }
-    }
-
     OpenDDS::XTypes::UnionMemberFlag member_flags = try_construct_to_member_flag(try_con);
 
-    if (is_default) {
+    if (isDefaultBranch(branch)) {
       member_flags |= OpenDDS::XTypes::IS_DEFAULT;
     }
 

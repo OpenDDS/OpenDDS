@@ -130,6 +130,14 @@ module Mod {
   };
 
   @topic
+  union StringBranchKeyUnion switch (@key MyEnum) {
+  case two:
+    string str;
+  default:
+    octet o;
+  };
+
+  @topic
   struct KeyOnlyStruct {
     @key long id;
     @key ExplicitKeysStruct eks;
