@@ -121,6 +121,36 @@ namespace {
     be_global->impl_ << ");\n";
   }
 
+  std::string activate_union_branch(const std::string&, AST_Decl* branch,
+                                    const std::string& name, AST_Type* type,
+                                    const std::string&, bool, Intro&,
+                                    const std::string&)
+  {
+    AST_UnionBranch* const ub = dynamic_cast<AST_UnionBranch*>(branch);
+    const bool pass_discriminator = isDefaultBranch(ub) || ub->label_list_length() > 1;
+    return "        " + dds_generator::field_type_name(ub, type) + " branch_value{};\n"
+      "        value_." + name + "(branch_value" + (pass_discriminator ? ", temp" : "") + ");\n";
+  }
+
+  void set_union_discriminator(AST_Union* node)
+  {
+    std::vector<AST_UnionBranch*> branches;
+    const Fields fields(node);
+    for (Fields::Iterator pos = fields.begin(); pos != fields.end(); ++pos) {
+      branches.push_back(dynamic_cast<AST_UnionBranch*>(*pos));
+    }
+
+    generateSwitchForUnion(node, "temp", activate_union_branch, branches,
+                           node->disc_type(), "", "", "", false, false);
+    if (hasImplicitDefault(branches, node->disc_type())) {
+      be_global->impl_ <<
+        "        if (value_._d() != temp) {\n"
+        "          value_._default();\n"
+        "          value_._d(temp);\n"
+        "        }\n";
+    }
+  }
+
   void generate_dynamic_data_adapter_access_field(
     AST_Union* union_node, bool set,
     OpenDDS::XTypes::MemberId field_id, AST_Type* field_type, AST_Field* field = 0)
@@ -192,10 +222,17 @@ namespace {
         value + extra_access, rc_dest);
       if (union_node && set) {
         be_global->impl_ <<
-          "        if (rc == DDS::RETCODE_OK) {\n"
-          "          value_." << cpp_field_name << "(temp);\n"
-          "        }\n"
-          "        return rc;\n";
+          "        if (rc != DDS::RETCODE_OK) {\n"
+          "          return rc;\n"
+          "        }\n";
+        if (disc && use_cxx11) {
+          set_union_discriminator(union_node);
+        } else {
+          be_global->impl_ <<
+            "        value_." << cpp_field_name << "(temp);\n";
+        }
+        be_global->impl_ <<
+          "        return DDS::RETCODE_OK;\n";
       }
       if (!optional_value.empty()) {
         be_global->impl_ <<
