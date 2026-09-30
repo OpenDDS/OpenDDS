@@ -25,6 +25,42 @@ module Unions {
     case 0: dummy_sequence dsequence;
   };
 
+  // The default discriminator value, 0, selects the default branch.
+  union W switch(long) {
+    case 1: string val;
+    default: dummy_sequence dsequence;
+  };
+
+  // The default discriminator value, 0, selects the implicit default member.
+  union N switch(long) {
+    case 1: string val;
+  };
+
+  union BN switch(boolean) {
+    case TRUE: string val;
+  };
+
+  @mutable
+  union MN switch(long) {
+    case 1: string val;
+  };
+
+  @mutable
+  union MBN switch(boolean) {
+    case TRUE: string val;
+  };
+
+  @topic
+  union KU switch(@key long) {
+    case 1: string val;
+    default: dummy_sequence dsequence;
+  };
+
+  @topic
+  struct KS {
+    @key KU u;
+  };
+
   typedef dummy dummy_array[10];
   union T switch(unsigned long) {
     case 0: dummy_array darray;

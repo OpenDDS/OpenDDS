@@ -375,40 +375,6 @@ struct GeneratorBase {
     }
   };
 
-  static bool hasDefaultLabel(const std::vector<AST_UnionBranch*>& branches)
-  {
-    for (std::vector<AST_UnionBranch*>::const_iterator pos = branches.begin(), limit = branches.end();
-         pos != limit;
-         ++pos) {
-      AST_UnionBranch* branch = *pos;
-      for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
-        AST_UnionLabel* label = branch->label(j);
-        if (label->label_kind() == AST_UnionLabel::UL_default) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  static size_t countLabels(const std::vector<AST_UnionBranch*>& branches)
-  {
-    size_t count = 0;
-
-    for (std::vector<AST_UnionBranch*>::const_iterator pos = branches.begin(), limit = branches.end();
-         pos != limit;
-         ++pos) {
-      count += (*pos)->label_list_length();
-    }
-
-    return count;
-  }
-
-  static bool needsDefault(const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator)
-  {
-    return !hasDefaultLabel(branches) && needSyntheticDefault(discriminator, countLabels(branches));
-  }
-
   static void generate_union_field(AST_UnionBranch* branch)
   {
     AST_Type* field_type = branch->field_type();
@@ -584,7 +550,7 @@ struct GeneratorBase {
 
     std::for_each(branches.begin(), branches.end(), GenerateUnionAccessors(u, discriminator));
 
-    if (needsDefault(branches, discriminator)) {
+    if (hasImplicitDefault(branches, discriminator)) {
       be_global->lang_header_ <<
         "  void _default() {\n"
         "    _reset();\n"
@@ -1784,7 +1750,7 @@ struct Cxx11Generator : GeneratorBase {
       "  void _d(" << d_type << " d) { _disc = d; }\n\n";
 
     std::for_each(branches.begin(), branches.end(), union_accessors);
-    if (needsDefault(branches, discriminator)) {
+    if (hasImplicitDefault(branches, discriminator)) {
       be_global->lang_header_ <<
         "  void _default() { _reset(); _activate(" << defVal << "); }\n\n";
     }

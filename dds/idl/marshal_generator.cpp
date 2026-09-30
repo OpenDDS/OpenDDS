@@ -3969,6 +3969,10 @@ namespace {
           << streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
 
         // Activate the branch with a default so the union is in a good state.
+        if (unionHasDefaultModifier(node, branches, discriminator)) {
+          be_global->impl_
+            << "  uni.value._default();\n";
+        }
         generateSwitchForUnion(node, "disc", initializeUnion, branches,
                                discriminator, "", ">> forceStreamExp", cxx.c_str());
 
@@ -4073,9 +4077,17 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       }
     }
 
-    // If a default value was not found, just set the discriminator to the
-    // default value.
+    // If no branch has the default discriminator value, then it selects either
+    // the default branch or the implicit default member. Activate that member
+    // first because _d() can't switch members.
     if (!found) {
+      AST_UnionBranch* const default_branch = findDefaultBranch(branches);
+      if (default_branch) {
+        gen_union_default(default_branch, varname);
+      } else if (unionHasDefaultModifier(node, branches, discriminator)) {
+        be_global->impl_ <<
+          "  " << varname << "._default();\n";
+      }
       be_global->impl_ <<
         " " << scoped(discriminator->name()) << " temp;\n" <<
         type_to_default("", discriminator, "  temp") <<
@@ -4200,7 +4212,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       TryConstructFailAction try_construct = be_global->union_discriminator_try_construct(node);
       be_global->impl_ <<
         "  " << scoped(discriminator->name()) << " disc;\n"
-        "  if (!(strm >> disc)) {\n";
+        "  if (!(strm >> " << getWrapper("disc", discriminator, WD_INPUT) << ")) {\n";
       if (try_construct == tryconstructfailaction_use_default) {
         be_global->impl_ <<
           "    set_default(uni);\n"

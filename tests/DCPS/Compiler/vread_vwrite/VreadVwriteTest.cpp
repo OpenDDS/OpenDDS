@@ -176,7 +176,6 @@ void initialize_sample(Mod::Sample& sample)
   sample.ns[1][1] = "donatello";
   sample.ns[1][2] = "michelangelo";
   sample.ns[1][3] = "raphael";
-  sample.mu._d(Mod::three);
   sample.mu.d(5678);
   sample.ca[0] = 'f';
   sample.ca[1] = 'e';
@@ -467,6 +466,33 @@ TEST(VreadVwriteTest, KeyOnly_UnionWithKey)
   const OpenDDS::DCPS::KeyOnly<Mod::ExplicitKeyUnion> keyonly_out(sample_out);
   ASSERT_TRUE(vread(jvr, keyonly_out));
   ASSERT_EQ(sample._d(), sample_out._d());
+}
+
+TEST(VreadVwriteTest, KeyOnly_UnionWithKeySelectingOtherMember)
+{
+  Mod::StringBranchKeyUnion sample;
+  sample.str("hello");
+
+  CORBA::String_var result;
+  write_helper(sample, result);
+  rapidjson::Document document;
+  document.Parse(result.in());
+  rapidjson::Value& val = document;
+
+  ASSERT_TRUE(val.IsObject());
+  ASSERT_EQ(1ul, val.MemberCount());
+  ASSERT_EQ(val["$discriminator"], "two");
+
+  rapidjson::StringStream buffer(result.in());
+  OpenDDS::DCPS::JsonValueReader<> jvr(buffer);
+  Mod::StringBranchKeyUnion sample_out;
+  // Start with a different member active so reading the key has to switch members.
+  sample_out.o(0x7f);
+  const OpenDDS::DCPS::KeyOnly<Mod::StringBranchKeyUnion> keyonly_out(sample_out);
+  ASSERT_TRUE(vread(jvr, keyonly_out));
+  ASSERT_EQ(Mod::two, sample_out._d());
+  // Only the key is read, so the selected member has its default value.
+  ASSERT_STREQ("", sample_out.str());
 }
 
 #ifndef OPENDDS_SAFETY_PROFILE
