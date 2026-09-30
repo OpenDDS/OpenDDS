@@ -1,3 +1,5 @@
+.. news-prs: 5303
+
 .. news-start-section: Fixes
 - C++11 generated unions now use a common discriminator-to-member index to manage member lifetimes.
   Repeated member modifiers reuse the active member, and copy/move assignment releases an active member when the source selects an implicit default.
