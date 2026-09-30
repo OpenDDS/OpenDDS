@@ -140,6 +140,10 @@ namespace {
       branches.push_back(dynamic_cast<AST_UnionBranch*>(*pos));
     }
 
+    be_global->impl_ <<
+      "        try {\n"
+      "          value_._d(temp);\n"
+      "        } catch (const CORBA::BAD_PARAM&) {\n";
     generateSwitchForUnion(node, "temp", activate_union_branch, branches,
                            node->disc_type(), "", "", "", false, false);
     if (hasImplicitDefault(branches, node->disc_type())) {
@@ -149,6 +153,8 @@ namespace {
         "          value_._d(temp);\n"
         "        }\n";
     }
+    be_global->impl_ <<
+      "        }\n";
   }
 
   void generate_dynamic_data_adapter_access_field(
