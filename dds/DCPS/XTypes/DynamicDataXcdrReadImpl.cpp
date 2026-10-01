@@ -559,6 +559,10 @@ bool DynamicDataXcdrReadImpl::get_struct_item_count()
       }
       return false;
     }
+    DCPS::Serializer::ScopedReadLimit read_limit(strm_, dheader, !xcdr1, true);
+    if (!read_limit.valid()) {
+      return false;
+    }
 
     const size_t end_of_struct = xcdr1 ? 0 : strm_.rpos() + dheader;
     while (xcdr1 || strm_.rpos() < end_of_struct) {
@@ -572,6 +576,9 @@ bool DynamicDataXcdrReadImpl::get_struct_item_count()
         return false;
       }
       if (xcdr1 && member_id == DCPS::Serializer::pid_list_end) {
+        if (member_size != 0) {
+          return false;
+        }
         break;
       }
       if (!strm_.skip(member_size)) {
@@ -766,6 +773,10 @@ DDS::UInt32 DynamicDataXcdrReadImpl::get_item_count()
         if (log_level >= LogLevel::Warning) {
           ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataXcdrReadImpl::get_item_count: read delimiter failed\n"));
         }
+        return 0;
+      }
+      DCPS::Serializer::ScopedReadLimit read_limit(strm_, dheader, true, true);
+      if (!read_limit.valid()) {
         return 0;
       }
       const size_t end_of_map = strm_.rpos() + dheader;
@@ -1103,11 +1114,18 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_value_from_union(
     return DDS::RETCODE_ERROR;
   }
 
+  DCPS::Serializer::ScopedReadLimit member_limit(strm_, 0, false);
   if (ek == DDS::MUTABLE) {
     unsigned member_id;
     size_t member_size;
     bool must_understand;
     if (!strm_.read_parameter_id(member_id, member_size, must_understand)) {
+      return DDS::RETCODE_ERROR;
+    }
+    if (id == DISCRIMINATOR_ID && member_id != DISCRIMINATOR_SERIALIZED_ID) {
+      return DDS::RETCODE_ERROR;
+    }
+    if (!member_limit.reset(member_size)) {
       return DDS::RETCODE_ERROR;
     }
   }
@@ -1259,6 +1277,12 @@ bool DynamicDataXcdrReadImpl::skip_to_map_entry(MemberId id, bool skip_key, size
     size_t dheader;
     ACE_CDR::ULong index;
     if (!strm_.read_delimiter(dheader) || !get_index_from_id(id, index, ACE_UINT32_MAX)) {
+      return false;
+    }
+    // The limit deliberately outlives this call: the caller reads the located
+    // entry next and must stay within the map's delimited region.  It is reset
+    // when the next ScopedChainManager re-initializes strm_.
+    if (!strm_.set_read_limit(dheader)) {
       return false;
     }
     const size_t end_of_map = strm_.rpos() + dheader;
@@ -1769,15 +1793,23 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
         }
 
         const DDS::DynamicType_var disc_type = get_base_type(type_desc_->discriminator_type());
+        DCPS::Serializer::ScopedReadLimit disc_limit(strm_, 0, false);
         if (ek == DDS::MUTABLE) {
           unsigned disc_id;
           size_t size;
           bool must_understand;
-          if (!strm_.read_parameter_id(disc_id, size, must_understand)) {
+          if (!strm_.read_parameter_id(disc_id, size, must_understand) ||
+              disc_id != DISCRIMINATOR_SERIALIZED_ID) {
+            good = false;
+            break;
+          }
+          if (!disc_limit.reset(size)) {
             good = false;
             break;
           }
         }
+        // The nested reader below snapshots the (possibly narrowed) read limit
+        // at construction; disc_limit keeps it in place until then.
         CORBA::release(value);
         value = new DynamicDataXcdrReadImpl(strm_, disc_type, nested(extent_));
         break;
@@ -1789,11 +1821,16 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
         break;
       }
 
+      DCPS::Serializer::ScopedReadLimit member_limit(strm_, 0, false);
       if (ek == DDS::MUTABLE) {
         unsigned mem_id;
         size_t size;
         bool must_understand;
         if (!strm_.read_parameter_id(mem_id, size, must_understand)) {
+          good = false;
+          break;
+        }
+        if (!member_limit.reset(size)) {
           good = false;
           break;
         }
@@ -2248,11 +2285,15 @@ bool DynamicDataXcdrReadImpl::get_values_from_union(SequenceType& value, MemberI
     return false;
   }
 
+  DCPS::Serializer::ScopedReadLimit member_limit(strm_, 0, false);
   if (type_desc_->extensibility_kind() == DDS::MUTABLE) {
     unsigned member_id;
     size_t member_size;
     bool must_understand;
     if (!strm_.read_parameter_id(member_id, member_size, must_understand)) {
+      return false;
+    }
+    if (!member_limit.reset(member_size)) {
       return false;
     }
   }
@@ -2549,6 +2590,10 @@ DDS::DynamicType_ptr DynamicDataXcdrReadImpl::type()
 
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDescriptor* member_desc, MemberId id)
 {
+  // On RETCODE_OK this deliberately leaves strm_ read-limited to the located
+  // member (and, for a delimited struct, to the struct's DHEADER region): the
+  // caller reads that member next and must not run past it.  The limit is reset
+  // when the next ScopedChainManager re-initializes strm_.
   const DDS::ExtensibilityKind ek = type_desc_->extensibility_kind();
   if (ek == DDS::FINAL || ek == DDS::APPENDABLE) {
     size_t dheader = 0;
@@ -2559,6 +2604,9 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDesc
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::skip_to_struct_member: "
                    "Failed to read DHEADER for member ID %d\n", id));
       }
+      return DDS::RETCODE_ERROR;
+    }
+    if (xcdr2_appendable && !strm_.set_read_limit(dheader)) {
       return DDS::RETCODE_ERROR;
     }
     const size_t end_of_struct = strm_.rpos() + dheader;
@@ -2631,6 +2679,9 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDesc
       }
       return DDS::RETCODE_ERROR;
     }
+    if (!xcdr1 && !strm_.set_read_limit(dheader)) {
+      return DDS::RETCODE_ERROR;
+    }
 
     const size_t end_of_struct = xcdr1 ? 0 : strm_.rpos() + dheader;
     while (true) {
@@ -2654,10 +2705,13 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDesc
       }
 
       if (xcdr1 && member_id == DCPS::Serializer::pid_list_end) {
-        return DDS::RETCODE_NO_DATA;
+        return member_size == 0 ? DDS::RETCODE_NO_DATA : DDS::RETCODE_ERROR;
       }
 
       if (member_id == id) {
+        if (!strm_.set_read_limit(member_size)) {
+          return DDS::RETCODE_ERROR;
+        }
         return DDS::RETCODE_OK;
       }
 
@@ -3035,12 +3089,16 @@ void DynamicDataXcdrReadImpl::release_chains()
 
 bool DynamicDataXcdrReadImpl::read_discriminator(const DDS::DynamicType_ptr disc_type, DDS::ExtensibilityKind union_ek, ACE_CDR::Long& label)
 {
+  size_t member_size = 0;
   if (union_ek == DDS::MUTABLE) {
     unsigned id;
-    size_t size;
     bool must_understand;
-    if (!strm_.read_parameter_id(id, size, must_understand)) { return false; }
+    if (!strm_.read_parameter_id(id, member_size, must_understand) ||
+        id != DISCRIMINATOR_SERIALIZED_ID) { return false; }
   }
+  DCPS::Serializer::ScopedReadLimit member_limit(strm_, member_size,
+    union_ek == DDS::MUTABLE, true);
+  if (!member_limit.valid()) { return false; }
 
   const TypeKind disc_tk = disc_type->get_kind();
   switch (disc_tk) {
@@ -3223,7 +3281,7 @@ bool DynamicDataXcdrReadImpl::skip_all()
         return false;
       }
       if (member_id == DCPS::Serializer::pid_list_end) {
-        return true;
+        return member_size == 0;
       }
       if (!strm_.skip(member_size)) {
         return false;

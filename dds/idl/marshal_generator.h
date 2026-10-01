@@ -27,7 +27,8 @@ public:
                  const char* repoid);
 
   static void generate_dheader_code(const std::string& code, bool dheader_required,
-                                    bool is_ser_func = true, const char* indent = "  ");
+                                    bool is_ser_func = true, const char* indent = "  ",
+                                    bool read_limit = false);
 
   static void gen_field_getValueFromSerialized(AST_Structure* node, const std::string& clazz);
 
