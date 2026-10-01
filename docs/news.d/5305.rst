@@ -1,0 +1,8 @@
+.. news-prs: 5305
+
+.. news-start-section: Additions
+.. news-start-section: RtpsRelay
+- Added :option:`RtpsRelay -UtilizationLimitTolerance` to configure the number of consecutive times the utilization limit
+  of a thread can be exceeded before the RtpsRelay starts rejecting new client participants.
+.. news-end-section
+.. news-end-section
