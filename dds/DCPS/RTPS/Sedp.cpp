@@ -2884,15 +2884,21 @@ bool Sedp::should_drop_stateless_message(const DDS::Security::ParticipantGeneric
 {
   using DCPS::GUID_UNKNOWN;
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, true);
-
   const GUID_t& src_endpoint = msg.source_endpoint_guid;
   const GUID_t& dst_endpoint = msg.destination_endpoint_guid;
-  const GUID_t& this_endpoint = participant_stateless_message_reader_->get_guid();
   const GUID_t& dst_participant = msg.destination_participant_guid;
-  const GUID_t& this_participant = participant_id_;
+  GUID_t this_endpoint = GUID_UNKNOWN;
+  GUID_t this_participant = GUID_UNKNOWN;
+  bool ignored = false;
 
-  if (ignoring(src_endpoint)) {
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, true);
+    this_endpoint = participant_stateless_message_reader_->get_guid();
+    this_participant = participant_id_;
+    ignored = ignoring(src_endpoint);
+  }
+
+  if (ignored) {
     return true;
   }
 
@@ -2911,13 +2917,17 @@ bool Sedp::should_drop_volatile_message(const DDS::Security::ParticipantGenericM
 {
   using DCPS::GUID_UNKNOWN;
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, true);
-
   const GUID_t src_endpoint = msg.source_endpoint_guid;
   const GUID_t dst_participant = msg.destination_participant_guid;
-  const GUID_t this_participant = participant_id_;
+  GUID_t this_participant = GUID_UNKNOWN;
+  bool ignored = false;
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, true);
+    this_participant = participant_id_;
+    ignored = ignoring(src_endpoint);
+  }
 
-  if (ignoring(src_endpoint)) {
+  if (ignored) {
     if (DCPS::security_debug.auth_debug) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Sedp::should_drop_volatile_message: ")
                  ACE_TEXT("ignoring %C -> %C local %C\n"),
@@ -5727,7 +5737,7 @@ Sedp::handle_datawriter_crypto_tokens(const DDS::Security::ParticipantVolatileMe
   DDS::Security::SecurityException se = {"", 0, 0};
   Security::CryptoKeyExchange_var key_exchange = spdp_.get_security_config()->get_crypto_key_exchange();
 
-  ACE_Guard<ACE_Thread_Mutex> g(lock_, false);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
 
   const DDS::Security::DatawriterCryptoHandle dwch =
     get_handle_registry()->get_remote_datawriter_crypto_handle(msg.source_endpoint_guid);
@@ -5790,7 +5800,7 @@ Sedp::handle_datareader_crypto_tokens(const DDS::Security::ParticipantVolatileMe
   DDS::Security::SecurityException se = {"", 0, 0};
   Security::CryptoKeyExchange_var key_exchange = spdp_.get_security_config()->get_crypto_key_exchange();
 
-  ACE_Guard<ACE_Thread_Mutex> g(lock_, false);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
 
   const DDS::Security::DatareaderCryptoHandle drch =
     get_handle_registry()->get_remote_datareader_crypto_handle(msg.source_endpoint_guid);
