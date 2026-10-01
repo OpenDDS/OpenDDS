@@ -4174,7 +4174,7 @@ Spdp::lookup_participant_permissions(const DCPS::GUID_t& id) const
 {
   DDS::Security::PermissionsHandle result = DDS::HANDLE_NIL;
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, result);
+  ACE_Guard<ACE_Thread_Mutex> g(lock_, false);
   DiscoveredParticipantConstIter pi = participants_.find(id);
   if (pi != participants_.end()) {
     result = pi->second.permissions_handle_;
@@ -4184,7 +4184,7 @@ Spdp::lookup_participant_permissions(const DCPS::GUID_t& id) const
 
 AuthState Spdp::lookup_participant_auth_state(const GUID_t& id) const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, AUTH_STATE_HANDSHAKE);
+  ACE_Guard<ACE_Thread_Mutex> g(lock_, false);
   DiscoveredParticipantConstIter pi = participants_.find(id);
   if (pi != participants_.end()) {
     return pi->second.auth_state_;

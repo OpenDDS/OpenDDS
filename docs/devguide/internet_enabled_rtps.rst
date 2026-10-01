@@ -310,6 +310,12 @@ The command-line options for the RtpsRelay:
 
   If :cfg:prop:`thread monitoring is enabled <DCPSThreadStatusInterval>`, the RtpsRelay will not accept new client participants if the thread activity utilization of any thread is above this limit, default .95.
 
+.. option:: -UtilizationLimitTolerance <integer>
+
+  :ref:`Config store key <config-store-keys>`: ``RTPS_RELAY_UTILIZATION_LIMIT_TOLERANCE``
+
+  If :cfg:prop:`thread monitoring is enabled <DCPSThreadStatusInterval>`, the RtpsRelay will allow a thread to exceed the utilization limit this many times consecutively before rejecting new clients, default 2.
+
 .. option:: -AdmissionControlQueueSize <count>
 
   :ref:`Config store key <config-store-keys>`: ``RTPS_RELAY_ADMISSION_CONTROL_QUEUE_SIZE``
