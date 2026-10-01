@@ -548,7 +548,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   {
     //=====================================================================
     Xyz::StructAUnion val;
-    val.sau_f1()._d(Xyz::AnEnum::redx);
     val.sau_f1().rv("joe");
     // size = union descr/4 + string length/4 + string contents/4
     Xyz::StructAUnion val_out;
@@ -598,21 +597,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   //    ** see breakdown in comment at the end of this file
   //  AStructSeq theStructSeq; //+4 = 911
   //  ArrayOfAStruct structArray; //+(3*885) = 3566 {padding +4+3*123 = 506}
-  my_foo.theUnion()._d(Xyz::AnEnum::bluex); //+4 = 3570
 
   Xyz::SeqOfLong asol;
   asol.resize(2);
   asol[0] = 77;
   asol[1] = 88;
-  my_foo.theUnion().bv(asol); //+4+8 = 3582
+  my_foo.theUnion().bv(asol); //+4+4+8 = 3582
   my_foo.theSeqOfUnion().resize(2); //+4 = 3586
-  my_foo.theSeqOfUnion()[0]._d(Xyz::AnEnum::redx); //+4 = 3590
-  my_foo.theSeqOfUnion()[0].rv("Berkley"); //+4+8 = 3602
-  my_foo.theSeqOfUnion()[1]._d(Xyz::AnEnum::greenx); //+4 = 3606
+  my_foo.theSeqOfUnion()[0].rv("Berkley"); //+4+4+8 = 3602
   Xyz::AStruct as;
   as.f2() = 3.14F;
   as.f5() = 42;
-  my_foo.theSeqOfUnion()[1].gv(as); //+885 = 4491   {padding +123 = 629}
+  my_foo.theSeqOfUnion()[1].gv(as); //+4+885 = 4491   {padding +123 = 629}
 
   //  BigUnion theBigUnion;        //+4 = 4495
   //  BigUnionSeq theSeqOfBigUnion;//+4 = 4499
