@@ -124,6 +124,9 @@ const DDS::Duration_t RTPS_RELAY_ASYNC_DISCOVERY_CROSS_RELAY_TIMEOUT_default = {
 const char RTPS_RELAY_EARLY_ADMISSION_QUEUE_FREEUP[] = "RTPS_RELAY_EARLY_ADMISSION_QUEUE_FREE_UP";
 const bool RTPS_RELAY_EARLY_ADMISSION_QUEUE_FREEUP_default = false;
 
+const char RTPS_RELAY_UTILIZATION_LIMIT_TOLERANCE[] = "RTPS_RELAY_UTILIZATION_LIMIT_TOLERANCE";
+const int RTPS_RELAY_UTILIZATION_LIMIT_TOLERANCE_default = 2;
+
 /// Configuration values for the RtpsRelay
 ///
 /// Each value uses one of these implementation strategies:
@@ -583,6 +586,17 @@ public:
     return cached_early_admission_queue_freeup_.get();
   }
 
+  void utilization_limit_tolerance(int value)
+  {
+    TheServiceParticipant->config_store()->set_int32(RTPS_RELAY_UTILIZATION_LIMIT_TOLERANCE, value);
+    cached_utilization_limit_tolerance_.set(value);
+  }
+
+  int utilization_limit_tolerance() const
+  {
+    return cached_utilization_limit_tolerance_.get();
+  }
+
   static bool to_time_duration(const std::string& value, OpenDDS::DCPS::TimeDuration& out);
 
 private:
@@ -676,6 +690,7 @@ private:
   CachedValue<OpenDDS::DCPS::TimeDuration, to_time_duration> cached_async_discovery_remote_cache_timeout_{OpenDDS::DCPS::TimeDuration{RTPS_RELAY_ASYNC_DISCOVERY_REMOTE_CACHE_TIMEOUT_default}};
   CachedValue<OpenDDS::DCPS::TimeDuration, to_time_duration> cached_async_discovery_cross_relay_timeout_{OpenDDS::DCPS::TimeDuration{RTPS_RELAY_ASYNC_DISCOVERY_CROSS_RELAY_TIMEOUT_default}};
   CachedValue<bool, OpenDDS::DCPS::ConfigStoreImpl::convert_value> cached_early_admission_queue_freeup_{RTPS_RELAY_EARLY_ADMISSION_QUEUE_FREEUP_default};
+  CachedValue<int, OpenDDS::DCPS::convertToInteger> cached_utilization_limit_tolerance_{RTPS_RELAY_UTILIZATION_LIMIT_TOLERANCE_default};
 
   // start of variables without ConfigStore support
   std::string relay_id_;
