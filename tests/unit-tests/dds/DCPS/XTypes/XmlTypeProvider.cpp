@@ -9,6 +9,10 @@
 #include <dds/DCPS/XTypes/TypeLookupService.h>
 #include <dds/DCPS/XTypes/XmlTypeProvider.h>
 
+#include <ace/Log_Msg.h>
+#include <ace/Log_Msg_Callback.h>
+#include <ace/Log_Record.h>
+
 #include "gtest/gtest.h"
 
 #include <vector>
@@ -93,6 +97,42 @@ OpenDDS::XTypes::TypeConsistencyAttributes strict_type_consistency()
   attrs.prevent_type_widening = true;
   return attrs;
 }
+
+// Counts LM_ERROR messages logged on this thread while in scope.
+class ErrorLogCounter : public ACE_Log_Msg_Callback {
+public:
+  ErrorLogCounter()
+    : count_(0)
+    , prev_callback_(ACE_LOG_MSG->msg_callback(this))
+    , prev_flags_(ACE_LOG_MSG->flags())
+  {
+    ACE_LOG_MSG->set_flags(ACE_Log_Msg::MSG_CALLBACK);
+  }
+
+  ~ErrorLogCounter()
+  {
+    ACE_LOG_MSG->clr_flags(ACE_Log_Msg::MSG_CALLBACK);
+    ACE_LOG_MSG->set_flags(prev_flags_);
+    ACE_LOG_MSG->msg_callback(prev_callback_);
+  }
+
+  void log(ACE_Log_Record& record)
+  {
+    if (record.type() == LM_ERROR) {
+      ++count_;
+    }
+  }
+
+  unsigned count() const
+  {
+    return count_;
+  }
+
+private:
+  unsigned count_;
+  ACE_Log_Msg_Callback* const prev_callback_;
+  const unsigned long prev_flags_;
+};
 
 } // namespace
 
@@ -237,6 +277,26 @@ TEST(dds_DCPS_XTypes_XmlTypeProvider, RejectsNonExistentFile)
   EXPECT_FALSE(type);
 }
 
+TEST(dds_DCPS_XTypes_XmlTypeProvider, BitmaskTypeObjectFlagsAreZero)
+{
+  const char* const names[] = {
+    "XmlTypeProviderTest::Flags",
+    "XmlTypeProviderTest::AppendableFlags",
+  };
+  for (size_t i = 0; i < sizeof names / sizeof names[0]; ++i) {
+    SCOPED_TRACE(names[i]);
+    DDS::DynamicType_var flags = load_type(names[i]);
+    ASSERT_TRUE(flags);
+    DDS::DynamicTypeSupport_var ts = new DDS::DynamicTypeSupport(flags);
+    const OpenDDS::XTypes::TypeMap& map = ts->getCompleteTypeMap();
+    const OpenDDS::XTypes::TypeMap::const_iterator pos =
+      map.find(ts->getCompleteTypeIdentifier());
+    ASSERT_NE(map.end(), pos);
+    ASSERT_EQ(OpenDDS::XTypes::TK_BITMASK, pos->second.complete.kind);
+    EXPECT_EQ(0u, pos->second.complete.bitmask_type.bitmask_flags);
+  }
+}
+
 TEST(dds_DCPS_XTypes_XmlTypeProvider, BitmaskUnionIntrospection)
 {
   DDS::DynamicType_var type = load_type("XmlTypeProviderTest::Flagged");
@@ -301,6 +361,32 @@ TEST(dds_DCPS_XTypes_XmlTypeProvider, TypeAssignabilityPolicy)
   DDS::DynamicType_var two_members = load_type("XmlTypeProviderTest::TwoMembers");
   EXPECT_FALSE(assignability.assignable(type_information(two_members, tls),
                                         type_information(one_member, tls)));
+}
+
+TEST(dds_DCPS_XTypes_XmlTypeProvider, MinimalTypeObjectForCollectionsOfStructs)
+{
+  // Converting the struct before its collection's element type logs an error
+  const char* const names[] = {
+    "XmlTypeProviderTest::SeqOfStruct",
+    "XmlTypeProviderTest::ArrayOfStruct",
+    "XmlTypeProviderTest::MapOfStruct",
+  };
+  for (size_t i = 0; i < sizeof names / sizeof names[0]; ++i) {
+    SCOPED_TRACE(names[i]);
+    DDS::DynamicType_var type;
+    {
+      ErrorLogCounter errors;
+      type = load_type(names[i]);
+      EXPECT_EQ(0u, errors.count());
+    }
+    ASSERT_TRUE(type);
+
+    const OpenDDS::XTypes::TypeLookupService_rch tls =
+      OpenDDS::DCPS::make_rch<OpenDDS::XTypes::TypeLookupService>();
+    const OpenDDS::XTypes::TypeInformation info = type_information(type, tls);
+    EXPECT_EQ(OpenDDS::XTypes::EK_MINIMAL, info.minimal.typeid_with_size.type_id.kind());
+    EXPECT_EQ(OpenDDS::XTypes::EK_COMPLETE, info.complete.typeid_with_size.type_id.kind());
+  }
 }
 
 #endif
