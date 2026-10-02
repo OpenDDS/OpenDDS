@@ -277,6 +277,26 @@ TEST(dds_DCPS_XTypes_XmlTypeProvider, RejectsNonExistentFile)
   EXPECT_FALSE(type);
 }
 
+TEST(dds_DCPS_XTypes_XmlTypeProvider, BitmaskTypeObjectFlagsAreZero)
+{
+  const char* const names[] = {
+    "XmlTypeProviderTest::Flags",
+    "XmlTypeProviderTest::AppendableFlags",
+  };
+  for (size_t i = 0; i < sizeof names / sizeof names[0]; ++i) {
+    SCOPED_TRACE(names[i]);
+    DDS::DynamicType_var flags = load_type(names[i]);
+    ASSERT_TRUE(flags);
+    DDS::DynamicTypeSupport_var ts = new DDS::DynamicTypeSupport(flags);
+    const OpenDDS::XTypes::TypeMap& map = ts->getCompleteTypeMap();
+    const OpenDDS::XTypes::TypeMap::const_iterator pos =
+      map.find(ts->getCompleteTypeIdentifier());
+    ASSERT_NE(map.end(), pos);
+    ASSERT_EQ(OpenDDS::XTypes::TK_BITMASK, pos->second.complete.kind);
+    EXPECT_EQ(0u, pos->second.complete.bitmask_type.bitmask_flags);
+  }
+}
+
 TEST(dds_DCPS_XTypes_XmlTypeProvider, BitmaskUnionIntrospection)
 {
   DDS::DynamicType_var type = load_type("XmlTypeProviderTest::Flagged");
