@@ -134,6 +134,28 @@
           <member name="b" type="int32"/>
         </case>
       </union>
+      <!-- Plain collections of nested structs -->
+      <struct name="SeqElement" extensibility="appendable" nested="true">
+        <member name="value" type="int32"/>
+      </struct>
+      <struct name="ArrayElement" extensibility="appendable" nested="true">
+        <member name="value" type="int32"/>
+      </struct>
+      <struct name="MapElement" extensibility="appendable" nested="true">
+        <member name="value" type="int32"/>
+      </struct>
+      <struct name="SeqOfStruct" extensibility="appendable">
+        <member name="items" type="nonBasic" nonBasicTypeName="SeqElement" sequenceMaxLength="4"/>
+      </struct>
+      <struct name="ArrayOfStruct" extensibility="appendable">
+        <member name="items" type="nonBasic" nonBasicTypeName="ArrayElement" arrayDimensions="2"/>
+      </struct>
+      <struct name="MapOfStruct" extensibility="appendable">
+        <member name="items" type="map" mapMaxLength="4">
+          <key type="uint32"/>
+          <value type="nonBasic" nonBasicTypeName="MapElement"/>
+        </member>
+      </struct>
     </module>
   </types>
 </dds>
