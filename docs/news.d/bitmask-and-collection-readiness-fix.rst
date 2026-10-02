@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5308
 
 .. news-start-section: Fixes
 - Fixed ``TypeLookupService`` rejecting bitmask TypeObjects with no ``BitmaskTypeFlag`` set.
