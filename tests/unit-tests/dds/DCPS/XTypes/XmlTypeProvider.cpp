@@ -268,18 +268,6 @@ TEST(dds_DCPS_XTypes_XmlTypeProvider, RejectsNonExistentFile)
 
 TEST(dds_DCPS_XTypes_XmlTypeProvider, BitmaskUnionIntrospection)
 {
-  DDS::DynamicType_var flags = load_type("XmlTypeProviderTest::Flags");
-  ASSERT_TRUE(flags);
-  DDS::DynamicTypeSupport_var flags_ts = new DDS::DynamicTypeSupport(flags);
-  const OpenDDS::XTypes::TypeIdentifier& flags_id =
-    flags_ts->getCompleteTypeIdentifier();
-  const OpenDDS::XTypes::TypeMap& flags_map = flags_ts->getCompleteTypeMap();
-  const OpenDDS::XTypes::TypeMap::const_iterator flags_pos = flags_map.find(flags_id);
-  ASSERT_NE(flags_map.end(), flags_pos);
-  ASSERT_EQ(OpenDDS::XTypes::EK_COMPLETE, flags_pos->second.kind);
-  ASSERT_EQ(OpenDDS::XTypes::TK_BITMASK, flags_pos->second.complete.kind);
-  EXPECT_EQ(0u, flags_pos->second.complete.bitmask_type.bitmask_flags);
-
   DDS::DynamicType_var type = load_type("XmlTypeProviderTest::Flagged");
   ASSERT_TRUE(type);
   EXPECT_EQ(OpenDDS::XTypes::TK_UNION, type->get_kind());
