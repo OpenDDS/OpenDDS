@@ -296,7 +296,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyUnion)
   DDS::MemberDescriptor_var long_expected_md = new XTypes::MemberDescriptorImpl();
   //long_expected_dtm->set_parent(expected_union_dt);
   long_expected_md->name("l");
-  long_expected_md->id(0);
+  long_expected_md->id(1);
   long_expected_md->index(0);
   long_expected_md->try_construct_kind(DDS::DISCARD);
   long_expected_md->label().length(1);
@@ -307,7 +307,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyUnion)
   DDS::MemberDescriptor_var char_expected_md = new XTypes::MemberDescriptorImpl();
   //char_expected_dtm->set_parent(expected_union_dt);
   char_expected_md->name("c");
-  char_expected_md->id(1);
+  char_expected_md->id(2);
   char_expected_md->index(1);
   char_expected_md->try_construct_kind(DDS::DISCARD);
   char_expected_md->label().length(1);
@@ -318,7 +318,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyUnion)
   DDS::MemberDescriptor_var short_expected_md = new XTypes::MemberDescriptorImpl();
   //short_expected_dtm->set_parent(expected_union_dt);
   short_expected_md->name("s");
-  short_expected_md->id(2);
+  short_expected_md->id(3);
   short_expected_md->index(2);
   short_expected_md->try_construct_kind(DDS::DISCARD);
   short_expected_md->is_default_label(1);
