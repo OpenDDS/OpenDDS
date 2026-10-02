@@ -570,7 +570,7 @@ const unsigned char MutableXcdr2UnionExpectedShortBE::expected[] = {
   0x20, 0x00, 0x00, 0x00, // +4 EMHEADER1 = 8
   0x00, 0x00, 0x00, 0x00, // +4 value = 12
   // short_field
-  0x10, 0x00, 0x00, 0x01, // +4 EMHEADER1 (member id 1: discriminator is 0) = 16
+  0x10, 0x00, 0x00, 0x01, // +4 EMHEADER1 (member id 1: discriminator id is 0) = 16
   0x7f, 0xff // +2 value = 18
 };
 const unsigned MutableXcdr2UnionExpectedShortBE::layout[] = {4,4,4,4,2};
