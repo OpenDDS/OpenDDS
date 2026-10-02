@@ -9,6 +9,8 @@
 #include "SafetyProfileStreams.h"
 #include "debug.h"
 
+#include <cstring>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -71,9 +73,25 @@ EncapsulationHeader::set_encapsulation_options(Message_Block_Ptr& mb)
     return false;
   }
 
+  const size_t padding =
+    (padding_marker_alignment - mb->length() % padding_marker_alignment) & 0x03;
+  if (mb->space() < padding) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: EncapsulationHeader::set_encapsulation_options: "
+                 "insufficient buffer space for %B padding byte(s)\n",
+                 padding));
+    }
+    return false;
+  }
+
   unsigned char byte = static_cast<unsigned char>(mb->rd_ptr()[padding_marker_byte_index]);
-  byte |= (padding_marker_alignment - mb->length() % padding_marker_alignment) & 0x03;
+  byte |= static_cast<unsigned char>(padding);
   mb->rd_ptr()[padding_marker_byte_index] = static_cast<char>(byte);
+
+  // Peers subtract the declared padding from the received length, so write it
+  std::memset(mb->wr_ptr(), 0, padding);
+  mb->wr_ptr(padding);
   return true;
 }
 

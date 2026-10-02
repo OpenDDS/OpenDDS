@@ -834,8 +834,9 @@ bool runEncapsulationOptionsTest()
     OpenDDS::DCPS::Message_Block_Ptr mb;
     ACE_Message_Block* tmp_mb;
 
+    // Leave room for up to 3 padding bytes
     ACE_NEW_RETURN(tmp_mb,
-      ACE_Message_Block(4 + i, ACE_Message_Block::MB_DATA),
+      ACE_Message_Block(4 + i + 3, ACE_Message_Block::MB_DATA),
       false);
     mb.reset(tmp_mb);
 
@@ -855,6 +856,22 @@ bool runEncapsulationOptionsTest()
       std::cerr << "EncapsulationHeader::set_encapsulation_options failed for "
         << i << " bytes, padding marker alignment: " << padding_marker_alignment << std::endl;
       status = false;
+    }
+
+    // The declared padding must be written as zeros
+    if (mb->length() != 4 + i + padding_marker_alignment ||
+        mb->length() % OpenDDS::DCPS::EncapsulationHeader::padding_marker_alignment) {
+      std::cerr << "EncapsulationHeader::set_encapsulation_options failed for "
+        << i << " bytes, length after padding: " << mb->length() << std::endl;
+      status = false;
+    } else {
+      for (size_t j = 4 + i; j < mb->length(); ++j) {
+        if (mb->rd_ptr()[j] != 0) {
+          std::cerr << "EncapsulationHeader::set_encapsulation_options failed for "
+            << i << " bytes, nonzero padding byte at index " << j << std::endl;
+          status = false;
+        }
+      }
     }
   }
 
