@@ -32,6 +32,9 @@
         <flag name="FLAG_A" value="0"/>
         <flag name="FLAG_B" value="1"/>
       </bitmask>
+      <bitmask name="AppendableFlags" bitBound="8" extensibility="appendable">
+        <flag name="FLAG_A" value="0"/>
+      </bitmask>
 
       <struct name="NamedKeyMapSample" extensibility="appendable">
         <member name="kind_lookup" type="map" id="30" mapMaxLength="3">
