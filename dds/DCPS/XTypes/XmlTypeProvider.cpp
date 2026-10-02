@@ -548,15 +548,29 @@ private:
   typedef OPENDDS_MAP(OPENDDS_STRING, TypeIdentifier) TypeIdentifierByName;
   typedef OPENDDS_SET(OPENDDS_STRING) NameSet;
 
-  // An EK_COMPLETE TypeIdentifier is ready for minimal conversion when it has
-  // already been erased from 'pending' (i.e. successfully converted in a
-  // previous iteration).  Non-EK_COMPLETE identifiers (primitives, strings,
-  // plain sequences/arrays) are always ready because the converter handles
-  // them without needing an entry in the pending set.
+  // False if ti, or a plain collection's element or key identifier, is an
+  // EK_COMPLETE identifier still pending conversion
   static bool complete_ti_ready(const TypeIdentifier& ti,
                                 const OPENDDS_SET(TypeIdentifier)& pending)
   {
-    return ti.kind() != EK_COMPLETE || !pending.count(ti);
+    switch (ti.kind()) {
+    case TI_PLAIN_SEQUENCE_SMALL:
+      return complete_ti_ready(*ti.seq_sdefn().element_identifier, pending);
+    case TI_PLAIN_SEQUENCE_LARGE:
+      return complete_ti_ready(*ti.seq_ldefn().element_identifier, pending);
+    case TI_PLAIN_ARRAY_SMALL:
+      return complete_ti_ready(*ti.array_sdefn().element_identifier, pending);
+    case TI_PLAIN_ARRAY_LARGE:
+      return complete_ti_ready(*ti.array_ldefn().element_identifier, pending);
+    case TI_PLAIN_MAP_SMALL:
+      return complete_ti_ready(*ti.map_sdefn().element_identifier, pending) &&
+             complete_ti_ready(*ti.map_sdefn().key_identifier, pending);
+    case TI_PLAIN_MAP_LARGE:
+      return complete_ti_ready(*ti.map_ldefn().element_identifier, pending) &&
+             complete_ti_ready(*ti.map_ldefn().key_identifier, pending);
+    default:
+      return ti.kind() != EK_COMPLETE || !pending.count(ti);
+    }
   }
 
   // Returns true if every EK_COMPLETE TypeIdentifier directly referenced by
