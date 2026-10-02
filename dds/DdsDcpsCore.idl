@@ -294,7 +294,7 @@ module DDS {
     ALLOW_TYPE_COERCION
   };
   */
-  // So, until we implement @bit_bound(16_):
+  // So, until we implement @bit_bound(16):
   typedef short TypeConsistencyEnforcementQosPolicyKind_t;
   // Above is a direct copy of the actual DDS-XTYPES spec IDL for TypeConsistencyKind.
   // XTypes 1.3 7.3.1.2.1.5 ("Enumerated Literal Values") states that an enumerator's
