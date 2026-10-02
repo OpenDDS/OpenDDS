@@ -1418,13 +1418,11 @@ private:
   bool build_bitmask(const TypeModel& model, CompleteTypeObject& cto, std::string& error)
   {
     CompleteBitmaskType bt;
-    if (!model.bitmask_model.extensibility.empty() &&
-        !type_flags(model.bitmask_model.extensibility, false, bt.bitmask_flags, error)) {
+    if (model.bitmask_model.extensibility.empty()) {
+      bt.bitmask_flags = IS_FINAL;
+    } else if (!type_flags(model.bitmask_model.extensibility, false, bt.bitmask_flags, error)) {
       return false;
     }
-    // BitmaskTypeFlag is unused. Extensibility is accepted by the XML parser,
-    // but it must not affect the TypeObject or its equivalence hash.
-    bt.bitmask_flags = 0;
     bt.header.common.bit_bound = model.bitmask_model.bit_bound;
     bt.header.detail.type_name = model.fq_name.c_str();
     for (size_t i = 0; i != model.bitmask_model.flags.size(); ++i) {
