@@ -11,8 +11,6 @@
 #include "Service_Participant.h"
 #include "XTypes/TypeLookupService.h"
 
-#include <set>
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -51,6 +49,22 @@ TypeSupportImpl::get_type_name()
 }
 
 namespace {
+  bool minimal_dependencies_ready(
+    const XTypes::TypeMap& complete_type_map,
+    const XTypes::TypeIdentifier& complete_ti,
+    const XTypes::TypeIdentifierSet& pending)
+  {
+    XTypes::TypeIdentifierSet dependencies;
+    XTypes::compute_dependencies(complete_type_map, complete_ti, dependencies);
+    for (XTypes::TypeIdentifierSet::const_iterator pos = dependencies.begin();
+         pos != dependencies.end(); ++pos) {
+      if (pos->kind() == XTypes::EK_COMPLETE && pending.count(*pos)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   void log_ti_not_found(const char* method_name, const char* name, const XTypes::TypeIdentifier& ti)
   {
     if (log_level >= LogLevel::Error) {
@@ -79,7 +93,7 @@ namespace {
     XTypes::TypeLookupService converter;
     converter.add(complete_type_map.begin(), complete_type_map.end());
 
-    std::set<XTypes::TypeIdentifier> pending;
+    XTypes::TypeIdentifierSet pending;
     for (XTypes::TypeMap::const_iterator pos = complete_type_map.begin();
          pos != complete_type_map.end(); ++pos) {
       pending.insert(pos->first);
@@ -89,11 +103,16 @@ namespace {
     while (!pending.empty()) {
       bool progress = false;
 
-      for (std::set<XTypes::TypeIdentifier>::iterator pos = pending.begin();
+      for (XTypes::TypeIdentifierSet::iterator pos = pending.begin();
            pos != pending.end(); ) {
         const XTypes::TypeMap::const_iterator complete = complete_type_map.find(*pos);
         if (complete == complete_type_map.end()) {
           pending.erase(pos++);
+          continue;
+        }
+
+        if (!minimal_dependencies_ready(complete_type_map, complete->first, pending)) {
+          ++pos;
           continue;
         }
 
