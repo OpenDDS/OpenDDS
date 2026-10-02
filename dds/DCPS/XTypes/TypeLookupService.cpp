@@ -364,8 +364,9 @@ bool TypeLookupService::set_type_object_defaults(TypeObject& to)
     break;
   case TK_BITMASK:
     {
+      // BitmaskTypeFlag is unused, but some producers set extensibility flags
       const TypeFlag flags = to.minimal.bitmask_type.bitmask_flags & TypeFlagMinimalMask;
-      if (!(flags == IS_FINAL || flags == IS_APPENDABLE)) {
+      if (!(flags == 0 || flags == IS_FINAL || flags == IS_APPENDABLE)) {
         if (DCPS::log_level >= DCPS::LogLevel::Error) {
           ACE_ERROR((LM_ERROR,
                      "(%P|%t) ERROR: TypeLookupService::set_type_object_defaults: "
@@ -427,8 +428,9 @@ bool TypeLookupService::set_type_object_defaults(TypeObject& to)
     break;
   case TK_BITMASK:
     {
+      // BitmaskTypeFlag is unused, but some producers set extensibility flags
       const TypeFlag flags = to.complete.bitmask_type.bitmask_flags & TypeFlagMinimalMask;
-      if (!(flags == IS_FINAL || flags == IS_APPENDABLE)) {
+      if (!(flags == 0 || flags == IS_FINAL || flags == IS_APPENDABLE)) {
         if (DCPS::log_level >= DCPS::LogLevel::Error) {
           ACE_ERROR((LM_ERROR,
                      "(%P|%t) ERROR: TypeLookupService::set_type_object_defaults: "
