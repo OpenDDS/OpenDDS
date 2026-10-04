@@ -1,0 +1,5 @@
+module test {
+  struct ClassicMapStringKey {
+    map<string<8>, long, 4> map_probe;
+  };
+};

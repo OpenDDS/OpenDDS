@@ -249,8 +249,8 @@ namespace {
         elem = scoped(map_node->key_type()->name());
       }
       const Classification key_cls = classify(map_node->key_type());
-      if ((key_cls & CL_STRING) && be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
-        elem = (key_cls & CL_WIDE) ? "std::wstring" : "std::string";
+      if (key_cls & CL_STRING) {
+        elem = string_type(key_cls);
       }
       RefWrapper key(map_node->value_type(), elem, "key");
       be_global->impl_ <<
