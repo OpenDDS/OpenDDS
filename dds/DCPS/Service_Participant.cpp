@@ -823,6 +823,35 @@ int Service_Participant::parse_args(int& argc, ACE_TCHAR* argv[])
     }
   }
 
+#if OPENDDS_CONFIG_SECURITY
+  status = TheSecurityRegistry->load_security_configuration();
+  if (status != 0) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Service_Participant::parse_args: "
+                 "load_security_configuration() returned %d\n",
+                 status));
+    }
+    return -1;
+  }
+
+  const String global_security_config = config_store_->get(COMMON_DCPS_GLOBAL_SECURITY_CONFIG,
+                                                           COMMON_DCPS_GLOBAL_SECURITY_CONFIG_default);
+  if (!global_security_config.empty()) {
+    Security::SecurityConfig_rch config = TheSecurityRegistry->create_config(global_security_config);
+    if (!config) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) ERROR: Service_Participant::parse_args: "
+                   "Unable to create global security config: %C\n",
+                   global_security_config.c_str()));
+      }
+      return -1;
+    }
+    TheSecurityRegistry->default_config(config);
+  }
+#endif
+
   // Needs to be loaded after the [rtps_discovery/*] and [repository/*]
   // sections to allow error reporting on bad discovery config names.
   // Also loaded after the transport configuration so that

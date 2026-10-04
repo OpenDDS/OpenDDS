@@ -108,6 +108,7 @@ private:
     DCPS::String get_auth_name() const;
     DCPS::String get_access_control_name() const;
     DCPS::String get_crypto_name() const;
+    DCPS::String get_utility_name() const;
 
     ConfigPropertyList get_properties() const;
 
@@ -125,11 +126,11 @@ private:
   SecurityRegistry();
   ~SecurityRegistry();
 
-  int load_security_sections(ACE_Configuration_Heap& cf, ConfigEntryMap& entries);
-
   /// For internal use by OpenDDS DCPS layer:
   /// Dynamically load the library for the supplied security plugin type.
-  void load_security_plugin_lib(const OPENDDS_STRING& security_plugin_type);
+  bool load_security_plugin_lib(const OPENDDS_STRING& security_plugin_type);
+
+  int load_security_plugin_directives();
 
   bool find_config(const OPENDDS_STRING& name, SecurityConfig_rch& config);
   bool add_config(const OPENDDS_STRING& name, SecurityConfig_rch& config);
