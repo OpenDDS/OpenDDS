@@ -31,8 +31,22 @@ bool Config::from_arg(ACE_Arg_Shifter_T<char>& args)
   } else if ((arg = args.get_the_parameter("-LogDiscovery"))) {
     log_discovery(ACE_OS::atoi(arg));
     args.consume_arg();
+  } else if ((arg = args.get_the_parameter("-ActivityLogLevel"))) {
+    activity_log_level(ACE_OS::atoi(arg));
+    activity_log_level_explicitly_set_ = true;
+    args.consume_arg();
   } else if ((arg = args.get_the_parameter("-LogActivity"))) {
-    log_activity(ACE_OS::atoi(arg));
+    // Deprecated: retained for existing scripted invocations (tests, perf
+    // scenarios, and documented examples). Non-zero maps to the most verbose
+    // level (Identity) to preserve prior all-or-nothing behavior.
+    // Ignore if -ActivityLogLevel was given so the new option always wins.
+    if (activity_log_level_explicitly_set_) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Config::from_arg: "
+        "-LogActivity ignored because -ActivityLogLevel was specified\n"));
+    } else {
+      activity_log_level(ACE_OS::atoi(arg) ?
+        static_cast<int>(ActivityLogLevel::Identity) : static_cast<int>(ActivityLogLevel::None));
+    }
     args.consume_arg();
   } else if ((arg = args.get_the_parameter("-LogHttp"))) {
     log_http(ACE_OS::atoi(arg));
@@ -187,8 +201,8 @@ void Config::set_defaults()
   cached_log_discovery_.default_if_empty([&](bool default_val) {
     TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_DISCOVERY, default_val);
   });
-  cached_log_activity_.default_if_empty([&](bool default_val) {
-    TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_ACTIVITY, default_val);
+  cached_activity_log_level_.default_if_empty([&](int default_val) {
+    TheServiceParticipant->config_store()->set_int32(RTPS_RELAY_ACTIVITY_LOG_LEVEL, default_val);
   });
   cached_log_http_.default_if_empty([&](bool default_val) {
     TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_HTTP, default_val);
@@ -288,8 +302,8 @@ void Config::on_data_available(InternalDataReader_rch reader)
         cached_log_warnings_.set(pair.value());
       } else if (pair.key() == RTPS_RELAY_LOG_DISCOVERY) {
         cached_log_discovery_.set(pair.value());
-      } else if (pair.key() == RTPS_RELAY_LOG_ACTIVITY) {
-        cached_log_activity_.set(pair.value());
+      } else if (pair.key() == RTPS_RELAY_ACTIVITY_LOG_LEVEL) {
+        cached_activity_log_level_.set(pair.value());
       } else if (pair.key() == RTPS_RELAY_LOG_HTTP) {
         cached_log_http_.set(pair.value());
       } else if (pair.key() == RTPS_RELAY_LOG_THREAD_STATUS) {
