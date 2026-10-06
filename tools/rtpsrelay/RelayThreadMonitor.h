@@ -39,8 +39,11 @@ private:
   bool running_;
 
   struct UtilizationRecord {
-    double utilization; // latest recorded utilization
-    unsigned int exceed_limit_count; // number of consecutive times the utilization exceeded the limit
+    // latest recorded utilization
+    double utilization = 0.0;
+
+    // number of consecutive times the utilization exceeded the limit
+    unsigned int exceed_limit_count = 0;
 
     void record(double util, double limit)
     {
