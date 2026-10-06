@@ -15,7 +15,6 @@
 
 #include "gtest/gtest.h"
 
-#include <cfloat>
 #include <vector>
 
 namespace {
@@ -151,13 +150,14 @@ TEST(dds_DCPS_XTypes_DynamicDataJson, Float128HexRoundTrip)
   DDS::DynamicData_var data = create_data("XmlTypeProviderTest::Float128Sample");
   ASSERT_TRUE(data);
 
-  const char* const json =
-#if ACE_SIZEOF_LONG_DOUBLE == 16 && LDBL_MANT_DIG == 64 && !defined(ACE_BIG_ENDIAN)
-    "{\"x1\":\"0x0000000000003fff8000000000000000\"}";
-#else
-    "{\"x1\":\"0x0000000000000000000000003f800000\"}";
-#endif
+  // Big-endian binary128 for 1.0
+  const char* const json = "{\"x1\":\"0x3fff0000000000000000000000000000\"}";
   ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_from_json(data, json));
+  ACE_CDR::LongDouble value = ACE_CDR_LONG_DOUBLE_INITIALIZER;
+  ASSERT_EQ(DDS::RETCODE_OK, data->get_float128_value(value, data->get_member_id_by_name("x1")));
+  ACE_CDR::LongDouble one;
+  ACE_CDR_LONG_DOUBLE_ASSIGNMENT(one, 1.0L);
+  EXPECT_TRUE(value == one);
 
   std::string round_trip;
   ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_to_json(round_trip, data));
