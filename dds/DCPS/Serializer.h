@@ -108,6 +108,13 @@ const size_t xcdr1_pid_alignment = 4;
 OpenDDS_Dcps_Export
 void align(size_t& value, size_t by);
 
+/// Convert to and from IEEE 754 binary128 (the CDR float128 format) in host byte order
+OpenDDS_Dcps_Export
+void longdouble_to_binary128(const ACE_CDR::LongDouble& value, char* bytes);
+
+OpenDDS_Dcps_Export
+void binary128_to_longdouble(const char* bytes, ACE_CDR::LongDouble& value);
+
 /**
  * Represents the serialization rules. Used to construct a
  * Serializer and to pass to functions that are used without

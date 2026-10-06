@@ -22,6 +22,7 @@
 #include <ace/Log_Msg.h>
 
 #include <cstdlib>
+#include <cstring>
 #include <limits>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -54,6 +55,90 @@ void wstring_free(ACE_CDR::WChar* ptr)
 
 }
 #endif
+
+#if ACE_SIZEOF_LONG_DOUBLE == 16 && !defined ACE_BIG_ENDIAN
+namespace {
+
+// x87 extended precision and binary128 share the sign, exponent, and bias;
+// x87 has an explicit integer bit unless the exponent is zero.
+void x87_to_binary128(const ACE_CDR::LongDouble& value, char* bytes)
+{
+  const unsigned char* const src = reinterpret_cast<const unsigned char*>(&value);
+  ACE_UINT64 sig64;
+  std::memcpy(&sig64, src, 8);
+  const unsigned int exp = src[8] | ((src[9] & 0x7f) << 8);
+  const ACE_UINT64 hi64 =
+    (exp == 0 ? sig64 : sig64 & ACE_UINT64_LITERAL(0x7fffffffffffffff)) << 1;
+  std::memset(bytes, 0, 6);
+  std::memcpy(bytes + 6, &hi64, 8);
+  bytes[14] = static_cast<char>(src[8]);
+  bytes[15] = static_cast<char>(src[9]);
+}
+
+void binary128_to_x87(const char* bytes, ACE_CDR::LongDouble& value)
+{
+  const unsigned char* const src = reinterpret_cast<const unsigned char*>(bytes);
+  unsigned char* const dst = reinterpret_cast<unsigned char*>(&value);
+  std::memset(dst, 0, float128_cdr_size);
+
+  const unsigned int sign = src[15] >> 7;
+  unsigned int exp = src[14] | ((src[15] & 0x7f) << 8);
+  ACE_UINT64 hi64;
+  std::memcpy(&hi64, src + 6, 8);
+  bool low_nonzero = false;
+  for (int i = 0; i < 6; ++i) {
+    low_nonzero = low_nonzero || src[i];
+  }
+
+  const ACE_UINT64 integer_bit = ACE_UINT64_LITERAL(1) << 63;
+  ACE_UINT64 sig64 = hi64 >> 1;
+  if (exp == 0x7fff) {
+    // Inf/NaN: truncate the payload and quiet any NaN
+    if (hi64 || low_nonzero) {
+      sig64 |= ACE_UINT64_LITERAL(1) << 62;
+    }
+    sig64 |= integer_bit;
+  } else {
+    // Round the 112-bit fraction to x87's 63 (or 64 if subnormal) bits, ties to even
+    if ((hi64 & 1) && (low_nonzero || (sig64 & 1))) {
+      ++sig64;
+    }
+    if (sig64 == integer_bit) {
+      ++exp; // Rounding carried into the exponent
+    } else if (exp != 0) {
+      sig64 |= integer_bit;
+    }
+  }
+  std::memcpy(dst, &sig64, 8);
+  dst[8] = static_cast<unsigned char>(exp & 0xff);
+  dst[9] = static_cast<unsigned char>((sign << 7) | ((exp >> 8) & 0x7f));
+}
+
+}
+#  define MAY_BE_X87_LONG_DOUBLE
+#endif
+
+void longdouble_to_binary128(const ACE_CDR::LongDouble& value, char* bytes)
+{
+#ifdef MAY_BE_X87_LONG_DOUBLE
+  if (std::numeric_limits<long double>::digits == 64) {
+    x87_to_binary128(value, bytes);
+    return;
+  }
+#endif
+  std::memcpy(bytes, &value, float128_cdr_size);
+}
+
+void binary128_to_longdouble(const char* bytes, ACE_CDR::LongDouble& value)
+{
+#ifdef MAY_BE_X87_LONG_DOUBLE
+  if (std::numeric_limits<long double>::digits == 64) {
+    binary128_to_x87(bytes, value);
+    return;
+  }
+#endif
+  std::memcpy(&value, bytes, float128_cdr_size);
+}
 
 String endianness_to_string(Endianness endianness)
 {
