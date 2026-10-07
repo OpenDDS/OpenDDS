@@ -77,7 +77,9 @@ int RelayThreadMonitor::svc()
         const auto& bit_sample = datas[idx];
         const auto thread_id = bit_sample.thread_id.in();
         const auto old_utilization = utilization_.count(thread_id) ? utilization_[thread_id].utilization : bit_sample.utilization;
-        utilization_[thread_id].record(bit_sample.utilization, config_.utilization_limit());
+        if (infos[idx].sample_state == DDS::NOT_READ_SAMPLE_STATE) {
+          utilization_[thread_id].record(bit_sample.utilization, config_.utilization_limit());
+        }
         if (config_.log_utilization_changes() && std::abs(bit_sample.utilization - old_utilization) > 0.2) { // 20% change
           ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Thread %C utilization changed significantly: %.2f%% -> %.2f%%\n",
             thread_id, old_utilization * 100, bit_sample.utilization * 100));
