@@ -548,15 +548,29 @@ private:
   typedef OPENDDS_MAP(OPENDDS_STRING, TypeIdentifier) TypeIdentifierByName;
   typedef OPENDDS_SET(OPENDDS_STRING) NameSet;
 
-  // An EK_COMPLETE TypeIdentifier is ready for minimal conversion when it has
-  // already been erased from 'pending' (i.e. successfully converted in a
-  // previous iteration).  Non-EK_COMPLETE identifiers (primitives, strings,
-  // plain sequences/arrays) are always ready because the converter handles
-  // them without needing an entry in the pending set.
+  // False if ti, or a plain collection's element or key identifier, is an
+  // EK_COMPLETE identifier still pending conversion
   static bool complete_ti_ready(const TypeIdentifier& ti,
                                 const OPENDDS_SET(TypeIdentifier)& pending)
   {
-    return ti.kind() != EK_COMPLETE || !pending.count(ti);
+    switch (ti.kind()) {
+    case TI_PLAIN_SEQUENCE_SMALL:
+      return complete_ti_ready(*ti.seq_sdefn().element_identifier, pending);
+    case TI_PLAIN_SEQUENCE_LARGE:
+      return complete_ti_ready(*ti.seq_ldefn().element_identifier, pending);
+    case TI_PLAIN_ARRAY_SMALL:
+      return complete_ti_ready(*ti.array_sdefn().element_identifier, pending);
+    case TI_PLAIN_ARRAY_LARGE:
+      return complete_ti_ready(*ti.array_ldefn().element_identifier, pending);
+    case TI_PLAIN_MAP_SMALL:
+      return complete_ti_ready(*ti.map_sdefn().element_identifier, pending) &&
+             complete_ti_ready(*ti.map_sdefn().key_identifier, pending);
+    case TI_PLAIN_MAP_LARGE:
+      return complete_ti_ready(*ti.map_ldefn().element_identifier, pending) &&
+             complete_ti_ready(*ti.map_ldefn().key_identifier, pending);
+    default:
+      return ti.kind() != EK_COMPLETE || !pending.count(ti);
+    }
   }
 
   // Returns true if every EK_COMPLETE TypeIdentifier directly referenced by
@@ -1412,12 +1426,13 @@ private:
 
   bool build_bitmask(const TypeModel& model, CompleteTypeObject& cto, std::string& error)
   {
-    CompleteBitmaskType bt;
-    if (model.bitmask_model.extensibility.empty()) {
-      bt.bitmask_flags = IS_FINAL;
-    } else if (!type_flags(model.bitmask_model.extensibility, false, bt.bitmask_flags, error)) {
+    // Validate extensibility, but leave the unused BitmaskTypeFlag zero
+    TypeFlag flags = 0;
+    if (!model.bitmask_model.extensibility.empty() &&
+        !type_flags(model.bitmask_model.extensibility, false, flags, error)) {
       return false;
     }
+    CompleteBitmaskType bt;
     bt.header.common.bit_bound = model.bitmask_model.bit_bound;
     bt.header.detail.type_name = model.fq_name.c_str();
     for (size_t i = 0; i != model.bitmask_model.flags.size(); ++i) {
