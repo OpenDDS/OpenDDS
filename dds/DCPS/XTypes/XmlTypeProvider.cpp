@@ -1347,12 +1347,17 @@ private:
       error = "union '" + model.fq_name + "' discriminator: " + error;
       return false;
     }
+    // XTypes 7.2.2.4.4.4.6 requires every union discriminator to be
+    // must-understand.
+    ut.discriminator.common.member_flags = static_cast<UnionDiscriminatorFlag>(
+      ut.discriminator.common.member_flags | IS_MUST_UNDERSTAND);
     if (model.union_model.discriminator_key) {
       ut.discriminator.common.member_flags =
         static_cast<UnionDiscriminatorFlag>(ut.discriminator.common.member_flags | IS_KEY);
     }
 
-    MemberId next_id = 0;
+    // The union discriminator is the first member and has member ID 0.
+    MemberId next_id = 1;
     for (size_t i = 0; i != model.union_model.cases.size(); ++i) {
       const UnionCaseModel& case_model = model.union_model.cases[i];
       CompleteUnionMember cum;
@@ -1473,7 +1478,8 @@ private:
     }
     flags = static_cast<StructMemberFlag>(parsed);
     if (member.key) {
-      flags = static_cast<StructMemberFlag>(flags | IS_KEY);
+      // XTypes 7.2.2.4.4.4.8 requires key members to be must-understand.
+      flags = static_cast<StructMemberFlag>(flags | IS_KEY | IS_MUST_UNDERSTAND);
     }
     if (member.must_understand) {
       flags = static_cast<StructMemberFlag>(flags | IS_MUST_UNDERSTAND);
