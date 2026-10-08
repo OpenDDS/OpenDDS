@@ -28,18 +28,7 @@ public:
   int start();
   void stop();
 
-  bool threads_okay() const
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
-
-    for (const auto& u : utilization_) {
-      if (u.second > config_.utilization_limit()) {
-        return false;
-      }
-    }
-
-    return true;
-  }
+  bool threads_okay() const;
 
 private:
   int svc() override;
@@ -48,7 +37,26 @@ private:
 
   const Config& config_;
   bool running_;
-  std::map<std::string, double> utilization_;
+
+  struct UtilizationRecord {
+    // latest recorded utilization
+    double utilization = 0.0;
+
+    // number of consecutive times the utilization exceeded the limit
+    unsigned int exceed_limit_count = 0;
+
+    void record(double util, double limit)
+    {
+      utilization = util;
+      if (util > limit) {
+        ++exceed_limit_count;
+      } else {
+        exceed_limit_count = 0;
+      }
+    }
+  };
+  std::map<std::string, UtilizationRecord> utilization_;
+
   mutable ACE_Thread_Mutex mutex_;
   OpenDDS::DCPS::ConditionVariable<ACE_Thread_Mutex> condition_;
   OpenDDS::DCPS::InternalThreadBuiltinTopicDataDataReader_var thread_status_reader_;

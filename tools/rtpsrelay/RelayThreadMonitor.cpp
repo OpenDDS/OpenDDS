@@ -76,12 +76,13 @@ int RelayThreadMonitor::svc()
       if (infos[idx].valid_data) {
         const auto& bit_sample = datas[idx];
         const auto thread_id = bit_sample.thread_id.in();
-        auto& utilization = utilization_[thread_id];
-        const auto old_utilization = utilization;
-        utilization = bit_sample.utilization;
-        if (config_.log_utilization_changes() && std::abs(utilization - old_utilization) > 0.2) { // 20% change
+        const auto old_utilization = utilization_.count(thread_id) ? utilization_[thread_id].utilization : bit_sample.utilization;
+        if (infos[idx].sample_state == DDS::NOT_READ_SAMPLE_STATE) {
+          utilization_[thread_id].record(bit_sample.utilization, config_.utilization_limit());
+        }
+        if (config_.log_utilization_changes() && std::abs(bit_sample.utilization - old_utilization) > 0.2) { // 20% change
           ACE_DEBUG((LM_INFO, "(%P|%t) INFO: Thread %C utilization changed significantly: %.2f%% -> %.2f%%\n",
-            thread_id, old_utilization * 100, utilization * 100));
+            thread_id, old_utilization * 100, bit_sample.utilization * 100));
         }
 
       } else if (infos[idx].instance_state != DDS::ALIVE_INSTANCE_STATE) {
@@ -114,6 +115,20 @@ int RelayThreadMonitor::svc()
   return 0;
 }
 
+bool RelayThreadMonitor::threads_okay() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+
+    for (const auto& u : utilization_) {
+      if (u.second.utilization > config_.utilization_limit()
+          && u.second.exceed_limit_count > static_cast<unsigned>(config_.utilization_limit_tolerance())) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
 void RelayThreadMonitor::on_data_available(DDS::DataReader_ptr /*reader*/)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
@@ -138,7 +153,7 @@ void RelayThreadMonitor::on_data_available(DDS::DataReader_ptr /*reader*/)
 
   for (CORBA::ULong idx = 0; idx != infos.length(); ++idx) {
     if (infos[idx].valid_data) {
-      utilization_[datas[idx].thread_id.in()] = datas[idx].utilization;
+      utilization_[datas[idx].thread_id.in()].record(datas[idx].utilization, config_.utilization_limit());
     } else if (infos[idx].instance_state != DDS::ALIVE_INSTANCE_STATE) {
       utilization_.erase(datas[idx].thread_id.in());
     }
