@@ -38,7 +38,7 @@
 #include <tests/Utils/StatusMatching.h>
 #include <Common.h>
 #include "ProcessStatsCollector.h"
-#include "HostNetworkStatsCollector.h"
+#include <HostNetworkStatsCollector.h>
 #include "PropertyStatBlock.h"
 
 using namespace Bench::NodeController;
@@ -348,7 +348,7 @@ public:
   bool run_spawned_processes(ReportDataWriter_var report_writer_impl)
   {
     ACE_Reactor::instance()->schedule_timer(this, nullptr, ACE_Time_Value(timeout_));
-    const HostNetworkStatsCollector host_network_stats;
+    const Bench::HostNetworkStatsCollector host_network_stats;
     // Spawn Processes
     {
       std::lock_guard<std::mutex> guard(mutex_);
@@ -493,11 +493,14 @@ public:
       mem_block->finalize();
       virtual_mem_block->finalize();
 
-      const HostNetworkStatsCollector::CounterMap network_deltas = host_network_stats.deltas();
-      for (HostNetworkStatsCollector::CounterMap::const_iterator pos = network_deltas.begin();
-           pos != network_deltas.end(); ++pos) {
-        Bench::PropertyStatBlock block(report.properties, pos->first, 1);
-        block.update(static_cast<double>(pos->second));
+      Bench::HostNetworkStatsCollector::CounterMap network_deltas;
+      const bool network_stats_available = host_network_stats.deltas(network_deltas);
+      Builder::get_or_create_property(report.properties,
+        Bench::HostNetworkStatsCollector::available_property_name,
+        Builder::PVK_ULL)->value.ull_prop(network_stats_available ? 1 : 0);
+      for (const auto& delta : network_deltas) {
+        Bench::PropertyStatBlock block(report.properties, delta.first, 1);
+        block.update(static_cast<double>(delta.second));
         block.finalize();
       }
     } catch (const std::exception& e) {

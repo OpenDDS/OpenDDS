@@ -38,8 +38,10 @@ Each request will contain the configuration to use for the spawned workers and, 
 Failed workers processes (aborts, crashes) will be noted and have their output logs sent back to the requesting ``test_controller``.
 In addition to collecting worker reports, the node controller also gathers general system resource statistics during test execution (CPU and memory utilization) to be returned to the test controller at the end of the test.
 It also records changes in the portable, interface-level network counters for receive errors, receive drops, transmit errors, and transmit drops.
-Loopback interfaces are excluded.
+Loopback interfaces are excluded, as are Windows NDIS filter interfaces (which repeat the counters of the interface they're attached to).
+These counters cover the whole host, including traffic unrelated to the test, so non-zero values are reported as warnings rather than errors in test summaries.
 If a platform does not expose an equivalent counter, that statistic is omitted instead of being reported as zero.
+The ``host_network_stats_available`` property of the node controller report is 0 if the counters couldn't be read at all (including on unsupported platforms).
 Platform-specific network diagnostics, such as Linux UDP socket-buffer and softnet counters, are intentionally outside Bench's portable report contract.
 
 Test Controller

@@ -1,5 +1,7 @@
 #include "SharedSummaryReportVisitor.h"
 
+#include <HostNetworkStatsCollector.h>
+
 namespace Bench {
 
 SharedSummaryReportVisitor::SharedSummaryReportVisitor()
@@ -8,23 +10,18 @@ SharedSummaryReportVisitor::SharedSummaryReportVisitor()
 
 void SharedSummaryReportVisitor::on_node_controller_report(const ReportVisitorContext& context)
 {
-  static const char* const host_network_stats[] = {
-    "network_receive_dropped",
-    "network_transmit_dropped",
-    "network_receive_errors",
-    "network_transmit_errors"
-  };
-  bool host_network_error = false;
-  for (size_t i = 0; i < sizeof host_network_stats / sizeof host_network_stats[0]; ++i) {
-    ConstPropertyStatBlock counter(context.nc_report_->properties, host_network_stats[i]);
+  // Reports from older node controllers lack this property entirely; don't count those as unavailable
+  const Builder::ConstPropertyIndex available = get_property(context.nc_report_->properties,
+    HostNetworkStatsCollector::available_property_name, Builder::PVK_ULL);
+  if (available && available->value.ull_prop() == 0) {
+    ++untagged_warning_counts_.host_network_unavailable_;
+  }
+  for (size_t i = 0; i < HostNetworkStatsCollector::counter_count; ++i) {
+    ConstPropertyStatBlock counter(context.nc_report_->properties, HostNetworkStatsCollector::counter_names[i]);
     if (counter && counter.to_simple_stat_block().max_ > 0.0) {
-      host_network_error = true;
+      ++untagged_warning_counts_.host_network_;
       break;
     }
-  }
-  if (host_network_error) {
-    ++untagged_error_counts_.total_;
-    ++untagged_error_counts_.host_network_;
   }
 
   for (auto it = stats_.begin(); it != stats_.end(); ++it) {

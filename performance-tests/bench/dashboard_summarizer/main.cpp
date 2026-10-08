@@ -181,6 +181,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     Value& errors_value = find_or_create(full_scenario_value, "Errors", kNumberType, doc_out.GetAllocator());
     errors_value.SetUint64(errors);
 
+    // Write Host Network Warnings Value
+    uint64_t host_network_warnings = 0;
+    const auto warnings_it = doc_in.FindMember("warnings");
+    if (warnings_it != doc_in.MemberEnd()) {
+      const auto host_network_it = warnings_it->value.FindMember("host_network");
+      if (host_network_it != warnings_it->value.MemberEnd()) {
+        host_network_warnings = host_network_it->value.GetUint64();
+      }
+    }
+
+    Value& host_network_warnings_value = find_or_create(full_scenario_value, "Host Network Warnings", kNumberType, doc_out.GetAllocator());
+    host_network_warnings_value.SetUint64(host_network_warnings);
+
     // Write Max Discovery Time Delta Value
     double discovery_delta_max = 0.0;
     const auto stats_it = doc_in.FindMember("stats");
