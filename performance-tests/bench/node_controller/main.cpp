@@ -385,9 +385,13 @@ public:
     Report report{};
     report.spawned_process_reports.length(static_cast<CORBA::ULong>(all_spawned_processes_.size()));
     constexpr size_t max_stat_buffer_size = 3600; // one hour in seconds
-    auto cpu_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "cpu_percent", max_stat_buffer_size, true);
-    auto mem_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "mem_percent", max_stat_buffer_size, true);
-    auto virtual_mem_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "virtual_mem_percent", max_stat_buffer_size, true);
+    const bool process_stats_supported = ProcessStatsCollector::supported();
+    std::shared_ptr<Bench::PropertyStatBlock> cpu_block, mem_block, virtual_mem_block;
+    if (process_stats_supported) {
+      cpu_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "cpu_percent", max_stat_buffer_size, true);
+      mem_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "mem_percent", max_stat_buffer_size, true);
+      virtual_mem_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "virtual_mem_percent", max_stat_buffer_size, true);
+    }
     CORBA::ULong pos = 0;
     report.node_name = node_name_.c_str();
     report.node_id = node_id_;
@@ -398,6 +402,9 @@ public:
 
       while (running) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
+        if (!process_stats_supported) {
+          continue;
+        }
 
         double cpu_sum = 0.0;
         double mem_sum = 0.0;
@@ -489,9 +496,11 @@ public:
     stat_collector.join();
 
     try {
-      cpu_block->finalize();
-      mem_block->finalize();
-      virtual_mem_block->finalize();
+      if (process_stats_supported) {
+        cpu_block->finalize();
+        mem_block->finalize();
+        virtual_mem_block->finalize();
+      }
 
       Bench::HostNetworkStatsCollector::CounterMap network_deltas;
       const bool network_stats_available = host_network_stats.deltas(network_deltas);

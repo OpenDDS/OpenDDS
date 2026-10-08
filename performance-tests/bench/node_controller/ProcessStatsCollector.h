@@ -14,6 +14,10 @@ public:
 
   ~ProcessStatsCollector() noexcept;
 
+  // Whether this platform has an implementation.  Where it doesn't, the
+  // statistics must be omitted rather than reported as zero.
+  static bool supported() noexcept;
+
   double get_cpu_usage() noexcept;
 
   double get_virtual_mem_usage() noexcept;
