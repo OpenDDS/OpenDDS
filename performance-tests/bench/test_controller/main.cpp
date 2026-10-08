@@ -49,6 +49,8 @@ int handle_report(const Bench::TestController::Report& report,
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
+  Bench::ignore_sigpipe();
+
   int result = EXIT_SUCCESS;
   const char* cstr = ACE_OS::getenv("BENCH_ROOT");
   bench_root = cstr ? cstr : "";

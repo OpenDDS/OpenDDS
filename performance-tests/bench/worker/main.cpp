@@ -101,6 +101,8 @@ void do_wait(const Builder::TimeStamp& ts, const std::string& ts_name, bool zero
 }
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
+  Bench::ignore_sigpipe();
+
   Builder::NullStream null_stream_i;
   std::ostream null_stream(&null_stream_i);
 

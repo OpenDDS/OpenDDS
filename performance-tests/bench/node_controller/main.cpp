@@ -596,6 +596,8 @@ enum class RunMode {
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
+  Bench::ignore_sigpipe();
+
   const char* cstr = ACE_OS::getenv("BENCH_ROOT");
   bench_root = cstr ? cstr : "";
   if (bench_root.empty()) {

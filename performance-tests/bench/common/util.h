@@ -26,6 +26,12 @@ Bench_Common_Export unsigned get_option_argument_uint(int& i, int argc, ACE_TCHA
 
 Bench_Common_Export std::string& string_replace(std::string& input, const std::string& oldstr, const std::string& newstr);
 
+// Ignore SIGPIPE (where it exists) so a send to a dead peer or blocked
+// destination fails with EPIPE instead of killing the process.  OpenDDS
+// already handles those send failures; the signal's default action is the
+// only problem.
+Bench_Common_Export void ignore_sigpipe();
+
 // Filesytem
 inline std::string join_path(const std::string& arg)
 {
