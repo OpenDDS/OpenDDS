@@ -27,10 +27,13 @@ int SummaryRawFormatter::format(const Bench::TestController::Report& report, std
   const auto& tagged_stat_vecs = visitor.tagged_stat_vecs_;
   const auto& untagged_error_counts = visitor.untagged_error_counts_;
   const auto& tagged_error_counts = visitor.tagged_error_counts_;
+  const auto& untagged_warning_counts = visitor.untagged_warning_counts_;
 
   output_stream << std::endl;
   output_stream << "Total Errors: " << untagged_error_counts.total_ << std::endl;
   output_stream << "Discovery Errors: " << untagged_error_counts.discovery_ << std::endl;
+  output_stream << "Host Network Warnings: " << untagged_warning_counts.host_network_ << std::endl;
+  output_stream << "Host Network Stats Unavailable: " << untagged_warning_counts.host_network_unavailable_ << std::endl;
 
   for (auto stat_it = stats.begin(); stat_it != stats.end(); ++stat_it) {
     auto stat_pos = untagged_stat_vecs.find(*stat_it);

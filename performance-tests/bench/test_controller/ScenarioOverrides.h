@@ -14,6 +14,8 @@ struct ScenarioOverrides {
   unsigned start_time_delta{0};
   unsigned stop_time_delta{0};
   unsigned destruction_time_delta{0};
+  // Restrict worker DDS traffic to loopback (unicast discovery, no multicast)
+  bool local_only{false};
 };
 
 #endif

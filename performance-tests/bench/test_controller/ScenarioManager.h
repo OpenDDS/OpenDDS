@@ -43,6 +43,14 @@ public:
   void execute(const Bench::TestController::AllocatedScenario& allocated_scenario,
     Bench::TestController::Report& report);
 
+  /**
+   * Rewrite worker configs (by name, JSON) so all of the scenario's DDS traffic
+   * stays on loopback: unicast discovery between local participant ports and no
+   * multicast.  Only RTPS discovery and rtps_udp transport sections are changed.
+   */
+  static void apply_local_only(const Bench::TestController::ScenarioPrototype& scenario_prototype,
+    std::map<std::string, std::string>& worker_configs);
+
 private:
   void customize_configs(std::map<std::string, std::string>& worker_configs);
   bool is_matched(const std::string& str, const std::string& wildcard) const;

@@ -10,6 +10,7 @@
 
 #include <ace/OS_NS_unistd.h>
 
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <thread>
@@ -22,6 +23,41 @@ using namespace Bench::TestController;
 namespace {
   const size_t DEFAULT_MAX_DECIMAL_PLACES = 9u;
   const size_t SCENARIO_TIMEOUT_GRACE_PERIOD = 10u;
+
+  bool starts_with(const std::string& str, const std::string& prefix)
+  {
+    return str.compare(0, prefix.size(), prefix) == 0;
+  }
+
+  const Builder::ConfigProperty* find_config_property(const Builder::ConfigSection& section, const std::string& name)
+  {
+    for (CORBA::ULong i = 0; i < section.properties.length(); ++i) {
+      if (name == section.properties[i].name.in()) {
+        return &section.properties[i];
+      }
+    }
+    return nullptr;
+  }
+
+  void set_config_property(Builder::ConfigSection& section, const std::string& name, const std::string& value)
+  {
+    for (CORBA::ULong i = 0; i < section.properties.length(); ++i) {
+      if (name == section.properties[i].name.in()) {
+        section.properties[i].value = value.c_str();
+        return;
+      }
+    }
+    const CORBA::ULong len = section.properties.length();
+    section.properties.length(len + 1);
+    section.properties[len].name = name.c_str();
+    section.properties[len].value = value.c_str();
+  }
+
+  unsigned get_config_uint(const Builder::ConfigSection& section, const std::string& name, unsigned default_value)
+  {
+    const Builder::ConfigProperty* const prop = find_config_property(section, name);
+    return prop ? static_cast<unsigned>(std::stoul(prop->value.in())) : default_value;
+  }
 }
 
 ScenarioManager::ScenarioManager(
@@ -137,6 +173,101 @@ void ScenarioManager::customize_configs(std::map<std::string, std::string>& work
   }
 }
 
+void ScenarioManager::apply_local_only(const ScenarioPrototype& scenario_prototype,
+  std::map<std::string, std::string>& worker_configs)
+{
+  // Number of instances of each worker config across the scenario
+  std::map<std::string, size_t> instances;
+  for (CORBA::ULong i = 0; i < scenario_prototype.nodes.length(); ++i) {
+    const NodePrototype& np = scenario_prototype.nodes[i];
+    for (CORBA::ULong j = 0; j < np.workers.length(); ++j) {
+      instances[np.workers[j].config.in()] += std::max(np.count, 1u) * std::max(np.workers[j].count, 1u);
+    }
+  }
+  for (CORBA::ULong i = 0; i < scenario_prototype.any_node.length(); ++i) {
+    const WorkerPrototype& wp = scenario_prototype.any_node[i];
+    instances[wp.config.in()] += std::max(wp.count, 1u);
+  }
+
+  std::map<std::string, Bench::WorkerConfig> parsed;
+  std::map<unsigned, size_t> participants_per_domain;
+  for (const auto& config : worker_configs) {
+    std::stringstream iss(config.second);
+    Bench::WorkerConfig& wc = parsed[config.first];
+    if (!Bench::json_2_idl(iss, wc)) {
+      throw std::runtime_error("Can't parse json config '" + config.first + "' for --local-only");
+    }
+    for (CORBA::ULong i = 0; i < wc.process.participants.length(); ++i) {
+      participants_per_domain[wc.process.participants[i].domain] += instances[config.first];
+    }
+  }
+
+  for (auto& config : worker_configs) {
+    Bench::WorkerConfig& wc = parsed[config.first];
+    if (wc.process.participants.length() == 0) {
+      continue;
+    }
+    std::cout << "Restricting config '" << config.first << "' to loopback" << std::endl;
+
+    Builder::ConfigSectionSeq& sections = wc.process.config_sections;
+    bool has_common = false;
+    bool has_rtps_discovery = false;
+    for (CORBA::ULong i = 0; i < sections.length(); ++i) {
+      Builder::ConfigSection& section = sections[i];
+      const std::string name = section.name.in();
+      if (name == "common") {
+        has_common = true;
+        set_config_property(section, "DCPSDefaultAddress", "127.0.0.1");
+      } else if (starts_with(name, "rtps_discovery/")) {
+        has_rtps_discovery = true;
+        // Without multicast, SPDP needs explicit unicast destinations: the
+        // participant ports every participant in the scenario could be using.
+        // A participant may take two IDs (separate IPv4 and IPv6 sockets),
+        // plus some headroom for other participants on the host.
+        const unsigned pb = get_config_uint(section, "PB", 7400);
+        const unsigned dg = get_config_uint(section, "DG", 250);
+        const unsigned pg = get_config_uint(section, "PG", 2);
+        const unsigned d1 = get_config_uint(section, "D1", 10);
+        std::ostringstream send_addrs;
+        for (const auto& domain_count : participants_per_domain) {
+          const size_t ids = 2 * domain_count.second + 8;
+          for (size_t id = 0; id < ids; ++id) {
+            if (send_addrs.tellp() > 0) {
+              send_addrs << ',';
+            }
+            send_addrs << "127.0.0.1:" << (pb + dg * domain_count.first + d1 + pg * id);
+          }
+        }
+        set_config_property(section, "SedpMulticast", "0");
+        set_config_property(section, "SpdpSendAddrs", send_addrs.str());
+        set_config_property(section, "Ipv6SpdpLocalAddress", "[::1]:0");
+        set_config_property(section, "Ipv6SedpLocalAddress", "[::1]:0");
+      } else if (starts_with(name, "transport/")) {
+        const Builder::ConfigProperty* const type = find_config_property(section, "transport_type");
+        if (type && std::string(type->value.in()) == "rtps_udp") {
+          set_config_property(section, "use_multicast", "0");
+          set_config_property(section, "ipv6_local_address", "[::1]:0");
+        }
+      }
+    }
+    if (!has_common) {
+      const CORBA::ULong len = sections.length();
+      sections.length(len + 1);
+      sections[len].name = "common";
+      set_config_property(sections[len], "DCPSDefaultAddress", "127.0.0.1");
+    }
+    if (!has_rtps_discovery) {
+      std::cout << "- Warning: no rtps_discovery section to restrict; discovery may still leave loopback" << std::endl;
+    }
+
+    std::stringstream oss;
+    if (!Bench::idl_2_json(wc, oss, DEFAULT_MAX_DECIMAL_PLACES)) {
+      throw std::runtime_error("Can't reserialize json config '" + config.first + "' for --local-only");
+    }
+    config.second = oss.str();
+  }
+}
+
 bool ScenarioManager::is_matched(const std::string& str, const std::string& pat) const
 {
   if (pat.empty() ||
@@ -202,6 +333,10 @@ AllocatedScenario ScenarioManager::allocate_scenario(const ScenarioPrototype& sc
   }
   AllocationHelper::read_protoworker_configs(test_context_, scenario_prototype.any_node,
     worker_configs, debug_alloc);
+
+  if (overrides_.local_only && !debug_alloc) {
+    apply_local_only(scenario_prototype, worker_configs);
+  }
 
   AllocatedScenario allocated_scenario{};
   allocated_scenario.timeout = scenario_prototype.timeout;
