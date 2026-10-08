@@ -12,6 +12,7 @@
 #include <dds/DCPS/XTypes/DynamicDataImpl.h>
 #include <dds/DCPS/XTypes/DynamicDataFactory.h>
 #include <dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h>
+#include <dds/DCPS/XTypes/Utils.h>
 
 #include <gtest/gtest.h>
 
@@ -24,17 +25,10 @@ const DCPS::Encoding xcdr1(DCPS::Encoding::KIND_XCDR1, DCPS::ENDIAN_BIG);
 
 void set_float128_value(ACE_CDR::LongDouble& a)
 {
-#if defined(ACE_BIG_ENDIAN) && ACE_BIG_ENDIAN != 0
-  unsigned char value[] = { 0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
-#else
-  unsigned char value[] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0xff,0x3f };
-#endif
-
-#if ACE_SIZEOF_LONG_DOUBLE == 16
-  ACE_OS::memcpy((unsigned char*)&a, (unsigned char*)value, 16);
-#else
-  ACE_OS::memcpy((unsigned char*)a.ld, (unsigned char*)value, 16);
-#endif
+  // The float_128 wire bytes in this file encode 1.0; canonicalize so
+  // check_float128's memcmp ignores x87 padding bytes
+  ACE_CDR_LONG_DOUBLE_ASSIGNMENT(a, 1.0L);
+  XTypes::canonicalize_float128_padding(a);
 }
 
 void check_float128(const ACE_CDR::LongDouble& a, const ACE_CDR::LongDouble& b)

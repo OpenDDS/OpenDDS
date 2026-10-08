@@ -16,12 +16,14 @@
 #include "Utils.h"
 
 #include <dds/DCPS/RapidJsonWrapper.h>
+#include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/debug.h>
 
 #include <ace/Basic_Types.h>
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_string.h>
 
+#include <algorithm>
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
@@ -318,28 +320,12 @@ int hex_nibble(char c)
   return -1;
 }
 
-char* float128_bytes(ACE_CDR::LongDouble& value)
-{
-#if ACE_SIZEOF_LONG_DOUBLE == 16
-  return reinterpret_cast<char*>(&value);
-#else
-  return value.ld;
-#endif
-}
-
 void float128_big_endian_bytes(const ACE_CDR::LongDouble& value, char bytes[16])
 {
-  ACE_CDR::LongDouble canonical = value;
-  canonicalize_float128_padding(canonical);
-  const char* const src = float128_bytes(canonical);
-#if defined(ACE_BIG_ENDIAN)
-  ACE_OS::memcpy(bytes, src, 16);
-#else
-  for (size_t i = 0; i != 16; ++i) {
-    bytes[i] = src[15 - i];
-  }
+  DCPS::longdouble_to_binary128(value, bytes);
+#ifndef ACE_BIG_ENDIAN
+  std::reverse(bytes, bytes + 16);
 #endif
-
 }
 
 bool parse_hex_float128(const char* text, ACE_CDR::LongDouble& value)
@@ -363,15 +349,10 @@ bool parse_hex_float128(const char* text, ACE_CDR::LongDouble& value)
     }
     bytes[i] = static_cast<char>((high << 4) | low);
   }
-
-  char* const dest = float128_bytes(value);
-#if defined(ACE_BIG_ENDIAN)
-  ACE_OS::memcpy(dest, bytes, 16);
-#else
-  for (size_t i = 0; i != 16; ++i) {
-    dest[i] = bytes[15 - i];
-  }
+#ifndef ACE_BIG_ENDIAN
+  std::reverse(bytes, bytes + 16);
 #endif
+  DCPS::binary128_to_longdouble(bytes, value);
   return true;
 }
 

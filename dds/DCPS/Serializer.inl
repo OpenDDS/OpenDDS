@@ -694,7 +694,16 @@ Serializer::read_longdouble_array(ACE_CDR::LongDouble* x, ACE_CDR::ULong length)
   if (!align_r(float128_cdr_size)) {
     return false;
   }
-  read_array(reinterpret_cast<char*>(x), float128_cdr_size, length);
+  if (!check_size(length, float128_cdr_size)) {
+    return false;
+  }
+  char bytes[float128_cdr_size];
+  for (ACE_CDR::ULong i = 0; i < length && good_bit(); ++i) {
+    buffer_read(bytes, float128_cdr_size, swap_bytes_);
+    if (good_bit()) {
+      binary128_to_longdouble(bytes, x[i]);
+    }
+  }
   return good_bit();
 }
 
@@ -836,7 +845,11 @@ Serializer::write_longdouble_array(const ACE_CDR::LongDouble* x,
   if (!align_w(float128_cdr_size)) {
     return false;
   }
-  write_array(reinterpret_cast<const char*>(x), float128_cdr_size, length);
+  char bytes[float128_cdr_size];
+  for (ACE_CDR::ULong i = 0; i < length && good_bit(); ++i) {
+    longdouble_to_binary128(x[i], bytes);
+    buffer_write(bytes, float128_cdr_size, swap_bytes_);
+  }
   return good_bit();
 }
 
@@ -1087,7 +1100,9 @@ operator<<(Serializer& s, ACE_CDR::LongDouble x)
   if (!s.align_w(float128_cdr_size)) {
     return false;
   }
-  s.buffer_write(reinterpret_cast<char*>(&x), float128_cdr_size, s.swap_bytes());
+  char bytes[float128_cdr_size];
+  longdouble_to_binary128(x, bytes);
+  s.buffer_write(bytes, float128_cdr_size, s.swap_bytes());
   return s.good_bit();
 }
 
@@ -1363,7 +1378,11 @@ operator>>(Serializer& s, ACE_CDR::LongDouble& x)
   if (!s.align_r(float128_cdr_size)) {
     return false;
   }
-  s.buffer_read(reinterpret_cast<char*>(&x), float128_cdr_size, s.swap_bytes());
+  char bytes[float128_cdr_size];
+  s.buffer_read(bytes, float128_cdr_size, s.swap_bytes());
+  if (s.good_bit()) {
+    binary128_to_longdouble(bytes, x);
+  }
   return s.good_bit();
 }
 
