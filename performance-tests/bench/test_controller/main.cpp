@@ -170,6 +170,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           << "--override-start-time N                      Override the system-wide starting time." << std::endl
           << "--override-stop-time N                       Override the system-wide stopping time." << std::endl
           << "--override-destruction-time N                Override the system-wide destruction time." << std::endl
+          << "--local-only                 Rewrite worker DDS configs to keep all traffic on" << std::endl
+          << "                             loopback (unicast discovery, no multicast). For running" << std::endl
+          << "                             every node controller on one host where non-loopback" << std::endl
+          << "                             traffic is blocked. Only RTPS discovery and rtps_udp" << std::endl
+          << "                             transports are rewritten." << std::endl
           << "--tag TAG                    Specify a tag for which the user wants to collect" << std::endl
           << "                             the statistics information. User can specify multiple" << std::endl
           << "                             --tag options, each with a single tag." << std::endl
@@ -209,6 +214,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         overrides.stop_time_delta = get_option_argument_uint(i, argc, argv);
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-destruction-time"))) {
         overrides.destruction_time_delta = get_option_argument_uint(i, argc, argv);
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--local-only"))) {
+        overrides.local_only = true;
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--tag"))) {
         tags.insert(get_option_argument(i, argc, argv));
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--json"))) {

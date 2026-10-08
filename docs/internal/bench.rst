@@ -103,6 +103,10 @@ This is because the perl script sets the appropriate environment variables autom
 The perl script can be inspected in order to determine which scenarios have been made available in this way.
 The script can be modified to easily run other available scenarios (see :ghfile:`performance-tests/bench/example/config/scenario`) against a single node controller with relative ease.
 
+If non-loopback traffic is blocked on the host (for example, by a firewall that can't be configured), pass ``--local-only`` to keep all DDS traffic on loopback.
+This uses :ghfile:`performance-tests/bench/local_control_opendds_config.ini` for the node and test controllers and passes ``--local-only`` to the test controller, which rewrites the RTPS discovery and ``rtps_udp`` transport sections of every worker configuration to use unicast discovery between local participant ports and no multicast.
+The InfoRepo and RtpsRelay scenarios aren't supported in this mode.
+
 Running Scenarios Manually
 ==========================
 

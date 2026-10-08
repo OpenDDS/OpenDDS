@@ -43,6 +43,15 @@ if ($test->flag('--no-suffix')) {
   $tc_opts .= " --override-bench-partition-suffix none";
 }
 
+if ($test->flag('--local-only')) {
+  # Keep all DDS traffic on loopback, for hosts where other traffic is blocked
+  # (e.g. a firewall that can't be configured). Not supported by the InfoRepo
+  # or RtpsRelay scenarios.
+  my $config = "-DCPSConfigFile $DDS_ROOT/performance-tests/bench/local_control_opendds_config.ini";
+  $tc_opts .= " --local-only $config";
+  $nc_opts = "$config $nc_opts";
+}
+
 if ($test->flag('--json')) {
   # This will result in an additional results file being written in json format
   $tc_opts .= " --json";
