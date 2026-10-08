@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5311
 
 .. news-start-section: Fixes
 - Fixed ``long double`` (float128) values being sent as native x87 80-bit bytes instead of IEEE 754 binary128 on platforms such as x86-64 Linux and Intel macOS.
