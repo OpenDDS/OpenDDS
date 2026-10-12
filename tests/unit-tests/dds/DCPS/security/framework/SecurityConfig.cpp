@@ -10,8 +10,7 @@
 #include "dds/DCPS/security/framework/SecurityConfig.h"
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
 #include "dds/DCPS/security/framework/SecurityPluginInst_rch.h"
-#include "ace/Configuration.h"
-#include "ace/Configuration_Import_Export.h"
+#include "dds/DCPS/Service_Participant.h"
 
 // These are just used to meet signature requirements for a test
 #include <gtestWrapper.h>
@@ -44,18 +43,26 @@ public:
       loader->init(0,0);
     }
 #endif
-    cf_.open();
-    ACE_Ini_ImpExp import(cf_);
-    ASSERT_EQ(0, import.import_config(ACE_TEXT("dds/DCPS/security/framework/test1.ini")));
-    ASSERT_EQ(0, TheSecurityRegistry->load_security_configuration(cf_));
+    TheServiceParticipant->config_store()->add_section("SECURITY", "test_config_1");
+    TheServiceParticipant->config_store()->add_section("SECURITY", "test_config_2");
+    TheServiceParticipant->config_store()->add_section("SECURITY", "test_config_empty");
+    TheServiceParticipant->config_store()->set("SECURITY_TEST_CONFIG_1_PROP1", "prop1_value");
+    TheServiceParticipant->config_store()->set("SECURITY_TEST_CONFIG_1_PROP2", "prop2_value");
+    TheServiceParticipant->config_store()->set("SECURITY_TEST_CONFIG_1_AUTH_CONFIG", "BuiltIn");
+    TheServiceParticipant->config_store()->set(
+      "SECURITY_TEST_CONFIG_1_ACCESS_CTRL_CONFIG", "BuiltIn");
+    TheServiceParticipant->config_store()->set("SECURITY_TEST_CONFIG_1_CRYPTO_CONFIG", "BuiltIn");
+    TheServiceParticipant->config_store()->set(
+      "SECURITY_TEST_CONFIG_1_UTILITY_CONFIG", "BuiltIn");
+    TheServiceParticipant->config_store()->set("SECURITY_TEST_CONFIG_2_PROP1", "A");
+    TheServiceParticipant->config_store()->set("SECURITY_TEST_CONFIG_2_PROP2", "B");
+    TheServiceParticipant->config_store()->set("SECURITY_TEST_CONFIG_2_PROPX", "C");
+    ASSERT_EQ(0, TheSecurityRegistry->load_security_configuration());
   }
 
-  static ACE_Configuration_Heap cf_;
 };
 
 }
-
-ACE_Configuration_Heap dds_DCPS_security_framework_SecurityConfig::cf_;
 
 TEST_F(dds_DCPS_security_framework_SecurityConfig, UnknownSecurityConfig)
 {
@@ -75,6 +82,7 @@ TEST_F(dds_DCPS_security_framework_SecurityConfig, TestConfig1)
         EXPECT_TRUE(config->get_crypto_key_exchange());
         EXPECT_TRUE(config->get_crypto_key_factory());
         EXPECT_TRUE(config->get_crypto_transform());
+        EXPECT_TRUE(config->get_utility());
 
         //Check the properties
         DDS::Security::PropertyQosPolicy property_data;
@@ -82,9 +90,9 @@ TEST_F(dds_DCPS_security_framework_SecurityConfig, TestConfig1)
         EXPECT_EQ(0U, property_data.binary_value.length());
         ASSERT_EQ(2U, property_data.value.length());
 
-        EXPECT_STREQ("prop1", property_data.value[0].name);
+        EXPECT_STREQ("PROP1", property_data.value[0].name);
         EXPECT_STREQ("prop1_value", property_data.value[0].value);
-        EXPECT_STREQ("prop2", property_data.value[1].name);
+        EXPECT_STREQ("PROP2", property_data.value[1].name);
         EXPECT_STREQ("prop2_value", property_data.value[1].value);
 }
 
@@ -99,6 +107,7 @@ TEST_F(dds_DCPS_security_framework_SecurityConfig, TestConfig2)
         EXPECT_TRUE(config->get_crypto_key_exchange());
         EXPECT_TRUE(config->get_crypto_key_factory());
         EXPECT_TRUE(config->get_crypto_transform());
+        EXPECT_TRUE(config->get_utility());
 
         //Check the properties
         DDS::Security::PropertyQosPolicy property_data;
@@ -106,11 +115,11 @@ TEST_F(dds_DCPS_security_framework_SecurityConfig, TestConfig2)
         EXPECT_EQ(0U, property_data.binary_value.length());
         ASSERT_EQ(3U, property_data.value.length());
 
-        EXPECT_STREQ("prop1", property_data.value[0].name);
+        EXPECT_STREQ("PROP1", property_data.value[0].name);
         EXPECT_STREQ("A", property_data.value[0].value);
-        EXPECT_STREQ("prop2", property_data.value[1].name);
+        EXPECT_STREQ("PROP2", property_data.value[1].name);
         EXPECT_STREQ("B", property_data.value[1].value);
-        EXPECT_STREQ("propX", property_data.value[2].name);
+        EXPECT_STREQ("PROPX", property_data.value[2].name);
         EXPECT_STREQ("C", property_data.value[2].value);
 }
 
@@ -125,6 +134,7 @@ TEST_F(dds_DCPS_security_framework_SecurityConfig, TestConfig_NoProperties)
         EXPECT_TRUE(config->get_crypto_key_exchange());
         EXPECT_TRUE(config->get_crypto_key_factory());
         EXPECT_TRUE(config->get_crypto_transform());
+        EXPECT_TRUE(config->get_utility());
 
         //Check the properties
         DDS::Security::PropertyQosPolicy property_data;
