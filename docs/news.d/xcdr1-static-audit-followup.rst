@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5314
 
 .. news-start-section: Fixes
 - Fixed XCDR1 content filters, multitopics, and query conditions misreading fields after a ``@mutable`` union nested in a ``@final`` or ``@appendable`` type.
