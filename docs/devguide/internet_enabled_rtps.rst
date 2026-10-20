@@ -256,9 +256,27 @@ The command-line options for the RtpsRelay:
 
 .. option:: -LogActivity 0|1
 
+  .. deprecated:: 3.35.0
+
+    Use :option:`-ActivityLogLevel` instead.
+
   :ref:`Config store key <config-store-keys>`: ``RTPS_RELAY_LOG_ACTIVITY``
 
   Enable/disable logging of activity events.
+
+.. option:: -ActivityLogLevel <level>
+
+  :ref:`Config store key <config-store-keys>`: ``RTPS_RELAY_ACTIVITY_LOG_LEVEL``
+
+  Set the activity log level for the relay. Possible values are:
+
+  - 0: No logging
+  - 1: Log lifecycle events
+  - 2: Log discovery and admission events
+  - 3: Log certificate identity matching events
+  - 4: Log expiration and refresh events
+
+  A specified log level enables logging for that level and all lower levels. The default value is 1.
 
 .. option:: -LogHttp 0|1
 
