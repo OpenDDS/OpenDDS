@@ -1,0 +1,11 @@
+// A map is not supported as a key even when it's reached indirectly, as
+// the element type of a sequence that is (or is part of) a key.
+typedef map<long, long, 2> Map;
+
+module XYZ {
+  @topic
+  @final
+  struct Message {
+    @key sequence<Map, 2> value;
+  };
+};

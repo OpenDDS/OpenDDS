@@ -91,4 +91,124 @@ module Bound {
     float float_field;
   };
 
+  // An appendable struct of bounded fields should be bounded -- appendable
+  // only adds a DHEADER (XCDR2), no per-member overhead.
+#pragma DCPS_DATA_TYPE "Bound::AppendableBoundedMessage"
+
+  @appendable
+  struct AppendableBoundedMessage {
+    long long_field;
+    short short_field;
+  };
+
+  // A mutable struct of bounded fields is bounded, including each member's
+  // PID (XCDR1) or EMHEADER (XCDR2)
+#pragma DCPS_DATA_TYPE "Bound::MutableBoundedMessage"
+
+  @mutable
+  struct MutableBoundedMessage {
+    @id(0) long long_field;
+    @id(1) short short_field;
+  };
+
+  // A member id >= 0x4000 forces the 12-byte XCDR1 "extended" parameter
+  // header (XCDR2's EMHEADER has no id-based extension).
+#pragma DCPS_DATA_TYPE "Bound::MutableExtendedIdMessage"
+
+  @mutable
+  struct MutableExtendedIdMessage {
+    @id(20000) long long_field;
+  };
+
+  // A member whose own max size is >= 65536 bytes also forces the 12-byte
+  // XCDR1 extended header, independent of its id; XCDR2 instead needs the
+  // 4-byte NEXTINT since the size isn't 1, 2, 4, or 8 bytes.
+  typedef string<70000> Big70kString;
+
+#pragma DCPS_DATA_TYPE "Bound::MutableExtendedSizeMessage"
+
+  @mutable
+  struct MutableExtendedSizeMessage {
+    @id(0) Big70kString big_field;
+  };
+
+  // Mutable union -- the discriminator and each branch get their own
+  // parameter-list header; the bound is the largest branch.
+#pragma DCPS_DATA_TYPE "Bound::MutableBoundedUnionMessage"
+
+  @mutable
+  union MutableBoundedUnion switch (short) {
+  case 1: @id(0) long long_field;
+  default: @id(1) short short_field;
+  };
+
+  struct MutableBoundedUnionMessage {
+    MutableBoundedUnion union_field;
+  };
+
+  // These use @topic/@key instead of the legacy pragmas, since key-only bounds
+  // and the XCDR2 member-header cases only apply to that path
+
+  // A mutable key-only bound has to account for each key field's own
+  // parameter-list header too, not just concatenate the key fields' sizes.
+  @topic
+  @mutable
+  struct MutableKeyMessage {
+    @key long key_field;
+    long other_field;
+  };
+
+  // A variable-size member can need XCDR2's 8-byte NEXTINT header even when its
+  // maximum payload (1, 2, 4, or 8 bytes) fits the compact form
+  @topic
+  @mutable
+  struct VariableMutableMessage {
+    string<3> value;
+  };
+
+  @topic
+  @mutable
+  union VariableMutableUnion switch (short) {
+  case 1: string<3> value;
+  default: short short_field;
+  };
+
+  // A mutable union's key-only form always ends with the XCDR1 list-end
+  // sentinel, even when the discriminator is its only content
+  @topic
+  @mutable
+  union MutableKeyUnion switch (@key short) {
+  case 0: long value;
+  };
+
+  // A key only as a sequence key's element (see NestedSeqKeyMessage below); its
+  // own sequence key still counts toward the ordering
+  @topic
+  @final
+  struct NestedSeqKeyElement {
+    @key sequence<long, 2> value;
+  };
+
+  @topic
+  @final
+  struct NestedSeqKeyMessage {
+    @key sequence<NestedSeqKeyElement, 2> value;
+  };
+
+  // This file doesn't use -Lc++11, so this exercises the classic C++
+  // mapping's sequence<string>/sequence<wstring> element access.
+  @topic
+  @final
+  struct StringSeqKeyMessage {
+    @key sequence<string, 2> value;
+  };
+
+#ifndef OPENDDS_SAFETY_PROFILE
+  @topic
+  @final
+  struct WStringSeqKeyMessage {
+    @key sequence<wstring, 2> value;
+  };
+#endif
+
 };
