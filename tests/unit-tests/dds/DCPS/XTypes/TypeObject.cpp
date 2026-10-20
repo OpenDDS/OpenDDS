@@ -1965,3 +1965,51 @@ TEST(dds_DCPS_XTypes, compute_dependencies)
   const TypeIdentifier& x = *dependencies.begin();
   ASSERT_EQ(x, make_scc_id_or_default(ti));
 }
+
+template<typename T>
+void check_bound_seq_rejects_oversized_length(const Encoding& enc)
+{
+  // Length only (0xffffffff elements), no element data behind it.
+  const unsigned char oversized_length[] = {0xff, 0xff, 0xff, 0xff};
+  ACE_Message_Block buffer(reinterpret_cast<const char*>(oversized_length), sizeof oversized_length);
+  buffer.wr_ptr(sizeof oversized_length);
+  Serializer ser(&buffer, enc);
+  T seq;
+  EXPECT_FALSE(ser >> seq);
+}
+
+TEST(dds_DCPS_XTypes_TypeObject, bound_seq_rejects_oversized_length)
+{
+  check_bound_seq_rejects_oversized_length<LBoundSeq>(xcdr2_be);
+  check_bound_seq_rejects_oversized_length<LBoundSeq>(xcdr2_le);
+  check_bound_seq_rejects_oversized_length<SBoundSeq>(xcdr2_be);
+  check_bound_seq_rejects_oversized_length<SBoundSeq>(xcdr2_le);
+  check_bound_seq_rejects_oversized_length<UnionCaseLabelSeq>(xcdr2_be);
+  check_bound_seq_rejects_oversized_length<UnionCaseLabelSeq>(xcdr2_le);
+
+  // A well-formed, in-bounds length still round-trips correctly.
+  LBoundSeq lseq;
+  lseq.append(1).append(2).append(3);
+  const unsigned char lseq_expected[] = {
+    0, 0, 0, 3,
+    0, 0, 0, 1,
+    0, 0, 0, 2,
+    0, 0, 0, 3,
+  };
+  check_encode(lseq, xcdr2_be, lseq_expected);
+
+  SBoundSeq sseq;
+  sseq.append(1).append(2).append(3);
+  const unsigned char sseq_expected[] = {0, 0, 0, 3, 1, 2, 3};
+  check_encode(sseq, xcdr2_be, sseq_expected);
+
+  UnionCaseLabelSeq ulseq;
+  ulseq.append(1).append(2).append(3);
+  const unsigned char ulseq_expected[] = {
+    0, 0, 0, 3,
+    0, 0, 0, 1,
+    0, 0, 0, 2,
+    0, 0, 0, 3,
+  };
+  check_encode(ulseq, xcdr2_be, ulseq_expected);
+}
