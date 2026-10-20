@@ -8,5 +8,6 @@
 
 - Union discriminators and ``@key`` struct members are now always marked must-understand, per XTypes 7.2.2.4.4.4.6 and 7.2.2.4.4.4.8 respectively.
   This changes the equivalence hash of keyed struct types, but they remain assignable across versions.
+  Serialized mutable unions now set the must-understand flag on the discriminator, which older versions ignore.
 
 .. news-end-section

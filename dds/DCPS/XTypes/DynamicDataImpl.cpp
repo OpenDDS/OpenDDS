@@ -6010,7 +6010,8 @@ bool serialize_dynamic_discriminator(Serializer& ser, DDS::DynamicData_ptr union
   using namespace OpenDDS::XTypes;
   const DDS::MemberId disc_id = DISCRIMINATOR_SERIALIZED_ID;
   const CORBA::Boolean optional = disc_md->is_optional(); // Discriminator must be non-optional.
-  const CORBA::Boolean must_understand = disc_md->is_must_understand() || disc_md->is_key();
+  // XTypes 7.2.2.4.4.4.6 requires every union discriminator to be must-understand
+  const CORBA::Boolean must_understand = true;
   const DDS::DynamicType_var disc_type = get_base_type(disc_md->type());
   const DDS::TypeKind disc_tk = disc_type->get_kind();
   DDS::TypeKind treat_disc_as = disc_tk;
