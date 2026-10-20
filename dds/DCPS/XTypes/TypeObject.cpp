@@ -1581,6 +1581,9 @@ bool operator>>(Serializer& strm, XTypes::LBoundSeq& seq)
   if (!(strm >> length)) {
     return false;
   }
+  if (!strm.check_size(length, uint32_cdr_size)) {
+    return false;
+  }
   seq.length(length);
   if (length == 0) {
     return true;
@@ -1617,6 +1620,9 @@ bool operator>>(Serializer& strm, XTypes::SBoundSeq& seq)
   if (!(strm >> length)) {
     return false;
   }
+  if (!strm.check_size(length, 1u)) {
+    return false;
+  }
   seq.length(length);
   if (length == 0) {
     return true;
@@ -1651,6 +1657,9 @@ bool operator>>(Serializer& strm, XTypes::UnionCaseLabelSeq& seq)
 {
   ACE_CDR::ULong length;
   if (!(strm >> length)) {
+    return false;
+  }
+  if (!strm.check_size(length, int32_cdr_size)) {
     return false;
   }
   seq.length(length);
