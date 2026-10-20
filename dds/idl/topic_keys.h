@@ -160,6 +160,9 @@ public:
     /// Used in struct field key iteration
     bool implied_keys_;
 
+    /// Apply the implied-key rule (no explicit keys means all are keys) at the root
+    bool force_implied_;
+
     /**
      * Internal Recursive Impl. of path()
      */
@@ -172,9 +175,10 @@ public:
   TopicKeys(const TopicKeys& other);
   /**
    * If recursive is false, do a shallow iteration.
+   * If implied is true, apply the implied-key rule at the root, as for a sequence key's elements.
    */
-  TopicKeys(AST_Structure* root, bool recursive = true);
-  TopicKeys(AST_Union* root);
+  TopicKeys(AST_Structure* root, bool recursive = true, bool implied = false);
+  TopicKeys(AST_Union* root, bool implied = false);
   ~TopicKeys();
 
   TopicKeys& operator=(const TopicKeys& other);
@@ -190,6 +194,7 @@ public:
   size_t count();
 
   bool recursive() const;
+  bool implied() const;
 
 private:
   AST_Decl* root_;
@@ -203,6 +208,9 @@ private:
 
   /// Have iterators recurse into structures
   bool recursive_;
+
+  /// See the "implied" TopicKeys(AST_Structure*, ...) constructor parameter.
+  bool implied_;
 };
 
 #endif
