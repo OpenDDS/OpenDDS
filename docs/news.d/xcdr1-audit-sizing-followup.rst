@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5313
 
 .. news-start-section: Security
 - Fixed unchecked allocations when deserializing ``TypeObject`` bound and union label sequences, where a small malformed discovery parameter could cause a multi-gigabyte allocation.
