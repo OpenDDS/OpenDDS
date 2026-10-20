@@ -1284,8 +1284,8 @@ bool vwrite_union(ValueWriter& vw, DDS::DynamicData_ptr value, const DDS::Dynami
     }
     return false;
   }
-  MemberParam params(XTypes::DISCRIMINATOR_SERIALIZED_ID,
-                     disc_md->is_must_understand() || disc_md->is_key(),
+  // XTypes 7.2.2.4.4.4.6 requires every union discriminator to be must-understand
+  MemberParam params(XTypes::DISCRIMINATOR_SERIALIZED_ID, true,
                      disc_md->name(), disc_md->is_optional(), true);
   if (!vw.begin_discriminator(params)) {
     return false;
