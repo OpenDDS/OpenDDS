@@ -1,6 +1,7 @@
 // MutableUnknownMustUnderstandMemberRejected covers the generated-code case of
 // an unknown must_understand parameter causing an expected failure.
-// TODO: add the equivalent coverage for the DynamicData reader.
+// TODO: DynamicDataXcdrReadImpl seeks members by ID, so it doesn't reject an
+// unknown must-understand member like generated code does.
 
 #include "xcdrbasetypesTypeSupportImpl.h"
 #include "appendable_mixedTypeSupportImpl.h"
@@ -1285,6 +1286,86 @@ const unsigned MutableStructExpectedXcdr2BE::layout[] = {4,4,2,2,4,4,4,1,3,4,8};
 TEST(MutableTests, BaselineXcdr1Test)
 {
   baseline_checks<MutableStructWithExplicitIDs>(xcdr1, mutable_struct_expected_xcdr1);
+}
+
+// ---------- Extended XCDR1 parameter headers
+// A member ID >= 0x4000 or a member size >= 65536 forces the 12-byte extended
+// XCDR1 parameter header (PID_EXTENDED, 4-byte member ID, 4-byte size).
+
+// ext_id_field (@id(16384)): 7f01 (PID_EXTENDED | must understand), 0008, then
+// the 4-byte member ID and size
+const unsigned char extended_id_xcdr1_be[] = {
+  0x00, 0x01, 0x00, 0x02, 0x01, 0x02, 0x00, 0x00, // before_field (id 1)
+  0x7f, 0x01, 0x00, 0x08, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x02, // ext header
+  0x03, 0x04, 0x00, 0x00, // ext_id_field value + pad
+  0x00, 0x02, 0x00, 0x02, 0x05, 0x06, 0x00, 0x00, // after_field (id 2)
+  0x3f, 0x02, 0x00, 0x00 // sentinel
+};
+const unsigned char extended_id_xcdr1_le[] = {
+  0x01, 0x00, 0x02, 0x00, 0x02, 0x01, 0x00, 0x00,
+  0x01, 0x7f, 0x08, 0x00, 0x00, 0x40, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00,
+  0x04, 0x03, 0x00, 0x00,
+  0x02, 0x00, 0x02, 0x00, 0x06, 0x05, 0x00, 0x00,
+  0x02, 0x3f, 0x00, 0x00
+};
+
+void check_extended_id_struct(const Encoding& encoding, const DataView& expected)
+{
+  ExtendedIdStruct value;
+  value.before_field(0x0102);
+  value.ext_id_field(0x0304);
+  value.after_field(0x0506);
+
+  EXPECT_EQ(serialized_size(encoding, value), expected.size);
+
+  ACE_Message_Block buffer(expected.size);
+  Serializer writer(&buffer, encoding);
+  ASSERT_TRUE(writer << value);
+  EXPECT_PRED_FORMAT2(assert_DataView, expected, buffer);
+
+  ExtendedIdStruct result;
+  Serializer reader(&buffer, encoding);
+  ASSERT_TRUE(reader >> result);
+  EXPECT_EQ(result.before_field(), value.before_field());
+  EXPECT_EQ(result.ext_id_field(), value.ext_id_field());
+  EXPECT_EQ(result.after_field(), value.after_field());
+}
+
+TEST(MutableTests, ExtendedXcdr1HeaderFromMemberId)
+{
+  check_extended_id_struct(xcdr1, extended_id_xcdr1_be);
+  check_extended_id_struct(xcdr1_le, extended_id_xcdr1_le);
+}
+
+TEST(MutableTests, ExtendedXcdr1HeaderFromMemberSize)
+{
+  // big_field (4-byte length + 70000 octets) needs the extended header
+  LargeMemberStruct value;
+  value.before_field(0x0102);
+  value.big_field().resize(70000);
+  for (unsigned i = 0; i < value.big_field().size(); ++i) {
+    value.big_field()[i] = static_cast<unsigned char>(i);
+  }
+  value.after_field(0x0506);
+
+  for (int i = 0; i < 2; ++i) {
+    const Encoding& encoding = i ? xcdr1_le : xcdr1;
+    const size_t expected_size = serialized_size(encoding, value);
+    ACE_Message_Block buffer(expected_size);
+    Serializer writer(&buffer, encoding);
+    ASSERT_TRUE(writer << value);
+    // Sizing must count the full 12-byte header
+    EXPECT_EQ(buffer.length(), expected_size);
+
+    LargeMemberStruct result;
+    Serializer reader(&buffer, encoding);
+    ASSERT_TRUE(reader >> result);
+    EXPECT_EQ(result.before_field(), value.before_field());
+    ASSERT_EQ(result.big_field().size(), value.big_field().size());
+    EXPECT_EQ(result.big_field()[0], value.big_field()[0]);
+    EXPECT_EQ(result.big_field()[69999], value.big_field()[69999]);
+    EXPECT_EQ(result.after_field(), value.after_field());
+  }
 }
 
 TEST(MutableTests, BaselineXcdr2Test)

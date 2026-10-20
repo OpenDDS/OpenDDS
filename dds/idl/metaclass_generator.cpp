@@ -623,8 +623,9 @@ std::string metaclass_generator::gen_union_branch(const std::string&, AST_Decl* 
     ss << call_gen_skip_over(br_type, field_type_name(dynamic_cast<AST_Field*>(branch), br_type),
                              get_tag_name(scoped_helper(deepest_named_type(br_type)->name(), "::")));
   }
+  // Consume the PID_SENTINEL that ends an XCDR1 mutable union (a no-op otherwise)
   ss <<
-    "    return true;\n";
+    "    return is_mutable ? strm.read_list_end_parameter_id() : true;\n";
   return ss.str();
 }
 

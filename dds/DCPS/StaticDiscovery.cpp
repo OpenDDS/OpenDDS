@@ -1248,22 +1248,6 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
     const XTypes::TypeIdentifier& writer_type_id = writer_type_info->minimal.typeid_with_size.type_id;
     const XTypes::TypeIdentifier& reader_type_id = reader_type_info->minimal.typeid_with_size.type_id;
     if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
-      if (!writer_local || !reader_local) {
-        Encoding::Kind encoding_kind;
-        if (tempDwQos.representation.value.length() > 0 &&
-            repr_to_encoding_kind(tempDwQos.representation.value[0], encoding_kind) &&
-            encoding_kind == Encoding::KIND_XCDR1) {
-          const XTypes::TypeFlag extensibility_mask = XTypes::IS_APPENDABLE;
-          if (type_lookup_service_->extensibility(extensibility_mask, writer_type_id)) {
-            if (DCPS_debug_level) {
-              ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-                ACE_TEXT("StaticEndpointManager::match_continue: ")
-                ACE_TEXT("Encountered unsupported combination of XCDR1 encoding and appendable extensibility\n")));
-            }
-          }
-        }
-      }
-
       XTypes::TypeConsistencyAttributes type_consistency;
       type_consistency.ignore_sequence_bounds = drQos->type_consistency.ignore_sequence_bounds;
       type_consistency.ignore_string_bounds = drQos->type_consistency.ignore_string_bounds;
