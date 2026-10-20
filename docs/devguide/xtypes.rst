@@ -1549,6 +1549,7 @@ XCDR1 has the following limitations compared to XCDR2:
   A reader can still detect that a top-level sample lacks trailing members, but only by knowing exactly where the serialized data ends, which depends on the encapsulation padding and the transport.
   Implementations, including OpenDDS before 3.35, haven't always agreed on that padding, so evolving a top-level ``@appendable`` type is fragile across vendors and versions.
   A nested ``@appendable`` member isn't delimited at all, so evolving a nested ``@appendable`` type is only interoperable under XCDR2.
+  ``@mutable`` types are self-delimiting under XCDR1 and aren't subject to this restriction.
 
 * OpenDDS serializes ``@optional`` members of ``@final`` and ``@appendable`` types with a boolean presence flag in both encodings.
   XCDR1 instead requires a member header whose length is zero when the member is absent (see :omgspec:`xtypes:7.4.3.5.2`), so these members aren't interoperable with other implementations under XCDR1.
