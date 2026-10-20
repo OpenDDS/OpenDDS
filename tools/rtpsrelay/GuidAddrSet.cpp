@@ -155,7 +155,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
     if (result.second) {
       relay_stats_reporter_.remote_map_size(static_cast<uint32_t>(remote_map_.size()), now);
     } else if (result.first->second != src_guid) {
-      if (config_.log_activity()) {
+      if (config_.activity_log_enabled(ActivityLogLevel::Activity)) {
         ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::record_activity change detected %C -> %C\n",
                    guid_to_string(result.first->second).c_str(),
                    guid_to_string(src_guid).c_str()));
@@ -183,7 +183,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
   }
 
   if (created) {
-    if (config_.log_activity()) {
+    if (config_.activity_log_enabled(ActivityLogLevel::Activity)) {
       ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::record_activity "
                  "%C added 0.000 s into session from %C\n",
                  guid_to_string(src_guid).c_str(),
@@ -201,7 +201,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
   relay_participant_status_reporter_.set_alive_active(src_guid, true, true);
 
   if (addr_set_stats.upsert_address(remote_address, now, expiration, config_.max_ips_per_client())) {
-    if (config_.log_activity()) {
+    if (config_.activity_log_enabled(ActivityLogLevel::Expiration)) {
       ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::record_activity "
                  "%C %C is at %C %C into session ips=%B total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
                  handler.name().c_str(),
@@ -270,7 +270,7 @@ void GuidAddrSet::process_rejected_address_expiration(const OpenDDS::DCPS::Monot
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   if (!rejected_address_expiration_queue_.empty() && rejected_address_expiration_queue_.front()->second < now) {
     const auto& reject = rejected_address_expiration_queue_.front();
-    if (config_.log_activity()) {
+    if (config_.activity_log_enabled(ActivityLogLevel::Expiration)) {
       const auto ago = now - reject->second;
       ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::process_rejected_address_expiration "
                  "Rejected address %C expired %C ago, removing from rejected address map.\n",
@@ -367,7 +367,7 @@ void GuidAddrSet::process_expiration(const OpenDDS::DCPS::MonotonicTimePoint& no
         }
 
         // Address actually expired.
-        if (config_.log_activity()) {
+        if (config_.activity_log_enabled(ActivityLogLevel::Expiration)) {
           const auto ago = now - expiration;
           ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::process_expiration "
                      "%C %C expired %C ago %C into session ips=%B total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
@@ -440,7 +440,7 @@ bool GuidAddrSet::defer_client(bool from_application_participant,
   if (from_application_participant) {
     pos->second.allow_rtps = true;
 
-    if (config_.log_activity()) {
+    if (config_.activity_log_enabled(ActivityLogLevel::Discovery)) {
       ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::defer_client: %C was admitted %C into session\n",
                  guid_to_string(guid).c_str(),
                  pos->second.get_session_time(now).sec_str().c_str()));
@@ -471,7 +471,7 @@ bool GuidAddrSet::defer_client(bool from_application_participant,
   pos->second.allow_rtps = true;
   admitted = true;
 
-  if (config_.log_activity()) {
+  if (config_.activity_log_enabled(ActivityLogLevel::Discovery)) {
     ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::defer_client: %C was admitted %C into session\n",
                guid_to_string(guid).c_str(),
                pos->second.get_session_time(now).sec_str().c_str()));
@@ -506,7 +506,7 @@ void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid,
   relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
   check_participants_limit();
 
-  if (config_.log_activity()) {
+  if (config_.activity_log_enabled(ActivityLogLevel::Activity)) {
     ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::remove "
                "%C removed %C into session total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
                guid_to_string(guid).c_str(),
@@ -542,7 +542,7 @@ void GuidAddrSet::reject_address(const ACE_INET_Addr& addr,
   OpenDDS::DCPS::MonotonicTimePoint expiration = now + config_.rejected_address_duration();
   auto result = rejected_address_map_.insert(std::make_pair(OpenDDS::DCPS::NetworkAddress(addr), expiration));
   if (result.second) {
-    if (config_.log_activity()) {
+    if (config_.activity_log_enabled(ActivityLogLevel::Expiration)) {
       ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::reject_address Adding %C to list of rejected addresses.\n",
                  OpenDDS::DCPS::LogAddr(addr).c_str()));
     }
