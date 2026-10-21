@@ -63,19 +63,25 @@ EncapsulationHeader::to_string() const
 bool
 EncapsulationHeader::set_encapsulation_options(Message_Block_Ptr& mb)
 {
-  if (mb->length() < padding_marker_byte_index + 1) {
+  return set_encapsulation_options(*mb);
+}
+
+bool
+EncapsulationHeader::set_encapsulation_options(ACE_Message_Block& mb)
+{
+  if (mb.length() < padding_marker_byte_index + 1) {
     if (log_level >= LogLevel::Error) {
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: EncapsulationHeader::set_encapsulation_options: "
                  "insufficient buffer size %B\n",
-                 mb->length()));
+                 mb.length()));
     }
     return false;
   }
 
   const size_t padding =
-    (padding_marker_alignment - mb->length() % padding_marker_alignment) & 0x03;
-  if (mb->space() < padding) {
+    (padding_marker_alignment - mb.length() % padding_marker_alignment) & 0x03;
+  if (mb.space() < padding) {
     if (log_level >= LogLevel::Error) {
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: EncapsulationHeader::set_encapsulation_options: "
@@ -85,13 +91,13 @@ EncapsulationHeader::set_encapsulation_options(Message_Block_Ptr& mb)
     return false;
   }
 
-  unsigned char byte = static_cast<unsigned char>(mb->rd_ptr()[padding_marker_byte_index]);
+  unsigned char byte = static_cast<unsigned char>(mb.rd_ptr()[padding_marker_byte_index]);
   byte |= static_cast<unsigned char>(padding);
-  mb->rd_ptr()[padding_marker_byte_index] = static_cast<char>(byte);
+  mb.rd_ptr()[padding_marker_byte_index] = static_cast<char>(byte);
 
   // Peers subtract the declared padding from the received length, so write it
-  std::memset(mb->wr_ptr(), 0, padding);
-  mb->wr_ptr(padding);
+  std::memset(mb.wr_ptr(), 0, padding);
+  mb.wr_ptr(padding);
   return true;
 }
 

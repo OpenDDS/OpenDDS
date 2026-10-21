@@ -3496,12 +3496,14 @@ Sedp::LivelinessWriter::write_participant_message(const ParticipantMessageData& 
     new ACE_Message_Block(
       DCPS::DataSampleHeader::get_max_serialized_size(),
       ACE_Message_Block::MB_DATA,
-      new ACE_Message_Block(size)));
+      new ACE_Message_Block(size + DCPS::EncapsulationHeader::padding_marker_alignment - 1)));
   Serializer serializer(payload->cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
   if (from_encoding(encap, sedp_encoding, DCPS::FINAL) &&
-      serializer << encap && serializer << pmd) {
-    send_sample(OPENDDS_MOVE_NS::move(payload), size, reader, sequence, reader != GUID_UNKNOWN);
+      serializer << encap && serializer << pmd &&
+      DCPS::EncapsulationHeader::set_encapsulation_options(*payload->cont())) {
+    const size_t payload_length = payload->cont()->length();
+    send_sample(OPENDDS_MOVE_NS::move(payload), payload_length, reader, sequence, reader != GUID_UNKNOWN);
   } else {
     result = DDS::RETCODE_ERROR;
   }
@@ -3525,12 +3527,14 @@ Sedp::SecurityWriter::write_stateless_message(const DDS::Security::ParticipantSt
     new ACE_Message_Block(
       DCPS::DataSampleHeader::get_max_serialized_size(),
       ACE_Message_Block::MB_DATA,
-      new ACE_Message_Block(size)));
+      new ACE_Message_Block(size + DCPS::EncapsulationHeader::padding_marker_alignment - 1)));
   Serializer serializer(payload->cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
   if (from_encoding(encap, sedp_encoding, DCPS::FINAL) &&
-      serializer << encap && serializer << msg) {
-    send_sample(OPENDDS_MOVE_NS::move(payload), size, reader, sequence);
+      serializer << encap && serializer << msg &&
+      DCPS::EncapsulationHeader::set_encapsulation_options(*payload->cont())) {
+    const size_t payload_length = payload->cont()->length();
+    send_sample(OPENDDS_MOVE_NS::move(payload), payload_length, reader, sequence);
   } else {
     result = DDS::RETCODE_ERROR;
   }
@@ -3553,12 +3557,14 @@ Sedp::SecurityWriter::write_volatile_message_secure(const DDS::Security::Partici
     new ACE_Message_Block(
       DCPS::DataSampleHeader::get_max_serialized_size(),
       ACE_Message_Block::MB_DATA,
-      new ACE_Message_Block(size)));
+      new ACE_Message_Block(size + DCPS::EncapsulationHeader::padding_marker_alignment - 1)));
   Serializer serializer(payload->cont(), sedp_encoding);
   DCPS::EncapsulationHeader encap;
   if (from_encoding(encap, sedp_encoding, DCPS::FINAL) &&
-      serializer << encap && serializer << msg) {
-    send_sample(OPENDDS_MOVE_NS::move(payload), size, reader, sequence);
+      serializer << encap && serializer << msg &&
+      DCPS::EncapsulationHeader::set_encapsulation_options(*payload->cont())) {
+    const size_t payload_length = payload->cont()->length();
+    send_sample(OPENDDS_MOVE_NS::move(payload), payload_length, reader, sequence);
   } else {
     result = DDS::RETCODE_ERROR;
   }
@@ -3810,14 +3816,16 @@ bool Sedp::TypeLookupRequestWriter::send_type_lookup_request(
     new ACE_Message_Block(
       DCPS::DataSampleHeader::get_max_serialized_size(),
       ACE_Message_Block::MB_DATA,
-      new ACE_Message_Block(size)));
+      new ACE_Message_Block(size + DCPS::EncapsulationHeader::padding_marker_alignment - 1)));
   Serializer serializer(payload->cont(), type_lookup_encoding);
   DCPS::EncapsulationHeader encap;
   bool success = true;
   if (from_encoding(encap, serializer.encoding(), DCPS::FINAL) &&
-      serializer << encap && serializer << type_lookup_request) {
+      serializer << encap && serializer << type_lookup_request &&
+      DCPS::EncapsulationHeader::set_encapsulation_options(*payload->cont())) {
     DCPS::SequenceNumber sn(seq_++);
-    send_sample(OPENDDS_MOVE_NS::move(payload), size, reader, sn);
+    const size_t payload_length = payload->cont()->length();
+    send_sample(OPENDDS_MOVE_NS::move(payload), payload_length, reader, sn);
   } else {
     if (DCPS::DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
@@ -3854,14 +3862,16 @@ bool Sedp::TypeLookupReplyWriter::send_type_lookup_reply(
     new ACE_Message_Block(
       DCPS::DataSampleHeader::get_max_serialized_size(),
       ACE_Message_Block::MB_DATA,
-      new ACE_Message_Block(size)));
+      new ACE_Message_Block(size + DCPS::EncapsulationHeader::padding_marker_alignment - 1)));
   Serializer serializer(payload->cont(), type_lookup_encoding);
   DCPS::EncapsulationHeader encap;
   bool success = true;
   if (from_encoding(encap, serializer.encoding(), DCPS::FINAL) &&
-      serializer << encap && serializer << type_lookup_reply) {
+      serializer << encap && serializer << type_lookup_reply &&
+      DCPS::EncapsulationHeader::set_encapsulation_options(*payload->cont())) {
     DCPS::SequenceNumber sn(seq_++);
-    send_sample(OPENDDS_MOVE_NS::move(payload), size, reader, sn);
+    const size_t payload_length = payload->cont()->length();
+    send_sample(OPENDDS_MOVE_NS::move(payload), payload_length, reader, sn);
   } else {
     if (DCPS::DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
