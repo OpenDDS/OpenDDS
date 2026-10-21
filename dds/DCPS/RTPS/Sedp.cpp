@@ -3883,7 +3883,8 @@ bool Sedp::TypeLookupReplyWriter::send_type_lookup_reply(
   return success;
 }
 
-bool Sedp::TypeLookupRequestReader::process_type_lookup_request(
+Sedp::TypeLookupRequestReader::RequestResult
+Sedp::TypeLookupRequestReader::process_type_lookup_request(
   Serializer& ser, XTypes::TypeLookup_Reply& type_lookup_reply)
 {
   XTypes::TypeLookup_Request type_lookup_request;
@@ -3892,7 +3893,7 @@ bool Sedp::TypeLookupRequestReader::process_type_lookup_request(
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::process_type_lookup_request: ")
                  ACE_TEXT("failed to deserialize type lookup request\n")));
     }
-    return false;
+    return REQUEST_FAILED;
   }
 
   if (DCPS::DCPS_debug_level >= 8) {
@@ -3907,18 +3908,42 @@ bool Sedp::TypeLookupRequestReader::process_type_lookup_request(
     log_progress("receive type lookup request", get_guid(), remote, sedp_.spdp_.get_participant_discovered_at(remote));
   }
 
-  if (OPENDDS_STRING(type_lookup_request.header.instanceName) != instance_name_) {
+  if (!is_for_this_participant(type_lookup_request.header.instanceName)) {
+    if (DCPS::DCPS_debug_level >= 8) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupRequestReader::process_type_lookup_request: "
+        "ignoring request for instance %C\n", type_lookup_request.header.instanceName.in()));
+    }
+    return REQUEST_IGNORED;
+  }
+
+  bool processed = false;
+  switch (type_lookup_request.data._d()) {
+  case XTypes::TypeLookup_getTypes_HashId:
+    processed = process_get_types_request(type_lookup_request, type_lookup_reply);
+    break;
+  case XTypes::TypeLookup_getDependencies_HashId:
+    processed = process_get_dependencies_request(type_lookup_request, type_lookup_reply);
+    break;
+  }
+  return processed ? REQUEST_REPLY : REQUEST_FAILED;
+}
+
+bool Sedp::TypeLookupRequestReader::is_for_this_participant(const char* instance_name) const
+{
+  if (instance_name_ == instance_name) {
     return true;
   }
 
-  switch (type_lookup_request.data._d()) {
-  case XTypes::TypeLookup_getTypes_HashId:
-    return process_get_types_request(type_lookup_request, type_lookup_reply);
-  case XTypes::TypeLookup_getDependencies_HashId:
-    return process_get_dependencies_request(type_lookup_request, type_lookup_reply);
-  default:
+  // XTypes 1.3 7.6.3.3.4 is unclear on how much of the GUID the name carries, so
+  // also accept just our GUID prefix or an unknown (all zero) GUID.
+  static const OPENDDS_STRING prefix = "dds.builtin.TOS.";
+  const OPENDDS_STRING name(instance_name);
+  if (name.compare(0, prefix.size(), prefix) != 0) {
     return false;
   }
+  const OPENDDS_STRING id = name.substr(prefix.size());
+  return id.find_first_not_of('0') == OPENDDS_STRING::npos ||
+    id == instance_name_.substr(prefix.size(), 2 * sizeof(DCPS::GuidPrefix_t));
 }
 
 bool Sedp::TypeLookupRequestReader::process_get_types_request(
@@ -4684,10 +4709,15 @@ Sedp::TypeLookupRequestReader::data_received_i(const DCPS::ReceivedDataSample& s
   }
 
   XTypes::TypeLookup_Reply type_lookup_reply;
-  if (!process_type_lookup_request(ser, type_lookup_reply)) {
+  switch (process_type_lookup_request(ser, type_lookup_reply)) {
+  case REQUEST_FAILED:
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::TypeLookupRequestReader::data_received_i: ")
       ACE_TEXT("failed to take type lookup request\n")));
     return;
+  case REQUEST_IGNORED:
+    return;
+  case REQUEST_REPLY:
+    break;
   }
 
 #if OPENDDS_CONFIG_SECURITY
