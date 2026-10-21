@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5316
 
 .. news-start-section: Fixes
 - Fixed ``DynamicType`` member lookups by name failing when built with libc++.
