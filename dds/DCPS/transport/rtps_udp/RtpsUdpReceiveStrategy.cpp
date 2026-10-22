@@ -166,7 +166,14 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
       if (message_length > bytes_remaining_unsigned) {
         return 0;
       }
-      ReceivedDataSample rds = data_sample_header_.message_length() ? ReceivedDataSample(*cur_rb) : ReceivedDataSample();
+      ReceivedDataSample rds;
+      if (message_length) {
+        // Limit the sample to its own payload, not the rest of the RTPS message
+        char* const end = cur_rb->wr_ptr();
+        cur_rb->wr_ptr(cur_rb->rd_ptr() + message_length);
+        rds = ReceivedDataSample(*cur_rb);
+        cur_rb->wr_ptr(end);
+      }
       if (data_sample_header_.into_received_data_sample(rds)) {
 
         if (data_sample_header_.more_fragments() || receive_transport_header_.last_fragment()) {
