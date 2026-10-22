@@ -79,8 +79,6 @@ bool try_marshaling(const FOO& in_foo, FOO& out_foo,
   SerializedSizeBound expected_bound, size_t expected_size,
   size_t expected_pad, SerializedSizeBound expected_aligned_bound, const char* name)
 {
-  expected_aligned_bound = SerializedSizeBound(); // TODO: Remove Once This Is Fixed
-
   const OPENDDS_STRING expected_bound_str = expected_bound.to_string();
   const OPENDDS_STRING expected_aligned_bound_str = expected_aligned_bound.to_string();
   const size_t expected_aligned_size = expected_size + expected_pad;
@@ -120,7 +118,7 @@ bool try_marshaling(const FOO& in_foo, FOO& out_foo,
     return false;
   }
 
-  if (expected_bound != bound) {
+  if (expected_bound_str != bound_str) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("%C: serialized_size_bound(unaligned_encoding) got %C but expected %C\n"),
                name, bound_str.c_str(), expected_bound_str.c_str()));
@@ -136,7 +134,7 @@ bool try_marshaling(const FOO& in_foo, FOO& out_foo,
     return false;
   }
 
-  if (expected_aligned_bound != aligned_bound) {
+  if (expected_aligned_bound_str != aligned_bound_str) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("%C: serialized_size_bound(aligned_encoding) got %C but expected %C\n"),
                name, aligned_bound_str.c_str(), expected_aligned_bound_str.c_str()));
@@ -485,7 +483,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     Xyz::StructOfSeqOfAnEnum val_out;
 
     const size_t sz = SEQ_LEN_SIZE + SEQ_LEN*4;
-    if (try_marshaling(val, val_out, SerializedSizeBound(), sz, 0, 0,
+    if (try_marshaling(val, val_out, SerializedSizeBound(), sz, 0, SerializedSizeBound(),
                        "Xyz::StructOfSeqOfAnEnum")) {
       for (CORBA::ULong ii = 0; ii < SEQ_LEN; ii++) {
         if (val_out.field[ii] != ((ii % 2 == 0) ? Xyz::greenx : Xyz::bluex)) {
