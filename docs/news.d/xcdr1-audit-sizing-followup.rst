@@ -4,6 +4,11 @@
 - Fixed unchecked allocations when deserializing ``TypeObject`` bound and union label sequences, where a small malformed discovery parameter could cause a multi-gigabyte allocation.
 .. news-end-section
 
+.. news-start-section: Fixes
+- Fixed the RTPS/UDP transport handing a received sample to the ``DataReader`` with every submessage that followed it in the same RTPS message.
+  An XCDR1 ``@appendable`` sample with fewer members than the reader's type could read those bytes as its missing trailing members instead of using their defaults.
+.. news-end-section
+
 .. news-start-section: Additions
 - Appendable and mutable structs and unions now report a finite ``serialized_size_bound()`` and ``key_only_serialized_size_bound()`` when their contents are bounded.
   This lets a ``DataWriter`` for such a topic use its preallocated sample buffers instead of always allocating from the heap.
