@@ -4,6 +4,6 @@
 .. news-prs: none
 .. news-start-section: Platform Support and Dependencies
 .. news-start-section: ACE/TAO
-- Updated ACE 8/TAO 4 from 8.0.6 to `8.0.7 <https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-8_0_7>`__.
+- Updated ACE 8/TAO 4 from 8.0.7 to `8.0.8 <https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-8_0_8>`__.
 .. news-end-section
 .. news-end-section

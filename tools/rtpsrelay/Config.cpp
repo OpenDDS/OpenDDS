@@ -41,10 +41,23 @@ bool Config::from_arg(ACE_Arg_Shifter_T<char>& args)
     log_thread_status(ACE_OS::atoi(arg));
     args.consume_arg();
   } else if ((arg = args.get_the_parameter("-ThreadStatusSafetyFactor"))) {
-    thread_status_safety_factor(ACE_OS::atoi(arg));
+    const auto val = ACE_OS::atoi(arg);
+    if (val <= 0) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Argument for -ThreadStatusSafetyFactor option must be positive: %d\n", val));
+      return false;
+    }
+    thread_status_safety_factor(val);
     args.consume_arg();
   } else if ((arg = args.get_the_parameter("-UtilizationLimit"))) {
     utilization_limit(ACE_OS::atof(arg));
+    args.consume_arg();
+  } else if ((arg = args.get_the_parameter("-UtilizationLimitTolerance"))) {
+    const auto val = ACE_OS::atoi(arg);
+    if (val < 0) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Argument for -UtilizationLimitTolerance option must be non-negative: %d\n", val));
+      return false;
+    }
+    utilization_limit_tolerance(val);
     args.consume_arg();
   } else if ((arg = args.get_the_parameter("-LogUtilizationChanges"))) {
     log_utilization_changes(ACE_OS::atoi(arg));
@@ -189,6 +202,9 @@ void Config::set_defaults()
   cached_utilization_limit_.default_if_empty([&](double default_val) {
     TheServiceParticipant->config_store()->set_float64(RTPS_RELAY_UTILIZATION_LIMIT, default_val);
   });
+  cached_utilization_limit_tolerance_.default_if_empty([&](int default_val) {
+    TheServiceParticipant->config_store()->set_int32(RTPS_RELAY_UTILIZATION_LIMIT_TOLERANCE, default_val);
+  });
   cached_log_utilization_changes_.default_if_empty([&](bool default_val) {
     TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_UTILIZATION_CHANGES, default_val);
   });
@@ -282,6 +298,8 @@ void Config::on_data_available(InternalDataReader_rch reader)
         cached_thread_status_safety_factor_.set(pair.value());
       } else if (pair.key() == RTPS_RELAY_UTILIZATION_LIMIT) {
         cached_utilization_limit_.set(pair.value());
+      } else if (pair.key() == RTPS_RELAY_UTILIZATION_LIMIT_TOLERANCE) {
+        cached_utilization_limit_tolerance_.set(pair.value());
       } else if (pair.key() == RTPS_RELAY_LOG_UTILIZATION_CHANGES) {
         cached_log_utilization_changes_.set(pair.value());
       } else if (pair.key() == RTPS_RELAY_LOG_RELAY_STATISTICS) {

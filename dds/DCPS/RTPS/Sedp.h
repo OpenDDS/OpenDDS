@@ -85,50 +85,48 @@ public:
 
   void rtps_relay_only(bool flag)
   {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     rtps_relay_only_ = flag;
   }
 
   bool rtps_relay_only() const
   {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return rtps_relay_only_;
   }
 
   void use_rtps_relay(bool flag)
   {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     use_rtps_relay_ = flag;
   }
 
   bool use_rtps_relay() const
   {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return use_rtps_relay_;
   }
 
   bool from_relay(const DCPS::NetworkAddress& from) const
   {
+    const bool use_relay = rtps_relay_only_ || use_rtps_relay_;
+
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    return (rtps_relay_only_ || use_rtps_relay_) && from == spdp_rtps_relay_address_;
+    return use_relay && from == spdp_rtps_relay_address_;
   }
 
   bool ignore_from_relay(const DCPS::NetworkAddress& from) const
   {
+    const bool ignore_relay = !(rtps_relay_only_ || use_rtps_relay_);
+
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    return (!(rtps_relay_only_ || use_rtps_relay_)) && from == spdp_rtps_relay_address_;
+    return ignore_relay && from == spdp_rtps_relay_address_;
   }
 
 #if OPENDDS_CONFIG_SECURITY
   void use_ice(bool flag)
   {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     use_ice_ = flag;
   }
 
   bool use_ice() const
   {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return use_ice_;
   }
 #endif
@@ -296,10 +294,10 @@ private:
   mutable ACE_Thread_Mutex mutex_;
   const TimeDuration sedp_heartbeat_period_;
   const TimeDuration spdp_rtps_relay_send_period_;
-  bool rtps_relay_only_;
-  bool use_rtps_relay_;
+  DCPS::AtomicBool rtps_relay_only_;
+  DCPS::AtomicBool use_rtps_relay_;
 #if OPENDDS_CONFIG_SECURITY
-  bool use_ice_;
+  DCPS::AtomicBool use_ice_;
 #endif
   DCPS::NetworkAddress spdp_rtps_relay_address_;
   DCPS::FibonacciSequence<TimeDuration> relay_spdp_task_falloff_;
