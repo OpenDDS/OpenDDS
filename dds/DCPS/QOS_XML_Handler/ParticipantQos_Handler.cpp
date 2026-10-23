@@ -1,15 +1,17 @@
 #include "ParticipantQos_Handler.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DCPS/debug.h"
+#include <memory>
+#include <string>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 bool
 ParticipantQos_Handler::get_participant_qos(DDS::DomainParticipantQos& dp_qos,
                                             const dds::qosProfile * profile,
-                                            const ACE_TCHAR * name)
+                                            std::string_view name)
 {
-  if (name)
+  if (!name.empty())
     {
 //       // find the correct Participant_qos
 //       for (dds::qosProfile::Participant_qos_iterator dw_it = profile->begin_Participant_qos();
@@ -37,13 +39,14 @@ ParticipantQos_Handler::get_participant_qos(DDS::DomainParticipantQos& dp_qos,
         }
       // get the first Participant in the XML
       const dds::domainparticipantQos& participant_qos = profile->domainparticipant_qos().front();
-      return ParticipantQos_Handler::get_participant_qos(dp_qos, &participant_qos);
+      return ParticipantQos_Handler::get_participant_qos(dp_qos, std::addressof(participant_qos));
     }
 
+  const std::string name_string (name);
   ACE_ERROR((LM_ERROR,
     ACE_TEXT("(%P|%t) ERROR: ParticipantQos_Handler::get_participant_qos - ")
-    ACE_TEXT("Unable to find ParticipantQos <%s>\n"),
-    name));
+    ACE_TEXT("Unable to find ParticipantQos <%C>\n"),
+    name_string.c_str()));
   return false;
 }
 

@@ -1,5 +1,7 @@
 #include "DataReaderQos_Handler.h"
 #include "QOS_DataReader_T.h"
+#include <memory>
+#include <string>
 #include "dds/DCPS/debug.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -7,9 +9,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 bool
 DataReaderQos_Handler::get_datareader_qos(DDS::DataReaderQos& dr_qos,
                                           const dds::qosProfile * profile,
-                                          const ACE_TCHAR * name)
+                                          std::string_view name)
 {
-  if (name)
+  if (!name.empty())
     {
 //       // find the correct DataReader_qos
 //       for (dds::qosProfile::DataReader_qos_iterator dw_it = profile->begin_DataReader_qos();
@@ -37,13 +39,14 @@ DataReaderQos_Handler::get_datareader_qos(DDS::DataReaderQos& dr_qos,
         }
       // get the first DataReader in the XML
       const dds::datareaderQos& datareader_qos = profile->datareader_qos().front();
-      return DataReaderQos_Handler::get_datareader_qos(dr_qos, &datareader_qos);
+      return DataReaderQos_Handler::get_datareader_qos(dr_qos, std::addressof(datareader_qos));
     }
 
+  const std::string name_string (name);
   ACE_ERROR((LM_ERROR,
     ACE_TEXT("(%P|%t) ERROR: DataReaderQos_Handler::get_datareader_qos - ")
-    ACE_TEXT("Unable to find DataReaderQos <%s>\n"),
-    name));
+    ACE_TEXT("Unable to find DataReaderQos <%C>\n"),
+    name_string.c_str()));
   return false;
 }
 

@@ -1,14 +1,16 @@
 #include "PublisherQos_Handler.h"
 #include "QOS_PubSub_T.h"
+#include <memory>
+#include <string>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 bool
 PublisherQos_Handler::get_publisher_qos(DDS::PublisherQos& pub_qos,
                                         const dds::qosProfile * profile,
-                                        const ACE_TCHAR * name)
+                                        std::string_view name)
 {
-  if (name)
+  if (!name.empty())
     {
 //       // find the correct DataReader_qos
 //       for (dds::qosProfile::DataReader_qos_iterator dw_it = profile->begin_DataReader_qos();
@@ -36,13 +38,14 @@ PublisherQos_Handler::get_publisher_qos(DDS::PublisherQos& pub_qos,
         }
       // get the first DataReader in the XML
       const dds::publisherQos& publisher_qos = profile->publisher_qos().front();
-      return PublisherQos_Handler::get_publisher_qos(pub_qos, &publisher_qos);
+      return PublisherQos_Handler::get_publisher_qos(pub_qos, std::addressof(publisher_qos));
     }
 
+  const std::string name_string (name);
   ACE_ERROR((LM_ERROR,
     ACE_TEXT("(%P|%t) ERROR: PublisherQos_Handler::get_publisher_qos - ")
-    ACE_TEXT("Unable to find PublisherQos <%s>\n"),
-    name));
+    ACE_TEXT("Unable to find PublisherQos <%C>\n"),
+    name_string.c_str()));
   return false;
 }
 

@@ -11,6 +11,7 @@
 #include "ParticipantQos_Handler.h"
 
 #include "dds/DCPS/debug.h"
+#include <string>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -26,9 +27,9 @@ namespace DCPS {
   }
 
   const ::dds::qosProfile *
-  QOS_XML_Handler::get_profile(const ACE_TCHAR * profile_name) const
+  QOS_XML_Handler::get_profile(std::string_view profile_name) const
   {
-    if (ACE_OS::strlen(profile_name) == 0)
+    if (profile_name.empty())
     {
       if (DCPS_debug_level > 7)
       {
@@ -41,7 +42,7 @@ namespace DCPS {
 
     for (const dds::qosProfile& profile : profiles_->qos_profile())
       {
-        if (ACE_OS::strcmp(profile.name().c_str(), profile_name) == 0)
+        if (std::string_view(profile.name()) == profile_name)
           {
             if (DCPS_debug_level > 7)
               {
@@ -56,10 +57,11 @@ namespace DCPS {
 
     if (OpenDDS::DCPS::DCPS_debug_level > 7)
       {
+        const std::string profile_name_string (profile_name);
         ACE_ERROR ((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::get_profile - ")
-          ACE_TEXT("Did not find profile <%s>\n"),
-          profile_name));
+          ACE_TEXT("Did not find profile <%C>\n"),
+          profile_name_string.c_str()));
       }
 
     return 0;
@@ -72,8 +74,8 @@ namespace DCPS {
 
   DDS::ReturnCode_t
   QOS_XML_Handler::get_datawriter_qos(::DDS::DataWriterQos& dw_qos,
-                                      const ACE_TCHAR * profile_name,
-                                      const ACE_TCHAR * topic_name)
+                                      std::string_view profile_name,
+                                      std::string_view topic_name)
   {
     ACE_UNUSED_ARG(topic_name);
 
@@ -110,8 +112,8 @@ namespace DCPS {
 
   DDS::ReturnCode_t
   QOS_XML_Handler::get_datareader_qos(::DDS::DataReaderQos& dr_qos,
-                                      const ACE_TCHAR * profile_name,
-                                      const ACE_TCHAR * topic_name)
+                                      std::string_view profile_name,
+                                      std::string_view topic_name)
   {
     ACE_UNUSED_ARG(topic_name);
 
@@ -148,8 +150,8 @@ namespace DCPS {
 
   DDS::ReturnCode_t
   QOS_XML_Handler::get_topic_qos(::DDS::TopicQos& tp_qos,
-                                 const ACE_TCHAR * profile_name,
-                                 const ACE_TCHAR * topic_name)
+                                 std::string_view profile_name,
+                                 std::string_view topic_name)
   {
     ACE_UNUSED_ARG(topic_name);
 
@@ -186,7 +188,7 @@ namespace DCPS {
 
   DDS::ReturnCode_t
   QOS_XML_Handler::get_publisher_qos(::DDS::PublisherQos& pub_qos,
-                                     const ACE_TCHAR * profile_name)
+                                     std::string_view profile_name)
   {
     DDS::ReturnCode_t retcode = DDS::RETCODE_ERROR;
     try
@@ -221,7 +223,7 @@ namespace DCPS {
 
   DDS::ReturnCode_t
   QOS_XML_Handler::get_subscriber_qos(::DDS::SubscriberQos& sub_qos,
-                                      const ACE_TCHAR * profile_name)
+                                      std::string_view profile_name)
   {
     DDS::ReturnCode_t retcode = DDS::RETCODE_ERROR;
     try
@@ -256,7 +258,7 @@ namespace DCPS {
 
   DDS::ReturnCode_t
   QOS_XML_Handler::get_participant_qos(::DDS::DomainParticipantQos& sub_qos,
-                                       const ACE_TCHAR * profile_name)
+                                       std::string_view profile_name)
   {
     DDS::ReturnCode_t retcode = DDS::RETCODE_ERROR;
     try

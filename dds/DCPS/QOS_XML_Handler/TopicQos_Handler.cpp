@@ -1,14 +1,16 @@
 #include "TopicQos_Handler.h"
 #include "QOS_Topic_T.h"
+#include <memory>
+#include <string>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 bool
 TopicQos_Handler::get_topic_qos(DDS::TopicQos& tp_qos,
                                 const dds::qosProfile * profile,
-                                const ACE_TCHAR * name)
+                                std::string_view name)
 {
-  if (name)
+  if (!name.empty())
     {
 //       // find the correct DataReader_qos
 //       for (dds::qosProfile::DataReader_qos_iterator dw_it = profile->begin_DataReader_qos();
@@ -36,13 +38,14 @@ TopicQos_Handler::get_topic_qos(DDS::TopicQos& tp_qos,
         }
       // get the first DataReader in the XML
       const dds::topicQos& topic_qos = profile->topic_qos().front();
-      return TopicQos_Handler::get_topic_qos(tp_qos, &topic_qos);
+      return TopicQos_Handler::get_topic_qos(tp_qos, std::addressof(topic_qos));
     }
 
+  const std::string name_string (name);
   ACE_ERROR((LM_ERROR,
     ACE_TEXT("(%P|%t) ERROR: TopicQos_Handler::get_topic_qos - ")
-    ACE_TEXT("Unable to find TopicQos <%s>\n"),
-    name));
+    ACE_TEXT("Unable to find TopicQos <%C>\n"),
+    name_string.c_str()));
   return false;
 }
 

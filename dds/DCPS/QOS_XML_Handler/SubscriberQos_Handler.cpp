@@ -1,15 +1,17 @@
 
 #include "SubscriberQos_Handler.h"
 #include "QOS_PubSub_T.h"
+#include <memory>
+#include <string>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 bool
 SubscriberQos_Handler::get_subscriber_qos(DDS::SubscriberQos& sub_qos,
                                           const dds::qosProfile * profile,
-                                          const ACE_TCHAR * name)
+                                          std::string_view name)
 {
-  if (name)
+  if (!name.empty())
     {
 //       // find the correct DataReader_qos
 //       for (dds::qosProfile::DataReader_qos_iterator dw_it = profile->begin_DataReader_qos();
@@ -37,13 +39,14 @@ SubscriberQos_Handler::get_subscriber_qos(DDS::SubscriberQos& sub_qos,
         }
       // get the first DataReader in the XML
       const dds::subscriberQos& subscriber_qos = profile->subscriber_qos().front();
-      return SubscriberQos_Handler::get_subscriber_qos(sub_qos, &subscriber_qos);
+      return SubscriberQos_Handler::get_subscriber_qos(sub_qos, std::addressof(subscriber_qos));
     }
 
+  const std::string name_string (name);
   ACE_ERROR((LM_ERROR,
     ACE_TEXT("(%P|%t) ERROR: SubscriberQos_Handler::get_subscriber_qos - ")
-    ACE_TEXT("Unable to find SubscriberQos <%s>\n"),
-    name));
+    ACE_TEXT("Unable to find SubscriberQos <%C>\n"),
+    name_string.c_str()));
   return false;
 }
 

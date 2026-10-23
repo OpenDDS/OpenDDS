@@ -14,6 +14,7 @@
 
 #include "dds_qos.hpp"
 #include "dds/DdsDcpsInfrastructureC.h"
+#include <string_view>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -26,7 +27,7 @@ public:
    */
   static bool get_subscriber_qos (::DDS::SubscriberQos& sub_qos,
                                   const ::dds::qosProfile * profile,
-                                  const ACE_TCHAR * name = 0);
+                                  std::string_view name = {});
 private:
   /**
    * Start parsing the QOS XML, using the template classes.

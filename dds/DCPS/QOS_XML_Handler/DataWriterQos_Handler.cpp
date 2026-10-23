@@ -1,5 +1,7 @@
 #include "DataWriterQos_Handler.h"
 #include "QOS_DataWriter_T.h"
+#include <memory>
+#include <string>
 #include "dds/DCPS/debug.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -7,9 +9,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 bool
 DataWriterQos_Handler::get_datawriter_qos(DDS::DataWriterQos& dw_qos,
                                           const dds::qosProfile * profile,
-                                          const ACE_TCHAR * name)
+                                          std::string_view name)
 {
-  if (name)
+  if (!name.empty())
     {
 //       // find the correct datawriter_qos
 //       for (const dds::datawriterQos& datawriter_qos = profile->datawriter_qos().front();
@@ -37,13 +39,14 @@ DataWriterQos_Handler::get_datawriter_qos(DDS::DataWriterQos& dw_qos,
         }
       // get the first datawriter in the XML
       const dds::datawriterQos& datawriter_qos = profile->datawriter_qos().front();
-      return DataWriterQos_Handler::get_datawriter_qos(dw_qos, &datawriter_qos);
+      return DataWriterQos_Handler::get_datawriter_qos(dw_qos, std::addressof(datawriter_qos));
     }
 
+  const std::string name_string (name);
   ACE_ERROR((LM_ERROR,
     ACE_TEXT("(%P|%t) ERROR: DataWriterQos_Handler::get_datawriter_qos - ")
-    ACE_TEXT("Unable to find DataWriterQos <%s>\n"),
-    name));
+    ACE_TEXT("Unable to find DataWriterQos <%C>\n"),
+    name_string.c_str()));
   return false;
 }
 
