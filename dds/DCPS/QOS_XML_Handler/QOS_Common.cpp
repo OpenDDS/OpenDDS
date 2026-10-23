@@ -3,7 +3,7 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 void
-QosCommon::get_durability_kind(const ::dds::durabilityKind kind,
+QosCommon::get_durability_kind(const ::dds::durabilityKind& kind,
                                ::DDS::DurabilityQosPolicyKind& dds_kind)
 {
   switch (kind.integral())
@@ -31,7 +31,7 @@ QosCommon::get_durability_kind(const ::dds::durabilityKind kind,
 }
 
 void
-QosCommon::get_history_kind(const ::dds::historyKind kind,
+QosCommon::get_history_kind(const ::dds::historyKind& kind,
                             ::DDS::HistoryQosPolicyKind& dds_kind)
 {
   switch (kind.integral())
@@ -87,7 +87,7 @@ QosCommon::get_qos_long(const ACE_TCHAR* value)
 }
 
 void
-QosCommon::get_liveliness_kind(const ::dds::livelinessKind kind,
+QosCommon::get_liveliness_kind(const ::dds::livelinessKind& kind,
                                ::DDS::LivelinessQosPolicyKind& dds_kind)
 {
   switch (kind.integral())
@@ -112,7 +112,7 @@ QosCommon::get_liveliness_kind(const ::dds::livelinessKind kind,
 }
 
 void
-QosCommon::get_realiability_kind(const ::dds::reliabilityKind kind,
+QosCommon::get_realiability_kind(const ::dds::reliabilityKind& kind,
                                  ::DDS::ReliabilityQosPolicyKind& dds_kind)
 {
   switch (kind.integral())
@@ -134,7 +134,7 @@ QosCommon::get_realiability_kind(const ::dds::reliabilityKind kind,
 }
 
 void
-QosCommon::get_destination_order_kind(const ::dds::destinationOrderKind kind,
+QosCommon::get_destination_order_kind(const ::dds::destinationOrderKind& kind,
                                       ::DDS::DestinationOrderQosPolicyKind& dds_kind)
 {
   switch (kind.integral())
@@ -156,7 +156,7 @@ QosCommon::get_destination_order_kind(const ::dds::destinationOrderKind kind,
 }
 
 void
-QosCommon::get_ownership_kind(const ::dds::ownershipKind kind,
+QosCommon::get_ownership_kind(const ::dds::ownershipKind& kind,
                               ::DDS::OwnershipQosPolicyKind& dds_kind)
 {
   switch (kind.integral())
@@ -178,7 +178,7 @@ QosCommon::get_ownership_kind(const ::dds::ownershipKind kind,
 }
 
 void
-QosCommon::get_type_consistency_kind(const ::dds::typeConsistencyKind kind,
+QosCommon::get_type_consistency_kind(const ::dds::typeConsistencyKind& kind,
                                     ::DDS::TypeConsistencyEnforcementQosPolicyKind_t& dds_kind)
 {
   switch (kind.integral())
@@ -200,7 +200,7 @@ QosCommon::get_type_consistency_kind(const ::dds::typeConsistencyKind kind,
 }
 
 void
-QosCommon::get_data_presentation_id_kind(const ::dds::dataRepresentationIdKind kind,
+QosCommon::get_data_presentation_id_kind(const ::dds::dataRepresentationIdKind& kind,
                                          ::DDS::DataRepresentationId_t& dds_kind)
 {
   switch (kind.integral())

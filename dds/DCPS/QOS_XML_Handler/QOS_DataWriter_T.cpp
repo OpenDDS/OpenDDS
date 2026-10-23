@@ -29,7 +29,7 @@ QOS_DataWriter_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
 //    {
       // TODO: Have a good look at this.
 
-//       const std::string value = *xml_qos->user_data()->value();
+//       const std::string value = *xml_qos->user_data()->value_if_set();
 //
 //       ACE_DEBUG((LM_TRACE,
 //         ACE_TEXT("QOS_DataWriter_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
@@ -37,11 +37,12 @@ QOS_DataWriter_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
 //         value.c_str()));
 //
 //       dds_qos.user_data.value =
-//         *xml_qos->user_data()->value();
+//         *xml_qos->user_data()->value_if_set();
 //     }
- if (xml_qos->ownership_strength_p())
+ if (xml_qos->ownership_strength_if_set())
    {
-      dds_qos.ownership_strength.value = static_cast<CORBA::Long>(xml_qos->ownership_strength().value());
+      dds_qos.ownership_strength.value = static_cast<CORBA::Long>(
+        *xml_qos->ownership_strength_if_set()->value_if_set());
 
       if (OpenDDS::DCPS::DCPS_debug_level > 9)
         {
@@ -51,11 +52,11 @@ QOS_DataWriter_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
             dds_qos.ownership_strength.value));
         }
    }
-  if (xml_qos->writer_data_lifecycle_p() &&
-      xml_qos->writer_data_lifecycle().autodispose_unregistered_instances_p())
+  if (xml_qos->writer_data_lifecycle_if_set() &&
+      xml_qos->writer_data_lifecycle_if_set()->autodispose_unregistered_instances_if_set())
     {
       dds_qos.writer_data_lifecycle.autodispose_unregistered_instances =
-        xml_qos->writer_data_lifecycle().autodispose_unregistered_instances();
+        *xml_qos->writer_data_lifecycle_if_set()->autodispose_unregistered_instances_if_set();
 
       if (OpenDDS::DCPS::DCPS_debug_level > 9)
         {

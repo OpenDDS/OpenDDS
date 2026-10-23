@@ -6,7 +6,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 bool
 ParticipantQos_Handler::get_participant_qos(DDS::DomainParticipantQos& dp_qos,
-                                            dds::qosProfile * profile,
+                                            const dds::qosProfile * profile,
                                             const ACE_TCHAR * name)
 {
   if (name)
@@ -18,13 +18,13 @@ ParticipantQos_Handler::get_participant_qos(DDS::DomainParticipantQos& dp_qos,
 //         {
 //           if (ACE_OS::strcmp(dw_name.c_str(), name) == 0)
 //             {
-//               return get_Participant_qos(dw_qos, *dw_it->get());
+//               return get_Participant_qos(dw_qos, *&datawriter_qos);
 //             }
 //         }
     }
   else
     {
-      if (profile->count_domainparticipant_qos() == 0)
+      if (profile->domainparticipant_qos().empty())
         {
           if (OpenDDS::DCPS::DCPS_debug_level > 8)
             {
@@ -36,8 +36,8 @@ ParticipantQos_Handler::get_participant_qos(DDS::DomainParticipantQos& dp_qos,
           return true;
         }
       // get the first Participant in the XML
-      dds::qosProfile::domainparticipant_qos_iterator dr_it = profile->begin_domainparticipant_qos();
-      return ParticipantQos_Handler::get_participant_qos(dp_qos, dr_it->get());
+      const dds::domainparticipantQos& participant_qos = profile->domainparticipant_qos().front();
+      return ParticipantQos_Handler::get_participant_qos(dp_qos, &participant_qos);
     }
 
   ACE_ERROR((LM_ERROR,
@@ -49,14 +49,14 @@ ParticipantQos_Handler::get_participant_qos(DDS::DomainParticipantQos& dp_qos,
 
 bool
 ParticipantQos_Handler::get_participant_qos(DDS::DomainParticipantQos& dp_qos,
-                                            dds::domainparticipantQos * dp)
+                                            const dds::domainparticipantQos * dp)
 {
 
 //  if (xml_qos->user_data())
 //    {
       // TODO: Have a good look at this.
 
-//       const std::string value = *xml_qos->user_data()->value();
+//       const std::string value = *xml_qos->user_data()->value_if_set();
 //
 //       ACE_DEBUG((LM_TRACE,
 //         ACE_TEXT("QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
@@ -64,16 +64,16 @@ ParticipantQos_Handler::get_participant_qos(DDS::DomainParticipantQos& dp_qos,
 //         value.c_str()));
 //
 //       dds_qos.user_data.value =
-//         *xml_qos->user_data()->value();
+//         *xml_qos->user_data()->value_if_set();
 //     }
 
 
-  if (dp->entity_factory_p())
+  if (dp->entity_factory_if_set())
     {
-      if (dp->entity_factory().autoenable_created_entities_p())
+      if (dp->entity_factory_if_set()->autoenable_created_entities_if_set())
         {
           dp_qos.entity_factory.autoenable_created_entities =
-            dp->entity_factory().autoenable_created_entities();
+            dp->entity_factory_if_set()->autoenable_created_entities_if_set();
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {

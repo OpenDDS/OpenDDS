@@ -29,7 +29,7 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
 //    {
       // TODO: Have a good look at this.
 
-//       const std::string value = *xml_qos->user_data()->value();
+//       const std::string value = *xml_qos->user_data()->value_if_set();
 //
 //       ACE_DEBUG((LM_TRACE,
 //         ACE_TEXT("QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
@@ -37,14 +37,18 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
 //         value.c_str()));
 //
 //       dds_qos.user_data.value =
-//         *xml_qos->user_data()->value();
+//         *xml_qos->user_data()->value_if_set();
 //     }
-  if (xml_qos->time_based_filter_p())
+  if (xml_qos->time_based_filter_if_set())
     {
-      if (xml_qos->time_based_filter().minimum_separation_p())
+      if (xml_qos->time_based_filter_if_set()->minimum_separation_if_set())
         {
-          const ACE_TString sec(xml_qos->time_based_filter().minimum_separation().sec().c_str());
-          const ACE_TString nsec(xml_qos->time_based_filter().minimum_separation().nanosec().c_str());
+          const ::dds::duration* minimum_separation =
+            xml_qos->time_based_filter_if_set()->minimum_separation_if_set();
+          const ACE_TString sec(
+            minimum_separation->sec_if_set()->c_str());
+          const ACE_TString nsec(
+            minimum_separation->nanosec_if_set()->c_str());
 
           QosCommon::get_duration(dds_qos.time_based_filter.minimum_separation,
                                   sec.fast_rep(),
@@ -60,12 +64,16 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
             }
         }
     }
-  if (xml_qos->reader_data_lifecycle_p())
+  if (xml_qos->reader_data_lifecycle_if_set())
     {
-      if (xml_qos->reader_data_lifecycle().autopurge_nowriter_samples_delay_p())
+      if (xml_qos->reader_data_lifecycle_if_set()->autopurge_nowriter_samples_delay_if_set())
         {
-          const ACE_TString sec(xml_qos->reader_data_lifecycle().autopurge_nowriter_samples_delay().sec().c_str());
-          const ACE_TString nsec(xml_qos->reader_data_lifecycle().autopurge_nowriter_samples_delay().nanosec().c_str());
+          const ::dds::duration* delay =
+            xml_qos->reader_data_lifecycle_if_set()->autopurge_nowriter_samples_delay_if_set();
+          const ACE_TString sec(
+            delay->sec_if_set()->c_str());
+          const ACE_TString nsec(
+            delay->nanosec_if_set()->c_str());
 
           QosCommon::get_duration(dds_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay,
                                   sec.c_str(),
@@ -80,10 +88,14 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
                 dds_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec));
             }
         }
-      if (xml_qos->reader_data_lifecycle().autopurge_disposed_samples_delay_p())
+      if (xml_qos->reader_data_lifecycle_if_set()->autopurge_disposed_samples_delay_if_set())
         {
-          const ACE_TString sec(xml_qos->reader_data_lifecycle().autopurge_disposed_samples_delay().sec().c_str());
-          const ACE_TString nsec(xml_qos->reader_data_lifecycle().autopurge_disposed_samples_delay().nanosec().c_str());
+          const ::dds::duration* delay =
+            xml_qos->reader_data_lifecycle_if_set()->autopurge_disposed_samples_delay_if_set();
+          const ACE_TString sec(
+            delay->sec_if_set()->c_str());
+          const ACE_TString nsec(
+            delay->nanosec_if_set()->c_str());
 
           QosCommon::get_duration(dds_qos.reader_data_lifecycle.autopurge_disposed_samples_delay,
                                   sec.c_str(),
@@ -99,11 +111,11 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
             }
         }
     }
-  if (xml_qos->type_consistency_p())
+  if (xml_qos->type_consistency_if_set())
     {
-      if (xml_qos->type_consistency().kind_p())
+      if (xml_qos->type_consistency_if_set()->kind_if_set())
         {
-          QosCommon::get_type_consistency_kind(xml_qos->type_consistency().kind(),
+          QosCommon::get_type_consistency_kind(*xml_qos->type_consistency_if_set()->kind_if_set(),
                                                dds_qos.type_consistency.kind);
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
@@ -114,10 +126,10 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
                 dds_qos.type_consistency.kind));
             }
         }
-      if (xml_qos->type_consistency().ignore_sequence_bounds_p())
+      if (xml_qos->type_consistency_if_set()->ignore_sequence_bounds_if_set())
         {
           dds_qos.type_consistency.ignore_sequence_bounds =
-            xml_qos->type_consistency().ignore_sequence_bounds();
+            *xml_qos->type_consistency_if_set()->ignore_sequence_bounds_if_set();
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {
@@ -127,10 +139,10 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
                 dds_qos.type_consistency.ignore_sequence_bounds));
             }
         }
-      if (xml_qos->type_consistency().ignore_string_bounds_p())
+      if (xml_qos->type_consistency_if_set()->ignore_string_bounds_if_set())
         {
           dds_qos.type_consistency.ignore_string_bounds =
-            xml_qos->type_consistency().ignore_string_bounds();
+            *xml_qos->type_consistency_if_set()->ignore_string_bounds_if_set();
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {
@@ -140,10 +152,10 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
                 dds_qos.type_consistency.ignore_string_bounds));
             }
         }
-      if (xml_qos->type_consistency().ignore_member_names_p())
+      if (xml_qos->type_consistency_if_set()->ignore_member_names_if_set())
         {
           dds_qos.type_consistency.ignore_member_names =
-            xml_qos->type_consistency().ignore_member_names();
+            *xml_qos->type_consistency_if_set()->ignore_member_names_if_set();
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {
@@ -153,10 +165,10 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
                 dds_qos.type_consistency.ignore_member_names));
             }
         }
-      if (xml_qos->type_consistency().prevent_type_widening_p())
+      if (xml_qos->type_consistency_if_set()->prevent_type_widening_if_set())
         {
           dds_qos.type_consistency.prevent_type_widening =
-            xml_qos->type_consistency().prevent_type_widening();
+            *xml_qos->type_consistency_if_set()->prevent_type_widening_if_set();
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {
@@ -166,10 +178,10 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
                 dds_qos.type_consistency.prevent_type_widening));
             }
         }
-      if (xml_qos->type_consistency().force_type_validation_p())
+      if (xml_qos->type_consistency_if_set()->force_type_validation_if_set())
         {
           dds_qos.type_consistency.force_type_validation =
-            xml_qos->type_consistency().force_type_validation();
+            *xml_qos->type_consistency_if_set()->force_type_validation_if_set();
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {

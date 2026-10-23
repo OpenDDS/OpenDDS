@@ -6,7 +6,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 bool
 DataReaderQos_Handler::get_datareader_qos(DDS::DataReaderQos& dr_qos,
-                                          dds::qosProfile * profile,
+                                          const dds::qosProfile * profile,
                                           const ACE_TCHAR * name)
 {
   if (name)
@@ -18,13 +18,13 @@ DataReaderQos_Handler::get_datareader_qos(DDS::DataReaderQos& dr_qos,
 //         {
 //           if (ACE_OS::strcmp(dw_name.c_str(), name) == 0)
 //             {
-//               return get_DataReader_qos(dw_qos, *dw_it->get());
+//               return get_DataReader_qos(dw_qos, *&datawriter_qos);
 //             }
 //         }
     }
   else
     {
-      if (profile->count_datareader_qos() == 0)
+      if (profile->datareader_qos().empty())
         {
           if (OpenDDS::DCPS::DCPS_debug_level > 7)
             {
@@ -36,8 +36,8 @@ DataReaderQos_Handler::get_datareader_qos(DDS::DataReaderQos& dr_qos,
           return true;
         }
       // get the first DataReader in the XML
-      dds::qosProfile::datareader_qos_iterator dr_it = profile->begin_datareader_qos();
-      return DataReaderQos_Handler::get_datareader_qos(dr_qos, dr_it->get());
+      const dds::datareaderQos& datareader_qos = profile->datareader_qos().front();
+      return DataReaderQos_Handler::get_datareader_qos(dr_qos, &datareader_qos);
     }
 
   ACE_ERROR((LM_ERROR,
@@ -49,9 +49,9 @@ DataReaderQos_Handler::get_datareader_qos(DDS::DataReaderQos& dr_qos,
 
 bool
 DataReaderQos_Handler::get_datareader_qos(DDS::DataReaderQos& dr_qos,
-                                          dds::datareaderQos * dr)
+                                          const dds::datareaderQos * dr)
 {
-  typedef QOS_DataReader_T<dds::datareaderQos*, DDS::DataReaderQos> dr_type;
+  typedef QOS_DataReader_T<const dds::datareaderQos*, DDS::DataReaderQos> dr_type;
   dr_type datareader_qos_handler;
   datareader_qos_handler.read_qos(dr_qos, dr);
 

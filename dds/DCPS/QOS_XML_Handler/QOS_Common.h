@@ -25,21 +25,21 @@ public:
   //@{
   /** Operations which convert QOS XML kinds to QOS IDL kinds. */
 
-  static void get_durability_kind (const ::dds::durabilityKind kind,
+  static void get_durability_kind (const ::dds::durabilityKind& kind,
                                    ::DDS::DurabilityQosPolicyKind& dds_kind);
-  static void get_history_kind (const ::dds::historyKind kind,
+  static void get_history_kind (const ::dds::historyKind& kind,
                                 ::DDS::HistoryQosPolicyKind& dds_kind);
-  static void get_liveliness_kind (const ::dds::livelinessKind kind,
+  static void get_liveliness_kind (const ::dds::livelinessKind& kind,
                                    ::DDS::LivelinessQosPolicyKind& dds_kind);
-  static void get_realiability_kind (const dds::reliabilityKind kind,
+  static void get_realiability_kind (const dds::reliabilityKind& kind,
                                      ::DDS::ReliabilityQosPolicyKind& dds_kind);
-  static void get_destination_order_kind (const ::dds::destinationOrderKind kind,
+  static void get_destination_order_kind (const ::dds::destinationOrderKind& kind,
                                           ::DDS::DestinationOrderQosPolicyKind& dds_kind);
-  static void get_ownership_kind (::dds::ownershipKind kind,
+  static void get_ownership_kind (const ::dds::ownershipKind& kind,
                                   ::DDS::OwnershipQosPolicyKind& dds_kind);
-  static void get_type_consistency_kind (::dds::typeConsistencyKind kind,
+  static void get_type_consistency_kind (const ::dds::typeConsistencyKind& kind,
                                          ::DDS::TypeConsistencyEnforcementQosPolicyKind_t& dds_kind);
-  static void get_data_presentation_id_kind (::dds::dataRepresentationIdKind kind,
+  static void get_data_presentation_id_kind (const ::dds::dataRepresentationIdKind& kind,
                                              ::DDS::DataRepresentationId_t& dds_kind);
   //@}
 

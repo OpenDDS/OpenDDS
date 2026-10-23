@@ -6,7 +6,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 bool
 SubscriberQos_Handler::get_subscriber_qos(DDS::SubscriberQos& sub_qos,
-                                          dds::qosProfile * profile,
+                                          const dds::qosProfile * profile,
                                           const ACE_TCHAR * name)
 {
   if (name)
@@ -18,13 +18,13 @@ SubscriberQos_Handler::get_subscriber_qos(DDS::SubscriberQos& sub_qos,
 //         {
 //           if (ACE_OS::strcmp(dw_name.c_str(), name) == 0)
 //             {
-//               return get_DataReader_qos(dw_qos, *dw_it->get());
+//               return get_DataReader_qos(dw_qos, *&datawriter_qos);
 //             }
 //         }
     }
   else
     {
-      if (profile->count_subscriber_qos() == 0)
+      if (profile->subscriber_qos().empty())
         {
           if (OpenDDS::DCPS::DCPS_debug_level > 7)
             {
@@ -36,8 +36,8 @@ SubscriberQos_Handler::get_subscriber_qos(DDS::SubscriberQos& sub_qos,
           return true;
         }
       // get the first DataReader in the XML
-      dds::qosProfile::subscriber_qos_iterator sub_it = profile->begin_subscriber_qos();
-      return SubscriberQos_Handler::get_subscriber_qos(sub_qos, sub_it->get());
+      const dds::subscriberQos& subscriber_qos = profile->subscriber_qos().front();
+      return SubscriberQos_Handler::get_subscriber_qos(sub_qos, &subscriber_qos);
     }
 
   ACE_ERROR((LM_ERROR,
@@ -49,9 +49,9 @@ SubscriberQos_Handler::get_subscriber_qos(DDS::SubscriberQos& sub_qos,
 
 bool
 SubscriberQos_Handler::get_subscriber_qos(DDS::SubscriberQos& sub_qos,
-                                          dds::subscriberQos * sub)
+                                          const dds::subscriberQos * sub)
 {
-  typedef QOS_PubSub_T<dds::subscriberQos*, DDS::SubscriberQos> sub_type;
+  typedef QOS_PubSub_T<const dds::subscriberQos*, DDS::SubscriberQos> sub_type;
   sub_type subscriber_qos_handler;
   subscriber_qos_handler.read_qos(sub_qos, sub);
 

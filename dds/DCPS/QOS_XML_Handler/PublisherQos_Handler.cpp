@@ -5,7 +5,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 bool
 PublisherQos_Handler::get_publisher_qos(DDS::PublisherQos& pub_qos,
-                                        dds::qosProfile * profile,
+                                        const dds::qosProfile * profile,
                                         const ACE_TCHAR * name)
 {
   if (name)
@@ -17,13 +17,13 @@ PublisherQos_Handler::get_publisher_qos(DDS::PublisherQos& pub_qos,
 //         {
 //           if (ACE_OS::strcmp(dw_name.c_str(), name) == 0)
 //             {
-//               return get_DataReader_qos(dw_qos, *dw_it->get());
+//               return get_DataReader_qos(dw_qos, *&datawriter_qos);
 //             }
 //         }
     }
   else
     {
-      if (profile->count_publisher_qos() == 0)
+      if (profile->publisher_qos().empty())
         {
           if (OpenDDS::DCPS::DCPS_debug_level > 7)
             {
@@ -35,8 +35,8 @@ PublisherQos_Handler::get_publisher_qos(DDS::PublisherQos& pub_qos,
           return true;
         }
       // get the first DataReader in the XML
-      dds::qosProfile::publisher_qos_iterator pub_it = profile->begin_publisher_qos();
-      return PublisherQos_Handler::get_publisher_qos(pub_qos, pub_it->get());
+      const dds::publisherQos& publisher_qos = profile->publisher_qos().front();
+      return PublisherQos_Handler::get_publisher_qos(pub_qos, &publisher_qos);
     }
 
   ACE_ERROR((LM_ERROR,
@@ -48,9 +48,9 @@ PublisherQos_Handler::get_publisher_qos(DDS::PublisherQos& pub_qos,
 
 bool
 PublisherQos_Handler::get_publisher_qos(DDS::PublisherQos& pub_qos,
-                                        dds::publisherQos * pub)
+                                        const dds::publisherQos * pub)
 {
-  typedef QOS_PubSub_T<dds::publisherQos*, DDS::PublisherQos> pub_type;
+  typedef QOS_PubSub_T<const dds::publisherQos*, DDS::PublisherQos> pub_type;
   pub_type publisher_qos_handler;
   publisher_qos_handler.read_qos(pub_qos, pub);
 

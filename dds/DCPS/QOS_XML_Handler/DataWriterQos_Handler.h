@@ -25,14 +25,14 @@ public:
    * based on the given name.
    */
   static bool get_datawriter_qos (::DDS::DataWriterQos& dw_qos,
-                                  ::dds::qosProfile * profile,
+                                  const ::dds::qosProfile * profile,
                                   const ACE_TCHAR * name = 0);
 private:
   /**
    * Start parsing the QOS XML, using the template classes.
    */
   static bool get_datawriter_qos (DDS::DataWriterQos& dw_qos,
-                                  dds::datawriterQos * dw);
+                                  const dds::datawriterQos * dw);
 };
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

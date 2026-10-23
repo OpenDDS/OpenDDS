@@ -27,7 +27,7 @@ QOS_Topic_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos (DDS_QOS_TYPE& dds_qos, const 
 //    {
       // TODO: Have a good look at this.
 
-//       const std::string value = *xml_qos->topic_data ()->value ();
+//       const std::string value = *xml_qos->topic_data ()->value_if_set();
 //
 //       ACE_DEBUG ((LM_TRACE,
 //         ACE_TEXT ("QOS_Topic_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
@@ -35,7 +35,7 @@ QOS_Topic_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos (DDS_QOS_TYPE& dds_qos, const 
 //         value.c_str ()));
 //
 //       dds_qos.topic_data.value =
-//         *xml_qos->topic_data ()->value ();
+//         *xml_qos->topic_data ()->value_if_set();
 //     }
 }
 
