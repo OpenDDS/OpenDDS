@@ -12354,6 +12354,9 @@ jobs:
     needs: ACE_TAO_m15_o1d0_sec
 
     steps:
+    - name: check macOS firewall
+      run: |
+        /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
@@ -12436,6 +12439,11 @@ jobs:
       id-token: write
 
     steps:
+    - name: check and disable macOS firewall
+      run: |
+        /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
+        sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off
+        /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
@@ -12562,6 +12570,11 @@ jobs:
       id-token: write
 
     steps:
+    - name: check and disable macOS firewall
+      run: |
+        /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
+        sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off
+        /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
@@ -12763,6 +12776,9 @@ jobs:
     needs: ACE_TAO_m15_i0_j_FM-1f
 
     steps:
+    - name: check macOS firewall
+      run: |
+        /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
@@ -12860,6 +12876,11 @@ jobs:
       id-token: write
 
     steps:
+    - name: check and disable macOS firewall
+      run: |
+        /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
+        sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off
+        /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
@@ -12986,6 +13007,11 @@ jobs:
       id-token: write
 
     steps:
+    - name: check and disable macOS firewall
+      run: |
+        /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
+        sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off
+        /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
