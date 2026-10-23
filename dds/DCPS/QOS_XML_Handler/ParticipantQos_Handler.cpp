@@ -68,8 +68,7 @@ ParticipantQos_Handler::get_participant_qos(DDS::DomainParticipantQos& dp_qos,
 //     }
 
 
-  const ::dds::entityFactoryQosPolicy* entity_factory_if_set_ptr =
-    dp->entity_factory_if_set();
+  const ::dds::entityFactoryQosPolicy* entity_factory_if_set_ptr = dp->entity_factory_if_set();
   if (entity_factory_if_set_ptr)
     {
       const ::XMLSchema::boolean* autoenable_created_entities_if_set_ptr =
