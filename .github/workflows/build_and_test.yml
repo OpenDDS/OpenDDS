@@ -12357,6 +12357,14 @@ jobs:
     - name: check macOS firewall
       run: |
         /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
+    - name: check multicast routing table
+      run: |
+        echo "Check route"
+        route -n get 239.255.0.1
+        echo "Check netstat"
+        netstat -rn -f inet | grep -E '^(224|default)'
+        echo "Check interface"
+        ifconfig en0 | grep -i multicast
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
@@ -12444,6 +12452,14 @@ jobs:
         /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
         sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off
         /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
+    - name: check multicast routing table
+      run: |
+        echo "Check route"
+        route -n get 239.255.0.1
+        echo "Check netstat"
+        netstat -rn -f inet | grep -E '^(224|default)'
+        echo "Check interface"
+        ifconfig en0 | grep -i multicast
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
@@ -12575,6 +12591,14 @@ jobs:
         /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
         sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off
         /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
+    - name: check multicast routing table
+      run: |
+        echo "Check route"
+        route -n get 239.255.0.1
+        echo "Check netstat"
+        netstat -rn -f inet | grep -E '^(224|default)'
+        echo "Check interface"
+        ifconfig en0 | grep -i multicast
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
@@ -12779,6 +12803,14 @@ jobs:
     - name: check macOS firewall
       run: |
         /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
+    - name: check multicast routing table
+      run: |
+        echo "Check route"
+        route -n get 239.255.0.1
+        echo "Check netstat"
+        netstat -rn -f inet | grep -E '^(224|default)'
+        echo "Check interface"
+        ifconfig en0 | grep -i multicast
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
@@ -12881,6 +12913,14 @@ jobs:
         /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
         sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off
         /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
+    - name: check multicast routing table
+      run: |
+        echo "Check route"
+        route -n get 239.255.0.1
+        echo "Check netstat"
+        netstat -rn -f inet | grep -E '^(224|default)'
+        echo "Check interface"
+        ifconfig en0 | grep -i multicast
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
@@ -13012,6 +13052,14 @@ jobs:
         /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
         sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off
         /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
+    - name: check multicast routing table
+      run: |
+        echo "Check route"
+        route -n get 239.255.0.1
+        echo "Check netstat"
+        netstat -rn -f inet | grep -E '^(224|default)'
+        echo "Check interface"
+        ifconfig en0 | grep -i multicast
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
