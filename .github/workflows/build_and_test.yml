@@ -12365,6 +12365,11 @@ jobs:
         netstat -rn -f inet | grep -E '^(224|default)'
         echo "Check interface"
         ifconfig en0 | grep -i multicast
+    - name: route multicast over loopback
+      run: |
+        sudo route -n add -net 239.255.0.0/16 -interface lo0
+        route -n get 239.255.0.1
+        netstat -rn -f inet | grep -E '^(224|239)'
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
@@ -12460,6 +12465,11 @@ jobs:
         netstat -rn -f inet | grep -E '^(224|default)'
         echo "Check interface"
         ifconfig en0 | grep -i multicast
+    - name: route multicast over loopback
+      run: |
+        sudo route -n add -net 239.255.0.0/16 -interface lo0
+        route -n get 239.255.0.1
+        netstat -rn -f inet | grep -E '^(224|239)'
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
@@ -12599,6 +12609,11 @@ jobs:
         netstat -rn -f inet | grep -E '^(224|default)'
         echo "Check interface"
         ifconfig en0 | grep -i multicast
+    - name: route multicast over loopback
+      run: |
+        sudo route -n add -net 239.255.0.0/16 -interface lo0
+        route -n get 239.255.0.1
+        netstat -rn -f inet | grep -E '^(224|239)'
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
@@ -12811,6 +12826,11 @@ jobs:
         netstat -rn -f inet | grep -E '^(224|default)'
         echo "Check interface"
         ifconfig en0 | grep -i multicast
+    - name: route multicast over loopback
+      run: |
+        sudo route -n add -net 239.255.0.0/16 -interface lo0
+        route -n get 239.255.0.1
+        netstat -rn -f inet | grep -E '^(224|239)'
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
@@ -12921,6 +12941,11 @@ jobs:
         netstat -rn -f inet | grep -E '^(224|default)'
         echo "Check interface"
         ifconfig en0 | grep -i multicast
+    - name: route multicast over loopback
+      run: |
+        sudo route -n add -net 239.255.0.0/16 -interface lo0
+        route -n get 239.255.0.1
+        netstat -rn -f inet | grep -E '^(224|239)'
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
@@ -13060,6 +13085,11 @@ jobs:
         netstat -rn -f inet | grep -E '^(224|default)'
         echo "Check interface"
         ifconfig en0 | grep -i multicast
+    - name: route multicast over loopback
+      run: |
+        sudo route -n add -net 239.255.0.0/16 -interface lo0
+        route -n get 239.255.0.1
+        netstat -rn -f inet | grep -E '^(224|239)'
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
