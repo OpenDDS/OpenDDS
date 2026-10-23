@@ -39,12 +39,10 @@ QOS_DataWriter_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
 //       dds_qos.user_data.value =
 //         *xml_qos->user_data()->value_if_set();
 //     }
-  const ::dds::ownershipStrengthQosPolicy* ownership_strength_if_set_ptr =
-    xml_qos->ownership_strength_if_set();
+  const ::dds::ownershipStrengthQosPolicy* ownership_strength_if_set_ptr = xml_qos->ownership_strength_if_set();
   if (ownership_strength_if_set_ptr)
     {
-      const ::XMLSchema::nonNegativeInteger* value_if_set_ptr =
-        ownership_strength_if_set_ptr->value_if_set();
+      const ::XMLSchema::nonNegativeInteger* value_if_set_ptr = ownership_strength_if_set_ptr->value_if_set();
       if (value_if_set_ptr)
         {
           dds_qos.ownership_strength.value = static_cast<CORBA::Long>(*value_if_set_ptr);
@@ -58,8 +56,7 @@ QOS_DataWriter_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
             }
         }
     }
-  const ::dds::writerDataLifecycleQosPolicy* writer_data_lifecycle_if_set_ptr =
-    xml_qos->writer_data_lifecycle_if_set();
+  const ::dds::writerDataLifecycleQosPolicy* writer_data_lifecycle_if_set_ptr = xml_qos->writer_data_lifecycle_if_set();
   if (writer_data_lifecycle_if_set_ptr)
     {
       const ::XMLSchema::boolean* autodispose_if_set_ptr =

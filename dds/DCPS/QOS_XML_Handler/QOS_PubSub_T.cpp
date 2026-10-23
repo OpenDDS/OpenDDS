@@ -68,8 +68,7 @@ QOS_PubSub_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, const 
                   dds_qos.presentation.access_scope));
               }
           }
-        const ::XMLSchema::boolean* coherent_access_if_set_ptr =
-          presentation_if_set_ptr->coherent_access_if_set();
+        const ::XMLSchema::boolean* coherent_access_if_set_ptr = presentation_if_set_ptr->coherent_access_if_set();
         if (coherent_access_if_set_ptr)
           {
             dds_qos.presentation.coherent_access =
@@ -83,8 +82,7 @@ QOS_PubSub_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, const 
                   dds_qos.presentation.coherent_access));
               }
           }
-        const ::XMLSchema::boolean* ordered_access_if_set_ptr =
-          presentation_if_set_ptr->ordered_access_if_set();
+        const ::XMLSchema::boolean* ordered_access_if_set_ptr = presentation_if_set_ptr->ordered_access_if_set();
         if (ordered_access_if_set_ptr)
           {
             dds_qos.presentation.ordered_access =

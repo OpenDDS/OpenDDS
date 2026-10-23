@@ -203,8 +203,7 @@ QOS_DwDrTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, c
   const ::dds::resourceLimitsQosPolicy* resource_limits_if_set_ptr = xml_qos->resource_limits_if_set();
   if (resource_limits_if_set_ptr)
     {
-      const ::XMLSchema::string<char>* max_samples_if_set_ptr =
-        resource_limits_if_set_ptr->max_samples_if_set();
+      const ::XMLSchema::string<char>* max_samples_if_set_ptr = resource_limits_if_set_ptr->max_samples_if_set();
       if (max_samples_if_set_ptr)
         {
           dds_qos.resource_limits.max_samples = QosCommon::get_qos_long(*max_samples_if_set_ptr);
@@ -217,8 +216,7 @@ QOS_DwDrTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, c
                 dds_qos.resource_limits.max_samples));
             }
         }
-      const ::XMLSchema::string<char>* max_instances_if_set_ptr =
-        resource_limits_if_set_ptr->max_instances_if_set();
+      const ::XMLSchema::string<char>* max_instances_if_set_ptr = resource_limits_if_set_ptr->max_instances_if_set();
       if (max_instances_if_set_ptr)
         {
           dds_qos.resource_limits.max_instances = QosCommon::get_qos_long(*max_instances_if_set_ptr);
@@ -264,8 +262,7 @@ QOS_DwDrTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, c
             dds_qos.ownership.kind));
         }
     }
-  const ::dds::dataRepresentationQosPolicy* representation_if_set_ptr =
-    xml_qos->representation_if_set();
+  const ::dds::dataRepresentationQosPolicy* representation_if_set_ptr = xml_qos->representation_if_set();
   if (representation_if_set_ptr)
     {
       const ::dds::dataRepresentationIdSeq* value_if_set_ptr = representation_if_set_ptr->value_if_set();

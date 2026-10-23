@@ -39,12 +39,10 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
 //       dds_qos.user_data.value =
 //         *xml_qos->user_data()->value_if_set();
 //     }
-  const ::dds::timeBasedFilterQosPolicy* time_based_filter_if_set_ptr =
-    xml_qos->time_based_filter_if_set();
+  const ::dds::timeBasedFilterQosPolicy* time_based_filter_if_set_ptr = xml_qos->time_based_filter_if_set();
   if (time_based_filter_if_set_ptr)
     {
-      const ::dds::duration* minimum_separation_if_set_ptr =
-        time_based_filter_if_set_ptr->minimum_separation_if_set();
+      const ::dds::duration* minimum_separation_if_set_ptr = time_based_filter_if_set_ptr->minimum_separation_if_set();
       if (minimum_separation_if_set_ptr)
         {
           const ::XMLSchema::string<char>* sec_if_set_ptr = minimum_separation_if_set_ptr->sec_if_set();
@@ -64,16 +62,14 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
             }
         }
     }
-  const ::dds::readerDataLifecycleQosPolicy* reader_data_lifecycle_if_set_ptr =
-    xml_qos->reader_data_lifecycle_if_set();
+  const ::dds::readerDataLifecycleQosPolicy* reader_data_lifecycle_if_set_ptr = xml_qos->reader_data_lifecycle_if_set();
   if (reader_data_lifecycle_if_set_ptr)
     {
       const ::dds::duration* autopurge_nowriter_samples_delay_if_set_ptr =
         reader_data_lifecycle_if_set_ptr->autopurge_nowriter_samples_delay_if_set();
       if (autopurge_nowriter_samples_delay_if_set_ptr)
         {
-          const ::XMLSchema::string<char>* sec_if_set_ptr =
-            autopurge_nowriter_samples_delay_if_set_ptr->sec_if_set();
+          const ::XMLSchema::string<char>* sec_if_set_ptr = autopurge_nowriter_samples_delay_if_set_ptr->sec_if_set();
           const ::XMLSchema::string<char>* nsec_if_set_ptr =
             autopurge_nowriter_samples_delay_if_set_ptr->nanosec_if_set();
 
@@ -94,8 +90,7 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
         reader_data_lifecycle_if_set_ptr->autopurge_disposed_samples_delay_if_set();
       if (autopurge_disposed_samples_delay_if_set_ptr)
         {
-          const ::XMLSchema::string<char>* sec_if_set_ptr =
-            autopurge_disposed_samples_delay_if_set_ptr->sec_if_set();
+          const ::XMLSchema::string<char>* sec_if_set_ptr = autopurge_disposed_samples_delay_if_set_ptr->sec_if_set();
           const ::XMLSchema::string<char>* nsec_if_set_ptr =
             autopurge_disposed_samples_delay_if_set_ptr->nanosec_if_set();
 
@@ -113,8 +108,7 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
             }
         }
     }
-  const ::dds::typeConsistencyEnforcementQosPolicy* type_consistency_if_set_ptr =
-    xml_qos->type_consistency_if_set();
+  const ::dds::typeConsistencyEnforcementQosPolicy* type_consistency_if_set_ptr = xml_qos->type_consistency_if_set();
   if (type_consistency_if_set_ptr)
     {
       const ::dds::typeConsistencyKind* kind_if_set_ptr = type_consistency_if_set_ptr->kind_if_set();
