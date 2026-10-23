@@ -19,7 +19,7 @@ PublisherQos_Handler::get_publisher_qos(DDS::PublisherQos& pub_qos,
 //         {
 //           if (ACE_OS::strcmp(dw_name.c_str(), name) == 0)
 //             {
-//               return get_DataReader_qos(dw_qos, *&datawriter_qos);
+//               return get_publisher_qos(pub_qos, std::addressof(publisher_qos));
 //             }
 //         }
     }

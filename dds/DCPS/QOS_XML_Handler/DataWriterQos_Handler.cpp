@@ -20,7 +20,7 @@ DataWriterQos_Handler::get_datawriter_qos(DDS::DataWriterQos& dw_qos,
 //         {
 //           if (ACE_OS::strcmp(dw_name.c_str(), name) == 0)
 //             {
-//               return get_datawriter_qos(dw_qos, *&datawriter_qos);
+//               return get_datawriter_qos(dw_qos, std::addressof(datawriter_qos));
 //             }
 //         }
     }

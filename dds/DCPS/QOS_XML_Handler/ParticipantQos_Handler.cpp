@@ -20,7 +20,7 @@ ParticipantQos_Handler::get_participant_qos(DDS::DomainParticipantQos& dp_qos,
 //         {
 //           if (ACE_OS::strcmp(dw_name.c_str(), name) == 0)
 //             {
-//               return get_Participant_qos(dw_qos, *&datawriter_qos);
+//               return get_participant_qos(dp_qos, std::addressof(participant_qos));
 //             }
 //         }
     }

@@ -20,7 +20,7 @@ DataReaderQos_Handler::get_datareader_qos(DDS::DataReaderQos& dr_qos,
 //         {
 //           if (ACE_OS::strcmp(dw_name.c_str(), name) == 0)
 //             {
-//               return get_DataReader_qos(dw_qos, *&datawriter_qos);
+//               return get_datareader_qos(dr_qos, std::addressof(datareader_qos));
 //             }
 //         }
     }

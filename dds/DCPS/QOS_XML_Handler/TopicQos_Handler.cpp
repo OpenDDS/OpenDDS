@@ -19,7 +19,7 @@ TopicQos_Handler::get_topic_qos(DDS::TopicQos& tp_qos,
 //         {
 //           if (ACE_OS::strcmp(dw_name.c_str(), name) == 0)
 //             {
-//               return get_DataReader_qos(dw_qos, *&datawriter_qos);
+//               return get_topic_qos(tp_qos, std::addressof(topic_qos));
 //             }
 //         }
     }

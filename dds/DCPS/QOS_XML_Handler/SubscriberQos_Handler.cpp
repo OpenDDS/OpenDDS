@@ -20,7 +20,7 @@ SubscriberQos_Handler::get_subscriber_qos(DDS::SubscriberQos& sub_qos,
 //         {
 //           if (ACE_OS::strcmp(dw_name.c_str(), name) == 0)
 //             {
-//               return get_DataReader_qos(dw_qos, *&datawriter_qos);
+//               return get_subscriber_qos(sub_qos, std::addressof(subscriber_qos));
 //             }
 //         }
     }
