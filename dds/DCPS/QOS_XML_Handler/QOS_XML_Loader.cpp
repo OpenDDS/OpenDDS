@@ -50,7 +50,7 @@ namespace DCPS {
     return ACE_TString();
   }
 
-  ACE_TString
+  std::string
   QOS_XML_Loader::get_profile_name(const ACE_TCHAR* qos_profile)
   {
     if (qos_profile)
@@ -72,15 +72,15 @@ namespace DCPS {
                              "<xml_file_base_name>#<profile_name>\n",
                              qos_profile));
               }
-            return ACE_TString();
+            return std::string();
           }
 
-        ACE_TString ret(prof_name);
+        std::string ret (ACE_TEXT_ALWAYS_CHAR (prof_name));
         ACE_OS::free(buf);
         return ret;
       }
 
-    return ACE_TString();
+    return std::string();
   }
 
 
@@ -125,7 +125,7 @@ namespace DCPS {
   QOS_XML_Loader::get_datawriter_qos(
     ::DDS::DataWriterQos& dw_qos,
     const ACE_TCHAR * qos_profile,
-    const ACE_TCHAR * topic_name)
+    std::string_view topic_name)
   {
     if (!qos_profile)
       {
@@ -140,7 +140,7 @@ namespace DCPS {
         return DDS::RETCODE_OK;
       }
 
-    const ACE_TString profile_name = get_profile_name(qos_profile);
+    const std::string profile_name = get_profile_name(qos_profile);
 
     if (profile_name.empty())
       {
@@ -159,7 +159,7 @@ namespace DCPS {
     try
       {
         retcode = xml_file_.get_datawriter_qos(dw_qos,
-                                               profile_name.c_str(),
+                                               profile_name,
                                                topic_name);
       }
     catch (...)
@@ -180,7 +180,7 @@ namespace DCPS {
   QOS_XML_Loader::get_datareader_qos(
     DDS::DataReaderQos& dr_qos,
     const ACE_TCHAR * qos_profile,
-    const ACE_TCHAR * topic_name)
+    std::string_view topic_name)
   {
     if (!qos_profile)
       {
@@ -195,7 +195,7 @@ namespace DCPS {
         return DDS::RETCODE_OK;
       }
 
-    const ACE_TString profile_name = get_profile_name(qos_profile);
+    const std::string profile_name = get_profile_name(qos_profile);
 
     if (profile_name.empty())
       {
@@ -214,7 +214,7 @@ namespace DCPS {
     try
       {
         retcode = xml_file_.get_datareader_qos(dr_qos,
-                                               profile_name.c_str(),
+                                               profile_name,
                                                topic_name);
       }
     catch (...)
@@ -249,7 +249,7 @@ namespace DCPS {
         return DDS::RETCODE_OK;
       }
 
-    const ACE_TString profile_name = get_profile_name(qos_profile);
+    const std::string profile_name = get_profile_name(qos_profile);
 
     if (profile_name.empty())
       {
@@ -267,7 +267,7 @@ namespace DCPS {
 
     try
       {
-        retcode = xml_file_.get_publisher_qos(pub_qos, profile_name.c_str());
+        retcode = xml_file_.get_publisher_qos(pub_qos, profile_name);
       }
     catch (...)
       {
@@ -301,7 +301,7 @@ namespace DCPS {
         return DDS::RETCODE_OK;
       }
 
-    const ACE_TString profile_name = get_profile_name(qos_profile);
+    const std::string profile_name = get_profile_name(qos_profile);
 
     if (profile_name.empty())
       {
@@ -319,7 +319,7 @@ namespace DCPS {
 
     try
       {
-        retcode = xml_file_.get_subscriber_qos(sub_qos, profile_name.c_str());
+        retcode = xml_file_.get_subscriber_qos(sub_qos, profile_name);
       }
     catch (...)
       {
@@ -339,7 +339,7 @@ namespace DCPS {
   QOS_XML_Loader::get_topic_qos(
     DDS::TopicQos& topic_qos,
     const ACE_TCHAR * qos_profile,
-    const ACE_TCHAR * topic_name)
+    std::string_view topic_name)
   {
     if (!qos_profile)
       {
@@ -354,7 +354,7 @@ namespace DCPS {
         return DDS::RETCODE_OK;
       }
 
-    const ACE_TString profile_name = get_profile_name(qos_profile);
+    const std::string profile_name = get_profile_name(qos_profile);
 
     if (profile_name.empty())
       {
@@ -373,7 +373,7 @@ namespace DCPS {
     try
       {
         retcode = xml_file_.get_topic_qos(topic_qos,
-                                          profile_name.c_str(),
+                                          profile_name,
                                           topic_name);
       }
     catch (...)
@@ -408,7 +408,7 @@ namespace DCPS {
         return DDS::RETCODE_OK;
       }
 
-    const ACE_TString profile_name = get_profile_name(qos_profile);
+    const std::string profile_name = get_profile_name(qos_profile);
 
     if (profile_name.empty())
       {
@@ -426,7 +426,7 @@ namespace DCPS {
 
     try
       {
-        retcode = xml_file_.get_participant_qos(part_qos, profile_name.c_str());
+        retcode = xml_file_.get_participant_qos(part_qos, profile_name);
       }
     catch (...)
       {

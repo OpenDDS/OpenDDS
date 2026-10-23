@@ -29,7 +29,7 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
 //    {
       // TODO: Have a good look at this.
 
-//       const std::string value = *xml_qos->user_data()->value();
+//       const std::string value = *xml_qos->user_data()->value_if_set();
 //
 //       ACE_DEBUG((LM_TRACE,
 //         ACE_TEXT("QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
@@ -37,18 +37,20 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
 //         value.c_str()));
 //
 //       dds_qos.user_data.value =
-//         *xml_qos->user_data()->value();
+//         *xml_qos->user_data()->value_if_set();
 //     }
-  if (xml_qos->time_based_filter_p())
+  const ::dds::timeBasedFilterQosPolicy* time_based_filter_if_set_ptr = xml_qos->time_based_filter_if_set();
+  if (time_based_filter_if_set_ptr)
     {
-      if (xml_qos->time_based_filter().minimum_separation_p())
+      const ::dds::duration* minimum_separation_if_set_ptr = time_based_filter_if_set_ptr->minimum_separation_if_set();
+      if (minimum_separation_if_set_ptr)
         {
-          const ACE_TString sec(xml_qos->time_based_filter().minimum_separation().sec().c_str());
-          const ACE_TString nsec(xml_qos->time_based_filter().minimum_separation().nanosec().c_str());
+          const ::XMLSchema::string<char>* sec_if_set_ptr = minimum_separation_if_set_ptr->sec_if_set();
+          const ::XMLSchema::string<char>* nsec_if_set_ptr = minimum_separation_if_set_ptr->nanosec_if_set();
 
           QosCommon::get_duration(dds_qos.time_based_filter.minimum_separation,
-                                  sec.fast_rep(),
-                                  nsec.fast_rep());
+                                  sec_if_set_ptr ? sec_if_set_ptr->c_str() : "",
+                                  nsec_if_set_ptr ? nsec_if_set_ptr->c_str() : "");
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {
@@ -60,16 +62,20 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
             }
         }
     }
-  if (xml_qos->reader_data_lifecycle_p())
+  const ::dds::readerDataLifecycleQosPolicy* reader_data_lifecycle_if_set_ptr = xml_qos->reader_data_lifecycle_if_set();
+  if (reader_data_lifecycle_if_set_ptr)
     {
-      if (xml_qos->reader_data_lifecycle().autopurge_nowriter_samples_delay_p())
+      const ::dds::duration* autopurge_nowriter_samples_delay_if_set_ptr =
+        reader_data_lifecycle_if_set_ptr->autopurge_nowriter_samples_delay_if_set();
+      if (autopurge_nowriter_samples_delay_if_set_ptr)
         {
-          const ACE_TString sec(xml_qos->reader_data_lifecycle().autopurge_nowriter_samples_delay().sec().c_str());
-          const ACE_TString nsec(xml_qos->reader_data_lifecycle().autopurge_nowriter_samples_delay().nanosec().c_str());
+          const ::XMLSchema::string<char>* sec_if_set_ptr = autopurge_nowriter_samples_delay_if_set_ptr->sec_if_set();
+          const ::XMLSchema::string<char>* nsec_if_set_ptr =
+            autopurge_nowriter_samples_delay_if_set_ptr->nanosec_if_set();
 
           QosCommon::get_duration(dds_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay,
-                                  sec.c_str(),
-                                  nsec.c_str());
+                                  sec_if_set_ptr ? sec_if_set_ptr->c_str() : "",
+                                  nsec_if_set_ptr ? nsec_if_set_ptr->c_str() : "");
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {
@@ -80,14 +86,17 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
                 dds_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec));
             }
         }
-      if (xml_qos->reader_data_lifecycle().autopurge_disposed_samples_delay_p())
+      const ::dds::duration* autopurge_disposed_samples_delay_if_set_ptr =
+        reader_data_lifecycle_if_set_ptr->autopurge_disposed_samples_delay_if_set();
+      if (autopurge_disposed_samples_delay_if_set_ptr)
         {
-          const ACE_TString sec(xml_qos->reader_data_lifecycle().autopurge_disposed_samples_delay().sec().c_str());
-          const ACE_TString nsec(xml_qos->reader_data_lifecycle().autopurge_disposed_samples_delay().nanosec().c_str());
+          const ::XMLSchema::string<char>* sec_if_set_ptr = autopurge_disposed_samples_delay_if_set_ptr->sec_if_set();
+          const ::XMLSchema::string<char>* nsec_if_set_ptr =
+            autopurge_disposed_samples_delay_if_set_ptr->nanosec_if_set();
 
           QosCommon::get_duration(dds_qos.reader_data_lifecycle.autopurge_disposed_samples_delay,
-                                  sec.c_str(),
-                                  nsec.c_str());
+                                  sec_if_set_ptr ? sec_if_set_ptr->c_str() : "",
+                                  nsec_if_set_ptr ? nsec_if_set_ptr->c_str() : "");
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {
@@ -99,11 +108,13 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
             }
         }
     }
-  if (xml_qos->type_consistency_p())
+  const ::dds::typeConsistencyEnforcementQosPolicy* type_consistency_if_set_ptr = xml_qos->type_consistency_if_set();
+  if (type_consistency_if_set_ptr)
     {
-      if (xml_qos->type_consistency().kind_p())
+      const ::dds::typeConsistencyKind* kind_if_set_ptr = type_consistency_if_set_ptr->kind_if_set();
+      if (kind_if_set_ptr)
         {
-          QosCommon::get_type_consistency_kind(xml_qos->type_consistency().kind(),
+          QosCommon::get_type_consistency_kind(*kind_if_set_ptr,
                                                dds_qos.type_consistency.kind);
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
@@ -114,10 +125,12 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
                 dds_qos.type_consistency.kind));
             }
         }
-      if (xml_qos->type_consistency().ignore_sequence_bounds_p())
+      const ::XMLSchema::boolean* ignore_sequence_bounds_if_set_ptr =
+        type_consistency_if_set_ptr->ignore_sequence_bounds_if_set();
+      if (ignore_sequence_bounds_if_set_ptr)
         {
           dds_qos.type_consistency.ignore_sequence_bounds =
-            xml_qos->type_consistency().ignore_sequence_bounds();
+            *ignore_sequence_bounds_if_set_ptr;
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {
@@ -127,10 +140,12 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
                 dds_qos.type_consistency.ignore_sequence_bounds));
             }
         }
-      if (xml_qos->type_consistency().ignore_string_bounds_p())
+      const ::XMLSchema::boolean* ignore_string_bounds_if_set_ptr =
+        type_consistency_if_set_ptr->ignore_string_bounds_if_set();
+      if (ignore_string_bounds_if_set_ptr)
         {
           dds_qos.type_consistency.ignore_string_bounds =
-            xml_qos->type_consistency().ignore_string_bounds();
+            *ignore_string_bounds_if_set_ptr;
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {
@@ -140,10 +155,12 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
                 dds_qos.type_consistency.ignore_string_bounds));
             }
         }
-      if (xml_qos->type_consistency().ignore_member_names_p())
+      const ::XMLSchema::boolean* ignore_member_names_if_set_ptr =
+        type_consistency_if_set_ptr->ignore_member_names_if_set();
+      if (ignore_member_names_if_set_ptr)
         {
           dds_qos.type_consistency.ignore_member_names =
-            xml_qos->type_consistency().ignore_member_names();
+            *ignore_member_names_if_set_ptr;
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {
@@ -153,10 +170,12 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
                 dds_qos.type_consistency.ignore_member_names));
             }
         }
-      if (xml_qos->type_consistency().prevent_type_widening_p())
+      const ::XMLSchema::boolean* prevent_type_widening_if_set_ptr =
+        type_consistency_if_set_ptr->prevent_type_widening_if_set();
+      if (prevent_type_widening_if_set_ptr)
         {
           dds_qos.type_consistency.prevent_type_widening =
-            xml_qos->type_consistency().prevent_type_widening();
+            *prevent_type_widening_if_set_ptr;
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {
@@ -166,10 +185,12 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
                 dds_qos.type_consistency.prevent_type_widening));
             }
         }
-      if (xml_qos->type_consistency().force_type_validation_p())
+      const ::XMLSchema::boolean* force_type_validation_if_set_ptr =
+        type_consistency_if_set_ptr->force_type_validation_if_set();
+      if (force_type_validation_if_set_ptr)
         {
           dds_qos.type_consistency.force_type_validation =
-            xml_qos->type_consistency().force_type_validation();
+            *force_type_validation_if_set_ptr;
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {

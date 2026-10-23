@@ -1,9 +1,24 @@
 #include "QOS_Common.h"
+#include <charconv>
+#include <stdexcept>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
+namespace {
+template <typename Integer>
+Integer parse_integer (std::string_view text)
+{
+  Integer value {};
+  const std::from_chars_result result =
+    std::from_chars (text.data (), text.data () + text.size (), value);
+  if (result.ec != std::errc () || result.ptr != text.data () + text.size ())
+    throw std::invalid_argument ("Invalid numeric QoS value");
+  return value;
+}
+}
+
 void
-QosCommon::get_durability_kind(const ::dds::durabilityKind kind,
+QosCommon::get_durability_kind(const ::dds::durabilityKind& kind,
                                ::DDS::DurabilityQosPolicyKind& dds_kind)
 {
   switch (kind.integral())
@@ -31,7 +46,7 @@ QosCommon::get_durability_kind(const ::dds::durabilityKind kind,
 }
 
 void
-QosCommon::get_history_kind(const ::dds::historyKind kind,
+QosCommon::get_history_kind(const ::dds::historyKind& kind,
                             ::DDS::HistoryQosPolicyKind& dds_kind)
 {
   switch (kind.integral())
@@ -53,41 +68,39 @@ QosCommon::get_history_kind(const ::dds::historyKind kind,
 }
 
 void
-QosCommon::get_duration(::DDS::Duration_t& duration, const ACE_TCHAR * sec, const ACE_TCHAR * nsec)
+QosCommon::get_duration(::DDS::Duration_t& duration, std::string_view sec, std::string_view nsec)
 {
-  if (sec != 0) {
-    if (ACE_OS::strcmp(sec, ACE_TEXT("DURATION_INFINITY")) == 0 ||
-        ACE_OS::strcmp(sec, ACE_TEXT("DURATION_INFINITE_SEC")) == 0) {
+  if (!sec.empty()) {
+    if (sec == "DURATION_INFINITY" || sec == "DURATION_INFINITE_SEC") {
       duration.sec = ::DDS::DURATION_INFINITE_SEC;
     } else {
-      duration.sec = ACE_OS::atoi(sec);
+      duration.sec = parse_integer<::CORBA::Long> (sec);
     }
   }
 
-  if (nsec != 0) {
-    if (ACE_OS::strcmp(nsec, ACE_TEXT("DURATION_INFINITY")) == 0 ||
-             ACE_OS::strcmp(nsec, ACE_TEXT("DURATION_INFINITE_NSEC")) == 0) {
+  if (!nsec.empty()) {
+    if (nsec == "DURATION_INFINITY" || nsec == "DURATION_INFINITE_NSEC") {
       duration.nanosec =  ::DDS::DURATION_INFINITE_NSEC;
     } else {
-      duration.nanosec = static_cast<DDS::UInt32>(ACE_OS::atoi(nsec));
+      duration.nanosec = parse_integer<::DDS::UInt32> (nsec);
     }
   }
 }
 
 ::CORBA::Long
-QosCommon::get_qos_long(const ACE_TCHAR* value)
+QosCommon::get_qos_long(std::string_view value)
 {
-  if (value == 0) {
+  if (value.empty()) {
     return 0;
-  } else if (ACE_OS::strcmp(value, ACE_TEXT("LENGTH_UNLIMITED")) == 0) {
+  } else if (value == "LENGTH_UNLIMITED") {
     return -1;
   } else {
-    return ACE_OS::atoi(value);
+    return parse_integer<::CORBA::Long> (value);
   }
 }
 
 void
-QosCommon::get_liveliness_kind(const ::dds::livelinessKind kind,
+QosCommon::get_liveliness_kind(const ::dds::livelinessKind& kind,
                                ::DDS::LivelinessQosPolicyKind& dds_kind)
 {
   switch (kind.integral())
@@ -112,7 +125,7 @@ QosCommon::get_liveliness_kind(const ::dds::livelinessKind kind,
 }
 
 void
-QosCommon::get_realiability_kind(const ::dds::reliabilityKind kind,
+QosCommon::get_realiability_kind(const ::dds::reliabilityKind& kind,
                                  ::DDS::ReliabilityQosPolicyKind& dds_kind)
 {
   switch (kind.integral())
@@ -134,7 +147,7 @@ QosCommon::get_realiability_kind(const ::dds::reliabilityKind kind,
 }
 
 void
-QosCommon::get_destination_order_kind(const ::dds::destinationOrderKind kind,
+QosCommon::get_destination_order_kind(const ::dds::destinationOrderKind& kind,
                                       ::DDS::DestinationOrderQosPolicyKind& dds_kind)
 {
   switch (kind.integral())
@@ -156,7 +169,7 @@ QosCommon::get_destination_order_kind(const ::dds::destinationOrderKind kind,
 }
 
 void
-QosCommon::get_ownership_kind(const ::dds::ownershipKind kind,
+QosCommon::get_ownership_kind(const ::dds::ownershipKind& kind,
                               ::DDS::OwnershipQosPolicyKind& dds_kind)
 {
   switch (kind.integral())
@@ -178,7 +191,7 @@ QosCommon::get_ownership_kind(const ::dds::ownershipKind kind,
 }
 
 void
-QosCommon::get_type_consistency_kind(const ::dds::typeConsistencyKind kind,
+QosCommon::get_type_consistency_kind(const ::dds::typeConsistencyKind& kind,
                                     ::DDS::TypeConsistencyEnforcementQosPolicyKind_t& dds_kind)
 {
   switch (kind.integral())
@@ -200,7 +213,7 @@ QosCommon::get_type_consistency_kind(const ::dds::typeConsistencyKind kind,
 }
 
 void
-QosCommon::get_data_presentation_id_kind(const ::dds::dataRepresentationIdKind kind,
+QosCommon::get_data_presentation_id_kind(const ::dds::dataRepresentationIdKind& kind,
                                          ::DDS::DataRepresentationId_t& dds_kind)
 {
   switch (kind.integral())
