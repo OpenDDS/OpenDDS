@@ -32,7 +32,7 @@ ParticipantQos_Handler::get_participant_qos(DDS::DomainParticipantQos& dp_qos,
             {
               ACE_DEBUG((LM_TRACE,
                 ACE_TEXT("ParticipantQos_Handler::get_participant_qos - ")
-                ACE_TEXT("No Participant QOS available in profile <%s>\n"),
+                ACE_TEXT("No Participant QOS available in profile <%C>\n"),
                 profile->name().c_str()));
             }
           return true;

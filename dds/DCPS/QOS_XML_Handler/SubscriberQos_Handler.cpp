@@ -32,7 +32,7 @@ SubscriberQos_Handler::get_subscriber_qos(DDS::SubscriberQos& sub_qos,
             {
               ACE_DEBUG((LM_TRACE,
                 ACE_TEXT("SubscriberQos_Handler::get_subscriber_qos - ")
-                ACE_TEXT("No Subscriber QOS available in profile <%s>\n"),
+                ACE_TEXT("No Subscriber QOS available in profile <%C>\n"),
                 profile->name().c_str()));
             }
           return true;

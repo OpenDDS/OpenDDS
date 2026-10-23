@@ -19,6 +19,7 @@ namespace OpenDDS {
 namespace DCPS {
 
   QOS_XML_Handler::QOS_XML_Handler()
+    : profiles_ (std::make_unique<::dds::qosProfile_seq> ())
   {
   }
 
@@ -48,7 +49,7 @@ namespace DCPS {
               {
                 ACE_ERROR((LM_ERROR,
                   ACE_TEXT("QOS_XML_Handler::get_profile - ")
-                  ACE_TEXT("Found profile <%s>\n"),
+                  ACE_TEXT("Found profile <%C>\n"),
                   profile.name().c_str()));
               }
             return &profile;

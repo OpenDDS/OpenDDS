@@ -32,7 +32,7 @@ DataReaderQos_Handler::get_datareader_qos(DDS::DataReaderQos& dr_qos,
             {
               ACE_DEBUG((LM_TRACE,
                 ACE_TEXT("DataReaderQos_Handler::get_datareader_qos - ")
-                ACE_TEXT("No DataReader QOS available in profile <%s>\n"),
+                ACE_TEXT("No DataReader QOS available in profile <%C>\n"),
                 profile->name().c_str()));
             }
           return true;

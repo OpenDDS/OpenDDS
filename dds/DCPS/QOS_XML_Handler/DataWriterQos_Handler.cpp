@@ -32,7 +32,7 @@ DataWriterQos_Handler::get_datawriter_qos(DDS::DataWriterQos& dw_qos,
             {
               ACE_DEBUG((LM_TRACE,
                 ACE_TEXT("DataWriterQos_Handler::get_datawriter_qos - ")
-                ACE_TEXT("No DataWriter QOS available in profile <%s>\n"),
+                ACE_TEXT("No DataWriter QOS available in profile <%C>\n"),
                 profile->name().c_str()));
             }
           return true;

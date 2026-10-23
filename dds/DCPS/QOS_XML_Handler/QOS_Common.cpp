@@ -1,7 +1,21 @@
 #include "QOS_Common.h"
 #include <charconv>
+#include <stdexcept>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
+namespace {
+template <typename Integer>
+Integer parse_integer (std::string_view text)
+{
+  Integer value {};
+  const std::from_chars_result result =
+    std::from_chars (text.data (), text.data () + text.size (), value);
+  if (result.ec != std::errc () || result.ptr != text.data () + text.size ())
+    throw std::invalid_argument ("Invalid numeric QoS value");
+  return value;
+}
+}
 
 void
 QosCommon::get_durability_kind(const ::dds::durabilityKind& kind,
@@ -60,9 +74,7 @@ QosCommon::get_duration(::DDS::Duration_t& duration, std::string_view sec, std::
     if (sec == "DURATION_INFINITY" || sec == "DURATION_INFINITE_SEC") {
       duration.sec = ::DDS::DURATION_INFINITE_SEC;
     } else {
-      ::CORBA::Long value = 0;
-      std::from_chars(sec.data(), sec.data() + sec.size(), value);
-      duration.sec = value;
+      duration.sec = parse_integer<::CORBA::Long> (sec);
     }
   }
 
@@ -70,9 +82,7 @@ QosCommon::get_duration(::DDS::Duration_t& duration, std::string_view sec, std::
     if (nsec == "DURATION_INFINITY" || nsec == "DURATION_INFINITE_NSEC") {
       duration.nanosec =  ::DDS::DURATION_INFINITE_NSEC;
     } else {
-      ::CORBA::Long value = 0;
-      std::from_chars(nsec.data(), nsec.data() + nsec.size(), value);
-      duration.nanosec = static_cast<DDS::UInt32>(value);
+      duration.nanosec = parse_integer<::DDS::UInt32> (nsec);
     }
   }
 }
@@ -85,9 +95,7 @@ QosCommon::get_qos_long(std::string_view value)
   } else if (value == "LENGTH_UNLIMITED") {
     return -1;
   } else {
-    ::CORBA::Long result = 0;
-    std::from_chars(value.data(), value.data() + value.size(), result);
-    return result;
+    return parse_integer<::CORBA::Long> (value);
   }
 }
 

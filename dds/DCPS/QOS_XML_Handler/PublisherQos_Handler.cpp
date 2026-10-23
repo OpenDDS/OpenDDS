@@ -31,7 +31,7 @@ PublisherQos_Handler::get_publisher_qos(DDS::PublisherQos& pub_qos,
             {
               ACE_DEBUG((LM_TRACE,
                 ACE_TEXT("PublisherQos_Handler::get_publisher_qos - ")
-                ACE_TEXT("No Publisher QOS available in profile <%s>\n"),
+                ACE_TEXT("No Publisher QOS available in profile <%C>\n"),
                 profile->name().c_str()));
             }
           return true;

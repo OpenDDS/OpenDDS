@@ -31,7 +31,7 @@ TopicQos_Handler::get_topic_qos(DDS::TopicQos& tp_qos,
             {
               ACE_DEBUG((LM_TRACE,
                 ACE_TEXT("TopicQos_Handler::get_topic_qos - ")
-                ACE_TEXT("No Topic QOS available in profile <%s>\n"),
+                ACE_TEXT("No Topic QOS available in profile <%C>\n"),
                 profile->name().c_str()));
             }
           return true;
