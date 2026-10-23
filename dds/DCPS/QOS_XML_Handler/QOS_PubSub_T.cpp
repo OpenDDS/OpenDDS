@@ -34,11 +34,14 @@ QOS_PubSub_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, const 
 //         *xml_qos->group_data()->value_if_set();
 //     }
 
-    if (xml_qos->presentation_if_set())
+    const ::dds::presentationQosPolicy* presentation_if_set_ptr = xml_qos->presentation_if_set();
+    if (presentation_if_set_ptr)
       {
-        if (xml_qos->presentation_if_set()->access_scope_if_set())
+        const ::dds::presentationAccessScopeKind* access_scope_if_set_ptr =
+          presentation_if_set_ptr->access_scope_if_set();
+        if (access_scope_if_set_ptr)
           {
-            switch (xml_qos->presentation_if_set()->access_scope_if_set()->integral())
+            switch (access_scope_if_set_ptr->integral())
               {
               case ::dds::presentationAccessScopeKind::INSTANCE_PRESENTATION_QOS_l:
                 dds_qos.presentation.access_scope = ::DDS::INSTANCE_PRESENTATION_QOS;
@@ -53,7 +56,7 @@ QOS_PubSub_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, const 
                 ACE_ERROR((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: QOS_PubSub_T::read_qos - ")
                   ACE_TEXT("Unknown presentation access scope found <%d>; setting it to INSTANCE_PRESENTATION_QOS\n"),
-                  xml_qos->presentation_if_set()->access_scope_if_set()->integral()));
+                  access_scope_if_set_ptr->integral()));
                 dds_qos.presentation.access_scope = ::DDS::INSTANCE_PRESENTATION_QOS;
                 break;
               }
@@ -65,10 +68,12 @@ QOS_PubSub_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, const 
                   dds_qos.presentation.access_scope));
               }
           }
-        if (xml_qos->presentation_if_set()->coherent_access_if_set())
+        const ::XMLSchema::boolean* coherent_access_if_set_ptr =
+          presentation_if_set_ptr->coherent_access_if_set();
+        if (coherent_access_if_set_ptr)
           {
             dds_qos.presentation.coherent_access =
-              *xml_qos->presentation_if_set()->coherent_access_if_set();
+              *coherent_access_if_set_ptr;
 
             if (OpenDDS::DCPS::DCPS_debug_level > 9)
               {
@@ -78,10 +83,12 @@ QOS_PubSub_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, const 
                   dds_qos.presentation.coherent_access));
               }
           }
-        if (xml_qos->presentation_if_set()->ordered_access_if_set())
+        const ::XMLSchema::boolean* ordered_access_if_set_ptr =
+          presentation_if_set_ptr->ordered_access_if_set();
+        if (ordered_access_if_set_ptr)
           {
             dds_qos.presentation.ordered_access =
-              *xml_qos->presentation_if_set()->ordered_access_if_set();
+              *ordered_access_if_set_ptr;
 
             if (OpenDDS::DCPS::DCPS_debug_level > 9)
               {
@@ -93,12 +100,14 @@ QOS_PubSub_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, const 
           }
       }
 
-  if (xml_qos->partition_if_set())
+  const ::dds::partitionQosPolicy* partition_if_set_ptr = xml_qos->partition_if_set();
+  if (partition_if_set_ptr)
     {
-      if (xml_qos->partition_if_set()->name_if_set())
+      const ::dds::stringSeq* name_if_set_ptr = partition_if_set_ptr->name_if_set();
+      if (name_if_set_ptr)
         {
           const dds::stringSeq::element_container_type& names =
-            xml_qos->partition_if_set()->name_if_set()->element();
+            name_if_set_ptr->element();
           dds_qos.partition.name.length(static_cast<CORBA::ULong>(names.size()));
           CORBA::ULong pos = 0;
           for (const XMLSchema::string<char>& name : names)

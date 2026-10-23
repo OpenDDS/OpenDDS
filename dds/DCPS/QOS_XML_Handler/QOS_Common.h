@@ -16,6 +16,7 @@
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds_qos.hpp"
+#include <string_view>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -51,7 +52,7 @@ public:
    * values need to be converted to a numeric value.
    *
    */
-  static void get_duration (::DDS::Duration_t& duration, const ACE_TCHAR * sec, const ACE_TCHAR * nsec);
+  static void get_duration (::DDS::Duration_t& duration, std::string_view sec, std::string_view nsec);
 
   /**
    * get_qos_long
@@ -60,7 +61,7 @@ public:
    * This value need to be converted to a numeric value.
    *
    */
-  static ::CORBA::Long get_qos_long (const ACE_TCHAR * value);
+  static ::CORBA::Long get_qos_long (std::string_view value);
 };
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

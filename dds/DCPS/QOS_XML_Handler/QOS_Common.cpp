@@ -1,4 +1,5 @@
 #include "QOS_Common.h"
+#include <charconv>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -53,36 +54,40 @@ QosCommon::get_history_kind(const ::dds::historyKind& kind,
 }
 
 void
-QosCommon::get_duration(::DDS::Duration_t& duration, const ACE_TCHAR * sec, const ACE_TCHAR * nsec)
+QosCommon::get_duration(::DDS::Duration_t& duration, std::string_view sec, std::string_view nsec)
 {
-  if (sec != 0) {
-    if (ACE_OS::strcmp(sec, ACE_TEXT("DURATION_INFINITY")) == 0 ||
-        ACE_OS::strcmp(sec, ACE_TEXT("DURATION_INFINITE_SEC")) == 0) {
+  if (!sec.empty()) {
+    if (sec == "DURATION_INFINITY" || sec == "DURATION_INFINITE_SEC") {
       duration.sec = ::DDS::DURATION_INFINITE_SEC;
     } else {
-      duration.sec = ACE_OS::atoi(sec);
+      ::CORBA::Long value = 0;
+      std::from_chars(sec.data(), sec.data() + sec.size(), value);
+      duration.sec = value;
     }
   }
 
-  if (nsec != 0) {
-    if (ACE_OS::strcmp(nsec, ACE_TEXT("DURATION_INFINITY")) == 0 ||
-             ACE_OS::strcmp(nsec, ACE_TEXT("DURATION_INFINITE_NSEC")) == 0) {
+  if (!nsec.empty()) {
+    if (nsec == "DURATION_INFINITY" || nsec == "DURATION_INFINITE_NSEC") {
       duration.nanosec =  ::DDS::DURATION_INFINITE_NSEC;
     } else {
-      duration.nanosec = static_cast<DDS::UInt32>(ACE_OS::atoi(nsec));
+      ::CORBA::Long value = 0;
+      std::from_chars(nsec.data(), nsec.data() + nsec.size(), value);
+      duration.nanosec = static_cast<DDS::UInt32>(value);
     }
   }
 }
 
 ::CORBA::Long
-QosCommon::get_qos_long(const ACE_TCHAR* value)
+QosCommon::get_qos_long(std::string_view value)
 {
-  if (value == 0) {
+  if (value.empty()) {
     return 0;
-  } else if (ACE_OS::strcmp(value, ACE_TEXT("LENGTH_UNLIMITED")) == 0) {
+  } else if (value == "LENGTH_UNLIMITED") {
     return -1;
   } else {
-    return ACE_OS::atoi(value);
+    ::CORBA::Long result = 0;
+    std::from_chars(value.data(), value.data() + value.size(), result);
+    return result;
   }
 }
 
