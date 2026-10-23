@@ -71,12 +71,10 @@ ParticipantQos_Handler::get_participant_qos(DDS::DomainParticipantQos& dp_qos,
   const ::dds::entityFactoryQosPolicy* entity_factory_if_set_ptr = dp->entity_factory_if_set();
   if (entity_factory_if_set_ptr)
     {
-      const ::XMLSchema::boolean* autoenable_created_entities_if_set_ptr =
-        entity_factory_if_set_ptr->autoenable_created_entities_if_set();
-      if (autoenable_created_entities_if_set_ptr)
+      const ::XMLSchema::boolean* autoenable_ptr = entity_factory_if_set_ptr->autoenable_created_entities_if_set();
+      if (autoenable_ptr)
         {
-          dp_qos.entity_factory.autoenable_created_entities =
-            *autoenable_created_entities_if_set_ptr;
+          dp_qos.entity_factory.autoenable_created_entities = *autoenable_ptr;
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {

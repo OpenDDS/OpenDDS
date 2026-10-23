@@ -120,12 +120,10 @@ QOS_PubSub_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, const 
   const ::dds::entityFactoryQosPolicy* entity_factory_if_set_ptr = xml_qos->entity_factory_if_set();
   if (entity_factory_if_set_ptr)
     {
-      const ::XMLSchema::boolean* autoenable_created_entities_if_set_ptr =
-        entity_factory_if_set_ptr->autoenable_created_entities_if_set();
-      if (autoenable_created_entities_if_set_ptr)
+      const ::XMLSchema::boolean* autoenable_ptr = entity_factory_if_set_ptr->autoenable_created_entities_if_set();
+      if (autoenable_ptr)
         {
-          dds_qos.entity_factory.autoenable_created_entities =
-            *autoenable_created_entities_if_set_ptr;
+          dds_qos.entity_factory.autoenable_created_entities = *autoenable_ptr;
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {
