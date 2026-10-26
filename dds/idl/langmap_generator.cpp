@@ -1606,7 +1606,7 @@ struct Cxx11Generator : GeneratorBase {
       << ";\n";
   }
 
-  static void union_accessors(AST_UnionBranch* branch)
+  static void union_accessors(AST_UnionBranch* branch, size_t member_index)
   {
     FieldInfo af(*branch);
     gen_anon_field_types(af, branch);
@@ -1641,10 +1641,15 @@ struct Cxx11Generator : GeneratorBase {
       disc_param = disc_param_no_default + " = " + dval;
     }
 
-    const std::string assign_pre = "{ _activate(" + disc_name + "); _" + std::string(nm) + " = ",
+    std::ostringstream index_stream;
+    index_stream << member_index << "u";
+    const std::string index = index_stream.str();
+    const std::string validate = disc_param.empty() ? "" :
+      "if (_member_index(disc) != " + index + ") throw ::CORBA::BAD_PARAM(); ";
+    const std::string assign_pre = "{ " + validate + "_activate(" + disc_name + "); _" + std::string(nm) + " = ",
       assign = assign_pre + "val; }\n",
       move = assign_pre + "std::move(val); }\n",
-      ret = "{ return _" + std::string(nm) + "; }\n";
+      ret = "{ _check_member(" + index + "); return _" + std::string(nm) + "; }\n";
     if (cls & (CL_PRIMITIVE | CL_ENUM)) {
       be_global->lang_header_ <<
         "  void " << nm << '(' << lang_field_type << " val" << disc_param
@@ -1682,31 +1687,12 @@ struct Cxx11Generator : GeneratorBase {
     return "    _" + name + " = std::move(rhs._" + name + ");\n";
   }
 
-  static std::string union_assign(const std::string&, AST_Decl*, const std::string& name, AST_Type*,
-                                  const std::string&, bool, Intro&,
-                                  const std::string&)
-  {
-    return "    " + name + "(rhs._" + name + ");\n";
-  }
-
-  static std::string union_move_assign(const std::string&, AST_Decl*, const std::string& name, AST_Type*,
-                                       const std::string&, bool, Intro&,
-                                       const std::string&)
-  {
-    return "    " + name + "(std::move(rhs._" + name + "));\n";
-  }
-
   static std::string union_activate(const std::string&, AST_Decl*, const std::string& name, AST_Type* type,
                                     const std::string&, bool, Intro&,
                                     const std::string&)
   {
-    AST_Type* actual_field_type = resolveActualType(type);
     const std::string lang_field_type = generator_->map_type(type);
-    const Classification cls = classify(actual_field_type);
-    if (!(cls & (CL_PRIMITIVE | CL_ENUM))) {
-      return "    new(&_" + name + ") " + lang_field_type + ";\n";
-    }
-    return "";
+    return "    new(std::addressof(_" + name + ")) " + lang_field_type + "();\n";
   }
 
   static std::string union_reset(const std::string&, AST_Decl*, const std::string& name, AST_Type* type,
@@ -1725,6 +1711,77 @@ struct Cxx11Generator : GeneratorBase {
       return "    _" + name + ".~" + dtor_name + "();\n";
     }
     return "";
+  }
+
+  static void generate_member_index(const std::vector<AST_UnionBranch*>& branches,
+                                    AST_Type* discriminator, const std::string& d_type)
+  {
+    be_global->lang_header_ <<
+      "  static unsigned _member_index(" << d_type << " d) {\n";
+    AST_Type* const actual = resolveActualType(discriminator);
+    AST_PredefinedType* const primitive = dynamic_cast<AST_PredefinedType*>(actual);
+    size_t default_member = branches.size(); // No active member.
+    if (primitive && primitive->pt() == AST_PredefinedType::PT_boolean) {
+      size_t true_member = branches.size(), false_member = branches.size();
+      for (size_t i = 0; i < branches.size(); ++i) {
+        for (unsigned long j = 0; j < branches[i]->label_list_length(); ++j) {
+          AST_UnionLabel* const label = branches[i]->label(j);
+          if (label->label_kind() == AST_UnionLabel::UL_default) {
+            default_member = i;
+          } else if (label->label_val()->ev()->u.bval) {
+            true_member = i;
+          } else {
+            false_member = i;
+          }
+        }
+      }
+      be_global->lang_header_ <<
+        "    return d ? " << (true_member == branches.size() ? default_member : true_member) << "u : " <<
+        (false_member == branches.size() ? default_member : false_member) << "u;\n";
+    } else {
+      be_global->lang_header_ << "    switch (d) {\n";
+      for (size_t i = 0; i < branches.size(); ++i) {
+        bool has_label = false;
+        for (unsigned long j = 0; j < branches[i]->label_list_length(); ++j) {
+          AST_UnionLabel* const label = branches[i]->label(j);
+          if (label->label_kind() == AST_UnionLabel::UL_default) {
+            default_member = i;
+          } else {
+            be_global->lang_header_ << "    case ";
+            if (actual->node_type() == AST_Decl::NT_enum) {
+              be_global->lang_header_ << getEnumLabel(label->label_val(), actual);
+            } else {
+              be_global->lang_header_ << *label->label_val()->ev();
+            }
+            be_global->lang_header_ << ":\n";
+            has_label = true;
+          }
+        }
+        if (has_label) {
+          be_global->lang_header_ << "      return " << i << "u;\n";
+        }
+      }
+      be_global->lang_header_ <<
+        "    default: return " << default_member << "u;\n"
+        "    }\n";
+    }
+    be_global->lang_header_ << "  }\n";
+  }
+
+  static void generate_member_switch(const char* discriminator, CommonFn fn,
+                                     const std::vector<AST_UnionBranch*>& branches)
+  {
+    be_global->impl_ << "  switch (_member_index(" << discriminator << ")) {\n";
+    for (size_t i = 0; i < branches.size(); ++i) {
+      AST_UnionBranch* const branch = branches[i];
+      Intro intro;
+      const std::string body = fn("    ", branch, branch->local_name()->get_string(),
+                                  branch->field_type(), "", false, intro, "");
+      be_global->impl_ << "  case " << i << "u: {\n";
+      intro.join(be_global->impl_, "    ");
+      be_global->impl_ << body << "    break;\n  }\n";
+    }
+    be_global->impl_ << "  default: break; // No active member.\n  }\n";
   }
 
   bool gen_union(AST_Union* u, UTL_ScopedName* name,
@@ -1747,9 +1804,17 @@ struct Cxx11Generator : GeneratorBase {
       "  " << nm << "& operator=(" << nm << "&& rhs);\n"
       "  ~" << nm << "() { _reset(); }\n\n"
       "  " << d_type << " _d() const { return _disc; }\n"
-      "  void _d(" << d_type << " d) { _disc = d; }\n\n";
+      "  void _d(" << d_type << " d) {\n"
+      "    if (_member_index(d) != _member_index(_disc)) throw ::CORBA::BAD_PARAM();\n"
+      "    _disc = d;\n"
+      "  }\n\n";
 
-    std::for_each(branches.begin(), branches.end(), union_accessors);
+    be_global->add_include("tao/SystemException.h", BE_GlobalData::STREAM_LANG_H);
+    be_global->add_include("<memory>", BE_GlobalData::STREAM_CPP);
+    be_global->add_include("<new>", BE_GlobalData::STREAM_CPP);
+    for (size_t i = 0; i < branches.size(); ++i) {
+      union_accessors(branches[i], i);
+    }
     if (hasImplicitDefault(branches, discriminator)) {
       be_global->lang_header_ <<
         "  void _default() { _reset(); _activate(" << defVal << "); }\n\n";
@@ -1783,7 +1848,11 @@ struct Cxx11Generator : GeneratorBase {
     be_global->lang_header_ <<
       "  };\n\n"
       "  void _activate(" << d_type << " d);\n"
-      "  void _reset();\n";
+      "  void _reset();\n"
+      "  void _check_member(unsigned index) const {\n"
+      "    if (!_set || _member_index(_disc) != index) throw ::CORBA::BAD_PARAM();\n"
+      "  }\n";
+    generate_member_index(branches, discriminator, d_type);
 
     gen_common_strunion_post(nm);
     gen_union_pragma_post();
@@ -1792,21 +1861,22 @@ struct Cxx11Generator : GeneratorBase {
       nm << "::" << nm << "(const " << nm << "& rhs)\n"
       "{\n"
       "  _activate(rhs._disc);\n";
-    generateSwitchForUnion(u, "_disc", union_copy, branches, discriminator, "", "", "", false, false);
+    generate_member_switch("_disc", union_copy, branches);
     be_global->impl_ <<
       "}\n\n" <<
       nm << "::" << nm << '(' << nm << "&& rhs)\n"
       "{\n"
       "  _activate(rhs._disc);\n";
-    generateSwitchForUnion(u, "_disc", union_move, branches, discriminator, "", "", "", false, false);
+    generate_member_switch("_disc", union_move, branches);
     be_global->impl_ <<
       "}\n\n" <<
       nm << "& " << nm << "::operator=(const " << nm << "& rhs)\n"
       "{\n"
       "  if (this == &rhs) {\n"
       "    return *this;\n"
-      "  }\n";
-    generateSwitchForUnion(u, "rhs._disc", union_assign, branches, discriminator, "", "", "", false, false);
+      "  }\n"
+      "  _activate(rhs._disc);\n";
+    generate_member_switch("rhs._disc", union_copy, branches);
     be_global->impl_ <<
       "  _disc = rhs._disc;\n"
       "  return *this;\n"
@@ -1815,18 +1885,23 @@ struct Cxx11Generator : GeneratorBase {
       "{\n"
       "  if (this == &rhs) {\n"
       "    return *this;\n"
-      "  }\n";
-    generateSwitchForUnion(u, "rhs._disc", union_move_assign, branches, discriminator, "", "", "", false, false);
+      "  }\n"
+      "  _activate(rhs._disc);\n";
+    generate_member_switch("rhs._disc", union_move, branches);
     be_global->impl_ <<
       "  _disc = rhs._disc;\n"
       "  return *this;\n"
       "}\n\n" <<
       "void " << nm << "::_activate(" << d_type << " d)\n"
       "{\n"
-      "  if (_set && d != _disc) {\n"
+      "  if (_set) {\n"
+      "    if (_member_index(d) == _member_index(_disc)) {\n"
+      "      _disc = d;\n"
+      "      return;\n"
+      "    }\n"
       "    _reset();\n"
       "  }\n";
-    generateSwitchForUnion(u, "d", union_activate, branches, discriminator, "", "", "", false, false);
+    generate_member_switch("d", union_activate, branches);
     be_global->impl_ <<
       "  _set = true;\n"
       "  _disc = d;\n"
@@ -1834,7 +1909,7 @@ struct Cxx11Generator : GeneratorBase {
       "void " << nm << "::_reset()\n"
       "{\n"
       "  if (!_set) return;\n";
-    generateSwitchForUnion(u, "_disc", union_reset, branches, discriminator, "", "", "", false, false);
+    generate_member_switch("_disc", union_reset, branches);
     be_global->impl_ <<
       "  _set = false;\n"
       "}\n\n"
