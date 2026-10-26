@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5319
 
 .. news-start-section: Fixes
 - Fixed the TypeLookup service sending an uninitialized reply when a request was addressed to a different instance name.
