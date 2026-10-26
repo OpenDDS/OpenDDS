@@ -360,6 +360,24 @@ namespace {
     dur.nanosec = DCPS::uint32_fractional_seconds_to_nanoseconds(dur.nanosec);
   }
 
+  void encode_type_consistency_kind(DDS::TypeConsistencyEnforcementQosPolicyKind_t& kind,
+                                    ParameterListConverter::TypeConsistencyKindEncoding encoding)
+  {
+    if (encoding == ParameterListConverter::TCKE_LEGACY &&
+        (kind == DDS::DISALLOW_TYPE_COERCION || kind == DDS::ALLOW_TYPE_COERCION)) {
+      ++kind;
+    }
+  }
+
+  void decode_type_consistency_kind(DDS::TypeConsistencyEnforcementQosPolicyKind_t& kind,
+                                    ParameterListConverter::TypeConsistencyKindEncoding encoding)
+  {
+    if (encoding == ParameterListConverter::TCKE_LEGACY &&
+        (kind == DDS::DISALLOW_TYPE_COERCION + 1 || kind == DDS::ALLOW_TYPE_COERCION + 1)) {
+      --kind;
+    }
+  }
+
 #if OPENDDS_CONFIG_SECURITY
   OpenDDS::Security::DiscoveredParticipantDataKind find_data_kind(const ParameterList& param_list)
   {
@@ -1287,6 +1305,18 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
                    RtpsDurationEncoding duration_encoding,
                    bool map)
 {
+  return to_param_list(reader_data, param_list, use_xtypes, type_info,
+                       duration_encoding, TCKE_XTYPES, map);
+}
+
+bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
+                   ParameterList& param_list,
+                   bool use_xtypes,
+                   const DCPS::TypeInformation& type_info,
+                   RtpsDurationEncoding duration_encoding,
+                   TypeConsistencyKindEncoding tc_kind_encoding,
+                   bool map)
+{
   // Ignore builtin topic key
   {
     Parameter param;
@@ -1408,8 +1438,11 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
   add_DataRepresentationQos(param_list, reader_data.ddsSubscriptionData.representation.value);
 
   if (not_default(reader_data.ddsSubscriptionData.type_consistency)) {
+    DDS::TypeConsistencyEnforcementQosPolicy type_consistency =
+      reader_data.ddsSubscriptionData.type_consistency;
+    encode_type_consistency_kind(type_consistency.kind, tc_kind_encoding);
     Parameter param;
-    param.type_consistency(reader_data.ddsSubscriptionData.type_consistency);
+    param.type_consistency(type_consistency);
     DCPS::push_back(param_list, param);
   }
 
@@ -1480,6 +1513,18 @@ bool from_param_list(const ParameterList& param_list,
                      bool use_xtypes,
                      XTypes::TypeInformation& type_info,
                      RtpsDurationEncoding duration_encoding)
+{
+  return from_param_list(param_list, vendor_id, reader_data, use_xtypes,
+                         type_info, duration_encoding, TCKE_XTYPES);
+}
+
+bool from_param_list(const ParameterList& param_list,
+                     const VendorId_t& vendor_id,
+                     DCPS::DiscoveredReaderData& reader_data,
+                     bool use_xtypes,
+                     XTypes::TypeInformation& type_info,
+                     RtpsDurationEncoding duration_encoding,
+                     TypeConsistencyKindEncoding tc_kind_encoding)
 {
   // Collect the rtps_udp locators before appending them to allLocators
 
@@ -1610,6 +1655,8 @@ bool from_param_list(const ParameterList& param_list,
         break;
       case PID_XTYPES_TYPE_CONSISTENCY:
         reader_data.ddsSubscriptionData.type_consistency = param.type_consistency();
+        decode_type_consistency_kind(reader_data.ddsSubscriptionData.type_consistency.kind,
+                                     tc_kind_encoding);
         break;
       case PID_ENDPOINT_GUID:
         reader_data.readerProxy.remoteReaderGuid = param.guid();
@@ -1785,8 +1832,20 @@ bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
                    RtpsDurationEncoding duration_encoding,
                    bool map)
 {
+  return to_param_list(wrapper, param_list, use_xtypes, type_info,
+                       duration_encoding, TCKE_XTYPES, map);
+}
+
+bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
+                   ParameterList& param_list,
+                   bool use_xtypes,
+                   const DCPS::TypeInformation& type_info,
+                   RtpsDurationEncoding duration_encoding,
+                   TypeConsistencyKindEncoding tc_kind_encoding,
+                   bool map)
+{
   return to_param_list(wrapper.data, param_list, use_xtypes, type_info,
-                       duration_encoding, map)
+                       duration_encoding, tc_kind_encoding, map)
     && to_param_list(wrapper.security_info, param_list)
     && to_param_list(wrapper.data_tags, param_list);
 }
@@ -1808,8 +1867,20 @@ bool from_param_list(const ParameterList& param_list,
                      XTypes::TypeInformation& type_info,
                      RtpsDurationEncoding duration_encoding)
 {
+  return from_param_list(param_list, vendor_id, wrapper, use_xtypes,
+                         type_info, duration_encoding, TCKE_XTYPES);
+}
+
+bool from_param_list(const ParameterList& param_list,
+                     const VendorId_t& vendor_id,
+                     DiscoveredSubscription_SecurityWrapper& wrapper,
+                     bool use_xtypes,
+                     XTypes::TypeInformation& type_info,
+                     RtpsDurationEncoding duration_encoding,
+                     TypeConsistencyKindEncoding tc_kind_encoding)
+{
   bool result = from_param_list(param_list, vendor_id, wrapper.data, use_xtypes,
-                                type_info, duration_encoding) &&
+                                type_info, duration_encoding, tc_kind_encoding) &&
     from_param_list(param_list, wrapper.security_info) &&
     from_param_list(param_list, wrapper.data_tags);
 

@@ -4020,6 +4020,19 @@ bool Spdp::participant_uses_rtps_duration_fraction_i(const DCPS::GUID_t& guid) c
   return (participant_flags_ & PFLAGS_RTPS_DURATION_FRACTION) != 0;
 }
 
+bool Spdp::participant_uses_xtypes_type_consistency_kind_i(const DCPS::GUID_t& guid) const
+{
+  const DiscoveredParticipantMap::const_iterator iter =
+    participants_.find(make_part_guid(guid));
+  if (iter != participants_.end()) {
+    // Only older OpenDDS releases used the legacy values
+    return !is_opendds(iter->second.pdata_.participantProxy) ||
+      (iter->second.pdata_.participantProxy.opendds_participant_flags.bits &
+       PFLAGS_XTYPES_TYPE_CONSISTENCY_KIND) != 0;
+  }
+  return (participant_flags_ & PFLAGS_XTYPES_TYPE_CONSISTENCY_KIND) != 0;
+}
+
 bool Spdp::participant_uses_rtps_duration_fraction(const DCPS::GUID_t& guid) const
 {
   // participant_flags_ is const (set once at construction), so reading it
@@ -4855,13 +4868,15 @@ VendorId_t Spdp::get_vendor_id_i(const GUID_t& guid) const
   return unknown_vendor;
 }
 
-void Spdp::get_vendor_id_and_duration_encoding(const GUID_t& guid,
-                                                VendorId_t& vendor_id,
-                                                bool& uses_rtps_duration_fraction) const
+void Spdp::get_vendor_id_and_encodings(const GUID_t& guid,
+                                       VendorId_t& vendor_id,
+                                       bool& uses_rtps_duration_fraction,
+                                       bool& uses_xtypes_type_consistency_kind) const
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   vendor_id = get_vendor_id_i(guid);
   uses_rtps_duration_fraction = participant_uses_rtps_duration_fraction_i(guid);
+  uses_xtypes_type_consistency_kind = participant_uses_xtypes_type_consistency_kind_i(guid);
 }
 
 OPENDDS_SET(DDS::UInt32) Spdp::get_ignored_user_tags() const
