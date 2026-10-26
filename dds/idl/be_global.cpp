@@ -603,38 +603,92 @@ namespace {
     return make_pair(base_name + suffix, "");
   }
 
+  bool is_absolute_path(const string& path)
+  {
+    return (path.size() && (path[0] == '/' || path[0] == '\\')) ||
+      (path.size() > 2 && path[1] == ':' && (path[2] == '/' || path[2] == '\\'));
+  }
+
+  // Use '/' separators and remove "." and ".." segments from an absolute path
+  string normalize_path(const string& path)
+  {
+    string p(path);
+    std::replace(p.begin(), p.end(), '\\', '/');
+    const size_t root_len = p.size() > 1 && p[1] == ':' ? 3 : 1;
+    vector<string> segments;
+    size_t pos = root_len;
+    while (pos <= p.size()) {
+      const size_t end = (std::min)(p.find('/', pos), p.size());
+      const string segment = p.substr(pos, end - pos);
+      if (segment == "..") {
+        if (!segments.empty()) {
+          segments.pop_back();
+        }
+      } else if (!segment.empty() && segment != ".") {
+        segments.push_back(segment);
+      }
+      pos = end + 1;
+    }
+
+    string result = p.substr(0, root_len);
+    for (size_t i = 0; i < segments.size(); ++i) {
+      result += (i ? "/" : "") + segments[i];
+    }
+    return result;
+  }
+
+  bool starts_with_dir(const string& path, const string& dir)
+  {
+    if (dir.empty() || path.size() <= dir.size() ||
+#ifdef ACE_WIN32
+        ACE_OS::strncasecmp(path.c_str(), dir.c_str(), dir.size()) != 0
+#else
+        path.compare(0, dir.size(), dir) != 0
+#endif
+        ) {
+      return false;
+    }
+    return dir[dir.size() - 1] == '/' || path[dir.size()] == '/';
+  }
+
+  // Path of an included IDL file relative to the include path it was found in
   string make_relative(const string& absolute, bool filename_only_includes)
   {
+    string rel = absolute;
+    bool found = false;
     for (vector<string>::reverse_iterator iter = inc_path_vector.rbegin(),
-        end = inc_path_vector.rend(); iter != end; ++iter) {
+        end = inc_path_vector.rend(); iter != end && !found; ++iter) {
       if (absolute.find(*iter) == 0) {
-        string rel = absolute.substr(iter->size());
-
-        if (rel.size() && (rel[0] == '/' || rel[0] == '\\')) {
-          rel.erase(0, 1);
-        }
-
-        if (filename_only_includes) {
-          size_t loc = rel.rfind('/', rel.length());
-          const size_t locw = rel.rfind('\\', rel.length());
-
-          if (loc != string::npos && locw != string::npos) {
-            // path may contain both '/' and '\'. choose the last one.
-            loc = loc > locw ? loc : locw;
-          } else if (loc == string::npos) {
-            loc = locw;
-          }
-
-          if (loc != string::npos) {
-            rel = rel.substr(loc + 1, rel.length() - loc);
-          }
-        }
-
-        return rel;
+        rel = absolute.substr(iter->size());
+        found = true;
       }
     }
 
-    return absolute;
+    // The preprocessor can spell an absolute path differently than the include path
+    if (!found && is_absolute_path(absolute)) {
+      const string path = normalize_path(absolute);
+      for (vector<string>::reverse_iterator iter = inc_path_vector.rbegin(),
+          end = inc_path_vector.rend(); iter != end && !found; ++iter) {
+        const string dir = is_absolute_path(*iter) ? normalize_path(*iter) : "";
+        if (starts_with_dir(path, dir)) {
+          rel = path.substr(dir.size());
+          found = true;
+        }
+      }
+    }
+
+    if (found && rel.size() && (rel[0] == '/' || rel[0] == '\\')) {
+      rel.erase(0, 1);
+    }
+
+    if (filename_only_includes) {
+      const size_t loc = rel.find_last_of("/\\");
+      if (loc != string::npos) {
+        rel.erase(0, loc + 1);
+      }
+    }
+
+    return rel;
   }
 
   struct InsertIncludes {
