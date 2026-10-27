@@ -23,16 +23,16 @@ QosCommon::get_durability_kind(const ::dds::durabilityKind& kind,
 {
   switch (kind.integral())
     {
-    case ::dds::durabilityKind::VOLATILE_DURABILITY_QOS_l:
+    case ::dds::durabilityKind::VOLATILE_DURABILITY_QOS:
       dds_kind = ::DDS::VOLATILE_DURABILITY_QOS;
       break;
-    case ::dds::durabilityKind::TRANSIENT_LOCAL_DURABILITY_QOS_l:
+    case ::dds::durabilityKind::TRANSIENT_LOCAL_DURABILITY_QOS:
       dds_kind = ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
       break;
-    case ::dds::durabilityKind::TRANSIENT_DURABILITY_QOS_l:
+    case ::dds::durabilityKind::TRANSIENT_DURABILITY_QOS:
       dds_kind = ::DDS::TRANSIENT_DURABILITY_QOS;
       break;
-    case ::dds::durabilityKind::PERSISTENT_DURABILITY_QOS_l:
+    case ::dds::durabilityKind::PERSISTENT_DURABILITY_QOS:
       dds_kind = ::DDS::PERSISTENT_DURABILITY_QOS;
       break;
     default:
@@ -51,10 +51,10 @@ QosCommon::get_history_kind(const ::dds::historyKind& kind,
 {
   switch (kind.integral())
     {
-    case ::dds::historyKind::KEEP_ALL_HISTORY_QOS_l:
+    case ::dds::historyKind::KEEP_ALL_HISTORY_QOS:
       dds_kind = ::DDS::KEEP_ALL_HISTORY_QOS;
       break;
-    case ::dds::historyKind::KEEP_LAST_HISTORY_QOS_l:
+    case ::dds::historyKind::KEEP_LAST_HISTORY_QOS:
       dds_kind = ::DDS::KEEP_LAST_HISTORY_QOS;
       break;
     default:
@@ -105,13 +105,13 @@ QosCommon::get_liveliness_kind(const ::dds::livelinessKind& kind,
 {
   switch (kind.integral())
     {
-    case ::dds::livelinessKind::AUTOMATIC_LIVELINESS_QOS_l:
+    case ::dds::livelinessKind::AUTOMATIC_LIVELINESS_QOS:
       dds_kind = ::DDS::AUTOMATIC_LIVELINESS_QOS;
       break;
-    case ::dds::livelinessKind::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS_l:
+    case ::dds::livelinessKind::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
       dds_kind = ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
       break;
-    case ::dds::livelinessKind::MANUAL_BY_TOPIC_LIVELINESS_QOS_l:
+    case ::dds::livelinessKind::MANUAL_BY_TOPIC_LIVELINESS_QOS:
       dds_kind = ::DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
       break;
     default:
@@ -130,10 +130,10 @@ QosCommon::get_realiability_kind(const ::dds::reliabilityKind& kind,
 {
   switch (kind.integral())
     {
-    case ::dds::reliabilityKind::BEST_EFFORT_RELIABILITY_QOS_l:
+    case ::dds::reliabilityKind::BEST_EFFORT_RELIABILITY_QOS:
       dds_kind = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
       break;
-    case ::dds::reliabilityKind::RELIABLE_RELIABILITY_QOS_l:
+    case ::dds::reliabilityKind::RELIABLE_RELIABILITY_QOS:
       dds_kind = ::DDS::RELIABLE_RELIABILITY_QOS;
       break;
     default:
@@ -152,10 +152,10 @@ QosCommon::get_destination_order_kind(const ::dds::destinationOrderKind& kind,
 {
   switch (kind.integral())
     {
-    case ::dds::destinationOrderKind::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS_l:
+    case ::dds::destinationOrderKind::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS:
       dds_kind = ::DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
       break;
-    case ::dds::destinationOrderKind::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS_l:
+    case ::dds::destinationOrderKind::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS:
       dds_kind = ::DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
       break;
     default:
@@ -174,10 +174,10 @@ QosCommon::get_ownership_kind(const ::dds::ownershipKind& kind,
 {
   switch (kind.integral())
     {
-    case ::dds::ownershipKind::SHARED_OWNERSHIP_QOS_l:
+    case ::dds::ownershipKind::SHARED_OWNERSHIP_QOS:
       dds_kind = ::DDS::SHARED_OWNERSHIP_QOS;
       break;
-    case ::dds::ownershipKind::EXCLUSIVE_OWNERSHIP_QOS_l:
+    case ::dds::ownershipKind::EXCLUSIVE_OWNERSHIP_QOS:
       dds_kind = ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
       break;
     default:
@@ -196,10 +196,10 @@ QosCommon::get_type_consistency_kind(const ::dds::typeConsistencyKind& kind,
 {
   switch (kind.integral())
     {
-    case ::dds::typeConsistencyKind::DISALLOW_TYPE_COERCION_l:
+    case ::dds::typeConsistencyKind::DISALLOW_TYPE_COERCION:
       dds_kind = ::DDS::DISALLOW_TYPE_COERCION;
       break;
-    case ::dds::typeConsistencyKind::ALLOW_TYPE_COERCION_l:
+    case ::dds::typeConsistencyKind::ALLOW_TYPE_COERCION:
       dds_kind = ::DDS::ALLOW_TYPE_COERCION;
       break;
     default:
@@ -218,16 +218,16 @@ QosCommon::get_data_presentation_id_kind(const ::dds::dataRepresentationIdKind& 
 {
   switch (kind.integral())
     {
-    case ::dds::dataRepresentationIdKind::XCDR_DATA_REPRESENTATION_l:
+    case ::dds::dataRepresentationIdKind::XCDR_DATA_REPRESENTATION:
       dds_kind = ::DDS::XCDR_DATA_REPRESENTATION;
       break;
-    case ::dds::dataRepresentationIdKind::XML_DATA_REPRESENTATION_l:
+    case ::dds::dataRepresentationIdKind::XML_DATA_REPRESENTATION:
       dds_kind = ::DDS::XML_DATA_REPRESENTATION;
       break;
-    case ::dds::dataRepresentationIdKind::XCDR2_DATA_REPRESENTATION_l:
+    case ::dds::dataRepresentationIdKind::XCDR2_DATA_REPRESENTATION:
       dds_kind = ::DDS::XCDR2_DATA_REPRESENTATION;
       break;
-    case ::dds::dataRepresentationIdKind::UNALIGNED_CDR_DATA_REPRESENTATION_l:
+    case ::dds::dataRepresentationIdKind::UNALIGNED_CDR_DATA_REPRESENTATION:
       dds_kind = ::OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION;
       break;
     default:

@@ -43,13 +43,13 @@ QOS_PubSub_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, const 
           {
             switch (access_scope_if_set_ptr->integral())
               {
-              case ::dds::presentationAccessScopeKind::INSTANCE_PRESENTATION_QOS_l:
+              case ::dds::presentationAccessScopeKind::INSTANCE_PRESENTATION_QOS:
                 dds_qos.presentation.access_scope = ::DDS::INSTANCE_PRESENTATION_QOS;
                 break;
-              case ::dds::presentationAccessScopeKind::TOPIC_PRESENTATION_QOS_l:
+              case ::dds::presentationAccessScopeKind::TOPIC_PRESENTATION_QOS:
                 dds_qos.presentation.access_scope = ::DDS::TOPIC_PRESENTATION_QOS;
                 break;
-              case ::dds::presentationAccessScopeKind::GROUP_PRESENTATION_QOS_l:
+              case ::dds::presentationAccessScopeKind::GROUP_PRESENTATION_QOS:
                 dds_qos.presentation.access_scope = ::DDS::GROUP_PRESENTATION_QOS;
                 break;
               default:
