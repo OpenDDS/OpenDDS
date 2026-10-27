@@ -159,6 +159,12 @@ namespace dds
   : v_ (v)
   {
   }
+  duration::duration (duration const& s)
+  : ::XSCRT::Type (s)
+  , sec_ (s.sec_ ? std::make_unique<::XMLSchema::string<char>> (*s.sec_) : nullptr)
+  , nanosec_ (s.nanosec_ ? std::make_unique<::XMLSchema::string<char>> (*s.nanosec_) : nullptr)
+  {
+  }
   ::XMLSchema::string<char> const* duration::sec_if_set () const noexcept
   {
     return sec_.get ();
@@ -178,21 +184,46 @@ namespace dds
     return element_;
   }
 
+  deadlineQosPolicy::deadlineQosPolicy (deadlineQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , period_ (s.period_ ? std::make_unique<::dds::duration> (*s.period_) : nullptr)
+  {
+  }
   ::dds::duration const* deadlineQosPolicy::period_if_set () const noexcept
   {
     return period_.get ();
   }
 
+  destinationOrderQosPolicy::destinationOrderQosPolicy (destinationOrderQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , kind_ (s.kind_ ? std::make_unique<::dds::destinationOrderKind> (*s.kind_) : nullptr)
+  {
+  }
   ::dds::destinationOrderKind const* destinationOrderQosPolicy::kind_if_set () const noexcept
   {
     return kind_.get ();
   }
 
+  durabilityQosPolicy::durabilityQosPolicy (durabilityQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , kind_ (s.kind_ ? std::make_unique<::dds::durabilityKind> (*s.kind_) : nullptr)
+  {
+  }
   ::dds::durabilityKind const* durabilityQosPolicy::kind_if_set () const noexcept
   {
     return kind_.get ();
   }
 
+  durabilityServiceQosPolicy::durabilityServiceQosPolicy (durabilityServiceQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , service_cleanup_delay_ (s.service_cleanup_delay_ ? std::make_unique<::dds::duration> (*s.service_cleanup_delay_) : nullptr)
+  , history_kind_ (s.history_kind_ ? std::make_unique<::dds::historyKind> (*s.history_kind_) : nullptr)
+  , history_depth_ (s.history_depth_ ? std::make_unique<::XMLSchema::positiveInteger> (*s.history_depth_) : nullptr)
+  , max_samples_ (s.max_samples_ ? std::make_unique<::XMLSchema::string<char>> (*s.max_samples_) : nullptr)
+  , max_instances_ (s.max_instances_ ? std::make_unique<::XMLSchema::string<char>> (*s.max_instances_) : nullptr)
+  , max_samples_per_instance_ (s.max_samples_per_instance_ ? std::make_unique<::XMLSchema::string<char>> (*s.max_samples_per_instance_) : nullptr)
+  {
+  }
   ::dds::duration const* durabilityServiceQosPolicy::service_cleanup_delay_if_set () const noexcept
   {
     return service_cleanup_delay_.get ();
@@ -218,16 +249,32 @@ namespace dds
     return max_samples_per_instance_.get ();
   }
 
+  entityFactoryQosPolicy::entityFactoryQosPolicy (entityFactoryQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , autoenable_created_entities_ (s.autoenable_created_entities_ ? std::make_unique<::XMLSchema::boolean> (*s.autoenable_created_entities_) : nullptr)
+  {
+  }
   ::XMLSchema::boolean const* entityFactoryQosPolicy::autoenable_created_entities_if_set () const noexcept
   {
     return autoenable_created_entities_.get ();
   }
 
+  groupDataQosPolicy::groupDataQosPolicy (groupDataQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , value_ (s.value_ ? std::make_unique<::XMLSchema::string<char>> (*s.value_) : nullptr)
+  {
+  }
   ::XMLSchema::string<char> const* groupDataQosPolicy::value_if_set () const noexcept
   {
     return value_.get ();
   }
 
+  historyQosPolicy::historyQosPolicy (historyQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , kind_ (s.kind_ ? std::make_unique<::dds::historyKind> (*s.kind_) : nullptr)
+  , depth_ (s.depth_ ? std::make_unique<::XMLSchema::positiveInteger> (*s.depth_) : nullptr)
+  {
+  }
   ::dds::historyKind const* historyQosPolicy::kind_if_set () const noexcept
   {
     return kind_.get ();
@@ -237,16 +284,32 @@ namespace dds
     return depth_.get ();
   }
 
+  latencyBudgetQosPolicy::latencyBudgetQosPolicy (latencyBudgetQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , duration_ (s.duration_ ? std::make_unique<::dds::duration> (*s.duration_) : nullptr)
+  {
+  }
   ::dds::duration const* latencyBudgetQosPolicy::duration_if_set () const noexcept
   {
     return duration_.get ();
   }
 
+  lifespanQosPolicy::lifespanQosPolicy (lifespanQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , duration_ (s.duration_ ? std::make_unique<::dds::duration> (*s.duration_) : nullptr)
+  {
+  }
   ::dds::duration const* lifespanQosPolicy::duration_if_set () const noexcept
   {
     return duration_.get ();
   }
 
+  livelinessQosPolicy::livelinessQosPolicy (livelinessQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , kind_ (s.kind_ ? std::make_unique<::dds::livelinessKind> (*s.kind_) : nullptr)
+  , lease_duration_ (s.lease_duration_ ? std::make_unique<::dds::duration> (*s.lease_duration_) : nullptr)
+  {
+  }
   ::dds::livelinessKind const* livelinessQosPolicy::kind_if_set () const noexcept
   {
     return kind_.get ();
@@ -256,21 +319,43 @@ namespace dds
     return lease_duration_.get ();
   }
 
+  ownershipQosPolicy::ownershipQosPolicy (ownershipQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , kind_ (s.kind_ ? std::make_unique<::dds::ownershipKind> (*s.kind_) : nullptr)
+  {
+  }
   ::dds::ownershipKind const* ownershipQosPolicy::kind_if_set () const noexcept
   {
     return kind_.get ();
   }
 
+  ownershipStrengthQosPolicy::ownershipStrengthQosPolicy (ownershipStrengthQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , value_ (s.value_ ? std::make_unique<::XMLSchema::nonNegativeInteger> (*s.value_) : nullptr)
+  {
+  }
   ::XMLSchema::nonNegativeInteger const* ownershipStrengthQosPolicy::value_if_set () const noexcept
   {
     return value_.get ();
   }
 
+  partitionQosPolicy::partitionQosPolicy (partitionQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , name_ (s.name_ ? std::make_unique<::dds::stringSeq> (*s.name_) : nullptr)
+  {
+  }
   ::dds::stringSeq const* partitionQosPolicy::name_if_set () const noexcept
   {
     return name_.get ();
   }
 
+  presentationQosPolicy::presentationQosPolicy (presentationQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , access_scope_ (s.access_scope_ ? std::make_unique<::dds::presentationAccessScopeKind> (*s.access_scope_) : nullptr)
+  , coherent_access_ (s.coherent_access_ ? std::make_unique<::XMLSchema::boolean> (*s.coherent_access_) : nullptr)
+  , ordered_access_ (s.ordered_access_ ? std::make_unique<::XMLSchema::boolean> (*s.ordered_access_) : nullptr)
+  {
+  }
   ::dds::presentationAccessScopeKind const* presentationQosPolicy::access_scope_if_set () const noexcept
   {
     return access_scope_.get ();
@@ -284,6 +369,12 @@ namespace dds
     return ordered_access_.get ();
   }
 
+  readerDataLifecycleQosPolicy::readerDataLifecycleQosPolicy (readerDataLifecycleQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , autopurge_nowriter_samples_delay_ (s.autopurge_nowriter_samples_delay_ ? std::make_unique<::dds::duration> (*s.autopurge_nowriter_samples_delay_) : nullptr)
+  , autopurge_disposed_samples_delay_ (s.autopurge_disposed_samples_delay_ ? std::make_unique<::dds::duration> (*s.autopurge_disposed_samples_delay_) : nullptr)
+  {
+  }
   ::dds::duration const* readerDataLifecycleQosPolicy::autopurge_nowriter_samples_delay_if_set () const noexcept
   {
     return autopurge_nowriter_samples_delay_.get ();
@@ -293,6 +384,12 @@ namespace dds
     return autopurge_disposed_samples_delay_.get ();
   }
 
+  reliabilityQosPolicy::reliabilityQosPolicy (reliabilityQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , kind_ (s.kind_ ? std::make_unique<::dds::reliabilityKind> (*s.kind_) : nullptr)
+  , max_blocking_time_ (s.max_blocking_time_ ? std::make_unique<::dds::duration> (*s.max_blocking_time_) : nullptr)
+  {
+  }
   ::dds::reliabilityKind const* reliabilityQosPolicy::kind_if_set () const noexcept
   {
     return kind_.get ();
@@ -302,6 +399,15 @@ namespace dds
     return max_blocking_time_.get ();
   }
 
+  resourceLimitsQosPolicy::resourceLimitsQosPolicy (resourceLimitsQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , max_samples_ (s.max_samples_ ? std::make_unique<::XMLSchema::string<char>> (*s.max_samples_) : nullptr)
+  , max_instances_ (s.max_instances_ ? std::make_unique<::XMLSchema::string<char>> (*s.max_instances_) : nullptr)
+  , max_samples_per_instance_ (s.max_samples_per_instance_ ? std::make_unique<::XMLSchema::string<char>> (*s.max_samples_per_instance_) : nullptr)
+  , initial_samples_ (s.initial_samples_ ? std::make_unique<::XMLSchema::positiveInteger> (*s.initial_samples_) : nullptr)
+  , initial_instances_ (s.initial_instances_ ? std::make_unique<::XMLSchema::positiveInteger> (*s.initial_instances_) : nullptr)
+  {
+  }
   ::XMLSchema::string<char> const* resourceLimitsQosPolicy::max_samples_if_set () const noexcept
   {
     return max_samples_.get ();
@@ -323,36 +429,76 @@ namespace dds
     return initial_instances_.get ();
   }
 
+  timeBasedFilterQosPolicy::timeBasedFilterQosPolicy (timeBasedFilterQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , minimum_separation_ (s.minimum_separation_ ? std::make_unique<::dds::duration> (*s.minimum_separation_) : nullptr)
+  {
+  }
   ::dds::duration const* timeBasedFilterQosPolicy::minimum_separation_if_set () const noexcept
   {
     return minimum_separation_.get ();
   }
 
+  topicDataQosPolicy::topicDataQosPolicy (topicDataQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , value_ (s.value_ ? std::make_unique<::XMLSchema::string<char>> (*s.value_) : nullptr)
+  {
+  }
   ::XMLSchema::string<char> const* topicDataQosPolicy::value_if_set () const noexcept
   {
     return value_.get ();
   }
 
+  transportPriorityQosPolicy::transportPriorityQosPolicy (transportPriorityQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , value_ (s.value_ ? std::make_unique<::XMLSchema::nonNegativeInteger> (*s.value_) : nullptr)
+  {
+  }
   ::XMLSchema::nonNegativeInteger const* transportPriorityQosPolicy::value_if_set () const noexcept
   {
     return value_.get ();
   }
 
+  userDataQosPolicy::userDataQosPolicy (userDataQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , value_ (s.value_ ? std::make_unique<::XMLSchema::string<char>> (*s.value_) : nullptr)
+  {
+  }
   ::XMLSchema::string<char> const* userDataQosPolicy::value_if_set () const noexcept
   {
     return value_.get ();
   }
 
+  writerDataLifecycleQosPolicy::writerDataLifecycleQosPolicy (writerDataLifecycleQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , autodispose_unregistered_instances_ (s.autodispose_unregistered_instances_ ? std::make_unique<::XMLSchema::boolean> (*s.autodispose_unregistered_instances_) : nullptr)
+  {
+  }
   ::XMLSchema::boolean const* writerDataLifecycleQosPolicy::autodispose_unregistered_instances_if_set () const noexcept
   {
     return autodispose_unregistered_instances_.get ();
   }
 
+  dataRepresentationQosPolicy::dataRepresentationQosPolicy (dataRepresentationQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , value_ (s.value_ ? std::make_unique<::dds::dataRepresentationIdSeq> (*s.value_) : nullptr)
+  {
+  }
   ::dds::dataRepresentationIdSeq const* dataRepresentationQosPolicy::value_if_set () const noexcept
   {
     return value_.get ();
   }
 
+  typeConsistencyEnforcementQosPolicy::typeConsistencyEnforcementQosPolicy (typeConsistencyEnforcementQosPolicy const& s)
+  : ::XSCRT::Type (s)
+  , kind_ (s.kind_ ? std::make_unique<::dds::typeConsistencyKind> (*s.kind_) : nullptr)
+  , ignore_sequence_bounds_ (s.ignore_sequence_bounds_ ? std::make_unique<::XMLSchema::boolean> (*s.ignore_sequence_bounds_) : nullptr)
+  , ignore_string_bounds_ (s.ignore_string_bounds_ ? std::make_unique<::XMLSchema::boolean> (*s.ignore_string_bounds_) : nullptr)
+  , ignore_member_names_ (s.ignore_member_names_ ? std::make_unique<::XMLSchema::boolean> (*s.ignore_member_names_) : nullptr)
+  , prevent_type_widening_ (s.prevent_type_widening_ ? std::make_unique<::XMLSchema::boolean> (*s.prevent_type_widening_) : nullptr)
+  , force_type_validation_ (s.force_type_validation_ ? std::make_unique<::XMLSchema::boolean> (*s.force_type_validation_) : nullptr)
+  {
+  }
   ::dds::typeConsistencyKind const* typeConsistencyEnforcementQosPolicy::kind_if_set () const noexcept
   {
     return kind_.get ();
@@ -378,6 +524,14 @@ namespace dds
     return force_type_validation_.get ();
   }
 
+  domainparticipantQos::domainparticipantQos (domainparticipantQos const& s)
+  : ::XSCRT::Type (s)
+  , user_data_ (s.user_data_ ? std::make_unique<::dds::userDataQosPolicy> (*s.user_data_) : nullptr)
+  , entity_factory_ (s.entity_factory_ ? std::make_unique<::dds::entityFactoryQosPolicy> (*s.entity_factory_) : nullptr)
+  , name_ (s.name_ ? std::make_unique<::XMLSchema::string<char>> (*s.name_) : nullptr)
+  , base_name_ (s.base_name_ ? std::make_unique<::XMLSchema::string<char>> (*s.base_name_) : nullptr)
+  {
+  }
   ::dds::userDataQosPolicy const* domainparticipantQos::user_data_if_set () const noexcept
   {
     return user_data_.get ();
@@ -395,6 +549,16 @@ namespace dds
     return base_name_.get ();
   }
 
+  publisherQos::publisherQos (publisherQos const& s)
+  : ::XSCRT::Type (s)
+  , presentation_ (s.presentation_ ? std::make_unique<::dds::presentationQosPolicy> (*s.presentation_) : nullptr)
+  , partition_ (s.partition_ ? std::make_unique<::dds::partitionQosPolicy> (*s.partition_) : nullptr)
+  , group_data_ (s.group_data_ ? std::make_unique<::dds::groupDataQosPolicy> (*s.group_data_) : nullptr)
+  , entity_factory_ (s.entity_factory_ ? std::make_unique<::dds::entityFactoryQosPolicy> (*s.entity_factory_) : nullptr)
+  , name_ (s.name_ ? std::make_unique<::XMLSchema::string<char>> (*s.name_) : nullptr)
+  , base_name_ (s.base_name_ ? std::make_unique<::XMLSchema::string<char>> (*s.base_name_) : nullptr)
+  {
+  }
   ::dds::presentationQosPolicy const* publisherQos::presentation_if_set () const noexcept
   {
     return presentation_.get ();
@@ -420,6 +584,16 @@ namespace dds
     return base_name_.get ();
   }
 
+  subscriberQos::subscriberQos (subscriberQos const& s)
+  : ::XSCRT::Type (s)
+  , presentation_ (s.presentation_ ? std::make_unique<::dds::presentationQosPolicy> (*s.presentation_) : nullptr)
+  , partition_ (s.partition_ ? std::make_unique<::dds::partitionQosPolicy> (*s.partition_) : nullptr)
+  , group_data_ (s.group_data_ ? std::make_unique<::dds::groupDataQosPolicy> (*s.group_data_) : nullptr)
+  , entity_factory_ (s.entity_factory_ ? std::make_unique<::dds::entityFactoryQosPolicy> (*s.entity_factory_) : nullptr)
+  , name_ (s.name_ ? std::make_unique<::XMLSchema::string<char>> (*s.name_) : nullptr)
+  , base_name_ (s.base_name_ ? std::make_unique<::XMLSchema::string<char>> (*s.base_name_) : nullptr)
+  {
+  }
   ::dds::presentationQosPolicy const* subscriberQos::presentation_if_set () const noexcept
   {
     return presentation_.get ();
@@ -445,6 +619,27 @@ namespace dds
     return base_name_.get ();
   }
 
+  topicQos::topicQos (topicQos const& s)
+  : ::XSCRT::Type (s)
+  , topic_data_ (s.topic_data_ ? std::make_unique<::dds::topicDataQosPolicy> (*s.topic_data_) : nullptr)
+  , durability_ (s.durability_ ? std::make_unique<::dds::durabilityQosPolicy> (*s.durability_) : nullptr)
+  , durability_service_ (s.durability_service_ ? std::make_unique<::dds::durabilityServiceQosPolicy> (*s.durability_service_) : nullptr)
+  , deadline_ (s.deadline_ ? std::make_unique<::dds::deadlineQosPolicy> (*s.deadline_) : nullptr)
+  , latency_budget_ (s.latency_budget_ ? std::make_unique<::dds::latencyBudgetQosPolicy> (*s.latency_budget_) : nullptr)
+  , liveliness_ (s.liveliness_ ? std::make_unique<::dds::livelinessQosPolicy> (*s.liveliness_) : nullptr)
+  , reliability_ (s.reliability_ ? std::make_unique<::dds::reliabilityQosPolicy> (*s.reliability_) : nullptr)
+  , destination_order_ (s.destination_order_ ? std::make_unique<::dds::destinationOrderQosPolicy> (*s.destination_order_) : nullptr)
+  , history_ (s.history_ ? std::make_unique<::dds::historyQosPolicy> (*s.history_) : nullptr)
+  , resource_limits_ (s.resource_limits_ ? std::make_unique<::dds::resourceLimitsQosPolicy> (*s.resource_limits_) : nullptr)
+  , transport_priority_ (s.transport_priority_ ? std::make_unique<::dds::transportPriorityQosPolicy> (*s.transport_priority_) : nullptr)
+  , lifespan_ (s.lifespan_ ? std::make_unique<::dds::lifespanQosPolicy> (*s.lifespan_) : nullptr)
+  , ownership_ (s.ownership_ ? std::make_unique<::dds::ownershipQosPolicy> (*s.ownership_) : nullptr)
+  , representation_ (s.representation_ ? std::make_unique<::dds::dataRepresentationQosPolicy> (*s.representation_) : nullptr)
+  , name_ (s.name_ ? std::make_unique<::XMLSchema::string<char>> (*s.name_) : nullptr)
+  , base_name_ (s.base_name_ ? std::make_unique<::XMLSchema::string<char>> (*s.base_name_) : nullptr)
+  , topic_filter_ (s.topic_filter_ ? std::make_unique<::XMLSchema::string<char>> (*s.topic_filter_) : nullptr)
+  {
+  }
   ::dds::topicDataQosPolicy const* topicQos::topic_data_if_set () const noexcept
   {
     return topic_data_.get ();
@@ -514,6 +709,27 @@ namespace dds
     return topic_filter_.get ();
   }
 
+  datareaderQos::datareaderQos (datareaderQos const& s)
+  : ::XSCRT::Type (s)
+  , durability_ (s.durability_ ? std::make_unique<::dds::durabilityQosPolicy> (*s.durability_) : nullptr)
+  , deadline_ (s.deadline_ ? std::make_unique<::dds::deadlineQosPolicy> (*s.deadline_) : nullptr)
+  , latency_budget_ (s.latency_budget_ ? std::make_unique<::dds::latencyBudgetQosPolicy> (*s.latency_budget_) : nullptr)
+  , liveliness_ (s.liveliness_ ? std::make_unique<::dds::livelinessQosPolicy> (*s.liveliness_) : nullptr)
+  , reliability_ (s.reliability_ ? std::make_unique<::dds::reliabilityQosPolicy> (*s.reliability_) : nullptr)
+  , destination_order_ (s.destination_order_ ? std::make_unique<::dds::destinationOrderQosPolicy> (*s.destination_order_) : nullptr)
+  , history_ (s.history_ ? std::make_unique<::dds::historyQosPolicy> (*s.history_) : nullptr)
+  , resource_limits_ (s.resource_limits_ ? std::make_unique<::dds::resourceLimitsQosPolicy> (*s.resource_limits_) : nullptr)
+  , user_data_ (s.user_data_ ? std::make_unique<::dds::userDataQosPolicy> (*s.user_data_) : nullptr)
+  , ownership_ (s.ownership_ ? std::make_unique<::dds::ownershipQosPolicy> (*s.ownership_) : nullptr)
+  , time_based_filter_ (s.time_based_filter_ ? std::make_unique<::dds::timeBasedFilterQosPolicy> (*s.time_based_filter_) : nullptr)
+  , reader_data_lifecycle_ (s.reader_data_lifecycle_ ? std::make_unique<::dds::readerDataLifecycleQosPolicy> (*s.reader_data_lifecycle_) : nullptr)
+  , representation_ (s.representation_ ? std::make_unique<::dds::dataRepresentationQosPolicy> (*s.representation_) : nullptr)
+  , type_consistency_ (s.type_consistency_ ? std::make_unique<::dds::typeConsistencyEnforcementQosPolicy> (*s.type_consistency_) : nullptr)
+  , name_ (s.name_ ? std::make_unique<::XMLSchema::string<char>> (*s.name_) : nullptr)
+  , base_name_ (s.base_name_ ? std::make_unique<::XMLSchema::string<char>> (*s.base_name_) : nullptr)
+  , topic_filter_ (s.topic_filter_ ? std::make_unique<::XMLSchema::string<char>> (*s.topic_filter_) : nullptr)
+  {
+  }
   ::dds::durabilityQosPolicy const* datareaderQos::durability_if_set () const noexcept
   {
     return durability_.get ();
@@ -583,6 +799,29 @@ namespace dds
     return topic_filter_.get ();
   }
 
+  datawriterQos::datawriterQos (datawriterQos const& s)
+  : ::XSCRT::Type (s)
+  , durability_ (s.durability_ ? std::make_unique<::dds::durabilityQosPolicy> (*s.durability_) : nullptr)
+  , durability_service_ (s.durability_service_ ? std::make_unique<::dds::durabilityServiceQosPolicy> (*s.durability_service_) : nullptr)
+  , deadline_ (s.deadline_ ? std::make_unique<::dds::deadlineQosPolicy> (*s.deadline_) : nullptr)
+  , latency_budget_ (s.latency_budget_ ? std::make_unique<::dds::latencyBudgetQosPolicy> (*s.latency_budget_) : nullptr)
+  , liveliness_ (s.liveliness_ ? std::make_unique<::dds::livelinessQosPolicy> (*s.liveliness_) : nullptr)
+  , reliability_ (s.reliability_ ? std::make_unique<::dds::reliabilityQosPolicy> (*s.reliability_) : nullptr)
+  , destination_order_ (s.destination_order_ ? std::make_unique<::dds::destinationOrderQosPolicy> (*s.destination_order_) : nullptr)
+  , history_ (s.history_ ? std::make_unique<::dds::historyQosPolicy> (*s.history_) : nullptr)
+  , resource_limits_ (s.resource_limits_ ? std::make_unique<::dds::resourceLimitsQosPolicy> (*s.resource_limits_) : nullptr)
+  , transport_priority_ (s.transport_priority_ ? std::make_unique<::dds::transportPriorityQosPolicy> (*s.transport_priority_) : nullptr)
+  , lifespan_ (s.lifespan_ ? std::make_unique<::dds::lifespanQosPolicy> (*s.lifespan_) : nullptr)
+  , user_data_ (s.user_data_ ? std::make_unique<::dds::userDataQosPolicy> (*s.user_data_) : nullptr)
+  , ownership_ (s.ownership_ ? std::make_unique<::dds::ownershipQosPolicy> (*s.ownership_) : nullptr)
+  , ownership_strength_ (s.ownership_strength_ ? std::make_unique<::dds::ownershipStrengthQosPolicy> (*s.ownership_strength_) : nullptr)
+  , writer_data_lifecycle_ (s.writer_data_lifecycle_ ? std::make_unique<::dds::writerDataLifecycleQosPolicy> (*s.writer_data_lifecycle_) : nullptr)
+  , representation_ (s.representation_ ? std::make_unique<::dds::dataRepresentationQosPolicy> (*s.representation_) : nullptr)
+  , name_ (s.name_ ? std::make_unique<::XMLSchema::string<char>> (*s.name_) : nullptr)
+  , base_name_ (s.base_name_ ? std::make_unique<::XMLSchema::string<char>> (*s.base_name_) : nullptr)
+  , topic_filter_ (s.topic_filter_ ? std::make_unique<::XMLSchema::string<char>> (*s.topic_filter_) : nullptr)
+  {
+  }
   ::dds::durabilityQosPolicy const* datawriterQos::durability_if_set () const noexcept
   {
     return durability_.get ();
@@ -660,6 +899,23 @@ namespace dds
     return topic_filter_.get ();
   }
 
+  qosProfile::qosProfile (::XMLSchema::string<char> const& name__)
+  : ::XSCRT::Type ()
+  , name_ (std::make_unique<::XMLSchema::string<char>> (name__))
+  {
+  }
+  qosProfile::qosProfile (qosProfile const& s)
+  : ::XSCRT::Type (s)
+  , datareader_qos_ (s.datareader_qos_)
+  , datawriter_qos_ (s.datawriter_qos_)
+  , topic_qos_ (s.topic_qos_)
+  , domainparticipant_qos_ (s.domainparticipant_qos_)
+  , publisher_qos_ (s.publisher_qos_)
+  , subscriber_qos_ (s.subscriber_qos_)
+  , name_ (std::make_unique<::XMLSchema::string<char>> (*s.name_))
+  , base_name_ (s.base_name_ ? std::make_unique<::XMLSchema::string<char>> (*s.base_name_) : nullptr)
+  {
+  }
   qosProfile::datareader_qos_container_type const& qosProfile::datareader_qos () const noexcept
   {
     return datareader_qos_;

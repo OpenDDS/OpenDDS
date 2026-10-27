@@ -84,7 +84,7 @@ namespace dds
     Value integral () const;
 
     destinationOrderKind (Value v);
-    destinationOrderKind (destinationOrderKind const&) = delete;
+    destinationOrderKind (destinationOrderKind const&) = default;
     destinationOrderKind (destinationOrderKind&&) = delete;
     destinationOrderKind& operator= (destinationOrderKind const&) = delete;
     destinationOrderKind& operator= (destinationOrderKind&&) = delete;
@@ -113,7 +113,7 @@ namespace dds
     Value integral () const;
 
     durabilityKind (Value v);
-    durabilityKind (durabilityKind const&) = delete;
+    durabilityKind (durabilityKind const&) = default;
     durabilityKind (durabilityKind&&) = delete;
     durabilityKind& operator= (durabilityKind const&) = delete;
     durabilityKind& operator= (durabilityKind&&) = delete;
@@ -142,7 +142,7 @@ namespace dds
     Value integral () const;
 
     historyKind (Value v);
-    historyKind (historyKind const&) = delete;
+    historyKind (historyKind const&) = default;
     historyKind (historyKind&&) = delete;
     historyKind& operator= (historyKind const&) = delete;
     historyKind& operator= (historyKind&&) = delete;
@@ -171,7 +171,7 @@ namespace dds
     Value integral () const;
 
     livelinessKind (Value v);
-    livelinessKind (livelinessKind const&) = delete;
+    livelinessKind (livelinessKind const&) = default;
     livelinessKind (livelinessKind&&) = delete;
     livelinessKind& operator= (livelinessKind const&) = delete;
     livelinessKind& operator= (livelinessKind&&) = delete;
@@ -200,7 +200,7 @@ namespace dds
     Value integral () const;
 
     presentationAccessScopeKind (Value v);
-    presentationAccessScopeKind (presentationAccessScopeKind const&) = delete;
+    presentationAccessScopeKind (presentationAccessScopeKind const&) = default;
     presentationAccessScopeKind (presentationAccessScopeKind&&) = delete;
     presentationAccessScopeKind& operator= (presentationAccessScopeKind const&) = delete;
     presentationAccessScopeKind& operator= (presentationAccessScopeKind&&) = delete;
@@ -229,7 +229,7 @@ namespace dds
     Value integral () const;
 
     reliabilityKind (Value v);
-    reliabilityKind (reliabilityKind const&) = delete;
+    reliabilityKind (reliabilityKind const&) = default;
     reliabilityKind (reliabilityKind&&) = delete;
     reliabilityKind& operator= (reliabilityKind const&) = delete;
     reliabilityKind& operator= (reliabilityKind&&) = delete;
@@ -258,7 +258,7 @@ namespace dds
     Value integral () const;
 
     ownershipKind (Value v);
-    ownershipKind (ownershipKind const&) = delete;
+    ownershipKind (ownershipKind const&) = default;
     ownershipKind (ownershipKind&&) = delete;
     ownershipKind& operator= (ownershipKind const&) = delete;
     ownershipKind& operator= (ownershipKind&&) = delete;
@@ -287,7 +287,7 @@ namespace dds
     Value integral () const;
 
     dataRepresentationIdKind (Value v);
-    dataRepresentationIdKind (dataRepresentationIdKind const&) = delete;
+    dataRepresentationIdKind (dataRepresentationIdKind const&) = default;
     dataRepresentationIdKind (dataRepresentationIdKind&&) = delete;
     dataRepresentationIdKind& operator= (dataRepresentationIdKind const&) = delete;
     dataRepresentationIdKind& operator= (dataRepresentationIdKind&&) = delete;
@@ -316,7 +316,7 @@ namespace dds
     Value integral () const;
 
     typeConsistencyKind (Value v);
-    typeConsistencyKind (typeConsistencyKind const&) = delete;
+    typeConsistencyKind (typeConsistencyKind const&) = default;
     typeConsistencyKind (typeConsistencyKind&&) = delete;
     typeConsistencyKind& operator= (typeConsistencyKind const&) = delete;
     typeConsistencyKind& operator= (typeConsistencyKind&&) = delete;
@@ -345,9 +345,9 @@ namespace dds
     nanosec_type nanosec_ {};
 
   public:
-    duration () = delete;
+    duration () = default;
     explicit duration (::XSCRT::XML::Element<char> const&);
-    duration (duration const&) = delete;
+    duration (duration const& s);
     duration (duration&&) = delete;
     duration& operator= (duration const&) = delete;
     duration& operator= (duration&&) = delete;
@@ -363,9 +363,9 @@ namespace dds
     element_container_type element_ {};
 
   public:
-    stringSeq () = delete;
+    stringSeq () = default;
     explicit stringSeq (::XSCRT::XML::Element<char> const&);
-    stringSeq (stringSeq const&) = delete;
+    stringSeq (stringSeq const& s) = default;
     stringSeq (stringSeq&&) = delete;
     stringSeq& operator= (stringSeq const&) = delete;
     stringSeq& operator= (stringSeq&&) = delete;
@@ -381,9 +381,9 @@ namespace dds
     element_container_type element_ {};
 
   public:
-    dataRepresentationIdSeq () = delete;
+    dataRepresentationIdSeq () = default;
     explicit dataRepresentationIdSeq (::XSCRT::XML::Element<char> const&);
-    dataRepresentationIdSeq (dataRepresentationIdSeq const&) = delete;
+    dataRepresentationIdSeq (dataRepresentationIdSeq const& s) = default;
     dataRepresentationIdSeq (dataRepresentationIdSeq&&) = delete;
     dataRepresentationIdSeq& operator= (dataRepresentationIdSeq const&) = delete;
     dataRepresentationIdSeq& operator= (dataRepresentationIdSeq&&) = delete;
@@ -398,9 +398,9 @@ namespace dds
     period_type period_ {};
 
   public:
-    deadlineQosPolicy () = delete;
+    deadlineQosPolicy () = default;
     explicit deadlineQosPolicy (::XSCRT::XML::Element<char> const&);
-    deadlineQosPolicy (deadlineQosPolicy const&) = delete;
+    deadlineQosPolicy (deadlineQosPolicy const& s);
     deadlineQosPolicy (deadlineQosPolicy&&) = delete;
     deadlineQosPolicy& operator= (deadlineQosPolicy const&) = delete;
     deadlineQosPolicy& operator= (deadlineQosPolicy&&) = delete;
@@ -415,9 +415,9 @@ namespace dds
     kind_type kind_ {};
 
   public:
-    destinationOrderQosPolicy () = delete;
+    destinationOrderQosPolicy () = default;
     explicit destinationOrderQosPolicy (::XSCRT::XML::Element<char> const&);
-    destinationOrderQosPolicy (destinationOrderQosPolicy const&) = delete;
+    destinationOrderQosPolicy (destinationOrderQosPolicy const& s);
     destinationOrderQosPolicy (destinationOrderQosPolicy&&) = delete;
     destinationOrderQosPolicy& operator= (destinationOrderQosPolicy const&) = delete;
     destinationOrderQosPolicy& operator= (destinationOrderQosPolicy&&) = delete;
@@ -432,9 +432,9 @@ namespace dds
     kind_type kind_ {};
 
   public:
-    durabilityQosPolicy () = delete;
+    durabilityQosPolicy () = default;
     explicit durabilityQosPolicy (::XSCRT::XML::Element<char> const&);
-    durabilityQosPolicy (durabilityQosPolicy const&) = delete;
+    durabilityQosPolicy (durabilityQosPolicy const& s);
     durabilityQosPolicy (durabilityQosPolicy&&) = delete;
     durabilityQosPolicy& operator= (durabilityQosPolicy const&) = delete;
     durabilityQosPolicy& operator= (durabilityQosPolicy&&) = delete;
@@ -479,9 +479,9 @@ namespace dds
     max_samples_per_instance_type max_samples_per_instance_ {};
 
   public:
-    durabilityServiceQosPolicy () = delete;
+    durabilityServiceQosPolicy () = default;
     explicit durabilityServiceQosPolicy (::XSCRT::XML::Element<char> const&);
-    durabilityServiceQosPolicy (durabilityServiceQosPolicy const&) = delete;
+    durabilityServiceQosPolicy (durabilityServiceQosPolicy const& s);
     durabilityServiceQosPolicy (durabilityServiceQosPolicy&&) = delete;
     durabilityServiceQosPolicy& operator= (durabilityServiceQosPolicy const&) = delete;
     durabilityServiceQosPolicy& operator= (durabilityServiceQosPolicy&&) = delete;
@@ -496,9 +496,9 @@ namespace dds
     autoenable_created_entities_type autoenable_created_entities_ {};
 
   public:
-    entityFactoryQosPolicy () = delete;
+    entityFactoryQosPolicy () = default;
     explicit entityFactoryQosPolicy (::XSCRT::XML::Element<char> const&);
-    entityFactoryQosPolicy (entityFactoryQosPolicy const&) = delete;
+    entityFactoryQosPolicy (entityFactoryQosPolicy const& s);
     entityFactoryQosPolicy (entityFactoryQosPolicy&&) = delete;
     entityFactoryQosPolicy& operator= (entityFactoryQosPolicy const&) = delete;
     entityFactoryQosPolicy& operator= (entityFactoryQosPolicy&&) = delete;
@@ -513,9 +513,9 @@ namespace dds
     value_type value_ {};
 
   public:
-    groupDataQosPolicy () = delete;
+    groupDataQosPolicy () = default;
     explicit groupDataQosPolicy (::XSCRT::XML::Element<char> const&);
-    groupDataQosPolicy (groupDataQosPolicy const&) = delete;
+    groupDataQosPolicy (groupDataQosPolicy const& s);
     groupDataQosPolicy (groupDataQosPolicy&&) = delete;
     groupDataQosPolicy& operator= (groupDataQosPolicy const&) = delete;
     groupDataQosPolicy& operator= (groupDataQosPolicy&&) = delete;
@@ -536,9 +536,9 @@ namespace dds
     depth_type depth_ {};
 
   public:
-    historyQosPolicy () = delete;
+    historyQosPolicy () = default;
     explicit historyQosPolicy (::XSCRT::XML::Element<char> const&);
-    historyQosPolicy (historyQosPolicy const&) = delete;
+    historyQosPolicy (historyQosPolicy const& s);
     historyQosPolicy (historyQosPolicy&&) = delete;
     historyQosPolicy& operator= (historyQosPolicy const&) = delete;
     historyQosPolicy& operator= (historyQosPolicy&&) = delete;
@@ -553,9 +553,9 @@ namespace dds
     duration_type duration_ {};
 
   public:
-    latencyBudgetQosPolicy () = delete;
+    latencyBudgetQosPolicy () = default;
     explicit latencyBudgetQosPolicy (::XSCRT::XML::Element<char> const&);
-    latencyBudgetQosPolicy (latencyBudgetQosPolicy const&) = delete;
+    latencyBudgetQosPolicy (latencyBudgetQosPolicy const& s);
     latencyBudgetQosPolicy (latencyBudgetQosPolicy&&) = delete;
     latencyBudgetQosPolicy& operator= (latencyBudgetQosPolicy const&) = delete;
     latencyBudgetQosPolicy& operator= (latencyBudgetQosPolicy&&) = delete;
@@ -570,9 +570,9 @@ namespace dds
     duration_type duration_ {};
 
   public:
-    lifespanQosPolicy () = delete;
+    lifespanQosPolicy () = default;
     explicit lifespanQosPolicy (::XSCRT::XML::Element<char> const&);
-    lifespanQosPolicy (lifespanQosPolicy const&) = delete;
+    lifespanQosPolicy (lifespanQosPolicy const& s);
     lifespanQosPolicy (lifespanQosPolicy&&) = delete;
     lifespanQosPolicy& operator= (lifespanQosPolicy const&) = delete;
     lifespanQosPolicy& operator= (lifespanQosPolicy&&) = delete;
@@ -593,9 +593,9 @@ namespace dds
     lease_duration_type lease_duration_ {};
 
   public:
-    livelinessQosPolicy () = delete;
+    livelinessQosPolicy () = default;
     explicit livelinessQosPolicy (::XSCRT::XML::Element<char> const&);
-    livelinessQosPolicy (livelinessQosPolicy const&) = delete;
+    livelinessQosPolicy (livelinessQosPolicy const& s);
     livelinessQosPolicy (livelinessQosPolicy&&) = delete;
     livelinessQosPolicy& operator= (livelinessQosPolicy const&) = delete;
     livelinessQosPolicy& operator= (livelinessQosPolicy&&) = delete;
@@ -610,9 +610,9 @@ namespace dds
     kind_type kind_ {};
 
   public:
-    ownershipQosPolicy () = delete;
+    ownershipQosPolicy () = default;
     explicit ownershipQosPolicy (::XSCRT::XML::Element<char> const&);
-    ownershipQosPolicy (ownershipQosPolicy const&) = delete;
+    ownershipQosPolicy (ownershipQosPolicy const& s);
     ownershipQosPolicy (ownershipQosPolicy&&) = delete;
     ownershipQosPolicy& operator= (ownershipQosPolicy const&) = delete;
     ownershipQosPolicy& operator= (ownershipQosPolicy&&) = delete;
@@ -627,9 +627,9 @@ namespace dds
     value_type value_ {};
 
   public:
-    ownershipStrengthQosPolicy () = delete;
+    ownershipStrengthQosPolicy () = default;
     explicit ownershipStrengthQosPolicy (::XSCRT::XML::Element<char> const&);
-    ownershipStrengthQosPolicy (ownershipStrengthQosPolicy const&) = delete;
+    ownershipStrengthQosPolicy (ownershipStrengthQosPolicy const& s);
     ownershipStrengthQosPolicy (ownershipStrengthQosPolicy&&) = delete;
     ownershipStrengthQosPolicy& operator= (ownershipStrengthQosPolicy const&) = delete;
     ownershipStrengthQosPolicy& operator= (ownershipStrengthQosPolicy&&) = delete;
@@ -644,9 +644,9 @@ namespace dds
     name_type name_ {};
 
   public:
-    partitionQosPolicy () = delete;
+    partitionQosPolicy () = default;
     explicit partitionQosPolicy (::XSCRT::XML::Element<char> const&);
-    partitionQosPolicy (partitionQosPolicy const&) = delete;
+    partitionQosPolicy (partitionQosPolicy const& s);
     partitionQosPolicy (partitionQosPolicy&&) = delete;
     partitionQosPolicy& operator= (partitionQosPolicy const&) = delete;
     partitionQosPolicy& operator= (partitionQosPolicy&&) = delete;
@@ -673,9 +673,9 @@ namespace dds
     ordered_access_type ordered_access_ {};
 
   public:
-    presentationQosPolicy () = delete;
+    presentationQosPolicy () = default;
     explicit presentationQosPolicy (::XSCRT::XML::Element<char> const&);
-    presentationQosPolicy (presentationQosPolicy const&) = delete;
+    presentationQosPolicy (presentationQosPolicy const& s);
     presentationQosPolicy (presentationQosPolicy&&) = delete;
     presentationQosPolicy& operator= (presentationQosPolicy const&) = delete;
     presentationQosPolicy& operator= (presentationQosPolicy&&) = delete;
@@ -696,9 +696,9 @@ namespace dds
     autopurge_disposed_samples_delay_type autopurge_disposed_samples_delay_ {};
 
   public:
-    readerDataLifecycleQosPolicy () = delete;
+    readerDataLifecycleQosPolicy () = default;
     explicit readerDataLifecycleQosPolicy (::XSCRT::XML::Element<char> const&);
-    readerDataLifecycleQosPolicy (readerDataLifecycleQosPolicy const&) = delete;
+    readerDataLifecycleQosPolicy (readerDataLifecycleQosPolicy const& s);
     readerDataLifecycleQosPolicy (readerDataLifecycleQosPolicy&&) = delete;
     readerDataLifecycleQosPolicy& operator= (readerDataLifecycleQosPolicy const&) = delete;
     readerDataLifecycleQosPolicy& operator= (readerDataLifecycleQosPolicy&&) = delete;
@@ -719,9 +719,9 @@ namespace dds
     max_blocking_time_type max_blocking_time_ {};
 
   public:
-    reliabilityQosPolicy () = delete;
+    reliabilityQosPolicy () = default;
     explicit reliabilityQosPolicy (::XSCRT::XML::Element<char> const&);
-    reliabilityQosPolicy (reliabilityQosPolicy const&) = delete;
+    reliabilityQosPolicy (reliabilityQosPolicy const& s);
     reliabilityQosPolicy (reliabilityQosPolicy&&) = delete;
     reliabilityQosPolicy& operator= (reliabilityQosPolicy const&) = delete;
     reliabilityQosPolicy& operator= (reliabilityQosPolicy&&) = delete;
@@ -760,9 +760,9 @@ namespace dds
     initial_instances_type initial_instances_ {};
 
   public:
-    resourceLimitsQosPolicy () = delete;
+    resourceLimitsQosPolicy () = default;
     explicit resourceLimitsQosPolicy (::XSCRT::XML::Element<char> const&);
-    resourceLimitsQosPolicy (resourceLimitsQosPolicy const&) = delete;
+    resourceLimitsQosPolicy (resourceLimitsQosPolicy const& s);
     resourceLimitsQosPolicy (resourceLimitsQosPolicy&&) = delete;
     resourceLimitsQosPolicy& operator= (resourceLimitsQosPolicy const&) = delete;
     resourceLimitsQosPolicy& operator= (resourceLimitsQosPolicy&&) = delete;
@@ -777,9 +777,9 @@ namespace dds
     minimum_separation_type minimum_separation_ {};
 
   public:
-    timeBasedFilterQosPolicy () = delete;
+    timeBasedFilterQosPolicy () = default;
     explicit timeBasedFilterQosPolicy (::XSCRT::XML::Element<char> const&);
-    timeBasedFilterQosPolicy (timeBasedFilterQosPolicy const&) = delete;
+    timeBasedFilterQosPolicy (timeBasedFilterQosPolicy const& s);
     timeBasedFilterQosPolicy (timeBasedFilterQosPolicy&&) = delete;
     timeBasedFilterQosPolicy& operator= (timeBasedFilterQosPolicy const&) = delete;
     timeBasedFilterQosPolicy& operator= (timeBasedFilterQosPolicy&&) = delete;
@@ -794,9 +794,9 @@ namespace dds
     value_type value_ {};
 
   public:
-    topicDataQosPolicy () = delete;
+    topicDataQosPolicy () = default;
     explicit topicDataQosPolicy (::XSCRT::XML::Element<char> const&);
-    topicDataQosPolicy (topicDataQosPolicy const&) = delete;
+    topicDataQosPolicy (topicDataQosPolicy const& s);
     topicDataQosPolicy (topicDataQosPolicy&&) = delete;
     topicDataQosPolicy& operator= (topicDataQosPolicy const&) = delete;
     topicDataQosPolicy& operator= (topicDataQosPolicy&&) = delete;
@@ -811,9 +811,9 @@ namespace dds
     value_type value_ {};
 
   public:
-    transportPriorityQosPolicy () = delete;
+    transportPriorityQosPolicy () = default;
     explicit transportPriorityQosPolicy (::XSCRT::XML::Element<char> const&);
-    transportPriorityQosPolicy (transportPriorityQosPolicy const&) = delete;
+    transportPriorityQosPolicy (transportPriorityQosPolicy const& s);
     transportPriorityQosPolicy (transportPriorityQosPolicy&&) = delete;
     transportPriorityQosPolicy& operator= (transportPriorityQosPolicy const&) = delete;
     transportPriorityQosPolicy& operator= (transportPriorityQosPolicy&&) = delete;
@@ -828,9 +828,9 @@ namespace dds
     value_type value_ {};
 
   public:
-    userDataQosPolicy () = delete;
+    userDataQosPolicy () = default;
     explicit userDataQosPolicy (::XSCRT::XML::Element<char> const&);
-    userDataQosPolicy (userDataQosPolicy const&) = delete;
+    userDataQosPolicy (userDataQosPolicy const& s);
     userDataQosPolicy (userDataQosPolicy&&) = delete;
     userDataQosPolicy& operator= (userDataQosPolicy const&) = delete;
     userDataQosPolicy& operator= (userDataQosPolicy&&) = delete;
@@ -845,9 +845,9 @@ namespace dds
     autodispose_unregistered_instances_type autodispose_unregistered_instances_ {};
 
   public:
-    writerDataLifecycleQosPolicy () = delete;
+    writerDataLifecycleQosPolicy () = default;
     explicit writerDataLifecycleQosPolicy (::XSCRT::XML::Element<char> const&);
-    writerDataLifecycleQosPolicy (writerDataLifecycleQosPolicy const&) = delete;
+    writerDataLifecycleQosPolicy (writerDataLifecycleQosPolicy const& s);
     writerDataLifecycleQosPolicy (writerDataLifecycleQosPolicy&&) = delete;
     writerDataLifecycleQosPolicy& operator= (writerDataLifecycleQosPolicy const&) = delete;
     writerDataLifecycleQosPolicy& operator= (writerDataLifecycleQosPolicy&&) = delete;
@@ -862,9 +862,9 @@ namespace dds
     value_type value_ {};
 
   public:
-    dataRepresentationQosPolicy () = delete;
+    dataRepresentationQosPolicy () = default;
     explicit dataRepresentationQosPolicy (::XSCRT::XML::Element<char> const&);
-    dataRepresentationQosPolicy (dataRepresentationQosPolicy const&) = delete;
+    dataRepresentationQosPolicy (dataRepresentationQosPolicy const& s);
     dataRepresentationQosPolicy (dataRepresentationQosPolicy&&) = delete;
     dataRepresentationQosPolicy& operator= (dataRepresentationQosPolicy const&) = delete;
     dataRepresentationQosPolicy& operator= (dataRepresentationQosPolicy&&) = delete;
@@ -909,9 +909,9 @@ namespace dds
     force_type_validation_type force_type_validation_ {};
 
   public:
-    typeConsistencyEnforcementQosPolicy () = delete;
+    typeConsistencyEnforcementQosPolicy () = default;
     explicit typeConsistencyEnforcementQosPolicy (::XSCRT::XML::Element<char> const&);
-    typeConsistencyEnforcementQosPolicy (typeConsistencyEnforcementQosPolicy const&) = delete;
+    typeConsistencyEnforcementQosPolicy (typeConsistencyEnforcementQosPolicy const& s);
     typeConsistencyEnforcementQosPolicy (typeConsistencyEnforcementQosPolicy&&) = delete;
     typeConsistencyEnforcementQosPolicy& operator= (typeConsistencyEnforcementQosPolicy const&) = delete;
     typeConsistencyEnforcementQosPolicy& operator= (typeConsistencyEnforcementQosPolicy&&) = delete;
@@ -944,9 +944,9 @@ namespace dds
     base_name_type base_name_ {};
 
   public:
-    domainparticipantQos () = delete;
+    domainparticipantQos () = default;
     explicit domainparticipantQos (::XSCRT::XML::Element<char> const&);
-    domainparticipantQos (domainparticipantQos const&) = delete;
+    domainparticipantQos (domainparticipantQos const& s);
     domainparticipantQos (domainparticipantQos&&) = delete;
     domainparticipantQos& operator= (domainparticipantQos const&) = delete;
     domainparticipantQos& operator= (domainparticipantQos&&) = delete;
@@ -991,9 +991,9 @@ namespace dds
     base_name_type base_name_ {};
 
   public:
-    publisherQos () = delete;
+    publisherQos () = default;
     explicit publisherQos (::XSCRT::XML::Element<char> const&);
-    publisherQos (publisherQos const&) = delete;
+    publisherQos (publisherQos const& s);
     publisherQos (publisherQos&&) = delete;
     publisherQos& operator= (publisherQos const&) = delete;
     publisherQos& operator= (publisherQos&&) = delete;
@@ -1038,9 +1038,9 @@ namespace dds
     base_name_type base_name_ {};
 
   public:
-    subscriberQos () = delete;
+    subscriberQos () = default;
     explicit subscriberQos (::XSCRT::XML::Element<char> const&);
-    subscriberQos (subscriberQos const&) = delete;
+    subscriberQos (subscriberQos const& s);
     subscriberQos (subscriberQos&&) = delete;
     subscriberQos& operator= (subscriberQos const&) = delete;
     subscriberQos& operator= (subscriberQos&&) = delete;
@@ -1151,9 +1151,9 @@ namespace dds
     topic_filter_type topic_filter_ {};
 
   public:
-    topicQos () = delete;
+    topicQos () = default;
     explicit topicQos (::XSCRT::XML::Element<char> const&);
-    topicQos (topicQos const&) = delete;
+    topicQos (topicQos const& s);
     topicQos (topicQos&&) = delete;
     topicQos& operator= (topicQos const&) = delete;
     topicQos& operator= (topicQos&&) = delete;
@@ -1264,9 +1264,9 @@ namespace dds
     topic_filter_type topic_filter_ {};
 
   public:
-    datareaderQos () = delete;
+    datareaderQos () = default;
     explicit datareaderQos (::XSCRT::XML::Element<char> const&);
-    datareaderQos (datareaderQos const&) = delete;
+    datareaderQos (datareaderQos const& s);
     datareaderQos (datareaderQos&&) = delete;
     datareaderQos& operator= (datareaderQos const&) = delete;
     datareaderQos& operator= (datareaderQos&&) = delete;
@@ -1389,9 +1389,9 @@ namespace dds
     topic_filter_type topic_filter_ {};
 
   public:
-    datawriterQos () = delete;
+    datawriterQos () = default;
     explicit datawriterQos (::XSCRT::XML::Element<char> const&);
-    datawriterQos (datawriterQos const&) = delete;
+    datawriterQos (datawriterQos const& s);
     datawriterQos (datawriterQos&&) = delete;
     datawriterQos& operator= (datawriterQos const&) = delete;
     datawriterQos& operator= (datawriterQos&&) = delete;
@@ -1455,8 +1455,10 @@ namespace dds
 
   public:
     qosProfile () = delete;
+    qosProfile (::XMLSchema::string<char> const& name__);
+
     explicit qosProfile (::XSCRT::XML::Element<char> const&);
-    qosProfile (qosProfile const&) = delete;
+    qosProfile (qosProfile const& s);
     qosProfile (qosProfile&&) = delete;
     qosProfile& operator= (qosProfile const&) = delete;
     qosProfile& operator= (qosProfile&&) = delete;
@@ -1472,9 +1474,9 @@ namespace dds
     qos_profile_container_type qos_profile_ {};
 
   public:
-    qosProfile_seq () = delete;
+    qosProfile_seq () = default;
     explicit qosProfile_seq (::XSCRT::XML::Element<char> const&);
-    qosProfile_seq (qosProfile_seq const&) = delete;
+    qosProfile_seq (qosProfile_seq const& s) = default;
     qosProfile_seq (qosProfile_seq&&) = delete;
     qosProfile_seq& operator= (qosProfile_seq const&) = delete;
     qosProfile_seq& operator= (qosProfile_seq&&) = delete;
