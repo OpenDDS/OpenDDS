@@ -62,7 +62,7 @@ QOS_DwTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, con
       if (history_depth_if_set_ptr)
         {
           dds_qos.durability_service.history_depth =
-            static_cast<CORBA::Long>(*history_depth_if_set_ptr);
+            QosCommon::get_corba_long(static_cast<std::int64_t>(*history_depth_if_set_ptr));
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {
@@ -120,7 +120,7 @@ QOS_DwTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, con
       const ::XMLSchema::nonNegativeInteger* value_if_set_ptr = transport_priority_if_set_ptr->value_if_set();
       if (value_if_set_ptr)
         {
-          dds_qos.transport_priority.value = static_cast<CORBA::Long>(*value_if_set_ptr);
+          dds_qos.transport_priority.value = QosCommon::get_corba_long(static_cast<std::int64_t>(*value_if_set_ptr));
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {

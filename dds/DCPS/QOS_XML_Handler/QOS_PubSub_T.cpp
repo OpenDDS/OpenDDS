@@ -19,20 +19,15 @@ template <typename XML_QOS_TYPE, typename DDS_QOS_TYPE>
 void
 QOS_PubSub_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, const XML_QOS_TYPE xml_qos)
 {
-//  if (xml_qos->group_data())
-//    {
-      // TODO: Have a good look at this.
-
-//       const std::string value = *xml_qos->group_data()->value_if_set();
-//
-//       ACE_DEBUG((LM_TRACE,
-//         ACE_TEXT("QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
-//         ACE_TEXT("Set group_data to <%C>\n"),
-//         value.c_str()));
-//
-//       dds_qos.group_data.value =
-//         *xml_qos->group_data()->value_if_set();
-//     }
+    const ::dds::groupDataQosPolicy* group_data_if_set_ptr = xml_qos->group_data_if_set();
+    if (group_data_if_set_ptr)
+      {
+        const ::XMLSchema::string<char>* value_if_set_ptr = group_data_if_set_ptr->value_if_set();
+        if (value_if_set_ptr)
+          {
+            QosCommon::get_binary_data(dds_qos.group_data.value, value_if_set_ptr->c_str());
+          }
+      }
 
     const ::dds::presentationQosPolicy* presentation_if_set_ptr = xml_qos->presentation_if_set();
     if (presentation_if_set_ptr)

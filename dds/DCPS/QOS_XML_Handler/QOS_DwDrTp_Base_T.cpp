@@ -189,7 +189,7 @@ QOS_DwDrTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, c
       const ::XMLSchema::positiveInteger* depth_if_set_ptr = history_if_set_ptr->depth_if_set();
       if (depth_if_set_ptr)
         {
-          dds_qos.history.depth = static_cast<CORBA::Long>(*depth_if_set_ptr);
+          dds_qos.history.depth = QosCommon::get_corba_long(static_cast<std::int64_t>(*depth_if_set_ptr));
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {

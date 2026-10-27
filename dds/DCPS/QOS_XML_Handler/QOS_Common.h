@@ -16,6 +16,7 @@
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds_qos.hpp"
+#include <cstdint>
 #include <string_view>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -53,6 +54,10 @@ public:
    *
    */
   static void get_duration (::DDS::Duration_t& duration, std::string_view sec, std::string_view nsec);
+
+  static void get_binary_data (::DDS::OctetSeq& data, std::string_view value);
+
+  static ::CORBA::Long get_corba_long (std::int64_t value);
 
   /**
    * get_qos_long

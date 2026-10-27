@@ -25,27 +25,20 @@ QOS_DataWriter_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
 
   // Now parse the topic-only QOS settings.
 
-//  if (xml_qos->user_data())
-//    {
-      // TODO: Have a good look at this.
-
-//       const std::string value = *xml_qos->user_data()->value_if_set();
-//
-//       ACE_DEBUG((LM_TRACE,
-//         ACE_TEXT("QOS_DataWriter_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
-//         ACE_TEXT("Set user_data to <%C>\n"),
-//         value.c_str()));
-//
-//       dds_qos.user_data.value =
-//         *xml_qos->user_data()->value_if_set();
-//     }
+  const ::dds::userDataQosPolicy* user_data_if_set_ptr = xml_qos->user_data_if_set();
+  if (user_data_if_set_ptr) {
+    const ::XMLSchema::string<char>* value_if_set_ptr = user_data_if_set_ptr->value_if_set();
+    if (value_if_set_ptr) {
+      QosCommon::get_binary_data(dds_qos.user_data.value, value_if_set_ptr->c_str());
+    }
+  }
   const ::dds::ownershipStrengthQosPolicy* ownership_strength_if_set_ptr = xml_qos->ownership_strength_if_set();
   if (ownership_strength_if_set_ptr)
     {
       const ::XMLSchema::nonNegativeInteger* value_if_set_ptr = ownership_strength_if_set_ptr->value_if_set();
       if (value_if_set_ptr)
         {
-          dds_qos.ownership_strength.value = static_cast<CORBA::Long>(*value_if_set_ptr);
+          dds_qos.ownership_strength.value = QosCommon::get_corba_long(static_cast<std::int64_t>(*value_if_set_ptr));
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {

@@ -25,20 +25,13 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
 
   // Now parse the topic-only QOS settings.
 
-//  if (xml_qos->user_data())
-//    {
-      // TODO: Have a good look at this.
-
-//       const std::string value = *xml_qos->user_data()->value_if_set();
-//
-//       ACE_DEBUG((LM_TRACE,
-//         ACE_TEXT("QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
-//         ACE_TEXT("Set user_data to <%C>\n"),
-//         value.c_str()));
-//
-//       dds_qos.user_data.value =
-//         *xml_qos->user_data()->value_if_set();
-//     }
+  const ::dds::userDataQosPolicy* user_data_if_set_ptr = xml_qos->user_data_if_set();
+  if (user_data_if_set_ptr) {
+    const ::XMLSchema::string<char>* value_if_set_ptr = user_data_if_set_ptr->value_if_set();
+    if (value_if_set_ptr) {
+      QosCommon::get_binary_data(dds_qos.user_data.value, value_if_set_ptr->c_str());
+    }
+  }
   const ::dds::timeBasedFilterQosPolicy* time_based_filter_if_set_ptr = xml_qos->time_based_filter_if_set();
   if (time_based_filter_if_set_ptr)
     {

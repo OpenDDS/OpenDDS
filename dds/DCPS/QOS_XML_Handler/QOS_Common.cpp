@@ -1,6 +1,8 @@
 #include "QOS_Common.h"
 #include <charconv>
+#include <limits>
 #include <stdexcept>
+#include <vector>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -82,9 +84,80 @@ QosCommon::get_duration(::DDS::Duration_t& duration, std::string_view sec, std::
     if (nsec == "DURATION_INFINITY" || nsec == "DURATION_INFINITE_NSEC") {
       duration.nanosec =  ::DDS::DURATION_INFINITE_NSEC;
     } else {
-      duration.nanosec = parse_integer<::DDS::UInt32> (nsec);
+      const std::uint64_t value = parse_integer<std::uint64_t> (nsec);
+      if (value >= 1000000000) {
+        throw std::out_of_range ("QoS duration nanoseconds must be less than one second");
+      }
+      duration.nanosec = static_cast<::DDS::UInt32> (value);
     }
   }
+}
+
+void
+QosCommon::get_binary_data(::DDS::OctetSeq& data, std::string_view value)
+{
+  const auto whitespace = [] (char c) {
+    return c == ' ' || c == '\t' || c == '\r' || c == '\n';
+  };
+  if (value.find_first_not_of (" \t\r\n") == std::string_view::npos) {
+    data.length (0);
+    return;
+  }
+
+  std::vector<::CORBA::Octet> bytes;
+  std::size_t pos = 0;
+  while (pos < value.size()) {
+    while (pos < value.size() && whitespace (value[pos])) {
+      ++pos;
+    }
+    const std::size_t start = pos;
+    while (pos < value.size() && value[pos] != ',') {
+      ++pos;
+    }
+    std::size_t end = pos;
+    while (end > start && whitespace (value[end - 1])) {
+      --end;
+    }
+    if (start == end) {
+      throw std::invalid_argument ("Invalid empty byte in binary QoS value");
+    }
+    std::string_view token = value.substr (start, end - start);
+    int base = 10;
+    if (token.size() > 2 && token[0] == '0' && (token[1] == 'x' || token[1] == 'X')) {
+      token.remove_prefix (2);
+      base = 16;
+    }
+    unsigned int byte {};
+    const std::from_chars_result parsed = std::from_chars (token.data (), token.data () + token.size (), byte, base);
+    if (parsed.ec != std::errc () || parsed.ptr != token.data () + token.size () || byte > 255) {
+      throw std::invalid_argument ("Invalid byte in binary QoS value");
+    }
+    bytes.push_back (static_cast<::CORBA::Octet> (byte));
+    if (pos < value.size()) {
+      ++pos;
+      if (pos == value.size()) {
+        throw std::invalid_argument ("Invalid trailing comma in binary QoS value");
+      }
+    }
+  }
+
+  if (bytes.size() > std::numeric_limits<::CORBA::ULong>::max()) {
+    throw std::length_error ("Binary QoS value exceeds DDS sequence capacity");
+  }
+  const ::CORBA::ULong length = static_cast<::CORBA::ULong> (bytes.size());
+  data.length (length);
+  for (::CORBA::ULong i = 0; i < length; ++i) {
+    data[i] = bytes[i];
+  }
+}
+
+::CORBA::Long
+QosCommon::get_corba_long(std::int64_t value)
+{
+  if (value < 0 || value > std::numeric_limits<::CORBA::Long>::max()) {
+    throw std::out_of_range ("QoS integer is outside the CORBA::Long range");
+  }
+  return static_cast<::CORBA::Long> (value);
 }
 
 ::CORBA::Long

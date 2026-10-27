@@ -1,4 +1,5 @@
 #include "ParticipantQos_Handler.h"
+#include "QOS_Common.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DCPS/debug.h"
 #include <memory>
@@ -55,21 +56,15 @@ ParticipantQos_Handler::get_participant_qos(DDS::DomainParticipantQos& dp_qos,
                                             const dds::domainparticipantQos * dp)
 {
 
-//  if (xml_qos->user_data())
-//    {
-      // TODO: Have a good look at this.
-
-//       const std::string value = *xml_qos->user_data()->value_if_set();
-//
-//       ACE_DEBUG((LM_TRACE,
-//         ACE_TEXT("QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
-//         ACE_TEXT("Set user_data to <%C>\n"),
-//         value.c_str()));
-//
-//       dds_qos.user_data.value =
-//         *xml_qos->user_data()->value_if_set();
-//     }
-
+  const ::dds::userDataQosPolicy* user_data_if_set_ptr = dp->user_data_if_set();
+  if (user_data_if_set_ptr)
+    {
+      const ::XMLSchema::string<char>* value_if_set_ptr = user_data_if_set_ptr->value_if_set();
+      if (value_if_set_ptr)
+        {
+          QosCommon::get_binary_data(dp_qos.user_data.value, value_if_set_ptr->c_str());
+        }
+    }
 
   const ::dds::entityFactoryQosPolicy* entity_factory_if_set_ptr = dp->entity_factory_if_set();
   if (entity_factory_if_set_ptr)
