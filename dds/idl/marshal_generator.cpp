@@ -4001,7 +4001,7 @@ namespace {
           }
 
           be_global->impl_ <<
-            "  if (!strm.write_parameter_id(XTypes::DISCRIMINATOR_SERIALIZED_ID, size)) {\n"
+            "  if (!strm.write_parameter_id(XTypes::DISCRIMINATOR_SERIALIZED_ID, size, true)) {\n"
             "    return false;\n"
             "  }\n"
             "  size = 0;\n";
@@ -4250,7 +4250,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       }
 
       be_global->impl_ <<
-        "  if (!strm.write_parameter_id(XTypes::DISCRIMINATOR_SERIALIZED_ID, size)) {\n"
+        "  if (!strm.write_parameter_id(XTypes::DISCRIMINATOR_SERIALIZED_ID, size, true)) {\n"
         "    return false;\n"
         "  }\n"
         "  size = 0;\n";

@@ -123,7 +123,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       const DDS::TypeKind tk = topic.type->get_kind();
-      if (!t.check_rc(dd->set_string_value(0,
+      const DDS::MemberId id = dd->get_member_id_by_name("string_value");
+      if (!t.check_rc(dd->set_string_value(id,
           tk == OpenDDS::XTypes::TK_STRUCTURE ? "Hello struct" : "Hello union"),
           "set_string_value failed")) {
         t.exit_status = 1;
