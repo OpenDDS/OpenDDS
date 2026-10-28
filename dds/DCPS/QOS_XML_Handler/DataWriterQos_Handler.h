@@ -14,6 +14,7 @@
 
 #include "dds_qos.hpp"
 #include "dds/DdsDcpsInfrastructureC.h"
+#include <string_view>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -25,14 +26,14 @@ public:
    * based on the given name.
    */
   static bool get_datawriter_qos (::DDS::DataWriterQos& dw_qos,
-                                  ::dds::qosProfile * profile,
-                                  const ACE_TCHAR * name = 0);
+                                  const ::dds::qosProfile * profile,
+                                  std::string_view name = {});
 private:
   /**
    * Start parsing the QOS XML, using the template classes.
    */
   static bool get_datawriter_qos (DDS::DataWriterQos& dw_qos,
-                                  dds::datawriterQos * dw);
+                                  const dds::datawriterQos * dw);
 };
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

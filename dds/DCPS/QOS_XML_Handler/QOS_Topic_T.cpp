@@ -23,20 +23,15 @@ QOS_Topic_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos (DDS_QOS_TYPE& dds_qos, const 
 
   // Now parse the topic-only QOS settings.
 
-//  if (xml_qos->topic_data ())
-//    {
-      // TODO: Have a good look at this.
-
-//       const std::string value = *xml_qos->topic_data ()->value ();
-//
-//       ACE_DEBUG ((LM_TRACE,
-//         ACE_TEXT ("QOS_Topic_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
-//         ACE_TEXT ("Set topic_data to <%C>\n"),
-//         value.c_str ()));
-//
-//       dds_qos.topic_data.value =
-//         *xml_qos->topic_data ()->value ();
-//     }
+  const ::dds::topicDataQosPolicy* topic_data_if_set_ptr = xml_qos->topic_data_if_set();
+  if (topic_data_if_set_ptr)
+    {
+      const ::XMLSchema::string<char>* value_if_set_ptr = topic_data_if_set_ptr->value_if_set();
+      if (value_if_set_ptr)
+        {
+          QosCommon::get_binary_data(dds_qos.topic_data.value, value_if_set_ptr->c_str());
+        }
+    }
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
