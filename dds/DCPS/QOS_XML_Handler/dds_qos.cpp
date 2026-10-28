@@ -2451,7 +2451,7 @@ namespace dds
         base_name_ = std::make_unique<::XMLSchema::string<char>> (a);
       }
     }
-    if (!name_)throw std::invalid_argument ("missing required XML attribute: name");
+    if (!name_) throw std::invalid_argument ("missing required XML attribute: name");
   }
   qosProfile_seq::qosProfile_seq (::XSCRT::XML::Element<char> const& element)
   : ::XSCRT::Type (element)
