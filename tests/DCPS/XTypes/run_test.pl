@@ -227,6 +227,28 @@ if ($secure) {
       expect_inconsistent_topic => 1, topic => "MutableUnionNoMatchType_DTC",
       reader_args => "--disallow-type-coercion",
     },
+
+    # A participant using UseLegacyTypeConsistencyKind sends the same values as older releases
+    "LegacyTypeConsistencyKind_IgnoreMemberNamesMatch_r" => {
+      reader_type => "MutableUnion", writer_type => "ModifiedNameMutableUnion",
+      topic => "MutableUnion_IMN_LTCK_r", reader_args => "--ignore-member-names",
+      r_ini => "rtps_disc_legacy_tc_kind.ini",
+    },
+    "LegacyTypeConsistencyKind_IgnoreMemberNamesMatch_w" => {
+      reader_type => "MutableUnion", writer_type => "ModifiedNameMutableUnion",
+      topic => "MutableUnion_IMN_LTCK_w", reader_args => "--ignore-member-names",
+      w_ini => "rtps_disc_legacy_tc_kind.ini",
+    },
+    "LegacyTypeConsistencyKind_DisallowTypeCoercionNoMatch_r" => {
+      reader_type => "AppendableStruct", writer_type => "AdditionalPostfixFieldStruct",
+      expect_inconsistent_topic => 1, topic => "AppendableStructNoMatch_DTC_LTCK_r",
+      reader_args => "--disallow-type-coercion", r_ini => "rtps_disc_legacy_tc_kind.ini",
+    },
+    "LegacyTypeConsistencyKind_DisallowTypeCoercionNoMatch_w" => {
+      reader_type => "AppendableStruct", writer_type => "AdditionalPostfixFieldStruct",
+      expect_inconsistent_topic => 1, topic => "AppendableStructNoMatch_DTC_LTCK_w",
+      reader_args => "--disallow-type-coercion", w_ini => "rtps_disc_legacy_tc_kind.ini",
+    },
     "ForceTypeValidation_NoXTypesNoMatch_nn" => {
       reader_type => "AppendableStructNoXTypes", writer_type => "AppendableStructNoXTypes",
       expect_inconsistent_topic => 1, topic => "NoXTypes_FTV_nn",
