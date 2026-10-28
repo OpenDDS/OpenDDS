@@ -252,6 +252,15 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
 
     if (passive_setup_buffer_.length() >= hlen + sizeof(nprio)) {
 
+      // addr comes from the peer, don't let it run past hlen.
+      if (hlen == 0 || passive_setup_buffer_.rd_ptr()[hlen - 1] != '\0') {
+        if (log_level >= LogLevel::Warning) {
+          ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: TcpConnection::handle_setup_input: "
+                     "address in setup message is not null terminated\n"));
+        }
+        return -1;
+      }
+
       const std::string bufstr(passive_setup_buffer_.rd_ptr());
       const NetworkResource network_resource(bufstr);
       network_resource.to_addr(remote_address_);
