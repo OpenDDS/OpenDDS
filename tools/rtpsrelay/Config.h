@@ -46,8 +46,21 @@ const bool RTPS_RELAY_LOG_WARNINGS_default = false;
 const char RTPS_RELAY_LOG_DISCOVERY[] = "RTPS_RELAY_LOG_DISCOVERY";
 const bool RTPS_RELAY_LOG_DISCOVERY_default = false;
 
-const char RTPS_RELAY_LOG_ACTIVITY[] = "RTPS_RELAY_LOG_ACTIVITY";
-const bool RTPS_RELAY_LOG_ACTIVITY_default = false;
+// Activity log verbosity for the RtpsRelay. Higher levels are more verbose and
+// include all lower levels. Modeled after OpenDDS's DCPS_debug_level. Levels are
+// ordered by debugging value (and inversely by volume): the most useful, lowest-
+// volume events are at the lowest levels so operators can enable them without the
+// high-volume per-packet/periodic detail that only Verbose adds.
+enum class ActivityLogLevel {
+  None = 0,       // No activity logging.
+  Activity = 1,   // Client lifecycle activities.
+  Discovery = 2,  // Client discovery and admission.
+  Identity = 3,   // Identity certificate-match diagnostic.
+  Expiration = 4  // Expiration and refresh processing.
+};
+
+const char RTPS_RELAY_ACTIVITY_LOG_LEVEL[] = "RTPS_RELAY_ACTIVITY_LOG_LEVEL";
+const int RTPS_RELAY_ACTIVITY_LOG_LEVEL_default = static_cast<int>(ActivityLogLevel::Activity);
 
 const char RTPS_RELAY_LOG_HTTP[] = "RTPS_RELAY_LOG_HTTP";
 const bool RTPS_RELAY_LOG_HTTP_default = false;
@@ -239,15 +252,21 @@ public:
     return cached_log_discovery_.get();
   }
 
-  void log_activity(bool flag)
+  void activity_log_level(int value)
   {
-    TheServiceParticipant->config_store()->set_boolean(RTPS_RELAY_LOG_ACTIVITY, flag);
-    cached_log_activity_.set(flag);
+    TheServiceParticipant->config_store()->set_int32(RTPS_RELAY_ACTIVITY_LOG_LEVEL, value);
+    cached_activity_log_level_.set(value);
   }
 
-  bool log_activity() const
+  int activity_log_level() const
   {
-    return cached_log_activity_.get();
+    return cached_activity_log_level_.get();
+  }
+
+  // True if an activity log line at the given verbosity level should be emitted.
+  bool activity_log_enabled(ActivityLogLevel level) const
+  {
+    return cached_activity_log_level_.get() >= static_cast<int>(level);
   }
 
   void log_http(bool flag)
@@ -664,7 +683,7 @@ private:
   CachedValue<OpenDDS::DCPS::TimeDuration, to_time_duration> cached_inactive_period_{OpenDDS::DCPS::TimeDuration{RTPS_RELAY_INACTIVE_PERIOD_default}};
   CachedValue<bool, OpenDDS::DCPS::ConfigStoreImpl::convert_value> cached_log_warnings_{RTPS_RELAY_LOG_WARNINGS_default};
   CachedValue<bool, OpenDDS::DCPS::ConfigStoreImpl::convert_value> cached_log_discovery_{RTPS_RELAY_LOG_DISCOVERY_default};
-  CachedValue<bool, OpenDDS::DCPS::ConfigStoreImpl::convert_value> cached_log_activity_{RTPS_RELAY_LOG_ACTIVITY_default};
+  CachedValue<int, OpenDDS::DCPS::convertToInteger> cached_activity_log_level_{RTPS_RELAY_ACTIVITY_LOG_LEVEL_default};
   CachedValue<bool, OpenDDS::DCPS::ConfigStoreImpl::convert_value> cached_log_http_{RTPS_RELAY_LOG_HTTP_default};
   CachedValue<bool, OpenDDS::DCPS::ConfigStoreImpl::convert_value> cached_log_thread_status_{RTPS_RELAY_LOG_THREAD_STATUS_default};
   CachedValue<int, OpenDDS::DCPS::convertToInteger> cached_thread_status_safety_factor_{RTPS_RELAY_THREAD_STATUS_SAFETY_FACTOR_default};
@@ -706,6 +725,9 @@ private:
   OpenDDS::DCPS::TimeDuration run_time_;
   bool synchronous_output_ = false;
   size_t handler_threads_ = 1;
+  // True once -ActivityLogLevel is parsed so legacy -LogActivity invocations in
+  // existing scripts/docs can still work without overriding the new option.
+  bool activity_log_level_explicitly_set_ = false;
 
   // User-provided pattern, e.g., "CN=([\d]+)-.*", to extract a component from dds.cert.sn
   // that will be used as the key into the partition cache for asynchronous discovery.

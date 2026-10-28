@@ -534,7 +534,7 @@ VerticalHandler::record_activity(GuidAddrSet::Proxy& proxy,
           if (allow_stun_responses) {
             *allow_stun_responses = pos->second.allow_stun_responses;
           }
-          if (config_.log_activity()) {
+          if (config_.activity_log_enabled(ActivityLogLevel::Expiration)) {
             ACE_DEBUG((LM_INFO, "(%P|%t) INFO: VerticalHandler::record_activity %C skipped unadmitted participant %C from %C - relay not admitting\n",
                        name_.c_str(), guid_to_string(src_guid).c_str(),
                        OpenDDS::DCPS::LogAddr(remote_address.addr).c_str()));
@@ -1073,8 +1073,8 @@ void SpdpHandler::cache_message(GuidAddrSet::Proxy& proxy,
     if (pos != proxy.end()) {
       if (!pos->second.seen_spdp_message) {
         pos->second.identity_info = extract_identity(*msg, src_guid);
-        pos->second.identity_info.match_cert_id(guid_addr_set_.cert_id_regex(), config_.certificate_id_pattern());
-        if (config_.log_activity()) {
+        pos->second.identity_info.match_cert_id(guid_addr_set_.cert_id_regex(), config_.certificate_id_pattern(), config_.activity_log_enabled(ActivityLogLevel::Identity));
+        if (config_.activity_log_enabled(ActivityLogLevel::Discovery)) {
           ACE_DEBUG((LM_INFO, "(%P|%t) INFO: SpdpHandler::cache_message %C got first SPDP %C into session dds.cert.sn '%C' dds.ca.sn '%C'\n",
                      guid_to_string(src_guid).c_str(),
                      pos->second.get_session_time(now).sec_str().c_str(),

@@ -103,10 +103,6 @@ void RelayStatusReporter::on_data_available(InternalDataReader_rch reader)
 
 int RelayStatusReporter::handle_timeout(const ACE_Time_Value&, const void*)
 {
-  if (config_.log_activity()) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) RelayStatusReporter::handle_timeout\n"));
-  }
-
   OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager(), TIMER_MASK);
 
   {
