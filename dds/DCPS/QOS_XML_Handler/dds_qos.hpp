@@ -64,6 +64,36 @@ namespace dds
 }
 #include <memory>
 #include <string>
+#include <optional>
+#ifndef XSCRT_OPTIONAL_ARG_HPP
+#define XSCRT_OPTIONAL_ARG_HPP
+namespace XSCRT
+{
+  template <typename T>
+  class OptionalArg
+  {
+  public:
+    OptionalArg (std::nullopt_t) noexcept : value_ (nullptr)
+    {
+    }
+    OptionalArg (T const& value) noexcept : value_ (std::addressof (value))
+    {
+    }
+    OptionalArg (T const&&) = delete;
+
+    explicit operator bool () const noexcept
+    {
+      return value_ != nullptr;
+    }
+    T const& operator* () const noexcept
+    {
+      return *value_;
+    }
+  private:
+    T const* value_ {};
+  };
+}
+#endif // XSCRT_OPTIONAL_ARG_HPP
 #include <list>
 #include "ace/XML_Utils/XMLSchema/Types.hpp"
 #include "ace/XML_Utils/XMLSchema/id_map.hpp"
@@ -345,7 +375,9 @@ namespace dds
     nanosec_type nanosec_ {};
 
   public:
-    duration () = default;
+    duration (::XSCRT::OptionalArg<::XMLSchema::string<char>> sec__ = std::nullopt,
+              ::XSCRT::OptionalArg<::XMLSchema::string<char>> nanosec__ = std::nullopt);
+
     explicit duration (::XSCRT::XML::Element<char> const&);
     duration (duration const& s);
     duration (duration&&) = delete;
@@ -363,7 +395,8 @@ namespace dds
     element_container_type element_ {};
 
   public:
-    stringSeq () = default;
+    stringSeq (element_container_type const& element__ = {});
+
     explicit stringSeq (::XSCRT::XML::Element<char> const&);
     stringSeq (stringSeq const& s) = default;
     stringSeq (stringSeq&&) = delete;
@@ -381,7 +414,8 @@ namespace dds
     element_container_type element_ {};
 
   public:
-    dataRepresentationIdSeq () = default;
+    dataRepresentationIdSeq (element_container_type const& element__ = {});
+
     explicit dataRepresentationIdSeq (::XSCRT::XML::Element<char> const&);
     dataRepresentationIdSeq (dataRepresentationIdSeq const& s) = default;
     dataRepresentationIdSeq (dataRepresentationIdSeq&&) = delete;
@@ -398,7 +432,8 @@ namespace dds
     period_type period_ {};
 
   public:
-    deadlineQosPolicy () = default;
+    deadlineQosPolicy (::XSCRT::OptionalArg<::dds::duration> period__ = std::nullopt);
+
     explicit deadlineQosPolicy (::XSCRT::XML::Element<char> const&);
     deadlineQosPolicy (deadlineQosPolicy const& s);
     deadlineQosPolicy (deadlineQosPolicy&&) = delete;
@@ -415,7 +450,8 @@ namespace dds
     kind_type kind_ {};
 
   public:
-    destinationOrderQosPolicy () = default;
+    destinationOrderQosPolicy (::XSCRT::OptionalArg<::dds::destinationOrderKind> kind__ = std::nullopt);
+
     explicit destinationOrderQosPolicy (::XSCRT::XML::Element<char> const&);
     destinationOrderQosPolicy (destinationOrderQosPolicy const& s);
     destinationOrderQosPolicy (destinationOrderQosPolicy&&) = delete;
@@ -432,7 +468,8 @@ namespace dds
     kind_type kind_ {};
 
   public:
-    durabilityQosPolicy () = default;
+    durabilityQosPolicy (::XSCRT::OptionalArg<::dds::durabilityKind> kind__ = std::nullopt);
+
     explicit durabilityQosPolicy (::XSCRT::XML::Element<char> const&);
     durabilityQosPolicy (durabilityQosPolicy const& s);
     durabilityQosPolicy (durabilityQosPolicy&&) = delete;
@@ -479,7 +516,13 @@ namespace dds
     max_samples_per_instance_type max_samples_per_instance_ {};
 
   public:
-    durabilityServiceQosPolicy () = default;
+    durabilityServiceQosPolicy (::XSCRT::OptionalArg<::dds::duration> service_cleanup_delay__ = std::nullopt,
+                                ::XSCRT::OptionalArg<::dds::historyKind> history_kind__ = std::nullopt,
+                                ::XSCRT::OptionalArg<::XMLSchema::positiveInteger> history_depth__ = std::nullopt,
+                                ::XSCRT::OptionalArg<::XMLSchema::string<char>> max_samples__ = std::nullopt,
+                                ::XSCRT::OptionalArg<::XMLSchema::string<char>> max_instances__ = std::nullopt,
+                                ::XSCRT::OptionalArg<::XMLSchema::string<char>> max_samples_per_instance__ = std::nullopt);
+
     explicit durabilityServiceQosPolicy (::XSCRT::XML::Element<char> const&);
     durabilityServiceQosPolicy (durabilityServiceQosPolicy const& s);
     durabilityServiceQosPolicy (durabilityServiceQosPolicy&&) = delete;
@@ -496,7 +539,8 @@ namespace dds
     autoenable_created_entities_type autoenable_created_entities_ {};
 
   public:
-    entityFactoryQosPolicy () = default;
+    entityFactoryQosPolicy (::XSCRT::OptionalArg<::XMLSchema::boolean> autoenable_created_entities__ = std::nullopt);
+
     explicit entityFactoryQosPolicy (::XSCRT::XML::Element<char> const&);
     entityFactoryQosPolicy (entityFactoryQosPolicy const& s);
     entityFactoryQosPolicy (entityFactoryQosPolicy&&) = delete;
@@ -513,7 +557,8 @@ namespace dds
     value_type value_ {};
 
   public:
-    groupDataQosPolicy () = default;
+    groupDataQosPolicy (::XSCRT::OptionalArg<::XMLSchema::string<char>> value__ = std::nullopt);
+
     explicit groupDataQosPolicy (::XSCRT::XML::Element<char> const&);
     groupDataQosPolicy (groupDataQosPolicy const& s);
     groupDataQosPolicy (groupDataQosPolicy&&) = delete;
@@ -536,7 +581,9 @@ namespace dds
     depth_type depth_ {};
 
   public:
-    historyQosPolicy () = default;
+    historyQosPolicy (::XSCRT::OptionalArg<::dds::historyKind> kind__ = std::nullopt,
+                      ::XSCRT::OptionalArg<::XMLSchema::positiveInteger> depth__ = std::nullopt);
+
     explicit historyQosPolicy (::XSCRT::XML::Element<char> const&);
     historyQosPolicy (historyQosPolicy const& s);
     historyQosPolicy (historyQosPolicy&&) = delete;
@@ -553,7 +600,8 @@ namespace dds
     duration_type duration_ {};
 
   public:
-    latencyBudgetQosPolicy () = default;
+    latencyBudgetQosPolicy (::XSCRT::OptionalArg<::dds::duration> duration__ = std::nullopt);
+
     explicit latencyBudgetQosPolicy (::XSCRT::XML::Element<char> const&);
     latencyBudgetQosPolicy (latencyBudgetQosPolicy const& s);
     latencyBudgetQosPolicy (latencyBudgetQosPolicy&&) = delete;
@@ -570,7 +618,8 @@ namespace dds
     duration_type duration_ {};
 
   public:
-    lifespanQosPolicy () = default;
+    lifespanQosPolicy (::XSCRT::OptionalArg<::dds::duration> duration__ = std::nullopt);
+
     explicit lifespanQosPolicy (::XSCRT::XML::Element<char> const&);
     lifespanQosPolicy (lifespanQosPolicy const& s);
     lifespanQosPolicy (lifespanQosPolicy&&) = delete;
@@ -593,7 +642,9 @@ namespace dds
     lease_duration_type lease_duration_ {};
 
   public:
-    livelinessQosPolicy () = default;
+    livelinessQosPolicy (::XSCRT::OptionalArg<::dds::livelinessKind> kind__ = std::nullopt,
+                         ::XSCRT::OptionalArg<::dds::duration> lease_duration__ = std::nullopt);
+
     explicit livelinessQosPolicy (::XSCRT::XML::Element<char> const&);
     livelinessQosPolicy (livelinessQosPolicy const& s);
     livelinessQosPolicy (livelinessQosPolicy&&) = delete;
@@ -610,7 +661,8 @@ namespace dds
     kind_type kind_ {};
 
   public:
-    ownershipQosPolicy () = default;
+    ownershipQosPolicy (::XSCRT::OptionalArg<::dds::ownershipKind> kind__ = std::nullopt);
+
     explicit ownershipQosPolicy (::XSCRT::XML::Element<char> const&);
     ownershipQosPolicy (ownershipQosPolicy const& s);
     ownershipQosPolicy (ownershipQosPolicy&&) = delete;
@@ -627,7 +679,8 @@ namespace dds
     value_type value_ {};
 
   public:
-    ownershipStrengthQosPolicy () = default;
+    ownershipStrengthQosPolicy (::XSCRT::OptionalArg<::XMLSchema::nonNegativeInteger> value__ = std::nullopt);
+
     explicit ownershipStrengthQosPolicy (::XSCRT::XML::Element<char> const&);
     ownershipStrengthQosPolicy (ownershipStrengthQosPolicy const& s);
     ownershipStrengthQosPolicy (ownershipStrengthQosPolicy&&) = delete;
@@ -644,7 +697,8 @@ namespace dds
     name_type name_ {};
 
   public:
-    partitionQosPolicy () = default;
+    partitionQosPolicy (::XSCRT::OptionalArg<::dds::stringSeq> name__ = std::nullopt);
+
     explicit partitionQosPolicy (::XSCRT::XML::Element<char> const&);
     partitionQosPolicy (partitionQosPolicy const& s);
     partitionQosPolicy (partitionQosPolicy&&) = delete;
@@ -673,7 +727,10 @@ namespace dds
     ordered_access_type ordered_access_ {};
 
   public:
-    presentationQosPolicy () = default;
+    presentationQosPolicy (::XSCRT::OptionalArg<::dds::presentationAccessScopeKind> access_scope__ = std::nullopt,
+                           ::XSCRT::OptionalArg<::XMLSchema::boolean> coherent_access__ = std::nullopt,
+                           ::XSCRT::OptionalArg<::XMLSchema::boolean> ordered_access__ = std::nullopt);
+
     explicit presentationQosPolicy (::XSCRT::XML::Element<char> const&);
     presentationQosPolicy (presentationQosPolicy const& s);
     presentationQosPolicy (presentationQosPolicy&&) = delete;
@@ -696,7 +753,9 @@ namespace dds
     autopurge_disposed_samples_delay_type autopurge_disposed_samples_delay_ {};
 
   public:
-    readerDataLifecycleQosPolicy () = default;
+    readerDataLifecycleQosPolicy (::XSCRT::OptionalArg<::dds::duration> autopurge_nowriter_samples_delay__ = std::nullopt,
+                                  ::XSCRT::OptionalArg<::dds::duration> autopurge_disposed_samples_delay__ = std::nullopt);
+
     explicit readerDataLifecycleQosPolicy (::XSCRT::XML::Element<char> const&);
     readerDataLifecycleQosPolicy (readerDataLifecycleQosPolicy const& s);
     readerDataLifecycleQosPolicy (readerDataLifecycleQosPolicy&&) = delete;
@@ -719,7 +778,9 @@ namespace dds
     max_blocking_time_type max_blocking_time_ {};
 
   public:
-    reliabilityQosPolicy () = default;
+    reliabilityQosPolicy (::XSCRT::OptionalArg<::dds::reliabilityKind> kind__ = std::nullopt,
+                          ::XSCRT::OptionalArg<::dds::duration> max_blocking_time__ = std::nullopt);
+
     explicit reliabilityQosPolicy (::XSCRT::XML::Element<char> const&);
     reliabilityQosPolicy (reliabilityQosPolicy const& s);
     reliabilityQosPolicy (reliabilityQosPolicy&&) = delete;
@@ -760,7 +821,12 @@ namespace dds
     initial_instances_type initial_instances_ {};
 
   public:
-    resourceLimitsQosPolicy () = default;
+    resourceLimitsQosPolicy (::XSCRT::OptionalArg<::XMLSchema::string<char>> max_samples__ = std::nullopt,
+                             ::XSCRT::OptionalArg<::XMLSchema::string<char>> max_instances__ = std::nullopt,
+                             ::XSCRT::OptionalArg<::XMLSchema::string<char>> max_samples_per_instance__ = std::nullopt,
+                             ::XSCRT::OptionalArg<::XMLSchema::positiveInteger> initial_samples__ = std::nullopt,
+                             ::XSCRT::OptionalArg<::XMLSchema::positiveInteger> initial_instances__ = std::nullopt);
+
     explicit resourceLimitsQosPolicy (::XSCRT::XML::Element<char> const&);
     resourceLimitsQosPolicy (resourceLimitsQosPolicy const& s);
     resourceLimitsQosPolicy (resourceLimitsQosPolicy&&) = delete;
@@ -777,7 +843,8 @@ namespace dds
     minimum_separation_type minimum_separation_ {};
 
   public:
-    timeBasedFilterQosPolicy () = default;
+    timeBasedFilterQosPolicy (::XSCRT::OptionalArg<::dds::duration> minimum_separation__ = std::nullopt);
+
     explicit timeBasedFilterQosPolicy (::XSCRT::XML::Element<char> const&);
     timeBasedFilterQosPolicy (timeBasedFilterQosPolicy const& s);
     timeBasedFilterQosPolicy (timeBasedFilterQosPolicy&&) = delete;
@@ -794,7 +861,8 @@ namespace dds
     value_type value_ {};
 
   public:
-    topicDataQosPolicy () = default;
+    topicDataQosPolicy (::XSCRT::OptionalArg<::XMLSchema::string<char>> value__ = std::nullopt);
+
     explicit topicDataQosPolicy (::XSCRT::XML::Element<char> const&);
     topicDataQosPolicy (topicDataQosPolicy const& s);
     topicDataQosPolicy (topicDataQosPolicy&&) = delete;
@@ -811,7 +879,8 @@ namespace dds
     value_type value_ {};
 
   public:
-    transportPriorityQosPolicy () = default;
+    transportPriorityQosPolicy (::XSCRT::OptionalArg<::XMLSchema::nonNegativeInteger> value__ = std::nullopt);
+
     explicit transportPriorityQosPolicy (::XSCRT::XML::Element<char> const&);
     transportPriorityQosPolicy (transportPriorityQosPolicy const& s);
     transportPriorityQosPolicy (transportPriorityQosPolicy&&) = delete;
@@ -828,7 +897,8 @@ namespace dds
     value_type value_ {};
 
   public:
-    userDataQosPolicy () = default;
+    userDataQosPolicy (::XSCRT::OptionalArg<::XMLSchema::string<char>> value__ = std::nullopt);
+
     explicit userDataQosPolicy (::XSCRT::XML::Element<char> const&);
     userDataQosPolicy (userDataQosPolicy const& s);
     userDataQosPolicy (userDataQosPolicy&&) = delete;
@@ -845,7 +915,8 @@ namespace dds
     autodispose_unregistered_instances_type autodispose_unregistered_instances_ {};
 
   public:
-    writerDataLifecycleQosPolicy () = default;
+    writerDataLifecycleQosPolicy (::XSCRT::OptionalArg<::XMLSchema::boolean> autodispose_unregistered_instances__ = std::nullopt);
+
     explicit writerDataLifecycleQosPolicy (::XSCRT::XML::Element<char> const&);
     writerDataLifecycleQosPolicy (writerDataLifecycleQosPolicy const& s);
     writerDataLifecycleQosPolicy (writerDataLifecycleQosPolicy&&) = delete;
@@ -862,7 +933,8 @@ namespace dds
     value_type value_ {};
 
   public:
-    dataRepresentationQosPolicy () = default;
+    dataRepresentationQosPolicy (::XSCRT::OptionalArg<::dds::dataRepresentationIdSeq> value__ = std::nullopt);
+
     explicit dataRepresentationQosPolicy (::XSCRT::XML::Element<char> const&);
     dataRepresentationQosPolicy (dataRepresentationQosPolicy const& s);
     dataRepresentationQosPolicy (dataRepresentationQosPolicy&&) = delete;
@@ -909,7 +981,13 @@ namespace dds
     force_type_validation_type force_type_validation_ {};
 
   public:
-    typeConsistencyEnforcementQosPolicy () = default;
+    typeConsistencyEnforcementQosPolicy (::XSCRT::OptionalArg<::dds::typeConsistencyKind> kind__ = std::nullopt,
+                                         ::XSCRT::OptionalArg<::XMLSchema::boolean> ignore_sequence_bounds__ = std::nullopt,
+                                         ::XSCRT::OptionalArg<::XMLSchema::boolean> ignore_string_bounds__ = std::nullopt,
+                                         ::XSCRT::OptionalArg<::XMLSchema::boolean> ignore_member_names__ = std::nullopt,
+                                         ::XSCRT::OptionalArg<::XMLSchema::boolean> prevent_type_widening__ = std::nullopt,
+                                         ::XSCRT::OptionalArg<::XMLSchema::boolean> force_type_validation__ = std::nullopt);
+
     explicit typeConsistencyEnforcementQosPolicy (::XSCRT::XML::Element<char> const&);
     typeConsistencyEnforcementQosPolicy (typeConsistencyEnforcementQosPolicy const& s);
     typeConsistencyEnforcementQosPolicy (typeConsistencyEnforcementQosPolicy&&) = delete;
@@ -944,7 +1022,11 @@ namespace dds
     base_name_type base_name_ {};
 
   public:
-    domainparticipantQos () = default;
+    domainparticipantQos (::XSCRT::OptionalArg<::dds::userDataQosPolicy> user_data__ = std::nullopt,
+                          ::XSCRT::OptionalArg<::dds::entityFactoryQosPolicy> entity_factory__ = std::nullopt,
+                          ::XSCRT::OptionalArg<::XMLSchema::string<char>> name__ = std::nullopt,
+                          ::XSCRT::OptionalArg<::XMLSchema::string<char>> base_name__ = std::nullopt);
+
     explicit domainparticipantQos (::XSCRT::XML::Element<char> const&);
     domainparticipantQos (domainparticipantQos const& s);
     domainparticipantQos (domainparticipantQos&&) = delete;
@@ -991,7 +1073,13 @@ namespace dds
     base_name_type base_name_ {};
 
   public:
-    publisherQos () = default;
+    publisherQos (::XSCRT::OptionalArg<::dds::presentationQosPolicy> presentation__ = std::nullopt,
+                  ::XSCRT::OptionalArg<::dds::partitionQosPolicy> partition__ = std::nullopt,
+                  ::XSCRT::OptionalArg<::dds::groupDataQosPolicy> group_data__ = std::nullopt,
+                  ::XSCRT::OptionalArg<::dds::entityFactoryQosPolicy> entity_factory__ = std::nullopt,
+                  ::XSCRT::OptionalArg<::XMLSchema::string<char>> name__ = std::nullopt,
+                  ::XSCRT::OptionalArg<::XMLSchema::string<char>> base_name__ = std::nullopt);
+
     explicit publisherQos (::XSCRT::XML::Element<char> const&);
     publisherQos (publisherQos const& s);
     publisherQos (publisherQos&&) = delete;
@@ -1038,7 +1126,13 @@ namespace dds
     base_name_type base_name_ {};
 
   public:
-    subscriberQos () = default;
+    subscriberQos (::XSCRT::OptionalArg<::dds::presentationQosPolicy> presentation__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::partitionQosPolicy> partition__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::groupDataQosPolicy> group_data__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::entityFactoryQosPolicy> entity_factory__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::XMLSchema::string<char>> name__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::XMLSchema::string<char>> base_name__ = std::nullopt);
+
     explicit subscriberQos (::XSCRT::XML::Element<char> const&);
     subscriberQos (subscriberQos const& s);
     subscriberQos (subscriberQos&&) = delete;
@@ -1151,7 +1245,24 @@ namespace dds
     topic_filter_type topic_filter_ {};
 
   public:
-    topicQos () = default;
+    topicQos (::XSCRT::OptionalArg<::dds::topicDataQosPolicy> topic_data__ = std::nullopt,
+              ::XSCRT::OptionalArg<::dds::durabilityQosPolicy> durability__ = std::nullopt,
+              ::XSCRT::OptionalArg<::dds::durabilityServiceQosPolicy> durability_service__ = std::nullopt,
+              ::XSCRT::OptionalArg<::dds::deadlineQosPolicy> deadline__ = std::nullopt,
+              ::XSCRT::OptionalArg<::dds::latencyBudgetQosPolicy> latency_budget__ = std::nullopt,
+              ::XSCRT::OptionalArg<::dds::livelinessQosPolicy> liveliness__ = std::nullopt,
+              ::XSCRT::OptionalArg<::dds::reliabilityQosPolicy> reliability__ = std::nullopt,
+              ::XSCRT::OptionalArg<::dds::destinationOrderQosPolicy> destination_order__ = std::nullopt,
+              ::XSCRT::OptionalArg<::dds::historyQosPolicy> history__ = std::nullopt,
+              ::XSCRT::OptionalArg<::dds::resourceLimitsQosPolicy> resource_limits__ = std::nullopt,
+              ::XSCRT::OptionalArg<::dds::transportPriorityQosPolicy> transport_priority__ = std::nullopt,
+              ::XSCRT::OptionalArg<::dds::lifespanQosPolicy> lifespan__ = std::nullopt,
+              ::XSCRT::OptionalArg<::dds::ownershipQosPolicy> ownership__ = std::nullopt,
+              ::XSCRT::OptionalArg<::dds::dataRepresentationQosPolicy> representation__ = std::nullopt,
+              ::XSCRT::OptionalArg<::XMLSchema::string<char>> name__ = std::nullopt,
+              ::XSCRT::OptionalArg<::XMLSchema::string<char>> base_name__ = std::nullopt,
+              ::XSCRT::OptionalArg<::XMLSchema::string<char>> topic_filter__ = std::nullopt);
+
     explicit topicQos (::XSCRT::XML::Element<char> const&);
     topicQos (topicQos const& s);
     topicQos (topicQos&&) = delete;
@@ -1264,7 +1375,24 @@ namespace dds
     topic_filter_type topic_filter_ {};
 
   public:
-    datareaderQos () = default;
+    datareaderQos (::XSCRT::OptionalArg<::dds::durabilityQosPolicy> durability__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::deadlineQosPolicy> deadline__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::latencyBudgetQosPolicy> latency_budget__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::livelinessQosPolicy> liveliness__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::reliabilityQosPolicy> reliability__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::destinationOrderQosPolicy> destination_order__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::historyQosPolicy> history__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::resourceLimitsQosPolicy> resource_limits__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::userDataQosPolicy> user_data__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::ownershipQosPolicy> ownership__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::timeBasedFilterQosPolicy> time_based_filter__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::readerDataLifecycleQosPolicy> reader_data_lifecycle__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::dataRepresentationQosPolicy> representation__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::typeConsistencyEnforcementQosPolicy> type_consistency__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::XMLSchema::string<char>> name__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::XMLSchema::string<char>> base_name__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::XMLSchema::string<char>> topic_filter__ = std::nullopt);
+
     explicit datareaderQos (::XSCRT::XML::Element<char> const&);
     datareaderQos (datareaderQos const& s);
     datareaderQos (datareaderQos&&) = delete;
@@ -1389,7 +1517,26 @@ namespace dds
     topic_filter_type topic_filter_ {};
 
   public:
-    datawriterQos () = default;
+    datawriterQos (::XSCRT::OptionalArg<::dds::durabilityQosPolicy> durability__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::durabilityServiceQosPolicy> durability_service__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::deadlineQosPolicy> deadline__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::latencyBudgetQosPolicy> latency_budget__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::livelinessQosPolicy> liveliness__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::reliabilityQosPolicy> reliability__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::destinationOrderQosPolicy> destination_order__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::historyQosPolicy> history__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::resourceLimitsQosPolicy> resource_limits__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::transportPriorityQosPolicy> transport_priority__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::lifespanQosPolicy> lifespan__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::userDataQosPolicy> user_data__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::ownershipQosPolicy> ownership__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::ownershipStrengthQosPolicy> ownership_strength__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::writerDataLifecycleQosPolicy> writer_data_lifecycle__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::dds::dataRepresentationQosPolicy> representation__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::XMLSchema::string<char>> name__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::XMLSchema::string<char>> base_name__ = std::nullopt,
+                   ::XSCRT::OptionalArg<::XMLSchema::string<char>> topic_filter__ = std::nullopt);
+
     explicit datawriterQos (::XSCRT::XML::Element<char> const&);
     datawriterQos (datawriterQos const& s);
     datawriterQos (datawriterQos&&) = delete;
@@ -1455,7 +1602,14 @@ namespace dds
 
   public:
     qosProfile () = delete;
-    qosProfile (::XMLSchema::string<char> const& name__);
+    qosProfile (::XMLSchema::string<char> const& name__,
+                datareader_qos_container_type const& datareader_qos__ = {},
+                datawriter_qos_container_type const& datawriter_qos__ = {},
+                topic_qos_container_type const& topic_qos__ = {},
+                domainparticipant_qos_container_type const& domainparticipant_qos__ = {},
+                publisher_qos_container_type const& publisher_qos__ = {},
+                subscriber_qos_container_type const& subscriber_qos__ = {},
+                ::XSCRT::OptionalArg<::XMLSchema::string<char>> base_name__ = std::nullopt);
 
     explicit qosProfile (::XSCRT::XML::Element<char> const&);
     qosProfile (qosProfile const& s);
@@ -1474,7 +1628,8 @@ namespace dds
     qos_profile_container_type qos_profile_ {};
 
   public:
-    qosProfile_seq () = default;
+    qosProfile_seq (qos_profile_container_type const& qos_profile__ = {});
+
     explicit qosProfile_seq (::XSCRT::XML::Element<char> const&);
     qosProfile_seq (qosProfile_seq const& s) = default;
     qosProfile_seq (qosProfile_seq&&) = delete;
