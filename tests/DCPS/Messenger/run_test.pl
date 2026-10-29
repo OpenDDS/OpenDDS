@@ -16,8 +16,8 @@ my $status = 0;
 my $test = new PerlDDS::TestFramework();
 
 $test->{dcps_log_level} = 'debug';
-$test->{dcps_debug_level} = 4;
-$test->{dcps_transport_debug_level} = 2;
+$test->{dcps_debug_level} = 8;
+$test->{dcps_transport_debug_level} = 5;
 # will manually set -DCPSConfigFile
 $test->{add_transport_config} = 0;
 my $dbg_lvl = '-ORBDebugLevel 1';
@@ -82,33 +82,61 @@ elsif ($test->flag('rtps')) {
     $sub_opts .= " -DCPSConfigFile rtps.ini";
 }
 elsif ($test->flag('rtps_disc')) {
-    $pub_opts .= " -DCPSConfigFile rtps_disc.ini";
-    $sub_opts .= " -DCPSConfigFile rtps_disc.ini";
+    my $ini = $ENV{OPENDDS_RTPS_DISCOVERY_MULTICAST_VIA_LOOPBACK} ?
+        'rtps_disc_loopback.ini' : 'rtps_disc.ini';
+    $pub_opts .= " -DCPSConfigFile $ini";
+    $sub_opts .= " -DCPSConfigFile $ini";
     $is_rtps_disc = 1;
 }
 elsif ($test->flag('rtps_disc_half_sec_pub')) {
-    $pub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
-    $sub_opts .= " -DCPSConfigFile rtps_disc.ini";
+    my $pub_ini = "";
+    my $sub_ini = "";
+    if ($ENV{OPENDDS_RTPS_DISCOVERY_MULTICAST_VIA_LOOPBACK}) {
+        $pub_ini = "rtps_disc_sec_loopback.ini";
+        $sub_ini = "rtps_disc_loopback.ini";
+    }
+    else {
+        $pub_ini = "rtps_disc_sec.ini";
+        $sub_ini = "rtps_disc.ini";
+    }
+    $pub_opts .= " -DCPSConfigFile $pub_ini";
+    $sub_opts .= " -DCPSConfigFile $sub_ini";
     $is_rtps_disc = 1;
 }
 elsif ($test->flag('rtps_disc_half_sec_sub')) {
-    $pub_opts .= " -DCPSConfigFile rtps_disc.ini";
-    $sub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
+    my $pub_ini = "";
+    my $sub_ini = "";
+    if ($ENV{OPENDDS_RTPS_DISCOVERY_MULTICAST_VIA_LOOPBACK}) {
+        $pub_ini = "rtps_disc_loopback.ini";
+        $sub_ini = "rtps_disc_sec_loopback.ini";
+    }
+    else {
+        $pub_ini = "rtps_disc.ini";
+        $sub_ini = "rtps_disc_sec.ini";
+    }
+    $pub_opts .= " -DCPSConfigFile $pub_ini";
+    $sub_opts .= " -DCPSConfigFile $sub_ini";
     $is_rtps_disc = 1;
 }
 elsif ($test->flag('rtps_disc_sec')) {
-    $pub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
-    $sub_opts .= " -DCPSConfigFile rtps_disc_sec.ini";
+    my $ini = $ENV{OPENDDS_RTPS_DISCOVERY_MULTICAST_VIA_LOOPBACK} ?
+        'rtps_disc_sec_loopback.ini' : 'rtps_disc_sec.ini';
+    $pub_opts .= " -DCPSConfigFile $ini";
+    $sub_opts .= " -DCPSConfigFile $ini";
     $is_rtps_disc = 1;
 }
 elsif ($test->flag('rtps_disc_tcp')) {
-    $pub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
-    $sub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
+    my $ini = $ENV{OPENDDS_RTPS_DISCOVERY_MULTICAST_VIA_LOOPBACK} ?
+        'rtps_disc_tcp_loopback.ini' : 'rtps_disc_tcp.ini';
+    $pub_opts .= " -DCPSConfigFile $ini";
+    $sub_opts .= " -DCPSConfigFile $ini";
     $is_rtps_disc = 1;
 }
 elsif ($test->flag('rtps_disc_tcp_udp')) {
-    $pub_opts .= " -DCPSConfigFile rtps_disc_tcp_udp.ini";
-    $sub_opts .= " -DCPSConfigFile rtps_disc_tcp_udp.ini";
+    my $ini = $ENV{OPENDDS_RTPS_DISCOVERY_MULTICAST_VIA_LOOPBACK} ?
+        'rtps_disc_tcp_udp_loopback.ini' : 'rtps_disc_tcp_udp.ini';
+    $pub_opts .= " -DCPSConfigFile $ini";
+    $sub_opts .= " -DCPSConfigFile $ini";
     $is_rtps_disc = 1;
 }
 elsif ($test->flag('rtps_unicast')) {
