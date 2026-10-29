@@ -2146,6 +2146,11 @@ bool CryptoBuiltInImpl::decode_submessage(
       "Failed to deserialize next submessage\n"));
     return false;
   }
+  // octetsToNext came off the wire: SEC_POSTFIX is read at rd_ptr + octetsToNext
+  // and verify() covers RTPS::SMHDR_SZ + octetsToNext bytes.
+  if (octetsToNext > de_ser.length()) {
+    return CommonUtilities::set_security_error(ex, -2, 5, "Submessage length out of bounds");
+  }
 
   Message_Block_Ptr mb_footer(mb_in.duplicate());
   mb_footer->rd_ptr(octetsToNext);

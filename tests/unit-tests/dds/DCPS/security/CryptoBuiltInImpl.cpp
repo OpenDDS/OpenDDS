@@ -1170,6 +1170,67 @@ TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest,
   EXPECT_EQ(get_buffer(), decoded);
 }
 
+namespace {
+
+void regr_tamper_u16(DDS::OctetSeq& buf, unsigned int offset, unsigned int value)
+{
+  buf[offset] = static_cast<CORBA::Octet>(value >> 8);
+  buf[offset + 1] = static_cast<CORBA::Octet>(value);
+}
+
+// SEC_PREFIX header (4) + CryptoHeader (20) + submessageId (1) + flags (1)
+// of the submessage that follows SEC_PREFIX.
+const unsigned int OctetsToNextOffset = 26;
+
+} // namespace
+
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest,
+       decode_datawriter_submessage_SubmessageLength)
+{
+  using namespace DDS::Security;
+  CryptoKeyFactory& kef = dynamic_cast<CryptoKeyFactory&>(get_inst());
+
+  DDS::PropertySeq no_properties;
+  // Encrypted (SEC_BODY follows SEC_PREFIX) and authenticated-only (the
+  // plain submessage follows SEC_PREFIX).
+  const PluginEndpointSecurityAttributesMask kinds[] = {
+    PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ENCRYPTED, 0};
+  for (size_t k = 0; k < sizeof kinds / sizeof kinds[0]; ++k) {
+    EndpointSecurityAttributes esa = {{false, false, false, false}, true, false, false,
+                                      kinds[k], no_properties};
+    SecurityException ex;
+    const DatawriterCryptoHandle dwch = kef.register_local_datawriter(0, no_properties, esa, ex);
+
+    // Big-endian submessage header with octetsToNextHeader covering the rest of the buffer
+    init_buffer(32, 9);
+    get_buffer()[0] = 0x07;
+    get_buffer()[1] = 0;
+    regr_tamper_u16(get_buffer(), 2, 28);
+
+    DatareaderCryptoHandleSeq no_readers;
+    CORBA::Long idx = 0;
+    DDS::OctetSeq encoded;
+    ASSERT_TRUE(get_inst().encode_datawriter_submessage(encoded, get_buffer(), dwch, no_readers, idx, ex));
+    ASSERT_GT(encoded.length(), OctetsToNextOffset + 2);
+
+    const unsigned int available = encoded.length() - (OctetsToNextOffset + 2);
+    const unsigned int lengths[] = {0xFFFFu, available + 1};
+    for (size_t i = 0; i < sizeof lengths / sizeof lengths[0]; ++i) {
+      DDS::OctetSeq tampered(encoded);
+      regr_tamper_u16(tampered, OctetsToNextOffset, lengths[i]);
+      DDS::OctetSeq plain;
+      SecurityException ex2;
+      EXPECT_FALSE(get_inst().decode_datawriter_submessage(plain, tampered, DDS::HANDLE_NIL, dwch, ex2));
+      EXPECT_STREQ("Submessage length out of bounds", ex2.message.in());
+    }
+
+    DDS::OctetSeq decoded;
+    SecurityException ex3;
+    EXPECT_TRUE(get_inst().decode_datawriter_submessage(decoded, encoded, DDS::HANDLE_NIL, dwch, ex3));
+    EXPECT_EQ(get_buffer(), decoded);
+  }
+}
+
 TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest,
        decode_serialized_payload_CryptoContentLength)
 {
