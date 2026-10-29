@@ -12469,6 +12469,9 @@ jobs:
       run: |
         sudo route -n add -net 239.255.0.0/16 -interface lo0
         route -n get 239.255.0.1
+        sudo route -n add -net 224.0.0.0/24 -interface lo0
+        route -n get 224.0.0.128
+        route -n get 224.1.0.129
         netstat -rn -f inet | grep -E '^(224|239)'
     - name: checkout OpenDDS
       uses: actions/checkout@v7
@@ -12946,6 +12949,9 @@ jobs:
       run: |
         sudo route -n add -net 239.255.0.0/16 -interface lo0
         route -n get 239.255.0.1
+        sudo route -n add -net 224.0.0.0/24 -interface lo0
+        route -n get 224.0.0.128
+        route -n get 224.1.0.129
         netstat -rn -f inet | grep -E '^(224|239)'
     - name: checkout OpenDDS
       uses: actions/checkout@v7
@@ -13003,6 +13009,7 @@ jobs:
         sudo chmod o+w /cores
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
+        echo "export OPENDDS_RTPS_DISCOVERY_MULTICAST_VIA_LOOPBACK=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
