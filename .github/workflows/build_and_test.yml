@@ -12467,11 +12467,14 @@ jobs:
         ifconfig en0 | grep -i multicast
     - name: route multicast over loopback
       run: |
+        echo "=== Update routing table:"
         sudo route -n add -net 239.255.0.0/16 -interface lo0
+        sudo route -n change -net 224.0.0.0/4 -interface lo0
+        echo "=== Check routes:"
         route -n get 239.255.0.1
-        sudo route -n add -net 224.0.0.0/24 -interface lo0
         route -n get 224.0.0.128
         route -n get 224.1.0.129
+        echo "=== netstat check:"
         netstat -rn -f inet | grep -E '^(224|239)'
     - name: checkout OpenDDS
       uses: actions/checkout@v7
@@ -12947,11 +12950,14 @@ jobs:
         ifconfig en0 | grep -i multicast
     - name: route multicast over loopback
       run: |
+        echo "=== Update routing table:"
         sudo route -n add -net 239.255.0.0/16 -interface lo0
+        sudo route -n change -net 224.0.0.0/24 -interface lo0
+        echo "=== Check routes:"
         route -n get 239.255.0.1
-        sudo route -n add -net 224.0.0.0/24 -interface lo0
         route -n get 224.0.0.128
         route -n get 224.1.0.129
+        echo "=== netstat check:"
         netstat -rn -f inet | grep -E '^(224|239)'
     - name: checkout OpenDDS
       uses: actions/checkout@v7
