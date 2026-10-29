@@ -1539,6 +1539,10 @@ Consequently, a ``DynamicTypeSupport`` can use both XCDR1 and XCDR2, subject to 
 XCDR1 is useful when interoperating with implementations that do not support XCDR2.
 When interoperating with a pre-XTypes implementation, the additional restrictions in :ref:`xtypes--interoperability-with-non-xtypes-implementations` still apply; in particular, mutable types require XTypes-aware peers.
 
+Unlike XCDR2, XCDR1 doesn't prefix an ``appendable`` type with a delimiter header.
+A reader still ignores members appended to the end of a top-level type, but a nested ``appendable`` member isn't length-delimited, so evolving a nested ``appendable`` type is only interoperable under XCDR2.
+``mutable`` types are self-delimiting under XCDR1 and aren't subject to this restriction.
+
 .. _xtypes--type-system:
 
 Type System
