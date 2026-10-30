@@ -25,7 +25,9 @@ sub compiler_test {
     "invalid_nonarrayindex2.idl",
     "invalid_nonarrayindex.idl",
     "invalid_struct_no_nest.idl",
-    "invalid_sequence.idl",
+    "invalid_map.idl",
+    "invalid_map_in_sequence_key.idl",
+    "invalid_recursive_sequence_key.idl",
   );
   my $failed = 0;
   foreach my $file (@error_files) {
