@@ -1969,13 +1969,26 @@ TEST(dds_DCPS_XTypes, compute_dependencies)
 template<typename T>
 void check_bound_seq_rejects_oversized_length(const Encoding& enc)
 {
-  // Length only (0xffffffff elements), no element data behind it.
-  const unsigned char oversized_length[] = {0xff, 0xff, 0xff, 0xff};
-  ACE_Message_Block buffer(reinterpret_cast<const char*>(oversized_length), sizeof oversized_length);
-  buffer.wr_ptr(sizeof oversized_length);
+  // Length 1000 with only 4 bytes of elements behind it
+  ACE_Message_Block buffer(2 * uint32_cdr_size);
+  {
+    Serializer ser(&buffer, enc);
+    ASSERT_TRUE(ser << ACE_CDR::ULong(1000));
+    ASSERT_TRUE(ser << ACE_CDR::ULong(1));
+  }
   Serializer ser(&buffer, enc);
   T seq;
   EXPECT_FALSE(ser >> seq);
+  EXPECT_EQ(seq.length(), 0U);
+}
+
+template<typename T, size_t N>
+bool decode_be(T& object, const unsigned char (&data)[N])
+{
+  ACE_Message_Block buffer(reinterpret_cast<const char*>(data), N);
+  buffer.wr_ptr(N);
+  Serializer ser(&buffer, xcdr2_be);
+  return ser >> object;
 }
 
 TEST(dds_DCPS_XTypes_TypeObject, bound_seq_rejects_oversized_length)
@@ -1986,6 +1999,16 @@ TEST(dds_DCPS_XTypes_TypeObject, bound_seq_rejects_oversized_length)
   check_bound_seq_rejects_oversized_length<SBoundSeq>(xcdr2_le);
   check_bound_seq_rejects_oversized_length<UnionCaseLabelSeq>(xcdr2_be);
   check_bound_seq_rejects_oversized_length<UnionCaseLabelSeq>(xcdr2_le);
+
+  const unsigned char array_large[] = {TI_PLAIN_ARRAY_LARGE, 0, 0, 0, 0, 0, 0x03, 0xe8, 0, 0, 0, 1};
+  TypeIdentifier ti_large;
+  EXPECT_FALSE(decode_be(ti_large, array_large));
+  EXPECT_EQ(ti_large.array_ldefn().array_bound_seq.length(), 0U);
+
+  const unsigned char array_small[] = {TI_PLAIN_ARRAY_SMALL, 0, 0, 0, 0, 0, 0x03, 0xe8, 1, 2, 3, 4};
+  TypeIdentifier ti_small;
+  EXPECT_FALSE(decode_be(ti_small, array_small));
+  EXPECT_EQ(ti_small.array_sdefn().array_bound_seq.length(), 0U);
 
   // A well-formed, in-bounds length still round-trips correctly.
   LBoundSeq lseq;
