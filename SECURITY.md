@@ -19,7 +19,7 @@ Vulnerabilities will be evaluated against the master branch.
 Vulnerabilities are evaluated along the following dimensions:
 
 * The DDS Specification and, more specifically, the RTPS Specification made no provisions for security and it was assumed that applications run in a "secure" network with trusted participants.
-  Bugs reported for OpenDDS without security enabled, therefore, will not be treated as vulnerability.
+  Bugs reported for OpenDDS without security enabled, therefore, will not be treated as vulnerabilities.
 * DDS Security Specification was developed for non-secure environments.
   If the vulnerability is intrinsic to the DDS/RTPS Specification and using DDS Security would address it, then the maintainers of OpenDDS will most likely not accept the vulnerability report and suggest using DDS Security.
   In other words, OpenDDS deployments on non-secure environments should have DDS Security enabled.
