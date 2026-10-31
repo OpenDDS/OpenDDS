@@ -8,6 +8,7 @@
 #include "ace/XML_Utils/XML_Schema_Resolver.h"
 #include "ace/XML_Utils/XML_Error_Handler.h"
 
+XERCES_CPP_NAMESPACE_USE
 
 #include "dds/DCPS/debug.h"
 
