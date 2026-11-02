@@ -22,8 +22,9 @@
 
 // Prepare an argument for a BE
 void
-be_util::prep_be_arg(char* arg)
+be_util::prep_be_arg(std::string const& argument)
 {
+  char const * const arg = argument.c_str ();
   static const char WB_EXPORT_MACRO[] = "export_macro=";
   static const size_t SZ_WB_EXPORT_MACRO = sizeof(WB_EXPORT_MACRO) - 1;
   static const char WB_EXPORT_INCLUDE[] = "export_include=";
