@@ -37,5 +37,6 @@ set_target_properties(${subscriber} PROPERTIES
 
 # Testing
 configure_file(rtps.ini . COPYONLY)
+configure_file(rtps_loopback.ini . COPYONLY)
 opendds_add_test(NAME info_repo)
-opendds_add_test(NAME rtps ARGS ini=rtps.ini)
+opendds_add_test(NAME rtps ARGS --rtps)
