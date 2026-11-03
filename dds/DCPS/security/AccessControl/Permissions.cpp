@@ -51,17 +51,17 @@ int Permissions::load(const SSL::SignedDocument& doc)
 
       const xercesc::DOMNode* grantNode = grantNodes->item(gn);
 
-      const XStr g_tag = grantNode->getNodeName();
+      const XStr g_tag(grantNode->getNodeName());
 
-      if (g_tag == ACE_TEXT("subject_name")) {
+      if (g_tag == XStr(ACE_TEXT("subject_name"))) {
         valid_subject = grant->subject.parse(to_string(grantNode)) == 0;
 
-      } else if (g_tag == ACE_TEXT("validity")) {
+      } else if (g_tag == XStr(ACE_TEXT("validity"))) {
         const xercesc::DOMNodeList* validityNodes = grantNode->getChildNodes();
         for (XMLSize_t vn = 0, vn_len = validityNodes->getLength(); vn < vn_len; ++vn) {
           const xercesc::DOMNode* validityNode = validityNodes->item(vn);
-          const XStr v_tag = validityNode->getNodeName();
-          if (v_tag == ACE_TEXT("not_before")) {
+          const XStr v_tag(validityNode->getNodeName());
+          if (v_tag == XStr(ACE_TEXT("not_before"))) {
             if (!parse_time(validityNode->getTextContent(), grant->validity.not_before)) {
               if (security_debug.access_error) {
                 ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Permissions::load: "
@@ -69,7 +69,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
               }
               return -1;
             }
-          } else if (v_tag == ACE_TEXT("not_after")) {
+          } else if (v_tag == XStr(ACE_TEXT("not_after"))) {
             if (!parse_time(validityNode->getTextContent(), grant->validity.not_after)) {
               if (security_debug.access_error) {
                 ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Permissions::load: "
@@ -80,7 +80,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
           }
         }
 
-      } else if (g_tag == ACE_TEXT("default")) {
+      } else if (g_tag == XStr(ACE_TEXT("default"))) {
         const std::string def = to_string(grantNode);
         valid_default = true;
         if (def == "ALLOW") {
@@ -112,19 +112,19 @@ int Permissions::load(const SSL::SignedDocument& doc)
 
       const xercesc::DOMNode* adGrantNode = adGrantNodes->item(gn);
 
-      const XStr g_tag = adGrantNode->getNodeName();
+      const XStr g_tag(adGrantNode->getNodeName());
 
-      if (g_tag == ACE_TEXT("allow_rule") || g_tag == ACE_TEXT("deny_rule")) {
+      if (g_tag == XStr(ACE_TEXT("allow_rule")) || g_tag == XStr(ACE_TEXT("deny_rule"))) {
         Rule rule;
 
-        rule.ad_type = (g_tag == ACE_TEXT("allow_rule")) ? ALLOW : DENY;
+        rule.ad_type = (g_tag == XStr(ACE_TEXT("allow_rule"))) ? ALLOW : DENY;
 
         const xercesc::DOMNodeList* adNodeChildren = adGrantNode->getChildNodes();
 
         for (XMLSize_t anc = 0, anc_len = adNodeChildren->getLength(); anc < anc_len; ++anc) {
           const xercesc::DOMNode* const adNodeChild = adNodeChildren->item(anc);
-          const XStr anc_tag = adNodeChild->getNodeName();
-          if (anc_tag == ACE_TEXT("domains")) {
+          const XStr anc_tag(adNodeChild->getNodeName());
+          if (anc_tag == XStr(ACE_TEXT("domains"))) {
             if (!parse_domain_id_set(adNodeChild, rule.domains)) {
               if (security_debug.access_error) {
                 ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Permissions::load: "
@@ -133,45 +133,45 @@ int Permissions::load(const SSL::SignedDocument& doc)
               return -1;
             }
 
-          } else if (anc_tag == ACE_TEXT("publish") || anc_tag == ACE_TEXT("subscribe")) {
+          } else if (anc_tag == XStr(ACE_TEXT("publish")) || anc_tag == XStr(ACE_TEXT("subscribe"))) {
             Action action;
 
-            action.ps_type = (anc_tag == ACE_TEXT("publish")) ? PUBLISH : SUBSCRIBE;
+            action.ps_type = (anc_tag == XStr(ACE_TEXT("publish"))) ? PUBLISH : SUBSCRIBE;
             const xercesc::DOMNodeList* topicListNodes = adNodeChild->getChildNodes();
 
             for (XMLSize_t tln = 0, tln_len = topicListNodes->getLength(); tln < tln_len; ++tln) {
 
               const xercesc::DOMNode* topicListNode = topicListNodes->item(tln);
 
-              if (ACE_TEXT("topics") == XStr(topicListNode->getNodeName())) {
+              if (XStr(ACE_TEXT("topics")) == XStr(topicListNode->getNodeName())) {
                 const xercesc::DOMNodeList* topicNodes = topicListNode->getChildNodes();
 
                 for (XMLSize_t tn = 0, tn_len = topicNodes->getLength(); tn < tn_len; ++tn) {
 
                   const xercesc::DOMNode* topicNode = topicNodes->item(tn);
 
-                  if (ACE_TEXT("topic") == XStr(topicNode->getNodeName())) {
+                  if (XStr(ACE_TEXT("topic")) == XStr(topicNode->getNodeName())) {
                     action.topics.push_back(to_string(topicNode));
                   }
                 }
 
-              } else if (ACE_TEXT("partitions") == XStr(topicListNode->getNodeName())) {
+              } else if (XStr(ACE_TEXT("partitions")) == XStr(topicListNode->getNodeName())) {
                 const xercesc::DOMNodeList* partitionNodes = topicListNode->getChildNodes();
 
                 for (XMLSize_t pn = 0, pn_len = partitionNodes->getLength(); pn < pn_len; ++pn) {
 
                   const xercesc::DOMNode* partitionNode = partitionNodes->item(pn);
 
-                  if (ACE_TEXT("partition") == XStr(partitionNode->getNodeName())) {
+                  if (XStr(ACE_TEXT("partition")) == XStr(partitionNode->getNodeName())) {
                     action.partitions.push_back(to_string(partitionNode));
                   }
                 }
-              } else if (ACE_TEXT("validity") == XStr(topicListNode->getNodeName())) {
+              } else if (XStr(ACE_TEXT("validity")) == XStr(topicListNode->getNodeName())) {
                 const xercesc::DOMNodeList* validityNodes = topicListNode->getChildNodes();
                 for (XMLSize_t vn = 0, vn_len = validityNodes->getLength(); vn < vn_len; ++vn) {
                   const xercesc::DOMNode* validityNode = validityNodes->item(vn);
-                  const XStr v_tag = validityNode->getNodeName();
-                  if (v_tag == ACE_TEXT("not_before")) {
+                  const XStr v_tag(validityNode->getNodeName());
+                  if (v_tag == XStr(ACE_TEXT("not_before"))) {
                     if (!parse_time(validityNode->getTextContent(), action.validity.not_before)) {
                       if (security_debug.access_error) {
                         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Permissions::load: "
@@ -179,7 +179,7 @@ int Permissions::load(const SSL::SignedDocument& doc)
                       }
                       return -1;
                     }
-                  } else if (v_tag == ACE_TEXT("not_after")) {
+                  } else if (v_tag == XStr(ACE_TEXT("not_after"))) {
                     if (!parse_time(validityNode->getTextContent(), action.validity.not_after)) {
                       if (security_debug.access_error) {
                         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Permissions::load: "

@@ -141,8 +141,8 @@ int Governance::load(const SSL::SignedDocument& doc)
     const xercesc::DOMNodeList* const ruleNodes = domain_rule_el->getChildNodes();
     for (XMLSize_t rn = 0, rn_len = ruleNodes->getLength(); rn < rn_len; rn++) {
       const xercesc::DOMNode* const ruleNode = ruleNodes->item(rn);
-      const XStr dn_tag = ruleNode->getNodeName();
-      if (ACE_TEXT("domains") == dn_tag) {
+      const XStr dn_tag(ruleNode->getNodeName());
+      if (XStr(ACE_TEXT("domains")) == dn_tag) {
         if (!parse_domain_id_set(ruleNode, domain_rule.domains)) {
           if (security_debug.access_error) {
             ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: {access_error} Governance::load: "
