@@ -534,7 +534,7 @@ VerticalHandler::record_activity(GuidAddrSet::Proxy& proxy,
           if (allow_stun_responses) {
             *allow_stun_responses = pos->second.allow_stun_responses;
           }
-          if (config_.activity_log_enabled(ActivityLogLevel::Expiration)) {
+          if (config_.activity_log_enabled(ActivityLogLevel::Discovery)) {
             ACE_DEBUG((LM_INFO, "(%P|%t) INFO: VerticalHandler::record_activity %C skipped unadmitted participant %C from %C - relay not admitting\n",
                        name_.c_str(), guid_to_string(src_guid).c_str(),
                        OpenDDS::DCPS::LogAddr(remote_address.addr).c_str()));

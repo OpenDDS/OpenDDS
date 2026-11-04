@@ -38,14 +38,14 @@ bool Config::from_arg(ACE_Arg_Shifter_T<char>& args)
   } else if ((arg = args.get_the_parameter("-LogActivity"))) {
     // Deprecated: retained for existing scripted invocations (tests, perf
     // scenarios, and documented examples). Non-zero maps to the most verbose
-    // level (Identity) to preserve prior all-or-nothing behavior.
+    // level to preserve prior all-or-nothing behavior.
     // Ignore if -ActivityLogLevel was given so the new option always wins.
     if (activity_log_level_explicitly_set_) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Config::from_arg: "
         "-LogActivity ignored because -ActivityLogLevel was specified\n"));
     } else {
       activity_log_level(ACE_OS::atoi(arg) ?
-        static_cast<int>(ActivityLogLevel::Identity) : static_cast<int>(ActivityLogLevel::None));
+        static_cast<int>(ActivityLogLevel::Expiration) : static_cast<int>(ActivityLogLevel::None));
     }
     args.consume_arg();
   } else if ((arg = args.get_the_parameter("-LogHttp"))) {

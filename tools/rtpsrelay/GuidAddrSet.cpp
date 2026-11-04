@@ -155,7 +155,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
     if (result.second) {
       relay_stats_reporter_.remote_map_size(static_cast<uint32_t>(remote_map_.size()), now);
     } else if (result.first->second != src_guid) {
-      if (config_.activity_log_enabled(ActivityLogLevel::Activity)) {
+      if (config_.activity_log_enabled(ActivityLogLevel::Lifecycle)) {
         ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::record_activity change detected %C -> %C\n",
                    guid_to_string(result.first->second).c_str(),
                    guid_to_string(src_guid).c_str()));
@@ -183,7 +183,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
   }
 
   if (created) {
-    if (config_.activity_log_enabled(ActivityLogLevel::Activity)) {
+    if (config_.activity_log_enabled(ActivityLogLevel::Lifecycle)) {
       ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::record_activity "
                  "%C added 0.000 s into session from %C\n",
                  guid_to_string(src_guid).c_str(),
@@ -506,7 +506,7 @@ void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid,
   relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
   check_participants_limit();
 
-  if (config_.activity_log_enabled(ActivityLogLevel::Activity)) {
+  if (config_.activity_log_enabled(ActivityLogLevel::Lifecycle)) {
     ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::remove "
                "%C removed %C into session total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
                guid_to_string(guid).c_str(),

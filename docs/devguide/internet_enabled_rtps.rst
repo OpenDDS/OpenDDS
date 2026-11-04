@@ -274,9 +274,10 @@ The command-line options for the RtpsRelay:
   - 1: Log lifecycle events
   - 2: Log discovery and admission events
   - 3: Log certificate identity matching events
-  - 4: Log expiration and refresh events
+  - 4: Log expiration, rejection and refresh events
 
   A specified log level enables logging for that level and all lower levels. The default value is 1.
+  Note that this is different from the default value of the deprecated ``-LogActivity`` option, which is 0 (disabled).
 
 .. option:: -LogHttp 0|1
 

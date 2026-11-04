@@ -47,20 +47,17 @@ const char RTPS_RELAY_LOG_DISCOVERY[] = "RTPS_RELAY_LOG_DISCOVERY";
 const bool RTPS_RELAY_LOG_DISCOVERY_default = false;
 
 // Activity log verbosity for the RtpsRelay. Higher levels are more verbose and
-// include all lower levels. Modeled after OpenDDS's DCPS_debug_level. Levels are
-// ordered by debugging value (and inversely by volume): the most useful, lowest-
-// volume events are at the lowest levels so operators can enable them without the
-// high-volume per-packet/periodic detail that only Verbose adds.
+// include logging from all lower levels.
 enum class ActivityLogLevel {
   None = 0,       // No activity logging.
-  Activity = 1,   // Client lifecycle activities.
+  Lifecycle = 1,  // Client lifecycle activities.
   Discovery = 2,  // Client discovery and admission.
   Identity = 3,   // Identity certificate-match diagnostic.
-  Expiration = 4  // Expiration and refresh processing.
+  Expiration = 4  // Expiration, rejection and refresh processing.
 };
 
 const char RTPS_RELAY_ACTIVITY_LOG_LEVEL[] = "RTPS_RELAY_ACTIVITY_LOG_LEVEL";
-const int RTPS_RELAY_ACTIVITY_LOG_LEVEL_default = static_cast<int>(ActivityLogLevel::Activity);
+const int RTPS_RELAY_ACTIVITY_LOG_LEVEL_default = static_cast<int>(ActivityLogLevel::Lifecycle);
 
 const char RTPS_RELAY_LOG_HTTP[] = "RTPS_RELAY_LOG_HTTP";
 const bool RTPS_RELAY_LOG_HTTP_default = false;
