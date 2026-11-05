@@ -183,8 +183,8 @@ SubscriberImpl::create_datareader(
           }
           return DDS::DataReader::_nil();
         }
-        multitopic_reader_enabled(dr);
       }
+      multitopic_reader_enabled(dr);
       return dr._retn();
     } catch (const std::exception& e) {
       if (DCPS_debug_level > 0) {
@@ -302,6 +302,20 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
           retcode_to_string(rc), reason));
       }
       return rc;
+    }
+
+    bool not_enabled = false;
+    {
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, si_lock_, DDS::RETCODE_ERROR);
+      not_enabled = readers_not_enabled_.erase(dr_servant) > 0;
+    }
+    if (not_enabled) {
+      // The reader was never added to discovery, so only local cleanup is needed.
+      dr_servant->cleanup();
+      return DDS::RETCODE_OK;
+    }
+    if (!dr_servant->is_enabled()) {
+      return DDS::RETCODE_ERROR;
     }
 
     // marks entity as deleted and stops future associating
@@ -450,6 +464,10 @@ SubscriberImpl::delete_contained_entities()
 
     for (it = datareader_map_.begin(); it != itEnd; ++it) {
       drs.push_back(it->second.in());
+    }
+    for (DataReaderSet::iterator nit = readers_not_enabled_.begin();
+         nit != readers_not_enabled_.end(); ++nit) {
+      drs.push_back(nit->in());
     }
   }
 
@@ -917,6 +935,7 @@ bool SubscriberImpl::is_clean(String* leftover_entities) const
     // BIT datareaders.
     reader_count = reader_count == NUMBER_OF_BUILT_IN_TOPICS ? 0 : reader_count;
   }
+  reader_count += readers_not_enabled_.size();
   if (leftover_entities && reader_count) {
     *leftover_entities += to_dds_string(reader_count) + " reader(s)";
   }

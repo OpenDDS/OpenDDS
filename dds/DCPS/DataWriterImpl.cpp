@@ -1097,6 +1097,10 @@ DataWriterImpl::send_request_ack()
 DDS::ReturnCode_t
 DataWriterImpl::wait_for_acknowledgments(const DDS::Duration_t& max_wait)
 {
+  if (!enabled_) {
+    return DDS::RETCODE_NOT_ENABLED;
+  }
+
   if (this->qos_.reliability.kind != DDS::RELIABLE_RELIABILITY_QOS)
     return DDS::RETCODE_OK;
 
@@ -1198,6 +1202,10 @@ DataWriterImpl::get_publication_matched_status(
 DDS::ReturnCode_t
 DataWriterImpl::assert_liveliness()
 {
+  if (!enabled_) {
+    return DDS::RETCODE_NOT_ENABLED;
+  }
+
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
   switch (this->qos_.liveliness.kind) {
   case DDS::AUTOMATIC_LIVELINESS_QOS:
@@ -2908,6 +2916,10 @@ DDS::ReturnCode_t DataWriterImpl::setup_serialization()
 
 DDS::ReturnCode_t DataWriterImpl::get_key_value(Sample_rch& sample, DDS::InstanceHandle_t handle)
 {
+  if (!enabled_) {
+    return DDS::RETCODE_NOT_ENABLED;
+  }
+
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
   const InstanceHandlesToValues::iterator it = instance_handles_to_values_.find(handle);
   if (it == instance_handles_to_values_.end()) {
@@ -2919,6 +2931,10 @@ DDS::ReturnCode_t DataWriterImpl::get_key_value(Sample_rch& sample, DDS::Instanc
 
 DDS::InstanceHandle_t DataWriterImpl::lookup_instance(const Sample& sample)
 {
+  if (!enabled_) {
+    return DDS::HANDLE_NIL;
+  }
+
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
   const InstanceValuesToHandles::iterator it = find_instance(sample);
   return it == instance_values_to_handles_.end() ? DDS::HANDLE_NIL : it->second;
@@ -2942,6 +2958,10 @@ DDS::ReturnCode_t DataWriterImpl::unregister_instance_w_timestamp(
   DDS::InstanceHandle_t instance_handle,
   const DDS::Time_t& timestamp)
 {
+  if (!enabled_) {
+    return DDS::RETCODE_NOT_ENABLED;
+  }
+
   const DDS::ReturnCode_t rc = instance_must_exist(
     "unregister_instance_w_timestamp", sample, instance_handle, /* remove = */ true);
   if (rc != DDS::RETCODE_OK) {
@@ -2955,6 +2975,10 @@ DDS::ReturnCode_t DataWriterImpl::dispose_w_timestamp(
   DDS::InstanceHandle_t instance_handle,
   const DDS::Time_t& source_timestamp)
 {
+  if (!enabled_) {
+    return DDS::RETCODE_NOT_ENABLED;
+  }
+
 #if OPENDDS_CONFIG_SECURITY && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
   DDS::DynamicData_var dynamic_data = sample.get_dynamic_data(dynamic_type_);
   DDS::Security::SecurityException ex;
@@ -3089,6 +3113,10 @@ DDS::ReturnCode_t DataWriterImpl::get_or_create_instance_handle(
   const Sample& sample,
   const DDS::Time_t& source_timestamp)
 {
+  if (!enabled_) {
+    return DDS::RETCODE_NOT_ENABLED;
+  }
+
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
 
   handle = lookup_instance(sample);
@@ -3183,6 +3211,10 @@ DDS::ReturnCode_t DataWriterImpl::write_w_timestamp(
   DDS::InstanceHandle_t handle,
   const DDS::Time_t& source_timestamp)
 {
+  if (!enabled_) {
+    return DDS::RETCODE_NOT_ENABLED;
+  }
+
   // This operation assumes the provided handle is valid. The handle provided
   // will not be verified.
 

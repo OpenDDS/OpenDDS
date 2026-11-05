@@ -187,6 +187,11 @@ DomainParticipantFactoryImpl::delete_participant(
     }
   }
 
+  if (!the_servant->is_enabled()) {
+    // The participant was never added to discovery or the transports.
+    return DDS::RETCODE_OK;
+  }
+
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id);
   if (disco) {
     if (!disco->remove_domain_participant(domain_id, dp_id)) {
