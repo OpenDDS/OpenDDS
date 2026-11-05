@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5328
 
 .. news-start-section: Fixes
 - Fixed crashes and wrong return codes when using entities that were created but never enabled.
