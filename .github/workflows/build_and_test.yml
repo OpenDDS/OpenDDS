@@ -12271,11 +12271,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  # macOS 14
+  # macOS 15
 
-  ACE_TAO_m14_o1d0_sec:
+  ACE_TAO_m15_o1d0_sec:
 
-    runs-on: macos-14
+    runs-on: macos-15
 
     steps:
     - name: checkout OpenDDS
@@ -12347,11 +12347,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_m14_o1d0_sec:
+  build_m15_o1d0_sec:
 
-    runs-on: macos-14
+    runs-on: macos-15
 
-    needs: ACE_TAO_m14_o1d0_sec
+    needs: ACE_TAO_m15_o1d0_sec
 
     steps:
     - name: checkout OpenDDS
@@ -12376,13 +12376,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v8
       with:
-        name: ACE_TAO_m14_o1d0_sec_artifact
+        name: ACE_TAO_m15_o1d0_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        gtar xvfJ ACE_TAO_m14_o1d0_sec.tar.xz
+        gtar xvfJ ACE_TAO_m15_o1d0_sec.tar.xz
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -12425,17 +12425,30 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_m14_o1d0_sec:
+  test_m15_o1d0_sec:
 
-    runs-on: macos-14
+    runs-on: macos-15
 
-    needs: build_m14_o1d0_sec
+    needs: build_m15_o1d0_sec
 
     permissions:
       contents: read
       id-token: write
 
     steps:
+    # macOS 15 runner prohibits multicast over the en0 interface, so we route it over loopback instead.
+    # Add routes for:
+    # - 239.255.0.1: default multicast group for RTPS discovery
+    # - 224.0.0.128: default multicast group for the multicast transport
+    # - 224.1.0.129: some tests use this multicast group for multicast transport
+    - name: route multicast over loopback
+      run: |
+        sudo route -n add -net 239.255.0.0/16 -interface lo0
+        sudo route -n change -net 224.0.0.0/4 -interface lo0
+        echo "Updated routes:"
+        route -n get 239.255.0.1
+        route -n get 224.0.0.128
+        route -n get 224.1.0.129
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
@@ -12463,23 +12476,23 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v8
       with:
-        name: ACE_TAO_m14_o1d0_sec_artifact
+        name: ACE_TAO_m15_o1d0_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        gtar xvfJ ACE_TAO_m14_o1d0_sec.tar.xz
+        gtar xvfJ ACE_TAO_m15_o1d0_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v8
       with:
-        name: build_m14_o1d0_sec_artifact
+        name: build_m15_o1d0_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        gtar xvfJ build_m14_o1d0_sec.tar.xz
+        gtar xvfJ build_m15_o1d0_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -12492,6 +12505,7 @@ jobs:
         sudo chmod o+w /cores
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
+        echo "export OPENDDS_RTPS_DISCOVERY_MULTICAST_VIA_LOOPBACK=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -12551,17 +12565,21 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  cmake_m14_o1d0_sec:
+  cmake_m15_o1d0_sec:
 
-    runs-on: macos-14
+    runs-on: macos-15
 
-    needs: build_m14_o1d0_sec
+    needs: build_m15_o1d0_sec
 
     permissions:
       contents: read
       id-token: write
 
     steps:
+    - name: route multicast over loopback
+      run: |
+        sudo route -n add -net 239.255.0.0/16 -interface lo0
+        route -n get 239.255.0.1
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
@@ -12589,23 +12607,23 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v8
       with:
-        name: ACE_TAO_m14_o1d0_sec_artifact
+        name: ACE_TAO_m15_o1d0_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        gtar xvfJ ACE_TAO_m14_o1d0_sec.tar.xz
+        gtar xvfJ ACE_TAO_m15_o1d0_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v8
       with:
-        name: build_m14_o1d0_sec_artifact
+        name: build_m15_o1d0_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        gtar xvfJ build_m14_o1d0_sec.tar.xz
+        gtar xvfJ build_m15_o1d0_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -12618,6 +12636,7 @@ jobs:
         sudo chmod o+w /cores
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
+        echo "export OPENDDS_RTPS_DISCOVERY_MULTICAST_VIA_LOOPBACK=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -12677,9 +12696,9 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  ACE_TAO_m14_i0_j_FM-1f:
+  ACE_TAO_m15_i0_j_FM-1f:
 
-    runs-on: macos-14
+    runs-on: macos-15
 
     steps:
     - name: checkout OpenDDS
@@ -12756,11 +12775,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_m14_i0_j_FM-1f:
+  build_m15_i0_j_FM-1f:
 
-    runs-on: macos-14
+    runs-on: macos-15
 
-    needs: ACE_TAO_m14_i0_j_FM-1f
+    needs: ACE_TAO_m15_i0_j_FM-1f
 
     steps:
     - name: checkout OpenDDS
@@ -12785,13 +12804,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v8
       with:
-        name: ACE_TAO_m14_i0_j_FM-1f_artifact
+        name: ACE_TAO_m15_i0_j_FM-1f_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        gtar xvfJ ACE_TAO_m14_i0_j_FM-1f.tar.xz
+        gtar xvfJ ACE_TAO_m15_i0_j_FM-1f.tar.xz
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -12849,17 +12868,26 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_m14_i0_j_FM-1f:
+  test_m15_i0_j_FM-1f:
 
-    runs-on: macos-14
+    runs-on: macos-15
 
-    needs: build_m14_i0_j_FM-1f
+    needs: build_m15_i0_j_FM-1f
 
     permissions:
       contents: read
       id-token: write
 
     steps:
+    # See the comment for job test_m15_o1d0_sec
+    - name: route multicast over loopback
+      run: |
+        sudo route -n add -net 239.255.0.0/16 -interface lo0
+        sudo route -n change -net 224.0.0.0/24 -interface lo0
+        echo "Updated routes:"
+        route -n get 239.255.0.1
+        route -n get 224.0.0.128
+        route -n get 224.1.0.129
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
@@ -12887,23 +12915,23 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v8
       with:
-        name: ACE_TAO_m14_i0_j_FM-1f_artifact
+        name: ACE_TAO_m15_i0_j_FM-1f_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        gtar xvfJ ACE_TAO_m14_i0_j_FM-1f.tar.xz
+        gtar xvfJ ACE_TAO_m15_i0_j_FM-1f.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v8
       with:
-        name: build_m14_i0_j_FM-1f_artifact
+        name: build_m15_i0_j_FM-1f_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        gtar xvfJ build_m14_i0_j_FM-1f.tar.xz
+        gtar xvfJ build_m15_i0_j_FM-1f.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -12916,6 +12944,7 @@ jobs:
         sudo chmod o+w /cores
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
+        echo "export OPENDDS_RTPS_DISCOVERY_MULTICAST_VIA_LOOPBACK=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -12975,17 +13004,21 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
 
-  cmake_modeling_m14_i0_j_FM-1f:
+  cmake_modeling_m15_i0_j_FM-1f:
 
-    runs-on: macos-14
+    runs-on: macos-15
 
-    needs: build_m14_i0_j_FM-1f
+    needs: build_m15_i0_j_FM-1f
 
     permissions:
       contents: read
       id-token: write
 
     steps:
+    - name: route multicast over loopback
+      run: |
+        sudo route -n add -net 239.255.0.0/16 -interface lo0
+        route -n get 239.255.0.1
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
@@ -13013,23 +13046,23 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v8
       with:
-        name: ACE_TAO_m14_i0_j_FM-1f_artifact
+        name: ACE_TAO_m15_i0_j_FM-1f_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        gtar xvfJ ACE_TAO_m14_i0_j_FM-1f.tar.xz
+        gtar xvfJ ACE_TAO_m15_i0_j_FM-1f.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v8
       with:
-        name: build_m14_i0_j_FM-1f_artifact
+        name: build_m15_i0_j_FM-1f_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        gtar xvfJ build_m14_i0_j_FM-1f.tar.xz
+        gtar xvfJ build_m15_i0_j_FM-1f.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -13042,6 +13075,7 @@ jobs:
         sudo chmod o+w /cores
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
+        echo "export OPENDDS_RTPS_DISCOVERY_MULTICAST_VIA_LOOPBACK=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace

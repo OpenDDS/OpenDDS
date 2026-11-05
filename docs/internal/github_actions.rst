@@ -18,7 +18,7 @@ Operating System
 
 * u22/u24 - Ubuntu 22.04/24.04
 * w22/w25 - Windows Server 2022/Windows Server 2025
-* m14 - macOS 14
+* m15 - macOS 15
 
 .. seealso::
 
