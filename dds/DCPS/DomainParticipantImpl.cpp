@@ -669,6 +669,11 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_topic_i(
         const GUID_t topicId = the_topic_servant->get_id();
         topics_.erase(iter);
 
+        if (topicId == GUID_UNKNOWN) {
+          // The topic was never enabled, so it was never added to discovery.
+          return DDS::RETCODE_OK;
+        }
+
         Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
         TopicStatus status = disco->remove_topic(
           the_dp_servant->get_domain_id(), the_dp_servant->get_id(), topicId);
@@ -1077,7 +1082,7 @@ DomainParticipantImpl::delete_contained_entities()
   // rest of the entities, so need to report to discovery that
   // BIT is no longer available
   Discovery_rch disc = TheServiceParticipant->get_discovery(this->domain_id_);
-  if (disc)
+  if (disc && is_enabled())
     disc->fini_bit(this);
 
   RcHandle<ShutdownHandler> handler = make_rch<ShutdownHandler>(rchandle_from(this));
@@ -1174,6 +1179,9 @@ DomainParticipantImpl::set_qos(
 
     } else {
       qos_ = qos;
+      if (!enabled_) {
+        return DDS::RETCODE_OK;
+      }
 
       Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
       const bool status =
