@@ -225,6 +225,20 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
     }
   }
 
+  bool not_enabled = false;
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, pi_lock_, DDS::RETCODE_ERROR);
+    not_enabled = writers_not_enabled_.erase(rchandle_from(dw_servant)) > 0;
+  }
+  if (not_enabled) {
+    // The writer was never added to discovery, so only local cleanup is needed.
+    dw_servant->cleanup();
+    return DDS::RETCODE_OK;
+  }
+  if (!dw_servant->is_enabled()) {
+    return DDS::RETCODE_ERROR;
+  }
+
   if (!dw_servant->get_deleted()) {
     dw_servant->prepare_to_delete();
     dw_servant->set_wait_pending_deadline(TheServiceParticipant->new_pending_timeout_deadline());
@@ -433,6 +447,18 @@ DDS::ReturnCode_t PublisherImpl::delete_contained_entities()
             ACE_TEXT("datawriter %C.\n"),
             LogGuid(pub_id).c_str()));
       }
+      return ret;
+    }
+  }
+
+  DataWriterSet writers;
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, pi_lock_, DDS::RETCODE_ERROR);
+    writers = writers_not_enabled_;
+  }
+  for (DataWriterSet::iterator it = writers.begin(); it != writers.end(); ++it) {
+    const DDS::ReturnCode_t ret = delete_datawriter(it->in());
+    if (ret != DDS::RETCODE_OK) {
       return ret;
     }
   }
@@ -903,7 +929,7 @@ bool PublisherImpl::is_clean(String* leftover_entities) const
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, pi_lock_, false);
 
-  const size_t writer_count = datawriter_map_.size();
+  const size_t writer_count = datawriter_map_.size() + writers_not_enabled_.size();
   if (leftover_entities && writer_count) {
     *leftover_entities += to_dds_string(writer_count) + " writer(s)";
   }
