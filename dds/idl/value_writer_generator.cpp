@@ -359,10 +359,9 @@ namespace {
       "  }\n";
 
     if (has_discriminator(u, filter_kind)) {
-      const bool must_understand = be_global->is_effectively_must_understand(discriminator);
+      // XTypes 7.2.2.4.4.4.6 requires every union discriminator to be must-understand
       be_global->impl_ <<
-        "  if (!value_writer.begin_discriminator(MemberParam(0, " <<
-        (must_understand ? "true" : "false") << "))) {\n"
+        "  if (!value_writer.begin_discriminator(MemberParam(0, true))) {\n"
         "    return false;\n"
         "  }\n";
       generate_write(value_prefix + "_d()", "disc", discriminator, "i", 1, nested(filter_kind));
