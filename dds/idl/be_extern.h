@@ -66,6 +66,10 @@ trademarks or registered trademarks of Sun Microsystems, Inc.
 #define OPENDDS_IDL_BE_EXTERN_H
 
 #include "be_global.h"
+#include <idl_defines.h>
+
+#include <string>
+#include <vector>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -74,7 +78,11 @@ trademarks or registered trademarks of Sun Microsystems, Inc.
 extern BE_GlobalData* be_global;
 
 extern int BE_init(int&, ACE_TCHAR*[]);
+#ifdef TAO_IDL_HAS_STD_DRV_FILES
+extern void BE_post_init(std::vector<std::string> const&);
+#else
 extern void BE_post_init(char*[], long);
+#endif
 extern void BE_version();
 extern void BE_produce();
 extern void BE_abort();

@@ -1,4 +1,5 @@
 #include "annotations.h"
+#include "tao_idl_compat.h"
 
 #include "be_extern.h"
 #include "be_util.h"
@@ -138,7 +139,11 @@ std::string get_str_annotation_member_value(AST_Annotation_Appl* appl,
 {
   AST_Expression::AST_ExprValue* const ev =
     get_annotation_member_ev(appl, member_name, AST_Expression::EV_string);
+#ifdef TAO_IDL_HAS_STD_STRING_API
+  return ev->strval;
+#else
   return ev->u.strval->get_string();
+#endif
 }
 
 // @key ======================================================================

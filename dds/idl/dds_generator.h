@@ -8,6 +8,7 @@
 
 #include "be_extern.h"
 #include "be_util.h"
+#include "tao_idl_compat.h"
 
 #include <dds/DCPS/ValueHelper.h>
 
@@ -258,7 +259,7 @@ struct ScopedNamespaceGuard  {
     const EscapeContext ec = idl ? EscapeContext_ForGenIdl : EscapeContext_Normal;
     for (n_ = 0; name->tail();
          name = static_cast<UTL_ScopedName*>(name->tail())) {
-      const char* str = name->head()->get_string();
+      char const * const str = tao_idl_compat::c_str (name->head ()->get_string ());
       if (str && str[0]) {
         ++n_;
         os_ << keyword << ' ' << dds_generator::to_string(name->head(), ec) << " {\n";
@@ -695,9 +696,17 @@ std::ostream& operator<<(std::ostream& o,
   case AST_Expression::EV_double:
     return o << ev.u.dval;
   case AST_Expression::EV_wstring:
+#ifdef TAO_IDL_HAS_STD_STRING_API
+    return o << "L\"" << ev.strval << '"';
+#else
     return o << "L\"" << ev.u.wstrval << '"';
+#endif
   case AST_Expression::EV_string:
+#ifdef TAO_IDL_HAS_STD_STRING_API
+    return o << '"' << ev.strval << '"';
+#else
     return o << '"' << ev.u.strval->get_string() << '"';
+#endif
   case AST_Expression::EV_fixed: {
     char buf[ACE_CDR::Fixed::MAX_STRING_SIZE];
     ev.u.fixedval.to_string(buf, sizeof buf);
@@ -1173,9 +1182,15 @@ AST_Field* get_struct_field(AST_Structure* struct_node, unsigned index)
   if (!struct_node || index >= struct_node->nfields()) {
     return 0;
   }
+#ifdef TAO_IDL_HAS_AST_FIELD_REFERENCE_API
+  AST_Field* field = 0;
+  struct_node->field(field, index);
+  return field;
+#else
   AST_Field** field_ptrptr;
   struct_node->field(field_ptrptr, index);
   return field_ptrptr ? *field_ptrptr : 0;
+#endif
 }
 
 inline

@@ -24,7 +24,7 @@ class AST_Decl;
 namespace be_util {
 
   /// Special BE arg call factored out of DRV_args.
-  void prep_be_arg(char* s);
+  void prep_be_arg(std::string const& s);
 
   /// Checks made after parsing args.
   void arg_post_proc();
