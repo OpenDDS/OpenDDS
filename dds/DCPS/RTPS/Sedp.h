@@ -1506,6 +1506,7 @@ protected:
   const GUID_t participant_id_;
   const CORBA::ULong participant_flags_;
   const ParameterListConverter::RtpsDurationEncoding local_duration_encoding_;
+  const ParameterListConverter::TypeConsistencyKindEncoding local_tc_kind_encoding_;
   RepoIdSet ignored_guids_;
   unsigned int publication_counter_, subscription_counter_, topic_counter_;
   LocalPublicationMap local_publications_;

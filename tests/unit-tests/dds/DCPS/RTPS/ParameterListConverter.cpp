@@ -3520,6 +3520,51 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, encode_decode_reader_associated_guid_
                       sizeof(OpenDDS::DCPS::GuidPrefix_t)));
 }
 
+TEST(dds_DCPS_RTPS_ParameterListConverter, reader_type_consistency_kind_encoding_modes)
+{
+  DiscoveredReaderData reader_data = Factory::default_reader_data();
+  reader_data.ddsSubscriptionData.type_consistency.ignore_member_names = true;
+  OpenDDS::DCPS::TypeInformation type_info;
+
+  const DDS::TypeConsistencyEnforcementQosPolicyKind_t kinds[] = {
+    DDS::DISALLOW_TYPE_COERCION, DDS::ALLOW_TYPE_COERCION
+  };
+  for (size_t i = 0; i < sizeof kinds / sizeof kinds[0]; ++i) {
+    reader_data.ddsSubscriptionData.type_consistency.kind = kinds[i];
+
+    ParameterList xtypes_param_list;
+    EXPECT_TRUE(to_param_list(reader_data, xtypes_param_list, true, type_info,
+                              RDE_NANOSECONDS, TCKE_XTYPES));
+    ASSERT_TRUE(is_present(xtypes_param_list, PID_XTYPES_TYPE_CONSISTENCY));
+    EXPECT_EQ(static_cast<int>(i),
+              get(xtypes_param_list, PID_XTYPES_TYPE_CONSISTENCY).type_consistency().kind);
+
+    ParameterList legacy_param_list;
+    EXPECT_TRUE(to_param_list(reader_data, legacy_param_list, true, type_info,
+                              RDE_NANOSECONDS, TCKE_LEGACY));
+    ASSERT_TRUE(is_present(legacy_param_list, PID_XTYPES_TYPE_CONSISTENCY));
+    EXPECT_EQ(static_cast<int>(i + 1),
+              get(legacy_param_list, PID_XTYPES_TYPE_CONSISTENCY).type_consistency().kind);
+
+    DiscoveredReaderData reader_data_out;
+    EXPECT_TRUE(from_param_list(xtypes_param_list, VENDORID_OPENDDS, reader_data_out, true,
+                                type_info.xtypes_type_info_, RDE_NANOSECONDS, TCKE_XTYPES));
+    EXPECT_EQ(kinds[i], reader_data_out.ddsSubscriptionData.type_consistency.kind);
+    EXPECT_TRUE(reader_data_out.ddsSubscriptionData.type_consistency.ignore_member_names);
+
+    EXPECT_TRUE(from_param_list(legacy_param_list, VENDORID_OPENDDS, reader_data_out, true,
+                                type_info.xtypes_type_info_, RDE_NANOSECONDS, TCKE_LEGACY));
+    EXPECT_EQ(kinds[i], reader_data_out.ddsSubscriptionData.type_consistency.kind);
+
+    // Overloads without a TypeConsistencyKindEncoding use the XTypes values
+    ParameterList default_param_list;
+    EXPECT_TRUE(to_param_list(reader_data, default_param_list, true, type_info));
+    ASSERT_TRUE(is_present(default_param_list, PID_XTYPES_TYPE_CONSISTENCY));
+    EXPECT_EQ(static_cast<int>(i),
+              get(default_param_list, PID_XTYPES_TYPE_CONSISTENCY).type_consistency().kind);
+  }
+}
+
 TEST(dds_DCPS_RTPS_ParameterListConverter, set_reader_defaults)
 { // Should set reader defaults
   Locator_t uc_locators[2];

@@ -245,6 +245,9 @@ public:
   bool use_rtps_duration_fraction() const;
   void use_rtps_duration_fraction(bool value);
 
+  bool use_legacy_type_consistency_kind() const;
+  void use_legacy_type_consistency_kind(bool value);
+
   bool sedp_responsive_mode() const;
   void sedp_responsive_mode(bool sedp_responsive_mode);
 

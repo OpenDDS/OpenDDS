@@ -1532,6 +1532,25 @@ Those properties, along with options specific to OpenDDS's RTPS discovery implem
     (``PFLAGS_RTPS_DURATION_FRACTION``). Setting that bit directly through a ``PARTICIPANT_FLAGS`` override
     has no effect: the bit is always derived from ``UseRtpsDurationFraction`` when the participant flags are read.
 
+  .. prop:: UseLegacyTypeConsistencyKind=<boolean>
+    :default: ``0`` (disabled)
+
+    Controls the values sent for ``TypeConsistencyEnforcementQosPolicy::kind`` in DataReader discovery.
+    When disabled, OpenDDS sends the DDS-XTypes values, where ``DISALLOW_TYPE_COERCION`` is ``0`` and ``ALLOW_TYPE_COERCION`` is ``1``.
+    When enabled, OpenDDS sends ``1`` and ``2`` instead, as OpenDDS releases before 3.35 did.
+    The setting is sampled when each DomainParticipant is created.
+
+    OpenDDS participants advertise the selected values in participant discovery, allowing mixed-mode OpenDDS deployments to decode each peer correctly.
+    Values from other vendors are always interpreted as DDS-XTypes values.
+    When participant metadata is not available, incoming values are interpreted using the local setting.
+
+    OpenDDS releases before 3.35 do not recognize the participant flag and will misinterpret the DDS-XTypes values.
+    Enable this option when DataReaders with a non-default ``TypeConsistencyEnforcementQosPolicy`` must match DataWriters in those releases.
+    Other vendors will then misinterpret the policy sent by OpenDDS DataReaders.
+
+    This is the only supported way to control the corresponding participant flag bit (``PFLAGS_XTYPES_TYPE_CONSISTENCY_KIND``).
+    Setting that bit directly through a ``PARTICIPANT_FLAGS`` override has no effect: the bit is always derived from ``UseLegacyTypeConsistencyKind`` when the participant flags are read.
+
   .. prop:: TypeLookupServiceReplyTimeout=<msec>
     :default: ``5000`` milliseconds (5 seconds).
 
