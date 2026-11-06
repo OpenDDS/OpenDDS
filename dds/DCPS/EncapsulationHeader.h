@@ -92,6 +92,7 @@ public:
   String to_string() const;
 
   static bool set_encapsulation_options(Message_Block_Ptr& mb);
+  static bool set_encapsulation_options(ACE_Message_Block& mb);
 
 private:
   /// The first two bytes as a big endian integer
