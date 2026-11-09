@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5329
 
 .. news-start-section: Fixes
 - Fixed a data race where the participant's liveliness timers and ``DomainParticipant::assert_liveliness`` read a publisher's data writers while another thread created or deleted a data writer.
