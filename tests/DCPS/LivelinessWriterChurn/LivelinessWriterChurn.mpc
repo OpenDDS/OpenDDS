@@ -1,0 +1,10 @@
+project: dcpsexe, dcps_test, dcps_cm, dcps_rtps_udp {
+  exename = livelinesswriterchurn
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    main.cpp
+  }
+}

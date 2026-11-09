@@ -977,14 +977,26 @@ PublisherImpl::listener_for(DDS::StatusKind kind)
   }
 }
 
+void
+PublisherImpl::get_writers(DataWriterVec& writers) const
+{
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, pi_lock_);
+  writers.reserve(datawriter_map_.size());
+  for (DataWriterMap::const_iterator it = datawriter_map_.begin();
+      it != datawriter_map_.end(); ++it) {
+    writers.push_back(it->second);
+  }
+}
+
 DDS::ReturnCode_t
 PublisherImpl::assert_liveliness_by_participant()
 {
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
 
-  for (DataWriterMap::iterator it(datawriter_map_.begin());
-      it != datawriter_map_.end(); ++it) {
-    const DDS::ReturnCode_t dw_ret = it->second->assert_liveliness_by_participant();
+  DataWriterVec writers;
+  get_writers(writers);
+  for (DataWriterVec::iterator it = writers.begin(); it != writers.end(); ++it) {
+    const DDS::ReturnCode_t dw_ret = (*it)->assert_liveliness_by_participant();
 
     if (dw_ret != DDS::RETCODE_OK) {
       ret = dw_ret;
@@ -998,9 +1010,10 @@ TimeDuration
 PublisherImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind kind)
 {
   TimeDuration tv = TimeDuration::max_value;
-  for (DataWriterMap::iterator it(datawriter_map_.begin());
-      it != datawriter_map_.end(); ++it) {
-    tv = std::min(tv, it->second->liveliness_check_interval(kind));
+  DataWriterVec writers;
+  get_writers(writers);
+  for (DataWriterVec::iterator it = writers.begin(); it != writers.end(); ++it) {
+    tv = std::min(tv, (*it)->liveliness_check_interval(kind));
   }
   return tv;
 }
@@ -1008,9 +1021,10 @@ PublisherImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind kind)
 bool
 PublisherImpl::participant_liveliness_activity_after(const MonotonicTimePoint& tv)
 {
-  for (DataWriterMap::iterator it(datawriter_map_.begin());
-      it != datawriter_map_.end(); ++it) {
-    if (it->second->participant_liveliness_activity_after(tv)) {
+  DataWriterVec writers;
+  get_writers(writers);
+  for (DataWriterVec::iterator it = writers.begin(); it != writers.end(); ++it) {
+    if ((*it)->participant_liveliness_activity_after(tv)) {
       return true;
     }
   }
