@@ -21,8 +21,17 @@
 
 // Prepare an argument for a BE
 void
-be_util::prep_be_arg (char *arg)
+be_util::prep_be_arg (
+#ifdef TAO_IDL_HAS_STD_STRING_API
+  const std::string& argument
+#else
+  char *arg
+#endif
+)
 {
+#ifdef TAO_IDL_HAS_STD_STRING_API
+  const char* const arg = argument.c_str();
+#endif
   static const char WB_STUB_EXPORT_MACRO[] = "stub_export_macro=";
   static const size_t SZ_WB_STUB_EXPORT_MACRO =
     sizeof(WB_STUB_EXPORT_MACRO) - 1;

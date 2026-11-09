@@ -347,10 +347,10 @@ void BE_GlobalData::warning(const char* msg, const char* filename, unsigned line
   if (idl_global->print_warnings()) {
     if (filename) {
       ACE_ERROR((LM_WARNING, ACE_TEXT("Warning - %C: \"%C\", line %u: %C\n"),
-        idl_global->prog_name(), filename, lineno, msg));
+        tao_idl_compat::c_str(idl_global->prog_name()), filename, lineno, msg));
     } else {
       ACE_ERROR((LM_WARNING, ACE_TEXT("Warning - %C: %C\n"),
-        idl_global->prog_name(), msg));
+        tao_idl_compat::c_str(idl_global->prog_name()), msg));
     }
   }
   idl_global->err()->last_warning = UTL_Error::EIDL_MISC;
@@ -360,10 +360,10 @@ void BE_GlobalData::error(const char* msg, const char* filename, unsigned lineno
 {
   if (filename) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("Error - %C: \"%C\", line %u: %C\n"),
-      idl_global->prog_name(), filename, lineno, msg));
+      tao_idl_compat::c_str(idl_global->prog_name()), filename, lineno, msg));
   } else {
     ACE_ERROR((LM_ERROR, ACE_TEXT("Error - %C: %C\n"),
-      idl_global->prog_name(), msg));
+      tao_idl_compat::c_str(idl_global->prog_name()), msg));
   }
   idl_global->set_err_count(idl_global->err_count() + 1);
   idl_global->err()->last_error = UTL_Error::EIDL_MISC;

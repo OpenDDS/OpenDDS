@@ -657,7 +657,11 @@ bool idl_mapping_jni::gen_typedef(UTL_ScopedName *name, AST_Type *base,
       return false;
     }
 
+#ifdef TAO_IDL_HAS_STD_AST_LIST_API
+    AST_Expression *dim = arr->dims()[0].get();
+#else
     AST_Expression *dim = arr->dims()[0];
+#endif
 
     if (dim->ev()->et != AST_Expression::EV_ulong) {
       cerr << "ERROR - Array's dimension type must be ulong\n";
@@ -1509,8 +1513,14 @@ void recursive_bases(AST_Interface *interf, set<string> &bases,
   string name = idl_mapping::scoped_helper(interf->name(), "_");
 
   if (bases.insert(name).second) {
+ #ifdef TAO_IDL_HAS_STD_AST_LIST_API
+    const AST_Type_List& inherits = interf->inherits();
+    for (AST_Type_List::const_iterator i = inherits.begin(); i != inherits.end(); ++i) {
+      AST_Interface *base = dynamic_cast<AST_Interface*>(*i);
+ #else
     for (int i = 0; i < interf->n_inherits(); ++i) {
       AST_Interface *base = dynamic_cast<AST_Interface*>(interf->inherits()[i]);
+ #endif
       recursive_bases(base, bases, ctors);
     }
 

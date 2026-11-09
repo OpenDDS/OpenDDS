@@ -6,6 +6,7 @@
  */
 
 #include "be_extern.h"
+#include "tao_idl_compat.h"
 #include "../../../dds/Version.h"
 
 #include <global_extern.h>
@@ -22,13 +23,25 @@ int
 BE_init(int &, ACE_TCHAR *[])
 {
   ACE_NEW_RETURN(be_global, BE_GlobalData, -1);
+#ifdef TAO_IDL_HAS_IDL_VERSION_CLASS
+  idl_global->default_idl_version_.version(IDL_VERSION_4);
+#else
   idl_global->default_idl_version_ = IDL_VERSION_4;
+#endif
+#ifdef TAO_IDL_HAS_SCOPED_ANON_TYPE_DIAGNOSTIC
+  idl_global->anon_type_diagnostic(IDL_GlobalData::Anon_Type_Diagnostic::Silent);
+#else
   idl_global->anon_type_diagnostic(IDL_GlobalData::ANON_TYPE_SILENT);
+#endif
   return 0;
 }
 
 void
+#ifdef TAO_IDL_HAS_STD_DRV_FILES
+BE_post_init(const std::vector<std::string>&)
+#else
 BE_post_init(char *[], long)
+#endif
 {
   if (idl_global->idl_version_ < IDL_VERSION_4) {
     idl_global->ignore_files_ = true; // Exit without parsing files
