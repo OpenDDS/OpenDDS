@@ -16,6 +16,8 @@
 #ifndef OPENDDS_IDL_BE_UTIL_H
 #define OPENDDS_IDL_BE_UTIL_H
 
+#include <idl_defines.h>
+
 #include <string>
 
 class AST_Generator;
@@ -24,7 +26,11 @@ class AST_Decl;
 namespace be_util {
 
   /// Special BE arg call factored out of DRV_args.
+#ifdef TAO_IDL_HAS_STD_STRING_API
   void prep_be_arg(std::string const& s);
+#else
+  void prep_be_arg(char* s);
+#endif
 
   /// Checks made after parsing args.
   void arg_post_proc();
