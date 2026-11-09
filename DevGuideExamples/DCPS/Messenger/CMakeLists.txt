@@ -42,5 +42,6 @@ target_link_libraries(subscriber ${opendds_libs})
 
 # Testing
 configure_file(rtps.ini . COPYONLY)
+configure_file(rtps_loopback.ini . COPYONLY)
 opendds_add_test(NAME info_repo)
 opendds_add_test(NAME rtps ARGS --rtps)

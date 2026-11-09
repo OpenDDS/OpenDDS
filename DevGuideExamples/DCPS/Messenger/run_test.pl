@@ -41,7 +41,9 @@ if ($help) {
 }
 
 if ($rtps) {
-  $common_opts .= " -DCPSConfigFile rtps.ini";
+  my $ini = $ENV{OPENDDS_RTPS_DISCOVERY_MULTICAST_VIA_LOOPBACK} ?
+      'rtps_loopback.ini' : 'rtps.ini';
+  $common_opts .= " -DCPSConfigFile $ini";
 }
 
 my $test = new PerlDDS::TestFramework();

@@ -236,7 +236,6 @@ my $query_all = $show_all_configs || $list_all_configs || $list_all_tests;
 $show_configs |= $show_all_configs;
 $list_configs |= $list_all_configs;
 $list_tests |= $list_all_tests;
-my $query = $show_configs || $list_configs || $list_tests;
 
 # Determine what test list files to use
 my @file_list = ();
