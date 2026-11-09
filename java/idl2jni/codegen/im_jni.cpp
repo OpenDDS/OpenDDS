@@ -8,6 +8,7 @@
 #include "idl_mapping.h"
 
 #include "be_extern.h"
+#include "tao_idl_compat.h"
 #include "utl_identifier.h"
 #include "utl_string.h"
 #include "fe_private.h"
@@ -349,7 +350,7 @@ string idl_mapping_jni::jvmSignature(AST_Type *decl)
   }
 
   cerr << "ERROR - unknown jvmSignature for IDL type: " <<
-       decl->local_name()->get_string() << endl;
+       tao_idl_compat::c_str(decl->local_name()->get_string()) << endl;
   return "**unknown**";
 }
 
@@ -536,7 +537,7 @@ bool idl_mapping_jni::gen_struct(UTL_ScopedName *name,
   string fieldsToCxx, fieldsToJava;
 
   for (size_t i = 0; i < fields.size(); ++i) {
-    string fname = fields[i]->local_name()->get_string();
+    string fname = tao_idl_compat::c_str(fields[i]->local_name()->get_string());
     string jvmSig = jvmSignature(fields[i]->field_type()); // "I"
     const string getPrefix = jvmSig == "C" ? "static_cast<char> (" : "",
       getSuffix = jvmSig == "C" ? ")" : "";
@@ -1113,7 +1114,7 @@ string arg_conversion(const char *name, AST_Type *type,
 void write_native_attribute_r(UTL_ScopedName *name, const char *javaStub,
                               AST_Attribute *attr, bool local)
 {
-  const char *attrname = attr->local_name()->get_string();
+  const char *attrname = tao_idl_compat::c_str(attr->local_name()->get_string());
   string cxx = idl_mapping_jni::scoped(name);
   vector<string> params, *pparams = attr->readonly() ? 0 : &params;
   string fnName = jni_function_name(javaStub, attrname, pparams);
@@ -1225,7 +1226,7 @@ void write_native_attribute_r(UTL_ScopedName *name, const char *javaStub,
 void write_native_attribute_w(UTL_ScopedName *name, const char *javaStub,
                               AST_Attribute *attr, bool local)
 {
-  const char *attrname = attr->local_name()->get_string();
+  const char *attrname = tao_idl_compat::c_str(attr->local_name()->get_string());
   string ret = "void";
   string cxx = idl_mapping_jni::scoped(name);
   string retval, retconv, ret_exception;
@@ -1319,7 +1320,7 @@ void write_native_attribute_w(UTL_ScopedName *name, const char *javaStub,
 void write_native_operation(UTL_ScopedName *name, const char *javaStub,
                             AST_Operation *op, bool local)
 {
-  const char *opname = op->local_name()->get_string();
+  const char *opname = tao_idl_compat::c_str(op->local_name()->get_string());
   string ret = "void",
     cxx = idl_mapping_jni::scoped(name),
     fnName = jni_function_name(javaStub, opname),
@@ -1393,7 +1394,7 @@ void write_native_operation(UTL_ScopedName *name, const char *javaStub,
 
     if (item->node_type() == AST_Decl::NT_argument) {
       AST_Argument* const arg = dynamic_cast<AST_Argument*>(item);
-      const char* const argname = arg->local_name()->get_string();
+      const char* const argname = tao_idl_compat::c_str(arg->local_name()->get_string());
       const bool in = arg->direction() == AST_Argument::dir_IN;
 
       args += ", " + (in ? idl_mapping_jni::type(arg->field_type()) : "jobject");
@@ -1803,7 +1804,7 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
           const string prefix = scoped(discriminator->name(), true);
           UTL_ScopedName* n = ul->label_val()->n();
           branchesToJava +=
-            "    case " + prefix + "::" + n->last_component()->get_string() + ":\n";
+            "    case " + prefix + "::" + tao_idl_compat::c_str(n->last_component()->get_string()) + ":\n";
 
         } else {
           branchesToJava += "    case " + oss.str() + ":\n";
@@ -1822,7 +1823,7 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
       edisc = "jdisc, ";
     }
 
-    const char *br_name = branches[i]->local_name()->get_string();
+    const char *br_name = tao_idl_compat::c_str(branches[i]->local_name()->get_string());
 
     if (isPrimitive(branches[i]->field_type())) {
       if (br_sig[0] == 'C') cxxCast = "static_cast<CORBA::Char> (";

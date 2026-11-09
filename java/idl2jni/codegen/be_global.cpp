@@ -9,6 +9,7 @@
 
 #include "be_util.h"
 #include "be_extern.h"
+#include "tao_idl_compat.h"
 
 #include <ast_generator.h>
 #include <global_extern.h>
@@ -197,7 +198,7 @@ BE_Comment_Guard::~BE_Comment_Guard()
 ACE_CString
 BE_GlobalData::spawn_options()
 {
-  return /*this->orb_args_ +*/ idl_global->idl_flags();
+  return ACE_CString(tao_idl_compat::c_str(idl_global->idl_flags()));
 }
 
 void invalid_option(char * option)
