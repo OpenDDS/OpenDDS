@@ -310,3 +310,41 @@ TEST(dds_DCPS_EncapsulationHeader, read_encapsulation_header_short_read)
   EXPECT_EQ(EncapsulationReadStatus::HeaderError,
             read_encapsulation_header(ser, encap, APPENDABLE));
 }
+
+TEST(dds_DCPS_EncapsulationHeader, read_encapsulation_header_trailing_padding)
+{
+  for (unsigned char padding = 0; padding != 4; ++padding) {
+    // Keep the payload and padding in a continuation block to exercise chains.
+    const unsigned char header[] = {0, 1, 0, static_cast<unsigned char>(0xa4 | padding)};
+    const char payload[] = {42, 0, 0, 0};
+    ACE_Message_Block mb(sizeof header);
+    mb.copy(reinterpret_cast<const char*>(header), sizeof header);
+    mb.cont(new ACE_Message_Block(sizeof payload));
+    mb.cont()->copy(payload, sizeof payload);
+    Serializer ser(&mb, Encoding());
+    ASSERT_EQ(EncapsulationReadStatus::Ok, read_encapsulation_header(ser, APPENDABLE));
+    EXPECT_EQ(sizeof payload - padding, ser.length());
+    for (size_t i = 0; i < sizeof payload - padding; ++i) {
+      ACE_CDR::Octet value = 0;
+      ASSERT_TRUE(ser >> ACE_InputCDR::to_octet(value));
+      EXPECT_EQ(i ? 0 : 42, value);
+    }
+    EXPECT_EQ(0u, ser.length());
+    ACE_CDR::Octet value = 0;
+    EXPECT_FALSE(ser >> ACE_InputCDR::to_octet(value));
+  }
+}
+
+TEST(dds_DCPS_EncapsulationHeader, read_encapsulation_header_excess_padding)
+{
+  for (unsigned char padding = 1; padding != 4; ++padding) {
+    const unsigned char bytes[] = {0, 1, 0, padding, 0, 0};
+    ACE_Message_Block mb(sizeof bytes);
+    mb.copy(reinterpret_cast<const char*>(bytes), 4 + padding - 1);
+    Serializer ser(&mb, Encoding(Encoding::KIND_XCDR2, ENDIAN_BIG));
+    EXPECT_EQ(EncapsulationReadStatus::HeaderError,
+              read_encapsulation_header(ser, APPENDABLE));
+    EXPECT_EQ(Encoding::KIND_XCDR2, ser.encoding().kind());
+    EXPECT_EQ(ENDIAN_BIG, ser.encoding().endianness());
+  }
+}

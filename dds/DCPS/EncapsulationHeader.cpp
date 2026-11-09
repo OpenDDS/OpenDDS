@@ -299,6 +299,11 @@ read_encapsulation_header(Serializer& s,
   if (!to_encoding(encoding, header, expected_extensibility)) {
     return EncapsulationReadStatus::ExtensibilityMismatch;
   }
+  const size_t padding = header.options() & 0x03;
+  const size_t remaining = s.length();
+  if (padding > remaining || !s.set_read_limit(remaining - padding)) {
+    return EncapsulationReadStatus::HeaderError;
+  }
   s.encoding(encoding);
   return EncapsulationReadStatus::Ok;
 }

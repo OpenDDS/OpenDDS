@@ -4,6 +4,8 @@
 
 #include <tests/Utils/GtestRc.h>
 
+#include <dds/DCPS/EncapsulationHeader.h>
+
 #include <dds/DCPS/XTypes/TypeLookupService.h>
 #include <dds/DCPS/XTypes/DynamicTypeImpl.h>
 #include <dds/DCPS/XTypes/DynamicTypeMemberImpl.h>
@@ -1575,6 +1577,37 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Appendable_ReadValueFromStructXCDR
   CORBA::Long default_value = 1;
   EXPECT_EQ(DDS::RETCODE_OK, with_default.get_int32_value(default_value, 1));
   EXPECT_EQ(0, default_value);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Appendable_XCDR1_padding_is_not_a_member)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableSingleValueStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableSingleValueStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  ASSERT_TRUE(it != type_map.end());
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  const unsigned char bytes[] = {
+    0, 0, 0, 3, // XCDR1 big endian, three trailing padding bytes
+    0, 0, 0, 3, // my_enum
+    0, 0, 0, 10, // int_32
+    0, 0, 0, 11, // uint_32
+    5, // int_8: last member in the writer's shorter appendable type
+    0, 0, 0 // padding must not supply the reader's uint_8
+  };
+  ACE_Message_Block mb(sizeof bytes);
+  mb.copy(reinterpret_cast<const char*>(bytes), sizeof bytes);
+  DCPS::Serializer ser(&mb, xcdr1);
+  ASSERT_EQ(DCPS::EncapsulationReadStatus::Ok,
+            DCPS::read_encapsulation_header(ser, DCPS::APPENDABLE));
+  XTypes::DynamicDataXcdrReadImpl data(ser, dt);
+  CORBA::Int8 original = 0;
+  ASSERT_EQ(DDS::RETCODE_OK, data.get_int8_value(original, 3));
+  EXPECT_EQ(5, original);
+  CORBA::UInt8 added_octet = 42;
+  EXPECT_EQ(DDS::RETCODE_NO_DATA, data.get_uint8_value(added_octet, 4));
 }
 
 TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Appendable_StructWithOptionalMembers)
