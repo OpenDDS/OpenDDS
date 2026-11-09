@@ -121,8 +121,8 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
           wrapper.key_compare(fname);
         }
       } else if (info) {
-        const std::vector<std::string> keys = tao_idl_compat::dcps_keys (*info);
-        for (std::vector<std::string>::const_iterator i = keys.begin(); i != keys.end(); ++i) {
+        const std::vector<std::string> dcps_keys = tao_idl_compat::dcps_keys (*info);
+        for (std::vector<std::string>::const_iterator i = dcps_keys.begin(); i != dcps_keys.end(); ++i) {
           string fname = *i;
           if (use_cxx11) {
             fname = insert_cxx11_accessor_parens(fname, false);

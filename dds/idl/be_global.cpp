@@ -332,6 +332,11 @@ BE_GlobalData::spawn_options()
   return ACE_CString (tao_idl_compat::c_str (idl_global->idl_flags ()));
 }
 
+void
+BE_GlobalData::gen_source_info(bool)
+{
+}
+
 void invalid_option(char* option)
 {
   ACE_ERROR((LM_ERROR,

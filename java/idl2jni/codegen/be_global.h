@@ -55,7 +55,7 @@ public:
   // implementations in IDL and IFR backends.
 
   // Accepted by TAO IDL's shared argument parser.
-  void gen_source_info(bool) {}
+  void gen_source_info(bool);
 
   void parse_args(long &i, char **av);
   // Parse args that affect the backend.
