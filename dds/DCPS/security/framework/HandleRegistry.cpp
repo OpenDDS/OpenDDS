@@ -75,7 +75,7 @@ HandleRegistry::get_local_datareader_crypto_handle(const DCPS::GUID_t& id) const
   return DDS::HANDLE_NIL;
 }
 
-const DDS::Security::EndpointSecurityAttributes&
+DDS::Security::EndpointSecurityAttributes
 HandleRegistry::get_local_datareader_security_attributes(const DCPS::GUID_t& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, default_endpoint_security_attributes_);
@@ -130,7 +130,7 @@ HandleRegistry::get_local_datawriter_crypto_handle(const DCPS::GUID_t& id) const
   return DDS::HANDLE_NIL;
 }
 
-const DDS::Security::EndpointSecurityAttributes&
+DDS::Security::EndpointSecurityAttributes
 HandleRegistry::get_local_datawriter_security_attributes(const DCPS::GUID_t& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, default_endpoint_security_attributes_);
@@ -249,14 +249,14 @@ HandleRegistry::insert_remote_datareader_crypto_handle(const DCPS::GUID_t& id,
   if (handle != DDS::HANDLE_NIL) {
     ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
     remote_datareader_crypto_handles_[id] = std::make_pair(handle, attributes);
-  }
 
-  if (DCPS::security_debug.bookkeeping) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
-               ACE_TEXT("HandleRegistry::insert_remote_datareader_crypto_handle %C %d (total %B)\n"),
-               DCPS::LogGuid(id).c_str(),
-               handle,
-               remote_datareader_crypto_handles_.size()));
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("HandleRegistry::insert_remote_datareader_crypto_handle %C %d (total %B)\n"),
+                 DCPS::LogGuid(id).c_str(),
+                 handle,
+                 remote_datareader_crypto_handles_.size()));
+    }
   }
 }
 
@@ -271,7 +271,7 @@ HandleRegistry::get_remote_datareader_crypto_handle(const DCPS::GUID_t& id) cons
   return DDS::HANDLE_NIL;
 }
 
-const DDS::Security::EndpointSecurityAttributes&
+DDS::Security::EndpointSecurityAttributes
 HandleRegistry::get_remote_datareader_security_attributes(const DCPS::GUID_t& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, default_endpoint_security_attributes_);
@@ -341,7 +341,7 @@ HandleRegistry::get_remote_datawriter_crypto_handle(const DCPS::GUID_t& id) cons
   return DDS::HANDLE_NIL;
 }
 
-const DDS::Security::EndpointSecurityAttributes&
+DDS::Security::EndpointSecurityAttributes
 HandleRegistry::get_remote_datawriter_security_attributes(const DCPS::GUID_t& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, default_endpoint_security_attributes_);

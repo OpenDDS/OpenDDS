@@ -45,14 +45,14 @@ public:
                                              DDS::Security::DatareaderCryptoHandle handle,
                                              const DDS::Security::EndpointSecurityAttributes& attributes);
   DDS::Security::DatareaderCryptoHandle get_local_datareader_crypto_handle(const DCPS::GUID_t& id) const;
-  const DDS::Security::EndpointSecurityAttributes& get_local_datareader_security_attributes(const DCPS::GUID_t& id) const;
+  DDS::Security::EndpointSecurityAttributes get_local_datareader_security_attributes(const DCPS::GUID_t& id) const;
   void erase_local_datareader_crypto_handle(const DCPS::GUID_t& id);
 
   void insert_local_datawriter_crypto_handle(const DCPS::GUID_t& id,
                                              DDS::Security::DatawriterCryptoHandle handle,
                                              const DDS::Security::EndpointSecurityAttributes& attributes);
   DDS::Security::DatawriterCryptoHandle get_local_datawriter_crypto_handle(const DCPS::GUID_t& id) const;
-  const DDS::Security::EndpointSecurityAttributes& get_local_datawriter_security_attributes(const DCPS::GUID_t& id) const;
+  DDS::Security::EndpointSecurityAttributes get_local_datawriter_security_attributes(const DCPS::GUID_t& id) const;
   void erase_local_datawriter_crypto_handle(const DCPS::GUID_t& id);
 
   void insert_remote_participant_crypto_handle(const DCPS::GUID_t& id,
@@ -69,7 +69,7 @@ public:
                                               DDS::Security::DatareaderCryptoHandle handle,
                                               const DDS::Security::EndpointSecurityAttributes& attributes);
   DDS::Security::DatareaderCryptoHandle get_remote_datareader_crypto_handle(const DCPS::GUID_t& id) const;
-  const DDS::Security::EndpointSecurityAttributes& get_remote_datareader_security_attributes(const DCPS::GUID_t& id) const;
+  DDS::Security::EndpointSecurityAttributes get_remote_datareader_security_attributes(const DCPS::GUID_t& id) const;
   DatareaderCryptoHandleList get_all_remote_datareaders(const DCPS::GUID_t& prefix) const;
   void erase_remote_datareader_crypto_handle(const DCPS::GUID_t& id);
 
@@ -77,7 +77,7 @@ public:
                                               DDS::Security::DatawriterCryptoHandle handle,
                                               const DDS::Security::EndpointSecurityAttributes& attributes);
   DDS::Security::DatawriterCryptoHandle get_remote_datawriter_crypto_handle(const DCPS::GUID_t& id) const;
-  const DDS::Security::EndpointSecurityAttributes& get_remote_datawriter_security_attributes(const DCPS::GUID_t& id) const;
+  DDS::Security::EndpointSecurityAttributes get_remote_datawriter_security_attributes(const DCPS::GUID_t& id) const;
   DatawriterCryptoHandleList get_all_remote_datawriters(const DCPS::GUID_t& prefix) const;
   void erase_remote_datawriter_crypto_handle(const DCPS::GUID_t& id);
 
