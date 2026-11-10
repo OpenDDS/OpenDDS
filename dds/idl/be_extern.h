@@ -79,7 +79,7 @@ extern BE_GlobalData* be_global;
 
 extern int BE_init(int&, ACE_TCHAR*[]);
 #ifdef TAO_IDL_HAS_STD_DRV_FILES
-extern void BE_post_init(std::vector<std::string> const&);
+extern void BE_post_init(const std::vector<std::string>&);
 #else
 extern void BE_post_init(char*[], long);
 #endif

@@ -24,14 +24,14 @@
 void
 be_util::prep_be_arg(
 #ifdef TAO_IDL_HAS_STD_STRING_API
-  std::string const& argument
+  const std::string& argument
 #else
   char* arg
 #endif
 )
 {
 #ifdef TAO_IDL_HAS_STD_STRING_API
-  char const * const arg = argument.c_str ();
+  const char * const arg = argument.c_str ();
 #endif
   static const char WB_EXPORT_MACRO[] = "export_macro=";
   static const size_t SZ_WB_EXPORT_MACRO = sizeof(WB_EXPORT_MACRO) - 1;

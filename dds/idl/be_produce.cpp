@@ -315,7 +315,7 @@ void postprocess(const char* fn, ostringstream& content,
 void
 BE_produce()
 {
-  char const * const idl_fn = tao_idl_compat::c_str (idl_global->main_filename ());
+  const char * const idl_fn = tao_idl_compat::c_str (idl_global->main_filename ());
   be_global->filename(idl_fn);
 
   const BE_GlobalData::stream_enum_t out_stream =

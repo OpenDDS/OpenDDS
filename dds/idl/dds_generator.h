@@ -259,7 +259,7 @@ struct ScopedNamespaceGuard  {
     const EscapeContext ec = idl ? EscapeContext_ForGenIdl : EscapeContext_Normal;
     for (n_ = 0; name->tail();
          name = static_cast<UTL_ScopedName*>(name->tail())) {
-      char const * const str = tao_idl_compat::c_str (name->head ()->get_string ());
+      const char * const str = tao_idl_compat::c_str (name->head ()->get_string ());
       if (str && str[0]) {
         ++n_;
         os_ << keyword << ' ' << dds_generator::to_string(name->head(), ec) << " {\n";

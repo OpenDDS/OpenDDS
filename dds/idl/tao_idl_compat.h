@@ -19,22 +19,22 @@
 namespace tao_idl_compat {
 
 #ifdef TAO_IDL_HAS_STD_STRING_API
-inline char const *c_str (std::string const& value)
+inline const char *c_str (const std::string& value)
 {
   return value.c_str ();
 }
 #else
-inline char const *c_str (char const *value)
+inline const char *c_str (const char *value)
 {
   return value;
 }
 
-inline char const *c_str (UTL_String const *value)
+inline const char *c_str (const UTL_String *value)
 {
   return value->get_string ();
 }
 
-inline char const *c_str (ACE_CString const& value)
+inline const char *c_str (const ACE_CString& value)
 {
   return value.c_str ();
 }

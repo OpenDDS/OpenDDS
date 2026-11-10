@@ -28,7 +28,7 @@ namespace be_util {
 
   /// Special BE arg call factored out of DRV_args.
 #ifdef TAO_IDL_HAS_STD_STRING_API
-  void prep_be_arg(std::string const& s);
+  void prep_be_arg(const std::string& s);
 #else
   void prep_be_arg(char* s);
 #endif

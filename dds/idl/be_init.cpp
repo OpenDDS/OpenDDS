@@ -44,7 +44,7 @@ BE_init(int&, ACE_TCHAR*[])
 
 void
 #ifdef TAO_IDL_HAS_STD_DRV_FILES
-BE_post_init(std::vector<std::string> const&)
+BE_post_init(const std::vector<std::string>&)
 #else
 BE_post_init(char*[], long)
 #endif
