@@ -1,0 +1,7 @@
+module NeverEnabled {
+  @topic
+  struct Message {
+    @key long id;
+    long value;
+  };
+};

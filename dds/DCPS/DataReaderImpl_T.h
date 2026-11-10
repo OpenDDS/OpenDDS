@@ -278,6 +278,10 @@ namespace OpenDDS {
   virtual DDS::ReturnCode_t read_next_sample(MessageType& received_data,
                                              DDS::SampleInfo& sample_info_ref)
   {
+    if (!enabled_) {
+      return DDS::RETCODE_NOT_ENABLED;
+    }
+
     bool found_data = false;
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, DDS::RETCODE_ERROR);
 
@@ -332,6 +336,10 @@ namespace OpenDDS {
   virtual DDS::ReturnCode_t take_next_sample(MessageType& received_data,
                                              DDS::SampleInfo& sample_info_ref)
   {
+    if (!enabled_) {
+      return DDS::RETCODE_NOT_ENABLED;
+    }
+
     bool found_data = false;
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, DDS::RETCODE_ERROR);
 
@@ -2242,6 +2250,10 @@ DDS::ReturnCode_t check_inputs(const char* method_name,
                                DDS::SampleInfoSeq& info_seq,
                                ::CORBA::Long max_samples)
 {
+  if (!enabled_) {
+    return DDS::RETCODE_NOT_ENABLED;
+  }
+
   typename DDSTraits<MessageType>::MessageSequenceAdapterType received_data_p(received_data);
 
   // ---- start of preconditions common to read and take -----
