@@ -164,7 +164,7 @@ dds_visitor::visit_module(AST_Module* node)
     return 0;
   }
 
-  const char * const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
 
   BE_Comment_Guard g("MODULE", name);
 
@@ -180,7 +180,7 @@ dds_visitor::visit_module(AST_Module* node)
 int
 dds_visitor::visit_interface(AST_Interface* node)
 {
-  const char * const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
 
   BE_Comment_Guard g("INTERFACE", name);
 
@@ -232,7 +232,7 @@ dds_visitor::visit_interface(AST_Interface* node)
 int
 dds_visitor::visit_structure(AST_Structure* node)
 {
-  const char * const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
 
   BE_Comment_Guard g("STRUCT", name);
   // Check That Sample Keys Are Valid
@@ -345,7 +345,7 @@ dds_visitor::visit_exception(AST_Exception* node)
     return 0;
   }
 
-  const char * const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
 
   BE_Comment_Guard g("EXCEPTION", name);
 
@@ -355,7 +355,7 @@ dds_visitor::visit_exception(AST_Exception* node)
 int
 dds_visitor::visit_typedef(AST_Typedef* node)
 {
-  const char * const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
 
   BE_Comment_Guard g("TYPEDEF", name);
 
@@ -370,7 +370,7 @@ dds_visitor::visit_typedef(AST_Typedef* node)
 int
 dds_visitor::visit_enum(AST_Enum* node)
 {
-  const char * const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
 
   BE_Comment_Guard g("ENUM", name);
 
@@ -393,7 +393,7 @@ dds_visitor::visit_enum(AST_Enum* node)
 int
 dds_visitor::visit_interface_fwd(AST_InterfaceFwd* node)
 {
-  const char * const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
   BE_Comment_Guard g("INTERFACE-FWD", name);
   if (!java_ts_only_) {
     error_ |= !gen_target_.gen_interf_fwd(node->name());
@@ -405,7 +405,7 @@ dds_visitor::visit_interface_fwd(AST_InterfaceFwd* node)
 int
 dds_visitor::visit_structure_fwd(AST_StructureFwd* node)
 {
-  const char * const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
   BE_Comment_Guard g("STRUCT-FWD", name);
 
   if (!java_ts_only_) {
@@ -418,7 +418,7 @@ dds_visitor::visit_structure_fwd(AST_StructureFwd* node)
 int
 dds_visitor::visit_constant(AST_Constant* node)
 {
-  const char * const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
 
   BE_Comment_Guard g("CONST", name);
 
@@ -436,7 +436,7 @@ dds_visitor::visit_constant(AST_Constant* node)
 int
 dds_visitor::visit_native(AST_Native* node)
 {
-  const char * const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
 
   BE_Comment_Guard g("NATIVE", name);
 
@@ -451,7 +451,7 @@ dds_visitor::visit_native(AST_Native* node)
 int
 dds_visitor::visit_union(AST_Union* node)
 {
-  const char * const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
 
   BE_Comment_Guard g("UNION", name);
   vector<AST_UnionBranch*> branches;
@@ -483,7 +483,7 @@ dds_visitor::visit_union(AST_Union* node)
 int
 dds_visitor::visit_union_fwd(AST_UnionFwd* node)
 {
-  const char * const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
   BE_Comment_Guard g("UNION-FWD", name);
 
   if (!java_ts_only_) {
