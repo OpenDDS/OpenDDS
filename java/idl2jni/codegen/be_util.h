@@ -18,6 +18,7 @@
 
 #include <idl_defines.h>
 
+#include <memory>
 #include <string>
 
 class TAO_OutStream;
@@ -45,7 +46,11 @@ public:
   usage (void);
 
   /// Create an AST node generator.
+#ifdef TAO_IDL_HAS_STD_STRING_API
+  static std::unique_ptr<AST_Generator>
+#else
   static AST_Generator *
+#endif
   generator_init (void);
 };
 

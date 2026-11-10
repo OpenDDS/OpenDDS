@@ -164,12 +164,20 @@ be_util::usage()
     ));
 }
 
+#ifdef TAO_IDL_HAS_STD_STRING_API
+std::unique_ptr<AST_Generator>
+#else
 AST_Generator*
+#endif
 be_util::generator_init()
 {
+#ifdef TAO_IDL_HAS_STD_STRING_API
+  return std::unique_ptr<AST_Generator>(new (std::nothrow) AST_Generator);
+#else
   AST_Generator* gen = 0;
   ACE_NEW_RETURN(gen, AST_Generator, 0);
   return gen;
+#endif
 }
 
 const char*
