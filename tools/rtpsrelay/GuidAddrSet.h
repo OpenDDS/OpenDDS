@@ -53,7 +53,7 @@ public:
   }
 
 
-  void match_cert_id(const std::regex& re, const std::string& pattern)
+  void match_cert_id(const std::regex& re, const std::string& pattern, bool log_no_match = true)
   {
     if (pattern.empty()) {
       return;
@@ -64,7 +64,7 @@ public:
       if (std::regex_search(cert_sn_, match, re) && match.size() > 1) {
         // Take the first group match
         cert_id_ = match.str(1);
-      } else {
+      } else if (log_no_match) {
         ACE_DEBUG((LM_INFO, "(%P|%t) INFO: IdentityInfo::match_cert_id: pattern '%C' did not match dds.cert.sn '%C'\n",
           pattern.c_str(), cert_sn_.c_str()));
       }
