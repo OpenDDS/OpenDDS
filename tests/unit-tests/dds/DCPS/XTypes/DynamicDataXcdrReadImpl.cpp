@@ -1597,17 +1597,21 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Appendable_XCDR1_padding_is_not_a_
     5, // int_8: last member in the writer's shorter appendable type
     0, 0, 0 // padding must not supply the reader's uint_8
   };
-  ACE_Message_Block mb(sizeof bytes);
-  mb.copy(reinterpret_cast<const char*>(bytes), sizeof bytes);
-  DCPS::Serializer ser(&mb, xcdr1);
-  ASSERT_EQ(DCPS::EncapsulationReadStatus::Ok,
-            DCPS::read_encapsulation_header(ser, DCPS::APPENDABLE));
-  XTypes::DynamicDataXcdrReadImpl data(ser, dt);
-  CORBA::Int8 original = 0;
-  ASSERT_EQ(DDS::RETCODE_OK, data.get_int8_value(original, 3));
-  EXPECT_EQ(5, original);
-  CORBA::UInt8 added_octet = 42;
-  EXPECT_EQ(DDS::RETCODE_NO_DATA, data.get_uint8_value(added_octet, 4));
+  // Older OpenDDS writers declared the padding without writing it
+  for (int written = 0; written != 2; ++written) {
+    const size_t size = sizeof bytes - (written ? 0 : 3);
+    ACE_Message_Block mb(size);
+    mb.copy(reinterpret_cast<const char*>(bytes), size);
+    DCPS::Serializer ser(&mb, xcdr1);
+    ASSERT_EQ(DCPS::EncapsulationReadStatus::Ok,
+              DCPS::read_encapsulation_header(ser, DCPS::APPENDABLE));
+    XTypes::DynamicDataXcdrReadImpl data(ser, dt);
+    CORBA::Int8 original = 0;
+    ASSERT_EQ(DDS::RETCODE_OK, data.get_int8_value(original, 3));
+    EXPECT_EQ(5, original);
+    CORBA::UInt8 added_octet = 42;
+    EXPECT_EQ(DDS::RETCODE_NO_DATA, data.get_uint8_value(added_octet, 4));
+  }
 }
 
 TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Appendable_StructWithOptionalMembers)

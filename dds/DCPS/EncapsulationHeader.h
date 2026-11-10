@@ -132,7 +132,7 @@ bool to_any_encoding(Encoding& encoding,
 struct EncapsulationReadStatus {
   enum Value {
     Ok,
-    /// The header is truncated or declares more padding than the remaining input.
+    /// The 4-byte header itself could not be deserialized, e.g. a truncated buffer.
     HeaderError,
     /// The header was read, but its representation doesn't match expected_extensibility.
     ExtensibilityMismatch,
@@ -141,10 +141,10 @@ struct EncapsulationReadStatus {
 
 /**
  * Read encapsulation header from Serializer, validate representation against
- * expected extensibility, and set the stream's encoding and read limit to
- * exclude the declared trailing padding. The stream must contain exactly one
- * encapsulated sample. Leaves the stream's encoding unchanged unless
- * EncapsulationReadStatus::Ok is returned.
+ * expected extensibility, and set the stream's encoding. If the declared
+ * trailing padding is present, set the read limit to exclude it. The stream
+ * must contain exactly one encapsulated sample. Leaves the stream's encoding
+ * unchanged unless EncapsulationReadStatus::Ok is returned.
  */
 OpenDDS_Dcps_Export
 EncapsulationReadStatus::Value read_encapsulation_header(

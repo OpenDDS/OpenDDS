@@ -299,9 +299,13 @@ read_encapsulation_header(Serializer& s,
   if (!to_encoding(encoding, header, expected_extensibility)) {
     return EncapsulationReadStatus::ExtensibilityMismatch;
   }
+  // Older OpenDDS declared padding without writing it; written padding leaves
+  // the payload 4-byte aligned, so only trim in that case.
   const size_t padding = header.options() & 0x03;
   const size_t remaining = s.length();
-  if (padding > remaining || !s.set_read_limit(remaining - padding)) {
+  if (padding && remaining &&
+      remaining % EncapsulationHeader::padding_marker_alignment == 0 &&
+      !s.set_read_limit(remaining - padding)) {
     return EncapsulationReadStatus::HeaderError;
   }
   s.encoding(encoding);

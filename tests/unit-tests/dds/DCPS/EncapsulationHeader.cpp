@@ -335,16 +335,21 @@ TEST(dds_DCPS_EncapsulationHeader, read_encapsulation_header_trailing_padding)
   }
 }
 
-TEST(dds_DCPS_EncapsulationHeader, read_encapsulation_header_excess_padding)
+TEST(dds_DCPS_EncapsulationHeader, read_encapsulation_header_unwritten_padding)
 {
-  for (unsigned char padding = 1; padding != 4; ++padding) {
-    const unsigned char bytes[] = {0, 1, 0, padding, 0, 0};
+  // Older OpenDDS writers declared padding without writing it
+  for (size_t size = 0; size != 8; ++size) {
+    if (size == 4) {
+      continue; // An aligned payload with declared padding is trimmed
+    }
+    const unsigned char padding = static_cast<unsigned char>(size % 4 ? 4 - size % 4 : 3);
+    const unsigned char bytes[] = {0, 1, 0, padding, 1, 2, 3, 4, 5, 6, 7};
     ACE_Message_Block mb(sizeof bytes);
-    mb.copy(reinterpret_cast<const char*>(bytes), 4 + padding - 1);
+    mb.copy(reinterpret_cast<const char*>(bytes), 4 + size);
     Serializer ser(&mb, Encoding(Encoding::KIND_XCDR2, ENDIAN_BIG));
-    EXPECT_EQ(EncapsulationReadStatus::HeaderError,
-              read_encapsulation_header(ser, APPENDABLE));
-    EXPECT_EQ(Encoding::KIND_XCDR2, ser.encoding().kind());
-    EXPECT_EQ(ENDIAN_BIG, ser.encoding().endianness());
+    ASSERT_EQ(EncapsulationReadStatus::Ok, read_encapsulation_header(ser, APPENDABLE));
+    EXPECT_EQ(Encoding::KIND_XCDR1, ser.encoding().kind());
+    EXPECT_EQ(ENDIAN_LITTLE, ser.encoding().endianness());
+    EXPECT_EQ(size, ser.length());
   }
 }
