@@ -49,6 +49,22 @@ TEST(dds_DCPS_RTPS_RtpsDiscoveryConfig, use_rtps_duration_fraction)
   EXPECT_EQ(0u, t.rtps.participant_flags() & PFLAGS_RTPS_DURATION_FRACTION);
 }
 
+TEST(dds_DCPS_RTPS_RtpsDiscoveryConfig, use_legacy_type_consistency_kind)
+{
+  AddressTest t;
+
+  EXPECT_FALSE(t.rtps.use_legacy_type_consistency_kind());
+  EXPECT_NE(0u, t.rtps.participant_flags() & PFLAGS_XTYPES_TYPE_CONSISTENCY_KIND);
+
+  t.rtps.use_legacy_type_consistency_kind(true);
+  EXPECT_TRUE(t.rtps.use_legacy_type_consistency_kind());
+  EXPECT_EQ(0u, t.rtps.participant_flags() & PFLAGS_XTYPES_TYPE_CONSISTENCY_KIND);
+
+  t.rtps.use_legacy_type_consistency_kind(false);
+  t.rtps.participant_flags(PFLAGS_THIS_VERSION);
+  EXPECT_NE(0u, t.rtps.participant_flags() & PFLAGS_XTYPES_TYPE_CONSISTENCY_KIND);
+}
+
 TEST(dds_DCPS_RTPS_RtpsDiscoveryConfig, address_family)
 {
   AddressTest t;

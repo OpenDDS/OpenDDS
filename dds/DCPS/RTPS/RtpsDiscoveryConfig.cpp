@@ -1126,8 +1126,11 @@ RtpsDiscoveryConfig::participant_flags() const
   // overrides whatever was stored for that bit via participant_flags(CORBA::ULong).
   // This is unlike every other PARTICIPANT_FLAGS bit, which is raw, authoritative
   // storage (see e.g. Spdp::init()'s handling of PFLAGS_REFLECT_HEARTBEAT_COUNT).
-  return use_rtps_duration_fraction()
+  // PFLAGS_XTYPES_TYPE_CONSISTENCY_KIND is likewise derived from USE_LEGACY_TYPE_CONSISTENCY_KIND.
+  const CORBA::ULong with_duration = use_rtps_duration_fraction()
     ? (flags | PFLAGS_RTPS_DURATION_FRACTION) : (flags & ~PFLAGS_RTPS_DURATION_FRACTION);
+  return use_legacy_type_consistency_kind()
+    ? (with_duration & ~PFLAGS_XTYPES_TYPE_CONSISTENCY_KIND) : (with_duration | PFLAGS_XTYPES_TYPE_CONSISTENCY_KIND);
 }
 
 void
@@ -1149,6 +1152,20 @@ RtpsDiscoveryConfig::use_rtps_duration_fraction(bool value)
 {
   TheServiceParticipant->config_store()->set_boolean(
     config_key("USE_RTPS_DURATION_FRACTION").c_str(), value);
+}
+
+bool
+RtpsDiscoveryConfig::use_legacy_type_consistency_kind() const
+{
+  return TheServiceParticipant->config_store()->get_boolean(
+    config_key("USE_LEGACY_TYPE_CONSISTENCY_KIND").c_str(), false);
+}
+
+void
+RtpsDiscoveryConfig::use_legacy_type_consistency_kind(bool value)
+{
+  TheServiceParticipant->config_store()->set_boolean(
+    config_key("USE_LEGACY_TYPE_CONSISTENCY_KIND").c_str(), value);
 }
 
 bool

@@ -218,12 +218,14 @@ public:
   VendorId_t get_vendor_id_i(const GUID_t& guid) const;
 
   /**
-   * Combines get_vendor_id() and participant_uses_rtps_duration_fraction()
-   * into a single locked lookup, for callers that need both for the same guid.
+   * Combines get_vendor_id(), participant_uses_rtps_duration_fraction(), and
+   * whether the participant uses XTypes TypeConsistencyEnforcementQosPolicyKind_t
+   * values into a single locked lookup, for callers that need all of them for the same guid.
    */
-  void get_vendor_id_and_duration_encoding(const GUID_t& guid,
-                                            VendorId_t& vendor_id,
-                                            bool& uses_rtps_duration_fraction) const;
+  void get_vendor_id_and_encodings(const GUID_t& guid,
+                                   VendorId_t& vendor_id,
+                                   bool& uses_rtps_duration_fraction,
+                                   bool& uses_xtypes_type_consistency_kind) const;
 
   OPENDDS_SET(DDS::UInt32) get_ignored_user_tags() const;
 
@@ -393,8 +395,9 @@ private:
             const DDS::DomainParticipantQos& qos,
             XTypes::TypeLookupService_rch tls);
 
-  // lock_ must be held before calling this.
+  // lock_ must be held before calling these.
   bool participant_uses_rtps_duration_fraction_i(const DCPS::GUID_t& guid) const;
+  bool participant_uses_xtypes_type_consistency_kind_i(const DCPS::GUID_t& guid) const;
 
   mutable ACE_Thread_Mutex lock_;
   DCPS::RcHandle<DCPS::BitSubscriber> bit_subscriber_;

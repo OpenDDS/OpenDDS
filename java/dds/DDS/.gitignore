@@ -564,6 +564,8 @@
 /TransportPriorityQosPolicy.java
 /TransportPriorityQosPolicyHelper.java
 /TransportPriorityQosPolicyHolder.java
+/TYPE_CONSISTENCY_ENFORCEMENT_QOS_POLICY_ID.java
+/TYPE_CONSISTENCY_ENFORCEMENT_QOS_POLICY_NAME.java
 /TypeConsistencyEnforcementQosPolicy.java
 /TypeConsistencyEnforcementQosPolicyHelper.java
 /TypeConsistencyEnforcementQosPolicyHolder.java

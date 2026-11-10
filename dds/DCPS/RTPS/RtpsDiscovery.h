@@ -185,6 +185,9 @@ public:
   bool use_rtps_duration_fraction() const { return config_->use_rtps_duration_fraction(); }
   void use_rtps_duration_fraction(bool value) { config_->use_rtps_duration_fraction(value); }
 
+  bool use_legacy_type_consistency_kind() const { return config_->use_legacy_type_consistency_kind(); }
+  void use_legacy_type_consistency_kind(bool value) { config_->use_legacy_type_consistency_kind(value); }
+
   RtpsDiscoveryConfig_rch config() const { return config_; }
 
 #if OPENDDS_CONFIG_SECURITY

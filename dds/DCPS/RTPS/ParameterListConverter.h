@@ -32,6 +32,12 @@ enum RtpsDurationEncoding {
   RDE_FRACTIONAL_SECONDS
 };
 
+// Releases before 3.35 sent DISALLOW_TYPE_COERCION/ALLOW_TYPE_COERCION as 1/2
+enum TypeConsistencyKindEncoding {
+  TCKE_LEGACY,
+  TCKE_XTYPES
+};
+
 #if OPENDDS_CONFIG_SECURITY
 struct DiscoveredPublication_SecurityWrapper {
   DCPS::DiscoveredWriterData data;
@@ -197,6 +203,15 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
                    bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
+bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
+                   ParameterList& param_list,
+                   bool use_xtypes,
+                   const DCPS::TypeInformation& type_info,
+                   RtpsDurationEncoding duration_encoding,
+                   TypeConsistencyKindEncoding tc_kind_encoding,
+                   bool map = false /*map IPV4 to IPV6 addr*/);
+
+OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
                      const VendorId_t& vendor_id,
                      DCPS::DiscoveredReaderData& reader_data,
@@ -210,6 +225,15 @@ bool from_param_list(const ParameterList& param_list,
                      bool use_xtypes,
                      XTypes::TypeInformation& type_info,
                      RtpsDurationEncoding duration_encoding);
+
+OpenDDS_Rtps_Export
+bool from_param_list(const ParameterList& param_list,
+                     const VendorId_t& vendor_id,
+                     DCPS::DiscoveredReaderData& reader_data,
+                     bool use_xtypes,
+                     XTypes::TypeInformation& type_info,
+                     RtpsDurationEncoding duration_encoding,
+                     TypeConsistencyKindEncoding tc_kind_encoding);
 
 #if OPENDDS_CONFIG_SECURITY
 // DDS::Security::EndpointSecurityInfo
@@ -282,6 +306,15 @@ bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
                    bool map = false /*map IPV4 to IPV6 addr*/);
 
 OpenDDS_Rtps_Export
+bool to_param_list(const DiscoveredSubscription_SecurityWrapper& wrapper,
+                   ParameterList& param_list,
+                   bool use_xtypes,
+                   const DCPS::TypeInformation& type_info,
+                   RtpsDurationEncoding duration_encoding,
+                   TypeConsistencyKindEncoding tc_kind_encoding,
+                   bool map = false /*map IPV4 to IPV6 addr*/);
+
+OpenDDS_Rtps_Export
 bool from_param_list(const ParameterList& param_list,
                      const VendorId_t& vendor_id,
                      DiscoveredSubscription_SecurityWrapper& wrapper,
@@ -295,6 +328,15 @@ bool from_param_list(const ParameterList& param_list,
                      bool use_xtypes,
                      XTypes::TypeInformation& type_info,
                      RtpsDurationEncoding duration_encoding);
+
+OpenDDS_Rtps_Export
+bool from_param_list(const ParameterList& param_list,
+                     const VendorId_t& vendor_id,
+                     DiscoveredSubscription_SecurityWrapper& wrapper,
+                     bool use_xtypes,
+                     XTypes::TypeInformation& type_info,
+                     RtpsDurationEncoding duration_encoding,
+                     TypeConsistencyKindEncoding tc_kind_encoding);
 
 // Extensions for ICE
 
