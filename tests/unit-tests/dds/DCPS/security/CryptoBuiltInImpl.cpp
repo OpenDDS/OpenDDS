@@ -1196,4 +1196,180 @@ TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest,
   EXPECT_STREQ("CryptoContent length out of bounds", ex.message.in());
 }
 
+namespace {
+
+// SEC_PREFIX header (4) + CryptoHeader (20) + submessageId and flags (2).
+const unsigned int BodyOctetsToNextOffset = 26;
+const unsigned int BodyContentOffset = 28;
+
+void regr_tamper_u16(DDS::OctetSeq& buf, unsigned int offset, unsigned short value)
+{
+  buf[offset] = static_cast<CORBA::Octet>(value >> 8);
+  buf[offset + 1] = static_cast<CORBA::Octet>(value);
+}
+
+// Decodes a copy of encoded with the given body octetsToNext and logical length.
+// The copy is backed by zeroed storage large enough that reads past the logical
+// end (up to 64 KiB) stay in bounds and are deterministic.
+bool regr_decode_padded(DDS::Security::CryptoTransform& crypto, DDS::Security::DatawriterCryptoHandle dwch,
+                        const DDS::OctetSeq& encoded, unsigned short octetsToNext,
+                        unsigned int length, DDS::OctetSeq& plain, DDS::Security::SecurityException& ex)
+{
+  std::vector<CORBA::Octet> storage(encoded.length() + 0x10000 + 64);
+  std::memcpy(&storage[0], encoded.get_buffer(), encoded.length());
+  storage[BodyOctetsToNextOffset] = static_cast<CORBA::Octet>(octetsToNext >> 8);
+  storage[BodyOctetsToNextOffset + 1] = static_cast<CORBA::Octet>(octetsToNext);
+  const DDS::OctetSeq view(static_cast<CORBA::ULong>(storage.size()), length, &storage[0], false);
+  return crypto.decode_datawriter_submessage(plain, view, DDS::HANDLE_NIL, dwch, ex);
+}
+
+}
+
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest,
+       decode_datawriter_submessage_SubmessageLength)
+{
+  using namespace DDS::Security;
+  CryptoKeyFactory& kef = dynamic_cast<CryptoKeyFactory&>(get_inst());
+  DDS::PropertySeq no_properties;
+
+  // A submessage with a big-endian octetsToNextHeader of 28.
+  init_buffer(32, 5);
+  get_buffer()[0] = 0x80;
+  get_buffer()[1] = 0;
+  get_buffer()[2] = 0;
+  get_buffer()[3] = 28;
+
+  const PluginEndpointSecurityAttributesMask masks[] = {
+    PLUGIN_ENDPOINT_SECURITY_ATTRIBUTES_FLAG_IS_SUBMESSAGE_ENCRYPTED, // AES-GCM
+    0 // GMAC only
+  };
+  for (size_t i = 0; i < sizeof masks / sizeof masks[0]; ++i) {
+    SCOPED_TRACE(i ? "GMAC" : "AES-GCM");
+    EndpointSecurityAttributes esa = {{false, false, false, false}, true, false, false, masks[i], no_properties};
+    SecurityException ex;
+    const DatawriterCryptoHandle dwch = kef.register_local_datawriter(0, no_properties, esa, ex);
+
+    DatareaderCryptoHandleSeq no_readers;
+    CORBA::Long idx = 0;
+    DDS::OctetSeq encoded;
+    ASSERT_TRUE(get_inst().encode_datawriter_submessage(encoded, get_buffer(), dwch, no_readers, idx, ex));
+    const unsigned short octetsToNext =
+      static_cast<unsigned short>(encoded[BodyOctetsToNextOffset] << 8 | encoded[BodyOctetsToNextOffset + 1]);
+    const unsigned int postfixOffset = BodyContentOffset + octetsToNext;
+    const unsigned int remaining = encoded.length() - BodyContentOffset;
+    ASSERT_LT(postfixOffset, encoded.length());
+
+    // octetsToNext lands exactly on SEC_POSTFIX.
+    {
+      DDS::OctetSeq plain;
+      SecurityException ex2;
+      EXPECT_TRUE(get_inst().decode_datawriter_submessage(plain, encoded, DDS::HANDLE_NIL, dwch, ex2));
+      EXPECT_EQ(get_buffer(), plain);
+    }
+
+    // 0 would mean the submessage extends to the end, leaving no SEC_POSTFIX.
+    {
+      DDS::OctetSeq tampered(encoded), plain;
+      regr_tamper_u16(tampered, BodyOctetsToNextOffset, 0);
+      SecurityException ex2;
+      EXPECT_FALSE(get_inst().decode_datawriter_submessage(plain, tampered, DDS::HANDLE_NIL, dwch, ex2));
+      EXPECT_STREQ("Submessage length out of bounds", ex2.message.in());
+    }
+
+    // Exactly the remaining bytes is within bounds, but leaves no SEC_POSTFIX.
+    {
+      DDS::OctetSeq tampered(encoded), plain;
+      regr_tamper_u16(tampered, BodyOctetsToNextOffset, static_cast<unsigned short>(remaining));
+      SecurityException ex2;
+      EXPECT_FALSE(get_inst().decode_datawriter_submessage(plain, tampered, DDS::HANDLE_NIL, dwch, ex2));
+      EXPECT_STRNE("Submessage length out of bounds", ex2.message.in());
+    }
+
+    const unsigned short over[] = {static_cast<unsigned short>(remaining + 1), 0xFFFF};
+    for (size_t j = 0; j < sizeof over / sizeof over[0]; ++j) {
+      DDS::OctetSeq plain;
+      SecurityException ex2;
+      EXPECT_FALSE(regr_decode_padded(get_inst(), dwch, encoded, over[j], encoded.length(), plain, ex2))
+        << "octetsToNext " << over[j];
+      EXPECT_STREQ("Submessage length out of bounds", ex2.message.in()) << "octetsToNext " << over[j];
+    }
+
+    // Original octetsToNext, but the input ends 4 bytes before SEC_POSTFIX.
+    {
+      DDS::OctetSeq plain;
+      SecurityException ex2;
+      EXPECT_FALSE(regr_decode_padded(get_inst(), dwch, encoded, octetsToNext, postfixOffset - 4, plain, ex2));
+      EXPECT_STREQ("Submessage length out of bounds", ex2.message.in());
+    }
+  }
+}
+
+namespace {
+
+// RTPS Header (20) + SRTPS_PREFIX header (4) + CryptoHeader (20) + SEC_BODY header (4).
+const unsigned int RtpsCryptoContentLengthOffset = 48;
+
+}
+
+TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest,
+       decode_rtps_message_CryptoContentLength)
+{
+  using namespace DDS::Security;
+  CryptoKeyFactory& kef = dynamic_cast<CryptoKeyFactory&>(get_inst());
+
+  DDS::PropertySeq no_properties;
+  ParticipantSecurityAttributes psa = {false, false, true, false, false,
+                                       PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ENCRYPTED, no_properties};
+  SecurityException ex;
+  // Decode only needs the sender's own key, so reuse this handle on both sides.
+  const ParticipantCryptoHandle pch = kef.register_local_participant(1, 1, no_properties, psa, ex);
+  ASSERT_NE(DDS::HANDLE_NIL, pch);
+
+  // RTPS Header followed by one 12-byte submessage.
+  init_buffer(32, 3);
+  const CORBA::Octet header[] = {'R', 'T', 'P', 'S', 2, 5, 1, 15};
+  std::memcpy(get_buffer().get_buffer(), header, sizeof header);
+  const CORBA::Octet submessage[] = {0x80, 0, 0, 8};
+  std::memcpy(get_buffer().get_buffer() + 20, submessage, sizeof submessage);
+
+  ParticipantCryptoHandleSeq receivers;
+  receivers.length(1);
+  receivers[0] = pch;
+  CORBA::Long idx = 0;
+  DDS::OctetSeq encoded;
+  ASSERT_TRUE(get_inst().encode_rtps_message(encoded, get_buffer(), pch, receivers, idx, ex));
+  ASSERT_GT(encoded.length(), RtpsCryptoContentLengthOffset + 4);
+  const unsigned int submessageLength = encoded[RtpsCryptoContentLengthOffset - 2] << 8
+    | encoded[RtpsCryptoContentLengthOffset - 1];
+
+  {
+    DDS::OctetSeq plain;
+    SecurityException ex2;
+    EXPECT_TRUE(get_inst().decode_rtps_message(plain, encoded, pch, pch, ex2));
+    EXPECT_EQ(get_buffer(), plain);
+  }
+
+  // The largest length that fits in the SEC_BODY is within bounds.
+  {
+    DDS::OctetSeq tampered(encoded), plain;
+    regr_tamper_u32(tampered, RtpsCryptoContentLengthOffset, submessageLength - 4);
+    SecurityException ex2;
+    get_inst().decode_rtps_message(plain, tampered, pch, pch, ex2);
+    EXPECT_STRNE("CryptoContent length out of bounds", ex2.message.in());
+  }
+
+  // 0xFFFFFFFC..0xFFFFFFFF wrapped the old "length + 4 > submessageLength" check.
+  const unsigned int rejected[] = {submessageLength - 3, 0xFFFFFFFBu,
+                                   0xFFFFFFFCu, 0xFFFFFFFDu, 0xFFFFFFFEu, 0xFFFFFFFFu};
+  for (size_t i = 0; i < sizeof rejected / sizeof rejected[0]; ++i) {
+    DDS::OctetSeq tampered(encoded), plain;
+    regr_tamper_u32(tampered, RtpsCryptoContentLengthOffset, rejected[i]);
+    SecurityException ex2;
+    EXPECT_FALSE(get_inst().decode_rtps_message(plain, tampered, pch, pch, ex2))
+      << "length 0x" << std::hex << rejected[i];
+    EXPECT_STREQ("CryptoContent length out of bounds", ex2.message.in())
+      << "length 0x" << std::hex << rejected[i];
+  }
+}
+
 #endif
