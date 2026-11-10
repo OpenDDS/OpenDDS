@@ -2487,7 +2487,7 @@ namespace {
     }
 
     if (info) {
-      const std::vector<std::string> key_names = tao_idl_compat::dcps_keys (*info);
+      const std::vector<std::string> key_names = tao_idl_compat::dcps_keys(*info);
       for (std::vector<std::string>::const_iterator i = key_names.begin(); i != key_names.end(); ++i) {
         fn(indent, encoding, *i, find_type(node, *i), size, expr, intro);
       }
@@ -2554,7 +2554,7 @@ namespace {
     if (key_only) {
       if (info) {
         AST_Structure* const struct_type = dynamic_cast<AST_Structure*>(type);
-        const std::vector<std::string> key_names = tao_idl_compat::dcps_keys (*info);
+        const std::vector<std::string> key_names = tao_idl_compat::dcps_keys(*info);
         for (std::vector<std::string>::const_iterator i = key_names.begin(); i != key_names.end(); ++i) {
           AST_Type* const field_type = find_type(struct_type, *i);
           if (!is_bounded_type(field_type, encoding)) {
@@ -3475,7 +3475,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       Intro intro;
       const char* indent = "  ";
 
-      const std::vector<std::string> key_names = tao_idl_compat::dcps_keys (*info);
+      const std::vector<std::string> key_names = tao_idl_compat::dcps_keys(*info);
       for (std::vector<std::string>::const_iterator i = key_names.begin(); i != key_names.end(); ++i) {
         AST_Type* const field_type = find_type(node, *i);
         if (first) {
@@ -3501,7 +3501,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       std::string expr;
       const std::string indent = "  ";
 
-      const std::vector<std::string> key_names = tao_idl_compat::dcps_keys (*info);
+      const std::vector<std::string> key_names = tao_idl_compat::dcps_keys(*info);
       for (std::vector<std::string>::const_iterator i = key_names.begin(); i != key_names.end(); ++i) {
         AST_Type* const field_type = find_type(node, *i);
         if (first) {

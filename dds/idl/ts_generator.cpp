@@ -79,7 +79,7 @@ namespace {
 
   void gen_isDcpsKey(IDL_GlobalData::DCPS_Data_Type_Info* info)
   {
-    const std::vector<std::string> keys = tao_idl_compat::dcps_keys (*info);
+    const std::vector<std::string> keys = tao_idl_compat::dcps_keys(*info);
     for (std::vector<std::string>::const_iterator i = keys.begin(); i != keys.end(); ++i) {
       gen_isDcpsKey_i(i->c_str());
     }
@@ -527,7 +527,7 @@ bool ts_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
   if (be_global->generate_equality() && be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE) {
     // == and != are generated as class members in other language mappings.
 
-    const char* const nm = tao_idl_compat::c_str (name->last_component ()->get_string ());
+    const char* const nm = tao_idl_compat::c_str(name->last_component()->get_string());
 
     ScopedNamespaceGuard hGuard(name, be_global->header_);
     ScopedNamespaceGuard cppGuard(name, be_global->impl_);
@@ -616,7 +616,7 @@ bool ts_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   if (be_global->generate_equality() && be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE) {
     // == and != are generated as class members in other language mappings.
 
-    const char* const nm = tao_idl_compat::c_str (name->last_component ()->get_string ());
+    const char* const nm = tao_idl_compat::c_str(name->last_component()->get_string());
 
     ScopedNamespaceGuard hGuard(name, be_global->header_);
     ScopedNamespaceGuard cppGuard(name, be_global->impl_);

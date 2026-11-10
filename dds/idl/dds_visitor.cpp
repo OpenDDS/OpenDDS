@@ -164,7 +164,7 @@ dds_visitor::visit_module(AST_Module* node)
     return 0;
   }
 
-  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("MODULE", name);
 
@@ -180,7 +180,7 @@ dds_visitor::visit_module(AST_Module* node)
 int
 dds_visitor::visit_interface(AST_Interface* node)
 {
-  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("INTERFACE", name);
 
@@ -217,7 +217,7 @@ dds_visitor::visit_interface(AST_Interface* node)
   if (!java_ts_only_) {
     error_ |= !gen_target_.gen_interf(node, node->name(), node->is_local(),
                                       inherits, inherits_flat, attrs, ops,
-                                      tao_idl_compat::c_str (node->repoID ()));
+                                      tao_idl_compat::c_str(node->repoID()));
   }
 
   if (this->visit_scope(node) == -1) {
@@ -232,7 +232,7 @@ dds_visitor::visit_interface(AST_Interface* node)
 int
 dds_visitor::visit_structure(AST_Structure* node)
 {
-  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("STRUCT", name);
   // Check That Sample Keys Are Valid
@@ -266,9 +266,9 @@ dds_visitor::visit_structure(AST_Structure* node)
         topic_type_keys.insert(i.path());
       }
 
-      const std::vector<std::string> dcps_keys = tao_idl_compat::dcps_keys (*info);
+      const std::vector<std::string> dcps_keys = tao_idl_compat::dcps_keys(*info);
       for (std::vector<std::string>::const_iterator i = dcps_keys.begin(); i != dcps_keys.end(); ++i) {
-        dcps_data_type_keys.insert (*i);
+        dcps_data_type_keys.insert(*i);
       }
 
       if (topic_type_keys != dcps_data_type_keys) {
@@ -328,7 +328,7 @@ dds_visitor::visit_structure(AST_Structure* node)
   if (!java_ts_only_) {
     error_ |= !gen_target_.gen_struct(node, node->name(), field_vec,
                                       node->size_type(),
-                                      tao_idl_compat::c_str (node->repoID ()));
+                                      tao_idl_compat::c_str(node->repoID()));
   }
 
   if (!node->imported() && be_global->java()) {
@@ -345,7 +345,7 @@ dds_visitor::visit_exception(AST_Exception* node)
     return 0;
   }
 
-  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("EXCEPTION", name);
 
@@ -355,13 +355,13 @@ dds_visitor::visit_exception(AST_Exception* node)
 int
 dds_visitor::visit_typedef(AST_Typedef* node)
 {
-  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("TYPEDEF", name);
 
   if (!java_ts_only_) {
     error_ |= !gen_target_.gen_typedef(node, node->name(), node->base_type(),
-                                       tao_idl_compat::c_str (node->repoID ()));
+                                       tao_idl_compat::c_str(node->repoID()));
   }
 
   return 0;
@@ -370,7 +370,7 @@ dds_visitor::visit_typedef(AST_Typedef* node)
 int
 dds_visitor::visit_enum(AST_Enum* node)
 {
-  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("ENUM", name);
 
@@ -381,10 +381,10 @@ dds_visitor::visit_enum(AST_Enum* node)
   if (!java_ts_only_) {
     if (!node->imported()) {
       error_ |= !dds_generator::gen_enum_helper(
-        node, node->name(), contents, tao_idl_compat::c_str (node->repoID ()));
+        node, node->name(), contents, tao_idl_compat::c_str(node->repoID()));
     }
     error_ |= !gen_target_.gen_enum(
-      node, node->name(), contents, tao_idl_compat::c_str (node->repoID ()));
+      node, node->name(), contents, tao_idl_compat::c_str(node->repoID()));
   }
 
   return 0;
@@ -393,7 +393,7 @@ dds_visitor::visit_enum(AST_Enum* node)
 int
 dds_visitor::visit_interface_fwd(AST_InterfaceFwd* node)
 {
-  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
   BE_Comment_Guard g("INTERFACE-FWD", name);
   if (!java_ts_only_) {
     error_ |= !gen_target_.gen_interf_fwd(node->name());
@@ -405,7 +405,7 @@ dds_visitor::visit_interface_fwd(AST_InterfaceFwd* node)
 int
 dds_visitor::visit_structure_fwd(AST_StructureFwd* node)
 {
-  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
   BE_Comment_Guard g("STRUCT-FWD", name);
 
   if (!java_ts_only_) {
@@ -418,7 +418,7 @@ dds_visitor::visit_structure_fwd(AST_StructureFwd* node)
 int
 dds_visitor::visit_constant(AST_Constant* node)
 {
-  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("CONST", name);
 
@@ -436,13 +436,13 @@ dds_visitor::visit_constant(AST_Constant* node)
 int
 dds_visitor::visit_native(AST_Native* node)
 {
-  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("NATIVE", name);
 
   if (!java_ts_only_) {
     error_ |= !gen_target_.gen_native(
-      node, node->name(), tao_idl_compat::c_str (node->repoID ()));
+      node, node->name(), tao_idl_compat::c_str(node->repoID()));
   }
 
   return 0;
@@ -451,7 +451,7 @@ dds_visitor::visit_native(AST_Native* node)
 int
 dds_visitor::visit_union(AST_Union* node)
 {
-  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("UNION", name);
   vector<AST_UnionBranch*> branches;
@@ -470,7 +470,7 @@ dds_visitor::visit_union(AST_Union* node)
 
   if (!java_ts_only_) {
     error_ |= !gen_target_.gen_union(node, node->name(), branches, node->disc_type(),
-                                     tao_idl_compat::c_str (node->repoID ()));
+                                     tao_idl_compat::c_str(node->repoID()));
   }
 
   if (!node->imported() && be_global->java()) {
@@ -483,7 +483,7 @@ dds_visitor::visit_union(AST_Union* node)
 int
 dds_visitor::visit_union_fwd(AST_UnionFwd* node)
 {
-  const char* const name = tao_idl_compat::c_str (node->local_name ()->get_string ());
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
   BE_Comment_Guard g("UNION-FWD", name);
 
   if (!java_ts_only_) {

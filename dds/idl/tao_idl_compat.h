@@ -19,38 +19,38 @@
 namespace tao_idl_compat {
 
 #ifdef TAO_IDL_HAS_STD_STRING_API
-inline const char* c_str (const std::string& value)
+inline const char* c_str(const std::string& value)
 {
-  return value.c_str ();
+  return value.c_str();
 }
 #else
-inline const char* c_str (const char* value)
+inline const char* c_str(const char* value)
 {
   return value;
 }
 
-inline const char* c_str (const UTL_String* value)
+inline const char* c_str(const UTL_String* value)
 {
-  return value->get_string ();
+  return value->get_string();
 }
 
-inline const char* c_str (const ACE_CString& value)
+inline const char* c_str(const ACE_CString& value)
 {
-  return value.c_str ();
+  return value.c_str();
 }
 #endif
 
 inline std::vector<std::string>
-dcps_keys (IDL_GlobalData::DCPS_Data_Type_Info& info)
+dcps_keys(IDL_GlobalData::DCPS_Data_Type_Info& info)
 {
 #ifdef TAO_IDL_HAS_STD_DCPS_DATA_TYPE_INFO
   return info.key_list_;
 #else
   std::vector<std::string> keys;
-  IDL_GlobalData::DCPS_Data_Type_Info_Iter iter (info.key_list_);
-  for (ACE_TString *key = 0; iter.next (key) != 0; iter.advance ())
+  IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info.key_list_);
+  for (ACE_TString *key = 0; iter.next(key) != 0; iter.advance())
     {
-      keys.push_back (ACE_TEXT_ALWAYS_CHAR (key->c_str ()));
+      keys.push_back(ACE_TEXT_ALWAYS_CHAR(key->c_str()));
     }
   return keys;
 #endif

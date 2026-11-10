@@ -30,14 +30,14 @@ BE_init(int&, ACE_TCHAR*[])
 {
   ACE_NEW_RETURN(be_global, BE_GlobalData, -1);
 #ifdef TAO_IDL_HAS_IDL_VERSION_CLASS
-  idl_global->default_idl_version_.version (IDL_VERSION_4);
+  idl_global->default_idl_version_.version(IDL_VERSION_4);
 #else
   idl_global->default_idl_version_ = IDL_VERSION_4;
 #endif
 #ifdef TAO_IDL_HAS_SCOPED_ANON_TYPE_DIAGNOSTIC
-  idl_global->anon_type_diagnostic (IDL_GlobalData::Anon_Type_Diagnostic::Silent);
+  idl_global->anon_type_diagnostic(IDL_GlobalData::Anon_Type_Diagnostic::Silent);
 #else
-  idl_global->anon_type_diagnostic (IDL_GlobalData::ANON_TYPE_SILENT);
+  idl_global->anon_type_diagnostic(IDL_GlobalData::ANON_TYPE_SILENT);
 #endif
   return 0;
 }
@@ -72,10 +72,10 @@ BE_post_init(char*[], long)
   be_global->add_inc_path(include_dds.c_str());
 #ifdef TAO_IDL_HAS_STD_STRING_API
   std::string included;
-  DRV_add_include_path (included, include_dds, std::string (), true);
+  DRV_add_include_path(included, include_dds, std::string(), true);
 #else
   ACE_CString included;
-  DRV_add_include_path (included, include_dds.c_str (), 0, true);
+  DRV_add_include_path(included, include_dds.c_str(), 0, true);
 #endif
 
   DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_ANNOTATIONS");

@@ -135,7 +135,7 @@ namespace {
   get_raw_field(AST_Field* field)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    const char* fieldName = tao_idl_compat::c_str (field->local_name ()->get_string ());
+    const char* fieldName = tao_idl_compat::c_str(field->local_name()->get_string());
     const std::string idl_name = canonical_name(field);
     be_global->impl_ <<
       "    if (std::strcmp(field, \"" << idl_name << "\") == 0) {\n"
@@ -211,7 +211,7 @@ namespace {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     Classification cls = classify(field->field_type());
     if (!(cls & CL_SCALAR)) return;
-    const char* fieldName = tao_idl_compat::c_str (field->local_name ()->get_string ());
+    const char* fieldName = tao_idl_compat::c_str(field->local_name()->get_string());
     const std::string idl_name = canonical_name(field);
     be_global->impl_ <<
       "    if (std::strcmp(field, \"" << idl_name << "\") == 0) {\n";

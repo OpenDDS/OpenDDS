@@ -41,7 +41,7 @@ FieldInfo::EleLen::EleLen(AST_Type* type)
   }
   const Classification base_cls = classify(base);
   base_cls_ = base_cls;
-  base_name_ = tao_idl_compat::c_str (base->full_name ());
+  base_name_ = tao_idl_compat::c_str(base->full_name());
   if (base_cls_ & (CL_ARRAY | CL_SEQUENCE | CL_MAP)) {
     base_container_ = Container(new EleLen(base));
   }

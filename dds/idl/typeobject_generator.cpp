@@ -690,7 +690,7 @@ typeobject_generator::gen_epilogue()
   }
 
   std::ostream* const stream = be_global->typeobject_stream();
-  std::string file = tao_idl_compat::c_str (idl_global->filename ());
+  std::string file = tao_idl_compat::c_str(idl_global->filename());
   file.resize(file.find('.'));
   if (stream && stream->tellp() == 0) {
     *stream << "#include <cstddef>\nstruct Span { const unsigned char* bytes_; std::size_t size_; };\n";

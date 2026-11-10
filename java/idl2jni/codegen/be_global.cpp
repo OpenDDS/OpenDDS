@@ -198,7 +198,7 @@ BE_Comment_Guard::~BE_Comment_Guard()
 ACE_CString
 BE_GlobalData::spawn_options()
 {
-  return ACE_CString(tao_idl_compat::c_str(idl_global->idl_flags()));
+  return tao_idl_compat::c_str(idl_global->idl_flags());
 }
 
 void BE_GlobalData::gen_source_info(bool)
