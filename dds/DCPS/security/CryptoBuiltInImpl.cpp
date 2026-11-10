@@ -2146,6 +2146,10 @@ bool CryptoBuiltInImpl::decode_submessage(
       "Failed to deserialize next submessage\n"));
     return false;
   }
+  // SEC_POSTFIX must follow, so 0 ("extends to end of message") is invalid here.
+  if (octetsToNext == 0 || octetsToNext > de_ser.length()) {
+    return CommonUtilities::set_security_error(ex, -2, 5, "Submessage length out of bounds");
+  }
 
   Message_Block_Ptr mb_footer(mb_in.duplicate());
   mb_footer->rd_ptr(octetsToNext);
@@ -2186,8 +2190,7 @@ bool CryptoBuiltInImpl::decode_submessage(
             "Failed to deserialize content size(?)\n"));
           return false;
         }
-        // n came straight off the wire with no prior bounds check.
-        if (n > de_ser.length()) {
+        if (octetsToNext < CRYPTO_CONTENT_ADDED_LENGTH || n > octetsToNext - CRYPTO_CONTENT_ADDED_LENGTH) {
           return CommonUtilities::set_security_error(ex, -2, 4,
             "CryptoContent length out of bounds");
         }
