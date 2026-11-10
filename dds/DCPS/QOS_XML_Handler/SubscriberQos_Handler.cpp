@@ -1,15 +1,17 @@
 
 #include "SubscriberQos_Handler.h"
 #include "QOS_PubSub_T.h"
+#include <memory>
+#include <string>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 bool
 SubscriberQos_Handler::get_subscriber_qos(DDS::SubscriberQos& sub_qos,
-                                          dds::qosProfile * profile,
-                                          const ACE_TCHAR * name)
+                                          const dds::qosProfile * profile,
+                                          std::string_view name)
 {
-  if (name)
+  if (!name.empty())
     {
 //       // find the correct DataReader_qos
 //       for (dds::qosProfile::DataReader_qos_iterator dw_it = profile->begin_DataReader_qos();
@@ -18,40 +20,41 @@ SubscriberQos_Handler::get_subscriber_qos(DDS::SubscriberQos& sub_qos,
 //         {
 //           if (ACE_OS::strcmp(dw_name.c_str(), name) == 0)
 //             {
-//               return get_DataReader_qos(dw_qos, *dw_it->get());
+//               return get_subscriber_qos(sub_qos, std::addressof(subscriber_qos));
 //             }
 //         }
     }
   else
     {
-      if (profile->count_subscriber_qos() == 0)
+      if (profile->subscriber_qos().empty())
         {
           if (OpenDDS::DCPS::DCPS_debug_level > 7)
             {
               ACE_DEBUG((LM_TRACE,
                 ACE_TEXT("SubscriberQos_Handler::get_subscriber_qos - ")
-                ACE_TEXT("No Subscriber QOS available in profile <%s>\n"),
+                ACE_TEXT("No Subscriber QOS available in profile <%C>\n"),
                 profile->name().c_str()));
             }
           return true;
         }
       // get the first DataReader in the XML
-      dds::qosProfile::subscriber_qos_iterator sub_it = profile->begin_subscriber_qos();
-      return SubscriberQos_Handler::get_subscriber_qos(sub_qos, sub_it->get());
+      const dds::subscriberQos& subscriber_qos = profile->subscriber_qos().front();
+      return SubscriberQos_Handler::get_subscriber_qos(sub_qos, std::addressof(subscriber_qos));
     }
 
+  const std::string name_string (name);
   ACE_ERROR((LM_ERROR,
     ACE_TEXT("(%P|%t) ERROR: SubscriberQos_Handler::get_subscriber_qos - ")
-    ACE_TEXT("Unable to find SubscriberQos <%s>\n"),
-    name));
+    ACE_TEXT("Unable to find SubscriberQos <%C>\n"),
+    name_string.c_str()));
   return false;
 }
 
 bool
 SubscriberQos_Handler::get_subscriber_qos(DDS::SubscriberQos& sub_qos,
-                                          dds::subscriberQos * sub)
+                                          const dds::subscriberQos * sub)
 {
-  typedef QOS_PubSub_T<dds::subscriberQos*, DDS::SubscriberQos> sub_type;
+  typedef QOS_PubSub_T<const dds::subscriberQos*, DDS::SubscriberQos> sub_type;
   sub_type subscriber_qos_handler;
   subscriber_qos_handler.read_qos(sub_qos, sub);
 

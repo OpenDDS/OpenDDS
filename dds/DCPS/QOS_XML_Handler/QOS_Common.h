@@ -16,6 +16,8 @@
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds_qos.hpp"
+#include <cstdint>
+#include <string_view>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -25,21 +27,21 @@ public:
   //@{
   /** Operations which convert QOS XML kinds to QOS IDL kinds. */
 
-  static void get_durability_kind (const ::dds::durabilityKind kind,
+  static void get_durability_kind (const ::dds::durabilityKind& kind,
                                    ::DDS::DurabilityQosPolicyKind& dds_kind);
-  static void get_history_kind (const ::dds::historyKind kind,
+  static void get_history_kind (const ::dds::historyKind& kind,
                                 ::DDS::HistoryQosPolicyKind& dds_kind);
-  static void get_liveliness_kind (const ::dds::livelinessKind kind,
+  static void get_liveliness_kind (const ::dds::livelinessKind& kind,
                                    ::DDS::LivelinessQosPolicyKind& dds_kind);
-  static void get_realiability_kind (const dds::reliabilityKind kind,
+  static void get_realiability_kind (const dds::reliabilityKind& kind,
                                      ::DDS::ReliabilityQosPolicyKind& dds_kind);
-  static void get_destination_order_kind (const ::dds::destinationOrderKind kind,
+  static void get_destination_order_kind (const ::dds::destinationOrderKind& kind,
                                           ::DDS::DestinationOrderQosPolicyKind& dds_kind);
-  static void get_ownership_kind (::dds::ownershipKind kind,
+  static void get_ownership_kind (const ::dds::ownershipKind& kind,
                                   ::DDS::OwnershipQosPolicyKind& dds_kind);
-  static void get_type_consistency_kind (::dds::typeConsistencyKind kind,
+  static void get_type_consistency_kind (const ::dds::typeConsistencyKind& kind,
                                          ::DDS::TypeConsistencyEnforcementQosPolicyKind_t& dds_kind);
-  static void get_data_presentation_id_kind (::dds::dataRepresentationIdKind kind,
+  static void get_data_presentation_id_kind (const ::dds::dataRepresentationIdKind& kind,
                                              ::DDS::DataRepresentationId_t& dds_kind);
   //@}
 
@@ -51,7 +53,11 @@ public:
    * values need to be converted to a numeric value.
    *
    */
-  static void get_duration (::DDS::Duration_t& duration, const ACE_TCHAR * sec, const ACE_TCHAR * nsec);
+  static void get_duration (::DDS::Duration_t& duration, std::string_view sec, std::string_view nsec);
+
+  static void get_binary_data (::DDS::OctetSeq& data, std::string_view value);
+
+  static ::CORBA::Long get_corba_long (std::int64_t value);
 
   /**
    * get_qos_long
@@ -60,7 +66,7 @@ public:
    * This value need to be converted to a numeric value.
    *
    */
-  static ::CORBA::Long get_qos_long (const ACE_TCHAR * value);
+  static ::CORBA::Long get_qos_long (std::string_view value);
 };
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

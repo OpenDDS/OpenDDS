@@ -71,7 +71,7 @@ namespace DCPS {
         ID_Map::TSS_ID_Map* TSS_ID_Map(ACE_Singleton<ID_Map::TSS_ID_Map, ACE_Null_Mutex>::instance());
         (*TSS_ID_Map)->reset();
 
-        this->profiles_ = dds::reader::dds(dom);
+        this->set_profiles(new dds::qosProfile_seq(dds::reader::dds(dom)));
       }
     catch (const CORBA::Exception &ex)
       {
