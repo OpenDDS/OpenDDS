@@ -225,10 +225,12 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
     }
   }
 
+  // Keep the writer alive in case writers_not_enabled_ held the last reference.
+  const DataWriterImpl_rch dw_rch = rchandle_from(dw_servant);
   bool not_enabled = false;
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, pi_lock_, DDS::RETCODE_ERROR);
-    not_enabled = writers_not_enabled_.erase(rchandle_from(dw_servant)) > 0;
+    not_enabled = writers_not_enabled_.erase(dw_rch) > 0;
   }
   if (not_enabled) {
     // The writer was never added to discovery, so only local cleanup is needed.

@@ -135,6 +135,7 @@ DomainParticipantFactoryImpl::delete_participant(
 
   const DDS::DomainId_t domain_id = the_servant->get_domain_id();
   const GUID_t dp_id = the_servant->get_id();
+  const bool enabled = the_servant->is_enabled();
 
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -187,7 +188,7 @@ DomainParticipantFactoryImpl::delete_participant(
     }
   }
 
-  if (!the_servant->is_enabled()) {
+  if (!enabled) {
     // The participant was never added to discovery or the transports.
     return DDS::RETCODE_OK;
   }

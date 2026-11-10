@@ -107,6 +107,16 @@ TEST_F(NeverEnabledEntities, DeleteWriter)
   EXPECT_EQ(DDS::RETCODE_OK, participant_->delete_topic(topic_));
 }
 
+TEST_F(NeverEnabledEntities, DeleteWriterWithoutCallerReference)
+{
+  DDS::Publisher_var pub = create_disabled_publisher(participant_);
+  ASSERT_TRUE(pub);
+  DDS::DataWriter_ptr dw = create_writer(pub, topic_);
+  ASSERT_TRUE(dw);
+  CORBA::release(dw);
+  EXPECT_EQ(DDS::RETCODE_OK, pub->delete_datawriter(dw));
+}
+
 TEST_F(NeverEnabledEntities, DeleteReader)
 {
   DDS::Subscriber_var sub = create_disabled_subscriber(participant_);
@@ -280,6 +290,18 @@ TEST(NeverEnabledParticipant, DeleteParticipant)
   DDS::DomainParticipant_var dp = create_participant(false);
   ASSERT_TRUE(dp);
   EXPECT_EQ(DDS::RETCODE_OK, dpf->delete_participant(dp));
+}
+
+TEST(NeverEnabledParticipant, DeleteWithoutCallerReference)
+{
+  DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
+  for (int autoenable = 0; autoenable < 2; ++autoenable) {
+    DDS::DomainParticipant_ptr dp = create_participant(autoenable);
+    ASSERT_TRUE(dp);
+    // Only the factory holds a reference, as with the modeling SDK's Service.
+    CORBA::release(dp);
+    EXPECT_EQ(DDS::RETCODE_OK, dpf->delete_participant(dp));
+  }
 }
 
 TEST(NeverEnabledParticipant, SetQos)
