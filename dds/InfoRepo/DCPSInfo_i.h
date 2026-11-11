@@ -438,6 +438,11 @@ private:
   long dispatch_check_timer_id_;
 
 #ifndef DDS_HAS_MINIMUM_BIT
+  /// Clean up BITs for a domain (or ANY_DOMAIN for all) on the Service Participant's
+  /// reactor thread with lock_ held, so lock_ is always taken before participant locks.
+  /// The caller must hold lock_.
+  void run_bit_cleanup(DDS::DomainId_t domain);
+
   struct BIT_Cleanup_Handler : ACE_Event_Handler
   {
     BIT_Cleanup_Handler(TAO_DDS_DCPSInfo_i* parent, DDS::DomainId_t domain)
