@@ -96,7 +96,6 @@ project(*Federator): dcpslib, dcps_inforepodiscovery, dcps_tcp, iortable, instal
     FederatorManagerImpl.cpp
     FederatorManagerImpl_updates.cpp
     FederatorTypeSupportImpl.cpp
-    InfoRepoMulticastResponder.cpp
   }
 
   Header_Files {

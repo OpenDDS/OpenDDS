@@ -8,7 +8,6 @@
 #include "FederatorManagerImpl.h"
 
 #include "DCPSInfo_i.h"
-#include "DefaultValues.h"
 #include "FederatorTypeSupportC.h"
 #include "FederatorTypeSupportImpl.h"
 
@@ -22,8 +21,6 @@
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
 #include <dds/DCPS/transport/tcp/TcpInst.h>
 #include <dds/DCPS/transport/tcp/Tcp.h>
-
-#include <tao/ORB_Core.h>
 
 #include <ace/Log_Priority.h>
 #include <ace/Log_Msg.h>
@@ -50,22 +47,11 @@ ManagerImpl::ManagerImpl(Config& config)
     topicListener_(*this),
     participantListener_(*this),
     publicationListener_(*this),
-    subscriptionListener_(*this),
-    multicastEnabled_(false)
+    subscriptionListener_(*this)
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::ManagerImpl()\n")));
-  }
-
-  char* mdec = ACE_OS::getenv("MulticastDiscoveryEnabled");
-
-  if (mdec != 0) {
-    std::string mde(ACE_OS::getenv("MulticastDiscoveryEnabled"));
-
-    if (mde != "0") {
-      multicastEnabled_ = true;
-    }
   }
 }
 
@@ -705,86 +691,6 @@ ManagerImpl::initialize()
                  this->id().id()));
     }
   }
-
-  // JSP
-#if defined (ACE_HAS_IP_MULTICAST)
-
-  if (this->multicastEnabled_) {
-    //
-    // Install ior multicast handler.
-    //
-    // Get reactor instance from TAO.
-    ACE_Reactor* reactor = this->orb_->orb_core()->reactor();
-
-    // See if the -ORBMulticastDiscoveryEndpoint option was specified.
-    ACE_CString mde(this->orb_->orb_core()->orb_params()->mcast_discovery_endpoint());
-
-    // First, see if the user has given us a multicast port number
-    // on the command-line;
-    u_short port = 0;
-
-    // Check environment var. for multicast port.
-    const char *port_number = ACE_OS::getenv("OpenDDSFederationPort");
-
-    if (port_number != 0) {
-      port = static_cast<u_short>(ACE_OS::atoi(port_number));
-    }
-
-    // Port wasn't specified on the command-line -
-    // use the default.
-    if (port == 0)
-      port = OpenDDS::Federator::Defaults::DiscoveryRequestPort;
-
-    // Initialize the handler
-    if (mde.length() != 0) {
-      if (this->multicastResponder_.init(
-            this->orb_.in(),
-            mde.c_str()) == -1) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Unable to initialize ")
-                   ACE_TEXT("the multicast responder for repository %d.\n"),
-                   this->id().id()));
-        throw Incomplete();
-      }
-
-    } else {
-      if (this->multicastResponder_.init(
-            this->orb_.in(),
-            port,
-#if defined (ACE_HAS_IPV6)
-            ACE_DEFAULT_MULTICASTV6_ADDR
-#else
-            ACE_DEFAULT_MULTICAST_ADDR
-#endif /* ACE_HAS_IPV6 */
-          )) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: Unable to initialize ")
-                   ACE_TEXT("the multicast responder for repository %d.\n"),
-                   this->id().id()));
-        throw Incomplete();
-      }
-    }
-
-    // Register event handler for the ior multicast.
-    if (reactor->register_handler(&this->multicastResponder_,
-                                  ACE_Event_Handler::READ_MASK) == -1) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Unable to register event handler ")
-                 ACE_TEXT("for repository %d.\n"),
-                 this->id().id()));
-      throw Incomplete();
-    }
-
-    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
-                 ACE_TEXT("multicast server setup is complete.\n")));
-    }
-  }
-
-#else
-  ACE_UNUSED_ARG(this->multicastEnabled_);
-#endif /* ACE_HAS_IP_MULTICAST */
 }
 
 void
@@ -835,12 +741,6 @@ ManagerImpl::finalize()
         ACE_TEXT("unable to leave remote federation "));
       throw Incomplete();
     }
-  }
-
-  if (!CORBA::is_nil(this->orb_.in()) && (0 != this->orb_->orb_core())) {
-    this->orb_->orb_core()->reactor()->remove_handler(
-      &this->multicastResponder_,
-      ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL);
   }
 
   // Remove our local participant and contained entities.

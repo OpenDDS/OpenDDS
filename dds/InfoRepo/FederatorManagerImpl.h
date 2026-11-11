@@ -12,7 +12,6 @@
 #include "FederatorS.h"
 #include "FederatorTypeSupportC.h"
 #include "FederatorConfig.h"
-#include "InfoRepoMulticastResponder.h"
 #include "UpdateProcessor_T.h"
 #include "UpdateListener_T.h"
 #include "Updater.h"
@@ -239,9 +238,6 @@ private:
   /// The ORB in which we are activated.
   CORBA::ORB_var orb_;
 
-  /// Multicast responder
-  InfoRepoMulticastResponder multicastResponder_;
-
   /// local DomainParticipant
   DDS::DomainParticipant_var federationParticipant_;
 
@@ -286,9 +282,6 @@ private:
 
   /// Deferred subscription updates
   std::list<SubscriptionUpdate> deferredSubscriptions_;
-
-  /// Is multicast enabled?
-  bool multicastEnabled_;
 
   /// Protect deferred updates.
   ACE_Thread_Mutex deferred_lock_;
