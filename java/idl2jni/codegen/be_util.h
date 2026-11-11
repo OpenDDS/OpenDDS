@@ -46,7 +46,7 @@ public:
   usage (void);
 
   /// Create an AST node generator.
-#ifdef TAO_IDL_HAS_STD_STRING_API
+#ifdef TAO_IDL_HAS_STD_UNIQUE_PTR_API
   static std::unique_ptr<AST_Generator>
 #else
   static AST_Generator *

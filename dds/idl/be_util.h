@@ -40,7 +40,7 @@ namespace be_util {
   void usage();
 
   /// Create an AST node generator.
-#ifdef TAO_IDL_HAS_STD_STRING_API
+#ifdef TAO_IDL_HAS_STD_UNIQUE_PTR_API
   std::unique_ptr<AST_Generator> generator_init();
 #else
   AST_Generator* generator_init();

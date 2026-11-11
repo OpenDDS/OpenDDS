@@ -22,7 +22,6 @@
 // Prepare an argument for a BE
 void
 be_util::prep_be_arg (
-// TAO_IDL_HAS_STD_STRING_API was introduced with the generator ownership API.
 #ifdef TAO_IDL_HAS_STD_STRING_API
   const std::string& argument
 #else
@@ -109,14 +108,14 @@ be_util::usage (void)
   ));
 }
 
-#ifdef TAO_IDL_HAS_STD_STRING_API
+#ifdef TAO_IDL_HAS_STD_UNIQUE_PTR_API
 std::unique_ptr<AST_Generator>
 #else
 AST_Generator *
 #endif
 be_util::generator_init (void)
 {
-#ifdef TAO_IDL_HAS_STD_STRING_API
+#ifdef TAO_IDL_HAS_STD_UNIQUE_PTR_API
   return std::unique_ptr<AST_Generator>(new (std::nothrow) AST_Generator);
 #else
   AST_Generator* gen = 0;
