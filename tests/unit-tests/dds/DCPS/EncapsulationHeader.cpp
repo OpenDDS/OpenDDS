@@ -317,10 +317,11 @@ TEST(dds_DCPS_EncapsulationHeader, read_encapsulation_header_trailing_padding)
     // Keep the payload and padding in a continuation block to exercise chains.
     const unsigned char header[] = {0, 1, 0, static_cast<unsigned char>(0xa4 | padding)};
     const char payload[] = {42, 0, 0, 0};
+    ACE_Message_Block cont(sizeof payload);
+    cont.copy(payload, sizeof payload);
     ACE_Message_Block mb(sizeof header);
     mb.copy(reinterpret_cast<const char*>(header), sizeof header);
-    mb.cont(new ACE_Message_Block(sizeof payload));
-    mb.cont()->copy(payload, sizeof payload);
+    mb.cont(&cont);
     Serializer ser(&mb, Encoding());
     ASSERT_EQ(EncapsulationReadStatus::Ok, read_encapsulation_header(ser, APPENDABLE));
     EXPECT_EQ(sizeof payload - padding, ser.length());
