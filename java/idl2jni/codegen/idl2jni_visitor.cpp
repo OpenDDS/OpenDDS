@@ -178,7 +178,7 @@ idl2jni_visitor::visit_interface(AST_Interface *node)
   const AST_Type_List& ast_inherits = node->inherits();
   for (AST_Type_List::const_iterator i = ast_inherits.begin();
        i != ast_inherits.end(); ++i) {
-    inherits.push_back(dynamic_cast<AST_Interface *>(*i));
+    inherits.push_back(dynamic_cast<AST_Interface*>(*i));
   }
 
   const AST_Interface_List& ast_inherits_flat = node->inherits_flat();

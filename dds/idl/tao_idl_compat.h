@@ -3,8 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_TAO_IDL_COMPAT_H
-#define OPENDDS_TAO_IDL_COMPAT_H
+#ifndef OPENDDS_IDL_TAO_IDL_COMPAT_H
+#define OPENDDS_IDL_TAO_IDL_COMPAT_H
 
 #include <idl_defines.h>
 #include <idl_global.h>
@@ -24,24 +24,7 @@ inline const char* c_str(const std::string& value)
 {
   return value.c_str();
 }
-#else
-inline const char* c_str(const char* value)
-{
-  return value;
-}
 
-inline const char* c_str(const UTL_String* value)
-{
-  return value->get_string();
-}
-
-inline const char* c_str(const ACE_CString& value)
-{
-  return value.c_str();
-}
-#endif
-
-#ifdef TAO_IDL_HAS_STD_STRING_API
 inline const char* str_value(const AST_Expression::AST_ExprValue& value)
 {
   return value.strval.c_str();
@@ -58,6 +41,21 @@ dcps_keys(const IDL_GlobalData::DCPS_Data_Type_Info& info)
   return info.key_list_;
 }
 #else
+inline const char* c_str(const char* value)
+{
+  return value;
+}
+
+inline const char* c_str(const UTL_String* value)
+{
+  return value->get_string();
+}
+
+inline const char* c_str(const ACE_CString& value)
+{
+  return value.c_str();
+}
+
 inline const char* str_value(const AST_Expression::AST_ExprValue& value)
 {
   return value.u.strval->get_string();
@@ -82,4 +80,4 @@ dcps_keys(IDL_GlobalData::DCPS_Data_Type_Info& info)
 
 } // namespace tao_idl_compat
 
-#endif // OPENDDS_TAO_IDL_COMPAT_H
+#endif // OPENDDS_IDL_TAO_IDL_COMPAT_H
