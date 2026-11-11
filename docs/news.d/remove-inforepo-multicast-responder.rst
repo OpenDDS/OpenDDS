@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5333
 
 .. news-start-section: Removals
 - Removed the DCPS Information Repository's undocumented multicast discovery responder, which was enabled by the ``MulticastDiscoveryEnabled`` environment variable.
