@@ -1,4 +1,5 @@
 #include "dds/DCPS/XTypes/TypeAssignability.h"
+#include "dds/DCPS/Util.h"
 
 #include "gtest/gtest.h"
 
@@ -2958,6 +2959,107 @@ TEST(dds_DCPS_XTypes_TypeAssignability, AliasTypeTest_CyclicAliasesNotAssignable
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(alias_a)), TypeIdentifier(TK_INT32)));
   EXPECT_FALSE(test.assignable(TypeObject(MinimalTypeObject(alias_a)),
                                TypeObject(MinimalTypeObject(alias_b))));
+}
+
+TEST(dds_DCPS_XTypes_TypeAssignability, AliasTypeTest_NotAssignableFromCyclicAliasId)
+{
+  TypeAssignability test(make_rch<TypeLookupService>());
+
+  EquivalenceHash hash;
+  get_equivalence_hash(hash);
+  const TypeIdentifier self_alias_id = make(EK_MINIMAL, hash);
+  MinimalAliasType self_alias;
+  self_alias.body.common.related_type = self_alias_id;
+  test.insert_entry(self_alias_id, TypeObject(MinimalTypeObject(self_alias)));
+
+  EquivalenceHash hash_a;
+  EquivalenceHash hash_b;
+  get_equivalence_hash(hash_a);
+  get_equivalence_hash(hash_b);
+  const TypeIdentifier alias_a_id = make(EK_MINIMAL, hash_a);
+  const TypeIdentifier alias_b_id = make(EK_MINIMAL, hash_b);
+  MinimalAliasType alias_a;
+  MinimalAliasType alias_b;
+  alias_a.body.common.related_type = alias_b_id;
+  alias_b.body.common.related_type = alias_a_id;
+  test.insert_entry(alias_a_id, TypeObject(MinimalTypeObject(alias_a)));
+  test.insert_entry(alias_b_id, TypeObject(MinimalTypeObject(alias_b)));
+
+  MinimalSequenceType sequence_type;
+  sequence_type.element.common.type = TypeIdentifier(TK_INT32);
+  MinimalArrayType array_type;
+  array_type.header.common.bound_seq.append(10);
+  array_type.element.common.type = TypeIdentifier(TK_INT32);
+  MinimalMapType map_type;
+  map_type.key.common.type = TypeIdentifier(TK_INT32);
+  map_type.element.common.type = TypeIdentifier(TK_INT32);
+  MinimalBitmaskType bitmask_type;
+  bitmask_type.header.common.bit_bound = 8;
+
+  const TypeObject type_objects[] = {
+    TypeObject(MinimalTypeObject(MinimalStructType())),
+    TypeObject(MinimalTypeObject(MinimalUnionType())),
+    TypeObject(MinimalTypeObject(sequence_type)),
+    TypeObject(MinimalTypeObject(array_type)),
+    TypeObject(MinimalTypeObject(map_type)),
+    TypeObject(MinimalTypeObject(MinimalEnumeratedType())),
+    TypeObject(MinimalTypeObject(bitmask_type))
+  };
+  for (size_t i = 0; i < array_count(type_objects); ++i) {
+    EXPECT_FALSE(test.assignable(type_objects[i], self_alias_id));
+    EXPECT_FALSE(test.assignable(type_objects[i], alias_a_id));
+  }
+
+  SBoundSeq array_bounds;
+  array_bounds.append(10);
+  const PlainMapSTypeDefn map_sdefn(PlainCollectionHeader(EquivalenceKind(EK_MINIMAL),
+                                                          CollectionElementFlag()),
+                                    SBound(10), TypeIdentifier(TK_INT32),
+                                    CollectionElementFlag(), TypeIdentifier(TK_INT32));
+  const TypeIdentifier type_ids[] = {
+    TypeIdentifier(TK_UINT8),
+    makeString(false, StringSTypeDefn(10)),
+    makePlainSequence(TypeIdentifier(TK_INT32), SBound(10)),
+    makePlainArray(TypeIdentifier(TK_INT32), array_bounds),
+    make(TI_PLAIN_MAP_SMALL, map_sdefn)
+  };
+  for (size_t i = 0; i < array_count(type_ids); ++i) {
+    EXPECT_FALSE(test.assignable(type_ids[i], self_alias_id));
+    EXPECT_FALSE(test.assignable(type_ids[i], alias_a_id));
+  }
+
+  // Acyclic alias chains on the same paths still resolve
+  EquivalenceHash hash_c, hash_d, hash_e, hash_f, hash_s;
+  get_equivalence_hash(hash_c);
+  get_equivalence_hash(hash_d);
+  get_equivalence_hash(hash_e);
+  get_equivalence_hash(hash_f);
+  get_equivalence_hash(hash_s);
+  const TypeIdentifier alias_c_id = make(EK_MINIMAL, hash_c);
+  const TypeIdentifier alias_d_id = make(EK_MINIMAL, hash_d);
+  const TypeIdentifier alias_e_id = make(EK_MINIMAL, hash_e);
+  const TypeIdentifier alias_f_id = make(EK_MINIMAL, hash_f);
+  const TypeIdentifier struct_id = make(EK_MINIMAL, hash_s);
+
+  MinimalStructType struct_type;
+  struct_type.struct_flags = IS_APPENDABLE;
+  struct_type.member_seq.append(
+    MinimalStructMember(CommonStructMember(1, StructMemberFlag(), TypeIdentifier(TK_INT32)),
+                        MinimalMemberDetail("m1")));
+  test.insert_entry(struct_id, TypeObject(MinimalTypeObject(struct_type)));
+
+  MinimalAliasType alias_c, alias_d, alias_e, alias_f;
+  alias_c.body.common.related_type = alias_d_id;
+  alias_d.body.common.related_type = TypeIdentifier(TK_INT32);
+  alias_e.body.common.related_type = alias_f_id;
+  alias_f.body.common.related_type = struct_id;
+  test.insert_entry(alias_c_id, TypeObject(MinimalTypeObject(alias_c)));
+  test.insert_entry(alias_d_id, TypeObject(MinimalTypeObject(alias_d)));
+  test.insert_entry(alias_e_id, TypeObject(MinimalTypeObject(alias_e)));
+  test.insert_entry(alias_f_id, TypeObject(MinimalTypeObject(alias_f)));
+
+  EXPECT_TRUE(test.assignable(TypeIdentifier(TK_INT32), alias_c_id));
+  EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(struct_type)), alias_e_id));
 }
 
 TEST(dds_DCPS_XTypes_TypeAssignability, StructTypeTest_Assignable)
