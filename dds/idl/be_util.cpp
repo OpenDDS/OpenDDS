@@ -23,6 +23,7 @@
 // Prepare an argument for a BE
 void
 be_util::prep_be_arg(
+// TAO_IDL_HAS_STD_STRING_API was introduced with the generator ownership API.
 #ifdef TAO_IDL_HAS_STD_STRING_API
   const std::string& argument
 #else

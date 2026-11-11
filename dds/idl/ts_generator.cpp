@@ -79,7 +79,7 @@ namespace {
 
   void gen_isDcpsKey(IDL_GlobalData::DCPS_Data_Type_Info* info)
   {
-    const std::vector<std::string> keys = tao_idl_compat::dcps_keys(*info);
+    const std::vector<std::string>& keys = tao_idl_compat::dcps_keys(*info);
     for (std::vector<std::string>::const_iterator i = keys.begin(); i != keys.end(); ++i) {
       gen_isDcpsKey_i(i->c_str());
     }

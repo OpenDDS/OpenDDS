@@ -696,17 +696,9 @@ std::ostream& operator<<(std::ostream& o,
   case AST_Expression::EV_double:
     return o << ev.u.dval;
   case AST_Expression::EV_wstring:
-#ifdef TAO_IDL_HAS_STD_STRING_API
-    return o << "L\"" << ev.strval << '"';
-#else
-    return o << "L\"" << ev.u.wstrval << '"';
-#endif
+    return o << "L\"" << tao_idl_compat::wstr_value(ev) << '"';
   case AST_Expression::EV_string:
-#ifdef TAO_IDL_HAS_STD_STRING_API
-    return o << '"' << ev.strval << '"';
-#else
-    return o << '"' << ev.u.strval->get_string() << '"';
-#endif
+    return o << '"' << tao_idl_compat::str_value(ev) << '"';
   case AST_Expression::EV_fixed: {
     char buf[ACE_CDR::Fixed::MAX_STRING_SIZE];
     ev.u.fixedval.to_string(buf, sizeof buf);

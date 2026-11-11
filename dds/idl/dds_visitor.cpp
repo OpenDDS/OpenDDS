@@ -266,7 +266,7 @@ dds_visitor::visit_structure(AST_Structure* node)
         topic_type_keys.insert(i.path());
       }
 
-      const std::vector<std::string> dcps_keys = tao_idl_compat::dcps_keys(*info);
+      const std::vector<std::string>& dcps_keys = tao_idl_compat::dcps_keys(*info);
       for (std::vector<std::string>::const_iterator i = dcps_keys.begin(); i != dcps_keys.end(); ++i) {
         dcps_data_type_keys.insert(*i);
       }

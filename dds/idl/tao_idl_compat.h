@@ -8,6 +8,7 @@
 
 #include <idl_defines.h>
 #include <idl_global.h>
+#include <ast_expression.h>
 
 #include <ace/ACE.h>
 #include <ace/SString.h>
@@ -40,21 +41,44 @@ inline const char* c_str(const ACE_CString& value)
 }
 #endif
 
+#ifdef TAO_IDL_HAS_STD_STRING_API
+inline const char* str_value(const AST_Expression::AST_ExprValue& value)
+{
+  return value.strval.c_str();
+}
+
+inline const char* wstr_value(const AST_Expression::AST_ExprValue& value)
+{
+  return value.wstrval.c_str();
+}
+
+inline const IDL_GlobalData::DCPS_Key_List&
+dcps_keys(const IDL_GlobalData::DCPS_Data_Type_Info& info)
+{
+  return info.key_list_;
+}
+#else
+inline const char* str_value(const AST_Expression::AST_ExprValue& value)
+{
+  return value.u.strval->get_string();
+}
+
+inline const char* wstr_value(const AST_Expression::AST_ExprValue& value)
+{
+  return value.u.wstrval;
+}
+
 inline std::vector<std::string>
 dcps_keys(IDL_GlobalData::DCPS_Data_Type_Info& info)
 {
-#ifdef TAO_IDL_HAS_STD_DCPS_DATA_TYPE_INFO
-  return info.key_list_;
-#else
   std::vector<std::string> keys;
   IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info.key_list_);
-  for (ACE_TString *key = 0; iter.next(key) != 0; iter.advance())
-    {
-      keys.push_back(ACE_TEXT_ALWAYS_CHAR(key->c_str()));
-    }
+  for (ACE_TString* key = 0; iter.next(key) != 0; iter.advance()) {
+    keys.push_back(ACE_TEXT_ALWAYS_CHAR(key->c_str()));
+  }
   return keys;
-#endif
 }
+#endif
 
 } // namespace tao_idl_compat
 

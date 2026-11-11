@@ -462,18 +462,10 @@ ostream& operator<<(ostream& o, const AST_Expression::AST_ExprValue& expr)
     o << boolalpha << static_cast<bool>(ev->u.bval);
     break;
   case AST_Expression::EV_string:
-#ifdef TAO_IDL_HAS_STD_STRING_API
-    o << '"' << unicode_escape(ev->strval.c_str()) << '"';
-#else
-    o << '"' << unicode_escape(ev->u.strval->get_string()) << '"';
-#endif
+    o << '"' << unicode_escape(tao_idl_compat::str_value(*ev)) << '"';
     break;
   case AST_Expression::EV_wstring:
-#ifdef TAO_IDL_HAS_STD_STRING_API
-    o << '"' << unicode_escape(ev->strval.c_str()) << '"';
-#else
-    o << '"' << unicode_escape(ev->u.wstrval) << '"';
-#endif
+    o << '"' << unicode_escape(tao_idl_compat::wstr_value(*ev)) << '"';
     break;
   case AST_Expression::EV_enum:
     o << ev->u.eval;
