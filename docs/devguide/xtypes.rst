@@ -1384,7 +1384,7 @@ Interchanging Data using ``create_sample`` and ``create_dynamic_sample``
 
 The XTypes specification defines ``create_sample`` and ``create_dynamic_sample`` on the ``TypeSupport`` for every :term:`topic type` to interchange ``DynamicData`` and IDL-generated types.
 In addition to this, OpenDDS adds ``create_sample_rc`` and ``create_dynamic_sample_rc`` to indicate failure and provide a more consistent interface.
-The standard methods will only warn if there was an error and can't indicate that an error occured.
+The standard methods will only warn if there was an error and can't indicate that an error occurred.
 
 ``create_sample`` and ``create_sample_rc``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
