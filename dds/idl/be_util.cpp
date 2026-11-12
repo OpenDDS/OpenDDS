@@ -164,7 +164,6 @@ be_util::usage()
     ));
 }
 
-// Use TAO_IDL_HAS_UNIQUE_PTR_GENERATOR_INIT when it is available in ACE/TAO.
 #ifdef TAO_IDL_HAS_STD_UNIQUE_PTR_API
 std::unique_ptr<AST_Generator>
 #else
