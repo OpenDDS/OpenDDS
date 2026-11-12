@@ -93,6 +93,9 @@ public:
   void set_inc_paths(const char* cmdline);
   void add_inc_path(const char* path);
 
+  // Accepted for compatibility with TAO IDL's shared argument parser.
+  void gen_source_info(bool);
+
   std::string get_include_block(stream_enum_t which);
 
   ACE_CString export_macro() const;

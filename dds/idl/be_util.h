@@ -16,6 +16,9 @@
 #ifndef OPENDDS_IDL_BE_UTIL_H
 #define OPENDDS_IDL_BE_UTIL_H
 
+#include <idl_defines.h>
+
+#include <memory>
 #include <string>
 
 class AST_Generator;
@@ -24,7 +27,11 @@ class AST_Decl;
 namespace be_util {
 
   /// Special BE arg call factored out of DRV_args.
+#ifdef TAO_IDL_HAS_STD_STRING_API
+  void prep_be_arg(const std::string& s);
+#else
   void prep_be_arg(char* s);
+#endif
 
   /// Checks made after parsing args.
   void arg_post_proc();
@@ -33,7 +40,11 @@ namespace be_util {
   void usage();
 
   /// Create an AST node generator.
+#ifdef TAO_IDL_HAS_STD_UNIQUE_PTR_API
+  std::unique_ptr<AST_Generator> generator_init();
+#else
   AST_Generator* generator_init();
+#endif
 
   /// Get DDS_ROOT. It is a fatal error if it wasn't set.
   const char* dds_root();

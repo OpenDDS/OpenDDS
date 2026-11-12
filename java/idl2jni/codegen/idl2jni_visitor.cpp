@@ -34,6 +34,7 @@
 
 #include "idl2jni_visitor.h"
 #include "idl_mapping.h"
+#include "tao_idl_compat.h"
 
 #include <iostream>
 #include <vector>
@@ -81,7 +82,7 @@ idl2jni_visitor::~idl2jni_visitor()
 
 void idl2jni_visitor::addToToplevels(AST_Decl *node)
 {
-  toplevels_seen_.insert(node->repoID());
+  toplevels_seen_.insert(tao_idl_compat::c_str(node->repoID()));
 }
 
 //visit_* functions
@@ -142,7 +143,7 @@ idl2jni_visitor::visit_module(AST_Module *node)
     return 0;
   }
 
-  const char *name = node->local_name()->get_string();
+  const char *name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("MODULE", name);
 
@@ -164,7 +165,7 @@ idl2jni_visitor::visit_interface(AST_Interface *node)
     return 0;
   }
 
-  const char *name = node->local_name()->get_string();
+  const char *name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("INTERFACE", name);
 
@@ -172,11 +173,21 @@ idl2jni_visitor::visit_interface(AST_Interface *node)
 
   addToToplevels(node);
 
+#ifdef TAO_IDL_HAS_STD_AST_LIST_API
+  vector<AST_Interface *> inherits;
+  const AST_Type_List& ast_inherits = node->inherits();
+  for (AST_Type_List::const_iterator i = ast_inherits.begin();
+       i != ast_inherits.end(); ++i) {
+    inherits.push_back(dynamic_cast<AST_Interface*>(*i));
+  }
+
+  const AST_Interface_List& ast_inherits_flat = node->inherits_flat();
+  vector<AST_Interface *> inherits_flat(ast_inherits_flat.begin(),
+                                        ast_inherits_flat.end());
+#else
   // The type returned by AST_Interface::inherits() changed
   // to a AST_Type** in TAO 1.7.6.  This requires an explicit
   // dynamic cast for each element.
-  //vector<AST_Interface *> inherits(node->inherits(),
-  //                                 node->inherits() + node->n_inherits());
   const size_t n_inherits = static_cast<size_t>(node->n_inherits());
   vector<AST_Interface *> inherits(n_inherits);
   for (size_t i = 0; i < n_inherits; i++) {
@@ -185,6 +196,7 @@ idl2jni_visitor::visit_interface(AST_Interface *node)
 
   vector<AST_Interface *> inherits_flat(node->inherits_flat(),
                                         node->inherits_flat() + node->n_inherits_flat());
+#endif
 
   vector<AST_Attribute *> attrs;
 
@@ -195,7 +207,8 @@ idl2jni_visitor::visit_interface(AST_Interface *node)
   scope2vector(ops, node, AST_Decl::NT_op);
 
   error_ |= !map_target_.gen_interf(node->name(), node->is_local(),
-                                    inherits, inherits_flat, attrs, ops, node->repoID());
+                                    inherits, inherits_flat, attrs, ops,
+                                    tao_idl_compat::c_str(node->repoID()));
 
   if (this->visit_scope(node) == -1) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -213,7 +226,7 @@ idl2jni_visitor::visit_structure(AST_Structure *node)
     return 0;
   }
 
-  const char *name = node->local_name()->get_string();
+  const char *name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("STRUCT", name);
 
@@ -228,12 +241,19 @@ idl2jni_visitor::visit_structure(AST_Structure *node)
   fields.reserve(nfields);
 
   for (ACE_CDR::ULong i = 0; i < nfields; ++i) {
+#ifdef TAO_IDL_HAS_AST_FIELD_REFERENCE_API
+    AST_Field* f = 0;
+    node->field(f, i);
+    fields.push_back(f);
+#else
     AST_Field **f;
     node->field(f, i);
     fields.push_back(*f);
+#endif
   }
 
-  error_ |= !map_target_.gen_struct(node->name(), fields, node->repoID());
+  error_ |= !map_target_.gen_struct(node->name(), fields,
+                                    tao_idl_compat::c_str(node->repoID()));
   return 0;
 }
 
@@ -244,7 +264,7 @@ idl2jni_visitor::visit_exception(AST_Exception *node)
     return 0;
   }
 
-  const char *name = node->local_name()->get_string();
+  const char *name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("EXCEPTION", name);
 
@@ -264,7 +284,7 @@ idl2jni_visitor::visit_typedef(AST_Typedef *node)
     return 0;
   }
 
-  const char *name = node->local_name()->get_string();
+  const char *name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("TYPEDEF", name);
 
@@ -273,7 +293,7 @@ idl2jni_visitor::visit_typedef(AST_Typedef *node)
   addToToplevels(node);
 
   error_ |= !map_target_.gen_typedef(node->name(), node->base_type(),
-                                     node->repoID());
+                                     tao_idl_compat::c_str(node->repoID()));
 
   return 0;
 }
@@ -285,7 +305,7 @@ idl2jni_visitor::visit_enum(AST_Enum *node)
     return 0;
   }
 
-  const char *name = node->local_name()->get_string();
+  const char *name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("ENUM", name);
 
@@ -297,7 +317,8 @@ idl2jni_visitor::visit_enum(AST_Enum *node)
 
   scope2vector(contents, node, AST_Decl::NT_enum_val);
 
-  error_ |= !map_target_.gen_enum(node->name(), contents, node->repoID());
+  error_ |= !map_target_.gen_enum(node->name(), contents,
+                                  tao_idl_compat::c_str(node->repoID()));
 
   return 0;
 }
@@ -305,7 +326,7 @@ idl2jni_visitor::visit_enum(AST_Enum *node)
 int
 idl2jni_visitor::visit_interface_fwd(AST_InterfaceFwd *node)
 {
-  const char *name = node->local_name()->get_string();
+  const char *name = tao_idl_compat::c_str(node->local_name()->get_string());
   BE_Comment_Guard g("INTERFACE-FWD", name);
   ACE_UNUSED_ARG(g);
 
@@ -320,7 +341,7 @@ idl2jni_visitor::visit_constant(AST_Constant *node)
     return 0;
   }
 
-  const char *name = node->local_name()->get_string();
+  const char *name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("CONST", name);
 
@@ -345,13 +366,14 @@ idl2jni_visitor::visit_native(AST_Native *node)
     return 0;
   }
 
-  const char *name = node->local_name()->get_string();
+  const char *name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("NATIVE", name);
 
   ACE_UNUSED_ARG(g);
 
-  error_ |= !map_target_.gen_native(node->name(), node->repoID());
+  error_ |= !map_target_.gen_native(node->name(),
+                                    tao_idl_compat::c_str(node->repoID()));
 
   return 0;
 }
@@ -363,7 +385,7 @@ idl2jni_visitor::visit_union(AST_Union *node)
     return 0;
   }
 
-  const char *name = node->local_name()->get_string();
+  const char *name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("UNION", name);
 
@@ -378,9 +400,15 @@ idl2jni_visitor::visit_union(AST_Union *node)
   branches.reserve(nfields);
 
   for (ACE_CDR::ULong i = 0; i < nfields; ++i) {
+#ifdef TAO_IDL_HAS_AST_FIELD_REFERENCE_API
+    AST_Field* f = 0;
+    node->field(f, i);
+    AST_UnionBranch *ub = dynamic_cast<AST_UnionBranch*>(f);
+#else
     AST_Field **f;
     node->field(f, i);
     AST_UnionBranch *ub = dynamic_cast<AST_UnionBranch*>(*f);
+#endif
 
     if (!ub) {
       std::cerr << "ERROR - expected union to contain UnionBranches\n";
@@ -395,7 +423,8 @@ idl2jni_visitor::visit_union(AST_Union *node)
   node->default_value(defval);
 
   error_ |= !map_target_.gen_union(node->name(), branches, node->disc_type(),
-                                   node->udisc_type(), defval, node->repoID());
+                                   node->udisc_type(), defval,
+                                   tao_idl_compat::c_str(node->repoID()));
   return 0;
 }
 

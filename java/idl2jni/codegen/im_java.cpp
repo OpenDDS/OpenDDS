@@ -7,6 +7,7 @@
 
 #include "idl_mapping.h"
 #include "be_extern.h"
+#include "tao_idl_compat.h"
 
 #include "utl_identifier.h"
 #include "utl_string.h"
@@ -42,7 +43,7 @@ struct JavaName {
     for (UTL_ScopedName *sn(name); sn;
          sn = static_cast<UTL_ScopedName *>(sn->tail())) {
       string sname((sn->head()->escaped()) ? "_" : "");
-      sname += sn->head()->get_string();
+      sname += tao_idl_compat::c_str(sn->head()->get_string());
 
       if (!sname.empty()) {
         if (sn->tail()) pkg_.push_back(sname);
@@ -332,7 +333,7 @@ std::string idl_mapping_java::type(AST_Type *decl)
 
   cerr << "ERROR - unknown Java type " << decl->node_type()
        << " for IDL type: "
-       << decl->local_name()->get_string() << endl;
+       << tao_idl_compat::c_str(decl->local_name()->get_string()) << endl;
   return "**unknown**";
 }
 
@@ -461,10 +462,10 @@ ostream& operator<<(ostream& o, const AST_Expression::AST_ExprValue& expr)
     o << boolalpha << static_cast<bool>(ev->u.bval);
     break;
   case AST_Expression::EV_string:
-    o << '"' << unicode_escape(ev->u.strval->get_string()) << '"';
+    o << '"' << unicode_escape(tao_idl_compat::str_value(*ev)) << '"';
     break;
   case AST_Expression::EV_wstring:
-    o << '"' << unicode_escape(ev->u.wstrval) << '"';
+    o << '"' << unicode_escape(tao_idl_compat::wstr_value(*ev)) << '"';
     break;
   case AST_Expression::EV_enum:
     o << ev->u.eval;
@@ -570,7 +571,7 @@ bool idl_mapping_java::gen_enum(UTL_ScopedName *name,
 {
   ostringstream oss;
 
-  const char *enum_name = name->last_component()->get_string();
+  const char *enum_name = tao_idl_compat::c_str(name->last_component()->get_string());
   oss << "  private static " << enum_name << "[] __values = {\n";
   for (size_t i = 0; i < contents.size(); ++i) {
     oss << "    new " << enum_name << '(' << i << ')';
@@ -582,7 +583,7 @@ bool idl_mapping_java::gen_enum(UTL_ScopedName *name,
   oss << "  };\n\n";
 
   for (size_t i = 0; i < contents.size(); ++i) {
-    const char *enumerator_name = contents[i]->local_name()->get_string();
+    const char *enumerator_name = tao_idl_compat::c_str(contents[i]->local_name()->get_string());
     oss <<
       "  public static final int _" << enumerator_name << " = " << i << ";\n"
       "  public static final " << enum_name << ' ' << enumerator_name << " = __values[" << i << "];\n"
@@ -622,7 +623,7 @@ bool idl_mapping_java::gen_struct(UTL_ScopedName *name,
   string fieldDecl, ctorArgs, ctorBody;
 
   for (size_t i = 0; i < fields.size(); ++i) {
-    string fname = fields[i]->local_name()->get_string();
+    string fname = tao_idl_compat::c_str(fields[i]->local_name()->get_string());
     string ftype = type(fields[i]->field_type());
     fieldDecl += "  public " + ftype + " " + fname + ";\n";
     ctorArgs += ftype + " _" + fname;
@@ -632,7 +633,7 @@ bool idl_mapping_java::gen_struct(UTL_ScopedName *name,
     ctorBody += "    " + fname + " = _" + fname + ";\n";
   }
 
-  const char *struct_name = name->last_component()->get_string();
+  const char *struct_name = tao_idl_compat::c_str(name->last_component()->get_string());
 
   string body =
     fieldDecl + "\n"
@@ -666,12 +667,12 @@ namespace {
 string attr_signature_r(AST_Attribute *attr)
 {
   return idl_mapping_java::type(attr->field_type())
-         + ' ' + attr->local_name()->get_string() + "()";
+         + ' ' + tao_idl_compat::c_str(attr->local_name()->get_string()) + "()";
 }
 
 string attr_signature_w(AST_Attribute *attr)
 {
-  const char *name = attr->local_name()->get_string();
+  const char *name = tao_idl_compat::c_str(attr->local_name()->get_string());
   return string("void ") + name + '('
          + idl_mapping_java::type(attr->field_type()) + ' ' + name + ')';
 }
@@ -681,7 +682,7 @@ string op_signature(AST_Operation *op)
   string signature =
     (op->void_return_type() ? "void"
   : idl_mapping_java::type(op->return_type()))
-    + " " + op->local_name()->get_string() + "(";
+    + " " + tao_idl_compat::c_str(op->local_name()->get_string()) + "(";
   UTL_ScopeActiveIterator it(op, UTL_Scope::IK_decls);
   bool noArgs = true;
 
@@ -692,7 +693,7 @@ string op_signature(AST_Operation *op)
     if (item->node_type() == AST_Decl::NT_argument) {
       AST_Argument *arg = dynamic_cast<AST_Argument*>(item);
       signature += param_type(arg->field_type(), arg->direction())
-                   + " " + arg->local_name()->get_string() + ", ";
+                   + " " + tao_idl_compat::c_str(arg->local_name()->get_string()) + ", ";
     }
   }
 
@@ -770,7 +771,7 @@ bool idl_mapping_java::gen_interf(UTL_ScopedName *name, bool local,
 
   for (size_t i = 0; i < inherits_flat.size(); ++i) {
     AST_Interface *base = inherits_flat[i];
-    allRepoIds += ", \"" + string(base->repoID()) + '"';
+    allRepoIds += ", \"" + string(tao_idl_compat::c_str(base->repoID())) + '"';
 
     UTL_ScopeActiveIterator it(base, UTL_Scope::IK_decls);
 
@@ -926,7 +927,7 @@ bool idl_mapping_java::gen_union(UTL_ScopedName *name,
     }
 
     string ty = type(branches[i]->field_type());
-    const char *brname = branches[i]->local_name()->get_string();
+    const char *brname = tao_idl_compat::c_str(branches[i]->local_name()->get_string());
     body_branches +=
       "  private " + ty + ' ' + brname + ";\n\n"
       "  public " + ty + ' ' + brname + "() {\n"
@@ -960,7 +961,7 @@ bool idl_mapping_java::gen_union(UTL_ScopedName *name,
     idx = body_branches.find("<%default_disc_check%>");
   }
 
-  const char *union_name = name->last_component()->get_string();
+  const char *union_name = tao_idl_compat::c_str(name->last_component()->get_string());
 
   string body =
     "  public " + string(union_name) + "() {}\n\n"

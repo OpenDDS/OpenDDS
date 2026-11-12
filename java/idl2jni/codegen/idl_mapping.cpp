@@ -6,6 +6,7 @@
  */
 
 #include "idl_mapping.h"
+#include "tao_idl_compat.h"
 
 #include <ast_annotation_member.h>
 #include <utl_identifier.h>
@@ -30,7 +31,7 @@ string idl_mapping::scoped_helper(UTL_ScopedName *sn, const char *sep,
     if (sn->head()->escaped())
       sname += "_";
 
-    sname += sn->head()->get_string();
+    sname += tao_idl_compat::c_str(sn->head()->get_string());
   }
 
   return sname;

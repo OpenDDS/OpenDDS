@@ -4,6 +4,7 @@
  */
 
 #include "dds_visitor.h"
+#include "tao_idl_compat.h"
 
 #include "metaclass_generator.h"
 #include "ts_generator.h"
@@ -163,7 +164,7 @@ dds_visitor::visit_module(AST_Module* node)
     return 0;
   }
 
-  const char* name = node->local_name()->get_string();
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("MODULE", name);
 
@@ -179,10 +180,21 @@ dds_visitor::visit_module(AST_Module* node)
 int
 dds_visitor::visit_interface(AST_Interface* node)
 {
-  const char* name = node->local_name()->get_string();
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("INTERFACE", name);
 
+#ifdef TAO_IDL_HAS_STD_AST_LIST_API
+  vector<AST_Interface*> inherits;
+  const AST_Type_List& ast_inherits = node->inherits();
+  for (AST_Type_List::const_iterator i = ast_inherits.begin(); i != ast_inherits.end(); ++i) {
+    inherits.push_back(dynamic_cast<AST_Interface*>(*i));
+  }
+
+  const AST_Interface_List& ast_inherits_flat = node->inherits_flat();
+  vector<AST_Interface*> inherits_flat(ast_inherits_flat.begin(),
+                                       ast_inherits_flat.end());
+#else
   const size_t n_inherits = static_cast<size_t>(node->n_inherits());
   vector<AST_Interface*> inherits(n_inherits);
   for (size_t i = 0; i < n_inherits; ++i) {
@@ -192,6 +204,7 @@ dds_visitor::visit_interface(AST_Interface* node)
   vector<AST_Interface*> inherits_flat(node->inherits_flat(),
                                        node->inherits_flat()
                                        + node->n_inherits_flat());
+#endif
 
   vector<AST_Attribute*> attrs;
 
@@ -204,7 +217,7 @@ dds_visitor::visit_interface(AST_Interface* node)
   if (!java_ts_only_) {
     error_ |= !gen_target_.gen_interf(node, node->name(), node->is_local(),
                                       inherits, inherits_flat, attrs, ops,
-                                      node->repoID());
+                                      tao_idl_compat::c_str(node->repoID()));
   }
 
   if (this->visit_scope(node) == -1) {
@@ -219,7 +232,7 @@ dds_visitor::visit_interface(AST_Interface* node)
 int
 dds_visitor::visit_structure(AST_Structure* node)
 {
-  const char* name = node->local_name()->get_string();
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("STRUCT", name);
   // Check That Sample Keys Are Valid
@@ -253,9 +266,9 @@ dds_visitor::visit_structure(AST_Structure* node)
         topic_type_keys.insert(i.path());
       }
 
-      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
-      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-        dcps_data_type_keys.insert(ACE_TEXT_ALWAYS_CHAR(kp->c_str()));
+      const std::vector<std::string>& dcps_keys = tao_idl_compat::dcps_keys(*info);
+      for (std::vector<std::string>::const_iterator i = dcps_keys.begin(); i != dcps_keys.end(); ++i) {
+        dcps_data_type_keys.insert(*i);
       }
 
       if (topic_type_keys != dcps_data_type_keys) {
@@ -314,7 +327,8 @@ dds_visitor::visit_structure(AST_Structure* node)
 
   if (!java_ts_only_) {
     error_ |= !gen_target_.gen_struct(node, node->name(), field_vec,
-                                      node->size_type(), node->repoID());
+                                      node->size_type(),
+                                      tao_idl_compat::c_str(node->repoID()));
   }
 
   if (!node->imported() && be_global->java()) {
@@ -331,7 +345,7 @@ dds_visitor::visit_exception(AST_Exception* node)
     return 0;
   }
 
-  const char* name = node->local_name()->get_string();
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("EXCEPTION", name);
 
@@ -341,13 +355,13 @@ dds_visitor::visit_exception(AST_Exception* node)
 int
 dds_visitor::visit_typedef(AST_Typedef* node)
 {
-  const char* name = node->local_name()->get_string();
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("TYPEDEF", name);
 
   if (!java_ts_only_) {
     error_ |= !gen_target_.gen_typedef(node, node->name(), node->base_type(),
-                                       node->repoID());
+                                       tao_idl_compat::c_str(node->repoID()));
   }
 
   return 0;
@@ -356,7 +370,7 @@ dds_visitor::visit_typedef(AST_Typedef* node)
 int
 dds_visitor::visit_enum(AST_Enum* node)
 {
-  const char* name = node->local_name()->get_string();
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("ENUM", name);
 
@@ -366,9 +380,11 @@ dds_visitor::visit_enum(AST_Enum* node)
 
   if (!java_ts_only_) {
     if (!node->imported()) {
-      error_ |= !dds_generator::gen_enum_helper(node, node->name(), contents, node->repoID());
+      error_ |= !dds_generator::gen_enum_helper(
+        node, node->name(), contents, tao_idl_compat::c_str(node->repoID()));
     }
-    error_ |= !gen_target_.gen_enum(node, node->name(), contents, node->repoID());
+    error_ |= !gen_target_.gen_enum(
+      node, node->name(), contents, tao_idl_compat::c_str(node->repoID()));
   }
 
   return 0;
@@ -377,7 +393,7 @@ dds_visitor::visit_enum(AST_Enum* node)
 int
 dds_visitor::visit_interface_fwd(AST_InterfaceFwd* node)
 {
-  const char* name = node->local_name()->get_string();
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
   BE_Comment_Guard g("INTERFACE-FWD", name);
   if (!java_ts_only_) {
     error_ |= !gen_target_.gen_interf_fwd(node->name());
@@ -389,7 +405,7 @@ dds_visitor::visit_interface_fwd(AST_InterfaceFwd* node)
 int
 dds_visitor::visit_structure_fwd(AST_StructureFwd* node)
 {
-  const char* name = node->local_name()->get_string();
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
   BE_Comment_Guard g("STRUCT-FWD", name);
 
   if (!java_ts_only_) {
@@ -402,7 +418,7 @@ dds_visitor::visit_structure_fwd(AST_StructureFwd* node)
 int
 dds_visitor::visit_constant(AST_Constant* node)
 {
-  const char* name = node->local_name()->get_string();
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("CONST", name);
 
@@ -420,12 +436,13 @@ dds_visitor::visit_constant(AST_Constant* node)
 int
 dds_visitor::visit_native(AST_Native* node)
 {
-  const char* name = node->local_name()->get_string();
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("NATIVE", name);
 
   if (!java_ts_only_) {
-    error_ |= !gen_target_.gen_native(node, node->name(), node->repoID());
+    error_ |= !gen_target_.gen_native(
+      node, node->name(), tao_idl_compat::c_str(node->repoID()));
   }
 
   return 0;
@@ -434,7 +451,7 @@ dds_visitor::visit_native(AST_Native* node)
 int
 dds_visitor::visit_union(AST_Union* node)
 {
-  const char* name = node->local_name()->get_string();
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
 
   BE_Comment_Guard g("UNION", name);
   vector<AST_UnionBranch*> branches;
@@ -453,7 +470,7 @@ dds_visitor::visit_union(AST_Union* node)
 
   if (!java_ts_only_) {
     error_ |= !gen_target_.gen_union(node, node->name(), branches, node->disc_type(),
-                                     node->repoID());
+                                     tao_idl_compat::c_str(node->repoID()));
   }
 
   if (!node->imported() && be_global->java()) {
@@ -466,7 +483,7 @@ dds_visitor::visit_union(AST_Union* node)
 int
 dds_visitor::visit_union_fwd(AST_UnionFwd* node)
 {
-  const char* name = node->local_name()->get_string();
+  const char* const name = tao_idl_compat::c_str(node->local_name()->get_string());
   BE_Comment_Guard g("UNION-FWD", name);
 
   if (!java_ts_only_) {

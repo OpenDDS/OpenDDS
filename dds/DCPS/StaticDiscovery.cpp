@@ -354,7 +354,7 @@ StaticEndpointManager::add_publication_i(const GUID_t& writerid,
     const EndpointRegistry::Reader& reader = registry_.reader_map.find(readerid)->second;
 
     const ReaderAssociation ra =
-      {reader.trans_info, TransportLocator(), 0, readerid, reader.subscriber_qos, reader.qos, "", "", 0, 0, {0, 0}};
+      {reader.trans_info, TransportLocator(), 0, readerid, reader.subscriber_qos, reader.qos, "", "", DDS::StringSeq(), DDS::OctetSeq(), {0, 0}};
     DataWriterCallbacks_rch pl = pub.publication_.lock();
     if (pl) {
       pl->add_association(ra, true);

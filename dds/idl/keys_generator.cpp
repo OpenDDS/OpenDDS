@@ -6,6 +6,7 @@
  */
 
 #include "keys_generator.h"
+#include "tao_idl_compat.h"
 #include "be_extern.h"
 #include "topic_keys.h"
 
@@ -120,9 +121,9 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
           wrapper.key_compare(fname);
         }
       } else if (info) {
-        IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
-        for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-          string fname = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
+        const std::vector<std::string>& dcps_keys = tao_idl_compat::dcps_keys(*info);
+        for (std::vector<std::string>::const_iterator i = dcps_keys.begin(); i != dcps_keys.end(); ++i) {
+          string fname = *i;
           if (use_cxx11) {
             fname = insert_cxx11_accessor_parens(fname, false);
           }

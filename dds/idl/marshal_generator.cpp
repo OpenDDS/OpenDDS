@@ -4,6 +4,7 @@
  */
 
 #include "marshal_generator.h"
+#include "tao_idl_compat.h"
 
 #include "dds_generator.h"
 #include "field_info.h"
@@ -2486,10 +2487,9 @@ namespace {
     }
 
     if (info) {
-      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
-      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-        const string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-        fn(indent, encoding, key_name, find_type(node, key_name), size, expr, intro);
+      const std::vector<std::string>& key_names = tao_idl_compat::dcps_keys(*info);
+      for (std::vector<std::string>::const_iterator i = key_names.begin(); i != key_names.end(); ++i) {
+        fn(indent, encoding, *i, find_type(node, *i), size, expr, intro);
       }
     }
 
@@ -2553,11 +2553,10 @@ namespace {
     bool bounded = true;
     if (key_only) {
       if (info) {
-        IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
         AST_Structure* const struct_type = dynamic_cast<AST_Structure*>(type);
-        for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-          const string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-          AST_Type* const field_type = find_type(struct_type, key_name);
+        const std::vector<std::string>& key_names = tao_idl_compat::dcps_keys(*info);
+        for (std::vector<std::string>::const_iterator i = key_names.begin(); i != key_names.end(); ++i) {
+          AST_Type* const field_type = find_type(struct_type, *i);
           if (!is_bounded_type(field_type, encoding)) {
             bounded = false;
             break;
@@ -3476,16 +3475,15 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       Intro intro;
       const char* indent = "  ";
 
-      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
-      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-        const string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-        AST_Type* const field_type = find_type(node, key_name);
+      const std::vector<std::string>& key_names = tao_idl_compat::dcps_keys(*info);
+      for (std::vector<std::string>::const_iterator i = key_names.begin(); i != key_names.end(); ++i) {
+        AST_Type* const field_type = find_type(node, *i);
         if (first) {
           first = false;
         } else {
           expr += "\n    && ";
         }
-        expr += streamCommon(indent, 0, key_name, field_type, "<< stru.value", false, intro);
+        expr += streamCommon(indent, 0, *i, field_type, "<< stru.value", false, intro);
       }
 
       intro.join(be_global->impl_, indent);
@@ -3503,16 +3501,15 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       std::string expr;
       const std::string indent = "  ";
 
-      IDL_GlobalData::DCPS_Data_Type_Info_Iter iter(info->key_list_);
-      for (ACE_TString* kp = 0; iter.next(kp) != 0; iter.advance()) {
-        const string key_name = ACE_TEXT_ALWAYS_CHAR(kp->c_str());
-        AST_Type* const field_type = find_type(node, key_name);
+      const std::vector<std::string>& key_names = tao_idl_compat::dcps_keys(*info);
+      for (std::vector<std::string>::const_iterator i = key_names.begin(); i != key_names.end(); ++i) {
+        AST_Type* const field_type = find_type(node, *i);
         if (first) {
           first = false;
         } else {
           expr += "\n    && ";
         }
-        expr += streamCommon(indent, 0, key_name, field_type, ">> stru.value", false, intro);
+        expr += streamCommon(indent, 0, *i, field_type, ">> stru.value", false, intro);
       }
 
       intro.join(be_global->impl_, indent);

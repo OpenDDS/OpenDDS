@@ -4,6 +4,7 @@
  */
 
 #include "langmap_generator.h"
+#include "tao_idl_compat.h"
 
 #include "field_info.h"
 #include "be_extern.h"
@@ -71,7 +72,7 @@ namespace {
     if (be_global->suppress_typecode() || be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
       return;
     }
-    const char* const nm = name->last_component()->get_string();
+    const char* const nm = tao_idl_compat::c_str(name->last_component()->get_string());
     be_global->lang_header_ <<
       "extern " << exporter() << "const ::CORBA::TypeCode_ptr _tc_" << nm
       << ";\n";
@@ -183,7 +184,7 @@ struct GeneratorBase {
   virtual void struct_decls(UTL_ScopedName* name, AST_Type::SIZE_TYPE size, const char* struct_or_class = "struct")
   {
     be_global->add_include("<tao/VarOut_T.h>", BE_GlobalData::STREAM_LANG_H);
-    const char* const nm = name->last_component()->get_string();
+    const char* const nm = tao_idl_compat::c_str(name->last_component()->get_string());
     be_global->lang_header_ <<
       struct_or_class << ' ' << nm << ";\n";
     switch (size) {
@@ -297,7 +298,7 @@ struct GeneratorBase {
 
     void operator()(AST_UnionBranch* branch)
     {
-      const char* field_name = branch->local_name()->get_string();
+      const char* field_name = tao_idl_compat::c_str(branch->local_name()->get_string());
       std::stringstream first_label;
       {
         AST_UnionLabel* label = branch->label(0);
@@ -533,7 +534,7 @@ struct GeneratorBase {
                          const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator)
   {
     const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
-    const char* const nm = name->last_component()->get_string();
+    const char* const nm = tao_idl_compat::c_str(name->last_component()->get_string());
     struct_decls(name, u->size_type(), "class");
     be_global->lang_header_ <<
       "\n"
@@ -626,7 +627,7 @@ struct GeneratorBase {
   {
     be_global->add_include("<tao/Array_VarOut_T.h>", BE_GlobalData::STREAM_LANG_H);
     be_global->add_include("dds/DCPS/SafetyProfilePool.h", BE_GlobalData::STREAM_LANG_H);
-    const char* const nm = tdname->last_component()->get_string();
+    const char* const nm = tao_idl_compat::c_str(tdname->last_component()->get_string());
     AST_Type* elem = arr->base_type();
     const Classification elem_cls = classify(elem);
     const Helper var = (elem->size_type() == AST_Type::VARIABLE)
@@ -886,7 +887,7 @@ struct FaceGenerator : GeneratorBase {
     be_global->add_include("FACE/Sequence.h", BE_GlobalData::STREAM_LANG_H);
     be_global->add_include("FACE/SequenceVar.h", BE_GlobalData::STREAM_LANG_H);
     be_global->add_include("<ace/CDR_Stream.h>", BE_GlobalData::STREAM_LANG_H);
-    const char* const nm = tdname->last_component()->get_string();
+    const char* const nm = tao_idl_compat::c_str(tdname->last_component()->get_string());
     AST_Type* elem = seq->base_type();
     const Classification elem_cls = classify(elem);
     const bool bounded = !seq->unbounded();
@@ -964,7 +965,7 @@ struct FaceGenerator : GeneratorBase {
                   const char*)
   {
     const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
-    const char* const nm = name->last_component()->get_string();
+    const char* const nm = tao_idl_compat::c_str(name->last_component()->get_string());
     struct_decls(name, size);
     be_global->lang_header_ <<
       "\n"
@@ -1113,7 +1114,7 @@ struct SafetyProfileGenerator : GeneratorBase {
     be_global->add_include("<tao/Seq_Out_T.h>", BE_GlobalData::STREAM_LANG_H);
     be_global->add_include("dds/DCPS/SafetyProfileSequence.h", BE_GlobalData::STREAM_LANG_H);
     be_global->add_include("dds/DCPS/SafetyProfileSequenceVar.h", BE_GlobalData::STREAM_LANG_H);
-    const char* const nm = tdname->last_component()->get_string();
+    const char* const nm = tao_idl_compat::c_str(tdname->last_component()->get_string());
     AST_Type* elem = seq->base_type();
     const Classification elem_cls = classify(elem);
     const bool bounded = !seq->unbounded();
@@ -1191,7 +1192,7 @@ struct SafetyProfileGenerator : GeneratorBase {
                   const char*)
   {
     const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
-    const char* const nm = name->last_component()->get_string();
+    const char* const nm = tao_idl_compat::c_str(name->last_component()->get_string());
     struct_decls(name, size);
     be_global->lang_header_ <<
       "\n"
@@ -1509,7 +1510,8 @@ struct Cxx11Generator : GeneratorBase {
         "  const " << lang_field_type << "& " << af.name_ << "() const " << ret <<
         "  " << lang_field_type << "& " << af.name_ << "() " << ret;
       AST_Decl* const scope = dynamic_cast<AST_Decl*>(field->defined_in());
-      const char* const clazz = scope ? scope->local_name()->get_string() : "";
+      const char* const clazz = scope
+        ? tao_idl_compat::c_str(scope->local_name()->get_string()) : "";
       be_global->impl_ <<
         "void " << clazz << "::" << af.name_ << "(const " << lang_field_type << "& val)\n"
         << assign << "\n"
@@ -1526,7 +1528,7 @@ struct Cxx11Generator : GeneratorBase {
   {
     const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
     const ScopedNamespaceGuard namespaces2(name, be_global->impl_);
-    const char* const nm = name->last_component()->get_string();
+    const char* const nm = tao_idl_compat::c_str(name->last_component()->get_string());
     gen_common_strunion_pre(nm);
 
     std::for_each(fields.begin(), fields.end(), gen_struct_members);
@@ -1615,7 +1617,7 @@ struct Cxx11Generator : GeneratorBase {
     AST_Type* actual_field_type = resolveActualType(field_type);
     const std::string lang_field_type = generator_->map_type(field_type);
     const Classification cls = classify(actual_field_type);
-    const char* nm = branch->local_name()->get_string();
+    const char* nm = tao_idl_compat::c_str(branch->local_name()->get_string());
 
     AST_UnionLabel* label = branch->label(0);
     AST_Union* union_ = dynamic_cast<AST_Union*>(branch->defined_in());
@@ -1659,7 +1661,8 @@ struct Cxx11Generator : GeneratorBase {
         "  const " << lang_field_type << "& " << nm << "() const " << ret <<
         "  " << lang_field_type << "& " << nm << "() " << ret << "\n";
       AST_Decl* const scope = dynamic_cast<AST_Decl*>(branch->defined_in());
-      const char* const clazz = scope ? scope->local_name()->get_string() : "";
+      const char* const clazz = scope
+        ? tao_idl_compat::c_str(scope->local_name()->get_string()) : "";
       be_global->impl_ <<
         "void " << clazz << "::" << nm << "(const " << lang_field_type << "& val" << disc_param_no_default << ")\n"
         << assign << "\n"
@@ -1732,7 +1735,7 @@ struct Cxx11Generator : GeneratorBase {
   {
     const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
     const ScopedNamespaceGuard namespacesCpp(name, be_global->impl_);
-    const char* const nm = name->last_component()->get_string();
+    const char* const nm = tao_idl_compat::c_str(name->last_component()->get_string());
     const std::string d_type = generator_->map_type(discriminator);
     const std::string defVal = generateDefaultValue(u);
 
@@ -1877,7 +1880,7 @@ bool langmap_generator::gen_const(UTL_ScopedName* name, bool,
                                   AST_Constant* constant)
 {
   const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
-  const char* const nm = name->last_component()->get_string();
+  const char* const nm = tao_idl_compat::c_str(name->last_component()->get_string());
 
   const AST_Expression::ExprType type = constant->et();
   const bool is_enum = (type == AST_Expression::EV_enum);
@@ -1905,7 +1908,7 @@ bool langmap_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
                                  const char*)
 {
   const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
-  const char* const nm = name->last_component()->get_string();
+  const char* const nm = tao_idl_compat::c_str(name->last_component()->get_string());
   const char* const scoped_enum = generator_->scoped_enum() ? "class " : "";
   be_global->lang_header_ <<
     "enum " << scoped_enum << nm << generator_->enum_base() << " {\n";
@@ -1945,7 +1948,7 @@ namespace {
   void gen_fixed(UTL_ScopedName* name, AST_Fixed* fixed)
   {
     be_global->add_include("FACE/Fixed.h", BE_GlobalData::STREAM_LANG_H);
-    const char* const nm = name->last_component()->get_string();
+    const char* const nm = tao_idl_compat::c_str(name->last_component()->get_string());
     be_global->lang_header_ <<
       "typedef " << helpers_[HLP_FIXED] << '<' << *fixed->digits()->ev()
       << ", " << *fixed->scale()->ev() << "> " << nm << ";\n"
@@ -1959,7 +1962,7 @@ bool langmap_generator::gen_typedef(AST_Typedef* td, UTL_ScopedName* name, AST_T
   AST_Array* arr = 0;
   {
     const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
-    const char* const nm = name->last_component()->get_string();
+    const char* const nm = tao_idl_compat::c_str(name->last_component()->get_string());
 
     switch (base->node_type()) {
     case AST_Decl::NT_sequence:
@@ -2022,7 +2025,7 @@ bool langmap_generator::gen_interf_fwd(UTL_ScopedName* name)
   const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
 
   be_global->add_include("<tao/Objref_VarOut_T.h>", BE_GlobalData::STREAM_LANG_H);
-  const char* const nm = name->last_component()->get_string();
+  const char* const nm = tao_idl_compat::c_str(name->last_component()->get_string());
   be_global->lang_header_ <<
     "class " << nm << ";\n"
     "typedef " << nm << '*' << nm << "_ptr;\n"

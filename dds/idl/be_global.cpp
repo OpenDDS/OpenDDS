@@ -9,6 +9,7 @@
 
 #include "be_util.h"
 #include "be_extern.h"
+#include "tao_idl_compat.h"
 #include "dds_generator.h"
 
 #include "dds/DCPS/XTypes/TypeObject.h"
@@ -328,7 +329,12 @@ BE_Comment_Guard::~BE_Comment_Guard()
 ACE_CString
 BE_GlobalData::spawn_options()
 {
-  return idl_global->idl_flags();
+  return tao_idl_compat::c_str(idl_global->idl_flags());
+}
+
+void
+BE_GlobalData::gen_source_info(bool)
+{
 }
 
 void invalid_option(char* option)
@@ -816,10 +822,10 @@ void BE_GlobalData::warning(const char* msg, const char* filename, unsigned line
   if (idl_global->print_warnings()) {
     if (filename) {
       ACE_ERROR((LM_WARNING, ACE_TEXT("Warning - %C: \"%C\", line %u: %C\n"),
-        idl_global->prog_name(), filename, lineno, msg));
+        tao_idl_compat::c_str(idl_global->prog_name()), filename, lineno, msg));
     } else {
       ACE_ERROR((LM_WARNING, ACE_TEXT("Warning - %C: %C\n"),
-        idl_global->prog_name(), msg));
+        tao_idl_compat::c_str(idl_global->prog_name()), msg));
     }
   }
   idl_global->err()->last_warning = UTL_Error::EIDL_MISC;
@@ -829,10 +835,10 @@ void BE_GlobalData::error(const char* msg, const char* filename, unsigned lineno
 {
   if (filename) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("Error - %C: \"%C\", line %u: %C\n"),
-      idl_global->prog_name(), filename, lineno, msg));
+      tao_idl_compat::c_str(idl_global->prog_name()), filename, lineno, msg));
   } else {
     ACE_ERROR((LM_ERROR, ACE_TEXT("Error - %C: %C\n"),
-      idl_global->prog_name(), msg));
+      tao_idl_compat::c_str(idl_global->prog_name()), msg));
   }
   idl_global->set_err_count(idl_global->err_count() + 1);
   idl_global->err()->last_error = UTL_Error::EIDL_MISC;
