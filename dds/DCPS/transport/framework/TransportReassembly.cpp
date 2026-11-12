@@ -239,7 +239,10 @@ TransportReassembly::data_unavailable(const FragmentRange& dropped)
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   VDBG((LM_DEBUG, "(%P|%t) TransportReassembly::data_unavailable(): "
     "dropped %q-%q\n", dropped.first, dropped.second));
-  typedef OPENDDS_LIST(FragSample)::iterator list_iterator;
+  if (dropped.second < dropped.first) {
+    return;
+  }
+  check_expirations(MonotonicTimePoint::now());
 
   for (FragInfoMap::iterator iter = fragments_.begin(); iter != fragments_.end();
        ++iter) {
@@ -247,11 +250,17 @@ TransportReassembly::data_unavailable(const FragmentRange& dropped)
     FragInfo& finfo = iter->second;
     FragInfo::FragSampleList& flist = finfo.sample_list_;
 
+    // skip unless "dropped" is inside or adjacent to the stored range
+    const FragmentNumber prev = flist.front().frag_range_.first - 1;
+    const FragmentNumber next = flist.back().frag_range_.second + 1;
+    if (dropped.second < prev || dropped.first > next) {
+      continue;
+    }
+
     ReceivedDataSample dummy;
     dummy.header_.sequence_ = key.data_sample_seq_;
 
     // check if we should expand the front element (only if !have_first)
-    const FragmentNumber prev = flist.front().frag_range_.first - 1;
     if (dropped.second == prev && !finfo.have_first_) {
       finfo.have_first_ = true;
       dummy.header_.more_fragments_ = true;
@@ -260,24 +269,16 @@ TransportReassembly::data_unavailable(const FragmentRange& dropped)
     }
 
     // find a gap between list elements where "dropped" fits
-    for (list_iterator it = flist.begin(); it != flist.end(); ++it) {
-      list_iterator it_next = it;
-      ++it_next;
-      if (it_next == flist.end()) {
-        break;
-      }
-      FragSample& fr1 = *it;
-      FragSample& fr2 = *it_next;
-      if (dropped.first > fr1.frag_range_.second
-          && dropped.second < fr2.frag_range_.first) {
-        dummy.header_.more_fragments_ = true;
-        finfo.insert(dropped, dummy);
-        break;
-      }
+    const FragInfo::FragSampleListIterMap::const_iterator fit =
+      finfo.sample_finder_.lower_bound(dropped.first);
+    if (fit != finfo.sample_finder_.end() && fit->second != flist.begin()
+        && dropped.second < fit->second->frag_range_.first) {
+      dummy.header_.more_fragments_ = true;
+      finfo.insert(dropped, dummy);
+      continue;
     }
 
     // check if we should expand the last element
-    const FragmentNumber next = flist.back().frag_range_.second + 1;
     if (dropped.first == next) {
       flist.back().rec_ds_.header_.more_fragments_ = true;
       finfo.insert(dropped, dummy);
