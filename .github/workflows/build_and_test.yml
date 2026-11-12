@@ -12883,7 +12883,7 @@ jobs:
     - name: route multicast over loopback
       run: |
         sudo route -n add -net 239.255.0.0/16 -interface lo0
-        sudo route -n change -net 224.0.0.0/24 -interface lo0
+        sudo route -n change -net 224.0.0.0/4 -interface lo0
         echo "Updated routes:"
         route -n get 239.255.0.1
         route -n get 224.0.0.128
