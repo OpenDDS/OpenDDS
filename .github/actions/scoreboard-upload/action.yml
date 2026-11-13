@@ -1,0 +1,38 @@
+name: upload to scoreboard and check results
+description: Upload autobuild logs to the Google Cloud scoreboard (OpenDDS master only) and fail if any tests failed. The calling job needs the id-token write permission.
+
+inputs:
+  setenv-dir:
+    description: Same value that was passed to run-autobuild
+    default: OpenDDS
+
+runs:
+  using: composite
+  steps:
+    - name: Authenticate to Google Cloud
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+      uses: google-github-actions/auth@v3
+      with:
+        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
+        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
+    - name: get OpenDDS version
+      shell: bash
+      run: |
+        cd OpenDDS
+        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
+    - name: upload to Google Cloud
+      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
+      uses: google-github-actions/upload-cloud-storage@v3
+      with:
+        path: ${{ inputs.setenv-dir }}/${{ github.job }}_autobuild_workspace/logs
+        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
+        parent: false
+        process_gcloudignore: false
+    - name: check results
+      shell: bash
+      env:
+        LOGS: ${{ github.workspace }}/${{ inputs.setenv-dir }}/${{ github.job }}_autobuild_workspace/logs
+      run: |
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$LOGS/"*_Brief.html
+        cat "$LOGS/latest.txt"
+        grep -q 'Failures: 0' "$LOGS/latest.txt"
