@@ -1,0 +1,39 @@
+name: checkout dependencies
+description: Check out ACE_TAO, MPC and autobuild. OpenDDS itself must already be checked out by the caller.
+
+inputs:
+  ace-tao-path:
+    description: Where to check out ACE_TAO, empty to skip
+    default: ''
+  ace-tao-ref:
+    description: ACE_TAO branch or tag
+    default: ace6tao2
+  mpc:
+    description: Check out MPC to ./MPC if 'true'
+    default: 'true'
+  autobuild:
+    description: Check out autobuild to ./autobuild if 'true'
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: checkout ACE_TAO
+      if: inputs.ace-tao-path != ''
+      uses: actions/checkout@v7
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ${{ inputs.ace-tao-ref }}
+        path: ${{ inputs.ace-tao-path }}
+    - name: checkout MPC
+      if: inputs.mpc == 'true'
+      uses: actions/checkout@v7
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: checkout autobuild
+      if: inputs.autobuild == 'true'
+      uses: actions/checkout@v7
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild

@@ -1,0 +1,34 @@
+name: pack and upload artifact
+description: Tar the git-untracked build products of a directory into <job>.tar.xz and upload it as <job>_artifact.
+
+inputs:
+  dir:
+    description: Directory, relative to the workspace, to pack
+    required: true
+  initial-files:
+    description: Files that are always included in the tar, even if tracked by git
+    required: true
+  skip-pack:
+    description: Only upload, used when the tar.xz was restored from cache
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: create ${{ github.job }} tar.xz artifact
+      if: inputs.skip-pack != 'true'
+      shell: bash
+      env:
+        PACK_DIR: ${{ inputs.dir }}
+        INITIAL_FILES: ${{ inputs.initial-files }}
+      run: |
+        cd "$PACK_DIR"
+        find . -iname "*\.o" | xargs rm
+        tar cvf $GITHUB_WORKSPACE/${{ github.job }}.tar $INITIAL_FILES
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf $GITHUB_WORKSPACE/${{ github.job }}.tar
+        xz -3 $GITHUB_WORKSPACE/${{ github.job }}.tar
+    - name: upload ${{ github.job }} artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
