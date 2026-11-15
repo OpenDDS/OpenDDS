@@ -8,6 +8,9 @@ inputs:
   path:
     description: Directory to download and extract into
     required: true
+  remove-archive:
+    description: Delete the tar.xz after extracting to save disk space
+    default: 'false'
 
 runs:
   using: composite
@@ -22,6 +25,8 @@ runs:
       env:
         ARTIFACT_PATH: ${{ inputs.path }}
         ARTIFACT_JOB: ${{ inputs.job }}
+        REMOVE_ARCHIVE: ${{ inputs.remove-archive }}
       run: |
         cd "$ARTIFACT_PATH"
         tar xvfJ "$ARTIFACT_JOB.tar.xz"
+        if [ "$REMOVE_ARCHIVE" = true ]; then rm "$ARTIFACT_JOB.tar.xz"; fi

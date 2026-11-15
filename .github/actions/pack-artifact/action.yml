@@ -8,6 +8,9 @@ inputs:
   initial-files:
     description: Files that are always included in the tar, even if tracked by git
     required: true
+  remove:
+    description: Paths inside dir to delete before packing, e.g. ACE_TAO when it is nested and has its own artifact
+    default: ''
   skip-pack:
     description: Only upload, used when the tar.xz was restored from cache
     default: 'false'
@@ -21,8 +24,10 @@ runs:
       env:
         PACK_DIR: ${{ inputs.dir }}
         INITIAL_FILES: ${{ inputs.initial-files }}
+        REMOVE: ${{ inputs.remove }}
       run: |
         cd "$PACK_DIR"
+        if [ -n "$REMOVE" ]; then rm -rf $REMOVE; fi
         find . -iname "*\.o" | xargs rm
         tar cvf $GITHUB_WORKSPACE/${{ github.job }}.tar $INITIAL_FILES
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf $GITHUB_WORKSPACE/${{ github.job }}.tar

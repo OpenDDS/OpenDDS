@@ -320,31 +320,16 @@ jobs:
     needs: build_u22_o1d0v1_xer0_j11
 
     steps:
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        name: build_u22_o1d0v1_xer0_j11_artifact
+        job: build_u22_o1d0v1_xer0_j11
         path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u22_o1d0v1_xer0_j11.tar.xz
     - name: test make install messenger
       shell: bash
       run: |
@@ -383,35 +368,16 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: get ACE_TAO commit
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        export ACE_COMMIT=$(git rev-parse HEAD)
-        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get compiler version
-      shell: bash
-      run: |
-        export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
-        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
-    - name: Cache Artifact
-      id: cache-artifact
-      uses: actions/cache@v6
+        ace-tao-path: OpenDDS/ACE_TAO
+        mpc: false
+    - id: cache-artifact
+      uses: ./OpenDDS/.github/actions/ace-tao-cache
       with:
-        path: ${{ github.job }}.tar.xz
-        key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
-    - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
+        key-version: c11
+    - if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: ./OpenDDS/.github/actions/checkout-deps
     - name: setup gtest
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -477,22 +443,14 @@ jobs:
     needs: ACE_TAO_u22_esafe_js0
 
     steps:
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
+        ace-tao-path: OpenDDS/ACE_TAO
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: setup gtest
@@ -516,16 +474,10 @@ jobs:
           --safety-profile \
           --tests \
           --compile-warnings=WARNING
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        name: ACE_TAO_u22_esafe_js0_artifact
+        job: ACE_TAO_u22_esafe_js0
         path: OpenDDS
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ ACE_TAO_u22_esafe_js0.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -577,129 +529,37 @@ jobs:
       id-token: write
 
     steps:
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
+        ace-tao-path: OpenDDS/ACE_TAO
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        name: ACE_TAO_u22_esafe_js0_artifact
+        job: ACE_TAO_u22_esafe_js0
         path: OpenDDS
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ ACE_TAO_u22_esafe_js0.tar.xz
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        name: build_u22_esafe_js0_artifact
+        job: build_u22_esafe_js0
         path: OpenDDS/build
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS/build
-        tar xvfJ build_u22_esafe_js0.tar.xz
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout autobuild
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         tools/scripts/show_build_config.pl
-    - name: install gdb
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo apt-get install gdb
-        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
-    - name: change core file pattern
-      shell: bash
-      run: |
-        sudo sysctl -w kernel.core_pattern=core.%e.%p
-        echo Core file pattern set to:
-        cat /proc/sys/kernel/core_pattern
-    - name: run OpenDDS tests
-      shell: bash
-      run: |
-        ulimit -c unlimited
-        cd OpenDDS/build/target
-        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
-        . setenv.sh
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
-        <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_ace_config"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_EXTENDED -Config OPENDDS_SAFETY_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS_OPENDDS_SAFETY_PROFILE -Config NO_UNIT_TESTS"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="move prettify index"/>
-        </autobuild>
-        EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/run-autobuild
       with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v3
+        setenv-dir: OpenDDS/build/target
+        test-options: -Config SAFETY_EXTENDED -Config OPENDDS_SAFETY_PROFILE -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS_OPENDDS_SAFETY_PROFILE -Config NO_UNIT_TESTS
+        print-cmake-version: false
+    - uses: ./OpenDDS/.github/actions/scoreboard-upload
       with:
-        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
-        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: get OpenDDS version
-      shell: bash
-      run: |
-        cd OpenDDS
-        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
-    - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v3'
-      with:
-        path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
-        parent: false
-        process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: check results
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
-        cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        setenv-dir: OpenDDS/build/target
 
   ACE_TAO_u22_bsafe_js0_FM-1f:
 
@@ -711,35 +571,16 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: get ACE_TAO commit
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        export ACE_COMMIT=$(git rev-parse HEAD)
-        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get compiler version
-      shell: bash
-      run: |
-        export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
-        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
-    - name: Cache Artifact
-      id: cache-artifact
-      uses: actions/cache@v6
+        ace-tao-path: OpenDDS/ACE_TAO
+        mpc: false
+    - id: cache-artifact
+      uses: ./OpenDDS/.github/actions/ace-tao-cache
       with:
-        path: ${{ github.job }}.tar.xz
-        key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
-    - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
+        key-version: c11
+    - if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: ./OpenDDS/.github/actions/checkout-deps
     - name: setup gtest
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -806,22 +647,14 @@ jobs:
     needs: ACE_TAO_u22_bsafe_js0_FM-1f
 
     steps:
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
+        ace-tao-path: OpenDDS/ACE_TAO
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: setup gtest
@@ -846,16 +679,10 @@ jobs:
           --no-built-in-topics \
           --tests \
           --compile-warnings=WARNING
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        name: ACE_TAO_u22_bsafe_js0_FM-1f_artifact
+        job: ACE_TAO_u22_bsafe_js0_FM-1f
         path: OpenDDS
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ ACE_TAO_u22_bsafe_js0_FM-1f.tar.xz
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
@@ -907,129 +734,37 @@ jobs:
       id-token: write
 
     steps:
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
+        ace-tao-path: OpenDDS/ACE_TAO
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        name: ACE_TAO_u22_bsafe_js0_FM-1f_artifact
+        job: ACE_TAO_u22_bsafe_js0_FM-1f
         path: OpenDDS
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ ACE_TAO_u22_bsafe_js0_FM-1f.tar.xz
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        name: build_u22_bsafe_js0_FM-1f_artifact
+        job: build_u22_bsafe_js0_FM-1f
         path: OpenDDS/build
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS/build
-        tar xvfJ build_u22_bsafe_js0_FM-1f.tar.xz
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout autobuild
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         tools/scripts/show_build_config.pl
-    - name: install gdb
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo apt-get install gdb
-        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
-    - name: change core file pattern
-      shell: bash
-      run: |
-        sudo sysctl -w kernel.core_pattern=core.%e.%p
-        echo Core file pattern set to:
-        cat /proc/sys/kernel/core_pattern
-    - name: run OpenDDS tests
-      shell: bash
-      run: |
-        ulimit -c unlimited
-        cd OpenDDS/build/target
-        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
-        . setenv.sh
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
-        <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_ace_config"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config SAFETY_BASE -Config OPENDDS_SAFETY_PROFILE -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS_OPENDDS_SAFETY_PROFILE -Config NO_UNIT_TESTS"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="move prettify index"/>
-        </autobuild>
-        EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/run-autobuild
       with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v3
+        setenv-dir: OpenDDS/build/target
+        test-options: -Config SAFETY_BASE -Config OPENDDS_SAFETY_PROFILE -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_CONTENT_FILTERED_TOPIC -Config DDS_NO_MULTI_TOPIC -Config DDS_NO_QUERY_CONDITION -Config DDS_NO_OWNERSHIP_KIND_EXCLUSIVE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config GH_ACTIONS_OPENDDS_SAFETY_PROFILE -Config NO_UNIT_TESTS
+        print-cmake-version: false
+    - uses: ./OpenDDS/.github/actions/scoreboard-upload
       with:
-        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
-        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: get OpenDDS version
-      shell: bash
-      run: |
-        cd OpenDDS
-        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
-    - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v3'
-      with:
-        path: OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
-        parent: false
-        process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: check results
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
-        cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        setenv-dir: OpenDDS/build/target
 
   ACE_TAO_u22_d0i0v1_sec_js0_FM-08:
 
@@ -1041,38 +776,19 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: get ACE_TAO commit
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        export ACE_COMMIT=$(git rev-parse HEAD)
-        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get compiler version
-      shell: bash
-      run: |
-        export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
-        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
-    - name: Cache Artifact
-      id: cache-artifact
-      uses: actions/cache@v6
+        ace-tao-path: OpenDDS/ACE_TAO
+        mpc: false
+    - id: cache-artifact
+      uses: ./OpenDDS/.github/actions/ace-tao-cache
       with:
-        path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key-version: c01
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
+    - if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: ./OpenDDS/.github/actions/checkout-deps
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -1087,21 +803,18 @@ jobs:
         make -j4
         cd ../TAO
         make -j4
-    - name: create ACE_TAO tar.xz artifact
+    - name: remove opendds features from default.features
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
-        xz -3 ../../${{ github.job }}.tar
-    - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v7
+        # let individual build configure scripts handle opendds features
+        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS/ACE_TAO
+        initial-files: ACE/ace/config.h
+        skip-pack: ${{ steps.cache-artifact.outputs.cache-hit == 'true' }}
 
   build_u22_d0i0v1_sec_js0_FM-08:
 
@@ -1110,34 +823,20 @@ jobs:
     needs: ACE_TAO_u22_d0i0v1_sec_js0_FM-08
 
     steps:
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u22_d0i0v1_sec_js0_FM-08_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u22_d0i0v1_sec_js0_FM-08.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u22_d0i0v1_sec_js0_FM-08
+        path: ACE_TAO
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -1160,20 +859,10 @@ jobs:
         source setenv.sh
         cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
         cmake --build build -- -j4
-    - name: create OpenDDS tar.xz artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        rm -rf ACE_TAO
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar setenv.sh
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
-        xz -3 ../${{ github.job }}.tar
-    - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS
+        initial-files: setenv.sh
 
   test_u22_d0i0v1_sec_js0_FM-08:
 
@@ -1186,130 +875,33 @@ jobs:
       id-token: write
 
     steps:
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u22_d0i0v1_sec_js0_FM-08_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u22_d0i0v1_sec_js0_FM-08.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        name: build_u22_d0i0v1_sec_js0_FM-08_artifact
+        ace-tao-path: ACE_TAO
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u22_d0i0v1_sec_js0_FM-08
+        path: ACE_TAO
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: build_u22_d0i0v1_sec_js0_FM-08
         path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u22_d0i0v1_sec_js0_FM-08.tar.xz
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         tools/scripts/show_build_config.pl
-    - name: install gdb
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo apt-get install gdb
-        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
-    - name: change core file pattern
-      shell: bash
-      run: |
-        sudo sysctl -w kernel.core_pattern=core.%e.%p
-        echo Core file pattern set to:
-        cat /proc/sys/kernel/core_pattern
-    - name: run OpenDDS tests
-      shell: bash
-      run: |
-        ulimit -c unlimited
-        cd OpenDDS
-        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
-        . setenv.sh
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
-        <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_ace_config"/>
-        <command name="print_cmake_version"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config XERCES3 -Config WCHAR -Config CXX11 -Config OPENDDS_SECURITY -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config NO_UNIT_TESTS --security --cmake"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="move prettify index"/>
-        </autobuild>
-        EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/run-autobuild
       with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v3
-      with:
-        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
-        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: get OpenDDS version
-      shell: bash
-      run: |
-        cd OpenDDS
-        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
-    - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v3'
-      with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
-        parent: false
-        process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: check results
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        test-options: -Config XERCES3 -Config WCHAR -Config CXX11 -Config OPENDDS_SECURITY -Config NO_BUILT_IN_TOPICS -Config DDS_NO_CONTENT_SUBSCRIPTION -Config DDS_NO_OWNERSHIP_PROFILE -Config DDS_NO_OBJECT_MODEL_PROFILE -Config DDS_NO_PERSISTENCE_PROFILE -Config NO_UNIT_TESTS --security --cmake
+    - uses: ./OpenDDS/.github/actions/scoreboard-upload
 
   ACE_TAO_u24_clang18_i0w1_sec:
 
@@ -1321,38 +913,20 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: get ACE_TAO commit
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        export ACE_COMMIT=$(git rev-parse HEAD)
-        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get compiler version
-      shell: bash
-      run: |
-        export COMPILER_VERSION=$(clang++-18 --version 2>&1 | head -n 1)
-        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
-    - name: Cache Artifact
-      id: cache-artifact
-      uses: actions/cache@v6
+        ace-tao-path: OpenDDS/ACE_TAO
+        mpc: false
+    - id: cache-artifact
+      uses: ./OpenDDS/.github/actions/ace-tao-cache
       with:
-        path: ${{ github.job }}.tar.xz
-        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key-version: c02
+        compiler: clang++-18
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
+    - if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: ./OpenDDS/.github/actions/checkout-deps
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -1377,21 +951,18 @@ jobs:
         make -j4
         cd ../TAO
         make -j4
-    - name: create ACE_TAO tar.xz artifact
+    - name: remove opendds features from default.features
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
-        xz -3 ../../${{ github.job }}.tar
-    - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v7
+        # let individual build configure scripts handle opendds features
+        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS/ACE_TAO
+        initial-files: ACE/ace/config.h
+        skip-pack: ${{ steps.cache-artifact.outputs.cache-hit == 'true' }}
 
   build_u24_clang18_i0w1_sec:
 
@@ -1400,36 +971,22 @@ jobs:
     needs: ACE_TAO_u24_clang18_i0w1_sec
 
     steps:
-    - name: Update apt indexes
-      run: sudo apt-get -y update
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u24_clang18_i0w1_sec_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_clang18_i0w1_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
+    - name: Update apt indexes
+      run: sudo apt-get -y update
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u24_clang18_i0w1_sec
+        path: ACE_TAO
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -1466,20 +1023,10 @@ jobs:
           -DCMAKE_CXX_STANDARD=11 \
           -DCMAKE_CXX_COMPILER=clang++-18
         cmake --build build -- -j4
-    - name: create OpenDDS tar.xz artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        rm -rf ACE_TAO
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar setenv.sh
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
-        xz -3 ../${{ github.job }}.tar
-    - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS
+        initial-files: setenv.sh
 
   cmake_u24_clang18_i0w1_sec:
 
@@ -1492,51 +1039,31 @@ jobs:
       id-token: write
 
     steps:
-    - name: Update apt indexes
-      run: sudo apt-get -y update
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u24_clang18_i0w1_sec_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_clang18_i0w1_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        name: build_u24_clang18_i0w1_sec_artifact
+        ace-tao-path: ACE_TAO
+    - name: Update apt indexes
+      run: sudo apt-get -y update
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: checkout autobuild
+      uses: actions/checkout@v7
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u24_clang18_i0w1_sec
+        path: ACE_TAO
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: build_u24_clang18_i0w1_sec
         path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u24_clang18_i0w1_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -1630,12 +1157,10 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
+        ace-tao-path: OpenDDS/ACE_TAO
+        mpc: false
     - name: get ACE_TAO commit
       shell: bash
       run: |
@@ -1662,12 +1187,8 @@ jobs:
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
+    - if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: ./OpenDDS/.github/actions/checkout-deps
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -1691,21 +1212,18 @@ jobs:
         make -j4
         cd ../TAO
         make -j4
-    - name: create ACE_TAO tar.xz artifact
+    - name: remove opendds features from default.features
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
-        xz -3 ../../${{ github.job }}.tar
-    - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v7
+        # let individual build configure scripts handle opendds features
+        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS/ACE_TAO
+        initial-files: ACE/ace/config.h
+        skip-pack: ${{ steps.cache-artifact.outputs.cache-hit == 'true' }}
 
   build_u24_clang20_sec_js0:
 
@@ -1714,36 +1232,22 @@ jobs:
     needs: ACE_TAO_u24_clang20_sec_js0
 
     steps:
-    - name: Update apt indexes
-      run: sudo apt-get -y update
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u24_clang20_sec_js0_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_clang20_sec_js0.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
+    - name: Update apt indexes
+      run: sudo apt-get -y update
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u24_clang20_sec_js0
+        path: ACE_TAO
     - name: add LLVM apt repo llvm-toolchain-noble-20
       run: |
         wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
@@ -1785,20 +1289,10 @@ jobs:
           -DCMAKE_CXX_STANDARD=23 \
           -DCMAKE_CXX_COMPILER=clang++-20
         cmake --build build -- -j4
-    - name: create OpenDDS tar.xz artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        rm -rf ACE_TAO
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar setenv.sh
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
-        xz -3 ../${{ github.job }}.tar
-    - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS
+        initial-files: setenv.sh
 
   cmake_u24_clang20_sec_js0:
 
@@ -1811,51 +1305,31 @@ jobs:
       id-token: write
 
     steps:
-    - name: Update apt indexes
-      run: sudo apt-get -y update
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u24_clang20_sec_js0_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_clang20_sec_js0.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        name: build_u24_clang20_sec_js0_artifact
+        ace-tao-path: ACE_TAO
+    - name: Update apt indexes
+      run: sudo apt-get -y update
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: checkout autobuild
+      uses: actions/checkout@v7
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u24_clang20_sec_js0
+        path: ACE_TAO
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: build_u24_clang20_sec_js0
         path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u24_clang20_sec_js0.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -1949,38 +1423,20 @@ jobs:
       with:
         path: OpenDDS
         submodules: false # Otherwise this would conflict with --force-clone-submodules
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: get ACE_TAO commit
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        export ACE_COMMIT=$(git rev-parse HEAD)
-        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get compiler version
-      shell: bash
-      run: |
-        export COMPILER_VERSION=$(g++-13 --version 2>&1 | head -n 1)
-        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
-    - name: Cache Artifact
-      id: cache-artifact
-      uses: actions/cache@v6
+        ace-tao-path: OpenDDS/ACE_TAO
+        mpc: false
+    - id: cache-artifact
+      uses: ./OpenDDS/.github/actions/ace-tao-cache
       with:
-        path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key-version: c01
+        compiler: g++-13
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
+    - if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: ./OpenDDS/.github/actions/checkout-deps
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -2004,21 +1460,18 @@ jobs:
         make -j4
         cd ../TAO
         make -j4
-    - name: create ACE_TAO tar.xz artifact
+    - name: remove opendds features from default.features
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
-        xz -3 ../../${{ github.job }}.tar
-    - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v7
+        # let individual build configure scripts handle opendds features
+        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS/ACE_TAO
+        initial-files: ACE/ace/config.h
+        skip-pack: ${{ steps.cache-artifact.outputs.cache-hit == 'true' }}
 
   build_u24_gcc13_d0w1_cpp03:
 
@@ -2027,36 +1480,22 @@ jobs:
     needs: ACE_TAO_u24_gcc13_d0w1_cpp03
 
     steps:
-    - name: Update apt indexes
-      run: sudo apt-get -y update
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u24_gcc13_d0w1_cpp03_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_gcc13_d0w1_cpp03.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: false # Otherwise this would conflict with --force-clone-submodules
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
+    - name: Update apt indexes
+      run: sudo apt-get -y update
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u24_gcc13_d0w1_cpp03
+        path: ACE_TAO
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -2092,20 +1531,10 @@ jobs:
           -DCMAKE_CXX_STANDARD=98 \
           -DCMAKE_CXX_COMPILER=g++-13
         cmake --build build -- -j4
-    - name: create OpenDDS tar.xz artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        rm -rf ACE_TAO
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar setenv.sh
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
-        xz -3 ../${{ github.job }}.tar
-    - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS
+        initial-files: setenv.sh
 
   cmake_u24_gcc13_d0w1_cpp03:
 
@@ -2118,128 +1547,31 @@ jobs:
       id-token: write
 
     steps:
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u24_gcc13_d0w1_cpp03_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_gcc13_d0w1_cpp03.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        name: build_u24_gcc13_d0w1_cpp03_artifact
+        ace-tao-path: ACE_TAO
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u24_gcc13_d0w1_cpp03
+        path: ACE_TAO
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: build_u24_gcc13_d0w1_cpp03
         path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u24_gcc13_d0w1_cpp03.tar.xz
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         tools/scripts/show_build_config.pl
-    - name: install gdb
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo apt-get install gdb
-        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
-    - name: change core file pattern
-      shell: bash
-      run: |
-        sudo sysctl -w kernel.core_pattern=core.%e.%p
-        echo Core file pattern set to:
-        cat /proc/sys/kernel/core_pattern
-    - name: run OpenDDS tests
-      shell: bash
-      run: |
-        ulimit -c unlimited
-        cd OpenDDS
-        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
-        . setenv.sh
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
-        <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_ace_config"/>
-        <command name="print_cmake_version"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps --cmake"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="move prettify index"/>
-        </autobuild>
-        EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/run-autobuild
       with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v3
-      with:
-        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
-        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: get OpenDDS version
-      shell: bash
-      run: |
-        cd OpenDDS
-        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
-    - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v3'
-      with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
-        parent: false
-        process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: check results
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        test-options: --no-dcps --cmake
+    - uses: ./OpenDDS/.github/actions/scoreboard-upload
 
   ACE_TAO_u24_gcc12_i0_js0_j:
 
@@ -2251,43 +1583,21 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: get ACE_TAO commit
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        export ACE_COMMIT=$(git rev-parse HEAD)
-        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get compiler version
-      shell: bash
-      run: |
-        export COMPILER_VERSION=$(g++-12 --version 2>&1 | head -n 1)
-        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
-    - name: get jdk version
-      shell: bash
-      run: |
-        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
-        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
-    - name: Cache Artifact
-      id: cache-artifact
-      uses: actions/cache@v6
+        ace-tao-path: OpenDDS/ACE_TAO
+        mpc: false
+    - id: cache-artifact
+      uses: ./OpenDDS/.github/actions/ace-tao-cache
       with:
-        path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
+        key-version: c01
+        compiler: g++-12
+        jdk: true
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
+    - if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: ./OpenDDS/.github/actions/checkout-deps
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -2302,21 +1612,18 @@ jobs:
         make -j4
         cd ../TAO
         make -j4
-    - name: create ACE_TAO tar.xz artifact
+    - name: remove opendds features from default.features
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
-        xz -3 ../../${{ github.job }}.tar
-    - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v7
+        # let individual build configure scripts handle opendds features
+        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS/ACE_TAO
+        initial-files: ACE/ace/config.h
+        skip-pack: ${{ steps.cache-artifact.outputs.cache-hit == 'true' }}
 
   build_u24_gcc12_i0_js0_j:
 
@@ -2325,36 +1632,22 @@ jobs:
     needs: ACE_TAO_u24_gcc12_i0_js0_j
 
     steps:
-    - name: Update apt indexes
-      run: sudo apt-get -y update
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u24_gcc12_i0_js0_j_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_gcc12_i0_js0_j.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
+    - name: Update apt indexes
+      run: sudo apt-get -y update
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u24_gcc12_i0_js0_j
+        path: ACE_TAO
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -2379,20 +1672,10 @@ jobs:
           -DOPENDDS_JUST_BUILD_TESTS=TRUE \
           -DCMAKE_CXX_COMPILER=g++-12
         cmake --build build -- -j4
-    - name: create OpenDDS tar.xz artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        rm -rf ACE_TAO
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar setenv.sh
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
-        xz -3 ../${{ github.job }}.tar
-    - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS
+        initial-files: setenv.sh
 
   cmake_u24_gcc12_i0_js0_j:
 
@@ -2405,128 +1688,31 @@ jobs:
       id-token: write
 
     steps:
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u24_gcc12_i0_js0_j_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_gcc12_i0_js0_j.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        name: build_u24_gcc12_i0_js0_j_artifact
+        ace-tao-path: ACE_TAO
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u24_gcc12_i0_js0_j
+        path: ACE_TAO
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: build_u24_gcc12_i0_js0_j
         path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u24_gcc12_i0_js0_j.tar.xz
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         tools/scripts/show_build_config.pl
-    - name: install gdb
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo apt-get install gdb
-        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
-    - name: change core file pattern
-      shell: bash
-      run: |
-        sudo sysctl -w kernel.core_pattern=core.%e.%p
-        echo Core file pattern set to:
-        cat /proc/sys/kernel/core_pattern
-    - name: run OpenDDS tests
-      shell: bash
-      run: |
-        ulimit -c unlimited
-        cd OpenDDS
-        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
-        . setenv.sh
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
-        <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_ace_config"/>
-        <command name="print_cmake_version"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps --cmake"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="move prettify index"/>
-        </autobuild>
-        EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/run-autobuild
       with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v3
-      with:
-        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
-        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: get OpenDDS version
-      shell: bash
-      run: |
-        cd OpenDDS
-        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
-    - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v3'
-      with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
-        parent: false
-        process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: check results
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        test-options: --no-dcps --cmake
+    - uses: ./OpenDDS/.github/actions/scoreboard-upload
 
   ACE_TAO_u22_i0_xer0:
 
@@ -2664,44 +1850,25 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-    - name: Update apt indexes
-      run: sudo apt-get -y update
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: get ACE_TAO commit
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        export ACE_COMMIT=$(git rev-parse HEAD)
-        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get compiler version
-      shell: bash
-      run: |
-        export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
-        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
-    - name: Cache Artifact
-      id: cache-artifact
-      uses: actions/cache@v6
+        ace-tao-path: OpenDDS/ACE_TAO
+        mpc: false
+    - name: Update apt indexes
+      run: sudo apt-get -y update
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - id: cache-artifact
+      uses: ./OpenDDS/.github/actions/ace-tao-cache
       with:
-        path: ${{ github.job }}.tar.xz
-        key: c10_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
-    - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
+        key-version: c10
+    - if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: ./OpenDDS/.github/actions/checkout-deps
     - name: setup gtest
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -2770,26 +1937,18 @@ jobs:
     needs: ACE_TAO_u24_gcc14_bsafe_js0_FM-2c
 
     steps:
-    - name: Update apt indexes
-      run: sudo apt-get -y update
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
+        ace-tao-path: OpenDDS/ACE_TAO
+    - name: Update apt indexes
+      run: sudo apt-get -y update
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
     - name: setup gtest
       run: |
         cd OpenDDS/tests/googletest
@@ -2815,16 +1974,10 @@ jobs:
           --no-persistence-profile \
           --tests \
           --compile-warnings=WARNING
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        name: ACE_TAO_u24_gcc14_bsafe_js0_FM-2c_artifact
+        job: ACE_TAO_u24_gcc14_bsafe_js0_FM-2c
         path: OpenDDS
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ ACE_TAO_u24_gcc14_bsafe_js0_FM-2c.tar.xz
     - uses: ammaraskar/gcc-problem-matcher@0.3.0
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
@@ -2878,42 +2031,22 @@ jobs:
       with:
         path: OpenDDS
         submodules: false # Test that the configure script can download Google Test and RapidJSON
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        repository: DOCGroup/ACE_TAO
-        path: OpenDDS/ACE_TAO
-    - name: get ACE_TAO commit
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        export ACE_COMMIT=$(git rev-parse HEAD)
-        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get compiler version
-      shell: bash
-      run: |
-        export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
-        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
-    - name: get jdk version
-      shell: bash
-      run: |
-        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
-        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
-    - name: Cache Artifact
-      id: cache-artifact
-      uses: actions/cache@v6
+        ace-tao-path: OpenDDS/ACE_TAO
+        ace-tao-ref: master
+        mpc: false
+    - id: cache-artifact
+      uses: ./OpenDDS/.github/actions/ace-tao-cache
       with:
-        path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_master_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
+        key-version: c01
+        jdk: true
+        ace-tao-ref: master
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
+    - if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: ./OpenDDS/.github/actions/checkout-deps
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -2928,21 +2061,18 @@ jobs:
         make -j4
         cd ../TAO
         make -j4
-    - name: create ACE_TAO tar.xz artifact
+    - name: remove opendds features from default.features
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
-        xz -3 ../../${{ github.job }}.tar
-    - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v7
+        # let individual build configure scripts handle opendds features
+        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS/ACE_TAO
+        initial-files: ACE/ace/config.h
+        skip-pack: ${{ steps.cache-artifact.outputs.cache-hit == 'true' }}
 
   build_u24_acem_j_qt_ws_sec:
 
@@ -2951,35 +2081,23 @@ jobs:
     needs: ACE_TAO_u24_acem_j_qt_ws_sec
 
     steps:
-    - name: update apt
-      run: sudo apt-get update
-    - name: install dependencies
-      run: sudo apt-get -y install libxerces-c-dev wireshark-dev qtbase5-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u24_acem_j_qt_ws_sec_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_acem_j_qt_ws_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: false # Test that the configure script can download Google Test and RapidJSON
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
+        ace-tao-ref: master
+    - name: update apt
+      run: sudo apt-get update
+    - name: install dependencies
+      run: sudo apt-get -y install libxerces-c-dev wireshark-dev qtbase5-dev
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u24_acem_j_qt_ws_sec
+        path: ACE_TAO
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -3023,20 +2141,11 @@ jobs:
         cd OpenDDS/examples/DCPS/ishapes
         cmake -S . -B build
         cmake --build build -- -j4
-    - name: create OpenDDS tar.xz artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        rm -rf ACE_TAO
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar setenv.sh
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
-        xz -3 ../${{ github.job }}.tar
-    - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS
+        initial-files: setenv.sh
+        remove: ACE_TAO
 
   test_u24_acem_j_qt_ws_sec:
 
@@ -3049,131 +2158,36 @@ jobs:
       id-token: write
 
     steps:
-    - name: update apt
-      run: sudo apt-get update
-    - name: install dependencies
-      run: sudo apt-get -y install libxerces-c-dev wireshark-dev tshark qtbase5-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u24_acem_j_qt_ws_sec_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_acem_j_qt_ws_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        name: build_u24_acem_j_qt_ws_sec_artifact
+        ace-tao-path: ACE_TAO
+        ace-tao-ref: master
+    - name: update apt
+      run: sudo apt-get update
+    - name: install dependencies
+      run: sudo apt-get -y install libxerces-c-dev wireshark-dev tshark qtbase5-dev
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u24_acem_j_qt_ws_sec
+        path: ACE_TAO
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: build_u24_acem_j_qt_ws_sec
         path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u24_acem_j_qt_ws_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         tools/scripts/show_build_config.pl
-    - name: install gdb
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo apt-get install gdb
-        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
-    - name: change core file pattern
-      shell: bash
-      run: |
-        sudo sysctl -w kernel.core_pattern=core.%e.%p
-        echo Core file pattern set to:
-        cat /proc/sys/kernel/core_pattern
-    - name: run OpenDDS tests
-      shell: bash
-      run: |
-        ulimit -c unlimited
-        cd OpenDDS
-        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
-        . setenv.sh
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
-        <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_ace_config"/>
-        <command name="print_cmake_version"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config WIRESHARK --java --modeling --cmake"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="move prettify index"/>
-        </autobuild>
-        EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/run-autobuild
       with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v3
-      with:
-        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
-        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: get OpenDDS version
-      shell: bash
-      run: |
-        cd OpenDDS
-        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
-    - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v3'
-      with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
-        parent: false
-        process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: check results
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        test-options: -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config WIRESHARK --java --modeling --cmake
+    - uses: ./OpenDDS/.github/actions/scoreboard-upload
 
   ACE_TAO_u24_p1_asan:
 
@@ -3185,38 +2199,19 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: get ACE_TAO commit
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        export ACE_COMMIT=$(git rev-parse HEAD)
-        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get compiler version
-      shell: bash
-      run: |
-        export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
-        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
-    - name: Cache Artifact
-      id: cache-artifact
-      uses: actions/cache@v6
+        ace-tao-path: OpenDDS/ACE_TAO
+        mpc: false
+    - id: cache-artifact
+      uses: ./OpenDDS/.github/actions/ace-tao-cache
       with:
-        path: ${{ github.job }}.tar.xz
-        key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key-version: c11
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
+    - if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: ./OpenDDS/.github/actions/checkout-deps
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -3242,21 +2237,18 @@ jobs:
         make -j4
         cd ../TAO
         make -j4
-    - name: create ACE_TAO tar.xz artifact
+    - name: remove opendds features from default.features
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
-        xz -3 ../../${{ github.job }}.tar
-    - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v7
+        # let individual build configure scripts handle opendds features
+        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS/ACE_TAO
+        initial-files: ACE/ace/config.h
+        skip-pack: ${{ steps.cache-artifact.outputs.cache-hit == 'true' }}
 
   build_u24_p1_asan_sec:
 
@@ -3265,36 +2257,22 @@ jobs:
     needs: ACE_TAO_u24_p1_asan
 
     steps:
-    - name: Update apt indexes
-      run: sudo apt-get -y update
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u24_p1_asan_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_p1_asan.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
+    - name: Update apt indexes
+      run: sudo apt-get -y update
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u24_p1_asan
+        path: ACE_TAO
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -3332,20 +2310,10 @@ jobs:
           -DCMAKE_CXX_COMPILER=clang++-16 \
           -DCMAKE_CXX_STANDARD=11
         ASAN_OPTIONS=detect_leaks=0 cmake --build build -- -j4
-    - name: create OpenDDS tar.xz artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        rm -rf ACE_TAO
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar setenv.sh
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
-        xz -3 ../${{ github.job }}.tar
-    - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS
+        initial-files: setenv.sh
 
   test_u24_p1_asan_sec:
 
@@ -3358,51 +2326,31 @@ jobs:
       id-token: write
 
     steps:
-    - name: Update apt indexes
-      run: sudo apt-get -y update
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u24_p1_asan_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_p1_asan.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        name: build_u24_p1_asan_sec_artifact
+        ace-tao-path: ACE_TAO
+    - name: Update apt indexes
+      run: sudo apt-get -y update
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: checkout autobuild
+      uses: actions/checkout@v7
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u24_p1_asan
+        path: ACE_TAO
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: build_u24_p1_asan_sec
         path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u24_p1_asan_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -3496,38 +2444,19 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: get ACE_TAO commit
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        export ACE_COMMIT=$(git rev-parse HEAD)
-        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get compiler version
-      shell: bash
-      run: |
-        export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
-        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
-    - name: Cache Artifact
-      id: cache-artifact
-      uses: actions/cache@v6
+        ace-tao-path: OpenDDS/ACE_TAO
+        mpc: false
+    - id: cache-artifact
+      uses: ./OpenDDS/.github/actions/ace-tao-cache
       with:
-        path: ${{ github.job }}.tar.xz
-        key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key-version: c11
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
+    - if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: ./OpenDDS/.github/actions/checkout-deps
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -3551,21 +2480,18 @@ jobs:
         make -j4
         cd ../TAO
         make -j4
-    - name: create ACE_TAO tar.xz artifact
+    - name: remove opendds features from default.features
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
-        xz -3 ../../${{ github.job }}.tar
-    - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v7
+        # let individual build configure scripts handle opendds features
+        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS/ACE_TAO
+        initial-files: ACE/ace/config.h
+        skip-pack: ${{ steps.cache-artifact.outputs.cache-hit == 'true' }}
 
   build_u24_p1_tsan_sec:
 
@@ -3574,36 +2500,22 @@ jobs:
     needs: ACE_TAO_u24_p1_tsan
 
     steps:
-    - name: Update apt indexes
-      run: sudo apt-get -y update
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u24_p1_tsan_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_p1_tsan.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
+    - name: Update apt indexes
+      run: sudo apt-get -y update
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u24_p1_tsan
+        path: ACE_TAO
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -3630,20 +2542,10 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4
-    - name: create OpenDDS tar.xz artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        rm -rf ACE_TAO
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar setenv.sh
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
-        xz -3 ../${{ github.job }}.tar
-    - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS
+        initial-files: setenv.sh
 
   test_u24_p1_tsan_sec:
 
@@ -3656,51 +2558,31 @@ jobs:
       id-token: write
 
     steps:
-    - name: Update apt indexes
-      run: sudo apt-get -y update
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u24_p1_tsan_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_p1_tsan.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        name: build_u24_p1_tsan_sec_artifact
+        ace-tao-path: ACE_TAO
+    - name: Update apt indexes
+      run: sudo apt-get -y update
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: checkout autobuild
+      uses: actions/checkout@v7
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u24_p1_tsan
+        path: ACE_TAO
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: build_u24_p1_tsan_sec
         path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u24_p1_tsan_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -3794,38 +2676,19 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: get ACE_TAO commit
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        export ACE_COMMIT=$(git rev-parse HEAD)
-        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get compiler version
-      shell: bash
-      run: |
-        export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
-        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
-    - name: Cache Artifact
-      id: cache-artifact
-      uses: actions/cache@v6
+        ace-tao-path: OpenDDS/ACE_TAO
+        mpc: false
+    - id: cache-artifact
+      uses: ./OpenDDS/.github/actions/ace-tao-cache
       with:
-        path: ${{ github.job }}.tar.xz
-        key: c11_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key-version: c11
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
+    - if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: ./OpenDDS/.github/actions/checkout-deps
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -3851,21 +2714,18 @@ jobs:
         make -j2
         cd ../TAO
         make -j2
-    - name: create ACE_TAO tar.xz artifact
+    - name: remove opendds features from default.features
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
-        xz -3 ../../${{ github.job }}.tar
-    - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v7
+        # let individual build configure scripts handle opendds features
+        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS/ACE_TAO
+        initial-files: ACE/ace/config.h
+        skip-pack: ${{ steps.cache-artifact.outputs.cache-hit == 'true' }}
 
   build_u24_p1_ubsan_sec:
 
@@ -3874,36 +2734,22 @@ jobs:
     needs: ACE_TAO_u24_p1_ubsan
 
     steps:
-    - name: Update apt indexes
-      run: sudo apt-get -y update
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u24_p1_ubsan_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_p1_ubsan.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
+    - name: Update apt indexes
+      run: sudo apt-get -y update
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u24_p1_ubsan
+        path: ACE_TAO
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -3942,20 +2788,10 @@ jobs:
           -DCMAKE_CXX_COMPILER=clang++-16 \
           -DCMAKE_CXX_STANDARD=11
         cmake --build build -- -j4
-    - name: create OpenDDS tar.xz artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        rm -rf ACE_TAO
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar setenv.sh
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
-        xz -3 ../${{ github.job }}.tar
-    - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS
+        initial-files: setenv.sh
 
   test_u24_p1_ubsan_sec:
 
@@ -3968,51 +2804,31 @@ jobs:
       id-token: write
 
     steps:
-    - name: Update apt indexes
-      run: sudo apt-get -y update
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u24_p1_ubsan_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_p1_ubsan.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        name: build_u24_p1_ubsan_sec_artifact
+        ace-tao-path: ACE_TAO
+    - name: Update apt indexes
+      run: sudo apt-get -y update
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: checkout autobuild
+      uses: actions/checkout@v7
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u24_p1_ubsan
+        path: ACE_TAO
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: build_u24_p1_ubsan_sec
         path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u24_p1_ubsan_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -4103,6 +2919,15 @@ jobs:
     needs: openssl3_u24
 
     steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v7
+      with:
+        path: OpenDDS
+        submodules: true
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: OpenDDS/ACE_TAO
+        mpc: false
     - name: download openssl artifact
       uses: actions/download-artifact@v8
       with:
@@ -4112,48 +2937,16 @@ jobs:
       run: |
         tar xvJf openssl3_u24.tar.xz
         rm -f openssl3_u24.tar.xz
-    - name: checkout OpenDDS
-      uses: actions/checkout@v7
+    - id: cache-artifact
+      uses: ./OpenDDS/.github/actions/ace-tao-cache
       with:
-        path: OpenDDS
-        submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: get ACE_TAO commit
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        export ACE_COMMIT=$(git rev-parse HEAD)
-        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get compiler version
-      shell: bash
-      run: |
-        export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
-        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
-    - name: get jdk version
-      shell: bash
-      run: |
-        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
-        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
-    - name: Cache Artifact
-      id: cache-artifact
-      uses: actions/cache@v6
-      with:
-        path: ${{ github.job }}.tar.xz
-        key: c06_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
+        key-version: c06
+        jdk: true
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
+    - if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: ./OpenDDS/.github/actions/checkout-deps
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -4169,21 +2962,18 @@ jobs:
         make -j4
         cd ../TAO
         make -j4
-    - name: create ACE_TAO tar.xz artifact
+    - name: remove opendds features from default.features
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
-        xz -3 ../../${{ github.job }}.tar
-    - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v7
+        # let individual build configure scripts handle opendds features
+        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS/ACE_TAO
+        initial-files: ACE/ace/config.h
+        skip-pack: ${{ steps.cache-artifact.outputs.cache-hit == 'true' }}
 
   build_u24_p1_sec:
 
@@ -4192,6 +2982,14 @@ jobs:
     needs: ACE_TAO_u24_p1
 
     steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v7
+      with:
+        path: OpenDDS
+        submodules: true
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
     - name: download openssl artifact
       uses: actions/download-artifact@v8
       with:
@@ -4205,32 +3003,10 @@ jobs:
       run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
+        job: ACE_TAO_u24_p1
         path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u24_p1_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_p1.tar.xz
-    - name: checkout OpenDDS
-      uses: actions/checkout@v7
-      with:
-        path: OpenDDS
-        submodules: true
     - name: configure OpenDDS
       run: |
         SSL_DIR=$PWD/openssl_install
@@ -4256,20 +3032,10 @@ jobs:
         source setenv.sh
         cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
         cmake --build build -- -j4
-    - name: create OpenDDS tar.xz artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        rm -rf ACE_TAO
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar setenv.sh
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
-        xz -3 ../${{ github.job }}.tar
-    - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS
+        initial-files: setenv.sh
 
   test_u24_p1_sec:
 
@@ -4282,6 +3048,14 @@ jobs:
       id-token: write
 
     steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v7
+      with:
+        path: OpenDDS
+        submodules: true
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
     - name: download openssl artifact
       uses: actions/download-artifact@v8
       with:
@@ -4295,128 +3069,23 @@ jobs:
       run: sudo apt-get -y update
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
+        job: ACE_TAO_u24_p1
         path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        name: ACE_TAO_u24_p1_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_p1.tar.xz
-    - name: checkout OpenDDS
-      uses: actions/checkout@v7
-      with:
+        job: build_u24_p1_sec
         path: OpenDDS
-        submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: build_u24_p1_sec_artifact
-        path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u24_p1_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         tools/scripts/show_build_config.pl
-    - name: install gdb
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo apt-get install gdb
-        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
-    - name: change core file pattern
-      shell: bash
-      run: |
-        sudo sysctl -w kernel.core_pattern=core.%e.%p
-        echo Core file pattern set to:
-        cat /proc/sys/kernel/core_pattern
-    - name: run OpenDDS tests
-      shell: bash
-      run: |
-        ulimit -c unlimited
-        cd OpenDDS
-        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
-        . setenv.sh
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
-        <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_ace_config"/>
-        <command name="print_cmake_version"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON --security --cmake"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="move prettify index"/>
-        </autobuild>
-        EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/run-autobuild
       with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v3
-      with:
-        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
-        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: get OpenDDS version
-      shell: bash
-      run: |
-        cd OpenDDS
-        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
-    - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v3'
-      with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
-        parent: false
-        process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: check results
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        test-options: -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON --security --cmake
+    - uses: ./OpenDDS/.github/actions/scoreboard-upload
 
   valgrind_u24_p1_sec:
 
@@ -4429,6 +3098,14 @@ jobs:
       id-token: write
 
     steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v7
+      with:
+        path: OpenDDS
+        submodules: true
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
     - name: download openssl artifact
       uses: actions/download-artifact@v8
       with:
@@ -4442,47 +3119,19 @@ jobs:
       run: sudo apt-get -y update
     - name: install xerces and valgrind
       run: sudo apt-get -y install libxerces-c-dev valgrind
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
     - name: checkout autobuild
       uses: actions/checkout@v7
       with:
         repository: DOCGroup/autobuild
         path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
+        job: ACE_TAO_u24_p1
         path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        name: ACE_TAO_u24_p1_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_p1.tar.xz
-    - name: checkout OpenDDS
-      uses: actions/checkout@v7
-      with:
+        job: build_u24_p1_sec
         path: OpenDDS
-        submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: build_u24_p1_sec_artifact
-        path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u24_p1_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -4563,36 +3212,22 @@ jobs:
     needs: ACE_TAO_u24_p1
 
     steps:
-    - name: Update apt indexes
-      run: sudo apt-get -y update
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u24_p1_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_p1.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
+    - name: Update apt indexes
+      run: sudo apt-get -y update
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u24_p1
+        path: ACE_TAO
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -4630,20 +3265,10 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4 -C tools/modeling/tests
-    - name: create OpenDDS tar.xz artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        rm -rf ACE_TAO
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar setenv.sh
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
-        xz -3 ../${{ github.job }}.tar
-    - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS
+        initial-files: setenv.sh
 
   test_u24_p1_j8_FM-1f:
 
@@ -4656,132 +3281,35 @@ jobs:
       id-token: write
 
     steps:
-    - name: Update apt indexes
-      run: sudo apt-get -y update
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u24_p1_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u24_p1.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        name: build_u24_p1_j8_FM-1f_artifact
+        ace-tao-path: ACE_TAO
+    - name: Update apt indexes
+      run: sudo apt-get -y update
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u24_p1
+        path: ACE_TAO
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: build_u24_p1_j8_FM-1f
         path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u24_p1_j8_FM-1f.tar.xz
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         tools/scripts/show_build_config.pl
-    - name: install gdb
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo apt-get install gdb
-        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
-    - name: change core file pattern
-      shell: bash
-      run: |
-        sudo sysctl -w kernel.core_pattern=core.%e.%p
-        echo Core file pattern set to:
-        cat /proc/sys/kernel/core_pattern
-    - name: run OpenDDS tests
-      shell: bash
-      run: |
-        ulimit -c unlimited
-        cd OpenDDS
-        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
-        . setenv.sh
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
-        <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_ace_config"/>
-        <command name="print_cmake_version"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS --modeling --cmake"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="move prettify index"/>
-        </autobuild>
-        EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/run-autobuild
       with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v3
-      with:
-        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
-        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: get OpenDDS version
-      shell: bash
-      run: |
-        cd OpenDDS
-        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
-    - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v3'
-      with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
-        parent: false
-        process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: check results
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        test-options: -Config IPV6 -Config CXX11 -Config RAPIDJSON -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS --modeling --cmake
+    - uses: ./OpenDDS/.github/actions/scoreboard-upload
 
   ACE_TAO_u22_w1:
 
@@ -4793,43 +3321,20 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: get ACE_TAO commit
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        export ACE_COMMIT=$(git rev-parse HEAD)
-        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get compiler version
-      shell: bash
-      run: |
-        export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
-        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
-    - name: get jdk version
-      shell: bash
-      run: |
-        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
-        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
-    - name: Cache Artifact
-      id: cache-artifact
-      uses: actions/cache@v6
+        ace-tao-path: OpenDDS/ACE_TAO
+        mpc: false
+    - id: cache-artifact
+      uses: ./OpenDDS/.github/actions/ace-tao-cache
       with:
-        path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
+        key-version: c01
+        jdk: true
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
+    - if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: ./OpenDDS/.github/actions/checkout-deps
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -4844,21 +3349,18 @@ jobs:
         make -j4
         cd ../TAO
         make -j4
-    - name: create ACE_TAO tar.xz artifact
+    - name: remove opendds features from default.features
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
-        xz -3 ../../${{ github.job }}.tar
-    - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v7
+        # let individual build configure scripts handle opendds features
+        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS/ACE_TAO
+        initial-files: ACE/ace/config.h
+        skip-pack: ${{ steps.cache-artifact.outputs.cache-hit == 'true' }}
 
   build_u22_w1a1_sec:
 
@@ -4867,34 +3369,20 @@ jobs:
     needs: ACE_TAO_u22_w1
 
     steps:
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u22_w1_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u22_w1.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u22_w1
+        path: ACE_TAO
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -4917,20 +3405,10 @@ jobs:
         source setenv.sh
         cmake -S . -B build -DOPENDDS_JUST_BUILD_TESTS=TRUE
         cmake --build build -- -j4
-    - name: create OpenDDS tar.xz artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        rm -rf ACE_TAO
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar setenv.sh
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
-        xz -3 ../${{ github.job }}.tar
-    - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS
+        initial-files: setenv.sh
 
   test_u22_w1a1_sec:
 
@@ -4943,130 +3421,33 @@ jobs:
       id-token: write
 
     steps:
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u22_w1_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u22_w1.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        name: build_u22_w1a1_sec_artifact
+        ace-tao-path: ACE_TAO
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u22_w1
+        path: ACE_TAO
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: build_u22_w1a1_sec
         path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u22_w1a1_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         tools/scripts/show_build_config.pl
-    - name: install gdb
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo apt-get install gdb
-        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
-    - name: change core file pattern
-      shell: bash
-      run: |
-        sudo sysctl -w kernel.core_pattern=core.%e.%p
-        echo Core file pattern set to:
-        cat /proc/sys/kernel/core_pattern
-    - name: run OpenDDS tests
-      shell: bash
-      run: |
-        ulimit -c unlimited
-        cd OpenDDS
-        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
-        . setenv.sh
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
-        <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_ace_config"/>
-        <command name="print_cmake_version"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config WCHAR -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_UNIT_TESTS --security --cmake"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="move prettify index"/>
-        </autobuild>
-        EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/run-autobuild
       with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v3
-      with:
-        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
-        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: get OpenDDS version
-      shell: bash
-      run: |
-        cd OpenDDS
-        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
-    - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v3'
-      with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
-        parent: false
-        process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: check results
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        test-options: -Config WCHAR -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_UNIT_TESTS --security --cmake
+    - uses: ./OpenDDS/.github/actions/scoreboard-upload
 
   build_u22_w1_j_FM-2f:
 
@@ -5075,34 +3456,20 @@ jobs:
     needs: ACE_TAO_u22_w1
 
     steps:
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u22_w1_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u22_w1.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u22_w1
+        path: ACE_TAO
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -5140,20 +3507,10 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4 -C tools/modeling/tests
-    - name: create OpenDDS tar.xz artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        rm -rf ACE_TAO
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar setenv.sh
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
-        xz -3 ../${{ github.job }}.tar
-    - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS
+        initial-files: setenv.sh
 
   test_u22_w1_j_FM-2f:
 
@@ -5166,130 +3523,33 @@ jobs:
       id-token: write
 
     steps:
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u22_w1_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u22_w1.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        name: build_u22_w1_j_FM-2f_artifact
+        ace-tao-path: ACE_TAO
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u22_w1
+        path: ACE_TAO
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: build_u22_w1_j_FM-2f
         path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u22_w1_j_FM-2f.tar.xz
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         tools/scripts/show_build_config.pl
-    - name: install gdb
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo apt-get install gdb
-        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
-    - name: change core file pattern
-      shell: bash
-      run: |
-        sudo sysctl -w kernel.core_pattern=core.%e.%p
-        echo Core file pattern set to:
-        cat /proc/sys/kernel/core_pattern
-    - name: run OpenDDS tests
-      shell: bash
-      run: |
-        ulimit -c unlimited
-        cd OpenDDS
-        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
-        . setenv.sh
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
-        <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_ace_config"/>
-        <command name="print_cmake_version"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config WCHAR -Config CXX11 -Config RAPIDJSON -Config DDS_NO_CONTENT_SUBSCRIPTION -Config NO_UNIT_TESTS --java --modeling --cmake"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="move prettify index"/>
-        </autobuild>
-        EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/run-autobuild
       with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v3
-      with:
-        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
-        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: get OpenDDS version
-      shell: bash
-      run: |
-        cd OpenDDS
-        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
-    - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v3'
-      with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
-        parent: false
-        process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: check results
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        test-options: -Config WCHAR -Config CXX11 -Config RAPIDJSON -Config DDS_NO_CONTENT_SUBSCRIPTION -Config NO_UNIT_TESTS --java --modeling --cmake
+    - uses: ./OpenDDS/.github/actions/scoreboard-upload
 
   ACE_TAO_u22_stat_qt_ws_sec:
 
@@ -5301,29 +3561,14 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: get ACE_TAO commit
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        export ACE_COMMIT=$(git rev-parse HEAD)
-        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get compiler version
-      shell: bash
-      run: |
-        export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
-        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
-    - name: Cache Artifact
-      id: cache-artifact
-      uses: actions/cache@v6
+        ace-tao-path: OpenDDS/ACE_TAO
+        mpc: false
+    - id: cache-artifact
+      uses: ./OpenDDS/.github/actions/ace-tao-cache
       with:
-        path: ${{ github.job }}.tar.xz
-        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key-version: c02
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -5369,37 +3614,23 @@ jobs:
     needs: ACE_TAO_u22_stat_qt_ws_sec
 
     steps:
-    - name: update apt
-      run: sudo apt-get update
-    - name: install dependencies
-      run: sudo apt-get -y install libxerces-c-dev wireshark-dev qtbase5-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u22_stat_qt_ws_sec_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u22_stat_qt_ws_sec.tar.xz
-        rm ACE_TAO_u22_stat_qt_ws_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
+    - name: update apt
+      run: sudo apt-get update
+    - name: install dependencies
+      run: sudo apt-get -y install libxerces-c-dev wireshark-dev qtbase5-dev
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u22_stat_qt_ws_sec
+        path: ACE_TAO
+        remove-archive: true
     - name: setup gtest
       run: |
         cd OpenDDS/tests/googletest
@@ -5426,20 +3657,10 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4
-    - name: create OpenDDS tar.xz artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        rm -rf ACE_TAO
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar setenv.sh
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
-        xz -3 ../${{ github.job }}.tar
-    - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS
+        initial-files: setenv.sh
 
   cmake_u22_stat_qt_ws_sec:
 
@@ -5452,53 +3673,33 @@ jobs:
       id-token: write
 
     steps:
-    - name: update apt
-      run: sudo apt-get update
-    - name: install dependencies
-      run: sudo apt-get -y install libxerces-c-dev wireshark-dev qtbase5-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u22_stat_qt_ws_sec_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u22_stat_qt_ws_sec.tar.xz
-        rm ACE_TAO_u22_stat_qt_ws_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        name: build_u22_stat_qt_ws_sec_artifact
+        ace-tao-path: ACE_TAO
+    - name: update apt
+      run: sudo apt-get update
+    - name: install dependencies
+      run: sudo apt-get -y install libxerces-c-dev wireshark-dev qtbase5-dev
+    - name: checkout autobuild
+      uses: actions/checkout@v7
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u22_stat_qt_ws_sec
+        path: ACE_TAO
+        remove-archive: true
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: build_u22_stat_qt_ws_sec
         path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u22_stat_qt_ws_sec.tar.xz
-        rm build_u22_stat_qt_ws_sec.tar.xz
+        remove-archive: true
     - name: check build configuration
       shell: bash
       run: |
@@ -5599,55 +3800,35 @@ jobs:
       id-token: write
 
     steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v7
+      with:
+        path: OpenDDS
+        submodules: true
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: update apt
       run: sudo apt-get update
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
     - name: checkout autobuild
       uses: actions/checkout@v7
       with:
         repository: DOCGroup/autobuild
         path: autobuild
-    - name: checkout OpenDDS
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        path: OpenDDS
-        submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
+        job: ACE_TAO_u22_stat_qt_ws_sec
         path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
+        remove-archive: true
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        name: ACE_TAO_u22_stat_qt_ws_sec_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u22_stat_qt_ws_sec.tar.xz
-        rm ACE_TAO_u22_stat_qt_ws_sec.tar.xz
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: build_u22_stat_qt_ws_sec_artifact
+        job: build_u22_stat_qt_ws_sec
         path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u22_stat_qt_ws_sec.tar.xz
-        rm build_u22_stat_qt_ws_sec.tar.xz
+        remove-archive: true
     - name: setup gtest
       run: |
         cd OpenDDS/tests/googletest
@@ -5779,55 +3960,35 @@ jobs:
       id-token: write
 
     steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v7
+      with:
+        path: OpenDDS
+        submodules: true
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: update apt
       run: sudo apt-get update
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
     - name: checkout autobuild
       uses: actions/checkout@v7
       with:
         repository: DOCGroup/autobuild
         path: autobuild
-    - name: checkout OpenDDS
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        path: OpenDDS
-        submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
+        job: ACE_TAO_u22_stat_qt_ws_sec
         path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
+        remove-archive: true
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        name: ACE_TAO_u22_stat_qt_ws_sec_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u22_stat_qt_ws_sec.tar.xz
-        rm ACE_TAO_u22_stat_qt_ws_sec.tar.xz
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: build_u22_stat_qt_ws_sec_artifact
+        job: build_u22_stat_qt_ws_sec
         path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u22_stat_qt_ws_sec.tar.xz
-        rm build_u22_stat_qt_ws_sec.tar.xz
+        remove-archive: true
     - name: setup gtest
       run: |
         cd OpenDDS/tests/googletest
@@ -5945,55 +4106,35 @@ jobs:
       id-token: write
 
     steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v7
+      with:
+        path: OpenDDS
+        submodules: true
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: update apt
       run: sudo apt-get update
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
     - name: checkout autobuild
       uses: actions/checkout@v7
       with:
         repository: DOCGroup/autobuild
         path: autobuild
-    - name: checkout OpenDDS
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        path: OpenDDS
-        submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
+        job: ACE_TAO_u22_stat_qt_ws_sec
         path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
+        remove-archive: true
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        name: ACE_TAO_u22_stat_qt_ws_sec_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u22_stat_qt_ws_sec.tar.xz
-        rm ACE_TAO_u22_stat_qt_ws_sec.tar.xz
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: build_u22_stat_qt_ws_sec_artifact
+        job: build_u22_stat_qt_ws_sec
         path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u22_stat_qt_ws_sec.tar.xz
-        rm build_u22_stat_qt_ws_sec.tar.xz
+        remove-archive: true
     - name: setup gtest
       run: |
         cd OpenDDS/tests/googletest
@@ -6112,55 +4253,35 @@ jobs:
       id-token: write
 
     steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v7
+      with:
+        path: OpenDDS
+        submodules: true
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: update apt
       run: sudo apt-get update
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
     - name: checkout autobuild
       uses: actions/checkout@v7
       with:
         repository: DOCGroup/autobuild
         path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
+        job: ACE_TAO_u22_stat_qt_ws_sec
         path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
+        remove-archive: true
+    - uses: ./OpenDDS/.github/actions/extract-artifact
       with:
-        name: ACE_TAO_u22_stat_qt_ws_sec_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u22_stat_qt_ws_sec.tar.xz
-        rm ACE_TAO_u22_stat_qt_ws_sec.tar.xz
-    - name: checkout OpenDDS
-      uses: actions/checkout@v7
-      with:
+        job: build_u22_stat_qt_ws_sec
         path: OpenDDS
-        submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: build_u22_stat_qt_ws_sec_artifact
-        path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u22_stat_qt_ws_sec.tar.xz
-        rm build_u22_stat_qt_ws_sec.tar.xz
+        remove-archive: true
     - name: check build configuration
       shell: bash
       run: |
@@ -6266,34 +4387,15 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: get ACE_TAO commit
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        export ACE_COMMIT=$(git rev-parse HEAD)
-        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
-    - name: get compiler version
-      shell: bash
-      run: |
-        export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
-        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
-    - name: get jdk version
-      shell: bash
-      run: |
-        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
-        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
-    - name: Cache Artifact
-      id: cache-artifact
-      uses: actions/cache@v6
+        ace-tao-path: OpenDDS/ACE_TAO
+        mpc: false
+    - id: cache-artifact
+      uses: ./OpenDDS/.github/actions/ace-tao-cache
       with:
-        path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
+        key-version: c01
+        jdk: true
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -6317,21 +4419,18 @@ jobs:
         make -j4
         cd ../TAO
         make -j4
-    - name: create ACE_TAO tar.xz artifact
+    - name: remove opendds features from default.features
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
-        xz -3 ../../${{ github.job }}.tar
-    - name: upload ACE_TAO artifact
-      uses: actions/upload-artifact@v7
+        # let individual build configure scripts handle opendds features
+        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS/ACE_TAO
+        initial-files: ACE/ace/config.h
+        skip-pack: ${{ steps.cache-artifact.outputs.cache-hit == 'true' }}
 
   build_u22_j_cft0_FM-37:
 
@@ -6340,34 +4439,20 @@ jobs:
     needs: ACE_TAO_u22_j_cft0_FM-37
 
     steps:
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u22_j_cft0_FM-37_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u22_j_cft0_FM-37.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
+    - uses: ./OpenDDS/.github/actions/checkout-deps
+      with:
+        ace-tao-path: ACE_TAO
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u22_j_cft0_FM-37
+        path: ACE_TAO
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -6405,20 +4490,10 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4 -C tools/modeling/tests
-    - name: create OpenDDS tar.xz artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        rm -rf ACE_TAO
-        find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar setenv.sh
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
-        xz -3 ../${{ github.job }}.tar
-    - name: upload OpenDDS artifact
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/pack-artifact
       with:
-        name: ${{ github.job }}_artifact
-        path: ${{ github.job }}.tar.xz
+        dir: OpenDDS
+        initial-files: setenv.sh
 
   test_u22_j_cft0_FM-37:
 
@@ -6431,130 +4506,33 @@ jobs:
       id-token: write
 
     steps:
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: checkout MPC
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v7
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v8
-      with:
-        name: ACE_TAO_u22_j_cft0_FM-37_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u22_j_cft0_FM-37.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v7
       with:
         path: OpenDDS
         submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v8
+    - uses: ./OpenDDS/.github/actions/checkout-deps
       with:
-        name: build_u22_j_cft0_FM-37_artifact
+        ace-tao-path: ACE_TAO
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: ACE_TAO_u22_j_cft0_FM-37
+        path: ACE_TAO
+    - uses: ./OpenDDS/.github/actions/extract-artifact
+      with:
+        job: build_u22_j_cft0_FM-37
         path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u22_j_cft0_FM-37.tar.xz
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         tools/scripts/show_build_config.pl
-    - name: install gdb
-      shell: bash
-      run: |
-        sudo apt-get update
-        sudo apt-get install gdb
-        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
-    - name: change core file pattern
-      shell: bash
-      run: |
-        sudo sysctl -w kernel.core_pattern=core.%e.%p
-        echo Core file pattern set to:
-        cat /proc/sys/kernel/core_pattern
-    - name: run OpenDDS tests
-      shell: bash
-      run: |
-        ulimit -c unlimited
-        cd OpenDDS
-        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
-        . setenv.sh
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
-        <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_ace_config"/>
-        <command name="print_cmake_version"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RAPIDJSON -Config DDS_NO_CONTENT_FILTERED_TOPIC --modeling --cmake"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="move prettify index"/>
-        </autobuild>
-        EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v7
+    - uses: ./OpenDDS/.github/actions/run-autobuild
       with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v3
-      with:
-        workload_identity_provider: projects/30587790497/locations/global/workloadIdentityPools/gha-scoreboard-upload/providers/gha-provider
-        service_account: gha-scoreboard-uploader@opendds-support.iam.gserviceaccount.com
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: get OpenDDS version
-      shell: bash
-      run: |
-        cd OpenDDS
-        echo "OPENDDS_MAJOR_VERSION=$(grep '#define OPENDDS_MAJOR_VERSION' dds/Version.h | cut -d' ' -f3)" >> $GITHUB_ENV
-    - name: upload to Google Cloud
-      uses: 'google-github-actions/upload-cloud-storage@v3'
-      with:
-        path: OpenDDS/${{ github.job }}_autobuild_workspace/logs
-        destination: opendds-gha-scoreboard-uploads/${{ env.OPENDDS_MAJOR_VERSION }}/${{ github.job }}
-        parent: false
-        process_gcloudignore: false
-      if: ${{ github.repository == 'OpenDDS/OpenDDS' && github.ref == env.SCOREBOARD_UPLOAD_BRANCH }}
-    - name: check results
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/"*_Brief.html
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/logs/latest.txt"
+        test-options: -Config RAPIDJSON -Config DDS_NO_CONTENT_FILTERED_TOPIC --modeling --cmake
+    - uses: ./OpenDDS/.github/actions/scoreboard-upload
 
   ACE_TAO_w25_p1_stat_js0:
 
