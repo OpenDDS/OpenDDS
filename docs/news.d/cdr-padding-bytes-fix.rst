@@ -8,4 +8,9 @@
 - Readers now exclude declared padding from the serialized data when the padding is present, so it can't be read as a member of an XCDR1 ``@appendable`` type.
   Samples from older OpenDDS writers, which declare the padding without writing it, are still read in full.
   Older OpenDDS readers don't exclude the padding, so an XCDR1 ``@appendable`` member that the writer's type lacks may read as zero instead of being absent.
+  XCDR2, the default for OpenDDS writers, delimits ``@appendable`` types and isn't affected.
+.. news-end-section
+
+.. news-start-section: Documentation
+- Documented the limitations of XCDR1 compared to XCDR2 in :ref:`xtypes--xcdr1-support` and recommended using XCDR2 whenever all peers support it.
 .. news-end-section
