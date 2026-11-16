@@ -1431,13 +1431,16 @@ private:
 
   bool build_bitmask(const TypeModel& model, CompleteTypeObject& cto, std::string& error)
   {
-    // Validate extensibility, but leave the unused BitmaskTypeFlag zero
-    TypeFlag flags = 0;
-    if (!model.bitmask_model.extensibility.empty() &&
-        !type_flags(model.bitmask_model.extensibility, false, flags, error)) {
+    // Bitmasks are final or appendable, defaulting to appendable (XTypes 1.4, DDS-XML)
+    CompleteBitmaskType bt;
+    if (!type_flags(model.bitmask_model.extensibility, true, bt.bitmask_flags, error)) {
+      error = "bitmask '" + model.fq_name + "': " + error;
       return false;
     }
-    CompleteBitmaskType bt;
+    if (bt.bitmask_flags == IS_MUTABLE) {
+      error = "bitmask '" + model.fq_name + "': extensibility must be final or appendable";
+      return false;
+    }
     bt.header.common.bit_bound = model.bitmask_model.bit_bound;
     bt.header.detail.type_name = model.fq_name.c_str();
     for (size_t i = 0; i != model.bitmask_model.flags.size(); ++i) {
@@ -1459,7 +1462,7 @@ private:
     }
     if (value == "final") {
       flags = IS_FINAL;
-    } else if (value == "appendable") {
+    } else if (value == "appendable" || value == "append") {
       flags = IS_APPENDABLE;
     } else if (value == "mutable") {
       flags = IS_MUTABLE;

@@ -53,11 +53,10 @@ TEST(dds_DCPS_XTypes_TypeLookupService, AddBitmaskTypeObjectFlags)
   OpenDDS::DCPS::LogRestore restore;
   OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
 
-  // BitmaskTypeFlag is unused, so a bitmask without any flags is valid.
+  // No flags means appendable (XTypes 1.4)
   EXPECT_TRUE(added_to_cache(minimal_bitmask(0)));
   EXPECT_TRUE(added_to_cache(complete_bitmask(0)));
 
-  // Extensibility flags some producers set are also accepted.
   EXPECT_TRUE(added_to_cache(minimal_bitmask(IS_FINAL)));
   EXPECT_TRUE(added_to_cache(complete_bitmask(IS_FINAL)));
   EXPECT_TRUE(added_to_cache(minimal_bitmask(IS_APPENDABLE)));

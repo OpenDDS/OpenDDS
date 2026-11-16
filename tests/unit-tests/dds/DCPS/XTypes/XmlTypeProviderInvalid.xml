@@ -5,6 +5,10 @@
         <flag name="HIGH" value="40"/>
       </bitmask>
 
+      <bitmask name="MutableFlags" bitBound="8" extensibility="mutable">
+        <flag name="FLAG_A" value="0"/>
+      </bitmask>
+
       <union name="WideFlagUnion">
         <discriminator type="nonBasic" nonBasicTypeName="WideFlags"/>
         <case>

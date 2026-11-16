@@ -306,24 +306,47 @@ TEST(dds_DCPS_XTypes_XmlTypeProvider, RejectsNonExistentFile)
   EXPECT_FALSE(type);
 }
 
-TEST(dds_DCPS_XTypes_XmlTypeProvider, BitmaskTypeObjectFlagsAreZero)
+TEST(dds_DCPS_XTypes_XmlTypeProvider, BitmaskExtensibility)
 {
-  const char* const names[] = {
-    "XmlTypeProviderTest::Flags",
-    "XmlTypeProviderTest::AppendableFlags",
+  // Unspecified extensibility means appendable (XTypes 1.4, DDS-XML)
+  const struct {
+    const char* name;
+    OpenDDS::XTypes::TypeFlag flags;
+    DDS::ExtensibilityKind kind;
+  } cases[] = {
+    {"XmlTypeProviderTest::Flags", OpenDDS::XTypes::IS_APPENDABLE, DDS::APPENDABLE},
+    {"XmlTypeProviderTest::AppendableFlags", OpenDDS::XTypes::IS_APPENDABLE, DDS::APPENDABLE},
+    {"XmlTypeProviderTest::AppendFlags", OpenDDS::XTypes::IS_APPENDABLE, DDS::APPENDABLE},
+    {"XmlTypeProviderTest::FinalFlags", OpenDDS::XTypes::IS_FINAL, DDS::FINAL},
   };
-  for (size_t i = 0; i < sizeof names / sizeof names[0]; ++i) {
-    SCOPED_TRACE(names[i]);
-    DDS::DynamicType_var flags = load_type(names[i]);
+  for (size_t i = 0; i < sizeof cases / sizeof cases[0]; ++i) {
+    SCOPED_TRACE(cases[i].name);
+    DDS::DynamicType_var flags = load_type(cases[i].name);
     ASSERT_TRUE(flags);
+    DDS::TypeDescriptor_var descriptor;
+    ASSERT_EQ(DDS::RETCODE_OK, flags->get_descriptor(descriptor));
+    EXPECT_EQ(cases[i].kind, descriptor->extensibility_kind());
+
     DDS::DynamicTypeSupport_var ts = new DDS::DynamicTypeSupport(flags);
     const OpenDDS::XTypes::TypeMap& map = ts->getCompleteTypeMap();
     const OpenDDS::XTypes::TypeMap::const_iterator pos =
       map.find(ts->getCompleteTypeIdentifier());
     ASSERT_NE(map.end(), pos);
     ASSERT_EQ(OpenDDS::XTypes::TK_BITMASK, pos->second.complete.kind);
-    EXPECT_EQ(0u, pos->second.complete.bitmask_type.bitmask_flags);
+    EXPECT_EQ(cases[i].flags, pos->second.complete.bitmask_type.bitmask_flags);
   }
+}
+
+TEST(dds_DCPS_XTypes_XmlTypeProvider, RejectsMutableBitmask)
+{
+  OpenDDS::DCPS::LogRestore restore;
+  OpenDDS::DCPS::log_level.set(OpenDDS::DCPS::LogLevel::None);
+
+  DDS::DynamicType_var type;
+  EXPECT_EQ(DDS::RETCODE_ERROR,
+            OpenDDS::XTypes::load_xml_type(
+              type, INVALID_XML_TYPE_FILE, "XmlTypeProviderInvalid::MutableFlags"));
+  EXPECT_FALSE(type);
 }
 
 TEST(dds_DCPS_XTypes_XmlTypeProvider, BitmaskUnionIntrospection)
