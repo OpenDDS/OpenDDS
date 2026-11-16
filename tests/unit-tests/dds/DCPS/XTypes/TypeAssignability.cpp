@@ -3062,6 +3062,88 @@ TEST(dds_DCPS_XTypes_TypeAssignability, AliasTypeTest_NotAssignableFromCyclicAli
   EXPECT_TRUE(test.assignable(TypeObject(MinimalTypeObject(struct_type)), alias_e_id));
 }
 
+static TypeIdentifier insert_minimal(TypeAssignability& test, const TypeObject& tobj)
+{
+  EquivalenceHash hash;
+  get_equivalence_hash(hash);
+  const TypeIdentifier id = make(EK_MINIMAL, hash);
+  test.insert_entry(id, tobj);
+  return id;
+}
+
+// Returns the first alias of a two-hop alias chain ending at target
+static TypeIdentifier insert_alias_chain(TypeAssignability& test, const TypeIdentifier& target)
+{
+  MinimalAliasType last;
+  last.body.common.related_type = target;
+  MinimalAliasType first;
+  first.body.common.related_type = insert_minimal(test, TypeObject(MinimalTypeObject(last)));
+  return insert_minimal(test, TypeObject(MinimalTypeObject(first)));
+}
+
+TEST(dds_DCPS_XTypes_TypeAssignability, AliasTypeTest_AssignableFromAcyclicAliasChain)
+{
+  TypeAssignability test(make_rch<TypeLookupService>());
+
+  MinimalUnionType union_type;
+  union_type.union_flags = IS_APPENDABLE;
+  union_type.discriminator.common = CommonDiscriminatorMember(UnionDiscriminatorFlag(),
+                                                              TypeIdentifier(TK_INT32));
+  UnionCaseLabelSeq labels;
+  labels.append(1);
+  union_type.member_seq.append(
+    MinimalUnionMember(CommonUnionMember(1, UnionMemberFlag(), TypeIdentifier(TK_INT32), labels),
+                       MinimalMemberDetail("m1")));
+  MinimalSequenceType sequence_type;
+  sequence_type.element.common.type = TypeIdentifier(TK_INT32);
+  MinimalArrayType array_type;
+  array_type.header.common.bound_seq.append(10);
+  array_type.element.common.type = TypeIdentifier(TK_INT32);
+  MinimalMapType map_type;
+  map_type.key.common.type = TypeIdentifier(TK_INT32);
+  map_type.element.common.type = TypeIdentifier(TK_INT32);
+  MinimalEnumeratedType enum_type;
+  enum_type.enum_flags = IS_APPENDABLE;
+  enum_type.header.common.bit_bound = 32;
+  MinimalEnumeratedLiteral literal;
+  literal.common.value = 0;
+  literal.common.flags = IS_DEFAULT;
+  enum_type.literal_seq.append(literal);
+  MinimalBitmaskType bitmask_type;
+  bitmask_type.header.common.bit_bound = 8;
+
+  const TypeObject type_objects[] = {
+    TypeObject(MinimalTypeObject(union_type)),
+    TypeObject(MinimalTypeObject(sequence_type)),
+    TypeObject(MinimalTypeObject(array_type)),
+    TypeObject(MinimalTypeObject(map_type)),
+    TypeObject(MinimalTypeObject(enum_type)),
+    TypeObject(MinimalTypeObject(bitmask_type))
+  };
+  for (size_t i = 0; i < array_count(type_objects); ++i) {
+    SCOPED_TRACE(i);
+    const TypeIdentifier alias_id = insert_alias_chain(test, insert_minimal(test, type_objects[i]));
+    EXPECT_TRUE(test.assignable(type_objects[i], alias_id));
+  }
+
+  SBoundSeq array_bounds;
+  array_bounds.append(10);
+  const PlainMapSTypeDefn map_sdefn(PlainCollectionHeader(EquivalenceKind(EK_MINIMAL),
+                                                          CollectionElementFlag()),
+                                    SBound(10), TypeIdentifier(TK_INT32),
+                                    CollectionElementFlag(), TypeIdentifier(TK_INT32));
+  const TypeIdentifier type_ids[] = {
+    makeString(false, StringSTypeDefn(10)),
+    makePlainSequence(TypeIdentifier(TK_INT32), SBound(10)),
+    makePlainArray(TypeIdentifier(TK_INT32), array_bounds),
+    make(TI_PLAIN_MAP_SMALL, map_sdefn)
+  };
+  for (size_t i = 0; i < array_count(type_ids); ++i) {
+    SCOPED_TRACE(i);
+    EXPECT_TRUE(test.assignable(type_ids[i], insert_alias_chain(test, type_ids[i])));
+  }
+}
+
 TEST(dds_DCPS_XTypes_TypeAssignability, StructTypeTest_Assignable)
 {
   TypeAssignability test(make_rch<TypeLookupService>());
