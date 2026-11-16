@@ -354,6 +354,8 @@ XTypes :ref:`xtypes--data-representation` determines the format used by DataWrit
 The set of formats for a DataReader must include the formats used by the DataWriters for interoperability.
 The two interoperable formats supported by OpenDDS are :ref:`xtypes--xcdr1` and :ref:`xtypes--xcdr2`.
 OpenDDS DataReaders default to XCDR1 and XCDR2 and OpenDDS DataWriters default to XCDR2.
+As a result, OpenDDS readers and writers use XCDR2 with each other by default, while readers can still accept XCDR1 from writers that require it.
+XCDR2 should be preferred unless a peer only supports XCDR1; see :ref:`xtypes--xcdr1-support` for the limitations of XCDR1.
 For interoperability, the data representation should be considered and adjusted appropriately.
 
 The data representation can be changed using the :ref:`qos-data-representation`.

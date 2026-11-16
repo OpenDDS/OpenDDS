@@ -92,6 +92,7 @@ public:
   String to_string() const;
 
   static bool set_encapsulation_options(Message_Block_Ptr& mb);
+  static bool set_encapsulation_options(ACE_Message_Block& mb);
 
 private:
   /// The first two bytes as a big endian integer
@@ -140,8 +141,10 @@ struct EncapsulationReadStatus {
 
 /**
  * Read encapsulation header from Serializer, validate representation against
- * expected extensibility, and set the stream's encoding. Leaves the stream's
- * encoding unchanged unless EncapsulationReadStatus::Ok is returned.
+ * expected extensibility, and set the stream's encoding. If the declared
+ * trailing padding is present, set the read limit to exclude it. The stream
+ * must contain exactly one encapsulated sample. Leaves the stream's encoding
+ * unchanged unless EncapsulationReadStatus::Ok is returned.
  */
 OpenDDS_Dcps_Export
 EncapsulationReadStatus::Value read_encapsulation_header(

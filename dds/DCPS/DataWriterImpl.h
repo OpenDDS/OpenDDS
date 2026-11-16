@@ -613,6 +613,8 @@ protected:
     : valid_(true)
     , encoding_(kind, swap_the_bytes)
     , header_size_(encoding_.is_encapsulated() ? EncapsulationHeader::serialized_size : 0)
+    , padding_size_(encoding_.is_encapsulated() ?
+                    EncapsulationHeader::padding_marker_alignment - 1 : 0)
     , bound_(ts->serialized_size_bound(encoding_))
     , key_only_bound_(ts->key_only_serialized_size_bound(encoding_))
     {
@@ -635,19 +637,23 @@ protected:
 
     SerializedSizeBound buffer_size_bound() const
     {
-      return bound_ ? SerializedSizeBound(header_size_ + bound_.get()) : SerializedSizeBound();
+      return bound_ ? SerializedSizeBound(header_size_ + bound_.get() + padding_size_) :
+        SerializedSizeBound();
     }
 
     size_t buffer_size(const Sample& sample) const
     {
       const SerializedSizeBound bound = sample.key_only() ? key_only_bound_ : bound_;
-      return header_size_ + (bound ? bound.get() : sample.serialized_size(encoding_));
+      return header_size_ + (bound ? bound.get() : sample.serialized_size(encoding_)) +
+        padding_size_;
     }
 
   private:
     bool valid_;
     Encoding encoding_;
     size_t header_size_;
+    /// Room for the padding EncapsulationHeader::set_encapsulation_options appends
+    size_t padding_size_;
     SerializedSizeBound bound_;
     SerializedSizeBound key_only_bound_;
   } encoding_mode_;

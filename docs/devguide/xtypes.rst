@@ -417,7 +417,8 @@ XML
 
 XCDR1
     This is the pre-XTypes standard CDR extended with XTypes features.
-    See :ref:`xtypes--xcdr1-support` for details.
+    Use it only to interoperate with implementations that don't support XCDR2.
+    See :ref:`xtypes--xcdr1-support` for its limitations.
 
     The ``DataRepresentationId_t`` value is ``DDS::XCDR_DATA_REPRESENTATION``
 
@@ -426,8 +427,9 @@ XCDR1
 .. _xtypes--xcdr2:
 
 XCDR2
-    This is default for writers when using the :ref:`rtps-udp-transport` and should be preferred in most cases.
+    This is the default for writers when using the :ref:`rtps-udp-transport` and should be used unless a peer doesn't support it.
     It is a more robust and efficient version of XCDR1.
+    It delimits ``@appendable`` types so they can evolve at any nesting level, and it aligns members to at most 4 bytes, which makes samples with 64-bit members smaller.
 
     The ``DataRepresentationId_t`` value is ``DDS::XCDR2_DATA_REPRESENTATION``
 
@@ -448,7 +450,8 @@ Writers can only encode samples using only one data representation, but readers 
 .. warning::
 
   Because writers default to XCDR2 instead of XCDR1, they aren't likely to be compatible with readers from OpenDDS versions before 3.16 and other DDS implementations by default.
-  Either the remote readers will have to set to use XCDR2 if they support it or OpenDDS writers will have to be set to use XCDR1.
+  If the remote readers support XCDR2, prefer configuring them to accept it.
+  Otherwise, OpenDDS writers will have to be set to use XCDR1, subject to the limitations in :ref:`xtypes--xcdr1-support`.
 
   The example below shows a possible configuration for an XCDR1 DataWriter.
 
@@ -1538,6 +1541,19 @@ Consequently, a ``DynamicTypeSupport`` can use both XCDR1 and XCDR2, subject to 
 
 XCDR1 is useful when interoperating with implementations that do not support XCDR2.
 When interoperating with a pre-XTypes implementation, the additional restrictions in :ref:`xtypes--interoperability-with-non-xtypes-implementations` still apply; in particular, mutable types require XTypes-aware peers.
+
+Writers should only be configured for XCDR1 when a peer doesn't support XCDR2.
+XCDR1 has the following limitations compared to XCDR2:
+
+* XCDR1 doesn't prefix an ``@appendable`` type with a delimiter header.
+  A reader can still detect that a top-level sample lacks trailing members, but only by knowing exactly where the serialized data ends, which depends on the encapsulation padding and the transport.
+  Implementations, including OpenDDS before 3.35, haven't always agreed on that padding, so evolving a top-level ``@appendable`` type is fragile across vendors and versions.
+  A nested ``@appendable`` member isn't delimited at all, so evolving a nested ``@appendable`` type is only interoperable under XCDR2.
+
+* OpenDDS serializes ``@optional`` members of ``@final`` and ``@appendable`` types with a boolean presence flag in both encodings.
+  XCDR1 instead requires a member header whose length is zero when the member is absent (see :omgspec:`xtypes:7.4.3.5.2`), so these members aren't interoperable with other implementations under XCDR1.
+
+* XCDR1 aligns 64-bit members to 8 bytes and uses 4- or 12-byte member headers in ``@mutable`` types, so XCDR1 samples are usually larger than the same samples in XCDR2.
 
 .. _xtypes--type-system:
 
