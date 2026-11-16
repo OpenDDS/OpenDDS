@@ -1,0 +1,32 @@
+name: download and extract artifact
+description: Download the artifact produced by an earlier job and extract its tar.xz.
+
+inputs:
+  job:
+    description: Id of the job that produced the artifact
+    required: true
+  path:
+    description: Directory to download and extract into
+    required: true
+  remove-archive:
+    description: Delete the tar.xz after extracting to save disk space
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: download ${{ inputs.job }} artifact
+      uses: actions/download-artifact@v8
+      with:
+        name: ${{ inputs.job }}_artifact
+        path: ${{ inputs.path }}
+    - name: extract ${{ inputs.job }} artifact
+      shell: bash
+      env:
+        ARTIFACT_PATH: ${{ inputs.path }}
+        ARTIFACT_JOB: ${{ inputs.job }}
+        REMOVE_ARCHIVE: ${{ inputs.remove-archive }}
+      run: |
+        cd "$ARTIFACT_PATH"
+        tar xvfJ "$ARTIFACT_JOB.tar.xz"
+        if [ "$REMOVE_ARCHIVE" = true ]; then rm "$ARTIFACT_JOB.tar.xz"; fi
