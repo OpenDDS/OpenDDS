@@ -7,6 +7,7 @@
 
 #ifndef OPENDDS_SAFETY_PROFILE
 
+#  include <CompleteToMinimalTypeObjectTypeSupportImpl.h>
 #  include <XTypesUtilsTypeSupportImpl.h>
 
 #  include <dds/DCPS/TypeSupportImpl.h>
@@ -22,18 +23,19 @@ using namespace OpenDDS;
 
 namespace {
 
-// Counts LM_ERROR messages logged on this thread while in scope.
-class ErrorLogCounter : public ACE_Log_Msg_Callback {
+// Counts LM_ERROR and LM_WARNING messages logged on this thread while in scope.
+class LogCounter : public ACE_Log_Msg_Callback {
 public:
-  ErrorLogCounter()
-    : count_(0)
+  LogCounter()
+    : errors_(0)
+    , warnings_(0)
     , prev_callback_(ACE_LOG_MSG->msg_callback(this))
     , prev_flags_(ACE_LOG_MSG->flags())
   {
     ACE_LOG_MSG->set_flags(ACE_Log_Msg::MSG_CALLBACK);
   }
 
-  ~ErrorLogCounter()
+  ~LogCounter()
   {
     ACE_LOG_MSG->clr_flags(ACE_Log_Msg::MSG_CALLBACK);
     ACE_LOG_MSG->set_flags(prev_flags_);
@@ -43,17 +45,25 @@ public:
   void log(ACE_Log_Record& record)
   {
     if (record.type() == LM_ERROR) {
-      ++count_;
+      ++errors_;
+    } else if (record.type() == LM_WARNING) {
+      ++warnings_;
     }
   }
 
-  unsigned count() const
+  unsigned errors() const
   {
-    return count_;
+    return errors_;
+  }
+
+  unsigned warnings() const
+  {
+    return warnings_;
   }
 
 private:
-  unsigned count_;
+  unsigned errors_;
+  unsigned warnings_;
   ACE_Log_Msg_Callback* const prev_callback_;
   const unsigned long prev_flags_;
 };
@@ -65,9 +75,9 @@ void expect_complete_to_minimal_map()
   TypeSupportImplType ts;
   {
     // Converting a type before its dependencies logs an error
-    ErrorLogCounter errors;
+    LogCounter logs;
     ts.add_types(tls);
-    EXPECT_EQ(0u, errors.count());
+    EXPECT_EQ(0u, logs.errors());
   }
 
   XTypes::TypeIdentifier minimal_ti;
@@ -94,6 +104,26 @@ TEST(dds_DCPS_TypeSupportImpl, AddTypesManyMemberKinds)
 {
   expect_complete_to_minimal_map<XTypesUtils::LessThanStructTypeSupportImpl,
                                  DCPS::XTypesUtils_LessThanStruct_xtag>();
+}
+
+TEST(dds_DCPS_TypeSupportImpl, AddTypesKeepsMappingsWithRecursiveTypes)
+{
+  const XTypes::TypeLookupService_rch tls = DCPS::make_rch<XTypes::TypeLookupService>();
+  MyModCompleteToMinimal::MyStructTypeSupportImpl ts;
+  {
+    LogCounter logs;
+    ts.add_types(tls);
+    EXPECT_EQ(0u, logs.errors());
+    EXPECT_EQ(1u, logs.warnings());
+  }
+
+  XTypes::TypeIdentifier minimal_ti;
+  EXPECT_TRUE(tls->get_minimal_type_identifier(
+    DCPS::getCompleteTypeIdentifier<DCPS::MyModCompleteToMinimal_MyStruct_xtag>(), minimal_ti));
+  EXPECT_TRUE(DCPS::getMinimalTypeIdentifier<DCPS::MyModCompleteToMinimal_MyStruct_xtag>() == minimal_ti);
+  EXPECT_TRUE(tls->get_minimal_type_identifier(
+    DCPS::getCompleteTypeIdentifier<DCPS::MyModCompleteToMinimal_MyUnion_xtag>(), minimal_ti));
+  EXPECT_TRUE(DCPS::getMinimalTypeIdentifier<DCPS::MyModCompleteToMinimal_MyUnion_xtag>() == minimal_ti);
 }
 
 #endif
