@@ -148,7 +148,7 @@ Manager::pushImage(const DImage& image)
     if (!(in_cdr >> *qos)) {
       if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
         ACE_ERROR((LM_ERROR,
-          "(%P|%t) ERROR: UpdateManager::pushImage: failed to demarshal participant qos\n"));
+          "(%P|%t) ERROR: Manager::pushImage: failed to demarshal participant qos\n"));
       }
       delete qos;
       continue;
@@ -185,7 +185,7 @@ Manager::pushImage(const DImage& image)
     if (!(in_cdr >> *qos)) {
       if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
         ACE_ERROR((LM_ERROR,
-          "(%P|%t) ERROR: UpdateManager::pushImage: failed to demarshal topic qos\n"));
+          "(%P|%t) ERROR: Manager::pushImage: failed to demarshal topic qos\n"));
       }
       delete qos;
       continue;
@@ -240,7 +240,7 @@ Manager::pushImage(const DImage& image)
     if (!(in_cdr >> *trans)) {
       if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
         ACE_ERROR((LM_ERROR,
-          "(%P|%t) ERROR: UpdateManager::pushImage: failed to demarshal transport locators\n"));
+          "(%P|%t) ERROR: Manager::pushImage: failed to demarshal transport locators\n"));
       }
       continue;
     }
@@ -255,7 +255,7 @@ Manager::pushImage(const DImage& image)
     if (actor.serializedTypeInfo.first > 0 && !(ti_cdr >> *type_info_ptr)) {
       if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
         ACE_ERROR((LM_ERROR,
-          "(%P|%t) ERROR: UpdateManager::pushImage: failed to demarshal type info\n"));
+          "(%P|%t) ERROR: Manager::pushImage: failed to demarshal type info\n"));
       }
       continue;
     }
@@ -273,7 +273,7 @@ Manager::pushImage(const DImage& image)
       if (!(sub_cdr >> *sub_qos)) {
         if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
           ACE_ERROR((LM_ERROR,
-            "(%P|%t) ERROR: UpdateManager::pushImage: failed to demarshal subscriber qos\n"));
+            "(%P|%t) ERROR: Manager::pushImage: failed to demarshal subscriber qos\n"));
         }
         continue;
       }
@@ -285,7 +285,7 @@ Manager::pushImage(const DImage& image)
       if (!(read_cdr >> *reader_qos)) {
         if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
           ACE_ERROR((LM_ERROR,
-            "(%P|%t) ERROR: UpdateManager::pushImage: failed to demarshal datareader qos\n"));
+            "(%P|%t) ERROR: Manager::pushImage: failed to demarshal datareader qos\n"));
         }
         continue;
       }
@@ -315,7 +315,7 @@ Manager::pushImage(const DImage& image)
       if (!(pub_cdr >> *pub_qos)) {
         if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
           ACE_ERROR((LM_ERROR,
-            "(%P|%t) ERROR: UpdateManager::pushImage: failed to demarshal publisher qos\n"));
+            "(%P|%t) ERROR: Manager::pushImage: failed to demarshal publisher qos\n"));
         }
         continue;
       }
@@ -327,7 +327,7 @@ Manager::pushImage(const DImage& image)
       if (!(write_cdr >> *writer_qos)) {
         if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
           ACE_ERROR((LM_ERROR,
-            "(%P|%t) ERROR: UpdateManager::pushImage: failed to demarshal datawriter qos\n"));
+            "(%P|%t) ERROR: Manager::pushImage: failed to demarshal datawriter qos\n"));
         }
         continue;
       }
@@ -380,7 +380,7 @@ Manager::add(const DTopic& topic)
   if (!(in_cdr >> qos)) {
     if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
       ACE_ERROR((LM_ERROR,
-        "(%P|%t) ERROR: UpdateManager::add: failed to demarshal topic qos\n"));
+        "(%P|%t) ERROR: Manager::add: failed to demarshal topic qos\n"));
     }
     return;
   }
@@ -406,7 +406,7 @@ Manager::add(const DParticipant& participant)
   if (!(in_cdr >> qos)) {
     if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
       ACE_ERROR((LM_ERROR,
-        "(%P|%t) ERROR: UpdateManager::add: failed to demarshal participant qos\n"));
+        "(%P|%t) ERROR: Manager::add: failed to demarshal participant qos\n"));
     }
     return;
   }
