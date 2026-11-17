@@ -1,0 +1,8 @@
+project: dcpsexe, dcps_test, dcps_rtps_udp, googletest {
+  requires += no_opendds_safety_profile
+  exename = *
+
+  TypeSupport_Files {
+    NeverEnabledEntities.idl
+  }
+}
