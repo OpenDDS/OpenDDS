@@ -626,6 +626,13 @@ metadata_protection_kind
 
 Specifies the :ref:`dds_security--protection-kind` used for the RTPS SubMessages sent by any DataWriter and DataReader whose associated Topic name matches the rule's topic expression.
 
+.. warning::
+
+  If both ``metadata_protection_kind`` and :ref:`rtps_protection_kind <dds_security--rtps-protection-kind>` are ``NONE``, the RTPS SubMessages of the topic's DataWriters and DataReaders are not protected, even if :ref:`data_protection_kind <dds_security--data-protection-kind>` protects the payload.
+  This includes sequence numbers, heartbeats, gaps, and acknowledgements.
+  A sample with a protected payload can then be captured and resent under a different sequence number, and forged SubMessages can disrupt reliable delivery.
+  Use a ``metadata_protection_kind`` of at least ``SIGN``, or use ``rtps_protection_kind``, for topics that need protection against replay or interference with delivery.
+
 .. _dds_security--data-protection-kind:
 
 data_protection_kind
