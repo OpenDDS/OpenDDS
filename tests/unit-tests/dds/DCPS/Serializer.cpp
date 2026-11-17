@@ -4,8 +4,10 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <cstdlib>
 #include <cstring>
 #include <limits>
+#include <string>
 
 using namespace OpenDDS::DCPS;
 
@@ -1252,6 +1254,34 @@ ACE_CDR::LongDouble from_big_endian_binary128(const unsigned char (&be)[16])
   return value;
 }
 
+void hex_to_binary128(const char* hex, char* bytes)
+{
+  for (size_t i = 0; i < 16; ++i) {
+    const char digits[3] = {hex[2 * i], hex[2 * i + 1], 0};
+#ifdef ACE_BIG_ENDIAN
+    bytes[i] = static_cast<char>(std::strtoul(digits, 0, 16));
+#else
+    bytes[15 - i] = static_cast<char>(std::strtoul(digits, 0, 16));
+#endif
+  }
+}
+
+std::string binary128_to_hex(const char* bytes)
+{
+  static const char hex[] = "0123456789abcdef";
+  std::string result;
+  for (size_t i = 0; i < 16; ++i) {
+#ifdef ACE_BIG_ENDIAN
+    const unsigned char byte = static_cast<unsigned char>(bytes[i]);
+#else
+    const unsigned char byte = static_cast<unsigned char>(bytes[15 - i]);
+#endif
+    result += hex[byte >> 4];
+    result += hex[byte & 0xf];
+  }
+  return result;
+}
+
 }
 
 TEST(dds_DCPS_Serializer, Float128WireFormat)
@@ -1276,18 +1306,14 @@ TEST(dds_DCPS_Serializer, Float128WireFormat)
       Serializer in(&mb, encoding);
       ACE_CDR::LongDouble value = ACE_CDR_LONG_DOUBLE_INITIALIZER;
       ASSERT_TRUE(in >> value);
-      EXPECT_TRUE(value == values[i]);
+      EXPECT_EQ(static_cast<long double>(values[i]), static_cast<long double>(value));
     }
   }
 }
 
-#if ACE_SIZEOF_LONG_DOUBLE == 16 && !defined ACE_BIG_ENDIAN
+#if defined OPENDDS_X87_LONG_DOUBLE && ACE_SIZEOF_LONG_DOUBLE == 16
 TEST(dds_DCPS_Serializer, Float128X87Conversion)
 {
-  if (std::numeric_limits<long double>::digits != 64) {
-    return;
-  }
-
   // Fraction bit k of a big-endian binary128 is worth 2^(k - 112)
   struct Case {
     unsigned char exp_hi;
@@ -1336,5 +1362,80 @@ TEST(dds_DCPS_Serializer, Float128X87Conversion)
     binary128_to_longdouble(bytes, round_trip);
     EXPECT_EQ(exact[i], round_trip) << "value " << i;
   }
+
+  // A pseudo-denormal has the value of the smallest normal
+  long double odd;
+  unsigned char* const odd_bytes = reinterpret_cast<unsigned char*>(&odd);
+  std::memset(odd_bytes, 0, sizeof odd);
+  odd_bytes[7] = 0x80;
+  char bytes[16];
+  longdouble_to_binary128(odd, bytes);
+  EXPECT_EQ("00010000000000000000000000000000", binary128_to_hex(bytes));
+
+  // An unnormal (0.5 without the integer bit) is invalid on x87, so it's a NaN
+  odd_bytes[7] = 0x40;
+  odd_bytes[8] = 0xff;
+  odd_bytes[9] = 0x3f;
+  longdouble_to_binary128(odd, bytes);
+  EXPECT_EQ("7fff8000000000000000000000000000", binary128_to_hex(bytes));
 }
 #endif
+
+TEST(dds_DCPS_Serializer, Float128DoubleDoubleConversion)
+{
+  struct ToBinary128 {
+    double hi;
+    double lo;
+    const char* expected;
+  };
+  const ToBinary128 to_binary128[] = {
+    {1.0, 0.0, "3fff0000000000000000000000000000"},
+    {1.0, std::ldexp(1.0, -60), "3fff0000000000000010000000000000"},
+    {-2.5, 0.0, "c0004000000000000000000000000000"},
+    {-0.0, 0.0, "80000000000000000000000000000000"},
+    {1.0, std::ldexp(1.0, -113), "3fff0000000000000000000000000000"}, // Tie, rounds to even
+    {1.0, std::ldexp(3.0, -114), "3fff0000000000000000000000000001"}, // Above the tie
+    // Just below the tie only because of bits far below the 113 kept
+    {1.0, -std::ldexp(1.0, -114) - std::ldexp(1.0, -166), "3ffeffffffffffffffffffffffffffff"},
+    {1.0, std::ldexp(1.0, -200), "3fff0000000000000000000000000000"},
+    {std::numeric_limits<double>::denorm_min(), 0.0, "3bcd0000000000000000000000000000"},
+    {-std::numeric_limits<double>::infinity(), 0.0, "ffff0000000000000000000000000000"},
+  };
+  for (size_t i = 0; i < sizeof to_binary128 / sizeof to_binary128[0]; ++i) {
+    char bytes[16];
+    double_double_to_binary128(to_binary128[i].hi, to_binary128[i].lo, bytes);
+    EXPECT_EQ(to_binary128[i].expected, binary128_to_hex(bytes)) << "case " << i;
+  }
+
+  struct FromBinary128 {
+    const char* binary128;
+    double hi;
+    double lo;
+  };
+  const FromBinary128 from_binary128[] = {
+    {"3fff0000000000000000000000000000", 1.0, 0.0},
+    {"bfff8000000000000000000000000000", -1.5, 0.0},
+    {"3fff0000000000000010000000000000", 1.0, std::ldexp(1.0, -60)},
+    {"3fff0000000000000800000000000000", 1.0, std::ldexp(1.0, -53)}, // Tie, hi rounds to even
+    // Tie, hi rounds up to even and lo is negative
+    {"3fff0000000000001800000000000000", 1.0 + std::ldexp(1.0, -51), -std::ldexp(1.0, -53)},
+    {"3fff0000000000000000000000000001", 1.0, std::ldexp(1.0, -112)},
+    {"7ffeffffffffffffffffffffffffffff", std::numeric_limits<double>::infinity(), 0.0},
+    {"00000000000000000000000000000001", 0.0, 0.0},
+  };
+  for (size_t i = 0; i < sizeof from_binary128 / sizeof from_binary128[0]; ++i) {
+    char bytes[16];
+    hex_to_binary128(from_binary128[i].binary128, bytes);
+    double hi = 1, lo = 1;
+    binary128_to_double_double(bytes, hi, lo);
+    EXPECT_EQ(from_binary128[i].hi, hi) << "case " << i;
+    EXPECT_EQ(from_binary128[i].lo, lo) << "case " << i;
+  }
+
+  char nan[16];
+  hex_to_binary128("7fff0000000000000000000000000001", nan);
+  double hi = 0, lo = 1;
+  binary128_to_double_double(nan, hi, lo);
+  EXPECT_NE(hi, hi);
+  EXPECT_EQ(0.0, lo);
+}

@@ -694,6 +694,7 @@ Serializer::read_longdouble_array(ACE_CDR::LongDouble* x, ACE_CDR::ULong length)
   if (!align_r(float128_cdr_size)) {
     return false;
   }
+#ifdef OPENDDS_CONVERT_LONG_DOUBLE
   if (!check_size(length, float128_cdr_size)) {
     return false;
   }
@@ -704,6 +705,9 @@ Serializer::read_longdouble_array(ACE_CDR::LongDouble* x, ACE_CDR::ULong length)
       binary128_to_longdouble(bytes, x[i]);
     }
   }
+#else
+  read_array(reinterpret_cast<char*>(x), float128_cdr_size, length);
+#endif
   return good_bit();
 }
 
@@ -845,11 +849,15 @@ Serializer::write_longdouble_array(const ACE_CDR::LongDouble* x,
   if (!align_w(float128_cdr_size)) {
     return false;
   }
+#ifdef OPENDDS_CONVERT_LONG_DOUBLE
   char bytes[float128_cdr_size];
   for (ACE_CDR::ULong i = 0; i < length && good_bit(); ++i) {
     longdouble_to_binary128(x[i], bytes);
     buffer_write(bytes, float128_cdr_size, swap_bytes_);
   }
+#else
+  write_array(reinterpret_cast<const char*>(x), float128_cdr_size, length);
+#endif
   return good_bit();
 }
 

@@ -353,6 +353,14 @@ bool parse_hex_float128(const char* text, ACE_CDR::LongDouble& value)
   std::reverse(bytes, bytes + 16);
 #endif
   DCPS::binary128_to_longdouble(bytes, value);
+#ifdef OPENDDS_CONVERT_LONG_DOUBLE
+  char round_trip[16];
+  DCPS::longdouble_to_binary128(value, round_trip);
+  if (std::memcmp(bytes, round_trip, 16) && DCPS::log_level >= DCPS::LogLevel::Warning) {
+    ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: dynamic_data_json: float128 %C was rounded to fit long double\n",
+      text));
+  }
+#endif
   return true;
 }
 

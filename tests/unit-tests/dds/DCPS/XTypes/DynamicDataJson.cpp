@@ -155,9 +155,7 @@ TEST(dds_DCPS_XTypes_DynamicDataJson, Float128HexRoundTrip)
   ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_from_json(data, json));
   ACE_CDR::LongDouble value = ACE_CDR_LONG_DOUBLE_INITIALIZER;
   ASSERT_EQ(DDS::RETCODE_OK, data->get_float128_value(value, data->get_member_id_by_name("x1")));
-  ACE_CDR::LongDouble one;
-  ACE_CDR_LONG_DOUBLE_ASSIGNMENT(one, 1.0L);
-  EXPECT_TRUE(value == one);
+  EXPECT_EQ(1.0L, static_cast<long double>(value));
 
   std::string round_trip;
   ASSERT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_to_json(round_trip, data));
