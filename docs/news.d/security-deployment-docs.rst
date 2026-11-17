@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5341
 
 .. news-start-section: Documentation
 - Added a warning to :ref:`dds_security--metadata-protection-kind` that topics with neither metadata nor RTPS protection have no protection against replayed or forged RTPS submessages.
