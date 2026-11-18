@@ -21,8 +21,6 @@
 #include <ace/OS_Memory.h>
 #include <ace/Log_Msg.h>
 
-#include <algorithm>
-#include <cmath>
 #include <cstdlib>
 #include <cstring>
 #include <limits>
@@ -58,159 +56,10 @@ void wstring_free(ACE_CDR::WChar* ptr)
 }
 #endif
 
+#ifdef OPENDDS_X87_LONG_DOUBLE
 namespace {
 
-const ACE_UINT64 sign_bit = ACE_UINT64_LITERAL(1) << 63;
 const ACE_UINT64 low48 = (ACE_UINT64_LITERAL(1) << 48) - 1;
-const ACE_UINT64 low52 = (ACE_UINT64_LITERAL(1) << 52) - 1;
-const ACE_UINT64 double_exp_mask = ACE_UINT64_LITERAL(0x7ff) << 52;
-
-// binary128 as two host-order 64-bit halves: sign, exponent, and 48 fraction bits, then 64 more
-void store_binary128(ACE_UINT64 hi, ACE_UINT64 lo, char* bytes)
-{
-#ifdef ACE_BIG_ENDIAN
-  std::memcpy(bytes, &hi, 8);
-  std::memcpy(bytes + 8, &lo, 8);
-#else
-  std::memcpy(bytes, &lo, 8);
-  std::memcpy(bytes + 8, &hi, 8);
-#endif
-}
-
-void load_binary128(const char* bytes, ACE_UINT64& hi, ACE_UINT64& lo)
-{
-#ifdef ACE_BIG_ENDIAN
-  std::memcpy(&hi, bytes, 8);
-  std::memcpy(&lo, bytes + 8, 8);
-#else
-  std::memcpy(&lo, bytes, 8);
-  std::memcpy(&hi, bytes + 8, 8);
-#endif
-}
-
-struct U128 {
-  ACE_UINT64 hi, lo;
-  U128(ACE_UINT64 h, ACE_UINT64 l) : hi(h), lo(l) {}
-  bool operator==(const U128& o) const { return hi == o.hi && lo == o.lo; }
-  bool operator<(const U128& o) const { return hi < o.hi || (hi == o.hi && lo < o.lo); }
-};
-
-int top_bit(ACE_UINT64 x)
-{
-  int n = -1;
-  for (; x; x >>= 1) {
-    ++n;
-  }
-  return n;
-}
-
-int top_bit(const U128& x)
-{
-  return x.hi ? 64 + top_bit(x.hi) : top_bit(x.lo);
-}
-
-U128 shl(const U128& x, int n)
-{
-  if (n >= 64) {
-    return U128(x.lo << (n - 64), 0);
-  }
-  return n ? U128((x.hi << n) | (x.lo >> (64 - n)), x.lo << n) : x;
-}
-
-U128 shr(const U128& x, int n)
-{
-  if (n >= 128) {
-    return U128(0, 0);
-  }
-  if (n >= 64) {
-    return U128(0, x.hi >> (n - 64));
-  }
-  return n ? U128(x.hi >> n, (x.lo >> n) | (x.hi << (64 - n))) : x;
-}
-
-U128 low_bits(const U128& x, int n)
-{
-  if (n >= 128) {
-    return x;
-  }
-  return n ? shr(shl(x, 128 - n), 128 - n) : U128(0, 0);
-}
-
-U128 add(const U128& a, const U128& b)
-{
-  const ACE_UINT64 lo = a.lo + b.lo;
-  return U128(a.hi + b.hi + (lo < a.lo), lo);
-}
-
-U128 sub(const U128& a, const U128& b)
-{
-  return U128(a.hi - b.hi - (a.lo < b.lo), a.lo - b.lo);
-}
-
-ACE_UINT64 double_bits(double d)
-{
-  ACE_UINT64 bits;
-  std::memcpy(&bits, &d, 8);
-  return bits;
-}
-
-double bits_double(ACE_UINT64 bits)
-{
-  double d;
-  std::memcpy(&d, &bits, 8);
-  return d;
-}
-
-// A finite double as (-1)^neg * m * 2^scale
-struct Finite {
-  bool neg;
-  int scale;
-  ACE_UINT64 m;
-  explicit Finite(double d)
-  {
-    const ACE_UINT64 bits = double_bits(d);
-    const int exp = static_cast<int>((bits >> 52) & 0x7ff);
-    neg = (bits >> 63) != 0;
-    m = bits & low52;
-    if (exp) {
-      m |= ACE_UINT64_LITERAL(1) << 52;
-    }
-    scale = (exp ? exp : 1) - 1075;
-  }
-};
-
-// Round m * 2^scale to the nearest double (ties to even), setting rem to what's left over
-double round_to_double(const U128& m, int scale, U128& rem, bool& rem_neg)
-{
-  rem = U128(0, 0);
-  rem_neg = false;
-  const int p = top_bit(m);
-  if (p < 0) {
-    return 0.0;
-  }
-  // Significant bits available: 53, or fewer for subnormals
-  const int e = scale + p;
-  const int n = e < -1022 ? 53 - (-1022 - e) : 53;
-  const int k = p + 1 - n;
-  if (k <= 0) {
-    return std::ldexp(static_cast<double>(m.lo), scale);
-  }
-  U128 q = shr(m, k);
-  const U128 dropped = low_bits(m, k);
-  if (k <= 128) {
-    const U128 half = shl(U128(0, 1), k - 1);
-    if (half < dropped || (dropped == half && (q.lo & 1))) {
-      q = add(q, U128(0, 1));
-      rem = sub(shl(U128(0, 1), k), dropped);
-      rem_neg = true;
-      return std::ldexp(static_cast<double>(q.lo), scale + k);
-    }
-  }
-  rem = dropped;
-  return std::ldexp(static_cast<double>(q.lo), scale + k);
-}
-
-#ifdef OPENDDS_X87_LONG_DOUBLE
 const ACE_UINT64 x87_integer_bit = ACE_UINT64_LITERAL(1) << 63;
 const ACE_UINT64 x87_quiet_bit = ACE_UINT64_LITERAL(1) << 62;
 
@@ -230,14 +79,19 @@ void x87_to_binary128(const ACE_CDR::LongDouble& value, char* bytes)
     exp = 0x7fff;
     sig = x87_quiet_bit;
   }
+  // Little-endian binary128: 64 low fraction bits, then sign, exponent, and 48 high fraction bits
   const ACE_UINT64 frac = sig & ~x87_integer_bit;
-  store_binary128((sign << 63) | (exp << 48) | (frac >> 15), frac << 49, bytes);
+  const ACE_UINT64 lo = frac << 49;
+  const ACE_UINT64 hi = (sign << 63) | (exp << 48) | (frac >> 15);
+  std::memcpy(bytes, &lo, 8);
+  std::memcpy(bytes + 8, &hi, 8);
 }
 
 void binary128_to_x87(const char* bytes, ACE_CDR::LongDouble& value)
 {
-  ACE_UINT64 hi, lo;
-  load_binary128(bytes, hi, lo);
+  ACE_UINT64 lo, hi;
+  std::memcpy(&lo, bytes, 8);
+  std::memcpy(&hi, bytes + 8, 8);
   const unsigned int sign = static_cast<unsigned int>(hi >> 63);
   unsigned int exp = static_cast<unsigned int>(hi >> 48) & 0x7fff;
   // The top 63 of the 112 fraction bits, and the 49 below them
@@ -269,135 +123,14 @@ void binary128_to_x87(const char* bytes, ACE_CDR::LongDouble& value)
   dst[8] = static_cast<unsigned char>(exp & 0xff);
   dst[9] = static_cast<unsigned char>((sign << 7) | ((exp >> 8) & 0x7f));
 }
+
+}
 #endif
-
-}
-
-void double_double_to_binary128(double hi, double lo, char* bytes)
-{
-  // Inf or NaN in either part is the result, with the payload's top 52 bits
-  ACE_UINT64 special = double_bits(hi);
-  if ((special & double_exp_mask) != double_exp_mask) {
-    special = double_bits(lo);
-  }
-  if ((special & double_exp_mask) == double_exp_mask) {
-    const ACE_UINT64 frac = special & low52;
-    store_binary128((special & sign_bit) | (ACE_UINT64_LITERAL(0x7fff) << 48) | (frac >> 4),
-                    frac << 60, bytes);
-    return;
-  }
-
-  // Add the exact parts with the larger one's leading bit at bit 125 of r,
-  // which leaves room for a carry
-  Finite a(hi), b(lo);
-  if (!a.m && !b.m) {
-    store_binary128(a.neg ? sign_bit : 0, 0, bytes);
-    return;
-  }
-  if (!a.m || (b.m && b.scale + top_bit(b.m) > a.scale + top_bit(a.m))) {
-    std::swap(a, b);
-  }
-  const int shift_a = 125 - top_bit(a.m);
-  U128 r = shl(U128(0, a.m), shift_a);
-  int scale = a.scale - shift_a;
-  bool sticky = false;
-  if (b.m) {
-    U128 rb(0, b.m);
-    const int shift_b = b.scale - scale;
-    if (shift_b >= 0) {
-      rb = shl(rb, shift_b);
-    } else {
-      sticky = !(low_bits(rb, -shift_b) == U128(0, 0));
-      rb = shr(rb, -shift_b);
-    }
-    if (a.neg == b.neg) {
-      r = add(r, rb);
-    } else if (rb < r) {
-      // b was truncated toward zero, so a sticky b takes one more from r
-      r = sub(sub(r, rb), U128(0, sticky));
-    } else {
-      // Only possible when b wasn't truncated
-      r = sub(rb, r);
-      a.neg = b.neg;
-    }
-  }
-  if (r == U128(0, 0)) {
-    store_binary128(0, 0, bytes);
-    return;
-  }
-
-  // Normalize to 113 significant bits, rounding to nearest, ties to even
-  const int p = top_bit(r);
-  if (p > 112) {
-    const int k = p - 112;
-    const U128 dropped = low_bits(r, k);
-    const U128 half = shl(U128(0, 1), k - 1);
-    r = shr(r, k);
-    scale += k;
-    if (half < dropped || (dropped == half && (sticky || (r.lo & 1)))) {
-      r = add(r, U128(0, 1));
-      if (top_bit(r) > 112) {
-        r = shr(r, 1);
-        ++scale;
-      }
-    }
-  } else {
-    r = shl(r, 112 - p);
-    scale -= 112 - p;
-  }
-  const ACE_UINT64 exp = static_cast<ACE_UINT64>(scale + 112 + 16383);
-  store_binary128((a.neg ? sign_bit : 0) | (exp << 48) | (r.hi & low48), r.lo, bytes);
-}
-
-void binary128_to_double_double(const char* bytes, double& hi, double& lo)
-{
-  ACE_UINT64 bhi, blo;
-  load_binary128(bytes, bhi, blo);
-  const bool neg = (bhi >> 63) != 0;
-  const int exp = static_cast<int>(bhi >> 48) & 0x7fff;
-  U128 m(bhi & low48, blo);
-  lo = 0.0;
-
-  if (exp == 0x7fff) {
-    // Inf/NaN: truncate the payload and quiet any NaN
-    ACE_UINT64 bits = (neg ? sign_bit : 0) | (ACE_UINT64_LITERAL(0x7ff) << 52);
-    if (!(m == U128(0, 0))) {
-      bits |= (ACE_UINT64_LITERAL(1) << 51) | (m.hi << 4) | (m.lo >> 60);
-    }
-    hi = bits_double(bits);
-    return;
-  }
-
-  // hi is the nearest double and lo is the nearest double to the rest
-  if (exp) {
-    m.hi |= ACE_UINT64_LITERAL(1) << 48;
-  }
-  const int scale = (exp ? exp : 1) - 16383 - 112;
-  U128 rem(0, 0);
-  bool rem_neg = false;
-  hi = round_to_double(m, scale, rem, rem_neg);
-  if ((double_bits(hi) & double_exp_mask) != double_exp_mask) {
-    U128 unused(0, 0);
-    bool unused_neg = false;
-    lo = round_to_double(rem, scale, unused, unused_neg);
-    if (rem_neg) {
-      lo = -lo;
-    }
-  }
-  if (neg) {
-    hi = -hi;
-    lo = -lo;
-  }
-}
 
 void longdouble_to_binary128(const ACE_CDR::LongDouble& value, char* bytes)
 {
-#if defined OPENDDS_X87_LONG_DOUBLE
+#ifdef OPENDDS_X87_LONG_DOUBLE
   x87_to_binary128(value, bytes);
-#elif defined OPENDDS_DOUBLE_DOUBLE_LONG_DOUBLE
-  double parts[2];
-  std::memcpy(parts, &value, sizeof parts);
-  double_double_to_binary128(parts[0], parts[1], bytes);
 #else
   std::memcpy(bytes, &value, float128_cdr_size);
 #endif
@@ -405,12 +138,8 @@ void longdouble_to_binary128(const ACE_CDR::LongDouble& value, char* bytes)
 
 void binary128_to_longdouble(const char* bytes, ACE_CDR::LongDouble& value)
 {
-#if defined OPENDDS_X87_LONG_DOUBLE
+#ifdef OPENDDS_X87_LONG_DOUBLE
   binary128_to_x87(bytes, value);
-#elif defined OPENDDS_DOUBLE_DOUBLE_LONG_DOUBLE
-  double parts[2];
-  binary128_to_double_double(bytes, parts[0], parts[1]);
-  std::memcpy(&value, parts, sizeof parts);
 #else
   std::memcpy(&value, bytes, float128_cdr_size);
 #endif

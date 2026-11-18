@@ -4,7 +4,6 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
-#include <cstdlib>
 #include <cstring>
 #include <limits>
 #include <string>
@@ -1237,53 +1236,8 @@ TEST(dds_DCPS_Serializer, read_parameter_id_xcdr2_walk_past_end)
   }
 }
 
-namespace {
-
-ACE_CDR::LongDouble from_big_endian_binary128(const unsigned char (&be)[16])
-{
-  char bytes[16];
-  for (size_t i = 0; i < 16; ++i) {
-#ifdef ACE_BIG_ENDIAN
-    bytes[i] = static_cast<char>(be[i]);
-#else
-    bytes[i] = static_cast<char>(be[15 - i]);
-#endif
-  }
-  ACE_CDR::LongDouble value = ACE_CDR_LONG_DOUBLE_INITIALIZER;
-  binary128_to_longdouble(bytes, value);
-  return value;
-}
-
-void hex_to_binary128(const char* hex, char* bytes)
-{
-  for (size_t i = 0; i < 16; ++i) {
-    const char digits[3] = {hex[2 * i], hex[2 * i + 1], 0};
-#ifdef ACE_BIG_ENDIAN
-    bytes[i] = static_cast<char>(std::strtoul(digits, 0, 16));
-#else
-    bytes[15 - i] = static_cast<char>(std::strtoul(digits, 0, 16));
-#endif
-  }
-}
-
-std::string binary128_to_hex(const char* bytes)
-{
-  static const char hex[] = "0123456789abcdef";
-  std::string result;
-  for (size_t i = 0; i < 16; ++i) {
-#ifdef ACE_BIG_ENDIAN
-    const unsigned char byte = static_cast<unsigned char>(bytes[i]);
-#else
-    const unsigned char byte = static_cast<unsigned char>(bytes[15 - i]);
-#endif
-    result += hex[byte >> 4];
-    result += hex[byte & 0xf];
-  }
-  return result;
-}
-
-}
-
+// IBM double-double long double isn't converted to binary128
+#ifndef OPENDDS_DOUBLE_DOUBLE_LONG_DOUBLE
 TEST(dds_DCPS_Serializer, Float128WireFormat)
 {
   const unsigned char one[16] = {0x3f, 0xff};
@@ -1310,8 +1264,37 @@ TEST(dds_DCPS_Serializer, Float128WireFormat)
     }
   }
 }
+#endif
 
 #if defined OPENDDS_X87_LONG_DOUBLE && ACE_SIZEOF_LONG_DOUBLE == 16
+namespace {
+
+// x87 is little-endian, so binary128 is too
+ACE_CDR::LongDouble from_big_endian_binary128(const unsigned char (&be)[16])
+{
+  char bytes[16];
+  for (size_t i = 0; i < 16; ++i) {
+    bytes[i] = static_cast<char>(be[15 - i]);
+  }
+  ACE_CDR::LongDouble value = ACE_CDR_LONG_DOUBLE_INITIALIZER;
+  binary128_to_longdouble(bytes, value);
+  return value;
+}
+
+std::string binary128_to_hex(const char* bytes)
+{
+  static const char hex[] = "0123456789abcdef";
+  std::string result;
+  for (size_t i = 0; i < 16; ++i) {
+    const unsigned char byte = static_cast<unsigned char>(bytes[15 - i]);
+    result += hex[byte >> 4];
+    result += hex[byte & 0xf];
+  }
+  return result;
+}
+
+}
+
 TEST(dds_DCPS_Serializer, Float128X87Conversion)
 {
   // Fraction bit k of a big-endian binary128 is worth 2^(k - 112)
@@ -1380,62 +1363,3 @@ TEST(dds_DCPS_Serializer, Float128X87Conversion)
   EXPECT_EQ("7fff8000000000000000000000000000", binary128_to_hex(bytes));
 }
 #endif
-
-TEST(dds_DCPS_Serializer, Float128DoubleDoubleConversion)
-{
-  struct ToBinary128 {
-    double hi;
-    double lo;
-    const char* expected;
-  };
-  const ToBinary128 to_binary128[] = {
-    {1.0, 0.0, "3fff0000000000000000000000000000"},
-    {1.0, std::ldexp(1.0, -60), "3fff0000000000000010000000000000"},
-    {-2.5, 0.0, "c0004000000000000000000000000000"},
-    {-0.0, 0.0, "80000000000000000000000000000000"},
-    {1.0, std::ldexp(1.0, -113), "3fff0000000000000000000000000000"}, // Tie, rounds to even
-    {1.0, std::ldexp(3.0, -114), "3fff0000000000000000000000000001"}, // Above the tie
-    // Just below the tie only because of bits far below the 113 kept
-    {1.0, -std::ldexp(1.0, -114) - std::ldexp(1.0, -166), "3ffeffffffffffffffffffffffffffff"},
-    {1.0, std::ldexp(1.0, -200), "3fff0000000000000000000000000000"},
-    {std::numeric_limits<double>::denorm_min(), 0.0, "3bcd0000000000000000000000000000"},
-    {-std::numeric_limits<double>::infinity(), 0.0, "ffff0000000000000000000000000000"},
-  };
-  for (size_t i = 0; i < sizeof to_binary128 / sizeof to_binary128[0]; ++i) {
-    char bytes[16];
-    double_double_to_binary128(to_binary128[i].hi, to_binary128[i].lo, bytes);
-    EXPECT_EQ(to_binary128[i].expected, binary128_to_hex(bytes)) << "case " << i;
-  }
-
-  struct FromBinary128 {
-    const char* binary128;
-    double hi;
-    double lo;
-  };
-  const FromBinary128 from_binary128[] = {
-    {"3fff0000000000000000000000000000", 1.0, 0.0},
-    {"bfff8000000000000000000000000000", -1.5, 0.0},
-    {"3fff0000000000000010000000000000", 1.0, std::ldexp(1.0, -60)},
-    {"3fff0000000000000800000000000000", 1.0, std::ldexp(1.0, -53)}, // Tie, hi rounds to even
-    // Tie, hi rounds up to even and lo is negative
-    {"3fff0000000000001800000000000000", 1.0 + std::ldexp(1.0, -51), -std::ldexp(1.0, -53)},
-    {"3fff0000000000000000000000000001", 1.0, std::ldexp(1.0, -112)},
-    {"7ffeffffffffffffffffffffffffffff", std::numeric_limits<double>::infinity(), 0.0},
-    {"00000000000000000000000000000001", 0.0, 0.0},
-  };
-  for (size_t i = 0; i < sizeof from_binary128 / sizeof from_binary128[0]; ++i) {
-    char bytes[16];
-    hex_to_binary128(from_binary128[i].binary128, bytes);
-    double hi = 1, lo = 1;
-    binary128_to_double_double(bytes, hi, lo);
-    EXPECT_EQ(from_binary128[i].hi, hi) << "case " << i;
-    EXPECT_EQ(from_binary128[i].lo, lo) << "case " << i;
-  }
-
-  char nan[16];
-  hex_to_binary128("7fff0000000000000000000000000001", nan);
-  double hi = 0, lo = 1;
-  binary128_to_double_double(nan, hi, lo);
-  EXPECT_NE(hi, hi);
-  EXPECT_EQ(0.0, lo);
-}

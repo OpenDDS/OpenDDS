@@ -44,7 +44,8 @@
 #include <limits>
 #include <string>
 
-// Formats ACE_CDR::LongDouble can hold that differ from binary128 (CDR float128)
+// ACE_CDR::LongDouble holds x87 extended precision, which is converted to and from
+// binary128 (CDR float128), or IBM double-double, which isn't converted
 #if LDBL_MANT_DIG == 64 && !defined ACE_BIG_ENDIAN
 #  if !defined NONNATIVE_LONGDOUBLE || !defined ACE_CDR_IMPLEMENT_WITH_NATIVE_DOUBLE
 #    define OPENDDS_X87_LONG_DOUBLE
@@ -53,9 +54,6 @@
 #  endif
 #elif LDBL_MANT_DIG == 106 && ACE_SIZEOF_LONG_DOUBLE == 16
 #  define OPENDDS_DOUBLE_DOUBLE_LONG_DOUBLE
-#endif
-#if defined OPENDDS_X87_LONG_DOUBLE || defined OPENDDS_DOUBLE_DOUBLE_LONG_DOUBLE
-#  define OPENDDS_CONVERT_LONG_DOUBLE
 #endif
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -129,13 +127,6 @@ void longdouble_to_binary128(const ACE_CDR::LongDouble& value, char* bytes);
 
 OpenDDS_Dcps_Export
 void binary128_to_longdouble(const char* bytes, ACE_CDR::LongDouble& value);
-
-/// IBM double-double conversions, used by the above on PowerPC and exposed for testing
-OpenDDS_Dcps_Export
-void double_double_to_binary128(double hi, double lo, char* bytes);
-
-OpenDDS_Dcps_Export
-void binary128_to_double_double(const char* bytes, double& hi, double& lo);
 
 /**
  * Represents the serialization rules. Used to construct a
