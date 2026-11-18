@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5342
 
 .. news-start-section: Fixes
 - Fixed fragmented samples from writers that put several ``DATA_FRAG`` submessages in one RTPS message, as Cyclone DDS does.
