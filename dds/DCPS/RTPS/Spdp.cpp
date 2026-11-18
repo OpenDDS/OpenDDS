@@ -4047,41 +4047,55 @@ bool Spdp::participant_uses_rtps_duration_fraction(const DCPS::GUID_t& guid) con
 void
 Spdp::remove_lease_expiration_i(DiscoveredParticipantIter iter)
 {
-  for (std::pair<TimeQueue::iterator, TimeQueue::iterator> x = lease_expirations_.equal_range(iter->second.lease_expiration_);
+  if (iter->second.lease_queue_time_.is_zero()) {
+    return;
+  }
+
+  for (std::pair<TimeQueue::iterator, TimeQueue::iterator> x = lease_expirations_.equal_range(iter->second.lease_queue_time_);
        x.first != x.second; ++x.first) {
     if (x.first->second == iter->first) {
       lease_expirations_.erase(x.first);
       break;
     }
   }
+  iter->second.lease_queue_time_ = MonotonicTimePoint::zero_value;
+}
+
+void
+Spdp::insert_lease_expiration_i(DiscoveredParticipantIter iter,
+                                const DCPS::MonotonicTimePoint& when)
+{
+  lease_expirations_.insert(std::make_pair(when, iter->first));
+  iter->second.lease_queue_time_ = when;
 }
 
 void
 Spdp::update_lease_expiration_i(DiscoveredParticipantIter iter,
                                 const DCPS::MonotonicTimePoint& now)
 {
-  remove_lease_expiration_i(iter);
-
   // Compute new expiration.
   const DCPS::TimeDuration d =
     rtps_duration_to_time_duration(iter->second.pdata_.leaseDuration,
                                    iter->second.pdata_.participantProxy.protocolVersion,
                                    iter->second.pdata_.participantProxy.vendorId);
 
-  iter->second.lease_expiration_ = now + d + lease_extension_;
+  const MonotonicTimePoint expiration = now + d + lease_extension_;
+  iter->second.lease_expiration_ = expiration;
 
-  // Insert.
-  const bool cancel = !lease_expirations_.empty() && iter->second.lease_expiration_ < lease_expirations_.begin()->first;
-  const bool schedule = lease_expirations_.empty() || iter->second.lease_expiration_ < lease_expirations_.begin()->first;
-
-  lease_expirations_.insert(std::make_pair(iter->second.lease_expiration_, iter->first));
-
-  if (cancel) {
-    tport_->lease_expiration_event_->cancel();
+  // Common case: the participant is already queued no later than its new
+  // expiration.  Leave the entry alone; process_lease_expirations will
+  // re-queue it when it comes due.
+  if (!iter->second.lease_queue_time_.is_zero() &&
+      iter->second.lease_queue_time_ <= expiration) {
+    return;
   }
-  if (schedule) {
-    tport_->lease_expiration_event_->schedule(d);
-  }
+
+  // New participant, or its lease got shorter: (re)queue at the new expiration.
+  remove_lease_expiration_i(iter);
+  insert_lease_expiration_i(iter, expiration);
+
+  // SporadicEvent::schedule only moves the event earlier, never later.
+  tport_->lease_expiration_event_->schedule(expiration - now);
 }
 
 void
@@ -4089,35 +4103,55 @@ Spdp::process_lease_expirations(const MonotonicTimePoint& now)
 {
   ACE_GUARD (ACE_Thread_Mutex, g, lock_);
 
-  // Process one at a time to keep the thread responsive.
-  const TimeQueue::iterator pos = lease_expirations_.begin();
-  if (pos != lease_expirations_.end() && pos->first <= now) {
+  // Entries for participants that renewed their lease since being queued are
+  // re-queued at the actual expiration.  Re-queuing is cheap, so handle up to
+  // max_lease_entries_per_pass entries per call, but remove at most one
+  // participant to keep the thread responsive.
+  static const size_t max_lease_entries_per_pass = 256;
+  for (size_t i = 0; i < max_lease_entries_per_pass; ++i) {
+    const TimeQueue::iterator pos = lease_expirations_.begin();
+    if (pos == lease_expirations_.end() || pos->first > now) {
+      break;
+    }
+
+    const MonotonicTimePoint queue_time = pos->first;
     DiscoveredParticipantIter part = participants_.find(pos->second);
     // Pre-emptively erase so purge_discovered_participant will not modify lease_expirations_.
     lease_expirations_.erase(pos);
 
-    if (part != participants_.end()) {
-      if (DCPS::DCPS_debug_level) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Spdp::process_lease_expirations: "
-                   "participant %C exceeded lease duration, removing\n",
-                   DCPS::LogGuid(part->first).c_str()));
-      }
+    if (part == participants_.end() || part->second.lease_queue_time_ != queue_time) {
+      // Not the participant's current entry; drop it.
+      continue;
+    }
+    part->second.lease_queue_time_ = MonotonicTimePoint::zero_value;
+
+    if (now < part->second.lease_expiration_) {
+      // Lease was renewed after this entry was queued.
+      insert_lease_expiration_i(part, part->second.lease_expiration_);
+      continue;
+    }
+
+    if (DCPS::DCPS_debug_level) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Spdp::process_lease_expirations: "
+                 "participant %C exceeded lease duration, removing\n",
+                 DCPS::LogGuid(part->first).c_str()));
+    }
 
 #if OPENDDS_CONFIG_SECURITY
-      DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
-      if (sedp_endpoint) {
-        stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints,
-                 part->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
-      }
-      DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = tport_->get_ice_endpoint();
-      if (spdp_endpoint) {
-        ice_agent_->stop_ice(spdp_endpoint, guid_, part->first);
-      }
-      purge_handshake_deadlines(part);
-#endif
-      purge_discovered_participant(part);
-      participants_.erase(part);
+    DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
+    if (sedp_endpoint) {
+      stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints,
+               part->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
     }
+    DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = tport_->get_ice_endpoint();
+    if (spdp_endpoint) {
+      ice_agent_->stop_ice(spdp_endpoint, guid_, part->first);
+    }
+    purge_handshake_deadlines(part);
+#endif
+    purge_discovered_participant(part);
+    participants_.erase(part);
+    break;
   }
 
   if (!lease_expirations_.empty()) {

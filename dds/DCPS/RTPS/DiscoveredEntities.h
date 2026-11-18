@@ -152,7 +152,13 @@ struct DiscoveredParticipant {
 
   DCPS::NetworkAddress last_recv_address_;
   DCPS::MonotonicTimePoint discovered_at_;
+  /// When the participant's lease actually expires.  Updated on every SPDP
+  /// message from the participant.
   DCPS::MonotonicTimePoint lease_expiration_;
+  /// The key under which the participant is currently stored in
+  /// Spdp::lease_expirations_, or zero if it is not stored there.
+  /// Invariant: if not zero, lease_queue_time_ <= lease_expiration_.
+  DCPS::MonotonicTimePoint lease_queue_time_;
   DDS::InstanceHandle_t bit_ih_;
   DCPS::SequenceNumber max_seq_;
   ACE_UINT16 seq_reset_count_;
