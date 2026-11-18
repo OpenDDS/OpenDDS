@@ -364,8 +364,9 @@ bool TypeLookupService::set_type_object_defaults(TypeObject& to)
     break;
   case TK_BITMASK:
     {
+      // No flags means appendable (XTypes 1.4)
       const TypeFlag flags = to.minimal.bitmask_type.bitmask_flags & TypeFlagMinimalMask;
-      if (!(flags == IS_FINAL || flags == IS_APPENDABLE)) {
+      if (!(flags == 0 || flags == IS_FINAL || flags == IS_APPENDABLE)) {
         if (DCPS::log_level >= DCPS::LogLevel::Error) {
           ACE_ERROR((LM_ERROR,
                      "(%P|%t) ERROR: TypeLookupService::set_type_object_defaults: "
@@ -427,8 +428,9 @@ bool TypeLookupService::set_type_object_defaults(TypeObject& to)
     break;
   case TK_BITMASK:
     {
+      // No flags means appendable (XTypes 1.4)
       const TypeFlag flags = to.complete.bitmask_type.bitmask_flags & TypeFlagMinimalMask;
-      if (!(flags == IS_FINAL || flags == IS_APPENDABLE)) {
+      if (!(flags == 0 || flags == IS_FINAL || flags == IS_APPENDABLE)) {
         if (DCPS::log_level >= DCPS::LogLevel::Error) {
           ACE_ERROR((LM_ERROR,
                      "(%P|%t) ERROR: TypeLookupService::set_type_object_defaults: "
@@ -754,7 +756,8 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
   case TK_BITMASK: {
     td->kind(TK_BITMASK);
     td->name(cto.bitmask_type.header.detail.type_name.c_str());
-    td->extensibility_kind(type_flags_to_extensibility(cto.bitmask_type.bitmask_flags));
+    // No flags means appendable (XTypes 1.4)
+    td->extensibility_kind((cto.bitmask_type.bitmask_flags & IS_FINAL) ? DDS::FINAL : DDS::APPENDABLE);
     td->bound().length(1);
     td->bound()[0] = cto.bitmask_type.header.common.bit_bound;
     const DDS::DynamicType_var temp = type_identifier_to_dynamic(TypeIdentifier(TK_BOOLEAN), guid);

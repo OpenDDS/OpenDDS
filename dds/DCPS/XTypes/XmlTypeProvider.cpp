@@ -548,15 +548,29 @@ private:
   typedef OPENDDS_MAP(OPENDDS_STRING, TypeIdentifier) TypeIdentifierByName;
   typedef OPENDDS_SET(OPENDDS_STRING) NameSet;
 
-  // An EK_COMPLETE TypeIdentifier is ready for minimal conversion when it has
-  // already been erased from 'pending' (i.e. successfully converted in a
-  // previous iteration).  Non-EK_COMPLETE identifiers (primitives, strings,
-  // plain sequences/arrays) are always ready because the converter handles
-  // them without needing an entry in the pending set.
+  // False if ti, or a plain collection's element or key identifier, is an
+  // EK_COMPLETE identifier still pending conversion
   static bool complete_ti_ready(const TypeIdentifier& ti,
                                 const OPENDDS_SET(TypeIdentifier)& pending)
   {
-    return ti.kind() != EK_COMPLETE || !pending.count(ti);
+    switch (ti.kind()) {
+    case TI_PLAIN_SEQUENCE_SMALL:
+      return complete_ti_ready(*ti.seq_sdefn().element_identifier, pending);
+    case TI_PLAIN_SEQUENCE_LARGE:
+      return complete_ti_ready(*ti.seq_ldefn().element_identifier, pending);
+    case TI_PLAIN_ARRAY_SMALL:
+      return complete_ti_ready(*ti.array_sdefn().element_identifier, pending);
+    case TI_PLAIN_ARRAY_LARGE:
+      return complete_ti_ready(*ti.array_ldefn().element_identifier, pending);
+    case TI_PLAIN_MAP_SMALL:
+      return complete_ti_ready(*ti.map_sdefn().element_identifier, pending) &&
+             complete_ti_ready(*ti.map_sdefn().key_identifier, pending);
+    case TI_PLAIN_MAP_LARGE:
+      return complete_ti_ready(*ti.map_ldefn().element_identifier, pending) &&
+             complete_ti_ready(*ti.map_ldefn().key_identifier, pending);
+    default:
+      return ti.kind() != EK_COMPLETE || !pending.count(ti);
+    }
   }
 
   // Returns true if every EK_COMPLETE TypeIdentifier directly referenced by
@@ -1417,10 +1431,14 @@ private:
 
   bool build_bitmask(const TypeModel& model, CompleteTypeObject& cto, std::string& error)
   {
+    // Bitmasks are final or appendable, defaulting to appendable (XTypes 1.4, DDS-XML)
     CompleteBitmaskType bt;
-    if (model.bitmask_model.extensibility.empty()) {
-      bt.bitmask_flags = IS_FINAL;
-    } else if (!type_flags(model.bitmask_model.extensibility, false, bt.bitmask_flags, error)) {
+    if (!type_flags(model.bitmask_model.extensibility, true, bt.bitmask_flags, error)) {
+      error = "bitmask '" + model.fq_name + "': " + error;
+      return false;
+    }
+    if (bt.bitmask_flags == IS_MUTABLE) {
+      error = "bitmask '" + model.fq_name + "': extensibility must be final or appendable";
       return false;
     }
     bt.header.common.bit_bound = model.bitmask_model.bit_bound;
@@ -1444,7 +1462,7 @@ private:
     }
     if (value == "final") {
       flags = IS_FINAL;
-    } else if (value == "appendable") {
+    } else if (value == "appendable" || value == "append") {
       flags = IS_APPENDABLE;
     } else if (value == "mutable") {
       flags = IS_MUTABLE;
