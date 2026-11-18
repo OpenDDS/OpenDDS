@@ -2835,7 +2835,8 @@ void
 Spdp::SpdpTransport::write_i(WriteFlags flags)
 {
   DCPS::RcHandle<Spdp> outer = outer_.lock();
-  if (!outer) return;
+  // A send scheduled before shutdown can still run while the transports are being torn down.
+  if (!outer || outer->shutdown_flag_) return;
 
   if (!outer->undirected_spdp_) {
     return;
@@ -2969,7 +2970,7 @@ void
 Spdp::SpdpTransport::write_i(const DCPS::GUID_t& guid, const DCPS::NetworkAddress& local_address, WriteFlags flags)
 {
   DCPS::RcHandle<Spdp> outer = outer_.lock();
-  if (!outer) return;
+  if (!outer || outer->shutdown_flag_) return;
 
   const ParticipantData_t pdata = outer->build_local_pdata(
 #if OPENDDS_CONFIG_SECURITY
