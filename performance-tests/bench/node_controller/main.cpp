@@ -38,6 +38,7 @@
 #include <tests/Utils/StatusMatching.h>
 #include <Common.h>
 #include "ProcessStatsCollector.h"
+#include <HostNetworkStatsCollector.h>
 #include "PropertyStatBlock.h"
 
 using namespace Bench::NodeController;
@@ -347,6 +348,7 @@ public:
   bool run_spawned_processes(ReportDataWriter_var report_writer_impl)
   {
     ACE_Reactor::instance()->schedule_timer(this, nullptr, ACE_Time_Value(timeout_));
+    const Bench::HostNetworkStatsCollector host_network_stats;
     // Spawn Processes
     {
       std::lock_guard<std::mutex> guard(mutex_);
@@ -383,9 +385,13 @@ public:
     Report report{};
     report.spawned_process_reports.length(static_cast<CORBA::ULong>(all_spawned_processes_.size()));
     constexpr size_t max_stat_buffer_size = 3600; // one hour in seconds
-    auto cpu_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "cpu_percent", max_stat_buffer_size, true);
-    auto mem_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "mem_percent", max_stat_buffer_size, true);
-    auto virtual_mem_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "virtual_mem_percent", max_stat_buffer_size, true);
+    const bool process_stats_supported = ProcessStatsCollector::supported();
+    std::shared_ptr<Bench::PropertyStatBlock> cpu_block, mem_block, virtual_mem_block;
+    if (process_stats_supported) {
+      cpu_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "cpu_percent", max_stat_buffer_size, true);
+      mem_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "mem_percent", max_stat_buffer_size, true);
+      virtual_mem_block = std::make_shared<Bench::PropertyStatBlock>(report.properties, "virtual_mem_percent", max_stat_buffer_size, true);
+    }
     CORBA::ULong pos = 0;
     report.node_name = node_name_.c_str();
     report.node_id = node_id_;
@@ -396,6 +402,9 @@ public:
 
       while (running) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
+        if (!process_stats_supported) {
+          continue;
+        }
 
         double cpu_sum = 0.0;
         double mem_sum = 0.0;
@@ -487,9 +496,22 @@ public:
     stat_collector.join();
 
     try {
-      cpu_block->finalize();
-      mem_block->finalize();
-      virtual_mem_block->finalize();
+      if (process_stats_supported) {
+        cpu_block->finalize();
+        mem_block->finalize();
+        virtual_mem_block->finalize();
+      }
+
+      Bench::HostNetworkStatsCollector::CounterMap network_deltas;
+      const bool network_stats_available = host_network_stats.deltas(network_deltas);
+      Builder::get_or_create_property(report.properties,
+        Bench::HostNetworkStatsCollector::available_property_name,
+        Builder::PVK_ULL)->value.ull_prop(network_stats_available ? 1 : 0);
+      for (const auto& delta : network_deltas) {
+        Bench::PropertyStatBlock block(report.properties, delta.first, 1);
+        block.update(static_cast<double>(delta.second));
+        block.finalize();
+      }
     } catch (const std::exception& e) {
       std::cerr << Bench::iso8601() << ": Exception caught trying to finalize statistic blocks: " << e.what() << std::endl;
       return false;
@@ -583,6 +605,8 @@ enum class RunMode {
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
+  Bench::ignore_sigpipe();
+
   const char* cstr = ACE_OS::getenv("BENCH_ROOT");
   bench_root = cstr ? cstr : "";
   if (bench_root.empty()) {

@@ -7,6 +7,7 @@
 #include <ace/Lib_Find.h> // For ACE::get_temp_dir
 #include <ace/OS_NS_string.h> // For ACE_OS::strcpy
 #include <ace/OS_NS_sys_stat.h> // For ACE_OS::mkdir and ACE_OS::stat
+#include <ace/OS_NS_signal.h> // For ACE_OS::signal
 
 #include <iostream>
 #include <exception>
@@ -14,6 +15,13 @@
 #include <ctime>
 
 namespace Bench {
+
+void ignore_sigpipe()
+{
+#if defined SIGPIPE && !defined ACE_LACKS_UNIX_SIGNALS
+  ACE_OS::signal(SIGPIPE, (ACE_SignalHandler) SIG_IGN);
+#endif
+}
 
 std::string get_option_argument(int& i, int argc, ACE_TCHAR* argv[])
 {
