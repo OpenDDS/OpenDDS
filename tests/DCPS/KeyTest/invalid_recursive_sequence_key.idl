@@ -1,0 +1,18 @@
+// A recursive type can't be a key, since comparing it would need unbounded
+// generated code
+module XYZ {
+  struct Node;
+  typedef sequence<Node> Nodes;
+
+  @final
+  struct Node {
+    long value;
+    Nodes children;
+  };
+
+  @topic
+  @final
+  struct Tree {
+    @key Nodes roots;
+  };
+};
