@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5343
 
 .. news-start-section: Fixes
 - Choosing an address for a hostname no longer does a reverse DNS lookup when there is only one candidate address.
