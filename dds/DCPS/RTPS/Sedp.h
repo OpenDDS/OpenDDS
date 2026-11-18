@@ -957,8 +957,12 @@ private:
       DCPS::Serializer& ser,
       DCPS::Extensibility extensibility);
 
-    bool process_type_lookup_request(DCPS::Serializer& ser,
+    enum RequestResult { REQUEST_FAILED, REQUEST_IGNORED, REQUEST_REPLY };
+
+    RequestResult process_type_lookup_request(DCPS::Serializer& ser,
       XTypes::TypeLookup_Reply& type_lookup_reply);
+
+    bool is_for_this_participant(const char* instance_name) const;
 
     bool process_get_types_request(const XTypes::TypeLookup_Request& type_lookup_request,
       XTypes::TypeLookup_Reply& type_lookup_reply);
