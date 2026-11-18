@@ -243,9 +243,9 @@ private:
   class ThreadContainer {
   public:
     void set_manager_info(const ManagerInfo& manager_info);
-    void add_thread(const Thread& thread);
+    void add_thread(const String& name, const ThreadId& thread_id, ACE_thread_t handle);
     void update(Thread::ThreadStatus status, bool finished, bool nested, int detail1, int detail2,
-      const MonotonicTimePoint& m_now, const SystemTimePoint& s_now, const ThreadId& thread_id);
+      const ThreadId& thread_id);
     void harvest(const MonotonicTimePoint& start, List& running, List& finished) const;
 
   protected:
