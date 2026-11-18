@@ -11,6 +11,7 @@
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
 
+#include <ace/Log_Msg.h>
 #include <ace/Message_Block.h>
 
 #include "gtest/gtest.h"
@@ -1281,7 +1282,12 @@ TEST_F(dds_DCPS_security_CryptoBuiltInImpl_CryptoTransformTest,
       DDS::OctetSeq tampered(encoded), plain;
       regr_tamper_u16(tampered, BodyOctetsToNextOffset, static_cast<unsigned short>(remaining));
       SecurityException ex2;
-      EXPECT_FALSE(get_inst().decode_datawriter_submessage(plain, tampered, DDS::HANDLE_NIL, dwch, ex2));
+      // The expected SEC_POSTFIX failure logs an error, which test runs treat as a failure.
+      const u_long mask = ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS);
+      ACE_LOG_MSG->priority_mask(mask & ~LM_ERROR, ACE_Log_Msg::PROCESS);
+      const bool decoded = get_inst().decode_datawriter_submessage(plain, tampered, DDS::HANDLE_NIL, dwch, ex2);
+      ACE_LOG_MSG->priority_mask(mask, ACE_Log_Msg::PROCESS);
+      EXPECT_FALSE(decoded);
       EXPECT_STRNE("Submessage length out of bounds", ex2.message.in());
     }
 
