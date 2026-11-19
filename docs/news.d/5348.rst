@@ -1,0 +1,5 @@
+.. news-prs: 5348
+
+.. news-start-section: Fixes
+- RTPS discovery no longer sends participant announcements after its participant starts shutting down, which could log "Spdp::build_local_pdata: no locators".
+.. news-end-section
