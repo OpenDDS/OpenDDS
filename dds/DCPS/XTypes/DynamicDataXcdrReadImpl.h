@@ -463,6 +463,9 @@ private:
   /** Skip to an element with a given ID in a sequence or array, or skip the entire collection. */
   bool skip_to_sequence_element(MemberId id, DDS::DynamicType_ptr coll_type = 0);
   bool skip_to_array_element(MemberId id, DDS::DynamicType_ptr coll_type = 0);
+
+  /// Skip the first @a index elements of the collection at the current position
+  bool skip_elements(ACE_CDR::ULong index, DDS::DynamicType_ptr elem_type, bool use_cache);
   ///@}
 
   /// Skip to an element with a given ID in a map. The key associated with that
@@ -595,6 +598,15 @@ private:
   /// Cache the number of items (i.e., members or elements) in the data it holds.
   ACE_CDR::ULong item_count_;
   ACE_CDR::ULong item_count_limit_;
+
+  /// Nesting level of this object (1 at the top), limited by Serializer::max_nesting_depth()
+  unsigned depth_;
+
+  /// Index and read position of the last collection element located by skip_elements
+  ACE_CDR::ULong cached_elem_index_;
+  size_t cached_elem_rpos_;
+
+  bool can_nest() const;
 };
 
 OpenDDS_Dcps_Export bool print_dynamic_data(DDS::DynamicData_ptr dd,
