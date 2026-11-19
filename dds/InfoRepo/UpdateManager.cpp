@@ -148,7 +148,7 @@ Manager::pushImage(const DImage& image)
     if (!(in_cdr >> *qos)) {
       if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
         ACE_ERROR((LM_ERROR,
-          "(%P|%t) ERROR: UpdateManager::pushImage: failed to demarshal participant qos\n"));
+          "(%P|%t) ERROR: Manager::pushImage: failed to demarshal participant qos\n"));
       }
       delete qos;
       continue;
@@ -185,7 +185,7 @@ Manager::pushImage(const DImage& image)
     if (!(in_cdr >> *qos)) {
       if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
         ACE_ERROR((LM_ERROR,
-          "(%P|%t) ERROR: UpdateManager::pushImage: failed to demarshal topic qos\n"));
+          "(%P|%t) ERROR: Manager::pushImage: failed to demarshal topic qos\n"));
       }
       delete qos;
       continue;
@@ -237,14 +237,28 @@ Manager::pushImage(const DImage& image)
     OpenDDS::DCPS::TransportLocatorSeq* trans;
     ACE_NEW_NORETURN(trans, OpenDDS::DCPS::TransportLocatorSeq);
     transports.push_back(trans);
-    in_cdr >> *trans;
+    if (!(in_cdr >> *trans)) {
+      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+          "(%P|%t) ERROR: Manager::pushImage: failed to demarshal transport locators\n"));
+      }
+      continue;
+    }
 
     TAO_InputCDR ti_cdr(actor.serializedTypeInfo.second
                         , actor.serializedTypeInfo.first);
     DDS::OctetSeq* type_info_ptr;
     ACE_NEW_NORETURN(type_info_ptr, DDS::OctetSeq);
     serializedTypeInfoSeq.push_back(type_info_ptr);
-    ti_cdr >> *type_info_ptr;
+    // Type info may be absent (e.g. actors restored from persistence);
+    // only a non-empty buffer that fails to decode is an error.
+    if (actor.serializedTypeInfo.first > 0 && !(ti_cdr >> *type_info_ptr)) {
+      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+          "(%P|%t) ERROR: Manager::pushImage: failed to demarshal type info\n"));
+      }
+      continue;
+    }
 
     DDS::PublisherQos* pub_qos = 0;
     DDS::DataWriterQos* writer_qos = 0;
@@ -256,13 +270,25 @@ Manager::pushImage(const DImage& image)
                            , actor.pubsubQos.second.first);
       ACE_NEW_NORETURN(sub_qos, DDS::SubscriberQos);
       sub_qos_seq.push_back(sub_qos);
-      sub_cdr >> *sub_qos;
+      if (!(sub_cdr >> *sub_qos)) {
+        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+            "(%P|%t) ERROR: Manager::pushImage: failed to demarshal subscriber qos\n"));
+        }
+        continue;
+      }
 
       TAO_InputCDR read_cdr(actor.drdwQos.second.second
                             , actor.drdwQos.second.first);
       ACE_NEW_NORETURN(reader_qos, DDS::DataReaderQos);
       dr_qos_seq.push_back(reader_qos);
-      read_cdr >> *reader_qos;
+      if (!(read_cdr >> *reader_qos)) {
+        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+            "(%P|%t) ERROR: Manager::pushImage: failed to demarshal datareader qos\n"));
+        }
+        continue;
+      }
 
       csi.filterClassName = actor.contentSubscriptionProfile.filterClassName.c_str();
       csi.filterExpr = actor.contentSubscriptionProfile.filterExpr.c_str();
@@ -286,13 +312,25 @@ Manager::pushImage(const DImage& image)
                            , actor.pubsubQos.second.first);
       ACE_NEW_NORETURN(pub_qos, DDS::PublisherQos);
       pub_qos_seq.push_back(pub_qos);
-      pub_cdr >> *pub_qos;
+      if (!(pub_cdr >> *pub_qos)) {
+        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+            "(%P|%t) ERROR: Manager::pushImage: failed to demarshal publisher qos\n"));
+        }
+        continue;
+      }
 
       TAO_InputCDR write_cdr(actor.drdwQos.second.second
                              , actor.drdwQos.second.first);
       ACE_NEW_NORETURN(writer_qos, DDS::DataWriterQos);
       dw_qos_seq.push_back(writer_qos);
-      write_cdr >> *writer_qos;
+      if (!(write_cdr >> *writer_qos)) {
+        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+            "(%P|%t) ERROR: Manager::pushImage: failed to demarshal datawriter qos\n"));
+        }
+        continue;
+      }
 
       UWActor* writer;
       ACE_NEW_NORETURN(writer
@@ -342,7 +380,7 @@ Manager::add(const DTopic& topic)
   if (!(in_cdr >> qos)) {
     if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
       ACE_ERROR((LM_ERROR,
-        "(%P|%t) ERROR: UpdateManager::add: failed to demarshal topic qos\n"));
+        "(%P|%t) ERROR: Manager::add: failed to demarshal topic qos\n"));
     }
     return;
   }
@@ -368,7 +406,7 @@ Manager::add(const DParticipant& participant)
   if (!(in_cdr >> qos)) {
     if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
       ACE_ERROR((LM_ERROR,
-        "(%P|%t) ERROR: UpdateManager::add: failed to demarshal participant qos\n"));
+        "(%P|%t) ERROR: Manager::add: failed to demarshal participant qos\n"));
     }
     return;
   }
