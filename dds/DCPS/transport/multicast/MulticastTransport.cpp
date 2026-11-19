@@ -171,6 +171,9 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
 
   if (link_iter == this->client_links_.end()) {
     link = this->make_datalink(attribs.local_id_, attribs.priority_, true /*active*/);
+    if (!link) {
+      return AcceptConnectResult(AcceptConnectResult::ACR_FAILED);
+    }
     this->client_links_[local_peer] = link;
   } else {
     link = link_iter->second;
@@ -234,6 +237,9 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
   if (link_iter == this->server_links_.end()) {
 
     link = this->make_datalink(attribs.local_id_, attribs.priority_, false /*passive*/);
+    if (!link) {
+      return AcceptConnectResult(AcceptConnectResult::ACR_FAILED);
+    }
     this->server_links_[local_peer] = link;
   } else {
     link = link_iter->second;

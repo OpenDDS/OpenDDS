@@ -1,0 +1,5 @@
+.. news-prs: 5346
+
+.. news-start-section: Fixes
+- The multicast transport no longer crashes when it fails to join its multicast group; the association fails instead.
+.. news-end-section
