@@ -1021,7 +1021,7 @@ size_t fact(size_t val)
 }
 
 template <typename T>
-void swap(T* a, T* b)
+void swap_elements(T* a, T* b)
 {
   T temp = *a;
   *a = *b;
@@ -1036,7 +1036,7 @@ bool permute(T* list, size_t size, size_t state)
   const size_t swap_index = state / sub_size;
   const size_t mod = state % sub_size;
   if (swap_index) {
-    swap(list, list + swap_index);
+    swap_elements(list, list + swap_index);
   }
   permute(list + 1, size - 1, mod);
   return state + 1 == size * sub_size;
@@ -1051,7 +1051,7 @@ bool unpermute(T* list, size_t size, size_t state)
   const size_t mod = state % sub_size;
   unpermute(list + 1, size - 1, mod);
   if (swap_index) {
-    swap(list, list + swap_index);
+    swap_elements(list, list + swap_index);
   }
   return state + 1 == size * sub_size;
 }

@@ -96,11 +96,12 @@ public:
     return preset_type_info_set_ ? &preset_type_info_ : 0;
   }
 
+  // Not DDS::DynamicTypeMembersByName: libc++ orders a map keyed by TAO::String_Manager
+  // by address, since it ignores TAO's std::less specialization
+  typedef OPENDDS_MAP(DCPS::String, DDS::DynamicTypeMember_var) DynamicTypeMembersByName;
 #if OPENDDS_CONFIG_IDL_MAP
-  typedef DDS::DynamicTypeMembersByName DynamicTypeMembersByName;
   typedef DDS::DynamicTypeMembersById DynamicTypeMembersById;
 #else
-  typedef OPENDDS_MAP(DCPS::String, DDS::DynamicTypeMember_var) DynamicTypeMembersByName;
   typedef OPENDDS_MAP(DDS::MemberId, DDS::DynamicTypeMember_var) DynamicTypeMembersById;
 #endif
 
