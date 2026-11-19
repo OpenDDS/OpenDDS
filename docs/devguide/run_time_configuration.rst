@@ -592,6 +592,14 @@ For example:
 
     See :ref:`run_time_configuration--logging` for details.
 
+  .. prop:: DCPSMaxNestingDepth=<n>
+    :default: ``256``
+
+    The maximum depth of nested structs, unions, and collections read from a received sample, a ``TypeObject``, or JSON input for dynamic data.
+    Content filter and query expressions are limited to the same number of parentheses and ``AND``, ``OR``, and ``NOT`` operators.
+    Input that exceeds the limit is rejected, which prevents stack exhaustion from deeply nested or recursive data.
+    Increase it if an application uses deeper recursive data.
+
   .. prop:: DCPSMonitor=<boolean>
     :default: ``0``
 

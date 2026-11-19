@@ -34,6 +34,16 @@ using namespace OpenDDS::DCPS;
 namespace {
   const string RtpsNamespace = " ::OpenDDS::RTPS::", DdsNamespace = " ::DDS::";
 
+  /// Count a level of nesting that could be recursive and fail past the limit
+  void generate_nesting_guard()
+  {
+    be_global->impl_ <<
+      "  const Serializer::ScopedNesting nesting(strm);\n"
+      "  if (!nesting.valid()) {\n"
+      "    return false;\n"
+      "  }\n";
+  }
+
   typedef bool (*gen_special_case)(const string& cxx);
   typedef std::map<std::string, gen_special_case> SpecialCases;
   SpecialCases special_struct_cases;
@@ -726,6 +736,9 @@ namespace {
         be_global->impl_ <<
           "  const Encoding& encoding = strm.encoding();\n"
           "  ACE_UNUSED_ARG(encoding);\n";
+        if (!primitive) {
+          generate_nesting_guard();
+        }
         marshal_generator::generate_dheader_code(
           "    if (!strm.read_delimiter(total_size)) {\n"
           "      return false;\n"
@@ -1129,6 +1142,9 @@ namespace {
       extraction.addArg("map", wrapper.wrapped_type_name());
       extraction.endArgs();
 
+      if (!both_primitive) {
+        generate_nesting_guard();
+      }
       be_global->impl_ <<
         "  DDS::UInt32 size = 0;\n" << // in bytes for DHeader, or in elements for Length
         streamAndCheck(">> size");
@@ -1397,6 +1413,9 @@ namespace {
       be_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
+      if (!primitive) {
+        generate_nesting_guard();
+      }
       marshal_generator::generate_dheader_code(
         "    if (!strm.read_delimiter(total_size)) {\n"
         "      return false;\n"
@@ -2894,6 +2913,7 @@ namespace {
       be_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
+      generate_nesting_guard();
       if (is_appendable) {
         be_global->impl_ <<
           "  bool reached_end_of_struct = false;\n"
@@ -4278,6 +4298,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     be_global->impl_ <<
       "  const Encoding& encoding = strm.encoding();\n"
       "  ACE_UNUSED_ARG(encoding);\n";
+    generate_nesting_guard();
     marshal_generator::generate_dheader_code(
       "    if (!strm.read_delimiter(total_size)) {\n"
       "      return false;\n"

@@ -1493,6 +1493,10 @@ bool operator<<(Serializer& strm, const NestedKeyOnly<const XTypes::TypeIdentifi
 
 bool operator>>(Serializer& strm, XTypes::TypeIdentifier& uni)
 {
+  const Serializer::ScopedNesting nesting(strm);
+  if (!nesting.valid()) {
+    return false;
+  }
   ACE_CDR::Octet k;
   if (!(strm >> ACE_InputCDR::to_octet(k))) {
     return false;

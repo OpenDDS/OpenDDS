@@ -761,6 +761,38 @@ public:
     bool finished_;
   };
 
+  /// Default for max_nesting_depth(), see DCPSMaxNestingDepth
+  static const unsigned DEFAULT_MAX_NESTING_DEPTH = 256;
+
+  /// Process-wide limit on nested reads, enforced by ScopedNesting
+  static unsigned max_nesting_depth();
+  static void max_nesting_depth(unsigned depth);
+
+  /// Number of ScopedNesting objects currently active on this stream
+  unsigned nesting_depth() const { return nesting_depth_; }
+
+  /// Start counting from @a depth, for a stream that continues a nested read
+  void nesting_depth(unsigned depth) { nesting_depth_ = depth; }
+
+  /**
+   * Count one level of a nested (possibly recursive) read.  If that exceeds
+   * max_nesting_depth(), the stream's good bit is cleared and valid() is false.
+   */
+  class OpenDDS_Dcps_Export ScopedNesting {
+  public:
+    explicit ScopedNesting(Serializer& ser);
+    ~ScopedNesting() { --ser_.nesting_depth_; }
+
+    bool valid() const { return valid_; }
+
+  private:
+    ScopedNesting(const ScopedNesting&);
+    ScopedNesting& operator=(const ScopedNesting&);
+
+    Serializer& ser_;
+    bool valid_;
+  };
+
   template <typename T>
   bool peek_helper(ACE_Message_Block* const block, size_t bytes, T& t)
   {
@@ -898,6 +930,11 @@ private:
 
   /// Logical writing position of the stream.
   size_t wpos_;
+
+  /// Current depth of nested reads, see ScopedNesting.
+  unsigned nesting_depth_;
+
+  static unsigned max_nesting_depth_;
 
   /// Buffer that is copied for zero padding
   static const char ALIGN_PAD[Encoding::ALIGN_MAX];

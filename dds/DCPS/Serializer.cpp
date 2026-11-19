@@ -12,6 +12,7 @@
 #endif /* !__ACE_INLINE__ */
 
 #include "SafetyProfileStreams.h"
+#include "debug.h"
 
 #ifndef OPENDDS_UTIL_BUILD
 #  include <tao/String_Alloc.h>
@@ -131,6 +132,7 @@ Serializer::Serializer(ACE_Message_Block* chain, const Encoding& enc)
   , rpos_(0)
   , read_limit_((std::numeric_limits<size_t>::max)())
   , wpos_(0)
+  , nesting_depth_(0)
 {
   encoding(enc);
   reset_alignment();
@@ -146,6 +148,7 @@ Serializer::Serializer(ACE_Message_Block* chain, Encoding::Kind kind,
   , rpos_(0)
   , read_limit_((std::numeric_limits<size_t>::max)())
   , wpos_(0)
+  , nesting_depth_(0)
 {
   encoding(Encoding(kind, endianness));
   reset_alignment();
@@ -161,6 +164,7 @@ Serializer::Serializer(ACE_Message_Block* chain,
   , rpos_(0)
   , read_limit_((std::numeric_limits<size_t>::max)())
   , wpos_(0)
+  , nesting_depth_(0)
 {
   encoding(Encoding(kind, swap_bytes));
   reset_alignment();
@@ -168,6 +172,31 @@ Serializer::Serializer(ACE_Message_Block* chain,
 
 Serializer::~Serializer()
 {
+}
+
+unsigned Serializer::max_nesting_depth_ = Serializer::DEFAULT_MAX_NESTING_DEPTH;
+
+unsigned Serializer::max_nesting_depth()
+{
+  return max_nesting_depth_;
+}
+
+void Serializer::max_nesting_depth(unsigned depth)
+{
+  max_nesting_depth_ = depth;
+}
+
+Serializer::ScopedNesting::ScopedNesting(Serializer& ser)
+  : ser_(ser)
+  , valid_(++ser.nesting_depth_ <= max_nesting_depth_ && ser.good_bit_)
+{
+  if (!valid_ && ser.good_bit_) {
+    ser.good_bit_ = false;
+    if (DCPS_debug_level >= 1) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Serializer::ScopedNesting: "
+                 "input exceeds the maximum nesting depth of %u\n", max_nesting_depth_));
+    }
+  }
 }
 
 Serializer::ScopedReadLimit::ScopedReadLimit(Serializer& ser, size_t size,
