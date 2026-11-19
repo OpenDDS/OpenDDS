@@ -16,6 +16,7 @@
 #include "Utils.h"
 
 #include <dds/DCPS/RapidJsonWrapper.h>
+#include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/debug.h>
 
 #include <ace/Basic_Types.h>
@@ -614,11 +615,43 @@ bool discriminator_variant_key(
   }
 }
 
+struct PopulateContext : DynamicDataJsonOptions {
+  explicit PopulateContext(const DynamicDataJsonOptions& options)
+    : DynamicDataJsonOptions(options)
+    , depth(0)
+  {}
+
+  /// Number of structs, unions, and collections being populated
+  mutable unsigned depth;
+};
+
+class ScopedPopulateDepth {
+public:
+  ScopedPopulateDepth(const PopulateContext& context, const std::string& path)
+    : context_(context)
+    , valid_(++context.depth <= DCPS::Serializer::max_nesting_depth())
+  {
+    if (!valid_) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: dynamic_data_json: "
+        "exceeded the maximum nesting depth of %u at %C\n",
+        DCPS::Serializer::max_nesting_depth(), path.c_str()));
+    }
+  }
+
+  ~ScopedPopulateDepth() { --context_.depth; }
+
+  bool valid() const { return valid_; }
+
+private:
+  const PopulateContext& context_;
+  const bool valid_;
+};
+
 DDS::ReturnCode_t populate_value(
   DDS::DynamicData_ptr data,
   DDS::DynamicType_ptr type,
   const JsonValue& value,
-  const DynamicDataJsonOptions& options,
+  const PopulateContext& options,
   const std::string& path);
 
 DDS::ReturnCode_t populate_member(
@@ -626,7 +659,7 @@ DDS::ReturnCode_t populate_member(
   DDS::MemberId id,
   DDS::DynamicType_ptr type,
   const JsonValue& value,
-  const DynamicDataJsonOptions& options,
+  const PopulateContext& options,
   const std::string& path)
 {
   DDS::DynamicType_var base = get_base_type(type);
@@ -757,10 +790,14 @@ DDS::ReturnCode_t populate_structure(
   DDS::DynamicData_ptr data,
   DDS::DynamicType_ptr type,
   const JsonValue& value,
-  const DynamicDataJsonOptions& options,
+  const PopulateContext& options,
   const std::string& path)
 {
   if (!value.IsObject()) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+  const ScopedPopulateDepth depth(options, path);
+  if (!depth.valid()) {
     return DDS::RETCODE_BAD_PARAMETER;
   }
 
@@ -805,7 +842,7 @@ DDS::ReturnCode_t populate_union_with_discriminator(
   DDS::DynamicData_ptr data,
   DDS::DynamicType_ptr type,
   const JsonValue& value,
-  const DynamicDataJsonOptions& options,
+  const PopulateContext& options,
   const std::string& path,
   JsonValue::ConstMemberIterator discriminator)
 {
@@ -891,7 +928,7 @@ DDS::ReturnCode_t populate_union_active_member(
   DDS::DynamicData_ptr data,
   DDS::DynamicType_ptr type,
   const JsonValue& value,
-  const DynamicDataJsonOptions& options,
+  const PopulateContext& options,
   const std::string& path)
 {
   JsonValue::ConstMemberIterator branch = value.MemberEnd();
@@ -916,10 +953,14 @@ DDS::ReturnCode_t populate_union(
   DDS::DynamicData_ptr data,
   DDS::DynamicType_ptr type,
   const JsonValue& value,
-  const DynamicDataJsonOptions& options,
+  const PopulateContext& options,
   const std::string& path)
 {
   if (!value.IsObject()) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+  const ScopedPopulateDepth depth(options, path);
+  if (!depth.valid()) {
     return DDS::RETCODE_BAD_PARAMETER;
   }
 
@@ -938,10 +979,14 @@ DDS::ReturnCode_t populate_collection(
   DDS::DynamicData_ptr data,
   DDS::DynamicType_ptr type,
   const JsonValue& value,
-  const DynamicDataJsonOptions& options,
+  const PopulateContext& options,
   const std::string& path)
 {
   if (!value.IsArray()) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+  const ScopedPopulateDepth depth(options, path);
+  if (!depth.valid()) {
     return DDS::RETCODE_BAD_PARAMETER;
   }
 
@@ -979,10 +1024,14 @@ DDS::ReturnCode_t populate_map(
   DDS::DynamicData_ptr data,
   DDS::DynamicType_ptr type,
   const JsonValue& value,
-  const DynamicDataJsonOptions& options,
+  const PopulateContext& options,
   const std::string& path)
 {
   if (!value.IsArray()) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+  const ScopedPopulateDepth depth(options, path);
+  if (!depth.valid()) {
     return DDS::RETCODE_BAD_PARAMETER;
   }
 
@@ -1048,7 +1097,7 @@ DDS::ReturnCode_t populate_value(
   DDS::DynamicData_ptr data,
   DDS::DynamicType_ptr type,
   const JsonValue& value,
-  const DynamicDataJsonOptions& options,
+  const PopulateContext& options,
   const std::string& path)
 {
   DDS::DynamicType_var base = get_base_type(type);
@@ -1416,7 +1465,8 @@ DDS::ReturnCode_t dynamic_data_from_json(
   }
 
   JsonDocument document;
-  document.Parse(json);
+  // Iterative parsing doesn't recurse for nested JSON values
+  document.Parse<rapidjson::kParseIterativeFlag>(json);
   if (document.HasParseError()) {
     report_error("failed to parse JSON at offset " + dynamic_data_json_value_to_string(document.GetErrorOffset()));
     return DDS::RETCODE_BAD_PARAMETER;
@@ -1424,7 +1474,8 @@ DDS::ReturnCode_t dynamic_data_from_json(
 
   DDS::DynamicType_var type = data->type();
   DDS::DynamicType_var base = get_base_type(type);
-  DDS::ReturnCode_t rc = populate_value(data, base, document, options, "$");
+  const PopulateContext context(options);
+  DDS::ReturnCode_t rc = populate_value(data, base, document, context, "$");
   if (rc != DDS::RETCODE_OK) {
     report_error("failed to populate DynamicData for " + type_name(base));
   }

@@ -782,3 +782,22 @@ TEST(dds_DCPS_XTypes_DynamicDataJson, TryConstructTrimSerializedBackingStore)
 }
 
 #endif
+
+TEST(dds_DCPS_XTypes_DynamicDataJson, NestingDepthLimit)
+{
+  DDS::DynamicType_var type = load_type("XmlTypeProviderTest::Sample");
+  DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(type);
+  ASSERT_TRUE(data);
+
+  const unsigned prev_max = OpenDDS::DCPS::Serializer::max_nesting_depth();
+  OpenDDS::DCPS::Serializer::max_nesting_depth(1);
+  EXPECT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::dynamic_data_from_json(data, "{\"id\":7}"));
+  EXPECT_EQ(DDS::RETCODE_BAD_PARAMETER,
+            OpenDDS::XTypes::dynamic_data_from_json(data, "{\"inner_value\":{\"value\":42}}"));
+  OpenDDS::DCPS::Serializer::max_nesting_depth(prev_max);
+
+  // Deeply nested JSON doesn't exhaust the stack while parsing
+  const size_t depth = 100000;
+  const std::string deep = std::string(depth, '[') + std::string(depth, ']');
+  EXPECT_EQ(DDS::RETCODE_BAD_PARAMETER, OpenDDS::XTypes::dynamic_data_from_json(data, deep.c_str()));
+}
