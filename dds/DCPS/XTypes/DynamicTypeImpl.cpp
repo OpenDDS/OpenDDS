@@ -188,21 +188,20 @@ void DynamicTypeImpl::clear()
 
 DDS::DynamicType_var get_base_type(DDS::DynamicType_ptr type)
 {
-  if (!type) {
-    return 0;
-  }
-
+  // Bound the walk, since a remote alias cycle yields a cyclic DynamicType
+  const size_t max_alias_chain_length = 64;
   DDS::DynamicType_var t = DDS::DynamicType::_duplicate(type);
-  if (t->get_kind() != TK_ALIAS) {
-    return t;
+  for (size_t i = 0; t && i <= max_alias_chain_length; ++i) {
+    if (t->get_kind() != TK_ALIAS) {
+      return t;
+    }
+    DDS::TypeDescriptor_var descriptor;
+    if (t->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+      return 0;
+    }
+    t = DDS::DynamicType::_duplicate(descriptor->base_type());
   }
-
-  DDS::TypeDescriptor_var descriptor;
-  if (t->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return 0;
-  }
-
-  return get_base_type(descriptor->base_type());
+  return 0;
 }
 
 bool test_equality(DDS::DynamicType_ptr lhs, DDS::DynamicType_ptr rhs, DynamicTypePtrPairSeen& dt_ptr_pair)

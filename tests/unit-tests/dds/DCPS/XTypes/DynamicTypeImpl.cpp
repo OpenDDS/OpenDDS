@@ -213,6 +213,35 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyAliasStruct)
   test_conversion<DCPS::MyModCompleteToDynamic_MyAliasStruct_xtag>(expected_alias_dt);
 }
 
+TEST(dds_DCPS_XTypes_DynamicTypeImpl_GetBaseType, CyclicAlias)
+{
+  XTypes::DynamicTypeImpl* const alias_a = new XTypes::DynamicTypeImpl();
+  DDS::DynamicType_var alias_a_var = alias_a;
+  XTypes::DynamicTypeImpl* const alias_b = new XTypes::DynamicTypeImpl();
+  DDS::DynamicType_var alias_b_var = alias_b;
+  DDS::TypeDescriptor_var td_a = new XTypes::TypeDescriptorImpl();
+  td_a->kind(XTypes::TK_ALIAS);
+  td_a->base_type(alias_b);
+  alias_a->set_descriptor(td_a);
+  DDS::TypeDescriptor_var td_b = new XTypes::TypeDescriptorImpl();
+  td_b->kind(XTypes::TK_ALIAS);
+  td_b->base_type(alias_a);
+  alias_b->set_descriptor(td_b);
+
+  EXPECT_FALSE(XTypes::get_base_type(alias_a));
+
+  // Acyclic chains still resolve
+  DDS::DynamicType_var int32 = new XTypes::DynamicTypeImpl();
+  DDS::TypeDescriptor_var td_int32 = new XTypes::TypeDescriptorImpl();
+  td_int32->kind(XTypes::TK_INT32);
+  dynamic_cast<XTypes::DynamicTypeImpl*>(int32.in())->set_descriptor(td_int32);
+  td_b->base_type(int32);
+  EXPECT_EQ(int32.in(), XTypes::get_base_type(alias_a).in());
+
+  alias_a->clear();
+  alias_b->clear();
+}
+
 TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_StructWithTypedefMember)
 {
   XTypes::DynamicTypeImpl* swtm_dt = new XTypes::DynamicTypeImpl();
