@@ -31,7 +31,7 @@ public:
   Atomic(T desired) : impl_(desired) {}
 
   inline T load() const { return impl_.value(); }
-  inline void store(T desired) const { impl_ = desired; }
+  inline void store(T desired) { impl_ = desired; }
   inline T exchange(const T& desired) { return impl_.exchange(desired); }
 
   inline operator T() const { return impl_.value(); }

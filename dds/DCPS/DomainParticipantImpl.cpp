@@ -2373,9 +2373,9 @@ DomainParticipantImpl::LivelinessTimer::remove_adjust()
 void DomainParticipantImpl::LivelinessTimer::execute(const MonotonicTimePoint& now)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
+  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
 
   if (recalculate_interval_) {
-    ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
     TimeDuration interval;
     while (recalculate_interval_) {
       recalculate_interval_ = false;
@@ -2388,7 +2388,12 @@ void DomainParticipantImpl::LivelinessTimer::execute(const MonotonicTimePoint& n
   scheduled_ = false;
 
   if (!interval_.is_max()) {
-    dispatch(now);
+    const TimeDuration interval = interval_;
+    {
+      // dispatch() takes publisher locks that may be held while calling add_adjust().
+      ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rev_guard, rev_lock);
+      dispatch(now, interval);
+    }
     last_liveliness_check_ = now;
     schedule(interval_);
     scheduled_ = true;
@@ -2400,7 +2405,8 @@ DomainParticipantImpl::AutomaticLivelinessTimer::AutomaticLivelinessTimer(Domain
 { }
 
 void
-DomainParticipantImpl::AutomaticLivelinessTimer::dispatch(const MonotonicTimePoint& /* tv */)
+DomainParticipantImpl::AutomaticLivelinessTimer::dispatch(const MonotonicTimePoint& /* tv */,
+                                                          const TimeDuration& /* interval */)
 {
   impl_.signal_liveliness(kind_);
 }
@@ -2410,9 +2416,10 @@ DomainParticipantImpl::ParticipantLivelinessTimer::ParticipantLivelinessTimer(Do
 { }
 
 void
-DomainParticipantImpl::ParticipantLivelinessTimer::dispatch(const MonotonicTimePoint& tv)
+DomainParticipantImpl::ParticipantLivelinessTimer::dispatch(const MonotonicTimePoint& tv,
+                                                            const TimeDuration& interval)
 {
-  if (impl_.participant_liveliness_activity_after (tv - interval())) {
+  if (impl_.participant_liveliness_activity_after(tv - interval)) {
     impl_.signal_liveliness(kind_);
   }
 }
@@ -2437,11 +2444,11 @@ DomainParticipantImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind ki
 bool
 DomainParticipantImpl::participant_liveliness_activity_after(const MonotonicTimePoint& tv)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, tao_mon, this->publishers_protector_, !tv.is_zero());
+
   if (last_liveliness_activity_ > tv) {
     return true;
   }
-
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, tao_mon, this->publishers_protector_, !tv.is_zero());
 
   for (PublisherSet::iterator it(publishers_.begin());
        it != publishers_.end(); ++it) {

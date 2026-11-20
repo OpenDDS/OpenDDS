@@ -181,6 +181,9 @@ private:
   typedef OPENDDS_SET(DataWriterImpl_rch) DataWriterSet;
   DataWriterSet writers_not_enabled_;
 
+  typedef OPENDDS_VECTOR(DataWriterImpl_rch) DataWriterVec;
+  void get_writers(DataWriterVec& writers) const;
+
   /// This map is used to support datawriter lookup by topic name.
   DataWriterMap                datawriter_map_;
   /// This map is used to support datawriter lookup by datawriter
