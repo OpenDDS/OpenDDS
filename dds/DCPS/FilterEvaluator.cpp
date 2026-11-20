@@ -20,12 +20,48 @@
 #include <ace/ACE.h>
 
 #include <stdexcept>
+#include <cctype>
 #include <cstring>
 #include <algorithm>
 #include <sstream>
 
 namespace {
   const char MOD[] = "MOD";
+
+  bool is_ident_char(char c)
+  {
+    return std::isalnum(static_cast<unsigned char>(c)) || c == '_';
+  }
+
+  bool is_keyword_at(const char* begin, const char* pos, const char* keyword)
+  {
+    const size_t len = std::strlen(keyword);
+    if (pos != begin && is_ident_char(pos[-1])) {
+      return false;
+    }
+    for (size_t i = 0; i < len; ++i) {
+      if (std::toupper(static_cast<unsigned char>(pos[i])) != keyword[i]) {
+        return false;
+      }
+    }
+    return !is_ident_char(pos[len]);
+  }
+
+  // The parser and evaluator recurse once for each '(', AND, OR, and NOT.
+  // These are also counted inside string literals, which only makes this stricter.
+  bool within_nesting_limit(const char* filter)
+  {
+    unsigned count = 0;
+    for (const char* pos = filter; *pos; ++pos) {
+      if (*pos == '(' || is_keyword_at(filter, pos, "AND") ||
+          is_keyword_at(filter, pos, "OR") || is_keyword_at(filter, pos, "NOT")) {
+        if (++count > OpenDDS::DCPS::Serializer::max_nesting_depth()) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
 }
 
 using namespace OpenDDS::DCPS::FilterExpressionGrammar;
@@ -46,6 +82,9 @@ FilterEvaluator::FilterEvaluator(const char* filter, bool allowOrderBy)
   , filter_root_(0)
   , number_parameters_(0)
 {
+  if (!within_nesting_limit(filter)) {
+    throw std::runtime_error("Expression exceeds the maximum nesting depth");
+  }
   const char* out = filter + std::strlen(filter);
   yard::SimpleTextParser parser(filter, out);
   if (!(allowOrderBy ? parser.Parse<QueryCompleteInput>()
