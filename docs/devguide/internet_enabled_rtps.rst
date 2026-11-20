@@ -483,6 +483,7 @@ DomainParticipantFactory.  Therefore options like ``-DCPSConfigFile`` are all su
 In most cases, the same config file used for the RtpsRelay can be used for RtpsRelayControl.
 If a different config file is desired, it must configure the Relay Domain with compatible discovery
 and transport options.
+Any participant that can reach the Relay Domain can change the relays' configuration, so the Relay Domain must be isolated as described in :ref:`internet_enabled_rtps--deployment-considerations`.
 
 The command-line options specific to ``RtpsRelayControl`` are:
 
@@ -548,6 +549,11 @@ Load balancing can be achieved by having the participants choose a relay accordi
 To support this usage, the RtpsRelay includes a :ref:`web server <internet_enabled_rtps--metadisc-server>` which can be configured to serve the public IP address of the relay.
 These web server ports would be exposed via a centralized load balancer.
 A participant, then, could access the HTTP load balancer to select a relay.
+
+The Relay Participant does not use DDS Security, even when the Application Participant does.
+Relay instances trust everything they receive in the Relay Domain (:option:`RtpsRelay -RelayDomain`), including other relays' discovery and status information and configuration changes from :ref:`internet_enabled_rtps--rtps_relay_control`.
+The Relay Domain must therefore only be reachable by the relays and trusted control applications, for example through an isolated (virtual) network.
+It must not be exposed to the public Internet or to clients.
 
 .. _internet_enabled_rtps--interactive-connectivity-establishment-ice-for-rtps:
 .. _ice:

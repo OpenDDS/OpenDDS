@@ -15,6 +15,10 @@ The DCPS Information Repository is scheduled for deprecation with OpenDDS 4 and 
 There is no interoperability guarantee between multiple OpenDDS releases when you are using the DCPS Information Repository.
 All applications using a specific DCPS Information Repository must use the same OpenDDS release as that DCPS Information Repository.
 
+The DCPS Information Repository doesn't support :ref:`DDS Security <dds_security>` and doesn't authenticate the applications or other repositories that connect to it.
+The same is true of the transports other than ``rtps_udp``.
+Only use the DCPS Information Repository on a trusted network, where every host that can reach the repository or its applications is trusted.
+
 .. _the_dcps_information_repository--dcps-information-repository-options:
 
 ***********************************
