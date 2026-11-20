@@ -301,6 +301,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     // way into the SPDP timer's cancelation, only into the Service_Partipant config store,
     // so the safest thing to do here is just wait until we know for sure the timer is definitely done
     ACE_OS::sleep(1); // Assume any updates here are pre-cancelation updates (config still propagating)
+    {
+      // Discard those pre-cancelation updates so the wait below only sees later ones
+      InternalThreadBuiltinTopicDataSeq datas;
+      DDS::SampleInfoSeq infos;
+      itbtd_reader->read(datas, infos, DDS::LENGTH_UNLIMITED,
+        DDS::NOT_READ_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+    }
     const DDS::Duration_t waittime = {5, 0};
     DDS::ConditionSeq active;
     DDS::ReturnCode_t rc = ws->wait(active, waittime);
