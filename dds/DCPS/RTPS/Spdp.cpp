@@ -4047,26 +4047,7 @@ bool Spdp::participant_uses_rtps_duration_fraction(const DCPS::GUID_t& guid) con
 void
 Spdp::remove_lease_expiration_i(DiscoveredParticipantIter iter)
 {
-  if (iter->second.lease_queue_time_.is_zero()) {
-    return;
-  }
-
-  for (std::pair<TimeQueue::iterator, TimeQueue::iterator> x = lease_expirations_.equal_range(iter->second.lease_queue_time_);
-       x.first != x.second; ++x.first) {
-    if (x.first->second == iter->first) {
-      lease_expirations_.erase(x.first);
-      break;
-    }
-  }
-  iter->second.lease_queue_time_ = MonotonicTimePoint::zero_value;
-}
-
-void
-Spdp::insert_lease_expiration_i(DiscoveredParticipantIter iter,
-                                const DCPS::MonotonicTimePoint& when)
-{
-  lease_expirations_.insert(std::make_pair(when, iter->first));
-  iter->second.lease_queue_time_ = when;
+  lease_expirations_.remove(iter->second.lease_);
 }
 
 void
@@ -4079,23 +4060,12 @@ Spdp::update_lease_expiration_i(DiscoveredParticipantIter iter,
                                    iter->second.pdata_.participantProxy.protocolVersion,
                                    iter->second.pdata_.participantProxy.vendorId);
 
-  const MonotonicTimePoint expiration = now + d + lease_extension_;
-  iter->second.lease_expiration_ = expiration;
-
-  // Common case: the participant is already queued no later than its new
-  // expiration.  Leave the entry alone; process_lease_expirations will
-  // re-queue it when it comes due.
-  if (!iter->second.lease_queue_time_.is_zero() &&
-      iter->second.lease_queue_time_ <= expiration) {
-    return;
+  LeaseQueue::Entry& lease = iter->second.lease_;
+  if (lease_expirations_.renew(lease, iter->first, now + d + lease_extension_, now)) {
+    // New participant, or its lease got shorter.
+    // SporadicEvent::schedule only moves the event earlier, never later.
+    tport_->lease_expiration_event_->schedule(lease.queue_time() - now);
   }
-
-  // New participant, or its lease got shorter: (re)queue at the new expiration.
-  remove_lease_expiration_i(iter);
-  insert_lease_expiration_i(iter, expiration);
-
-  // SporadicEvent::schedule only moves the event earlier, never later.
-  tport_->lease_expiration_event_->schedule(expiration - now);
 }
 
 void
@@ -4103,31 +4073,27 @@ Spdp::process_lease_expirations(const MonotonicTimePoint& now)
 {
   ACE_GUARD (ACE_Thread_Mutex, g, lock_);
 
-  // Entries for participants that renewed their lease since being queued are
-  // re-queued at the actual expiration.  Re-queuing is cheap, so handle up to
-  // max_lease_entries_per_pass entries per call, but remove at most one
-  // participant to keep the thread responsive.
+  // Most entries that come due belong to participants that renewed their
+  // lease after the entry was queued; those are queued again.  That is cheap,
+  // so handle up to max_lease_entries_per_pass entries per call, but remove at
+  // most one participant to keep the thread responsive.
   static const size_t max_lease_entries_per_pass = 256;
   for (size_t i = 0; i < max_lease_entries_per_pass; ++i) {
-    const TimeQueue::iterator pos = lease_expirations_.begin();
-    if (pos == lease_expirations_.end() || pos->first > now) {
+    const LeaseQueue::iterator pos = lease_expirations_.due(now);
+    if (pos == lease_expirations_.end()) {
       break;
     }
 
-    const MonotonicTimePoint queue_time = pos->first;
     DiscoveredParticipantIter part = participants_.find(pos->second);
-    // Pre-emptively erase so purge_discovered_participant will not modify lease_expirations_.
-    lease_expirations_.erase(pos);
-
-    if (part == participants_.end() || part->second.lease_queue_time_ != queue_time) {
+    if (part == participants_.end() || !lease_expirations_.is_current(part->second.lease_, pos)) {
       // Not the participant's current entry; drop it.
+      lease_expirations_.erase(pos);
       continue;
     }
-    part->second.lease_queue_time_ = MonotonicTimePoint::zero_value;
 
-    if (now < part->second.lease_expiration_) {
-      // Lease was renewed after this entry was queued.
-      insert_lease_expiration_i(part, part->second.lease_expiration_);
+    // If the lease expired, this removes the entry, so
+    // purge_discovered_participant will not modify lease_expirations_.
+    if (lease_expirations_.requeue_if_renewed(part->second.lease_, part->first, now)) {
       continue;
     }
 
@@ -4155,7 +4121,7 @@ Spdp::process_lease_expirations(const MonotonicTimePoint& now)
   }
 
   if (!lease_expirations_.empty()) {
-    const TimeDuration duration = lease_expirations_.begin()->first - MonotonicTimePoint::now();
+    const TimeDuration duration = lease_expirations_.next_due() - MonotonicTimePoint::now();
     tport_->lease_expiration_event_->schedule(std::max(duration, minimum_cleanup_separation_));
   }
 }

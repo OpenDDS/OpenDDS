@@ -663,18 +663,13 @@ private:
   typedef OPENDDS_MULTIMAP(DCPS::MonotonicTimePoint, DCPS::GUID_t) TimeQueue;
 
   void remove_lease_expiration_i(DiscoveredParticipantIter iter);
-  void insert_lease_expiration_i(DiscoveredParticipantIter iter,
-                                 const DCPS::MonotonicTimePoint& when);
   void update_lease_expiration_i(DiscoveredParticipantIter iter,
                                  const DCPS::MonotonicTimePoint& now);
   void process_lease_expirations(const DCPS::MonotonicTimePoint& now);
 
-  // Lease expirations are tracked lazily: a participant's entry may be keyed
-  // earlier than its actual lease expiration.  When such an entry comes due,
-  // process_lease_expirations re-inserts it at the actual expiration instead
-  // of removing the participant.  This keeps the per-SPDP-message cost of a
-  // lease renewal to O(1).
-  TimeQueue lease_expirations_;
+  // Lease expirations are tracked lazily (see LeaseQueue), which keeps the
+  // per-SPDP-message cost of a lease renewal to O(1).
+  LeaseQueue lease_expirations_;
 
 #if OPENDDS_CONFIG_SECURITY
   DDS::Security::ExtendedBuiltinEndpointSet_t available_extended_builtin_endpoints_;
