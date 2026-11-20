@@ -666,7 +666,10 @@ private:
   void update_lease_expiration_i(DiscoveredParticipantIter iter,
                                  const DCPS::MonotonicTimePoint& now);
   void process_lease_expirations(const DCPS::MonotonicTimePoint& now);
-  TimeQueue lease_expirations_;
+
+  // Lease expirations are tracked lazily (see LeaseQueue), which keeps the
+  // per-SPDP-message cost of a lease renewal to O(1).
+  LeaseQueue lease_expirations_;
 
 #if OPENDDS_CONFIG_SECURITY
   DDS::Security::ExtendedBuiltinEndpointSet_t available_extended_builtin_endpoints_;

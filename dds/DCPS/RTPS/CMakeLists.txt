@@ -31,6 +31,7 @@ target_sources(OpenDDS_Rtps
     ICE/Ice.h
     ICE/Stun.h
     ICE/Task.h
+    LeaseQueue.h
     LocalEntities.h
     MessageParser.h
     MessageTypes.h
