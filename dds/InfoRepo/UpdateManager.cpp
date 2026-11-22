@@ -294,7 +294,13 @@ Manager::pushImage(const DImage& image)
       csi.filterExpr = actor.contentSubscriptionProfile.filterExpr.c_str();
       TAO_InputCDR csp_cdr(actor.contentSubscriptionProfile.exprParams.second,
                            actor.contentSubscriptionProfile.exprParams.first);
-      csp_cdr >> csi.exprParams;
+      if (!(csp_cdr >> csi.exprParams)) {
+        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+            "(%P|%t) ERROR: Manager::pushImage: failed to demarshal content filter expression parameters\n"));
+        }
+        continue;
+      }
 
       URActor* reader;
       ACE_NEW_NORETURN(reader
@@ -437,26 +443,59 @@ Manager::add(const DActor& actor)
                             , actor.transportInterfaceInfo.first);
 
   OpenDDS::DCPS::TransportLocatorSeq transport_info;
-  transportCdr >> transport_info;
+  if (!(transportCdr >> transport_info)) {
+    if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+        "(%P|%t) ERROR: Manager::add: failed to demarshal transport locators\n"));
+    }
+    return;
+  }
 
   TAO_InputCDR typeInfoCdr(actor.serializedTypeInfo.second, actor.serializedTypeInfo.first);
 
   DDS::OctetSeq serializedTypeInfo;
-  typeInfoCdr >> serializedTypeInfo;
+  // Type info may be absent (e.g. actors restored from persistence);
+  // only a non-empty buffer that fails to decode is an error.
+  if (actor.serializedTypeInfo.first > 0 && !(typeInfoCdr >> serializedTypeInfo)) {
+    if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+      ACE_ERROR((LM_ERROR,
+        "(%P|%t) ERROR: Manager::add: failed to demarshal type info\n"));
+    }
+    return;
+  }
 
   if (actor.type == DataReader) {
     DDS::SubscriberQos sub_qos;
     DDS::DataReaderQos reader_qos;
 
-    pubSubCdr >> sub_qos;
-    drdwCdr >> reader_qos;
+    if (!(pubSubCdr >> sub_qos)) {
+      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+          "(%P|%t) ERROR: Manager::add: failed to demarshal subscriber qos\n"));
+      }
+      return;
+    }
+
+    if (!(drdwCdr >> reader_qos)) {
+      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+          "(%P|%t) ERROR: Manager::add: failed to demarshal datareader qos\n"));
+      }
+      return;
+    }
 
     Update::ContentSubscriptionInfo csi;
     csi.filterClassName = actor.contentSubscriptionProfile.filterClassName.c_str();
     csi.filterExpr = actor.contentSubscriptionProfile.filterExpr.c_str();
     TAO_InputCDR cspCdr(actor.contentSubscriptionProfile.exprParams.second,
                         actor.contentSubscriptionProfile.exprParams.first);
-    cspCdr >> csi.exprParams;
+    if (!(cspCdr >> csi.exprParams)) {
+      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+          "(%P|%t) ERROR: Manager::add: failed to demarshal content filter expression parameters\n"));
+      }
+      return;
+    }
 
     // Pass actor to InfoRepo.
     info_->add_subscription(actor.domainId, actor.participantId
@@ -470,8 +509,21 @@ Manager::add(const DActor& actor)
     DDS::PublisherQos pub_qos;
     DDS::DataWriterQos writer_qos;
 
-    pubSubCdr >> pub_qos;
-    drdwCdr >> writer_qos;
+    if (!(pubSubCdr >> pub_qos)) {
+      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+          "(%P|%t) ERROR: Manager::add: failed to demarshal publisher qos\n"));
+      }
+      return;
+    }
+
+    if (!(drdwCdr >> writer_qos)) {
+      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        ACE_ERROR((LM_ERROR,
+          "(%P|%t) ERROR: Manager::add: failed to demarshal datawriter qos\n"));
+      }
+      return;
+    }
 
     // Pass actor info to infoRepo.
     info_->add_publication(actor.domainId, actor.participantId
