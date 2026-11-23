@@ -4069,11 +4069,22 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
     return false;
   }
 
-  bool success;
   const ACE_CDR::Long kind = type_lookup_reply._cxx_return._d();
+  const TypeIdOrigSeqNumber& orig = seq_num_it->second;
+  if (DCPS::make_part_guid(sample.header_.publication_id_) != orig.participant ||
+      is_discovery_protected != orig.secure || kind != orig.kind) {
+    if (DCPS::log_level >= DCPS::LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Sedp::TypeLookupReplyReader::process_type_lookup_reply: "
+                 "reply from %C doesn't match request seq %q\n",
+                 DCPS::LogGuid(sample.header_.publication_id_).c_str(), seq_num.getValue()));
+    }
+    return false;
+  }
+
+  bool success;
   switch (kind) {
   case XTypes::TypeLookup_getTypes_HashId:
-    success = process_get_types_reply(type_lookup_reply);
+    success = process_get_types_reply(type_lookup_reply, orig.type_id);
     break;
   case XTypes::TypeLookup_getDependencies_HashId:
     success = process_get_dependencies_reply(sample, type_lookup_reply, seq_num, is_discovery_protected);
@@ -4141,7 +4152,8 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
   return success;
 }
 
-bool Sedp::TypeLookupReplyReader::process_get_types_reply(const XTypes::TypeLookup_Reply& reply)
+bool Sedp::TypeLookupReplyReader::process_get_types_reply(const XTypes::TypeLookup_Reply& reply,
+                                                         const XTypes::TypeIdentifier& type_id)
 {
   if (DCPS::DCPS_debug_level > 8) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_get_types_reply\n"));
@@ -4171,10 +4183,10 @@ bool Sedp::TypeLookupReplyReader::process_get_types_reply(const XTypes::TypeLook
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_get_types_reply: "
                  "received reply with non-empty complete to minimal map\n"));
     }
-    sedp_.type_lookup_service_->update_type_identifier_map(reply._cxx_return.getType().result().complete_to_minimal);
+    sedp_.type_lookup_service_->add_remote_type_identifier_map(reply._cxx_return.getType().result().complete_to_minimal);
   }
 
-  return true;
+  return sedp_.type_lookup_service_->type_object_in_cache(type_id);
 }
 
 bool Sedp::TypeLookupReplyReader::process_get_dependencies_reply(
@@ -4213,8 +4225,10 @@ bool Sedp::TypeLookupReplyReader::process_get_dependencies_reply(
   dependencies_[part_guid][remote_ti].first = data.continuation_point;
 
   // Update internal data
-  sedp_.orig_seq_numbers_.insert(std::make_pair(++sedp_.type_lookup_service_sequence_number_,
-                                                sedp_.orig_seq_numbers_[seq_num]));
+  TypeIdOrigSeqNumber& next = sedp_.orig_seq_numbers_[++sedp_.type_lookup_service_sequence_number_];
+  next = sedp_.orig_seq_numbers_[seq_num];
+  next.kind = data.continuation_point.length() == 0 ?
+    XTypes::TypeLookup_getTypes_HashId : XTypes::TypeLookup_getDependencies_HashId;
   sedp_.orig_seq_numbers_.erase(seq_num);
 
   if (data.continuation_point.length() == 0) { // Get all type objects
@@ -8045,11 +8059,15 @@ void Sedp::get_remote_type_objects(const XTypes::TypeIdentifierWithDependencies&
   }
 #endif
   orig_req_data.time_started = md.time_added_to_map;
-  orig_seq_numbers_.insert(std::make_pair(orig_seqnum, orig_req_data));
 
   XTypes::TypeIdentifierSeq type_ids;
-  if (tid_with_deps.dependent_typeid_count == -1 ||
-      tid_with_deps.dependent_typeids.length() < (CORBA::ULong)tid_with_deps.dependent_typeid_count) {
+  const bool get_dependencies = tid_with_deps.dependent_typeid_count == -1 ||
+    tid_with_deps.dependent_typeids.length() < (CORBA::ULong)tid_with_deps.dependent_typeid_count;
+  orig_req_data.kind = get_dependencies ?
+    XTypes::TypeLookup_getDependencies_HashId : XTypes::TypeLookup_getTypes_HashId;
+  orig_seq_numbers_.insert(std::make_pair(orig_seqnum, orig_req_data));
+
+  if (get_dependencies) {
     type_ids.append(make_scc_id_or_default(tid_with_deps.typeid_with_size.type_id));
 
     // Get dependencies of the topic type. TypeObjects of both topic type and

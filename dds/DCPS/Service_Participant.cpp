@@ -2457,6 +2457,19 @@ Service_Participant::type_object_encoding(const char* encoding)
   config_store_->set(COMMON_DCPS_TYPE_OBJECT_ENCODING, encoding, type_object_encoding_kinds);
 }
 
+bool
+Service_Participant::validate_type_objects() const
+{
+  return config_store_->get_boolean(COMMON_DCPS_VALIDATE_TYPE_OBJECTS,
+                                    COMMON_DCPS_VALIDATE_TYPE_OBJECTS_default);
+}
+
+void
+Service_Participant::validate_type_objects(bool flag)
+{
+  config_store_->set_boolean(COMMON_DCPS_VALIDATE_TYPE_OBJECTS, flag);
+}
+
 unsigned int
 Service_Participant::printer_value_writer_indent() const
 {

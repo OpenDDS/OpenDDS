@@ -134,6 +134,9 @@ const char COMMON_DCPS_TRANSPORT_DEBUG_LEVEL[] = "COMMON_DCPS_TRANSPORT_DEBUG_LE
 const char COMMON_DCPS_TYPE_OBJECT_ENCODING[] = "COMMON_DCPS_TYPE_OBJECT_ENCODING";
 const String COMMON_DCPS_TYPE_OBJECT_ENCODING_default = "Normal";
 
+const char COMMON_DCPS_VALIDATE_TYPE_OBJECTS[] = "COMMON_DCPS_VALIDATE_TYPE_OBJECTS";
+const bool COMMON_DCPS_VALIDATE_TYPE_OBJECTS_default = true;
+
 const char COMMON_FEDERATION_BACKOFF_MULTIPLIER[] = "COMMON_FEDERATION_BACKOFF_MULTIPLIER";
 const int COMMON_FEDERATION_BACKOFF_MULTIPLIER_default = 2;
 
@@ -593,6 +596,10 @@ public:
   TypeObjectEncoding type_object_encoding() const;
   void type_object_encoding(TypeObjectEncoding encoding);
   void type_object_encoding(const char* encoding);
+
+  /// Whether TypeObjects received from peers must match their TypeIdentifiers
+  bool validate_type_objects() const;
+  void validate_type_objects(bool flag);
 
   unsigned int printer_value_writer_indent() const;
   void printer_value_writer_indent(unsigned int value);
