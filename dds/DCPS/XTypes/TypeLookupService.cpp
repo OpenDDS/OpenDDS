@@ -7,6 +7,7 @@
 #include "TypeLookupService.h"
 
 #include "../debug.h"
+#include "../Serializer.h"
 
 #include <sstream>
 
@@ -634,12 +635,12 @@ bool TypeLookupService::complete_to_minimal_type_object(const TypeObject& cto, T
 
 #ifndef OPENDDS_SAFETY_PROFILE
 DDS::MemberDescriptor* TypeLookupService::complete_struct_member_to_member_descriptor(
-  const CompleteStructMember& cm, const DCPS::GUID_t& guid)
+  const CompleteStructMember& cm, const DCPS::GUID_t& guid, unsigned depth)
 {
   DDS::MemberDescriptor_var md = new MemberDescriptorImpl();
   md->name(cm.detail.name.c_str());
   md->id(cm.common.member_id);
-  DDS::DynamicType_var dt = type_identifier_to_dynamic(cm.common.member_type_id, guid);
+  DDS::DynamicType_var dt = type_identifier_to_dynamic_i(cm.common.member_type_id, guid, depth + 1);
   md->type(dt);
   handle_tryconstruct_flags(md, cm.common.member_flags);
   md->is_key(cm.common.member_flags & IS_KEY);
@@ -651,12 +652,12 @@ DDS::MemberDescriptor* TypeLookupService::complete_struct_member_to_member_descr
 }
 
 DDS::MemberDescriptor* TypeLookupService::complete_union_member_to_member_descriptor(
-  const CompleteUnionMember& cm, const DCPS::GUID_t& guid)
+  const CompleteUnionMember& cm, const DCPS::GUID_t& guid, unsigned depth)
 {
   DDS::MemberDescriptor_var md = new MemberDescriptorImpl();
   md->name(cm.detail.name.c_str());
   md->id(cm.common.member_id);
-  DDS::DynamicType_var dt = type_identifier_to_dynamic(cm.common.type_id, guid);
+  DDS::DynamicType_var dt = type_identifier_to_dynamic_i(cm.common.type_id, guid, depth + 1);
   md->type(dt);
   // Make a copy.
   // FUTURE:  Have the TypeObject code use DDS::UnionCaseLabelSeq
@@ -676,11 +677,11 @@ DDS::MemberDescriptor* TypeLookupService::complete_union_member_to_member_descri
 }
 
 DDS::MemberDescriptor* TypeLookupService::complete_annotation_member_to_member_descriptor(
-  const CompleteAnnotationParameter& cm, const DCPS::GUID_t& guid)
+  const CompleteAnnotationParameter& cm, const DCPS::GUID_t& guid, unsigned depth)
 {
   DDS::MemberDescriptor_var md = new MemberDescriptorImpl();
   md->name(cm.name.c_str());
-  DDS::DynamicType_var dt = type_identifier_to_dynamic(cm.common.member_type_id, guid);
+  DDS::DynamicType_var dt = type_identifier_to_dynamic_i(cm.common.member_type_id, guid, depth + 1);
   md->type(dt);
   md->try_construct_kind(DDS::DISCARD);
   md->is_key(false);
@@ -695,7 +696,7 @@ DDS::DynamicType_ptr TypeLookupService::complete_to_dynamic(const CompleteTypeOb
 {
   DynamicTypeImpl* dt = new DynamicTypeImpl();
   DDS::DynamicType_var dt_var = dt;
-  complete_to_dynamic_i(dt, cto, guid);
+  complete_to_dynamic_i(dt, cto, guid, 1);
   return dt_var._retn();
 }
 
@@ -716,14 +717,15 @@ namespace {
 
 void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
                                               const CompleteTypeObject& cto,
-                                              const DCPS::GUID_t& guid)
+                                              const DCPS::GUID_t& guid,
+                                              unsigned depth)
 {
   DDS::TypeDescriptor_var td = new TypeDescriptorImpl();
   switch (cto.kind) {
   case TK_ALIAS: {
     td->kind(TK_ALIAS);
     td->name(cto.alias_type.header.detail.type_name.c_str());
-    const DDS::DynamicType_var temp = type_identifier_to_dynamic(cto.alias_type.body.common.related_type, guid);
+    const DDS::DynamicType_var temp = type_identifier_to_dynamic_i(cto.alias_type.body.common.related_type, guid, depth + 1);
     td->base_type(temp);
     // The spec says that Alias DynamicTypes should have DynamicTypeMembers, but that leads to redundancy
     }
@@ -760,7 +762,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
     td->extensibility_kind((cto.bitmask_type.bitmask_flags & IS_FINAL) ? DDS::FINAL : DDS::APPENDABLE);
     td->bound().length(1);
     td->bound()[0] = cto.bitmask_type.header.common.bit_bound;
-    const DDS::DynamicType_var temp = type_identifier_to_dynamic(TypeIdentifier(TK_BOOLEAN), guid);
+    const DDS::DynamicType_var temp = type_identifier_to_dynamic_i(TypeIdentifier(TK_BOOLEAN), guid, depth + 1);
     td->element_type(temp);
     for (ACE_CDR::ULong i = 0; i < cto.bitmask_type.flag_seq.length(); ++i) {
       DynamicTypeMemberImpl* dtm = new DynamicTypeMemberImpl();
@@ -770,7 +772,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
       md->name(cto.bitmask_type.flag_seq[i].detail.name.c_str());
       // Use Id to convey the position of bit flag.
       md->id(cto.bitmask_type.flag_seq[i].common.position);
-      const DDS::DynamicType_var temp2 = type_identifier_to_dynamic(TypeIdentifier(TK_BOOLEAN), guid);
+      const DDS::DynamicType_var temp2 = type_identifier_to_dynamic_i(TypeIdentifier(TK_BOOLEAN), guid, depth + 1);
       md->type(temp2);
       md->index(i);
       dtm->set_descriptor(md);
@@ -782,7 +784,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
     td->kind(TK_ANNOTATION);
     td->name(cto.annotation_type.header.annotation_name.c_str());
     for (ACE_CDR::ULong i = 0; i < cto.annotation_type.member_seq.length(); ++i) {
-      DDS::MemberDescriptor_var md = complete_annotation_member_to_member_descriptor(cto.annotation_type.member_seq[i], guid);
+      DDS::MemberDescriptor_var md = complete_annotation_member_to_member_descriptor(cto.annotation_type.member_seq[i], guid, depth);
       md->index(i);
       md->id(i);
       DynamicTypeMemberImpl* dtm = new DynamicTypeMemberImpl();
@@ -795,7 +797,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
     td->kind(TK_STRUCTURE);
     td->name(cto.struct_type.header.detail.type_name.c_str());
     if (cto.struct_type.header.base_type.kind() != TK_NONE) {
-      const DDS::DynamicType_var base = type_identifier_to_dynamic(cto.struct_type.header.base_type, guid);
+      const DDS::DynamicType_var base = type_identifier_to_dynamic_i(cto.struct_type.header.base_type, guid, depth + 1);
       td->base_type(base);
     }
     td->extensibility_kind(type_flags_to_extensibility(cto.struct_type.struct_flags));
@@ -803,7 +805,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
     for (ACE_CDR::ULong i = 0; i < cto.struct_type.member_seq.length(); ++i) {
       DynamicTypeMemberImpl* dtm = new DynamicTypeMemberImpl();
       DDS::DynamicTypeMember_var dtm_var = dtm;
-      DDS::MemberDescriptor_var md = complete_struct_member_to_member_descriptor(cto.struct_type.member_seq[i], guid);
+      DDS::MemberDescriptor_var md = complete_struct_member_to_member_descriptor(cto.struct_type.member_seq[i], guid, depth);
       md->index(i);
       dtm->set_descriptor(md);
       dt->insert_dynamic_member(dtm);
@@ -817,7 +819,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
     td->is_nested(cto.union_type.union_flags & IS_NESTED);
 
     const DDS::DynamicType_var disc_type =
-      type_identifier_to_dynamic(cto.union_type.discriminator.common.type_id, guid);
+      type_identifier_to_dynamic_i(cto.union_type.discriminator.common.type_id, guid, depth + 1);
     td->discriminator_type(disc_type);
     DDS::MemberDescriptor_var disc_md = new MemberDescriptorImpl();
     disc_md->name("discriminator");
@@ -832,7 +834,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
     dt->insert_dynamic_member(disc_dtm);
 
     for (ACE_CDR::ULong i = 0; i < cto.union_type.member_seq.length(); ++i) {
-      DDS::MemberDescriptor_var md = complete_union_member_to_member_descriptor(cto.union_type.member_seq[i], guid);
+      DDS::MemberDescriptor_var md = complete_union_member_to_member_descriptor(cto.union_type.member_seq[i], guid, depth);
       md->index(i);
       DynamicTypeMemberImpl* dtm = new DynamicTypeMemberImpl();
       DDS::DynamicTypeMember_var dtm_var = dtm;
@@ -852,7 +854,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
     }
     td->bound().length(1);
     td->bound()[0] = cto.sequence_type.header.common.bound;
-    const DDS::DynamicType_var temp = type_identifier_to_dynamic(cto.sequence_type.element.common.type, guid);
+    const DDS::DynamicType_var temp = type_identifier_to_dynamic_i(cto.sequence_type.element.common.type, guid, depth + 1);
     td->element_type(temp);
     }
     break;
@@ -866,7 +868,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
       bounds[idx] = cto.array_type.header.common.bound_seq[idx];
     }
     td->bound(bounds);
-    const DDS::DynamicType_var temp = type_identifier_to_dynamic(cto.array_type.element.common.type, guid);
+    const DDS::DynamicType_var temp = type_identifier_to_dynamic_i(cto.array_type.element.common.type, guid, depth + 1);
     td->element_type(temp);
     }
     break;
@@ -877,9 +879,9 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
     }
     td->bound().length(1);
     td->bound()[0] = cto.map_type.header.common.bound;
-    const DDS::DynamicType_var el_temp = type_identifier_to_dynamic(cto.map_type.element.common.type, guid);
+    const DDS::DynamicType_var el_temp = type_identifier_to_dynamic_i(cto.map_type.element.common.type, guid, depth + 1);
     td->element_type(el_temp);
-    const DDS::DynamicType_var key_temp = type_identifier_to_dynamic(cto.map_type.key.common.type, guid);
+    const DDS::DynamicType_var key_temp = type_identifier_to_dynamic_i(cto.map_type.key.common.type, guid, depth + 1);
     td->key_element_type(key_temp);
     }
     break;
@@ -889,6 +891,20 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
 
 DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic(const TypeIdentifier& ti, const DCPS::GUID_t& guid)
 {
+  return type_identifier_to_dynamic_i(ti, guid, 1);
+}
+
+DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic_i(const TypeIdentifier& ti,
+                                                                     const DCPS::GUID_t& guid,
+                                                                     unsigned depth)
+{
+  if (depth > DCPS::Serializer::max_nesting_depth()) {
+    if (DCPS::log_level >= DCPS::LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: TypeLookupService::type_identifier_to_dynamic: "
+                 "type exceeds the maximum nesting depth of %u\n", DCPS::Serializer::max_nesting_depth()));
+    }
+    return 0;
+  }
   if (ti.kind() == TK_NONE) {
     if (DCPS::DCPS_debug_level >= 1) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) TypeLookupService::type_identifier_to_dynamic -")
@@ -997,7 +1013,7 @@ DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic(const TypeIde
     td->name("String8");
     td->bound().length(1);
     td->bound()[0] = ti.string_sdefn().bound;
-    const DDS::DynamicType_var temp = type_identifier_to_dynamic(TypeIdentifier(TK_CHAR8), guid);
+    const DDS::DynamicType_var temp = type_identifier_to_dynamic_i(TypeIdentifier(TK_CHAR8), guid, depth + 1);
     td->element_type(temp);
     dt->set_descriptor(td);
     }
@@ -1007,7 +1023,7 @@ DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic(const TypeIde
     td->name("String8");
     td->bound().length(1);
     td->bound()[0] = ti.string_ldefn().bound;
-    const DDS::DynamicType_var temp = type_identifier_to_dynamic(TypeIdentifier(TK_CHAR8), guid);
+    const DDS::DynamicType_var temp = type_identifier_to_dynamic_i(TypeIdentifier(TK_CHAR8), guid, depth + 1);
     td->element_type(temp);
     dt->set_descriptor(td);
     }
@@ -1017,7 +1033,7 @@ DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic(const TypeIde
     td->name("WString16");
     td->bound().length(1);
     td->bound()[0] = ti.string_sdefn().bound;
-    const DDS::DynamicType_var temp = type_identifier_to_dynamic(TypeIdentifier(TK_CHAR16), guid);
+    const DDS::DynamicType_var temp = type_identifier_to_dynamic_i(TypeIdentifier(TK_CHAR16), guid, depth + 1);
     td->element_type(temp);
     dt->set_descriptor(td);
     }
@@ -1027,7 +1043,7 @@ DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic(const TypeIde
     td->name("WString16");
     td->bound().length(1);
     td->bound()[0] = ti.string_ldefn().bound;
-    const DDS::DynamicType_var temp = type_identifier_to_dynamic(TypeIdentifier(TK_CHAR16), guid);
+    const DDS::DynamicType_var temp = type_identifier_to_dynamic_i(TypeIdentifier(TK_CHAR16), guid, depth + 1);
     td->element_type(temp);
     dt->set_descriptor(td);
     }
@@ -1037,7 +1053,7 @@ DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic(const TypeIde
     td->name("Sequence");
     td->bound().length(1);
     td->bound()[0] = ti.seq_sdefn().bound;
-    const DDS::DynamicType_var temp = type_identifier_to_dynamic(*ti.seq_sdefn().element_identifier, guid);
+    const DDS::DynamicType_var temp = type_identifier_to_dynamic_i(*ti.seq_sdefn().element_identifier, guid, depth + 1);
     td->element_type(temp);
     dt->set_descriptor(td);
     }
@@ -1047,7 +1063,7 @@ DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic(const TypeIde
     td->name("Sequence");
     td->bound().length(1);
     td->bound()[0] = ti.seq_ldefn().bound;
-    const DDS::DynamicType_var temp = type_identifier_to_dynamic(*ti.seq_ldefn().element_identifier, guid);
+    const DDS::DynamicType_var temp = type_identifier_to_dynamic_i(*ti.seq_ldefn().element_identifier, guid, depth + 1);
     td->element_type(temp);
     dt->set_descriptor(td);
     }
@@ -1059,7 +1075,7 @@ DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic(const TypeIde
     for (ACE_CDR::ULong i = 0; i< td->bound().length(); ++i) {
       td->bound()[i] = ti.array_sdefn().array_bound_seq[i];
     }
-    const DDS::DynamicType_var temp = type_identifier_to_dynamic(*ti.array_sdefn().element_identifier, guid);
+    const DDS::DynamicType_var temp = type_identifier_to_dynamic_i(*ti.array_sdefn().element_identifier, guid, depth + 1);
     td->element_type(temp);
     dt->set_descriptor(td);
     }
@@ -1073,7 +1089,7 @@ DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic(const TypeIde
       bounds[idx] = ti.array_ldefn().array_bound_seq[idx];
     }
     td->bound(bounds);
-    const DDS::DynamicType_var temp = type_identifier_to_dynamic(*ti.array_ldefn().element_identifier, guid);
+    const DDS::DynamicType_var temp = type_identifier_to_dynamic_i(*ti.array_ldefn().element_identifier, guid, depth + 1);
     td->element_type(temp);
     dt->set_descriptor(td);
     }
@@ -1083,9 +1099,9 @@ DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic(const TypeIde
     td->name("Map");
     td->bound().length(1);
     td->bound()[0] = ti.map_sdefn().bound;
-    const DDS::DynamicType_var el_temp = type_identifier_to_dynamic(*ti.map_sdefn().element_identifier, guid);
+    const DDS::DynamicType_var el_temp = type_identifier_to_dynamic_i(*ti.map_sdefn().element_identifier, guid, depth + 1);
     td->element_type(el_temp);
-    const DDS::DynamicType_var key_temp = type_identifier_to_dynamic(*ti.map_sdefn().key_identifier, guid);
+    const DDS::DynamicType_var key_temp = type_identifier_to_dynamic_i(*ti.map_sdefn().key_identifier, guid, depth + 1);
     td->key_element_type(key_temp);
     dt->set_descriptor(td);
     }
@@ -1095,9 +1111,9 @@ DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic(const TypeIde
     td->name("Map");
     td->bound().length(1);
     td->bound()[0] = ti.map_ldefn().bound;
-    const DDS::DynamicType_var el_temp = type_identifier_to_dynamic(*ti.map_ldefn().element_identifier, guid);
+    const DDS::DynamicType_var el_temp = type_identifier_to_dynamic_i(*ti.map_ldefn().element_identifier, guid, depth + 1);
     td->element_type(el_temp);
-    const DDS::DynamicType_var key_temp = type_identifier_to_dynamic(*ti.map_ldefn().key_identifier, guid);
+    const DDS::DynamicType_var key_temp = type_identifier_to_dynamic_i(*ti.map_ldefn().key_identifier, guid, depth + 1);
     td->key_element_type(key_temp);
     dt->set_descriptor(td);
     }
@@ -1110,7 +1126,7 @@ DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic(const TypeIde
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TypeLookupService::type_identifier_to_dynamic -")
                    ACE_TEXT(" get_type_object_i returned TK_NONE\n")));
       } else {
-        complete_to_dynamic_i(dt, to.complete, guid);
+        complete_to_dynamic_i(dt, to.complete, guid, depth);
       }
     }
     break;
