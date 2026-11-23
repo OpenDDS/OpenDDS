@@ -9,8 +9,11 @@
 #include <utl_identifier.h>
 #include <ast_union.h>
 #include <ast_array.h>
+#include <ast_sequence.h>
 
+#include <algorithm>
 #include <string>
+#include <vector>
 
 TopicKeys::RootType TopicKeys::root_type(AST_Type* type)
 {
@@ -174,6 +177,44 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator=(const TopicKeys::Iterator& o
   return *this;
 }
 
+namespace {
+  // Rejects what a sequence key's KeyLessThan can't compare in its elements
+  void validate_sequence_key_element(AST_Type* type)
+  {
+    static std::vector<AST_Type*> type_stack;
+    type = AstTypeClassification::resolveActualType(type);
+    if (std::find(type_stack.begin(), type_stack.end(), type) != type_stack.end()) {
+      throw TopicKeys::Error(type,
+        "a recursive type can't be used as (or as part of) a sequence key element");
+    }
+    struct TypeStackGuard {
+      explicit TypeStackGuard(AST_Type* t) { type_stack.push_back(t); }
+      ~TypeStackGuard() { type_stack.pop_back(); }
+    } const guard(type);
+    switch (TopicKeys::root_type(type)) {
+    case TopicKeys::PrimitiveType:
+    case TopicKeys::UnionType:
+      break;
+    case TopicKeys::StructureType: {
+      // Iterating the keys validates any sequence keys nested in the struct
+      TopicKeys keys(dynamic_cast<AST_Structure*>(type), true, true);
+      keys.count();
+      break;
+    }
+    case TopicKeys::ArrayType:
+      validate_sequence_key_element(dynamic_cast<AST_Array*>(type)->base_type());
+      break;
+    case TopicKeys::SequenceType:
+      validate_sequence_key_element(dynamic_cast<AST_Sequence*>(type)->base_type());
+      break;
+    case TopicKeys::MapType:
+      throw TopicKeys::Error(type, "map types are not supported as keys");
+    default:
+      throw TopicKeys::Error(type, "this type is not supported as a key");
+    }
+  }
+}
+
 TopicKeys::Iterator& TopicKeys::Iterator::operator++()
 {
   // Nop if we are a invalid iterator of any type
@@ -297,6 +338,12 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
     if (pos_ == 0) { // Only Allow One Iteration
       pos_ = 1;
       current_value_ = root_;
+      if (root_type_ == SequenceType) {
+        AST_Field* const field = dynamic_cast<AST_Field*>(root_);
+        AST_Type* const seq = AstTypeClassification::resolveActualType(
+          field ? field->field_type() : dynamic_cast<AST_Type*>(root_));
+        validate_sequence_key_element(dynamic_cast<AST_Sequence*>(seq)->base_type());
+      }
       return *this;
     }
   }

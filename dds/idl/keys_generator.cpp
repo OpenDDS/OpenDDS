@@ -23,23 +23,12 @@ using std::string;
 using namespace AstTypeClassification;
 
 // Emit comparisons of two expressions of IDL type `type`, recursing into content that
-// is a key only because it is inside a sequence key; maps and recursive types throw.
+// is a key only because it is inside a sequence key, which TopicKeys has validated
 void
 compare_key_content(const string& e1, const string& e2, AST_Type* type, bool use_cxx11,
   size_t depth = 0)
 {
   type = resolveActualType(type);
-  static std::vector<AST_Type*> type_stack;
-  for (size_t i = 0; i < type_stack.size(); ++i) {
-    if (type == type_stack[i]) {
-      throw TopicKeys::Error(type,
-        "a recursive type can't be used as (or as part of) a sequence key element");
-    }
-  }
-  struct TypeStackGuard {
-    explicit TypeStackGuard(AST_Type* t) { type_stack.push_back(t); }
-    ~TypeStackGuard() { type_stack.pop_back(); }
-  } const guard(type);
   switch (TopicKeys::root_type(type)) {
   case TopicKeys::PrimitiveType:
     if (!use_cxx11 && (classify(type) & CL_STRING)) {
@@ -74,6 +63,7 @@ compare_key_content(const string& e1, const string& e2, AST_Type* type, bool use
   }
   case TopicKeys::SequenceType: {
     const char* const size_call = use_cxx11 ? ".size()" : ".length()";
+    const char* const index_type = use_cxx11 ? "size_t" : "CORBA::ULong";
     std::ostringstream oss;
     oss << "opendds_i" << depth;
     const string idx = oss.str();
@@ -81,7 +71,7 @@ compare_key_content(const string& e1, const string& e2, AST_Type* type, bool use
       "    if (" << e1 << size_call << " != " << e2 << size_call << ") {\n"
       "      return " << e1 << size_call << " < " << e2 << size_call << ";\n"
       "    }\n"
-      "    for (size_t " << idx << " = 0; " << idx << " < " << e1 << size_call <<
+      "    for (" << index_type << " " << idx << " = 0; " << idx << " < " << e1 << size_call <<
         "; ++" << idx << ") {\n";
     compare_key_content(e1 + "[" + idx + "]", e2 + "[" + idx + "]",
       dynamic_cast<AST_Sequence*>(type)->base_type(), use_cxx11, depth + 1);
@@ -107,10 +97,7 @@ compare_key_content(const string& e1, const string& e2, AST_Type* type, bool use
     }
     break;
   }
-  case TopicKeys::MapType:
-    throw TopicKeys::Error(type, "map types are not supported as keys");
   default:
-    // Reject anything unexpected rather than silently comparing nothing
     throw TopicKeys::Error(type, "this type is not supported as a key");
   }
 }
@@ -238,7 +225,6 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
       wrapper.has_no_keys_signature();
     }
   } catch (TopicKeys::Error& error) {
-    // compare_key_content() rejected a map or recursive type in a sequence key
     idl_global->err()->misc_error(error.what(), error.node());
     return false;
   }
