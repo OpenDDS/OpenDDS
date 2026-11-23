@@ -47,3 +47,8 @@ struct Data {
   map<string, @try_construct TestStructMap> stringMapMap;
 };
 
+
+@topic @appendable
+struct BoundedMap {
+  map<int32, int64, 3> intLongMap;
+};

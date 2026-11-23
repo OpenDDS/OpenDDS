@@ -169,7 +169,8 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     xcdr2_encoding, "Bound::MutableExtendedSizeMessage (XCDR2)", 70017);
 
   failed |= assert_bounded<Bound::MutableBoundedUnionMessage>(
-    xcdr1_encoding, "Bound::MutableBoundedUnionMessage (XCDR1)", 20);
+    // 20 on the wire, plus 4 for padding a nested XCDR1 mutable type can cause after it
+    xcdr1_encoding, "Bound::MutableBoundedUnionMessage (XCDR1)", 24);
   failed |= assert_bounded<Bound::MutableBoundedUnionMessage>(
     // The implicitly appendable wrapping struct adds its own 4-byte XCDR2 DHEADER
     xcdr2_encoding, "Bound::MutableBoundedUnionMessage (XCDR2)", 24);

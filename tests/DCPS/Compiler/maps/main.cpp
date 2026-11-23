@@ -92,6 +92,21 @@ TEST(MapsTests, Marshalling)
   }
 }
 
+TEST(MapsTests, BoundedMapSerializedSizeBound)
+{
+  BoundedMap full;
+  full.intLongMap()[1] = 10;
+  full.intLongMap()[2] = 20;
+  full.intLongMap()[3] = 30;
+  for (size_t i = 0; i < sizeof marshalling_encodings / sizeof marshalling_encodings[0]; ++i) {
+    const OpenDDS::DCPS::Encoding& encoding = marshalling_encodings[i];
+    const OpenDDS::DCPS::SerializedSizeBound bound =
+      OpenDDS::DCPS::MarshalTraits<BoundedMap>::serialized_size_bound(encoding);
+    ASSERT_TRUE(bound);
+    EXPECT_EQ(OpenDDS::DCPS::serialized_size(encoding, full), bound.get());
+  }
+}
+
 TEST(MapsTests, SerializedSize)
 {
   Data expectedData;

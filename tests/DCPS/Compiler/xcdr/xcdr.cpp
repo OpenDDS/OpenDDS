@@ -339,6 +339,20 @@ void baseline_checks(const Encoding& encoding, const DataView& expected_cdr,
   baseline_checks_vwrite(encoding, value, expected_cdr);
 }
 
+// Serializing into a buffer of exactly serialized_size_bound() bytes must succeed
+template<typename Type>
+void expect_fits_in_bound(const Encoding& encoding, const Type& value, size_t expected_size = 0)
+{
+  const SerializedSizeBound bound = MarshalTraits<Type>::serialized_size_bound(encoding);
+  ASSERT_TRUE(bound);
+  ACE_Message_Block buffer(bound.get());
+  Serializer ser(&buffer, encoding);
+  ASSERT_TRUE(ser << value);
+  if (expected_size) {
+    EXPECT_EQ(buffer.length(), expected_size);
+  }
+}
+
 template<typename Type>
 void baseline_checks_union(const Encoding& encoding, const DataView& expected_cdr, UnionDisc disc)
 {
@@ -3239,6 +3253,35 @@ TEST(OptionalTests, Present)
   value.str_field(OPENDDS_OPTIONAL_NS::optional<std::string>("Hello World"));
   Optional::OptionalMembers result;
   amalgam_serializer_test(xcdr2, expected, value, result);
+}
+
+TEST(OptionalTests, OptionalFitsBound)
+{
+  Optional::AppendableOptionalLongLong value;
+  value.value(OPENDDS_OPTIONAL_NS::optional<int64_t>(1));
+  expect_fits_in_bound(xcdr1, value);
+  expect_fits_in_bound(xcdr2, value);
+}
+
+TEST(OptionalTests, MutableMemberWithOptionalFitsBound)
+{
+  // When absent, the XCDR2 member is 5 bytes, which needs the long EMHEADER form
+  Optional::MutableOptionalShort value;
+  expect_fits_in_bound(xcdr1, value);
+  expect_fits_in_bound(xcdr2, value);
+  value.value().value(OPENDDS_OPTIONAL_NS::optional<int16_t>(1));
+  expect_fits_in_bound(xcdr1, value);
+  expect_fits_in_bound(xcdr2, value);
+}
+
+TEST(MutableTests, NestedMutableXcdr1FitsBound)
+{
+  // XCDR1 aligns after to inner's PID, not the start of the stream, so it's at 20, not 16
+  FinalMutableThenDouble value;
+  value.inner().value(1);
+  value.after(2.0);
+  expect_fits_in_bound(xcdr1, value, 28);
+  expect_fits_in_bound(xcdr2, value);
 }
 
 int main(int argc, char* argv[])
