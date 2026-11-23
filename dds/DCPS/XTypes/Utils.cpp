@@ -13,6 +13,7 @@
 #  include <dds/DCPS/debug.h>
 #  include <dds/DCPS/DCPS_Utils.h>
 #  include <dds/DCPS/SafetyProfileStreams.h>
+#  include <dds/DCPS/Serializer.h>
 
 #  include <ace/OS_NS_string.h>
 
@@ -27,6 +28,135 @@ namespace XTypes {
 using DCPS::retcode_to_string;
 using DCPS::LogLevel;
 using DCPS::log_level;
+
+namespace {
+  struct TypeNode {
+    TypeNode() : state(0), depth(0) {}
+    // Types this type contains by value
+    OPENDDS_VECTOR(DDS::DynamicType_ptr) by_value;
+    // 0: not visited, 1: on the stack, 2: done
+    int state;
+    unsigned depth;
+  };
+  typedef OPENDDS_MAP(DDS::DynamicType_ptr, TypeNode) TypeGraph;
+  typedef std::pair<TypeNode*, size_t> StackEntry;
+
+  bool add_edge(TypeNode& node, OPENDDS_VECTOR(DDS::DynamicType_ptr)& pending,
+                DDS::DynamicType_ptr target, bool by_value)
+  {
+    if (!target) {
+      return false;
+    }
+    pending.push_back(target);
+    if (by_value) {
+      node.by_value.push_back(target);
+    }
+    return true;
+  }
+
+  bool add_member_edges(TypeNode& node, OPENDDS_VECTOR(DDS::DynamicType_ptr)& pending,
+                        DDS::DynamicType_ptr type)
+  {
+    for (ACE_CDR::ULong i = 0; i < type->get_member_count(); ++i) {
+      DDS::DynamicTypeMember_var member;
+      DDS::MemberDescriptor_var md;
+      if (type->get_member_by_index(member, i) != DDS::RETCODE_OK ||
+          member->get_descriptor(md) != DDS::RETCODE_OK || !md ||
+          !add_edge(node, pending, md->type(), !md->is_optional())) {
+        return false;
+      }
+    }
+    return true;
+  }
+}
+
+bool dynamic_type_is_valid(DDS::DynamicType_ptr type)
+{
+  if (!type) {
+    return false;
+  }
+
+  // Visit every reachable type without recursion
+  TypeGraph graph;
+  OPENDDS_VECTOR(DDS::DynamicType_ptr) pending(1, type);
+  while (!pending.empty()) {
+    const DDS::DynamicType_ptr current = pending.back();
+    pending.pop_back();
+    if (graph.count(current)) {
+      continue;
+    }
+    TypeNode& node = graph[current];
+    DDS::TypeDescriptor_var td;
+    if (current->get_descriptor(td) != DDS::RETCODE_OK || !td) {
+      return false;
+    }
+    bool ok = true;
+    switch (td->kind()) {
+    case TK_ALIAS:
+      ok = add_edge(node, pending, td->base_type(), true);
+      break;
+    case TK_ARRAY:
+      ok = add_edge(node, pending, td->element_type(), true);
+      break;
+    case TK_SEQUENCE:
+      ok = add_edge(node, pending, td->element_type(), false);
+      break;
+    case TK_MAP:
+      ok = add_edge(node, pending, td->key_element_type(), false) &&
+        add_edge(node, pending, td->element_type(), false);
+      break;
+    case TK_STRUCTURE:
+      ok = (!td->base_type() || add_edge(node, pending, td->base_type(), true)) &&
+        add_member_edges(node, pending, current);
+      break;
+    case TK_UNION:
+      ok = add_edge(node, pending, td->discriminator_type(), true) &&
+        add_member_edges(node, pending, current);
+      break;
+    }
+    if (!ok) {
+      return false;
+    }
+  }
+
+  // Types contained by value can't form a cycle, and their nesting is limited
+  const unsigned max_depth = DCPS::Serializer::max_nesting_depth();
+  for (TypeGraph::iterator start = graph.begin(); start != graph.end(); ++start) {
+    if (start->second.state) {
+      continue;
+    }
+    OPENDDS_VECTOR(StackEntry) stack;
+    start->second.state = 1;
+    stack.push_back(std::make_pair(&start->second, size_t(0)));
+    while (!stack.empty()) {
+      TypeNode* const node = stack.back().first;
+      const size_t next = stack.back().second;
+      if (next < node->by_value.size()) {
+        ++stack.back().second;
+        TypeNode& child = graph[node->by_value[next]];
+        if (child.state == 1) {
+          return false;
+        }
+        if (child.state == 0) {
+          child.state = 1;
+          stack.push_back(std::make_pair(&child, size_t(0)));
+        }
+        continue;
+      }
+      unsigned depth = 1;
+      for (size_t i = 0; i < node->by_value.size(); ++i) {
+        depth = (std::max)(depth, graph[node->by_value[i]].depth + 1);
+      }
+      if (depth > max_depth) {
+        return false;
+      }
+      node->depth = depth;
+      node->state = 2;
+      stack.pop_back();
+    }
+  }
+  return true;
+}
 
 DDS::ReturnCode_t extensibility(DDS::DynamicType_ptr type, DCPS::Extensibility& ext)
 {

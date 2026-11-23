@@ -32,6 +32,7 @@
 #endif
 
 #include "XTypes/DynamicDataXcdrReadImpl.h"
+#include "XTypes/Utils.h"
 
 #include "transport/framework/EntryExit.h"
 #include "transport/framework/TransportExceptions.h"
@@ -234,6 +235,13 @@ RecorderImpl::add_to_dynamic_type_map(const GUID_t& pub_id, const XTypes::TypeId
 {
   XTypes::TypeLookupService_rch tls = participant_servant_->get_type_lookup_service();
   DDS::DynamicType_var dt = tls->type_identifier_to_dynamic(ti, pub_id);
+  if (!XTypes::dynamic_type_is_valid(dt)) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RecorderImpl::add_to_dynamic_type_map: "
+                 "invalid DynamicType for %C\n", LogGuid(pub_id).c_str()));
+    }
+    return;
+  }
   if (DCPS_debug_level >= 4) {
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) RecorderImpl::add_association: "

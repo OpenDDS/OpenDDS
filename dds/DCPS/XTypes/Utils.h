@@ -22,11 +22,10 @@ namespace XTypes {
 
 class TypeLookupService;
 
-inline bool dynamic_type_is_valid(DDS::DynamicType_ptr type)
-{
-  DDS::TypeDescriptor_var td;
-  return type && type->get_descriptor(td) == DDS::RETCODE_OK && td;
-}
+/// Check that every type reachable from type is complete, that no type contains itself
+/// without an optional member or a sequence or map in between, and that types aren't
+/// nested deeper than the maximum nesting depth.
+OpenDDS_Dcps_Export bool dynamic_type_is_valid(DDS::DynamicType_ptr type);
 
 OpenDDS_Dcps_Export DDS::ReturnCode_t extensibility(
   DDS::DynamicType_ptr type, DCPS::Extensibility& ext);
