@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5354
 
 .. news-start-section: Fixes
 - Changed the default :prop:`[transport@multicast]port_offset` from ``49152`` to ``7405``.
