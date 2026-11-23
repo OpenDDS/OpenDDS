@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5355
 
 .. news-start-section: Security
 - ``TypeObject``\s received through the TypeLookup service are now removed once every participant that sent them has been removed, so a long-running process no longer keeps the types of every peer it has seen.
