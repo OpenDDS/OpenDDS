@@ -597,6 +597,7 @@ For example:
 
     The maximum depth of nested structs, unions, and collections read from a received sample, a ``TypeObject``, or JSON input for dynamic data.
     Content filter and query expressions are limited to the same number of parentheses and ``AND``, ``OR``, and ``NOT`` operators.
+    A ``DynamicType`` built from types received from a peer is also limited to this depth, counting types nested by value.
     Input that exceeds the limit is rejected, which prevents stack exhaustion from deeply nested or recursive data.
     Increase it if an application uses deeper recursive data.
 

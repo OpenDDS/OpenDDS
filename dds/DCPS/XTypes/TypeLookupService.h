@@ -112,10 +112,11 @@ private:
   bool complete_to_minimal_bitset(const CompleteBitsetType& ct, MinimalBitsetType& mt) const;
 
 #ifndef OPENDDS_SAFETY_PROFILE
-  DDS::MemberDescriptor* complete_struct_member_to_member_descriptor(const CompleteStructMember& cm, const DCPS::GUID_t& guid);
-  DDS::MemberDescriptor* complete_union_member_to_member_descriptor(const CompleteUnionMember& cm, const DCPS::GUID_t& guid);
-  DDS::MemberDescriptor* complete_annotation_member_to_member_descriptor(const CompleteAnnotationParameter& cm, const DCPS::GUID_t& guid);
-  void complete_to_dynamic_i(DynamicTypeImpl* dt, const CompleteTypeObject& cto, const DCPS::GUID_t& guid);
+  DDS::MemberDescriptor* complete_struct_member_to_member_descriptor(const CompleteStructMember& cm, const DCPS::GUID_t& guid, unsigned depth);
+  DDS::MemberDescriptor* complete_union_member_to_member_descriptor(const CompleteUnionMember& cm, const DCPS::GUID_t& guid, unsigned depth);
+  DDS::MemberDescriptor* complete_annotation_member_to_member_descriptor(const CompleteAnnotationParameter& cm, const DCPS::GUID_t& guid, unsigned depth);
+  void complete_to_dynamic_i(DynamicTypeImpl* dt, const CompleteTypeObject& cto, const DCPS::GUID_t& guid, unsigned depth);
+  DDS::DynamicType_ptr type_identifier_to_dynamic_i(const TypeIdentifier& ti, const DCPS::GUID_t& guid, unsigned depth);
   void remove_guid_from_dynamic_map_i(const DCPS::GUID_t& guid, bool clear);
   GuidTypeMap gt_map_;
 #endif

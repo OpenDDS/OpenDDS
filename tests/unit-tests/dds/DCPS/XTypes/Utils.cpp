@@ -946,4 +946,125 @@ TEST_F(dds_DCPS_XTypes_Utils, remove_enumerators)
   checkAdded(compAdded);
 }
 
+namespace {
+  DynamicTypeImpl* make_type(TypeKind kind, const char* name)
+  {
+    DynamicTypeImpl* const type = new DynamicTypeImpl;
+    DDS::TypeDescriptor_var td = new TypeDescriptorImpl;
+    td->kind(kind);
+    td->name(name);
+    type->set_descriptor(td);
+    return type;
+  }
+
+  void add_member(DynamicTypeImpl* type, DDS::DynamicType_ptr member_type, bool optional = false)
+  {
+    DynamicTypeMemberImpl* const member = new DynamicTypeMemberImpl;
+    DDS::DynamicTypeMember_var member_var = member;
+    DDS::MemberDescriptor_var md = new MemberDescriptorImpl;
+    md->name("m");
+    md->id(type->get_member_count());
+    md->index(type->get_member_count());
+    md->type(member_type);
+    md->is_optional(optional);
+    member->set_descriptor(md);
+    type->insert_dynamic_member(member);
+  }
+
+  DDS::DynamicType_var node_type(TypeLookupService& tls)
+  {
+    const TypeIdentifier& ti = getCompleteTypeIdentifier<DynamicDataImpl_Node_xtag>();
+    const TypeMap& type_map = getCompleteTypeMap<DynamicDataImpl_Node_xtag>();
+    tls.add(type_map.begin(), type_map.end());
+    return tls.type_identifier_to_dynamic(ti, GUID_UNKNOWN);
+  }
+}
+
+TEST(dds_DCPS_XTypes_Utils_DynamicTypeIsValid, Recursive)
+{
+  TypeLookupService tls;
+  const DDS::DynamicType_var node = node_type(tls);
+  EXPECT_TRUE(dynamic_type_is_valid(node));
+}
+
+TEST(dds_DCPS_XTypes_Utils_DynamicTypeIsValid, Cycles)
+{
+  // struct S { S s; };
+  DynamicTypeImpl* const s = make_type(TK_STRUCTURE, "S");
+  DDS::DynamicType_var s_var = s;
+  add_member(s, s);
+  EXPECT_FALSE(dynamic_type_is_valid(s));
+  s->clear();
+
+  // struct O { @optional O o; };
+  DynamicTypeImpl* const o = make_type(TK_STRUCTURE, "O");
+  DDS::DynamicType_var o_var = o;
+  add_member(o, o, true);
+  EXPECT_TRUE(dynamic_type_is_valid(o));
+  o->clear();
+
+  // struct B : B {};
+  DynamicTypeImpl* const b = make_type(TK_STRUCTURE, "B");
+  DDS::DynamicType_var b_var = b;
+  DDS::TypeDescriptor_var b_td;
+  b->get_descriptor(b_td);
+  b_td->base_type(b);
+  EXPECT_FALSE(dynamic_type_is_valid(b));
+  b_td->base_type(0);
+
+  // struct A { A_array a; }; through an array
+  DynamicTypeImpl* const a = make_type(TK_STRUCTURE, "A");
+  DDS::DynamicType_var a_var = a;
+  DynamicTypeImpl* const arr = make_type(TK_ARRAY, "A_array");
+  DDS::DynamicType_var arr_var = arr;
+  DDS::TypeDescriptor_var arr_td;
+  arr->get_descriptor(arr_td);
+  arr_td->element_type(a);
+  add_member(a, arr);
+  EXPECT_FALSE(dynamic_type_is_valid(a));
+  a->clear();
+  arr_td->element_type(0);
+}
+
+TEST(dds_DCPS_XTypes_Utils_DynamicTypeIsValid, Incomplete)
+{
+  DynamicTypeImpl* const s = make_type(TK_STRUCTURE, "S");
+  DDS::DynamicType_var s_var = s;
+  DDS::DynamicType_var no_descriptor = new DynamicTypeImpl;
+  add_member(s, no_descriptor);
+  EXPECT_FALSE(dynamic_type_is_valid(s));
+  EXPECT_FALSE(dynamic_type_is_valid(0));
+}
+
+TEST(dds_DCPS_XTypes_Utils_DynamicTypeIsValid, Depth)
+{
+  const unsigned prev_max = Serializer::max_nesting_depth();
+  Serializer::max_nesting_depth(3);
+
+  // Structs nested by value: 3 levels pass, 4 fail
+  DynamicTypeImpl* const inner = make_type(TK_STRUCTURE, "Inner");
+  DDS::DynamicType_var inner_var = inner;
+  DynamicTypeImpl* const middle = make_type(TK_STRUCTURE, "Middle");
+  DDS::DynamicType_var middle_var = middle;
+  add_member(middle, inner);
+  DynamicTypeImpl* const outer = make_type(TK_STRUCTURE, "Outer");
+  DDS::DynamicType_var outer_var = outer;
+  add_member(outer, middle);
+  EXPECT_TRUE(dynamic_type_is_valid(outer));
+  DynamicTypeImpl* const top = make_type(TK_STRUCTURE, "Top");
+  DDS::DynamicType_var top_var = top;
+  add_member(top, outer);
+  EXPECT_FALSE(dynamic_type_is_valid(top));
+
+  // Building a DynamicType is also limited
+  Serializer::max_nesting_depth(2);
+  {
+    TypeLookupService tls;
+    const DDS::DynamicType_var node = node_type(tls);
+    EXPECT_FALSE(dynamic_type_is_valid(node));
+  }
+
+  Serializer::max_nesting_depth(prev_max);
+}
+
 #endif // OPENDDS_SAFETY_PROFILE
