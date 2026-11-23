@@ -271,7 +271,7 @@ struct TestParticipant: ACE_Event_Handler {
       inlineQoS[0].string_data("my_topic_name");
       inlineQoS[0]._d(PID_TOPIC_NAME);
     }
-    const DataFragSubmessage df = {
+    DataFragSubmessage df = {
       {DATA_FRAG, CORBA::Octet(FLAG_E | (i ? 0 : FLAG_Q)), 0},
       0, DATA_FRAG_OCTETS_TO_IQOS, ENTITYID_UNKNOWN, writer, seq,
       {i + 1},       // fragmentStartingNum
@@ -281,10 +281,19 @@ struct TestParticipant: ACE_Event_Handler {
       inlineQoS
     };
 
+    // Another submessage follows the fragment in the same message, as with
+    // writers that pack several fragments and heartbeats into one datagram.
+    // The fragment's data must end where its submessage ends.
+    const PadSubmessage pad = {{PAD, FLAG_E, 0}};
+    size_t df_size = 0;
+    serialized_size(encoding, df_size, df);
+    df.smHeader.submessageLength =
+      static_cast<CORBA::UShort>(df_size - SMHDR_SZ + FRAG_SIZE);
+
     size_t size = 0;
     serialized_size(encoding, size, hdr_);
-    serialized_size(encoding, size, df);
-    size += FRAG_SIZE;
+    size += df_size + FRAG_SIZE;
+    serialized_size(encoding, size, pad);
     ACE_Message_Block mb(size);
     Serializer ser(&mb, encoding);
     const EncapsulationHeader encap(encoding, FINAL);
@@ -292,6 +301,7 @@ struct TestParticipant: ACE_Event_Handler {
     if (i == 0) ok &= (ser << encap);
     ok &= ser.write_octet_array(data_for_frag_,
                                 i ? FRAG_SIZE : FRAG_SIZE - 4);
+    ok &= (ser << pad);
     if (!ok) {
       ACE_DEBUG((LM_DEBUG, "ERROR: failed to serialize data frag %d\n", i));
       return false;
