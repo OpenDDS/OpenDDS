@@ -232,4 +232,143 @@ TEST(dds_DCPS_XTypes_TypeLookupService, RemoteTypeIdentifierMap)
   EXPECT_EQ(minimal.type_identifier, result);
 }
 
+namespace {
+  DCPS::GUID_t participant(unsigned char id)
+  {
+    DCPS::GUID_t guid = DCPS::GUID_UNKNOWN;
+    guid.guidPrefix[0] = id;
+    guid.entityId = DCPS::ENTITYID_PARTICIPANT;
+    return guid;
+  }
+
+  TypeIdentifierTypeObjectPairSeq struct_types()
+  {
+    TypeIdentifierTypeObjectPairSeq types;
+    add_pair(types, struct_pair(EK_MINIMAL));
+    add_pair(types, struct_pair(EK_COMPLETE));
+    return types;
+  }
+}
+
+TEST(dds_DCPS_XTypes_TypeLookupService, RemoveParticipant)
+{
+  const TypeIdentifierTypeObjectPairSeq types = struct_types();
+  const TypeIdentifier& ti = types[0].type_identifier;
+  const TypeIdentifier& complete = types[1].type_identifier;
+  TypeIdentifierPairSeq pairs;
+  pairs.append(TypeIdentifierPair(complete, ti));
+
+  TypeLookupService tls;
+  tls.add_type_objects_to_cache(types, participant(1));
+  tls.add_type_objects_to_cache(types, participant(2));
+  tls.add_remote_type_identifier_map(pairs);
+
+  tls.remove_participant(participant(1));
+  EXPECT_TRUE(tls.type_object_in_cache(ti));
+  tls.remove_participant(participant(2));
+  EXPECT_FALSE(tls.type_object_in_cache(ti));
+  EXPECT_FALSE(tls.type_object_in_cache(complete));
+
+  // The complete-to-minimal mapping goes with the complete TypeObject
+  tls.add(complete, types[1].type_object);
+  TypeIdentifier result;
+  EXPECT_FALSE(tls.get_minimal_type_identifier(complete, result));
+}
+
+TEST(dds_DCPS_XTypes_TypeLookupService, LocalTypesNotRemoved)
+{
+  const TypeIdentifierTypeObjectPairSeq types = struct_types();
+  const TypeIdentifier& ti = types[0].type_identifier;
+
+  {
+    // Added locally after a peer sent it
+    TypeLookupService tls;
+    tls.add_type_objects_to_cache(types, participant(1));
+    tls.add(ti, types[0].type_object);
+    tls.remove_participant(participant(1));
+    EXPECT_TRUE(tls.type_object_in_cache(ti));
+    EXPECT_FALSE(tls.type_object_in_cache(types[1].type_identifier));
+  }
+
+  {
+    // Added locally before a peer sent it
+    TypeLookupService tls;
+    tls.add(ti, types[0].type_object);
+    tls.add_type_objects_to_cache(types, participant(1));
+    tls.remove_participant(participant(1));
+    EXPECT_TRUE(tls.type_object_in_cache(ti));
+  }
+
+  {
+    // Retained for a DynamicType
+    TypeLookupService tls;
+    tls.add_type_objects_to_cache(types, participant(1));
+    tls.retain(ti);
+    tls.remove_participant(participant(1));
+    EXPECT_TRUE(tls.type_object_in_cache(ti));
+    EXPECT_FALSE(tls.type_object_in_cache(types[1].type_identifier));
+  }
+}
+
+TEST(dds_DCPS_XTypes_TypeLookupService, RetainScc)
+{
+  const TypeIdentifierTypeObjectPairSeq scc = node_scc(EK_MINIMAL);
+  TypeLookupService tls;
+  tls.add_type_objects_to_cache(scc, participant(1));
+  tls.retain(DCPS::getMinimalTypeIdentifier<DCPS::Node_xtag>());
+  tls.remove_participant(participant(1));
+  for (ACE_CDR::ULong i = 0; i < scc.length(); ++i) {
+    EXPECT_TRUE(tls.type_object_in_cache(scc[i].type_identifier));
+  }
+}
+
+TEST(dds_DCPS_XTypes_TypeLookupService, PinDefersRemoval)
+{
+  const TypeIdentifierTypeObjectPairSeq types = struct_types();
+  const TypeIdentifier& ti = types[0].type_identifier;
+
+  TypeLookupService tls;
+  tls.add_type_objects_to_cache(types, participant(1));
+  {
+    const TypeLookupService::Pin pin(&tls);
+    const TypeObject& to = tls.get_type_object(ti);
+    tls.remove_participant(participant(1));
+    EXPECT_EQ(EK_MINIMAL, to.kind);
+    EXPECT_TRUE(tls.type_object_in_cache(ti));
+  }
+  EXPECT_FALSE(tls.type_object_in_cache(ti));
+
+  // Sent again while removal was deferred
+  tls.add_type_objects_to_cache(types, participant(1));
+  {
+    const TypeLookupService::Pin pin(&tls);
+    tls.remove_participant(participant(1));
+    tls.add_type_objects_to_cache(types, participant(2));
+  }
+  EXPECT_TRUE(tls.type_object_in_cache(ti));
+}
+
+TEST(dds_DCPS_XTypes_TypeLookupService, MaxTypeObjectsPerParticipant)
+{
+  const DDS::UInt32 prev = TheServiceParticipant->max_type_objects_per_participant();
+  TheServiceParticipant->max_type_objects_per_participant(1);
+  const TypeIdentifierTypeObjectPairSeq types = struct_types();
+
+  TypeLookupService tls;
+  tls.add_type_objects_to_cache(types, participant(1));
+  EXPECT_FALSE(tls.type_object_in_cache(types[0].type_identifier));
+  EXPECT_FALSE(tls.type_object_in_cache(types[1].type_identifier));
+
+  TypeIdentifierTypeObjectPairSeq one;
+  add_pair(one, types[0]);
+  tls.add_type_objects_to_cache(one, participant(1));
+  EXPECT_TRUE(tls.type_object_in_cache(types[0].type_identifier));
+  // Sending the same one again doesn't count twice
+  tls.add_type_objects_to_cache(one, participant(1));
+  tls.add_type_objects_to_cache(types, participant(2));
+  EXPECT_FALSE(tls.type_object_in_cache(types[1].type_identifier));
+
+  TheServiceParticipant->max_type_objects_per_participant(prev);
+}
+
 #endif // OPENDDS_SAFETY_PROFILE

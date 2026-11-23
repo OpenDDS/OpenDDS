@@ -7,6 +7,7 @@
 #include "TypeLookupService.h"
 
 #include "../debug.h"
+#include "../GuidConverter.h"
 #include "../SafetyProfileStreams.h"
 #include "../Service_Participant.h"
 
@@ -101,6 +102,7 @@ namespace {
 }
 
 TypeLookupService::TypeLookupService()
+  : pins_(0)
 {
   to_empty_.minimal.kind = TK_NONE;
   to_empty_.complete.kind = TK_NONE;
@@ -118,6 +120,100 @@ TypeLookupService::~TypeLookupService()
     }
   }
 #endif
+}
+
+TypeLookupService::Pin::Pin(const TypeLookupService* tls)
+  : tls_(const_cast<TypeLookupService*>(tls))
+{
+  if (tls_) {
+    ACE_GUARD(ACE_Thread_Mutex, g, tls_->mutex_);
+    ++tls_->pins_;
+  }
+}
+
+TypeLookupService::Pin::Pin(const Pin& other)
+  : tls_(other.tls_)
+{
+  if (tls_) {
+    ACE_GUARD(ACE_Thread_Mutex, g, tls_->mutex_);
+    ++tls_->pins_;
+  }
+}
+
+TypeLookupService::Pin::~Pin()
+{
+  if (tls_) {
+    tls_->unpin();
+  }
+}
+
+void TypeLookupService::unpin()
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  if (--pins_ > 0) {
+    return;
+  }
+  for (TypeIdentifierSet::const_iterator pos = pending_erase_.begin(); pos != pending_erase_.end(); ++pos) {
+    const RefCountMap::const_iterator ref = remote_refs_.find(*pos);
+    if (ref != remote_refs_.end() && ref->second == 0) {
+      erase_type_i(*pos);
+    }
+  }
+  pending_erase_.clear();
+}
+
+void TypeLookupService::erase_type_i(const TypeIdentifier& type_id)
+{
+  remote_refs_.erase(type_id);
+  type_map_.erase(type_id);
+  complete_to_minimal_ti_map_.erase(type_id);
+}
+
+void TypeLookupService::make_local_i(const TypeIdentifier& type_id)
+{
+  remote_refs_.erase(type_id);
+}
+
+void TypeLookupService::remove_participant(const DCPS::GUID_t& participant)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  const ParticipantTypeMap::iterator pos = participant_types_.find(participant);
+  if (pos == participant_types_.end()) {
+    return;
+  }
+  for (TypeIdentifierSet::const_iterator ti = pos->second.begin(); ti != pos->second.end(); ++ti) {
+    const RefCountMap::iterator ref = remote_refs_.find(*ti);
+    if (ref == remote_refs_.end() || --ref->second > 0) {
+      continue;
+    }
+    if (pins_) {
+      pending_erase_.insert(*ti);
+    } else {
+      erase_type_i(*ti);
+    }
+  }
+  participant_types_.erase(pos);
+}
+
+void TypeLookupService::retain(const TypeIdentifier& type_id)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  TypeIdentifierSet ids;
+  compute_dependencies(type_map_, type_id, ids);
+  ids.insert(type_id);
+  for (TypeIdentifierSet::const_iterator pos = ids.begin(); pos != ids.end(); ++pos) {
+    if (pos->kind() != TI_STRONGLY_CONNECTED_COMPONENT) {
+      make_local_i(*pos);
+      continue;
+    }
+    TypeIdentifier first(*pos);
+    first.sc_component_id().scc_index = 1;
+    for (TypeMap::const_iterator member = type_map_.lower_bound(first);
+         member != type_map_.end() && member->first.kind() == TI_STRONGLY_CONNECTED_COMPONENT &&
+           same_scc(member->first.sc_component_id(), pos->sc_component_id()); ++member) {
+      make_local_i(member->first);
+    }
+  }
 }
 
 void TypeLookupService::get_type_objects(const TypeIdentifierSeq& type_ids,
@@ -219,9 +315,11 @@ void TypeLookupService::get_type_dependencies_i(const TypeIdentifierSeq& type_id
   }
 }
 
-void TypeLookupService::add_type_objects_to_cache(const TypeIdentifierTypeObjectPairSeq& types)
+void TypeLookupService::add_type_objects_to_cache(const TypeIdentifierTypeObjectPairSeq& types,
+                                                  const DCPS::GUID_t& participant)
 {
   const bool validate = TheServiceParticipant->validate_type_objects();
+  const size_t max_per_participant = TheServiceParticipant->max_type_objects_per_participant();
   const bool old_format =
     TheServiceParticipant->type_object_encoding() != DCPS::Service_Participant::Encoding_Normal;
 
@@ -276,9 +374,44 @@ void TypeLookupService::add_type_objects_to_cache(const TypeIdentifierTypeObject
   }
 
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  const bool track = participant != DCPS::GUID_UNKNOWN;
+  TypeIdentifierSet* sent = 0;
+  if (track) {
+    sent = &participant_types_[participant];
+    size_t added = 0;
+    for (TypeMap::const_iterator pos = valid.begin(); pos != valid.end(); ++pos) {
+      added += sent->count(pos->first) ? 0 : 1;
+    }
+    if (sent->size() + added > max_per_participant) {
+      if (DCPS::log_level >= DCPS::LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: TypeLookupService::add_type_objects_to_cache: "
+                   "%C would exceed the maximum of %B TypeObjects per participant\n",
+                   DCPS::LogGuid(participant).c_str(), max_per_participant));
+      }
+      if (sent->empty()) {
+        participant_types_.erase(participant);
+      }
+      return;
+    }
+  }
+
   for (TypeMap::iterator pos = valid.begin(); pos != valid.end(); ++pos) {
-    if (type_map_.find(pos->first) == type_map_.end() && set_type_object_defaults(pos->second)) {
+    if (type_map_.find(pos->first) == type_map_.end()) {
+      if (!set_type_object_defaults(pos->second)) {
+        continue;
+      }
       type_map_.insert(*pos);
+      if (track) {
+        remote_refs_[pos->first] = 0;
+      }
+    }
+    if (!track) {
+      make_local_i(pos->first);
+    } else if (sent->insert(pos->first).second) {
+      const RefCountMap::iterator ref = remote_refs_.find(pos->first);
+      if (ref != remote_refs_.end()) {
+        ++ref->second;
+      }
     }
   }
 }
@@ -287,6 +420,9 @@ void TypeLookupService::add(TypeMap::const_iterator begin, TypeMap::const_iterat
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   type_map_.insert(begin, end);
+  for (TypeMap::const_iterator pos = begin; pos != end; ++pos) {
+    make_local_i(pos->first);
+  }
 }
 
 void TypeLookupService::add(const TypeIdentifier& ti, const TypeObject& tobj)
@@ -296,6 +432,7 @@ void TypeLookupService::add(const TypeIdentifier& ti, const TypeObject& tobj)
   if (pos == type_map_.end()) {
     type_map_.insert(std::make_pair(ti, tobj));
   }
+  make_local_i(ti);
 }
 
 void TypeLookupService::update_type_identifier_map(const TypeIdentifierPairSeq& tid_pairs)
@@ -304,6 +441,7 @@ void TypeLookupService::update_type_identifier_map(const TypeIdentifierPairSeq& 
   for (ACE_CDR::ULong i = 0; i < tid_pairs.length(); ++i) {
     const TypeIdentifierPair& pair = tid_pairs[i];
     complete_to_minimal_ti_map_[pair.type_identifier1] = pair.type_identifier2;
+    make_local_i(pair.type_identifier1);
   }
 }
 

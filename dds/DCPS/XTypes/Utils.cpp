@@ -2236,7 +2236,11 @@ namespace { // helpers for XTypes::remove_enumerators (below)
 
     TypeIdentifier replace_object(const TypeIdentifier& typeId)
     {
-      TypeObject copy(lookup_.get_type_object(typeId));
+      TypeObject copy;
+      {
+        const TypeLookupService::Pin pin(&lookup_);
+        copy = lookup_.get_type_object(typeId);
+      }
       bool replaced = false;
 
       switch (copy.kind) {
@@ -2268,6 +2272,7 @@ TypeIdentifier remove_enumerators(const TypeIdentifier& top_level,
                                   TypeMap& type_map,
                                   TypeIdentifier* modified_enum)
 {
+  const TypeLookupService::Pin pin(&lookup);
   const TypeObject& to_enum_type = lookup.get_type_object(enum_type);
   if (to_enum_type.kind == TK_NONE) {
     return TypeIdentifier::None;

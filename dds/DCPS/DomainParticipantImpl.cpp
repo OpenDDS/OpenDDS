@@ -2698,6 +2698,10 @@ DDS::ReturnCode_t DomainParticipantImpl::get_dynamic_type(
   impl->set_minimal_type_identifier(ti.minimal.typeid_with_size.type_id);
   impl->set_preset_type_info(ti);
 
+  // Endpoints using this type rely on its TypeObjects staying cached after the peer leaves
+  type_lookup_service_->retain(ctid);
+  type_lookup_service_->retain(ti.minimal.typeid_with_size.type_id);
+
   return DDS::RETCODE_OK;
 }
 #endif

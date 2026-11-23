@@ -31,6 +31,18 @@ public:
   TypeLookupService();
   ~TypeLookupService();
 
+  /// Defers removing TypeObjects received from peers while references to cached TypeObjects are in use
+  class OpenDDS_Dcps_Export Pin {
+  public:
+    explicit Pin(const TypeLookupService* tls);
+    Pin(const Pin& other);
+    ~Pin();
+
+  private:
+    Pin& operator=(const Pin&);
+    TypeLookupService* tls_;
+  };
+
   /// For TypeAssignability
   const TypeObject& get_type_object(const TypeIdentifier& type_id) const;
   void add(const TypeIdentifier& ti, const TypeObject& tobj);
@@ -38,8 +50,13 @@ public:
   /// For TypeLookup_getTypes
   void get_type_objects(const TypeIdentifierSeq& type_ids,
     TypeIdentifierTypeObjectPairSeq& types) const;
-  /// Caches TypeObjects received from a peer that match their TypeIdentifiers
-  void add_type_objects_to_cache(const TypeIdentifierTypeObjectPairSeq& types);
+  /// Caches TypeObjects received from a peer that match their TypeIdentifiers.
+  /// They are removed after every participant that sent them is removed.
+  void add_type_objects_to_cache(const TypeIdentifierTypeObjectPairSeq& types,
+                                 const DCPS::GUID_t& participant = DCPS::GUID_UNKNOWN);
+  void remove_participant(const DCPS::GUID_t& participant);
+  /// Keeps a TypeObject received from peers, and its dependencies, from being removed
+  void retain(const TypeIdentifier& type_id);
 
   /// For converting between complete to minimal TypeObject of remote types
   ///@{
@@ -87,8 +104,20 @@ private:
   void get_type_dependencies_i(const TypeIdentifierSeq& type_ids,
     TypeIdentifierWithSizeSeq& dependencies) const;
 
+  void unpin();
+  void erase_type_i(const TypeIdentifier& type_id);
+  void make_local_i(const TypeIdentifier& type_id);
+
   /// Contains both minimal and complete type mapping.
   TypeMap type_map_;
+
+  /// Number of participants that sent each removable TypeObject
+  typedef OPENDDS_MAP(TypeIdentifier, unsigned) RefCountMap;
+  RefCountMap remote_refs_;
+  typedef OPENDDS_MAP_CMP(DCPS::GUID_t, TypeIdentifierSet, DCPS::GUID_tKeyLessThan) ParticipantTypeMap;
+  ParticipantTypeMap participant_types_;
+  unsigned pins_;
+  TypeIdentifierSet pending_erase_;
 
   /// For dependencies of local types
   typedef OPENDDS_MAP(TypeIdentifier, TypeIdentifierWithSizeSeq) TypeIdentifierWithSizeSeqMap;
