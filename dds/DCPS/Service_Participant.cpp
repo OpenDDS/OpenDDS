@@ -2424,6 +2424,7 @@ Service_Participant::get_type_object(DDS::DomainParticipant_ptr participant,
   if (participant_servant) {
     XTypes::TypeLookupService_rch tls = participant_servant->get_type_lookup_service();
     if (tls) {
+      const XTypes::TypeLookupService::Pin pin(tls.in());
       return tls->get_type_object(ti);
     }
   }
@@ -2468,6 +2469,19 @@ void
 Service_Participant::validate_type_objects(bool flag)
 {
   config_store_->set_boolean(COMMON_DCPS_VALIDATE_TYPE_OBJECTS, flag);
+}
+
+DDS::UInt32
+Service_Participant::max_type_objects_per_participant() const
+{
+  return config_store_->get_uint32(COMMON_DCPS_MAX_TYPE_OBJECTS_PER_PARTICIPANT,
+                                   COMMON_DCPS_MAX_TYPE_OBJECTS_PER_PARTICIPANT_default);
+}
+
+void
+Service_Participant::max_type_objects_per_participant(DDS::UInt32 count)
+{
+  config_store_->set_uint32(COMMON_DCPS_MAX_TYPE_OBJECTS_PER_PARTICIPANT, count);
 }
 
 unsigned int

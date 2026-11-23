@@ -36,6 +36,7 @@ class OpenDDS_Dcps_Export TypeAssignability {
 public:
   explicit TypeAssignability(TypeLookupService_rch tls)
     : tl_service_(tls)
+    , pin_(tls.in())
   {
     // Use default type consistency values
     type_consistency_.prevent_type_widening = false;
@@ -47,6 +48,7 @@ public:
   TypeAssignability(TypeLookupService_rch tls,
                     TypeConsistencyAttributes type_consistency)
     : tl_service_(tls)
+    , pin_(tls.in())
     , type_consistency_(type_consistency) {}
 
   // Check whether ta is-assignable-from tb
@@ -143,6 +145,8 @@ private:
   }
 
   XTypes::TypeLookupService_rch tl_service_;
+  // lookup_minimal returns references into tl_service_'s cache
+  TypeLookupService::Pin pin_;
 
   TypeConsistencyAttributes type_consistency_;
 };

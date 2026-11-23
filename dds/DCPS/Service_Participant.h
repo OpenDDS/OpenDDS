@@ -137,6 +137,9 @@ const String COMMON_DCPS_TYPE_OBJECT_ENCODING_default = "Normal";
 const char COMMON_DCPS_VALIDATE_TYPE_OBJECTS[] = "COMMON_DCPS_VALIDATE_TYPE_OBJECTS";
 const bool COMMON_DCPS_VALIDATE_TYPE_OBJECTS_default = true;
 
+const char COMMON_DCPS_MAX_TYPE_OBJECTS_PER_PARTICIPANT[] = "COMMON_DCPS_MAX_TYPE_OBJECTS_PER_PARTICIPANT";
+const DDS::UInt32 COMMON_DCPS_MAX_TYPE_OBJECTS_PER_PARTICIPANT_default = 10000;
+
 const char COMMON_FEDERATION_BACKOFF_MULTIPLIER[] = "COMMON_FEDERATION_BACKOFF_MULTIPLIER";
 const int COMMON_FEDERATION_BACKOFF_MULTIPLIER_default = 2;
 
@@ -600,6 +603,10 @@ public:
   /// Whether TypeObjects received from peers must match their TypeIdentifiers
   bool validate_type_objects() const;
   void validate_type_objects(bool flag);
+
+  /// Maximum number of TypeObjects cached from each remote participant
+  DDS::UInt32 max_type_objects_per_participant() const;
+  void max_type_objects_per_participant(DDS::UInt32 count);
 
   unsigned int printer_value_writer_indent() const;
   void printer_value_writer_indent(unsigned int value);

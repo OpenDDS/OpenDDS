@@ -592,6 +592,13 @@ For example:
 
     See :ref:`run_time_configuration--logging` for details.
 
+  .. prop:: DCPSMaxTypeObjectsPerParticipant=<n>
+    :default: ``10000``
+
+    The maximum number of ``TypeObject``\s received through the TypeLookup service that are cached for each remote participant.
+    A reply that would go over this is dropped.
+    ``TypeObject``\s received from a participant are removed once every participant that sent them has been removed, unless the application got a ``DynamicType`` that uses them.
+
   .. prop:: DCPSMonitor=<boolean>
     :default: ``0``
 
