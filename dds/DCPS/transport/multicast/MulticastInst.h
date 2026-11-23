@@ -40,7 +40,7 @@ public:
   bool default_to_ipv6() const;
 
   /// The default port number (when group_address is not set)
-  /// The default value is: 49152 [IANA 2009-11-16].
+  /// The default value is: 7405.
   ConfigValue<MulticastInst, u_short> port_offset_;
   void port_offset(u_short po);
   u_short port_offset() const;

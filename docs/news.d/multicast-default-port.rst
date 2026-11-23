@@ -1,0 +1,8 @@
+.. news-prs: 0
+
+.. news-start-section: Fixes
+- Changed the default :prop:`[transport@multicast]port_offset` from ``49152`` to ``7405``.
+
+  - The old default was in the operating system's ephemeral port range, so joining the default multicast group could fail when that port was reserved (for example by Hyper-V on Windows) or already in use.
+  - Set :prop:`[transport@multicast]port_offset` to ``49152`` to communicate with applications using the old default.
+.. news-end-section
