@@ -246,11 +246,28 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
     ACE_OS::memcpy(&nlen, passive_setup_buffer_.rd_ptr(), sizeof(nlen));
     passive_setup_buffer_.rd_ptr(sizeof(nlen));
     const ACE_UINT32 hlen = ntohl(nlen);
+    const ACE_UINT32 max_address_len = 1024;
+    if (hlen == 0 || hlen > max_address_len) {
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: TcpConnection::handle_setup_input: "
+                   "address length %u in setup message is out of range\n", hlen));
+      }
+      return -1;
+    }
     passive_setup_buffer_.size(hlen + 2 * sizeof(nlen));
 
     ACE_UINT32 nprio = 0;
 
     if (passive_setup_buffer_.length() >= hlen + sizeof(nprio)) {
+
+      // addr comes from the peer, don't let it run past hlen.
+      if (passive_setup_buffer_.rd_ptr()[hlen - 1] != '\0') {
+        if (log_level >= LogLevel::Warning) {
+          ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: TcpConnection::handle_setup_input: "
+                     "address in setup message is not null terminated\n"));
+        }
+        return -1;
+      }
 
       const std::string bufstr(passive_setup_buffer_.rd_ptr());
       const NetworkResource network_resource(bufstr);
