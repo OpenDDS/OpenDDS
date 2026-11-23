@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5356
 
 .. news-start-section: Security
 - ``DynamicType``\s built from types received from peers, by ``DomainParticipant::get_dynamic_type`` and by recorders, are now checked before use.
