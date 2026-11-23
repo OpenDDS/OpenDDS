@@ -2786,12 +2786,12 @@ This transport has the following restrictions:
     The maximum number of milliseconds to wait before giving up on a repair response (reliable only).
 
   .. prop:: port_offset=<n>
-    :default: ``49152``
+    :default: ``7405``
 
     Used to set the port number when not specifying a group address.
     When a group address is specified, the port number within it is used.
     If no group address is specified, the port offset is used as a port number.
-    This value should not be set less than ``49152``.
+    Avoid ports in the operating system's ephemeral range (``49152`` and up on Windows and macOS, ``32768`` and up on Linux), since they can be reserved or already in use.
 
   .. prop:: rcv_buffer_size=<n>
     :default: ``0`` (system default buffer size)

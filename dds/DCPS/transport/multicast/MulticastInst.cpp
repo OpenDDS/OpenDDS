@@ -22,7 +22,8 @@ namespace {
 
 const bool DEFAULT_TO_IPV6(false);
 
-const u_short DEFAULT_PORT_OFFSET(49152);
+// Below the OS ephemeral port ranges, which can be reserved or already in use.
+const u_short DEFAULT_PORT_OFFSET(7405);
 
 const char* DEFAULT_IPV4_GROUP_ADDRESS("224.0.0.128");
 const char* DEFAULT_IPV6_GROUP_ADDRESS("FF01::80");
