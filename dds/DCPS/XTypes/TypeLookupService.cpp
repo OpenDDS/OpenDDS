@@ -7,7 +7,10 @@
 #include "TypeLookupService.h"
 
 #include "../debug.h"
+#include "../SafetyProfileStreams.h"
+#include "../Service_Participant.h"
 
+#include <cstring>
 #include <sstream>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -34,6 +37,69 @@ void handle_tryconstruct_flags(DDS::MemberDescriptor* md, MemberFlag mf)
 namespace OpenDDS {
 namespace XTypes {
 
+namespace {
+  DCPS::String hash_id_to_string(const TypeIdentifier& ti)
+  {
+    switch (ti.kind()) {
+    case EK_MINIMAL:
+    case EK_COMPLETE:
+      return DCPS::String(ti.kind() == EK_MINIMAL ? "minimal " : "complete ") +
+        equivalence_hash_to_string(ti.equivalence_hash());
+    case TI_STRONGLY_CONNECTED_COMPONENT:
+      return DCPS::String(ti.sc_component_id().sc_component_id.kind == EK_MINIMAL ? "minimal " : "complete ") +
+        equivalence_hash_to_string(ti.sc_component_id().sc_component_id.hash) +
+        " length " + DCPS::to_dds_string(static_cast<int>(ti.sc_component_id().scc_length));
+    default:
+      return "kind " + DCPS::to_dds_string(static_cast<unsigned>(ti.kind()));
+    }
+  }
+
+  bool same_scc(const StronglyConnectedComponentId& a, const StronglyConnectedComponentId& b)
+  {
+    return a.sc_component_id.kind == b.sc_component_id.kind &&
+      std::memcmp(a.sc_component_id.hash, b.sc_component_id.hash, sizeof(EquivalenceHash)) == 0 &&
+      a.scc_length == b.scc_length;
+  }
+
+  bool hash_matches(const TypeIdentifier& ti, const TypeObject& to, bool old_format)
+  {
+    if ((ti.kind() != EK_MINIMAL && ti.kind() != EK_COMPLETE) || to.kind != ti.kind()) {
+      return false;
+    }
+    if (makeTypeIdentifier(to) == ti) {
+      return true;
+    }
+    if (!old_format) {
+      return false;
+    }
+    DCPS::Encoding encoding = get_typeobject_encoding();
+    encoding.skip_sequence_dheader(true);
+    return makeTypeIdentifier(to, &encoding) == ti;
+  }
+
+  bool scc_hash_matches(const StronglyConnectedComponentId& scc, const TypeObjectSeq& members,
+                        bool old_format)
+  {
+    for (ACE_CDR::ULong i = 0; i < members.length(); ++i) {
+      if (members[i].kind != scc.sc_component_id.kind) {
+        return false;
+      }
+    }
+    EquivalenceHash hash;
+    make_scc_hash(hash, scc, members);
+    if (std::memcmp(hash, scc.sc_component_id.hash, sizeof hash) == 0) {
+      return true;
+    }
+    if (!old_format) {
+      return false;
+    }
+    DCPS::Encoding encoding = get_typeobject_encoding();
+    encoding.skip_sequence_dheader(true);
+    make_scc_hash(hash, scc, members, &encoding);
+    return std::memcmp(hash, scc.sc_component_id.hash, sizeof hash) == 0;
+  }
+}
+
 TypeLookupService::TypeLookupService()
 {
   to_empty_.minimal.kind = TK_NONE;
@@ -57,22 +123,39 @@ TypeLookupService::~TypeLookupService()
 void TypeLookupService::get_type_objects(const TypeIdentifierSeq& type_ids,
                                          TypeIdentifierTypeObjectPairSeq& types) const
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   TypeIdentifierSet tids;
 
   for (unsigned i = 0; i < type_ids.length(); ++i) {
     const TypeIdentifier& tid = type_ids[i];
     if (tid.kind() != TI_STRONGLY_CONNECTED_COMPONENT) {
       tids.insert(tid);
-    } else {
-      TypeIdentifier scc_id(tid);
-      for (ACE_CDR::Long j = 1; j <= scc_id.sc_component_id().scc_length; ++j) {
-        scc_id.sc_component_id().scc_index = j;
-        tids.insert(scc_id);
+      continue;
+    }
+
+    // Reply with all members of the SCC or none, walking the cache instead of trusting scc_length
+    const ACE_CDR::Long length = tid.sc_component_id().scc_length;
+    TypeIdentifier scc_id(tid);
+    scc_id.sc_component_id().scc_index = 1;
+    TypeIdentifierSet members;
+    for (TypeMap::const_iterator pos = type_map_.lower_bound(scc_id);
+         pos != type_map_.end() && pos->first.kind() == TI_STRONGLY_CONNECTED_COMPONENT; ++pos) {
+      const StronglyConnectedComponentId& member = pos->first.sc_component_id();
+      if (!same_scc(member, tid.sc_component_id()) ||
+          member.scc_index != static_cast<ACE_CDR::Long>(members.size()) + 1) {
+        break;
       }
+      members.insert(pos->first);
+    }
+    if (length > 0 && members.size() == static_cast<size_t>(length)) {
+      tids.insert(members.begin(), members.end());
+    } else if (DCPS::log_level >= DCPS::LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING,
+                 "(%P|%t) WARNING: TypeLookupService::get_type_objects: "
+                 "unknown or incomplete strongly connected component\n"));
     }
   }
 
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   for (TypeIdentifierSet::const_iterator pos = tids.begin(), limit = tids.end(); pos != limit; ++pos) {
     const TypeIdentifier& tid = *pos;
     TypeMap::const_iterator pos2 = type_map_.find(tid);
@@ -80,7 +163,7 @@ void TypeLookupService::get_type_objects(const TypeIdentifierSeq& type_ids,
       types.append(TypeIdentifierTypeObjectPair(tid, pos2->second));
     } else if (DCPS::log_level >= DCPS::LogLevel::Warning) {
       ACE_ERROR((LM_WARNING,
-                 "(%P|%t) WARNING: TypeLookupService::set_type_objects: "
+                 "(%P|%t) WARNING: TypeLookupService::get_type_objects: "
                  "unknown type\n"));
     }
   }
@@ -138,14 +221,64 @@ void TypeLookupService::get_type_dependencies_i(const TypeIdentifierSeq& type_id
 
 void TypeLookupService::add_type_objects_to_cache(const TypeIdentifierTypeObjectPairSeq& types)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  const bool validate = TheServiceParticipant->validate_type_objects();
+  const bool old_format =
+    TheServiceParticipant->type_object_encoding() != DCPS::Service_Participant::Encoding_Normal;
+
+  // Members of each strongly connected component, by scc_index
+  typedef OPENDDS_MAP(ACE_CDR::Long, const TypeObject*) SccMembers;
+  typedef OPENDDS_MAP(TypeIdentifier, SccMembers) SccMap;
+  SccMap sccs;
+  TypeIdentifierSet invalid_sccs;
+  TypeMap valid;
+
   for (unsigned i = 0; i < types.length(); ++i) {
-    const TypeMap::iterator pos = type_map_.find(types[i].type_identifier);
-    if (pos == type_map_.end()) {
-      TypeObject to = types[i].type_object;
-      if (set_type_object_defaults(to)) {
-        type_map_.insert(std::make_pair(types[i].type_identifier, to));
+    const TypeIdentifier& ti = types[i].type_identifier;
+    const TypeObject& to = types[i].type_object;
+    if (ti.kind() == TI_STRONGLY_CONNECTED_COMPONENT) {
+      const StronglyConnectedComponentId& scc = ti.sc_component_id();
+      const TypeIdentifier scc_id = make_scc_id_or_default(ti);
+      if (scc.scc_index < 1 || scc.scc_index > scc.scc_length ||
+          !sccs[scc_id].insert(std::make_pair(scc.scc_index, &to)).second) {
+        invalid_sccs.insert(scc_id);
       }
+    } else if (!validate || hash_matches(ti, to, old_format)) {
+      valid.insert(std::make_pair(ti, to));
+    } else if (DCPS::log_level >= DCPS::LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: TypeLookupService::add_type_objects_to_cache: "
+                 "TypeObject doesn't match its TypeIdentifier %C\n",
+                 hash_id_to_string(ti).c_str()));
+    }
+  }
+
+  for (SccMap::const_iterator pos = sccs.begin(); pos != sccs.end(); ++pos) {
+    const StronglyConnectedComponentId& scc = pos->first.sc_component_id();
+    TypeObjectSeq members;
+    if (invalid_sccs.count(pos->first) == 0 &&
+        pos->second.size() == static_cast<size_t>(scc.scc_length)) {
+      for (SccMembers::const_iterator m = pos->second.begin(); m != pos->second.end(); ++m) {
+        members.append(*m->second);
+      }
+    }
+    if (members.length() == 0 || (validate && !scc_hash_matches(scc, members, old_format))) {
+      if (DCPS::log_level >= DCPS::LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: TypeLookupService::add_type_objects_to_cache: "
+                   "strongly connected component %C is incomplete or doesn't match its TypeObjects\n",
+                   hash_id_to_string(pos->first).c_str()));
+      }
+      continue;
+    }
+    TypeIdentifier member_id(pos->first);
+    for (SccMembers::const_iterator m = pos->second.begin(); m != pos->second.end(); ++m) {
+      member_id.sc_component_id().scc_index = m->first;
+      valid.insert(std::make_pair(member_id, *m->second));
+    }
+  }
+
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  for (TypeMap::iterator pos = valid.begin(); pos != valid.end(); ++pos) {
+    if (type_map_.find(pos->first) == type_map_.end() && set_type_object_defaults(pos->second)) {
+      type_map_.insert(*pos);
     }
   }
 }
@@ -167,9 +300,53 @@ void TypeLookupService::add(const TypeIdentifier& ti, const TypeObject& tobj)
 
 void TypeLookupService::update_type_identifier_map(const TypeIdentifierPairSeq& tid_pairs)
 {
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   for (ACE_CDR::ULong i = 0; i < tid_pairs.length(); ++i) {
     const TypeIdentifierPair& pair = tid_pairs[i];
-    complete_to_minimal_ti_map_.insert(std::make_pair(pair.type_identifier1, pair.type_identifier2));
+    complete_to_minimal_ti_map_[pair.type_identifier1] = pair.type_identifier2;
+  }
+}
+
+void TypeLookupService::add_remote_type_identifier_map(const TypeIdentifierPairSeq& tid_pairs)
+{
+  const bool validate = TheServiceParticipant->validate_type_objects();
+  const bool old_format =
+    TheServiceParticipant->type_object_encoding() != DCPS::Service_Participant::Encoding_Normal;
+
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  OPENDDS_VECTOR(const TypeIdentifierPair*) pending;
+  for (ACE_CDR::ULong i = 0; i < tid_pairs.length(); ++i) {
+    const TypeIdentifierPair& pair = tid_pairs[i];
+    if (complete_to_minimal_ti_map_.count(pair.type_identifier1)) {
+      continue;
+    }
+    if (!validate) {
+      complete_to_minimal_ti_map_.insert(std::make_pair(pair.type_identifier1, pair.type_identifier2));
+    } else if (pair.type_identifier1.kind() == EK_COMPLETE && pair.type_identifier2.kind() == EK_MINIMAL) {
+      pending.push_back(&pair);
+    }
+  }
+
+  // Accept a pair only if converting the cached complete TypeObject gives the minimal TypeIdentifier.
+  // Dependencies may be converted on a later pass.
+  for (bool progress = true; progress && !pending.empty();) {
+    progress = false;
+    for (size_t i = 0; i < pending.size();) {
+      const TypeIdentifierPair& pair = *pending[i];
+      const TypeObject& cto = get_type_object_i(pair.type_identifier1);
+      TypeObject mto;
+      if (cto.kind != EK_COMPLETE) {
+        pending.erase(pending.begin() + i);
+      } else if (complete_to_minimal_type_object_i(cto, mto)) {
+        if (hash_matches(pair.type_identifier2, mto, old_format)) {
+          complete_to_minimal_ti_map_.insert(std::make_pair(pair.type_identifier1, pair.type_identifier2));
+          progress = true;
+        }
+        pending.erase(pending.begin() + i);
+      } else {
+        ++i;
+      }
+    }
   }
 }
 
@@ -199,6 +376,37 @@ const TypeInformation& TypeLookupService::get_type_info(const DDS::BuiltinTopicK
 }
 
 bool TypeLookupService::get_minimal_type_identifier(const TypeIdentifier& ct, TypeIdentifier& mt) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+  if (get_minimal_type_identifier_i(ct, mt)) {
+    return true;
+  }
+
+  ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TypeLookupService::get_minimal_type_identifier: ")
+             ACE_TEXT("complete TypeIdentifier not found.\n")));
+  if (ct.kind() == EK_COMPLETE) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TypeLookupService::get_minimal_type_identifier: ")
+               ACE_TEXT(" Kind: EK_COMPLETE. Hash: (%C)\n"),
+               equivalence_hash_to_string(ct.equivalence_hash()).c_str()));
+  } else if (ct.kind() == TI_STRONGLY_CONNECTED_COMPONENT) {
+    const EquivalenceKind ek = ct.sc_component_id().sc_component_id.kind;
+    if (ek == EK_MINIMAL) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TypeLookupService::get_minimal_type_identifier: ")
+                 ACE_TEXT("Expect EK_COMPLETE but received EK_MINIMAL.\n")));
+    }
+    const DCPS::String ek_str = ek == EK_COMPLETE ? "EK_COMPLETE" : "EK_MINIMAL";
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TypeLookupService::get_minimal_type_identifier: ")
+               ACE_TEXT("Kind: TI_STRONGLY_CONNECTED_COMPONENT. ")
+               ACE_TEXT("Equivalence kind: %C. Hash: (%C). Scc length: %d. Scc index: %d\n"),
+               ek_str.c_str(),
+               equivalence_hash_to_string(ct.sc_component_id().sc_component_id.hash).c_str(),
+               ct.sc_component_id().scc_length,
+               ct.sc_component_id().scc_index));
+  }
+  return false;
+}
+
+bool TypeLookupService::get_minimal_type_identifier_i(const TypeIdentifier& ct, TypeIdentifier& mt) const
 {
   if (ct.kind() == TK_NONE || is_fully_descriptive(ct)) {
     mt = ct;
@@ -237,7 +445,7 @@ bool TypeLookupService::get_minimal_type_identifier(const TypeIdentifier& ct, Ty
       complete_elem_ti = *ct.map_ldefn().element_identifier;
       break;
     }
-    if (!get_minimal_type_identifier(complete_elem_ti, minimal_elem_ti)) {
+    if (!get_minimal_type_identifier_i(complete_elem_ti, minimal_elem_ti)) {
       mt = TypeIdentifier(TK_NONE);
       return false;
     }
@@ -259,7 +467,7 @@ bool TypeLookupService::get_minimal_type_identifier(const TypeIdentifier& ct, Ty
       {
         mt.map_sdefn().element_identifier = minimal_elem_ti;
         TypeIdentifier minimal_key_ti;
-        if (!get_minimal_type_identifier(*ct.map_sdefn().key_identifier, minimal_key_ti)) {
+        if (!get_minimal_type_identifier_i(*ct.map_sdefn().key_identifier, minimal_key_ti)) {
           mt = TypeIdentifier(TK_NONE);
           return false;
         }
@@ -270,7 +478,7 @@ bool TypeLookupService::get_minimal_type_identifier(const TypeIdentifier& ct, Ty
       {
         mt.map_ldefn().element_identifier = minimal_elem_ti;
         TypeIdentifier minimal_key_ti;
-        if (!get_minimal_type_identifier(*ct.map_ldefn().key_identifier, minimal_key_ti)) {
+        if (!get_minimal_type_identifier_i(*ct.map_ldefn().key_identifier, minimal_key_ti)) {
           mt = TypeIdentifier(TK_NONE);
           return false;
         }
@@ -285,28 +493,6 @@ bool TypeLookupService::get_minimal_type_identifier(const TypeIdentifier& ct, Ty
   // Mapping for the remaining type kinds should be provided by the remote endpoint.
   const TypeIdentifierMap::const_iterator pos = complete_to_minimal_ti_map_.find(ct);
   if (pos == complete_to_minimal_ti_map_.end()) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TypeLookupService::get_minimal_type_identifier: ")
-               ACE_TEXT("complete TypeIdentifier not found.\n")));
-    if (ct.kind() == EK_COMPLETE) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TypeLookupService::get_minimal_type_identifier: ")
-                 ACE_TEXT(" Kind: EK_COMPLETE. Hash: (%C)\n"),
-                 equivalence_hash_to_string(ct.equivalence_hash()).c_str()));
-    } else if (ct.kind() == TI_STRONGLY_CONNECTED_COMPONENT) {
-      const EquivalenceKind ek = ct.sc_component_id().sc_component_id.kind;
-      if (ek == EK_MINIMAL) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TypeLookupService::get_minimal_type_identifier: ")
-                   ACE_TEXT("Expect EK_COMPLETE but received EK_MINIMAL.\n")));
-      }
-      const DCPS::String ek_str = ek == EK_COMPLETE ? "EK_COMPLETE" : "EK_MINIMAL";
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TypeLookupService::get_minimal_type_identifier: ")
-                 ACE_TEXT("Kind: TI_STRONGLY_CONNECTED_COMPONENT. ")
-                 ACE_TEXT("Equivalence kind: %C. Hash: (%C). Scc length: %d. Scc index: %d\n"),
-                 ek_str.c_str(),
-                 equivalence_hash_to_string(ct.sc_component_id().sc_component_id.hash).c_str(),
-                 ct.sc_component_id().scc_length,
-                 ct.sc_component_id().scc_index));
-    }
-
     mt = TypeIdentifier(TK_NONE);
     return false;
   }
@@ -449,7 +635,7 @@ bool TypeLookupService::complete_to_minimal_struct(const CompleteStructType& ct,
                                                    MinimalStructType& mt) const
 {
   mt.struct_flags = ct.struct_flags;
-  if (!get_minimal_type_identifier(ct.header.base_type, mt.header.base_type)) {
+  if (!get_minimal_type_identifier_i(ct.header.base_type, mt.header.base_type)) {
     return false;
   }
   mt.member_seq.length(ct.member_seq.length());
@@ -457,7 +643,7 @@ bool TypeLookupService::complete_to_minimal_struct(const CompleteStructType& ct,
   for (ACE_CDR::ULong i = 0; i < ct.member_seq.length(); ++i) {
     mt.member_seq[i].common.member_id = ct.member_seq[i].common.member_id;
     mt.member_seq[i].common.member_flags = ct.member_seq[i].common.member_flags;
-    if (!get_minimal_type_identifier(ct.member_seq[i].common.member_type_id,
+    if (!get_minimal_type_identifier_i(ct.member_seq[i].common.member_type_id,
                                      mt.member_seq[i].common.member_type_id)) {
       return false;
     }
@@ -472,7 +658,7 @@ bool TypeLookupService::complete_to_minimal_union(const CompleteUnionType& ct,
   mt.union_flags = ct.union_flags;
   mt.header = MinimalUnionHeader();
   mt.discriminator.common.member_flags = ct.discriminator.common.member_flags;
-  if (!get_minimal_type_identifier(ct.discriminator.common.type_id,
+  if (!get_minimal_type_identifier_i(ct.discriminator.common.type_id,
                                    mt.discriminator.common.type_id)) {
     return false;
   }
@@ -481,7 +667,7 @@ bool TypeLookupService::complete_to_minimal_union(const CompleteUnionType& ct,
   for (ACE_CDR::ULong i = 0; i < ct.member_seq.length(); ++i) {
     mt.member_seq[i].common.member_id = ct.member_seq[i].common.member_id;
     mt.member_seq[i].common.member_flags = ct.member_seq[i].common.member_flags;
-    if (!get_minimal_type_identifier(ct.member_seq[i].common.type_id,
+    if (!get_minimal_type_identifier_i(ct.member_seq[i].common.type_id,
                                      mt.member_seq[i].common.type_id)) {
       return false;
     }
@@ -499,7 +685,7 @@ bool TypeLookupService::complete_to_minimal_annotation(const CompleteAnnotationT
 
   for (ACE_CDR::ULong i = 0; i < ct.member_seq.length(); ++i) {
     mt.member_seq[i].common.member_flags = ct.member_seq[i].common.member_flags;
-    if (!get_minimal_type_identifier(ct.member_seq[i].common.member_type_id,
+    if (!get_minimal_type_identifier_i(ct.member_seq[i].common.member_type_id,
                                      mt.member_seq[i].common.member_type_id)) {
       return false;
     }
@@ -514,7 +700,7 @@ bool TypeLookupService::complete_to_minimal_alias(const CompleteAliasType& ct,
 {
   mt.alias_flags = ct.alias_flags;
   mt.body.common.related_flags = ct.body.common.related_flags;
-  if (!get_minimal_type_identifier(ct.body.common.related_type,
+  if (!get_minimal_type_identifier_i(ct.body.common.related_type,
                                    mt.body.common.related_type)) {
     return false;
   }
@@ -527,7 +713,7 @@ bool TypeLookupService::complete_to_minimal_sequence(const CompleteSequenceType&
   mt.collection_flag = ct.collection_flag;
   mt.header.common = ct.header.common;
   mt.element.common.element_flags = ct.element.common.element_flags;
-  if (!get_minimal_type_identifier(ct.element.common.type, mt.element.common.type)) {
+  if (!get_minimal_type_identifier_i(ct.element.common.type, mt.element.common.type)) {
     return false;
   }
   return true;
@@ -539,7 +725,7 @@ bool TypeLookupService::complete_to_minimal_array(const CompleteArrayType& ct,
   mt.collection_flag = ct.collection_flag;
   mt.header.common = ct.header.common;
   mt.element.common.element_flags = ct.element.common.element_flags;
-  if (!get_minimal_type_identifier(ct.element.common.type, mt.element.common.type)) {
+  if (!get_minimal_type_identifier_i(ct.element.common.type, mt.element.common.type)) {
     return false;
   }
   return true;
@@ -551,11 +737,11 @@ bool TypeLookupService::complete_to_minimal_map(const CompleteMapType& ct,
   mt.collection_flag = ct.collection_flag;
   mt.header.common = ct.header.common;
   mt.key.common.element_flags = ct.key.common.element_flags;
-  if (!get_minimal_type_identifier(ct.key.common.type, mt.key.common.type)) {
+  if (!get_minimal_type_identifier_i(ct.key.common.type, mt.key.common.type)) {
     return false;
   }
   mt.element.common.element_flags = ct.element.common.element_flags;
-  if (!get_minimal_type_identifier(ct.element.common.type, mt.element.common.type)) {
+  if (!get_minimal_type_identifier_i(ct.element.common.type, mt.element.common.type)) {
     return false;
   }
   return true;
@@ -600,6 +786,12 @@ bool TypeLookupService::complete_to_minimal_bitset(const CompleteBitsetType& ct,
 }
 
 bool TypeLookupService::complete_to_minimal_type_object(const TypeObject& cto, TypeObject& mto) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+  return complete_to_minimal_type_object_i(cto, mto);
+}
+
+bool TypeLookupService::complete_to_minimal_type_object_i(const TypeObject& cto, TypeObject& mto) const
 {
   mto.kind = EK_MINIMAL;
   mto.minimal.kind = cto.complete.kind;
@@ -1102,7 +1294,11 @@ DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic(const TypeIde
   case TI_STRONGLY_CONNECTED_COMPONENT:
   case EK_COMPLETE:
     {
-      const TypeObject& to = get_type_object_i(ti);
+      TypeObject to;
+      {
+        ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+        to = get_type_object_i(ti);
+      }
       if (to.kind == TK_NONE) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TypeLookupService::type_identifier_to_dynamic -")
                    ACE_TEXT(" get_type_object_i returned TK_NONE\n")));

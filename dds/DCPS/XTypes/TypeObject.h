@@ -3273,6 +3273,12 @@ namespace XTypes {
   TypeIdentifier makeTypeIdentifier(const TypeObject& type_object,
                                     const DCPS::Encoding* encoding_option = 0);
 
+  /// Hash of a strongly connected component's members, in scc_index order, as opendds_idl
+  /// computes it: references to the component (same kind, hash, and length) count as zero.
+  OpenDDS_Dcps_Export
+  void make_scc_hash(EquivalenceHash& hash, const StronglyConnectedComponentId& scc,
+                     const TypeObjectSeq& members, const DCPS::Encoding* encoding_option = 0);
+
   template <typename T>
   void serialize_type_info(const TypeInformation& type_info, T& seq,
                            const DCPS::Encoding* encoding_option = 0)

@@ -675,6 +675,15 @@ For example:
       The default, correct encoding is used.
       Once all applications are using both OpenDDS 3.18 or later and ``ReadOldFormat``, then ``Normal`` can be used.
 
+  .. prop:: DCPSValidateTypeObjects=0|1
+    :default: ``1``
+
+    Only cache a ``TypeObject`` received through the TypeLookup service if hashing it gives the ``TypeIdentifier`` it was sent with.
+    The members of a strongly connected component are only cached together, after hashing all of them gives the component's ``TypeIdentifier``.
+    A ``TypeObject`` that doesn't match is dropped and can be requested again later.
+    When :prop:`DCPSTypeObjectEncoding` isn't ``Normal``, hashes of the incorrect encoding are also accepted.
+    Setting this to ``0`` caches ``TypeObject``\s as they are received, which might be needed for peers that compute ``TypeIdentifier``\s differently.
+
   .. prop:: ORBLogFile=<path>
     :default: Output to standard error stream on most platforms
 

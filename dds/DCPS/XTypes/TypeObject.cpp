@@ -368,6 +368,108 @@ TypeIdentifier makeTypeIdentifier(const TypeObject& type_object, const DCPS::Enc
   return ti;
 }
 
+namespace {
+  void zero_scc_refs(TypeIdentifier& ti, const StronglyConnectedComponentId& scc)
+  {
+    switch (ti.kind()) {
+    case TI_PLAIN_SEQUENCE_SMALL:
+      zero_scc_refs(*ti.seq_sdefn().element_identifier, scc);
+      break;
+    case TI_PLAIN_SEQUENCE_LARGE:
+      zero_scc_refs(*ti.seq_ldefn().element_identifier, scc);
+      break;
+    case TI_PLAIN_ARRAY_SMALL:
+      zero_scc_refs(*ti.array_sdefn().element_identifier, scc);
+      break;
+    case TI_PLAIN_ARRAY_LARGE:
+      zero_scc_refs(*ti.array_ldefn().element_identifier, scc);
+      break;
+    case TI_PLAIN_MAP_SMALL:
+      zero_scc_refs(*ti.map_sdefn().element_identifier, scc);
+      zero_scc_refs(*ti.map_sdefn().key_identifier, scc);
+      break;
+    case TI_PLAIN_MAP_LARGE:
+      zero_scc_refs(*ti.map_ldefn().element_identifier, scc);
+      zero_scc_refs(*ti.map_ldefn().key_identifier, scc);
+      break;
+    case TI_STRONGLY_CONNECTED_COMPONENT:
+      {
+        StronglyConnectedComponentId& ref = ti.sc_component_id();
+        if (ref.sc_component_id.kind == scc.sc_component_id.kind &&
+            std::memcmp(ref.sc_component_id.hash, scc.sc_component_id.hash, sizeof(EquivalenceHash)) == 0 &&
+            ref.scc_length == scc.scc_length) {
+          std::memset(ref.sc_component_id.hash, 0, sizeof(EquivalenceHash));
+        }
+      }
+      break;
+    }
+  }
+
+  template <typename T>
+  void zero_scc_refs_in_members(T& members, const StronglyConnectedComponentId& scc)
+  {
+    for (ACE_CDR::ULong i = 0; i < members.length(); ++i) {
+      zero_scc_refs(members[i].common.member_type_id, scc);
+    }
+  }
+
+  template <typename T>
+  void zero_scc_refs_in_type(T& type, const StronglyConnectedComponentId& scc)
+  {
+    switch (type.kind) {
+    case TK_ALIAS:
+      zero_scc_refs(type.alias_type.body.common.related_type, scc);
+      break;
+    case TK_ANNOTATION:
+      zero_scc_refs_in_members(type.annotation_type.member_seq, scc);
+      break;
+    case TK_STRUCTURE:
+      zero_scc_refs(type.struct_type.header.base_type, scc);
+      zero_scc_refs_in_members(type.struct_type.member_seq, scc);
+      break;
+    case TK_UNION:
+      zero_scc_refs(type.union_type.discriminator.common.type_id, scc);
+      for (ACE_CDR::ULong i = 0; i < type.union_type.member_seq.length(); ++i) {
+        zero_scc_refs(type.union_type.member_seq[i].common.type_id, scc);
+      }
+      break;
+    case TK_SEQUENCE:
+      zero_scc_refs(type.sequence_type.element.common.type, scc);
+      break;
+    case TK_ARRAY:
+      zero_scc_refs(type.array_type.element.common.type, scc);
+      break;
+    case TK_MAP:
+      zero_scc_refs(type.map_type.key.common.type, scc);
+      zero_scc_refs(type.map_type.element.common.type, scc);
+      break;
+    }
+  }
+}
+
+void make_scc_hash(EquivalenceHash& hash, const StronglyConnectedComponentId& scc,
+                   const TypeObjectSeq& members, const DCPS::Encoding* encoding_option)
+{
+  TypeObjectSeq zeroed(members);
+  for (ACE_CDR::ULong i = 0; i < zeroed.length(); ++i) {
+    TypeObject& to = zeroed[i];
+    if (to.kind == EK_MINIMAL) {
+      zero_scc_refs_in_type(to.minimal, scc);
+    } else if (to.kind == EK_COMPLETE) {
+      zero_scc_refs_in_type(to.complete, scc);
+    }
+  }
+
+  const Encoding& encoding = encoding_option ? *encoding_option : get_typeobject_encoding();
+  ACE_Message_Block buff(serialized_size(encoding, zeroed));
+  DCPS::Serializer ser(&buff, encoding);
+  ser << zeroed;
+
+  unsigned char result[16];
+  DCPS::MD5Hash(result, buff.rd_ptr(), buff.length());
+  std::memcpy(hash, result, sizeof(EquivalenceHash));
+}
+
 AnnotationParameterValue::AnnotationParameterValue(ACE_CDR::Octet kind)
   : kind_(kind)
   , active_(0)

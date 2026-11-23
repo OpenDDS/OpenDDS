@@ -38,11 +38,14 @@ public:
   /// For TypeLookup_getTypes
   void get_type_objects(const TypeIdentifierSeq& type_ids,
     TypeIdentifierTypeObjectPairSeq& types) const;
+  /// Caches TypeObjects received from a peer that match their TypeIdentifiers
   void add_type_objects_to_cache(const TypeIdentifierTypeObjectPairSeq& types);
 
   /// For converting between complete to minimal TypeObject of remote types
   ///@{
   void update_type_identifier_map(const TypeIdentifierPairSeq& tid_pairs);
+  /// Adds pairs received from a peer that match converting the cached complete TypeObject
+  void add_remote_type_identifier_map(const TypeIdentifierPairSeq& tid_pairs);
   bool get_minimal_type_identifier(const TypeIdentifier& complete_ti, TypeIdentifier& minimal_ti) const;
   bool complete_to_minimal_type_object(const TypeObject& cto, TypeObject& mto) const;
   ///@}
@@ -79,6 +82,8 @@ public:
 
 private:
   const TypeObject& get_type_object_i(const TypeIdentifier& type_id) const;
+  bool get_minimal_type_identifier_i(const TypeIdentifier& complete_ti, TypeIdentifier& minimal_ti) const;
+  bool complete_to_minimal_type_object_i(const TypeObject& cto, TypeObject& mto) const;
   void get_type_dependencies_i(const TypeIdentifierSeq& type_ids,
     TypeIdentifierWithSizeSeq& dependencies) const;
 
