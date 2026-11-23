@@ -1,4 +1,4 @@
-.. news-prs: 0
+.. news-prs: 5353
 
 .. news-start-section: Security
 - The TypeLookup service now checks what it receives before caching it:
