@@ -1637,6 +1637,9 @@ Sedp::disassociate(DiscoveredParticipant& participant)
 
   remove_entities_belonging_to(discovered_publications_, part, false, pubs_to_remove_from_bit);
   remove_entities_belonging_to(discovered_subscriptions_, part, true, subs_to_remove_from_bit);
+  if (type_lookup_service_) {
+    type_lookup_service_->remove_participant(part);
+  }
 
   for (OPENDDS_VECTOR(DiscoveredPublication)::iterator it = pubs_to_remove_from_bit.begin(); it != pubs_to_remove_from_bit.end(); ++it) {
     remove_from_bit_i(*it);
@@ -4084,7 +4087,7 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
   bool success;
   switch (kind) {
   case XTypes::TypeLookup_getTypes_HashId:
-    success = process_get_types_reply(type_lookup_reply, orig.type_id);
+    success = process_get_types_reply(type_lookup_reply, orig.type_id, orig.participant);
     break;
   case XTypes::TypeLookup_getDependencies_HashId:
     success = process_get_dependencies_reply(sample, type_lookup_reply, seq_num, is_discovery_protected);
@@ -4153,7 +4156,8 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
 }
 
 bool Sedp::TypeLookupReplyReader::process_get_types_reply(const XTypes::TypeLookup_Reply& reply,
-                                                         const XTypes::TypeIdentifier& type_id)
+                                                         const XTypes::TypeIdentifier& type_id,
+                                                         const GUID_t& participant)
 {
   if (DCPS::DCPS_debug_level > 8) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_get_types_reply\n"));
@@ -4176,7 +4180,7 @@ bool Sedp::TypeLookupReplyReader::process_get_types_reply(const XTypes::TypeLook
     return false;
   }
 
-  sedp_.type_lookup_service_->add_type_objects_to_cache(reply._cxx_return.getType().result().types);
+  sedp_.type_lookup_service_->add_type_objects_to_cache(reply._cxx_return.getType().result().types, participant);
 
   if (reply._cxx_return.getType().result().complete_to_minimal.length() != 0) {
     if (DCPS::DCPS_debug_level >= 4) {

@@ -1004,7 +1004,8 @@ private:
     bool process_type_lookup_reply(
       const DCPS::ReceivedDataSample&, DCPS::Serializer& ser, bool is_discovery_protected);
     bool process_get_types_reply(const XTypes::TypeLookup_Reply& reply,
-                                 const XTypes::TypeIdentifier& type_id);
+                                 const XTypes::TypeIdentifier& type_id,
+                                 const GUID_t& participant);
     bool process_get_dependencies_reply(
       const DCPS::ReceivedDataSample& sample, const XTypes::TypeLookup_Reply& reply,
       const DCPS::SequenceNumber& seq_num, bool is_discovery_protected);
