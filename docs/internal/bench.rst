@@ -37,6 +37,13 @@ Each machine in the test environment will run (at least) one ``node_controller``
 Each request will contain the configuration to use for the spawned workers and, upon successful exit, the workers’ report files will be read and sent back to the ``test_controller`` which requested it.
 Failed workers processes (aborts, crashes) will be noted and have their output logs sent back to the requesting ``test_controller``.
 In addition to collecting worker reports, the node controller also gathers general system resource statistics during test execution (CPU and memory utilization) to be returned to the test controller at the end of the test.
+These are currently only collected on Linux and Windows and are omitted from the report on other platforms.
+It also records changes in the portable, interface-level network counters for receive errors, receive drops, transmit errors, and transmit drops.
+Loopback interfaces are excluded, as are Windows NDIS filter interfaces (which repeat the counters of the interface they're attached to).
+These counters cover the whole host, including traffic unrelated to the test, so non-zero values are reported as warnings rather than errors in test summaries.
+If a platform does not expose an equivalent counter, that statistic is omitted instead of being reported as zero.
+The ``host_network_stats_available`` property of the node controller report is 0 if the counters couldn't be read at all (including on unsupported platforms).
+Platform-specific network diagnostics, such as Linux UDP socket-buffer and softnet counters, are intentionally outside Bench's portable report contract.
 
 Test Controller
 ===============
@@ -96,6 +103,10 @@ In the event that you’re debugging a failing Bench CI test, you can use :ghfil
 This is because the perl script sets the appropriate environment variables automatically before launching its processes (a single ``node_controller`` in the background, as well as the test controller with the requested scenario).
 The perl script can be inspected in order to determine which scenarios have been made available in this way.
 The script can be modified to easily run other available scenarios (see :ghfile:`performance-tests/bench/example/config/scenario`) against a single node controller with relative ease.
+
+If non-loopback traffic is blocked on the host (for example, by a firewall that can't be configured), pass ``--local-only`` to keep all DDS traffic on loopback.
+This uses :ghfile:`performance-tests/bench/local_control_opendds_config.ini` for the node and test controllers and passes ``--local-only`` to the test controller, which rewrites the RTPS discovery and ``rtps_udp`` transport sections of every worker configuration to use unicast discovery between local participant ports and no multicast.
+The InfoRepo and RtpsRelay scenarios aren't supported in this mode.
 
 Running Scenarios Manually
 ==========================

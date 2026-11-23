@@ -178,6 +178,15 @@ ProcessStatsCollector::ProcessStatsCollector(const int process_id) noexcept
 #endif
 }
 
+bool ProcessStatsCollector::supported() noexcept
+{
+#if defined ACE_WIN32 || defined ACE_LINUX
+  return true;
+#else
+  return false;
+#endif
+}
+
 ProcessStatsCollector::~ProcessStatsCollector() noexcept
 {
 #ifdef ACE_WIN32
