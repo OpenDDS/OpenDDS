@@ -11,6 +11,7 @@
 #include "ParticipantQos_Handler.h"
 
 #include "dds/DCPS/debug.h"
+#include <string>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -18,6 +19,7 @@ namespace OpenDDS {
 namespace DCPS {
 
   QOS_XML_Handler::QOS_XML_Handler()
+    : profiles_ (std::make_unique<::dds::qosProfile_seq> ())
   {
   }
 
@@ -25,10 +27,10 @@ namespace DCPS {
   {
   }
 
-  ::dds::qosProfile *
-  QOS_XML_Handler::get_profile(const ACE_TCHAR * profile_name)
+  const ::dds::qosProfile *
+  QOS_XML_Handler::get_profile(std::string_view profile_name) const
   {
-    if (ACE_OS::strlen(profile_name) == 0)
+    if (profile_name.empty())
     {
       if (DCPS_debug_level > 7)
       {
@@ -39,144 +41,49 @@ namespace DCPS {
       }
     }
 
-    dds::qosProfile_seq::qos_profile_const_iterator it;
-    for (it = profiles_.begin_qos_profile();
-        it != profiles_.end_qos_profile();
-        ++it)
+    for (const dds::qosProfile& profile : profiles_->qos_profile())
       {
-        if (ACE_OS::strcmp((*it)->name().c_str(), profile_name) == 0)
+        if (std::string_view(profile.name()) == profile_name)
           {
             if (DCPS_debug_level > 7)
               {
                 ACE_ERROR((LM_ERROR,
                   ACE_TEXT("QOS_XML_Handler::get_profile - ")
-                  ACE_TEXT("Found profile <%s>\n"),
-                  (*it)->name().c_str()));
+                  ACE_TEXT("Found profile <%C>\n"),
+                  profile.name().c_str()));
               }
-            return it->get();
+            return &profile;
           }
       }
 
     if (OpenDDS::DCPS::DCPS_debug_level > 7)
       {
+        const std::string profile_name_string (profile_name);
         ACE_ERROR ((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::get_profile - ")
-          ACE_TEXT("Did not find profile <%s>\n"),
-          profile_name));
+          ACE_TEXT("Did not find profile <%C>\n"),
+          profile_name_string.c_str()));
       }
 
     return 0;
   }
 
-  DDS::ReturnCode_t
-  QOS_XML_Handler::addQoSProfile(const dds::qosProfile & profile)
-  {
-    // get profile name  and check if it exists
-
-    const ACE_TCHAR* profileName = profile.name().c_str();
-    if (ACE_OS::strlen(profileName) == 0) {
-      if (DCPS_debug_level > 7)
-      {
-         ACE_ERROR((LM_ERROR,
-           ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::addQoSProfile - ")
-           ACE_TEXT("No profile name specified\n")));
-      return DDS::RETCODE_ERROR;
-      }
-    }
-
-    // check if this profile name is already in the list
-    dds::qosProfile_seq::qos_profile_const_iterator it;
-    for (it = profiles_.begin_qos_profile();
-         it != profiles_.end_qos_profile();
-         ++it)
-    {
-      if (ACE_OS::strcmp((*it)->name().c_str(), profileName) == 0) {
-        if (DCPS_debug_level > 7)
-        {
-          ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::addQoSProfile - ")
-            ACE_TEXT("Profile exists or profile name <%C> in use.\n"),
-            profileName));
-        }
-        return DDS::RETCODE_ERROR;
-      }
-    }
-
-    // append qos profile to list
-    dds::qosProfile_seq::qos_profile_value_type t(new dds::qosProfile(profile));
-    profiles_.add_qos_profile(t);
-    return DDS::RETCODE_OK;
-  }
-
-  DDS::ReturnCode_t
-  QOS_XML_Handler::addQoSProfileSeq(const dds::qosProfile_seq & profiles)
-  {
-
-    dds::qosProfile_seq::qos_profile_const_iterator it;
-    for (it = profiles.begin_qos_profile();
-         it != profiles.end_qos_profile();
-         ++it)
-    {
-      dds::qosProfile qos(*(it->get()));
-      addQoSProfile(qos);
-    }
-
-    return DDS::RETCODE_OK;
-
-  }
-
-  DDS::ReturnCode_t
-  QOS_XML_Handler::delQoSProfile(const ACE_TCHAR * profileName)
-  {
-
-    if (ACE_OS::strlen(profileName) == 0)
-    {
-      if (DCPS_debug_level > 7)
-      {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::delQoSProfile - ")
-          ACE_TEXT("No profile specified\n")));
-        return DDS::RETCODE_ERROR;
-      }
-    }
-
-    dds::qosProfile_seq::qos_profile_const_iterator it;
-    for (it = profiles_.begin_qos_profile();
-         it != profiles_.end_qos_profile();
-         ++it)
-    {
-      if (ACE_OS::strcmp((*it)->name().c_str(), profileName) == 0) {
-        profiles_.del_qos_profile(*it);
-        return DDS::RETCODE_OK;
-      }
-
-    }
-
-    if (DCPS_debug_level > 7)
-    {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: QOS_XML_Handler::delQoSProfile - ")
-        ACE_TEXT("Profile doesn't exists or wrong profile name.\n")));
-    }
-    return DDS::RETCODE_ERROR;
-  }
-
   size_t QOS_XML_Handler::length() const
   {
-     return profiles_.count_qos_profile();
+     return profiles_ ? profiles_->qos_profile().size() : 0;
   }
 
   DDS::ReturnCode_t
   QOS_XML_Handler::get_datawriter_qos(::DDS::DataWriterQos& dw_qos,
-                                      const ACE_TCHAR * profile_name,
-                                      const ACE_TCHAR * topic_name)
+                                      std::string_view profile_name,
+                                      std::string_view topic_name)
   {
     ACE_UNUSED_ARG(topic_name);
 
     DDS::ReturnCode_t retcode = DDS::RETCODE_ERROR;
     try
       {
-        ::dds::qosProfile * profile = this->get_profile(profile_name);
+        const ::dds::qosProfile * profile = this->get_profile(profile_name);
         if (profile != 0)
           {
             DataWriterQos_Handler::get_datawriter_qos(dw_qos, profile);
@@ -206,15 +113,15 @@ namespace DCPS {
 
   DDS::ReturnCode_t
   QOS_XML_Handler::get_datareader_qos(::DDS::DataReaderQos& dr_qos,
-                                      const ACE_TCHAR * profile_name,
-                                      const ACE_TCHAR * topic_name)
+                                      std::string_view profile_name,
+                                      std::string_view topic_name)
   {
     ACE_UNUSED_ARG(topic_name);
 
     DDS::ReturnCode_t retcode = DDS::RETCODE_ERROR;
     try
       {
-        ::dds::qosProfile * profile = this->get_profile(profile_name);
+        const ::dds::qosProfile * profile = this->get_profile(profile_name);
         if (profile != 0)
           {
             DataReaderQos_Handler::get_datareader_qos(dr_qos, profile);
@@ -244,15 +151,15 @@ namespace DCPS {
 
   DDS::ReturnCode_t
   QOS_XML_Handler::get_topic_qos(::DDS::TopicQos& tp_qos,
-                                 const ACE_TCHAR * profile_name,
-                                 const ACE_TCHAR * topic_name)
+                                 std::string_view profile_name,
+                                 std::string_view topic_name)
   {
     ACE_UNUSED_ARG(topic_name);
 
     DDS::ReturnCode_t retcode = DDS::RETCODE_ERROR;
     try
       {
-        ::dds::qosProfile * profile = this->get_profile(profile_name);
+        const ::dds::qosProfile * profile = this->get_profile(profile_name);
         if (profile != 0)
           {
             TopicQos_Handler::get_topic_qos(tp_qos, profile);
@@ -282,12 +189,12 @@ namespace DCPS {
 
   DDS::ReturnCode_t
   QOS_XML_Handler::get_publisher_qos(::DDS::PublisherQos& pub_qos,
-                                     const ACE_TCHAR * profile_name)
+                                     std::string_view profile_name)
   {
     DDS::ReturnCode_t retcode = DDS::RETCODE_ERROR;
     try
       {
-        ::dds::qosProfile * profile = this->get_profile(profile_name);
+        const ::dds::qosProfile * profile = this->get_profile(profile_name);
         if (profile != 0)
           {
             PublisherQos_Handler::get_publisher_qos(pub_qos, profile);
@@ -317,12 +224,12 @@ namespace DCPS {
 
   DDS::ReturnCode_t
   QOS_XML_Handler::get_subscriber_qos(::DDS::SubscriberQos& sub_qos,
-                                      const ACE_TCHAR * profile_name)
+                                      std::string_view profile_name)
   {
     DDS::ReturnCode_t retcode = DDS::RETCODE_ERROR;
     try
       {
-        ::dds::qosProfile * profile = this->get_profile(profile_name);
+        const ::dds::qosProfile * profile = this->get_profile(profile_name);
         if (profile != 0)
           {
             SubscriberQos_Handler::get_subscriber_qos(sub_qos, profile);
@@ -352,12 +259,12 @@ namespace DCPS {
 
   DDS::ReturnCode_t
   QOS_XML_Handler::get_participant_qos(::DDS::DomainParticipantQos& sub_qos,
-                                       const ACE_TCHAR * profile_name)
+                                       std::string_view profile_name)
   {
     DDS::ReturnCode_t retcode = DDS::RETCODE_ERROR;
     try
       {
-        ::dds::qosProfile * profile = this->get_profile(profile_name);
+        const ::dds::qosProfile * profile = this->get_profile(profile_name);
         if (profile != 0)
           {
             ParticipantQos_Handler::get_participant_qos(sub_qos, profile);

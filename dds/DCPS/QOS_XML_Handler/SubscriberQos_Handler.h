@@ -14,6 +14,7 @@
 
 #include "dds_qos.hpp"
 #include "dds/DdsDcpsInfrastructureC.h"
+#include <string_view>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -25,14 +26,14 @@ public:
    * based on the given name.
    */
   static bool get_subscriber_qos (::DDS::SubscriberQos& sub_qos,
-                                  ::dds::qosProfile * profile,
-                                  const ACE_TCHAR * name = 0);
+                                  const ::dds::qosProfile * profile,
+                                  std::string_view name = {});
 private:
   /**
    * Start parsing the QOS XML, using the template classes.
    */
   static bool get_subscriber_qos (DDS::SubscriberQos& sub_qos,
-                                  dds::subscriberQos * sub);
+                                  const dds::subscriberQos * sub);
 };
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

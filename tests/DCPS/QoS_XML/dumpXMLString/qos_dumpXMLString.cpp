@@ -4,13 +4,13 @@
 #include <dds/DdsDcpsC.h>
 
 #include <fstream>
-#include <streambuf>
 #include <sstream>
+#include <string_view>
 
 int parseXML(
   const char* fileName,
-  const ACE_TCHAR* profileName,
-  const ACE_TCHAR* topicName,
+  std::string_view profileName,
+  std::string_view topicName,
   OpenDDS::DCPS::QOS_XML_String_Handler& xml_membuf)
 {
   int retval = 0;
@@ -154,8 +154,8 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
   // topic name in respective profile name
   {
     retval += parseXML("test.xml",
-                      ACE_TEXT("TestProfile"),
-                      ACE_TEXT("TopicName"),
+                      "TestProfile",
+                      "TopicName",
                       xml1);
     if (retval > 0)
       return retval;
@@ -165,69 +165,28 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
   // topic name in respective profile name
   {
     retval += parseXML("append2test.xml",
-                      ACE_TEXT("TestProfile2"),
-                      ACE_TEXT("TopicName"),
+                      "TestProfile2",
+                      "TopicName",
                       xml2);
     if (retval > 0)
       return retval;
   }
-  // Test xml_membuf operations
-  // append a profile
+  if (!xml1.getProfile("TestProfile"))
   {
-    const ACE_TCHAR* profileName = ACE_TEXT("TestA");
-    dds::qosProfile profile = xml2.getProfile(profileName);
-    DDS::ReturnCode_t retcode;
-    retcode = xml1.addQoSProfile(profile);
-    if (retcode != DDS::RETCODE_OK)
-    {
-      ACE_ERROR ((LM_ERROR, "MAIN - "
-            "Cannot append profile name <%C>. Retcode <%d>\n",
-            profileName, retcode));
-      return ++retval;
-    }
-    // Check if it was inserted
-    dds::qosProfile testA = xml2.getProfile(profileName);
-    if (ACE_OS::strcmp(testA.name().c_str(),profileName) != 0)
-    {
-      ACE_ERROR ((LM_ERROR, "MAIN - "
-            "Cannot get last profile name <%C> inserted. Retcode <%d>\n",
-            profileName, retcode));
-      return ++retval;
-    }
+    ACE_ERROR ((LM_ERROR, "MAIN - Could not find TestProfile in test.xml\n"));
+    ++retval;
+  }
 
-    // Remove profile
-    retcode = xml1.delQoSProfile(profileName);
-    if (retcode != DDS::RETCODE_OK)
-    {
-      ACE_ERROR ((LM_ERROR, "MAIN - "
-            "Cannot remove profile name <%C>. Retcode <%d>\n",
-            profileName, retcode));
-      return ++retval;
-    }
-  }
-  // append existing profile name
+  if (!xml2.getProfile("TestProfile2"))
   {
-    const ACE_TCHAR* profileName = ACE_TEXT("TestProfile");
-    dds::qosProfile profile = xml2.getProfile(profileName);
-    DDS::ReturnCode_t retcode = xml1.addQoSProfile(profile);
-    if (retcode == DDS::RETCODE_OK)
-    {
-      ACE_ERROR ((LM_ERROR, "MAIN - "
-            "Unexpected insertion of profile name <%C>.\n",
-            profileName));
-      return ++retval;
-    }
+    ACE_ERROR ((LM_ERROR, "MAIN - Could not find TestProfile2 in append2test.xml\n"));
+    ++retval;
   }
-  // append list of profiles
+
+  if (xml2.get().qos_profile().size() != 5)
   {
-    const dds::qosProfile_seq& profiles = xml2.get();
-    DDS::ReturnCode_t retcode = xml1.addQoSProfileSeq(profiles);
-    if (retcode != DDS::RETCODE_OK)
-    {
-      ACE_ERROR ((LM_ERROR, "MAIN - "
-            "Cannot append profile list. RetCode %d\n",retcode));
-      return ++retval;
-    }
+    ACE_ERROR ((LM_ERROR, "MAIN - append2test.xml should contain five QoS profiles\n"));
+    ++retval;
   }
   return retval;
 }

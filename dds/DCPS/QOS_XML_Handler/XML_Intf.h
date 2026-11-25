@@ -18,6 +18,8 @@
 #include "dds_qos.hpp"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "OpenDDS_XML_QOS_Handler_Export.h"
+#include <memory>
+#include <string_view>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -45,75 +47,53 @@ namespace DCPS {
      */
     DDS::ReturnCode_t
     get_datawriter_qos(::DDS::DataWriterQos& dw_qos,
-                       const ACE_TCHAR * profile_name,
-                       const ACE_TCHAR * topic_name);
+                       std::string_view profile_name,
+                       std::string_view topic_name);
 
     DDS::ReturnCode_t
     get_datareader_qos(::DDS::DataReaderQos& dr_qos,
-                       const ACE_TCHAR * profile_name,
-                       const ACE_TCHAR * topic_name);
+                       std::string_view profile_name,
+                       std::string_view topic_name);
 
     DDS::ReturnCode_t
     get_topic_qos(::DDS::TopicQos& tp_qos,
-                  const ACE_TCHAR * profile_name,
-                  const ACE_TCHAR * topic_name);
+                  std::string_view profile_name,
+                  std::string_view topic_name);
 
     DDS::ReturnCode_t
     get_publisher_qos(::DDS::PublisherQos& pub_qos,
-                      const ACE_TCHAR * profile_name);
+                      std::string_view profile_name);
 
     DDS::ReturnCode_t
     get_subscriber_qos(::DDS::SubscriberQos& sub_qos,
-                       const ACE_TCHAR * profile_name);
+                       std::string_view profile_name);
 
     DDS::ReturnCode_t
     get_participant_qos(::DDS::DomainParticipantQos& sub_qos,
-                        const ACE_TCHAR * profile_name);
+                        std::string_view profile_name);
 
-    /**
-     *  Add qos profile to sequence
-     */
-    DDS::ReturnCode_t
-    addQoSProfile(const dds::qosProfile & profile);
-
-    /**
-     *  Add qos profiles to sequence
-     */
-    DDS::ReturnCode_t
-    addQoSProfileSeq(const dds::qosProfile_seq & profiles);
-
-    /**
-     *  Remove  qos profile to sequence
-     */
-    DDS::ReturnCode_t
-    delQoSProfile(const ACE_TCHAR * profileName);
-
-    /**
-     *  Get number of profiles in sequence
-     */
     size_t length() const;
 
     /**
     * Get profile by name
     */
-    ::dds::qosProfile getProfile(const ACE_TCHAR * profileName) {
-      ::dds::qosProfile* profile = get_profile (profileName);
-      if (profile) {
-        return *profile;
-      } else {
-        return ::dds::qosProfile(ACE_TEXT(""));
-      }
+    const ::dds::qosProfile* getProfile(std::string_view profileName) const {
+      return get_profile(profileName);
     }
 
     /**
      *  get profiles sequence
      */
-    const ::dds::qosProfile_seq& get() {
-      return profiles_;
+    const ::dds::qosProfile_seq& get() const {
+      return *profiles_;
     }
 
   protected:
-    ::dds::qosProfile_seq profiles_;
+    void set_profiles(::dds::qosProfile_seq* profiles) {
+      profiles_.reset(profiles);
+    }
+
+    std::unique_ptr<::dds::qosProfile_seq> profiles_;
 
     /**
      *
@@ -121,7 +101,7 @@ namespace DCPS {
      * profile name.
      *
      */
-    ::dds::qosProfile * get_profile(const ACE_TCHAR * profile_name);
+    const ::dds::qosProfile * get_profile(std::string_view profile_name) const;
   };
 }
 }
