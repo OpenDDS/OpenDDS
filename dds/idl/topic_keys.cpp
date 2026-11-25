@@ -9,8 +9,11 @@
 #include <utl_identifier.h>
 #include <ast_union.h>
 #include <ast_array.h>
+#include <ast_sequence.h>
 
+#include <algorithm>
 #include <string>
+#include <vector>
 
 TopicKeys::RootType TopicKeys::root_type(AST_Type* type)
 {
@@ -80,6 +83,7 @@ TopicKeys::Iterator::Iterator()
   , recursive_(false)
   , element_count_(0)
   , implied_keys_(false)
+  , force_implied_(false)
 {
 }
 
@@ -92,6 +96,7 @@ TopicKeys::Iterator::Iterator(TopicKeys& parent)
   , recursive_(parent.recursive())
   , element_count_(0)
   , implied_keys_(false)
+  , force_implied_(parent.implied())
 {
   root_ = parent.root();
   root_type_ = parent.root_type();
@@ -107,6 +112,7 @@ TopicKeys::Iterator::Iterator(AST_Type* root, Iterator* parent)
   , recursive_(parent->recursive_)
   , element_count_(0)
   , implied_keys_(false)
+  , force_implied_(false)
 {
   root_type_ = TopicKeys::root_type(root);
   root_ = root;
@@ -122,10 +128,11 @@ TopicKeys::Iterator::Iterator(AST_Field* root, Iterator* parent)
   , recursive_(parent->recursive_)
   , element_count_(0)
   , implied_keys_(false)
+  , force_implied_(false)
 {
   AST_Type* type = root->field_type()->unaliased_type();
   root_type_ = TopicKeys::root_type(type);
-  if (root_type_ == PrimitiveType) {
+  if (root_type_ == PrimitiveType || root_type_ == SequenceType) {
     root_ = root;
   } else {
     root_ = type;
@@ -143,6 +150,7 @@ TopicKeys::Iterator::Iterator(const Iterator& other)
   , recursive_(false)
   , element_count_(0)
   , implied_keys_(false)
+  , force_implied_(false)
 {
   *this = other;
 }
@@ -165,7 +173,46 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator=(const TopicKeys::Iterator& o
   dimensions_ = other.dimensions_;
   child_ = other.child_ ? new Iterator(*other.child_) : 0;
   element_count_ = other.element_count_;
+  force_implied_ = other.force_implied_;
   return *this;
+}
+
+namespace {
+  // Rejects what a sequence key's KeyLessThan can't compare in its elements
+  void validate_sequence_key_element(AST_Type* type)
+  {
+    static std::vector<AST_Type*> type_stack;
+    type = AstTypeClassification::resolveActualType(type);
+    if (std::find(type_stack.begin(), type_stack.end(), type) != type_stack.end()) {
+      throw TopicKeys::Error(type,
+        "a recursive type can't be used as (or as part of) a sequence key element");
+    }
+    struct TypeStackGuard {
+      explicit TypeStackGuard(AST_Type* t) { type_stack.push_back(t); }
+      ~TypeStackGuard() { type_stack.pop_back(); }
+    } const guard(type);
+    switch (TopicKeys::root_type(type)) {
+    case TopicKeys::PrimitiveType:
+    case TopicKeys::UnionType:
+      break;
+    case TopicKeys::StructureType: {
+      // Iterating the keys validates any sequence keys nested in the struct
+      TopicKeys keys(dynamic_cast<AST_Structure*>(type), true, true);
+      keys.count();
+      break;
+    }
+    case TopicKeys::ArrayType:
+      validate_sequence_key_element(dynamic_cast<AST_Array*>(type)->base_type());
+      break;
+    case TopicKeys::SequenceType:
+      validate_sequence_key_element(dynamic_cast<AST_Sequence*>(type)->base_type());
+      break;
+    case TopicKeys::MapType:
+      throw TopicKeys::Error(type, "map types are not supported as keys");
+    default:
+      throw TopicKeys::Error(type, "this type is not supported as a key");
+    }
+  }
 }
 
 TopicKeys::Iterator& TopicKeys::Iterator::operator++()
@@ -202,7 +249,7 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
       // If a nested struct marked as a key has no keys, all the fields are
       // implied to be keys (expect those marked with @key(FALSE)).
       if (pos_ == 0) {
-        if (level_ > 0) {
+        if (level_ > 0 || force_implied_) {
           implied_keys_ = true;
           for (Fields::Iterator i = fields.begin(); i != fields_end && implied_keys_; ++i) {
             bool key_annotation_value;
@@ -276,23 +323,27 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
     if (pos_ == 0) { // Only Allow One Iteration
       pos_ = 1;
       AST_Union* union_node = dynamic_cast<AST_Union*>(root_);
-      if (level_ > 0 || be_global->union_discriminator_is_key(union_node)) {
+      if (level_ > 0 || force_implied_ || be_global->union_discriminator_is_key(union_node)) {
         current_value_ = root_;
         return *this;
       }
     }
 
-  } else if (root_type_ == SequenceType) {
-    throw Error(root_, "sequence types are not supported as keys");
-
   } else if (root_type_ == MapType) {
     throw Error(root_, "map types are not supported as keys");
 
-  // If we are a primitive type, use self
-  } else if (root_type_ == PrimitiveType) {
+  // Primitives and sequences are single key leaves; a sequence's length isn't
+  // known until runtime, so it cannot be expanded like an array
+  } else if (root_type_ == PrimitiveType || root_type_ == SequenceType) {
     if (pos_ == 0) { // Only Allow One Iteration
       pos_ = 1;
       current_value_ = root_;
+      if (root_type_ == SequenceType) {
+        AST_Field* const field = dynamic_cast<AST_Field*>(root_);
+        AST_Type* const seq = AstTypeClassification::resolveActualType(
+          field ? field->field_type() : dynamic_cast<AST_Type*>(root_));
+        validate_sequence_key_element(dynamic_cast<AST_Sequence*>(seq)->base_type());
+      }
       return *this;
     }
   }
@@ -386,7 +437,7 @@ void TopicKeys::Iterator::path_i(std::stringstream& ss, bool canonical)
     for (; ri != rfinished; ++ri) {
       ss << '[' << *ri << ']';
     }
-  } else if (root_type_ != PrimitiveType) {
+  } else if (root_type_ != PrimitiveType && root_type_ != SequenceType) {
     throw Error(root_, error_msg);
   }
   if (child_ && recursive_) {
@@ -454,7 +505,8 @@ TopicKeys::TopicKeys()
     root_type_(InvalidType),
     counted_(false),
     count_(0),
-    recursive_(false)
+    recursive_(false),
+    implied_(false)
 {
 }
 
@@ -463,22 +515,24 @@ TopicKeys::TopicKeys(const TopicKeys& other)
   *this = other;
 }
 
-TopicKeys::TopicKeys(AST_Structure* root, bool recursive)
+TopicKeys::TopicKeys(AST_Structure* root, bool recursive, bool implied)
   : root_(root),
     root_type_(StructureType),
     counted_(false),
     count_(0),
-    recursive_(recursive)
+    recursive_(recursive),
+    implied_(implied)
 {
   root_ = root;
 }
 
-TopicKeys::TopicKeys(AST_Union* root)
+TopicKeys::TopicKeys(AST_Union* root, bool implied)
   : root_(root),
     root_type_(UnionType),
     counted_(false),
     count_(0),
-    recursive_(false)
+    recursive_(false),
+    implied_(implied)
 {
   root_ = root;
 }
@@ -494,6 +548,7 @@ TopicKeys& TopicKeys::operator=(const TopicKeys& other)
   counted_ = other.counted_;
   count_ = other.count_;
   recursive_ = other.recursive_;
+  implied_ = other.implied_;
   return *this;
 }
 
@@ -533,6 +588,11 @@ size_t TopicKeys::count()
 bool TopicKeys::recursive() const
 {
   return recursive_;
+}
+
+bool TopicKeys::implied() const
+{
+  return implied_;
 }
 
 TopicKeys::Iterator TopicKeys::Iterator::end_value()

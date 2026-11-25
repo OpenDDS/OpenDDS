@@ -75,3 +75,14 @@ case E_SHORT_FIELD:
 case E_ADDITIONAL_FIELD:
   @id(12) long additional_field;
 };
+
+@mutable
+struct MutableLongLong {
+  long long value;
+};
+
+@final
+struct FinalMutableThenDouble {
+  MutableLongLong inner;
+  double after;
+};

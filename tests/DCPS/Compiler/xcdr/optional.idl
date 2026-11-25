@@ -14,4 +14,19 @@ module Optional {
     @optional sequence<int32> seq_field;
     @optional TestStruct struct_field;
   };
+
+  @appendable
+  struct AppendableOptionalLongLong {
+    @optional int64 value;
+  };
+
+  @appendable
+  struct OptionalShort {
+    @optional int16 value;
+  };
+
+  @mutable
+  struct MutableOptionalShort {
+    OptionalShort value;
+  };
 };

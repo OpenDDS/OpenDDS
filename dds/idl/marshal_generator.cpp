@@ -1604,7 +1604,7 @@ namespace {
     return 0;
   }
 
-  bool is_bounded_type(AST_Type* type, Encoding::Kind encoding)
+  bool is_bounded_type(AST_Type* type, Encoding::Kind encoding, FieldFilter field_filter = FieldFilter_All)
   {
     bool bounded = true;
     static std::vector<AST_Type*> type_stack;
@@ -1618,50 +1618,39 @@ namespace {
     if ((fld_cls & CL_STRING) && !(fld_cls & CL_BOUNDED)) {
       bounded = false;
     } else if (fld_cls & CL_STRUCTURE) {
-      const ExtensibilityKind exten = be_global->extensibility(type);
-      if (exten != extensibilitykind_final && encoding != Encoding::KIND_UNALIGNED_CDR) {
-        /*
-         * TODO(iguessthislldo): This is a workaround for not properly
-         * implementing serialized_size_bound for XCDR. See XTYPE-83.
-         */
-        bounded = false;
-      } else {
-        const Fields fields(dynamic_cast<AST_Structure*>(type));
-        const Fields::Iterator fields_end = fields.end();
-        for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-          if (!is_bounded_type((*i)->field_type(), encoding)) {
-            bounded = false;
-            break;
-          }
+      // Bounded when its (key, if key-only) fields are; idl_max_serialized_size()
+      // includes the DHEADER and mutable member headers
+      const Fields fields(dynamic_cast<AST_Structure*>(type), field_filter);
+      const Fields::Iterator fields_end = fields.end();
+      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+        if (!is_bounded_type((*i)->field_type(), encoding, nested(field_filter))) {
+          bounded = false;
+          break;
         }
       }
     } else if (fld_cls & CL_SEQUENCE) {
       if (fld_cls & CL_BOUNDED) {
         AST_Sequence* seq_node = dynamic_cast<AST_Sequence*>(type);
-        if (!is_bounded_type(seq_node->base_type(), encoding)) bounded = false;
+        if (!is_bounded_type(seq_node->base_type(), encoding, nested(field_filter))) bounded = false;
       } else {
         bounded = false;
       }
     } else if (fld_cls & CL_MAP) {
       if (fld_cls & CL_BOUNDED) {
         AST_Map* const map = dynamic_cast<AST_Map*>(type);
-        bounded = is_bounded_type(map->key_type(), encoding) && is_bounded_type(map->value_type(), encoding);
+        bounded = is_bounded_type(map->key_type(), encoding, nested(field_filter)) &&
+          is_bounded_type(map->value_type(), encoding, nested(field_filter));
       } else {
         bounded = false;
       }
     } else if (fld_cls & CL_ARRAY) {
       AST_Array* array_node = dynamic_cast<AST_Array*>(type);
-      if (!is_bounded_type(array_node->base_type(), encoding)) bounded = false;
+      if (!is_bounded_type(array_node->base_type(), encoding, nested(field_filter))) bounded = false;
     } else if (fld_cls & CL_UNION) {
-      const ExtensibilityKind exten = be_global->extensibility(type);
-      if (exten != extensibilitykind_final && encoding != Encoding::KIND_UNALIGNED_CDR) {
-        /*
-         * TODO(iguessthislldo): This is a workaround for not properly
-         * implementing serialized_size_bound for XCDR. See XTYPE-83.
-         */
-        bounded = false;
-      } else {
-        const Fields fields(dynamic_cast<AST_Union*>(type));
+      // A key-only union has only its discriminator, so it is always bounded
+      AST_Union* const union_node = dynamic_cast<AST_Union*>(type);
+      if (field_filter == FieldFilter_All) {
+        const Fields fields(union_node);
         const Fields::Iterator fields_end = fields.end();
         for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
           if (!is_bounded_type((*i)->field_type(), encoding)) {
@@ -1768,28 +1757,103 @@ namespace {
     }
   }
 
-  void idl_max_serialized_size(Encoding::Kind encoding, size_t& size, AST_Type* type);
+  /// Whether a bounded type always has the same serialized size, which is needed to
+  /// pick a mutable member's XCDR2 EMHEADER form from its maximum size
+  bool idl_is_fixed_size(AST_Type* type, FieldFilter field_filter)
+  {
+    type = resolveActualType(type);
+    switch (type->node_type()) {
+    case AST_Decl::NT_pre_defined:
+    case AST_Decl::NT_enum:
+      return true;
+    case AST_Decl::NT_array: {
+      AST_Array* const array_node = dynamic_cast<AST_Array*>(type);
+      return idl_is_fixed_size(array_node->base_type(), nested(field_filter));
+    }
+    case AST_Decl::NT_struct: {
+      const Fields fields(dynamic_cast<AST_Structure*>(type), field_filter);
+      const Fields::Iterator fields_end = fields.end();
+      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+        if (be_global->is_optional(*i) ||
+            !idl_is_fixed_size((*i)->field_type(), nested(field_filter))) {
+          return false;
+        }
+      }
+      return true;
+    }
+    case AST_Decl::NT_union:
+      // A key-only union has at most its discriminator
+      return field_filter != FieldFilter_All;
+    default:
+      // Strings, sequences, and maps can vary in size
+      return false;
+    }
+  }
 
-  // Max marshaled size of repeating 'type' 'n' times in the stream
-  // (for an array or sequence)
+  // Size of a mutable member's PID (XCDR1) or EMHEADER (XCDR2) header
+  size_t idl_max_member_header_size(
+    Encoding::Kind encoding, unsigned id, size_t max_payload, bool is_fixed_size)
+  {
+    if (encoding == Encoding::KIND_XCDR1) {
+      // The "extended header" size trigger is monotonic in the payload
+      // size, so the maximum payload is always the worst case here.
+      return (id >= (1u << 14) || max_payload >= (1u << 16)) ? 12 : 4;
+    } else if (encoding == Encoding::KIND_XCDR2) {
+      const bool compact = is_fixed_size &&
+        (max_payload == 1 || max_payload == 2 || max_payload == 4 || max_payload == 8);
+      return compact ? 4 : 8;
+    }
+    return 0;
+  }
+
+  void idl_max_serialized_size(Encoding::Kind encoding, size_t& size, AST_Type* type,
+    FieldFilter field_filter = FieldFilter_All, bool outermost = false);
+
+  // A mutable member: its PID (XCDR1) or EMHEADER (XCDR2), then its value
+  void idl_max_serialized_size_member(Encoding::Kind encoding, size_t& size,
+    AST_Type* type, unsigned id, bool optional, FieldFilter field_filter)
+  {
+    align(encoding, size, 4);
+    size_t member_size = optional ? 1 : 0;
+    idl_max_serialized_size(encoding, member_size, type, field_filter);
+    size += idl_max_member_header_size(encoding, id, member_size,
+      !optional && idl_is_fixed_size(type, field_filter));
+    size += member_size;
+  }
+
+  // XCDR1 keeps the alignment origin at the last PID after the list ends, which can
+  // add up to 4 bytes of padding to whatever follows
+  void idl_max_serialized_size_list_end(
+    Encoding::Kind encoding, ExtensibilityKind exten, size_t& size, bool outermost)
+  {
+    if (exten == extensibilitykind_mutable && encoding == Encoding::KIND_XCDR1) {
+      align(encoding, size, 4);
+      size += outermost ? 4 : 8;
+    }
+  }
+
+  // Max marshaled size of 'n' elements of 'type' (an array or sequence),
+  // with field_filter applied to each element
   void idl_max_serialized_size_repeating(
-    Encoding::Kind encoding, size_t& size, AST_Type* type, size_t n)
+    Encoding::Kind encoding, size_t& size, AST_Type* type, size_t n, FieldFilter field_filter)
   {
     if (n > 0) {
       // 1st element may need padding relative to whatever came before
-      idl_max_serialized_size(encoding, size, type);
+      idl_max_serialized_size(encoding, size, type, field_filter);
     }
     if (n > 1) {
       // subsequent elements may need padding relative to prior element
       // TODO(iguessthislldo): https://github.com/OpenDDS/OpenDDS/pull/1668#discussion_r432521888
       const size_t prev_size = size;
-      idl_max_serialized_size(encoding, size, type);
+      idl_max_serialized_size(encoding, size, type, field_filter);
       size += (n - 2) * (size - prev_size);
     }
   }
 
-  /// Should only be called on bounded types
-  void idl_max_serialized_size(Encoding::Kind encoding, size_t& size, AST_Type* type)
+  /// Should only be called on bounded types; field_filter selects which fields count,
+  /// matching the generated KeyOnly<T>/NestedKeyOnly<T> reader/writer
+  void idl_max_serialized_size(Encoding::Kind encoding, size_t& size, AST_Type* type,
+    FieldFilter field_filter, bool outermost)
   {
     type = resolveActualType(type);
     const ExtensibilityKind exten = be_global->extensibility(type);
@@ -1854,13 +1918,22 @@ namespace {
       break;
     }
     case AST_Decl::NT_struct: {
-      const Fields fields(dynamic_cast<AST_Structure*>(type));
+      const Fields fields(dynamic_cast<AST_Structure*>(type), field_filter);
       const Fields::Iterator fields_end = fields.end();
       idl_max_serialized_size_dheader(encoding, exten, size);
-      // TODO(iguessthislldo) Handle Parameter List
       for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-        idl_max_serialized_size(encoding, size, (*i)->field_type());
+        AST_Field* const field = *i;
+        // An optional member is preceded by a presence flag
+        const bool optional = be_global->is_optional(field);
+        if (exten == extensibilitykind_mutable) {
+          idl_max_serialized_size_member(encoding, size, field->field_type(),
+            be_global->get_id(field), optional, nested(field_filter));
+        } else {
+          size += optional ? 1 : 0;
+          idl_max_serialized_size(encoding, size, field->field_type(), nested(field_filter));
+        }
       }
+      idl_max_serialized_size_list_end(encoding, exten, size, outermost);
       break;
     }
     case AST_Decl::NT_sequence: {
@@ -1870,7 +1943,7 @@ namespace {
       size_t bound = seq_node->max_size()->ev()->u.ulval;
       align(encoding, size, 4);
       size += 4;
-      idl_max_serialized_size_repeating(encoding, size, base_node, bound);
+      idl_max_serialized_size_repeating(encoding, size, base_node, bound, nested(field_filter));
       break;
     }
     case AST_Decl::NT_array: {
@@ -1878,28 +1951,61 @@ namespace {
       AST_Type* base_node = array_node->base_type();
       idl_max_serialized_size_dheader(encoding, exten, size);
       idl_max_serialized_size_repeating(
-        encoding, size, base_node, array_element_count(array_node));
+        encoding, size, base_node, array_element_count(array_node), nested(field_filter));
+      break;
+    }
+    case AST_Decl::NT_map: {
+      // One UInt32 (DHEADER or length) then the entries, sized like
+      // idl_max_serialized_size_repeating()
+      AST_Map* const map_node = dynamic_cast<AST_Map*>(type);
+      const size_t bound = map_node->max_size()->ev()->u.ulval;
+      align(encoding, size, 4);
+      size += 4;
+      if (bound > 0) {
+        idl_max_serialized_size(encoding, size, map_node->key_type());
+        idl_max_serialized_size(encoding, size, map_node->value_type());
+      }
+      if (bound > 1) {
+        const size_t prev_size = size;
+        idl_max_serialized_size(encoding, size, map_node->key_type());
+        idl_max_serialized_size(encoding, size, map_node->value_type());
+        size += (bound - 2) * (size - prev_size);
+      }
       break;
     }
     case AST_Decl::NT_union: {
-      AST_Union* union_node = dynamic_cast<AST_Union*>(type);
+      AST_Union* const union_node = dynamic_cast<AST_Union*>(type);
+      const bool is_mutable = exten == extensibilitykind_mutable;
       idl_max_serialized_size_dheader(encoding, exten, size);
-      // TODO(iguessthislldo) Handle Parameter List
-      idl_max_serialized_size(encoding, size, union_node->disc_type());
-      size_t largest_field_size = 0;
-      const size_t starting_size = size;
-      const Fields fields(union_node);
-      const Fields::Iterator fields_end = fields.end();
-      for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-        idl_max_serialized_size(encoding, size, (*i)->field_type());
-        size_t field_size = size - starting_size;
-        if (field_size > largest_field_size) {
-          largest_field_size = field_size;
+      // A key-only union has at most its discriminator
+      if (has_discriminator(union_node, field_filter)) {
+        if (is_mutable) {
+          idl_max_serialized_size_member(encoding, size, union_node->disc_type(),
+            OpenDDS::XTypes::DISCRIMINATOR_SERIALIZED_ID, false, FieldFilter_All);
+        } else {
+          idl_max_serialized_size(encoding, size, union_node->disc_type());
         }
-        // rewind:
-        size = starting_size;
       }
-      size += largest_field_size;
+      if (field_filter == FieldFilter_All) {
+        // Only one branch is on the wire, so use the largest
+        size_t largest_branch_size = 0;
+        const size_t starting_size = size;
+        const Fields fields(union_node);
+        const Fields::Iterator fields_end = fields.end();
+        for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+          AST_Field* const branch = *i;
+          if (is_mutable) {
+            idl_max_serialized_size_member(encoding, size, branch->field_type(),
+              be_global->get_id(branch), false, FieldFilter_All);
+          } else {
+            idl_max_serialized_size(encoding, size, branch->field_type());
+          }
+          largest_branch_size = (std::max)(largest_branch_size, size - starting_size);
+          size = starting_size;
+        }
+        size += largest_branch_size;
+      }
+      idl_max_serialized_size_list_end(encoding, exten, size, outermost);
       break;
     }
     default:
@@ -2539,20 +2645,13 @@ namespace {
   }
 
   bool is_bounded_topic_struct(AST_Type* type, Encoding::Kind encoding, bool key_only,
-    TopicKeys& keys, IDL_GlobalData::DCPS_Data_Type_Info* info = 0)
+    IDL_GlobalData::DCPS_Data_Type_Info* info = 0)
   {
-    /*
-     * TODO(iguessthislldo): This is a workaround for not properly implementing
-     * serialized_size_bound for XCDR. See XTYPE-83.
-     */
-    const ExtensibilityKind exten = be_global->extensibility(type);
-    if (exten != extensibilitykind_final && encoding != Encoding::KIND_UNALIGNED_CDR) {
-      return false;
-    }
-
     bool bounded = true;
     if (key_only) {
       if (info) {
+        // The legacy DCPS_DATA_KEY pragmas name keys by path, so check those fields
+        // directly; their key-only form has no parameter list
         AST_Structure* const struct_type = dynamic_cast<AST_Structure*>(type);
         const std::vector<std::string>& key_names = tao_idl_compat::dcps_keys(*info);
         for (std::vector<std::string>::const_iterator i = key_names.begin(); i != key_names.end(); ++i) {
@@ -2563,13 +2662,7 @@ namespace {
           }
         }
       } else {
-        const TopicKeys::Iterator finished = keys.end();
-        for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
-          if (!is_bounded_type(i.get_ast_type(), encoding)) {
-            bounded = false;
-            break;
-          }
-        }
+        bounded = is_bounded_type(type, encoding, FieldFilter_KeyOnly);
       }
     } else {
       bounded = is_bounded_type(type, encoding);
@@ -2578,12 +2671,10 @@ namespace {
   }
 
   bool generate_marshal_traits_struct_bounds_functions(AST_Structure* node,
-    TopicKeys& keys, IDL_GlobalData::DCPS_Data_Type_Info* info, bool key_only)
+    IDL_GlobalData::DCPS_Data_Type_Info* info, bool key_only)
   {
     const char* function_prefix = key_only ? "key_only_" : "";
     AST_Type* const type_node = dynamic_cast<AST_Type*>(node);
-    const Fields fields(node);
-    const Fields::Iterator fields_end = fields.end();
     const std::string name = scoped(node->name());
     const ExtensibilityKind exten = be_global->extensibility(node);
 
@@ -2597,18 +2688,18 @@ namespace {
       be_global->header_ <<
         "    case " << encoding_to_encoding_kind(encoding) << ":\n"
         "      return SerializedSizeBound(";
-      if (is_bounded_topic_struct(type_node, encoding, key_only, keys, info)) {
+      if (is_bounded_topic_struct(type_node, encoding, key_only, info)) {
         size_t size = 0;
-        if (key_only) {
+        if (key_only && info) {
+          // Legacy pragma key-only form: the named key fields, DHEADER-wrapped unless final
           idl_max_serialized_size_dheader(encoding, exten, size);
-          if (!iterate_over_keys("", encoding, node, name, info, &keys,
+          if (!iterate_over_keys("", encoding, node, name, info, 0,
                 idl_max_serialized_size_iteration, &size, 0, 0)) {
             return false;
           }
         } else {
-          for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
-            idl_max_serialized_size(encoding, size, (*i)->field_type());
-          }
+          idl_max_serialized_size(encoding, size, type_node,
+            key_only ? FieldFilter_KeyOnly : FieldFilter_All, true);
         }
         be_global->header_ << size;
       }
@@ -2626,14 +2717,14 @@ namespace {
   }
 
   bool generate_marshal_traits_struct(AST_Structure* node,
-    TopicKeys& keys, IDL_GlobalData::DCPS_Data_Type_Info* info = 0)
+    IDL_GlobalData::DCPS_Data_Type_Info* info = 0)
   {
     return
-      generate_marshal_traits_struct_bounds_functions(node, keys, info, false) && // All Fields
-      generate_marshal_traits_struct_bounds_functions(node, keys, info, true); // Key Fields
+      generate_marshal_traits_struct_bounds_functions(node, info, false) && // All Fields
+      generate_marshal_traits_struct_bounds_functions(node, info, true); // Key Fields
   }
 
-  bool generate_marshal_traits_union(AST_Union* node, bool has_key, ExtensibilityKind exten)
+  bool generate_marshal_traits_union(AST_Union* node)
   {
     be_global->header_ <<
       "  static SerializedSizeBound serialized_size_bound(const Encoding& encoding)\n"
@@ -2646,7 +2737,7 @@ namespace {
         "      return SerializedSizeBound(";
       if (is_bounded_type(node, encoding)) {
         size_t size = 0;
-        idl_max_serialized_size(encoding, size, node);
+        idl_max_serialized_size(encoding, size, node, FieldFilter_All, true);
         be_global->header_ << size;
       }
       be_global->header_ << ");\n";
@@ -2668,15 +2759,10 @@ namespace {
       be_global->header_ <<
         "    case " << encoding_to_encoding_kind(encoding) << ":\n"
         "      return SerializedSizeBound(";
-      /*
-       * TODO(iguessthislldo): This is a workaround for not properly implementing
-       * serialized_size_bound for Mutable. See XTYPE-83.
-       */
-      if (exten == extensibilitykind_final || encoding == Encoding::KIND_UNALIGNED_CDR) {
+      {
+        // The key-only form is at most the discriminator, so it's always bounded
         size_t size = 0;
-        if (has_key) {
-          idl_max_serialized_size(encoding, size, node->disc_type());
-        }
+        idl_max_serialized_size(encoding, size, node, FieldFilter_KeyOnly, true);
         be_global->header_ << size;
       }
       be_global->header_ << ");\n";
@@ -2694,7 +2780,7 @@ namespace {
 
   bool generate_marshal_traits(
     AST_Decl* node, const std::string& cxx, ExtensibilityKind exten,
-    TopicKeys& keys, IDL_GlobalData::DCPS_Data_Type_Info* info = 0)
+    IDL_GlobalData::DCPS_Data_Type_Info* info = 0)
   {
     AST_Structure* const struct_node =
       node->node_type() == AST_Decl::NT_struct ? dynamic_cast<AST_Structure*>(node) : 0;
@@ -2742,11 +2828,11 @@ namespace {
       "\n";
 
     if (struct_node) {
-      if (!generate_marshal_traits_struct(struct_node, keys, info)) {
+      if (!generate_marshal_traits_struct(struct_node, info)) {
         return false;
       }
     } else if (union_node) {
-      if (!generate_marshal_traits_union(union_node, keys.count(), exten)) {
+      if (!generate_marshal_traits_union(union_node)) {
         return false;
       }
     }
@@ -3417,9 +3503,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
 
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
   const bool is_topic_type = be_global->is_topic_type(node);
-  TopicKeys keys;
   if (is_topic_type) {
-    keys = TopicKeys(node);
     info = 0; // Annotations Override DCPS_DATA_TYPE
 
     if (!generate_struct_serialization_functions(node, FieldFilter_KeyOnly)) {
@@ -3428,7 +3512,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   }
 
   if ((info || is_topic_type) &&
-      !generate_marshal_traits(node, cxx, be_global->extensibility(node), keys, info)) {
+      !generate_marshal_traits(node, cxx, be_global->extensibility(node), info)) {
     return false;
   }
 
@@ -4372,8 +4456,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     gen_union_key_serializers(node, FieldFilter_KeyOnly, branches);
   }
 
-  TopicKeys keys(node);
-  return generate_marshal_traits(node, cxx, exten, keys);
+  return generate_marshal_traits(node, cxx, exten);
 }
 
 void marshal_generator::gen_union_default(AST_UnionBranch* branch, const std::string& varname)
