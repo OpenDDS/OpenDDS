@@ -11,8 +11,6 @@
 #include "Service_Participant.h"
 #include "XTypes/TypeLookupService.h"
 
-#include <set>
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -51,6 +49,95 @@ TypeSupportImpl::get_type_name()
 }
 
 namespace {
+  // False if ti, or a plain collection's element or key, is still pending conversion
+  bool complete_ti_ready(const XTypes::TypeIdentifier& ti, const XTypes::TypeIdentifierSet& pending)
+  {
+    switch (ti.kind()) {
+    case XTypes::TI_PLAIN_SEQUENCE_SMALL:
+      return complete_ti_ready(*ti.seq_sdefn().element_identifier, pending);
+    case XTypes::TI_PLAIN_SEQUENCE_LARGE:
+      return complete_ti_ready(*ti.seq_ldefn().element_identifier, pending);
+    case XTypes::TI_PLAIN_ARRAY_SMALL:
+      return complete_ti_ready(*ti.array_sdefn().element_identifier, pending);
+    case XTypes::TI_PLAIN_ARRAY_LARGE:
+      return complete_ti_ready(*ti.array_ldefn().element_identifier, pending);
+    case XTypes::TI_PLAIN_MAP_SMALL:
+      return complete_ti_ready(*ti.map_sdefn().element_identifier, pending) &&
+        complete_ti_ready(*ti.map_sdefn().key_identifier, pending);
+    case XTypes::TI_PLAIN_MAP_LARGE:
+      return complete_ti_ready(*ti.map_ldefn().element_identifier, pending) &&
+        complete_ti_ready(*ti.map_ldefn().key_identifier, pending);
+    default:
+      return !pending.count(ti);
+    }
+  }
+
+  // True if every identifier complete_to_minimal_type_object looks up has been converted
+  bool minimal_dependencies_ready(const XTypes::CompleteTypeObject& cto,
+                                  const XTypes::TypeIdentifierSet& pending)
+  {
+    switch (cto.kind) {
+    case XTypes::TK_STRUCTURE:
+      if (!complete_ti_ready(cto.struct_type.header.base_type, pending)) {
+        return false;
+      }
+      for (CORBA::ULong i = 0; i < cto.struct_type.member_seq.length(); ++i) {
+        if (!complete_ti_ready(cto.struct_type.member_seq[i].common.member_type_id, pending)) {
+          return false;
+        }
+      }
+      return true;
+    case XTypes::TK_UNION:
+      if (!complete_ti_ready(cto.union_type.discriminator.common.type_id, pending)) {
+        return false;
+      }
+      for (CORBA::ULong i = 0; i < cto.union_type.member_seq.length(); ++i) {
+        if (!complete_ti_ready(cto.union_type.member_seq[i].common.type_id, pending)) {
+          return false;
+        }
+      }
+      return true;
+    case XTypes::TK_ANNOTATION:
+      for (CORBA::ULong i = 0; i < cto.annotation_type.member_seq.length(); ++i) {
+        if (!complete_ti_ready(cto.annotation_type.member_seq[i].common.member_type_id, pending)) {
+          return false;
+        }
+      }
+      return true;
+    case XTypes::TK_ALIAS:
+      return complete_ti_ready(cto.alias_type.body.common.related_type, pending);
+    case XTypes::TK_SEQUENCE:
+      return complete_ti_ready(cto.sequence_type.element.common.type, pending);
+    case XTypes::TK_ARRAY:
+      return complete_ti_ready(cto.array_type.element.common.type, pending);
+    case XTypes::TK_MAP:
+      return complete_ti_ready(cto.map_type.key.common.type, pending) &&
+        complete_ti_ready(cto.map_type.element.common.type, pending);
+    default:
+      return true;
+    }
+  }
+
+  String complete_type_name(const XTypes::CompleteTypeObject& cto)
+  {
+    switch (cto.kind) {
+    case XTypes::TK_STRUCTURE:
+      return cto.struct_type.header.detail.type_name.c_str();
+    case XTypes::TK_UNION:
+      return cto.union_type.header.detail.type_name.c_str();
+    case XTypes::TK_ALIAS:
+      return cto.alias_type.header.detail.type_name.c_str();
+    case XTypes::TK_ENUM:
+      return cto.enumerated_type.header.detail.type_name.c_str();
+    case XTypes::TK_BITMASK:
+      return cto.bitmask_type.header.detail.type_name.c_str();
+    case XTypes::TK_ANNOTATION:
+      return cto.annotation_type.header.annotation_name.c_str();
+    default:
+      return "";
+    }
+  }
+
   void log_ti_not_found(const char* method_name, const char* name, const XTypes::TypeIdentifier& ti)
   {
     if (log_level >= LogLevel::Error) {
@@ -70,7 +157,8 @@ namespace {
 
   void add_complete_to_minimal_type_identifier_map(
     const XTypes::TypeLookupService_rch& tls,
-    const XTypes::TypeMap& complete_type_map)
+    const XTypes::TypeMap& complete_type_map,
+    const char* topic_type_name)
   {
     if (complete_type_map.empty()) {
       return;
@@ -79,7 +167,7 @@ namespace {
     XTypes::TypeLookupService converter;
     converter.add(complete_type_map.begin(), complete_type_map.end());
 
-    std::set<XTypes::TypeIdentifier> pending;
+    XTypes::TypeIdentifierSet pending;
     for (XTypes::TypeMap::const_iterator pos = complete_type_map.begin();
          pos != complete_type_map.end(); ++pos) {
       pending.insert(pos->first);
@@ -89,11 +177,16 @@ namespace {
     while (!pending.empty()) {
       bool progress = false;
 
-      for (std::set<XTypes::TypeIdentifier>::iterator pos = pending.begin();
+      for (XTypes::TypeIdentifierSet::iterator pos = pending.begin();
            pos != pending.end(); ) {
         const XTypes::TypeMap::const_iterator complete = complete_type_map.find(*pos);
         if (complete == complete_type_map.end()) {
           pending.erase(pos++);
+          continue;
+        }
+
+        if (!minimal_dependencies_ready(complete->second.complete, pending)) {
+          ++pos;
           continue;
         }
 
@@ -118,7 +211,25 @@ namespace {
       }
 
       if (!progress) {
-        return;
+        // Keep the mappings converted so far; recursive types can't be converted yet
+        if (log_level >= LogLevel::Warning) {
+          String names;
+          unsigned anonymous = 0;
+          for (XTypes::TypeIdentifierSet::const_iterator pos = pending.begin();
+               pos != pending.end(); ++pos) {
+            const String name = complete_type_name(complete_type_map.find(*pos)->second.complete);
+            if (name.empty()) {
+              ++anonymous;
+            } else {
+              names += (names.empty() ? "" : ", ") + name;
+            }
+          }
+          ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: TypeSupportImpl::add_types: "
+                     "could not convert complete TypeObjects to minimal for topic type \"%C\": "
+                     "%C and %u anonymous types\n",
+                     topic_type_name, names.c_str(), anonymous));
+        }
+        break;
       }
     }
 
@@ -187,7 +298,7 @@ void TypeSupportImpl::add_types(const XTypes::TypeLookupService_rch& tls) const
   tls->add(minTypeMap.begin(), minTypeMap.end());
   const TypeMap& comTypeMap = getCompleteTypeMap();
   tls->add(comTypeMap.begin(), comTypeMap.end());
-  add_complete_to_minimal_type_identifier_map(tls, comTypeMap);
+  add_complete_to_minimal_type_identifier_map(tls, comTypeMap, name());
 
   if (TheServiceParticipant->type_object_encoding() != Service_Participant::Encoding_Normal) {
     // In this mode we need to be able to recognize TypeIdentifiers received over the network
