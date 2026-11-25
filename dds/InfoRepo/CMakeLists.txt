@@ -37,7 +37,6 @@ add_library(OpenDDS_Federator
   FederatorConfig.cpp
   FederatorManagerImpl.cpp
   FederatorManagerImpl_updates.cpp
-  InfoRepoMulticastResponder.cpp
 )
 target_sources(OpenDDS_Federator
   PUBLIC FILE_SET HEADERS BASE_DIRS "${OPENDDS_SOURCE_DIR}" FILES
