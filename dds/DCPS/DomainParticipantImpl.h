@@ -580,14 +580,12 @@ private:
     void add_adjust(OpenDDS::DCPS::DataWriterImpl* writer);
     void remove_adjust();
     void execute(const MonotonicTimePoint& now);
-    virtual void dispatch(const MonotonicTimePoint& tv) = 0;
+    virtual void dispatch(const MonotonicTimePoint& tv, const TimeDuration& interval) = 0;
     virtual void cancel() = 0;
 
   protected:
     DomainParticipantImpl& impl_;
     const DDS::LivelinessQosPolicyKind kind_;
-
-    TimeDuration interval () const { return interval_; }
 
     virtual void schedule(const TimeDuration& interval) = 0;
 
@@ -602,7 +600,7 @@ private:
   class AutomaticLivelinessTimer : public LivelinessTimer {
   public:
     AutomaticLivelinessTimer(DomainParticipantImpl& impl);
-    virtual void dispatch(const MonotonicTimePoint& tv);
+    virtual void dispatch(const MonotonicTimePoint& tv, const TimeDuration& interval);
 
     void cancel()
     {
@@ -622,7 +620,7 @@ private:
   class ParticipantLivelinessTimer : public LivelinessTimer {
   public:
     ParticipantLivelinessTimer(DomainParticipantImpl& impl);
-    virtual void dispatch(const MonotonicTimePoint& tv);
+    virtual void dispatch(const MonotonicTimePoint& tv, const TimeDuration& interval);
 
     void cancel()
     {
