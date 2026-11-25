@@ -64,7 +64,11 @@ DDS::ReturnCode_t DynamicTypeImpl::get_member_by_name(DDS::DynamicTypeMember_ptr
 #if OPENDDS_CONFIG_IDL_MAP
 DDS::ReturnCode_t DynamicTypeImpl::get_all_members_by_name(DDS::DynamicTypeMembersByName& members)
 {
-  members = members_by_name_;
+  members.clear();
+  for (DynamicTypeMembersByName::const_iterator it = members_by_name_.begin();
+       it != members_by_name_.end(); ++it) {
+    members.insert(std::make_pair(it->first.c_str(), it->second));
+  }
   return DDS::RETCODE_OK;
 }
 #else
@@ -175,7 +179,8 @@ void DynamicTypeImpl::insert_dynamic_member(DDS::DynamicTypeMember_ptr dtm)
   if (d->id() != MEMBER_ID_INVALID) {
     members_by_id_.insert(std::make_pair(d->id(), DDS::DynamicTypeMember::_duplicate(dtm)));
   }
-  members_by_name_.insert(std::make_pair(d->name(), DDS::DynamicTypeMember::_duplicate(dtm)));
+  const CORBA::String_var name = d->name();
+  members_by_name_.insert(std::make_pair(name.in(), DDS::DynamicTypeMember::_duplicate(dtm)));
 }
 
 void DynamicTypeImpl::clear()
