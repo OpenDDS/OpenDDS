@@ -17,6 +17,7 @@
 #include "Qos_Helper.h"
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
+#include "Serializer.h"
 #include "ServiceEventDispatcher.h"
 #include "StaticDiscovery.h"
 #include "ThreadStatusManager.h"
@@ -2538,6 +2539,21 @@ Service_Participant::ConfigReaderListener::on_data_available(InternalDataReader_
 #endif
       } else if (p.key() == COMMON_DCPS_LOG_LEVEL) {
         log_level.set_from_string(p.value().c_str());
+      } else if (p.key() == COMMON_DCPS_MAX_NESTING_DEPTH) {
+        DDS::Int64 value = 0;
+        if (convertToInteger(p.value(), value) && value > 0
+            && value <= static_cast<DDS::Int64>(std::numeric_limits<DDS::UInt32>::max())) {
+          Serializer::max_nesting_depth(static_cast<unsigned>(value));
+        } else {
+          if (log_level >= LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING,
+                       "(%P|%t) WARNING: ConfigReaderListener::on_data_available: "
+                       "configured value %C for %C is invalid, using %u\n",
+                       p.value().c_str(), COMMON_DCPS_MAX_NESTING_DEPTH,
+                       Serializer::DEFAULT_MAX_NESTING_DEPTH));
+          }
+          Serializer::max_nesting_depth(Serializer::DEFAULT_MAX_NESTING_DEPTH);
+        }
       } else if (p.key() == COMMON_DCPS_PENDING_TIMEOUT) {
         ACE_GUARD(ACE_Thread_Mutex, guard, service_participant_.cached_config_mutex_);
         service_participant_.pending_timeout_ =

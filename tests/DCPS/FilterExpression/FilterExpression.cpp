@@ -220,6 +220,30 @@ bool testParsing() {
     std::cout << e.what() << std::endl;
   }
 
+  // Expressions nested beyond DCPSMaxNestingDepth are rejected before parsing
+  const unsigned max_depth = Serializer::max_nesting_depth();
+  std::string parens = "x = 1";
+  std::string chain = "x = 1";
+  for (unsigned i = 0; i <= max_depth; ++i) {
+    parens = "(" + parens + ")";
+    chain += " AND x = 1";
+  }
+  const std::string too_deep[] = {parens, chain, "x = ''' AND " + chain};
+  for (size_t i = 0; i < sizeof too_deep / sizeof too_deep[0]; ++i) {
+    try {
+      FilterEvaluator eval(too_deep[i].c_str(), false);
+      std::cout << "ERROR: expression " << i << " exceeding the nesting limit was accepted" << std::endl;
+      ok = false;
+    } catch (const std::exception&) {
+    }
+  }
+  try {
+    FilterEvaluator eval(parens.substr(1, parens.size() - 2).c_str(), false);
+  } catch (const std::exception& e) {
+    std::cout << "ERROR: expression within the nesting limit was rejected: " << e.what() << std::endl;
+    ok = false;
+  }
+
   const char* inttests[] = {"3", "+4", "-5", "1348907505135", "0x135135",
     "0X43514651", "0xABCD", "0x132fabe"};
   ok &= parserTest<FilterExpressionGrammar::IntVal>(inttests);

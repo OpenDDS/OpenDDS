@@ -58,6 +58,9 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl()
   , strm_(0, encoding_)
   , item_count_(ITEM_COUNT_INVALID)
   , item_count_limit_(ACE_UINT32_MAX)
+  , depth_(1)
+  , cached_elem_index_(ITEM_COUNT_INVALID)
+  , cached_elem_rpos_(0)
 {}
 
 DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
@@ -73,6 +76,9 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
   , strm_(chain_, encoding_)
   , item_count_(ITEM_COUNT_INVALID)
   , item_count_limit_(item_count_limit)
+  , depth_(1)
+  , cached_elem_index_(ITEM_COUNT_INVALID)
+  , cached_elem_rpos_(0)
 {
   if (!chain_) {
     throw std::runtime_error("DynamicDataXcdrReadImpl requires a message block");
@@ -95,6 +101,9 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::Dyn
   , strm_(chain_, encoding_)
   , item_count_(ITEM_COUNT_INVALID)
   , item_count_limit_(item_count_limit)
+  , depth_(ser.nesting_depth() + 1)
+  , cached_elem_index_(ITEM_COUNT_INVALID)
+  , cached_elem_rpos_(0)
 {
   if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
       encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
@@ -105,6 +114,7 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::Dyn
   }
 
   strm_.rdstate(align_state_);
+  strm_.nesting_depth(depth_);
 }
 
 DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type,
@@ -118,6 +128,9 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::Dyn
   , strm_(chain_, encoding_)
   , item_count_(ITEM_COUNT_INVALID)
   , item_count_limit_(ACE_UINT32_MAX)
+  , depth_(ser.nesting_depth() + 1)
+  , cached_elem_index_(ITEM_COUNT_INVALID)
+  , cached_elem_rpos_(0)
 {
   if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
       encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
@@ -125,6 +138,7 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::Dyn
   }
 
   strm_.rdstate(align_state_);
+  strm_.nesting_depth(depth_);
 }
 
 DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(const DynamicDataXcdrReadImpl& other)
@@ -164,6 +178,9 @@ void DynamicDataXcdrReadImpl::copy(const DynamicDataXcdrReadImpl& other)
   type_ = other.type_;
   item_count_ = other.item_count_;
   item_count_limit_ = other.item_count_limit_;
+  depth_ = other.depth_;
+  cached_elem_index_ = other.cached_elem_index_;
+  cached_elem_rpos_ = other.cached_elem_rpos_;
 }
 
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::set_descriptor(MemberId, DDS::MemberDescriptor*)
@@ -837,7 +854,23 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::return_loaned_value(DDS::DynamicData_
 
 DDS::DynamicData_ptr DynamicDataXcdrReadImpl::clone()
 {
-  return new DynamicDataXcdrReadImpl(chain_, strm_.encoding(), type_, extent_);
+  DynamicDataXcdrReadImpl* const dd = new DynamicDataXcdrReadImpl(chain_, strm_.encoding(), type_, extent_);
+  dd->depth_ = depth_;
+  dd->strm_.nesting_depth(depth_);
+  return dd;
+}
+
+bool DynamicDataXcdrReadImpl::can_nest() const
+{
+  if (depth_ < DCPS::Serializer::max_nesting_depth()) {
+    return true;
+  }
+  if (DCPS::DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DynamicDataXcdrReadImpl::can_nest: "
+               "input exceeds the maximum nesting depth of %u\n",
+               DCPS::Serializer::max_nesting_depth()));
+  }
+  return false;
 }
 
 template<typename ValueType>
@@ -1180,12 +1213,7 @@ bool DynamicDataXcdrReadImpl::skip_to_sequence_element(MemberId id, DDS::Dynamic
     } else if (!get_index_from_id(id, index, length)) {
       return false;
     }
-    for (ACE_CDR::ULong i = 0; i < index; ++i) {
-      if (!skip_member(elem_type)) {
-        return false;
-      }
-    }
-    return true;
+    return skip_elements(index, elem_type, !skip_all);
   }
 }
 
@@ -1221,13 +1249,32 @@ bool DynamicDataXcdrReadImpl::skip_to_array_element(MemberId id, DDS::DynamicTyp
     } else if (!get_index_from_id(id, index, length)) {
       return false;
     }
-    for (ACE_CDR::ULong i = 0; i < index; ++i) {
-      if (!skip_member(elem_type)) {
-        return false;
-      }
-    }
-    return true;
+    return skip_elements(index, elem_type, !skip_all);
   }
+}
+
+bool DynamicDataXcdrReadImpl::skip_elements(ACE_CDR::ULong index, DDS::DynamicType_ptr elem_type,
+                                            bool use_cache)
+{
+  ACE_CDR::ULong i = 0;
+  // Resume from the last located element so reading elements in order is linear
+  if (use_cache && cached_elem_index_ != ITEM_COUNT_INVALID && cached_elem_index_ <= index &&
+      cached_elem_rpos_ >= strm_.rpos()) {
+    if (!strm_.skip(cached_elem_rpos_ - strm_.rpos())) {
+      return false;
+    }
+    i = cached_elem_index_;
+  }
+  for (; i < index; ++i) {
+    if (!skip_member(elem_type)) {
+      return false;
+    }
+  }
+  if (use_cache) {
+    cached_elem_index_ = index;
+    cached_elem_rpos_ = strm_.rpos();
+  }
+  return true;
 }
 
 bool DynamicDataXcdrReadImpl::skip_to_map_element(MemberId id)
@@ -1386,6 +1433,7 @@ void DynamicDataXcdrReadImpl::setup_stream(ACE_Message_Block* chain)
   if (reset_align_state_) {
     strm_.rdstate(align_state_);
   }
+  strm_.nesting_depth(depth_);
 }
 
 template<TypeKind ValueTypeKind, typename ValueType>
@@ -1731,6 +1779,9 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_wstring_value(ACE_CDR::WChar*& va
 
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_ptr& value, MemberId id)
 {
+  if (!can_nest()) {
+    return DDS::RETCODE_ERROR;
+  }
   ScopedChainManager chain_manager(*this);
 
   const TypeKind tk = type_->get_kind();
@@ -1876,6 +1927,9 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
 
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_map_key_i(DDS::DynamicData_ptr& key, DDS::MemberId id)
 {
+  if (!can_nest()) {
+    return DDS::RETCODE_ERROR;
+  }
   if (type_->get_kind() != TK_MAP) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
@@ -1897,6 +1951,9 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_map_key_i(DDS::DynamicData_ptr& k
 
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_map_value_i(DDS::DynamicData_ptr& value, DDS::MemberId id)
 {
+  if (!can_nest()) {
+    return DDS::RETCODE_ERROR;
+  }
   if (type_->get_kind() != TK_MAP) {
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
@@ -3052,6 +3109,9 @@ bool DynamicDataXcdrReadImpl::skip_collection_member(DDS::DynamicType_ptr coll_t
 
 bool DynamicDataXcdrReadImpl::skip_aggregated_member(DDS::DynamicType_ptr member_type)
 {
+  if (!can_nest()) {
+    return false;
+  }
   DynamicDataXcdrReadImpl nested_data(strm_, member_type);
   const size_t start = nested_data.strm_.rpos();
   if (!nested_data.skip_all()) {
@@ -3075,6 +3135,7 @@ bool DynamicDataXcdrReadImpl::skip_aggregated_member(DDS::DynamicType_ptr member
   ACE_Message_Block* const result_chain = nested_data.strm_.current()->duplicate();
   strm_ = DCPS::Serializer(result_chain, encoding_);
   strm_.rdstate(curr_state);
+  strm_.nesting_depth(depth_);
   chains_to_release.push_back(result_chain);
   return true;
 }

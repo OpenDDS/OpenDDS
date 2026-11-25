@@ -1965,3 +1965,40 @@ TEST(dds_DCPS_XTypes, compute_dependencies)
   const TypeIdentifier& x = *dependencies.begin();
   ASSERT_EQ(x, make_scc_id_or_default(ti));
 }
+
+namespace {
+  TypeIdentifier nested_sequence_type_identifier(unsigned depth)
+  {
+    TypeIdentifier ti(TK_INT32);
+    for (unsigned i = 0; i < depth; ++i) {
+      ti = TypeIdentifier(TI_PLAIN_SEQUENCE_SMALL,
+        PlainSequenceSElemDefn(PlainCollectionHeader(EK_BOTH, 0), 0, ti));
+    }
+    return ti;
+  }
+
+  bool round_trip(const TypeIdentifier& ti)
+  {
+    const Encoding encoding(Encoding::KIND_XCDR2);
+    ACE_Message_Block mb(serialized_size(encoding, ti));
+    {
+      Serializer ser(&mb, encoding);
+      if (!(ser << ti)) {
+        return false;
+      }
+    }
+    Serializer ser(&mb, encoding);
+    TypeIdentifier result;
+    return (ser >> result) && result == ti;
+  }
+}
+
+TEST(dds_DCPS_XTypes_TypeObject, TypeIdentifierNestingDepth)
+{
+  const unsigned prev_max = Serializer::max_nesting_depth();
+  Serializer::max_nesting_depth(10);
+  // Each plain sequence and the element type count as a level
+  EXPECT_TRUE(round_trip(nested_sequence_type_identifier(9)));
+  EXPECT_FALSE(round_trip(nested_sequence_type_identifier(10)));
+  Serializer::max_nesting_depth(prev_max);
+}

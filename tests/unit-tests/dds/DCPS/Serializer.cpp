@@ -1232,3 +1232,29 @@ TEST(dds_DCPS_Serializer, read_parameter_id_xcdr2_walk_past_end)
     EXPECT_FALSE(extra_ok);
   }
 }
+
+TEST(dds_DCPS_Serializer, ScopedNesting)
+{
+  const unsigned prev_max = Serializer::max_nesting_depth();
+  Serializer::max_nesting_depth(2);
+  {
+    ACE_Message_Block mb(8);
+    Serializer ser(&mb, Encoding::KIND_XCDR2);
+    {
+      const Serializer::ScopedNesting one(ser);
+      EXPECT_TRUE(one.valid());
+      {
+        const Serializer::ScopedNesting two(ser);
+        EXPECT_TRUE(two.valid());
+        EXPECT_EQ(2u, ser.nesting_depth());
+        {
+          const Serializer::ScopedNesting three(ser);
+          EXPECT_FALSE(three.valid());
+          EXPECT_FALSE(ser.good_bit());
+        }
+      }
+    }
+    EXPECT_EQ(0u, ser.nesting_depth());
+  }
+  Serializer::max_nesting_depth(prev_max);
+}

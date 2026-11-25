@@ -14,6 +14,8 @@
 #include <dds/DCPS/XTypes/DynamicDataImpl.h>
 #include <dds/DCPS/XTypes/DynamicDataFactory.h>
 #include <dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h>
+#include <dds/DCPS/XTypes/DynamicSample.h>
+#include <dds/DCPS/Message_Block_Ptr.h>
 
 #include <gtest/gtest.h>
 
@@ -3701,4 +3703,99 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, MapRoundTrip)
     }
   }
 }
+
+namespace {
+  DDS::DynamicType_var node_dynamic_type(XTypes::TypeLookupService& tls)
+  {
+    const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::Node_xtag>();
+    const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::Node_xtag>();
+    tls.add(type_map.begin(), type_map.end());
+    return tls.complete_to_dynamic(type_map.find(ti)->second.complete, DCPS::GUID_t());
+  }
+
+  // Each level of the chain adds a nested Node and NodeSeq
+  void make_node_chain(Node& node, unsigned levels)
+  {
+    Node* current = &node;
+    for (unsigned i = 0; i < levels; ++i) {
+      current->value = i;
+      current->children.length(1);
+      current = &current->children[0];
+    }
+    current->value = levels;
+  }
+
+  struct NestingDepthResult {
+    bool generated;
+    bool dynamic;
+  };
+
+  NestingDepthResult read_node_chain(DDS::DynamicType_ptr type, unsigned levels)
+  {
+    Node node;
+    make_node_chain(node, levels);
+    ACE_Message_Block mb(DCPS::serialized_size(xcdr2, node));
+    DCPS::Serializer out(&mb, xcdr2);
+    EXPECT_TRUE(out << node);
+
+    NestingDepthResult result;
+    DCPS::Message_Block_Ptr generated_mb(mb.duplicate());
+    DCPS::Serializer generated_ser(generated_mb.get(), xcdr2);
+    Node generated_node;
+    result.generated = generated_ser >> generated_node;
+
+    DCPS::Message_Block_Ptr dynamic_mb(mb.duplicate());
+    DCPS::Serializer dynamic_ser(dynamic_mb.get(), xcdr2);
+    DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(type);
+    XTypes::DynamicSample sample(data);
+    result.dynamic = sample.deserialize(dynamic_ser);
+    return result;
+  }
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, NestingDepthLimit)
+{
+  XTypes::TypeLookupService tls;
+  const DDS::DynamicType_var type = node_dynamic_type(tls);
+
+  const unsigned prev_max = DCPS::Serializer::max_nesting_depth();
+  // 9 levels need 20 (the top-level Node, then a NodeSeq and Node per level, then an empty NodeSeq)
+  DCPS::Serializer::max_nesting_depth(20);
+  const NestingDepthResult within = read_node_chain(type, 9);
+  EXPECT_TRUE(within.generated);
+  EXPECT_TRUE(within.dynamic);
+  const NestingDepthResult beyond = read_node_chain(type, 10);
+  EXPECT_FALSE(beyond.generated);
+  EXPECT_FALSE(beyond.dynamic);
+  DCPS::Serializer::max_nesting_depth(prev_max);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, ElementsInAnyOrder)
+{
+  XTypes::TypeLookupService tls;
+  const DDS::DynamicType_var type = node_dynamic_type(tls);
+
+  Node node;
+  node.value = 100;
+  node.children.length(5);
+  for (CORBA::ULong i = 0; i < node.children.length(); ++i) {
+    node.children[i].value = static_cast<CORBA::Long>(i * 10);
+  }
+  ACE_Message_Block mb(DCPS::serialized_size(xcdr2, node));
+  DCPS::Serializer out(&mb, xcdr2);
+  ASSERT_TRUE(out << node);
+
+  XTypes::DynamicDataXcdrReadImpl data(&mb, xcdr2, type);
+  DDS::DynamicData_var children;
+  ASSERT_EQ(DDS::RETCODE_OK, data.get_complex_value(children, 1));
+  const CORBA::ULong order[] = {3, 1, 4, 4, 0, 2, 3};
+  for (size_t i = 0; i < sizeof order / sizeof order[0]; ++i) {
+    DDS::DynamicData_var child;
+    ASSERT_EQ(DDS::RETCODE_OK, children->get_complex_value(child, order[i]));
+    CORBA::Long value = -1;
+    EXPECT_EQ(DDS::RETCODE_OK, child->get_int32_value(value, 0));
+    EXPECT_EQ(static_cast<CORBA::Long>(order[i] * 10), value);
+  }
+}
+
 #endif // OPENDDS_SAFETY_PROFILE
