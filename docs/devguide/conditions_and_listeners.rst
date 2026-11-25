@@ -586,6 +586,11 @@ A common "gotcha" when using ``set_listener`` is that the listener is not invoke
 Instead, the listener will be invoked for the next status change.
 Consequently, usages of ``set_listener`` should 1) invoke the listener manually after calling ``set_listener`` and 2) ensure that the listener methods are thread safe.
 
+Listeners are reference counted, and OpenDDS holds its own reference to a listener while invoking it.
+A listener operation that has already started on another thread may still be running after ``set_listener`` replaces that listener, or after the entity is deleted.
+Hold listeners in a ``_var`` (as in the examples above) or another reference-counting smart pointer, and never ``delete`` a listener directly.
+Listener operations must not depend on application state that is destroyed when the listener is replaced or the entity is deleted.
+
 The following sections define the different listener interfaces.
 For more details on the individual statuses, see :ref:`conditions_and_listeners--communication-status-types`.
 
