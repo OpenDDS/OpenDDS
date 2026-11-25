@@ -3,7 +3,10 @@
 
 #include <gtest/gtest.h>
 
+#include <cmath>
 #include <cstring>
+#include <limits>
+#include <string>
 
 using namespace OpenDDS::DCPS;
 
@@ -1232,3 +1235,131 @@ TEST(dds_DCPS_Serializer, read_parameter_id_xcdr2_walk_past_end)
     EXPECT_FALSE(extra_ok);
   }
 }
+
+// IBM double-double long double isn't converted to binary128
+#ifndef OPENDDS_DOUBLE_DOUBLE_LONG_DOUBLE
+TEST(dds_DCPS_Serializer, Float128WireFormat)
+{
+  const unsigned char one[16] = {0x3f, 0xff};
+  const unsigned char minus_two_and_a_half[16] = {0xc0, 0x00, 0x40};
+  const unsigned char* const expected[] = {one, minus_two_and_a_half};
+  ACE_CDR::LongDouble values[2];
+  ACE_CDR_LONG_DOUBLE_ASSIGNMENT(values[0], 1.0L);
+  ACE_CDR_LONG_DOUBLE_ASSIGNMENT(values[1], -2.5L);
+
+  for (size_t i = 0; i < 2; ++i) {
+    for (int e = 0; e < 2; ++e) {
+      const Encoding encoding(Encoding::KIND_XCDR2, e ? ENDIAN_BIG : ENDIAN_LITTLE);
+      ACE_Message_Block mb(float128_cdr_size);
+      Serializer out(&mb, encoding);
+      ASSERT_TRUE(out << values[i]);
+      for (size_t b = 0; b < float128_cdr_size; ++b) {
+        EXPECT_EQ(expected[i][e ? b : 15 - b], static_cast<unsigned char>(mb.rd_ptr()[b]));
+      }
+
+      Serializer in(&mb, encoding);
+      ACE_CDR::LongDouble value = ACE_CDR_LONG_DOUBLE_INITIALIZER;
+      ASSERT_TRUE(in >> value);
+      EXPECT_EQ(static_cast<long double>(values[i]), static_cast<long double>(value));
+    }
+  }
+}
+#endif
+
+#if defined OPENDDS_X87_LONG_DOUBLE && ACE_SIZEOF_LONG_DOUBLE == 16
+namespace {
+
+// x87 is little-endian, so binary128 is too
+ACE_CDR::LongDouble from_big_endian_binary128(const unsigned char (&be)[16])
+{
+  char bytes[16];
+  for (size_t i = 0; i < 16; ++i) {
+    bytes[i] = static_cast<char>(be[15 - i]);
+  }
+  ACE_CDR::LongDouble value = ACE_CDR_LONG_DOUBLE_INITIALIZER;
+  binary128_to_longdouble(bytes, value);
+  return value;
+}
+
+std::string binary128_to_hex(const char* bytes)
+{
+  static const char hex[] = "0123456789abcdef";
+  std::string result;
+  for (size_t i = 0; i < 16; ++i) {
+    const unsigned char byte = static_cast<unsigned char>(bytes[15 - i]);
+    result += hex[byte >> 4];
+    result += hex[byte & 0xf];
+  }
+  return result;
+}
+
+}
+
+TEST(dds_DCPS_Serializer, Float128X87Conversion)
+{
+  // Fraction bit k of a big-endian binary128 is worth 2^(k - 112)
+  struct Case {
+    unsigned char exp_hi;
+    unsigned char exp_lo;
+    int bits[3];
+    long double expected;
+  };
+  const Case cases[] = {
+    {0x3f, 0xff, {48, -1, -1}, 1.0L}, // Tie, rounds to even
+    {0x3f, 0xff, {49, 48, -1}, 1.0L + std::ldexp(1.0L, -62)}, // Tie, rounds up to even
+    {0x3f, 0xff, {48, 0, -1}, 1.0L + std::ldexp(1.0L, -63)}, // Above the tie
+    {0xbf, 0xff, {111, -1, -1}, -1.5L},
+    {0x7f, 0xff, {-1, -1, -1}, std::numeric_limits<long double>::infinity()},
+  };
+  for (size_t i = 0; i < sizeof cases / sizeof cases[0]; ++i) {
+    unsigned char be[16] = {cases[i].exp_hi, cases[i].exp_lo};
+    for (size_t b = 0; b < 3 && cases[i].bits[b] >= 0; ++b) {
+      be[15 - cases[i].bits[b] / 8] |= 1 << (cases[i].bits[b] % 8);
+    }
+    EXPECT_EQ(cases[i].expected, from_big_endian_binary128(be)) << "case " << i;
+  }
+
+  // Rounding up carries into the exponent
+  unsigned char all_ones[16] = {0x3f, 0xff};
+  unsigned char subnormal_all_ones[16] = {0};
+  for (size_t b = 2; b < 16; ++b) {
+    all_ones[b] = subnormal_all_ones[b] = 0xff;
+  }
+  EXPECT_EQ(2.0L, from_big_endian_binary128(all_ones));
+  EXPECT_EQ(std::numeric_limits<long double>::min(), from_big_endian_binary128(subnormal_all_ones));
+
+  // Any NaN payload stays a NaN
+  const unsigned char nan[16] = {0x7f, 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+  const long double nan_value = from_big_endian_binary128(nan);
+  EXPECT_NE(nan_value, nan_value);
+
+  // x87 values convert to binary128 exactly
+  const long double exact[] = {
+    1.0L / 3, -std::numeric_limits<long double>::max(),
+    std::numeric_limits<long double>::denorm_min(), 0.0L,
+  };
+  for (size_t i = 0; i < sizeof exact / sizeof exact[0]; ++i) {
+    char bytes[16];
+    longdouble_to_binary128(exact[i], bytes);
+    ACE_CDR::LongDouble round_trip = 0;
+    binary128_to_longdouble(bytes, round_trip);
+    EXPECT_EQ(exact[i], round_trip) << "value " << i;
+  }
+
+  // A pseudo-denormal has the value of the smallest normal
+  long double odd;
+  unsigned char* const odd_bytes = reinterpret_cast<unsigned char*>(&odd);
+  std::memset(odd_bytes, 0, sizeof odd);
+  odd_bytes[7] = 0x80;
+  char bytes[16];
+  longdouble_to_binary128(odd, bytes);
+  EXPECT_EQ("00010000000000000000000000000000", binary128_to_hex(bytes));
+
+  // An unnormal (0.5 without the integer bit) is invalid on x87, so it's a NaN
+  odd_bytes[7] = 0x40;
+  odd_bytes[8] = 0xff;
+  odd_bytes[9] = 0x3f;
+  longdouble_to_binary128(odd, bytes);
+  EXPECT_EQ("7fff8000000000000000000000000000", binary128_to_hex(bytes));
+}
+#endif

@@ -26,17 +26,11 @@ const DCPS::Encoding xcdr1(DCPS::Encoding::KIND_XCDR1, DCPS::ENDIAN_BIG);
 
 void set_float128_value(ACE_CDR::LongDouble& a)
 {
-#if defined(ACE_BIG_ENDIAN) && ACE_BIG_ENDIAN != 0
-  unsigned char value[] = { 0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
-#else
-  unsigned char value[] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0xff,0x3f };
-#endif
-
-#if ACE_SIZEOF_LONG_DOUBLE == 16
-  ACE_OS::memcpy((unsigned char*)&a, (unsigned char*)value, 16);
-#else
-  ACE_OS::memcpy((unsigned char*)a.ld, (unsigned char*)value, 16);
-#endif
+  // The float_128 wire bytes in this file are binary128 1.0, read as the Serializer would
+  char one[DCPS::float128_cdr_size] = {0};
+  one[DCPS::ENDIAN_NATIVE == DCPS::ENDIAN_BIG ? 0 : 15] = 0x3f;
+  one[DCPS::ENDIAN_NATIVE == DCPS::ENDIAN_BIG ? 1 : 14] = static_cast<char>(0xff);
+  DCPS::binary128_to_longdouble(one, a);
 }
 
 void check_float128(const ACE_CDR::LongDouble& a, const ACE_CDR::LongDouble& b)

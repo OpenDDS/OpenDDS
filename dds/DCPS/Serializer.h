@@ -40,8 +40,21 @@
 #include <ace/CDR_Base.h>
 #include <ace/CDR_Stream.h>
 
+#include <cfloat>
 #include <limits>
 #include <string>
+
+// ACE_CDR::LongDouble holds x87 extended precision, which is converted to and from
+// binary128 (CDR float128), or IBM double-double, which isn't converted
+#if LDBL_MANT_DIG == 64 && !defined ACE_BIG_ENDIAN
+#  if !defined NONNATIVE_LONGDOUBLE || !defined ACE_CDR_IMPLEMENT_WITH_NATIVE_DOUBLE
+#    define OPENDDS_X87_LONG_DOUBLE
+#  elif ACE_CDR_IMPLEMENT_WITH_NATIVE_DOUBLE != 1
+#    define OPENDDS_X87_LONG_DOUBLE
+#  endif
+#elif LDBL_MANT_DIG == 106 && ACE_SIZEOF_LONG_DOUBLE == 16
+#  define OPENDDS_DOUBLE_DOUBLE_LONG_DOUBLE
+#endif
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
@@ -107,6 +120,13 @@ const size_t xcdr1_pid_alignment = 4;
 /// Align "value" by "by" if it's not already
 OpenDDS_Dcps_Export
 void align(size_t& value, size_t by);
+
+/// Convert to and from IEEE 754 binary128 (the CDR float128 format) in host byte order
+OpenDDS_Dcps_Export
+void longdouble_to_binary128(const ACE_CDR::LongDouble& value, char* bytes);
+
+OpenDDS_Dcps_Export
+void binary128_to_longdouble(const char* bytes, ACE_CDR::LongDouble& value);
 
 /**
  * Represents the serialization rules. Used to construct a

@@ -22,6 +22,7 @@
 #include <ace/Log_Msg.h>
 
 #include <cstdlib>
+#include <cstring>
 #include <limits>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -54,6 +55,95 @@ void wstring_free(ACE_CDR::WChar* ptr)
 
 }
 #endif
+
+#ifdef OPENDDS_X87_LONG_DOUBLE
+namespace {
+
+const ACE_UINT64 low48 = (ACE_UINT64_LITERAL(1) << 48) - 1;
+const ACE_UINT64 x87_integer_bit = ACE_UINT64_LITERAL(1) << 63;
+const ACE_UINT64 x87_quiet_bit = ACE_UINT64_LITERAL(1) << 62;
+
+// x87 extended precision and binary128 share the sign, exponent, and bias;
+// x87 has an explicit integer bit, set for normal numbers, infinity, and NaN.
+void x87_to_binary128(const ACE_CDR::LongDouble& value, char* bytes)
+{
+  const unsigned char* const src = reinterpret_cast<const unsigned char*>(&value);
+  ACE_UINT64 sig;
+  std::memcpy(&sig, src, 8);
+  const ACE_UINT64 sign = src[9] >> 7;
+  ACE_UINT64 exp = src[8] | ((src[9] & 0x7f) << 8);
+  if (exp == 0 && (sig & x87_integer_bit)) {
+    exp = 1; // Pseudo-denormal, same value as with the minimum normal exponent
+  } else if (exp != 0 && !(sig & x87_integer_bit)) {
+    // Unnormal, pseudo-infinity, or pseudo-NaN: x87 treats these as invalid
+    exp = 0x7fff;
+    sig = x87_quiet_bit;
+  }
+  // Little-endian binary128: 64 low fraction bits, then sign, exponent, and 48 high fraction bits
+  const ACE_UINT64 frac = sig & ~x87_integer_bit;
+  const ACE_UINT64 lo = frac << 49;
+  const ACE_UINT64 hi = (sign << 63) | (exp << 48) | (frac >> 15);
+  std::memcpy(bytes, &lo, 8);
+  std::memcpy(bytes + 8, &hi, 8);
+}
+
+void binary128_to_x87(const char* bytes, ACE_CDR::LongDouble& value)
+{
+  ACE_UINT64 lo, hi;
+  std::memcpy(&lo, bytes, 8);
+  std::memcpy(&hi, bytes + 8, 8);
+  const unsigned int sign = static_cast<unsigned int>(hi >> 63);
+  unsigned int exp = static_cast<unsigned int>(hi >> 48) & 0x7fff;
+  // The top 63 of the 112 fraction bits, and the 49 below them
+  ACE_UINT64 sig = ((hi & low48) << 15) | (lo >> 49);
+  const ACE_UINT64 rest = lo & ((ACE_UINT64_LITERAL(1) << 49) - 1);
+  const ACE_UINT64 half = ACE_UINT64_LITERAL(1) << 48;
+
+  if (exp == 0x7fff) {
+    // Inf/NaN: truncate the payload and quiet any NaN
+    if (sig || rest) {
+      sig |= x87_quiet_bit;
+    }
+    sig |= x87_integer_bit;
+  } else {
+    // Round to x87's 63 fraction bits, ties to even
+    if (rest > half || (rest == half && (sig & 1))) {
+      ++sig;
+    }
+    if (sig == x87_integer_bit) {
+      ++exp; // Rounding carried into the exponent
+    } else if (exp != 0) {
+      sig |= x87_integer_bit;
+    }
+  }
+
+  unsigned char* const dst = reinterpret_cast<unsigned char*>(&value);
+  std::memset(dst, 0, sizeof value);
+  std::memcpy(dst, &sig, 8);
+  dst[8] = static_cast<unsigned char>(exp & 0xff);
+  dst[9] = static_cast<unsigned char>((sign << 7) | ((exp >> 8) & 0x7f));
+}
+
+}
+#endif
+
+void longdouble_to_binary128(const ACE_CDR::LongDouble& value, char* bytes)
+{
+#ifdef OPENDDS_X87_LONG_DOUBLE
+  x87_to_binary128(value, bytes);
+#else
+  std::memcpy(bytes, &value, float128_cdr_size);
+#endif
+}
+
+void binary128_to_longdouble(const char* bytes, ACE_CDR::LongDouble& value)
+{
+#ifdef OPENDDS_X87_LONG_DOUBLE
+  binary128_to_x87(bytes, value);
+#else
+  std::memcpy(&value, bytes, float128_cdr_size);
+#endif
+}
 
 String endianness_to_string(Endianness endianness)
 {

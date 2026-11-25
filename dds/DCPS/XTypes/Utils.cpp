@@ -17,7 +17,6 @@
 #  include <ace/OS_NS_string.h>
 
 #  include <algorithm>
-#  include <cfloat>
 #  include <limits>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -499,7 +498,7 @@ bool is_key(DDS::DynamicType_ptr type, const char* field)
 
 void canonicalize_float128_padding(ACE_CDR::LongDouble& value)
 {
-#if ACE_SIZEOF_LONG_DOUBLE == 16 && LDBL_MANT_DIG == 64 && !defined(ACE_BIG_ENDIAN)
+#ifdef OPENDDS_X87_LONG_DOUBLE
   char* const bytes = reinterpret_cast<char*>(&value);
   for (size_t i = 10; i != 16; ++i) {
     bytes[i] = 0;
@@ -520,30 +519,6 @@ namespace {
     } else {
       result = 0;
     }
-  }
-
-  const char* float128_bytes(const ACE_CDR::LongDouble& value)
-  {
-#if ACE_SIZEOF_LONG_DOUBLE == 16
-    return reinterpret_cast<const char*>(&value);
-#else
-    return value.ld;
-#endif
-  }
-
-  void float128_big_endian_bytes(const ACE_CDR::LongDouble& value, char bytes[16])
-  {
-    ACE_CDR::LongDouble canonical = value;
-    canonicalize_float128_padding(canonical);
-    const char* const src = float128_bytes(canonical);
-#if defined(ACE_BIG_ENDIAN)
-    ACE_OS::memcpy(bytes, src, 16);
-#else
-    for (size_t i = 0; i != 16; ++i) {
-      bytes[i] = src[15 - i];
-    }
-#endif
-
   }
 
   bool get_type_descriptor(DDS::TypeDescriptor_var& descriptor, DDS::DynamicType_ptr type)
@@ -638,11 +613,11 @@ namespace {
       if (left_rc != DDS::RETCODE_OK || right_rc != DDS::RETCODE_OK) {
         return false;
       }
-      char left_bytes[16];
-      char right_bytes[16];
-      float128_big_endian_bytes(left, left_bytes);
-      float128_big_endian_bytes(right, right_bytes);
-      return ACE_OS::memcmp(left_bytes, right_bytes, 16) == 0;
+      char left_bytes[DCPS::float128_cdr_size];
+      char right_bytes[DCPS::float128_cdr_size];
+      DCPS::longdouble_to_binary128(left, left_bytes);
+      DCPS::longdouble_to_binary128(right, right_bytes);
+      return ACE_OS::memcmp(left_bytes, right_bytes, DCPS::float128_cdr_size) == 0;
     }
     case TK_CHAR8: {
       CORBA::Char left = 0, right = 0;
