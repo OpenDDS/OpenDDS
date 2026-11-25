@@ -1564,33 +1564,48 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
   else if (where->second->useBIT() &&
            where->second->participants().size() == 1) {
     // The only participant left is the one we created to publish BITs.
-    // It can be removed now since no user participants exist in this domain,
-    // but it has to be removed on the Service Participant's reactor thread
-    // in order to make the locking work properly in delete_participant().
-    BIT_Cleanup_Handler* eh_impl = new BIT_Cleanup_Handler(this, domainId);
-    const ACE_Event_Handler_var eh = eh_impl;
-    TheServiceParticipant->reactor()->notify(eh.handler());
-
-    // Wait for that to be finished
-    using OpenDDS::DCPS::CvStatus_NoTimeout;
-    OpenDDS::DCPS::CvStatus cv_status = CvStatus_NoTimeout;
-    OpenDDS::DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-    while (cv_status == CvStatus_NoTimeout && !eh_impl->done_) {
-      cv_status = eh_impl->cv_.wait(thread_status_manager);
-    }
+    // It can be removed now since no user participants exist in this domain.
+    run_bit_cleanup(domainId);
   }
 #endif
 }
 
 #ifndef DDS_HAS_MINIMUM_BIT
+void TAO_DDS_DCPSInfo_i::run_bit_cleanup(DDS::DomainId_t domain)
+{
+  BIT_Cleanup_Handler* eh_impl = new BIT_Cleanup_Handler(this, domain);
+  const ACE_Event_Handler_var eh = eh_impl;
+  TheServiceParticipant->reactor()->notify(eh.handler());
+
+  // Wait for that to be finished
+  using OpenDDS::DCPS::CvStatus_NoTimeout;
+  OpenDDS::DCPS::CvStatus cv_status = CvStatus_NoTimeout;
+  OpenDDS::DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
+  while (cv_status == CvStatus_NoTimeout && !eh_impl->done_) {
+    cv_status = eh_impl->cv_.wait(thread_status_manager);
+  }
+}
+
 int TAO_DDS_DCPSInfo_i::BIT_Cleanup_Handler::handle_exception(ACE_HANDLE)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, parent_->lock_, 0);
 
-  const DCPS_IR_Domain_Map::iterator where = parent_->domains_.find(domain_);
+  if (domain_ == OpenDDS::DCPS::Service_Participant::ANY_DOMAIN) {
+    parent_->in_cleanup_all_built_in_topics_ = true;
+    const DCPS_IR_Domain_Map copy = parent_->domains_;
+    for (DCPS_IR_Domain_Map::const_iterator it = copy.begin(); it != copy.end(); ++it) {
+      it->second->cleanup_built_in_topics();
+    }
+    parent_->in_cleanup_all_built_in_topics_ = false;
+    parent_->domains_.clear();
 
-  if (where != parent_->domains_.end() && where->second->participants().size() == 1) {
-    where->second->cleanup_built_in_topics();
+  } else {
+    const DCPS_IR_Domain_Map::iterator where = parent_->domains_.find(domain_);
+    if (where != parent_->domains_.end() && where->second->participants().size() == 1) {
+      // Removing the BIT participant erases the domain from the map.
+      const OpenDDS::DCPS::RcHandle<DCPS_IR_Domain> domain = where->second;
+      domain->cleanup_built_in_topics();
+    }
   }
 
   done_ = true;
@@ -2555,26 +2570,11 @@ TAO_DDS_DCPSInfo_i::dump_to_string()
 void TAO_DDS_DCPSInfo_i::cleanup_all_built_in_topics()
 {
 #ifndef DDS_HAS_MINIMUM_BIT
-  DCPS_IR_Domain_Map copy;
-  {
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
-    if (domains_.empty() || in_cleanup_all_built_in_topics_) {
-      return;
-    }
-    copy = domains_;
-    in_cleanup_all_built_in_topics_ = true;
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
+  if (domains_.empty() || in_cleanup_all_built_in_topics_) {
+    return;
   }
-
-  for (DCPS_IR_Domain_Map::iterator it = copy.begin(); it != copy.end(); ++it) {
-    it->second->cleanup_built_in_topics();
-  }
-
-  {
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
-    in_cleanup_all_built_in_topics_ = false;
-    copy.clear();
-    domains_.clear();
-  }
+  run_bit_cleanup(OpenDDS::DCPS::Service_Participant::ANY_DOMAIN);
 #endif
 }
 
