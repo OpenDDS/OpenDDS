@@ -779,6 +779,145 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, Main_Test)
   }
 }
 
+namespace {
+  // The data_unavailable case that applies to the fragments stored by store_frags
+  enum DropCase { DROP_GAP, DROP_FRONT, DROP_BACK, DROP_CASES };
+
+  FragmentNumber frag_base(size_t i)
+  {
+    return FragmentNumber(10 * (i + 1));
+  }
+
+  // The first missing fragment of sample i, which is the one data_unavailable drops
+  FragmentNumber drop_target(size_t i)
+  {
+    return frag_base(i) + (i % DROP_CASES == DROP_FRONT ? 1 : 2);
+  }
+
+  void store_frags(TransportReassembly& tr, const GUID_t& pub_id, size_t i)
+  {
+    const SequenceNumber msg_seq(SequenceNumber::Value(i + 1));
+    const FragmentNumber base = frag_base(i);
+    switch (i % DROP_CASES) {
+    case DROP_GAP: { // base+1 (first) and base+4 (last), missing base+2 and base+3
+      Sample a(pub_id, msg_seq), b(pub_id, msg_seq, false);
+      EXPECT_FALSE(tr.reassemble(base + 1, true, a.sample));
+      EXPECT_FALSE(tr.reassemble(base + 4, false, b.sample));
+      break;
+    }
+    case DROP_FRONT: { // base+2 and base+4 (last), missing base+1 (first) and base+3
+      Sample a(pub_id, msg_seq), b(pub_id, msg_seq, false);
+      EXPECT_FALSE(tr.reassemble(base + 2, false, a.sample));
+      EXPECT_FALSE(tr.reassemble(base + 4, false, b.sample));
+      break;
+    }
+    default: { // base+1 (first), missing base+2 and base+3 (last)
+      Sample a(pub_id, msg_seq);
+      EXPECT_FALSE(tr.reassemble(base + 1, true, a.sample));
+      break;
+    }
+    }
+  }
+
+  // Returns the result of reassembling the last missing fragment of sample i
+  bool deliver_missing(TransportReassembly& tr, const GUID_t& pub_id, size_t i, bool dropped)
+  {
+    const SequenceNumber msg_seq(SequenceNumber::Value(i + 1));
+    if (!dropped) {
+      Sample a(pub_id, msg_seq);
+      EXPECT_FALSE(tr.reassemble(drop_target(i), i % DROP_CASES == DROP_FRONT, a.sample));
+    }
+    Sample b(pub_id, msg_seq, i % DROP_CASES != DROP_BACK);
+    return tr.reassemble(frag_base(i) + 3, false, b.sample);
+  }
+}
+
+TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Data_Unavailable_Many_FragInfos)
+{
+  const GUID_t pub_ids[] = { create_pub_id(), create_pub_id() };
+  const size_t count = 60;
+  const size_t targets[] = { 0, 1, 2, 30, 31, 32, count - 3, count - 2, count - 1 };
+  const size_t target_count = sizeof targets / sizeof targets[0];
+
+  // Drop each target alone, then one range from the back of 32 to the front of 40
+  for (size_t t = 0; t <= target_count; ++t) {
+    TransportReassembly tr;
+    for (size_t i = 0; i < count; ++i) {
+      store_frags(tr, pub_ids[i % 2], i);
+    }
+    ASSERT_EQ(count, tr.fragments_size());
+
+    size_t first = 32, last = 40;
+    if (t < target_count) {
+      first = last = targets[t];
+      tr.data_unavailable(FragmentRange(drop_target(first), drop_target(first)));
+    } else {
+      ASSERT_EQ(size_t(DROP_BACK), first % DROP_CASES);
+      ASSERT_EQ(size_t(DROP_FRONT), last % DROP_CASES);
+      tr.data_unavailable(FragmentRange(frag_base(first) + 2, frag_base(last) + 1));
+    }
+    EXPECT_EQ(count, tr.fragments_size());
+
+    for (size_t i = 0; i < count; ++i) {
+      const bool dropped = i == first || i == last;
+      EXPECT_EQ(!dropped, deliver_missing(tr, pub_ids[i % 2], i, dropped)) << "t " << t << " i " << i;
+    }
+    // The back-expanded sample of the multi-sample range is never completed
+    EXPECT_EQ(t < target_count ? 0u : 1u, tr.fragments_size());
+  }
+}
+
+TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Data_Unavailable_Long_Gap_List)
+{
+  TransportReassembly tr;
+  const GUID_t pub_id = create_pub_id();
+  const SequenceNumber msg_seq(5), other_seq(6);
+  const FragmentNumber last = 81, kept = 42;
+
+  // Fragments at odd numbers, leaving gaps at 2, 4, ..., 80
+  for (FragmentNumber f = 1; f <= last; f += 2) {
+    Sample s(pub_id, msg_seq, f != last);
+    EXPECT_FALSE(tr.reassemble(f, f == 1, s.sample));
+  }
+  Sample other(pub_id, other_seq);
+  EXPECT_FALSE(tr.reassemble(last + 2, true, other.sample));
+
+  // Drop every gap except "kept", out of order
+  for (FragmentNumber k = 0; k < 40; ++k) {
+    const FragmentNumber f = 2 * ((k * 17) % 40 + 1);
+    if (f != kept) {
+      tr.data_unavailable(FragmentRange(f, f));
+    }
+  }
+
+  Gaps gaps;
+  EXPECT_EQ(CORBA::ULong(kept), gaps.get(tr, msg_seq, pub_id));
+  EXPECT_EQ(1u, gaps.result_bits);
+  EXPECT_TRUE(gaps.check_gap(kept));
+
+  Sample s(pub_id, msg_seq);
+  EXPECT_FALSE(tr.reassemble(kept, false, s.sample));
+  EXPECT_FALSE(tr.has_frags(msg_seq, pub_id));
+  EXPECT_TRUE(tr.has_frags(other_seq, pub_id));
+}
+
+TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Data_Unavailable_Purges_Expired)
+{
+  // With a zero timeout, stored fragments have expired by the next call
+  TransportReassembly tr(TimeDuration::zero_value);
+  const GUID_t pub_id = create_pub_id();
+  const SequenceNumber msg_seq(3);
+  Sample s(pub_id, msg_seq);
+  EXPECT_FALSE(tr.reassemble(1, true, s.sample));
+  EXPECT_EQ(1u, tr.fragments_size());
+  EXPECT_EQ(1u, tr.queue_size());
+
+  tr.data_unavailable(FragmentRange(5, 5));
+  EXPECT_EQ(0u, tr.fragments_size());
+  EXPECT_EQ(0u, tr.queue_size());
+  EXPECT_FALSE(tr.has_frags(msg_seq, pub_id));
+}
+
 TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Empty)
 {
   TransportReassembly tr;
