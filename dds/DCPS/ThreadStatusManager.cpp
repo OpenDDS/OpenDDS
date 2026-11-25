@@ -156,24 +156,35 @@ void ThreadStatusManager::ThreadContainer::set_manager_info(const ManagerInfo& m
   }
 }
 
-void ThreadStatusManager::ThreadContainer::add_thread(const Thread& thread)
+void ThreadStatusManager::ThreadContainer::add_thread(const String& name, const ThreadId& thread_id,
+                                                      ACE_thread_t handle)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   if (!manager_info_.update_thread_status()) {
     return;
   }
-  map_.insert(std::make_pair(thread.info().thread_id, thread));
+  // Construct (and so timestamp) under the lock, see harvest.
+  const Thread thread(name, thread_id, handle);
+  if (DCPS_debug_level > 4) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatusManager::add_thread: "
+               "adding thread %C\n", thread.bit_key().c_str()));
+  }
+  map_.insert(std::make_pair(thread_id, thread));
   manager_info_.on_thread_started(thread);
 }
 
 void ThreadStatusManager::ThreadContainer::update(
   Thread::ThreadStatus status, bool finished, bool nested, int detail1, int detail2,
-  const MonotonicTimePoint& m_now, const SystemTimePoint& s_now, const ThreadId& thread_id)
+  const ThreadId& thread_id)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   if (!manager_info_.update_thread_status()) {
     return;
   }
+
+  // Timestamp under the lock, see harvest.
+  const MonotonicTimePoint m_now = MonotonicTimePoint::now();
+  const SystemTimePoint s_now = SystemTimePoint::now();
 
   const bool update_thread_details = manager_info_.thread_status_interval();
   if (!update_thread_details && !finished) {
@@ -206,6 +217,8 @@ void ThreadStatusManager::ThreadContainer::update(
   }
 }
 
+// Callers take the next start time before harvesting. Updates are timestamped
+// under mutex_, so any update this harvest misses is later than that start.
 void ThreadStatusManager::ThreadContainer::harvest(const MonotonicTimePoint& start,
   ThreadStatusManager::List& running, ThreadStatusManager::List& finished) const
 {
@@ -245,24 +258,14 @@ void ThreadStatusManager::update_manager_info(const ManagerInfo& copy)
 void ThreadStatusManager::add_thread(const String& name)
 {
   const ThreadId thread_id = get_thread_id();
-  const Thread thread(name, thread_id, ACE_OS::thr_self());
-
-  if (DCPS_debug_level > 4) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatusManager::add_thread: "
-               "adding thread %C\n", thread.bit_key().c_str()));
-  }
-
-  get_container(thread_id).add_thread(thread);
+  get_container(thread_id).add_thread(name, thread_id, ACE_OS::thr_self());
 }
 
 void ThreadStatusManager::update_i(Thread::ThreadStatus status, bool finished,
                                    bool nested, int detail1, int detail2)
 {
-  const MonotonicTimePoint m_now = MonotonicTimePoint::now();
-  const SystemTimePoint s_now = SystemTimePoint::now();
   const ThreadId thread_id = get_thread_id();
-
-  get_container(thread_id).update(status, finished, nested, detail1, detail2, m_now, s_now, thread_id);
+  get_container(thread_id).update(status, finished, nested, detail1, detail2, thread_id);
 }
 
 void ThreadStatusManager::harvest(const MonotonicTimePoint& start,

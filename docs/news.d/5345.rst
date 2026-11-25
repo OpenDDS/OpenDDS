@@ -1,0 +1,5 @@
+.. news-prs: 5345
+
+.. news-start-section: Fixes
+- Fixed a race where the internal thread status built-in topic could miss a thread's update made while the status was being collected.
+.. news-end-section
