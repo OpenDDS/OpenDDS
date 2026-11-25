@@ -1,0 +1,81 @@
+name: run OpenDDS tests with autobuild
+description: Run auto_run_tests through autobuild on Linux and upload the autobuild workspace.
+
+inputs:
+  setenv-dir:
+    description: Directory, relative to the workspace, containing setenv.sh
+    default: OpenDDS
+  test-options:
+    description: Options for auto_run_tests after "script_path=tests dir=<OpenDDS root>"
+    required: true
+  print-cmake-version:
+    description: Add the print_cmake_version autobuild command if 'true'
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: checkout autobuild
+      uses: actions/checkout@v7
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
+    - name: run OpenDDS tests
+      shell: bash
+      env:
+        SETENV_DIR: ${{ inputs.setenv-dir }}
+        TEST_OPTIONS: ${{ inputs.test-options }}
+        PRINT_CMAKE_VERSION: ${{ inputs.print-cmake-version }}
+      run: |
+        ulimit -c unlimited
+        cd "$SETENV_DIR"
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
+        . setenv.sh
+        mkdir ${{ github.job }}_autobuild_workspace
+        cd ${{ github.job }}_autobuild_workspace
+        echo using commit $TRIGGERING_COMMIT for SHA
+        echo $TRIGGERING_COMMIT >> ./SHA
+        CMAKE_VERSION_COMMAND=
+        if [ "$PRINT_CMAKE_VERSION" = true ]; then
+          CMAKE_VERSION_COMMAND='<command name="print_cmake_version"/>'
+        fi
+        cat > config.xml <<EOF
+        <autobuild>
+        <configuration>
+        <variable name="log_file" value="output"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace/logs"/>
+        <variable name="project_root" value="$DDS_ROOT"/>
+        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="junit_xml_output" value="Tests"/>
+        </configuration>
+        <command name="log" options="on"/>
+        <command name="print_os_version"/>
+        <command name="print_ace_config"/>
+        $CMAKE_VERSION_COMMAND
+        <command name="print_make_version"/>
+        <command name="check_compiler" options="gcc"/>
+        <command name="print_perl_version"/>
+        <command name="print_autobuild_config"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS $TEST_OPTIONS"/>
+        <command name="log" options="off"/>
+        <command name="process_logs" options="move prettify index"/>
+        </autobuild>
+        EOF
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/$SETENV_DIR/${{ github.job }}_autobuild_workspace/config.xml"
+    - name: upload autobuild output
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ github.job }}_autobuild_output
+        path: ${{ inputs.setenv-dir }}/${{ github.job }}_autobuild_workspace

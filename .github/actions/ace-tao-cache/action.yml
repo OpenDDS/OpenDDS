@@ -1,0 +1,52 @@
+name: ACE_TAO artifact cache
+description: Compute the ACE_TAO cache key and restore the cached ACE_TAO artifact for the calling job.
+
+inputs:
+  ace-tao-path:
+    description: Path of the ACE_TAO checkout
+    default: OpenDDS/ACE_TAO
+  ace-tao-ref:
+    description: ACE_TAO branch or tag, used in the cache key
+    default: ace6tao2
+  compiler:
+    description: C++ compiler command whose version is part of the cache key
+    default: c++
+  jdk:
+    description: Include the JDK version in the cache key if 'true'
+    default: 'false'
+  key-version:
+    description: Cache key prefix, bump to invalidate caches
+    required: true
+
+outputs:
+  cache-hit:
+    description: Whether the artifact was restored from cache
+    value: ${{ steps.cache-artifact.outputs.cache-hit }}
+
+runs:
+  using: composite
+  steps:
+    - name: get ACE_TAO commit
+      shell: bash
+      env:
+        ACE_TAO_PATH: ${{ inputs.ace-tao-path }}
+      run: |
+        cd "$ACE_TAO_PATH"
+        echo "ACE_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
+    - name: get compiler version
+      shell: bash
+      env:
+        COMPILER: ${{ inputs.compiler }}
+      run: |
+        echo "COMPILER_VERSION=$($COMPILER --version 2>&1 | head -n 1)" >> $GITHUB_ENV
+    - name: get jdk version
+      if: inputs.jdk == 'true'
+      shell: bash
+      run: |
+        echo "JDK_VERSION=$(java -version 2>&1 | grep -i version)" >> $GITHUB_ENV
+    - name: Cache Artifact
+      id: cache-artifact
+      uses: actions/cache@v6
+      with:
+        path: ${{ github.job }}.tar.xz
+        key: ${{ inputs.key-version }}_${{ github.job }}_${{ inputs.ace-tao-ref }}_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}${{ inputs.jdk == 'true' && format('_{0}', env.JDK_VERSION) || '' }}
