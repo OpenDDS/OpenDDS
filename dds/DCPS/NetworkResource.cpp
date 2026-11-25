@@ -565,7 +565,8 @@ namespace {
 template <typename T>
 ACE_INET_Addr tie_breaker(const T& addrs, const String& name)
 {
-  if (!name.empty()) {
+  // Skip the reverse lookups below when there is nothing to break a tie between.
+  if (!name.empty() && addrs.size() > 1) {
     for (typename T::const_iterator it = addrs.begin(); it != addrs.end(); ++it) {
       if (name.compare(LogAddr::host(*it)) == 0) {
         VDBG((LM_DEBUG, "(%P|%t) tie_breaker - Choosing Address %C\n",

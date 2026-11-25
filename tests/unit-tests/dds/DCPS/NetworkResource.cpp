@@ -5,6 +5,8 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
+
 using namespace OpenDDS::DCPS;
 
 // Test Utils
@@ -76,6 +78,22 @@ TEST(dds_DCPS_NetworkResource, choose_single_coherent_address_ipv4)
 
   const ACE_INET_Addr result2 = choose_single_coherent_address(vec2, true);
   EXPECT_EQ(result2, addr1);
+}
+
+// Round-robin DNS returns the same addresses in varying order; the choice must not depend on it.
+TEST(dds_DCPS_NetworkResource, choose_single_coherent_address_order_independent)
+{
+  OPENDDS_VECTOR(ACE_INET_Addr) vec;
+  vec.push_back(ACE_INET_Addr("198.51.100.7:80", AF_INET));
+  vec.push_back(ACE_INET_Addr("192.0.2.33:80", AF_INET));
+  vec.push_back(ACE_INET_Addr("203.0.113.12:80", AF_INET));
+  std::sort(vec.begin(), vec.end());
+
+  const ACE_INET_Addr expected = choose_single_coherent_address(vec, false);
+  EXPECT_NE(expected, ACE_INET_Addr());
+  do {
+    EXPECT_EQ(choose_single_coherent_address(vec, false), expected);
+  } while (std::next_permutation(vec.begin(), vec.end()));
 }
 
 #if defined ACE_HAS_IPV6
