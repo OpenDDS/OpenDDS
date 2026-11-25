@@ -67,6 +67,9 @@ DDS::ReturnCode_t TopicImpl::set_qos(const DDS::TopicQos& qos_arg)
 
     } else {
       qos_ = qos;
+      if (!enabled_) {
+        return DDS::RETCODE_OK;
+      }
 
       Discovery_rch disco =
         TheServiceParticipant->get_discovery(participant_->get_domain_id());

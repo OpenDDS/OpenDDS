@@ -1035,6 +1035,10 @@ DDS::ReturnCode_t
 DataReaderImpl::wait_for_historical_data(
     const DDS::Duration_t & /* max_wait */)
 {
+  if (!enabled_) {
+    return DDS::RETCODE_NOT_ENABLED;
+  }
+
   // Add your implementation here
   return DDS::RETCODE_OK;
 }
