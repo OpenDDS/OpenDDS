@@ -85,6 +85,32 @@ module Unions {
   };
 
   enum Dog { Mastiff, St_Bernard };
+  union SharedLabels switch(long) {
+    case 1:
+    case 2: string val;
+    case 3: dummy_sequence dsequence;
+    default: string fallback;
+  };
+
+  union BooleanSharedLabels switch(boolean) {
+    case TRUE:
+    case FALSE: string val;
+  };
+
+  union BooleanDefault switch(boolean) {
+    case TRUE: string val;
+    default: dummy_sequence dsequence;
+  };
+
+  union BooleanFalse switch(boolean) {
+    case FALSE: string val;
+  };
+
+  union EnumSharedLabels switch(Dog) {
+    case Mastiff:
+    case St_Bernard: string val;
+  };
+
   union O switch(Dog) {
     case Mastiff: float mval;
     case St_Bernard: long long val;
