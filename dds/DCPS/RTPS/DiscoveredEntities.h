@@ -8,6 +8,7 @@
 #include <dds/Versioned_Namespace.h>
 
 #include "AssociationRecord.h"
+#include "LeaseQueue.h"
 #include "RtpsCoreC.h"
 
 #include "ICE/Ice.h"
@@ -152,7 +153,8 @@ struct DiscoveredParticipant {
 
   DCPS::NetworkAddress last_recv_address_;
   DCPS::MonotonicTimePoint discovered_at_;
-  DCPS::MonotonicTimePoint lease_expiration_;
+  /// Lease state, tracked by Spdp::lease_expirations_.
+  LeaseQueue::Entry lease_;
   DDS::InstanceHandle_t bit_ih_;
   DCPS::SequenceNumber max_seq_;
   ACE_UINT16 seq_reset_count_;

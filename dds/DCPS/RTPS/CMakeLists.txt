@@ -10,6 +10,7 @@ add_library(OpenDDS_Rtps
   Sedp.cpp
   Spdp.cpp
   GuidGenerator.cpp
+  LeaseQueue.cpp
   ParameterListConverter.cpp
   MessageUtils.cpp
   MessageParser.cpp
@@ -31,6 +32,7 @@ target_sources(OpenDDS_Rtps
     ICE/Ice.h
     ICE/Stun.h
     ICE/Task.h
+    LeaseQueue.h
     LocalEntities.h
     MessageParser.h
     MessageTypes.h
