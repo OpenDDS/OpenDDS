@@ -10,6 +10,7 @@ add_library(OpenDDS_Rtps
   Sedp.cpp
   Spdp.cpp
   GuidGenerator.cpp
+  LeaseQueue.cpp
   ParameterListConverter.cpp
   MessageUtils.cpp
   MessageParser.cpp

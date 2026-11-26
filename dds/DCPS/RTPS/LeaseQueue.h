@@ -5,6 +5,8 @@
 #ifndef OPENDDS_DCPS_RTPS_LEASE_QUEUE_H
 #define OPENDDS_DCPS_RTPS_LEASE_QUEUE_H
 
+#include "rtps_export.h"
+
 #include <dds/Versioned_Namespace.h>
 
 #include <dds/DdsDcpsGuidC.h>
@@ -38,7 +40,7 @@ namespace RTPS {
  *
  * Not thread-safe: the caller provides locking.
  */
-class LeaseQueue {
+class OpenDDS_Rtps_Export LeaseQueue {
 public:
   typedef OPENDDS_MULTIMAP(DCPS::MonotonicTimePoint, DCPS::GUID_t) Map;
   typedef Map::iterator iterator;
@@ -102,18 +104,7 @@ public:
 
   /// The time a lease that expires at `expiration` is queued under.
   DCPS::MonotonicTimePoint queue_time_for(const DCPS::MonotonicTimePoint& expiration,
-                                          const DCPS::MonotonicTimePoint& now) const
-  {
-    if (granularity_usec_ == 0) {
-      return expiration;
-    }
-    ACE_UINT64 usec = 0;
-    expiration.value().to_usec(usec);
-    usec -= usec % granularity_usec_;
-    const DCPS::MonotonicTimePoint rounded(
-      ACE_Time_Value(static_cast<time_t>(usec / 1000000), static_cast<suseconds_t>(usec % 1000000)));
-    return now < rounded ? rounded : expiration;
-  }
+                                          const DCPS::MonotonicTimePoint& now) const;
 
   /**
    * Record that the lease of participant `id` now expires at `expiration`.
@@ -127,16 +118,7 @@ public:
    */
   bool renew(Entry& entry, DCPS::GUID_t id,
              DCPS::MonotonicTimePoint expiration,
-             DCPS::MonotonicTimePoint now)
-  {
-    entry.expiration_ = expiration;
-    if (entry.queued_ && entry.pos_->first <= expiration) {
-      return false;
-    }
-    remove(entry);
-    insert(entry, id, queue_time_for(expiration, now));
-    return true;
-  }
+             DCPS::MonotonicTimePoint now);
 
   /// Remove the entry from the queue, if it is queued.  O(1).
   void remove(Entry& entry)
@@ -175,15 +157,7 @@ public:
    * element's own pos->second or pos->first, which remove() frees.
    */
   bool requeue_if_renewed(Entry& entry, DCPS::GUID_t id,
-                          DCPS::MonotonicTimePoint now)
-  {
-    remove(entry);
-    if (now < entry.expiration_) {
-      insert(entry, id, queue_time_for(entry.expiration_, now));
-      return true;
-    }
-    return false;
-  }
+                          DCPS::MonotonicTimePoint now);
 
   iterator end() { return map_.end(); }
   bool empty() const { return map_.empty(); }
