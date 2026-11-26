@@ -120,10 +120,14 @@ public:
    * Returns true if the entry was (re)queued: the participant is new, or its
    * lease got shorter.  The caller must then make sure its timer fires no
    * later than entry.queue_time().
+   *
+   * The arguments are taken by value because they are used after the entry's
+   * element is erased, and the caller may pass values that live in it, such as
+   * pos->second.
    */
-  bool renew(Entry& entry, const DCPS::GUID_t& id,
-             const DCPS::MonotonicTimePoint& expiration,
-             const DCPS::MonotonicTimePoint& now)
+  bool renew(Entry& entry, DCPS::GUID_t id,
+             DCPS::MonotonicTimePoint expiration,
+             DCPS::MonotonicTimePoint now)
   {
     entry.expiration_ = expiration;
     if (entry.queued_ && entry.pos_->first <= expiration) {
@@ -166,9 +170,12 @@ public:
    * For an entry that came due: if the lease was renewed after the entry was
    * queued, queue it again and return true.  Otherwise remove it from the
    * queue and return false: the lease has expired.
+   *
+   * Like renew(), takes its arguments by value: the caller may pass the
+   * element's own pos->second or pos->first, which remove() frees.
    */
-  bool requeue_if_renewed(Entry& entry, const DCPS::GUID_t& id,
-                          const DCPS::MonotonicTimePoint& now)
+  bool requeue_if_renewed(Entry& entry, DCPS::GUID_t id,
+                          DCPS::MonotonicTimePoint now)
   {
     remove(entry);
     if (now < entry.expiration_) {

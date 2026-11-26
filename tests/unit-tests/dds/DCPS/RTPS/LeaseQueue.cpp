@@ -329,7 +329,12 @@ TEST(dds_DCPS_RTPS_LeaseQueue, stale_entry_of_recreated_participant)
   // Both elements are queued at 5000; only one is current.
   size_t stale = 0;
   size_t current = 0;
-  // Bounded so that a broken is_current fails instead of looping.
+  // A correct run takes two passes: the stale element is erased, then the
+  // current one is re-queued at 5600.  The limit of 10 is only a safety bound:
+  // if is_current wrongly accepted the stale element, requeue_if_renewed would
+  // move the current element instead, the stale one would stay due at 5000,
+  // and an unbounded loop would never end.  With the bound, the checks below
+  // fail instead.
   for (int passes = 0; passes < 10; ++passes) {
     const LeaseQueue::iterator pos = queue.due(at_ms(5000));
     if (pos == queue.end()) {
